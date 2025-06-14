@@ -1,0 +1,26 @@
+[build-system]
+requires = ["poetry-core>=2.1"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "euler"
+version = "0.1.0"
+description = "A package for solving Project Euler problems"
+authors = ["Vikas Munshi <vikas.munshi@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "euler" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = "^2.31"
+
+[tool.poetry.group.dev.dependencies]
+poetry = "^2.1"
+
+[tool.poetry.urls]
+Homepage = "https://github.com/vikasmunshi/euler"
+Repository = "https://github.com/vikasmunshi/euler.git"
+
+[tool.poetry.scripts]
+euler = "euler.cli:main"
