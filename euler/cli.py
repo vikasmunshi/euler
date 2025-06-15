@@ -29,13 +29,20 @@ def main() -> int:
     Returns:
         int: Exit code, 0 for success
     """
-    parser.add_argument('problem_number', type=int, help='The number of the Project Euler problem to retrieve')
-    parser.add_argument('max_problem_number', type=int, nargs='?', default=None,
-                        help='The maximum number of the Project Euler problem to retrieve (default: problem_number)')
+    problem_number_help = (
+        "The problem number to evaluate the solution for. "
+        "If only this argument is provided, the solution for the specified problem will be evaluated."
+    )
+
+    max_problem_number_help = (
+        "The maximum problem number in a range to download problem statements and create solution templates. "
+        "If both 'problem_number' and 'max_problem_number' are provided, problem statements for the range "
+        "will be downloaded and solution templates created."
+    )
+    parser.add_argument('problem_number', type=int, help=problem_number_help)
+    parser.add_argument('max_problem_number', type=int, nargs='?', default=None, help=max_problem_number_help)
     args: Namespace = parser.parse_args()
     logger.setLevel(args.log_level)
-    logger.info({'action': 'cli_start', 'message': 'Starting Project Euler CLI',
-                 'problem_number': args.problem_number, 'timeout': args.timeout, 'max_workers': args.max_workers})
     if args.max_problem_number:
         modules_list = get_problem_modules(start_number=args.problem_number, end_number=args.max_problem_number + 1)
         print(f'retrieved {len(modules_list)} problem modules')

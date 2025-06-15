@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 3
 # https://projecteuler.net/problem=3
-# Answer:
+# Answer: 
 # Notes: 
 import textwrap
 

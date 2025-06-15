@@ -10,9 +10,9 @@ solution_template: str = r"""
 # Answer: 
 # Notes: 
 import textwrap
-from typing import Any
+from typing import Any, Dict
 
-from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
+from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
 problem_args_list: ProblemArgsList = [
     ProblemArgs(
@@ -22,15 +22,15 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(*, kwarg: Any) -> Any:
+def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
     # enter the solution here
-    return None
+    raise NotImplementedError
 
 
 # Explicitly annotate that this function implements SolutionProtocol
 solution: SolutionProtocol
 
-solution.__doc__ = textwrap.dedent('''
+solution.__doc__ = textwrap.dedent(r'''
 solution to Project Euler problem {problem_number}
 https://projecteuler.net/problem={problem_number}
 {problem_content}

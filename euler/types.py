@@ -36,16 +36,18 @@ class SolutionProtocol(Protocol):
     keyword-only arguments and provides better static type checking.
     """
 
-    def __call__(self, *, kwargs: Any) -> SolutionResult:
-        """Execute the solution with the provided keyword-only arguments.
+    def __call__(self, **kwargs: Dict[str, Any]) -> SolutionResult:
+        """Executes the solution with the provided keyword-only arguments.
 
-        The asterisk (*) indicates that all arguments must be passed as keywords,
-        not positional arguments. This matches the pattern used in Project Euler solutions.
+        This method allows passing problem-specific keyword arguments to calculate
+        the desired solution in compliance with the Project Euler solution structure.
 
         Args:
-            **kwargs: Keyword arguments specific to the problem (e.g., max_limit, target_sum)
+            **kwargs: A dictionary of keyword arguments specific to the problem 
+                      (e.g., max_limit, target_sum, or other problem-specific details).
 
         Returns:
-            The solution result
+            SolutionResult: The computed result of the solution. This can be an integer, 
+            float, string, list, or dictionary, depending on the nature of the problem solution.
         """
         ...
