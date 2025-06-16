@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 1
 # https://projecteuler.net/problem=1
-# Answer: answers={10: 23, 1000: 233168}
+# Answer: 10: 23, 1000: 233,168
 # Notes: 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
@@ -56,12 +56,21 @@ def solution(*, max_limit: int) -> int:
 solution: SolutionProtocol
 
 if __name__ == '__main__':
+    # When run directly, evaluate the solution with test cases
+    # Import required modules for evaluating the solution
     from euler.evaluator import evaluate_solution
     from euler.cli import parser
     from euler.logger import logger
 
+    # Parse command-line arguments
     args = parser.parse_args()
+
+    # Set the logging level based on command-line arguments
     logger.setLevel(args.log_level)
+
+    # Extract timeout and maximum worker threads from arguments
     timeout, max_workers = args.timeout, args.max_workers
 
+    # Run the solution with the specified test cases and parameters
+    # This validates that our implementation gives the correct answers
     evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
