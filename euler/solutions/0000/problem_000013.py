@@ -1,10 +1,28 @@
-#!/usr/bin/env python3.8
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-https://projecteuler.net/problem=13
-Work out the first ten digits of the sum of the following one-hundred 50-digit numbers.
-Answer: 5537376230
-"""
+# solution to Project Euler problem 13
+# https://projecteuler.net/problem=13
+# Answer: answers={10: '5537376230'}
+# Notes:
+import textwrap
+
+from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
+
+problem_args_list: ProblemArgsList = [
+    ProblemArgs(
+        kwargs={'digits': 10},
+        answer='5537376230',
+    ),
+    ProblemArgs(
+        kwargs={'digits': 20},
+        answer='55373762303908766372',
+    ),
+    ProblemArgs(
+        kwargs={'digits': 100},
+        answer='5537376230390876637302048746832985971773659831892672',
+    ),
+]
+
 numbers = """
 37107287533902102798797998220837590246510135740250
 46376937677490009712648124896970078050417018260538
@@ -109,15 +127,51 @@ numbers = """
 """
 
 
-def n_digits_of_sum(digits: int) -> str:
-    if digits:
-        return str(sum([int(i[:digits + 1]) for i in numbers.splitlines() if i != '']))[:digits]
-    else:
-        return str(sum([int(i) for i in numbers.splitlines() if i != '']))
+def solution(*, digits: int) -> str:
+    """
+    Solution to Project Euler problem 13: Large Sum
+    https://projecteuler.net/problem=13
 
+    Work out the first ten digits of the sum of the following one-hundred 50-digit numbers.
+    The problem provides a list of one hundred 50-digit numbers and asks for the first 'digits' digits
+    of their sum. By default, the problem requests the first 10 digits, but this implementation supports
+    getting an arbitrary number of leading digits.
+
+    Parameters:
+        digits (int): Number of leading digits to return from the sum
+
+    Returns:
+        str: The first 'digits' digits of the sum as a string
+    """
+    return str(sum([int(i[:digits + 1]) for i in numbers.splitlines() if i != '']))[:digits]
+
+
+# Explicitly annotate that this function implements SolutionProtocol
+solution: SolutionProtocol
+
+solution.__doc__ = textwrap.dedent(r'''
+solution to Project Euler problem 13
+https://projecteuler.net/problem=13
+Work out the first ten digits of the sum of the following one-hundred 50-digit numbers.
+...
+''').strip()
 
 if __name__ == '__main__':
-    from .evaluate import Watchdog
+    # When run directly, evaluate the solution with test cases
+    # Import required modules for evaluating the solution
+    from euler.evaluator import evaluate_solution
+    from euler.cli import parser
+    from euler.logger import logger
 
-    with Watchdog() as wd:
-        result = wd.evaluate_range(n_digits_of_sum, answers={10: '5537376230'})
+    # Parse command-line arguments
+    args = parser.parse_args()
+
+    # Set the logging level based on command-line arguments
+    logger.setLevel(args.log_level)
+
+    # Extract timeout and maximum worker threads from arguments
+    timeout, max_workers = args.timeout, args.max_workers
+
+    # Run the solution with the specified test cases and parameters
+    # This validates that our implementation gives the correct answers
+    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
