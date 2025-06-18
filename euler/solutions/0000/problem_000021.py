@@ -11,7 +11,7 @@ from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
     # Test case for finding the sum of all amicable numbers under 10,000
-    # The expected answer (31,626) is the sum of all amicable numbers: 220, 284, 1184, 1210, etc.
+    # The expected answer (31,626) is the sum of all amicable numbers: 220, 284, 1184, 1210, etc. under 10,000
     ProblemArgs(
         kwargs={'max_num': 10000},
         answer=31626,
@@ -54,7 +54,7 @@ def solution(*, max_num: int) -> int:
     Returns:
         Sum of all amicable numbers below max_num
     """
-    return sum(x for x in range(2, max_num + 1) if sum_factors(x) != x and sum_factors(sum_factors(x)) == x)
+    return sum(x for x in range(2, max_num + 1) if (y := sum_factors(x)) != x and sum_factors(y) == x)
 
 
 # Explicitly annotate that this function implements SolutionProtocol
