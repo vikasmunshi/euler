@@ -5,24 +5,32 @@
 # Answer: 983
 # Notes: This solution uses number theory to find the longest recurring decimal cycle
 #        by calculating the multiplicative order of 10 modulo d.
+#        For unit fractions 1/d where gcd(d, 10) = 1, the cycle length equals
+#        the multiplicative order of 10 mod d (a result from modular arithmetic).
 import textwrap
 from math import gcd
 from typing import Optional
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
+# Test cases with different upper bounds and their expected answers
+# Each test validates the solution at different scales
 problem_args_list: ProblemArgsList = [
     ProblemArgs(
-        kwargs={'max_val': 10},
-        answer=7,
+        kwargs={'max_val': 10},  # Small test case: find the longest cycle for d < 10
+        answer=7,  # 1/7 has a 6-digit cycle: 0.(142857)
     ),
     ProblemArgs(
-        kwargs={'max_val': 100},
-        answer=97,
+        kwargs={'max_val': 100},  # Medium test case: find the longest cycle for d < 100
+        answer=97,  # 1/97 has a 96-digit cycle
     ),
     ProblemArgs(
-        kwargs={'max_val': 1000},
-        answer=983,
+        kwargs={'max_val': 1000},  # Full problem: find the longest cycle for d < 1000
+        answer=983,  # 1/983 has a 982-digit cycle
+    ),
+    ProblemArgs(
+        kwargs={'max_val': 10000},  # Full problem: find the longest cycle for d < 10000
+        answer=9967,  # 1/9967 has a 9966-digit cycle
     ),
 ]
 
@@ -69,8 +77,12 @@ def solution(*, max_val: int) -> int:
     Returns:
         The value of d < max_val for which 1/d has the longest recurring decimal cycle
     """
-    return max((multiplicative_order(a=10, modulus=d), d)for i in range(100) for d in (max_val - i,)
-               if d > 6 and gcd(d, 10) == 1)[1]
+    # Using walrus operator ":=" to assign and test d in a single expression
+    # Starting from max_val and checking in descending order (more efficient)
+    # Only considering values where gcd(d, 10) = 1 (not divisible by 2 or 5)
+    return max((multiplicative_order(a=10, modulus=d), d)
+               for i in range(max(max_val // 10, 10))
+               if (d := max_val - i) > 6 and gcd(d, 10) == 1)[1]
 
 
 # Explicitly annotate that this function implements SolutionProtocol
@@ -118,26 +130,21 @@ For values below 1000, the answer is 983, which has a recurring cycle of length 
 ''').strip()
 
 if __name__ == '__main__':
-    # When this module is run directly (not imported), evaluate the solution with test cases
+    # When run directly, evaluate the solution with test cases
     # Import required modules for evaluating the solution
     from euler.evaluator import evaluate_solution
     from euler.cli import parser
     from euler.logger import logger
 
-    # Parse command-line arguments for controlling execution parameters
+    # Parse command-line arguments
     args = parser.parse_args()
 
-    # Set the logging level based on command-line arguments (e.g., debug, info, warning)
+    # Set the logging level based on command-line arguments
     logger.setLevel(args.log_level)
 
     # Extract timeout and maximum worker threads from arguments
-    # - timeout: maximum time allowed for solution execution
-    # - max_workers: controls parallel execution of test cases
     timeout, max_workers = args.timeout, args.max_workers
 
     # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers for multiple test cases:
-    # 1. max_val=10: Expected answer is 7 (1/7 has a 6-digit recurring cycle)
-    # 2. max_val=100: Expected answer is 97 (1/97 has a 96-digit recurring cycle)
-    # 3. max_val=1000: Expected answer is 983 (1/983 has a 982-digit recurring cycle)
+    # This validates that our implementation gives the correct answers
     evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
