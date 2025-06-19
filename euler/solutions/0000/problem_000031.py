@@ -18,6 +18,14 @@ problem_args_list: ProblemArgsList = [
         kwargs={'target': 200},
         answer=73682,
     ),
+    ProblemArgs(
+        kwargs={'target': 1000},
+        answer=321335886,
+    ),
+    ProblemArgs(
+        kwargs={'target': 100000},
+        answer=10056050940818192726001,
+    ),
 ]
 
 
