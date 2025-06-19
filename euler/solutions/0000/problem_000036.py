@@ -17,7 +17,7 @@
 #    - For single-digit numbers: Just using 1-9
 #    - For even-length palindromes: Taking a number and appending its reverse (e.g., 12 → 1221)
 #    - For odd-length palindromes: Taking a number, adding a middle digit, and appending the reverse
-#      (e.g., 12 + 3 + 21 = 12321)
+#      (e.g., 12 + 3 + 21 = 12,321)
 #
 # 2. We then filter these palindromes to find those that are also palindromic in binary by:
 #    - Converting to binary representation (removing '0b' prefix)
@@ -94,7 +94,7 @@ def generate_decimal_palindromes(max_digits: int) -> Generator[int, None, None]:
     The generation follows these steps:
     1. Yield all single-digit numbers (1-9) which are palindromes by definition
     2. Generate even-length palindromes by mirroring digits (e.g., 12 → 1221)
-    3. Generate odd-length palindromes by inserting a middle digit (e.g., 12 → 12321)
+    3. Generate odd-length palindromes by inserting a middle digit (e.g., 12 → 12,321)
 
     Args:
         max_digits: The maximum number of decimal digits allowed in the palindromes
