@@ -9,6 +9,7 @@ import textwrap
 import requests
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
+from euler.utils import word_to_number
 
 problem_args_list: ProblemArgsList = [
     ProblemArgs(
@@ -22,9 +23,8 @@ def solution(*, file_url: str) -> int:
     response = requests.get(file_url)
     response.raise_for_status()  # Raise an error if the request failed
     content = response.text  # Extract the raw content of the file
-    # Parse the names from the file content
-    names = [n.strip('"').upper() for n in content.split(',')]
-    return sum((i + 1) * sum(ord(c) - 64 for c in name) for i, name in enumerate(sorted(names)))
+    return sum((i + 1) * word_to_number(name)
+               for i, name in enumerate(sorted(n.strip('"') for n in content.split(','))))
 
 
 # Explicitly annotate that this function implements SolutionProtocol
@@ -43,20 +43,27 @@ What is the total of all the name scores in the file?
 
 Implementation Steps:
 1. Fetch the names list as a text file from the provided URL using the requests library.
-   If the request fails, an exception is raised.
+   If the request fails, an exception is raised with raise_for_status().
 2. Parse the file content by:
    - Splitting the string on commas to extract individual names.
-   - Removing the surrounding quotation marks from each name.
-   - Ensuring all names are converted to uppercase to simplify calculations.
-3. Sort the names lexicographically (alphabetical order).
+   - Removing the surrounding quotation marks from each name using strip('"').
+   - The names in the file are already in uppercase, so no conversion is needed.
+3. Sort the names lexicographically (alphabetical order) using Python's built-in sorted() function.
 4. Compute the score for each name:
    - The alphabetical value of a name is calculated as the sum of the positions of its characters in the 
-     alphabet ('A' = 1, ..., 'Z' = 26). This is done using `ord(c) - 64` where `c` is a character.
+     alphabet ('A' = 1, ..., 'Z' = 26). This is done using the word_to_number() utility function.
    - Multiply the alphabetical value by the name's position in the sorted list (1-based indexing).
-5. Sum the scores of all names to compute the final result.
+5. Sum the scores of all names to compute the final result using a generator expression with sum().
 6. Return the total score as the solution.
 
-This implementation demonstrates efficient parsing, sorting, and numerical computation using Python's built-in features.
+Algorithm Analysis:
+- Time Complexity: O(n log n) due to the sorting operation, where n is the number of names.
+- Space Complexity: O(n) for storing the sorted list of names.
+- The solution uses a generator expression to compute the sum efficiently without creating intermediate lists.
+- The word_to_number function is cached with @lru_cache to improve performance for repeated calculations.
+
+This implementation demonstrates efficient parsing, sorting, and numerical computation using Python's built-in features
+and functional programming concepts.
 ''').strip()
 
 if __name__ == '__main__':

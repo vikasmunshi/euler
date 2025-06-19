@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import re
+from functools import lru_cache
 
 
 def parse_html_tags(text: str) -> str:
@@ -56,3 +57,19 @@ def parse_html_tags(text: str) -> str:
     text = re.sub(r'<[^>]*>', '', text)
 
     return text
+
+
+@lru_cache(maxsize=None)
+def word_to_number(word: str) -> int:
+    """Convert a word to a number by summing the alphabetical position values of each letter.
+
+    Each letter is assigned a value based on its position in the alphabet (A=1, B=2, etc.).
+    Used in Project Euler problems where alphabetical values of words are needed.
+
+    Args:
+        word: The input word (expected to be uppercase letters)
+
+    Returns:
+        The sum of the alphabetical positions of all letters in the word
+    """
+    return sum(ord(c) - 64 for c in word)
