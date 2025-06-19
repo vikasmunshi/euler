@@ -1,17 +1,34 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Prime Number Generation Module
+Prime Number Generation and Number Theory Module
 
-This module provides functions for generating and working with prime numbers,
-primarily to support Project Euler problem solutions that require efficient prime number handling.
+This module provides a comprehensive set of functions for generating and working with prime numbers
+and performing number theory operations, primarily to support Project Euler problem solutions that
+require efficient mathematical algorithms.
 
-Functionality includes:
+Key functionality includes:
 - Prime number generation with the Sundaram sieve algorithm
 - Primality testing with optimized trial division
+- Prime factorization of integers
+- Divisor enumeration (both proper and improper)
+- Counting unique prime factors
 
-The implementation uses caching strategies to improve performance for repeated operations,
-including a pre-computed cache of primes up to 100 and function-level caching with lru_cache.
+Performance optimizations:
+- Caching strategies improve performance for repeated operations
+- Pre-computed cache of primes up to 100 for immediate access
+- Function-level memoization with lru_cache decorator
+- Wheel factorization technique to skip non-candidate numbers
+- Strategic use of mathematical properties to minimize computation
+
+Mathematical principles used:
+- Sundaram sieve for efficient prime generation
+- Trial division limited to sqrt(n) for primality testing
+- Prime factorization based on fundamental theorem of arithmetic
+- Wheel factorization patterns to optimize trial division
+
+These utilities form the foundation for solving many Project Euler problems that
+involve number theory concepts and prime number manipulation.
 """
 from collections import namedtuple
 from functools import lru_cache
@@ -194,3 +211,50 @@ def proper_factors(n: int) -> Tuple[int, ...]:
         [1, 2, 3, 4, 6]
     """
     return divisors(n)[:-1]
+
+
+@lru_cache()
+def prime_factor_count(num: int) -> int:
+    """
+    Count the number of unique prime factors of a positive integer.
+
+    This function determines the number of distinct prime factors of an integer using
+    an optimized wheel factorization approach. Instead of testing divisibility by all
+    integers, it uses a pattern of gaps between potential prime factors to improve
+    efficiency.
+
+    The wheel pattern is:
+    - For factors < 11: Use gaps [1, 1, 2, 2, 4] (checking 2, 3, 5, 7, 11...)
+    - For factors ≥ 11: Use gaps [2, 4, 2, 4, 6, 2, 6, 4] (a pattern that skips
+      multiples of 2, 3, 5, reducing the number of divisibility tests)
+
+    Each unique prime factor is counted only once, regardless of its multiplicity.
+    For example, 12 = 2² × 3 has 2 unique prime factors (2 and 3).
+
+    Args:
+        num: A positive integer to factorize
+
+    Returns:
+        The number of unique prime factors of num
+
+    Examples:
+        >>> prime_factor_count(12)  # 12 = 2² × 3
+        2
+        >>> prime_factor_count(14)  # 14 = 2 × 7
+        2
+        >>> prime_factor_count(17)  # 17 is prime
+        1
+        >>> prime_factor_count(60)  # 60 = 2² × 3 × 5
+        3
+    """
+    factor, num_factors = 1, 0
+    while factor <= int(num ** 0.5):
+        for gap in ([1, 1, 2, 2, 4] if factor < 11 else [2, 4, 2, 4, 6, 2, 6, 4]):
+            factor, is_new_factor = factor + gap, True
+            while num % factor == 0:
+                num //= factor
+                if is_new_factor:
+                    num_factors, is_new_factor = num_factors + 1, False
+    # If num is still > 1, it means num itself is a prime factor
+    # that we couldn't find divisors for during the trial division
+    return num_factors + (0 if num == 1 else 1)
