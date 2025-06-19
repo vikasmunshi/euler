@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# solution to Project Euler problem 674
+# https://projecteuler.net/problem=674
+# Answer: 
+# Notes: 
+import textwrap
+from typing import Any, Dict
+
+from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
+
+problem_args_list: ProblemArgsList = [
+    ProblemArgs(kwargs={}, answer=None, ),
+]
+
+
+def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
+    # enter the solution here
+    raise NotImplementedError
+
+
+# Explicitly annotate that this function implements SolutionProtocol
+solution: SolutionProtocol
+
+solution.__doc__ = textwrap.dedent(r'''
+solution to Project Euler problem 674
+https://projecteuler.net/problem=674
+We define the $\mathcal{I}$ operator as the function
+\[\mathcal{I}(x,y) = (1+x+y)^2+y-x\]
+and $\mathcal{I}$-expressions as arithmetic expressions built only from variable names and applications of $\mathcal{I}$. A variable name may consist of one or more letters. For example, the three expressions $x$, $\mathcal{I}(x,y)$, and $\mathcal{I}(\mathcal{I}(x,ab),x)$ are all $\mathcal{I}$-expressions.
+
+For two $\mathcal{I}$-expressions $e_1$ and $e_2$ such that the equation $e_1=e_2$ has a solution in non-negative integers, we define the least simultaneous value of $e_1$ and $e_2$ to be the minimum value taken by $e_1$ and $e_2$ on such a solution. If the equation $e_1=e_2$ has no solution in non-negative integers, we define the least simultaneous value of $e_1$ and $e_2$ to be $0$. For example, consider the following three $\mathcal{I}$-expressions:
+\[\begin{array}{l}A = \mathcal{I}(x,\mathcal{I}(z,t))\\
+B = \mathcal{I}(\mathcal{I}(y,z),y)\\
+C = \mathcal{I}(\mathcal{I}(x,z),y)\end{array}\]
+The least simultaneous value of $A$ and $B$ is $23$, attained for $x=3,y=1,z=t=0$. On the other hand, $A=C$ has no solutions in non-negative integers, so the least simultaneous value of $A$ and $C$ is $0$. The total sum of least simultaneous pairs made of $\mathcal{I}$-expressions from $\{A,B,C\}$ is $26$.
+
+Find the sum of least simultaneous values of all $\mathcal{I}$-expressions pairs made of distinct expressions from file I-expressions.txt (pairs $(e_1,e_2)$ and $(e_2,e_1)$ are considered to be identical). Give the last nine digits of the result as the answer.
+
+
+''').strip()
+
+if __name__ == '__main__':
+    # When run directly, evaluate the solution with test cases
+    # Import required modules for evaluating the solution
+    from euler.evaluator import evaluate_solution
+    from euler.cli import parser
+    from euler.logger import logger
+
+    # Parse command-line arguments
+    args = parser.parse_args()
+
+    # Set the logging level based on command-line arguments
+    logger.setLevel(args.log_level)
+
+    # Extract timeout and maximum worker threads from arguments
+    timeout, max_workers = args.timeout, args.max_workers
+
+    # Run the solution with the specified test cases and parameters
+    # This validates that our implementation gives the correct answers
+    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)

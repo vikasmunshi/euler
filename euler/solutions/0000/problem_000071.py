@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# solution to Project Euler problem 71
+# https://projecteuler.net/problem=71
+# Answer: 
+# Notes: 
+import textwrap
+from typing import Any, Dict
+
+from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
+
+problem_args_list: ProblemArgsList = [
+    ProblemArgs(kwargs={}, answer=None, ),
+]
+
+
+def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
+    # enter the solution here
+    raise NotImplementedError
+
+
+# Explicitly annotate that this function implements SolutionProtocol
+solution: SolutionProtocol
+
+solution.__doc__ = textwrap.dedent(r'''
+solution to Project Euler problem 71
+https://projecteuler.net/problem=71
+Consider the fraction, $\dfrac n d$, where $n$ and $d$ are positive integers. If $n \lt d$ and $\operatorname{HCF}(n,d)=1$, it is called a reduced proper fraction.
+If we list the set of reduced proper fractions for $d \le 8$ in ascending order of size, we get:
+$$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \frac 3 8, \mathbf{\frac 2 5}, \frac 3 7, \frac 1 2, \frac 4 7, \frac 3 5, \frac 5 8, \frac 2 3, \frac 5 7, \frac 3 4, \frac 4 5, \frac 5 6, \frac 6 7, \frac 7 8$$
+It can be seen that $\dfrac 2 5$ is the fraction immediately to the left of $\dfrac 3 7$.
+By listing the set of reduced proper fractions for $d \le 1\,000\,000$ in ascending order of size, find the numerator of the fraction immediately to the left of $\dfrac 3 7$.
+
+
+''').strip()
+
+if __name__ == '__main__':
+    # When run directly, evaluate the solution with test cases
+    # Import required modules for evaluating the solution
+    from euler.evaluator import evaluate_solution
+    from euler.cli import parser
+    from euler.logger import logger
+
+    # Parse command-line arguments
+    args = parser.parse_args()
+
+    # Set the logging level based on command-line arguments
+    logger.setLevel(args.log_level)
+
+    # Extract timeout and maximum worker threads from arguments
+    timeout, max_workers = args.timeout, args.max_workers
+
+    # Run the solution with the specified test cases and parameters
+    # This validates that our implementation gives the correct answers
+    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)

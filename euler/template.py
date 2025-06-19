@@ -15,10 +15,7 @@ from typing import Any, Dict
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={{}},
-        answer=None,
-    ),
+    ProblemArgs(kwargs={{}}, answer=None, ),
 ]
 
 

@@ -9,6 +9,7 @@ A Python package for solving and managing [Project Euler](https://projecteuler.n
 - Solution evaluation with timeout and concurrency control
 - JSON logging with appropriate stdout/stderr separation
 - Command-line interface for running solutions
+- Worked solutions for problems 1 to 51
 
 ## Installation
 
@@ -62,10 +63,7 @@ def solution(*, kwarg: Any) -> Any:
     return result
 
 problem_args_list = [
-    ProblemArgs(
-        kwargs={"arg1": value1},
-        answer=expected_answer,
-    ),
+    ProblemArgs(kwargs={"arg1": value1}, answer=expected_answer, ),
     # Additional test cases...
 ]
 ```

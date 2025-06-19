@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# solution to Project Euler problem 489
+# https://projecteuler.net/problem=489
+# Answer: 
+# Notes: 
+import textwrap
+from typing import Any, Dict
+
+from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
+
+problem_args_list: ProblemArgsList = [
+    ProblemArgs(kwargs={}, answer=None, ),
+]
+
+
+def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
+    # enter the solution here
+    raise NotImplementedError
+
+
+# Explicitly annotate that this function implements SolutionProtocol
+solution: SolutionProtocol
+
+solution.__doc__ = textwrap.dedent(r'''
+solution to Project Euler problem 489
+https://projecteuler.net/problem=489
+Let $G(a, b)$ be the smallest non-negative integer $n$ for which $\operatorname{\mathbf{gcd}}$Greatest common divisor$(n^3 + b, (n + a)^3 + b)$ is maximized.
+
+For example, $G(1, 1) = 5$ because $\gcd(n^3 + 1, (n + 1)^3 + 1)$ reaches its maximum value of $7$ for $n = 5$, and is smaller for $0 \le n \lt 5$.
+
+Let $H(m, n) = \sum G(a, b)$ for $1 \le a \le m$, $1 \le b \le n$.
+
+You are given $H(5, 5) = 128878$ and $H(10, 10) = 32936544$.
+Find $H(18, 1900)$.
+
+''').strip()
+
+if __name__ == '__main__':
+    # When run directly, evaluate the solution with test cases
+    # Import required modules for evaluating the solution
+    from euler.evaluator import evaluate_solution
+    from euler.cli import parser
+    from euler.logger import logger
+
+    # Parse command-line arguments
+    args = parser.parse_args()
+
+    # Set the logging level based on command-line arguments
+    logger.setLevel(args.log_level)
+
+    # Extract timeout and maximum worker threads from arguments
+    timeout, max_workers = args.timeout, args.max_workers
+
+    # Run the solution with the specified test cases and parameters
+    # This validates that our implementation gives the correct answers
+    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)

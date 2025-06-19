@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# solution to Project Euler problem 409
+# https://projecteuler.net/problem=409
+# Answer: 
+# Notes: 
+import textwrap
+from typing import Any, Dict
+
+from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
+
+problem_args_list: ProblemArgsList = [
+    ProblemArgs(kwargs={}, answer=None, ),
+]
+
+
+def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
+    # enter the solution here
+    raise NotImplementedError
+
+
+# Explicitly annotate that this function implements SolutionProtocol
+solution: SolutionProtocol
+
+solution.__doc__ = textwrap.dedent(r'''
+solution to Project Euler problem 409
+https://projecteuler.net/problem=409
+Let $n$ be a positive integer. Consider nim positions where:There are $n$ non-empty piles.
+Each pile has size less than $2^n$.
+No two piles have the same size.
+Let $W(n)$ be the number of winning nim positions satisfying the above conditions (a position is winning if the first player has a winning strategy). For example, $W(1) = 1$, $W(2) = 6$, $W(3) = 168$, $W(5) = 19764360$ and $W(100) \bmod 1\,000\,000\,007 = 384777056$.
+
+Find $W(10\,000\,000) \bmod 1\,000\,000\,007$.
+
+
+
+''').strip()
+
+if __name__ == '__main__':
+    # When run directly, evaluate the solution with test cases
+    # Import required modules for evaluating the solution
+    from euler.evaluator import evaluate_solution
+    from euler.cli import parser
+    from euler.logger import logger
+
+    # Parse command-line arguments
+    args = parser.parse_args()
+
+    # Set the logging level based on command-line arguments
+    logger.setLevel(args.log_level)
+
+    # Extract timeout and maximum worker threads from arguments
+    timeout, max_workers = args.timeout, args.max_workers
+
+    # Run the solution with the specified test cases and parameters
+    # This validates that our implementation gives the correct answers
+    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
