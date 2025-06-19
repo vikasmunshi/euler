@@ -154,10 +154,6 @@ def solution(*, max_digits: int) -> int:
         solution(max_digits=1) -> 25 (sum of 1, 3, 5, 7, 9)
         solution(max_digits=2) -> 157
         solution(max_digits=6) -> 872,187 (solves the original problem for numbers < 1,000,000)
-
-    Note:
-        The original problem asks for numbers less than one million, which corresponds
-        to max_digits=6. Other values are provided for testing and exploration.
     """
     return sum(number for number in generate_decimal_palindromes(max_digits)
                if number == int(str(bin(number))[2:][::-1], base=2))
