@@ -35,6 +35,12 @@ def solution(*, n: int) -> int:
        - The sum of nth powers of d digits is at most d*(9^n)
        - For large enough d, d*(9^n) < 10^d - 1, making it impossible to find matches
        - We solve for d where d*(9^n) and 10^d have similar magnitudes
+       - The formula `ceil(log(n * 9 ** n, 10))` implements this bound by:
+         a. Finding the value of n×9^n, which represents a safe upper estimate
+         b. Taking log base 10 gives us approximately how many digits this number has
+         c. Ceiling function ensures we don't underestimate the bound
+         d. Example: For n=5, this gives 6 digits as our search limit instead of checking 
+            all numbers up to some arbitrary limit like 1,000,000
 
     2. Generate all possible multisets of digits up to the calculated bound using
        combinations_with_replacement, which efficiently handles all digit combinations
@@ -44,9 +50,6 @@ def solution(*, n: int) -> int:
        - Calculate the sum of the nth powers of these digits
        - Check if this sum creates a number that equals the sum of the nth powers of its own digits
        - Exclude single-digit numbers (like 1) as they're not considered sums
-
-    Time Complexity: O(10^d) where d is the calculated digit upper bound
-    Space Complexity: O(10^d) for storing combinations
 
     Args:
         n: The power to which each digit is raised
@@ -73,6 +76,29 @@ As 1 = 1^4 is not a sum it is not included.
 The sum of these numbers is 1634 + 8208 + 9474 = 19316.
 Find the sum of all the numbers that can be written as the sum of fifth powers of their digits.
 
+    Mathematical Approach:
+    1. Determine an upper bound for the number of digits by solving the inequality:
+       - A d-digit number is at most 10^d - 1
+       - The sum of nth powers of d digits is at most d*(9^n)
+       - For large enough d, d*(9^n) < 10^d - 1, making it impossible to find matches
+       - We solve for d where d*(9^n) and 10^d have similar magnitudes
+       - The formula `upper_bound_num_digits = ceil(log(n * 9 ** n, 10))` calculates this bound:
+         a. We need to find the smallest d where d × 9^n < 10^d
+         b. Taking log base 10 of both sides: log10(d × 9^n) < d
+         c. Using log properties: log10(d) + n × log10(9) < d
+         d. For most values of n, log10(d) is small compared to n × log10(9)
+         e. We use n * 9^n as a conservative estimate and take its log
+         f. Ceiling function ensures we get an integer upper bound
+         g. Example for n=5: 9^5 = 59,049; 5×9^5 = 295,245; log10(295,245) ≈ 5.47; ceil(5.47) = 6
+
+    2. Generate all possible multisets of digits up to the calculated bound using
+       combinations_with_replacement, which efficiently handles all digit combinations
+       including repeats.
+
+    3. For each combination of digits:
+       - Calculate the sum of the nth powers of these digits
+       - Check if this sum creates a number that equals the sum of the nth powers of its own digits
+       - Exclude single-digit numbers (like 1) as they're not considered sums
 
 ''').strip()
 
