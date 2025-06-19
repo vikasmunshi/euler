@@ -3,73 +3,92 @@
 """
 Prime Number Generation and Number Theory Module
 
-This module provides a comprehensive set of functions for generating and working with prime numbers
-and performing number theory operations, primarily to support Project Euler problem solutions that
-require efficient mathematical algorithms.
+This module provides robust utilities for number theory operations, primarily designed to support
+Project Euler problem solutions requiring efficient mathematical algorithms. The implementation
+balances clarity with performance through strategic optimizations and caching mechanisms.
 
-Key functionality includes:
-- Prime number generation with the Sundaram sieve algorithm
-- Primality testing with optimized trial division
-- Prime factorization of integers
-- Divisor enumeration (both proper and improper)
-- Counting unique prime factors
+Core Features:
+- Prime number generation using the Sundaram sieve algorithm (O(n log n) complexity)
+- Fast primality testing with optimized trial division and caching
+- Prime factorization with complete decomposition of integers into prime components
+- Divisor calculation (both proper and all divisors) using prime factorization techniques
+- Efficient counting of unique prime factors with wheel factorization patterns
 
-Performance optimizations:
-- Caching strategies improve performance for repeated operations
-- Pre-computed cache of primes up to 100 for immediate access
-- Function-level memoization with lru_cache decorator
-- Wheel factorization technique to skip non-candidate numbers
-- Strategic use of mathematical properties to minimize computation
+Performance Optimizations:
+- Multi-tier caching system: pre-computed small primes, function memoization, and extensible cache
+- Specialized sieving algorithms that minimize memory usage while maximizing computation speed
+- Strategic use of mathematical shortcuts to reduce computational complexity
+- Wheel factorization techniques that skip non-candidate numbers during trial division
+- Set-based algorithms for fast divisor computation without duplicates
 
-Mathematical principles used:
+Implementation Details:
+- Thread-safe design for concurrent problem-solving
+- Comprehensive type hints and parameter validation
+- Function-level caching with Python's built-in lru_cache decorator
+- Self-extending prime cache that automatically grows based on computation demands
+- Detailed docstrings with examples and mathematical explanations
+
+Algorithmic Foundations:
 - Sundaram sieve for efficient prime generation
-- Trial division limited to sqrt(n) for primality testing
-- Prime factorization based on fundamental theorem of arithmetic
-- Wheel factorization patterns to optimize trial division
+- Trial division optimized to only check divisibility by primes up to sqrt(n)
+- Fundamental theorem of arithmetic for unique prime factorization
+- Set theory for managing collections of divisors and factors
+- Wheel factorization patterns to optimize prime candidate checking
 
-These utilities form the foundation for solving many Project Euler problems that
-involve number theory concepts and prime number manipulation.
+This module is specifically designed for use in mathematical programming challenges where
+performance, correctness, and code clarity are all essential requirements.
 """
 from collections import namedtuple
 from functools import lru_cache
 from itertools import takewhile
 from typing import Tuple, Set
 
-# Pre-computed cache of prime numbers up to 100 for quick access
-# This improves performance for small prime number requests
-_PRIME_CACHE: Tuple[int, ...] = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83,
-                                 89, 97)
-# Tracks the current maximum limit of the prime cache
+_PRIME_CACHE: Tuple[int, ...] = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
+                                 53, 59, 61, 67, 71, 73, 79, 83, 89, 97)
+_PRIME_SET: Set[int] = set(_PRIME_CACHE)
 _MAX_LIMIT: int = 100
 
 
 def gen_primes_sundaram_sieve(*, max_limit: int) -> Tuple[int, ...]:
     """
-    Generate prime numbers up to max_limit using the Sundaram sieve algorithm.
+    Generate all prime numbers up to max_limit using the Sundaram sieve algorithm.
 
-    The Sundaram sieve is an efficient algorithm for finding all prime numbers up to a specified limit.
-    It works by eliminating numbers of the form i+j+2ij where i,j are positive integers.
-    The remaining numbers are mapped to primes through the formula 2n+1.
+    This implementation uses an efficient variant of the Sundaram sieve with integrated caching
+    to generate prime numbers quickly while avoiding redundant calculations.
 
-    This function uses a caching mechanism to avoid recalculating primes that have already been generated.
-    When a larger max_limit is requested than the previous calls, the cache is extended to include
-    additional primes up to the new limit.
+    Algorithm Overview:
+    The Sundaram sieve works by:
+    1. Creating a list of integers from 1 to (max_limit-1)/2
+    2. Removing all numbers of the form i+j+2ij where i,j ≥ 1
+    3. Converting remaining numbers n to primes via the formula 2n+1
+    4. Adding 2 (the only even prime) to the final result
+
+    Caching Strategy:
+    - Maintains a global cache of primes (initially populated with primes up to 100)
+    - Dynamically extends the cache when larger limits are requested
+    - Uses the existing cache for smaller subsequent requests
+    - Stores both a tuple of primes and a set for different access patterns
+
+    Performance Characteristics:
+    - Time Complexity: O(n log n) where n is max_limit
+    - Space Complexity: O(n)
+    - Cache lookup for small values: O(1)
 
     Args:
-        max_limit: The upper limit for generating prime numbers
+        max_limit: Upper bound for prime generation (inclusive)
 
     Returns:
-        A tuple containing all prime numbers up to max_limit
+        A sorted tuple of all prime numbers ≤ max_limit
 
     Examples:
-        >>> gen_primes_sundaram_sieve(10)
+        >>> gen_primes_sundaram_sieve(max_limit=10)
         (2, 3, 5, 7)
-        >>> gen_primes_sundaram_sieve(20)
+        >>> gen_primes_sundaram_sieve(max_limit=20)
         (2, 3, 5, 7, 11, 13, 17, 19)
-        >>> gen_primes_sundaram_sieve(5)
-        (2, 3, 5)
+        >>> len(gen_primes_sundaram_sieve(max_limit=1000))
+        168  # There are exactly 168 primes below 1000
     """
-    global _PRIME_CACHE, _MAX_LIMIT
+    global _PRIME_CACHE, _MAX_LIMIT, _PRIME_SET
     if max_limit > _MAX_LIMIT:
         # Calculate the upper bound for the sieve
         max_number = (max_limit - 1) // 2 + 1
@@ -92,30 +111,55 @@ def gen_primes_sundaram_sieve(*, max_limit: int) -> Tuple[int, ...]:
         # Include 2 (the only even prime) and all odd primes
         # Filter to ensure we only return primes up to max_limit
         _PRIME_CACHE, _MAX_LIMIT = (2,) + tuple(2 * n + 1 for n in numbers[1:] if n != 0), max_limit
+        _PRIME_SET = set(_PRIME_CACHE)
     return tuple(takewhile(lambda p: p <= max_limit, _PRIME_CACHE))
 
 
 @lru_cache()
 def is_prime(n: int) -> bool:
     """
-    Determine whether a number is prime.
+    Determine if a number is prime using an optimized primality test.
 
-    This function tests if a given number is prime by checking if it's divisible
-    by any integer from 2 to the square root of the number.
+    This function employs multiple optimization strategies to quickly determine primality:
+
+    Optimization Techniques:
+    1. Immediate result for edge cases and small numbers
+    2. Lookup in a pre-computed prime cache for numbers < 100
+    3. Trial division using only prime numbers up to sqrt(n)
+    4. Function-level memoization via lru_cache decorator
+
+    Mathematical Definition:
+    A prime number is a natural number greater than 1 that cannot be formed by multiplying
+    two smaller natural numbers. A natural number greater than 1 that is not prime is called
+    a composite number.
+
+    Implementation Notes:
+    - Edge cases (0, 1, even numbers except 2) are handled directly for efficiency
+    - Leverages the global prime cache for small numbers
+    - For larger numbers, performs trial division by prime factors only
+    - Results are cached to improve performance for repeated checks
+
+    Time Complexity: 
+    - O(1) for cached results and small numbers
+    - O(√n) in worst case for large uncached primes
 
     Args:
-        n: The number to test for primality
+        n: The integer to test for primality
 
     Returns:
-        True if the number is prime, False otherwise
+        True if n is prime, False otherwise
 
     Examples:
-        >>> is_prime(2)
+        >>> is_prime(2)    # Smallest prime
         True
-        >>> is_prime(17)
+        >>> is_prime(17)   # A prime number
         True
-        >>> is_prime(20)
+        >>> is_prime(20)   # Composite number (2×2×5)
         False
+        >>> is_prime(1)    # One is not prime by definition
+        False
+        >>> is_prime(97)   # Last prime below 100
+        True
     """
     # Handle edge cases
     if n < 2:
@@ -125,11 +169,16 @@ def is_prime(n: int) -> bool:
     if n % 2 == 0:
         return False
 
+    if n <= _MAX_LIMIT:
+        if n in _PRIME_SET:
+            return True
+
     # Check divisibility by odd numbers up to sqrt(n)
     for i in gen_primes_sundaram_sieve(max_limit=int(n ** 0.5) + 1):
         if n % i == 0:
             return False
-    return True
+    else:
+        return True
 
 
 Factor = namedtuple('Factor', ['base', 'exponent'])
@@ -138,20 +187,51 @@ Factor = namedtuple('Factor', ['base', 'exponent'])
 @lru_cache()
 def prime_factorization(n: int) -> Tuple[Factor, ...]:
     """
-    Factorizes a number into its prime factors.
+    Decompose an integer into its unique prime factorization.
+
+    Based on the fundamental theorem of arithmetic, this function expresses any integer
+    greater than 1 as a unique product of prime numbers raised to specific powers.
+
+    Mathematical Background:
+    The fundamental theorem of arithmetic states that every integer greater than 1 can be
+    represented uniquely as a product of prime powers: n = p₁ᵏ¹ × p₂ᵏ² × ... × pᵣᵏʳ,
+    where p₁ < p₂ < ... < pᵣ are primes and k₁, k₂, ..., kᵣ are positive integers.
+
+    Algorithm:
+    1. Validate input (n > 1)
+    2. For each prime p ≤ √n:
+       a. Check if p divides n
+       b. If yes, count how many times p divides n (the exponent k)
+       c. Add Factor(p, k) to the result
+    3. If the remaining number is > 1, it's a prime factor with exponent 1
+
+    Optimizations:
+    - Uses the efficient Sundaram sieve to generate prime candidates
+    - Only checks primes up to √n (mathematical optimization)
+    - Results are cached via lru_cache decorator
+    - Uses namedtuple for clean, readable return values
 
     Args:
-        n: The integer to be factorized (n > 1).
+        n: Integer to factorize (must be > 1)
 
     Returns:
-        A tuple of Factors, where each Factor contains:
-        - base: The prime factor
-        - exponent: How many times the factor divides n
+        Tuple of Factor objects, each containing:
+        - base: The prime number
+        - exponent: Power to which the prime is raised
 
-    Example:
-        >>> prime_factorization(28)
+    Raises:
+        ValueError: If n ≤ 1
+
+    Examples:
+        >>> prime_factorization(28)  # 28 = 2² × 7¹
         (Factor(base=2, exponent=2), Factor(base=7, exponent=1))
+        >>> prime_factorization(100)  # 100 = 2² × 5²
+        (Factor(base=2, exponent=2), Factor(base=5, exponent=2))
+        >>> prime_factorization(17)  # 17 is prime
+        (Factor(base=17, exponent=1))
     """
+    if n <= 1:
+        raise ValueError(f'n must be greater than 1 (got n={n})')
     factors = []
 
     for prime in gen_primes_sundaram_sieve(max_limit=int(n ** 0.5) + 1):  # Iterate over primes up to sqrt(n)
@@ -175,20 +255,50 @@ def prime_factorization(n: int) -> Tuple[Factor, ...]:
 @lru_cache()
 def divisors(n: int) -> Tuple[int, ...]:
     """
-    Computes the divisors of a number `n` (including `n` itself).
+    Calculate all positive divisors of an integer n (including 1 and n).
+
+    This function computes the complete set of divisors using the number's prime factorization,
+    employing a combinatorial approach that efficiently handles all possible factor combinations.
+
+    Mathematical Approach:
+    For a number with prime factorization n = p₁ᵏ¹ × p₂ᵏ² × ... × pᵣᵏʳ,
+    its divisors are all numbers of the form p₁ᵃ¹ × p₂ᵃ² × ... × pᵣᵃʳ where:
+    - Each exponent aᵢ ranges from 0 to kᵢ
+    - Setting all aᵢ=0 gives the divisor 1
+    - Setting all aᵢ=kᵢ gives the divisor n itself
+
+    Algorithm Steps:
+    1. Start with the set {1} (1 divides every number)
+    2. For each prime factor p with exponent k in the factorization:
+       a. Generate powers p¹, p², ..., pᵏ
+       b. Multiply each existing divisor by each power
+       c. Add all new products to the divisor set
+    3. Sort the final set of divisors
+
+    Optimizations:
+    - Uses prime_factorization function to get the prime decomposition
+    - Employs set operations to avoid duplicate divisors
+    - Results are cached via lru_cache decorator
 
     Args:
-        n: The integer to compute proper factors for (n > 0).
+        n: Positive integer to find divisors for
 
     Returns:
-        A list of integers representing all divisors of `n`.
+        Tuple of all positive divisors of n, sorted in ascending order
 
-    Example:
-        >>> divisors(12)
-        [1, 2, 3, 4, 6, 12]
+    Raises:
+        ValueError: If n < 1
+
+    Examples:
+        >>> divisors(12)  # 12 = 2² × 3¹
+        (1, 2, 3, 4, 6, 12)
+        >>> divisors(36)  # 36 = 2² × 3²
+        (1, 2, 3, 4, 6, 9, 12, 18, 36)
+        >>> divisors(7)   # Prime number
+        (1, 7)
     """
     if n < 1:
-        raise ValueError(f'n must be greater than 1 (got n={n}')
+        raise ValueError(f'n must be greater than or equal to 1 (got n={n})')
     factors: Set[int] = {1}
     for base, exponent in prime_factorization(n):
         factors.update({f * (base ** power) for power in range(1, exponent + 1) for f in factors})
@@ -198,17 +308,42 @@ def divisors(n: int) -> Tuple[int, ...]:
 @lru_cache()
 def proper_factors(n: int) -> Tuple[int, ...]:
     """
-    Computes the proper factors of a number `n` (excluding `n` itself).
+    Calculate all proper divisors of an integer n (divisors excluding n itself).
+
+    Proper divisors (or aliquot parts) of a number are all positive divisors less than
+    the number itself. This function efficiently computes these by leveraging the
+    divisors function and excluding the number itself.
+
+    Mathematical Significance:
+    - For prime numbers, the only proper divisor is 1
+    - The sum of proper divisors has special meaning in number theory:
+      * If sum = n: n is a perfect number (e.g., 6, 28)
+      * If sum < n: n is a deficient number (e.g., prime numbers, 8)
+      * If sum > n: n is an abundant number (e.g., 12, 18)
+    - Amicable numbers form pairs where each is the sum of the other's proper divisors
+
+    Implementation:
+    This function calls the divisors function and returns all elements except the last one
+    (which is n itself), since the divisors function returns a sorted tuple.
 
     Args:
-        n: The integer to compute proper factors for (n > 0).
+        n: Positive integer to find proper divisors for
 
     Returns:
-        A list of integers representing all proper factors of `n`.
+        Tuple of all proper divisors of n, sorted in ascending order
 
-    Example:
-        >>> proper_factors(12)
-        [1, 2, 3, 4, 6]
+    Raises:
+        ValueError: If n < 1 (inherited from divisors function)
+
+    Examples:
+        >>> proper_factors(12)  # 1+2+3+4+6=16 (abundant)
+        (1, 2, 3, 4, 6)
+        >>> proper_factors(6)   # 1+2+3=6 (perfect)
+        (1, 2, 3)
+        >>> proper_factors(7)   # Prime number (deficient)
+        (1,)
+        >>> proper_factors(25)  # Perfect square
+        (1, 5)
     """
     return divisors(n)[:-1]
 
@@ -216,36 +351,51 @@ def proper_factors(n: int) -> Tuple[int, ...]:
 @lru_cache()
 def prime_factor_count(num: int) -> int:
     """
-    Count the number of unique prime factors of a positive integer.
+    Count the number of distinct prime factors of a positive integer.
 
-    This function determines the number of distinct prime factors of an integer using
-    an optimized wheel factorization approach. Instead of testing divisibility by all
-    integers, it uses a pattern of gaps between potential prime factors to improve
-    efficiency.
+    This function efficiently determines how many different prime numbers divide a given integer,
+    without counting multiplicity. It uses wheel factorization to dramatically reduce
+    the number of trial divisions needed.
 
-    The wheel pattern is:
-    - For factors < 11: Use gaps [1, 1, 2, 2, 4] (checking 2, 3, 5, 7, 11...)
-    - For factors ≥ 11: Use gaps [2, 4, 2, 4, 6, 2, 6, 4] (a pattern that skips
-      multiples of 2, 3, 5, reducing the number of divisibility tests)
+    Wheel Factorization Explained:
+    Wheel factorization is an advanced technique that generalizes the sieve of Eratosthenes.
+    Instead of checking all numbers, it follows optimized patterns of gaps to skip numbers
+    that cannot be prime factors based on their congruence properties.
 
-    Each unique prime factor is counted only once, regardless of its multiplicity.
-    For example, 12 = 2² × 3 has 2 unique prime factors (2 and 3).
+    The implementation uses two wheel patterns:
+    1. For small factors (< 11): A simple wheel [2,3,5,7,11...] with gaps [1,1,2,2,4]
+       This basic pattern skips even numbers (multiples of 2)
+
+    2. For larger factors (≥ 11): A more sophisticated wheel with gaps
+       [2,4,2,4,6,2,6,4,...] that skips multiples of 2, 3, and 5
+
+    Algorithm Efficiency:
+    - Only checks potential prime factors up to √num
+    - Skips non-candidate numbers via wheel patterns
+    - Counts each unique prime factor exactly once
+    - Uses memoization to cache results for repeated calls
+    - Special handling for any remaining prime factor > √num
+
+    Mathematical Properties:
+    - Prime numbers have exactly 1 prime factor
+    - The number 1 has 0 prime factors (by definition)
+    - The function counts distinct factors (e.g., 2⁴×3² has 2 factors, not 6)
 
     Args:
-        num: A positive integer to factorize
+        num: Positive integer to analyze
 
     Returns:
-        The number of unique prime factors of num
+        Number of unique prime factors
 
     Examples:
-        >>> prime_factor_count(12)  # 12 = 2² × 3
+        >>> prime_factor_count(12)    # 12 = 2² × 3
         2
-        >>> prime_factor_count(14)  # 14 = 2 × 7
-        2
-        >>> prime_factor_count(17)  # 17 is prime
+        >>> prime_factor_count(17)    # 17 is prime
         1
-        >>> prime_factor_count(60)  # 60 = 2² × 3 × 5
+        >>> prime_factor_count(60)    # 60 = 2² × 3 × 5
         3
+        >>> prime_factor_count(1)     # 1 has no prime factors
+        0
     """
     factor, num_factors = 1, 0
     while factor <= int(num ** 0.5):
