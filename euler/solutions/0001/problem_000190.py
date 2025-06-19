@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 190
 # https://projecteuler.net/problem=190
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,24 +14,19 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 190
-https://projecteuler.net/problem=190
-Let $S_m = (x_1, x_2, ... , x_m)$ be the $m$-tuple of positive real numbers with $x_1 + x_2 + \cdots + x_m = m$ for which $P_m = x_1 \cdot x_2^2 \cdot \cdots \cdot x_m^m$ is maximised.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 190
+    https://projecteuler.net/problem=190
+    Let $S_m = (x_1, x_2, ... , x_m)$ be the $m$-tuple of positive real numbers with $x_1 + x_2 + \cdots + x_m = m$ for which $P_m = x_1 \cdot x_2^2 \cdot \cdots \cdot x_m^m$ is maximised.
 
 For example, it can be verified that $\lfloor P_{10}\rfloor = 4112$ ($\lfloor \, \rfloor$ is the integer part function).
 
 Find $\sum\limits_{m = 2}^{15} \lfloor P_m \rfloor$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -51,4 +46,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

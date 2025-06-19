@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 144
 # https://projecteuler.net/problem=144
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 144
-https://projecteuler.net/problem=144
-In laser physics, a "white cell" is a mirror system that acts as a delay line for the laser beam. The beam enters the cell, bounces around on the mirrors, and eventually works its way back out.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 144
+    https://projecteuler.net/problem=144
+    In laser physics, a "white cell" is a mirror system that acts as a delay line for the laser beam. The beam enters the cell, bounces around on the mirrors, and eventually works its way back out.
 The specific white cell we will be considering is an ellipse with the equation $4x^2 + y^2 = 100$.
 The section corresponding to $-0.01 \le x \le +0.01$ at the top is missing, allowing the light to enter and exit through the hole.
 
@@ -37,7 +30,9 @@ The animation on the right shows the first $10$ reflections of the beam.
 
 How many times does the beam hit the internal surface of the white cell before exiting?
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -57,4 +52,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

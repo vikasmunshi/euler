@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 786
 # https://projecteuler.net/problem=786
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 786
-https://projecteuler.net/problem=786
-
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 786
+    https://projecteuler.net/problem=786
+    
 The following diagram shows a billiard table of a special quadrilateral shape.
 The four angles $A, B, C, D$ are $120^\circ, 90^\circ, 60^\circ, 90^\circ$ respectively, and the lengths $AB$ and $AD$ are equal.
 
@@ -60,7 +53,9 @@ For example, $B(10) = 6$, $B(100) = 478$, $B(1000) = 45790$.
 Find $B(10^9)$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -80,4 +75,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

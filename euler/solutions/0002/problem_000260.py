@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 260
 # https://projecteuler.net/problem=260
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 260
-https://projecteuler.net/problem=260
-A game is played with three piles of stones and two players.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 260
+    https://projecteuler.net/problem=260
+    A game is played with three piles of stones and two players.
 
 On each player's turn, the player may remove one or more stones from the piles. However, if the player takes stones from more than one pile, then the same number of stones must be removed from each of the selected piles.
 
@@ -50,7 +43,9 @@ We can verify that $\sum (x_i + y_i + z_i) = 173895$ for these.
 
 Find $\sum (x_i + y_i + z_i)$ where $(x_i, y_i, z_i)$ ranges over the losing configurations with $x_i \le y_i \le z_i \le 1000$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -70,4 +65,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

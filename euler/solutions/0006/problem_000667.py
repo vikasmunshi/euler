@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 667
 # https://projecteuler.net/problem=667
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 667
-https://projecteuler.net/problem=667
-
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 667
+    https://projecteuler.net/problem=667
+    
 After buying a Gerver Sofa from the Moving Sofa Company, Jack wants to buy a matching cocktail table from the same company. Most important for him is that the table can be pushed through his L-shaped corridor into the living room without having to be lifted from its table legs. 
 
 Unfortunately, the simple square model offered to him is too small for him, so he asks for a bigger model.
@@ -38,7 +31,9 @@ Given optimal form and size, what is the biggest pentagonal cocktail table (in t
 
 Give your answer rounded to 10 digits after the decimal point (if Jack had choosen the square model instead the answer would have been 1.0000000000).
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -58,4 +53,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 370
 # https://projecteuler.net/problem=370
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 370
-https://projecteuler.net/problem=370
-Let us define a geometric triangle as an integer sided triangle with sides $a \le b \le c$ so that its sides form a geometric progression, i.e. $b^2 = a \cdot c$ 
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 370
+    https://projecteuler.net/problem=370
+    Let us define a geometric triangle as an integer sided triangle with sides $a \le b \le c$ so that its sides form a geometric progression, i.e. $b^2 = a \cdot c$ 
 
 An example of such a geometric triangle is the triangle with sides $a = 144$, $b = 156$ and $c = 169$.
 
@@ -34,7 +27,9 @@ There are $861805$ geometric triangles with perimeter $\le 10^6$.
 How many geometric triangles exist with perimeter $\le 2.5 \cdot 10^{13}$?
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -54,4 +49,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

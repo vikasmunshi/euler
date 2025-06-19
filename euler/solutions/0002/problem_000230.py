@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 230
 # https://projecteuler.net/problem=230
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 230
-https://projecteuler.net/problem=230
-For any two strings of digits, $A$ and $B$, we define $F_{A, B}$ to be the sequence $(A,B,AB,BAB,ABBAB,...)$ in which each term is the concatenation of the previous two.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 230
+    https://projecteuler.net/problem=230
+    For any two strings of digits, $A$ and $B$, we define $F_{A, B}$ to be the sequence $(A,B,AB,BAB,ABBAB,...)$ in which each term is the concatenation of the previous two.
 
 Further, we define $D_{A, B}(n)$ to be the $n$th digit in the first term of $F_{A, B}$ that contains at least $n$ digits.
 
@@ -66,7 +59,9 @@ Find $\sum_{n = 0}^{17} 10^n \times D_{A,B}((127+19n) \times 7^n)$.
  
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -86,4 +81,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

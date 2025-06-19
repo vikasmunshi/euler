@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 66
 # https://projecteuler.net/problem=66
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 66
-https://projecteuler.net/problem=66
-Consider quadratic Diophantine equations of the form:
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 66
+    https://projecteuler.net/problem=66
+    Consider quadratic Diophantine equations of the form:
 $$x^2 - Dy^2 = 1$$
 For example, when $D=13$, the minimal solution in $x$ is $649^2 - 13 \times 180^2 = 1$.
 It can be assumed that there are no solutions in positive integers when $D$ is square.
@@ -41,7 +34,9 @@ Hence, by considering minimal solutions in $x$ for $D \le 7$, the largest $x$ is
 Find the value of $D \le 1000$ in minimal solutions of $x$ for which the largest value of $x$ is obtained.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -61,4 +56,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

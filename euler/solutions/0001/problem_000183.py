@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 183
 # https://projecteuler.net/problem=183
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 183
-https://projecteuler.net/problem=183
-Let $N$ be a positive integer and let $N$ be split into $k$ equal parts, $r = N/k$, so that $N = r + r + \cdots + r$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 183
+    https://projecteuler.net/problem=183
+    Let $N$ be a positive integer and let $N$ be split into $k$ equal parts, $r = N/k$, so that $N = r + r + \cdots + r$.
 
 Let $P$ be the product of these parts, $P = r \times r \times \cdots \times r = r^k$.
 
@@ -44,7 +37,9 @@ For example, $\sum\limits_{N = 5}^{100} D(N)$ is $2438$.
 Find $\sum\limits_{N = 5}^{10000} D(N)$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -64,4 +59,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

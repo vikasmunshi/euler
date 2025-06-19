@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 514
 # https://projecteuler.net/problem=514
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 514
-https://projecteuler.net/problem=514
-A geoboard (of order $N$) is a square board with equally-spaced pins protruding from the surface, representing an integer point lattice for coordinates $0 \le x, y \le N$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 514
+    https://projecteuler.net/problem=514
+    A geoboard (of order $N$) is a square board with equally-spaced pins protruding from the surface, representing an integer point lattice for coordinates $0 \le x, y \le N$.
 
 John begins with a pinless geoboard. Each position on the board is a hole that can be filled with a pin. John decides to generate a random integer between $1$ and $N+1$ (inclusive) for each hole in the geoboard. If the random integer is equal to $1$ for a given hole, then a pin is placed in that hole.
 
@@ -39,7 +32,9 @@ Let $E(N)$ be the expected area of $S$ given a geoboard of order $N$. For exampl
 
 Calculate $E(100)$ rounded to five decimal places.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -59,4 +54,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

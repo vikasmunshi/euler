@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 156
 # https://projecteuler.net/problem=156
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 156
-https://projecteuler.net/problem=156
-Starting from zero the natural numbers are written down in base $10$ like this:
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 156
+    https://projecteuler.net/problem=156
+    Starting from zero the natural numbers are written down in base $10$ like this:
 
 
 $0\,1\,2\,3\,4\,5\,6\,7\,8\,9\,10\,11\,12\cdots$
@@ -64,7 +57,9 @@ You are given that $s(1)=22786974071$.
 Find  $\sum s(d)$ for $1 \le d \le 9$.
 Note: if, for some $n$, $f(n,d)=n$ for more than one value of $d$ this value of $n$ is counted again for every value of $d$ for which $f(n,d)=n$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -84,4 +79,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

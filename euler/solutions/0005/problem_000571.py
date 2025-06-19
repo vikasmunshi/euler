@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 571
 # https://projecteuler.net/problem=571
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 571
-https://projecteuler.net/problem=571
-A positive number is pandigital in base $b$ if it contains all digits from $0$ to $b - 1$ at least once when written in base $b$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 571
+    https://projecteuler.net/problem=571
+    A positive number is pandigital in base $b$ if it contains all digits from $0$ to $b - 1$ at least once when written in base $b$.
 
 An $n$-super-pandigital number is a number that is simultaneously pandigital in all bases from $2$ to $n$ inclusively.
 
@@ -37,7 +30,9 @@ The sum of the $10$ smallest $10$-super-pandigital numbers is $20319792309$.
 
 What is the sum of the $10$ smallest $12$-super-pandigital numbers?
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -57,4 +52,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

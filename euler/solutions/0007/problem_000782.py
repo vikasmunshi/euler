@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 782
 # https://projecteuler.net/problem=782
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 782
-https://projecteuler.net/problem=782
-The complexity of an $n\times n$ binary matrix is the number of distinct rows and columns.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 782
+    https://projecteuler.net/problem=782
+    The complexity of an $n\times n$ binary matrix is the number of distinct rows and columns.
 
 For example, consider the $3\times 3$ matrices
 $$		\mathbf{A} = \begin{pmatrix} 1&0&1\\0&0&0\\1&0&1\end{pmatrix}	\quad
@@ -43,7 +36,9 @@ You are given $C(5) = 64$, $C(10) = 274$ and $C(20) = 1150$.
 
 Find $C(10^4)$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -63,4 +58,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

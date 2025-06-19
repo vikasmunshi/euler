@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 556
 # https://projecteuler.net/problem=556
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 556
-https://projecteuler.net/problem=556
-A Gaussian integer is a number $z = a + bi$ where $a$, $b$ are integers and $i^2 = -1$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 556
+    https://projecteuler.net/problem=556
+    A Gaussian integer is a number $z = a + bi$ where $a$, $b$ are integers and $i^2 = -1$.
 
 Gaussian integers are a subset of the complex numbers, and the integers are the subset of Gaussian integers for which $b = 0$.
 
@@ -66,7 +59,9 @@ You are given $f(10^2) = 54$, $f(10^4) = 5218$ and $f(10^8) = 52126906$.
 Find $f(10^{14})$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -86,4 +81,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

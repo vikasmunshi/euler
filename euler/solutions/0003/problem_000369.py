@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 369
 # https://projecteuler.net/problem=369
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,25 +14,20 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 369
-https://projecteuler.net/problem=369
-In a standard $52$ card deck of playing cards, a set of $4$ cards is a Badugi if it contains $4$ cards with no pairs and no two cards of the same suit.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 369
+    https://projecteuler.net/problem=369
+    In a standard $52$ card deck of playing cards, a set of $4$ cards is a Badugi if it contains $4$ cards with no pairs and no two cards of the same suit.
 
 Let $f(n)$ be the number of ways to choose $n$ cards with a $4$ card subset that is a Badugi.  For example, there are $2598960$ ways to choose five cards from a standard $52$ card deck, of which $514800$ contain a $4$ card subset that is a Badugi, so $f(5) = 514800$.
 
 Find $\sum f(n)$ for $4 \le n \le 13$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -52,4 +47,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

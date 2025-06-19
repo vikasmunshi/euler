@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 162
 # https://projecteuler.net/problem=162
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 162
-https://projecteuler.net/problem=162
-In the hexadecimal number system numbers are represented using $16$ different digits:
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 162
+    https://projecteuler.net/problem=162
+    In the hexadecimal number system numbers are represented using $16$ different digits:
 $$0,1,2,3,4,5,6,7,8,9,\mathrm A,\mathrm B,\mathrm C,\mathrm D,\mathrm E,\mathrm F.$$
 The hexadecimal number $\mathrm{AF}$ when written in the decimal number system equals $10 \times 16 + 15 = 175$.
 In the $3$-digit hexadecimal numbers $10\mathrm A$, $1\mathrm A0$, $\mathrm A10$, and $\mathrm A01$ the digits $0$, $1$ and $\mathrm A$ are all present.
@@ -36,7 +29,9 @@ How many hexadecimal numbers containing at most sixteen hexadecimal digits exist
 Give your answer as a hexadecimal number.
 (A, B, C, D, E and F in upper case, without any leading or trailing code that marks the number as hexadecimal and without leading zeroes, e.g. 1A3F and not: 1a3f and not 0x1a3f and not $1A3F and not #1A3F and not 0000001A3F)
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -56,4 +51,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

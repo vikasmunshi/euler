@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 112
 # https://projecteuler.net/problem=112
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 112
-https://projecteuler.net/problem=112
-Working from left-to-right if no digit is exceeded by the digit to its left it is called an increasing number; for example, $134468$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 112
+    https://projecteuler.net/problem=112
+    Working from left-to-right if no digit is exceeded by the digit to its left it is called an increasing number; for example, $134468$.
 Similarly if no digit is exceeded by the digit to its right it is called a decreasing number; for example, $66420$.
 We shall call a positive integer that is neither increasing nor decreasing a "bouncy" number; for example, $155349$.
 Clearly there cannot be any bouncy numbers below one-hundred, but just over half of the numbers below one-thousand ($525$) are bouncy. In fact, the least number for which the proportion of bouncy numbers first reaches $50\%$ is $538$.
@@ -33,7 +26,9 @@ Surprisingly, bouncy numbers become more and more common and by the time we reac
 Find the least number for which the proportion of bouncy numbers is exactly $99\%$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -53,4 +48,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 495
 # https://projecteuler.net/problem=495
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 495
-https://projecteuler.net/problem=495
-Let $W(n,k)$ be the number of ways in which $n$ can be written as the product of $k$ distinct positive integers.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 495
+    https://projecteuler.net/problem=495
+    Let $W(n,k)$ be the number of ways in which $n$ can be written as the product of $k$ distinct positive integers.
 For example, $W(144,4) = 7$. There are $7$ ways in which $144$ can be written as a product of $4$ distinct positive integers:
 $144 = 1 \times 2 \times 4 \times 18$
 $144 = 1 \times 2 \times 8 \times 9$
@@ -38,7 +31,9 @@ Note that permutations of the integers themselves are not considered distinct.
 Furthermore, $W(100!,10)$ modulo $1\,000\,000\,007 = 287549200$.
 Find $W(10000!,30)$ modulo $1\,000\,000\,007$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -58,4 +53,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

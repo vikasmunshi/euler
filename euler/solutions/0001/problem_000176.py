@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 176
 # https://projecteuler.net/problem=176
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,21 +14,16 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 176
-https://projecteuler.net/problem=176
-The four right-angled triangles with sides $(9,12,15)$, $(12,16,20)$, $(5,12,13)$ and $(12,35,37)$ all have one of the shorter sides (catheti) equal to $12$. It can be shown that no other integer sided right-angled triangle exists with one of the catheti equal to $12$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 176
+    https://projecteuler.net/problem=176
+    The four right-angled triangles with sides $(9,12,15)$, $(12,16,20)$, $(5,12,13)$ and $(12,35,37)$ all have one of the shorter sides (catheti) equal to $12$. It can be shown that no other integer sided right-angled triangle exists with one of the catheti equal to $12$.
 Find the smallest integer that can be the length of a cathetus of exactly $47547$ different integer sided right-angled triangles.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -48,4 +43,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

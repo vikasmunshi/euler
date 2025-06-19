@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 660
 # https://projecteuler.net/problem=660
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,25 +14,20 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 660
-https://projecteuler.net/problem=660
-We call an integer sided triangle $n$-pandigital if it contains one angle of $120$ degrees and, when the sides of the triangle are written in base $n$, together they use all $n$ digits of that base exactly once.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 660
+    https://projecteuler.net/problem=660
+    We call an integer sided triangle $n$-pandigital if it contains one angle of $120$ degrees and, when the sides of the triangle are written in base $n$, together they use all $n$ digits of that base exactly once.
 
 
 For example, the triangle $(217, 248, 403)$ is $9$-pandigital because it contains one angle of $120$ degrees and the sides written in base $9$ are $261_9, 305_9, 487_9$ using each of the $9$ digits of that base once.
 
 Find the sum of the largest sides of all $n$-pandigital triangles with $9 \le n \le 18$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -52,4 +47,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

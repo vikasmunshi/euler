@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 462
 # https://projecteuler.net/problem=462
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 462
-https://projecteuler.net/problem=462
-
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 462
+    https://projecteuler.net/problem=462
+    
 A $3$-smooth number is an integer which has no prime factor larger than $3$. For an integer $N$, we define $S(N)$ as the set of $3$-smooth numbers less than or equal to $N$. For example, $S(20) = \{ 1, 2, 3, 4, 6, 8, 9, 12, 16, 18 \}$.
 
 
@@ -48,7 +41,9 @@ Find $F(10^{18})$. Give as your answer its scientific notation rounded to ten di
 When giving your answer, use a lowercase e to separate mantissa and exponent. E.g. if the answer is $112\,233\,445\,566\,778\,899$ then the answer format would be 1.1223344557e17.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -68,4 +63,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

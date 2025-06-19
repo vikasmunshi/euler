@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 328
 # https://projecteuler.net/problem=328
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 328
-https://projecteuler.net/problem=328
-We are trying to find a hidden number selected from the set of integers $\{1, 2, ..., n\}$ by asking questions. 
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 328
+    https://projecteuler.net/problem=328
+    We are trying to find a hidden number selected from the set of integers $\{1, 2, ..., n\}$ by asking questions. 
 Each number (question) we ask, has a cost equal to the number asked and we get one of three possible answers:
  "Your guess is lower than the hidden number", or
  "Yes, that's it!", or
@@ -58,7 +51,9 @@ Similarly, $C(100) = 400$ and $\sum \limits_{n = 1}^{100} C(n) = 17575$.
 
 Find $\sum \limits_{n = 1}^{200000} C(n)$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -78,4 +73,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 467
 # https://projecteuler.net/problem=467
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 467
-https://projecteuler.net/problem=467
-An integer $s$ is called a superinteger of another integer $n$ if the digits of $n$ form a subsequenceA subsequence is a sequence that can be derived from another sequence by deleting some elements without changing the order of the remaining elements. of the digits of $s$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 467
+    https://projecteuler.net/problem=467
+    An integer $s$ is called a superinteger of another integer $n$ if the digits of $n$ form a subsequenceA subsequence is a sequence that can be derived from another sequence by deleting some elements without changing the order of the remaining elements. of the digits of $s$.
 
 For example, $2718281828$ is a superinteger of $18828$, while $314159$ is not a superinteger of $151$.
 
@@ -53,7 +46,9 @@ For example, $f(10) = 2357246891352679$, and $f(100) \bmod 1\,000\,000\,007 = 77
 
 Find $f(10\,000) \bmod 1\,000\,000\,007$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -73,4 +68,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

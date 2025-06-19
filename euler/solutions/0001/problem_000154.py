@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 154
 # https://projecteuler.net/problem=154
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 154
-https://projecteuler.net/problem=154
-A triangular pyramid is constructed using spherical balls so that each ball rests on exactly three balls of the next lower level.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 154
+    https://projecteuler.net/problem=154
+    A triangular pyramid is constructed using spherical balls so that each ball rests on exactly three balls of the next lower level.
 
 Then, we calculate the number of paths leading from the apex to each position:
 A path starts at the apex and progresses downwards to any of the three spheres directly below the current position.
@@ -34,7 +27,9 @@ The result is Pascal's pyramid and the numbers at each level $n$ are the coeffic
 $(x + y + z)^n$.
 How many coefficients in the expansion of $(x + y + z)^{200000}$ are multiples of $10^{12}$?
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -54,4 +49,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

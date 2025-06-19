@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 57
 # https://projecteuler.net/problem=57
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 57
-https://projecteuler.net/problem=57
-It is possible to show that the square root of two can be expressed as an infinite continued fraction.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 57
+    https://projecteuler.net/problem=57
+    It is possible to show that the square root of two can be expressed as an infinite continued fraction.
 $\sqrt 2 =1+ \frac 1 {2+ \frac 1 {2 +\frac 1 {2+ ...}}}$
 By expanding this for the first four iterations, we get:
 $1 + \frac 1 2 = \frac  32 = 1.5$
@@ -40,7 +33,9 @@ The next three expansions are $\frac {99}{70}$, $\frac {239}{169}$, and $\frac {
 In the first one-thousand expansions, how many fractions contain a numerator with more digits than the denominator?
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -60,4 +55,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

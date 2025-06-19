@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 396
 # https://projecteuler.net/problem=396
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 396
-https://projecteuler.net/problem=396
-
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 396
+    https://projecteuler.net/problem=396
+    
 For any positive integer $n$, the $n$th weak Goodstein sequence $\{g_1, g_2, g_3, ...\}$ is defined as:
  $g_1 = n$
  for $k \gt 1$, $g_k$ is obtained by writing $g_{k-1}$ in base $k$, interpreting it as a base $k + 1$ number, and subtracting $1$.
@@ -55,7 +48,9 @@ It can also be verified that $\sum G(n) = 2517$ for $1 \le n \lt 8$.
 Find the last $9$ digits of $\sum G(n)$ for $1 \le n \lt 16$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -75,4 +70,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

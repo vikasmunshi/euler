@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 171
 # https://projecteuler.net/problem=171
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 171
-https://projecteuler.net/problem=171
-For a positive integer $n$, let $f(n)$ be the sum of the squares of the digits (in base $10$) of $n$, e.g.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 171
+    https://projecteuler.net/problem=171
+    For a positive integer $n$, let $f(n)$ be the sum of the squares of the digits (in base $10$) of $n$, e.g.
 \begin{align}
 f(3) &= 3^2 = 9,\\
 f(25) &= 2^2 + 5^2 = 4 + 25 = 29,\\
@@ -33,7 +26,9 @@ f(442) &= 4^2 + 4^2 + 2^2 = 16 + 16 + 4 = 36\\
 \end{align}
 Find the last nine digits of the sum of all $n$, $0 \lt n \lt 10^{20}$, such that $f(n)$ is a perfect square.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -53,4 +48,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

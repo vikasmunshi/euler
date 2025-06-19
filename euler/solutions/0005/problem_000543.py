@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 543
 # https://projecteuler.net/problem=543
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 543
-https://projecteuler.net/problem=543
-Define function $P(n, k) = 1$ if $n$ can be written as the sum of $k$ prime numbers (with repetitions allowed), and $P(n, k) = 0$ otherwise.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 543
+    https://projecteuler.net/problem=543
+    Define function $P(n, k) = 1$ if $n$ can be written as the sum of $k$ prime numbers (with repetitions allowed), and $P(n, k) = 0$ otherwise.
 
 For example, $P(10,2) = 1$ because $10$ can be written as either $3 + 7$ or $5 + 5$, but $P(11,2) = 0$ because no two primes can sum to $11$.
 
@@ -37,7 +30,9 @@ Let $F(k)$ be the $k$th Fibonacci number (with $F(0) = 0$ and $F(1) = 1$).
 
 Find the sum of all $S(F(k))$ over $3 \le k \le 44$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -57,4 +52,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

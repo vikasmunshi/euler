@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 187
 # https://projecteuler.net/problem=187
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,25 +14,20 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 187
-https://projecteuler.net/problem=187
-A composite is a number containing at least two prime factors. For example, $15 = 3 \times 5$; $9 = 3 \times 3$; $12 = 2 \times 2 \times 3$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 187
+    https://projecteuler.net/problem=187
+    A composite is a number containing at least two prime factors. For example, $15 = 3 \times 5$; $9 = 3 \times 3$; $12 = 2 \times 2 \times 3$.
 
 There are ten composites below thirty containing precisely two, not necessarily distinct, prime factors:
 $4, 6, 9, 10, 14, 15, 21, 22, 25, 26$.
 
 How many composite integers, $n \lt 10^8$, have precisely two, not necessarily distinct, prime factors?
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -52,4 +47,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

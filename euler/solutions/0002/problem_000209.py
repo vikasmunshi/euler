@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 209
 # https://projecteuler.net/problem=209
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 209
-https://projecteuler.net/problem=209
-A $k$-input binary truth table is a map from $k$ input bits (binary digits, $0$ [false] or $1$ [true]) to $1$ output bit. For example, the $2$-input binary truth tables for the logical $\mathbin{\text{AND}}$ and $\mathbin{\text{XOR}}$ functions are:
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 209
+    https://projecteuler.net/problem=209
+    A $k$-input binary truth table is a map from $k$ input bits (binary digits, $0$ [false] or $1$ [true]) to $1$ output bit. For example, the $2$-input binary truth tables for the logical $\mathbin{\text{AND}}$ and $\mathbin{\text{XOR}}$ functions are:
 
 $x$
 $y$
@@ -44,7 +37,9 @@ $$\tau(a, b, c, d, e, f) \mathbin{\text{AND}} \tau(b, c, d, e, f, a \mathbin{\te
 for all $6$-bit inputs $(a, b, c, d, e, f)$?
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -64,4 +59,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

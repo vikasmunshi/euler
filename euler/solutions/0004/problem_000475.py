@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 475
 # https://projecteuler.net/problem=475
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 475
-https://projecteuler.net/problem=475
-$12n$ musicians participate at a music festival. On the first day, they form $3n$ quartets and practice all day.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 475
+    https://projecteuler.net/problem=475
+    $12n$ musicians participate at a music festival. On the first day, they form $3n$ quartets and practice all day.
 It is a disaster. At the end of the day, all musicians decide they will never again agree to play with any member of their quartet.
 On the second day, they form $4n$ trios, with every musician avoiding any previous quartet partners.
 
@@ -35,7 +28,9 @@ You are given $f(12) = 576$ and $f(24) \bmod 1\,000\,000\,007 = 509089824$.
 Find $f(600) \bmod 1\,000\,000\,007$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -55,4 +50,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

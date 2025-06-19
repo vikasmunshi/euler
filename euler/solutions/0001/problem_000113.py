@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 113
 # https://projecteuler.net/problem=113
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,25 +14,20 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 113
-https://projecteuler.net/problem=113
-Working from left-to-right if no digit is exceeded by the digit to its left it is called an increasing number; for example, $134468$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 113
+    https://projecteuler.net/problem=113
+    Working from left-to-right if no digit is exceeded by the digit to its left it is called an increasing number; for example, $134468$.
 Similarly if no digit is exceeded by the digit to its right it is called a decreasing number; for example, $66420$.
 We shall call a positive integer that is neither increasing nor decreasing a "bouncy" number; for example, $155349$.
 As $n$ increases, the proportion of bouncy numbers below $n$ increases such that there are only $12951$ numbers below one-million that are not bouncy and only $277032$ non-bouncy numbers below $10^{10}$.
 How many numbers below a googol ($10^{100}$) are not bouncy?
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -52,4 +47,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 863
 # https://projecteuler.net/problem=863
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 863
-https://projecteuler.net/problem=863
-Using only a six-sided fair dice and a five-sided fair dice, we would like to emulate an $n$-sided fair dice.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 863
+    https://projecteuler.net/problem=863
+    Using only a six-sided fair dice and a five-sided fair dice, we would like to emulate an $n$-sided fair dice.
 For example, one way to emulate a 28-sided dice is to follow this procedure:
 
 Roll both dice, obtaining integers $1\le p\le 6$ and $1\le q\le 5$.
@@ -53,7 +46,9 @@ Let $S(n) = \displaystyle\sum_{k=2}^n R(k)$. You are given that $S(30) \approx 5
 Find $S(1000)$. Give your answer rounded to 6 decimal places.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -73,4 +68,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 275
 # https://projecteuler.net/problem=275
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 275
-https://projecteuler.net/problem=275
-Let us define a balanced sculpture of order $n$ as follows:
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 275
+    https://projecteuler.net/problem=275
+    Let us define a balanced sculpture of order $n$ as follows:
 A polyominoAn arrangement of identical squares connected through shared edges; holes are allowed. made up of $n + 1$ tiles known as the blocks ($n$ tiles)
  and the plinth (remaining tile);
 the plinth has its centre at position ($x = 0, y = 0$);
@@ -38,7 +31,9 @@ There are $964$ balanced sculptures of order $10$ and $360505$ of order $15$.
 How many balanced sculptures are there of order $18$?
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -58,4 +53,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

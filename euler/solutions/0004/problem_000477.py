@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 477
 # https://projecteuler.net/problem=477
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 477
-https://projecteuler.net/problem=477
-The number sequence game starts with a sequence $S$ of $N$ numbers written on a line.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 477
+    https://projecteuler.net/problem=477
+    The number sequence game starts with a sequence $S$ of $N$ numbers written on a line.
 Two players alternate turns. The players on their respective turns must select and remove either the first or the last number remaining in the sequence.
 A player's own score is (determined by) the sum of all the numbers that player has taken. Each player attempts to maximize their own sum.
 If $N = 4$ and $S = \{1, 2, 10, 3\}$, then each player maximizes their own score as follows:
@@ -41,7 +34,9 @@ The sequence begins with $S=\{0, 45, 2070, 4284945, 753524550, 478107844, 894218
 You are given $F(2)=45$, $F(4)=4284990$, $F(100)=26365463243$, $F(10^4)=2495838522951$.
 Find $F(10^8)$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -61,4 +56,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

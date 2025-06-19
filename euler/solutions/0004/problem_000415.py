@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 415
 # https://projecteuler.net/problem=415
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 415
-https://projecteuler.net/problem=415
-A set of lattice points $S$ is called a titanic set if there exists a line passing through exactly two points in $S$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 415
+    https://projecteuler.net/problem=415
+    A set of lattice points $S$ is called a titanic set if there exists a line passing through exactly two points in $S$.
 
 An example of a titanic set is $S = \{(0, 0), (0, 1), (0, 2), (1, 1), (2, 0), (1, 0)\}$, where the line passing through $(0, 1)$ and $(2, 0)$ does not pass through any other point in $S$.
 
@@ -37,7 +30,9 @@ It can be verified that $T(1) = 11$, $T(2) = 494$, $T(4) = 33554178$, $T(111) \b
 Find $T(10^{11})\bmod 10^8$.
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -57,4 +52,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

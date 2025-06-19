@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 188
 # https://projecteuler.net/problem=188
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 188
-https://projecteuler.net/problem=188
-The hyperexponentiation or tetration of a number $a$ by a positive integer $b$, denoted by $a\mathbin{\uparrow \uparrow}b$ or $^b a$, is recursively defined by:
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 188
+    https://projecteuler.net/problem=188
+    The hyperexponentiation or tetration of a number $a$ by a positive integer $b$, denoted by $a\mathbin{\uparrow \uparrow}b$ or $^b a$, is recursively defined by:
 
 
 $a \mathbin{\uparrow \uparrow} 1 = a$,
@@ -35,7 +28,9 @@ $a \mathbin{\uparrow \uparrow} (k+1) = a^{(a \mathbin{\uparrow \uparrow} k)}$.
 Thus we have e.g. $3 \mathbin{\uparrow \uparrow} 2 = 3^3 = 27$, hence $3 \mathbin{\uparrow \uparrow} 3 = 3^{27} = 7625597484987$ and $3 \mathbin{\uparrow \uparrow} 4$ is roughly $10^{3.6383346400240996 \cdot 10^{12}}$.
 Find the last $8$ digits of $1777 \mathbin{\uparrow \uparrow} 1855$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -55,4 +50,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

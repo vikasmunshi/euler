@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 174
 # https://projecteuler.net/problem=174
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 174
-https://projecteuler.net/problem=174
-We shall define a square lamina to be a square outline with a square "hole" so that the shape possesses vertical and horizontal symmetry.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 174
+    https://projecteuler.net/problem=174
+    We shall define a square lamina to be a square outline with a square "hole" so that the shape possesses vertical and horizontal symmetry.
 Given eight tiles it is possible to form a lamina in only one way: $3 \times 3$ square with a $1 \times 1$ hole in the middle. However, using thirty-two tiles it is possible to form two distinct laminae.
 
 
@@ -33,7 +26,9 @@ If t represents the number of tiles used, we shall say that $t = 8$ is type $L(1
 Let $N(n)$ be the number of $t \le 1000000$ such that $t$ is type $L(n)$; for example, $N(15) = 832$.
 What is $\sum\limits_{n = 1}^{10} N(n)$?
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -53,4 +48,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

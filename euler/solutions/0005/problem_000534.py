@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 534
 # https://projecteuler.net/problem=534
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 534
-https://projecteuler.net/problem=534
-The classical eight queens puzzle is the well known problem of placing eight chess queens on an $8 \times 8$ chessboard so that no two queens threaten each other. Allowing configurations to reappear in rotated or mirrored form, a total of $92$ distinct configurations can be found for eight queens. The general case asks for the number of distinct ways of placing $n$ queens on an $n \times n$ board, e.g. you can find $2$ distinct configurations for $n=4$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 534
+    https://projecteuler.net/problem=534
+    The classical eight queens puzzle is the well known problem of placing eight chess queens on an $8 \times 8$ chessboard so that no two queens threaten each other. Allowing configurations to reappear in rotated or mirrored form, a total of $92$ distinct configurations can be found for eight queens. The general case asks for the number of distinct ways of placing $n$ queens on an $n \times n$ board, e.g. you can find $2$ distinct configurations for $n=4$.
 
 Let's define a weak queen on an $n \times n$ board to be a piece which can move any number of squares if moved horizontally, but a maximum of $n - 1 - w$ squares if moved vertically or diagonally, $0 \le w \lt n$ being the "weakness factor". For example, a weak queen on an $n \times n$ board with a weakness factor of $w=1$ located in the bottom row will not be able to threaten any square in the top row as the weak queen would need to move $n - 1$ squares vertically or diagonally to get there, but may only move $n - 2$ squares in these directions. In contrast, the weak queen is not handicapped horizontally, thus threatening every square in its own row, independently from its current position in that row.
 
@@ -37,7 +30,9 @@ You are given that $S(4)=276$ and $S(5)=3347$.
 
 Find $S(14)$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -57,4 +52,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

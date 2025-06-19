@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 282
 # https://projecteuler.net/problem=282
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 282
-https://projecteuler.net/problem=282
-$\def\htmltext#1{\style{font-family:inherit;}{\text{#1}}}$
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 282
+    https://projecteuler.net/problem=282
+    $\def\htmltext#1{\style{font-family:inherit;}{\text{#1}}}$
 
 For non-negative integers $m$, $n$, the Ackermann function $A(m,n)$ is defined as follows:
 
@@ -42,7 +35,9 @@ For example $A(1,0) = 2$, $A(2,2) = 7$ and $A(3,4) = 125$.
 
 Find $\displaystyle\sum_{n=0}^6 A(n,n)$ and give your answer mod $14^8$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -62,4 +57,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

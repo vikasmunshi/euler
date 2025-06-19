@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 201
 # https://projecteuler.net/problem=201
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 201
-https://projecteuler.net/problem=201
-For any set $A$ of numbers, let $\operatorname{sum}(A)$ be the sum of the elements of $A$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 201
+    https://projecteuler.net/problem=201
+    For any set $A$ of numbers, let $\operatorname{sum}(A)$ be the sum of the elements of $A$.
 
 Consider the set $B = \{1,3,6,8,10,11\}$.
  There are $20$ subsets of $B$ containing three elements, and their sums are:
@@ -63,7 +56,9 @@ S has $100891344545564193334812497256$ $50$-element subsets.
 
 Determine the sum of all integers which are the sum of exactly one of the $50$-element subsets of $S$, i.e. find $\operatorname{sum}(U(S,50))$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -83,4 +78,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

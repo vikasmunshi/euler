@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 767
 # https://projecteuler.net/problem=767
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 767
-https://projecteuler.net/problem=767
-A window into a matrix is a contiguous sub matrix.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 767
+    https://projecteuler.net/problem=767
+    A window into a matrix is a contiguous sub matrix.
 
 Consider a $16\times n$ matrix where every entry is either 0 or 1.
 Let $B(k,n)$ be the total number of these matrices such that the sum of the entries in every $2\times k$ window is $k$.
@@ -34,7 +27,9 @@ You are given that $B(2,4) = 65550$ and $B(3,9) \equiv 87273560 \pmod{1\,000\,00
 
 Find $B(10^5,10^{16})$. Give your answer modulo $1\,000\,000\,007$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -54,4 +49,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

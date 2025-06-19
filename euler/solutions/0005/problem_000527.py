@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 527
 # https://projecteuler.net/problem=527
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 527
-https://projecteuler.net/problem=527
-A secret integer $t$ is selected at random within the range $1 \le t \le n$. 
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 527
+    https://projecteuler.net/problem=527
+    A secret integer $t$ is selected at random within the range $1 \le t \le n$. 
 
 The goal is to guess the value of $t$ by making repeated guesses, via integer $g$. After a guess is made, there are three possible outcomes, in which it will be revealed that either $g \lt t$, $g = t$, or $g \gt t$. Then the process can repeat as necessary.
 
@@ -37,7 +30,9 @@ Given that $1 \le t \le n$ for random $t$, let $B(n)$ be the expected number of 
 
 Find $R(10^{10}) - B(10^{10})$ rounded to $8$ decimal places.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -57,4 +52,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

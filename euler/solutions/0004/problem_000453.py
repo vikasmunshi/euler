@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 453
 # https://projecteuler.net/problem=453
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 453
-https://projecteuler.net/problem=453
-A simple quadrilateral is a polygon that has four distinct vertices, has no straight angles and does not self-intersect.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 453
+    https://projecteuler.net/problem=453
+    A simple quadrilateral is a polygon that has four distinct vertices, has no straight angles and does not self-intersect.
 
 Let $Q(m, n)$ be the number of simple quadrilaterals whose vertices are lattice points with coordinates $(x,y)$ satisfying $0 \le x \le m$ and $0 \le y \le n$.
 
@@ -35,7 +28,9 @@ It can also be verified that $Q(3, 7) = 39590$, $Q(12, 3) = 309000$ and $Q(123, 
 
 Find $Q(12345, 6789) \bmod 135707531$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -55,4 +50,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

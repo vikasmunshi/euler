@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 280
 # https://projecteuler.net/problem=280
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 280
-https://projecteuler.net/problem=280
-A laborious ant walks randomly on a $5 \times 5$ grid. The walk starts from the central square. At each step, the ant moves to an adjacent square at random, without leaving the grid; thus there are $2$, $3$ or $4$ possible moves at each step depending on the ant's position.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 280
+    https://projecteuler.net/problem=280
+    A laborious ant walks randomly on a $5 \times 5$ grid. The walk starts from the central square. At each step, the ant moves to an adjacent square at random, without leaving the grid; thus there are $2$, $3$ or $4$ possible moves at each step depending on the ant's position.
 
 At the start of the walk, a seed is placed on each square of the lower row. When the ant isn't carrying a seed and reaches a square of the lower row containing a seed, it will start to carry the seed. The ant will drop the seed on the first empty square of the upper row it eventually reaches.
 
@@ -33,7 +26,9 @@ What's the expected number of steps until all seeds have been dropped in the top
 
 Give your answer rounded to $6$ decimal places.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -53,4 +48,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

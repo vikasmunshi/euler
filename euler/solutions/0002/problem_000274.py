@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 274
 # https://projecteuler.net/problem=274
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 274
-https://projecteuler.net/problem=274
-For each integer $p \gt 1$ coprime to $10$ there is a positive divisibility multiplier $m \lt p$ which preserves divisibility by $p$ for the following function on any positive integer, $n$:
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 274
+    https://projecteuler.net/problem=274
+    For each integer $p \gt 1$ coprime to $10$ there is a positive divisibility multiplier $m \lt p$ which preserves divisibility by $p$ for the following function on any positive integer, $n$:
 
 $f(n) = (\text{all but the last digit of }n) + (\text{the last digit of }n) \cdot m$.
 
@@ -41,7 +34,9 @@ $f(12345) = 1234 + 5 \cdot 34 = 1404$: $12345$ and $1404$ are both not divisible
 The sum of the divisibility multipliers for the primes that are coprime to $10$ and less than $1000$ is $39517$. What is the sum of the divisibility multipliers for the primes that are coprime to $10$ and less than $10^7$?
 
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -61,4 +56,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

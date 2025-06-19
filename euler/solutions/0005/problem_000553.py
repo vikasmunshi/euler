@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 553
 # https://projecteuler.net/problem=553
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 553
-https://projecteuler.net/problem=553
-Let $P(n)$ be the set of the first $n$ positive integers $\{1, 2, ..., n\}$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 553
+    https://projecteuler.net/problem=553
+    Let $P(n)$ be the set of the first $n$ positive integers $\{1, 2, ..., n\}$.
 
 Let $Q(n)$ be the set of all the non-empty subsets of $P(n)$.
 
@@ -52,7 +45,9 @@ You are given $C(2, 1) = 6$, $C(3, 1) = 111$, $C(4, 2) = 486$, $C(100, 10) \bmod
 
 Find $C(10^4, 10) \bmod 1\,000\,000\,007$.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -72,4 +67,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

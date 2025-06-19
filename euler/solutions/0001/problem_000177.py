@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 177
 # https://projecteuler.net/problem=177
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,25 +14,20 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 177
-https://projecteuler.net/problem=177
-Let $ABCD$ be a convex quadrilateral, with diagonals $AC$ and $BD$. At each vertex the diagonal makes an angle with each of the two sides, creating eight corner angles.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 177
+    https://projecteuler.net/problem=177
+    Let $ABCD$ be a convex quadrilateral, with diagonals $AC$ and $BD$. At each vertex the diagonal makes an angle with each of the two sides, creating eight corner angles.
 
 For example, at vertex $A$, the two angles are $CAD$, $CAB$.
 We call such a quadrilateral for which all eight corner angles have integer values when measured in degrees an "integer angled quadrilateral". An example of an integer angled quadrilateral is a square, where all eight corner angles are $45^\circ$. Another example is given by $DAC = 20^\circ$, $BAC = 60^\circ$, $ABD = 50^\circ$, $CBD = 30^\circ$, $BCA = 40^\circ$, $DCA = 30^\circ$, $CDB = 80^\circ$, $ADB = 50^\circ$.
 What is the total number of non-similar integer angled quadrilaterals?
 Note: In your calculations you may assume that a calculated angle is integral if it is within a tolerance of $10^{-9}$ of an integer value.
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -52,4 +47,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

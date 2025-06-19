@@ -1,11 +1,11 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 234
 # https://projecteuler.net/problem=234
 # Answer: 
 # Notes: 
-import textwrap
-from typing import Any, Dict
+from typing import cast, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol, SolutionResult
 
@@ -14,18 +14,11 @@ problem_args_list: ProblemArgsList = [
 ]
 
 
-def solution(**kwarg: Dict[str, Any]) -> SolutionResult:
-    # enter the solution here
-    raise NotImplementedError
-
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 234
-https://projecteuler.net/problem=234
-For an integer $n \ge 4$, we define the lower prime square root of $n$, denoted by $\operatorname{lps}(n)$, as the largest prime $\le \sqrt n$ and the upper prime square root of $n$, $\operatorname{ups}(n)$, as the smallest prime $\ge \sqrt n$.
+def solution(*, kwarg: Any) -> SolutionResult:
+    r"""
+    solution to Project Euler problem 234
+    https://projecteuler.net/problem=234
+    For an integer $n \ge 4$, we define the lower prime square root of $n$, denoted by $\operatorname{lps}(n)$, as the largest prime $\le \sqrt n$ and the upper prime square root of $n$, $\operatorname{ups}(n)$, as the smallest prime $\ge \sqrt n$.
 So, for example, $\operatorname{lps}(4) = 2 = \operatorname{ups}(4)$, $\operatorname{lps}(1000) = 31$, $\operatorname{ups}(1000) = 37$.
 
 Let us call an integer $n \ge 4$ semidivisible, if one of $\operatorname{lps}(n)$ and $\operatorname{ups}(n)$ divides $n$, but not both.
@@ -37,7 +30,9 @@ As a further example, the sum of the $92$ semidivisible numbers up to $1000$ is 
 
 What is the sum of all semidivisible numbers not exceeding $999966663333$?
 
-''').strip()
+    """
+    raise NotImplementedError
+
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -57,4 +52,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)
