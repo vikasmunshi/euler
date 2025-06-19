@@ -1,6 +1,7 @@
 # Project Euler Solutions
 
-A Python package for solving and managing [Project Euler](https://projecteuler.net/) mathematical and computational problems.
+A Python package for solving and managing [Project Euler](https://projecteuler.net/) mathematical and computational
+problems.
 
 ## Features
 
@@ -51,7 +52,8 @@ Create a new solution for a problem:
 euler 21
 ```
 
-The template will be created at `euler/solutions/0000/problem_000021.py` with a basic structure ready for implementation.
+The template will be created at `euler/solutions/0000/problem_000021.py` with a basic structure ready for
+implementation.
 
 ### Solution Structure
 
@@ -61,6 +63,7 @@ Each solution follows this pattern:
 def solution(*, kwarg: Any) -> Any:
     # Your solution implementation here
     return result
+
 
 problem_args_list = [
     ProblemArgs(kwargs={"arg1": value1}, answer=expected_answer, ),
@@ -99,9 +102,13 @@ problem_args_list = [
 - Python 3.12+
 - Dependencies: requests
 
+## Security
+
+For information about reporting security vulnerabilities, please see [Security Policy](SECURITY.md).
+
 ## License
 
-This project is licensed under the MIT License—see the LICENSE file for details.
+This project is licensed under the MIT License—see the [LICENSE](LICENSE) file for details.
 
 ## Author
 

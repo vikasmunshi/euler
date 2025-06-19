@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "euler"
 version = "0.1.51"
-description = "A package with solutions to Project Euler problems"
+description = "A Python package for solving and managing Project Euler mathematical and computational problems."
 authors = ["Vikas Munshi <vikas.munshi@gmail.com>"]
 license = "MIT"
 readme = "README.md"
