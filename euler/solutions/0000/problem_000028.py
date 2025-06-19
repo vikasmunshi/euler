@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # solution to Project Euler problem 28
 # https://projecteuler.net/problem=28
-# Answer: answers={5: 101, 1001: 669171001}
+# Answer: 669171001
 # Notes: This solution uses a closed-form formula for finding the sum of spiral diagonals
 # which is much more efficient than generating the full spiral.
 import textwrap
