@@ -118,7 +118,13 @@ def solution(*, size: int) -> int:
 
     Returns:
         The sum of all numbers on both diagonals of the spiral
+
+    Raises:
+        ValueError: If size is not a positive odd integer
     """
+    if not isinstance(size, int) or size <= 0 or size % 2 == 0:
+        raise ValueError("Size must be a positive odd integer")
+
     return (size * (size * (4 * size + 3) + 8) - 9) // 6 if size > 10 else number_spiral_with_diagonal_sum(size)
 
 
