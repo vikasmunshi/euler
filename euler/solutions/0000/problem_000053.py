@@ -4,15 +4,19 @@
 # https://projecteuler.net/problem=53
 # Answer: 4075
 # Notes:
-from math import factorial
 from typing import cast
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-problem_args_list: ProblemArgsList = [ProblemArgs(kwargs={}, answer=4075, ), ]
+problem_args_list: ProblemArgsList = [
+    ProblemArgs(kwargs={'max_n': 100, 'threshold': 10 ** 2}, answer=4724, ),
+    ProblemArgs(kwargs={'max_n': 100, 'threshold': 10 ** 6}, answer=4075, ),
+    ProblemArgs(kwargs={'max_n': 1000, 'threshold': 10 ** 6}, answer=494861, ),
+    ProblemArgs(kwargs={'max_n': 1000, 'threshold': 10 ** 9}, answer=491894, ),
+]
 
 
-def solution() -> int:
+def solution(*, max_n: int, threshold: int) -> int:
     """
     Solution to Project Euler problem 53: Combinatoric selections
     https://projecteuler.net/problem=53
@@ -34,21 +38,32 @@ def solution() -> int:
     How many, not necessarily distinct, values of binom{n}{r} for 1 <= n <= 100,
     are greater than one-million?
 
-    Returns:
-        int: The count of combinations C(n,r) that exceed one million
-
     Solution Approach:
-    - We start from n=23 since that's the first value where combinations exceed 1 million
-    - For each n, we only need to check up to the midpoint due to symmetry: C(n,r) = C(n,n-r)
-    - We start with r=4 since C(100,5) is the first value of r exceeding 1 million,
-      so all C(n,4) will be less than 1 million for all n <= 100
-    - For odd n, the midpoint value is counted once, for even n, all values are counted twice
+    Determine the count of binomial coefficients greater than a given threshold.
+
+    This function computes the number of binomial coefficient values C(n, r) that
+    are greater than a specified threshold, where n ranges from 1 to `max_n`.
+    The computation leverages symmetry in binomial coefficients to optimize
+    calculation and minimize redundant work.
+
+    Args:
+        max_n (int): The maximum value of n to compute binomial coefficients for.
+        threshold (int): The value threshold that determines which coefficients
+            are counted.
+
+    Returns:
+        int: The count of binomial coefficients greater than the threshold.
     """
-    return sum(1 if (r == mid_point and n_is_odd) else 2
-               for n in range(23, 101)
-               if (n_is_odd := n % 2 != 0, mid_point := n // 2)
-               for r in range(4, mid_point + 1)
-               if (factorial(n) // (factorial(r) * factorial(n - r))) > 10 ** 6)
+    count = 0
+    for n in range(1, max_n + 1):
+        c = 1  # C(n, 0) is always 1
+        for r in range(0, n // 2 + 1):  # Only compute up to n//2 due to symmetry
+            if c > threshold:
+                count += (n - 2 * r + 1)  # Count all symmetric combinations directly and exit the loop
+                break
+            else:
+                c = c * (n - r) // (r + 1)  # Compute the next binomial coefficient dynamically from the current one
+    return count
 
 
 if __name__ == '__main__':
