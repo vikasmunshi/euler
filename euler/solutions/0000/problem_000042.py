@@ -18,12 +18,10 @@ The solution involves:
 Triangle numbers are of the form t_n = n(n+1)/2, and this module uses an efficient
 formula to check if a number is triangular without generating the sequence.
 """
-import textwrap
-
-import requests
+from typing import cast
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
-from euler.utils import word_to_number
+from euler.utils import word_to_num, get_text_file
 
 # List of test cases for this problem
 # Each case provides input parameters and expected output
@@ -54,65 +52,50 @@ def is_triangle_number(n: int) -> bool:
 
 
 def solution(*, file_url: str) -> int:
-    """Count the number of triangle words in the given file.
-
-    This function downloads a file containing words, processes each word to determine
-    if its alphabetical value is a triangle number, and returns the count of such words.
-
-    Args:
-        file_url: URL of the text file containing comma-separated words in quotes
-
-    Returns:
-        The number of triangle words in the file
-
-    Raises:
-        HTTPError: If the file download fails
     """
-    response = requests.get(file_url)
-    response.raise_for_status()  # Raise an error if the request failed
-    content = response.text  # Extract the raw content of the file
-    return len([word for word in content.split(',') if is_triangle_number(word_to_number(word.strip('"')))])
+    solution to Project Euler problem 42: Coded Triangle Numbers
+    https://projecteuler.net/problem=42
 
+    Problem Description:
+    The nth term of the sequence of triangle numbers is given by, t_n = (1/2)*n*(n+1); so the first ten triangle numbers are:
+    1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
+    By converting each letter in a word to a number corresponding to its alphabetical position and adding these values
+    we form a word value.
+    For example, the word value for SKY is 19 + 11 + 25 = 55 = t_{10}.
+    If the word value is a triangle number then we shall call the word a triangle word.
+    Using words.txt (right click and 'Save Link/Target As...'), a 16K text file containing
+    nearly two-thousand common English words, how many are triangle words?
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
+    Solution Approach:
+    Determines the number of triangle words in a given text file. A triangle word is a word whose
+    numerical value corresponds to a triangle number. The function takes a text file URL, reads
+    its contents, processes each word, and counts how many of them are triangle words.
 
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 42: Coded Triangle Numbers
-https://projecteuler.net/problem=42
+    Parameters
+    ----------
+    file_url : str
+        The URL of the text file containing comma-separated words.
 
-Problem Description:
-The nth term of the sequence of triangle numbers is given by, t_n = (1/2)*n*(n+1); so the first ten triangle numbers are:
-1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
-By converting each letter in a word to a number corresponding to its alphabetical position and adding these values
-we form a word value.
-For example, the word value for SKY is 19 + 11 + 25 = 55 = t_{10}.
-If the word value is a triangle number then we shall call the word a triangle word.
-Using words.txt (right click and 'Save Link/Target As...'), a 16K text file containing
-nearly two-thousand common English words, how many are triangle words?
+    Returns
+    -------
+    int
+        The count of triangle words in the provided text file.
 
-Approach:
-1. Mathematical foundation: A number n is triangular if and only if 8n+1 is a perfect square.
-   This allows us to quickly test if a number is triangular without generating the sequence.
+    Raises
+    ------
+    ValueError
+        If the file contents cannot be processed correctly.
 
-2. File processing: Download and parse the comma-separated words file, removing quotation marks.
+    Notes
+    -----
+    A triangle number is a number that can be arranged in an equilateral triangle. It is calculated
+    using the formula n(n + 1) / 2, where n is a positive integer.
 
-3. Word conversion: For each word, calculate its alphabetical value by summing the position
-   values of its letters (A=1, B=2, ..., Z=26). We use the word_to_number utility function.
+    To check if any number is a triangle number,
+    we use the mathematical property that a number is triangular if and only if 8n+1 is a perfect square.
+    """
+    return sum(is_triangle_number(word_to_num(word)) for word in get_text_file(file_url).split(','))
 
-4. Triangle test: For each word value, determine if it's a triangle number using our efficient test.
-
-5. Count calculation: Count how many words have triangle number values.
-
-Optimizations:
-- The is_triangle_number function uses a mathematical property to avoid generating triangle numbers.
-- We use a list comprehension for efficient filtering and counting in a single operation.
-- The word_to_number function is decorated with @lru_cache to avoid recalculating values for
-  repeated words.
-
-Time Complexity: O(n*m) where n is the number of words and m is the average word length.
-Space Complexity: O(n) for storing the filtered list during the list comprehension.
-''').strip()
 
 if __name__ == '__main__':
     # When run directly, evaluate the solution with test cases
@@ -132,4 +115,5 @@ if __name__ == '__main__':
 
     # Run the solution with the specified test cases and parameters
     # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
+                      max_workers=max_workers)

@@ -17,6 +17,7 @@
 .dmypy.json
 .eggs/
 .env
+.euler_cache/
 .hypothesis/
 .idea/
 .installed.cfg
@@ -33,7 +34,6 @@
 .tox/
 .venv/
 .webassets-cache
-/site
 ENV/
 MANIFEST
 __pycache__/
@@ -67,6 +67,7 @@ pip-wheel-metadata/
 profile_default/
 sdist/
 share/python-wheels/
+site
 target/
 var/
 venv.bak/
