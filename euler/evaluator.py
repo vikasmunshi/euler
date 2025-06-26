@@ -131,18 +131,8 @@ def execute_solution_module(solution_module: pathlib.Path, args: Namespace) -> i
             cmd += f' --max-workers {max_workers}'
 
         # Run the solution module in a new process
-        result = subprocess.run(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout)
-
-        # Print the output
-        if result.stdout:
-            print(result.stdout.strip('\n'))
-
-        # Print any errors
-        if result.stderr:
-            print(result.stderr.strip('\n'))
-
+        result = subprocess.run(cmd.split(), timeout=timeout)
         logger.info({'action': 'solution_executed', 'problem_number': problem_number, 'return_code': result.returncode})
-
         return result.returncode
 
     except subprocess.TimeoutExpired:

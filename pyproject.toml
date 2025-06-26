@@ -13,7 +13,18 @@ packages = [{ include = "euler" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
+
+matplotlib = "^3.10"
+numpy = "2.3"
 requests = "^2.32"
+
+# System dependencies (not managed by Poetry)
+# python3-tk: Required for matplotlib TkAgg backend visualization
+# Install with: sudo apt install python3-tk (Debian/Ubuntu)
+#              dnf install python3-tkinter (Fedora)
+#              pacman -S tk (Arch)
+#              brew install python-tk (macOS with Homebrew)
+# Note: tkinter comes bundled with Python on Windows
 
 [tool.poetry.group.dev.dependencies]
 poetry = "^2.1"
