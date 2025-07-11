@@ -1,52 +1,55 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 31
-# https://projecteuler.net/problem=31
-# Answer: 73682
-# Notes: 
-import textwrap
-from typing import cast
+"""
+Solution to Project Euler problem 31: Coin sums
+
+Problem Statement:
+In the United Kingdom the currency is made up of pound (£) and pence (p). There are eight coins in general circulation:
+1p, 2p, 5p, 10p, 20p, 50p, £1 (100p), and £2 (200p).
+
+It is possible to make £2 in the following way:
+1×£1 + 1×50p + 2×20p + 1×5p + 1×2p + 3×1p
+
+How many different ways can £2 be made using any number of coins?
+
+Solution Approach:
+This solution uses dynamic programming to solve the coin change problem. The implementation
+creates a table where each cell represents the number of ways to make a specific amount
+using the available coins.
+
+The algorithm works as follows:
+1. Initialize an array with 1 way to make 0 (using no coins) and 0 ways for all other amounts
+2. For each coin denomination, update the ways to make each amount from the coin value up to target
+3. Each cell [i] represents the number of ways to make amount i using all coins considered so far
+
+This bottom-up approach builds the solution incrementally, reusing previously calculated results
+to find the total number of ways to make the target amount.
+
+Test Cases:
+- For target=0, the answer is 1 (only one way: use no coins)
+- For target=200 (£2), the answer is 73,682
+- For target=1000, the answer is 321,335,886
+- For larger targets like 100000, the algorithm remains efficient
+
+URL: https://projecteuler.net/problem=31
+Answer: 73682
+"""
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'target': 0},
-        answer=1,
-    ),
-    ProblemArgs(
-        kwargs={'target': 200},
-        answer=73682,
-    ),
-    ProblemArgs(
-        kwargs={'target': 1000},
-        answer=321335886,
-    ),
-    ProblemArgs(
-        kwargs={'target': 100000},
-        answer=10056050940818192726001,
-    ),
+    ProblemArgs(kwargs={'target': 0}, answer=1, ),
+    ProblemArgs(kwargs={'target': 200}, answer=73682, ),
+    ProblemArgs(kwargs={'target': 1000}, answer=321335886, ),
+    ProblemArgs(kwargs={'target': 100000}, answer=10056050940818192726001, ),
 ]
 
 
 def coin_sum(*, target: int, coins: (int, ...) = (1, 2, 5, 10, 20, 50, 100, 200)) -> int:
     """Calculate the number of different ways to make a target amount using given coin denominations.
 
-    This function implements a dynamic programming solution to the coin change problem.
-    It counts all possible combinations of coins that sum up to the target amount.
-
-    Algorithm:
-    1. Create an array 'result' initialized with 1 at index 0 (there's 1 way to make 0: use no coins)
-       and 0 for all other indices up to the target amount.
-    2. For each coin denomination:
-       a. Iterate through all amounts from the coin value up to the target
-       b. For each amount, add the number of ways to make (current amount - coin value)
-          to the number of ways to make the current amount
-    3. Return the final count at index 'target', which represents the total number of ways
-       to make the target amount using the available coins
-
-    Time Complexity: O(target * len(coins)) - we process each coin for each possible amount
-    Space Complexity: O(target) - we store one value for each amount from 0 to target
+    This function implements a dynamic programming solution to the coin change problem,
+    counting all possible combinations of coins that sum up to the target amount.
 
     Args:
         target: The target amount to make
@@ -57,7 +60,9 @@ def coin_sum(*, target: int, coins: (int, ...) = (1, 2, 5, 10, 20, 50, 100, 200)
 
     Example:
         >>> coin_sum(target=5, coins=(1, 2, 5))
-        4 # The ways are: [1,1,1,1,1], [1,1,1,2], [1,2,2], and [5]
+        4  # The ways are: [1,1,1,1,1], [1,1,1,2], [1,2,2], and [5]
+        >>> coin_sum(target=200)
+        73682  # Number of ways to make £2 using standard UK coins
     """
     result = [1] + [0] * target
     for coin in coins:
@@ -66,61 +71,28 @@ def coin_sum(*, target: int, coins: (int, ...) = (1, 2, 5, 10, 20, 50, 100, 200)
     return result[-1]
 
 
-solution = cast(SolutionProtocol, coin_sum)
-
-solution.__doc__ = textwrap.dedent(r'''
-Solution to Project Euler problem 31: Coin Sums
-https://projecteuler.net/problem=31
-
-Problem Description:
-In the United Kingdom the currency is made up of pound (£) and pence (p). There are eight coins in general circulation:
-1p, 2p, 5p, 10p, 20p, 50p, £1 (100p), and £2 (200p).
-It is possible to make £2 in the following way:
-1×£1 + 1×50p + 2×20p + 1×5p + 1×2p + 3×1p
-How many different ways can £2 be made using any number of coins?
-
-Solution Approach:
-This problem is a classic example of the coin change counting problem, which is efficiently solved using dynamic programming.
-
-1. Dynamic Programming Formulation:
-   - We create an array to count the ways to make each amount from 0 to the target
-   - Initialize ways[0] = 1 (there's exactly one way to make 0: using no coins)
-   - For each coin denomination, update the ways array for all amounts from coin value to target
-
-2. Recurrence Relation:
-   - ways[amount] += ways[amount - coin]
-   - This adds the number of ways to make (amount - coin) to the number of ways to make amount
-   - Intuitively, if we know how to make £1.80, and we have a 20p coin, we can make £2.00 in that many more ways
-
-3. Processing Order:
-   - We process coins in any order, but each coin is processed completely before moving to the next
-   - For each coin, we process amounts in ascending order to avoid counting the same combination multiple times
-   - This ensures we correctly count combinations (ordered selections of coins) rather than permutations
-
-4. Optimization:
-   - The solution is very efficient with O(target × number of coin types) time complexity
-   - We only need O(target) space regardless of how many coin types we have
-   - The algorithm naturally handles the constraint of having an unlimited supply of each coin
-
-The result 73682 represents the total number of different ways to make £2 using any combination of the standard UK coins.
-''').strip()
+# Create an alias for the coin_sum function to match the expected solution interface
+# This allows the function to be named descriptively while still conforming to the
+# Project Euler framework's convention of using 'solution' as the entry point
+solution = coin_sum
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

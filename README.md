@@ -40,7 +40,7 @@ euler 21 --timeout 60 --max-workers 4
 euler 42 --log-level DEBUG
 
 # Multiple problems
-for i in {5..10}; do euler $i; done
+euler 1 12 --timeout 10 --max-workers 12
 ```
 
 ### Development
@@ -91,6 +91,7 @@ problem_args_list = [
 │   ├── loader.py           # Problem fetching/loading
 │   ├── logger.py           # JSON logging with stdout/stderr separation
 │   ├── primes.py           # Functions for generating Primes
+│   ├── primes.txt          # List of primes upto 10,000,000
 │   ├── template.py         # Solution template generator
 │   ├── types.py            # Type definitions for solutions
 │   └── utils.py            # Utility functions

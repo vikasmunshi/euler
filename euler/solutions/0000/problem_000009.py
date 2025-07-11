@@ -1,42 +1,51 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 9
-# https://projecteuler.net/problem=9
-# Answer: answers={12: 60, 1000: 31875000}
-# Notes: 
+r"""
+Solution to Project Euler problem 9: Special Pythagorean Triplet
 
+Problem Statement:
+A Pythagorean triplet is a set of three natural numbers, a < b < c, for which,
+a² + b² = c².
+
+For example, 3² + 4² = 9 + 16 = 25 = 5².
+
+There exists exactly one Pythagorean triplet for which a + b + c = 1000.
+Find the product abc.
+
+Solution Approach:
+This solution employs an efficient search strategy to find Pythagorean triplets with specific sums:
+
+1. Mathematical Constraints: Using the constraints of Pythagorean triplets and the sum requirement,
+   we can significantly narrow the search space:
+   - Since a < b < c and a + b + c = sum_sides, we know that a < sum_sides/3
+   - For practical purposes, we can further constrain a < sum_sides/4 and b < sum_sides/2
+
+2. Direct Calculation: Rather than searching for all three values independently, we calculate
+   c directly as sum_sides - a - b, which guarantees that a + b + c = sum_sides.
+
+3. Efficient Implementation: We use Python's generator expressions with next() to find the
+   first matching triplet without creating full lists of all possible combinations.
+
+4. Early Termination: The algorithm stops as soon as it finds a matching triplet, avoiding
+   unnecessary computation since the problem states there is exactly one solution.
+
+The time complexity is O(n²) where n is the sum_sides value, but the practical runtime
+is much better due to the mathematical optimizations that limit the search space.
+
+Test Cases:
+- For sum_sides=12: Product = 60 (from the triplet 3,4,5 where 3+4+5=12 and 3²+4²=5²)
+- For sum_sides=1000: Product = 31875000
+
+URL: https://projecteuler.net/problem=9
+Answer: 31875000
 """
-Pythagorean Triplet Problem (Project Euler #9)
-
-This module solves Project Euler problem 9, which asks for the product of the
-Pythagorean triplet (a, b, c) that satisfies a + b + c = 1000.
-
-A Pythagorean triplet is a set of three natural numbers where a < b < c and
-a² + b² = c². The solution finds the unique triplet with a specified sum and
-returns the product a*b*c.
-
-Example:
-    For sum = 12, the triplet is (3, 4, 5) and the product is 60.
-    For sum = 1000, the product is 31,875,000.
-
-Tests:
-    Two test cases are included: sum_sides=12 and sum_sides=1000.
-"""
-
-import textwrap
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 # Define test cases for validation
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'sum_sides': 12},  # First test case: sum = 12 (3,4,5)
-        answer=60,                 # Expected answer: 3*4*5 = 60
-    ),
-    ProblemArgs(
-        kwargs={'sum_sides': 1000}, # Second test case: sum = 1000
-        answer=31875000,            # Expected answer
-    ),
+    ProblemArgs(kwargs={'sum_sides': 12}, answer=60, ),  # First test case: sum = 12 (3,4,5) Expected answer: 3*4*5 = 60
+    ProblemArgs(kwargs={'sum_sides': 1000}, answer=31875000, ),  # Second test case: sum = 1000 Expected answer 31875000
 ]
 
 
@@ -70,47 +79,30 @@ def solution(*, sum_sides: int) -> int | None:
     try:
         return next(a * b * c
                     for a in range(1, sum_sides // 4 + 1)  # Optimized range for 'a'
-                    for b in range(a, sum_sides // 2)      # Optimized range for 'b'
-                    for c in (sum_sides - a - b,)          # Calculate 'c' directly
-                    if a ** 2 + b ** 2 == c ** 2)          # Pythagorean condition
+                    for b in range(a, sum_sides // 2)  # Optimized range for 'b'
+                    for c in (sum_sides - a - b,)  # Calculate 'c' directly
+                    if a ** 2 + b ** 2 == c ** 2)  # Pythagorean condition
     except StopIteration:
         pass  # Return None if no triplet is found
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-# Preserve the original docstring as specified in the requirements
-# This maintains compatibility with the Project Euler problem format
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 9
-https://projecteuler.net/problem=9
-A Pythagorean triplet is a set of three natural numbers, a \lt b \lt c, for which,
-a^2 + b^2 = c^2.
-For example, 3^2 + 4^2 = 9 + 16 = 25 = 5^2.
-There exists exactly one Pythagorean triplet for which a + b + c = 1000.
-Find the product abc.
-
-
-''').strip()
-
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

@@ -1,24 +1,37 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 42
-# https://projecteuler.net/problem=42
-# Answer: 162
-# Notes: 
-"""Solution to Project Euler problem 42: Coded triangle numbers.
-
-This module provides a solution to the triangle words problem. It identifies
-words whose alphabetical value (sum of letter positions) forms a triangle number.
-
-The solution involves:
-1. Defining a mathematical test for triangle numbers
-2. Reading words from a file
-3. Converting each word to its alphabetical value
-4. Counting words whose values are triangle numbers
-
-Triangle numbers are of the form t_n = n(n+1)/2, and this module uses an efficient
-formula to check if a number is triangular without generating the sequence.
 """
-from typing import cast
+Solution to Project Euler problem 42: Coded triangle numbers
+
+Problem Statement:
+The nth term of the sequence of triangle numbers is given by, tn = ½n(n+1); 
+so the first ten triangle numbers are:
+1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
+
+By converting each letter in a word to a number corresponding to its alphabetical position
+and adding these values we form a word value. For example, the word value for SKY is 
+19 + 11 + 25 = 55 = t10. If the word value is a triangle number then we shall call the 
+word a triangle word.
+
+Using words.txt, a 16K text file containing nearly two-thousand common English words,
+how many are triangle words?
+
+Solution Approach:
+This solution processes each word in the provided file by:
+1. Converting each letter to its alphabetical position (A=1, B=2, etc.)
+2. Summing these values to get the word's numerical value
+3. Checking if the sum is a triangle number using the formula: 8n+1 is a perfect square
+4. Counting how many words have triangle number values
+
+Triangle numbers follow the pattern tn = n(n+1)/2, so we can efficiently determine if
+a number is triangular without generating the entire sequence.
+
+Test Cases:
+- The file words.txt contains 162 triangle words
+
+URL: https://projecteuler.net/problem=42
+Answer: 162
+"""
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 from euler.utils import word_to_num, get_text_file
@@ -36,84 +49,66 @@ problem_args_list: ProblemArgsList = [
 
 
 def is_triangle_number(n: int) -> bool:
-    """Check if a number is a triangle number.
+    """
+    Check if a number is a triangle number.
 
-    A triangle number t_n can be calculated as t_n = n(n+1)/2 where n > 0.
-    This function uses the mathematical property that a number is triangular
-    if and only if 8n+1 is a perfect square.
+    This function determines if a given number is a triangle number using the mathematical
+    property that a number n is triangular if and only if 8n+1 is a perfect square.
+    A triangle number is a number that can be represented as a triangular array of points.
 
     Args:
         n: The number to check
 
     Returns:
         True if n is a triangle number, False otherwise
+
+    Example:
+        >>> is_triangle_number(10)
+        True  # 10 is the 4th triangle number
+        >>> is_triangle_number(11)
+        False  # 11 is not a triangle number
     """
     return (8 * n + 1) ** 0.5 % 1 == 0
 
 
 def solution(*, file_url: str) -> int:
     """
-    solution to Project Euler problem 42: Coded Triangle Numbers
-    https://projecteuler.net/problem=42
+    Count how many words in a file have triangle number values.
 
-    Problem Description:
-    The nth term of the sequence of triangle numbers is given by, t_n = (1/2)*n*(n+1); so the first ten triangle numbers are:
-    1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
-    By converting each letter in a word to a number corresponding to its alphabetical position and adding these values
-    we form a word value.
-    For example, the word value for SKY is 19 + 11 + 25 = 55 = t_{10}.
-    If the word value is a triangle number then we shall call the word a triangle word.
-    Using words.txt (right click and 'Save Link/Target As...'), a 16K text file containing
-    nearly two-thousand common English words, how many are triangle words?
+    This function processes a file containing comma-separated words, calculates the
+    numerical value of each word by summing the alphabetical positions of its letters,
+    and counts how many of these values are triangle numbers.
 
-    Solution Approach:
-    Determines the number of triangle words in a given text file. A triangle word is a word whose
-    numerical value corresponds to a triangle number. The function takes a text file URL, reads
-    its contents, processes each word, and counts how many of them are triangle words.
+    Args:
+        file_url: The URL of the text file containing comma-separated words
 
-    Parameters
-    ----------
-    file_url : str
-        The URL of the text file containing comma-separated words.
+    Returns:
+        The count of triangle words in the provided text file
 
-    Returns
-    -------
-    int
-        The count of triangle words in the provided text file.
-
-    Raises
-    ------
-    ValueError
-        If the file contents cannot be processed correctly.
-
-    Notes
-    -----
-    A triangle number is a number that can be arranged in an equilateral triangle. It is calculated
-    using the formula n(n + 1) / 2, where n is a positive integer.
-
-    To check if any number is a triangle number,
-    we use the mathematical property that a number is triangular if and only if 8n+1 is a perfect square.
+    Example:
+        >>> solution(file_url="https://projecteuler.net/resources/documents/0042_words.txt")
+        162  # There are 162 triangle words in the provided file
     """
     return sum(is_triangle_number(word_to_num(word)) for word in get_text_file(file_url).split(','))
 
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
-                      max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

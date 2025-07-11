@@ -1,92 +1,62 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 41
-# https://projecteuler.net/problem=41
-# Answer: 7652413
-# Notes: 
 """
-Solution to Project Euler problem 41 - Pandigital prime.
+Solution to Project Euler problem 41: Pandigital prime
 
-This module finds the largest n-digit pandigital prime number.
-A pandigital number uses all digits from 1 to n exactly once.
+Problem Statement:
+We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once.
+For example, 2143 is a 4-digit pandigital and is also prime.
 
-The solution uses mathematical insights to optimize the search:
-- 9-digit pandigitals: sum = 45, divisible by 3, thus not prime
-- 8-digit pandigitals: sum = 36, divisible by 3, thus not prime
-- 6-digit pandigitals: sum = 21, divisible by 3, thus not prime
-- 5-digit pandigitals: sum = 15, divisible by 3, thus not prime
-- 3-digit pandigitals: sum = 6, divisible by 3, thus not prime
-- 2-digit pandigitals: sum = 3, divisible by 3, thus not prime
-- 1-digit pandigitals: only 1, which is not prime by definition
+What is the largest n-digit pandigital prime that exists?
 
-Thus, we only need to check 7-digit and 4-digit pandigitals.
+Solution Approach:
+This solution uses number theory to reduce the search space. Since a number is divisible by 3
+if the sum of its digits is divisible by 3, we know that:
+- 9-digit pandigitals (sum = 45) are divisible by 3 and thus not prime
+- 8-digit pandigitals (sum = 36) are divisible by 3 and thus not prime
+- 7-digit pandigitals (sum = 28) could be prime
+- 6-digit pandigitals (sum = 21) are divisible by 3 and thus not prime
+- 5-digit pandigitals (sum = 15) are divisible by 3 and thus not prime
+- 4-digit pandigitals (sum = 10) could be prime
 
-Functions:
-    is_prime: Tests if a number is prime
-    largest_pandigital_prime: Finds the largest pandigital prime
+The algorithm generates pandigital numbers in descending order for 7 digits, then 4 digits
+if necessary, and tests each for primality until the first (largest) prime is found.
+
+Test Cases:
+- The correct answer is 7652413
+
+URL: https://projecteuler.net/problem=41
+Answer: 7652413
 """
-import textwrap
+
 from itertools import permutations
-from typing import cast
 
+from euler.primes import is_prime
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={},
-        answer=7652413,
-    ),
+    ProblemArgs(kwargs={}, answer=7652413, ),
 ]
-
-
-def is_prime(n: int) -> bool:
-    """
-    Check if a number is prime.
-
-    A prime number is a natural number greater than 1 that is not divisible
-    by any positive integer other than 1 and itself.
-
-    Parameters:
-        n: The integer to check for primality
-
-    Returns:
-        True if the number is prime, False otherwise
-
-    Notes:
-        - This implementation uses trial division up to the square root of n
-        - It does not handle special cases like n <= 1
-        - Time complexity: O(√n)
-    """
-    for i in range(2, int(n ** 0.5) + 1):
-        if n % i == 0:
-            return False
-    return True
 
 
 def largest_pandigital_prime() -> int:
     """
     Find the largest n-digit pandigital prime number.
 
-    A pandigital number is one that uses all digits from 1 to n exactly once.
-    For example, 2143 is a 4-digit pandigital number.
+    This solution uses mathematical optimization to efficiently search for the largest
+    pandigital prime. By analyzing the divisibility properties of pandigital numbers,
+    we can focus our search on only 7-digit and 4-digit pandigitals, since all other
+    lengths are divisible by 3 (and thus not prime).
+
+    The algorithm generates pandigital numbers in descending order and tests each for
+    primality until the largest prime is found.
 
     Returns:
-        The largest pandigital prime number
+        The largest n-digit pandigital prime number
 
-    Algorithm:
-    1. Using number theory, we know that:
-       - A number is divisible by 3 if the sum of its digits is divisible by 3
-       - The sum of digits 1 through 9 is 45 (divisible by 3)
-       - The sum of digits 1 through 8 is 36 (divisible by 3)
-       - Similarly, 6, 5, 3, and 2-digit pandigitals are all divisible by 3
-    2. Therefore, we only need to check 7-digit and 4-digit pandigitals
-    3. Start with 7-digit pandigitals (larger) and check primality
-    4. If none is found, check 4-digit pandigitals
-    5. Return the first (largest) prime found
-
-    Optimization:
-    - We reverse the digits before generating permutations to get the
-      largest pandigitals first, ensuring we find the answer quickly
+    Example:
+        >>> largest_pandigital_prime()
+        7652413
     """
     pandigital_primes = (
         number
@@ -97,36 +67,28 @@ def largest_pandigital_prime() -> int:
     return next(pandigital_primes)
 
 
-solution = cast(SolutionProtocol, largest_pandigital_prime)
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 41
-https://projecteuler.net/problem=41
-We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once.
-For example, 2143 is a 4-digit pandigital and is also prime.
-What is the largest n-digit pandigital prime that exists?
-
-''').strip()
+# Create an alias for the largest_pandigital_prime function to match the expected solution interface
+# This allows the function to be named descriptively while still conforming to the
+# Project Euler framework's convention of using 'solution' as the entry point
+solution = largest_pandigital_prime
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

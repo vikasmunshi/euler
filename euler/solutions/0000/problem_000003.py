@@ -1,39 +1,39 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Solution to Project Euler problem 3: Largest Prime Factor
+r"""
+Solution to Project Euler problem 3: Largest Prime Factor
 
-https://projecteuler.net/problem=3
+Problem Statement:
+The prime factors of 13195 are 5, 7, 13 and 29.
+What is the largest prime factor of the number 600851475143?
 
-Problem statement:
-    The prime factors of 13,195 are 5, 7, 13 and 29.
-    What is the largest prime factor of the number 600851475143?
+Solution Approach:
+This implementation uses an optimized trial division algorithm to find prime factors efficiently:
 
+1. Handle the smallest prime factor (2) separately for optimization
+2. For remaining odd factors, only check up to the square root of the current number
+3. When a factor is found, completely divide it out before moving to the next potential factor
+4. Continuously update the search limit as the number gets reduced
+5. The final remaining number, if greater than 1, is the largest prime factor
+
+The approach is efficient because:
+- We only check factors up to sqrt(n), significantly reducing the search space
+- We only consider odd numbers as potential factors after handling 2
+- We completely remove each factor before checking the next one
+
+Test Cases:
+- For number=13195, the largest prime factor is 29
+- For number=600851475143, the largest prime factor is 6857
+
+URL: https://projecteuler.net/problem=3
 Answer: 6857
-
-Strategy:
-    1. Start by checking if the number is divisible by 2 (the smallest prime)
-    2. Continue with odd factors starting from 3
-    3. For each prime factor, divide the number completely by that factor
-    4. Optimize by only checking factors up to the square root of the current number
-    5. If no factor is found and the number is greater than 1, it is prime
-
-Complexity analysis:
-    Time complexity: O(sqrt(n)) where n is the input number
-    Space complexity: O(1) - only uses a constant amount of extra space
 """
-import textwrap
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'number': 13195},
-        answer=29,
-    ),
-    ProblemArgs(
-        kwargs={'number': 600851475143},
-        answer=6857,
-    ),
+    ProblemArgs(kwargs={'number': 13195}, answer=29,),
+    ProblemArgs(kwargs={'number': 600851475143}, answer=6857,),
 ]
 
 
@@ -109,47 +109,23 @@ def solution(*, number: int) -> int:
     return remaining_number if remaining_number > 1 else largest_factor
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-# Create a well-formatted docstring for documentation and help
-solution.__doc__ = textwrap.dedent('''
-    Solution to Project Euler problem 3: Largest Prime Factor
-
-    Problem Statement:
-    -----------------
-    The prime factors of 13195 are 5, 7, 13 and 29.
-    What is the largest prime factor of the number 600851475143?
-
-    This solution uses an optimized trial division algorithm that:
-    1. Handles the even prime factor (2) separately
-    2. Only checks odd factors from 3 upward
-    3. Limits the search space to sqrt(n) where n is the current number
-    4. Completely removes each prime factor before continuing
-
-    Examples:
-        >>> solution(number=13195)
-        29
-        >>> solution(number=600851475143)
-        6857
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

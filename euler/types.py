@@ -8,7 +8,7 @@ This module provides type annotations for Project Euler solution functions and r
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, Optional, List, Union, Protocol
+from typing import Any, Dict, Optional, List, Protocol
 
 
 @dataclass
@@ -25,9 +25,6 @@ class ProblemArgs:
 
 ProblemArgsList = List[ProblemArgs]
 
-# Common solution return types
-SolutionResult = Union[int, float, str, List[Any], Dict[str, Any]]
-
 
 class SolutionProtocol(Protocol):
     """Protocol defining the structure of a Project Euler solution function.
@@ -36,7 +33,7 @@ class SolutionProtocol(Protocol):
     keyword-only arguments and provides better static type checking.
     """
 
-    def __call__(self, **kwargs: Dict[str, Any]) -> SolutionResult:
+    def __call__(self, **kwargs) -> int:
         """Executes the solution with the provided keyword-only arguments.
 
         This method allows passing problem-specific keyword arguments to calculate
@@ -47,7 +44,6 @@ class SolutionProtocol(Protocol):
                       (e.g., max_limit, target_sum, or other problem-specific details).
 
         Returns:
-            SolutionResult: The computed result of the solution. This can be an integer, 
-            float, string, list, or dictionary, depending on the nature of the problem solution.
+            The computed result of the solution (an integer for most problems).
         """
         ...

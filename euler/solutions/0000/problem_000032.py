@@ -1,20 +1,49 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 32
-# https://projecteuler.net/problem=32
-# Answer: 45228
-# Notes: 
-import textwrap
+"""
+Solution to Project Euler problem 32: Pandigital products
+
+Problem Statement:
+We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n
+exactly once; for example, the 5-digit number, 15234, is 1 through 5 pandigital.
+
+The product 7254 is unusual, as the identity, 39 × 186 = 7254, containing multiplicand,
+multiplier, and product is 1 through 9 pandigital.
+
+Find the sum of all products whose multiplicand/multiplier/product identity can be written
+as a 1 through 9 pandigital.
+
+HINT: Some products can be obtained in more than one way so be sure to only include it once in your sum.
+
+Solution Approach:
+This solution systematically explores the possible configurations for a 1-9 pandigital product:
+
+1. Through mathematical reasoning, we can determine that only two configurations can possibly work:
+   - 1-digit × 4-digit = 4-digit product
+   - 2-digit × 3-digit = 4-digit product
+   (Other configurations would use too many or too few digits to be valid)
+
+2. The implementation uses the permutations function from the itertools module to efficiently
+   generate all possible arrangements of digits for the multiplicand and multiplier.
+
+3. For each valid pair, it calculates the product and checks if the combined digits of all three
+   numbers form a 1-9 pandigital (i.e., they use each digit 1-9 exactly once).
+
+4. The solution uses a set to ensure each product is counted only once, as required by the problem,
+   before computing the final sum.
+
+The implementation efficiently prunes the search space by only considering digit combinations
+that could potentially form a valid pandigital product.
+
+URL: https://projecteuler.net/problem=32
+Answer: 45228
+"""
 from itertools import permutations
-from typing import cast
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={},
-        answer=45228,
-    ),
+    ProblemArgs(kwargs={}, answer=45228, ),
 ]
 
 digits = ('1', '2', '3', '4', '5', '6', '7', '8', '9')
@@ -23,23 +52,15 @@ digits = ('1', '2', '3', '4', '5', '6', '7', '8', '9')
 def sum_pandigital_products() -> int:
     """Calculate the sum of all products whose multiplicand/multiplier/product identity is 1-9 pandigital.
 
-    A pandigital product identity is an equation a × b = c where the digits used in a, b, and c 
-    together use each digit from 1-9 exactly once. For example, 39 × 186 = 7254 is pandigital
-    because the digits 1-9 are used exactly once across all three numbers.
-
-    Algorithm:
-    1. Consider only the possible valid configurations for digit lengths:
-       - 1-digit × 4-digit = 4-digit product
-       - 2-digit × 3-digit = 4-digit product
-       (Other combinations would have too many or too few digits to be valid)
-    2. Generate permutations of digits for multiplicands and multipliers of appropriate lengths
-    3. Calculate the product for each valid pair
-    4. Check if the combined digits of multiplicand, multiplier, and product form a 1-9 pandigital
-    5. Use a set to ensure each product is counted only once (as required by the problem)
-    6. Sum the unique products that satisfy the pandigital condition
+    A pandigital product identity is an equation a × b = c where the digits used in a, b, and c
+    together use each digit from 1-9 exactly once.
 
     Returns:
         The sum of all unique products that can be written as part of a 1-9 pandigital identity
+
+    Example:
+        >>> sum_pandigital_products()
+        45228  # Includes products like 7254 from 39 × 186
     """
     return sum(set(
         c
@@ -50,50 +71,28 @@ def sum_pandigital_products() -> int:
         == '123456789'))
 
 
-solution = cast(SolutionProtocol, sum_pandigital_products)
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 32
-https://projecteuler.net/problem=32
-We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once;
-for example, the 5-digit number, 15234, is 1 through 5 pandigital.
-
-The product 7254 is unusual, as the identity, 39 * 186 = 7254, containing multiplicand, multiplier,
-and product is 1 through 9 pandigital.
-
-Find the sum of all products whose multiplicand/multiplier/product identity can be written as a 1 through 9 pandigital.
-
-HINT: Some products can be obtained in more than one way so be sure to only include it once in your sum.
-
-    Algorithm:
-    1. Consider only the possible valid configurations for digit lengths:
-       - 1-digit × 4-digit = 4-digit product
-       - 2-digit × 3-digit = 4-digit product
-       (Other combinations would have too many or too few digits to be valid)
-    2. Generate permutations of digits for multiplicands and multipliers of appropriate lengths
-    3. Calculate the product for each valid pair
-    4. Check if the combined digits of multiplicand, multiplier, and product form a 1-9 pandigital
-    5. Use a set to ensure each product is counted only once (as required by the problem)
-    6. Sum the unique products that satisfy the pandigital condition
-
-''').strip()
+# Create an alias for the sum_pandigital_products function to match the expected solution interface
+# This allows the function to be named descriptively while still conforming to the
+# Project Euler framework's convention of using 'solution' as the entry point
+solution = sum_pandigital_products
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

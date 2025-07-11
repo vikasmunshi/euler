@@ -1,38 +1,68 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Solution to Project Euler problem 8: Largest product in a series
-https://projecteuler.net/problem=8
+r"""
+Solution to Project Euler problem 8: Largest Product in a Series
 
 Problem Statement:
-The four adjacent digits in the 1000-digit number that have the greatest product are 9×9×8×9=5832.
+The four adjacent digits in the 1000-digit number that have the greatest product are 9 × 9 × 8 × 9 = 5832.
 
-Find the thirteen adjacent digits in the 1000-digit number that have the greatest product.
+73167176531330624919225119674426574742355349194934
+96983520312774506326239578318016984801869478851843
+85861560789112949495459501737958331952853208805511
+12540698747158523863050715693290963295227443043557
+66896648950445244523161731856403098711121722383113
+62229893423380308135336276614282806444486645238749
+30358907296290491560440772390713810515859307960866
+70172427121883998797908792274921901699720888093776
+65727333001053367881220235421809751254540594752243
+52584907711670556013604839586446706324415722155397
+53697817977846174064955149290862569321978468622482
+83972241375657056057490261407972968652414535100474
+82166370484403199890008895243450658541227588666881
+16427171479924442928230863465674813919123162824586
+17866458359124566529476545682848912883142607690042
+24219022671055626321111109370544217506941658960408
+07198403850962455444362981230987879927244284909188
+84580156166097919133875499200524063689912560717606
+05886116467109405077541002256983155200055935729725
+71636269561882670428252483600823257530420752963450
+
+Find the thirteen adjacent digits in the 1000-digit number that have the greatest product. 
 What is the value of this product?
 
-Approach:
-This solution iterates through all possible subsequences of the specified length in the 1000-digit number.
-For each subsequence, it calculates the product of its digits and finds the maximum value.
+Solution Approach:
+This solution employs a sliding window approach to find the maximum product of adjacent digits:
 
-Known answers:
-- For 4 adjacent digits: 5832
-- For 13 adjacent digits: 23,514,624,000
+1. Sliding Window: We iterate through the 1000-digit number using a window of the specified length,
+   extracting all possible subsequences.
+
+2. Functional Programming: We use Python's functional programming tools (list comprehensions and
+   reduce) to concisely express the algorithm.
+
+3. Early Optimization: The solution could be optimized to skip windows containing zeros, as any
+   product with a zero will be zero. However, the current implementation has a bug in this logic
+   that needs to be fixed.
+
+4. Generalization: The solution is parameterized by the window length, making it adaptable to
+   different requirements (e.g., finding the product of 4 vs. 13 adjacent digits).
+
+The algorithm has a time complexity of O(n), where n is the length of the number string, as
+we process each possible window exactly once.
+
+Test Cases:
+- For length=4: 5832 (corresponding to the digits 9×9×8×9)
+- For length=13: 23514624000 (corresponding to the 13 digits with maximum product)
+
+URL: https://projecteuler.net/problem=8
+Answer: 23514624000
 """
-import textwrap
 from functools import reduce
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# Define test cases with their expected answers for validation
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'length': 4},  # Find the product of 4 adjacent digits
-        answer=5832,  # The answer for 4 adjacent digits is 5832
-    ),
-    ProblemArgs(
-        kwargs={'length': 13},  # Find the product of 13 adjacent digits
-        answer=23514624000,  # The answer for 13 adjacent digits is 23,514,624,000
-    ),
+    ProblemArgs(kwargs={'length': 4}, answer=5832, ),  # Find the product of 4 adjacent digits - 5832
+    ProblemArgs(kwargs={'length': 13}, answer=23514624000, ),  # Find the product of 13 adjacent digits - 23,514,624,000
 ]
 
 # The 1000-digit number from the problem statement
@@ -70,69 +100,32 @@ def solution(*, length: int) -> int:
 
     Algorithm:
     1. Generate all possible subsequences of the specified length from the 1000-digit number
-    2. For each subsequence, calculate the product of all its digits
-    3. Return the maximum product found
-
-    Note: The condition '0 not in sequence' is intended to filter out sequences containing 0,
-          but there appears to be a syntax issue. The code would still work correctly if the 
-          condition checked for '0' not in sequence without quotes, as any sequence with 0 
-          would result in a product of 0.
+    2. Filter out subsequences containing the digit '0' (as their product would be zero)
+    3. For each remaining subsequence, calculate the product of all its digits
+    4. Return the maximum product found
     """
     return max([reduce(lambda a, b: int(a) * int(b), sequence)  # type: ignore
                 for sequence in (number[i:i + length]
-                                 for i in range(len(number) - length + 1)) if '0 not in sequence'])
+                                 for i in range(len(number) - length + 1)) if '0' not in sequence])
 
-
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-# Preserve the original docstring for the solution function
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 8
-https://projecteuler.net/problem=8
-The four adjacent digits in the 1000-digit number that have the greatest product are 9 * 9 * 8 * 9 = 5832.
-
-73167176531330624919225119674426574742355349194934
-96983520312774506326239578318016984801869478851843
-85861560789112949495459501737958331952853208805511
-12540698747158523863050715693290963295227443043557
-66896648950445244523161731856403098711121722383113
-62229893423380308135336276614282806444486645238749
-30358907296290491560440772390713810515859307960866
-70172427121883998797908792274921901699720888093776
-65727333001053367881220235421809751254540594752243
-52584907711670556013604839586446706324415722155397
-53697817977846174064955149290862569321978468622482
-83972241375657056057490261407972968652414535100474
-82166370484403199890008895243450658541227588666881
-16427171479924442928230863465674813919123162824586
-17866458359124566529476545682848912883142607690042
-24219022671055626321111109370544217506941658960408
-07198403850962455444362981230987879927244284909188
-84580156166097919133875499200524063689912560717606
-05886116467109405077541002256983155200055935729725
-71636269561882670428252483600823257530420752963450
-
-Find the thirteen adjacent digits in the 1000-digit number that have the greatest product. What is the value of this product?
-
-''').strip()
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

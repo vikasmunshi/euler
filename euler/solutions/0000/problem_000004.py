@@ -1,35 +1,46 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
+r"""
+Solution to Project Euler problem 4: Largest Palindrome Product
+
+Problem Statement:
+A palindromic number reads the same both ways. The largest palindrome made from the product 
+of two 2-digit numbers is 9009 = 91 × 99.
+
+Find the largest palindrome made from the product of two 3-digit numbers.
+
+Solution Approach:
+This implementation uses an optimized algorithm to find palindrome products efficiently:
+
+1. Start with the largest possible n-digit numbers for both factors to maximize chances of
+   finding large palindromes early
+
+2. Use the mathematical property that palindromes with an even number of digits are 
+   always divisible by 11, which means at least one of the factors must be divisible by 11
+
+3. Implement early termination when the current product becomes smaller than the best
+   palindrome found so far
+
+4. Check palindromic property by converting to string and comparing with its reverse
+
+5. Avoid duplicate checks by ensuring the second factor is never larger than the first
+
+The optimizations significantly reduce the search space from O(10^(2n)) to approximately
+O(10^(2n)/11) in the worst case, with typical performance being much better.
+
+Test Cases:
+- For size=2 (two-digit numbers): 9009 (91 × 99)
+- For size=3 (three-digit numbers): 906609 (993 × 913)
+
+URL: https://projecteuler.net/problem=4
+Answer: 906609
 """
-Project Euler Problem 4: Largest Palindrome Product
-
-Problem Description:
-A palindromic number reads the same both ways. The largest palindrome made from 
-the product of two 2-digit numbers is 9009 = 91 × 99.
-Find the largest palindrome made from the product of two n-digit numbers.
-
-This solution uses multiple optimizations:
-1. Starting with the largest possible factors to find large palindromes early
-2. Using the mathematical property that for palindromes with even digits, at least
-   one factor must be divisible by 11 (when the other is not)
-3. Early termination when a path can't produce better results than already found
-
-https://projecteuler.net/problem=4
-"""
-import textwrap
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# Test cases with known answers for verification
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'size': 2},
-        answer=9009,  # Largest palindrome product of two 2-digit numbers (91×99)
-    ),
-    ProblemArgs(
-        kwargs={'size': 3},
-        answer=906609,  # Largest palindrome product of two 3-digit numbers (993×913)
-    ),
+    ProblemArgs(kwargs={'size': 2}, answer=9009, ),  # Largest palindrome product of two 2-digit numbers (91×99)
+    ProblemArgs(kwargs={'size': 3}, answer=906609, ),  # Largest palindrome product of two 3-digit numbers (993×913)
 ]
 
 
@@ -62,7 +73,7 @@ def solution(*, size: int) -> int:
 
     This function uses an optimized algorithm that:
     1. Starts with the largest possible n-digit numbers for both factors
-    2. Uses the mathematical property that for palindromes with even number 
+    2. Uses the mathematical property that for palindromes with even number
        of digits, if one factor is not divisible by 11, the other factor must be
     3. Breaks early from searches that cannot improve the current best result
 
@@ -121,59 +132,23 @@ def solution(*, size: int) -> int:
     return largest_palindrome
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent('''
-Solution to Project Euler Problem 4: Largest Palindrome Product
-
-Problem Description:
-A palindromic number reads the same both ways. The largest palindrome made from the product of two 2-digit numbers is 9009 = 91 × 99.
-Find the largest palindrome made from the product of two n-digit numbers where n is the input parameter 'size'.
-
-Approach:
-1. Define the range of n-digit numbers (10^(n-1) to 10^n - 1)
-2. Use a nested loop to check products of pairs of n-digit numbers
-3. Use optimizations:
-   - Start from the largest numbers to find large palindromes early
-   - Use the property that for a palindrome product with even digits, at least one factor must be divisible by 11
-     (This is because all palindromes with an even number of digits are divisible by 11)
-   - Stop early when we can't exceed our current largest palindrome
-
-Mathematical Insight:
-For a 6-digit palindrome abccba, its decimal representation is:
-100000a + 10000b + 1000c + 100c + 10b + a = 100001a + 10010b + 1100c = 11(9091a + 910b + 100c)
-
-This proves that any palindrome with an even number of digits is divisible by 11,
-which leads to our optimization that at least one of the factors must be divisible by 11.
-
-Parameters:
-    size (int): The number of digits in each factor
-
-Returns:
-    int: The largest palindromic product of two n-digit numbers
-
-Examples:
-    For size=2: Returns 9009 (product of 91 and 99)
-    For size=3: Returns 906609 (product of 993 and 913)
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

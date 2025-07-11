@@ -1,41 +1,46 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Solution to Project Euler problem 7
-https://projecteuler.net/problem=7
+r"""
+Solution to Project Euler problem 7: 10001st Prime
 
 Problem Statement:
 By listing the first six prime numbers: 2, 3, 5, 7, 11, and 13, we can see that the 6th prime is 13.
-What is the 10001st prime number?
+What is the 10,001st prime number?
 
-Approach:
-This solution implements a modified Sieve of Eratosthenes to find prime numbers. Instead of marking
-composite numbers directly, we work with indices that map to odd numbers and only handle the odd
-numbers (since all even numbers except 2 are composite). We use the property that odd numbers can
-be represented as 2n+1, where n is the index in our number list.
+Solution Approach:
+This solution employs a modified version of the Sieve of Eratosthenes algorithm, optimized for
+finding the nth prime number efficiently. The implementation includes several key optimizations:
 
-The upper bound for the search space is estimated using the Prime Number Theorem,
-which states that the nth prime number is approximately n*log(n).
+1. Prime Number Theorem: Uses the Prime Number Theorem to estimate an upper bound for the
+   search space. The theorem states that the nth prime is approximately n*ln(n), which helps
+   avoid allocating an unnecessarily large sieve.
 
-Known answers:
-- 6th prime number: 13
-- 10001st prime number: 104743
+2. Odd Number Optimization: Only considers odd numbers (except for handling 2 as a special case),
+   reducing the search space by half.
+
+3. Index Mapping: Uses a clever indexing scheme where the index i in the sieve array corresponds
+   to the odd number 2i+1, making the algorithm more space-efficient.
+
+4. Composite Number Generation: Uses the formula i+j+(2*i*j) to generate indices of composite
+   numbers, which is a mathematical optimization specific to this implementation.
+
+The algorithm has a time complexity of approximately O(n log log n), which is efficient
+even for finding large prime numbers like the 10,001st prime.
+
+Test Cases:
+- For n=6: 13 (the 6th prime number)
+- For n=10001: 104743 (the 10,001st prime number)
+
+URL: https://projecteuler.net/problem=7
+Answer: 104743
 """
-import textwrap
 from math import log
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# Define test cases with expected answers for validation
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'n': 6},  # Find the 6th prime number
-        answer=13,  # The 6th prime number is 13
-    ),
-    ProblemArgs(
-        kwargs={'n': 10001},  # Find the 10001st prime number
-        answer=104743,  # The 10001st prime number is 104743
-    ),
+    ProblemArgs(kwargs={'n': 6}, answer=13, ),  # Find the 6th prime number - 13
+    ProblemArgs(kwargs={'n': 10001}, answer=104743, ),  # Find the 10001st prime number - 104743
 ]
 
 
@@ -83,35 +88,23 @@ def solution(*, n: int) -> int:
     return 2 * [i for i in numbers if i != 0][n - 2] + 1
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-# Preserve the original docstring for the solution function
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 7
-https://projecteuler.net/problem=7
-By listing the first six prime numbers: 2, 3, 5, 7, 11, and 13, we can see that the 6th prime is 13.
-What is the 10001st prime number?
-
-
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

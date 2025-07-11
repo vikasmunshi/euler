@@ -1,23 +1,48 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Solution to Project Euler problem 25: 1000-digit Fibonacci number
-# https://projecteuler.net/problem=25
-# Answer: 4782
-# Notes: This solution finds the index of the first Fibonacci number with a specified number of digits
-#        using an iterative approach rather than recursion for better performance.
-import textwrap
+"""
+Solution to Project Euler problem 25: 1000-digit Fibonacci number
+
+Problem Statement:
+The Fibonacci sequence is defined by the recurrence relation:
+F_n = F_{n-1} + F_{n-2}, where F_1 = 1 and F_2 = 1.
+
+Hence the first 12 terms will be:
+F_1 = 1
+F_2 = 1
+F_3 = 2
+F_4 = 3
+F_5 = 5
+F_6 = 8
+F_7 = 13
+F_8 = 21
+F_9 = 34
+F_10 = 55
+F_11 = 89
+F_12 = 144
+
+The 12th term, F_12, is the first term to contain three digits.
+What is the index of the first term in the Fibonacci sequence to contain 1000 digits?
+
+Solution Approach:
+This implementation uses an iterative approach to generate Fibonacci numbers until reaching
+the first number with the desired number of digits. The algorithm maintains only the two most
+recent Fibonacci numbers in memory, making it memory-efficient. We determine the number of
+digits by comparing each Fibonacci number with 10^(n-1), which is the smallest n-digit number.
+
+Test Cases:
+- For n=3, the answer is 12 (F_12 = 144 is the first 3-digit Fibonacci number)
+- For n=1000, the answer is 4782
+
+URL: https://projecteuler.net/problem=25
+Answer: 4782
+"""
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'n': 3},
-        answer=12,
-    ),
-    ProblemArgs(
-        kwargs={'n': 1000},
-        answer=4782,
-    ),
+    ProblemArgs(kwargs={'n': 3}, answer=12, ),
+    ProblemArgs(kwargs={'n': 1000}, answer=4782, ),
 ]
 
 
@@ -25,9 +50,10 @@ def solution(*, n: int) -> int:
     """
     Find the index of the first Fibonacci number with n digits.
 
-    This function iteratively generates Fibonacci numbers until finding the first one
-    that has at least n digits. It uses an efficient approach that only stores the
-    two most recent Fibonacci numbers in memory, rather than the entire sequence.
+    This solution iteratively generates Fibonacci numbers using the recurrence relation
+    F_n = F_{n-1} + F_{n-2}, starting with F_1 = F_2 = 1. It continues until finding the
+    first number with at least n digits, determined by checking if the number is greater
+    than or equal to 10^(n-1).
 
     Args:
         n: The number of digits to look for in a Fibonacci number
@@ -37,7 +63,9 @@ def solution(*, n: int) -> int:
 
     Example:
         >>> solution(n=3)
-        12 # F_12 = 144 is the first Fibonacci number with 3 digits
+        12  # F_12 = 144 is the first Fibonacci number with 3 digits
+        >>> solution(n=1000)
+        4782  # The answer to the original problem
     """
     a, b = 1, 1
     i = 2
@@ -47,65 +75,23 @@ def solution(*, n: int) -> int:
     return i
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-Solution to Project Euler problem 25: 1000-digit Fibonacci number
-https://projecteuler.net/problem=25
-
-Problem Description:
-The Fibonacci sequence is defined by the recurrence relation:
-F_n = F_{n - 1} + F_{n - 2}, where F_1 = 1 and F_2 = 1.
-
-Hence the first 12 terms will be:
-F_1 -> 1
-F_2 -> 1
-F_3 -> 2
-F_4 -> 3
-F_5 -> 5
-F_6 -> 8
-F_7 -> 13
-F_8 -> 21
-F_9 -> 34
-F_{10} -> 55
-F_{11} -> 89
-F_{12} -> 144
-
-The 12th term, F_{12}, is the first term to contain three digits.
-
-Problem Statement:
-What is the index of the first term in the Fibonacci sequence to contain 1000 digits?
-
-Solution Overview:
-This solution uses an iterative approach to generate Fibonacci numbers one by one
-until finding the first one with the required number of digits. We efficiently track
-only the two most recent numbers in the sequence at any time, keeping memory usage
-constant regardless of how many Fibonacci numbers need to be calculated.
-
-For the case of 1000 digits, the answer is 4782, meaning F_4782 is the first
-Fibonacci number with 1000 digits.
-
-''').strip()
-
 if __name__ == '__main__':
-    # When this module is run directly (not imported), evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments for controlling execution parameters
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments (e.g., debug, info, warning)
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    # - timeout: maximum time allowed for solution execution
-    # - max_workers: controls parallel execution of test cases
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

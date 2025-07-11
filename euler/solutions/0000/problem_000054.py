@@ -1,16 +1,77 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Solution to Project Euler Problem 54: Poker hands
-https://projecteuler.net/problem=54
+Solution to Project Euler problem 54: Poker hands
+
+Problem Statement:
+In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
+
+- High Card: Highest value card.
+- One Pair: Two cards of the same value.
+- Two Pairs: Two different pairs.
+- Three of a Kind: Three cards of the same value.
+- Straight: All cards are consecutive values.
+- Flush: All cards of the same suit.
+- Full House: Three of a kind and a pair.
+- Four of a Kind: Four cards of the same value.
+- Straight Flush: All cards are consecutive values of same suit.
+- Royal Flush: Ten, Jack, Queen, King, Ace, in same suit.
+
+The cards are valued in the order:
+2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King, Ace.
+
+If two players have the same ranked hands then the rank made up of the highest value wins; 
+for example, a pair of eights beats a pair of fives (see example 1 below). But if two ranks tie, 
+for example, both players have a pair of queens, then highest cards in each hand are compared; 
+if the highest cards tie then the next highest cards are compared, and so on.
+Consider the following five hands dealt to two players:
+
+Hand  | Player 1          | Player 2          | Winner
+------|-------------------|-------------------|--------
+1     | 5H 5C 6S 7S KD    | 2C 3S 8S 8D TD    | Player 2
+      | (Pair of Fives)   | (Pair of Eights)  |
+2     | 5D 8C 9S JS AC    | 2C 5C 7D 8S QH    | Player 1
+      | (Highest: Ace)    | (Highest: Queen)  |
+3     | 2D 9C AS AH AC    | 3D 6D 7D TD QD    | Player 2
+      | (Three Aces)      | (Flush with Diamonds)|
+4     | 4D 6S 9H QH QC    | 3D 6D 7H QD QS    | Player 1
+      | (Queens, Nine high)| (Queens, Seven high)|
+5     | 2H 2D 4C 4D 4S    | 3C 3D 3S 9S 9D    | Player 1
+      | (Full House: 4s/2s)| (Full House: 3s/9s)|
+
+The file, poker.txt, contains one-thousand random hands dealt to two players. Each line of the 
+file contains ten cards (separated by a single space): the first five are Player 1's cards and 
+the last five are Player 2's cards. You can assume that all hands are valid (no invalid characters 
+or repeated cards), each player's hand is in no specific order, and in each hand there is a clear winner.
+
+How many hands does Player 1 win?
+
+Solution Approach:
+This solution implements an object-oriented poker hand evaluator with three main components:
+
+1. PokerRank - An enumeration defining the hierarchy of poker hand categories
+2. HandRank - A class that encapsulates both the hand category and tiebreaking values
+3. PokerHand - A class that parses card strings, evaluates hand strength, and enables comparison
+
+The implementation works as follows:
+- Parse each line of the input file into two hands of five cards each
+- For each hand, determine its poker rank and appropriate tiebreaking values
+- Compare the hands directly using overloaded comparison operators
+- Count how many times Player 1's hand ranks higher than Player 2's
+
+The evaluation algorithm efficiently identifies hand types from highest to lowest rank,
+and applies comprehensive tiebreaking logic according to standard poker rules.
+
+Test Cases:
+- For the provided poker.txt file: Player 1 wins 376 hands
+
+URL: https://projecteuler.net/problem=54
 Answer: 376
 """
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from enum import IntEnum
 from functools import cached_property
-from typing import cast, Tuple, Dict, Union, Any
+from typing import Tuple, Dict, Union, Any
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 from euler.utils import get_text_file
@@ -27,12 +88,10 @@ SUIT_ORDER: Dict[str, int] = {'C': 0, 'D': 1, 'H': 2, 'S': 3}
 
 class PokerRank(IntEnum):
     """
-    Enum class representing standard poker hand rankings.
+    Enum representing standard poker hand rankings from lowest to highest.
 
-    This enum provides a hierarchical ranking system for poker hands using an
-    integer-based enumeration. Each rank is assigned an integer value with higher
-    values representing stronger hands. These ranks are used to compare and evaluate
-    poker hands during gameplay to determine winners or assess hand strength.
+    Each rank is assigned an integer value with higher values representing stronger hands.
+    These values provide a simple way to compare different hand categories.
     """
     HIGH_CARD = 0
     ONE_PAIR = 1
@@ -50,12 +109,12 @@ class PokerRank(IntEnum):
 class HandRank:
     """Class representing a poker hand rank with comprehensive tiebreaking capabilities.
 
-    This class encapsulates both the primary classification of a poker hand (e.g., Flush, 
-    Straight, etc.) and the secondary tiebreaking values that determine the winner when 
+    This class encapsulates both the primary classification of a poker hand (e.g., Flush,
+    Straight, etc.) and the secondary tiebreaking values that determine the winner when
     two hands share the same primary rank.
 
     Attributes:
-        rank: The PokerRank enum value representing the hand's classification (0-9, 
+        rank: The PokerRank enum value representing the hand's classification (0-9,
               where 9 is Royal Flush)
         tie_breakers: Value(s) used to break ties between hands of the same rank.
             This can be either a single integer (for simpler hands like Straight) or
@@ -208,72 +267,22 @@ class PokerHand:
 
 def solution(*, file_url: str) -> int:
     """
-    Solution to Project Euler Problem 54: Poker hands
-    https://projecteuler.net/problem=54
+    Count how many poker hands Player 1 wins out of 1000 dealt hands.
 
-    Problem Description:
-    In poker, hands consist of five cards ranked from lowest to highest as follows:
-    - High Card: Highest value card.
-    - One Pair: Two cards of the same value.
-    - Two Pairs: Two different pairs.
-    - Three of a Kind: Three cards of the same value.
-    - Straight: All cards are consecutive values.
-    - Flush: All cards of the same suit.
-    - Full House: Three of a kind and a pair.
-    - Four of a Kind: Four cards of the same value.
-    - Straight Flush: All cards are consecutive values of the same suit.
-    - Royal Flush: Ten, Jack, Queen, King, Ace, in the same suit.
+    This function analyzes poker hands from the provided file, evaluates each hand
+    according to standard poker rules, and determines how many times Player 1 wins.
+    It uses a comprehensive poker hand evaluation system that handles all hand types
+    and tiebreaking situations.
 
-    Cards are valued in the order: 2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King, Ace.
+    Args:
+        file_url: URL to the text file containing 1000 poker hand pairs
 
-    Tiebreaking follows specific rules: When hands have the same rank, the higher value cards
-    determine the winner. For instance, a pair of eights beats a pair of fives. When ranks and
-    primary values tie (e.g., both players have a pair of queens), the highest remaining cards
-    are compared sequentially until a difference is found.
+    Returns:
+        The number of hands won by Player 1
 
     Examples:
-
-    Hand    Player 1            Player 2            Winner
-    1       5H 5C 6S 7S KD      2C 3S 8S 8D TD      Player 2
-            (Pair of Fives)     (Pair of Eights)
-
-    2       5D 8C 9S JS AC      2C 5C 7D 8S QH      Player 1
-            (Highest: Ace)      (Highest: Queen)
-
-    3       2D 9C AS AH AC      3D 6D 7D TD QD      Player 2
-            (Three Aces)        (Flush with Diamonds)
-
-    4       4D 6S 9H QH QC      3D 6D 7H QD QS      Player 1
-            (Queens, Nine high) (Queens, Seven high)
-
-    5       2H 2D 4C 4D 4S      3C 3D 3S 9S 9D      Player 1
-            (Full House: 4s/2s) (Full House: 3s/9s)
-
-    The file contains 1000 random poker hands, with each line showing ten cards: first five for
-    Player 1 and last five for Player 2. All hands are valid, in no specific order, and each
-    hand has a clear winner.
-
-    The task is to determine how many hands Player 1 wins.
-
-    Solution Approach:
-    This solution implements an object-oriented poker hand evaluator with three main components:
-
-    1. PokerRank - An enumeration defining the hierarchy of poker hand categories
-    2. HandRank - A class that encapsulates both the hand category and tiebreaking values
-    3. PokerHand - A class that parses card strings, evaluates hand strength, and enables comparison
-
-    The implementation works as follows:
-    1. Parse each line of the input file into two hands of five cards each
-    2. For each hand, determine its poker rank and appropriate tiebreaking values
-    3. Compare the hands directly using the overloaded comparison operators
-    4. Count how many times Player 1's hand ranks higher than Player 2's
-
-    The strength evaluation algorithm efficiently analyzes card patterns to identify hand types
-    from highest to lowest rank. When hands have the same rank category, comprehensive tiebreaking
-    logic is applied according to standard poker rules.
-
-    Time complexity is O(n) where n is the number of poker hands to evaluate, as each hand
-    comparison takes constant time regardless of the specific cards involved.
+        >>> solution(file_url='https://projecteuler.net/resources/documents/0054_poker.txt')
+        376
     """
 
     plays = ((PokerHand(cast(tuple[str, str, str, str, str], cards[:5])),
@@ -283,22 +292,22 @@ def solution(*, file_url: str) -> int:
 
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
-                      max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

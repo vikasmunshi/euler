@@ -1,52 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 49
-# https://projecteuler.net/problem=49
-# Answer: 2969 6299 9629
-# Notes: 
 """
-Project Euler Problem 49: Prime permutations
+Solution to Project Euler problem 49: Prime permutations
 
-The arithmetic sequence 1487, 4817, 8147, in which each term increases by 3330, 
-is unusual in two ways:
-(i) each of the three terms are prime, and
-(ii) each of the 4-digit numbers are permutations of one another.
+Problem Statement:
+The arithmetic sequence, 1487, 4817, 8147, in which each of the terms increases by 3330, 
+is unusual in two ways: (i) each of the three terms are prime, and, (ii) each of the 
+4-digit numbers are permutations of one another.
 
-There are no arithmetic sequences made up of three 1-, 2-, or 3-digit primes, 
-exhibiting this property, but there is one other 4-digit increasing sequence.
+There are no arithmetic sequences made up of three 1-, 2-, or 3-digit primes, exhibiting 
+this property, but there is one other 4-digit increasing sequence.
 
 What 12-digit number do you form by concatenating the three terms in this sequence?
 
-Solution approach:
------------------
-This module identifies arithmetic sequences of n-digit prime numbers where all numbers
-are permutations of each other. The implementation follows these steps:
+Solution Approach:
+This solution searches for prime number arithmetic sequences with special properties:
 
 1. Generate all n-digit prime numbers using the Sundaram sieve algorithm
-2. For each prime, identify all its digit permutations that are also prime
-3. For each set of permuted primes with at least 3 members, find all pairwise differences
-4. Identify arithmetic sequences by finding groups of exactly 3 numbers with the same
-   absolute difference between consecutive terms
-5. Return these sequences as space-separated strings in ascending numerical order
+2. For each prime, find all its digit permutations that are also prime
+3. For primes sharing the same set of digits, identify those that form arithmetic 
+   sequences (have equal differences between consecutive terms)
+4. Return all such sequences of exactly three primes
 
-Key optimizations:
-- Efficient prime generation using the Sundaram sieve algorithm
-- String-based permutation generation to simplify digit manipulation
-- Using defaultdict to efficiently track differences between prime pairs
-- Set data structures to eliminate duplicates automatically
+The algorithm uses defaultdict to efficiently group prime pairs by their differences,
+and then identifies complete sequences by finding difference groups with exactly three
+prime numbers.
 
-For n=4 (4-digit primes), the solution finds two sequences:
-- 1487 4817 8147 (the example given in the problem)
-- 2969 6299 9629 (the answer to the problem)
+Test Cases:
+- For 4-digit primes: Two sequences are found: 
+  * 1487, 4817, 8147 (explicitly mentioned in the problem)
+  * 2969, 6299, 9629 (the answer to the problem)
+- For 5-digit primes: 42 different sequences are found (additional test)
 
-For n=5 (5-digit primes), the solution finds 42 different sequences with this property,
-showing how this mathematical pattern extends to larger numbers.
-
-Performance characteristics:
-- Time complexity: O(P * n!) where P is the number of n-digit primes and n is the number of digits
-- Space complexity: O(P) where P is the number of n-digit primes
+URL: https://projecteuler.net/problem=49
+Answer: 296962999629
 """
-import textwrap
 from collections import defaultdict
 from itertools import permutations, combinations
 from typing import Set
@@ -72,25 +60,25 @@ problem_args_list: ProblemArgsList = [
 
 
 def solution(*, n: int) -> Set[str]:
-    """Find arithmetic sequences of prime numbers that are permutations of each other.
+    """
+    Find arithmetic sequences of prime numbers that are permutations of each other.
 
-    This function identifies sets of exactly three n-digit prime numbers that form an arithmetic
-    sequence (with equal differences between consecutive terms) and are permutations of
-    each other's digits.
+    This solution searches for sets of exactly three n-digit prime numbers that form an 
+    arithmetic sequence and are permutations of each other's digits. For the original 
+    problem where n=4, this includes the known sequence 1487, 4817, 8147 and the sequence 
+    we need to identify, 2969, 6299, 9629.
 
     Args:
-        n: int - The number of digits in the prime numbers to consider
-              For n=4, finds 4-digit prime sequences
-              For n=5, finds 5-digit prime sequences
+        n: The number of digits in the prime numbers to consider
 
     Returns:
-        Set[str] - A set of strings, each containing three space-separated prime numbers
-                   that form an arithmetic sequence and are permutations of each other.
-                   The numbers in each string are sorted in ascending order.
+        A set of strings, each containing three space-separated prime numbers in ascending order
 
-    Example:
+    Examples:
         >>> solution(n=4)
         {'1487 4817 8147', '2969 6299 9629'}
+        >>> len(solution(n=5))  # Number of 5-digit sequences
+        42
     """
     sequences: Set[str] = set()
     min_n_digit_hum = 10 ** (n - 1)
@@ -107,37 +95,23 @@ def solution(*, n: int) -> Set[str]:
     return sequences
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 49
-https://projecteuler.net/problem=49
-The arithmetic sequence, 1487, 4817, 8147, in which each of the terms increases by 3330, is unusual in two ways:
-(i) each of the three terms are prime, and,
-(ii) each of the 4-digit numbers are permutations of one another.
-There are no arithmetic sequences made up of three 1-, 2-, or 3-digit primes, exhibiting this property,
-but there is one other 4-digit increasing sequence.
-What 12-digit number do you form by concatenating the three terms in this sequence?
-
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

@@ -1,23 +1,59 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 17 - Number letter counts
-# https://projecteuler.net/problem=17
-# Answer: answers={5: 19, 1000: 21124}
-# Notes: Uses a recursive approach with memoization for converting numbers to words following British usage
-import textwrap
+r"""
+Solution to Project Euler problem 17: Number Letter Counts
+
+Problem Statement:
+If the numbers 1 to 5 are written out in words: one, two, three, four, five, then there 
+are 3 + 3 + 5 + 4 + 4 = 19 letters used in total.
+
+If all the numbers from 1 to 1000 (one thousand) inclusive were written out in words, 
+how many letters would be used? 
+
+NOTE: Do not count spaces or hyphens. For example, 342 (three hundred and forty-two) 
+contains 23 letters and 115 (one hundred and fifteen) contains 20 letters. The use of 
+"and" when writing out numbers is in compliance with British usage.
+
+Solution Approach:
+This solution uses a recursive approach to convert numbers to their word representations:
+
+1. Dictionary-Based Foundation: We begin with a mapping of basic numbers (1-20, tens up to 90)
+   to their word representations.
+
+2. Hierarchical Decomposition: Numbers are broken down into manageable chunks:
+   - For numbers under 100: We handle direct dictionary lookups or tens-ones combinations
+   - For numbers under 1000: We break down into hundreds and remainder parts
+   - For larger numbers: We segment into triplets and apply appropriate scale suffixes
+     (thousand, million, etc.)
+
+3. British Usage Compliance: We strictly follow British conventions:
+   - "and" is included after "hundred" when there's a remainder
+   - Proper hyphenation is applied for compound numbers (e.g., twenty-one)
+
+4. Optimization: We use memoization (@lru_cache) to avoid recalculating common number
+   representations, significantly improving performance.
+
+5. Letter Counting: Finally, we strip out spaces and hyphens before counting letters
+   in accordance with the problem's rules.
+
+The algorithm handles numbers of arbitrary size by decomposing them into triplets
+and applying appropriate suffixes, though the problem only requires handling numbers
+up to 1000.
+
+Test Cases:
+- For max_number=5: 19 letters total
+- For max_number=1000: 21124 letters total
+
+URL: https://projecteuler.net/problem=17
+Answer: 21124
+"""
 from functools import lru_cache
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'max_number': 5},
-        answer=19,
-    ),
-    ProblemArgs(
-        kwargs={'max_number': 1000},
-        answer=21124,
-    ),
+    ProblemArgs(kwargs={'max_number': 5}, answer=19, ),
+    ProblemArgs(kwargs={'max_number': 1000}, answer=21124, ),
 ]
 
 # Dictionary mapping basic numbers to their word representations
@@ -39,6 +75,11 @@ placeholder_suffixes = (
 
 # Suffix used for hundreds place
 hundred_suffix = 'hundred'
+
+
+# In British English, the word "and" is used as a connector between hundred and the rest of the number
+# This is enforced in the problem statement: "The use of 'and' when writing out numbers is in compliance with British usage."
+# Examples: "one hundred and one", "three hundred and forty-two"
 
 
 @lru_cache()
@@ -73,11 +114,24 @@ def convert_number_to_words(number: int) -> str:
     (triplets) and applying the appropriate scale suffix (thousand, million, etc.)
     to each group, following British usage conventions.
 
+    The algorithm works as follows:
+    1. Split the number into comma-separated triplets (e.g., 1,234,567)
+    2. Convert each triplet to words using number_triplet_in_words()
+    3. Append the appropriate scale suffix to each triplet (thousand, million, etc.)
+    4. Apply British usage rules (e.g., adding 'and' before the final triplet when needed)
+    5. Join all parts with spaces to form the complete word representation
+
+    For example, 1,234,567 would be processed as:
+    - "one million" (from triplet 1 with suffix 'million')
+    - "two hundred and thirty-four thousand" (from triplet 234 with suffix 'thousand')
+    - "five hundred and sixty-seven" (from triplet 567 with no suffix)
+    Resulting in: "one million two hundred and thirty-four thousand five hundred and sixty-seven"
+
     Args:
-        number: A positive integer
+        number: A positive integer to be converted to words
 
     Returns:
-        Complete string representation of the number in words
+        Complete string representation of the number in words following British conventions
     """
     number_triplets = f'{number:,}'.split(',')
     len_number_triplets = len(number_triplets)
@@ -96,60 +150,55 @@ def solution(*, max_number: int) -> int:
     The function converts each number to words following British usage,
     then counts only the letters by removing spaces and hyphens.
 
+    Algorithm:
+    1. For each number from 1 to max_number:
+       a. Convert the number to its word representation using convert_number_to_words()
+       b. Remove all spaces and hyphens from the word representation
+       c. Count the remaining characters (letters only)
+    2. Return the sum of all letter counts
+
+    Implementation Note:
+    - We use Python's string.translate() method with a mapping table that removes
+      spaces and hyphens, which is more efficient than multiple replace() calls
+    - The @lru_cache decorator on number_triplet_in_words() significantly improves
+      performance by avoiding redundant calculations
+
+    Complexity:
+    - Time: O(max_number * log(max_number)) - we process each number and the word length
+      grows logarithmically with the number's value
+    - Space: O(unique_triplets) - storage for memoized triplet representations
+
     Args:
         max_number: The upper limit (inclusive) of numbers to convert to words
 
     Returns:
         Total count of letters used in all word representations
+
+    Example:
+        >>> solution(max_number=5)  # "one", "two", "three", "four", "five"
+        19  # 3 + 3 + 5 + 4 + 4 = 19 letters total
     """
     ignored_chars = {ord(i): None for i in (' ', '-')}
     return sum(len(convert_number_to_words(s).translate(ignored_chars)) for s in range(1, max_number + 1))
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-Solution to Project Euler problem 17: Number letter counts
-https://projecteuler.net/problem=17
-
-Problem Description:
-If the numbers 1 to 5 are written out in words: one, two, three, four, five,
-then there are 3 + 3 + 5 + 4 + 4 = 19 letters used in total.
-
-If all the numbers from 1 to 1000 (one thousand) inclusive were written out in words, how many letters would be used? 
-
-NOTE: Do not count spaces or hyphens. For example, 342 (three hundred and forty-two) contains 23 letters 
-and 115 (one hundred and fifteen) contains 20 letters.
-The use of "and" when writing out numbers is in compliance with British usage.
-
-Solution Approach:
-- Define mappings from numbers to their word representations
-- Implement a recursive function to convert three-digit numbers to words
-- Handle larger numbers by breaking them into groups of three digits
-- Apply appropriate scale suffixes (thousand, million, etc.)
-- Follow British usage rules (including "and" between hundreds and tens/units)
-- Count only letters by removing spaces and hyphens
-- Sum the letter counts across all numbers in the required range
-
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

@@ -1,26 +1,47 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 13
-# https://projecteuler.net/problem=13
-# Answer: answers={10: '5537376230'}
-# Notes:
-import textwrap
+r"""
+Solution to Project Euler problem 13: Large Sum
+
+Problem Statement:
+Work out the first ten digits of the sum of the following one-hundred 50-digit numbers.
+
+[100 50-digit numbers listed in the 'numbers' variable below]
+
+Solution Approach:
+This solution employs a simple yet efficient approach to find the first few digits of the sum:
+
+1. Optimization Insight: To calculate the first N digits of a sum, we don't need to process
+   all 50 digits of each number. Only the most significant digits contribute to the desired result.
+
+2. Implementation Details:
+   - We read only the first (digits+1) digits from each number
+   - The extra digit provides a buffer for carrying operations
+   - We convert these digits to integers and compute their sum
+   - We extract the first 'digits' characters from the resulting sum
+
+3. Mathematical Justification: When summing 100 numbers, the sum can at most increase by
+   log₁₀(100) ≈ 2 digits in length compared to the original numbers. Therefore, reading
+   slightly more than the target number of digits ensures accuracy.
+
+This approach significantly reduces computational work when only the first few digits
+of a large sum are needed.
+
+Test Cases:
+- For digits=10: Returns '5537376230'
+- For digits=20: Returns '55373762303908766372'
+- For digits=100: Returns the full exact sum (truncated to 100 digits)
+
+URL: https://projecteuler.net/problem=13
+Answer: 5537376230
+"""
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'digits': 10},
-        answer='5537376230',
-    ),
-    ProblemArgs(
-        kwargs={'digits': 20},
-        answer='55373762303908766372',
-    ),
-    ProblemArgs(
-        kwargs={'digits': 100},
-        answer='5537376230390876637302048746832985971773659831892672',
-    ),
+    ProblemArgs(kwargs={'digits': 10}, answer='5537376230', ),
+    ProblemArgs(kwargs={'digits': 20}, answer='55373762303908766372', ),
+    ProblemArgs(kwargs={'digits': 100}, answer='5537376230390876637302048746832985971773659831892672', ),
 ]
 
 numbers = """
@@ -129,49 +150,52 @@ numbers = """
 
 def solution(*, digits: int) -> str:
     """
-    Solution to Project Euler problem 13: Large Sum
-    https://projecteuler.net/problem=13
+    Find the first N digits of the sum of large numbers.
 
-    Work out the first ten digits of the sum of the following one-hundred 50-digit numbers.
-    The problem provides a list of one hundred 50-digit numbers and asks for the first 'digits' digits
-    of their sum. By default, the problem requests the first 10 digits, but this implementation supports
-    getting an arbitrary number of leading digits.
+    This function calculates the sum of the provided list of large numbers and returns
+    only the first 'digits' digits of that sum. It uses an optimization where we only
+    process digits+1 characters from each number, since additional digits won't affect
+    the leading digits of the result.
 
-    Parameters:
+    Args:
         digits (int): Number of leading digits to return from the sum
 
     Returns:
         str: The first 'digits' digits of the sum as a string
+
+    Algorithm:
+        1. For each non-empty line in the input:
+           - Take only the first (digits+1) characters
+           - Convert to integer
+        2. Sum all these integers
+        3. Convert the sum to a string and return the first 'digits' characters
+
+    Examples:
+        >>> solution(digits=10)
+        '5537376230'
+        >>> solution(digits=20)
+        '55373762303908766372'
     """
     return str(sum([int(i[:digits + 1]) for i in numbers.splitlines() if i != '']))[:digits]
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 13
-https://projecteuler.net/problem=13
-Work out the first ten digits of the sum of the following one-hundred 50-digit numbers.
-...
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

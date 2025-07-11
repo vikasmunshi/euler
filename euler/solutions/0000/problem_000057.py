@@ -1,64 +1,76 @@
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 57
-# https://projecteuler.net/problem=57
-# Answer: 153
-# Notes: This solution calculates continued fraction expansions of sqrt(2) and counts
-# how many of these expansions have a numerator with more digits than the denominator.
-# The recurrence relation for the convergents is used to efficiently compute each expansion.
-# For large numbers of expansions, set_int_max_str_digits(0) is used to handle potential
-# integer size limitations.
+"""
+Solution to Project Euler problem 57: Square Root Convergents
+
+Problem Statement:
+It is possible to show that the square root of two can be expressed as an infinite continued fraction.
+√2 = 1 + 1/(2 + 1/(2 + 1/(2 + ...)))
+
+By expanding this for the first four iterations, we get:
+1 + 1/2 = 3/2 = 1.5
+1 + 1/(2 + 1/2) = 7/5 = 1.4
+1 + 1/(2 + 1/(2 + 1/2)) = 17/12 = 1.41666...
+1 + 1/(2 + 1/(2 + 1/(2 + 1/2))) = 41/29 = 1.41379...
+
+The next three expansions are 99/70, 239/169, and 577/408, but the eighth expansion, 
+1393/985, is the first example where the number of digits in the numerator exceeds 
+the number of digits in the denominator.
+
+In the first one-thousand expansions, how many fractions contain a numerator with more 
+digits than the denominator?
+
+Solution Approach:
+This solution uses a recurrence relation to efficiently compute the convergents of the 
+continued fraction expansion of √2. For each expansion, we check if the numerator has 
+more digits than the denominator and count those instances.
+
+The recurrence relation used is:
+- h_n = h_{n-1} + 2*k_{n-1}
+- k_n = h_{n-1} + k_{n-1}
+
+where h_n is the numerator and k_n is the denominator of the nth convergent.
+
+Test Cases:
+- For expansions=10: 1 fraction has more digits in numerator than denominator
+- For expansions=100: 15 fractions have more digits in numerator than denominator
+- For expansions=1000: 153 fractions have more digits in numerator than denominator
+- For expansions=10000: 1508 fractions have more digits in numerator than denominator
+
+URL: https://projecteuler.net/problem=57
+Answer: 153
+"""
 from sys import set_int_max_str_digits
-from typing import cast
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# Test cases for the solution with expected answers
-# Each case specifies the number of expansions to calculate and the expected count of
-# fractions where the numerator has more digits than the denominator
 problem_args_list: ProblemArgsList = [
     ProblemArgs(kwargs={'expansions': 10 ** 1}, answer=1, ),  # 10 expansions
-    ProblemArgs(kwargs={'expansions': 10 ** 2}, answer=15, ), # 100 expansions
-    ProblemArgs(kwargs={'expansions': 10 ** 3}, answer=153, ), # 1,000 expansions (the problem's target)
-    ProblemArgs(kwargs={'expansions': 10 ** 4}, answer=1508, ), # 10,000 expansions
+    ProblemArgs(kwargs={'expansions': 10 ** 2}, answer=15, ),  # 100 expansions
+    ProblemArgs(kwargs={'expansions': 10 ** 3}, answer=153, ),  # 1,000 expansions (the problem's target)
+    ProblemArgs(kwargs={'expansions': 10 ** 4}, answer=1508, ),  # 10,000 expansions
     # ProblemArgs(kwargs={'expansions': 10 ** 5}, answer=15052, ), # 100,000 expansions
 ]
 
 
 def solution(*, expansions: int) -> int:
-    r"""
-    Solution to Project Euler problem 57: Square root convergents
-    https://projecteuler.net/problem=57
+    """
+    Count the fractions in the continued fraction expansion of √2 where the numerator 
+    has more digits than the denominator.
 
-    It is possible to show that the square root of two can be expressed as an infinite continued fraction.
-    \sqrt 2 =1+ \frac 1 {2+ \frac 1 {2 +\frac 1 {2+ ...}}}
-
-    By expanding this for the first four iterations, we get:
-    1 + \frac 1 2 = \frac  32 = 1.5
-    1 + \frac 1 {2 + \frac 1 2} = \frac 7 5 = 1.4
-    1 + \frac 1 {2 + \frac 1 {2+\frac 1 2}} = \frac {17}{12} = 1.41666 ...
-    1 + \frac 1 {2 + \frac 1 {2+\frac 1 {2+\frac 1 2}}} = \frac {41}{29} = 1.41379 ...
-
-    The next three expansions are \frac {99}{70}, \frac {239}{169}, and \frac {577}{408}, but the eighth expansion,
-    \frac {1393}{985}, is the first example where the number of digits in the numerator exceeds the number of digits
-    in the denominator.
-
-    In the first one-thousand expansions, how many fractions contain a numerator with more digits than the denominator?
+    This solution efficiently computes the convergents of the continued fraction expansion
+    of √2 using a recurrence relation. For each expansion, we check if the numerator has
+    more digits than the denominator and count those instances.
 
     Args:
-        expansions (int): The number of expansions to compute
+        expansions: The number of expansions to compute
 
     Returns:
-        int: The count of fractions where the numerator has more digits than the denominator
+        The count of fractions where the numerator has more digits than the denominator
 
-    Notes:
-        The solution uses the recurrence relation for continued fraction convergents:
-        h_n = h_{n-1} + 2*k_{n-1}
-        k_n = h_{n-1} + k_{n-1}
-
-        where h_n is the numerator and k_n is the denominator of the nth convergent.
-        For extremely large values of expansions, Python's string conversion limit might be exceeded,
-        which is handled by disabling the limit with set_int_max_str_digits(0).
+    Example:
+        >>> solution(expansions=1000)
+        153
     """
     # Initialize variables for the recurrence relation
     # Starting with h_0=1, k_0=1 (representing 1/1)
@@ -87,22 +99,22 @@ def solution(*, expansions: int) -> int:
 
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
-                      max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

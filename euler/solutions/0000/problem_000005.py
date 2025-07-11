@@ -1,25 +1,46 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 5
-# https://projecteuler.net/problem=5
-# Answer: 232792560
-# Notes: Calculates the least common multiple (LCM) of all integers from 1 to n
-import textwrap
-from functools import reduce  # For performing cumulative operations
-from math import gcd  # Greatest common divisor function
+r"""
+Solution to Project Euler problem 5: Smallest Multiple
+
+Problem Statement:
+2520 is the smallest number that can be divided by each of the numbers from 1 to 10 without any remainder.
+What is the smallest positive number that is evenly divisible by all of the numbers from 1 to 20?
+
+Solution Approach:
+This problem asks for the least common multiple (LCM) of all integers from 1 to n.
+
+The implementation uses the following mathematical concepts and optimizations:
+
+1. The LCM of two numbers a and b can be calculated using the formula: LCM(a,b) = (a*b)/GCD(a,b)
+   where GCD is the greatest common divisor
+
+2. Python's math.gcd function efficiently computes the greatest common divisor using 
+   the Euclidean algorithm
+
+3. The functools.reduce function elegantly extends the LCM calculation to multiple numbers by
+   applying the LCM operation cumulatively across the range
+
+4. Since the LCM of 1 and any number is that number itself, we start the range from 2
+   and use 1 as the initial value for reduce
+
+The solution has O(n log n) time complexity, which is efficient even for large values of n.
+
+Test Cases:
+- For n=10: 2520
+- For n=20: 232792560
+
+URL: https://projecteuler.net/problem=5
+Answer: 232792560
+"""
+from functools import reduce
+from math import gcd
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# List of test cases with expected answers
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'n': 10},  # First test case with n=10
-        answer=2520,  # Expected answer for n=10
-    ),
-    ProblemArgs(
-        kwargs={'n': 20},  # Second test case with n=20
-        answer=232792560,  # Expected answer for n=20
-    ),
+    ProblemArgs(kwargs={'n': 10}, answer=2520, ),  # First test case with n=10 Expected answer for n=10
+    ProblemArgs(kwargs={'n': 20}, answer=232792560, ),  # Second test case with n=20 Expected answer for n=20
 ]
 
 
@@ -44,35 +65,23 @@ def solution(*, n: int) -> int:
     return reduce(lambda x, y: x * y // gcd(x, y), range(2, n + 1), 1)
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-# Preserve the original problem description as required
-solution.__doc__ = textwrap.dedent('''
-solution to Project Euler problem 5
-https://projecteuler.net/problem=5
-2520 is the smallest number that can be divided by each of the numbers from 1 to 10 without any remainder.
-What is the smallest positive number that is evenly divisible with no remainder by all of the numbers from 1 to 20?
-
-
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

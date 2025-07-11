@@ -1,10 +1,46 @@
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 53
-# https://projecteuler.net/problem=53
-# Answer: 4075
-# Notes:
-from typing import cast
+"""
+Solution to Project Euler problem 53: Combinatoric selections
+
+Problem Statement:
+There are exactly ten ways of selecting three from five, 12345:
+123, 124, 125, 134, 135, 145, 234, 235, 245, and 345
+
+In combinatorics, we use the notation, C(5,3) = 10.
+
+In general, C(n,r) = n!/(r!(n-r)!), where:
+- r ≤ n
+- n! = n × (n-1) × ... × 3 × 2 × 1
+- 0! = 1
+
+It is not until n = 23, that a value exceeds one-million: C(23,10) = 1,144,066.
+
+How many, not necessarily distinct, values of C(n,r) for 1 ≤ n ≤ 100, are greater 
+than one-million?
+
+Solution Approach:
+This solution efficiently counts binomial coefficients exceeding a threshold by using:
+
+1. The symmetry property of binomial coefficients: C(n,r) = C(n,n-r)
+2. A recursive formula to compute each coefficient: C(n,r+1) = C(n,r) × (n-r)/(r+1)
+3. Early termination when the threshold is exceeded, using the fact that once a
+   coefficient exceeds the threshold, all remaining values in that row will also exceed it
+
+For each value of n from 1 to max_n, the algorithm:
+- Starts with C(n,0) = 1
+- Computes coefficients C(n,r) for increasing r
+- When a coefficient exceeds the threshold, counts all remaining values in that row
+  without explicitly computing them
+
+Test Cases:
+- For max_n=100, threshold=100: 4724 values exceed threshold
+- For max_n=100, threshold=1,000,000: 4075 values exceed threshold (the answer)
+- For max_n=1000, threshold=1,000,000: 494861 values exceed threshold
+
+URL: https://projecteuler.net/problem=53
+Answer: 4075
+"""
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
@@ -18,50 +54,25 @@ problem_args_list: ProblemArgsList = [
 
 def solution(*, max_n: int, threshold: int) -> int:
     """
-    Solution to Project Euler problem 53: Combinatoric selections
-    https://projecteuler.net/problem=53
+    Count binomial coefficients C(n,r) that exceed a given threshold.
 
-    Problem Description:
-    There are exactly ten ways of selecting three from five, 12345:
-    123, 124, 125, 134, 135, 145, 234, 235, 245, and 345
-
-    In combinatorics, we use the notation: binom{5}{3} = 10.
-
-    In general, binom{n}{r} = n! // (r! * (n-r)!), where:
-    - r <= n
-    - n! = n * (n-1) * ... * 3 * 2 * 1
-    - 0! = 1
-
-    It is not until n = 23 that a value exceeds one-million: binom{23}{10} = 1,144,066.
-
-    Problem Statement:
-    How many, not necessarily distinct, values of binom{n}{r} for 1 <= n <= 100,
-    are greater than one-million?
-
-    Solution Approach:
-    Determine the count of binomial coefficients greater than a given threshold.
-
-    This function computes the number of binomial coefficient values C(n, r) that
-    are greater than a specified threshold, where n ranges from 1 to `max_n`.
-    
-    Key optimizations:
-    1. Leverages symmetry of binomial coefficients: C(n, r) = C(n, n-r)
-    2. Uses a recursive formula to efficiently compute each coefficient:
-       C(n, r+1) = C(n, r) * (n-r) / (r+1)
-    3. Employs early termination when the threshold is exceeded, counting all remaining
-       symmetric values without explicit computation
-    
-    Time Complexity: O(max_n²) in the worst case, but often better due to early termination
-    Space Complexity: O(1) - uses constant additional space
+    This function efficiently computes the number of binomial coefficient values C(n,r)
+    that are greater than the specified threshold, where n ranges from 1 to max_n.
+    It uses mathematical properties of binomial coefficients to avoid unnecessary
+    calculations.
 
     Args:
-        max_n (int): The maximum value of n to compute binomial coefficients for.
-            For the original problem, this is 100.
-        threshold (int): The value threshold that determines which coefficients
-            are counted. For the original problem, this is 10^6 (one million).
+        max_n: Maximum value of n to consider (100 for the original problem)
+        threshold: Value that binomial coefficients must exceed to be counted (10^6 for the original problem)
 
     Returns:
-        int: The count of binomial coefficients greater than the threshold.
+        Number of binomial coefficients greater than the threshold
+
+    Examples:
+        >>> solution(max_n=100, threshold=10**6)
+        4075  # Answer to the original problem
+        >>> solution(max_n=100, threshold=10**2)
+        4724  # Different threshold for testing
     """
     count = 0
     for n in range(1, max_n + 1):
@@ -80,22 +91,22 @@ def solution(*, max_n: int, threshold: int) -> int:
 
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
-                      max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

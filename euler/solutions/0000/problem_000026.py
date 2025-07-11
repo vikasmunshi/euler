@@ -1,13 +1,48 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Solution to Project Euler problem 26: Reciprocal cycles
-# https://projecteuler.net/problem=26
-# Answer: 983
-# Notes: This solution uses number theory to find the longest recurring decimal cycle
-#        by calculating the multiplicative order of 10 modulo d.
-#        For unit fractions 1/d where gcd(d, 10) = 1, the cycle length equals
-#        the multiplicative order of 10 mod d (a result from modular arithmetic).
-import textwrap
+"""
+Solution to Project Euler problem 26: Reciprocal cycles
+
+Problem Statement:
+A unit fraction contains 1 in the numerator. The decimal representation of the unit fractions
+with denominators 2 to 10 are given:
+
+1/2 = 0.5
+1/3 = 0.(3)
+1/4 = 0.25
+1/5 = 0.2
+1/6 = 0.1(6)
+1/7 = 0.(142857)
+1/8 = 0.125
+1/9 = 0.(1)
+1/10 = 0.1
+
+Where 0.1(6) means 0.166666..., and has a 1-digit recurring cycle. It can be seen that 1/7
+has a 6-digit recurring cycle.
+
+Find the value of d < 1000 for which 1/d contains the longest recurring cycle in its decimal
+fraction part.
+
+Solution Approach:
+This implementation uses number theory to efficiently find the answer. For a fraction 1/d,
+the length of its recurring decimal cycle equals the multiplicative order of 10 modulo d
+(when gcd(10, d) = 1). The multiplicative order is the smallest positive integer k such
+that 10^k ≡ 1 (mod d).
+
+To optimize the search:
+1. We only consider values where gcd(d, 10) = 1 (d not divisible by 2 or 5)
+2. We search in descending order from the upper bound, as larger primes tend to have longer cycles
+3. We use the walrus operator (:=) to efficiently assign and test values in a single expression
+
+Test Cases:
+- For max_val=10, the answer is 7 (1/7 has a 6-digit cycle)
+- For max_val=100, the answer is 97 (1/97 has a 96-digit cycle)
+- For max_val=1000, the answer is 983 (1/983 has a 982-digit cycle)
+
+URL: https://projecteuler.net/problem=26
+Answer: 983
+"""
+
 from math import gcd
 from typing import Optional
 
@@ -63,19 +98,21 @@ def solution(*, max_val: int) -> int:
     """
     Find the value of d < max_val with the longest recurring decimal cycle in 1/d.
 
-    This function uses number theory to determine the length of recurring cycles in
-    decimal fractions. For a fraction 1/d, the length of its recurring decimal cycle
-    equals the multiplicative order of 10 modulo d, when gcd(10, d) = 1.
-
-    The function searches in descending order from max_val, which is efficient because:
-    1. Larger primes tend to have longer cycles
-    2. We only need to check values where gcd(d, 10) = 1 (i.e., d is not divisible by 2 or 5)
+    This solution uses number theory to efficiently find the denominator with the longest
+    recurring cycle. It leverages the fact that for a fraction 1/d, the length of its recurring
+    decimal cycle equals the multiplicative order of 10 modulo d (when gcd(10, d) = 1).
 
     Args:
         max_val: The upper bound for d (exclusive)
 
     Returns:
         The value of d < max_val for which 1/d has the longest recurring decimal cycle
+
+    Example:
+        >>> solution(max_val=10)
+        7  # 1/7 has a 6-digit recurring cycle: 0.(142857)
+        >>> solution(max_val=1000)
+        983  # 1/983 has a 982-digit recurring cycle
     """
     # Using walrus operator ":=" to assign and test d in a single expression
     # Starting from max_val and checking in descending order (more efficient)
@@ -85,66 +122,23 @@ def solution(*, max_val: int) -> int:
                if (d := max_val - i) > 6 and gcd(d, 10) == 1)[1]
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-Solution to Project Euler problem 26: Reciprocal cycles
-https://projecteuler.net/problem=26
-
-Problem Description:
-A unit fraction contains 1 in the numerator.
-The decimal representation of the unit fractions with denominators 2 to 10 are given:
-
-1/2 -> 0.5
-1/3 -> 0.(3)
-1/4 -> 0.25
-1/5 -> 0.2
-1/6 -> 0.1(6)
-1/7 -> 0.(142857)
-1/8 -> 0.125
-1/9 -> 0.(1)
-1/10 -> 0.1
-
-Where 0.1(6) means 0.166666..., and has a 1-digit recurring cycle.
-It can be seen that 1/7 has a 6-digit recurring cycle.
-
-Problem Statement:
-Find the value of d < 1000 for which 1/d contains the longest recurring cycle in its decimal fraction part.
-
-Solution Overview:
-This solution applies number theory to efficiently find the answer. For a unit fraction 1/d:
-
-1. When d is divisible by 2 or 5, the decimal expansion will terminate or have a finite
-   number of repeating digits followed by termination.
-
-2. For other values of d (where gcd(d, 10) = 1), the length of the recurring cycle equals
-   the multiplicative order of 10 modulo d - the smallest positive integer k such that
-   10^k ≡ 1 (mod d).
-
-3. The solution searches for values of d in descending order from the maximum value,
-   as larger primes tend to have longer cycles, and returns the value with the longest cycle.
-
-For values below 1000, the answer is 983, which has a recurring cycle of length 982.
-
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

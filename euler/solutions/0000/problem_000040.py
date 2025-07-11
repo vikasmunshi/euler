@@ -1,24 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 40
-# https://projecteuler.net/problem=40
-# Answer: 210
-# Notes: 
 """
-Solution to Project Euler problem 40 - Champernowne's constant.
+Solution to Project Euler problem 40: Champernowne's constant
 
-This module provides functions to work with Champernowne's constant,
-an irrational decimal fraction created by concatenating positive integers:
-0.12345678910111213...
+Problem Statement:
+An irrational decimal fraction is created by concatenating the positive integers:
+0.123456789101112131415161718192021...
 
-The main solution calculates the product of digits at specific positions
-(1, 10, 100, etc.) in this constant.
+It can be seen that the 12th digit of the fractional part is 1.
 
-Functions:
-    get_nth_digit_champernowne_s_constant: Find the nth digit in Champernowne's constant
-    solution: Calculate the product of digits at positions 10^0 through 10^i
+If d_n represents the nth digit of the fractional part, find the value of the following expression:
+d_1 × d_10 × d_100 × d_1000 × d_10000 × d_100000 × d_1000000
+
+Solution Approach:
+This solution efficiently calculates the digits at specific positions in Champernowne's constant
+without generating the entire sequence. The approach uses mathematical patterns to determine:
+1. Which number in the sequence contains the desired position
+2. Which digit within that number corresponds to the position
+
+The algorithm avoids generating the entire constant by calculating ranges of positions
+for numbers with the same number of digits, then locating the specific number and digit
+through offset calculations.
+
+Test Cases:
+- d_1 = 1
+- d_10 = 1
+- d_100 = 5
+- d_1000 = 3
+- d_10000 = 7
+- d_100000 = 2
+- d_1000000 = 1
+
+URL: https://projecteuler.net/problem=40
+Answer: 210
 """
-import textwrap
 from functools import reduce
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
@@ -42,22 +57,22 @@ def get_nth_digit_champernowne_s_constant(n: int) -> int:
     """
     Calculate the nth digit of Champernowne's constant.
 
-    Champernowne's constant is formed by concatenating positive integers:
-    0.12345678910111213...
+    This helper function efficiently determines which digit appears at the 
+    specified position in Champernowne's constant without generating the entire sequence.
 
-    Parameters:
+    Args:
         n: The position of the digit to find (1-indexed)
 
     Returns:
         The digit at the nth position as an integer
 
-    Algorithm:
-    1. Determine how many digits the number containing the nth digit has
-    2. Calculate the specific number that contains the nth digit
-    3. Extract the correct digit from that number
-
     Example:
-        For n=12, the function returns 1 (the 12th digit in the sequence is 1)
+        >>> get_nth_digit_champernowne_s_constant(12)
+        1  # The 12th digit in the sequence is 1
+        >>> get_nth_digit_champernowne_s_constant(1)
+        1  # The 1st digit is 1
+        >>> get_nth_digit_champernowne_s_constant(10)
+        1  # The 10th digit is 1 (from the number 10)
     """
     length_till_num_digits, length_with_num_digits, num_digits = 0, 0, 0
     while length_with_num_digits < n:
@@ -75,54 +90,43 @@ def solution(*, i: int) -> int:
     """
     Calculate the product of specific digits in Champernowne's constant.
 
-    This function finds the product of digits at positions 1, 10, 100, ..., 10^i
-    in Champernowne's constant (0.12345678910111213...).
+    This solution finds the product of digits at positions 10^0, 10^1, 10^2, ..., 10^i
+    in Champernowne's constant (0.123456789101112...) without generating the
+    entire sequence. It uses efficient position calculations to find each digit.
 
-    Parameters:
-        i: The maximum exponent to consider (inclusive)
-           The function will calculate the product of digits at positions
-           10^0, 10^1, 10^2, ..., 10^i
+    Args:
+        i: The maximum exponent to consider (inclusive).
+           For the original problem, i=6 to get positions 1, 10, 100, ..., 1,000,000
 
     Returns:
         The product of the digits at the specified positions
 
     Example:
-        For i=6, the function returns the product of the digits at positions
-        1, 10, 100, 1000, 10,000, 100,000, and 1,000,000
+        >>> solution(i=6)
+        210  # Product of digits at positions 1, 10, 100, 1000, 10000, 100000, 1000000
+        >>> solution(i=2)
+        5    # Product of digits at positions 1, 10, 100
     """
     return reduce(lambda x, y: x * y, (get_nth_digit_champernowne_s_constant(10 ** i) for i in range(0, i + 1)), 1)
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 40
-https://projecteuler.net/problem=40
-An irrational decimal fraction is created by concatenating the positive integers:
-0.12345678910 112131415161718192021...
-It can be seen that the 12th digit of the fractional part is 1.
-If d_n represents the nth digit of the fractional part, find the value of the following expression.
-d_1 * d_{10} * d_{100} * d_{1000} * d_{10000} * d_{100000} * d_{1000000}
-
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

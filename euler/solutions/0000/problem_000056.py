@@ -2,31 +2,37 @@
 # -*- coding: utf-8 -*-
 """
 Solution to Project Euler problem 56: Powerful Digit Sum
-https://projecteuler.net/problem=56
 
-Problem description:
-A googol (10^100) is a massive number: one followed by one-hundred zeros;
-100^100 is almost unimaginably large: one followed by two-hundred zeros.
-Despite their size, the sum of the digits in each number is only 1.
+Problem Statement:
+A googol (10^100) is a massive number: one followed by one-hundred zeros; 100^100 is almost 
+unimaginably large: one followed by two-hundred zeros. Despite their size, the sum of the 
+digits in each number is only 1.
 
-Considering natural numbers of the form a^b, where a, b < 100,
-what is the maximum digital sum?
+Considering natural numbers of the form a^b, where a, b < 100, what is the maximum digital sum?
 
+Solution Approach:
+This solution explores all combinations of a^b where a and b are below a given limit (determined by
+num_digits parameter). For efficiency, the solution focuses on larger values of a and b where higher
+digital sums are more likely to be found.
+
+The implementation includes two modes:
+1. Standard mode: Efficiently calculates the maximum digital sum without visualization
+2. Visualization mode: When the VISUALIZE environment variable is set, generates heatmaps
+   showing digital sums, digit lengths, and average digit values
+
+Test Cases:
+- For num_digits=1 (a,b < 10): 45
+- For num_digits=2 (a,b < 100): 972 (original problem)
+- For num_digits=3 (a,b < 1000): 13,888
+- For num_digits=4 (a,b < 10000): 181,855
+
+URL: https://projecteuler.net/problem=56
 Answer: 972
-
-Notes: 
-- Requires python3-tk system package for GUI visualization
-- System dependencies (not managed by package):
-  python3-tk: Required for matplotlib TkAgg backend visualization
-  Install with: 
-    - sudo apt install python3-tk (Debian/Ubuntu)
-    - dnf install python3-tkinter (Fedora)
-    - pacman -S tk (Arch)
-    - brew install python-tk (macOS with Homebrew)
 """
+
 import os
 import sys
-from typing import cast, Tuple
+from typing import Tuple
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -233,22 +239,22 @@ def solution(*, num_digits: int) -> int:
 
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
-                      max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

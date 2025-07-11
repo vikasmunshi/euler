@@ -1,31 +1,47 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Solution to Project Euler problem 51.
+"""
+Solution to Project Euler problem 51: Prime digit replacements
 
-Problem statement:
-By replacing the 1st digit of the 2-digit number *3, it turns out that six of the nine possible values:
-13, 23, 43, 53, 73, and 83, are all prime.
+Problem Statement:
+By replacing the 1st digit of the 2-digit number *3, it turns out that six of the nine 
+possible values: 13, 23, 43, 53, 73, and 83, are all prime.
 
-By replacing the 3rd and 4th digits of 56**3 with the same digit, this 5-digit number is the first example having
-seven primes among the ten generated numbers, yielding the family: 56003, 56113, 56333, 56443, 56663, 56773, and 56993.
-Consequently, 56003 being the first member of this family, is the smallest prime with this property.
+By replacing the 3rd and 4th digits of 56**3 with the same digit, this 5-digit number 
+is the first example having seven primes among the ten generated numbers, yielding the 
+family: 56003, 56113, 56333, 56443, 56663, 56773, and 56993. Consequently 56003, 
+being the first member of this family, is the smallest prime with this property.
 
-Find the smallest prime which, by replacing part of the number (not necessarily adjacent digits) with the same digit,
-is part of an eight prime value family.
+Find the smallest prime which, by replacing part of the number (not necessarily adjacent 
+digits) with the same digit, is part of an eight prime value family.
+
+Solution Approach:
+This solution uses a systematic approach to find prime families through digit replacement:
+
+1. Generate prime numbers in ascending order using the Sundaram sieve algorithm
+2. For each prime, try replacing each digit (0-9) with other digits
+3. Check how many resulting numbers are also prime
+4. When a replacement pattern produces exactly the required number of primes,
+   return the smallest prime in that family
+
+Optimizations include:
+- Only checking digits 0 through (9-prime_run) for replacement, as we need at least
+  'prime_run' valid replacements
+- Using efficient primality testing
+- Only considering replacements that produce numbers greater than or equal to the
+  original prime to ensure we find the smallest such prime
+
+Test Cases:
+- For prime_run=6: Returns 13 (family: 13,23,43,53,73,83)
+- For prime_run=7: Returns 56003 (family includes 56003,56113,56333,...)
+- For prime_run=8: Returns 121313 (the answer)
 
 URL: https://projecteuler.net/problem=51
 Answer: 121313
 """
-
-# Import prime number generation and testing functions
 from euler.primes import gen_primes_sundaram_sieve, is_prime
-# Import type definitions for the solution framework
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# List of test cases with expected answers for validation
-# - prime_run=6: Find prime numbers with six-prime value families (answer: 13)
-# - prime_run=7: Find prime numbers with seven-prime value families (answer: 56003)
-# - prime_run=8: Find prime numbers with eight-prime value families (answer: 121313)
 problem_args_list: ProblemArgsList = [
     ProblemArgs(kwargs={'prime_run': 6}, answer=13, ),
     ProblemArgs(kwargs={'prime_run': 7}, answer=56003, ),
@@ -34,23 +50,28 @@ problem_args_list: ProblemArgsList = [
 
 
 def solution(*, prime_run: int, num_digits: int = 6) -> int:
-    """Find the smallest prime that forms a family of prime numbers by digit replacement.
+    """
+    Find the smallest prime that forms a family of prime numbers by digit replacement.
 
-    This function implements the solution to Project Euler problem 51, which involves
-    finding prime numbers where replacing specific digits with other digits yields a
-    family of prime numbers of a given size.
-
-    The approach works as follows:
-    1. Generate prime numbers up to 10^num_digits
-    2. For each prime, try replacing all occurrences of each digit (0-9) with other digits
-    3. If the replacement generates exactly 'prime_run' prime numbers, return the original prime
+    This solution finds prime numbers where replacing specific digits with other digits
+    yields a family of prime numbers of the specified size. It systematically examines
+    primes in ascending order and tests various digit replacement patterns until finding
+    a prime that belongs to a family of the required size.
 
     Args:
         prime_run: The required number of primes in the family (e.g., 6, 7, or 8)
-        num_digits: The maximum number of digits to consider in the prime numbers (default: 6)
+        num_digits: The maximum number of digits to consider (default: 6)
 
     Returns:
-        int: The smallest prime number that generates a family of 'prime_run' primes
+        The smallest prime that generates a family of 'prime_run' primes
+
+    Examples:
+        >>> solution(prime_run=6)
+        13  # Family: 13,23,43,53,73,83
+        >>> solution(prime_run=7)
+        56003  # Family includes 56003,56113,56333,etc.
+        >>> solution(prime_run=8)
+        121313  # The answer to the main problem
 
     Raises:
         ValueError: If no solution is found within the given constraints
@@ -74,34 +95,23 @@ def solution(*, prime_run: int, num_digits: int = 6) -> int:
         raise ValueError('No solution found')
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-# This ensures type checking validates that our solution conforms to the expected interface
-solution: SolutionProtocol
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # This allows the module to be executed directly to verify the solution
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution  # Framework for testing solutions
-    from euler.cli import parser  # Command-line argument parser
-    from euler.logger import logger  # Logging configuration
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Parse command-line arguments (e.g., logging level, timeout settings)
-    args = parser.parse_args()
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Set the logging level based on command-line arguments
-    # This controls the verbosity of output during execution
-    logger.setLevel(args.log_level)
-
-    # Extract timeout and maximum worker threads from arguments
-    # These control the execution environment for testing
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers for all test cases
-    # - solution: The solution function to evaluate
-    # - args_list: List of test cases with inputs and expected outputs
-    # - timeout: Maximum time allowed for each test case
-    # - max_workers: Number of parallel workers for testing
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

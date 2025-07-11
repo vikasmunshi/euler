@@ -1,39 +1,50 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
+r"""
+Solution to Project Euler problem 6: Sum Square Difference
+
+Problem Statement:
+The sum of the squares of the first ten natural numbers is,
+1² + 2² + ... + 10² = 385.
+
+The square of the sum of the first ten natural numbers is,
+(1 + 2 + ... + 10)² = 55² = 3025.
+
+Hence the difference between the sum of the squares of the first ten natural numbers 
+and the square of the sum is 3025 - 385 = 2640.
+
+Find the difference between the sum of the squares of the first one hundred natural 
+numbers and the square of the sum.
+
+Solution Approach:
+This problem can be solved using mathematical formulas rather than explicit computation:
+
+1. Sum of first n natural numbers: n(n+1)/2
+   This is a well-known formula attributed to Gauss
+
+2. Sum of squares of first n natural numbers: n(n+1)(2n+1)/6
+   This is a standard mathematical formula derived from sequence analysis
+
+3. The difference is calculated by:
+   [Sum of first n natural numbers]² - [Sum of squares of first n natural numbers]
+   = [n(n+1)/2]² - n(n+1)(2n+1)/6
+
+Using these formulas allows us to compute the result in O(1) time complexity 
+regardless of the input size, which is much more efficient than using loops.
+
+Test Cases:
+- For n=10: 2640
+- For n=100: 25164150
+
+URL: https://projecteuler.net/problem=6
+Answer: 25164150
 """
-This script provides a solution to Project Euler problem 6:
-https://projecteuler.net/problem=6
-
-The problem statement:
-The sum of the squares of the first ten natural numbers is:
-1^2 + 2^2 + ... + 10^2 = 385.
-
-The square of the sum of the first ten natural numbers is:
-(1 + 2 + ... + 10)^2 = 55^2 = 3025.
-
-Hence, the difference between the sum of the squares of the first ten natural numbers and the square of the sum is:
-3025-385 = 2640.
-
-The goal is to find the difference between the sum of the squares of the first `n` natural numbers and the square of the sum for a given `n`.
-
-Answer:
-    answers={10: 2640, 100: 25164150}
-"""
-
-import textwrap
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# List of problem arguments and their corresponding answers for validation purposes
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'n': 10},  # Test case where n=10
-        answer=2640,  # Expected answer for n=10
-    ),
-    ProblemArgs(
-        kwargs={'n': 100},  # Test case where n=100
-        answer=25164150,  # Expected answer for n=100
-    ),
+    ProblemArgs(kwargs={'n': 10}, answer=2640, ),  # Test case where n=10 Expected answer for n=10
+    ProblemArgs(kwargs={'n': 100}, answer=25164150, ),  # Test case where n=100 Expected answer for n=100
 ]
 
 
@@ -61,36 +72,23 @@ def solution(*, n: int) -> int:
     return (n * (n + 1) // 2) ** 2 - (2 * n + 1) * (n + 1) * n // 6
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-solution to Project Euler problem 6
-https://projecteuler.net/problem=6
-The sum of the squares of the first ten natural numbers is,
-1^2 + 2^2 + ... + 10^2 = 385.
-The square of the sum of the first ten natural numbers is,
-(1 + 2 + ... + 10)^2 = 55^2 = 3025.
-Hence the difference between the sum of the squares of the first ten natural numbers and the square of the sum is 3025 - 385 = 2640.
-Find the difference between the sum of the squares of the first one hundred natural numbers and the square of the sum.
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

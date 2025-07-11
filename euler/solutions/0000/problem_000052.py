@@ -1,26 +1,45 @@
-# !/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 52
-# https://projecteuler.net/problem=52
-# Answer: 142857
-# Notes:
+"""
+Solution to Project Euler problem 52: Permuted multiples
+
+Problem Statement:
+It can be seen that the number, 125874, and its double, 251748, contain exactly the same digits, 
+but in a different order.
+
+Find the smallest positive integer, x, such that 2x, 3x, 4x, 5x, and 6x, contain the same digits.
+
+Solution Approach:
+This solution systematically searches for the target number by:
+
+1. Iterating through positive integers in ascending order
+2. For each integer, calculating its first N multiples (2x, 3x, etc.)
+3. Converting each multiple to a string and sorting its digits to create a canonical
+   representation regardless of digit order
+4. Using a set to efficiently determine if all multiples contain the same digits
+   - If the set contains only one element, all multiples have identical digits
+
+For efficiency, the solution:
+- Limits the search space to reasonable values (using sys.maxsize//multiples)
+- Uses a compact set comprehension to check all multiples simultaneously
+- Implements validation to ensure the input parameter is within reasonable bounds
+
+Test Cases:
+- For multiples=2: 125874 (125874 and 251748 have the same digits)
+- For multiples=3,4,5,6: 142857 (all multiples up to 6x contain the same digits)
+  * 142857 × 2 = 285714
+  * 142857 × 3 = 428571
+  * 142857 × 4 = 571428
+  * 142857 × 5 = 714285
+  * 142857 × 6 = 857142
+
+URL: https://projecteuler.net/problem=52
+Answer: 142857
+"""
 import sys
-from typing import cast
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
-# A list of test cases for the solution function.
-# Each test case defines:
-#  - multiples: The number of consecutive multiples that should contain the same digits
-#  - answer: The expected smallest integer meeting the criteria for the given 'multiples' parameter
-# 
-# For example:
-#  - When 'multiples' is 2, the smallest integer is 125874 (125874 and 2×125874=251748 contain the same digits)
-#  - When 'multiples' is 6, the smallest integer is 142857 (142857, 2×142857, 3×142857, 4×142857, 5×142857, 
-#    and 6×142857 all contain the same digits)
-# 
-# Note: These test cases validate various scenarios for the solution and ensure correct implementation
-# across different input parameters.
 problem_args_list: ProblemArgsList = [
     ProblemArgs(kwargs={'multiples': 2}, answer=125874, ),
     ProblemArgs(kwargs={'multiples': 3}, answer=142857, ),
@@ -32,28 +51,26 @@ problem_args_list: ProblemArgsList = [
 
 def solution(*, multiples: int) -> int:
     """
-    solution to Project Euler problem 52
-    https://projecteuler.net/problem=52
-    It can be seen that the number, 125874, and its double, 251748, contain exactly the same digits,
-    but in a different order.
-    Find the smallest positive integer, x, such that 2x, 3x, 4x, 5x, and 6x, contain the same digits.
+    Find the smallest positive integer whose multiples contain the same digits.
 
-    Finds the smallest positive integer such that the digits of its multiples up to a given
-    count are permutations of each other.
+    This function searches for the smallest number x where x, 2x, 3x, ..., up to
+    multiples×x all contain exactly the same digits (in any order). It works by
+    converting each multiple to a string, sorting its digits, and comparing them.
 
-    This function iterates from 1 upward to find the smallest number whose first `multiples`
-    multiples all have the exact same digits in any order. If no solution is found within
-    the range of the integer space, a ValueError is raised. The algorithm relies on
-    converting the numbers to strings, sorting their digits, and checking for equivalence.
-
-    Parameters:
-        multiples (int): The number of multiples to evaluate for permutation checks.
+    Args:
+        multiples: The number of consecutive multiples to check (between 2 and 6)
 
     Returns:
-        int: The smallest integer that meets the described criteria.
+        The smallest positive integer with the permuted multiples property
+
+    Examples:
+        >>> solution(multiples=2)
+        125874  # 125874 and 251748 contain the same digits
+        >>> solution(multiples=6)
+        142857  # 142857, 285714, 428571, 571428, 714285, 857142 all contain the same digits
 
     Raises:
-        ValueError: If no valid integer is found within the search limit.
+        ValueError: If multiples is not between 2 and 6, or if no solution is found
     """
     if not (isinstance(multiples, int) and 1 < multiples < 7):
         # For multiples=7 or higher, there likely does not exist a solution where a positive integer and all its first n
@@ -84,22 +101,22 @@ def solution(*, multiples: int) -> int:
 
 
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=cast(SolutionProtocol, solution), args_list=problem_args_list, timeout=timeout,
-                      max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))

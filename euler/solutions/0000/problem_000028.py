@@ -1,31 +1,50 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# solution to Project Euler problem 28
-# https://projecteuler.net/problem=28
-# Answer: 669171001
-# Notes: This solution uses a closed-form formula for finding the sum of spiral diagonals
-# which is much more efficient than generating the full spiral.
-import textwrap
+"""
+Solution to Project Euler problem 28: Number spiral diagonals
+
+Problem Statement:
+Starting with the number 1 and moving to the right in a clockwise direction a 5 by 5 spiral
+is formed as follows:
+
+21 22 23 24 25
+20  7  8  9 10
+19  6  1  2 11
+18  5  4  3 12
+17 16 15 14 13
+
+It can be verified that the sum of the numbers on the diagonals is 101.
+
+What is the sum of the numbers on the diagonals in a 1001 by 1001 spiral formed in the same way?
+
+Solution Approach:
+This implementation offers two approaches to solve the problem:
+
+1. Visualization approach: For small spirals (size ≤ 10), the solution generates the actual
+   spiral and calculates the diagonal sum by traversing the coordinates. This provides
+   a visual verification of the pattern and the diagonal elements.
+
+2. Mathematical approach: For larger spirals, the solution uses a closed-form formula
+   derived from analyzing the pattern of diagonal numbers. The formula provides an O(1)
+   time complexity solution: (size * (size * (4 * size + 3) + 8) - 9) // 6
+
+Test Cases:
+- For size=5, the answer is 101
+- For size=7, the answer is 261
+- For size=9, the answer is 537
+- For size=1001, the answer is 669,171,001
+
+URL: https://projecteuler.net/problem=28
+Answer: 669171001
+"""
 
 from euler.types import ProblemArgs, ProblemArgsList, SolutionProtocol
 
 problem_args_list: ProblemArgsList = [
-    ProblemArgs(
-        kwargs={'size': 5},
-        answer=101,
-    ),
-    ProblemArgs(
-        kwargs={'size': 7},
-        answer=261,
-    ),
-    ProblemArgs(
-        kwargs={'size': 9},
-        answer=537,
-    ),
-    ProblemArgs(
-        kwargs={'size': 1001},
-        answer=669171001,
-    ),
+    ProblemArgs(kwargs={'size': 5}, answer=101, ),
+    ProblemArgs(kwargs={'size': 7}, answer=261, ),
+    ProblemArgs(kwargs={'size': 9}, answer=537, ),
+    ProblemArgs(kwargs={'size': 1001}, answer=669171001, ),
 ]
 
 
@@ -73,7 +92,8 @@ def number_spiral_with_diagonal_sum(size: int) -> int:
         coordinate_map[(x, y)] = number
 
     # Print the coordinate map in a spiral format
-    print(f'Generated spiral for size {size} with diagonal elements highlighted in\033[31m red\033[0m:')
+    # Set orange color code (\033[33m for orange/yellow)
+    msg: List[str] = [f'Generated spiral for size {size} with diagonal elements highlighted in\033[34m blue\033[0m:']
     half_size = size // 2
     for row in range(half_size, -half_size - 1, -1):  # y-axis is inverted for display
         row_values = []
@@ -81,37 +101,26 @@ def number_spiral_with_diagonal_sum(size: int) -> int:
             value = coordinate_map.get((col, row), 0)  # Get value at coordinate or 0 if not found
             # Highlight diagonal elements in red
             if col == row or col == -row:
-                # Mark diagonal elements with an asterisk
-                row_values.append(f"\033[31m{value:2d}\033[0m")
+                # Mark diagonal elements with blue color
+                row_values.append(f"\033[34m{value:2d}\033[0m")
             else:
                 row_values.append(f"{value:2d}")
-
-        print(" ".join(row_values))
-
+        msg.append(' '.join(row_values))
     diagonal_sum = sum(n for c, n in coordinate_map.items() if c[0] == c[1] or c[0] == -c[1])
     formula_result = ((size * (size * (4 * size + 3) + 8) - 9) // 6)
-    print(f'{size=}; '
-          f'{formula_result=}; '
-          f'{diagonal_sum=}; '
-          f'{"\033[32m✓\033[0m" if formula_result == diagonal_sum else "\033[31m✗\033[0m"}')
+    status = '\033[32m✓' if formula_result == diagonal_sum else '\033[31m✗'
+    msg.append(f'{status} {size=}; {formula_result=}; {diagonal_sum=}\033[0m')
+    print('\n'.join(msg))
     return diagonal_sum
 
 
 def solution(*, size: int) -> int:
     """Calculate the sum of diagonal elements in a number spiral using a closed-form formula.
 
-    This is the optimized solution that directly calculates the sum using a mathematical formula
-    derived from analyzing the pattern of diagonal numbers, without needing to generate the entire spiral.
-
-    The closed-form formula is: (size * (size * (4 * size + 3) + 8) - 9) // 6
-
-    This formula was derived by analyzing the pattern of numbers that appear on the diagonals and
-    finding a mathematical relationship between the spiral size and the diagonal sum. The formula
-    provides an O(1) time complexity solution compared to the O(n²) approach of generating the spiral.
-
-    For small spirals (size <= 10), the function uses the number_spiral_with_diagonal_sum
-    implementation which actually generates the spiral for visualization and verification purposes.
-    For larger spirals where visualization is impractical, the efficient closed-form formula is used.
+    This solution efficiently calculates the sum of diagonal elements in a square number spiral
+    without generating the entire spiral. For small spirals (size ≤ 10), it uses the visual
+    approach for demonstration purposes. For larger spirals, it applies the derived mathematical
+    formula for optimal performance.
 
     Args:
         size: The width/height of the square spiral (must be odd)
@@ -121,6 +130,12 @@ def solution(*, size: int) -> int:
 
     Raises:
         ValueError: If size is not a positive odd integer
+
+    Example:
+        >>> solution(size=5)
+        101
+        >>> solution(size=1001)
+        669171001
     """
     if not isinstance(size, int) or size <= 0 or size % 2 == 0:
         raise ValueError("Size must be a positive odd integer")
@@ -128,86 +143,23 @@ def solution(*, size: int) -> int:
     return (size * (size * (4 * size + 3) + 8) - 9) // 6 if size > 10 else number_spiral_with_diagonal_sum(size)
 
 
-# Explicitly annotate that this function implements SolutionProtocol
-solution: SolutionProtocol
-
-solution.__doc__ = textwrap.dedent(r'''
-Solution to Project Euler Problem 28: Number Spiral Diagonals
-https://projecteuler.net/problem=28
-
-Problem Description:
-Starting with the number 1 and moving to the right in a clockwise direction a 5 by 5 spiral is formed as follows:
-
-21 22 23 24 25
-20  7  8  9 10
-19  6  1  2 11
-18  5  4  3 12
-17 16 15 14 13
-
-It can be verified that the sum of the numbers on the diagonals is 101.
-What is the sum of the numbers on the diagonals in a 1001 by 1001 spiral formed in the same way?
-
-Mathematical Analysis:
-By examining the spiral pattern, we can identify several key insights:
-
-1. The corners of each "ring" of the spiral follow a pattern:
-   - For a 3x3 spiral, the corners are 3, 5, 7, 9 (sum = 24 + center 1 = 25)
-   - For a 5x5 spiral, the corners are 13, 17, 21, 25 (sum = 76 + previous sum 25 = 101)
-   - For a 7x7 spiral, the corners are 31, 37, 43, 49 (sum = 160 + previous sum 101 = 261)
-
-2. For each ring n (where n is odd):
-   - The top-right corner value is n²
-   - The other corners can be calculated as: n² - (n-1), n² - 2(n-1), n² - 3(n-1)
-
-3. By summing these patterns, we derive the closed-form formula:
-   - Diagonal sum = (size * (size * (4 * size + 3) + 8) - 9) // 6
-
-Solution Approach:
-This implementation provides two methods for solving the problem:
-
-1. Closed-form Formula (Primary Solution):
-   - Uses the mathematical formula derived from analyzing the diagonal patterns
-   - Provides O(1) time complexity, making it efficient for large spirals
-   - Formula: (size * (size * (4 * size + 3) + 8) - 9) // 6
-
-2. Spiral Generation (Visualization & Verification):
-   - For small spirals (size <= 10), generates the complete spiral matrix
-   - Builds the spiral using a coordinate system with (0,0) at the center
-   - Calculates adjacent positions based on minimizing distance from center
-   - Visually displays the spiral with diagonal elements highlighted
-   - Serves as verification for the mathematical formula
-
-Diagonals Explanation:
-The diagonal elements consist of:
-1. The main diagonal (top-left to bottom-right): values where x = y
-2. The anti-diagonal (top-right to bottom-left): values where x = -y
-3. The center element (1) is counted only once despite being on both diagonals
-
-For a 5x5 spiral, the diagonal elements are: 1, 3, 5, 7, 9, 13, 17, 21, 25
-Their sum is 101, which matches our formula's result.
-
-Performance Considerations:
-The closed-form formula provides constant-time performance regardless of spiral size,
-making it suitable for calculating the sum for the 1001x1001 spiral required by the problem.
-The spiral generation approach is used only for small sizes to aid in understanding and verification.
-''').strip()
-
 if __name__ == '__main__':
-    # When run directly, evaluate the solution with test cases
-    # Import required modules for evaluating the solution
-    from euler.evaluator import evaluate_solution
-    from euler.cli import parser
-    from euler.logger import logger
+    # This block is executed when the Python module is run directly.
+    # It evaluates the solution function to ensure its correctness against test cases.
 
-    # Parse command-line arguments
-    args = parser.parse_args()
+    # Importing required modules: `module_main` manages how the solution is invoked and tested,
+    # while `cast` helps with type safety in passing the solution as a `SolutionProtocol`.
+    from typing import cast, List
+    from euler.evaluator import module_main
 
-    # Set the logging level based on command-line arguments
-    logger.setLevel(args.log_level)
+    # The `module_main` function handles the evaluation process by:
+    # 1. Extracting the problem number from the file name for contextual usage.
+    # 2. Accepting command-line arguments to configure execution, e.g., timeout or threading options.
+    # 3. Running the `solution` function for all test cases defined in `problem_args_list`.
+    # 4. Outputting the test results, including details such as whether the test passed/failed and time taken.
+    # 5. Returning an appropriate exit code (exit code 0 indicates success, non-zero for failures).
 
-    # Extract timeout and maximum worker threads from arguments
-    timeout, max_workers = args.timeout, args.max_workers
-
-    # Run the solution with the specified test cases and parameters
-    # This validates that our implementation gives the correct answers
-    evaluate_solution(solution=solution, args_list=problem_args_list, timeout=timeout, max_workers=max_workers)
+    # The `SystemExit` ensures the program exits with the exit code returned by `module_main`.
+    raise SystemExit(module_main(module_name=__file__,
+                                 solution=cast(SolutionProtocol, solution),
+                                 args_list=problem_args_list))
