@@ -7,7 +7,8 @@ This module contains comprehensive unit tests for all the geometric classes defi
 euler.utils.two_d_shapes module, including:
 
 - Point2D: Tests for 2D point operations, including vector operations
-- Polygon2D: Tests for polygon operations, including area calculation and point containment
+- LineSegment2D: Tests for line segment operations, including point-on-segment checks
+- Polygon2D: Tests for polygon operations, including point containment
 - from_points_str: Tests for creating polygons from string input
 
 The tests verify both basic functionality and edge cases for each class.
@@ -15,7 +16,7 @@ The tests verify both basic functionality and edge cases for each class.
 
 import unittest
 
-from euler.utils.two_d_shapes import Point2D, Polygon2D, ShapeError, from_points_str
+from euler.utils.two_d_shapes import LineSegment2D, Point2D, Polygon2D, ShapeError, from_points_str
 
 
 class TestPoint2D(unittest.TestCase):
@@ -35,6 +36,64 @@ class TestPoint2D(unittest.TestCase):
 
         self.assertEqual(point1, point2)
         self.assertNotEqual(point1, point3)
+
+    def test_vector_operations(self):
+        """Test vector operations on points."""
+        p1 = Point2D(x=1.0, y=2.0)
+        p2 = Point2D(x=3.0, y=4.0)
+
+        # Test addition
+        result = p1 + p2
+        self.assertEqual(result.x, 4.0)
+        self.assertEqual(result.y, 6.0)
+
+        # Test subtraction
+        result = p2 - p1
+        self.assertEqual(result.x, 2.0)
+        self.assertEqual(result.y, 2.0)
+
+        # Test cross product
+        # Cross product of (1,2) and (3,4) is 1*4 - 2*3 = 4 - 6 = -2
+        result = p1 * p2
+        self.assertEqual(result, -2.0)
+
+
+class TestLineSegment2D(unittest.TestCase):
+    """Test cases for the LineSegment2D class."""
+
+    def test_initialization(self):
+        """Test line segment initialization."""
+        p1 = Point2D(x=0.0, y=0.0)
+        p2 = Point2D(x=1.0, y=1.0)
+        segment = LineSegment2D(a=p1, b=p2)
+
+        self.assertEqual(segment.a, p1)
+        self.assertEqual(segment.b, p2)
+
+    def test_point_on_segment(self):
+        """Test point_on_segment method."""
+        segment = LineSegment2D(a=Point2D(x=0.0, y=0.0), b=Point2D(x=2.0, y=2.0))
+
+        # Points on the segment
+        self.assertTrue(segment.point_on_segment(Point2D(x=0.0, y=0.0)))  # Endpoint a
+        self.assertTrue(segment.point_on_segment(Point2D(x=2.0, y=2.0)))  # Endpoint b
+        self.assertTrue(segment.point_on_segment(Point2D(x=1.0, y=1.0)))  # Middle point
+        self.assertTrue(segment.point_on_segment(Point2D(x=0.5, y=0.5)))  # Another point on segment
+
+        # Points not on the segment
+        self.assertFalse(segment.point_on_segment(Point2D(x=3.0, y=3.0)))  # Beyond segment
+        self.assertFalse(segment.point_on_segment(Point2D(x=-1.0, y=-1.0)))  # Before segment
+        self.assertFalse(segment.point_on_segment(Point2D(x=1.0, y=0.0)))  # Off the line
+
+        # Horizontal segment
+        horizontal = LineSegment2D(a=Point2D(x=0.0, y=0.0), b=Point2D(x=2.0, y=0.0))
+        self.assertTrue(horizontal.point_on_segment(Point2D(x=1.0, y=0.0)))
+        self.assertFalse(horizontal.point_on_segment(Point2D(x=1.0, y=0.1)))
+
+        # Vertical segment
+        vertical = LineSegment2D(a=Point2D(x=0.0, y=0.0), b=Point2D(x=0.0, y=2.0))
+        self.assertTrue(vertical.point_on_segment(Point2D(x=0.0, y=1.0)))
+        self.assertFalse(vertical.point_on_segment(Point2D(x=0.1, y=1.0)))
 
 
 class TestPolygon2D(unittest.TestCase):
@@ -108,6 +167,12 @@ class TestPolygon2D(unittest.TestCase):
             Point2D(x=0.0, y=2.0)
         )
         triangle = Polygon2D(vertices=triangle_vertices)
+
+        # Points on inclined edge
+        self.assertTrue(triangle.contains_point(Point2D(x=0.0, y=1.0)))  # Vertical edge
+        self.assertTrue(triangle.contains_point(Point2D(x=1.0, y=0.0)))  # Horizontal edge
+        # Point on inclined edge from (0,2) to (2,0)
+        self.assertTrue(triangle.contains_point(Point2D(x=1.0, y=1.0)))  # Inclined edge
 
         # Points inside
         self.assertTrue(triangle.contains_point(Point2D(x=0.5, y=0.5)))
@@ -188,9 +253,11 @@ class TestPolygon2D(unittest.TestCase):
         self.assertTrue(line_polygon.contains_point(Point2D(x=0.0, y=0.0)))  # Endpoint
         self.assertTrue(line_polygon.contains_point(Point2D(x=1.0, y=1.0)))  # Endpoint
         self.assertFalse(line_polygon.contains_point(Point2D(x=0.5, y=0.6)))  # Off the line
-        # The following would be true if we implemented point-on-line check
-        # But currently, contains_point for lines only checks vertices
-        self.assertFalse(line_polygon.contains_point(Point2D(x=0.5, y=0.5)))
+        self.assertFalse(line_polygon.contains_point(Point2D(x=2, y=2)))  # On the line, outside the segment
+        self.assertFalse(line_polygon.contains_point(Point2D(x=-2, y=-2)))  # On the line, outside the segment
+        # Check that points on the line segment are properly detected
+        self.assertTrue(line_polygon.contains_point(Point2D(x=0.5, y=0.5)))  # On the line
+        self.assertTrue(line_polygon.contains_point(Point2D(x=0.25, y=0.25)))  # On the line
 
 
 class TestFromPointsStr(unittest.TestCase):
@@ -223,6 +290,47 @@ class TestFromPointsStr(unittest.TestCase):
         # Too few values
         with self.assertRaises(ShapeError):
             from_points_str("0")
+
+
+class TestEdgeCases(unittest.TestCase):
+    """Test special edge cases in geometric calculations."""
+
+    def test_point_on_inclined_edge(self):
+        """Test specific case of points on inclined edges."""
+        # Create a polygon with an inclined edge
+        polygon = Polygon2D(vertices=(
+            Point2D(x=0.0, y=0.0),
+            Point2D(x=2.0, y=0.0),
+            Point2D(x=2.0, y=2.0),
+            Point2D(x=0.0, y=2.0)
+        ))
+
+        # Create a point on an inclined edge (if we added a diagonal)
+        diagonal_point = Point2D(x=1.0, y=1.0)
+
+        # This point is inside the square but not on any edge
+        self.assertTrue(polygon.contains_point(diagonal_point))
+        self.assertTrue(polygon.contains_point(Point2D(x=1.5, y=0.5)))
+
+        # Create a triangle with an inclined edge
+        triangle = Polygon2D(vertices=(
+            Point2D(x=0.0, y=0.0),
+            Point2D(x=2.0, y=0.0),
+            Point2D(x=1.0, y=2.0)
+        ))
+
+        # Point on the inclined edge from (2,0) to (1,2)
+        inclined_point = Point2D(x=1.5, y=1.0)
+        self.assertTrue(triangle.contains_point(inclined_point))
+
+        # Very precise edge case - point exactly on a nearly vertical line
+        nearly_vertical = Polygon2D(vertices=(
+            Point2D(x=0.0, y=0.0),
+            Point2D(x=0.001, y=2.0),
+            Point2D(x=2.0, y=0.0)
+        ))
+
+        self.assertTrue(nearly_vertical.contains_point(Point2D(x=0.0005, y=1.0)))
 
 
 if __name__ == '__main__':

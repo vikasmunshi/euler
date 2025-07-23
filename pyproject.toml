@@ -27,6 +27,7 @@ requests = "^2.32"
 # Note: tkinter comes bundled with Python on Windows
 
 [tool.poetry.group.dev.dependencies]
+coverage = "^7.9"
 flake8 = "^7.3"
 mypy = "^1.16"
 pre-commit = "^4.2"

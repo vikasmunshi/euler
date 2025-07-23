@@ -25,11 +25,12 @@ repos:
         verbose: true
         stages:
           - pre-commit
+          - pre-push
         files: \.py$  # Restrict mypy to Python files only
         exclude: tests
       - id: unittest
         name: unittest
-        entry: python -m unittest discover -s tests
+        entry: coverage run -m unittest discover -s tests
         language: python
         language_version: python3.12
         pass_filenames: false
