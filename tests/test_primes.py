@@ -10,16 +10,70 @@ functions defined in euler.utils.primes.
 import unittest
 
 from euler.logger import logger
-from euler.utils.primes import (PrimeError, euler_totient, gen_primes_sieve, gen_primes_sundaram_sieve, get_divisors,
-                                get_relative_primes, is_prime, prime_factor_count, prime_factorization, proper_factors)
+from euler.utils.primes import (PrimeError, _CACHE, ensure_prime_cache_is_loaded, euler_totient, gen_primes_sieve,
+                                gen_primes_sundaram_sieve, get_divisors, get_max_cached_primes, get_relative_primes,
+                                is_prime, prime_factor_count, prime_factorization, proper_factors, seed_cache)
 
 # Set logger level to ERROR to suppress informational messages during tests
 logger.setLevel('ERROR')
 
 
-class TestPrimeNumberUtilities(unittest.TestCase):
-    """Tests for the prime number utility functions."""
+class TestPrimeNumberCache(unittest.TestCase):
+    def setUp(self):
+        _CACHE['primes'] = tuple()
+        _CACHE['primes_set'] = set()
+        _CACHE['max_limit'] = 0
 
+    def tearDown(self):
+        _CACHE['primes'] = tuple()
+        _CACHE['primes_set'] = set()
+        _CACHE['max_limit'] = 0
+
+    def test_ensure_prime_cache_is_loaded_decorator(self):
+        """Test that the ensure_prime_cache_is_loaded decorator loads primes cache."""
+
+        # Define a test function with the decorator
+        @ensure_prime_cache_is_loaded
+        def test_function():
+            return get_max_cached_primes() > 0
+
+        # The cache should be loaded during function definition
+        self.assertTrue(get_max_cached_primes() > 0)
+
+        # The function should work as expected
+        self.assertTrue(test_function())
+
+    def test_seed_cache(self):
+        """Test seed_cache function."""
+        seed_cache(regenerate=False)
+        max_limit = get_max_cached_primes()
+        self.assertTrue(max_limit > 0)
+        seed_cache(regenerate=True)
+        max_limit_regenerated = get_max_cached_primes()
+        self.assertTrue(max_limit_regenerated > 0)
+        self.assertEqual(max_limit, max_limit_regenerated)
+
+
+class TestPrimeIsPrime(unittest.TestCase):
+    def setUp(self):
+        _CACHE['primes'] = tuple()
+        _CACHE['primes_set'] = set()
+        _CACHE['max_limit'] = 0
+
+    def tearDown(self):
+        _CACHE['primes'] = tuple()
+        _CACHE['primes_set'] = set()
+        _CACHE['max_limit'] = 0
+
+    def test_is_prime_with_primes_sieve(self):
+        """Test is_prime function with primes sieve."""
+        max_limit = 100
+        results = [n for n in range(max_limit) if is_prime(n)]
+        expected_primes = list(gen_primes_sundaram_sieve(max_limit=max_limit))
+        self.assertEqual(results, expected_primes)
+
+
+class TestPrimeNumberUtilities(unittest.TestCase):
     def test_is_prime_small_numbers(self):
         """Test is_prime function with small numbers."""
         # Test known primes
@@ -98,6 +152,9 @@ class TestPrimeNumberUtilities(unittest.TestCase):
 
     def test_prime_factorization(self):
         """Test prime_factorization function."""
+        for not_prime in (-1, 0, 1):
+            with self.assertRaises(PrimeError):
+                prime_factorization(not_prime)
         # Test with prime numbers (should return just the number itself with exponent 1)
         self.assertEqual(prime_factorization(2), ((2, 1),))
         self.assertEqual(prime_factorization(3), ((3, 1),))

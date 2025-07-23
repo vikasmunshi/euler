@@ -57,6 +57,7 @@ from functools import wraps
 from math import ceil, floor, sqrt
 from typing import Callable, Dict, Generator, Tuple
 
+from euler.logger import logger
 from euler.types import EulerError
 
 __all__ = [
@@ -413,17 +414,6 @@ class FigurateNumber(Enum):
     HEPTAGONAL = 7
     OCTAGONAL = 8
 
-    def __format__(self, format_spec: str) -> str:
-        """Format the enum member as a title-cased string.
-
-        Args:
-            format_spec: Format specification string
-
-        Returns:
-            The name of the figurate number type in title case
-        """
-        return self.name.title().format(format_spec)
-
     def __str__(self) -> str:
         """Return the enum member as a title-cased string."""
         return self.name.title()
@@ -511,26 +501,26 @@ def main() -> int:
     ):
         for n in range(1, 121):
             p_number = p_func(n)
-            if not (validated := v_func(p_number)):
-                print(f'calculated {p_func.__name__}({n})={p_number}, does not validate.')
+            if not (validated := v_func(p_number)):  # pragma: no cover
+                logger.error(f'calculated {p_func.__name__}({n})={p_number}, does not validate.')
                 failed += 1
-            print(f'{p_func.__name__}({n})={p_number}; {v_func.__name__}({p_number})={validated}')
+            logger.info(f'{p_func.__name__}({n})={p_number}; {v_func.__name__}({p_number})={validated}')
             if previous_p_number != 0:
                 for not_a_p_number in range(previous_p_number + 1, p_number):
-                    if v_func(not_a_p_number):
-                        print(f'{not_a_p_number=} also validates as {v_func.__name__}.')
+                    if v_func(not_a_p_number):  # pragma: no cover
+                        logger.error(f'{not_a_p_number=} also validates as {v_func.__name__}.')
                         failed += 1
                     i, previous_p, current_p = c_func(not_a_p_number)
-                    if i > n or previous_p != previous_p_number or current_p != p_number:
-                        print(f'{c_func.__name__}({not_a_p_number})=({i:.2f}, {previous_p}, {current_p})')
+                    if i > n or previous_p != previous_p_number or current_p != p_number:  # pragma: no cover
+                        logger.error(f'{c_func.__name__}({not_a_p_number})=({i:.2f}, {previous_p}, {current_p})')
                         failed += 1
             previous_p_number = p_number
         min_value: int = 1000
         max_value: int = 10000
         vals = list(p_gen(p_num, min_value=min_value, max_value=max_value))
-        print(f'{p_num} numbers: {vals}')
-        if vals[0] < min_value or vals[-1] > max_value:
-            print(f'p_nums out of range: {vals}')
+        logger.info(f'{p_num} numbers: {vals}')
+        if vals[0] < min_value or vals[-1] > max_value:  # pragma: no cover
+            logger.error(f'p_nums out of range: {vals}')
             failed += 1
     return failed
 
@@ -544,7 +534,10 @@ if __name__ == '__main__':
 
     This allows the module to be used both as a library and as a standalone validation tool.
     """
+    logger.setLevel('ERROR')
     print('Validating polynomial number calculations...')
     if (result := main()) != 0:
         print('Validation failed: Some polynomial number tests did not pass.')
+    else:
+        print('Validation passed: All polynomial number tests passed.')
     raise SystemExit(result)

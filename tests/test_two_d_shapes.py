@@ -15,8 +15,9 @@ The tests verify both basic functionality and edge cases for each class.
 """
 
 import unittest
+from math import isclose
 
-from euler.utils.two_d_shapes import LineSegment2D, Point2D, Polygon2D, ShapeError, from_points_str
+from euler.utils.two_d_shapes import LineSegment2D, Point2D, Polygon2D, ShapeError, epsilon, from_points_str
 
 
 class TestPoint2D(unittest.TestCase):
@@ -37,6 +38,29 @@ class TestPoint2D(unittest.TestCase):
         self.assertEqual(point1, point2)
         self.assertNotEqual(point1, point3)
 
+        # Test epsilon-based equality
+        almost_equal_point = Point2D(x=1.0 + epsilon, y=2.0 - epsilon)
+        self.assertEqual(point1, almost_equal_point, "Points within epsilon should be equal")
+
+        barely_different_point = Point2D(x=1.0 + epsilon * 10, y=2.0)
+        self.assertNotEqual(point1, barely_different_point, "Points outside epsilon should not be equal")
+
+    def test_comparison_with_other_types(self):
+        """Test equality comparison between Point2D and other types."""
+        point = Point2D(x=1.0, y=2.0)
+
+        # Compare with tuple
+        self.assertNotEqual(point, (1.0, 2.0))
+
+        # Compare with list
+        self.assertNotEqual(point, [1.0, 2.0])
+
+        # Compare with dict
+        self.assertNotEqual(point, {"x": 1.0, "y": 2.0})
+
+        # Compare with None
+        self.assertNotEqual(point, None)
+
     def test_vector_operations(self):
         """Test vector operations on points."""
         p1 = Point2D(x=1.0, y=2.0)
@@ -56,6 +80,22 @@ class TestPoint2D(unittest.TestCase):
         # Cross product of (1,2) and (3,4) is 1*4 - 2*3 = 4 - 6 = -2
         result = p1 * p2
         self.assertEqual(result, -2.0)
+
+        # Test perpendicular vectors (cross product should be equal to areas)
+        horizontal = Point2D(x=3.0, y=0.0)
+        vertical = Point2D(x=0.0, y=4.0)
+        self.assertEqual(horizontal * vertical, 12.0, "Cross product should be area of rectangle")
+
+        # Test zero vector
+        zero = Point2D(x=0.0, y=0.0)
+        self.assertEqual(p1 * zero, 0.0, "Cross product with zero vector should be zero")
+        self.assertEqual(zero + p1, p1, "Adding zero vector should return the original point")
+
+        # Test parallel vectors (cross product should be zero)
+        parallel1 = Point2D(x=2.0, y=4.0)  # 2 * (1,2)
+        parallel2 = Point2D(x=3.0, y=6.0)  # 3 * (1,2)
+        self.assertTrue(isclose(parallel1 * parallel2, 0.0, abs_tol=epsilon),
+                        "Cross product of parallel vectors should be zero")
 
 
 class TestLineSegment2D(unittest.TestCase):
@@ -234,6 +274,48 @@ class TestPolygon2D(unittest.TestCase):
         self.assertFalse(concave.contains_point(Point2D(x=5.0, y=2.0)))
         self.assertFalse(concave.contains_point(Point2D(x=-1.0, y=-1.0)))
 
+    def test_self_intersecting_polygon(self):
+        """Test point containment for self-intersecting polygon (figure-8 shape)."""
+        # A self-intersecting polygon (figure-8 shape)
+        figure8_vertices = (
+            Point2D(x=0.0, y=0.0),
+            Point2D(x=2.0, y=2.0),
+            Point2D(x=0.0, y=4.0),
+            Point2D(x=2.0, y=0.0),
+            Point2D(x=4.0, y=4.0),
+            Point2D(x=4.0, y=0.0)
+        )
+        figure8 = Polygon2D(vertices=figure8_vertices)
+
+        # Test points in different regions of the figure-8
+        self.assertTrue(figure8.contains_point(Point2D(x=1.0, y=1.0)))
+        self.assertTrue(figure8.contains_point(Point2D(x=3.0, y=1.0)))
+
+        # Points near the crossing
+        self.assertTrue(figure8.contains_point(Point2D(x=2.0, y=2.0)))
+
+        # Points outside
+        self.assertFalse(figure8.contains_point(Point2D(x=5.0, y=2.0)))
+
+    def test_ray_casting_edge_cases(self):
+        """Test ray casting algorithm edge cases in point containment."""
+        # Create a polygon with horizontal and vertical edges
+        rectangle = Polygon2D(vertices=(
+            Point2D(x=1.0, y=1.0),
+            Point2D(x=4.0, y=1.0),  # Horizontal edge
+            Point2D(x=4.0, y=3.0),  # Vertical edge
+            Point2D(x=1.0, y=3.0)  # Vertical edge
+        ))
+
+        # Test points exactly on horizontal ray path
+        self.assertTrue(rectangle.contains_point(Point2D(x=2.0, y=1.0)), "Point on bottom edge")
+        self.assertTrue(rectangle.contains_point(Point2D(x=2.5, y=3.0)), "Point on top edge")
+
+        # Test points that cast ray exactly through a vertex
+        self.assertTrue(rectangle.contains_point(Point2D(x=2.0, y=2.0)), "Point inside with ray through vertex")
+        point_with_ray_through_vertex = Point2D(x=2.0, y=2.0)
+        self.assertTrue(rectangle.contains_point(point_with_ray_through_vertex))
+
     def test_point_containment_degenerate_cases(self):
         """Test point containment for degenerate cases (point, line)."""
         # Point
@@ -277,6 +359,31 @@ class TestFromPointsStr(unittest.TestCase):
 
         self.assertEqual('triangle', triangle.shape)
 
+        # Line
+        line_str = "0,0,1,1"
+        line = from_points_str(line_str)
+        self.assertEqual('line', line.shape)
+
+        # Point
+        point_str = "10.5,20.5"
+        point = from_points_str(point_str)
+        self.assertEqual('point', point.shape)
+        self.assertEqual(Point2D(x=10.5, y=20.5), point.vertices[0])
+
+        # With extra spaces (should be handled)
+        spaced_str = "0, 0, 1, 0, 1, 1, 0, 1"
+        try:
+            spaced_polygon = from_points_str(spaced_str)
+            self.assertEqual('quadrilateral', spaced_polygon.shape)
+        except ShapeError:
+            self.fail("from_points_str should handle commas with spaces")
+
+        # With large coordinate values
+        large_coords = "0,0,100000,0,100000,100000"
+        large_triangle = from_points_str(large_coords)
+        self.assertEqual('triangle', large_triangle.shape)
+        self.assertEqual(Point2D(x=100000, y=100000), large_triangle.vertices[2])
+
     def test_invalid_input(self):
         """Test from_points_str with invalid input."""
         # Non-numeric values
@@ -290,6 +397,17 @@ class TestFromPointsStr(unittest.TestCase):
         # Too few values
         with self.assertRaises(ShapeError):
             from_points_str("0")
+
+        # Empty string
+        with self.assertRaises(ShapeError):
+            from_points_str("")
+
+        # Check error message for odd number of coordinates
+        try:
+            from_points_str("0,0,1")
+            self.fail("Should have raised ShapeError")
+        except ShapeError as e:
+            self.assertIn("even number", str(e), "Error message should mention 'even number'")
 
 
 class TestEdgeCases(unittest.TestCase):

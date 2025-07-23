@@ -4,7 +4,7 @@
 
 import unittest
 
-from euler.utils.misc import word_to_num, sum_digits
+from euler.utils.misc import sum_digits, word_to_num
 
 
 class TestMisc(unittest.TestCase):

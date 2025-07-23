@@ -124,7 +124,7 @@ def ensure_prime_cache_is_loaded[T](func: Callable[..., T]) -> Callable[..., T]:
         ...     # Prime cache is guaranteed to be loaded here
         ...     return n in _CACHE['primes_set']
     """
-    if not _CACHE['primes']:
+    if get_max_cached_primes() == 0:
         seed_cache()
     return func
 
@@ -261,9 +261,7 @@ def is_prime(n: int) -> bool:
         return n in cast(Set[int], _CACHE['primes_set'])
     else:
         max_divisor = int(n ** 0.5) + 1
-        if max_divisor > cast(int, _CACHE['max_limit']):
-            logger.info(f'got a number {n=:,} that is too large for the cache, regenerating primes')
-        for p in gen_primes_sundaram_sieve(max_limit=int(n ** 0.5) + 1):
+        for p in gen_primes_sundaram_sieve(max_limit=max_divisor):
             if n % p == 0:
                 return False
         else:

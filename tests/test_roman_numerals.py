@@ -8,7 +8,8 @@ defined in euler.utils.roman_numerals.
 """
 
 import unittest
-from euler.utils.roman_numerals import roman_to_number, number_as_roman_numeral
+
+from euler.utils.roman_numerals import number_as_roman_numeral, roman_to_number
 
 
 class TestRomanNumerals(unittest.TestCase):

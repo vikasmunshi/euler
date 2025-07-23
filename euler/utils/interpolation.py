@@ -23,7 +23,10 @@ Typical Usage:
     >>> newton_interpolation(x_values=[0, 1, 2], y_values=[1, 3, 7], x=0.5)
     1.75  # Interpolated value at x=0.5 using Newton's method
 """
+from math import isclose
 from typing import List, Sequence, Tuple
+
+from euler.types import EulerError
 
 # Define a variable for numeric types that can be used in interpolation
 Numeric = int | float
@@ -31,6 +34,11 @@ Numeric = int | float
 # Type definition for polynomial representation as a tuple of coefficients
 # where the index represents the power (e.g., [a₀, a₁, a₂] for a₀ + a₁x + a₂x²)
 Polynomial = Tuple[Numeric, ...]
+
+
+class InterpolationError(EulerError):
+    """Exception raised for errors in interpolation methods."""
+    pass
 
 
 def eval_polynomial(polynomial: Polynomial, x: Numeric) -> float:
@@ -80,12 +88,12 @@ def lagrange_interpolation(*, x_values: Sequence[Numeric], y_values: Sequence[Nu
         6.25  # Interpolated value at x=2.5 for the points (1,1), (2,4), (3,9)
     """
     # Validate input parameters
-    if len(x_values) != len(y_values):
-        raise ValueError('x_values and y_values must have the same length')
+    if (num_x_vals := len(x_values)) != len(y_values):
+        raise InterpolationError('x_values and y_values must have the same length')
 
     # Check for duplicate x values which would cause division by zero
-    if len(set(x_values)) != len(x_values):
-        raise ValueError('x_values must contain unique values to avoid division by zero')
+    if len(set(x_values)) != num_x_vals:
+        raise InterpolationError('x_values must contain unique values to avoid division by zero')
 
     # If x exactly matches one of the input points, return the corresponding y value
     for i, xi in enumerate(x_values):
@@ -102,7 +110,7 @@ def lagrange_interpolation(*, x_values: Sequence[Numeric], y_values: Sequence[Nu
                 # Use factored form to avoid potential overflow
                 basis *= (x - xj) / (x_values[i] - xj)
                 # Break early if basis becomes zero (optimization)
-                if basis == 0.0:
+                if isclose(basis, 0.0, abs_tol=1e-10):
                     break
         result += yi * basis
     return result
@@ -129,25 +137,24 @@ def newton_interpolation(*, x_values: Sequence[Numeric], y_values: Sequence[Nume
         6.25  # Interpolated value at x=2.5 for the points (1,1), (2,4), (3,9)
     """
     # Validate input parameters
-    if len(x_values) != len(y_values):
-        raise ValueError("x_values and y_values must have the same length")
+    if (num_x_vals := len(x_values)) != len(y_values):
+        raise InterpolationError('x_values and y_values must have the same length')
 
     # Check for duplicate x values which would cause division by zero
-    if len(set(x_values)) != len(x_values):
-        raise ValueError("x_values must contain unique values to avoid division by zero")
+    if len(set(x_values)) != num_x_vals:
+        raise InterpolationError('x_values must contain unique values to avoid division by zero')
 
-    n = len(x_values)
     # Create a copy of y_values to store divided differences
     coeffs: List[float] = list(map(float, y_values))
 
     # Calculate the divided differences (coefficients for Newton's polynomial)
-    for j in range(1, n):
-        for i in range(n - 1, j - 1, -1):
+    for j in range(1, num_x_vals):
+        for i in range(num_x_vals - 1, j - 1, -1):
             coeffs[i] = (coeffs[i] - coeffs[i - 1]) / (x_values[i] - x_values[i - j])
 
     # Evaluate the polynomial using Horner's rule
-    result = coeffs[n - 1]
-    for i in range(n - 2, -1, -1):
+    result = coeffs[num_x_vals - 1]
+    for i in range(num_x_vals - 2, -1, -1):
         result = result * (x - x_values[i]) + coeffs[i]
 
     return result
@@ -180,44 +187,43 @@ def construct_polynomial(*, x_values: Sequence[Numeric], y_values: Sequence[Nume
         The returned polynomial can be evaluated with eval_polynomial.
     """
     # Validate input parameters
-    if len(x_values) != len(y_values):
-        raise ValueError("x_values and y_values must have the same length")
+    if (num_x_vals := len(x_values)) != len(y_values):
+        raise InterpolationError('x_values and y_values must have the same length')
 
     # Check for duplicate x values which would cause division by zero
-    if len(set(x_values)) != len(x_values):
-        raise ValueError("x_values must contain unique values to avoid division by zero")
+    if len(set(x_values)) != num_x_vals:
+        raise InterpolationError('x_values must contain unique values to avoid division by zero')
 
-    n = len(x_values)
     # Calculate divided differences (Newton's coefficients)
     newton_coeffs = list(map(float, y_values))
-    for j in range(1, n):
-        for i in range(n - 1, j - 1, -1):
+    for j in range(1, num_x_vals):
+        for i in range(num_x_vals - 1, j - 1, -1):
             newton_coeffs[i] = (newton_coeffs[i] - newton_coeffs[i - 1]) / (x_values[i] - x_values[i - j])
 
     # Convert from Newton's form to standard form
     # Initialize polynomial with all zeros
-    poly = [0.0] * n
+    poly = [0.0] * num_x_vals
 
     # Iteratively convert Newton form to standard form
-    for i in range(n):
+    for i in range(num_x_vals):
         # Add contribution of the current Newton coefficient
         # First, calculate the expanded term
-        term = [0.0] * n
+        term = [0.0] * num_x_vals
         term[0] = 1.0  # Start with 1 (constant term)
 
         # Build the product (x-x₀)(x-x₁)...(x-xₖ₋₁) for k from 0 to i-1
         for k in range(i):
             # Multiply by (x-xₖ) using distributive property
-            new_term = [0.0] * n
-            for j in range(min(i, n - 1), -1, -1):
-                if j < n - 1:  # Multiply by x (shift right)
+            new_term = [0.0] * num_x_vals
+            for j in range(min(i, num_x_vals - 1), -1, -1):
+                if j < num_x_vals - 1:  # Multiply by x (shift right)
                     new_term[j + 1] += term[j]
                 # Multiply by -xₖ
                 new_term[j] -= x_values[k] * term[j]
             term = new_term
 
         # Add this term multiplied by the coefficient
-        for j in range(n):
+        for j in range(num_x_vals):
             poly[j] += newton_coeffs[i] * term[j]
 
     return tuple(poly)

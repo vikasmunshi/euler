@@ -7,9 +7,10 @@ This module contains unit tests for the high-precision square root calculation m
 defined in euler.utils.sqrt.
 """
 
-import unittest
 import math
-from euler.utils.sqrt import sqrt_heron_method, sqrt_binary_search, SquareRootError
+import unittest
+
+from euler.utils.sqrt import SquareRootError, sqrt_binary_search, sqrt_heron_method
 
 
 class TestSqrtMethods(unittest.TestCase):

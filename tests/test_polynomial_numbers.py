@@ -8,7 +8,7 @@ from euler.utils.polynomial_numbers import (FigurateNumber, NumberError, closest
                                             closest_hexagonal_number, closest_octagonal_number,
                                             closest_pentagonal_number, closest_square_number, closest_triangle_number,
                                             is_heptagonal_number, is_hexagonal_number, is_octagonal_number,
-                                            is_pentagonal_number, is_square_number, is_triangle_number,
+                                            is_pentagonal_number, is_square_number, is_triangle_number, main,
                                             nth_heptagonal_number, nth_hexagonal_number, nth_octagonal_number,
                                             nth_pentagonal_number, nth_square_number, nth_triangle_number)
 
@@ -77,6 +77,37 @@ class TestPolynomialNumbers(unittest.TestCase):
         self.assertFalse(is_square_number(3))
         self.assertFalse(is_square_number(5))
         self.assertFalse(is_square_number(10))
+
+        # Test closest_square_number
+        # Test with a perfect square
+        index, lower, upper = closest_square_number(16)
+        self.assertEqual(index, 4.0)
+        self.assertEqual(lower, 16)
+        self.assertEqual(upper, 16)
+
+        # Test with a value between squares
+        index, lower, upper = closest_square_number(8)
+        self.assertAlmostEqual(index, 2.82843, places=5)  # sqrt(8)
+        self.assertEqual(lower, 4)  # 2²
+        self.assertEqual(upper, 9)  # 3²
+
+        # Test with a value just above a square
+        index, lower, upper = closest_square_number(10)
+        self.assertAlmostEqual(index, 3.16228, places=5)  # sqrt(10)
+        self.assertEqual(lower, 9)  # 3²
+        self.assertEqual(upper, 16)  # 4²
+
+        # Test with a value just below a square
+        index, lower, upper = closest_square_number(15)
+        self.assertAlmostEqual(index, 3.87298, places=5)  # sqrt(15)
+        self.assertEqual(lower, 9)  # 3²
+        self.assertEqual(upper, 16)  # 4²
+
+        # Test with a large number
+        index, lower, upper = closest_square_number(10000)
+        self.assertEqual(index, 100.0)
+        self.assertEqual(lower, 10000)  # 100²
+        self.assertEqual(upper, 10000)  # 100²
 
         # Test closest_square_number
         index, lower, upper = closest_square_number(8)
@@ -377,6 +408,50 @@ class TestPolynomialNumbers(unittest.TestCase):
         self.assertEqual(nth_hexagonal_number(1), 1)
         self.assertEqual(nth_heptagonal_number(1), 1)
         self.assertEqual(nth_octagonal_number(1), 1)
+
+    def test_p_gen(self):
+        """Test p_gen generator function."""
+        # Test generating triangle numbers in a range
+        from euler.utils.polynomial_numbers import p_gen, FigurateNumber
+
+        triangle_nums = list(p_gen(FigurateNumber.TRIANGLE, 10, 30))
+        self.assertEqual(triangle_nums, [10, 15, 21, 28])  # Triangle numbers between 10 and 30
+
+        # Test generating square numbers in a range
+        square_nums = list(p_gen(FigurateNumber.SQUARE, 20, 100))
+        self.assertEqual(square_nums, [25, 36, 49, 64, 81, 100])  # Square numbers between 20 and 100
+
+        # Test generating pentagonal numbers in a range
+        pent_nums = list(p_gen(FigurateNumber.PENTAGONAL, 50, 100))
+        self.assertEqual(pent_nums, [51, 70, 92])  # Pentagonal numbers between 50 and 100
+
+        # Test empty range (min > max)
+        self.assertEqual(list(p_gen(FigurateNumber.TRIANGLE, 100, 10)), [])
+
+        # Test min equals max for exact value
+        hex_nums = list(p_gen(FigurateNumber.HEXAGONAL, 67, 67))
+        self.assertEqual(hex_nums, [])  # No exact hexagonal number 67
+
+        # Test with a value that is a hexagonal number
+        hex_nums = list(p_gen(FigurateNumber.HEXAGONAL, 28, 28))
+        self.assertEqual(hex_nums, [28])  # Exactly one hexagonal number 28
+
+        # Test large range with few numbers
+        oct_nums = list(p_gen(FigurateNumber.OCTAGONAL, 1000, 2000))
+        self.assertEqual(oct_nums, [1045, 1160, 1281, 1408, 1541, 1680, 1825, 1976])  # Octagonal numbers 1000 to 2000
+
+        # Test minimum value boundary
+        hept_nums = list(p_gen(FigurateNumber.HEPTAGONAL, 1, 50))
+        self.assertEqual(hept_nums, [1, 7, 18, 34])  # Heptagonal numbers from 1 to 50
+
+        # Test empty result
+        self.assertEqual(list(p_gen(FigurateNumber.TRIANGLE, 4, 5)), [])  # No triangle numbers between 4 and 5
+
+    def test_main_function(self):
+        """Test the main function returns 0 when all validations pass."""
+        # The main function should return 0 when all tests pass
+        result = main()
+        self.assertEqual(result, 0, "The main function should return 0 when all validations pass")
 
 
 if __name__ == '__main__':

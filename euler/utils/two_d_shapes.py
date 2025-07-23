@@ -222,18 +222,22 @@ class Polygon2D:
         if any(vertex == point for vertex in self.vertices):
             return True
 
+        # Pre-compute all edges for efficiency
+        edges = [LineSegment2D(a=self.vertices[i], b=self.vertices[(i + 1) % num_sides])
+                 for i in range(num_sides)]
+
+        # Check if the point lies on any of the edges
+        # This will also catch intersection points, as they lie on multiple edges
+        if any(edge.point_on_segment(point) for edge in edges):
+            return True
+
         # Ray casting algorithm (even-odd rule)
-        # Cast a ray from point to the right (positive x direction) and count intersections with polygon edges
-        # If the number of intersections is odd, the point is inside; if even, it's outside
+        # Cast a ray from point to the right (positive x direction) and count intersections
         inside: bool = False
         x, y = point.x, point.y
 
         # Loop through all edges of the polygon
-        for edge in (LineSegment2D(a=self.vertices[i], b=self.vertices[(i + 1) % num_sides]) for i in range(num_sides)):
-            # If point is on this edge, it's inside
-            if edge.point_on_segment(point):
-                return True
-
+        for edge in edges:
             # Get edge endpoints coordinates
             vax, vay, vbx, vby = edge.a.x, edge.a.y, edge.b.x, edge.b.y
 
