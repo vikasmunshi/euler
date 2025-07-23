@@ -4,11 +4,16 @@
 
 import unittest
 
-from euler.utils.integer_partitions import get_partitions
+from euler.utils.integer_partitions import IntegerPartitionError, get_partitions, get_prime_partitions, main, \
+    num_integer_partitions, num_partitions, num_prime_integer_partitions
 
 
 class TestIntegerPartitions(unittest.TestCase):
     """Test case for integer_partitions.py utility functions."""
+
+    def test_main_function(self):
+        """Test that the main function returns 0."""
+        self.assertEqual(main(), 0)
 
     def test_basic_partitions(self):
         """Test basic partition cases."""
@@ -94,20 +99,47 @@ class TestIntegerPartitions(unittest.TestCase):
     def test_validation(self):
         """Test input validation."""
         # Test negative number
-        with self.assertRaises(ValueError):
+        with self.assertRaises(IntegerPartitionError):
             get_partitions(number=-1, slots=5)
 
         # Test negative slots
-        with self.assertRaises(ValueError):
+        with self.assertRaises(IntegerPartitionError):
             get_partitions(number=5, slots=-2)
 
         # Test number < slots
-        with self.assertRaises(ValueError):
+        with self.assertRaises(IntegerPartitionError):
             get_partitions(number=3, slots=5)
 
         # Test safe limit
         with self.assertRaises(OverflowError):
             get_partitions(number=100, slots=10, safe_limit=50)
+
+        # Test validation in num_integer_partitions
+        with self.assertRaises(IntegerPartitionError):
+            num_integer_partitions(number=-1, slots=5)
+
+        with self.assertRaises(IntegerPartitionError):
+            num_integer_partitions(number=5, slots=-1)
+
+        with self.assertRaises(IntegerPartitionError):
+            num_integer_partitions(number=3, slots=5)
+
+        # Test validation in num_prime_integer_partitions
+        with self.assertRaises(IntegerPartitionError):
+            num_prime_integer_partitions(number=-1, slots=5)
+
+        with self.assertRaises(IntegerPartitionError):
+            num_prime_integer_partitions(number=5, slots=-1)
+
+        # Test validation in get_prime_partitions
+        with self.assertRaises(OverflowError):
+            get_prime_partitions(number=100, slots=10, safe_limit=50)
+
+        with self.assertRaises(IntegerPartitionError):
+            get_prime_partitions(number=-1, slots=5)
+
+        with self.assertRaises(IntegerPartitionError):
+            get_prime_partitions(number=5, slots=-1)
 
     def test_special_cases(self):
         """Test special edge cases."""
@@ -116,6 +148,26 @@ class TestIntegerPartitions(unittest.TestCase):
 
         # Test with exactly matching constraints
         self.assertEqual(get_partitions(number=5, slots=5), get_partitions(number=5, slots=5, safe_limit=10))
+
+        # Test num_partitions with 0
+        self.assertEqual(num_partitions(0), 1)
+
+        # Test num_partitions with negative number
+        self.assertEqual(num_partitions(-5), 0)
+
+        # Test num_integer_partitions with 0 and 1
+        self.assertEqual(num_integer_partitions(number=0, slots=0), 0)
+        self.assertEqual(num_integer_partitions(number=1, slots=1), 1)
+
+        # Test num_prime_integer_partitions with 0
+        self.assertEqual(num_prime_integer_partitions(number=0, slots=5), 1)
+
+        # Test num_prime_integer_partitions with small slots
+        self.assertEqual(num_prime_integer_partitions(number=5, slots=1), 0)
+
+        # Test get_prime_partitions with small values
+        self.assertEqual(get_prime_partitions(number=1, slots=10), [])
+        self.assertEqual(get_prime_partitions(number=5, slots=1), [])
 
         # Test number=slots (should only have one partition)
         partitions_equal = get_partitions(number=5, slots=5)

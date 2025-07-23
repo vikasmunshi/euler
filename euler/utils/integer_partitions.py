@@ -44,7 +44,12 @@ from itertools import count
 from typing import List
 
 from euler.logger import logger
+from euler.types import EulerError
 from euler.utils.primes import gen_primes_sieve, is_prime
+
+
+class IntegerPartitionError(EulerError):
+    pass
 
 
 @lru_cache(maxsize=None)
@@ -97,7 +102,7 @@ def num_integer_partitions(*, number: int, slots: int) -> int:
         The count of valid partitions
 
     Raises:
-        ValueError: If number or slots is negative, or if number < slots
+        IntegerPartitionError: If number or slots is negative, or if number < slots
 
     Examples:
         >>> num_integer_partitions(number=5, slots=5)
@@ -106,9 +111,9 @@ def num_integer_partitions(*, number: int, slots: int) -> int:
         5  # Only partitions with values ≤ 3: [3,2], [3,1,1], [2,2,1], [2,1,1,1], [1,1,1,1,1]
     """
     if number < 0 or slots < 0:
-        raise ValueError('number and slots must be non-negative')
+        raise IntegerPartitionError('number and slots must be non-negative')
     if number < slots:
-        raise ValueError('number must be greater than or equal to slots')
+        raise IntegerPartitionError('number must be greater than or equal to slots')
     if number <= 1:
         return number
     return sum(num_integer_partitions(number=number - n, slots=min(number - n, n))
@@ -132,7 +137,7 @@ def num_prime_integer_partitions(*, number: int, slots: int) -> int:
         The count of valid prime partitions
 
     Raises:
-        ValueError: If number or slots is negative
+        IntegerPartitionError: If number or slots is negative
 
     Examples:
         >>> num_prime_integer_partitions(number=10, slots=10)
@@ -141,7 +146,7 @@ def num_prime_integer_partitions(*, number: int, slots: int) -> int:
         2  # [5,5], [2,3,5]
     """
     if number < 0 or slots < 0:
-        raise ValueError('number and slots must be non-negative')
+        raise IntegerPartitionError('number and slots must be non-negative')
     if number == 0:
         return 1
     if slots < 2:  # 2 is the smallest prime
@@ -174,7 +179,7 @@ def get_partitions(*, number: int, slots: int, safe_limit: int = 50) -> List[Lis
 
     Raises:
         OverflowError: If number exceeds the safe_limit
-        ValueError: If number or slots is negative, or if number < slots
+        IntegerPartitionError: If number or slots is negative, or if number < slots
 
     Examples:
         >>> get_partitions(number=4, slots=4)
@@ -185,9 +190,9 @@ def get_partitions(*, number: int, slots: int, safe_limit: int = 50) -> List[Lis
     if number > safe_limit:
         raise OverflowError(f'number must be less than {safe_limit=}')
     if number < 0 or slots < 0:
-        raise ValueError('number and slots must be non-negative')
+        raise IntegerPartitionError('number and slots must be non-negative')
     if number < slots:
-        raise ValueError('number must be greater than or equal to slots')
+        raise IntegerPartitionError('number must be greater than or equal to slots')
     if number <= 1:
         return [] if number == 0 else [[1]]
     partitions: List[List[int]] = []
@@ -221,7 +226,7 @@ def get_prime_partitions(*, number: int, slots: int, safe_limit: int = 50) -> Li
 
     Raises:
         OverflowError: If number exceeds the safe_limit
-        ValueError: If number or slots is negative
+        IntegerPartitionError: If number or slots is negative
 
     Examples:
         >>> get_prime_partitions(number=10, slots=10)
@@ -232,7 +237,7 @@ def get_prime_partitions(*, number: int, slots: int, safe_limit: int = 50) -> Li
     if number > safe_limit:
         raise OverflowError(f'number must be less than {safe_limit=}')
     if number < 0 or slots < 0:
-        raise ValueError('number and slots must be non-negative')
+        raise IntegerPartitionError('number and slots must be non-negative')
     if number < 2 or slots < 2:  # 2 is the smallest prime
         return []
     prime_partitions: List[List[int]] = []
@@ -309,7 +314,7 @@ def main() -> int:
         assert num_prime_integer_partitions_ == len_prime_partitions, (f'{num_prime_integer_partitions_=} '
                                                                        f'!= {len_prime_partitions=}')
 
-        print(f'partitions for {number=} are correct')
+        logger.info(f'partitions for {number=} are correct')
     for number in range(10, 51, 10):
         partitions = get_partitions(number=number, slots=number)
         len_partitions = len(partitions)
@@ -322,7 +327,7 @@ def main() -> int:
         assert num_integer_partitions_ == len_partitions, f'{num_integer_partitions_=} != {len_partitions=}'
         assert num_prime_integer_partitions_ == len_prime_partitions, (f'{num_prime_integer_partitions_=} '
                                                                        f'!= {len_prime_partitions=}')
-        print(f'partitions for {number=} are correct')
+        logger.info(f'partitions for {number=} are correct')
     return 0
 
 
