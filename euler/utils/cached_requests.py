@@ -56,9 +56,9 @@ def get_text_file(url: str) -> str:
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
         logger.info({'action': 'retrieved_text_file', 'url': url, 'content_length': len(content)})
         return content
-    except (IOError, OSError) as e:
-        logger.error(f"Error accessing cache file {cache_file}: {e}")
-        raise
     except requests.RequestException as e:
         logger.error(f"Error fetching URL {url}: {e}")
+        raise
+    except (IOError, OSError) as e:
+        logger.error(f"Error accessing cache file {cache_file}: {e}")
         raise
