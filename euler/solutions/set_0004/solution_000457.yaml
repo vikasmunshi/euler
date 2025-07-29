@@ -1,0 +1,23 @@
+name: a_polynomial_modulo_the_square_of_a_prime
+number: 457
+problem_statement: |
+  Let f(n) = n^2 - 3n - 1. Let p be a prime. Let R(p) be the smallest positive
+  integer n such that f(n) \bmod p^2 = 0 if such an integer n exists, otherwise
+  R(p) = 0.   Let SR(L) be \sum R(p) for all primes not exceeding L.   Find
+  SR(10^7).
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=457

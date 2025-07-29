@@ -1,0 +1,21 @@
+name: perfect_square_collection
+number: 142
+problem_statement: |
+  Find the smallest x + y + z with integers x \gt y \gt z \gt 0 such that x + y, x
+  - y, x + z, x - z, y + z, y - z are all perfect squares.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=142

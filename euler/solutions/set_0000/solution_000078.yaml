@@ -1,0 +1,24 @@
+name: coin_partitions
+number: 78
+problem_statement: "Let p(n) represent the number of different ways in which n coins\
+  \ can be\nseparated into piles. For example, five coins can be separated into piles\
+  \ in\nexactly seven different ways, so p(5)=7.  OOOOO OOOO\_ \_O OOO\_ \_OO OOO\_\
+  \ \_O\_ \_O\nOO\_ \_OO\_ \_O OO\_ \_O\_ \_O\_ \_O O\_ \_O\_ \_O\_ \_O\_ \_O  Find\
+  \ the least value of n for\nwhich p(n) is divisible by one million.\n"
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 449
+  is_main_case: false
+  kwargs:
+    divisor: 1000
+  solution_execution_time: 0.011158065994095523
+  solved: true
+- answer: 55374
+  is_main_case: false
+  kwargs:
+    divisor: 1000000
+  solution_execution_time: 18.172224253998138
+  solved: true
+url: https://projecteuler.net/problem=78

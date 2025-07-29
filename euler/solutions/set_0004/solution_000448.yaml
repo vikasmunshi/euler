@@ -1,0 +1,24 @@
+name: average_least_common_multiple
+number: 448
+problem_statement: |
+  The function \operatorname{\mathbf{lcm}}(a,b) denotes the least common multiple
+  of a and b. Let A(n) be the average of the values of \operatorname{lcm}(n,i) for
+  1 \le i \le n. E.g: A(2)=(2+2)/2=2 and
+  A(10)=(10+10+30+20+10+30+70+40+90+10)/10=32.   Let S(n)=\sum A(k) for 1 \le k
+  \le n. S(100)=122726.   Find S(99999999019) \bmod 999999017.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=448

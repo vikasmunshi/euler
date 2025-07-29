@@ -1,0 +1,24 @@
+name: inverse_digit_sum
+number: 684
+problem_statement: |
+  Define s(n) to be the smallest number that has a digit sum of n. For example
+  s(10) = 19. Let \displaystyle S(k) = \sum_{n=1}^k s(n). You are given S(20) =
+  1074.  Further let f_i be the Fibonacci sequence defined by f_0=0, f_1=1 and
+  f_i=f_{i-2}+f_{i-1} for all i \ge 2.  Find \displaystyle \sum_{i=2}^{90} S(f_i).
+  Give your answer modulo 1\,000\,000\,007.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=684

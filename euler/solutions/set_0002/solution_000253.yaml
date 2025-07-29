@@ -1,0 +1,35 @@
+name: tidying_up_a
+number: 253
+problem_statement: "A small child has a \u201Cnumber caterpillar\u201D consisting\
+  \ of forty jigsaw pieces, each\nwith one number on it, which, when connected together\
+  \ in a line, reveal the\nnumbers 1 to 40 in order. Every night, the child's father\
+  \ has to pick up the\npieces of the caterpillar that have been scattered across\
+  \ the play room. He\npicks up the pieces at random and places them in the correct\
+  \ order. As the\ncaterpillar is built up in this way, it forms distinct segments\
+  \ that gradually\nmerge together. The number of segments starts at zero (no pieces\
+  \ placed),\ngenerally increases up to about eleven or twelve, then tends to drop\
+  \ again\nbefore finishing at a single segment (all pieces placed). For example:\
+  \  Piece\nPlaced Segments So Far 121422936434554354\u2026\u2026 Let M be the maximum\
+  \ number of\nsegments encountered during a random tidy-up of the caterpillar. For\
+  \ a\ncaterpillar of ten pieces, the number of possibilities for each M is  M\nPossibilities\
+  \ 1512\_ \_\_ \_2250912\_ \_\_ \_31815264\_ \_\_ \_41418112\_ \_\_ \_5144000\_ \_\
+  \_ \_\nso the most likely value of M is 3 and the average value is 385643/113400\
+  \ =\n3.400732, rounded to six decimal places. The most likely value of M for a forty-\n\
+  piece caterpillar is 11; but what is the average value of M? Give your answer\n\
+  rounded to six decimal places.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=253

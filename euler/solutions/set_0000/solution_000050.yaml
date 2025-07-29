@@ -1,0 +1,44 @@
+name: consecutive_prime_sum
+number: 50
+problem_statement: |
+  The prime 41, can be written as the sum of six consecutive primes: 41 = 2 + 3 +
+  5 + 7 + 11 + 13. This is the longest sum of consecutive primes that adds to a
+  prime below one-hundred. The longest sum of consecutive primes below one-
+  thousand that adds to a prime, contains 21 terms, and is equal to 953. Which
+  prime, below one-million, can be written as the sum of the most consecutive
+  primes?
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 41
+  is_main_case: false
+  kwargs:
+    max_limit: 100
+  solution_execution_time: 0.000368681998224929
+  solved: true
+- answer: 953
+  is_main_case: false
+  kwargs:
+    max_limit: 1000
+  solution_execution_time: 0.0010262939977110364
+  solved: true
+- answer: 9521
+  is_main_case: false
+  kwargs:
+    max_limit: 10000
+  solution_execution_time: 0.006643570006417576
+  solved: true
+- answer: 92951
+  is_main_case: false
+  kwargs:
+    max_limit: 100000
+  solution_execution_time: 0.08142064900312107
+  solved: true
+- answer: 997651
+  is_main_case: false
+  kwargs:
+    max_limit: 1000000
+  solution_execution_time: 0.968618308994337
+  solved: true
+url: https://projecteuler.net/problem=50

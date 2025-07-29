@@ -1,0 +1,23 @@
+name: smallest_prime_factor
+number: 521
+problem_statement: |
+  Let \operatorname{smpf}(n) be the smallest prime factor of n.
+  \operatorname{smpf}(91)=7 because 91=7* 13 and \operatorname{smpf}(45)=3 because
+  45=3* 3* 5. Let S(n) be the sum of \operatorname{smpf}(i) for 2 \le i \le n.
+  E.g. S(100)=1257.   Find S(10^{12}) \bmod 10^9.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=521

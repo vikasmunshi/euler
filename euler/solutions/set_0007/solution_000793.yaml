@@ -1,0 +1,23 @@
+name: median_of_products
+number: 793
+problem_statement: |
+  Let S_i be an integer sequence produced with the following pseudo-random number
+  generator:   S_0 = 290797  S_{i+1} = S_i ^2 \bmod 50515093   Let M(n) be the
+  median of the pairwise products  S_i S_j  for 0 \le i \lt j \lt n.   You are
+  given M(3) = 3878983057768 and M(103) = 492700616748525.   Find M(1\,000\,003).
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=793

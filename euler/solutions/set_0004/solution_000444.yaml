@@ -1,0 +1,39 @@
+name: the_roundtable_lottery
+number: 444
+problem_statement: "A group of p people decide to sit down at a round table and play\
+  \ a lottery-\nticket trading game. Each person starts off with a randomly-assigned,\n\
+  unscratched lottery ticket. Each ticket, when scratched, reveals a whole-pound\n\
+  prize ranging anywhere from \xA31 to \xA3p, with no two tickets alike. The goal\
+  \ of the\ngame is for all of the players to maximize the winnings of the ticket\
+  \ they hold\nupon leaving the game. An arbitrary person is chosen to be the first\
+  \ player.\nGoing around the table, each player has only one of two options:  The\
+  \ player can\nchoose to scratch the ticket and reveal its worth to everyone at the\
+  \ table. If\nthe player's ticket is unscratched, then the player may trade it with\
+  \ a previous\nplayer's scratched ticket, and then leaves the game with that ticket.\
+  \ The\nprevious player then scratches the newly-acquired ticket and reveals its\
+  \ worth\nto everyone at the table.  The game ends once all tickets have been scratched.\n\
+  All players still remaining at the table must leave with their currently-held\n\
+  tickets. Assume that players will use the optimal strategy for maximizing the\n\
+  expected value of their ticket winnings. Let E(p) represent the expected number\n\
+  of players left at the table when the game ends in a game consisting of p\nplayers.\
+  \ E.g. E(111) = 5.2912 when rounded to 5 significant digits. Let S_1(N) =\n\\sum\
+  \ \\limits_{p = 1}^{N} {E(p)}. Let S_k(N) = \\sum \\limits_{p = 1}^{N}\n{S_{k-1}(p)}\
+  \ for k \\gt 1. Find S_{20}(10^{14}) and write the answer in\nscientific notation\
+  \ rounded to 10 significant digits. Use a lowercase e to\nseparate mantissa and\
+  \ exponent. For example, the answer for S_3(100) would be\n5.983679014e5.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=444

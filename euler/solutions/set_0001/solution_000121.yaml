@@ -1,0 +1,29 @@
+name: disc_game_prize_fund
+number: 121
+problem_statement: "A bag contains one red disc and one blue disc. In a game of chance\
+  \ a player\ntakes a disc at random and its colour is noted. After each turn the\
+  \ disc is\nreturned to the bag, an extra red disc is added, and another disc is\
+  \ taken at\nrandom. The player pays \xA31 to play and wins if they have taken more\
+  \ blue discs\nthan red discs at the end of the game. If the game is played for four\
+  \ turns, the\nprobability of a player winning is exactly 11/120, and so the maximum\
+  \ prize fund\nthe banker should allocate for winning in this game would be \xA3\
+  10 before they\nwould expect to incur a loss. Note that any payout will be a whole\
+  \ number of\npounds and also includes the original \xA31 paid to play the game,\
+  \ so in the\nexample given the player actually wins \xA39. Find the maximum prize\
+  \ fund that\nshould be allocated to a single game in which fifteen turns are played.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=121

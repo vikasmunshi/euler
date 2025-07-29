@@ -1,0 +1,16 @@
+name: powerful_digit_counts
+number: 63
+problem_statement: |
+  The 5-digit number, 16807=7^5, is also a fifth power. Similarly, the 9-digit
+  number, 134217728=8^9, is a ninth power. How many n-digit positive integers
+  exist which are also an nth power?
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 49
+  is_main_case: false
+  kwargs: {}
+  solution_execution_time: 0.00028595400362974033
+  solved: true
+url: https://projecteuler.net/problem=63

@@ -1,0 +1,22 @@
+name: factorials_divisible_by_a_huge_integer
+number: 320
+problem_statement: |
+  Let N(i) be the smallest integer n such that n! is divisible by
+  (i!)^{1234567890}  Let S(u)=\sum N(i) for 10 \le i \le u.
+  S(1000)=614538266565663.   Find S(1\,000\,000) \bmod 10^{18}.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=320

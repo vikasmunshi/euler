@@ -1,0 +1,24 @@
+name: a_huge_binomial_coefficient
+number: 365
+problem_statement: |
+  The binomial coefficient \displaystyle{\binom{10^{18}}{10^9}} is a number with
+  more than 9 billion (9* 10^9) digits.   Let M(n,k,m) denote the binomial
+  coefficient \displaystyle{\binom{n}{k}} modulo m.   Calculate \displaystyle{\sum
+  M(10^{18},10^9,p\cdot q\cdot r)} for 1000\lt p\lt q\lt r\lt 5000 and p,q,r
+  prime.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=365

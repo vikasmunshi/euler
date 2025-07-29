@@ -1,0 +1,24 @@
+name: tours_on_a_4_times_n_playing_board
+number: 237
+problem_statement: |
+  Let T(n) be the number of tours over a 4 * n playing board such that: The tour
+  starts in the top left corner. The tour consists of moves that are up, down,
+  left, or right one square. The tour visits each square exactly once. The tour
+  ends in the bottom left corner. The diagram shows one tour over a 4 * 10 board:
+  T(10) is 2329. What is T(10^{12}) modulo 10^8?
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=237

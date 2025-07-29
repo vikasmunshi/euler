@@ -1,0 +1,22 @@
+name: double_pandigital_number_divisible_by_11
+number: 491
+problem_statement: |
+  We call a positive integer double pandigital if it uses all the digits 0 to 9
+  exactly twice (with no leading zero). For example, 40561817703823564929 is one
+  such number. How many double pandigital numbers are divisible by 11?
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=491

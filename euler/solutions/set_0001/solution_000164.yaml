@@ -1,0 +1,21 @@
+name: three_consecutive_digital_sum_limit
+number: 164
+problem_statement: |
+  How many 20 digit numbers n (without any leading zero) exist such that no three
+  consecutive digits of n have a sum greater than 9?
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=164

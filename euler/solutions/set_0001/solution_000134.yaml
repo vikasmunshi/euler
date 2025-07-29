@@ -1,0 +1,26 @@
+name: prime_pair_connection
+number: 134
+problem_statement: |
+  Consider the consecutive primes p_1 = 19 and p_2 = 23. It can be verified that
+  1219 is the smallest number such that the last digits are formed by p_1 whilst
+  also being divisible by p_2. In fact, with the exception of p_1 = 3 and p_2 = 5,
+  for every pair of consecutive primes, p_2 \gt p_1, there exist values of n for
+  which the last digits are formed by p_1 and n is divisible by p_2. Let S be the
+  smallest of these values of n. Find \sum S for every pair of consecutive primes
+  with 5 \le p_1 \le 1000000.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=134

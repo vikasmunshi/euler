@@ -1,0 +1,24 @@
+name: prime_factorisation_of_binomial_coefficients
+number: 231
+problem_statement: |
+  The binomial coefficient \displaystyle \binom {10} 3 = 120. 120 = 2^3 * 3 * 5 =
+  2 * 2 * 2 * 3 * 5, and 2 + 2 + 2 + 3 + 5 = 14. So the sum of the terms in the
+  prime factorisation of \displaystyle \binom {10} 3 is 14.  Find the sum of the
+  terms in the prime factorisation of \displaystyle \binom {20\,000\,000}
+  {15\,000\,000}.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=231

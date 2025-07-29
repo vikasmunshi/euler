@@ -1,0 +1,21 @@
+name: euler_s_totient_function_equals_13
+number: 248
+problem_statement: |
+  The first number n for which \phi(n)=13! is 6227180929. Find the 150\,000th such
+  number.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=248

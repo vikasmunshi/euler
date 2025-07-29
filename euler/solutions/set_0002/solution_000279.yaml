@@ -1,0 +1,21 @@
+name: triangles_with_integral_sides_and_an_integral_angle_
+number: 279
+problem_statement: |
+  How many triangles are there with integral sides, at least one integral angle
+  (measured in degrees), and a perimeter that does not exceed 10^8?
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=279

@@ -1,0 +1,28 @@
+name: coresilience
+number: 245
+problem_statement: |
+  We shall call a fraction that cannot be cancelled down a resilient fraction.
+  Furthermore we shall define the resilience of a denominator, R(d), to be the
+  ratio of its proper fractions that are resilient; for example, R(12) =
+  \dfrac{4}{11}. The resilience of a number d \gt 1 is then \dfrac{\varphi(d)}{d -
+  1}, where \varphi is Euler's totient function. We further define the
+  coresilience of a number n \gt 1 as C(n) = \dfrac{n - \varphi(n)}{n - 1}. The
+  coresilience of a prime p is C(p) = \dfrac{1}{p - 1}. Find the sum of all
+  composite integers 1 \lt n \le 2 * 10^{11}, for which C(n) is a unit fractionA
+  fraction with numerator 1.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=245

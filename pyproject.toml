@@ -1,0 +1,48 @@
+[build-system]
+requires = ["poetry-core>=2.1"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "euler"
+version = "0.1.51"
+description = "A Python package for solving and managing Project Euler mathematical and computational problems."
+authors = ["Vikas Munshi <vikas.munshi@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "euler" }]
+
+[tool.poetry.dependencies]
+beautifulsoup4 = "^4.13"
+matplotlib = "^3.10"
+numpy = "2.3"
+python = "^3.12"
+pyyaml = "^6.0"
+requests = "^2.32"
+
+
+# System dependencies (not managed by Poetry)
+# python3-tk: Required for matplotlib TkAgg backend visualization
+# Install with: sudo apt install python3-tk (Debian/Ubuntu)
+#              dnf install python3-tkinter (Fedora)
+#              pacman -S tk (Arch)
+#              brew install python-tk (macOS with Homebrew)
+# Note: tkinter comes bundled with Python on Windows
+
+[tool.poetry.group.dev.dependencies]
+coverage = "^7.9"
+flake8 = "^7.3"
+mypy = "^1.16"
+pre-commit = "^4.2"
+types-beautifulsoup4 = "^4.12"
+types-pyyaml = "^6.0"
+types-requests = "^2.32"
+
+[tool.poetry.urls]
+Homepage = "https://github.com/vikasmunshi/euler"
+Repository = "https://github.com/vikasmunshi/euler.git"
+
+[tool.poetry.scripts]
+euler = "euler.cli:main"
+
+[tool.flake8]
+max-line-length = 120

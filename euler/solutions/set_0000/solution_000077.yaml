@@ -1,0 +1,42 @@
+name: prime_summations
+number: 77
+problem_statement: |
+  It is possible to write ten as the sum of primes in exactly five different ways:
+  \begin{align} &7 + 3\\ &5 + 5\\ &5 + 3 + 2\\ &3 + 3 + 2 + 2\\ &2 + 2 + 2 + 2 + 2
+  \end{align} What is the first value which can be written as the sum of primes in
+  over five thousand different ways?
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 10
+  is_main_case: false
+  kwargs:
+    num_prime_partitions: 5
+  solution_execution_time: 0.00019823099864879623
+  solved: true
+- answer: 25
+  is_main_case: false
+  kwargs:
+    num_prime_partitions: 50
+  solution_execution_time: 0.0009301320023951121
+  solved: true
+- answer: 45
+  is_main_case: false
+  kwargs:
+    num_prime_partitions: 500
+  solution_execution_time: 0.003289641004812438
+  solved: true
+- answer: 71
+  is_main_case: false
+  kwargs:
+    num_prime_partitions: 5000
+  solution_execution_time: 0.01012915500177769
+  solved: true
+- answer: 104
+  is_main_case: false
+  kwargs:
+    num_prime_partitions: 50000
+  solution_execution_time: 0.027571586993872188
+  solved: true
+url: https://projecteuler.net/problem=77

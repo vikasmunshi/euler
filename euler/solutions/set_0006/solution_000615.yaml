@@ -1,0 +1,27 @@
+name: the_millionth_number_with_at_least_one_million_prime_factors
+number: 615
+problem_statement: |
+  Consider the natural numbers having at least 5 prime factors, which don't have
+  to be distinct. Sorting these numbers by size gives a list which starts with:
+  32=2 \cdot 2 \cdot 2 \cdot 2 \cdot 2 48=2 \cdot 2 \cdot 2 \cdot 2 \cdot 3 64=2
+  \cdot 2 \cdot 2 \cdot 2 \cdot 2 \cdot 2 72=2 \cdot 2 \cdot 2 \cdot 3 \cdot 3
+  80=2 \cdot 2 \cdot 2 \cdot 2 \cdot 5 96=2 \cdot 2 \cdot 2 \cdot 2 \cdot 2 \cdot
+  3 \cdots  So, for example, the fifth number with at least 5 prime factors is 80.
+  Find the millionth number with at least one million prime factors.  Give your
+  answer modulo 123454321.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=615

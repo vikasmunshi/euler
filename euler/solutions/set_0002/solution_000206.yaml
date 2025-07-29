@@ -1,0 +1,20 @@
+name: concealed_square
+number: 206
+problem_statement: "Find the unique positive integer whose square has the form 1_2_3_4_5_6_7_8_9_0,\n\
+  where each \u201C_\u201D is a single digit.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=206

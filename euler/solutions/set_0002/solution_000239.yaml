@@ -1,0 +1,24 @@
+name: twenty_two_foolish_primes
+number: 239
+problem_statement: |
+  A set of disks numbered 1 through 100 are placed in a line in random order. What
+  is the probability that we have a partial derangement such that exactly 22 prime
+  number discs are found away from their natural positions? (Any number of non-
+  prime disks may also be found in or out of their natural positions.) Give your
+  answer rounded to 12 places behind the decimal point in the form 0.abcdefghijkl.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=239

@@ -1,0 +1,29 @@
+name: look_and_say_sequence
+number: 419
+problem_statement: "The look and say sequence goes 1, 11, 21, 1211, 111221, 312211,\
+  \ 13112221,\n1113213211, ... The sequence starts with 1 and all other members are\
+  \ obtained by\ndescribing the previous member in terms of consecutive digits. It\
+  \ helps to do\nthis out loud: 1 is 'one one' \u2192 11 11 is 'two ones' \u2192 21\
+  \ 21 is 'one two and one\none' \u2192 1211  1211 is 'one one, one two and two ones'\
+  \ \u2192 111221 111221 is 'three\nones, two twos and one one' \u2192 312211 ...\
+  \   Define A(n), B(n) and C(n) as the\nnumber of ones, twos and threes in the n'th\
+  \ element of the sequence\nrespectively. One can verify that A(40) = 31254, B(40)\
+  \ = 20259 and C(40) =\n11625.   Find A(n), B(n) and C(n) for n = 10^{12}. Give your\
+  \ answer modulo\n2^{30} and separate your values for A, B and C by a comma. E.g.\
+  \ for n = 40 the\nanswer would be 31254,20259,11625\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=419

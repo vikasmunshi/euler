@@ -1,0 +1,23 @@
+name: lcm
+number: 858
+problem_statement: |
+  Define G(N) = \sum_S \operatorname{lcm}(S) where S ranges through all subsets of
+  \{1, ..., N\} and \operatorname{lcm} denotes the lowest common multiple. Note
+  that the \operatorname{lcm} of the empty set is 1.  You are given G(5) = 528 and
+  G(20) = 8463108648960.  Find G(800). Give your answer modulo 10^9 + 7.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=858

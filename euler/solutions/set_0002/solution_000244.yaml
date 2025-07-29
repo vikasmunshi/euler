@@ -1,0 +1,32 @@
+name: sliders
+number: 244
+problem_statement: "You probably know the game Fifteen Puzzle. Here, instead of numbered\
+  \ tiles, we\nhave seven red tiles and eight blue tiles. A move is denoted by the\
+  \ uppercase\ninitial of the direction (Left, Right, Up, Down) in which the tile\
+  \ is slid, e.g.\nstarting from configuration (S), by the sequence LULUR we reach\
+  \ the\nconfiguration (E):  (S),\_(E)  For each path, its checksum is calculated\
+  \ by\n(pseudocode):  \\begin{align} \\mathrm{checksum} &= 0\\\\ \\mathrm{checksum}\
+  \ &=\n(\\mathrm{checksum} * 243 + m_1) \\bmod 100\\,000\\,007\\\\ \\mathrm{checksum}\
+  \ &=\n(\\mathrm{checksum} * 243 + m_2) \\bmod 100\\,000\\,007\\\\ \\cdots &\\\\\n\
+  \\mathrm{checksum} &= (\\mathrm{checksum} * 243 + m_n) \\bmod 100\\,000\\,007\n\\\
+  end{align} where m_k is the ASCII value of the kth letter in the move sequence\n\
+  and the ASCII values for the moves are:   L76R82U85D68 For the sequence LULUR\n\
+  given above, the checksum would be 19761398. Now, starting from configuration\n\
+  (S), find all shortest ways to reach configuration (T).  (S),\_(T)  What is the\n\
+  sum of all checksums for the paths having the minimal length?\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=244

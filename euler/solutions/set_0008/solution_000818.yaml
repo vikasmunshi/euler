@@ -1,0 +1,28 @@
+name: set
+number: 818
+problem_statement: "The SET\xAE card game is played with a pack of 81 distinct cards.\
+  \ Each card has\nfour features (Shape, Color, Number, Shading). Each feature has\
+  \ three different\nvariants (e.g. Color can be red, purple, green).  A SET consists\
+  \ of three\ndifferent cards such that each feature is either the same on each card\
+  \ or\ndifferent on each card.  For a collection C_n of n cards, let S(C_n) denote\
+  \ the\nnumber of SETs in C_n. Then define F(n) = \\sum\\limits_{C_n} S(C_n)^4 where\
+  \ C_n\nranges through all collections of n cards (among the 81 cards). You are given\n\
+  F(3) = 1080 and F(6) = 159690960.  Find F(12).  \\scriptsize{\\text{SET is a\nregistered\
+  \ trademark of Cannei, LLC.  All rights reserved.   Used with\npermission from PlayMonster,\
+  \ LLC.}}\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=818

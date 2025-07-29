@@ -1,0 +1,22 @@
+name: summation_of_primes
+number: 10
+problem_statement: |
+  The sum of the primes below 10 is 2 + 3 + 5 + 7 = 17. Find the sum of all the
+  primes below two million.
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 17
+  is_main_case: false
+  kwargs:
+    max_num: 10
+  solution_execution_time: 0.00023684699408477172
+  solved: true
+- answer: 142913828922
+  is_main_case: false
+  kwargs:
+    max_num: 2000000
+  solution_execution_time: 1.8751425700029358
+  solved: true
+url: https://projecteuler.net/problem=10

@@ -1,0 +1,24 @@
+name: reversible_prime_squares
+number: 808
+problem_statement: |
+  Both 169 and 961 are the square of a prime. 169 is the reverse of 961.   We call
+  a number a reversible prime square if:  It is not a palindrome, and It is the
+  square of a prime, and Its reverse is also the square of a prime.   169 and 961
+  are not palindromes, so both are reversible prime squares.   Find the sum of the
+  first 50 reversible prime squares.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=808

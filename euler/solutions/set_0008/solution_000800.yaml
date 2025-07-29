@@ -1,0 +1,23 @@
+name: hybrid_integers
+number: 800
+problem_statement: |
+  An integer of the form p^q q^p with prime numbers p \neq q is called a hybrid-
+  integer. For example, 800 = 2^5 5^2 is a hybrid-integer.   We define C(n) to be
+  the number of hybrid-integers less than or equal to n. You are given C(800) = 2
+  and C(800^{800}) = 10790.   Find C(800800^{800800}).
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=800

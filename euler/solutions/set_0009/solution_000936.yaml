@@ -1,0 +1,23 @@
+name: peerless_trees
+number: 936
+problem_statement: |
+  A peerless tree is a tree with no edge between two vertices of the same degree.
+  Let P(n) be the number of peerless trees on n unlabelled vertices. There are six
+  of these trees on seven unlabelled vertices, P(7)=6, shown below.  Define
+  \displaystyle S(N)  = \sum_{n=3}^N P(n). You are given S(10) = 74. Find S(50).
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=936

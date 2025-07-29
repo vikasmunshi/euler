@@ -1,0 +1,31 @@
+name: tidying_up_b
+number: 866
+problem_statement: "A small child has a \u201Cnumber caterpillar\u201D consisting\
+  \ of N jigsaw pieces, each\nwith one number on it, which, when connected together\
+  \ in a line, reveal the\nnumbers 1 to N in order.  Every night, the child's father\
+  \ has to pick up the\npieces of the caterpillar that have been scattered across\
+  \ the play room. He\npicks up the pieces at random and places them in the correct\
+  \ order. As the\ncaterpillar is built up in this way, it forms distinct segments\
+  \ that gradually\nmerge together.  Any time the father places a new piece in its\
+  \ correct position,\na segment of length k is formed and he writes down the kth\
+  \ hexagonal number\nk\\cdot(2k-1). Once all pieces have been placed and the full\
+  \ caterpillar\nconstructed he calculates the product of all the numbers written\
+  \ down.\nInterestingly, the expected value of this product is always an integer.\
+  \ For\nexample if N=4 then the expected value is 994.  Find the expected value of\
+  \ the\nproduct for a caterpillar of N=100 pieces. Give your answer modulo 987654319.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=866

@@ -1,0 +1,21 @@
+name: prime_digit_sum
+number: 845
+problem_statement: |
+  Let D(n) be the n-th positive integer that has the sum of its digits a prime.
+  For example, D(61) = 157 and D(10^8) = 403539364.  Find D(10^{16}).
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=845

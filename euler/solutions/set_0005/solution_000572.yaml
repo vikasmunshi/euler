@@ -1,0 +1,24 @@
+name: idempotent_matrices
+number: 572
+problem_statement: |
+  A matrix M is called idempotent if M^2 = M. Let M be a three by three matrix :
+  M=\begin{pmatrix}    a & b & c\\    d & e & f\\   g &h &i\\ \end{pmatrix}. Let
+  C(n) be the number of idempotent three by three matrices M with integer elements
+  such that  -n \le a,b,c,d,e,f,g,h,i \le n.  C(1)=164 and C(2)=848.   Find
+  C(200).
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=572

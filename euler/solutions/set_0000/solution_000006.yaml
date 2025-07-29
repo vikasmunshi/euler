@@ -1,0 +1,26 @@
+name: sum_square_difference
+number: 6
+problem_statement: |
+  The sum of the squares of the first ten natural numbers is, 1^2 + 2^2 + ... +
+  10^2 = 385. The square of the sum of the first ten natural numbers is, (1 + 2 +
+  ... + 10)^2 = 55^2 = 3025. Hence the difference between the sum of the squares
+  of the first ten natural numbers and the square of the sum is 3025 - 385 = 2640.
+  Find the difference between the sum of the squares of the first one hundred
+  natural numbers and the square of the sum.
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 2640
+  is_main_case: false
+  kwargs:
+    n: 10
+  solution_execution_time: 8.62700107973069e-06
+  solved: true
+- answer: 25164150
+  is_main_case: false
+  kwargs:
+    n: 100
+  solution_execution_time: 1.4721998013556004e-05
+  solved: true
+url: https://projecteuler.net/problem=6

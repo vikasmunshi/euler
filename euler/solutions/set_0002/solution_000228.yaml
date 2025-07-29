@@ -1,0 +1,27 @@
+name: minkowski_sums
+number: 228
+problem_statement: "Let S_n be the regular n-sided polygon \u2013 or shape \u2013\
+  \ whose vertices   v_k (k = 1,\n2, ..., n) have coordinates: \\begin{align} x_k\
+  \ &= \\cos((2k - 1)/n * 180^\\circ)\\\\\ny_k &= \\sin((2k - 1)/n * 180^\\circ) \\\
+  end{align}  Each S_n is to be interpreted\nas a filled shape consisting of all points\
+  \ on the perimeter and in the interior.\nThe Minkowski sum, S + T, of two shapes\
+  \ S and T is the result of adding every\npoint in S to every point in T, where point\
+  \ addition is performed coordinate-\nwise: (u, v) + (x, y) = (u + x, v + y). For\
+  \ example, the sum of S_3 and S_4 is\nthe six-sided shape shown in pink below: \
+  \  How many sides does S_{1864} +\nS_{1865} + \\cdots + S_{1909} have?\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=228

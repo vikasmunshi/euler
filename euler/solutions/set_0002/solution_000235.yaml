@@ -1,0 +1,23 @@
+name: an_arithmetic_geometric_sequence
+number: 235
+problem_statement: |
+  Given is the arithmetic-geometric sequence u(k) = (900-3k)r^{k - 1}. Let s(n) =
+  \sum_{k = 1}^n u(k).   Find the value of r for which s(5000) =
+  -600\,000\,000\,000.   Give your answer rounded to 12 places behind the decimal
+  point.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=235

@@ -1,0 +1,35 @@
+name: smallest_multiple
+number: 5
+problem_statement: |
+  2520 is the smallest number that can be divided by each of the numbers from 1 to
+  10 without any remainder. What is the smallest positive number that is evenly
+  divisibledivisible with no remainder by all of the numbers from 1 to 20?
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 2520
+  is_main_case: false
+  kwargs:
+    n: 10
+  solution_execution_time: 4.262800212018192e-05
+  solved: true
+- answer: 232792560
+  is_main_case: false
+  kwargs:
+    n: 20
+  solution_execution_time: 1.6639001842122525e-05
+  solved: true
+- answer: 3099044504245996706400
+  is_main_case: false
+  kwargs:
+    n: 50
+  solution_execution_time: 6.780399417039007e-05
+  solved: true
+- answer: 69720375229712477164533808935312303556800
+  is_main_case: false
+  kwargs:
+    n: 100
+  solution_execution_time: 6.690999725833535e-05
+  solved: true
+url: https://projecteuler.net/problem=5

@@ -1,0 +1,23 @@
+name: numbers_of_the_form_a2b3
+number: 634
+problem_statement: "Define F(n) to be the number of integers x\u2264n that can be\
+  \ written in the form\nx=a^2b^3, where a and b are integers not necessarily different\
+  \ and both greater\nthan 1.  For example, 32=2^2* 2^3  and 72=3^2* 2^3 are the only\
+  \ two integers\nless than 100 that can be written in this form. Hence, F(100)=2.\
+  \   Further you\nare given F(2* 10^4)=130 and F(3* 10^6)=2014.   Find F(9* 10^{18}).\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=634

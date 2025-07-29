@@ -1,0 +1,42 @@
+name: integer_right_triangles
+number: 39
+problem_statement: |
+  If p is the perimeter of a right angle triangle with integral length sides, \{a,
+  b, c\}, there are exactly three solutions for p = 120. \{20,48,52\},
+  \{24,45,51\}, \{30,40,50\} For which value of p \le 1000, is the number of
+  solutions maximised?
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 60
+  is_main_case: false
+  kwargs:
+    max_perimeter: 100
+  solution_execution_time: 0.0007205309957498685
+  solved: true
+- answer: 840
+  is_main_case: false
+  kwargs:
+    max_perimeter: 1000
+  solution_execution_time: 0.00024953899992397055
+  solved: true
+- answer: 5040
+  is_main_case: false
+  kwargs:
+    max_perimeter: 10000
+  solution_execution_time: 0.002741907002928201
+  solved: true
+- answer: 55440
+  is_main_case: false
+  kwargs:
+    max_perimeter: 100000
+  solution_execution_time: 0.09123254699807148
+  solved: true
+- answer: 720720
+  is_main_case: false
+  kwargs:
+    max_perimeter: 1000000
+  solution_execution_time: 0.828663284999493
+  solved: true
+url: https://projecteuler.net/problem=39

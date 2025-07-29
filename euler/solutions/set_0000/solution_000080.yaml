@@ -1,0 +1,36 @@
+name: square_root_digital_expansion
+number: 80
+problem_statement: |
+  It is well known that if the square root of a natural number is not an integer,
+  then it is irrational. The decimal expansion of such square roots is infinite
+  without any repeating pattern at all. The square root of two is
+  1.41421356237309504880\cdots, and the digital sum of the first one hundred
+  decimal digits is 475. For the first one hundred natural numbers, find the total
+  of the digital sums of the first one hundred decimal digits for all the
+  irrational square roots.
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 475
+  is_main_case: false
+  kwargs:
+    digits: 100
+    max_num: 2
+  solution_execution_time: 0.0006017420018906705
+  solved: true
+- answer: 40886
+  is_main_case: false
+  kwargs:
+    digits: 100
+    max_num: 99
+  solution_execution_time: 0.05419927299953997
+  solved: true
+- answer: 434576
+  is_main_case: false
+  kwargs:
+    digits: 100
+    max_num: 999
+  solution_execution_time: 0.5518121610002709
+  solved: true
+url: https://projecteuler.net/problem=80

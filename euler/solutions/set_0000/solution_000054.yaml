@@ -1,0 +1,38 @@
+name: poker_hands
+number: 54
+problem_statement: "In the card game poker, a hand consists of five cards and are\
+  \ ranked, from\nlowest to highest, in the following way: High Card: Highest value\
+  \ card. One\nPair: Two cards of the same value. Two Pairs: Two different pairs.\
+  \ Three of a\nKind: Three cards of the same value. Straight: All cards are consecutive\
+  \ values.\nFlush: All cards of the same suit. Full House: Three of a kind and a\
+  \ pair. Four\nof a Kind: Four cards of the same value. Straight Flush: All cards\
+  \ are\nconsecutive values of same suit. Royal Flush: Ten, Jack, Queen, King, Ace,\
+  \ in\nsame suit. The cards are valued in the order:2, 3, 4, 5, 6, 7, 8, 9, 10, Jack,\n\
+  Queen, King, Ace. If two players have the same ranked hands then the rank made\n\
+  up of the highest value wins; for example, a pair of eights beats a pair of\nfives\
+  \ (see example 1 below). But if two ranks tie, for example, both players\nhave a\
+  \ pair of queens, then highest cards in each hand are compared (see example\n4 below);\
+  \ if the highest cards tie then the next highest cards are compared, and\nso on.\
+  \ Consider the following five hands dealt to two players:  Hand\_Player\n1\_Player\
+  \ 2\_Winner 1\_5H 5C 6S 7S KDPair of Fives\_2C 3S 8S 8D TDPair of\nEights\_Player\
+  \ 2 2\_5D 8C 9S JS ACHighest card Ace\_2C 5C 7D 8S QHHighest card\nQueen\_Player\
+  \ 1 3\_2D 9C AS AH ACThree Aces\_3D 6D 7D TD QDFlush  with\nDiamonds\_Player 2 4\_\
+  4D 6S 9H QH QCPair of QueensHighest card Nine\_3D 6D 7H QD\nQSPair of QueensHighest\
+  \ card Seven\_Player 1 5\_2H 2D 4C 4D 4SFull HouseWith Three\nFours\_3C 3D 3S 9S\
+  \ 9DFull Housewith Three Threes\_Player 1  The file, poker.txt,\ncontains one-thousand\
+  \ random hands dealt to two players. Each line of the file\ncontains ten cards (separated\
+  \ by a single space): the first five are Player 1's\ncards and the last five are\
+  \ Player 2's cards. You can assume that all hands are\nvalid (no invalid characters\
+  \ or repeated cards), each player's hand is in no\nspecific order, and in each hand\
+  \ there is a clear winner. How many hands does\nPlayer 1 win?\n"
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 376
+  is_main_case: false
+  kwargs:
+    file_url: https://projecteuler.net/resources/documents/0054_poker.txt
+  solution_execution_time: 0.05620305600314168
+  solved: true
+url: https://projecteuler.net/problem=54

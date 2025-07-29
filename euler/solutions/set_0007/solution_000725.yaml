@@ -1,0 +1,24 @@
+name: digit_sum_numbers
+number: 725
+problem_statement: |
+  A number where one digit is the sum of the other digits is called a digit sum
+  number or DS-number for short. For example, 352, 3003 and 32812 are DS-numbers.
+  We define S(n) to be the sum of all DS-numbers of n digits or less.   You are
+  given S(3) = 63270 and S(7) = 85499991450.   Find S(2020). Give your answer
+  modulo 10^{16}.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=725

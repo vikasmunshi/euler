@@ -1,0 +1,23 @@
+name: modular_cubes_part_1
+number: 271
+problem_statement: |
+  For a positive number n, define S(n) as the sum of the integers x, for which 1
+  \lt x \lt n andx^3 \equiv 1 \bmod n.   When n=91, there are 8 possible values
+  for x, namely: 9, 16, 22, 29, 53, 74, 79, 81. Thus,
+  S(91)=9+16+22+29+53+74+79+81=363.  Find S(13082761331670030).
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=271

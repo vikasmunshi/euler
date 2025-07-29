@@ -1,0 +1,27 @@
+name: cutting_rope
+number: 398
+problem_statement: |
+  Inside a rope of length n, n - 1 points are placed with distance 1 from each
+  other and from the endpoints. Among these points, we choose m - 1 points at
+  random and cut the rope at these points to create m segments.   Let E(n, m) be
+  the expected length of the second-shortest segment. For example, E(3, 2) = 2 and
+  E(8, 3) = 16/7. Note that if multiple segments have the same shortest length the
+  length of the second-shortest segment is defined as the same as the shortest
+  length.   Find E(10^7, 100). Give your answer rounded to 5 decimal places behind
+  the decimal point.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=398

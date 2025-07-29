@@ -1,0 +1,72 @@
+name: coin_sums
+number: 31
+problem_statement: "In the United Kingdom the currency is made up of pound (\xA3)\
+  \ and pence (p). There\nare eight coins in general circulation: 1p, 2p, 5p, 10p,\
+  \ 20p, 50p, \xA31 (100p),\nand \xA32 (200p). It is possible to make \xA32 in the\
+  \ following way: 1\xD7\xA31 + 1\xD750p +\n2\xD720p + 1\xD75p + 1\xD72p + 3\xD71p\
+  \ How many different ways can \xA32 be made using any\nnumber of coins?\n"
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 1
+  is_main_case: false
+  kwargs:
+    coins:
+    - 1
+    - 2
+    - 5
+    - 10
+    - 20
+    - 50
+    - 100
+    - 200
+    target: 0
+  solution_execution_time: 2.5004002964124084e-05
+  solved: true
+- answer: 73682
+  is_main_case: false
+  kwargs:
+    coins:
+    - 1
+    - 2
+    - 5
+    - 10
+    - 20
+    - 50
+    - 100
+    - 200
+    target: 200
+  solution_execution_time: 0.0001421429988113232
+  solved: true
+- answer: 321335886
+  is_main_case: false
+  kwargs:
+    coins:
+    - 1
+    - 2
+    - 5
+    - 10
+    - 20
+    - 50
+    - 100
+    - 200
+    target: 1000
+  solution_execution_time: 0.003582428995287046
+  solved: true
+- answer: 10056050940818192726001
+  is_main_case: false
+  kwargs:
+    coins:
+    - 1
+    - 2
+    - 5
+    - 10
+    - 20
+    - 50
+    - 100
+    - 200
+    target: 100000
+  solution_execution_time: 0.2168943090000539
+  solved: true
+url: https://projecteuler.net/problem=31

@@ -1,0 +1,21 @@
+name: binomials_and_powers
+number: 830
+problem_statement: |
+  Let \displaystyle S(n)=\sum\limits_{k=0}^{n}\binom{n}{k}k^n.  You are given,
+  S(10)=142469423360.  Find S(10^{18}). Submit your answer modulo 83^3 89^3 97^3.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=830

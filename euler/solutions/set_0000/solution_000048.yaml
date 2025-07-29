@@ -1,0 +1,46 @@
+name: self_powers
+number: 48
+problem_statement: |
+  The series, 1^1 + 2^2 + 3^3 + \cdots + 10^{10} = 10405071317. Find the last ten
+  digits of the series, 1^1 + 2^2 + 3^3 + \cdots + 1000^{1000}.
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 405071317
+  is_main_case: false
+  kwargs:
+    n: 10
+  solution_execution_time: 2.6738998712971807e-05
+  solved: true
+- answer: 9027641920
+  is_main_case: false
+  kwargs:
+    n: 100
+  solution_execution_time: 0.00014096499944571406
+  solved: true
+- answer: 9110846700
+  is_main_case: false
+  kwargs:
+    n: 1000
+  solution_execution_time: 0.002505935997760389
+  solved: true
+- answer: 6237204500
+  is_main_case: false
+  kwargs:
+    n: 10000
+  solution_execution_time: 0.04667433199938387
+  solved: true
+- answer: 3031782500
+  is_main_case: false
+  kwargs:
+    n: 100000
+  solution_execution_time: 0.4975914980022935
+  solved: true
+- answer: 4077562500
+  is_main_case: false
+  kwargs:
+    n: 1000000
+  solution_execution_time: 8.875089180997747
+  solved: true
+url: https://projecteuler.net/problem=48

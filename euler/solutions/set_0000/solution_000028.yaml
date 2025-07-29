@@ -1,0 +1,36 @@
+name: number_spiral_diagonals
+number: 28
+problem_statement: "Starting with the number 1 and moving to the right in a clockwise\
+  \ direction a 5\nby 5 spiral is formed as follows: 21 22 23 24 25 20 \_7 \_8 \_\
+  9 10 19 \_6 \_1 \_2 11\n18 \_5 \_4 \_3 1217 16 15 14 13 It can be verified that\
+  \ the sum of the numbers on\nthe diagonals is 101. What is the sum of the numbers\
+  \ on the diagonals in a 1001\nby 1001 spiral formed in the same way?\n"
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 101
+  is_main_case: false
+  kwargs:
+    size: 5
+  solution_execution_time: 0.00033389899908797815
+  solved: true
+- answer: 261
+  is_main_case: false
+  kwargs:
+    size: 7
+  solution_execution_time: 0.00027572699764277786
+  solved: true
+- answer: 537
+  is_main_case: false
+  kwargs:
+    size: 9
+  solution_execution_time: 0.000360136000381317
+  solved: true
+- answer: 669171001
+  is_main_case: false
+  kwargs:
+    size: 1001
+  solution_execution_time: 4.155997885391116e-06
+  solved: true
+url: https://projecteuler.net/problem=28

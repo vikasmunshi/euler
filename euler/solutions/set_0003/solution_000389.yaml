@@ -1,0 +1,26 @@
+name: platonic_dice
+number: 389
+problem_statement: |
+  An unbiased single 4-sided die is thrown and its value, T, is noted.T unbiased
+  6-sided dice are thrown and their scores are added together. The sum, C, is
+  noted.C unbiased 8-sided dice are thrown and their scores are added together.
+  The sum, O, is noted.O unbiased 12-sided dice are thrown and their scores are
+  added together. The sum, D, is noted.D unbiased 20-sided dice are thrown and
+  their scores are added together. The sum, I, is noted. Find the variance of I,
+  and give your answer rounded to 4 decimal places.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=389

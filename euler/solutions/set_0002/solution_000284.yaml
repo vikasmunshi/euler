@@ -1,0 +1,31 @@
+name: steady_squares
+number: 284
+problem_statement: "The 3-digit number 376 in the decimal numbering system is an example\
+  \ of numbers\nwith the special property that its square ends with the same digits:\
+  \ 3762 =\n141376. Let's call a number with this property a steady square. Steady\
+  \ squares\ncan also be observed in other numbering systems. In the base 14 numbering\n\
+  system, the 3-digit number c37 is also a steady square: c372 = aa0c37, and the\n\
+  sum of its digits is c+3+7=18 in the same numbering system. The letters a, b, c\n\
+  and d are used for the 10, 11, 12 and 13 digits respectively, in a manner\nsimilar\
+  \ to the hexadecimal numbering system. For 1 \u2264 n \u2264 9, the sum of the\n\
+  digits of all the n-digit steady squares in the base 14 numbering system is 2d8\n\
+  (582 decimal). Steady squares with leading 0's are not allowed. Find the sum of\n\
+  the digits of all the n-digit steady squares in the base 14 numbering system for\n\
+  1 \u2264 n \u2264 10000 (decimal) and give your answer in the base 14 system using\
+  \ lower\ncase letters where necessary.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=284

@@ -1,0 +1,21 @@
+name: gcd_sum
+number: 625
+problem_statement: |
+  G(N)=\sum_{j=1}^N\sum_{i=1}^j \gcd(i,j).  You are given: G(10)=122.  Find
+  G(10^{11}). Give your answer modulo 998244353.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=625

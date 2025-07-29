@@ -1,0 +1,42 @@
+name: darts
+number: 109
+problem_statement: "In the game of darts a player throws three darts at a target board\
+  \ which is\nsplit into twenty equal sized sections numbered one to twenty.   The\
+  \ score of a\ndart is determined by the number of the region that the dart lands\
+  \ in. A dart\nlanding outside the red/green outer ring scores zero. The black and\
+  \ cream\nregions inside this ring represent single scores. However, the red/green\
+  \ outer\nring and middle ring score double and treble scores respectively. At the\
+  \ centre\nof the board are two concentric circles called the bull region, or bulls-eye.\n\
+  The outer bull is worth 25 points and the inner bull is a double, worth 50\npoints.\
+  \ There are many variations of rules but in the most popular game the\nplayers will\
+  \ begin with a score 301 or 501 and the first player to reduce their\nrunning total\
+  \ to zero is a winner. However, it is normal to play a \"doubles out\"\nsystem,\
+  \ which means that the player must land a double (including the double\nbulls-eye\
+  \ at the centre of the board) on their final dart to win; any other dart\nthat would\
+  \ reduce their running total to one or lower means the score for that\nset of three\
+  \ darts is \"bust\". When a player is able to finish  on their current\nscore it\
+  \ is called a \"checkout\" and the highest checkout is 170: T20 T20 D25\n(two treble\
+  \ 20s and double bull). There are exactly eleven distinct ways to\ncheckout on a\
+  \ score of 6:  \_\_\_\_\_ \_\_\_\_\_ \_\_\_\_\_\nD3D1D2S2D2D2D1S4D1S1S1D2S1T1D1S1S3D1D1D1D1D1S2D1S2S2D1\
+  \ Note that D1 D2 is\nconsidered different to D2 D1 as they finish on different\
+  \ doubles. However, the\ncombination S1 T1 D1 is considered the same as T1 S1 D1.\
+  \ In addition we shall\nnot include misses in considering combinations; for example,\
+  \ D3 is the same as 0\nD3 and 0 0 D3. Incredibly there are 42336 distinct ways of\
+  \ checking out in\ntotal. How many distinct ways can a player checkout with a score\
+  \ less than 100?\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=109

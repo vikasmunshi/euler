@@ -1,0 +1,25 @@
+name: chip_defects
+number: 307
+problem_statement: |
+  k defects are randomly distributed amongst n integrated-circuit chips produced
+  by a factory (any number of defects may be found on a chip and each defect is
+  independent of the other defects).   Let p(k, n) represent the probability that
+  there is a chip with at least 3 defects. For instance p(3,7) \approx
+  0.0204081633.   Find p(20\,000, 1\,000\,000) and give your answer rounded to 10
+  decimal places in the form 0.abcdefghij.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=307

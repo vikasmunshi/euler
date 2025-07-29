@@ -1,0 +1,22 @@
+name: sum_of_largest_prime_factors
+number: 642
+problem_statement: |
+  Let f(n) be the largest prime factor of n and \displaystyle F(n) = \sum_{i=2}^n
+  f(i). For example F(10)=32, F(100)=1915 and F(10000)=10118280.  Find
+  F(201820182018). Give your answer modulus 10^9.
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=642

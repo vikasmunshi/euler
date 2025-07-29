@@ -1,0 +1,28 @@
+name: billionaire
+number: 267
+problem_statement: "You are given a unique investment opportunity. Starting with \xA3\
+  1 of capital, you\ncan choose a fixed proportion, f, of your capital to bet on a\
+  \ fair coin toss\nrepeatedly for 1000 tosses. Your return is double your bet for\
+  \ heads and you\nlose your bet for tails. For example, if f\u2009=\u20091/4,  for\
+  \ the first toss you bet\n\xA30.25, and if heads comes up you win \xA30.5 and so\
+  \ then have \xA31.5. You then bet\n\xA30.375 and if the second toss is tails, you\
+  \ have \xA31.125. Choosing f to maximize\nyour chances of having at least \xA31,000,000,000\
+  \ after 1,000 flips, what is the\nchance that you become a billionaire? All computations\
+  \ are assumed to be exact\n(no rounding), but give your answer rounded to 12 digits\
+  \ behind the decimal\npoint in the form 0.abcdefghijkl.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=267

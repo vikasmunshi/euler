@@ -1,0 +1,64 @@
+name: counting_fractions
+number: 72
+problem_statement: |
+  Consider the fraction, \dfrac n d, where n and d are positive integers. If n \lt
+  d and \operatorname{HCF}(n,d)=1, it is called a reduced proper fraction. If we
+  list the set of reduced proper fractions for d \le 8 in ascending order of size,
+  we get: \frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac
+  1 3, \frac 3 8, \frac 2 5, \frac 3 7, \frac 1 2, \frac 4 7, \frac 3 5, \frac 5
+  8, \frac 2 3, \frac 5 7, \frac 3 4, \frac 4 5, \frac 5 6, \frac 6 7, \frac 7 8
+  It can be seen that there are 21 elements in this set. How many elements would
+  be contained in the set of reduced proper fractions for d \le 1\,000\,000?
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 21
+  is_main_case: false
+  kwargs:
+    max_d: 8
+  solution_execution_time: 5.194800178287551e-05
+  solved: true
+- answer: 31
+  is_main_case: false
+  kwargs:
+    max_d: 10
+  solution_execution_time: 5.8796998928301036e-05
+  solved: true
+- answer: 3043
+  is_main_case: false
+  kwargs:
+    max_d: 100
+  solution_execution_time: 9.208499977830797e-05
+  solved: true
+- answer: 304191
+  is_main_case: false
+  kwargs:
+    max_d: 1000
+  solution_execution_time: 0.0006841240028734319
+  solved: true
+- answer: 30397485
+  is_main_case: false
+  kwargs:
+    max_d: 10000
+  solution_execution_time: 0.027776644004916307
+  solved: true
+- answer: 3039650753
+  is_main_case: false
+  kwargs:
+    max_d: 100000
+  solution_execution_time: 0.45341155899950536
+  solved: true
+- answer: 303963552391
+  is_main_case: false
+  kwargs:
+    max_d: 1000000
+  solution_execution_time: 2.077682890005235
+  solved: true
+- answer: 30396356427241
+  is_main_case: false
+  kwargs:
+    max_d: 10000000
+  solution_execution_time: 17.328483573000995
+  solved: true
+url: https://projecteuler.net/problem=72

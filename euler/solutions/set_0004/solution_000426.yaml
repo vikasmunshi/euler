@@ -1,0 +1,37 @@
+name: box_ball_system
+number: 426
+problem_statement: "Consider an infinite row of boxes. Some of the boxes contain a\
+  \ ball. For\nexample, an initial configuration of 2 consecutive occupied boxes followed\
+  \ by 2\nempty boxes, 2 occupied boxes, 1 empty box, and 2 occupied boxes can be\
+  \ denoted\nby the sequence (2, 2, 2, 1, 2), in which the number of consecutive occupied\
+  \ and\nempty boxes appear alternately.   A turn consists of moving each ball exactly\n\
+  once according to the following rule: Transfer the leftmost ball which has not\n\
+  been moved to the nearest empty box to its right.   After one turn the sequence\n\
+  (2, 2, 2, 1, 2) becomes (2, 2, 1, 2, 3) as can be seen below; note that we begin\n\
+  the new sequence starting at the first occupied box.     A system like this is\n\
+  called a Box-Ball System or BBS for short.   It can be shown that after a\nsufficient\
+  \ number of turns, the system evolves to a state where the consecutive\nnumbers\
+  \ of occupied boxes is invariant. In the example below, the consecutive\nnumbers\
+  \ of occupied boxes evolves to [1, 2, 3]; we shall call this the final\nstate. \
+  \    We define the sequence {ti}:s0 = 290797 sk+1 = sk2 mod 50515093 tk =\n(sk mod\
+  \ 64) + 1  Starting from the initial configuration (t0, t1, \u2026, t10), the\n\
+  final state becomes [1, 3, 10, 24, 51, 75]. Starting from the initial\nconfiguration\
+  \ (t0, t1, \u2026, t10 000 000), find the final state. Give as your\nanswer the\
+  \ sum of the squares of the elements of the final state. For example,\nif the final\
+  \ state is [1, 2, 3] then 14 ( = 12 + 22 + 32) is your answer.\n"
+solution_approach: |
+  Document the mathematical approach here.
+test_cases:
+- answer: 0
+  is_main_case: false
+  kwargs:
+    n: 0
+  solution_execution_time: null
+  solved: false
+- answer: 1
+  is_main_case: false
+  kwargs:
+    n: 1
+  solution_execution_time: null
+  solved: false
+url: https://projecteuler.net/problem=426

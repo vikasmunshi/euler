@@ -1,0 +1,23 @@
+name: lattice_paths
+number: 15
+problem_statement: |
+  Starting in the top left corner of a 2 * 2 grid, and only being able to move to
+  the right and down, there are exactly 6 routes to the bottom right corner.   How
+  many such routes are there through a 20 * 20 grid?
+solution_approach: |
+  Document the mathematical approach here.
+solved: false
+test_cases:
+- answer: 6
+  is_main_case: false
+  kwargs:
+    lattice_size: 2
+  solution_execution_time: 2.0749001123476774e-05
+  solved: true
+- answer: 137846528820
+  is_main_case: false
+  kwargs:
+    lattice_size: 20
+  solution_execution_time: 1.751200034050271e-05
+  solved: true
+url: https://projecteuler.net/problem=15
