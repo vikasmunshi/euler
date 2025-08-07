@@ -1,0 +1,39 @@
+euler_problem: 81
+problem_name: path_sum_two_ways
+problem_statement: |4-
+        In the 5 by 5 matrix below, the minimal path sum from the top left to the
+        bottom right, by only moving to the right and down, is indicated in bold
+        red and is equal to 2427.
+
+        Find the minimal path sum from the top left to the bottom right by only
+        moving right and down in matrix.txt (right click and "Save Link/Target
+        As..."), a 31K text file containing an 80 by 80 matrix.
+solution_approach: |4-
+        To solve this problem, use dynamic programming to efficiently compute the
+        minimal path sum. Start at the top-left cell and iteratively calculate the
+        minimal sum to reach each cell by moving only right or down. For each cell,
+        take the minimum of the sums from the cell above and the cell to the left,
+        then add the current cell's value. Store these intermediate sums in a 2D
+        array to avoid redundant calculations. Finally, the value at the bottom-right
+        cell will represent the minimal path sum. This approach leverages the
+        principle of optimality and ensures an O(n^2) time complexity for an n by n
+        matrix.
+solved: true
+test_cases:
+-   euler_problem: 81
+    kwargs:
+        file_url: ''
+    result: 2427
+    solution_execution_time_in_sec:
+        path_sum_two_ways: 112.82 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 81
+    kwargs:
+        file_url: https://projecteuler.net/resources/documents/0081_matrix.txt
+    result: 427337
+    solution_execution_time_in_sec:
+        path_sum_two_ways: 19.62 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=81

@@ -23,7 +23,7 @@ Optimization Strategies:
 - Memory-efficient algorithms for large number operations
 
 Example Usage:
-    >>> from euler.misc.primes import is_prime, prime_factorization, get_divisors
+    >>> from euler.maths.primes import is_prime, prime_factorization, get_divisors
 
     # Test if a number is prime
     >>> is_prime(17)
@@ -51,10 +51,9 @@ from typing import Callable, Dict, Generator, List, Set, Tuple, cast
 
 from euler.logger import logger
 from euler.setup import base_dir
-from euler.types import EulerError
 
 
-class PrimeError(EulerError):
+class PrimeError(ValueError):
     """Error class for prime-related errors."""
     pass
 
@@ -95,7 +94,7 @@ def seed_cache(max_limit: int = __MAX_LIMIT, regenerate: bool = False) -> None:
     if regenerate or not primes_file.exists():
         with open(primes_file, 'w') as out_file:
             out_file.write(f'{max_limit=}\n')
-            primes = gen_primes_sundaram_sieve(max_limit=max_limit)
+            primes = get_pre_computed_primes_sundaram_sieve(max_limit=max_limit)
             out_file.write('\n'.join(f'{prime}' for prime in primes))
         logger.info(f'wrote primes up to {max_limit:,} to {primes_file}')
     with open(primes_file, 'r') as in_file:
@@ -130,7 +129,7 @@ def ensure_prime_cache_is_loaded[T](func: Callable[..., T]) -> Callable[..., T]:
     return func
 
 
-def gen_primes_sieve() -> Generator[int, None, None]:
+def gen_primes_sieve_eratosthenes() -> Generator[int, None, None]:
     """Generate prime numbers indefinitely using a memory-efficient sieve algorithm.
 
     This function implements a memory-efficient version of the Sieve of Eratosthenes
@@ -148,7 +147,7 @@ def gen_primes_sieve() -> Generator[int, None, None]:
         Prime numbers as integers, starting from 2 and continuing indefinitely
 
     Examples:
-        >>> primes_gen = gen_primes_sieve()
+        >>> primes_gen = gen_primes_sieve_eratosthenes()
         >>> [next(primes_gen) for _ in range(5)]  # First 5 primes
         [2, 3, 5, 7, 11]
 
@@ -174,7 +173,7 @@ def gen_primes_sieve() -> Generator[int, None, None]:
         current_number += 1
 
 
-def gen_primes_sundaram_sieve(*, max_limit: int) -> Tuple[int, ...]:
+def get_pre_computed_primes_sundaram_sieve(*, max_limit: int) -> Tuple[int, ...]:
     """Generate prime numbers up to max_limit using the Sieve of Sundaram.
 
     The Sieve of Sundaram is an efficient algorithm for finding all prime numbers up to a
@@ -188,9 +187,9 @@ def gen_primes_sundaram_sieve(*, max_limit: int) -> Tuple[int, ...]:
         A tuple of prime numbers up to max_limit, sorted in ascending order
 
     Examples:
-        >>> gen_primes_sundaram_sieve(max_limit=20)
+        >>> get_pre_computed_primes_sundaram_sieve(max_limit=20)
         (2, 3, 5, 7, 11, 13, 17, 19)
-        >>> gen_primes_sundaram_sieve(max_limit=10)
+        >>> get_pre_computed_primes_sundaram_sieve(max_limit=10)
         (2, 3, 5, 7)
 
     Notes:
@@ -262,7 +261,7 @@ def is_prime(n: int) -> bool:
         return n in cast(Set[int], _CACHE['primes_set'])
     else:
         max_divisor = int(n ** 0.5) + 1
-        for p in gen_primes_sundaram_sieve(max_limit=max_divisor):
+        for p in get_pre_computed_primes_sundaram_sieve(max_limit=max_divisor):
             if n % p == 0:
                 return False
         else:
@@ -322,7 +321,7 @@ def prime_factorization(n: int) -> Tuple[Factor, ...]:
         raise PrimeError(f'n must be greater than 1 (got n={n})')
     factors = []
 
-    for prime in gen_primes_sundaram_sieve(max_limit=int(n ** 0.5) + 1):  # Iterate over primes up to sqrt(n)
+    for prime in get_pre_computed_primes_sundaram_sieve(max_limit=int(n ** 0.5) + 1):
         if prime > n:
             break
         exponent = 0

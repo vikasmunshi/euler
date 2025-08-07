@@ -1,0 +1,70 @@
+euler_problem: 66
+problem_name: diophantine_equation
+problem_statement: |4-
+        Consider quadratic Diophantine equations of the form:
+        x^2 - Dy^2 = 1
+
+        For example, when D = 13, the minimal solution in x is
+        649^2 - 13 x 180^2 = 1.
+
+        It can be assumed that there are no solutions in positive integers when
+        D is square.
+
+        By finding minimal solutions in x for D = {2, 3, 5, 6, 7}, we obtain the
+        following:
+
+        3^2 - 2 x 2^2 = 1
+        2^2 - 3 x 1^2 = 1
+        9^2 - 5 x 4^2 = 1
+        5^2 - 6 x 2^2 = 1
+        8^2 - 7 x 3^2 = 1
+
+        Hence, by considering minimal solutions in x for D less than or equal to 7,
+        the largest x is obtained when D = 5.
+
+        Find the value of D less than or equal to 1000 in minimal solutions of x
+        for which the largest value of x is obtained.
+solution_approach: |4-
+        This problem involves solving Pell's equation, a classical quadratic
+        Diophantine equation of the form x^2 - D y^2 = 1, for various non-square
+        integers D. The goal is to find the minimal solutions for x, where the
+        solution (x, y) are positive integers, and identify which D gives the
+        largest minimal x for D up to 1000.
+
+        To solve this computationally, one can use the method of continued
+        fractions to find the fundamental solution (minimal positive x) for each
+        D. The continued fraction expansion of the square root of D is periodic,
+        and from this the minimal solution to Pell's equation can be derived.
+
+        By iterating over all D values from 1 to 1000 (excluding squares), and
+        computing their fundamental solutions, the D with the largest x can be
+        efficiently identified. Implementations typically benefit from efficient
+        generation and truncation of continued fractions, and careful handling
+        of large integer arithmetic because solutions can grow very large.
+solved: true
+test_cases:
+-   euler_problem: 66
+    kwargs:
+        max_d: 7
+    result: 5
+    solution_execution_time_in_sec:
+        diophantine_equation: 397.29 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 66
+    kwargs:
+        max_d: 1000
+    result: 661
+    solution_execution_time_in_sec:
+        diophantine_equation: 90.16 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 66
+    kwargs:
+        max_d: 10000
+    result: 9949
+    solution_execution_time_in_sec:
+        diophantine_equation: 2.26 sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=66

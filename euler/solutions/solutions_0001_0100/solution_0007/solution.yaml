@@ -1,0 +1,41 @@
+euler_problem: 7
+problem_name: _10_001st_prime
+problem_statement: |4-
+        By listing the first six prime numbers: 2, 3, 5, 7, 11, and 13, we can see
+        that the 6th prime is 13.
+
+        What is the 10,001st prime number?
+solution_approach: |4-
+        To solve this problem, generate prime numbers sequentially and count them
+        until reaching the 10,001st prime.
+
+        Efficient prime checking methods such as the Sieve of Eratosthenes or
+        optimized trial division should be used to reduce computation time. Implement
+        a function to test primality and iterate through natural numbers, counting
+        each prime found.
+
+        Since the position is large, avoid simple brute force methods. Consider
+        using a dynamic sieve or a segmented sieve approach to handle memory and
+        performance effectively.
+
+        The main goal is to identify the exact prime that appears at the 10,001st
+        position in the ordered sequence of prime numbers.
+solved: true
+test_cases:
+-   euler_problem: 7
+    kwargs:
+        n: 6
+    result: 13
+    solution_execution_time_in_sec:
+        solution_10_001st_prime: 75.68 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 7
+    kwargs:
+        n: 10001
+    result: 104743
+    solution_execution_time_in_sec:
+        solution_10_001st_prime: 139.09 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=7

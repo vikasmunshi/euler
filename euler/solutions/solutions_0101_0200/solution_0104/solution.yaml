@@ -1,0 +1,37 @@
+euler_problem: 104
+problem_name: pandigital_fibonacci_ends
+problem_statement: |4-
+        The Fibonacci sequence is defined by the recurrence relation:
+
+        F_n = F_{n - 1} + F_{n - 2}, where F_1 = 1 and F_2 = 1.
+
+        It turns out that F_541, which contains 113 digits, is the first Fibonacci number
+        for which the last nine digits are 1-9 pandigital (contain all the digits 1 to 9,
+        but not necessarily in order). And F_2749, which contains 575 digits, is the
+        first Fibonacci number for which the first nine digits are 1-9 pandigital.
+
+        Given that F_k is the first Fibonacci number for which the first nine digits AND
+        the last nine digits are 1-9 pandigital, find k.
+solution_approach: |4-
+        To solve this problem, one should generate Fibonacci numbers and efficiently
+        check their digit patterns. Since the numbers grow very large, directly
+        computing the full Fibonacci numbers for high indices is computationally
+        expensive. Instead, use modular arithmetic to track the last nine digits and
+        logarithmic properties or floating-point arithmetic to approximate the first
+        nine digits.
+
+        By maintaining the last nine digits modulo 10^9, you can check for pandigitality
+        at the end. For the first nine digits, use the fact that the number of digits
+        and leading digits can be derived from the logarithm (base 10) of the Fibonacci
+        number. Implement a check for pandigitality for both ends and iterate until
+        finding the first Fibonacci number where both criteria are met.
+solved: true
+test_cases:
+-   euler_problem: 104
+    kwargs: {}
+    result: null
+    solution_execution_time_in_sec:
+        pandigital_fibonacci_ends: 413.87 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=104

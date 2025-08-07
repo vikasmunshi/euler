@@ -1,0 +1,40 @@
+euler_problem: 17
+problem_name: number_letter_counts
+problem_statement: |4-
+        If the numbers 1 to 5 are written out in words: one, two, three, four, five, then
+        there are 3 + 3 + 5 + 4 + 4 = 19 letters used in total.
+
+        If all the numbers from 1 to 1000 (one thousand) inclusive were written out in words,
+        how many letters would be used?
+
+        Note:
+        Do not count spaces or hyphens. For example, 342 (three hundred and forty two)
+        contains 23 letters and 115 (one hundred and fifteen) contains 20 letters. The use
+        of "and" when writing out numbers is in compliance with British usage.
+solution_approach: |4-
+        To solve this problem, first devise a function to convert integers into their
+        English word equivalents, carefully following British usage, including the correct
+        use of "and" between hundreds and tens/units. Avoid counting spaces or hyphens
+        when tallying letters. Then programmatically generate words for all numbers from 1
+        through 1000, compute the total letter count of these word representations, and
+        output the sum. This approach requires precise string manipulation, indexing of
+        number words, and iterating through the numeric range.
+solved: true
+test_cases:
+-   euler_problem: 17
+    kwargs:
+        max_number: 5
+    result: 19
+    solution_execution_time_in_sec:
+        number_letter_counts: 266.85 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 17
+    kwargs:
+        max_number: 1000
+    result: 21124
+    solution_execution_time_in_sec:
+        number_letter_counts: 10.40 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=17

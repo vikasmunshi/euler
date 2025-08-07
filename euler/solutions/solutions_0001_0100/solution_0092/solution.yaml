@@ -1,0 +1,94 @@
+euler_problem: 92
+problem_name: square_digit_chains
+problem_statement: |4-
+        A number chain is created by continuously adding the square of the digits
+        in a number to form a new number until it has been seen before.
+
+        For example,
+
+        44 -> 32 -> 13 -> 10 -> 1 -> 1
+        85 -> 89 -> 145 -> 42 -> 20 -> 4 -> 16 -> 37 -> 58 -> 89
+
+        Therefore any chain that arrives at 1 or 89 will become stuck in an
+        endless loop. What is most amazing is that EVERY starting number will
+        eventually arrive at 1 or 89.
+
+        How many starting numbers below ten million will arrive at 89?
+solution_approach: |4-
+        To solve this problem, implement a function that generates the number
+        chain by repeatedly replacing a number with the sum of the squares of its
+        digits. Use memoization to store results for numbers already processed to
+        avoid redundant calculations and speed up the solution.
+
+        Iterate through all starting numbers below ten million, applying the
+        chain function to determine if the chain ends at 89. Count and return the
+        number of such starting numbers. Understanding properties of these chains
+        and efficient caching techniques are crucial for handling the problem
+        efficiently.
+solved: true
+test_cases:
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 2
+    result: 80
+    solution_execution_time_in_sec:
+        square_digit_chains: 518.90 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 3
+    result: 857
+    solution_execution_time_in_sec:
+        square_digit_chains: 861.99 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 4
+    result: 8558
+    solution_execution_time_in_sec:
+        square_digit_chains: 1.33 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 5
+    result: 85623
+    solution_execution_time_in_sec:
+        square_digit_chains: 2.30 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 6
+    result: 856929
+    solution_execution_time_in_sec:
+        square_digit_chains: 3.25 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 7
+    result: 8581146
+    solution_execution_time_in_sec:
+        square_digit_chains: 3.72 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 8
+    result: 85744333
+    solution_execution_time_in_sec:
+        square_digit_chains: 4.42 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 92
+    kwargs:
+        power_of_10: 9
+    result: 854325192
+    solution_execution_time_in_sec:
+        square_digit_chains: 10.32 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=92

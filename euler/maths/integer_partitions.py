@@ -44,11 +44,10 @@ from itertools import count
 from typing import List
 
 from euler.logger import logger
-from euler.maths.primes import gen_primes_sieve, is_prime
-from euler.types import EulerError
+from euler.maths.primes import gen_primes_sieve_eratosthenes, is_prime
 
 
-class IntegerPartitionError(EulerError):
+class IntegerPartitionError(ValueError):
     pass
 
 
@@ -153,7 +152,7 @@ def num_prime_integer_partitions(*, number: int, slots: int) -> int:
         return 0
     result = 0
     max_num = min(number, slots)
-    for n in gen_primes_sieve():
+    for n in gen_primes_sieve_eratosthenes():
         if n > max_num:
             break
         result += num_prime_integer_partitions(number=number - n, slots=n)
@@ -242,7 +241,7 @@ def get_prime_partitions(*, number: int, slots: int, safe_limit: int = 50) -> Li
         return []
     prime_partitions: List[List[int]] = []
     max_num = min(number, slots)
-    for n in gen_primes_sieve():
+    for n in gen_primes_sieve_eratosthenes():
         if n > max_num:
             break
         if n == number:

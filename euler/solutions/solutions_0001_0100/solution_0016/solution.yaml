@@ -1,0 +1,44 @@
+euler_problem: 16
+problem_name: power_digit_sum
+problem_statement: |4-
+        2^15 = 32768 and the sum of its digits is 3 + 2 + 7 + 6 + 8 = 26.
+
+        What is the sum of the digits of the number 2^1000?
+solution_approach: |4-
+        To solve this problem, you need to compute the number 2 raised to the power of 1000.
+        Since this number is very large, it cannot be handled by standard integer types in
+        many programming languages, so you should use arbitrary-precision arithmetic or
+        built-in large integer support. After computing the power, convert the resulting
+        number to a string to access each digit individually. Sum these digits to find the
+        answer. Efficient methods for exponentiation, such as exponentiation by squaring,
+        can be used to optimize the calculation if needed.
+solved: true
+test_cases:
+-   euler_problem: 16
+    kwargs:
+        base: 2
+        power: 15
+    result: 26
+    solution_execution_time_in_sec:
+        power_digit_sum: 51.17 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 16
+    kwargs:
+        base: 2
+        power: 1000
+    result: 1366
+    solution_execution_time_in_sec:
+        power_digit_sum: 92.04 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 16
+    kwargs:
+        base: 2
+        power: 10000
+    result: 13561
+    solution_execution_time_in_sec:
+        power_digit_sum: 833.49 micro-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=16

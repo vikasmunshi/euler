@@ -1,0 +1,38 @@
+euler_problem: 9
+problem_name: special_pythagorean_triplet
+problem_statement: |4-
+        A Pythagorean triplet is a set of three natural numbers, a < b < c, for which,
+        a^2 + b^2 = c^2.
+
+        For example, 3^2 + 4^2 = 9 + 16 = 25 = 5^2.
+
+        There exists exactly one Pythagorean triplet for which a + b + c = 1000.
+        Find the product abc.
+solution_approach: |4-
+        To solve this problem, consider the relationship between the numbers a, b, and
+        c that satisfy the Pythagorean theorem and the sum constraint a + b + c = 1000.
+        Use algebraic manipulations to express one variable in terms of the others.
+        Iterate through possible values of a and b, compute c, and check whether they
+        meet both the Pythagorean condition and the sum condition. Be efficient by
+        limiting the search space using inequalities and properties of Pythagorean
+        triplets. This problem involves a combination of mathematical reasoning about
+        integer solutions and a computational search for the unique triplet.
+solved: true
+test_cases:
+-   euler_problem: 9
+    kwargs:
+        sum_sides: 12
+    result: 60
+    solution_execution_time_in_sec:
+        special_pythagorean_triplet: 33.95 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 9
+    kwargs:
+        sum_sides: 1000
+    result: 31875000
+    solution_execution_time_in_sec:
+        special_pythagorean_triplet: 33.97 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=9

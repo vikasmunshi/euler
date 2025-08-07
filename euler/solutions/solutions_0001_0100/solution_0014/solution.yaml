@@ -1,0 +1,44 @@
+euler_problem: 14
+problem_name: longest_collatz_sequence
+problem_statement: |4-
+        The following iterative sequence is defined for the set of positive integers:
+
+        n -> n / 2 (n is even)
+        n -> 3 n + 1 (n is odd)
+
+        Using the rule above and starting with 13, we generate the following sequence:
+        13 -> 40 -> 20 -> 10 -> 5 -> 16 -> 8 -> 4 -> 2 -> 1.
+
+        It can be seen that this sequence (starting at 13 and finishing at 1) contains
+        10 terms. Although it has not been proved yet (Collatz Problem), it is thought
+        that all starting numbers finish at 1.
+
+        Which starting number, under one million, produces the longest chain?
+
+        NOTE: Once the chain starts the terms are allowed to go above one million.
+solution_approach: |4-
+        To solve this problem efficiently, implement memoization to store the sequence
+        lengths for previously computed numbers, reducing redundant computations.
+        Start from each number under one million and generate the Collatz sequence,
+        recording the length until reaching 1. Maintain a record of the longest
+        sequence and its starting number. This approach leverages dynamic
+        programming concepts to optimize the exploration of the Collatz sequences.
+solved: true
+test_cases:
+-   euler_problem: 14
+    kwargs:
+        max_number: 1000000
+    result: 837799
+    solution_execution_time_in_sec:
+        longest_collatz_sequence: 2.63 sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 14
+    kwargs:
+        max_number: 10000000
+    result: 8400511
+    solution_execution_time_in_sec:
+        longest_collatz_sequence: 25.96 sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=14

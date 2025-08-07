@@ -1,0 +1,71 @@
+euler_problem: 53
+problem_name: combinatoric_selections
+problem_statement: |4-
+        There are exactly ten ways of selecting three from five, 12345:
+
+        123, 124, 125, 134, 135, 145, 234, 235, 245, and 345
+
+        In combinatorics, we use the notation, (5 3) = 10.
+
+        In general, (n r) = n! / (r! (n - r)!), where r \u2264 n, n! = n x (n - 1) x ... x 3
+        x 2 x 1, and 0! = 1.
+
+        It is not until n = 23, that a value exceeds one-million: (23 10) = 1144066.
+
+        How many, not necessarily distinct, values of (n r) for 1 \u2264 n \u2264 100,
+        are greater than one-million?
+solution_approach: |4-
+        To solve this problem, you need to efficiently calculate binomial coefficients,
+        which are given by n! / (r! (n - r)!). However, computing full factorials for
+        large n can be expensive. Use properties of binomial coefficients such as symmetry
+        (C(n, r) = C(n, n-r)) and iterative formulae to compute values without overflow.
+
+        Iterate through all values of n from 1 to 100 and for each n, iterate through
+        values of r from 1 to n. For each combination, check if the binomial coefficient
+        exceeds one million. Keep a count of such occurrences.
+
+        Efficient approaches avoid computing factorials repeatedly by using dynamic
+        programming or Pascal's triangle relationships. You can also use direct
+        multiplicative formulas that build coefficients from previous values.
+
+        This approach balances computational efficiency with clarity to find the count
+        of large binomial coefficients within the defined range.
+solved: true
+test_cases:
+-   euler_problem: 53
+    kwargs:
+        max_n: 100
+        threshold: 100
+    result: 4724
+    solution_execution_time_in_sec:
+        combinatoric_selections: 235.17 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 53
+    kwargs:
+        max_n: 100
+        threshold: 1000000
+    result: 4075
+    solution_execution_time_in_sec:
+        combinatoric_selections: 144.61 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 53
+    kwargs:
+        max_n: 1000
+        threshold: 1000000
+    result: 494861
+    solution_execution_time_in_sec:
+        combinatoric_selections: 907.62 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 53
+    kwargs:
+        max_n: 1000
+        threshold: 1000000000
+    result: 491894
+    solution_execution_time_in_sec:
+        combinatoric_selections: 1.18 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=53

@@ -1,0 +1,36 @@
+euler_problem: 37
+problem_name: truncatable_primes
+problem_statement: |4-
+        The number 3797 has an interesting property. Being prime itself, it is
+        possible to continuously remove digits from left to right, and remain
+        prime at each stage: 3797, 797, 97, and 7. Similarly we can work from
+        right to left: 3797, 379, 37, and 3.
+
+        Find the sum of the only eleven primes that are both truncatable from
+        left to right and right to left.
+
+        NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
+solution_approach: |4-
+        To solve this problem, one should identify primes that remain prime
+        when digits are truncated from either the left or the right sides.
+        A practical approach involves generating candidate primes and checking
+        these truncation properties. Efficient primality testing is crucial,
+        and caching computed results can reduce redundant checks.
+
+        Start from small primes and attempt to build larger truncatable
+        primes by appending digits, ensuring primality at each truncation.
+        Since 2, 3, 5, and 7 are excluded, focus on primes greater than these.
+
+        This exploration can be implemented via iterative or recursive search
+        with pruning based on truncation primality criteria until the unique
+        eleven truncatable primes are found and their sum calculated.
+solved: true
+test_cases:
+-   euler_problem: 37
+    kwargs: {}
+    result: 748317
+    solution_execution_time_in_sec:
+        truncatable_primes: 1.36 sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=37

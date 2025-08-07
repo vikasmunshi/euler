@@ -1,0 +1,52 @@
+euler_problem: 4
+problem_name: largest_palindrome_product
+problem_statement: |4-
+        A palindromic number reads the same both ways. The largest palindrome made from
+        the product of two 2-digit numbers is 9009 = 91 x 99.
+
+        Find the largest palindrome made from the product of two 3-digit numbers.
+solution_approach: |4-
+        To solve this problem, consider iterating over all products of two 3-digit
+        numbers, starting from 999 down to 100. For each product, check if it is a
+        palindrome by converting the number to a string and verifying if it reads the
+        same forwards and backwards. Keep track of the largest palindrome found. You
+        can optimize by starting with larger numbers and breaking early if the product
+        is smaller than the current largest palindrome, reducing unnecessary checks.
+        This approach combines brute force with palindrome verification and mindful
+        iteration to efficiently find the solution.
+        Tip: Divisibility by 11.
+solved: true
+test_cases:
+-   euler_problem: 4
+    kwargs:
+        n: 2
+    result: 9009
+    solution_execution_time_in_sec:
+        largest_palindrome_product: 361.46 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 4
+    kwargs:
+        n: 3
+    result: 906609
+    solution_execution_time_in_sec:
+        largest_palindrome_product: 719.58 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 4
+    kwargs:
+        n: 4
+    result: 99000099
+    solution_execution_time_in_sec:
+        largest_palindrome_product: 6.24 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 4
+    kwargs:
+        n: 5
+    result: 9966006699
+    solution_execution_time_in_sec:
+        largest_palindrome_product: 48.08 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=4

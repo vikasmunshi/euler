@@ -1,0 +1,43 @@
+euler_problem: 87
+problem_name: prime_power_triples
+problem_statement: |4-
+        The smallest number expressible as the sum of a prime square, prime cube, and
+        prime fourth power is 28. In fact, there are exactly four numbers below
+        fifty that can be expressed in such a way:
+
+            28 = 2 x 2 + 2 x 2 x 2 + 2 x 2 x 2 x 2
+            33 = 3 x 3 + 2 x 2 x 2 + 2 x 2 x 2 x 2
+            49 = 5 x 5 + 2 x 2 x 2 + 2 x 2 x 2 x 2
+            47 = 2 x 2 + 3 x 3 x 3 + 2 x 2 x 2 x 2
+
+        How many numbers below fifty million can be expressed as the sum of a prime
+        square, prime cube, and prime fourth power?
+solution_approach: |4-
+        To solve this problem, generate lists of prime numbers up to the limits
+        imposed by the given range (fifty million) for squares, cubes, and fourth
+        powers. Then compute all possible sums of a prime square, prime cube, and
+        prime fourth power. Use an efficient data structure, such as a set, to
+        store unique sums and avoid duplicates. Finally, count how many unique
+        sums are below fifty million. Efficient prime generation algorithms,
+        like the Sieve of Eratosthenes, can be used to produce the prime lists.
+        This approach leverages number theory properties and efficient search
+        techniques to enumerate valid sums within constraints.
+solved: true
+test_cases:
+-   euler_problem: 87
+    kwargs:
+        max_num: 50
+    result: 4
+    solution_execution_time_in_sec:
+        prime_power_triples: 222.30 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 87
+    kwargs:
+        max_num: 50000000
+    result: 1097343
+    solution_execution_time_in_sec:
+        prime_power_triples: 660.13 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=87

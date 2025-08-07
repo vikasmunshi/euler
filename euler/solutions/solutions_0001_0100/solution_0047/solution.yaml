@@ -1,0 +1,50 @@
+euler_problem: 47
+problem_name: distinct_primes_factors
+problem_statement: |4-
+        The first two consecutive numbers to have two distinct prime factors are:
+
+        14 = 2 x 7
+        15 = 3 x 5.
+
+        The first three consecutive numbers to have three distinct prime factors are:
+
+        644 = 2^2 x 7 x 23
+        645 = 3 x 5 x 43
+        646 = 2 x 17 x 19.
+
+        Find the first four consecutive integers to have four distinct prime factors
+        each. What is the first of these numbers?
+solution_approach: |4-
+        To solve this problem, iteratively examine consecutive integers and determine
+        the count of distinct prime factors for each. Efficiently factor numbers using
+        precomputed primes or a sieve method. Once finding four consecutive numbers with
+        exactly four distinct prime prime factors, identify and return the first. This
+        approach benefits from efficient factorization algorithms and careful iteration
+        through integers.
+solved: true
+test_cases:
+-   euler_problem: 47
+    kwargs:
+        n: 2
+    result: 14
+    solution_execution_time_in_sec:
+        distinct_primes_factors: 176.98 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 47
+    kwargs:
+        n: 3
+    result: 644
+    solution_execution_time_in_sec:
+        distinct_primes_factors: 2.15 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 47
+    kwargs:
+        n: 4
+    result: 134043
+    solution_execution_time_in_sec:
+        distinct_primes_factors: 826.80 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=47

@@ -1,0 +1,43 @@
+euler_problem: 91
+problem_name: right_triangles_with_integer_coordinates
+problem_statement: |4-
+        The points P(x_1, y_1) and Q(x_2, y_2) are plotted at integer coordinates
+        and are joined to the origin, O(0,0), to form \u0394OPQ.
+
+        There are exactly fourteen triangles containing a right angle that can be
+        formed when each coordinate lies between 0 and 2 inclusive; that is,
+        0 \u2264 x_1, y_1, x_2, y_2 \u2264 2.
+
+        Given that 0 \u2264 x_1, y_1, x_2, y_2 \u2264 50, how many right triangles can
+        be formed?
+solution_approach: |4-
+        To solve this problem, consider all possible points with integer
+        coordinates between 0 and the given limit (50 in this case). For each
+        pair of points P and Q, check if the triangle formed with the origin is a
+        right triangle. Use the property that a triangle is right angled if the
+        dot product of the vectors representing two sides is zero.
+
+        More specifically, compute vectors OP, OQ, and PQ, and check the
+        perpendicularity conditions for the three angles. Optimizing the search
+        by leveraging symmetry and avoiding duplicate triangles can improve
+        efficiency. Counting all valid configurations gives the number of
+        right triangles.
+solved: true
+test_cases:
+-   euler_problem: 91
+    kwargs:
+        max_num: 2
+    result: 14
+    solution_execution_time_in_sec:
+        right_triangles_with_integer_coordinates: 64.55 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 91
+    kwargs:
+        max_num: 50
+    result: 14234
+    solution_execution_time_in_sec:
+        right_triangles_with_integer_coordinates: 1.48 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=91

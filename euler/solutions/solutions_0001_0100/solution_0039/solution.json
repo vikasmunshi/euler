@@ -1,0 +1,7 @@
+{
+    "max_perimeter=1.0e+02": 60,
+    "max_perimeter=1.0e+03": 840,
+    "max_perimeter=1.0e+04": 5040,
+    "max_perimeter=1.0e+05": 55440,
+    "max_perimeter=1.0e+06": 720720
+}

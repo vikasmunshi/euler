@@ -17,16 +17,14 @@ Implemented algorithms:
 - Binary search method: Alternative approach with predictable performance
 
 Typical usage:
-    from euler.misc.sqrt import sqrt_heron_method
+    from euler.utils.sqrt import sqrt_heron_method
 
     # Calculate square root of 2 with 100 digits of precision
     sqrt_2 = sqrt_heron_method(2, 100)
 """
 
-from euler.types import EulerError
 
-
-class SquareRootError(EulerError):
+class SquareRootError(ValueError):
     """Exception raised for errors in square root calculations.
 
     This exception is raised when invalid inputs are provided to the square root

@@ -1,0 +1,7 @@
+{
+    "max_limit=10": 4,
+    "max_limit=1.0e+02": 13,
+    "max_limit=1.0e+03": 25,
+    "max_limit=1.0e+06": 55,
+    "max_limit=1.0e+07": 55
+}

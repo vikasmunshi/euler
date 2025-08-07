@@ -39,7 +39,7 @@ Mathematical Background:
    - Sequence: 1, 8, 21, 40, 65, 96, 133, ...
    - Inverse: n is octagonal if (2 + sqrt(4 + 12n))/6 is an integer
 
-For each figurate number type, this module provides three misc functions:
+For each figurate number type, this module provides three utils functions:
 - nth_*_number: Calculate the nth number in the sequence (e.g., nth_triangle_number)
 - is_*_number: Check if a number belongs to the sequence (e.g., is_square_number)
 - closest_*_number: Find the closest numbers in the sequence to a given value (e.g., closest_pentagonal_number)
@@ -58,7 +58,6 @@ from math import ceil, floor, sqrt
 from typing import Callable, Dict, Generator, Tuple
 
 from euler.logger import logger
-from euler.types import EulerError
 
 __all__ = [
     'nth_triangle_number', 'is_triangle_number', 'closest_triangle_number',
@@ -71,7 +70,7 @@ __all__ = [
 ]
 
 
-class NumberError(EulerError):
+class NumberError(ValueError):
     """Exception raised when an invalid number is encountered."""
     pass
 

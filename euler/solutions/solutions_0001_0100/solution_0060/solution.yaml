@@ -1,0 +1,52 @@
+euler_problem: 60
+problem_name: prime_pair_sets
+problem_statement: |4-
+        The primes 3, 7, 109, and 673, are quite remarkable. By taking any two
+        primes and concatenating them in any order the result will always be
+        prime. For example, taking 7 and 109, both 7109 and 1097 are prime. The
+        sum of these four primes, 792, represents the lowest sum for a set of
+        four primes with this property.
+
+        Find the lowest sum for a set of five primes for which any two primes
+        concatenate to produce another prime.
+solution_approach: |4-
+        To solve this problem, consider checking combinations of primes and
+        testing whether every pairwise concatenation forms a prime. A key
+        approach involves generating primes efficiently using a sieve method
+        and implementing a fast primality check for concatenated numbers.
+
+        Construct a graph where each node is a prime and edges represent the
+        concatenation primality property. Then search for complete subgraphs
+        (cliques) of size five. Employ backtracking with pruning to limit the
+        search space, starting from smaller sets that satisfy the property.
+
+        Optimizing concatenation checks by caching results and avoiding
+        redundant tests will help handle the computational intensity of the
+        problem.
+solved: true
+test_cases:
+-   euler_problem: 60
+    kwargs:
+        set_length: 3
+    result: 107
+    solution_execution_time_in_sec:
+        prime_pair_sets: 1.02 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 60
+    kwargs:
+        set_length: 4
+    result: 792
+    solution_execution_time_in_sec:
+        prime_pair_sets: 3.86 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 60
+    kwargs:
+        set_length: 5
+    result: 26033
+    solution_execution_time_in_sec:
+        prime_pair_sets: 18.62 sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=60

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Tests for the misc module."""
+"""Tests for the utils module."""
 
 import unittest
 

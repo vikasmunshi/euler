@@ -1,0 +1,83 @@
+euler_problem: 62
+problem_name: cubic_permutations
+problem_statement: |4-
+        The cube, 41063625 (345 x 345 x 345), can be permuted to produce two other cubes: 56623104
+        (384 x 384 x 384) and 66430125 (405 x 405 x 405). In fact, 41063625 is the smallest cube
+        which has exactly three permutations of its digits which are also cube.
+
+        Find the smallest cube for which exactly five permutations of its digits are cube.
+solution_approach: |4-
+        To solve this problem, generate cubes of consecutive integers and sort the digits
+        of each cube to form a signature that identifies permutations. Use a data structure
+        like a dictionary that maps this digit signature to all cubes sharing it. Track the
+        occurrences of each signature to find when exactly five cubes share the same digit
+        permutation. The smallest cube with this property is the desired answer. Efficient
+        checking and sorting, along with careful management of digit signatures, are key
+        to solving this problem within reasonable time and memory constraints.
+solved: true
+test_cases:
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 2
+    result: 125
+    solution_execution_time_in_sec:
+        cubic_permutations: 169.10 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 3
+    result: 41063625
+    solution_execution_time_in_sec:
+        cubic_permutations: 997.72 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 4
+    result: 1006012008
+    solution_execution_time_in_sec:
+        cubic_permutations: 5.90 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 5
+    result: 127035954683
+    solution_execution_time_in_sec:
+        cubic_permutations: 132.73 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 6
+    result: 1000600120008
+    solution_execution_time_in_sec:
+        cubic_permutations: 176.94 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 7
+    result: 10569784298536
+    solution_execution_time_in_sec:
+        cubic_permutations: 243.57 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 8
+    result: 10314675896832
+    solution_execution_time_in_sec:
+        cubic_permutations: 242.17 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 62
+    kwargs:
+        num_permutations: 9
+    result: 13465983902671
+    solution_execution_time_in_sec:
+        cubic_permutations: 208.36 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=62

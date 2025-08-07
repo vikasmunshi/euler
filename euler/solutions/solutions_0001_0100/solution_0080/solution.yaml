@@ -1,0 +1,67 @@
+euler_problem: 80
+problem_name: square_root_digital_expansion
+problem_statement: |4-
+        It is well known that if the square root of a natural number is not an
+        integer, then it is irrational. The decimal expansion of such square
+        roots is infinite without any repeating pattern at all.
+
+        The square root of two is 1.41421356237309504880..., and the digital sum
+        of the first one hundred decimal digits is 475.
+
+        For the first one hundred natural numbers, find the total of the digital
+        sums of the first one hundred decimal digits for all the irrational
+        square roots.
+solution_approach: |4-
+        To solve this problem, first understand that only natural numbers
+        which are perfect squares have rational square roots with finite
+        decimal expansions. For all other natural numbers, the square roots
+        are irrational with infinite non-repeating decimal expansions.
+
+        The key is to compute the decimal expansion of the square root for
+        each natural number up to 100, excluding perfect squares. Since the
+        decimal expansion is infinite, use an algorithm or numerical method
+        that allows you to extract each decimal digit accurately up to 100
+        digits.
+
+        Methods like the digit-by-digit calculation of square roots, or
+        utilizing high-precision arithmetic with Python's decimal module,
+        can be effective.
+
+        After computing the digits, sum the first 100 decimal digits for each
+        irrational root, then accumulate these sums for the total.
+
+        Efficiently identifying perfect squares and managing precision are
+        important to ensure correctness and performance.
+solved: true
+test_cases:
+-   euler_problem: 80
+    kwargs:
+        digits: 100
+        max_num: 2
+    result: 475
+    solution_execution_time_in_sec:
+        square_root_digital_expansion_sqrt_binary_search: 1.87 milli-sec
+        square_root_digital_expansion_sqrt_heron_method: 633.40 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 80
+    kwargs:
+        digits: 100
+        max_num: 99
+    result: 40886
+    solution_execution_time_in_sec:
+        square_root_digital_expansion_sqrt_binary_search: 58.05 milli-sec
+        square_root_digital_expansion_sqrt_heron_method: 38.88 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 80
+    kwargs:
+        digits: 100
+        max_num: 999
+    result: 434576
+    solution_execution_time_in_sec:
+        square_root_digital_expansion_sqrt_binary_search: 587.07 milli-sec
+        square_root_digital_expansion_sqrt_heron_method: 389.20 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=80

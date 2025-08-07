@@ -1,0 +1,65 @@
+euler_problem: 48
+problem_name: self_powers
+problem_statement: |4-
+        The series, 1 x 1 + 2 x 2 + 3 x 3 + \u22ef + 10 x 10 = 10405071317.
+
+        Find the last ten digits of the series, 1 x 1 + 2 x 2 + 3 x 3 + \u22ef +
+        1000 x 1000.
+solution_approach: |4-
+        To solve this problem, consider calculating each term n^n for n from 1
+        to 1000, and summing them while keeping track of only the last ten digits.
+        This can be efficiently done using modular exponentiation with modulus 10^10,
+        which avoids handling very large numbers directly. The approach exploits
+        properties of modular arithmetic to maintain manageable number sizes and
+        achieve correct last ten digits of the sum.
+solved: true
+test_cases:
+-   euler_problem: 48
+    kwargs:
+        n: 10
+    result: 405071317
+    solution_execution_time_in_sec:
+        self_powers: 189.83 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 48
+    kwargs:
+        n: 100
+    result: 9027641920
+    solution_execution_time_in_sec:
+        self_powers: 300.84 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 48
+    kwargs:
+        n: 1000
+    result: 9110846700
+    solution_execution_time_in_sec:
+        self_powers: 2.38 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 48
+    kwargs:
+        n: 10000
+    result: 6237204500
+    solution_execution_time_in_sec:
+        self_powers: 33.72 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 48
+    kwargs:
+        n: 100000
+    result: 3031782500
+    solution_execution_time_in_sec:
+        self_powers: 416.10 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 48
+    kwargs:
+        n: 1000000
+    result: 4077562500
+    solution_execution_time_in_sec:
+        self_powers: 5.71 sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=48

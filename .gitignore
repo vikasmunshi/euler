@@ -76,13 +76,9 @@ celerybeat-schedule
 docs/_build/
 local_settings.py
 
-# Ignore all project euler solution files except the specified ones
-problem_[0-9][0-9][0-9][0-9][0-9][0-9].py
-!problem_0000[0-9][0-9].py
-!problem_000100.py
-solution_[0-9][0-9][0-9][0-9][0-9][0-9].py
-!solution_0000[0-9][0-9].py
-!solution_000100.py
+# Ignore project euler files that cannot be published
+private.json
+private.py
 
 # Project data
 db.sqlite3

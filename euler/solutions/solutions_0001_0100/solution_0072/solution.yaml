@@ -1,0 +1,99 @@
+euler_problem: 72
+problem_name: counting_fractions
+problem_statement: |4-
+        Consider the fraction, n over d, where n and d are positive integers. If n is less
+        than d and the highest common factor (HCF) of n and d is 1, it is called a reduced
+        proper fraction.
+
+        If we list the set of reduced proper fractions for d less than or equal to 8 in
+        ascending order of size, we get:
+        1 over 8, 1 over 7, 1 over 6, 1 over 5, 1 over 4, 2 over 7, 1 over 3, 3 over 8,
+        2 over 5, 3 over 7, 1 over 2, 4 over 7, 3 over 5, 5 over 8, 2 over 3, 5 over 7,
+        3 over 4, 4 over 5, 5 over 6, 6 over 7, 7 over 8.
+
+        It can be seen that there are 21 elements in this set.
+
+        How many elements would be contained in the set of reduced proper fractions for d
+        less than or equal to 1,000,000?
+solution_approach: |4-
+        To solve this problem, we need to count the number of reduced proper fractions with
+        denominators up to a given limit. A key concept is Euler's Totient function phi(d),
+        which counts the positive integers up to d that are relatively prime to d.
+
+        The total number of reduced proper fractions for denominators less than or equal to
+        N is the sum of phi(d) for d from 2 to N.
+
+        An efficient algorithm involves using a sieve-like method to compute the totient
+        values for all numbers up to N. This approach avoids individually checking
+        coprimality for each fraction and leverages number-theoretic properties for fast
+        computation.
+
+        Implementing this approach with optimized data structures and careful iteration
+        will allow the calculation for N = 1,000,000 within a reasonable time frame.
+solved: true
+test_cases:
+-   euler_problem: 72
+    kwargs:
+        max_d: 8
+    result: 21
+    solution_execution_time_in_sec:
+        counting_fractions: 69.48 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 72
+    kwargs:
+        max_d: 10
+    result: 31
+    solution_execution_time_in_sec:
+        counting_fractions: 57.46 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 72
+    kwargs:
+        max_d: 100
+    result: 3043
+    solution_execution_time_in_sec:
+        counting_fractions: 120.23 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 72
+    kwargs:
+        max_d: 1000
+    result: 304191
+    solution_execution_time_in_sec:
+        counting_fractions: 751.40 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 72
+    kwargs:
+        max_d: 10000
+    result: 30397485
+    solution_execution_time_in_sec:
+        counting_fractions: 8.70 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 72
+    kwargs:
+        max_d: 100000
+    result: 3039650753
+    solution_execution_time_in_sec:
+        counting_fractions: 112.26 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 72
+    kwargs:
+        max_d: 1000000
+    result: 303963552391
+    solution_execution_time_in_sec:
+        counting_fractions: 1.68 sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 72
+    kwargs:
+        max_d: 10000000
+    result: 30396356427241
+    solution_execution_time_in_sec:
+        counting_fractions: 16.93 sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=72

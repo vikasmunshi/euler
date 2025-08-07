@@ -1,0 +1,132 @@
+euler_problem: 69
+problem_name: totient_maximum
+problem_statement: |4-
+        Euler's totient function, \u03d5(n) [sometimes called the phi function], is
+        defined as the number of positive integers not exceeding n which are
+        relatively prime to n. For example, as 1, 2, 4, 5, 7, and 8, are all
+        less than or equal to nine and relatively prime to nine, \u03d5(9) = 6.
+
+        n   Relatively Prime  \u03d5(n)    n / \u03d5(n)
+        2   1                1        2
+        3   1,2              2        1.5
+        4   1,3              2        2
+        5   1,2,3,4          4        1.25
+        6   1,5              2        3
+        7   1,2,3,4,5,6      6        1.1666...
+        8   1,3,5,7          4        2
+        9   1,2,4,5,7,8      6        1.5
+        10  1,3,7,9          4        2.5
+
+        It can be seen that n = 6 produces a maximum n / \u03d5(n) for n \u2264 10.
+
+        Find the value of n \u2264 1 000 000 for which n / \u03d5(n) is a maximum.
+solution_approach: |4-
+        To solve this problem, understand that \u03d5(n) counts integers relatively
+        prime to n. The ratio n / \u03d5(n) is maximized when n has many small prime
+        factors. To find the maximum n / \u03d5(n) for n up to one million, use the
+        fact that \u03d5 is multiplicative and for a prime p, \u03d5(p) = p - 1. The
+        ratio n / \u03d5(n) can be expressed as a product over the primes dividing n
+        of p / (p - 1). Therefore, the problem reduces to multiplying small primes
+        in ascending order until the product exceeds one million. The largest
+        product under one million maximizing n / \u03d5(n) is the answer. Efficient
+        computation requires prime generation, careful product accumulation, and
+        checking values.
+solved: true
+test_cases:
+-   euler_problem: 69
+    kwargs:
+        n: 10
+    result: 6
+    solution_execution_time_in_sec:
+        totient_maximum: 28.16 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 69
+    kwargs:
+        n: 100
+    result: 30
+    solution_execution_time_in_sec:
+        totient_maximum: 47.78 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 69
+    kwargs:
+        n: 1000
+    result: 210
+    solution_execution_time_in_sec:
+        totient_maximum: 66.20 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 69
+    kwargs:
+        n: 10000
+    result: 2310
+    solution_execution_time_in_sec:
+        totient_maximum: 71.39 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 69
+    kwargs:
+        n: 100000
+    result: 30030
+    solution_execution_time_in_sec:
+        totient_maximum: 76.71 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 69
+    kwargs:
+        n: 1000000
+    result: 510510
+    solution_execution_time_in_sec:
+        totient_maximum: 78.34 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 69
+    kwargs:
+        n: 10000000
+    result: 9699690
+    solution_execution_time_in_sec:
+        totient_maximum: 94.05 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 69
+    kwargs:
+        n: 100000000
+    result: 9699690
+    solution_execution_time_in_sec:
+        totient_maximum: 103.80 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 69
+    kwargs:
+        n: 1000000000
+    result: 223092870
+    solution_execution_time_in_sec:
+        totient_maximum: 78.61 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 69
+    kwargs:
+        n: 10000000000
+    result: 6469693230
+    solution_execution_time_in_sec:
+        totient_maximum: 93.95 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 69
+    kwargs:
+        n: 100000000000
+    result: 6469693230
+    solution_execution_time_in_sec:
+        totient_maximum: 160.96 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 69
+    kwargs:
+        n: 1000000000000
+    result: 200560490130
+    solution_execution_time_in_sec:
+        totient_maximum: 156.66 micro-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=69

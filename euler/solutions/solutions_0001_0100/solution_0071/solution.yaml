@@ -1,0 +1,75 @@
+euler_problem: 71
+problem_name: ordered_fractions
+problem_statement: |4-
+        Consider the fraction, n over d, where n and d are positive integers. If n
+        is less than d and the highest common factor of n and d is 1, it is called
+        a reduced proper fraction.
+
+        If we list the set of reduced proper fractions for d less than or equal to 8
+        in ascending order of size, we get:
+        1 over 8, 1 over 7, 1 over 6, 1 over 5, 1 over 4, 2 over 7, 1 over 3, 3 over 8,
+        2 over 5, 3 over 7, 1 over 2, 4 over 7, 3 over 5, 5 over 8, 2 over 3, 5 over
+        7, 3 over 4, 4 over 5, 5 over 6, 6 over 7, 7 over 8.
+
+        It can be seen that 2 over 5 is the fraction immediately to the left of 3 over
+        7.
+
+        By listing the set of reduced proper fractions for d less than or equal to
+        1,000,000 in ascending order of size, find the numerator of the fraction
+        immediately to the left of 3 over 7.
+solution_approach: |4-
+        This problem involves finding the reduced proper fraction immediately
+        to the left of a given target fraction (3/7) within the set of fractions
+        with denominators up to a large limit (1,000,000).
+
+        A practical approach is to use the concept of farey sequences or mediant
+        properties to search efficiently without enumerating all fractions.
+        Since fractions are reduced, greatest common divisor (GCD) checks help
+        ensure validity.
+
+        One way is to iterate over denominators up to the limit and calculate the
+        best possible numerator n such that n/d is less than 3/7, then track the
+        fraction closest to 3/7 from the left side.
+
+        Efficient computations of GCD and careful fraction comparison will help
+        maintain performance. This approach avoids generating and sorting the
+        entire list of fractions.
+
+        The problem tests number theory understanding, especially knowledge of
+        coprime integers, fraction ordering, and optimization techniques to handle
+        large search spaces.
+solved: true
+test_cases:
+-   euler_problem: 71
+    kwargs:
+        max_d: 10
+    result: 2
+    solution_execution_time_in_sec:
+        ordered_fractions: 122.79 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 71
+    kwargs:
+        max_d: 1000000
+    result: 428570
+    solution_execution_time_in_sec:
+        ordered_fractions: 125.94 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 71
+    kwargs:
+        max_d: 1000000000
+    result: 428571425
+    solution_execution_time_in_sec:
+        ordered_fractions: 122.17 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 71
+    kwargs:
+        max_d: 1000000000000
+    result: 428571428570
+    solution_execution_time_in_sec:
+        ordered_fractions: 132.34 micro-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=71

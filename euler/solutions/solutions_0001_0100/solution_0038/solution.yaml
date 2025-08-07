@@ -1,0 +1,37 @@
+euler_problem: 38
+problem_name: pandigital_multiples
+problem_statement: |4-
+        Take the number 192 and multiply it by each of 1, 2, and 3:
+
+            192 x 1 = 192
+            192 x 2 = 384
+            192 x 3 = 576
+
+        By concatenating each product we get the 1 to 9 pandigital, 192384576.
+        We will call 192384576 the concatenated product of 192 and (1, 2, 3).
+
+        The same can be achieved by starting with 9 and multiplying by 1, 2, 3, 4,
+        and 5, giving the pandigital, 918273645, which is the concatenated product
+        of 9 and (1, 2, 3, 4, 5).
+
+        What is the largest 1 to 9 pandigital 9-digit number that can be formed as
+        the concatenated product of an integer with (1, 2, ..., n) where n > 1?
+solution_approach: |4-
+        To solve this problem, consider generating concatenated products for a range
+        of integers multiplied by sequences of increasing length starting from 2. For
+        each integer, concatenate the products of it multiplied by 1, 2, ..., n until
+        the concatenated string reaches nine digits. Check if this resulting 9-digit
+        number is pandigital, containing each digit from 1 to 9 exactly once. Keep
+        track of the largest such pandigital number found. Efficiently prune the search
+        by considering the numeric range that can produce a 9-digit concatenated product
+        and leverage string manipulation and set operations to verify pandigitality.
+solved: true
+test_cases:
+-   euler_problem: 38
+    kwargs: {}
+    result: 932718654
+    solution_execution_time_in_sec:
+        pandigital_multiples: 3.34 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=38

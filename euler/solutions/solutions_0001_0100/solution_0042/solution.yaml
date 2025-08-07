@@ -1,0 +1,34 @@
+euler_problem: 42
+problem_name: coded_triangle_numbers
+problem_statement: |4-
+        The n th term of the sequence of triangle numbers is given by, t_n = 1/2 n(n+1); so
+        the first ten triangle numbers are:
+        1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
+
+        By converting each letter in a word to a number corresponding to its alphabetical
+        position and adding these values we form a word value. For example, the word
+        value for SKY is 19 + 11 + 25 = 55 = t_10. If the word value is a triangle number
+        then we shall call the word a triangle word.
+
+        Using words.txt (right click and 'Save Link/Target As...'), a 16K text file
+        containing nearly two-thousand common English words, how many are triangle words?
+solution_approach: |4-
+        To solve this problem, first generate a list of triangle numbers up to the
+        maximum possible word value. Next, read the provided list of words and convert
+        each word to its word value by summing the alphabetical positions of its letters
+        (A=1, B=2, ...). Check if each word value is present in the list of triangle
+        numbers. Counting all such occurrences gives the number of triangle words.
+
+        Efficient string processing and precomputation of triangle numbers will be
+        key. Consider using a set for quick membership checking of triangle numbers.
+solved: true
+test_cases:
+-   euler_problem: 42
+    kwargs:
+        file_url: https://projecteuler.net/resources/documents/0042_words.txt
+    result: 162
+    solution_execution_time_in_sec:
+        coded_triangle_numbers: 11.38 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=42

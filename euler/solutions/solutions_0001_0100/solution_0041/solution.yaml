@@ -1,0 +1,26 @@
+euler_problem: 41
+problem_name: pandigital_prime
+problem_statement: |4-
+        We shall say that an n-digit number is pandigital if it makes use of all the digits
+        1 to n exactly once. For example, 2143 is a 4-digit pandigital and is also prime.
+
+        What is the largest n-digit pandigital prime that exists?
+solution_approach: |4-
+        To solve this problem, you can use a combinatorial approach combined with
+        prime checking. Generate permutations of digits from 1 to n for different values
+        of n, starting from the largest possible n-digit pandigital numbers and moving
+        downwards. For each permutation, convert it into a number and test if it is prime.
+        Since the problem asks for the largest pandigital prime, you can stop once you
+        find the first prime during this descending search. Efficient primality testing
+        will significantly improve performance. Additionally, consider properties of
+        digit sums to eliminate certain pandigital lengths without exhaustive search.
+solved: true
+test_cases:
+-   euler_problem: 41
+    kwargs: {}
+    result: 7652413
+    solution_execution_time_in_sec:
+        pandigital_prime: 2.07 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=41

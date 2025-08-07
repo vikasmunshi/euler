@@ -1,0 +1,4 @@
+{
+    "dice_size=6, simulations=1.0e+06": "102400",
+    "dice_size=4, simulations=1.0e+06": "101524"
+}

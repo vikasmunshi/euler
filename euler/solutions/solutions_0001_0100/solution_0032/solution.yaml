@@ -1,0 +1,46 @@
+euler_problem: 32
+problem_name: pandigital_products
+problem_statement: |4-
+        We shall say that an n-digit number is pandigital if it makes use of all the
+        digits 1 to n exactly once; for example, the 5-digit number, 15234, is 1
+        through 5 pandigital.
+
+        The product 7254 is unusual, as the identity, 39 x 186 = 7254, containing
+        multiplicand, multiplier, and product is 1 through 9 pandigital.
+
+        Find the sum of all products whose multiplicand/multiplier/product identity
+        can be written as a 1 through 9 pandigital.
+
+        HINT: Some products can be obtained in more than one way so be sure to
+        only include it once in your sum.
+solution_approach: |4-
+        To solve this problem, consider the concept of pandigital numbers, which
+        are numbers that contain each digit in a given range exactly once. The key
+        challenge is to find all unique products whose multiplicand, multiplier, and
+        product together form a 1 through 9 pandigital combination.
+
+        An effective approach involves generating all possible combinations of
+        multiplicand and multiplier pairs that use distinct digits 1 to 9 without
+        repetition, then calculating their product. Check if the concatenation of
+        the multiplicand, multiplier, and product contains all digits from 1 to 9
+        exactly once.
+
+        Tracking duplicates is crucial, as a product might be expressible in multiple
+        ways. Store unique products in a set to avoid counting them multiple times.
+
+        The problem is computational but can be optimized by reasoning about the
+        lengths of multiplicand and multiplier and limiting search space accordingly.
+        This involves combinatorial enumeration and careful digit usage checks.
+
+        Overall, this task combines number theory, combinatorics, and efficient
+        search algorithms to find the required sum.
+solved: true
+test_cases:
+-   euler_problem: 32
+    kwargs: {}
+    result: 45228
+    solution_execution_time_in_sec:
+        pandigital_products: 42.91 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=32

@@ -1,0 +1,6 @@
+{
+    "max_n=1.0e+02, threshold=1.0e+02": 4724,
+    "max_n=1.0e+02, threshold=1.0e+06": 4075,
+    "max_n=1.0e+03, threshold=1.0e+06": 494861,
+    "max_n=1.0e+03, threshold=1.0e+09": 491894
+}

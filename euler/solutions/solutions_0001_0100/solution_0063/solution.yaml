@@ -1,0 +1,31 @@
+euler_problem: 63
+problem_name: powerful_digit_counts
+problem_statement: |4-
+        The 5-digit number, 16807=7 x 5, is also a fifth power. Similarly, the
+        9-digit number, 134217728=8 x 9, is a ninth power.
+
+        How many n-digit positive integers exist which are also an nth power?
+solution_approach: |4-
+        To solve this problem, consider the relationship between the number of digits
+        of a number and its value as a power. For an integer base b and exponent n,
+        the number b^n will have a certain number of digits that can be determined
+        using logarithms (specifically, using the formula floor(n * log10(b)) + 1).
+
+        The task is to count all cases where the number of digits of b^n equals n.
+        Start by iterating through possible bases and exponents, calculating the
+        digit count of each power. Then compare the digit count to the exponent.
+        Efficiently implement a stopping condition to avoid unnecessary computations
+        when numbers exceed or fall below the required digit length.
+
+        This approach combines mathematical insight on digit length with algorithmic
+        iteration and conditional checks, enabling the counting of all n-digit nth powers.
+solved: true
+test_cases:
+-   euler_problem: 63
+    kwargs: {}
+    result: 49
+    solution_execution_time_in_sec:
+        powerful_digit_counts: 201.44 micro-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=63

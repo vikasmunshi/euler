@@ -4,7 +4,7 @@
 Unit Tests for the Square Root Calculation Module
 
 This module contains unit tests for the high-precision square root calculation methods
-defined in euler.misc.sqrt.
+defined in euler.utils.sqrt.
 """
 
 import math

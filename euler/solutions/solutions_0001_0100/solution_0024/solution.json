@@ -1,0 +1,5 @@
+{
+    "digits=012, permutation_number=4": "120",
+    "digits=012, permutation_number=6": "210",
+    "digits=0123456789, permutation_number=1.0e+06": "2783915460"
+}

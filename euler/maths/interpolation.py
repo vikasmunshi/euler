@@ -26,8 +26,6 @@ Typical Usage:
 from math import isclose
 from typing import List, Sequence, Tuple
 
-from euler.types import EulerError
-
 # Define a variable for numeric types that can be used in interpolation
 Numeric = int | float
 
@@ -36,7 +34,7 @@ Numeric = int | float
 Polynomial = Tuple[Numeric, ...]
 
 
-class InterpolationError(EulerError):
+class InterpolationError(ValueError):
     """Exception raised for errors in interpolation methods."""
     pass
 

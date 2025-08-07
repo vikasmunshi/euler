@@ -1,0 +1,62 @@
+euler_problem: 35
+problem_name: circular_primes
+problem_statement: |4-
+        The number, 197, is called a circular prime because all rotations of the
+        digits: 197, 971, and 719, are themselves prime.
+
+        There are thirteen such primes below 100: 2, 3, 5, 7, 11, 13, 17, 31, 37,
+        71, 73, 79, and 97.
+
+        How many circular primes are there below one million?
+solution_approach: |4-
+        To solve the problem of finding circular primes below one million,
+        first generate all prime numbers up to that limit using an efficient
+        method such as the Sieve of Eratosthenes. Then, for each prime, generate
+        all rotations of its digits and check if all these rotations are also
+        prime. Count only those primes for which every rotation is prime. Pay
+        special attention to digit rotations that may introduce leading zeros or
+        change the length of numbers. This approach involves prime testing and
+        careful handling of digit manipulations to identify circular primes.
+solved: true
+test_cases:
+-   euler_problem: 35
+    kwargs:
+        max_limit: 10
+    result: 4
+    solution_execution_time_in_sec:
+        circular_primes: 253.06 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 35
+    kwargs:
+        max_limit: 100
+    result: 13
+    solution_execution_time_in_sec:
+        circular_primes: 421.71 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 35
+    kwargs:
+        max_limit: 1000
+    result: 25
+    solution_execution_time_in_sec:
+        circular_primes: 1.35 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 35
+    kwargs:
+        max_limit: 1000000
+    result: 55
+    solution_execution_time_in_sec:
+        circular_primes: 775.38 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 35
+    kwargs:
+        max_limit: 10000000
+    result: 55
+    solution_execution_time_in_sec:
+        circular_primes: 8.95 sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=35

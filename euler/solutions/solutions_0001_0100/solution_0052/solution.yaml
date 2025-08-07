@@ -1,0 +1,61 @@
+euler_problem: 52
+problem_name: permuted_multiples
+problem_statement: |4-
+        It can be seen that the number, 125874, and its double, 251748, contain
+        exactly the same digits, but in a different order.
+
+        Find the smallest positive integer, x, such that 2 x x, 3 x x, 4 x x,
+        5 x x, and 6 x x, contain the same digits.
+solution_approach: |4-
+        To solve this problem, consider iterating through positive integers
+        and for each integer, generate its multiples from 2x up to 6x. Convert
+        each multiple to a string and compare the sorted digits to ensure they
+        are identical. The first integer for which all these multiples contain
+        the same digits in a different order is the solution. Efficient
+        digit comparison and early rejection of candidates can speed up the
+        search process. This approach leverages string manipulation and
+        sorting techniques and ensures that the solution is found without
+        excessive computational effort.
+solved: true
+test_cases:
+-   euler_problem: 52
+    kwargs:
+        multiples: 2
+    result: 125874
+    solution_execution_time_in_sec:
+        permuted_multiples: 278.20 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 52
+    kwargs:
+        multiples: 3
+    result: 142857
+    solution_execution_time_in_sec:
+        permuted_multiples: 453.02 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 52
+    kwargs:
+        multiples: 4
+    result: 142857
+    solution_execution_time_in_sec:
+        permuted_multiples: 624.69 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 52
+    kwargs:
+        multiples: 5
+    result: 142857
+    solution_execution_time_in_sec:
+        permuted_multiples: 761.50 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 52
+    kwargs:
+        multiples: 6
+    result: 142857
+    solution_execution_time_in_sec:
+        permuted_multiples: 903.92 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=52

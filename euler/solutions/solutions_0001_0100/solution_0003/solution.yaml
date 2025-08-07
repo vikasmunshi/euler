@@ -1,0 +1,57 @@
+euler_problem: 3
+problem_name: largest_prime_factor
+problem_statement: |4-
+        The prime factors of 13195 are 5, 7, 13 and 29.
+        What is the largest prime factor of the number 600851475143?
+solution_approach: |4-
+        To solve this problem, start by understanding prime factorization.
+        Break down the given number into its prime factors by testing divisibility
+        starting from the smallest primes. You can repeatedly divide the number by
+        its smallest prime factor until it reduces to 1. The largest prime factor
+        encountered during this process is the answer. Efficient algorithms like
+        trial division, optimized by checking factors only up to the square root
+        of the number, can be used to improve performance. Avoid checking even
+        numbers beyond 2 to save computation time.
+solved: true
+test_cases:
+-   euler_problem: 3
+    kwargs:
+        number: 13195
+    result: 29
+    solution_execution_time_in_sec:
+        largest_prime_factor_repeated_division: 58.51 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 3
+    kwargs:
+        number: 10
+    result: 5
+    solution_execution_time_in_sec:
+        largest_prime_factor_repeated_division: 57.92 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 3
+    kwargs:
+        number: 20
+    result: 5
+    solution_execution_time_in_sec:
+        largest_prime_factor_repeated_division: 56.35 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 3
+    kwargs:
+        number: 600851475143
+    result: 6857
+    solution_execution_time_in_sec:
+        largest_prime_factor_repeated_division: 176.37 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 3
+    kwargs:
+        number: 79376318561249
+    result: 9999991
+    solution_execution_time_in_sec:
+        largest_prime_factor_repeated_division: 678.55 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=3

@@ -1,0 +1,65 @@
+euler_problem: 26
+problem_name: reciprocal_cycles
+problem_statement: |4-
+        A unit fraction contains 1 in the numerator. The decimal representation of
+        the unit fractions with denominators 2 to 10 are given:
+
+        1/2 = 0.5
+        1/3 = 0.(3)
+        1/4 = 0.25
+        1/5 = 0.2
+        1/6 = 0.1(6)
+        1/7 = 0.(142857)
+        1/8 = 0.125
+        1/9 = 0.(1)
+        1/10 = 0.1
+
+        Where 0.1(6) means 0.166666... and has a 1-digit recurring cycle. It can be
+        seen that 1/7 has a 6-digit recurring cycle.
+
+        Find the value of d < 1000 for which 1/d contains the longest recurring cycle
+        in its decimal fraction part.
+solution_approach: |4-
+        To solve this problem, investigate the decimal representation of the unit
+        fractions 1/d for d less than 1000. The length of the recurring cycle in the
+        decimal expansion of 1/d is related to the order of 10 modulo d, which can be
+        found using modular arithmetic. By computing the smallest positive integer k
+        such that 10^k \equiv 1 (mod d), you determine the cycle length. Iterate over
+        all denominators less than 1000 to find the maximum cycle length. Efficient
+        implementation might involve skipping numbers with factors 2 and 5 since
+        these denominators produce terminating decimals.
+solved: true
+test_cases:
+-   euler_problem: 26
+    kwargs:
+        max_val: 10
+    result: 7
+    solution_execution_time_in_sec:
+        reciprocal_cycles: 57.91 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 26
+    kwargs:
+        max_val: 100
+    result: 97
+    solution_execution_time_in_sec:
+        reciprocal_cycles: 67.36 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 26
+    kwargs:
+        max_val: 1000
+    result: 983
+    solution_execution_time_in_sec:
+        reciprocal_cycles: 3.48 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 26
+    kwargs:
+        max_val: 10000
+    result: 9967
+    solution_execution_time_in_sec:
+        reciprocal_cycles: 123.92 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=26

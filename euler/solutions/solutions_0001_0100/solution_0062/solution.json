@@ -1,0 +1,10 @@
+{
+    "num_permutations=2": 125,
+    "num_permutations=3": 41063625,
+    "num_permutations=4": 1006012008,
+    "num_permutations=5": 127035954683,
+    "num_permutations=6": 1000600120008,
+    "num_permutations=7": 10569784298536,
+    "num_permutations=8": 10314675896832,
+    "num_permutations=9": 13465983902671
+}

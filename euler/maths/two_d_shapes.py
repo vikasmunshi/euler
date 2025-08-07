@@ -24,7 +24,16 @@ from dataclasses import dataclass
 from math import isclose
 from typing import ClassVar, Dict, List, Tuple
 
-from euler.types import EulerError
+
+class ShapeError(ValueError):
+    """Exception raised for errors in geometric shape validation or creation.
+
+    This exception is raised when attempting to create invalid geometric shapes,
+    such as a triangle with two points, a line with coincident points,
+    or a non-simple quadrilateral.
+    """
+    pass
+
 
 epsilon: float = 1e-10
 
@@ -56,17 +65,7 @@ def from_points_str(comma_seperated_points_str: str) -> Polygon2D:
     return Polygon2D(vertices=tuple(Point2D(x=points[i], y=points[i + 1]) for i in range(0, len(points), 2)))
 
 
-class ShapeError(EulerError):
-    """Exception raised for errors in geometric shape validation or creation.
-
-    This exception is raised when attempting to create invalid geometric shapes,
-    such as a triangle with two points, a line with coincident points,
-    or a non-simple quadrilateral.
-    """
-    pass
-
-
-@dataclass(frozen=True, slots=True, kw_only=True)
+@dataclass(frozen=True, slots=True, kw_only=False)
 class Point2D:
     """A class representing a point in 2D space.
 

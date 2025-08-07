@@ -1,0 +1,37 @@
+euler_problem: 46
+problem_name: goldbachs_other_conjecture
+problem_statement: |4-
+        It was proposed by Christian Goldbach that every odd composite number can be written
+        as the sum of a prime and twice a square.
+
+        9 = 7 + 2 x 1^2
+        15 = 7 + 2 x 2^2
+        21 = 3 + 2 x 3^2
+        25 = 7 + 2 x 3^2
+        27 = 19 + 2 x 2^2
+        33 = 31 + 2 x 1^2
+
+        It turns out that the conjecture was false.
+
+        What is the smallest odd composite that cannot be written as the sum of a prime and
+        twice a square?
+solution_approach: |4-
+        To solve this problem, start by generating a list of prime numbers using an
+        efficient algorithm such as the Sieve of Eratosthenes. Then, generate odd
+        composite numbers sequentially. For each odd composite, test whether it can be
+        expressed as the sum of a prime and twice a square. To verify this, iterate over
+        primes less than the composite and check if the difference between the composite
+        and the prime is twice a perfect square. Use efficient methods to check for
+        perfect squares to optimize the process. The smallest odd composite for which no
+        such decomposition holds is the solution. This approach combines prime number
+        generation with iterative testing of the given representation.
+solved: true
+test_cases:
+-   euler_problem: 46
+    kwargs: {}
+    result: 5777
+    solution_execution_time_in_sec:
+        goldbach_s_other_conjecture: 53.21 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=46

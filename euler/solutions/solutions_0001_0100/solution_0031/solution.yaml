@@ -1,0 +1,93 @@
+euler_problem: 31
+problem_name: coin_sums
+problem_statement: |4-
+        In the United Kingdom the currency is made up of pound (\u00a3) and pence (p). There
+        are eight coins in general circulation:
+
+        1p, 2p, 5p, 10p, 20p, 50p, \u00a31 (100p), and \u00a32 (200p).
+
+        It is possible to make \u00a32 in the following way:
+
+        1 x \u00a31 + 1 x 50p + 2 x 20p + 1 x 5p + 1 x 2p + 3 x 1p
+
+        How many different ways can \u00a32 be made using any number of coins?
+solution_approach: |4-
+        To solve this problem, consider using dynamic programming to count the number
+        of ways to make a total sum using a given set of coin denominations. Begin by
+        representing each coin value in pence to work with integers. Then create an
+        array where each index represents a sub-amount up to the target (200p).
+        Iteratively update this array by adding the ways to form each amount with the
+        current coin. This approach efficiently counts combinations without repetitions,
+        taking care to handle each coin denomination in sequence to avoid counting
+        identical sets multiple times.
+solved: true
+test_cases:
+-   euler_problem: 31
+    kwargs:
+        coins:
+        - 1
+        - 2
+        - 5
+        - 10
+        - 20
+        - 50
+        - 100
+        - 200
+        target: 0
+    result: 1
+    solution_execution_time_in_sec:
+        coin_sums: 233.56 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 31
+    kwargs:
+        coins:
+        - 1
+        - 2
+        - 5
+        - 10
+        - 20
+        - 50
+        - 100
+        - 200
+        target: 200
+    result: 73682
+    solution_execution_time_in_sec:
+        coin_sums: 167.46 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 31
+    kwargs:
+        coins:
+        - 1
+        - 2
+        - 5
+        - 10
+        - 20
+        - 50
+        - 100
+        - 200
+        target: 1000
+    result: 321335886
+    solution_execution_time_in_sec:
+        coin_sums: 1.67 milli-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 31
+    kwargs:
+        coins:
+        - 1
+        - 2
+        - 5
+        - 10
+        - 20
+        - 50
+        - 100
+        - 200
+        target: 100000
+    result: 10056050940818192726001
+    solution_execution_time_in_sec:
+        coin_sums: 140.91 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=31

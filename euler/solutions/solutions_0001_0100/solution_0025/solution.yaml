@@ -1,0 +1,61 @@
+euler_problem: 25
+problem_name: _1000_digit_fibonacci_number
+problem_statement: |4-
+        The Fibonacci sequence is defined by the recurrence relation:
+
+            F_n = F_{n - 1} + F_{n - 2}, where F_1 = 1 and F_2 = 1.
+
+        Hence the first 12 terms will be:
+
+            F_1 = 1
+            F_2 = 1
+            F_3 = 2
+            F_4 = 3
+            F_5 = 5
+            F_6 = 8
+            F_7 = 13
+            F_8 = 21
+            F_9 = 34
+            F_10 = 55
+            F_11 = 89
+            F_12 = 144
+
+        The 12th term, F_12, is the first term to contain three digits.
+
+        What is the index of the first term in the Fibonacci sequence to contain 1000 digits?
+solution_approach: |4-
+        To solve this problem, you can use the properties of the Fibonacci sequence
+        and numerical methods. The key idea is to find the smallest index n such
+        that the Fibonacci number F_n has at least 1000 digits. Directly computing
+        Fibonacci numbers for large n by naive methods may be inefficient.
+
+        A more efficient approach involves either:
+
+        1. Using an iterative or dynamic programming technique to generate Fibonacci
+        numbers until one reaches 1000 digits.
+
+        2. Applying Binet's formula approximation and logarithms to estimate n by
+        solving for the term's number of digits.
+
+        Both methods require handling large integers or floating-point precision
+        carefully. Efficient libraries or built-in big integer support in your
+        programming language can help to handle large Fibonacci numbers.
+solved: true
+test_cases:
+-   euler_problem: 25
+    kwargs:
+        n: 3
+    result: 12
+    solution_execution_time_in_sec:
+        solution_1000_digit_fibonacci_number: 161.32 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 25
+    kwargs:
+        n: 1000
+    result: 4782
+    solution_execution_time_in_sec:
+        solution_1000_digit_fibonacci_number: 37.87 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=25

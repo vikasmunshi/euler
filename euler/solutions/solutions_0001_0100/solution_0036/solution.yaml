@@ -1,0 +1,84 @@
+euler_problem: 36
+problem_name: double_base_palindromes
+problem_statement: |4-
+        The decimal number, 585 = 1001001001_2 (binary), is palindromic in
+        both bases.
+
+        Find the sum of all numbers, less than one million, which are
+        palindromic in base 10 and base 2.
+
+        (Please note that the palindromic number, in either base, may not
+        include leading zeros.)
+solution_approach: |4-
+        To solve this problem, first understand what it means for a number
+        to be palindromic in two different bases (decimal and binary). You
+        will need to generate or test numbers less than one million to check
+        if they satisfy this property.
+
+        To efficiently check for palindromes, create helper functions that
+        can convert a number to a string in the desired base and verify if
+        that string reads the same forwards and backwards.
+
+        Consider iterating through all numbers under one million, checking
+        both their decimal and binary representations for the palindrome
+        property.
+
+        Accumulate these numbers to find the sum.
+
+        Be mindful that palindromic numbers must not have leading zeros in
+        either base representation.
+
+        This approach combines number theory concepts (palindromes) and
+        efficient string manipulation or mathematical checks for palindrome
+        validation.
+solved: true
+test_cases:
+-   euler_problem: 36
+    kwargs:
+        max_digits: 1
+    result: 25
+    solution_execution_time_in_sec:
+        double_base_palindromes: 1.69 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 36
+    kwargs:
+        max_digits: 2
+    result: 157
+    solution_execution_time_in_sec:
+        double_base_palindromes: 143.71 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 36
+    kwargs:
+        max_digits: 3
+    result: 1772
+    solution_execution_time_in_sec:
+        double_base_palindromes: 291.90 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 36
+    kwargs:
+        max_digits: 4
+    result: 18228
+    solution_execution_time_in_sec:
+        double_base_palindromes: 346.50 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 36
+    kwargs:
+        max_digits: 6
+    result: 872187
+    solution_execution_time_in_sec:
+        double_base_palindromes: 2.81 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 36
+    kwargs:
+        max_digits: 9
+    result: 2609044274
+    solution_execution_time_in_sec:
+        double_base_palindromes: 151.04 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=36

@@ -4,7 +4,7 @@
 Test cases for the two_d_shapes module.
 
 This module contains comprehensive unit tests for all the geometric classes defined in the
-euler.misc.two_d_shapes module, including:
+euler.utils.two_d_shapes module, including:
 
 - Point2D: Tests for 2D point operations, including vector operations
 - LineSegment2D: Tests for line segment operations, including point-on-segment checks

@@ -1,0 +1,64 @@
+euler_problem: 28
+problem_name: number_spiral_diagonals
+problem_statement: |4-
+        Starting with the number 1 and moving to the right in a clockwise direction a 5
+        by 5 spiral is formed as follows:
+
+        21 22 23 24 25
+        20  7  8  9 10
+        19  6  1  2 11
+        18  5  4  3 12
+        17 16 15 14 13
+
+        It can be verified that the sum of the numbers on the diagonals is 101.
+
+        What is the sum of the numbers on the diagonals in a 1001 by 1001 spiral formed
+        in the same way?
+solution_approach: |4-
+     To solve this problem, consider the pattern of the numbers on the diagonals
+     as the spiral expands. Note that the spiral consists of concentric square layers.
+     Each layer has four corner numbers which can be expressed mathematically
+     in terms of the size of the layer and its position in the spiral.
+
+     Instead of constructing the entire spiral, use a formula for the values at the
+     corners of each layer and sum them iteratively from the center to the outermost
+     layer. This approach reduces the problem to a numerical series summation.
+
+     Implement a loop or use direct algebraic expressions to sum the four corners for
+     each layer up to the 1001 by 1001 spiral, ensuring efficient computation without
+     generating the entire spiral matrix.
+solved: true
+test_cases:
+-   euler_problem: 28
+    kwargs:
+        size: 5
+    result: 101
+    solution_execution_time_in_sec:
+        number_spiral_diagonals: 25.51 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 28
+    kwargs:
+        size: 7
+    result: 261
+    solution_execution_time_in_sec:
+        number_spiral_diagonals: 22.37 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 28
+    kwargs:
+        size: 9
+    result: 537
+    solution_execution_time_in_sec:
+        number_spiral_diagonals: 135.60 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 28
+    kwargs:
+        size: 1001
+    result: 669171001
+    solution_execution_time_in_sec:
+        number_spiral_diagonals: 27.36 micro-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=28

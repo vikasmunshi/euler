@@ -1,0 +1,68 @@
+euler_problem: 77
+problem_name: prime_summations
+problem_statement: |4-
+        It is possible to write ten as the sum of primes in exactly five different
+        ways:
+        7 + 3
+        5 + 5
+        5 + 3 + 2
+        3 + 3 + 2 + 2
+        2 + 2 + 2 + 2 + 2
+
+        What is the first value which can be written as the sum of primes in over
+        five thousand different ways?
+solution_approach: |4-
+        To solve this problem, one should consider the concept of partitioning
+        numbers into sums of prime numbers. A dynamic programming approach can
+        efficiently count the ways to express integers as sums of primes by building
+        up from smaller values. Begin by generating a list of prime numbers up to a
+        certain limit using the Sieve of Eratosthenes. Then use a table to store the
+        number of ways to write each integer as a sum of primes, updating this table
+        iteratively for each prime. Continue until the count for the number of ways
+        exceeds five thousand, identifying the first such number.
+solved: true
+test_cases:
+-   euler_problem: 77
+    kwargs:
+        num_prime_partitions: 5
+    result: 10
+    solution_execution_time_in_sec:
+        prime_summations_dynamic_recursion: 203.72 micro-sec
+        prime_summations_list_prime_partitions: 418.51 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 77
+    kwargs:
+        num_prime_partitions: 50
+    result: 25
+    solution_execution_time_in_sec:
+        prime_summations_dynamic_recursion: 875.49 micro-sec
+        prime_summations_list_prime_partitions: 9.61 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 77
+    kwargs:
+        num_prime_partitions: 500
+    result: 45
+    solution_execution_time_in_sec:
+        prime_summations_dynamic_recursion: 3.50 milli-sec
+        prime_summations_list_prime_partitions: 22.32 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 77
+    kwargs:
+        num_prime_partitions: 5000
+    result: 71
+    solution_execution_time_in_sec:
+        prime_summations_dynamic_recursion: 10.07 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 77
+    kwargs:
+        num_prime_partitions: 50000
+    result: 104
+    solution_execution_time_in_sec:
+        prime_summations_dynamic_recursion: 25.31 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=77

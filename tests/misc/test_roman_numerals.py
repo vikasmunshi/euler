@@ -4,12 +4,12 @@
 Unit Tests for the Roman Numerals Module
 
 This module contains unit tests for the Roman numeral conversion utilities
-defined in euler.misc.roman_numerals.
+defined in euler.utils.roman_numerals.
 """
 
 import unittest
 
-from euler.misc.roman_numerals import number_as_roman_numeral, roman_to_number
+from euler.utils.roman_numerals import number_as_roman_numeral, roman_to_number
 
 
 class TestRomanNumerals(unittest.TestCase):

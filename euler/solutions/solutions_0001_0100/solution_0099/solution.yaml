@@ -1,0 +1,38 @@
+euler_problem: 99
+problem_name: largest_exponential
+problem_statement: |4-
+        Comparing two numbers written in index form like 2 x 11 and 3 x 7 is not
+        difficult, as any calculator would confirm that 2 x 11 = 2048 < 3 x 7 =
+        2187.
+
+        However, confirming that 632382 x 518061 > 519432 x 525806 would be much
+        more difficult, as both numbers contain over three million digits.
+
+        Using base_exp.txt (right click and 'Save Link/Target As...'), a 22K text
+        file containing one thousand lines with a base/exponent pair on each line,
+        determine which line number has the greatest numerical value.
+
+        Note: The first two lines in the file represent the numbers in the example
+        given above.
+solution_approach: |4-
+        To solve this problem efficiently, you should avoid calculating the full
+        numbers, as they are extremely large. Instead, use logarithms to compare
+        values: for each base-exponent pair, compute the product of the exponent and
+        logarithm of the base. The pair with the largest result corresponds to the
+        largest number.
+
+        Read the base-exponent pairs from the provided file, compute the comparison
+        value for each, and track the line number with the maximum value. This approach
+        leverages numerical properties and enables handling of very large numbers
+        without overflow or performance issues.
+solved: true
+test_cases:
+-   euler_problem: 99
+    kwargs:
+        file_url: https://projecteuler.net/resources/documents/0099_base_exp.txt
+    result: 709
+    solution_execution_time_in_sec:
+        largest_exponential: 9.52 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=99

@@ -1,0 +1,44 @@
+euler_problem: 85
+problem_name: counting_rectangles
+problem_statement: |4-
+        By counting carefully it can be seen that a rectangular grid measuring 3 by 2
+        contains eighteen rectangles:
+
+        Although there exists no rectangular grid that contains exactly two million
+        rectangles, find the area of the grid with the nearest solution.
+solution_approach: |4-
+        To solve this problem, consider how to count all possible rectangles in a
+        grid of dimensions M by N. The total number of rectangles is given by the
+        product of the number of ways to choose two vertical grid lines and two
+        horizontal grid lines from the grid, which is (M x (M + 1) / 2) x (N x (N +
+        1) / 2). To find the grid area with a number of rectangles nearest to two
+        million, implement a search varying M and N and calculate the number of
+        rectangles for each. Track the area M x N that yields the closest count.
+        Efficiently prune the search space using bounding conditions since rectangle
+        counts grow quickly with grid dimensions. This approach combines combinatorial
+        counting with a numerical search for optimization.
+solved: true
+test_cases:
+-   euler_problem: 85
+    kwargs:
+        max_error: 0
+        max_side: 10
+        target_num_rectangles: 18
+    result: 6
+    solution_execution_time_in_sec:
+        counting_rectangles_pre_calculated_for_widths: 151.20 micro-sec
+        counting_rectangles_product_height_width: 87.12 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 85
+    kwargs:
+        max_error: 2
+        max_side: 100
+        target_num_rectangles: 2000000
+    result: 2772
+    solution_execution_time_in_sec:
+        counting_rectangles_pre_calculated_for_widths: 1.28 milli-sec
+        counting_rectangles_product_height_width: 492.03 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=85

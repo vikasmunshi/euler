@@ -1,0 +1,47 @@
+euler_problem: 93
+problem_name: arithmetic_expressions
+problem_statement: |4-
+        By using each of the digits from the set, {1, 2, 3, 4}, exactly once, and making
+        use of the four arithmetic operations (+, -, x, /) and brackets/parentheses, it is
+        possible to form different positive integer targets.
+
+        For example,
+
+            8 = (4 x (1 + 3)) / 2
+            14 = 4 x (3 + 1 / 2)
+            19 = 4 x (2 + 3) - 1
+            36 = 3 x 4 x (2 + 1)
+
+        Note that concatenations of the digits, like 12 + 34, are not allowed.
+
+        Using the set, {1, 2, 3, 4}, it is possible to obtain thirty-one different
+        target numbers of which 36 is the maximum, and each of the numbers 1 to 28 can
+        be obtained before encountering the first non-expressible number.
+
+        Find the set of four distinct digits, a < b < c < d, for which the longest set
+        of consecutive positive integers, 1 to n, can be obtained, giving your answer
+        as a string: abcd.
+solution_approach: |4-
+        To solve this problem, start by generating all possible sets of four distinct
+        digits from 1 to 9. For each set, compute all valid arithmetic expressions that
+        can be formed using each digit exactly once, the four basic operations, and
+        parentheses.
+
+        Systematically evaluate these expressions to find all positive integers they
+        produce. Then identify the longest consecutive sequence starting from 1 for
+        each set of digits.
+
+        Comparing these sequences across all digit sets will reveal the one with the
+        longest run of consecutive positive integers. Employing recursion and
+        permutation techniques will be effective for enumerating expressions and
+        combinations efficiently.
+solved: true
+test_cases:
+-   euler_problem: 93
+    kwargs: {}
+    result: '1258'
+    solution_execution_time_in_sec:
+        arithmetic_expressions: 366.51 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=93

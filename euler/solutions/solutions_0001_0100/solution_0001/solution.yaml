@@ -1,0 +1,42 @@
+euler_problem: 1
+problem_name: multiples_of_3_or_5
+problem_statement: |4-
+        If we list all the natural numbers below 10 that are multiples of 3 or 5, we
+        get 3, 5, 6, and 9. The sum of these multiples is 23.
+
+        Find the sum of all the multiples of 3 or 5 below 1000.
+solution_approach: |4-
+        To solve this problem, consider using the principle of inclusion and exclusion.
+        First, sum all multiples of 3 below the limit, then sum all multiples of 5,
+        and subtract the sum of multiples of 15 to avoid double counting. You can use
+        arithmetic progression formulas to efficiently calculate these sums without
+        iteration. This approach ensures an optimal and clean solution.
+solved: true
+test_cases:
+-   euler_problem: 1
+    kwargs:
+        max_limit: 10
+    result: 23
+    solution_execution_time_in_sec:
+        multiples_of_3_or_5_series: 19.89 micro-sec
+        multiples_of_3_or_5_sum: 483.30 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 1
+    kwargs:
+        max_limit: 1000
+    result: 233168
+    solution_execution_time_in_sec:
+        multiples_of_3_or_5_series: 134.57 micro-sec
+        multiples_of_3_or_5_sum: 39.20 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 1
+    kwargs:
+        max_limit: 1000000000
+    result: 233333333166666668
+    solution_execution_time_in_sec:
+        multiples_of_3_or_5_sum: 229.30 micro-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=1

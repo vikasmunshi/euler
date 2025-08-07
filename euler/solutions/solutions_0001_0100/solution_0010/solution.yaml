@@ -1,0 +1,44 @@
+euler_problem: 10
+problem_name: summation_of_primes
+problem_statement: |4-
+        The sum of the primes below 10 is 2 + 3 + 5 + 7 = 17.
+
+        Find the sum of all the primes below two million.
+solution_approach: |4-
+        To solve this problem, one can utilize an efficient prime number
+        generation technique such as the Sieve of Eratosthenes. This algorithm
+        iteratively marks the multiples of each prime starting from 2, allowing
+        identification of all primes below a given limit. Once the primes below
+        two million are identified, their sum can be computed. Consider using
+        optimized data structures or segmented sieves to handle the large
+        upper bound efficiently while managing memory usage.
+solved: true
+test_cases:
+-   euler_problem: 10
+    kwargs:
+        max_num: 10
+    result: 17
+    solution_execution_time_in_sec:
+        summation_of_primes_eratosthenes_sieve: 60.34 micro-sec
+        summation_of_primes_sundaram_sieve: 351.03 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 10
+    kwargs:
+        max_num: 2000000
+    result: 142913828922
+    solution_execution_time_in_sec:
+        summation_of_primes_eratosthenes_sieve: 2.87 sec
+        summation_of_primes_sundaram_sieve: 1.35 sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 10
+    kwargs:
+        max_num: 10000000
+    result: 3203324994356
+    solution_execution_time_in_sec:
+        summation_of_primes_eratosthenes_sieve: 13.99 sec
+        summation_of_primes_sundaram_sieve: 7.60 sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=10

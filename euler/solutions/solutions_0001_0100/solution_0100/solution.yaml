@@ -1,0 +1,55 @@
+euler_problem: 100
+problem_name: arranged_probability
+problem_statement: |4-
+        If a box contains twenty-one coloured discs, composed of fifteen blue discs and
+        six red discs, and two discs were taken at random, it can be seen that the
+        probability of taking two blue discs, P(BB) = (15/21) x (14/20) = 1/2.
+
+        The next such arrangement, for which there is exactly 50% chance of taking
+        two blue discs at random, is a box containing eighty-five blue discs and
+        thirty-five red discs.
+
+        By finding the first arrangement to contain over 10^12 = 1 000 000 000 000
+        discs in total, determine the number of blue discs that the box would contain.
+solution_approach: |4-
+        This problem involves finding specific integer solutions to a probability
+        condition involving combinations of discs. The probability of drawing two
+        blue discs is given by a fraction involving the counts of blue and total
+        discs. By setting this probability equal to 1/2 and using variables for blue
+        and total discs, the problem reduces to finding integral solutions of a
+        quadratic Diophantine equation. A fruitful approach involves identifying that
+        the problem can be represented using Pell's equation, which is a well-known
+        form in number theory. One can use the properties of Pell's equation to
+        generate successive integer solutions starting from the known initial cases.
+        Efficiently iterating through these solutions to find the first exceeding
+        the total discs limit (10^12) will yield the number of blue discs. Implementing
+        this approach requires careful handling of large integers and understanding
+        of recurrence relations or continued fraction expansions related to Pell's
+        equation.
+solved: true
+test_cases:
+-   euler_problem: 100
+    kwargs:
+        total_discs: 21
+    result: 15
+    solution_execution_time_in_sec:
+        arranged_probability: 18.13 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 100
+    kwargs:
+        total_discs: 120
+    result: 85
+    solution_execution_time_in_sec:
+        arranged_probability: 19.08 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 100
+    kwargs:
+        total_discs: 1000000000000
+    result: 756872327473
+    solution_execution_time_in_sec:
+        arranged_probability: 37.49 micro-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=100

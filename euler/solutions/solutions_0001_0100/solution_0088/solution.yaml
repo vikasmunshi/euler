@@ -1,0 +1,61 @@
+euler_problem: 88
+problem_name: product_sum_numbers
+problem_statement: |4-
+        A natural number, N, that can be written as the sum and product of a given
+        set of at least two natural numbers, {a_1, a_2, ..., a_k} is called a
+        product-sum number: N = a_1 + a_2 + ... + a_k = a_1 x a_2 x ... x a_k.
+
+        For example, 6 = 1 + 2 + 3 = 1 x 2 x 3.
+
+        For a given set of size, k, we shall call the smallest N with this property
+        a minimal product-sum number. The minimal product-sum numbers for sets of
+        size, k = 2, 3, 4, 5, and 6 are as follows.
+
+        k=2: 4 = 2 x 2 = 2 + 2
+        k=3: 6 = 1 x 2 x 3 = 1 + 2 + 3
+        k=4: 8 = 1 x 1 x 2 x 4 = 1 + 1 + 2 + 4
+        k=5: 8 = 1 x 1 x 2 x 2 x 2 = 1 + 1 + 2 + 2 + 2
+        k=6: 12 = 1 x 1 x 1 x 1 x 2 x 6 = 1 + 1 + 1 + 1 + 2 + 6
+
+        Hence for 2 <= k <= 6, the sum of all the minimal product-sum numbers is
+        4+6+8+12 = 30; note that 8 is only counted once in the sum.
+
+        In fact, as the complete set of minimal product-sum numbers for 2 <= k <= 12
+        is {4, 6, 8, 12, 15, 16}, the sum is 61.
+
+        What is the sum of all the minimal product-sum numbers for 2 <= k <= 12000?
+solution_approach: |4-
+        To approach this problem, consider the properties of numbers that are both
+        the sum and product of a set of natural numbers. You will need to generate
+        all possible combinations of factors for sets of various sizes, tracking
+        those whose sum equals the product.
+
+        Efficiently searching for minimal product-sum numbers involves understanding
+        factorization, partitioning numbers into their additive and multiplicative
+        components, and avoiding redundant calculations. Implementing a recursive
+        backtracking algorithm with pruning strategies can help explore valid sets.
+
+        Additionally, keep track of minimal values found for each set size k to
+        compute the final sum efficiently without duplicates. Using combinatorial
+        optimizations and memoization will significantly reduce the search space.
+solved: true
+test_cases:
+-   euler_problem: 88
+    kwargs:
+        max_k: 6
+        min_k: 2
+    result: 30
+    solution_execution_time_in_sec:
+        product_sum_numbers: 172.74 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 88
+    kwargs:
+        max_k: 12000
+        min_k: 2
+    result: 7587457
+    solution_execution_time_in_sec:
+        product_sum_numbers: 276.51 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=88

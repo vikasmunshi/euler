@@ -1,0 +1,39 @@
+euler_problem: 20
+problem_name: factorial_digit_sum
+problem_statement: |4-
+        n! means n x (n - 1) x ... x 3 x 2 x 1.
+
+        For example, 10! = 10 x 9 x ... x 3 x 2 x 1 = 3628800, and the sum of the
+        digits in the number 10! is 3 + 6 + 2 + 8 + 8 + 0 + 0 = 27.
+
+        Find the sum of the digits in the number 100!.
+solution_approach: |4-
+        To solve the problem of finding the sum of the digits of 100!, first compute
+        the factorial of 100. Since 100! is an extremely large number that cannot be
+        handled by standard integer data types, use arbitrary-precision arithmetic
+        available in many programming languages.
+
+        After computing 100!, convert the resulting number to a string to iterate
+        over each digit. Sum these digits to get the final answer.
+
+        Efficient algorithms for factorial computation and string manipulation will
+        be helpful, but the main focus is on handling big integers and digit summation.
+solved: true
+test_cases:
+-   euler_problem: 20
+    kwargs:
+        n: 10
+    result: 27
+    solution_execution_time_in_sec:
+        factorial_digit_sum: 57.15 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 20
+    kwargs:
+        n: 100
+    result: 648
+    solution_execution_time_in_sec:
+        factorial_digit_sum: 301.02 micro-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=20

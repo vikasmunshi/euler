@@ -1,0 +1,53 @@
+euler_problem: 58
+problem_name: spiral_primes
+problem_statement: |4-
+        Starting with 1 and spiralling anticlockwise in the following way, a square
+        spiral with side length 7 is formed.
+
+        37 36 35 34 33 32 31
+        38 17 16 15 14 13 30
+        39 18  5  4  3 12 29
+        40 19  6  1  2 11 28
+        41 20  7  8  9 10 27
+        42 21 22 23 24 25 26
+        43 44 45 46 47 48 49
+
+        It is interesting to note that the odd squares lie along the bottom right
+        diagonal, but what is more interesting is that 8 out of the 13 numbers
+        lying along both diagonals are prime; that is, a ratio of 8 x 13 approximately
+        62%.
+
+        If one complete new layer is wrapped around the spiral above, a square
+        spiral with side length 9 will be formed. If this process is continued,
+        what is the side length of the square spiral for which the ratio of primes
+        along both diagonals first falls below 10%?
+solution_approach: |4-
+        To solve this problem, first understand how the spiral's numbers are
+        generated and their positions along the diagonals. Each layer added to
+        the spiral increases the side length by 2, and the numbers on the diagonals
+        of each layer can be expressed through quadratic formulas.
+
+        The key is to generate the numbers on the diagonals layer by layer and
+        check which ones are prime. Maintaining a count of total diagonal numbers
+        and prime diagonal numbers allows you to compute the ratio of primes along
+        the diagonals.
+
+        Efficient primality testing is crucial, as the numbers get large quickly.
+        Implement methods like the Miller-Rabin primality test to handle large
+        numbers quickly and reliably.
+
+        Iterate this process until the ratio of prime numbers along both diagonals
+        falls below 10%, tracking the side length at that point. This approach
+        combines number theory for primality checks with careful iteration over
+        the spiral's construction.
+solved: true
+test_cases:
+-   euler_problem: 58
+    kwargs:
+        threshold: 0.1
+    result: 26241
+    solution_execution_time_in_sec:
+        spiral_primes: 12.83 sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=58

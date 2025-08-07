@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Tests for the misc module."""
+"""Tests for the utils module."""
 
 import unittest
 
-from euler.misc.word_to_num import word_to_num
+from euler.utils.word_to_num import word_to_num
 
 
 class TestMisc(unittest.TestCase):

@@ -1,0 +1,53 @@
+euler_problem: 24
+problem_name: lexicographic_permutations
+problem_statement: |4-
+        A permutation is an ordered arrangement of objects. For example, 3124 is one
+        possible permutation of the digits 1, 2, 3 and 4. If all of the permutations
+        are listed numerically or alphabetically, we call it lexicographic order.
+        The lexicographic permutations of 0, 1 and 2 are:
+
+        012    021    102    120    201    210
+
+        What is the millionth lexicographic permutation of the digits 0, 1, 2, 3, 4,
+        5, 6, 7, 8 and 9?
+solution_approach: |4-
+        To solve the problem of finding the millionth lexicographic permutation of the
+        digits 0 through 9, one can use combinatorial mathematics rather than
+        brute-force enumeration. The approach involves using factorial values to
+        count how many permutations start with each digit, thereby determining the
+        leading digit of the desired permutation. After fixing the first digit, the
+        problem reduces to finding the lexicographic permutation within the
+        remaining digits. This process repeats recursively or iteratively until the
+        complete sequence is constructed. Efficient use of factorial computations and
+        index manipulation allows direct calculation of the target permutation without
+        generating all permutations explicitly.
+solved: true
+test_cases:
+-   euler_problem: 24
+    kwargs:
+        digits: '012'
+        permutation_number: 4
+    result: '120'
+    solution_execution_time_in_sec:
+        lexicographic_permutations: 113.34 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 24
+    kwargs:
+        digits: '012'
+        permutation_number: 6
+    result: '210'
+    solution_execution_time_in_sec:
+        lexicographic_permutations: 66.06 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 24
+    kwargs:
+        digits: 0123456789
+        permutation_number: 1000000
+    result: '2783915460'
+    solution_execution_time_in_sec:
+        lexicographic_permutations: 542.90 micro-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=24

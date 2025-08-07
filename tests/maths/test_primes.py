@@ -4,15 +4,16 @@
 Unit Tests for the Prime Number Utilities Module
 
 This module contains unit tests for the prime number generation and analysis
-functions defined in euler.misc.primes.
+functions defined in euler.utils.primes.
 """
 
 import unittest
 
 from euler.logger import logger
-from euler.maths.primes import (PrimeError, _CACHE, ensure_prime_cache_is_loaded, euler_totient, gen_primes_sieve,
-                                gen_primes_sundaram_sieve, get_divisors, get_max_cached_primes, get_relative_primes,
-                                is_prime, prime_factor_count, prime_factorization, proper_factors, seed_cache)
+from euler.maths.primes import (PrimeError, _CACHE, ensure_prime_cache_is_loaded, euler_totient,
+                                gen_primes_sieve_eratosthenes, get_divisors, get_max_cached_primes,
+                                get_pre_computed_primes_sundaram_sieve, get_relative_primes, is_prime,
+                                prime_factor_count, prime_factorization, proper_factors, seed_cache)
 
 # Set logger level to ERROR to suppress informational messages during tests
 logger.setLevel('ERROR')
@@ -69,7 +70,7 @@ class TestPrimeIsPrime(unittest.TestCase):
         """Test is_prime function with primes sieve."""
         max_limit = 100
         results = [n for n in range(max_limit) if is_prime(n)]
-        expected_primes = list(gen_primes_sundaram_sieve(max_limit=max_limit))
+        expected_primes = list(get_pre_computed_primes_sundaram_sieve(max_limit=max_limit))
         self.assertEqual(results, expected_primes)
 
 
@@ -120,18 +121,18 @@ class TestPrimeNumberUtilities(unittest.TestCase):
     def test_sundaram_sieve(self):
         """Test gen_primes_sundaram_sieve function."""
         # Test with different limits
-        self.assertEqual(gen_primes_sundaram_sieve(max_limit=2), (2,))
-        self.assertEqual(gen_primes_sundaram_sieve(max_limit=3), (2, 3))
-        self.assertEqual(gen_primes_sundaram_sieve(max_limit=10), (2, 3, 5, 7))
-        self.assertEqual(gen_primes_sundaram_sieve(max_limit=20), (2, 3, 5, 7, 11, 13, 17, 19))
+        self.assertEqual(get_pre_computed_primes_sundaram_sieve(max_limit=2), (2,))
+        self.assertEqual(get_pre_computed_primes_sundaram_sieve(max_limit=3), (2, 3))
+        self.assertEqual(get_pre_computed_primes_sundaram_sieve(max_limit=10), (2, 3, 5, 7))
+        self.assertEqual(get_pre_computed_primes_sundaram_sieve(max_limit=20), (2, 3, 5, 7, 11, 13, 17, 19))
 
         # Check a specific larger range
-        primes_to_50 = gen_primes_sundaram_sieve(max_limit=50)
+        primes_to_50 = get_pre_computed_primes_sundaram_sieve(max_limit=50)
         expected_primes = (2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47)
         self.assertEqual(primes_to_50, expected_primes)
 
         # Test with large primes
-        large_primes = gen_primes_sundaram_sieve(max_limit=100000)
+        large_primes = get_pre_computed_primes_sundaram_sieve(max_limit=100000)
         # Check if specific large primes are included in the generated list
         expected_last_four = (99961, 99971, 99989, 99991)
         self.assertEqual(large_primes[-4:], expected_last_four)
@@ -139,12 +140,12 @@ class TestPrimeNumberUtilities(unittest.TestCase):
     def test_prime_sieve_generator(self):
         """Test gen_primes_sieve generator function."""
         # Generate first 15 primes
-        prime_gen = gen_primes_sieve()
+        prime_gen = gen_primes_sieve_eratosthenes()
         first_15_primes = [next(prime_gen) for _ in range(15)]
         expected_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
         self.assertEqual(first_15_primes, expected_primes)
         # Test with large primes
-        prime_gen = gen_primes_sieve()
+        prime_gen = gen_primes_sieve_eratosthenes()
         large_primes = [next(prime_gen) for _ in range(9999)]
         # Check if specific large primes are included in the generated list
         expected_last_four = [104707, 104711, 104717, 104723]

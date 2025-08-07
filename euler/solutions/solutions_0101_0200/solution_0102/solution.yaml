@@ -1,0 +1,53 @@
+euler_problem: 102
+problem_name: triangle_containment
+problem_statement: |4-
+        Three distinct points are plotted at random on a Cartesian plane, for which
+        -1000 <= x, y <= 1000, such that a triangle is formed.
+
+        Consider the following two triangles:
+
+        A(-340, 495), B(-153, -910), C(835, -947)
+        X(-175, 41), Y(-421, -714), Z(574, -645)
+
+        It can be verified that triangle ABC contains the origin, whereas triangle XYZ
+        does not.
+
+        Using triangles.txt (right click and 'Save Link/Target As...'), a 27K text
+        file containing the co-ordinates of one thousand "random" triangles, find the
+        number of triangles for which the interior contains the origin.
+
+        NOTE: The first two examples in the file represent the triangles in the example
+        given above.
+solution_approach: |4-
+        To determine whether the origin lies inside a given triangle, apply
+        vector geometry or coordinate geometry techniques. One common approach is
+        to use the concept of barycentric coordinates or to check the signs of
+        areas formed by the origin with each pair of triangle vertices.
+
+        Another method involves checking if the origin is on the same side of each
+        of the triangle's edges as the opposite vertex, ensuring the origin falls
+        within the triangle boundaries.
+
+        To solve the problem computationally, parse each triangle from the file,
+        apply the containment test algorithm, and count how many triangles contain
+        the origin as an interior point. Efficient file handling and precise
+        arithmetic are essential for accurate results.
+solved: true
+test_cases:
+-   euler_problem: 102
+    kwargs:
+        triangles_file_url: ''
+    result: 1
+    solution_execution_time_in_sec:
+        triangle_containment: 322.36 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 102
+    kwargs:
+        triangles_file_url: https://projecteuler.net/resources/documents/0102_triangles.txt
+    result: null
+    solution_execution_time_in_sec:
+        triangle_containment: 62.42 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=102

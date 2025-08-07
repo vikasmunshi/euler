@@ -1,0 +1,66 @@
+euler_problem: 76
+problem_name: counting_summations
+problem_statement: |4-
+        It is possible to write five as a sum in exactly six different ways:
+
+        4 + 1
+        3 + 2
+        3 + 1 + 1
+        2 + 2 + 1
+        2 + 1 + 1 + 1
+        1 + 1 + 1 + 1 + 1
+
+        How many different ways can one hundred be written as a sum of at least
+        two positive integers?
+solution_approach: |4-
+        This problem involves counting the number of integer partitions of a
+        given number, where order does not matter and each partition has at
+        least two parts. A suitable approach is to use dynamic programming to
+        build the count of partitions incrementally. Define a function to
+        represent the number of ways to write an integer as a sum of smaller
+        integers, considering constraints to avoid counting duplicates.
+
+        Efficient implementation stores intermediate results in a table to
+        avoid redundant calculations. Familiarity with partition theory and
+        combinatorics is helpful to understand the problem's mathematical
+        foundations. The goal is to compute the total number of partitions of
+        100 with at least two positive integers.
+solved: true
+test_cases:
+-   euler_problem: 76
+    kwargs:
+        num: 5
+    result: 6
+    solution_execution_time_in_sec:
+        counting_summations_formula: 107.00 micro-sec
+        counting_summations_listing_partitions: 131.78 micro-sec
+        counting_summations_recursion: 149.92 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 76
+    kwargs:
+        num: 50
+    result: 204225
+    solution_execution_time_in_sec:
+        counting_summations_formula: 346.43 micro-sec
+        counting_summations_listing_partitions: 1.67 sec
+        counting_summations_recursion: 4.03 milli-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 76
+    kwargs:
+        num: 100
+    result: 190569291
+    solution_execution_time_in_sec:
+        counting_summations_formula: 1.34 milli-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 76
+    kwargs:
+        num: 1000
+    result: 24061467864032622473692149727990
+    solution_execution_time_in_sec:
+        counting_summations_formula: 19.25 milli-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=76

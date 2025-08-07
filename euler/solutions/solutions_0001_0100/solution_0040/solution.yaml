@@ -1,0 +1,115 @@
+euler_problem: 40
+problem_name: champernownes_constant
+problem_statement: |4-
+        An irrational decimal fraction is created by concatenating the positive integers:
+        0.12345678910 1112131415161718192021 ...
+
+        It can be seen that the 12th digit of the fractional part is 1.
+
+        If d_n represents the nth digit of the fractional part, find the value
+        of the following expression.
+        d_1 x d_10 x d_100 x d_1000 x d_10000 x d_100000 x d_1000000
+solution_approach: |4-
+        To solve this problem, first understand how the concatenated decimal
+        (Champernowne's constant) is constructed by joining positive integers.
+        The key task is to find the digit at specific positions efficiently.
+
+        Calculate the ranges of digit lengths (1-digit, 2-digit numbers, etc.)
+        and determine which range contains the desired digit position.
+        Then, identify the exact integer and its digit that corresponds to that
+        position. Finally, multiply the retrieved digits as required.
+
+        This approach requires careful index calculations and handling of
+        number lengths but avoids constructing the entire string, making
+        it efficient for large digit positions.
+solved: true
+test_cases:
+-   euler_problem: 40
+    kwargs:
+        i: 1
+    result: 1
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 258.49 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 40
+    kwargs:
+        i: 2
+    result: 5
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 307.52 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 40
+    kwargs:
+        i: 3
+    result: 15
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 236.19 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 40
+    kwargs:
+        i: 4
+    result: 105
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 546.95 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 40
+    kwargs:
+        i: 5
+    result: 210
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 222.12 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 40
+    kwargs:
+        i: 6
+    result: 210
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 84.91 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 40
+    kwargs:
+        i: 7
+    result: 1470
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 92.62 micro-sec
+    solved: true
+    test_case_category: main
+-   euler_problem: 40
+    kwargs:
+        i: 8
+    result: 11760
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 71.64 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 40
+    kwargs:
+        i: 9
+    result: 11760
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 112.08 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 40
+    kwargs:
+        i: 10
+    result: 11760
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 347.60 micro-sec
+    solved: true
+    test_case_category: extended
+-   euler_problem: 40
+    kwargs:
+        i: 11
+    result: 0
+    solution_execution_time_in_sec:
+        champernowne_s_constant: 194.26 micro-sec
+    solved: true
+    test_case_category: extended
+url: https://projecteuler.net/problem=40

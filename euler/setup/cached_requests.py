@@ -15,7 +15,6 @@ from euler.setup.base_dir import base_dir
 
 def url_cached_path(url: str) -> Path:
     cache_dir: Path = base_dir / 'resources' / 'data'
-    cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file: Path = cache_dir / hashlib.sha256(url.encode()).hexdigest()
     return cache_file
 

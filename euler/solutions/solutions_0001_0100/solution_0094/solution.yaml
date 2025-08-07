@@ -1,0 +1,36 @@
+euler_problem: 94
+problem_name: almost_equilateral_triangles
+problem_statement: |4-
+        It is easily proved that no equilateral triangle exists with integral
+        length sides and integral area. However, the almost equilateral triangle
+        5-5-6 has an area of 12 square units.
+
+        We shall define an almost equilateral triangle to be a triangle for which
+        two sides are equal and the third differs by no more than one unit.
+
+        Find the sum of the perimeters of all almost equilateral triangles with
+        integral side lengths and area and whose perimeters do not exceed one
+        billion (1 000 000 000).
+solution_approach: |4-
+        To solve this problem, one can leverage the properties of almost equilateral
+        triangles and the relationship between their side lengths and area.
+        Using the formula for the area of a triangle with two equal sides, we can
+        derive equations involving integer side lengths and areas.
+
+        A key insight is to reduce the problem to solving specific Pell equations,
+        which arise naturally from the constraints on sides and area.
+        Generating solutions to these Pell equations systematically allows us to
+        find all qualifying triangles with integral area and side lengths that satisfy
+        the perimeter limit. Efficient iteration and checking of these solutions
+        will yield the desired sum of perimeters.
+solved: true
+test_cases:
+-   euler_problem: 94
+    kwargs:
+        max_perimeter: 1000000000
+    result: 518408346
+    solution_execution_time_in_sec:
+        almost_equilateral_triangles: 40.65 micro-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=94

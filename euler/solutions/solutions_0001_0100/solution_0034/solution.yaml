@@ -1,0 +1,28 @@
+euler_problem: 34
+problem_name: digit_factorials
+problem_statement: |4-
+        145 is a curious number, as 1! + 4! + 5! = 1 + 24 + 120 = 145.
+
+        Find the sum of all numbers which are equal to the sum of the factorial of
+        their digits.
+
+        Note: As 1! = 1 and 2! = 2 are not sums they are not included.
+solution_approach: |4-
+        To solve this problem, start by understanding the factorial function and how
+        to compute factorials of digits efficiently, possibly caching the results.
+        Next, generate candidate numbers and for each, calculate the sum of the
+        factorials of its digits. Compare this sum to the original number to check
+        equality. An upper bound can be established because beyond a certain number
+        of digits, the sum of factorials of digits will be smaller than the number
+        itself. This allows limiting the search space systematically. Summing all
+        such numbers that meet the condition will yield the answer.
+solved: true
+test_cases:
+-   euler_problem: 34
+    kwargs: {}
+    result: 40730
+    solution_execution_time_in_sec:
+        digit_factorials: 28.27 milli-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=34

@@ -79,8 +79,8 @@ def set_resource_limits(
             recursion_var_param = sig.parameters.get(recursion_var)
             if recursion_var_param is None or recursion_var_param.kind != Parameter.KEYWORD_ONLY:
                 raise TypeError(f"'{recursion_var}' not defined as keyword only argument in '{func.__name__}'.")
-            if recursion_var_param.annotation != 'int':
-                raise TypeError(f"'{recursion_var}' must be int in '{func.__name__}'")
+            if recursion_var_param.annotation != 'int' and recursion_var_param.annotation != int:
+                raise TypeError(f"'{recursion_var}' must be int in '{func.__name__}'.")
 
         if when == 'always':
             @wraps(func)

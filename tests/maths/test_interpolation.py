@@ -4,7 +4,7 @@
 Unit tests for the interpolation module.
 
 This test suite validates the functionality of the interpolation methods defined in
-the euler.misc.interpolation module, including:
+the euler.utils.interpolation module, including:
 - Lagrange interpolation
 - Newton interpolation
 - Polynomial construction and evaluation

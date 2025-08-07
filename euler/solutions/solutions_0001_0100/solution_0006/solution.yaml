@@ -1,0 +1,43 @@
+euler_problem: 6
+problem_name: sum_square_difference
+problem_statement: |4-
+        The sum of the squares of the first ten natural numbers is,
+
+        1^2 + 2^2 + ... + 10^2 = 385.
+
+        The square of the sum of the first ten natural numbers is,
+
+        (1 + 2 + ... + 10)^2 = 55^2 = 3025.
+
+        Hence the difference between the sum of the squares of the first ten
+        natural numbers and the square of the sum is 3025 - 385 = 2640.
+
+        Find the difference between the sum of the squares of the first one
+        hundred natural numbers and the square of the sum.
+solution_approach: |4-
+        To solve this problem, consider the formulas for the sum of the first
+        n natural numbers and the sum of the squares of the first n natural
+        numbers. The sum of the first n numbers is n(n + 1)/2, and the sum of
+        squares is n(n + 1)(2n + 1)/6. Compute the square of the sum using the
+        first formula, then subtract the sum of the squares from it. Efficient
+        computation can be done directly using these closed-form expressions,
+        avoiding iteration and ensuring fast calculation even for large n.
+solved: true
+test_cases:
+-   euler_problem: 6
+    kwargs:
+        n: 10
+    result: 2640
+    solution_execution_time_in_sec:
+        sum_square_difference: 69.52 micro-sec
+    solved: true
+    test_case_category: preliminary
+-   euler_problem: 6
+    kwargs:
+        n: 100
+    result: 25164150
+    solution_execution_time_in_sec:
+        sum_square_difference: 19.22 micro-sec
+    solved: true
+    test_case_category: main
+url: https://projecteuler.net/problem=6
