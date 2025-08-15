@@ -1,0 +1,12 @@
+{
+  "multiples=2": 125874,
+  "multiples=3": 142857,
+  "multiples=4": 142857,
+  "multiples=5": 142857,
+  "multiples=6": 142857,
+  "solve_permuted_multiples_p0052_s0_multiples=2": "167.47 milli-sec",
+  "solve_permuted_multiples_p0052_s0_multiples=3": "310.17 milli-sec",
+  "solve_permuted_multiples_p0052_s0_multiples=4": "389.28 milli-sec",
+  "solve_permuted_multiples_p0052_s0_multiples=5": "496.02 milli-sec",
+  "solve_permuted_multiples_p0052_s0_multiples=6": "642.45 milli-sec"
+}

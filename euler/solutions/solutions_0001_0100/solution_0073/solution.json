@@ -1,0 +1,10 @@
+{
+  "max_d=1.0e+03": 50695,
+  "max_d=1.0e+05": 506608484,
+  "max_d=1.2e+04": 7295372,
+  "max_d=8": 3,
+  "solve_counting_fractions_in_a_range_p0073_s2_max_d=1.0e+03": "1.58 milli-sec",
+  "solve_counting_fractions_in_a_range_p0073_s2_max_d=1.0e+05": "346.52 milli-sec",
+  "solve_counting_fractions_in_a_range_p0073_s2_max_d=1.2e+04": "43.36 milli-sec",
+  "solve_counting_fractions_in_a_range_p0073_s2_max_d=8": "52.19 micro-sec"
+}

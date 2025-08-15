@@ -1,0 +1,6 @@
+{
+  "max_error=0.0e+00, max_side=10, target_num_rectangles=18": 6,
+  "max_error=2, max_side=1.0e+02, target_num_rectangles=2.0e+06": 2772,
+  "solve_counting_rectangles_p0085_s1_max_error=0.0e+00, max_side=10, target_num_rectangles=18": "129.94 micro-sec",
+  "solve_counting_rectangles_p0085_s1_max_error=2, max_side=1.0e+02, target_num_rectangles=2.0e+06": "644.99 micro-sec"
+}

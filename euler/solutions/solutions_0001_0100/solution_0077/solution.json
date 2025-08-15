@@ -1,0 +1,12 @@
+{
+  "num_prime_partitions=5": 10,
+  "num_prime_partitions=5.0e+02": 45,
+  "num_prime_partitions=5.0e+03": 71,
+  "num_prime_partitions=5.0e+04": 104,
+  "num_prime_partitions=50": 25,
+  "solve_prime_summations_p0077_s1_num_prime_partitions=5": "197.02 micro-sec",
+  "solve_prime_summations_p0077_s1_num_prime_partitions=5.0e+02": "3.09 milli-sec",
+  "solve_prime_summations_p0077_s1_num_prime_partitions=5.0e+03": "10.71 milli-sec",
+  "solve_prime_summations_p0077_s1_num_prime_partitions=5.0e+04": "19.45 milli-sec",
+  "solve_prime_summations_p0077_s1_num_prime_partitions=50": "4.92 milli-sec"
+}

@@ -1,0 +1,12 @@
+{
+  "max_limit=1.0e+02": 13,
+  "max_limit=1.0e+03": 25,
+  "max_limit=1.0e+06": 55,
+  "max_limit=1.0e+07": 55,
+  "max_limit=10": 4,
+  "solve_circular_primes_p0035_s0_max_limit=1.0e+02": "432.96 micro-sec",
+  "solve_circular_primes_p0035_s0_max_limit=1.0e+03": "1.65 milli-sec",
+  "solve_circular_primes_p0035_s0_max_limit=1.0e+06": "615.17 milli-sec",
+  "solve_circular_primes_p0035_s0_max_limit=1.0e+07": "6.42 sec",
+  "solve_circular_primes_p0035_s0_max_limit=10": "539.74 micro-sec"
+}

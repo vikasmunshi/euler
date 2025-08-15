@@ -1,0 +1,6 @@
+{
+  "dice_size=4, simulations=1.0e+06": "101524",
+  "dice_size=6, simulations=1.0e+06": "102400",
+  "solve_monopoly_odds_p0084_s0_dice_size=4, simulations=1.0e+06": "1.54 sec",
+  "solve_monopoly_odds_p0084_s0_dice_size=6, simulations=1.0e+06": "1.47 sec"
+}

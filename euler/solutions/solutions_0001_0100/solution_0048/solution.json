@@ -1,0 +1,6 @@
+{
+  "limit=1.0e+03": 9110846700,
+  "limit=10": 405071317,
+  "solve_self_powers_p0048_s0_limit=1.0e+03": "1.72 milli-sec",
+  "solve_self_powers_p0048_s0_limit=10": "21.72 micro-sec"
+}

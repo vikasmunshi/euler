@@ -1,0 +1,8 @@
+{
+  "max_perimeter=1.0e+07": 1067080,
+  "max_perimeter=1.5e+06": 161667,
+  "max_perimeter=50": 6,
+  "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=1.0e+07": "5.03 sec",
+  "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=1.5e+06": "492.14 milli-sec",
+  "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=50": "110.99 micro-sec"
+}

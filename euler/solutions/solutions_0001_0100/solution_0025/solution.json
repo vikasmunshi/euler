@@ -1,0 +1,6 @@
+{
+  "n=1.0e+03": 4782,
+  "n=3": 12,
+  "solve__1000_digit_fibonacci_number_p0025_s0_n=1.0e+03": "29.54 milli-sec",
+  "solve__1000_digit_fibonacci_number_p0025_s0_n=3": "23.06 micro-sec"
+}

@@ -1,0 +1,18 @@
+{
+  "power_of_10=2": 80,
+  "power_of_10=3": 857,
+  "power_of_10=4": 8558,
+  "power_of_10=5": 85623,
+  "power_of_10=6": 856929,
+  "power_of_10=7": 8581146,
+  "power_of_10=8": 85744333,
+  "power_of_10=9": 854325192,
+  "solve_square_digit_chains_p0092_s0_power_of_10=2": "331.03 micro-sec",
+  "solve_square_digit_chains_p0092_s0_power_of_10=3": "617.41 micro-sec",
+  "solve_square_digit_chains_p0092_s0_power_of_10=4": "712.60 micro-sec",
+  "solve_square_digit_chains_p0092_s0_power_of_10=5": "1.07 milli-sec",
+  "solve_square_digit_chains_p0092_s0_power_of_10=6": "1.86 milli-sec",
+  "solve_square_digit_chains_p0092_s0_power_of_10=7": "2.19 milli-sec",
+  "solve_square_digit_chains_p0092_s0_power_of_10=8": "3.00 milli-sec",
+  "solve_square_digit_chains_p0092_s0_power_of_10=9": "3.63 milli-sec"
+}

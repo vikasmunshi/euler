@@ -1,0 +1,8 @@
+{
+  "max_limit=1.0e+02": 44,
+  "max_limit=10": 10,
+  "max_limit=4.0e+06": 4613732,
+  "solve_even_fibonacci_numbers_p0002_s0_max_limit=1.0e+02": "20.63 micro-sec",
+  "solve_even_fibonacci_numbers_p0002_s0_max_limit=10": "27.73 micro-sec",
+  "solve_even_fibonacci_numbers_p0002_s0_max_limit=4.0e+06": "37.18 micro-sec"
+}

@@ -1,0 +1,8 @@
+{
+  "max_limit=1.0e+03": 233168,
+  "max_limit=1.0e+09": 233333333166666668,
+  "max_limit=10": 23,
+  "solve_multiples_of_3_or_5_p0001_s4_max_limit=1.0e+03": "88.87 micro-sec",
+  "solve_multiples_of_3_or_5_p0001_s4_max_limit=1.0e+09": "44.19 sec",
+  "solve_multiples_of_3_or_5_p0001_s4_max_limit=10": "43.36 micro-sec"
+}

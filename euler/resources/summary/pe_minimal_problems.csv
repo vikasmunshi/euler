@@ -1,0 +1,958 @@
+"ID","Title","Published","Solved By","Last Poster","Last Post Date","Solve Status"
+1,"Multiples of 3 or 5",1002301200,1034758,jleastral,1754888407,1
+2,"Even Fibonacci Numbers",1003510800,823628,reyf,1754833761,1
+3,"Largest Prime Factor",1004724000,593403,Klao1960,1754762650,1
+4,"Largest Palindrome Product",1005933600,524136,Eman_Eladaly,1754548845,1
+5,"Smallest Multiple",1007143200,526471,cutrovic,1754559301,1
+6,"Sum Square Difference",1008352800,530193,cutrovic,1754567797,1
+7,"10 001st Prime",1009562400,453254,EngelbrechtC,1754762425,1
+8,"Largest Product in a Series",1010772000,379868,EngelbrechtC,1754769427,1
+9,"Special Pythagorean Triplet",1011981600,385073,Dylan_Scully,1754694572,1
+10,"Summation of Primes",1013191200,353827,TheOfficialVenator,1754830335,1
+11,"Largest Product in a Grid",1014400800,253982,cutrovic,1754903484,1
+12,"Highly Divisible Triangular Number",1015610400,240664,fedandr,1754674933,1
+13,"Large Sum",1016820000,245646,Scrapperen,1754907876,1
+14,"Longest Collatz Sequence",1018026000,246347,fedandr,1754676819,1
+15,"Lattice Paths",1019235600,203766,fedandr,1754903630,1
+16,"Power Digit Sum",1020445200,248449,fedandr,1754907072,1
+17,"Number Letter Counts",1021654800,165404,Yami98,1754908025,1
+18,"Maximum Path Sum I",1022864400,158370,TaGchie_R,1754488584,1
+19,"Counting Sundays",1024074000,147003,MrsAristoteles,1753701462,1
+20,"Factorial Digit Sum",1024678800,214841,atenglabrador,1754283410,1
+21,"Amicable Numbers",1025888400,159672,MrsAristoteles,1753959342,1
+22,"Names Scores",1027098000,146603,l33tminion,1753972129,1
+23,"Non-Abundant Sums",1028307600,114867,MrsAristoteles,1754901605,1
+24,"Lexicographic Permutations",1029517200,125598,MrsAristoteles,1754906057,1
+25,"$1000$-digit Fibonacci Number",1030726800,169329,MrsAristoteles,1754896923,1
+26,"Reciprocal Cycles",1031936400,92875,xxmn,1754756668,1
+27,"Quadratic Primes",1033146000,96351,l33tminion,1754337552,1
+28,"Number Spiral Diagonals",1034355600,117713,lemimme,1754872308,1
+29,"Distinct Powers",1035565200,115686,l33tminion,1754680632,1
+30,"Digit Fifth Powers",1036778400,120286,l33tminion,1754681733,1
+31,"Coin Sums",1037988000,94084,l33tminion,1754683860,1
+32,"Pandigital Products",1039197600,78921,nick.kahlor,1754549616,1
+33,"Digit Cancelling Fractions",1040407200,79174,sukanka,1754224097,1
+34,"Digit Factorials",1041616800,103420,MrsAristoteles,1754910079,1
+35,"Circular Primes",1042826400,93151,sukanka,1754493217,1
+36,"Double-base Palindromes",1044036000,97272,sukanka,1754495031,1
+37,"Truncatable Primes",1045245600,81197,SunflowerBoy,1754045493,1
+38,"Pandigital Multiples",1046455200,69713,sukanka,1754572655,1
+39,"Integer Right Triangles",1047664800,80606,sukanka,1754574413,1
+40,"Champernowne's Constant",1048874400,87831,sukanka,1754663628,1
+41,"Pandigital Prime",1050080400,75368,sukanka,1754672549,1
+42,"Coded Triangle Numbers",1051290000,81612,xxmn,1754827310,1
+43,"Sub-string Divisibility",1052499600,66356,xxmn,1754828669,1
+44,"Pentagon Numbers",1053709200,65047,xxmn,1754829164,1
+45,"Triangular, Pentagonal, and Hexagonal",1054918800,77993,xxmn,1754829593,1
+46,"Goldbach's Other Conjecture",1056128400,68384,xxmn,1754833646,1
+47,"Distinct Primes Factors",1057338000,64375,xxmn,1754834074,1
+48,"Self Powers",1058547600,121859,xxmn,1754836536,1
+49,"Prime Permutations",1059757200,64191,xxmn,1754837511,1
+50,"Consecutive Prime Sum",1060966800,69278,SunflowerBoy,1754642022,1
+51,"Prime Digit Replacements",1062176400,38573,meilbeigi,1754905648,1
+52,"Permuted Multiples",1063386000,71736,xxmn,1754839905,1
+53,"Combinatoric Selections",1064595600,64809,xxmn,1754840109,1
+54,"Poker Hands",1065805200,40391,bestofthe3,1754528585,1
+55,"Lychrel Numbers",1067014800,59305,rjn,1754017912,1
+56,"Powerful Digit Sum",1068228000,64139,MrsAristoteles,1754910975,1
+57,"Square Root Convergents",1069437600,46354,FriendzonedByMath,1753524718,1
+58,"Spiral Primes",1070647200,44681,FriendzonedByMath,1753528005,1
+59,"XOR Decryption",1071856800,45593,imrgr,1752184070,1
+60,"Prime Pair Sets",1073066400,30588,Whzaaa,1753951554,1
+61,"Cyclical Figurate Numbers",1074276000,28867,papathurzday,1753968936,1
+62,"Cubic Permutations",1075485600,35519,nbfields,1753652946,1
+63,"Powerful Digit Counts",1076695200,47781,FriendzonedByMath,1753548301,1
+64,"Odd Period Square Roots",1077904800,25079,eoily,1754837307,1
+65,"Convergents of $e$",1079114400,33425,eoily,1754873141,1
+66,"Diophantine Equation",1080324000,22446,M3trixs,1753345734,1
+67,"Maximum Path Sum II",1081530000,103950,<i>quecto</i>,1753957725,1
+68,"Magic 5-gon Ring",1082739600,23515,FriendzonedByMath,1753036366,1
+69,"Totient Maximum",1083949200,39126,rjn,1754165549,1
+70,"Totient Permutation",1085158800,25274,FriendzonedByMath,1752947745,1
+71,"Ordered Fractions",1086368400,32756,juster,1752535570,1
+72,"Counting Fractions",1087578000,25299,<i>Nick Potter</i>,1753687965,1
+73,"Counting Fractions in a Range",1088787600,28056,AlfyB,1753024933,1
+74,"Digit Factorial Chains",1089997200,29950,Moop07,1753218057,1
+75,"Singular Integer Right Triangles",1091206800,20529,PierrotLeFou,1752860268,1
+76,"Counting Summations",1092416400,31914,AlfyB,1753519593,1
+77,"Prime Summations",1093626000,21831,AlfyB,1753521074,1
+78,"Coin Partitions",1094835600,19416,bzollars,1753651030,1
+79,"Passcode Derivation",1095440400,44688,AlfyB,1753532350,1
+80,"Square Root Digital Expansion",1097254800,22392,AlfyB,1753544372,1
+81,"Path Sum: Two Ways",1098464400,38015,xxmn,1754329003,1
+82,"Path Sum: Three Ways",1099677600,23715,xxmn,1754329674,1
+83,"Path Sum: Four Ways",1100887200,20612,xxmn,1754330247,1
+84,"Monopoly Odds",1102096800,14474,xxmn,1754780527,1
+85,"Counting Rectangles",1103306400,27618,xxmn,1754773341,1
+86,"Cuboid Route",1105120800,14537,youyh0319,1754132504,1
+87,"Prime Power Triples",1106330400,23461,AaryanSachdeva,1753314470,1
+88,"Product-sum Numbers",1107540000,11772,ProtonDecay314,1754727218,1
+89,"Roman Numerals",1108749600,23515,AlfyB,1754586257,1
+90,"Cube Digit Pairs",1109959200,13053,ConnorColombe,1751602998,1
+91,"Right Triangles with Integer Coordinates",1111168800,17576,AlfyB,1754714324,1
+92,"Square Digit Chains",1112374800,45608,AlfyB,1754731565,1
+93,"Arithmetic Expressions",1113584400,13597,<i>pablo</i>,1750383425,1
+94,"Almost Equilateral Triangles",1114794000,14306,AlfyB,1754832395,1
+95,"Amicable Chains",1116003600,16419,PierrotLeFou,1753066291,1
+96,"Su Doku",1117213200,19378,roosendaalsander,1753275601,1
+97,"Large Non-Mersenne Prime",1118422800,47152,roosendaalsander,1753341350,1
+98,"Anagramic Squares",1119027600,13110,faridlihyan,1754311501,1
+99,"Largest Exponential",1120237200,33963,BrandonWojo,1751897271,1
+100,"Arranged Probability",1121446800,18665,xxmn,1754406856,1
+101,"Optimum Polynomial",1122656400,13266,Killlerkecske7,1753028753,1
+102,"Triangle Containment",1123866000,24393,drassont,1754878208,1
+103,"Special Subset Sums: Optimum",1125075600,9299,eschafer90,1753616826,1
+104,"Pandigital Fibonacci Ends",1126285200,18085,xxmn,1754430333,1
+105,"Special Subset Sums: Testing",1127494800,9230,AI_Andy,1744929377,1
+106,"Special Subset Sums: Meta-testing",1128704400,7392,jemulator,1749187875,0
+107,"Minimal Network",1129914000,12376,xxmn,1753621635,0
+108,"Diophantine Reciprocals I",1131127200,14276,xxmn,1754413160,0
+109,"Darts",1132336800,9279,xxmn,1753622903,0
+110,"Diophantine Reciprocals II",1133546400,9255,xxmn,1754413308,0
+111,"Primes with Runs",1134756000,8329,xxmn,1753716309,0
+112,"Bouncy Numbers",1135965600,27191,xxmn,1754436853,0
+113,"Non-bouncy Numbers",1139594400,12417,xxmn,1754473255,0
+114,"Counting Block Combinations I",1140199200,12220,xxmn,1754489975,0
+115,"Counting Block Combinations II",1140804000,11174,xxmn,1754490515,0
+116,"Red, Green or Blue Tiles",1141408800,13573,xxmn,1754490884,0
+117,"Red, Green, and Blue Tiles",1142013600,12526,xxmn,1754491048,0
+118,"Pandigital Prime Sets",1143223200,8025,xxmn,1754492557,0
+119,"Digit Power Sum",1144429200,13808,PierrotLeFou,1748916190,0
+120,"Square Remainders",1145638800,15371,AI_Andy,1745208107,0
+121,"Disc Game Prize Fund",1148058000,10892,xxmn,1753717343,0
+122,"Efficient Exponentiation",1149267600,8884,PierrotLeFou,1751657631,0
+123,"Prime Square Remainders",1150477200,12855,prettysg,1738885610,0
+124,"Ordered Radicals",1152896400,15154,,1752056659,0
+125,"Palindromic Sums",1154710800,15119,CurryBoi,1754678155,0
+126,"Cuboid Layers",1155920400,5458,<i>Icy</i>,1751140210,0
+127,"abc-hits",1157130000,7152,<i>Nick Potter</i>,1743241070,0
+128,"Hexagonal Tile Differences",1159549200,5722,prettysg,1740146582,0
+129,"Repunit Divisibility",1161968400,7139,megabyte0,1744535745,0
+130,"Composites with Prime Repunit Property",1161968400,6702,pickdig,1747043321,0
+131,"Prime Cube Partnership",1163181600,8343,GoodRiddance,1753433287,0
+132,"Large Repunit Factors",1164996000,7195,abelin,1751372902,0
+133,"Repunit Nonfactors",1164996000,6308,Smylic,1748358543,0
+134,"Prime Pair Connection",1166205600,7959,PierrotLeFou,1751773715,0
+135,"Same Differences",1167415200,7298,AI_Andy,1745812568,0
+136,"Singleton Difference",1167415200,6509,AI_Andy,1745812696,0
+137,"Fibonacci Golden Nuggets",1168624800,6348,ShomNom,1754650079,0
+138,"Special Isosceles Triangles",1169290800,6631,GoodRiddance,1753748811,0
+139,"Pythagorean Tiles",1169888400,6436,CurryBoi,1754341982,0
+140,"Modified Fibonacci Golden Nuggets",1170486000,4997,squareroot,1750712476,0
+141,"Square Progressive Numbers",1171688400,4565,hitman47,1750489734,0
+142,"Perfect Square Collection",1172278800,6569,ronnyweasle,1734474823,0
+143,"Torricelli Triangles",1172869200,3183,brahimzeno,1738459113,0
+144,"Laser Beam Reflections ",1173459600,7097,azax,1747509357,0
+145,"Reversible Numbers",1174050000,18363,PierrotLeFou,1751337566,0
+146,"Investigating a Prime Pattern ",1174726800,5834,kwj,1754050110,0
+147,"Rectangles in Cross-hatched Grids",1175317200,3485,yJluTbl4,1732861863,0
+148,"Exploring Pascal's Triangle",1175907600,5845,reck314,1750920456,0
+149,"Maximum-sum Subsequence",1176498000,5485,Oliver1012,1737712676,0
+150,"Sub-triangle Sums",1176498000,4507,Duvoleros,1734180799,0
+151,"A Preference for A5",1177088400,6282,Anonymoose,1748285724,0
+152,"Sums of Square Reciprocals",1177678800,3117,StudiousGoblin,1750783896,0
+153,"Investigating Gaussian Integers",1178355600,3018,hitman47,1752913964,0
+154,"Exploring Pascal's Pyramid",1178946000,3023,sqrt73,1739308929,0
+155,"Counting Capacitor Circuits",1179536400,4118,firas5673,1743233672,0
+156,"Counting Digits",1180126800,2818,jakell,1749103433,0
+157,"Base-10 Diophantine Reciprocal",1180717200,3115,xxmn,1754742876,0
+158,"Lexicographical Neighbours",1181912400,4117,xxmn,1754693022,0
+159,"Digital Root Sums of Factorisations",1183208400,3732,<i>Mythreyi</i>,1754579504,0
+160,"Factorial Trailing Digits",1189170000,4013,returned,1742436677,0
+161,"Triominoes",1190394000,2468,<i>Ido Nahshon</i>,1752332535,0
+162,"Hexadecimal Numbers",1191618000,5980,<i>Mikhail Lomonosov</i>,1753048617,0
+163,"Cross-hatched Triangles",1192237200,2103,Smylic,1750956152,0
+164,"Three Consecutive Digital Sum Limit",1192856400,6461,sqlmdx,1752699980,0
+165,"Intersections",1193475600,2979,ATawnyOwl,1738369561,0
+166,"Criss Cross",1194094800,4636,WaveM3,1749538825,0
+167,"Investigating Ulam Sequences",1194613200,1978,adamant,1742837742,0
+168,"Number Rotations",1195232400,3037,<i>ricbit</i>,1754630177,0
+169,"Sums of Powers of Two",1195851600,5764,flakelorenz,1750207535,0
+170,"Pandigital Concatenating Products",1196470800,2277,<i>Ido Nahshon</i>,1751016224,0
+171,"Square Sum of the Digital Squares",1197090000,3196,sqlmdx,1752700691,0
+172,"Few Repeated Digits",1197709200,4321,sqlmdx,1752707774,0
+173,"Hollow Square Laminae I",1198328400,10072,xxmn,1754841437,0
+174,"Hollow Square Laminae II",1198328400,6597,xxmn,1754842972,0
+175,"Fractions and Sum of Powers of Two",1198846800,2077,popop614,1754883575,0
+176,"Common Cathetus Right-angled Triangles",1199466000,2175,<i>Nick Potter</i>,1747053584,0
+177,"Integer Angled Quadrilaterals",1200085200,1494,sqrt73,1740875877,0
+178,"Step Numbers",1200704400,3874,aviad_bl,1732656314,0
+179,"Consecutive Positive Divisors",1201323600,12358,<i>Mikhail Lomonosov</i>,1752535579,0
+180,"Golden Triplets",1201942800,1829,WaveM3,1754038400,0
+181,"Grouping Two Different Coloured Objects",1202562000,2315,jakell,1748765231,0
+182,"RSA Encryption",1203080400,2976,Oliver1609,1741171400,0
+183,"Maximum Product of Parts",1203699600,5201,hitman47,1750518363,0
+184,"Triangles Containing the Origin",1204318800,1903,adamant,1752432232,0
+185,"Number Mind",1204938000,3555,adamant,1752438875,0
+186,"Connectedness of a Network",1205557200,3238,sel68,1746045917,0
+187,"Semiprimes",1206176400,12292,<i>Mikhail Lomonosov</i>,1752538604,0
+188,"Hyperexponentiation",1207314000,7067,yoav745,1751759273,0
+189,"Tri-colouring a Triangular Grid",1207929600,2383,<i>ricbit</i>,1743991675,0
+190,"Maximising a Weighted Product",1208552400,4650,xxmn,1753806517,0
+191,"Prize Strings",1209168000,7879,aksarv,1754341703,0
+192,"Best Approximations",1209787200,1910,<i>Greymagick</i>,1741214508,0
+193,"Squarefree Numbers",1210420800,3874,<i>Mikhail Lomonosov</i>,1752769256,0
+194,"Coloured Configurations",1211014800,1650,<i>Mikhail Lomonosov</i>,1750199750,0
+195,"$60$-degree Triangle Inscribed Circles",1211547600,1651,popop614,1752027366,0
+196,"Prime Triplets",1212166800,2957,pickdig,1747153439,0
+197,"A Recursively Defined Sequence",1212786000,5465,Marouan,1740432210,0
+198,"Ambiguous Numbers",1213405200,1321,adamant,1752443083,0
+199,"Iterative Circle Packing",1214024400,2245,sqrt73,1741784914,0
+200,"Prime-proof Squbes",1214643600,2750,krihag,1750553252,0
+201,"Subsets with a Unique Sum",1215262800,2689,<i>Haroun</i>,1754598710,0
+202,"Laserbeam",1215262800,2915,<i>Mikhail Lomonosov</i>,1749324624,0
+203,"Squarefree Binomial Coefficients",1220706000,10025,<i>Mikhail Lomonosov</i>,1752541474,0
+204,"Generalised Hamming Numbers",1220706000,8110,PierrotLeFou,1747362349,0
+205,"Dice Game",1220706000,16317,slghtrd,1752498788,0
+206,"Concealed Square",1220706000,26525,AbstractAlgebrist,1754774817,0
+207,"Integer Partition Equations",1220706000,5222,Varcho,1738969529,0
+208,"Robot Walks",1221224400,2002,sqrt73,1744031235,0
+209,"Circular Logic",1221843600,2829,<i>Nick Potter</i>,1753236932,0
+210,"Obtuse Angled Triangles",1222462800,1938,ATawnyOwl,1741731729,0
+211,"Divisor Square Sum",1223082000,4708,feyrie,1754865878,0
+212,"Combined Volume of Cuboids",1223701200,1586,sqrt73,1744650635,0
+213,"Flea Circus",1224320400,2664,siennathesane,1749576377,0
+214,"Totient Chains",1224939600,5789,rap2363,1748540351,0
+215,"Crack-free Walls",1225458000,4102,<i>Mikhail Lomonosov</i>,1752776322,0
+216,"The Primality of $2n^2 - 1$",1226077200,4673,<i>Ido Nahshon</i>,1747497288,0
+217,"Balanced Numbers",1226696400,1719,<i>Janardhanan</i>,1743736255,0
+218,"Perfect Right-angled Triangles",1227315600,3359,Qq0,1745207226,0
+219,"Skew-cost Coding",1227934800,1674,<i>Mikhail Lomonosov</i>,1750802557,0
+220,"Heighway Dragon",1228554000,2408,megabyte0,1745877473,0
+221,"Alexandrian Integers",1229173200,2382,sqrt73,1741552929,0
+222,"Sphere Packing",1229691600,2338,sqrt73,1743427514,0
+223,"Almost Right-angled Triangles I",1230310800,1759,sqrt73,1743544406,0
+224,"Almost Right-angled Triangles II",1230310800,1430,sqrt73,1744318928,0
+225,"Tribonacci Non-divisors",1230310800,4956,Anonymoose,1746659835,0
+226,"A Scoop of Blancmange",1230930000,1996,Wrobinson,1734545692,0
+227,"The Chase",1231549200,2402,Mino260806,1751228295,0
+228,"Minkowski Sums",1232168400,1517,<i>Mikhail Lomonosov</i>,1752003962,0
+229,"Four Representations Using Squares",1232787600,1650,sqrt73,1744410592,0
+230,"Fibonacci Words",1233406800,3175,Mino260806,1751233518,0
+231,"Prime Factorisation of Binomial Coefficients",1233925200,6025,jgraham49,1753206671,0
+232,"The Race",1234544400,2025,grok123,1752728205,0
+233,"Lattice Points on a Circle",1235163600,2606,megabyte0,1746155459,0
+234,"Semidivisible Numbers",1235782800,3580,<i>pilotInPyjamas</i>,1741151369,0
+235,"An Arithmetic Geometric Sequence",1236402000,5468,phroq,1749075415,0
+236,"Luxury Hampers",1237021200,1081,Smylic,1754584572,0
+237,"Tours on a $4 \times N$ Playing Board",1237640400,1802,megabyte0,1746267097,0
+238,"Infinite String Tour",1238335200,1107,bcsb1001,1753586879,0
+239,"Twenty-two Foolish Primes",1238774400,2055,grok123,1752351758,0
+240,"Top Dice",1239397200,2450,michelkraemer,1746476680,0
+241,"Perfection Quotients",1240016400,1085,hacatu,1749597617,0
+242,"Odd Triplets",1240635600,1194,sqrt73,1746630270,0
+243,"Resilience",1241254800,10440,Polycarbohydrate,1750529357,0
+244,"Sliders",1241874000,1497,<i>Mikhail Lomonosov</i>,1751403605,0
+245,"Coresilience",1242392400,958,IvayloS,1734869554,0
+246,"Tangents to an Ellipse",1243008000,955,FlorianDelpoux,1728946314,0
+247,"Squares Under a Hyperbola",1243627200,1665,sqrt73,1743707913,0
+248,"Euler's Totient Function Equals 13!",1244246400,1495,sqrt73,1744743734,0
+249,"Prime Subset Sums",1244865600,2860,grok123,1754107268,0
+250,"$250250$",1244865600,3388,emerent,1740841498,0
+251,"Cardano Triplets",1245484800,1609,<i>Mikhail Lomonosov</i>,1749528574,0
+252,"Convex Holes",1246104000,989,michelkraemer,1743161777,0
+253,"Tidying Up A",1251460800,1198,michelkraemer,1746958979,0
+254,"Sums of Digit Factorials",1252080000,1108,sqrt73,1748891470,0
+255,"Rounded Square Roots",1252699200,1008,<i>Mikhail Lomonosov</i>,1751797755,0
+256,"Tatami-Free Rooms",1253318400,847,hacatu,1750805814,0
+257,"Angular Bisectors",1253937600,810,aryabhatta_euler,1751025268,0
+258,"A Lagged Fibonacci Sequence",1254556800,1849,jasperrou,1750084581,0
+259,"Reachable Numbers",1255176000,1713,bcsb1001,1753637951,0
+260,"Stone Game",1255694400,1495,sqrt73,1747140736,0
+261,"Pivotal Square Sums",1256313600,803,Mohammad_Ali_B,1729959705,0
+262,"Mountain Range",1256936400,839,Varcho,1737409570,0
+263,"An Engineers' Dream Come True",1257555600,1201,sqrt73,1745970255,0
+264,"Triangle Centres",1258174800,667,megabyte0,1749128871,0
+265,"Binary Circles",1258794000,4621,FlorianDelpoux,1729896936,0
+266,"Pseudo Square Root",1259413200,1932,sqrt73,1731536871,0
+267,"Billionaire",1259931600,3788,Alphanumerical,1754391738,0
+268,"At Least Four Distinct Prime Factors Less Than 100",1260550800,1663,papadil,1748041144,0
+269,"Polynomials with at Least One Integer Root",1261213200,810,dainichikai,1750783455,0
+270,"Cutting Squares",1261789200,747,Patryqss,1751625233,0
+271,"Modular Cubes, Part 1",1262408400,2695,hitman47,1746883222,0
+272,"Modular Cubes, Part 2",1262408400,1132,yamaguch,1753801272,0
+273,"Sum of Squares",1263042000,1594,yamaguch,1752410838,0
+274,"Divisibility Multipliers",1263560400,1602,yamaguch,1753886712,0
+275,"Balanced Sculptures",1264179600,704,michelkraemer,1748197191,0
+276,"Primitive Triangles",1264798800,1237,yamaguch,1752409324,0
+277,"A Modified Collatz Sequence",1265418000,3602,michelkraemer,1746042850,0
+278,"Linear Combinations of Semiprimes",1266037200,1200,sqrt73,1748636605,0
+279,"Triangles with Integral Sides and an Integral Angle ",1266656400,861,ATawnyOwl,1741133699,0
+280,"Ant and Seeds",1267275600,1196,sqrt73,1751065189,0
+281,"Pizza Toppings",1267794000,1145,<i>Mikhail Lomonosov</i>,1751616585,0
+282,"The Ackermann Function",1268413200,1187,hacatu,1750757394,0
+283,"Integer Sided Triangles with Integral Area/perimeter Ratio",1269032400,725,j...,1736875783,0
+284,"Steady Squares",1269651600,1424,ATawnyOwl,1750609929,0
+285,"Pythagorean Odds",1270267200,1392,sqrt73,1745854366,0
+286,"Scoring Probabilities",1270267200,2415,sqrt73,1741876279,0
+287,"Quadtree Encoding (a Simple Compression Algorithm)",1270886400,1632,dainichikai,1751015271,0
+288,"An Enormous Factorial",1271505600,1904,sel68,1747716676,0
+289,"Eulerian Cycles",1272024000,586,hacatu,1749848824,0
+290,"Digital Signature",1272643200,1120,am17an,1748495282,0
+291,"Panaitopol Primes",1273262400,1659,sqrt73,1740151526,0
+292,"Pythagorean Polygons",1273881600,658,FlorianDelpoux,1730557320,0
+293,"Pseudo-Fortunate Numbers",1274500800,3311,gal.eon,1740564469,0
+294,"Sum of Digits - Experience #23",1275120000,1069,sqrt73,1742997610,0
+295,"Lenticular Holes",1275739200,533,FlorianDelpoux,1730593943,0
+296,"Angular Bisector and Tangent",1276257600,683,FlorianDelpoux,1730676823,0
+297,"Zeckendorf Representation",1276876800,3090,sqrt73,1741362143,0
+298,"Selective Amnesia",1277496000,783,michelkraemer,1750523831,0
+299,"Three Similar Triangles",1278115200,711,hacatu,1750055740,0
+300,"Protein Folding",1283601600,1268,j...,1733320976,0
+301,"Nim",1284217200,7241,AbstractAlgebrist,1754912290,0
+302,"Strong Achilles Numbers",1284832800,872,FlorianDelpoux,1730744381,0
+303,"Multiples with Small Digits",1285448400,4042,megabyte0,1747661686,0
+304,"Primonacci",1286064000,2486,<i>Mikhail Lomonosov</i>,1753056344,0
+305,"Reflexive Position",1286679600,712,michelkraemer,1751185435,0
+306,"Paper-strip Game",1287295200,1418,<i>Icy</i>,1752855883,0
+307,"Chip Defects",1287910800,1878,jakell,1750918044,0
+308,"An Amazing Prime-generating Automaton",1288440000,877,michelkraemer,1751692050,0
+309,"Integer Ladders",1289059200,937,ATawnyOwl,1740701604,0
+310,"Nim Square",1289674800,1341,StudiousGoblin,1751393211,0
+311,"Biclinic Integral Quadrilaterals",1290290400,495,rspalek,1746587683,0
+312,"Cyclic Paths on Sierpiński Graphs",1290906000,967,ATawnyOwl,1748380734,0
+313,"Sliding Game",1291521600,1822,sqrt73,1746461532,0
+314,"The Mouse on the Moon",1292137200,593,pescador17,1753838720,0
+315,"Digital Root Clocks",1292752800,3744,2455,1737803940,0
+316,"Numbers in Decimal Expansions",1293282000,762,shobonvip,1743963603,0
+317,"Firecracker",1293897600,3040,<i>Shokan</i>,1750958192,0
+318,"2011 Nines",1293897600,1079,SeventhRootOfUnity,1748868494,0
+319,"Bounded Sequences",1294513200,472,FlorianDelpoux,1731193024,0
+320,"Factorials Divisible by a Huge Integer",1295128800,1021,michelkraemer,1753286112,0
+321,"Swapping Counters",1295744400,1949,sqrt73,1742151928,0
+322,"Binomial Coefficients Divisible by 10",1296360000,536,FlorianDelpoux,1731275689,0
+323,"Bitwise-OR Operations on Random Integers",1296975600,4330,<i>Mikhail Lomonosov</i>,1752350332,0
+324,"Building a Tower",1297591200,816,haroldgparker,1754582513,0
+325,"Stone Game II",1298120400,698,hacatu,1732354493,0
+326,"Modulo Summations",1298736000,611,FlorianDelpoux,1731333403,0
+327,"Rooms of Doom",1299351600,1265,hacatu,1748480920,0
+328,"Lowest-cost Search",1299967200,511,thedoctar,1752925002,0
+329,"Prime Frog",1300582800,2817,rcht,1745650143,0
+330,"Euler's Number",1301198400,603,flobacus,1751648250,0
+331,"Cross Flips",1301814000,491,FlorianDelpoux,1731435263,0
+332,"Spherical Triangles",1302426000,695,michelkraemer,1752167785,0
+333,"Special Partitions",1302955200,1405,sqrt73,1745507438,0
+334,"Spilling the Beans",1303570800,542,FlorianDelpoux,1731500572,0
+335,"Gathering the Beans",1303570800,587,j...,1734075573,0
+336,"Maximix Arrangements",1304186400,2299,sqrt73,1740082900,0
+337,"Totient Stairstep Sequences",1304802000,600,FlorianDelpoux,1731541853,0
+338,"Cutting Rectangular Grid Paper",1305417600,385,FlorianDelpoux,1731593073,0
+339,"Peredur Fab Efrawg",1306033200,634,michelkraemer,1752312302,0
+340,"Crazy Function",1306648800,1268,sqrt73,1745605652,0
+341,"Golomb's Self-describing Sequence",1307264400,1063,michelkraemer,1753446957,0
+342,"The Totient of a Square Is a Cube",1307793600,914,pwang00,1741059204,0
+343,"Fractional Sequences",1308409200,1576,sqrt73,1745545766,0
+344,"Silver Dollar Game",1309024800,384,lightbulbMEOW,1739530271,0
+345,"Matrix Sum",1315062000,6379,froycard,1751569920,0
+346,"Strong Repunits",1315062000,4878,CurryBoi,1754083964,0
+347,"Largest Integer Divisible by Two Primes",1315062000,5109,<i>Mikhail Lomonosov</i>,1752547492,0
+348,"Sum of a Square and a Cube",1315062000,3404,froycard,1752510166,0
+349,"Langton's Ant",1315062000,2156,sqrt73,1743425322,0
+350,"Constraining the Least Greatest and the Greatest Least",1315677600,545,FlorianDelpoux,1731927674,0
+351,"Hexagonal Orchards",1316293200,2899,megabyte0,1748319520,0
+352,"Blood Tests",1317513600,693,FlorianDelpoux,1731950670,0
+353,"Risky Moon",1318129200,569,michelkraemer,1753626517,0
+354,"Distances in a Bee's Honeycomb ",1318744800,508,Varcho,1741237749,0
+355,"Maximal Coprime Subset",1319360400,614,RibozymeR,1754846399,0
+356,"Largest Roots of Cubic Polynomials",1319889600,695,megabyte0,1748544607,0
+357,"Prime Generating Integers",1320508800,9077,phroq,1750335750,0
+358,"Cyclic Numbers",1321124400,1817,j...,1734943181,0
+359,"Hilbert's New Hotel",1321740000,1709,sqrt73,1746145429,0
+360,"Scary Sphere",1322355600,659,Varcho,1738445274,0
+361,"Subsequence of Thue-Morse Sequence",1322971200,361,FlorianDelpoux,1732181739,0
+362,"Squarefree Factors",1323586800,544,hacatu,1750410193,0
+363,"Bézier Curves",1324202400,1271,michelkraemer,1754544712,0
+364,"Comfortable Distance",1324731600,800,FlorianDelpoux,1732240915,0
+365,"A Huge Binomial Coefficient",1325347200,1459,sqrt73,1744910359,0
+366,"Stone Game III",1325962800,774,squareroot,1746645378,0
+367,"Bozo Sort",1326578400,594,FlorianDelpoux,1732324416,0
+368,"A Kempner-like Series",1327194000,616,GielvanBergen,1739303038,0
+369,"Badugi",1327809600,540,<i>Icy</i>,1752634295,0
+370,"Geometric Triangles",1328425200,605,aryabhatta_euler,1753293442,0
+371,"Licence Plates",1329040800,1859,sqrt73,1747328089,0
+372,"Pencils of Rays",1329570000,459,FlorianDelpoux,1732609611,0
+373,"Circumscribed Circles",1330185600,398,aryabhatta_euler,1751629104,0
+374,"Maximum Integer Partition Product",1330801200,768,FlorianDelpoux,1732634319,0
+375,"Minimum of Subsequences",1331416800,999,i707107,1750980089,0
+376,"Nontransitive Sets of Dice",1332032400,325,FlorianDelpoux,1732665087,0
+377,"Sum of Digits - Experience #13",1332648000,871,sqrt73,1752538221,0
+378,"Triangle Triples",1333260000,997,<i>Mikhail Lomonosov</i>,1735085341,0
+379,"Least Common Multiple Count",1333879200,611,aryabhatta_euler,1752739385,0
+380,"Amazing Mazes!",1334408400,587,FlorianDelpoux,1732718938,0
+381,"$(\text{prime}-k)$ Factorial",1335024000,4821,TitanCode,1751632783,0
+382,"Generating Polygons",1335639600,393,ATawnyOwl,1739593958,0
+383,"Divisibility Comparison Between Factorials",1336255200,540,FlorianDelpoux,1732786100,0
+384,"Rudin-Shapiro Sequence",1336870800,378,FlorianDelpoux,1732792443,0
+385,"Ellipses Inside Triangles",1337486400,329,<i>Icy</i>,1753118649,0
+386,"Maximum Length of an Antichain",1338102000,852,<i>Mikhail Lomonosov</i>,1751487994,0
+387,"Harshad Numbers",1338717600,5156,TitanCode,1748181661,0
+388,"Distinct Lines",1339246800,670,megabyte0,1749944443,0
+389,"Platonic Dice",1339862400,1721,sqrt73,1749820866,0
+390,"Triangles with Non Rational Sides and Integral Area",1340478000,638,FlorianDelpoux,1732931988,0
+391,"Hopping Game",1341093600,318,FlorianDelpoux,1733014183,0
+392,"Enmeshed Unit Circle",1346504400,900,<i>Mikhail Lomonosov</i>,1749579969,0
+393,"Migrating Ants",1347120000,870,FlorianDelpoux,1733097600,0
+394,"Eating Pie",1347735600,615,megabyte0,1750163994,0
+395,"Pythagorean Tree",1348351200,788,firas5673,1743630007,0
+396,"Weak Goodstein Sequence",1348966800,740,bcsb1001,1741045537,0
+397,"Triangle on Parabola",1349582400,307,FlorianDelpoux,1733268184,0
+398,"Cutting Rope",1350198000,433,FlorianDelpoux,1733273175,0
+399,"Squarefree Fibonacci Numbers",1350813600,660,i707107,1745001170,0
+400,"Fibonacci Tree Game",1351342800,550,FlorianDelpoux,1733395485,0
+401,"Sum of Squares of Divisors",1352563200,2974,overnite81,1749878914,0
+402,"Integer-valued Polynomials",1353178800,483,wim59,1751391413,0
+403,"Lattice Points Enclosed by Parabola and Line",1353794400,402,wim59,1751897925,0
+404,"Crisscross Ellipses",1354410000,369,it3,1750599871,0
+405,"A Rectangular Tiling",1355025600,712,FlorianDelpoux,1747000790,0
+406,"Guessing Game",1355641200,444,thedoctar,1738323675,0
+407,"Idempotents",1356256800,2797,papadil,1747192077,0
+408,"Admissible Paths Through a Grid",1356786000,665,<i>Mikhail Lomonosov</i>,1752182680,0
+409,"Nim Extreme",1357401600,512,wborgeaud,1714464305,0
+410,"Circle and Tangent Line",1358017200,320,wim59,1717892615,0
+411,"Uphill Paths",1358632800,771,j...,1700146610,0
+412,"Gnomon Numbering",1359248400,573,j...,1728428807,0
+413,"One-child Numbers",1359864000,451,<i>Janardhanan</i>,1742014776,0
+414,"Kaprekar Constant",1360479600,325,phs75,1680789270,0
+415,"Titanic Sets",1361095200,378,Redshiftz,1752961954,0
+416,"A Frog's Trip",1361624400,338,j...,1732780945,0
+417,"Reciprocal Cycles II",1362240000,1017,hitman47,1752174717,0
+418,"Factorisation Triples",1362855600,782,rexcirus,1750500518,0
+419,"Look and Say Sequence",1363471200,560,<i>Mikhail Lomonosov</i>,1752613809,0
+420,"$2 \times 2$ Positive Integer Matrix",1364086800,507,wim59,1752194045,0
+421,"Prime Factors of $n^{15}+1$",1364698800,771,hitman47,1753463936,0
+422,"Sequence of Points on a Hyperbola",1365314400,323,derektypist2019,1668021581,0
+423,"Consecutive Die Throws",1365930000,560,Genuine,1746468557,0
+424,"Kakuro",1366459200,463,jy314,1748613613,0
+425,"Prime Connection",1367074800,1666,sqrt73,1744902036,0
+426,"Box-Ball System",1367690400,285,Swistakk,1727699786,0
+427,"$n$-sequences",1368306000,365,lightbulbMEOW,1707749084,0
+428,"Necklace of Circles",1368921600,284,thedoctar,1753954289,0
+429,"Sum of Squares of Unitary Divisors",1369537200,2843,JMc137,1751163224,0
+430,"Range Flips",1370152800,964,<i>Mikhail Lomonosov</i>,1752794259,0
+431,"Square Space Silo",1370768400,688,<i>Mikhail Lomonosov</i>,1752756092,0
+432,"Totient Sum",1371297600,574,thedoctar,1754074314,0
+433,"Steps in Euclid's Algorithm",1371913200,511,wim59,1753247511,0
+434,"Rigid Graphs",1372528800,378,wim59,1694843504,0
+435,"Polynomials of Fibonacci Numbers",1378566000,1300,sqrt73,1747918144,0
+436,"Unfair Wager",1379181600,518,wim59,1752891441,0
+437,"Fibonacci Primitive Roots",1379797200,924,wim59,1752981732,0
+438,"Integer Part of Polynomial Equation's Solutions",1380412800,314,hacatu,1753644608,0
+439,"Sum of Sum of Divisors",1381028400,474,popop614,1754425919,0
+440,"GCD and Tiling",1381644000,451,wim59,1720119346,0
+441,"The Inverse Summation of Coprime Couples",1382259600,407,j...,1717501893,0
+442,"Eleven-free Integers",1382788800,460,wim59,1720232533,0
+443,"GCD Sequence",1383408000,1309,sqrt73,1748196316,0
+444,"The Roundtable Lottery",1384023600,350,Oleg.,1731031003,0
+445,"Retractions A",1384639200,468,i707107,1740430227,0
+446,"Retractions B",1384639200,443,i707107,1740383462,0
+447,"Retractions C",1384639200,367,Redshiftz,1753179835,0
+448,"Average Least Common Multiple",1385254800,403,aryabhatta_euler,1750865604,0
+449,"Chocolate Covered Candy",1386475200,1033,matressi,1748784806,0
+450,"Hypocycloid and Lattice Points",1387090800,224,wim59,1718228996,0
+451,"Modular Inverses",1387706400,1663,hitman47,1746863476,0
+452,"Long Products",1388235600,673,SciFiShroom,1726093671,0
+453,"Lattice Quadrilaterals",1388851200,251,pseudog,1619624538,0
+454,"Diophantine Reciprocals III",1389466800,558,aryabhatta_euler,1752593102,0
+455,"Powers with Trailing Digits",1390082400,829,FlorianDelpoux,1752493088,0
+456,"Triangles Containing the Origin II",1390698000,468,<i>Greymagick</i>,1739553995,0
+457,"A Polynomial Modulo the Square of a Prime",1391313600,925,wim59,1753225670,0
+458,"Permutations of Project",1391929200,1069,brucehart,1740838076,0
+459,"Flipping Game",1392544800,268,staffn,1753897195,0
+460,"An Ant on the Move",1393074000,363,hidesugar,1705476201,0
+461,"Almost Pi",1393689600,1379,sqrt73,1744806874,0
+462,"Permutation of 3-smooth Numbers",1394305200,373,j...,1728349127,0
+463,"A Weird Recurrence Relation",1394920800,1269,FlorianDelpoux,1738894935,0
+464,"Möbius Function and Intervals",1395536400,374,wim59,1753394147,0
+465,"Polar Polygons",1396152000,259,<i>Zach</i>,1750756382,0
+466,"Distinct Terms in a Multiplication Table",1396764000,375,hidesugar,1710139322,0
+467,"Superinteger",1397379600,509,Smylic,1744415645,0
+468,"Smooth Divisors of Binomial Coefficients",1397908800,324,sebastiangarrido,1741026210,0
+469,"Empty Chairs",1398524400,853,LhAllant,1750445930,0
+470,"Super Ramvok",1399140000,264,<i>Reiner Martin</i>,1638370764,0
+471,"Triangle Inscribed in Ellipse",1399755600,250,ikillsssue,1754555099,0
+472,"Comfortable Distance II",1400371200,291,<i>Reiner Martin</i>,1624745348,0
+473,"Phigital Number Base",1400986800,817,FlorianDelpoux,1739155063,0
+474,"Last Digits of Divisors",1401602400,479,j...,1729253564,0
+475,"Music Festival",1402218000,509,j...,1739665034,0
+476,"Circle Packing II",1402747200,465,thomjackson,1677173008,0
+477,"Number Sequence Game",1408806000,293,Swistakk,1726609124,0
+478,"Mixtures",1409421600,231,popop614,1754331954,0
+479,"Roots on the Rise",1410037200,1472,sqrt73,1746900796,0
+480,"The Last Question",1410652800,665,aviad_bl,1734808851,0
+481,"Chef Showdown",1411268400,288,Jacob_Elafandi,1680747499,0
+482,"The Incenter of a Triangle",1411884000,256,hacatu,1742186042,0
+483,"Repeated Permutation",1412499600,304,byhill,1741793019,0
+484,"Arithmetic Derivative",1413028800,468,aryabhatta_euler,1754279394,0
+485,"Maximum Number of Divisors",1413644400,1321,sqrt73,1745689038,0
+486,"Palindrome-containing Strings",1414260000,302,phs75,1677421286,0
+487,"Sums of Power Sums",1414879200,756,Genuine,1753990792,0
+488,"Unbalanced Nim",1415494800,272,wim59,1721746578,0
+489,"Common Factors Between Two Sequences",1416110400,290,jy314,1718311761,0
+490,"Jumping Frog",1416726000,367,<i>Yoni</i>,1735332510,0
+491,"Double Pandigital Number Divisible by $11$",1417341600,2420,froycard,1751790971,0
+492,"Exploding Sequence",1417870800,413,abliobli1821,1753868210,0
+493,"Under the Rainbow",1418486400,5988,Paixiao,1746373697,0
+494,"Collatz Prefix Families",1419102000,251,androl,1601467479,0
+495,"Writing $n$ as the Product of $k$ Distinct Positive Integers",1419717600,371,brucehart,1740417136,0
+496,"Incenter and Circumcenter of Triangle",1420333200,372,hacatu,1732165828,0
+497,"Drunken Tower of Hanoi",1420948800,628,FlorianDelpoux,1748268773,0
+498,"Remainder of Polynomial Division",1421564400,591,FlorianDelpoux,1752225079,0
+499,"St. Petersburg Lottery",1422180000,398,staffn,1752854278,0
+500,"Problem 500!!!",1422709200,4556,phroq,1749724652,0
+501,"Eight Divisors",1422709200,1565,FlorianDelpoux,1752885339,0
+502,"Counting Castles",1423324800,344,uau,1737574665,0
+503,"Compromise or Persist",1423940400,368,wim59,1753989358,0
+504,"Square on the Inside",1424556000,3461,SeventhRootOfUnity,1747918312,0
+505,"Bidirectional Recurrence",1425171600,242,Swistakk,1712617749,0
+506,"Clock Sequence",1425787200,1020,FlorianDelpoux,1738535914,0
+507,"Shortest Lattice Vector",1426402800,243,SYury,1629053833,0
+508,"Integers in Base $i-1$",1427018400,269,<i>fogjad mameg a s...</i>,1732825759,0
+509,"Divisor Nim",1427547600,689,FlorianDelpoux,1754343579,0
+510,"Tangent Circles",1428159600,1152,FlorianDelpoux,1738459783,0
+511,"Sequences with Nice Divisibility Properties",1428775200,487,mart0258,1750919273,0
+512,"Sums of Totients of Powers",1429390800,1704,hitman47,1749980704,0
+513,"Integral Median",1430006400,350,wim59,1744857083,0
+514,"Geoboard Shapes",1430622000,255,<i>fogjad mameg a s...</i>,1731197258,0
+515,"Dissonant Numbers",1431237600,522,FlorianDelpoux,1750112843,0
+516,"$5$-smooth Totients",1431853200,1747,hitman47,1745690337,0
+517,"A Real Recursion",1432382400,511,FlorianDelpoux,1754441011,0
+518,"Prime Triples and Geometric Sequences",1432998000,1801,hitman47,1745859190,0
+519,"Tricoloured Coin Fountains",1433613600,387,j...,1731309913,0
+520,"Simbers",1434229200,472,octarin,1719444521,0
+521,"Smallest Prime Factor",1434844800,877,thedoctar,1754721603,0
+522,"Hilbert's Blackout",1435460400,306,zielaj,1623679420,0
+523,"First Sort I",1441519200,1135,FlorianDelpoux,1738595846,0
+524,"First Sort II",1441519200,257,kissmoo,1705695978,0
+525,"Rolling Ellipse",1442134800,559,lukaxs,1739455564,0
+526,"Largest Prime Factors of Consecutive Numbers",1442664000,354,wim59,1745075632,0
+527,"Randomized Binary Search",1443279600,833,<i>Mikhail Lomonosov</i>,1751642145,0
+528,"Constrained Sums",1443895200,344,SpectralSequence...,1745788833,0
+529,"$10$-substrings",1444510800,302,bdolson,1752109049,0
+530,"GCD of Divisors",1445126400,532,aryabhatta_euler,1754678890,0
+531,"Chinese Leftovers",1445745600,1319,sel68,1749720334,0
+532,"Nanobots on Geodesics",1446361200,344,royjac,1604060920,0
+533,"Minimum Values of the Carmichael Function",1446976800,382,j...,1734963768,0
+534,"Weak Queens",1447506000,357,wim59,1745464299,0
+535,"Fractal Sequence",1448121600,328,hidesugar,1658049916,0
+536,"Modulo Power Identity ",1448737200,335,wim59,1754572903,0
+537,"Counting Tuples",1449352800,736,wim59,1750988178,0
+538,"Maximum Quadrilaterals",1449968400,368,FlorianDelpoux,1748383372,0
+539,"Odd Elimination",1450584000,933,hitman47,1748079342,0
+540,"Counting Primitive Pythagorean Triples",1451199600,762,hitman47,1745139805,0
+541,"Divisibility of Harmonic Number Denominators",1451815200,244,shs.10978,1659413731,0
+542,"Geometric Progression with Maximum Sum",1452344400,264,wim59,1745618301,0
+543,"Prime-Sum Numbers",1452960000,789,walgong,1742196938,0
+544,"Chromatic Conundrum",1453575600,301,aryanc403,1701559288,0
+545,"Faulhaber's Formulas",1454191200,618,i707107,1740761738,0
+546,"The Floor's Revenge",1454806800,275,aryabhatta_euler,1754638493,0
+547,"Distance of Random Points Within Hollow Square Laminae",1455422400,255,oliveul,1586101653,0
+548,"Gozinta Chains",1456038000,711,FlorianDelpoux,1743373031,0
+549,"Divisibility of Factorials",1456653600,3117,sqrt73,1738114664,0
+550,"Divisor Game",1457182800,410,wim59,1754610264,0
+551,"Sum of Digits Sequence",1457798400,530,Patryqss,1695190456,0
+552,"Chinese Leftovers II",1458414000,514,FlorianDelpoux,1752270739,0
+553,"Power Sets of Power Sets",1459029600,248,bobbilyking,1706214094,0
+554,"Centaurs on a Chess Board",1459641600,281,Swistakk,1725456808,0
+555,"McCarthy 91 Function",1460257200,807,SAG145,1751712108,0
+556,"Squarefree Gaussian Integers",1460872800,290,bigbangzeus,1742791253,0
+557,"Cutting Triangles",1461488400,321,<i>griff</i>,1734161390,0
+558,"Irrational Base",1462017600,281,koicy,1710507169,0
+559,"Permuted Matrices",1462633200,215,derektypist2019,1661519838,0
+560,"Coprime Nim",1463248800,384,wim59,1751165107,0
+561,"Divisor Pairs",1463864400,887,_epistemologist,1750125879,0
+562,"Maximal Perimeter",1464480000,215,Hoppi,1678717339,0
+563,"Robot Welders",1465095600,391,j...,1714349185,0
+564,"Maximal Polygons",1465711200,275,wim59,1746291586,0
+565,"Divisibility of Sum of Divisors",1466326800,722,FlorianDelpoux,1741913573,0
+566,"Cake Icing Puzzle",1466856000,220,<i>griff</i>,1754123196,0
+567,"Reciprocal Games I",1472914800,345,JudgeHoffman,1673529084,0
+568,"Reciprocal Games II",1472914800,332,JudgeHoffman,1673532513,0
+569,"Prime Mountain Range",1473530400,450,FlorianDelpoux,1754901705,0
+570,"Snowflakes",1474146000,306,wim59,1746718867,0
+571,"Super Pandigital Numbers",1474761600,1248,<i>Mikhail Lomonosov</i>,1752971925,0
+572,"Idempotent Matrices",1475377200,394,SNAIL-ERATO,1736248863,0
+573,"Unfair Race",1475992800,239,<i>Yoni</i>,1733176539,0
+574,"Verifying Primes",1476608400,300,damiengif,1567500546,0
+575,"Wandering Robots",1477137600,663,<i>Nick Potter</i>,1744870131,0
+576,"Irrational Jumps",1477753200,259,wim59,1658121626,0
+577,"Counting Hexagons",1478977200,1767,aksarv,1751384140,0
+578,"Integers with Decreasing Prime Powers",1479592800,275,dainichikai,1750694364,0
+579,"Lattice Points in Lattice Cubes",1480208400,194,wim59,1747437876,0
+580,"Squarefree Hilbert Numbers",1480824000,290,sukon767,1721583109,0
+581,"$47$-smooth Triangular Numbers",1481439600,1009,hitman47,1748189714,0
+582,"Nearly Isosceles $120$ Degree Triangles",1482055200,373,<i>pilotInPyjamas</i>,1741135222,0
+583,"Heron Envelopes",1482584400,416,KING-OLE,1717369345,0
+584,"Birthday Problem Revisited",1483200000,243,SanguineChameleon2,1752060241,0
+585,"Nested Square Roots",1483815600,203,lightbulbMEOW,1739275639,0
+586,"Binary Quadratic Form",1484431200,263,j...,1675118867,0
+587,"Concave Triangle",1485046800,3530,BenjamC,1752319064,0
+588,"Quintinomial Coefficients",1485662400,508,FlorianDelpoux,1746234850,0
+589,"Poohsticks Marathon",1486278000,234,Oleg.,1749520505,0
+590,"Sets with a Given Least Common Multiple",1486893600,302,<i>Icy</i>,1673628270,0
+591,"Best Approximations by Quadratic Integers",1487422800,225,hacatu,1754869424,0
+592,"Factorial Trailing Digits 2",1488038400,335,SNAIL-ERATO,1736550943,0
+593,"Fleeting Medians",1488654000,623,i707107,1750871840,0
+594,"Rhombus Tilings",1489269600,212,wim59,1694806969,0
+595,"Incremental Random Sort",1489885200,716,<i>Mikhail Lomonosov</i>,1751806686,0
+596,"Number of Lattice Points in a Hyperball",1490497200,417,eigenvector,1754616556,0
+597,"Torpids",1491112800,193,FlorianDelpoux,1731504483,0
+598,"Split Divisibilities",1491728400,563,FlorianDelpoux,1749688382,0
+599,"Distinct Colourings of a Rubik's Cube",1492257600,351,Varcho,1736023997,0
+600,"Integer Sided Equiangular Hexagons",1492873200,689,FlorianDelpoux,1738969082,0
+601,"Divisibility Streaks",1493488800,2339,ATawnyOwl,1740360115,0
+602,"Product of Head Counts",1494104400,580,<i>Mikhail Lomonosov</i>,1753914123,0
+603,"Substring Sums of Prime Concatenations",1494720000,488,<i>Mikhail Lomonosov</i>,1752055381,0
+604,"Convex Path in Square",1495335600,569,FlorianDelpoux,1749599148,0
+605,"Pairwise Coin-Tossing Game",1495951200,955,<i>Mikhail Lomonosov</i>,1740015356,0
+606,"Gozinta Chains II",1496566800,429,j...,1729684783,0
+607,"Marsh Crossing",1497096000,1904,md-geist,1753537797,0
+608,"Divisor Sums",1497711600,351,brucehart,1740165444,0
+609,"$\pi$ Sequences",1504969200,1051,<i>Mikhail Lomonosov</i>,1735668177,0
+610,"Roman Numerals II",1506189600,693,ravdin,1752178480,0
+611,"Hallway of Square Steps",1507410000,374,ColinPitrat,1738139098,0
+612,"Friend Numbers",1508630400,779,<i>Mikhail Lomonosov</i>,1750140952,0
+613,"Pythagorean Ant",1509854400,2025,jakell,1751109489,0
+614,"Special Partitions 2",1511074800,339,i707107,1749793519,0
+615,"The Millionth Number with at Least One Million Prime Factors",1512295200,671,MrDrake,1746019638,0
+616,"Creative Numbers",1513429200,539,<i>Mikhail Lomonosov</i>,1751581135,0
+617,"Mirror Power Sequence",1514649600,416,FlorianDelpoux,1747882214,0
+618,"Numbers with a Given Prime Factor Sum",1515870000,1189,SanguineChameleon2,1752993620,0
+619,"Square Subsets",1517090400,465,FlorianDelpoux,1754905148,0
+620,"Planetary Gears",1518310800,189,lightbulbMEOW,1717678589,0
+621,"Expressing an Integer as the Sum of Triangular Numbers",1519531200,630,<i>ricbit</i>,1750736948,0
+622,"Riffle Shuffles",1520751600,1954,abelin,1743146467,0
+623,"Lambda Count",1521968400,374,bcsb1001,1748190602,0
+624,"Two Heads Are Better Than One",1523102400,717,MrDrake,1745464598,0
+625,"Gcd Sum",1524322800,746,<i>Nick Potter</i>,1753771923,0
+626,"Counting Binary Matrices",1525543200,264,wim59,1741405498,0
+627,"Counting Products",1526763600,264,wim59,1741538597,0
+628,"Open Chess Positions",1527984000,899,<i>Mikhail Lomonosov</i>,1740484222,0
+629,"Scatterstone Nim",1529204400,277,firas5673,1702460696,0
+630,"Crossed Lines",1530424800,1157,Tcarrot4,1736085315,0
+631,"Constrained Permutations",1531645200,213,sshard,1727973221,0
+632,"Square Prime Factors",1532779200,571,aryabhatta_euler,1754370374,0
+633,"Square Prime Factors II",1532779200,368,wim59,1742574109,0
+634,"Numbers of the Form $a^2b^3$",1533999600,709,marecik16,1752711344,0
+635,"Subset Sums",1535220000,401,FlorianDelpoux,1750560452,0
+636,"Restricted Factorisations",1536440400,225,Swistakk,1724884613,0
+637,"Flexible Digit Sum",1537660800,364,wim59,1707630336,0
+638,"Weighted Lattice Paths",1538881200,425,FlorianDelpoux,1748211074,0
+639,"Summing a Multiplicative Function",1540101600,321,aryabhatta_euler,1753969927,0
+640,"Shut the Box",1540720800,418,ConnorColombe,1751006708,0
+641,"A Long Row of Dice",1541250000,567,MrDrake,1747468775,0
+642,"Sum of Largest Prime Factors",1541865600,414,wim59,1742690249,1
+643,"$2$-Friendly",1542481200,719,hitman47,1753011766,0
+644,"Squares on the Line",1543096800,180,aTree,1730177811,0
+645,"Every Day Is a Holiday",1543712400,248,matressi,1748887640,0
+646,"Bounded Divisors",1544328000,328,FlorianDelpoux,1752480387,0
+647,"Linear Transformations of Polygonal Numbers",1544943600,495,<i>Mikhail Lomonosov</i>,1740808685,0
+648,"Skipping Squares",1545559200,328,FlorianDelpoux,1754781506,0
+649,"Low-Prime Chessboard Nim",1546088400,481,FlorianDelpoux,1738458208,0
+650,"Divisors of Binomial Product",1546704000,1914,abelin,1742534819,0
+651,"Patterned Cylinders",1547319600,196,staffn,1709910737,0
+652,"Distinct Values of a Proto-logarithmic Function",1547935200,188,linguo,1551010583,0
+653,"Frictionless Tube",1548550800,356,pwild,1735622650,0
+654,"Neighbourly Constraints",1549166400,397,wim59,1706631526,0
+655,"Divisible Palindromes",1549782000,640,MrDrake,1746609873,0
+656,"Palindromic Sequences",1550397600,269,SanguineChameleon2,1753539125,0
+657,"Incomplete Words",1550926800,638,firas5673,1750958203,0
+658,"Incomplete Words II",1550926800,273,SanguineChameleon2,1753551964,0
+659,"Largest Prime",1551542400,1123,Oliver1012,1739522510,0
+660,"Pandigital Triangles",1552158000,341,FlorianDelpoux,1748337399,0
+661,"A Long Chess Match",1552773600,262,j...,1739971164,0
+662,"Fibonacci Paths",1553389200,928,FlorianDelpoux,1736126431,0
+663,"Sums of Subarrays",1554001200,418,FlorianDelpoux,1740176715,0
+664,"An Infinite Game",1554616800,220,,1749378878,0
+665,"Proportionate Nim",1555232400,279,mbh038,1583394589,0
+666,"Polymorphic Bacteria",1555761600,339,FlorianDelpoux,1754694863,0
+667,"Moving Pentagon",1556377200,228,CyclicISLscelesT...,1703751569,0
+668,"Square Root Smooth Numbers",1556992800,1202,i707107,1737513603,0
+669,"The King's Banquet",1557608400,347,j...,1736197421,0
+670,"Colouring a Strip",1558224000,395,FlorianDelpoux,1750206339,0
+671,"Colouring a Loop",1558224000,207,michpro,1751728017,0
+672,"One More One",1558839600,305,bcsb1001,1728879481,0
+673,"Beds and Desks",1559455200,363,FlorianDelpoux,1744684468,0
+674,"Solving $\mathcal{I}$-equations",1560070800,191,SanguineChameleon2,1753968625,0
+675,"$2^{\omega(n)}$",1560600000,873,sqrt73,1750807905,0
+676,"Matching Digit Sums",1561215600,264,j...,1735282361,0
+677,"Coloured Graphs",1561831200,213,Varcho,1729055658,0
+678,"Fermat-like Equations",1567890000,271,wim59,1695357295,0
+679,"Freefarea",1568505600,1029,sqrt73,1738612720,0
+680,"Yarra Gnisrever",1569121200,221,marecik16,1730423271,0
+681,"Maximal Area",1569736800,254,SNAIL-ERATO,1680030783,0
+682,"$5$-Smooth Pairs",1570352400,309,j...,1674620699,0
+683,"The Chase II",1570881600,368,marecik16,1754591544,0
+684,"Inverse Digit Sum",1571497200,3097,Roy_Elia,1748478764,0
+685,"Inverse Digit Sum II",1571497200,229,MoltenMan,1751006541,0
+686,"Powers of Two",1572112800,4027,Roy_Elia,1748698635,0
+687,"Shuffling Cards",1572732000,357,glodavac,1709027978,0
+688,"Piles of Plates",1573347600,878,brucehart,1743966490,0
+689,"Binary Series",1573963200,255,SanguineChameleon2,1754438881,0
+690,"Tom and Jerry",1574578800,240,Oleg.,1736724216,0
+691,"Long Substring with Many Repetitions",1575194400,310,FlorianDelpoux,1752490732,0
+692,"Siegbert and Jo",1575723600,1544,<i>Velsik</i>,1753044441,0
+693,"Finite Sequence Generator",1576339200,318,FlorianDelpoux,1748209747,0
+694,"Cube-full Divisors",1576954800,1165,sqrt73,1740936242,0
+695,"Random Rectangles",1577570400,242,brucehart,1739998443,0
+696,"Mahjong",1578186000,202,__LW__,1738686862,0
+697,"Randomly Decaying Sequence",1578801600,666,bcsb1001,1751760279,0
+698,"123 Numbers",1579417200,522,MrDrake,1748143218,0
+699,"Triffle Numbers",1580032800,213,<i>Yoni</i>,1707347001,0
+700,"Eulercoin",1580562000,4020,BrandonWojo,1751848455,0
+701,"Random Connected Area",1581177600,411,FlorianDelpoux,1752618786,0
+702,"Jumping Flea",1581793200,180,jgod8586,1650617914,0
+703,"Circular Logic II",1582408800,368,FlorianDelpoux,1754214928,0
+704,"Factors of Two in Binomial Coefficients",1583024400,1089,<i>Nick Potter</i>,1754802965,0
+705,"Total Inversion Count of Divided Sequences",1583640000,509,MrDrake,1748861875,0
+706,"$3$-Like Numbers",1584255600,652,MrDrake,1746344973,0
+707,"Lights Out",1584871200,261,bukebuer,1718088963,0
+708,"Twos Are All You Need",1585400400,368,aryabhatta_euler,1747464871,0
+709,"Even Stevens",1586016000,1016,bcsb1001,1750610959,0
+710,"One Million Members",1586631600,1474,<i>Icy</i>,1745348199,0
+711,"Binary Blackboard",1586631600,377,FlorianDelpoux,1739233793,0
+712,"Exponent Difference",1587247200,576,<i>Mikhail Lomonosov</i>,1749785115,0
+713,"Turán's Water Heating System",1587862800,799,FlorianDelpoux,1734833484,0
+714,"Duodigits",1588478400,817,sqrt73,1740531675,0
+715,"Sextuplet Norms",1589094000,218,sshard,1734854744,0
+716,"Grid Graphs",1589709600,254,j...,1747899551,0
+717,"Summation of a Modular Formula",1590238800,569,MrDrake,1747001525,0
+718,"Unreachable Numbers",1590854400,373,FlorianDelpoux,1740735279,0
+719,"Number Splitting",1591470000,4630,ReaI,1748207604,0
+720,"Unpredictable Permutations",1592085600,345,firas5673,1750848465,0
+721,"High Powers of Irrational Numbers",1592701200,485,FlorianDelpoux,1738376474,0
+722,"Slowly Converging Series",1593316800,591,<i>Mikhail Lomonosov</i>,1740704663,0
+723,"Pythagorean Quadrilaterals",1593932400,202,bukebuer,1732099172,0
+724,"Drone Delivery",1599310800,454,FlorianDelpoux,1738538014,0
+725,"Digit Sum Numbers",1599926400,1278,sel68,1753548883,0
+726,"Falling Bottles",1600542000,219,wim59,1660691036,0
+727,"Triangle of Circular Arcs",1601157600,588,FlorianDelpoux,1736132920,0
+728,"Circle of Coins",1601773200,314,FlorianDelpoux,1746314448,0
+729,"Range of Periodic Sequence",1602388800,264,interpird,1750291104,0
+730,"Shifted Pythagorean Triples",1603004400,203,Tinki-Vinki,1728043899,0
+731,"A Stoneham Number",1603620000,656,brucehart,1740683859,0
+732,"Standing on the Shoulders of Trolls",1604149200,250,FlorianDelpoux,1750591442,0
+733,"Ascending Subsequences",1604764800,527,FlorianDelpoux,1737765729,0
+734,"A Bit of Prime",1605380400,381,<i>Mikhail Lomonosov</i>,1750050885,0
+735,"Divisors of $2n^2$",1605996000,242,aryabhatta_euler,1753451889,0
+736,"Paths to Equality",1606611600,254,EthanKim8683,1738181793,0
+737,"Coin Loops",1607227200,419,marecik16,1753187450,0
+738,"Counting Ordered Factorisations",1607842800,317,FlorianDelpoux,1744764478,0
+739,"Summation of Summations",1608458400,584,bukebuer,1749517983,0
+740,"Secret Santa",1608987600,235,bukebuer,1752498537,0
+741,"Binary Grid Colouring",1609603200,176,thedoctar,1737784922,0
+742,"Minimum Area of a Convex Grid Polygon",1610218800,184,wim59,1685399431,0
+743,"Window into a Matrix",1610834400,1382,ihapiw,1754240444,0
+744,"What? Where? When?",1611450000,344,<i>Kelly Dance</i>,1743219217,0
+745,"Sum of Squares II",1612065600,1426,<i>Zach</i>,1742680778,0
+746,"A Messy Dinner",1612681200,319,FlorianDelpoux,1745017576,0
+747,"Triangular Pizza",1613296800,215,staffn,1625765010,0
+748,"Upside Down Diophantine Equation",1613826000,340,Redshiftz,1750321966,0
+749,"Near Power Sums",1614441600,823,hitman47,1746272973,0
+750,"Optimal Card Stacking",1615057200,371,FlorianDelpoux,1740440102,0
+751,"Concatenation Coincidence",1615672800,2635,Roy_Elia,1748103654,0
+752,"Powers of $1+\sqrt 7$",1616288400,748,hitman47,1750587645,0
+753,"Fermat Equation",1616904000,445,RibozymeR,1754793951,0
+754,"Product of Gauss Factorials",1617519600,809,i707107,1744917047,0
+755,"Not Zeckendorf",1618740000,1013,Thiros,1739522315,0
+756,"Approximating a Sum",1619874000,381,marecik16,1753540464,0
+757,"Stealthy Numbers",1621094400,1413,P_P,1754221125,0
+758,"Buckets of Water",1622314800,242,Swistakk,1749480966,0
+759,"A Squared Recurrence Relation",1623535200,618,<i>Mikhail Lomonosov</i>,1739215928,0
+760,"Sum over Bitwise Operators",1624755600,487,<i>Mikhail Lomonosov</i>,1740845021,0
+761,"Runner and Swimmer",1625976000,184,derektypist2019,1688571010,0
+762,"Amoebas in a 2D Grid",1630760400,244,wim59,1684387662,0
+763,"Amoebas in a 3D Grid",1630760400,195,boulet,1735411595,0
+764,"Asymmetric Diophantine Equation",1631376000,415,FlorianDelpoux,1746412442,0
+765,"Trillionaire",1631991600,247,Henrygb,1723461119,0
+766,"Sliding Block Puzzle",1633212000,363,FlorianDelpoux,1743825197,0
+767,"Window into a Matrix II",1633827600,197,sshard,1737313597,0
+768,"Chandelier",1634443200,215,<i>Yoni</i>,1738253612,0
+769,"Binary Quadratic Form II",1635055200,170,Swistakk,1738422537,0
+770,"Delphi Flip",1635674400,574,aryabhatta_euler,1748353481,0
+771,"Pseudo Geometric Sequences",1636203600,142,wim59,1682802036,0
+772,"Balanceable $k$-bounded Partitions",1636819200,583,walgong,1748238132,0
+773,"Ruff Numbers",1637434800,228,j...,1734772931,0
+774,"Conjunctive Sequences",1638050400,160,hacatu,1741460911,0
+775,"Saving Paper",1638666000,270,FlorianDelpoux,1749944113,0
+776,"Digit Sum Division",1639281600,615,sqrt73,1741014950,0
+777,"Lissajous Curves",1639897200,140,Swistakk,1741114573,0
+778,"Freshman's Product",1640512800,471,<i>Mikhail Lomonosov</i>,1740746905,0
+779,"Prime Factor and Exponent",1641042000,565,Vicfred,1749951626,0
+780,"Toriangulations",1641657600,149,ridiculous_compute,1744129893,0
+781,"Feynman Diagrams",1642273200,149,plamenko,1748344524,0
+782,"Distinct Rows and Columns",1642888800,173,ohadkel,1661914308,0
+783,"Urns",1643504400,217,j...,1737893161,0
+784,"Reciprocal Pairs",1644120000,454,hitman47,1749882733,0
+785,"Symmetric Diophantine Equation",1644735600,220,<i>Icy</i>,1745523739,0
+786,"Billiard",1645351200,142,Swistakk,1739123162,0
+787,"Bézout's Game",1645880400,224,FlorianDelpoux,1754707961,0
+788,"Dominating Numbers",1646496000,1355,JimYin88,1742837122,0
+789,"Minimal Pairing Modulo $p$",1647111600,230,j...,1735832279,0
+790,"Clock Grid",1647727200,298,FlorianDelpoux,1754431829,0
+791,"Average and Variance",1648342800,174,ohadkel,1656252329,0
+792,"Too Many Twos",1648958400,174,popop614,1751733697,0
+793,"Median of Products",1649574000,771,sqrt73,1753041841,0
+794,"Seventeen Points",1650189600,359,hacatu,1752395385,0
+795,"Alternating GCD Sum",1650718800,414,hitman47,1752998460,0
+796,"A Grand Shuffle",1651334400,229,j...,1673883053,0
+797,"Cyclogenic Polynomials",1651950000,217,ATawnyOwl,1747966978,0
+798,"Card Stacking Game",1652565600,143,ssfadaw,1748907827,0
+799,"Pentagonal Puzzle",1653181200,260,j...,1736599999,0
+800,"Hybrid Integers",1653796800,2253,froycard,1753305387,0
+801,"$x^y \equiv y^x$",1654412400,317,Circling,1750693133,0
+802,"Iterated Composition",1655028000,301,aryabhatta_euler,1749890272,0
+803,"Pseudorandom Sequence",1655557200,249,_epistemologist,1725473343,0
+804,"Counting Binary Quadratic Representations",1656172800,759,bcsb1001,1752273592,0
+805,"Shifted Multiples",1656788400,203,Swistakk,1750456095,0
+806,"Nim on Towers of Hanoi",1657404000,147,Swistakk,1737079554,0
+807,"Loops of Ropes",1662858000,145,sshard,1739022220,0
+808,"Reversible Prime Squares",1663473600,3136,AaryanSachdeva,1754347337,0
+809,"Rational Recurrence Relation ",1664089200,339,<i>Reiner Martin</i>,1747076998,0
+810,"XOR-Primes",1664704800,836,abelin,1754680696,0
+811,"Bitwise Recursion",1665234000,257,FlorianDelpoux,1754181138,0
+812,"Dynamical Polynomials",1665849600,154,wim59,1691175022,0
+813,"XOR-Powers",1666465200,657,abelin,1745258910,0
+814,"Mezzo-forte",1667080800,244,j...,1695037389,0
+815,"Group by Value",1667696400,497,Vicfred,1750030203,0
+816,"Shortest Distance Among Points",1668312000,2551,Roy_Elia,1746971824,0
+817,"Digits in Squares",1668927600,519,bcsb1001,1750019542,0
+818,"SET",1669543200,163,lightbulbMEOW,1714788179,0
+819,"Iterative Sampling",1670072400,247,main,1690381350,0
+820,"$N$<sup>th</sup> Digit of Reciprocals",1670688000,1112,AaryanSachdeva,1754434030,0
+821,"123-Separable",1671303600,170,tko919,1750281254,0
+822,"Square the Smallest",1671919200,918,AxelFox,1751283030,0
+823,"Factor Shuffle",1672534800,207,<i>Mikhail Lomonosov</i>,1752340802,0
+824,"Chess Sliders",1673150400,138,stewbasic,1723435379,0
+825,"Chasing Game",1673766000,172,Swistakk,1750201495,0
+826,"Birds on a Wire",1674381600,268,hidesugar,1711529148,0
+827,"Pythagorean Triple Occurrence",1674910800,202,Redshiftz,1744655545,0
+828,"Numbers Challenge",1675526400,742,Vicfred,1749747956,0
+829,"Integral Fusion",1676142000,231,adamant,1684185556,0
+830,"Binomials and Powers",1676757600,168,aryabhatta_euler,1750100119,0
+831,"Triple Product",1677373200,207,mavotroky,1698296053,0
+832,"Mex Sequence",1677988800,358,marijan,1746271024,0
+833,"Square Triangle Products",1678604400,182,staffn,1703176170,0
+834,"Add and Divide",1679220000,461,Vicfred,1749948711,0
+835,"Supernatural Triangles",1679749200,429,<i>Nick Potter</i>,1754558424,0
+836,"A Bold Proposition",1680364800,4793,qdiace,1753431860,0
+837,"Amidakuji",1680364800,230,matressi,1747900509,0
+838,"Not Coprime",1680980400,665,Vicfred,1749856538,0
+839,"Beans in Bowls",1681596000,397,<i>Reiner Martin</i>,1747431439,0
+840,"Sum of Products",1682211600,419,<i>Mikhail Lomonosov</i>,1750172710,0
+841,"Regular Star Polygons",1682827200,209,SNAIL-ERATO,1732861112,0
+842,"Irregular Star Polygons",1683442800,140,smilesformiles,1689046852,0
+843,"Periodic Circles",1684058400,138,<i>Yoni</i>,1741466207,0
+844,"$k$-Markov Numbers",1684587600,231,FlorianDelpoux,1752715738,0
+845,"Prime Digit Sum",1685203200,879,Vicfred,1749679220,0
+846,"Magic Bracelets",1685818800,232,Swistakk,1743003132,0
+847,"Jack's Bean",1686434400,130,lightbulbMEOW,1741083568,0
+848,"Guessing with Sets",1687050000,225,adamant,1689967716,0
+849,"The Tournament",1687665600,281,hacatu,1753345742,0
+850,"Fractions of Powers",1688281200,140,j...,1699122907,0
+851,"SOP and POS",1688896800,170,ridiculous_compute,1753468584,0
+852,"Coins in a Box",1693659600,255,mcj_haskell,1745264873,0
+853,"Pisano Periods 1",1694275200,1587,TitanCode,1749657160,0
+854,"Pisano Periods 2",1694275200,395,sqlmdx,1752851750,0
+855,"Delphi Paper",1694890800,151,lightbulbMEOW,1716897786,0
+856,"Waiting for a Pair",1695506400,677,Vicfred,1749753495,0
+857,"Beautiful Graphs",1696122000,193,hacatu,1744693155,0
+858,"LCM",1696737600,248,hacatu,1740196670,0
+859,"Cookie Game",1697353200,250,teeour,1738427486,0
+860,"Gold and Silver Coin Game",1697968800,517,Vicfred,1749769334,0
+861,"Products of Bi-Unitary Divisors",1698498000,230,FlorianDelpoux,1753709562,0
+862,"Larger Digit Permutation",1699113600,858,AxelFox,1750067244,0
+863,"Different Dice",1699729200,247,amic,1747839539,0
+864,"Square + 1 = Squarefree",1700344800,200,hitman47,1751724852,0
+865,"Triplicate Numbers",1700960400,298,<i>Reiner Martin</i>,1747318987,0
+866,"Tidying Up B",1701576000,453,Vicfred,1749909221,0
+867,"Tiling Dodecagon",1702191600,182,<i>KMG</i>,1706115411,0
+868,"Belfry Maths",1702807200,475,Vicfred,1749862340,0
+869,"Prime Guessing",1703336400,805,AxelFox,1751291588,0
+870,"Stone Game IV",1703952000,151,hacatu,1713821495,0
+871,"Drifting Subsets",1704567600,369,<i>Mikhail Lomonosov</i>,1750215438,0
+872,"Recursive Tree",1705183200,1149,blu.knite,1754525216,0
+873,"Words with Gaps",1705798800,354,<i>Mikhail Lomonosov</i>,1750196952,0
+874,"Maximal Prime Score",1706414400,568,Vicfred,1749712854,0
+875,"Quadruple Congruence",1707030000,233,plamenko,1749691857,0
+876,"Triplet Tricks",1707645600,115,sshard,1741603997,0
+877,"XOR-Equation A",1708174800,485,Vicfred,1749873062,0
+878,"XOR-Equation B",1708174800,293,s.c.koehler,1748447300,0
+879,"Touch-screen Password",1708790400,463,squareroot,1753529560,0
+880,"Nested Radicals",1709406000,118,byhill,1751449011,0
+881,"Divisor Graph Width",1710021600,532,<i>Mikhail Lomonosov</i>,1749834910,0
+882,"Removing Bits",1710637200,157,cheafdevo,1717725284,0
+883,"Remarkable Triangles",1711252800,113,popop614,1752989167,0
+884,"Removing Cubes",1711868400,623,Vicfred,1749927865,0
+885,"Sorted Digits",1712484000,1028,hitman47,1748099259,0
+886,"Coprime Permutations",1713013200,283,FlorianDelpoux,1752224300,0
+887,"Bounded Binary Search",1713628800,272,FlorianDelpoux,1738592358,0
+888,"1249 Nim",1714244400,201,ConWay3.14,1717067385,0
+889,"Rational Blancmange",1714860000,131,uselessness,1738563449,0
+890,"Binary Partitions",1715475600,204,AlperTheKing,1753912777,0
+891,"Ambiguous Clock",1716091200,162,marecik16,1723317019,0
+892,"Zebra Circles",1716706800,161,jh05013,1735406314,0
+893,"Matchsticks",1717322400,658,Vicfred,1749697766,0
+894,"Spiral of Circles",1717851600,351,FlorianDelpoux,1739525427,0
+895,"Gold &amp; Silver Coin Game II",1718467200,102,<i>Yoni</i>,1731429842,0
+896,"Divisible Ranges",1719082800,225,brucehart,1746307445,0
+897,"Maximal $n$-gon in a region",1719698400,437,<i>Mikhail Lomonosov</i>,1750303573,0
+898,"Claire Voyant",1720314000,323,hacatu,1745467211,0
+899,"DistribuNim I",1720929600,557,Vicfred,1749669895,0
+900,"DistribuNim II",1720929600,152,mdean,1748752003,0
+901,"Well Drilling",1721545200,490,StudiousGoblin,1751903464,0
+902,"Permutation Powers",1722160800,173,thedoctar,1732113006,0
+903,"Total Permutation Powers",1722160800,124,thedoctar,1732358556,0
+904,"Pythagorean Angle",1724504400,230,FlorianDelpoux,1754386345,0
+905,"Now I Know",1725120000,348,FlorianDelpoux,1740489624,0
+906,"A Collective Decision",1725735600,237,squareroot,1752525200,0
+907,"Stacking Cups",1726351200,287,marecik16,1748787753,0
+908,"Clock Sequence II",1726966800,145,wim59,1740342457,0
+909,"L-expressions I",1727582400,177,Steffel,1750705937,0
+910,"L-expressions II",1727582400,81,plamenko,1752101527,0
+911,"Khinchin Exceptions",1728198000,187,hacatu,1744383347,0
+912,"Where are the Odds?",1728813600,200,thedoctar,1736255128,0
+913,"Row-major vs Column-major",1729342800,149,wim59,1737266084,0
+914,"Triangles inside Circles",1729958400,525,Vicfred,1749937911,0
+915,"Giant GCDs",1730574000,207,wim59,1734762102,0
+916,"Restricted Permutations",1731189600,162,<i>zzz</i>,1750188761,0
+917,"Minimal Path Using Additive Cost",1731805200,224,Varcho,1738646810,0
+918,"Recursive Sequence Summation",1732420800,1139,sqlmdx,1753195144,0
+919,"Fortunate Triangles",1733036400,257,popop614,1751937870,0
+920,"Tau Numbers",1733652000,285,unime,1742072308,0
+921,"Golden Recurrence",1734181200,209,<i>Reiner Martin</i>,1747050710,0
+922,"Young's Game A",1734796800,137,Lazar,1738050860,0
+923,"Young's Game B",1734796800,104,Lazar,1738271846,0
+924,"Larger Digit Permutation II",1735412400,204,FlorianDelpoux,1754611264,0
+925,"Larger Digit Permutation III",1735412400,168,thedoctar,1735800913,0
+926,"Total Roundness",1736028000,689,SNAIL-ERATO,1751919587,0
+927,"Prime-ary Tree",1736643600,183,hacatu,1742958242,0
+928,"Cribbage",1737259200,222,FlorianDelpoux,1743475466,0
+929,"Odd-Run Compositions",1737874800,229,plamenko,1749864720,0
+930,"The Gathering",1738490400,122,sshard,1746599586,0
+931,"Totient Graph",1739019600,153,foraarslys,1740190520,0
+932,"$2025$",1739635200,1408,timday,1754833525,0
+933,"Paper Cutting",1740250800,155,jy314,1750157123,0
+934,"Unlucky Primes",1740866400,377,DanielJackson,1751949313,0
+935,"Rolling Square",1741482000,110,popop614,1754621688,0
+936,"Peerless Trees",1742097600,99,Varcho,1747434503,0
+937,"Equiproduct Partition",1742713200,148,j...,1747651423,0
+938,"Exhausting a Colour",1743328800,841,timday,1754842917,0
+939,"Partisan Nim",1743858000,121,shs.10978,1745591293,0
+940,"Two-Dimensional Recurrence",1744473600,499,jchaoisaac,1753758424,0
+941,"de Bruijn's Combination Lock",1745089200,114,WaveM3,1748512448,0
+942,"Mersenne's Square Root",1745704800,65,Redshiftz,1751747185,0
+943,"Self Describing Sequences",1746320400,71,uau,1752473700,0
+944,"Sum of Elevisors",1746936000,592,FlorianDelpoux,1752443434,0
+945,"XOR-Equation C",1747551600,188,FlorianDelpoux,1754007551,0
+946,"Continued Fraction Fraction",1748167200,208,FlorianDelpoux,1753754108,0
+947,"Fibonacci Residues",1748696400,133,hacatu,1749543209,0
+948,"Left vs Right",1749312000,272,tartuflein,1754830775,0
+949,"Left vs Right II",1749312000,30,<i>nimrod</i>,1753257764,0
+950,"Pirate Treasure",1749927600,92,lightbulbMEOW,1750692740,0
+951,"A Game of Chance",1750543200,281,grok123,1754546274,0
+952,"Order Modulo Factorial",1751158800,222,i707107,1751425407,0
+953,"Factorisation Nim",1751774400,148,Redshiftz,1751967185,0
+954,"Heptaphobia",1752390000,139,jjoshua2,1752716158,0
+955,"Finding Triangles",1753005600,335,ChandlerH,1754611640,0
+956,"Super Duper Sum",1753534800,268,xxmn,1754749336,0
+957,"Point Genesis",1754150400,28,<i>MrBlack</i>,1754435373,0

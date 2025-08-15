@@ -1,0 +1,6 @@
+{
+  "limit=1.0e+03": 983,
+  "limit=10": 7,
+  "solve_reciprocal_cycles_p0026_s0_limit=1.0e+03": "1.53 milli-sec",
+  "solve_reciprocal_cycles_p0026_s0_limit=10": "33.79 micro-sec"
+}

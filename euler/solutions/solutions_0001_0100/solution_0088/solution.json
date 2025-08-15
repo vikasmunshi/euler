@@ -1,0 +1,6 @@
+{
+  "max_k=1.2e+04, min_k=2": 7587457,
+  "max_k=6, min_k=2": 30,
+  "solve_product_sum_numbers_p0088_s0_max_k=1.2e+04, min_k=2": "174.93 milli-sec",
+  "solve_product_sum_numbers_p0088_s0_max_k=6, min_k=2": "134.39 micro-sec"
+}

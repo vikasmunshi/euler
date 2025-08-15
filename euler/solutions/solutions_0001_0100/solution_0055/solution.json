@@ -1,0 +1,4 @@
+{
+  "max_iterations=50, max_limit=1.0e+04": 249,
+  "solve_lychrel_numbers_p0055_s0_max_iterations=50, max_limit=1.0e+04": "37.23 milli-sec"
+}

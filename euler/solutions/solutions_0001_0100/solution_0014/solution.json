@@ -1,0 +1,6 @@
+{
+  "max_number=1.0e+06": 837799,
+  "max_number=1.0e+07": 8400511,
+  "solve_longest_collatz_sequence_p0014_s0_max_number=1.0e+06": "1.01 sec",
+  "solve_longest_collatz_sequence_p0014_s0_max_number=1.0e+07": "12.78 sec"
+}

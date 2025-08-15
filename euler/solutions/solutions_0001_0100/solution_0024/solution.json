@@ -1,0 +1,8 @@
+{
+  "digits=012, permutation_number=4": "120",
+  "digits=012, permutation_number=6": "210",
+  "digits=0123456789, permutation_number=1.0e+06": "2783915460",
+  "solve_lexicographic_permutations_p0024_s0_digits=012, permutation_number=4": "58.22 micro-sec",
+  "solve_lexicographic_permutations_p0024_s0_digits=012, permutation_number=6": "80.38 micro-sec",
+  "solve_lexicographic_permutations_p0024_s0_digits=0123456789, permutation_number=1.0e+06": "84.72 micro-sec"
+}

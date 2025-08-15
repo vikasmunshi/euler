@@ -1,0 +1,10 @@
+{
+  "convergent_num=1.0e+02": 272,
+  "convergent_num=1.0e+03": 4034,
+  "convergent_num=1.0e+04": 55322,
+  "convergent_num=10": 17,
+  "solve_convergents_of_e_p0065_s0_convergent_num=1.0e+02": "961.40 micro-sec",
+  "solve_convergents_of_e_p0065_s0_convergent_num=1.0e+03": "19.29 milli-sec",
+  "solve_convergents_of_e_p0065_s0_convergent_num=1.0e+04": "12.87 sec",
+  "solve_convergents_of_e_p0065_s0_convergent_num=10": "320.11 micro-sec"
+}

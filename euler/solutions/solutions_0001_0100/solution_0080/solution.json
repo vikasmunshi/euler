@@ -1,0 +1,8 @@
+{
+  "digits=1.0e+02, max_num=2": 475,
+  "digits=1.0e+02, max_num=99": 40886,
+  "digits=1.0e+02, max_num=999": 434576,
+  "solve_square_root_digital_expansion_p0080_s1_digits=1.0e+02, max_num=2": "496.99 micro-sec",
+  "solve_square_root_digital_expansion_p0080_s1_digits=1.0e+02, max_num=99": "35.31 milli-sec",
+  "solve_square_root_digital_expansion_p0080_s1_digits=1.0e+02, max_num=999": "354.07 milli-sec"
+}

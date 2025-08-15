@@ -1,0 +1,12 @@
+{
+  "max_perimeter=1.0e+02": 60,
+  "max_perimeter=1.0e+03": 840,
+  "max_perimeter=1.0e+04": 5040,
+  "max_perimeter=1.0e+05": 55440,
+  "max_perimeter=1.0e+06": 720720,
+  "solve_integer_right_triangles_p0039_s0_max_perimeter=1.0e+02": "1.21 milli-sec",
+  "solve_integer_right_triangles_p0039_s0_max_perimeter=1.0e+03": "1.61 milli-sec",
+  "solve_integer_right_triangles_p0039_s0_max_perimeter=1.0e+04": "2.60 milli-sec",
+  "solve_integer_right_triangles_p0039_s0_max_perimeter=1.0e+05": "28.23 milli-sec",
+  "solve_integer_right_triangles_p0039_s0_max_perimeter=1.0e+06": "361.50 milli-sec"
+}

@@ -1,0 +1,12 @@
+{
+  "max_limit=1.0e+02": 41,
+  "max_limit=1.0e+03": 953,
+  "max_limit=1.0e+04": 9521,
+  "max_limit=1.0e+05": 92951,
+  "max_limit=1.0e+06": 997651,
+  "solve_consecutive_prime_sum_p0050_s0_max_limit=1.0e+02": "319.28 micro-sec",
+  "solve_consecutive_prime_sum_p0050_s0_max_limit=1.0e+03": "944.01 micro-sec",
+  "solve_consecutive_prime_sum_p0050_s0_max_limit=1.0e+04": "5.11 milli-sec",
+  "solve_consecutive_prime_sum_p0050_s0_max_limit=1.0e+05": "54.28 milli-sec",
+  "solve_consecutive_prime_sum_p0050_s0_max_limit=1.0e+06": "471.77 milli-sec"
+}

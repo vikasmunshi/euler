@@ -1,0 +1,6 @@
+{
+  "num_divisors=5": 28,
+  "num_divisors=5.0e+02": 76576500,
+  "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=5": "63.31 micro-sec",
+  "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=5.0e+02": "3.45 sec"
+}

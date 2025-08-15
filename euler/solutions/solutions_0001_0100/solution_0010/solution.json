@@ -1,0 +1,8 @@
+{
+  "max_num=1.0e+07": 3203324994356,
+  "max_num=10": 17,
+  "max_num=2.0e+06": 142913828922,
+  "solve_summation_of_primes_p0010_s1_max_num=1.0e+07": "9.81 sec",
+  "solve_summation_of_primes_p0010_s1_max_num=10": "54.18 micro-sec",
+  "solve_summation_of_primes_p0010_s1_max_num=2.0e+06": "1.64 sec"
+}

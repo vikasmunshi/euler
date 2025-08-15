@@ -1,0 +1,32 @@
+{
+  "max_num=1.0e+02": [
+    2,
+    54
+  ],
+  "max_num=1.0e+03": [
+    12,
+    55
+  ],
+  "max_num=1.0e+04": [
+    42,
+    60
+  ],
+  "max_num=1.0e+05": [
+    42,
+    60
+  ],
+  "max_num=1.0e+06": [
+    60,
+    402
+  ],
+  "max_num=10": [
+    1,
+    36
+  ],
+  "solve_digit_factorial_chains_p0074_s0_max_num=1.0e+02": "3.28 milli-sec",
+  "solve_digit_factorial_chains_p0074_s0_max_num=1.0e+03": "9.38 milli-sec",
+  "solve_digit_factorial_chains_p0074_s0_max_num=1.0e+04": "32.14 milli-sec",
+  "solve_digit_factorial_chains_p0074_s0_max_num=1.0e+05": "153.38 milli-sec",
+  "solve_digit_factorial_chains_p0074_s0_max_num=1.0e+06": "1.24 sec",
+  "solve_digit_factorial_chains_p0074_s0_max_num=10": "1.77 milli-sec"
+}

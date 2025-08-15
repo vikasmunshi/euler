@@ -1,0 +1,6 @@
+{
+  "max_n=1.0e+02, threshold=1.0e+02": 4724,
+  "max_n=1.0e+02, threshold=1.0e+06": 4075,
+  "solve_combinatoric_selections_p0053_s0_max_n=1.0e+02, threshold=1.0e+02": "53.59 micro-sec",
+  "solve_combinatoric_selections_p0053_s0_max_n=1.0e+02, threshold=1.0e+06": "115.14 micro-sec"
+}
