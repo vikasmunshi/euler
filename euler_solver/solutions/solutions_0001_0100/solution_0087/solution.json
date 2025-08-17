@@ -1,0 +1,6 @@
+{
+    "max_num=50": 4,
+    "max_num=50000000": 1097343,
+    "solve_prime_power_triples_p0087_s0_max_num=50": "252.18 micro-sec",
+    "solve_prime_power_triples_p0087_s0_max_num=50000000": "839.69 milli-sec"
+}

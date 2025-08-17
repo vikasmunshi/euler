@@ -1,0 +1,14 @@
+{
+    "max_digits=1": 25,
+    "max_digits=2": 157,
+    "max_digits=3": 1772,
+    "max_digits=4": 18228,
+    "max_digits=6": 872187,
+    "max_digits=9": 2609044274,
+    "solve_double_base_palindromes_p0036_s0_max_digits=1": "106.82 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=2": "95.88 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=3": "200.00 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=4": "398.23 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=6": "2.81 milli-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=9": "173.08 milli-sec"
+}

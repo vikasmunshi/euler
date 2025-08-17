@@ -1,0 +1,36 @@
+{
+    "length=2": [
+        1,
+        8181
+    ],
+    "length=3": [
+        1,
+        19291
+    ],
+    "length=4": [
+        2,
+        [
+            12524,
+            16160
+        ]
+    ],
+    "length=5": [
+        5,
+        [
+            12019,
+            15857,
+            18685,
+            19493,
+            26058
+        ]
+    ],
+    "length=6": [
+        1,
+        28684
+    ],
+    "solve_cyclical_figurate_numbers_p0061_s0_length=2": "2.73 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=3": "5.75 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=4": "17.65 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=5": "40.54 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=6": "99.97 milli-sec"
+}

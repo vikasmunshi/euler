@@ -1,0 +1,8 @@
+{
+    "n=2": 14,
+    "n=3": 644,
+    "n=4": 134043,
+    "solve_distinct_primes_factors_p0047_s0_n=2": "180.62 micro-sec",
+    "solve_distinct_primes_factors_p0047_s0_n=3": "2.75 milli-sec",
+    "solve_distinct_primes_factors_p0047_s0_n=4": "1.12 sec"
+}

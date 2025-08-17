@@ -1,0 +1,10 @@
+{
+    "size=1001": 669171001,
+    "size=5": 101,
+    "size=7": 261,
+    "size=9": 537,
+    "solve_number_spiral_diagonals_p0028_s0_size=1001": "36.48 micro-sec",
+    "solve_number_spiral_diagonals_p0028_s0_size=5": "29.18 micro-sec",
+    "solve_number_spiral_diagonals_p0028_s0_size=7": "28.16 micro-sec",
+    "solve_number_spiral_diagonals_p0028_s0_size=9": "41.79 micro-sec"
+}

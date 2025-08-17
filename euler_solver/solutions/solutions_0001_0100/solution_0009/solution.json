@@ -1,0 +1,6 @@
+{
+    "solve_special_pythagorean_triplet_p0009_s0_sum_sides=1000": "38.47 milli-sec",
+    "solve_special_pythagorean_triplet_p0009_s0_sum_sides=12": "35.82 micro-sec",
+    "sum_sides=1000": 31875000,
+    "sum_sides=12": 60
+}

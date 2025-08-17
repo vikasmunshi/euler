@@ -1,0 +1,8 @@
+{
+    "num_digits=1": 45,
+    "num_digits=2": 972,
+    "num_digits=3": 13888,
+    "solve_powerful_digit_sum_p0056_s0_num_digits=1": "294.92 micro-sec",
+    "solve_powerful_digit_sum_p0056_s0_num_digits=2": "36.78 milli-sec",
+    "solve_powerful_digit_sum_p0056_s0_num_digits=3": "813.66 milli-sec"
+}

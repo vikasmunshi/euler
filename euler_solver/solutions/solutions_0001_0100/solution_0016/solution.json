@@ -1,0 +1,8 @@
+{
+    "base=2, power=1000": 1366,
+    "base=2, power=10000": 13561,
+    "base=2, power=15": 26,
+    "solve_power_digit_sum_p0016_s0_base=2, power=1000": "108.82 micro-sec",
+    "solve_power_digit_sum_p0016_s0_base=2, power=10000": "649.29 micro-sec",
+    "solve_power_digit_sum_p0016_s0_base=2, power=15": "54.08 micro-sec"
+}

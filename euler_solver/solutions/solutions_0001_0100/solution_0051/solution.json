@@ -1,0 +1,8 @@
+{
+    "num_digits=6, prime_run=6": 13,
+    "num_digits=6, prime_run=7": 56003,
+    "num_digits=6, prime_run=8": 121313,
+    "solve_prime_digit_replacements_p0051_s0_num_digits=6, prime_run=6": "778.28 milli-sec",
+    "solve_prime_digit_replacements_p0051_s0_num_digits=6, prime_run=7": "888.89 milli-sec",
+    "solve_prime_digit_replacements_p0051_s0_num_digits=6, prime_run=8": "975.28 milli-sec"
+}
