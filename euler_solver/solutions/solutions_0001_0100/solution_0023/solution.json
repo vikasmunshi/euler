@@ -1,4 +1,5 @@
 {
     "": 4179871,
-    "solve_non_abundant_sums_p0023_s0_": "2.53 sec"
+    "solve_non_abundant_sums_p0023_s0_": "132.51 milli-sec",
+    "solve_non_abundant_sums_p0023_s1_": "1.55 sec"
 }

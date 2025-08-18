@@ -25,10 +25,11 @@ URL: https://projecteuler.net/problem=44
 """
 from __future__ import annotations
 
+from math import sqrt
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.polynomial_numbers import is_pentagonal_number, nth_pentagonal_number
+# from euler_solver.maths.polynomial_numbers import is_pentagonal_number, nth_pentagonal_number
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 44
@@ -38,15 +39,23 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
+def nth_pentagonal_number(n: int) -> int:
+    return (n * (3 * n - 1)) // 2
+
+
+def is_pentagonal_number(n: int) -> bool:
+    return ((1 + sqrt(1 + 24 * n)) / 6).is_integer()
+
+
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_pentagon_numbers_p0044_s0() -> int:
     i = 0
     while i := (i + 1):
-        pi = nth_pentagonal_number(i)
+        p_i = nth_pentagonal_number(i)
         for j in range(i - 1, 0, -1):
-            pj = nth_pentagonal_number(j)
-            if is_pentagonal_number(pi - pj) and is_pentagonal_number(pi + pj):
-                return pi - pj
+            p_j = nth_pentagonal_number(j)
+            if is_pentagonal_number(p_i - p_j) and is_pentagonal_number(p_i + p_j):
+                return p_i - p_j
     else:
         raise ValueError('No solution found')
 

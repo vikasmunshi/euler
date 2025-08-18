@@ -25,9 +25,11 @@ URL: https://projecteuler.net/problem=44
 """
 from __future__ import annotations
 
+from math import sqrt
 from typing import Any
 
 from euler_solver.logger import logger
+# from euler_solver.maths.polynomial_numbers import is_pentagonal_number, nth_pentagonal_number
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 44
@@ -36,6 +38,12 @@ test_cases: list[dict[str, Any]] = [
     {'category': 'main', 'input': {}}
 ]
 
+
+def nth_pentagonal_number(n: int) -> int:
+    ...
+
+def is_pentagonal_number(n: int) -> bool:
+    ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_pentagon_numbers_p0044_s0() -> int:

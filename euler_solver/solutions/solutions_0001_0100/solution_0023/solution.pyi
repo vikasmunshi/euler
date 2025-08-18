@@ -34,7 +34,10 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
+
 from euler_solver.logger import logger
+from euler_solver.maths.primes import sum_proper_divisors
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 23
@@ -46,6 +49,10 @@ test_cases: list[dict[str, Any]] = [
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_non_abundant_sums_p0023_s0() -> int:
+    ...
+
+@register_solution(euler_problem=euler_problem, max_test_case=None)
+def solve_non_abundant_sums_p0023_s1() -> int:
     ...
 
 if __name__ == '__main__':

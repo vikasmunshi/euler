@@ -34,6 +34,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
+
 from euler_solver.logger import logger
 from euler_solver.maths.primes import sum_proper_divisors
 from euler_solver.setup import evaluate, register_solution
@@ -47,6 +49,32 @@ test_cases: list[dict[str, Any]] = [
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_non_abundant_sums_p0023_s0() -> int:
+    limit = 28123
+
+    # Step 1: Precompute the sum of proper divisors for all numbers
+    div_sums: np.ndarray = np.zeros(limit + 1, dtype=int)
+
+    for i in range(1, limit // 2 + 1):
+        div_sums[2 * i: limit + 1: i] += i
+
+    # Step 2: Identify all abundant numbers
+    abundant_numbers = np.flatnonzero(div_sums > np.arange(limit + 1))
+
+    # Step 3: Mark all sums of two abundant numbers
+    is_abundant_sum: np.ndarray = np.zeros(limit + 1, dtype=bool)
+
+    for i in range(len(abundant_numbers)):
+        sums = abundant_numbers[i] + abundant_numbers[i:]
+        sums = sums[sums <= limit]
+        is_abundant_sum[sums] = True
+
+    # Step 4: Calculate the sum of all numbers that are not abundant sums
+    non_abundant_sums = np.flatnonzero(~is_abundant_sum)
+    return np.sum(non_abundant_sums)
+
+
+@register_solution(euler_problem=euler_problem, max_test_case=None)
+def solve_non_abundant_sums_p0023_s1() -> int:
     limit = 28123
 
     # Find all abundant numbers

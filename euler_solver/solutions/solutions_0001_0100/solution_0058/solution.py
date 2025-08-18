@@ -40,7 +40,7 @@ from __future__ import annotations
 from typing import Any, Generator, Tuple
 
 from euler_solver.logger import logger
-from euler_solver.maths import primes
+from euler_solver.maths.is_prime.is_prime_cython import fast_is_prime
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 58
@@ -55,23 +55,21 @@ def generator_spiral_corners() -> Generator[Tuple[int, int, int, int, int], None
     while layer := (layer + 1):
         side_length = 2 * layer + 1
         side_length_min_1 = side_length - 1
-        corner_bottom_right = side_length ** 2
-        corner_bottom_left = corner_bottom_right - side_length_min_1
-        corner_top_left = corner_bottom_left - side_length_min_1
-        corner_top_right = corner_top_left - side_length_min_1
-        yield (side_length, corner_bottom_right, corner_bottom_left, corner_top_left, corner_top_right)
+        bottom_right = side_length ** 2
+        bottom_left = bottom_right - side_length_min_1
+        top_left = bottom_left - side_length_min_1
+        top_right = top_left - side_length_min_1
+        yield side_length, bottom_right, bottom_left, top_left, top_right
 
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_spiral_primes_p0058_s0(*, threshold: float) -> int:
-    primes.seed_cache()
     num_prime_diagonals: int = 0
     num_diagonal_elements: int = 1
-    for side_length, corner_bottom_right, corner_bottom_left, corner_top_left, corner_top_right \
-            in generator_spiral_corners():
+    for side_length, bottom_right, bottom_left, top_left, top_right in generator_spiral_corners():
         num_diagonal_elements += 4
-        for corner in (corner_bottom_right, corner_bottom_left, corner_top_left, corner_top_right):
-            num_prime_diagonals += primes.is_prime(corner)
+        for corner in (bottom_right, bottom_left, top_left, top_right):
+            num_prime_diagonals += fast_is_prime(corner)
         if num_prime_diagonals / num_diagonal_elements < threshold:
             return side_length
     else:

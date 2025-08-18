@@ -53,11 +53,13 @@ test_cases: list[dict[str, Any]] = [
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_counting_fractions_p0072_s0(*, max_d: int) -> int:
     euler_totients: List[int] = list(range(max_d + 1))
+    result: int = 0
     for n in range(2, max_d + 1):
         if euler_totients[n] == n:
             for j in range(n, max_d + 1, n):
                 euler_totients[j] = euler_totients[j] // n * (n - 1)
-    return sum((euler_totients[d] for d in range(2, max_d + 1)))
+        result += euler_totients[n]
+    return result
 
 
 if __name__ == '__main__':

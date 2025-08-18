@@ -39,12 +39,13 @@ URL: https://projecteuler.net/problem=74
 """
 from __future__ import annotations
 
+from collections import Counter
 from functools import lru_cache
 from math import factorial
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 74
 framework_version: str = '0.2.1'

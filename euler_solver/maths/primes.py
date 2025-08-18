@@ -47,10 +47,13 @@ import pathlib
 from collections import namedtuple
 from functools import lru_cache
 from itertools import takewhile
-from typing import Callable, Dict, Generator, List, Set, Tuple, cast
+from typing import Callable, Generator, cast
 
 from euler_solver.logger import logger
+from euler_solver.maths.is_prime.is_prime_cython import fast_is_prime
 from euler_solver.setup import base_dir
+
+is_prime: Callable[[int], bool] = fast_is_prime
 
 
 class PrimeError(ValueError):
@@ -58,9 +61,9 @@ class PrimeError(ValueError):
     pass
 
 
-_CACHE: Dict[str, Tuple[int, ...] | Set[int] | int] = {
-    'primes': tuple(),  # Tuple of prime numbers up to max_limit
-    'primes_set': set(),  # Set of prime numbers for O(1) lookups
+_CACHE: dict[str, tuple[int, ...] | set[int] | int] = {
+    'primes': tuple(),  # tuple of prime numbers up to max_limit
+    'primes_set': set(),  # set of prime numbers for O(1) lookups
     'max_limit': 0,  # Maximum value for which primes have been generated
 }
 
@@ -157,7 +160,7 @@ def gen_primes_sieve_eratosthenes() -> Generator[int, None, None]:
         - This is ideal when you need to search for primes without a predetermined limit
         - The algorithm only tracks composite numbers that are currently needed
     """
-    known_composites: Dict[int, List[int]] = dict()
+    known_composites: dict[int, list[int]] = dict()
     current_number = 2
     while True:
         if current_number not in known_composites:
@@ -173,7 +176,16 @@ def gen_primes_sieve_eratosthenes() -> Generator[int, None, None]:
         current_number += 1
 
 
-def get_primes_sundaram_sieve(max_num: int) -> Tuple[int, ...]:
+def get_primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
+    """
+    Generate prime numbers up to max_num using the Sieve of Sundaram.
+
+    Args:
+        max_num: The maximum value up to which to generate prime numbers (inclusive).
+
+    Returns:
+        A tuple of prime numbers up to max_num, sorted in ascending order.
+    """
     max_number = (max_num - 1) // 2
     numbers = [True] * (max_number + 1)
     for i in range(1, max_number + 1):
@@ -182,7 +194,7 @@ def get_primes_sundaram_sieve(max_num: int) -> Tuple[int, ...]:
     return (2,) + tuple(2 * i + 1 for i in range(1, max_number + 1) if numbers[i])
 
 
-def get_pre_computed_primes_sundaram_sieve(*, max_limit: int) -> Tuple[int, ...]:
+def get_pre_computed_primes_sundaram_sieve(*, max_limit: int) -> tuple[int, ...]:
     """Generate prime numbers up to max_limit using the Sieve of Sundaram.
 
     The Sieve of Sundaram is an efficient algorithm for finding all prime numbers up to a
@@ -226,7 +238,7 @@ def get_pre_computed_primes_sundaram_sieve(*, max_limit: int) -> Tuple[int, ...]
         _CACHE['primes'] = primes
         _CACHE['primes_set'] = set(primes)
         logger.info(f'generated primes {max_limit=:,} using sundaram sieve: {len(primes)=:,} {primes[-1]=:,}')
-    return tuple(takewhile(lambda p: p <= max_limit, cast(Tuple[int, ...], _CACHE['primes'])))
+    return tuple(takewhile(lambda p: p <= max_limit, cast(tuple[int, ...], _CACHE['primes'])))
 
 
 def num_factors(n: int) -> int:
@@ -255,54 +267,6 @@ def sum_proper_divisors(n: int) -> int:
     return total
 
 
-@lru_cache()
-def is_prime(n: int) -> bool:
-    """Determine whether a number is prime.
-
-    A prime number is a natural number greater than 1 that is not divisible
-    by any positive integers other than 1 and itself. This function uses an
-    optimized approach combining cache lookups and trial division.
-
-    Args:
-        n: The number to test for primality
-
-    Returns:
-        True if n is prime, False otherwise
-
-    Examples:
-        >>> is_prime(2)    # Smallest prime
-        True
-        >>> is_prime(4)    # Composite number
-        False
-        >>> is_prime(17)   # Prime number
-        True
-        >>> is_prime(1)    # 1 is not prime by definition
-        False
-        >>> is_prime(997)  # Larger prime
-        True
-
-    Performance Optimizations:
-        1. Results are cached using lru_cache for efficiency in repeated calls
-        2. For small numbers, checks against the pre-computed prime cache first
-        3. For large numbers, only tests divisibility by primes up to sqrt(n)
-        4. Dynamically generates primes up to sqrt(n) when needed
-        5. Avoids unnecessary divisibility tests
-    """
-    if n == 1:
-        return False
-    if n == 2:
-        return True
-    if n <= cast(int, _CACHE['max_limit']):
-        return n in cast(Set[int], _CACHE['primes_set'])
-    else:
-        max_divisor = int(n ** 0.5) + 1
-        for p in get_pre_computed_primes_sundaram_sieve(max_limit=max_divisor):
-            if n % p == 0:
-                return False
-        else:
-            return True
-
-
 # Define a namedtuple for representing prime factors with their exponents
 # Factor(base=2, exponent=3) represents 2³ = 8 in a prime factorization
 # This provides a clearer structure than using tuples or dictionaries
@@ -310,7 +274,7 @@ Factor = namedtuple('Factor', ['base', 'exponent'])
 
 
 @lru_cache()
-def prime_factorization(n: int) -> Tuple[Factor, ...]:
+def prime_factorization(n: int) -> tuple[Factor, ...]:
     """Compute the prime factorization of a number.
 
     This function decomposes a number into its prime factors, expressing each factor
@@ -372,7 +336,7 @@ def prime_factorization(n: int) -> Tuple[Factor, ...]:
 
 
 @lru_cache()
-def get_divisors(n: int) -> Tuple[int, ...]:
+def get_divisors(n: int) -> tuple[int, ...]:
     """Calculate all divisors of a number.
 
     This function computes all positive integers that divide the input number n
@@ -413,14 +377,14 @@ def get_divisors(n: int) -> Tuple[int, ...]:
         raise PrimeError(f'n must be greater than 0  (got n={n})')
     if n == 1:
         return (1,)
-    factors: Set[int] = {1}
+    factors: set[int] = {1}
     for base, exponent in prime_factorization(n):
         factors.update({f * (base ** power) for power in range(1, exponent + 1) for f in factors})
     return tuple(sorted(factors))
 
 
 @lru_cache()
-def proper_factors(n: int) -> Tuple[int, ...]:
+def proper_factors(n: int) -> tuple[int, ...]:
     """Calculate all proper divisors of a number.
 
     Proper divisors are positive integers that divide the input number n
@@ -501,10 +465,10 @@ def prime_factor_count(num: int) -> int:
 
 
 @lru_cache(maxsize=None)
-def get_relative_primes(n: int) -> Tuple[int, ...]:
+def get_relative_primes(n: int) -> tuple[int, ...]:
     """Get all relative primes of a number."""
-    relative_primes: Tuple[int, ...] = (1,)
-    divisors: Set[int] = set(get_divisors(n)[1:])
+    relative_primes: tuple[int, ...] = (1,)
+    divisors: set[int] = set(get_divisors(n)[1:])
     for i in range(2, n):
         if not any(factor_of_i.base in divisors for factor_of_i in prime_factorization(i)):
             relative_primes += (i,)

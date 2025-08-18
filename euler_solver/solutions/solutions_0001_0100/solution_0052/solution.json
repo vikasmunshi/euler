@@ -4,9 +4,9 @@
     "multiples=4": 142857,
     "multiples=5": 142857,
     "multiples=6": 142857,
-    "solve_permuted_multiples_p0052_s0_multiples=2": "319.70 milli-sec",
-    "solve_permuted_multiples_p0052_s0_multiples=3": "515.19 milli-sec",
-    "solve_permuted_multiples_p0052_s0_multiples=4": "640.07 milli-sec",
-    "solve_permuted_multiples_p0052_s0_multiples=5": "797.37 milli-sec",
-    "solve_permuted_multiples_p0052_s0_multiples=6": "1.00 sec"
+    "solve_permuted_multiples_p0052_s0_multiples=2": "192.06 milli-sec",
+    "solve_permuted_multiples_p0052_s0_multiples=3": "294.51 milli-sec",
+    "solve_permuted_multiples_p0052_s0_multiples=4": "361.29 milli-sec",
+    "solve_permuted_multiples_p0052_s0_multiples=5": "451.80 milli-sec",
+    "solve_permuted_multiples_p0052_s0_multiples=6": "540.04 milli-sec"
 }

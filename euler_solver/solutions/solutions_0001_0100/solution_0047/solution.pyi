@@ -27,9 +27,11 @@ URL: https://projecteuler.net/problem=47
 """
 from __future__ import annotations
 
+from itertools import count
 from typing import Any
 
 from euler_solver.logger import logger
+from euler_solver.maths.primes import prime_factor_count
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 47

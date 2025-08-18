@@ -52,10 +52,10 @@ framework_version: str = '0.2.1'
 test_cases: list[dict[str, Any]] = [
     {'category': 'preliminary', 'input': {'max_num': 10}},
     {'category': 'preliminary', 'input': {'max_num': 100}},
-    {'category': 'preliminary', 'input': {'max_num': 1000}},
-    {'category': 'preliminary', 'input': {'max_num': 10000}},
-    {'category': 'preliminary', 'input': {'max_num': 100000}},
-    {'category': 'main', 'input': {'max_num': 1000000}}
+    {'category': 'preliminary', 'input': {'max_num': 1_000}},
+    {'category': 'preliminary', 'input': {'max_num': 10_000}},
+    {'category': 'preliminary', 'input': {'max_num': 100_000}},
+    {'category': 'main', 'input': {'max_num': 1_000_000}}
 ]
 
 digit_factorials: dict[str, int] = {str(d): factorial(d) for d in range(0, 10)}
@@ -67,7 +67,7 @@ def sum_digit_factorial(n: int) -> int:
 
 @lru_cache(maxsize=None)
 def chain_len(n: int) -> int:
-    num, chain = (n, {n})
+    num, chain = n, {n}
     while (num := sum_digit_factorial(num)) not in chain:
         chain.add(num)
     return len(chain)
@@ -80,7 +80,7 @@ def solve_digit_factorial_chains_p0074_s0(*, max_num: int) -> list:
     length_counts: Counter[int] = Counter(chain_lengths)
     if show_solution():
         print(f'Chain lengths for max_num={max_num!r}: {sorted(length_counts.items())}')
-    return sorted(max(length_counts.items()))
+    return list(max(length_counts.items()))
 
 
 if __name__ == '__main__':

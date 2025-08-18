@@ -62,10 +62,12 @@ def prime_run(a: int, b: int) -> int:
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_quadratic_primes_p0027_s0(*, max_limit: int) -> int:
-    return max([max((prime_run(a, b), a * b), (prime_run(a, -b), -a * b), (prime_run(-a, -b), a * b),
-                    (prime_run(-a, b), -a * b)) for b in get_pre_computed_primes_sundaram_sieve(max_limit=max_limit) for
-                a in
-                range(0 if b == 2 else 1, max_limit, 2)])[1]
+    return max([max((prime_run(a, b), a * b),
+                    (prime_run(a, -b), -a * b),
+                    (prime_run(-a, -b), a * b),
+                    (prime_run(-a, b), -a * b), )
+                for b in get_pre_computed_primes_sundaram_sieve(max_limit=max_limit)
+                for a in range(0 if b == 2 else 1, max_limit, 2)])[1]
 
 
 if __name__ == '__main__':
