@@ -39,8 +39,8 @@ from euler_solver.setup import evaluate, register_solution
 euler_problem: int = 78
 framework_version: str = '0.2.1'
 test_cases: list[dict[str, Any]] = [
-    {'category': 'preliminary', 'input': {'divisor': 1000}},
-    {'category': 'main', 'input': {'divisor': 1000000}}
+    {'category': 'preliminary', 'input': {'divisor': 1_000}},
+    {'category': 'main', 'input': {'divisor': 1_000_000}}
 ]
 
 
