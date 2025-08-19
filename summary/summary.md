@@ -82,10 +82,10 @@
 | 🟧 |     78 | [Coin Partitions](https://projecteuler.net/problem=78) | 2025-07-18   |             4.60 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0078/solution.py) |
 | 🟩 |     79 | [Passcode Derivation](https://projecteuler.net/problem=79) | 2025-07-18   |     520.15 micro-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0079/solution.py) |
 | 🟩 |     80 | [Square Root Digital Expansion](https://projecteuler.net/problem=80) | 2025-07-18   |      20.23 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0080/solution.py) |
-| 🟩 |     81 | [Path Sum: Two Ways](https://projecteuler.net/problem=81) | 2025-07-18   |       7.18 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0081/solution.py) |
-| 🟧 |     82 | [Path Sum: Three Ways](https://projecteuler.net/problem=82) | 2025-07-18   |             1.48 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0082/solution.py) |
-| 🟧 |     83 | [Path Sum: Four Ways](https://projecteuler.net/problem=83) | 2025-07-18   |             3.30 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0083/solution.py) |
-| 🟧 |     84 | [Monopoly Odds](https://projecteuler.net/problem=84) | 2025-07-18   |             1.56 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0084/solution.py) |
+| 🟩 |     81 | [Path Sum: Two Ways](https://projecteuler.net/problem=81) | 2025-07-18   |       8.61 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0081/solution.py) |
+| 🟩 |     82 | [Path Sum: Three Ways](https://projecteuler.net/problem=82) | 2025-07-18   |     773.16 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0082/solution.py) |
+| 🟧 |     83 | [Path Sum: Four Ways](https://projecteuler.net/problem=83) | 2025-07-18   |             2.25 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0083/solution.py) |
+| 🟩 |     84 | [Monopoly Odds](https://projecteuler.net/problem=84) | 2025-07-18   |     766.85 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0084/solution.py) |
 | 🟩 |     85 | [Counting Rectangles](https://projecteuler.net/problem=85) | 2025-07-18   |     742.47 micro-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0085/solution.py) |
 | 🟩 |     86 | [Cuboid Route](https://projecteuler.net/problem=86) | 2025-07-18   |     693.89 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0086/solution.py) |
 | 🟩 |     87 | [Prime Power Triples](https://projecteuler.net/problem=87) | 2025-07-18   |     401.29 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0087/solution.py) |
@@ -96,9 +96,9 @@
 | 🟩 |     92 | [Square Digit Chains](https://projecteuler.net/problem=92) | 2025-07-18   |       2.84 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0092/solution.py) |
 | 🟩 |     93 | [Arithmetic Expressions](https://projecteuler.net/problem=93) | 2025-07-19   |      89.42 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0093/solution.py) |
 | 🟩 |     94 | [Almost Equilateral Triangles](https://projecteuler.net/problem=94) | 2025-07-19   |      20.78 micro-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0094/solution.py) |
-| 🟧 |     95 | [Amicable Chains](https://projecteuler.net/problem=95) | 2025-07-19   |             2.80 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0095/solution.py) |
+| 🟧 |     95 | [Amicable Chains](https://projecteuler.net/problem=95) | 2025-07-19   |             2.59 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0095/solution.py) |
 | 🟩 |     96 | [Su Doku](https://projecteuler.net/problem=96) | 2025-07-19   |      75.00 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0096/solution.py) |
-| 🟧 |     97 | [Large Non-Mersenne Prime](https://projecteuler.net/problem=97) | 2025-07-19   |             1.15 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0097/solution.py) |
+| 🟩 |     97 | [Large Non-Mersenne Prime](https://projecteuler.net/problem=97) | 2025-07-19   |     839.15 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0097/solution.py) |
 | 🟩 |     98 | [Anagramic Squares](https://projecteuler.net/problem=98) | 2025-07-19   |     475.99 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0098/solution.py) |
 | 🟩 |     99 | [Largest Exponential](https://projecteuler.net/problem=99) | 2025-07-19   |       1.46 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0099/solution.py) |
 | 🟩 |    100 | [Arranged Probability](https://projecteuler.net/problem=100) | 2025-07-19   |      28.92 micro-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0100/solution.py) |

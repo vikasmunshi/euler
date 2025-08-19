@@ -1,6 +1,6 @@
 {
-    "dice_size=4, simulations=1000000": "101524",
-    "dice_size=6, simulations=1000000": "102400",
-    "solve_monopoly_odds_p0084_s0_dice_size=4, simulations=1000000": "1.56 sec",
-    "solve_monopoly_odds_p0084_s0_dice_size=6, simulations=1000000": "1.49 sec"
+    "dice_size=4, simulations=500000": "101524",
+    "dice_size=6, simulations=500000": "102400",
+    "solve_monopoly_odds_p0084_s0_dice_size=4, simulations=500000": "766.85 milli-sec",
+    "solve_monopoly_odds_p0084_s0_dice_size=6, simulations=500000": "781.67 milli-sec"
 }

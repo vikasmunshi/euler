@@ -23,9 +23,10 @@ URL: https://projecteuler.net/problem=81
 """
 from __future__ import annotations
 
-from typing import Any, Generator, List
+from typing import Any, List
 
 from euler_solver.logger import logger
+from euler_solver.maths.c_lib.path_sums import path_sum_two_ways_p0081_s0
 from euler_solver.setup import evaluate, register_solution
 from euler_solver.utils.load_matrix import load_matrix
 
@@ -39,9 +40,6 @@ test_cases: list[dict[str, Any]] = [
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_path_sum_two_ways_p0081_s0(*, file_url: str) -> int:
-    ...
-
-def move_diagonally(size: int) -> Generator[tuple[int, int], None, None]:
     ...
 
 if __name__ == '__main__':

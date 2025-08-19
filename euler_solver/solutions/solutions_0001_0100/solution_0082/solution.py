@@ -29,9 +29,10 @@ URL: https://projecteuler.net/problem=82
 """
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any, List, cast
 
 from euler_solver.logger import logger
+from euler_solver.maths.c_lib.path_sums import path_sum_three_ways_p0082_s0
 from euler_solver.setup import evaluate, register_solution
 from euler_solver.utils.load_matrix import load_matrix
 
@@ -46,17 +47,7 @@ test_cases: list[dict[str, Any]] = [
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_path_sum_three_ways_p0082_s0(*, file_url: str) -> int:
     matrix: List[List[int]] = load_matrix(file_url)
-    for col in range(len(matrix) - 1, 0, -1):
-        reduce_column(matrix, col)
-    return min((matrix[row][0] for row in range(len(matrix))))
-
-
-def reduce_column(matrix: list[list[int]], col: int) -> None:
-    assert col > 0
-    new_entries = [min((sum((matrix[cell][col - 1] for cell in range(min(row, target), max(row, target) + 1))) +
-                        matrix[target][col] for target in range(len(matrix)))) for row in range(len(matrix))]
-    for row, value in enumerate(new_entries):
-        matrix[row][col - 1] = value
+    return cast(int, path_sum_three_ways_p0082_s0(matrix))
 
 
 if __name__ == '__main__':

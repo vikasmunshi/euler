@@ -32,6 +32,7 @@ from __future__ import annotations
 from typing import Any, List
 
 from euler_solver.logger import logger
+from euler_solver.maths.c_lib.path_sums import path_sum_three_ways_p0082_s0
 from euler_solver.setup import evaluate, register_solution
 from euler_solver.utils.load_matrix import load_matrix
 
@@ -45,9 +46,6 @@ test_cases: list[dict[str, Any]] = [
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_path_sum_three_ways_p0082_s0(*, file_url: str) -> int:
-    ...
-
-def reduce_column(matrix: list[list[int]], col: int) -> None:
     ...
 
 if __name__ == '__main__':

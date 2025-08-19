@@ -31,9 +31,10 @@ URL: https://projecteuler.net/problem=83
 """
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any, List, cast
 
 from euler_solver.logger import logger
+from euler_solver.maths.c_lib.path_sums import path_sum_four_ways_p0083_s0
 from euler_solver.setup import evaluate, register_solution
 from euler_solver.utils.load_matrix import load_matrix
 
@@ -48,28 +49,7 @@ test_cases: list[dict[str, Any]] = [
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_path_sum_four_ways_p0083_s0(*, file_url: str) -> int:
     matrix: List[List[int]] = load_matrix(file_url)
-    size = len(matrix)
-    node_weights = {(row, col): matrix[row][col] for row in range(size) for col in range(size)}
-    infinity = sum(node_weights.values()) + 1
-    unvisited = {(row, col) for row in range(size) for col in range(size)}
-    distances = {(row, col): infinity for row in range(size) for col in range(size)}
-    distances[0, 0] = matrix[0][0]
-    target = (size - 1, size - 1)
-    while target in unvisited:
-        current = min(unvisited, key=lambda node: distances[node])
-        current_row, current_col = current
-        up = (current_row - 1, current_col)
-        down = (current_row + 1, current_col)
-        left = (current_row, current_col - 1)
-        right = (current_row, current_col + 1)
-        for neighbor in [up, down, left, right]:
-            neighbor_row, neighbor_col = neighbor
-            if 0 <= neighbor_row < size and 0 <= neighbor_col < size and (neighbor in unvisited):
-                new_distance = distances[current] + node_weights[neighbor]
-                if new_distance < distances[neighbor]:
-                    distances[neighbor] = new_distance
-        unvisited.remove(current)
-    return distances[target]
+    return cast(int, path_sum_four_ways_p0083_s0(matrix))
 
 
 if __name__ == '__main__':

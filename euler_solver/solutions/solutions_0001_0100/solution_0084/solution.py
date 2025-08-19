@@ -81,7 +81,7 @@ from __future__ import annotations
 from collections import defaultdict
 from itertools import cycle
 from random import randint, shuffle
-from typing import Any, Dict, Generator, Iterator, List
+from typing import Any, Dict, Generator, Iterator, List, Protocol
 
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
@@ -89,8 +89,8 @@ from euler_solver.setup import evaluate, register_solution
 euler_problem: int = 84
 framework_version: str = '0.2.1'
 test_cases: list[dict[str, Any]] = [
-    {'category': 'preliminary', 'input': {'dice_size': 6, 'simulations': 1000000}},
-    {'category': 'main', 'input': {'dice_size': 4, 'simulations': 1000000}}
+    {'category': 'preliminary', 'input': {'dice_size': 6, 'simulations': 500_000}},
+    {'category': 'main', 'input': {'dice_size': 4, 'simulations': 500_000}}
 ]
 
 board: tuple[str, ...] = ('GO', 'A1', 'CC1', 'A2', 'T1', 'R1', 'B1', 'CH1', 'B2', 'B3', 'JAIL', 'C1', 'U1', 'C2', 'C3',
@@ -99,14 +99,11 @@ board: tuple[str, ...] = ('GO', 'A1', 'CC1', 'A2', 'T1', 'R1', 'B1', 'CH1', 'B2'
 board_size: int = len(board)
 
 
-class Movement:
-
-    def seek(self, position: int) -> int:
-        raise NotImplementedError()
+class Movement(Protocol):
+    def seek(self, position: int) -> int: ...
 
 
 class ForwardMovement(Movement):
-
     def __init__(self, prefix: str) -> None:
         self._prefix = prefix
 
@@ -118,13 +115,11 @@ class ForwardMovement(Movement):
 
 
 class BackwardMovement(Movement):
-
     def seek(self, position: int) -> int:
         return (position - 3 + board_size) % board_size
 
 
 class NullMovement(Movement):
-
     def seek(self, position: int) -> int:
         return position
 
@@ -171,9 +166,8 @@ def solve_monopoly_odds_p0084_s0(*, dice_size: int, simulations: int) -> str:
         elif board[position] == 'G2J':
             position = board.index('JAIL')
         visited_fields[board[position]] += 1
-    results = sorted(
-            [(100 * count / simulations, field, board.index(field)) for field, count in visited_fields.items()],
-            reverse=True)
+    results = sorted([(100 * count / simulations, field, board.index(field))
+                      for field, count in visited_fields.items()], reverse=True)
     return ''.join((f'{index:02d}' for percentage, field, index in results[:3]))
 
 
