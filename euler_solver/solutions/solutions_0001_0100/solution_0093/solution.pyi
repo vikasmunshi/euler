@@ -43,7 +43,7 @@ from functools import lru_cache
 from typing import Any, Set
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 93
 framework_version: str = '0.2.1'

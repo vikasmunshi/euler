@@ -23,6 +23,7 @@ URL: https://projecteuler.net/problem=34
 """
 from __future__ import annotations
 
+from itertools import combinations_with_replacement
 from typing import Any
 
 from euler_solver.logger import logger

@@ -29,7 +29,7 @@ URL: https://projecteuler.net/problem=73
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, List
 
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution, set_resource_limits

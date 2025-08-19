@@ -48,10 +48,12 @@ URL: https://projecteuler.net/problem=18
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, List
 
 from euler_solver.logger import logger
+from euler_solver.maths.graph_traversal import max_path_sum_triangle
 from euler_solver.setup import evaluate, register_solution
+from euler_solver.utils.text_to_array import text2triangle
 
 euler_problem: int = 18
 framework_version: str = '0.2.1'

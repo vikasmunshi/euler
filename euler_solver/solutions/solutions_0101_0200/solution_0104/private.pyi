@@ -29,7 +29,12 @@ from __future__ import annotations
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.maths.fibonacci_numbers import (gen_fibonacci_modulo_n,
+                                                  most_significant_n_digits_of_k_th_fibonacci_number,
+                                                  number_of_digits_in_k_th_fibonacci_number)
+from euler_solver.maths.pandigital_numbers import is_nine_pandigital
+from euler_solver.setup import evaluate, register_solution, show_solution
+from euler_solver.utils.color_codes import Color as C
 
 euler_problem: int = 104
 framework_version: str = '0.2.1'

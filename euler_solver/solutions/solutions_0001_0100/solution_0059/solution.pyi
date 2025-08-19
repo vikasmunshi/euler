@@ -41,10 +41,10 @@ URL: https://projecteuler.net/problem=59
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, List, Tuple
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.setup import evaluate, get_text_file, register_solution, show_solution
 
 euler_problem: int = 59
 framework_version: str = '0.2.1'

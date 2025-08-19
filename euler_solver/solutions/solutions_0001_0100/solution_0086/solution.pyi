@@ -31,6 +31,8 @@ URL: https://projecteuler.net/problem=86
 """
 from __future__ import annotations
 
+from itertools import count
+from math import sqrt
 from typing import Any
 
 from euler_solver.logger import logger

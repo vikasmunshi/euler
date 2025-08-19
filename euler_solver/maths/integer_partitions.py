@@ -37,11 +37,13 @@ Notes
   prevent excessive memory usage.
 """
 from functools import lru_cache
-from itertools import count
-from typing import List
+from typing import Callable, List
 
 from euler_solver.logger import logger
+from euler_solver.maths.c_lib.integer_partitions import num_partitions
 from euler_solver.maths.primes import gen_primes_sieve_eratosthenes, is_prime
+
+num_partitions: Callable[[int], int] = num_partitions
 
 
 class IntegerPartitionError(ValueError):
@@ -53,39 +55,6 @@ class IntegerPartitionError(ValueError):
     maximum allowed part value).
     """
     pass
-
-
-@lru_cache(maxsize=None)
-def num_partitions(number: int) -> int:
-    """
-    Return the total number of integer partitions p(n).
-
-    Implements Euler’s pentagonal number theorem with memoization for an
-    efficient computation of the number of ways to write n as a sum of positive
-    integers, disregarding order.
-
-    Args:
-        number (int): Integer n. If n < 0, returns 0; if n == 0, returns 1.
-
-    Returns:
-        int: The value p(n), the count of distinct partitions of n.
-
-    Examples:
-        >>> num_partitions(4)
-        5  # [4], [3, 1], [2, 2], [2, 1, 1], [1, 1, 1, 1]
-        >>> num_partitions(5)
-        7
-    """
-    if number <= 0:
-        return int(number == 0)
-    result = 0
-    for n in count(1):
-        _n, sign = -n, (-1, +1)[n % 2]
-        p_1, p_2 = num_partitions(number - (n * (3 * n - 1) // 2)), num_partitions(number - (_n * (3 * _n - 1) // 2))
-        result += sign * (p_1 + p_2)
-        if p_1 == 0 and p_2 == 0:
-            break
-    return result
 
 
 @lru_cache(maxsize=None)

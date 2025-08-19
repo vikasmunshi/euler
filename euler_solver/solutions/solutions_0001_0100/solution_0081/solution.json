@@ -1,6 +1,6 @@
 {
     "file_url=": 2427,
     "file_url=https://projecteuler.net/resources/documents/0081_matrix.txt": 427337,
-    "solve_path_sum_two_ways_p0081_s0_file_url=": "91.22 micro-sec",
-    "solve_path_sum_two_ways_p0081_s0_file_url=https://projecteuler.net/resources/documents/0081_matrix.txt": "12.76 milli-sec"
+    "solve_path_sum_two_ways_p0081_s0_file_url=": "52.56 micro-sec",
+    "solve_path_sum_two_ways_p0081_s0_file_url=https://projecteuler.net/resources/documents/0081_matrix.txt": "7.18 milli-sec"
 }

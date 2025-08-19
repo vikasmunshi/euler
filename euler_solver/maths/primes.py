@@ -23,12 +23,12 @@ Optimization Strategies:
 - Memory-efficient algorithms for large number operations
 
 Example Usage:
-    >>> from euler_solver.maths.primes import is_prime, prime_factorization, get_divisors
+    >>> from euler_solver.maths.primes import prime_factorization, get_divisors, is_prime, proper_factors
 
     # Test if a number is prime
-    >>> is_prime(17)
+    >>> c_lib(17)
     True
-    >>> is_prime(100)
+    >>> c_lib(100)
     False
 
     # Get prime factorization with exponents
@@ -50,10 +50,10 @@ from itertools import takewhile
 from typing import Callable, Generator, cast
 
 from euler_solver.logger import logger
-from euler_solver.maths.is_prime.is_prime_cython import fast_is_prime
+from euler_solver.maths.c_lib.is_prime import fast_is_prime
 from euler_solver.setup import base_dir
 
-is_prime: Callable[[int], bool] = fast_is_prime
+is_prime: Callable[[int], bool] = cast(Callable[[int], bool], fast_is_prime)
 
 
 class PrimeError(ValueError):

@@ -5,12 +5,12 @@
     "num=50": 204225,
     "solve_counting_summations_p0076_s0_num=100": "31.43 milli-sec",
     "solve_counting_summations_p0076_s0_num=1000": "22.49 sec",
-    "solve_counting_summations_p0076_s0_num=5": "205.09 micro-sec",
-    "solve_counting_summations_p0076_s0_num=50": "4.43 milli-sec",
-    "solve_counting_summations_p0076_s1_num=5": "330.32 micro-sec",
-    "solve_counting_summations_p0076_s1_num=50": "984.86 milli-sec",
-    "solve_counting_summations_p0076_s2_num=100": "2.37 milli-sec",
-    "solve_counting_summations_p0076_s2_num=1000": "20.79 milli-sec",
-    "solve_counting_summations_p0076_s2_num=5": "161.53 micro-sec",
-    "solve_counting_summations_p0076_s2_num=50": "737.27 micro-sec"
+    "solve_counting_summations_p0076_s0_num=5": "60.92 micro-sec",
+    "solve_counting_summations_p0076_s0_num=50": "1.83 milli-sec",
+    "solve_counting_summations_p0076_s1_num=5": "88.83 micro-sec",
+    "solve_counting_summations_p0076_s1_num=50": "762.82 milli-sec",
+    "solve_counting_summations_p0076_s2_num=100": "480.31 micro-sec",
+    "solve_counting_summations_p0076_s2_num=1000": "13.05 milli-sec",
+    "solve_counting_summations_p0076_s2_num=5": "76.35 micro-sec",
+    "solve_counting_summations_p0076_s2_num=50": "328.28 micro-sec"
 }

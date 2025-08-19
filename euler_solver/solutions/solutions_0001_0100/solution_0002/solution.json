@@ -2,7 +2,7 @@
     "max_limit=10": 10,
     "max_limit=100": 44,
     "max_limit=4000000": 4613732,
-    "solve_even_fibonacci_numbers_p0002_s0_max_limit=10": "32.48 micro-sec",
-    "solve_even_fibonacci_numbers_p0002_s0_max_limit=100": "33.40 micro-sec",
-    "solve_even_fibonacci_numbers_p0002_s0_max_limit=4000000": "35.52 micro-sec"
+    "solve_even_fibonacci_numbers_p0002_s0_max_limit=10": "13.19 micro-sec",
+    "solve_even_fibonacci_numbers_p0002_s0_max_limit=100": "16.39 micro-sec",
+    "solve_even_fibonacci_numbers_p0002_s0_max_limit=4000000": "18.56 micro-sec"
 }

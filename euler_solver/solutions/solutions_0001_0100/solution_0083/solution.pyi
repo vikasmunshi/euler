@@ -31,10 +31,11 @@ URL: https://projecteuler.net/problem=83
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, List
 
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
+from euler_solver.utils.load_matrix import load_matrix
 
 euler_problem: int = 83
 framework_version: str = '0.2.1'

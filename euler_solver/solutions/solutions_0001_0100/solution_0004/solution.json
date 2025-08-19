@@ -3,8 +3,8 @@
     "n=3": 906609,
     "n=4": 99000099,
     "n=5": 9966006699,
-    "solve_largest_palindrome_product_p0004_s0_n=2": "88.96 micro-sec",
-    "solve_largest_palindrome_product_p0004_s0_n=3": "817.09 micro-sec",
-    "solve_largest_palindrome_product_p0004_s0_n=4": "4.30 milli-sec",
-    "solve_largest_palindrome_product_p0004_s0_n=5": "56.12 milli-sec"
+    "solve_largest_palindrome_product_p0004_s0_n=2": "69.32 micro-sec",
+    "solve_largest_palindrome_product_p0004_s0_n=3": "590.96 micro-sec",
+    "solve_largest_palindrome_product_p0004_s0_n=4": "4.10 milli-sec",
+    "solve_largest_palindrome_product_p0004_s0_n=5": "37.18 milli-sec"
 }

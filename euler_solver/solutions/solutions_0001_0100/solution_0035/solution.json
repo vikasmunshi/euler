@@ -4,9 +4,9 @@
     "max_limit=1000": 25,
     "max_limit=1000000": 55,
     "max_limit=10000000": 55,
-    "solve_circular_primes_p0035_s0_max_limit=10": "253.49 micro-sec",
-    "solve_circular_primes_p0035_s0_max_limit=100": "408.22 micro-sec",
-    "solve_circular_primes_p0035_s0_max_limit=1000": "1.16 milli-sec",
-    "solve_circular_primes_p0035_s0_max_limit=1000000": "796.99 milli-sec",
-    "solve_circular_primes_p0035_s0_max_limit=10000000": "9.14 sec"
+    "solve_circular_primes_p0035_s0_max_limit=10": "103.60 micro-sec",
+    "solve_circular_primes_p0035_s0_max_limit=100": "187.26 micro-sec",
+    "solve_circular_primes_p0035_s0_max_limit=1000": "672.67 micro-sec",
+    "solve_circular_primes_p0035_s0_max_limit=1000000": "495.12 milli-sec",
+    "solve_circular_primes_p0035_s0_max_limit=10000000": "5.45 sec"
 }

@@ -36,7 +36,8 @@ URL: https://projecteuler.net/problem=75
 """
 from __future__ import annotations
 
-from typing import Any, Generator
+from math import gcd
+from typing import Any, Dict, Generator
 
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution

@@ -1,6 +1,6 @@
 {
     "max_k=12000, min_k=2": 7587457,
     "max_k=6, min_k=2": 30,
-    "solve_product_sum_numbers_p0088_s0_max_k=12000, min_k=2": "271.73 milli-sec",
-    "solve_product_sum_numbers_p0088_s0_max_k=6, min_k=2": "73.26 micro-sec"
+    "solve_product_sum_numbers_p0088_s0_max_k=12000, min_k=2": "158.24 milli-sec",
+    "solve_product_sum_numbers_p0088_s0_max_k=6, min_k=2": "61.88 micro-sec"
 }

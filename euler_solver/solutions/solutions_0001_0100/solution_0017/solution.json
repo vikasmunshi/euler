@@ -1,6 +1,6 @@
 {
     "max_number=1000": 21124,
     "max_number=5": 19,
-    "solve_number_letter_counts_p0017_s0_max_number=1000": "5.14 milli-sec",
-    "solve_number_letter_counts_p0017_s0_max_number=5": "106.74 micro-sec"
+    "solve_number_letter_counts_p0017_s0_max_number=1000": "4.78 milli-sec",
+    "solve_number_letter_counts_p0017_s0_max_number=5": "91.74 micro-sec"
 }

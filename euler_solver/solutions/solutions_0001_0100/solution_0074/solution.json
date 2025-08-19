@@ -1,32 +1,14 @@
 {
-    "max_num=10": [
-        36,
-        1
-    ],
-    "max_num=100": [
-        54,
-        2
-    ],
-    "max_num=1000": [
-        55,
-        12
-    ],
-    "max_num=10000": [
-        60,
-        42
-    ],
-    "max_num=100000": [
-        60,
-        42
-    ],
-    "max_num=1000000": [
-        60,
-        402
-    ],
-    "solve_digit_factorial_chains_p0074_s0_max_num=10": "532.56 micro-sec",
-    "solve_digit_factorial_chains_p0074_s0_max_num=100": "1.52 milli-sec",
-    "solve_digit_factorial_chains_p0074_s0_max_num=1000": "6.85 milli-sec",
-    "solve_digit_factorial_chains_p0074_s0_max_num=10000": "29.38 milli-sec",
-    "solve_digit_factorial_chains_p0074_s0_max_num=100000": "150.38 milli-sec",
-    "solve_digit_factorial_chains_p0074_s0_max_num=1000000": "1.35 sec"
+    "max_chain_length=36, max_num=10": 1,
+    "max_chain_length=54, max_num=100": 2,
+    "max_chain_length=55, max_num=1000": 12,
+    "max_chain_length=60, max_num=10000": 42,
+    "max_chain_length=60, max_num=100000": 42,
+    "max_chain_length=60, max_num=1000000": 402,
+    "solve_digit_factorial_chains_p0074_s0_max_chain_length=36, max_num=10": "76.62 micro-sec",
+    "solve_digit_factorial_chains_p0074_s0_max_chain_length=54, max_num=100": "183.35 micro-sec",
+    "solve_digit_factorial_chains_p0074_s0_max_chain_length=55, max_num=1000": "818.03 micro-sec",
+    "solve_digit_factorial_chains_p0074_s0_max_chain_length=60, max_num=10000": "10.05 milli-sec",
+    "solve_digit_factorial_chains_p0074_s0_max_chain_length=60, max_num=100000": "89.02 milli-sec",
+    "solve_digit_factorial_chains_p0074_s0_max_chain_length=60, max_num=1000000": "809.57 milli-sec"
 }

@@ -34,53 +34,35 @@ Solution Approach:
     The solution involves efficient simulation and caching for performance (O(n) expected).
     Number theory and combinatorics help to identify repeated loops and avoid redundant calculations.
 
-Answer: [60, 402]
+Answer: 402
 URL: https://projecteuler.net/problem=74
 """
 from __future__ import annotations
 
-from collections import Counter
-from functools import lru_cache
-from math import factorial
 from typing import Any
 
 from euler_solver.logger import logger
+from euler_solver.maths.c_lib.sum_digits import find_digit_factorial_chains
 from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 74
 framework_version: str = '0.2.1'
 test_cases: list[dict[str, Any]] = [
-    {'category': 'preliminary', 'input': {'max_num': 10}},
-    {'category': 'preliminary', 'input': {'max_num': 100}},
-    {'category': 'preliminary', 'input': {'max_num': 1_000}},
-    {'category': 'preliminary', 'input': {'max_num': 10_000}},
-    {'category': 'preliminary', 'input': {'max_num': 100_000}},
-    {'category': 'main', 'input': {'max_num': 1_000_000}}
+    {'category': 'preliminary', 'input': {'max_num': 10, 'max_chain_length': 36}},
+    {'category': 'preliminary', 'input': {'max_num': 100, 'max_chain_length': 54}},
+    {'category': 'preliminary', 'input': {'max_num': 1_000, 'max_chain_length': 55}},
+    {'category': 'preliminary', 'input': {'max_num': 10_000, 'max_chain_length': 60}},
+    {'category': 'preliminary', 'input': {'max_num': 100_000, 'max_chain_length': 60}},
+    {'category': 'main', 'input': {'max_num': 1_000_000, 'max_chain_length': 60}},
 ]
-
-digit_factorials: dict[str, int] = {str(d): factorial(d) for d in range(0, 10)}
-
-
-def sum_digit_factorial(n: int) -> int:
-    return sum((digit_factorials[d] for d in str(n)))
-
-
-@lru_cache(maxsize=None)
-def chain_len(n: int) -> int:
-    num, chain = n, {n}
-    while (num := sum_digit_factorial(num)) not in chain:
-        chain.add(num)
-    return len(chain)
 
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
-def solve_digit_factorial_chains_p0074_s0(*, max_num: int) -> list:
-    chain_lengths = [1 if n == (next_n := sum_digit_factorial(n)) else chain_len(next_n) + 1
-                     for n in range(1, max_num + 1)]
-    length_counts: Counter[int] = Counter(chain_lengths)
+def solve_digit_factorial_chains_p0074_s0(*, max_num: int, max_chain_length: int) -> int:
+    result: int = find_digit_factorial_chains(max_num, max_chain_length)
     if show_solution():
-        print(f'Chain lengths for max_num={max_num!r}: {sorted(length_counts.items())}')
-    return list(max(length_counts.items()))
+        print(f'Number of chains with exactly {max_chain_length} terms: {result}')
+    return result
 
 
 if __name__ == '__main__':

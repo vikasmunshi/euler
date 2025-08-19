@@ -1,8 +1,8 @@
 {
     "num_divisors=5": 28,
     "num_divisors=500": 76576500,
-    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=5": "80.97 micro-sec",
-    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=500": "121.89 milli-sec",
-    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=5": "91.23 micro-sec",
-    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=500": "5.23 sec"
+    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=5": "50.39 micro-sec",
+    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=500": "68.12 milli-sec",
+    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=5": "48.66 micro-sec",
+    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=500": "3.31 sec"
 }

@@ -40,7 +40,7 @@ from __future__ import annotations
 from typing import Any, Generator, Tuple
 
 from euler_solver.logger import logger
-from euler_solver.maths.is_prime.is_prime_cython import fast_is_prime
+from euler_solver.maths.primes import is_prime
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 58
@@ -69,7 +69,7 @@ def solve_spiral_primes_p0058_s0(*, threshold: float) -> int:
     for side_length, bottom_right, bottom_left, top_left, top_right in generator_spiral_corners():
         num_diagonal_elements += 4
         for corner in (bottom_right, bottom_left, top_left, top_right):
-            num_prime_diagonals += fast_is_prime(corner)
+            num_prime_diagonals += is_prime(corner)
         if num_prime_diagonals / num_diagonal_elements < threshold:
             return side_length
     else:

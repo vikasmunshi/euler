@@ -35,6 +35,8 @@ URL: https://projecteuler.net/problem=66
 from __future__ import annotations
 
 from fractions import Fraction
+from math import floor, sqrt
+from operator import itemgetter
 from typing import Any, Tuple
 
 from euler_solver.logger import logger

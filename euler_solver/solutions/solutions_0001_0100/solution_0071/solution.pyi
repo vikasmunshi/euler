@@ -28,10 +28,11 @@ URL: https://projecteuler.net/problem=71
 """
 from __future__ import annotations
 
+from fractions import Fraction
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 71
 framework_version: str = '0.2.1'
