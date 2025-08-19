@@ -23,7 +23,7 @@ URL: https://projecteuler.net/problem=81
 """
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any, List, cast
 
 from euler_solver.logger import logger
 from euler_solver.maths.c_lib.path_sums import path_sum_two_ways_p0081_s0

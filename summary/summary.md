@@ -82,9 +82,9 @@
 | 🟧 |     78 | [Coin Partitions](https://projecteuler.net/problem=78) | 2025-07-18   |             4.60 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0078/solution.py) |
 | 🟩 |     79 | [Passcode Derivation](https://projecteuler.net/problem=79) | 2025-07-18   |     520.15 micro-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0079/solution.py) |
 | 🟩 |     80 | [Square Root Digital Expansion](https://projecteuler.net/problem=80) | 2025-07-18   |      20.23 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0080/solution.py) |
-| 🟩 |     81 | [Path Sum: Two Ways](https://projecteuler.net/problem=81) | 2025-07-18   |       8.61 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0081/solution.py) |
-| 🟩 |     82 | [Path Sum: Three Ways](https://projecteuler.net/problem=82) | 2025-07-18   |     773.16 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0082/solution.py) |
-| 🟧 |     83 | [Path Sum: Four Ways](https://projecteuler.net/problem=83) | 2025-07-18   |             2.25 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0083/solution.py) |
+| 🟩 |     81 | [Path Sum: Two Ways](https://projecteuler.net/problem=81) | 2025-07-18   |       9.26 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0081/solution.py) |
+| 🟩 |     82 | [Path Sum: Three Ways](https://projecteuler.net/problem=82) | 2025-07-18   |     830.09 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0082/solution.py) |
+| 🟧 |     83 | [Path Sum: Four Ways](https://projecteuler.net/problem=83) | 2025-07-18   |             2.35 sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0083/solution.py) |
 | 🟩 |     84 | [Monopoly Odds](https://projecteuler.net/problem=84) | 2025-07-18   |     766.85 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0084/solution.py) |
 | 🟩 |     85 | [Counting Rectangles](https://projecteuler.net/problem=85) | 2025-07-18   |     742.47 micro-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0085/solution.py) |
 | 🟩 |     86 | [Cuboid Route](https://projecteuler.net/problem=86) | 2025-07-18   |     693.89 milli-sec | [solution](euler_solver/solutions/solutions_0001_0100/solution_0086/solution.py) |

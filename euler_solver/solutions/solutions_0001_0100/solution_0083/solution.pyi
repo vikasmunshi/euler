@@ -31,7 +31,7 @@ URL: https://projecteuler.net/problem=83
 """
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any, List, cast
 
 from euler_solver.logger import logger
 from euler_solver.maths.c_lib.path_sums import path_sum_four_ways_p0083_s0
