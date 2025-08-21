@@ -41,7 +41,8 @@ from typing import Callable, List
 
 from euler_solver.logger import logger
 from euler_solver.maths.c_lib.integer_partitions import num_partitions
-from euler_solver.maths.primes import gen_primes_sieve_eratosthenes, is_prime
+from euler_solver.maths.primes import gen_primes_sieve_eratosthenes
+from euler_solver.c_libs import is_prime
 
 num_partitions: Callable[[int], int] = num_partitions
 

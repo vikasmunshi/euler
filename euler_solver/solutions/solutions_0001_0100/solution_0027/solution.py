@@ -42,8 +42,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from euler_solver.c_libs import get_primes_sundaram_sieve, is_prime
 from euler_solver.logger import logger
-from euler_solver.maths.primes import get_pre_computed_primes_sundaram_sieve, is_prime
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 27
@@ -66,7 +66,7 @@ def solve_quadratic_primes_p0027_s0(*, max_limit: int) -> int:
                     (prime_run(a, -b), -a * b),
                     (prime_run(-a, -b), a * b),
                     (prime_run(-a, b), -a * b), )
-                for b in get_pre_computed_primes_sundaram_sieve(max_limit=max_limit)
+                for b in get_primes_sundaram_sieve(max_limit)
                 for a in range(0 if b == 2 else 1, max_limit, 2)])[1]
 
 

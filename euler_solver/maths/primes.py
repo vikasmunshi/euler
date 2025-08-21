@@ -50,10 +50,7 @@ from itertools import takewhile
 from typing import Callable, Generator, cast
 
 from euler_solver.logger import logger
-from euler_solver.maths.c_lib.is_prime import fast_is_prime
 from euler_solver.setup import base_dir
-
-is_prime: Callable[[int], bool] = cast(Callable[[int], bool], fast_is_prime)
 
 
 class PrimeError(ValueError):
