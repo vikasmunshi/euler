@@ -156,6 +156,7 @@ int count_digit_factorial_max_length_chains(int max_num,
     return 0;
 }
 
+#ifdef DFCHAINS_BUILD_MAIN
 int main(int argc, char **argv) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <max_num>\n", argv[0]);
@@ -179,3 +180,4 @@ int main(int argc, char **argv) {
     printf("max_num=%d max_chain_length=%d max_chain_length_count=%d\n", max_num, max_chain_length, max_chain_length_count);
     return 0;
 }
+#endif
