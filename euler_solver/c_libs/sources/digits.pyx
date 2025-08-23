@@ -1,5 +1,5 @@
 # distutils: language = c
-# cython: boundscheck=False, wraparound=False, cdivision=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, language_level=3
 
 cpdef tuple[int, ...] digits(const long long int n):
     cdef list result = []
@@ -10,4 +10,4 @@ cpdef tuple[int, ...] digits(const long long int n):
     result.reverse()
     return tuple(result)
 
-__signature__ = 'def digits(n: int) -> tuple[int, ...]: ...'
+__pyi__ = 'def digits(n: int) -> tuple[int, ...]: ...'

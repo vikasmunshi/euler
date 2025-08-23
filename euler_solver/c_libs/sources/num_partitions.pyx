@@ -1,5 +1,5 @@
 # distutils: language = c
-# cython: boundscheck=False, wraparound=False, cdivision=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, language_level=3
 
 from itertools import count
 
@@ -25,4 +25,4 @@ cpdef long long num_partitions(long number):
     cache[number] = result  # Store result in cache
     return result
 
-__signature__ = 'def num_partitions(number: int) -> int: ...'  # for stub
+__pyi__ = 'def num_partitions(number: int) -> int: ...'  # for stub

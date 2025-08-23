@@ -1,5 +1,5 @@
 # distutils: language = c
-# cython: boundscheck=False, wraparound=False, cdivision=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, language_level=3
 
 def gen_primes_sieve_eratosthenes():
     cdef dict known_composites = {}
@@ -23,4 +23,4 @@ def gen_primes_sieve_eratosthenes():
             del known_composites[current_number]
         current_number += 1
 
-__signature__ = 'def gen_primes_sieve_eratosthenes() -> Generator[int, None, None]: ...'
+__pyi__ = 'def gen_primes_sieve_eratosthenes() -> Generator[int, None, None]: ...'

@@ -1,5 +1,5 @@
 # distutils: language = c
-# cython: boundscheck=False, wraparound=False, cdivision=True
+# cython: boundscheck=False, wraparound=False, cdivision=True, language_level=3
 
 cdef int factorial(const int n):
     cdef result = 1
@@ -18,4 +18,4 @@ cpdef int sum_of_digit_factorials(const long long int n):
         num //= 10
     return result
 
-__signature__ = 'def sum_of_digit_factorials(n: int) -> int: ...'
+__pyi__ = 'def sum_of_digit_factorials(n: int) -> int: ...'

@@ -1,16 +1,18 @@
 # distutils: language = c
-# cython: boundscheck=False, wraparound=False, cdivision=True, initializedcheck=False
+# cython: boundscheck=False, wraparound=False, cdivision=True, language_level=3
 
 from libc.stdlib cimport malloc, free
 
-cpdef get_primes_sundaram_sieve(const long long int max_num):
+cdef int primes_sundaram_sieve(const long long int max_num, long long int** primes_out):
     cdef long long int max_number = (max_num - 1) // 2
     cdef long long int i, j, index_limit
-    cdef char * numbers = <char *> malloc((max_number + 1) * sizeof(char))  # Optimized C-level array
+    cdef char* numbers = <char *> malloc((max_number + 1) * sizeof(char))  # Optimized C-level array
     cdef long long int prime_count = 1  # Account for number 2 as prime
+    cdef long long int * primes
+    cdef long long int prime_idx
 
     if not numbers:
-        raise MemoryError("Failed to allocate memory for sieve bit array")
+        return -1  # Memory allocation failed
 
     # Initialize all as 1 (true)
     for i in range(max_number + 1):
@@ -22,24 +24,44 @@ cpdef get_primes_sundaram_sieve(const long long int max_num):
         for j in range(i, index_limit + 1):
             numbers[i + j + 2 * i * j] = 0
 
-    # Count primes and calculate output tuple size
+    # Count primes
     for i in range(1, max_number + 1):
         if numbers[i]:
             prime_count += 1
 
-    # Populate output tuple
-    cdef tuple results = tuple((0,) * prime_count)
-    results[0] = 2
+    # Allocate memory for the primes array
+    primes = <long long int *> malloc(prime_count * sizeof(long long int))
+    if not primes:
+        free(numbers)
+        return -1  # Memory allocation failed
 
-    prime_index = 1
+    # Populate primes array
+    primes[0] = 2
+    prime_idx = 1
     for i in range(1, max_number + 1):
         if numbers[i]:
-            results[prime_index] = 2 * i + 1
-            prime_index += 1
+            primes[prime_idx] = 2 * i + 1
+            prime_idx += 1
 
-    # Free allocated memory
+    primes_out[0] = primes
     free(numbers)
 
-    return results
+    return prime_count  # Return the count of primes
 
-__signature__ = 'def get_primes_sundaram_sieve(max_num: int) -> tuple[int, ...]: ...'
+
+cpdef get_primes_sundaram_sieve(const long long int max_num):
+    cdef long long int * primes
+    cdef int prime_count
+    cdef list result
+
+    prime_count = primes_sundaram_sieve(max_num, &primes)
+    if prime_count < 0:
+        raise MemoryError('Failed to allocate memory for sieve')
+
+    # Convert the C array to a Python list
+    result = [primes[i] for i in range(prime_count)]
+
+    free(<void *> primes)  # Free the C array
+    return tuple(result)
+
+__pyi__ = 'def get_primes_sundaram_sieve(max_num: int) -> tuple[int, ...]: ...'

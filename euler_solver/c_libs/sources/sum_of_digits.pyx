@@ -9,4 +9,4 @@ cpdef int sum_of_digits(const long long int n):
         num //= 10
     return result
 
-__signature__ = 'def sum_of_digits(n: int) -> int: ...'
+__pyi__ = 'def sum_of_digits(n: int) -> int: ...'
