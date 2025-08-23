@@ -39,10 +39,9 @@ URL: https://projecteuler.net/problem=74
 """
 from __future__ import annotations
 
-import ctypes
 from typing import Any
 
-from euler_solver.c_libs.import_c_lib import import_c_lib
+from euler_solver.c_libs.digit_factorial_chains import count_digit_factorial_max_length_chains_c
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution, show_solution
 
@@ -59,23 +58,10 @@ test_cases: list[dict[str, Any]] = [
     {'category': 'extended', 'input': {'max_num': 10_000_000}},
 ]
 
-c_func = import_c_lib('libdigit_factorial_chains', 'count_digit_factorial_max_length_chains')
-c_func.argtypes = [ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
-c_func.restype = ctypes.c_int
-
-
-def call_count_chains(n: int) -> tuple[int, int]:
-    chain_count = ctypes.c_int()
-    max_length = ctypes.c_int()
-    result = c_func(n, ctypes.byref(chain_count), ctypes.byref(max_length))
-    if result != 0:
-        raise RuntimeError(f'Error calling C function: {result}')
-    return chain_count.value, max_length.value
-
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_digit_factorial_chains_p0074_s0(*, max_num: int) -> int:
-    max_chain_length, max_chain_length_count = call_count_chains(max_num)
+    max_chain_length, max_chain_length_count = count_digit_factorial_max_length_chains_c(max_num)
     if show_solution():
         print(f'{max_num=} {max_chain_length=} {max_chain_length_count=}')
     return max_chain_length_count
