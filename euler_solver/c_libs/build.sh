@@ -23,7 +23,8 @@ mkdir -p "$LIBS_DIR"
 
 build_c_file() {
     local c_file="$1"
-    local base_name=$(basename "$c_file" .c)
+    local base_name
+    base_name=$(basename "$c_file" .c)
     
     # Compile source for shared library (without main)
     gcc $CFLAGS $PICFLAGS -c "$SRC_DIR/$c_file" -o "$BUILD_DIR/${base_name}_lib.o"
