@@ -9,299 +9,173 @@
  *
  * Copyright (c) 2025. All rights reserved.
  ******************************************************************************/
-#include "digit_factorial_chains.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
-// Precomputed factorials for digits 0-9
-static const int digit_factorials[] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
+#include "digit_factorial_chains.h"
 
-// Function to compute the sum of digit factorials for a given number
-static int sum_of_digit_factorials(int n) {
+static const int DIGIT_FACTORIALS[10] = {
+    1,        // 0!
+    1,        // 1!
+    2,        // 2!
+    6,        // 3!
+    24,       // 4!
+    120,      // 5!
+    720,      // 6!
+    5040,     // 7!
+    40320,    // 8!
+    362880    // 9!
+};
+
+static inline int sum_of_digit_factorials_int(int n) {
     int result = 0;
     while (n > 0) {
-        result += digit_factorials[n % 10];
+        result += DIGIT_FACTORIALS[n % 10];
         n /= 10;
     }
     return result;
 }
 
-int count_digit_factorial_max_length_chains(int max_num, int *max_chain_length, int *max_chain_length_count) {
-    if (max_num < 2 || !max_chain_length || !max_chain_length_count) {
-        return -1; // Invalid input
+/* Compute maximum possible value reachable from numbers up to max_num. */
+static int max_reachable_value(int max_num) {
+    if (max_num < 10) {
+        return 9 * DIGIT_FACTORIALS[9];
+    }
+    int digits = 0;
+    int temp = max_num;
+    while (temp > 0) {
+        digits++;
+        temp /= 10;
+    }
+    long long max_val = (long long)digits * (long long)DIGIT_FACTORIALS[9];
+    if (max_val < max_num) {
+        return max_num; // cache at least up to max_num
+    }
+    if (max_val > INT_MAX - 1) {
+        return INT_MAX - 1; // avoid overflow
+    }
+    return (int)max_val;
+}
+
+int count_digit_factorial_max_length_chains(int max_num,
+                                            int *out_max_chain_length,
+                                            int *out_max_chain_length_count) {
+    if (!out_max_chain_length || !out_max_chain_length_count) {
+        return 1;
+    }
+    if (max_num < 2) {
+        *out_max_chain_length = 0;
+        *out_max_chain_length_count = 0;
+        return 0;
     }
 
-    int *chain_length_cache = (int *)calloc(max_num + 1, sizeof(int));
-    int *graph = (int *)calloc(max_num + 1, sizeof(int));
+    int cache_limit = max_reachable_value(max_num);
+    int cache_size = cache_limit + 1;
 
+    int *chain_length_cache = (int *)calloc((size_t)cache_size, sizeof(int));
     if (!chain_length_cache) {
-        fprintf(stderr, "Error: Failed to allocate memory for chain_length_cache.\n");
-        free(graph);
-        return -1;
-    }
-    if (!graph) {
-        fprintf(stderr, "Error: Failed to allocate memory for graph.\n");
-        free(chain_length_cache);
-        return -1;
-    }
-        free(chain_length_cache);
-        free(graph);
-        return -1; // Memory allocation failure
+        return 2;
     }
 
-    *max_chain_length = 0;
-    *max_chain_length_count = 0;
+    int max_chain_length = 0;
+    int max_chain_length_count = 0;
+
+    // workspace for seen chain, grow as needed
+    int seen_capacity = 64;
+    int *seen = (int *)malloc((size_t)seen_capacity * sizeof(int));
+    if (!seen) {
+        free(chain_length_cache);
+        return 3;
+    }
 
     for (int start = 2; start <= max_num; ++start) {
-        int seen[512]; // Temporary array to track visited numbers, increased size for safety
         int seen_count = 0;
         int current = start;
 
-        // Chain generation until a loop or cache hit is found
-        while (current < max_num && chain_length_cache[current] == 0) {
-            if (seen_count >= 512) {
-                fprintf(stderr, "Error: Exceeded maximum chain length capacity.\n");
-                free(chain_length_cache);
-                free(graph);
-                return -1;
+        // Walk the chain until repeat or a cached value is found
+        while (1) {
+            // If current exceeds cache, extend cache? It shouldn't if cache_limit computed properly,
+            // but guard anyway by computing directly without caching for out-of-range values.
+            int cached_len = (current < cache_size) ? chain_length_cache[current] : 0;
+
+            // Check if current already in seen
+            int in_seen_index = -1;
+            for (int i = 0; i < seen_count; ++i) {
+                if (seen[i] == current) { in_seen_index = i; break; }
             }
-            seen[seen_count++] = current;
-            if (current >= max_num) {
+            if (in_seen_index != -1 || cached_len > 0) {
+                int length;
+                if (cached_len > 0) {
+                    length = seen_count + cached_len;
+                } else {
+                    // loop detected within seen: length is number of non-repeating terms
+                    length = seen_count;
+                }
+                // Propagate lengths back to all numbers in seen
+                for (int i = 0; i < seen_count; ++i) {
+                    int num = seen[i];
+                    int val = length - i;
+                    if (num < cache_size && chain_length_cache[num] == 0) {
+                        chain_length_cache[num] = val;
+                    }
+                }
+                int chain_length_start = (start < cache_size) ? chain_length_cache[start] : length;
+                if (chain_length_start > max_chain_length) {
+                    max_chain_length = chain_length_start;
+                    max_chain_length_count = 1;
+                } else if (chain_length_start == max_chain_length) {
+                    max_chain_length_count += 1;
+                }
                 break;
             }
-            if (graph[current] == 0) {
-                graph[current] = sum_of_digit_factorials(current);
-            }
-            current = graph[current];
-        }
 
-        int chain_length = 0;
-        if (current <= max_num && chain_length_cache[current] > 0) {
-            chain_length = chain_length_cache[current];
-        } else {
-            chain_length = seen_count; // Length is all non-repeating terms
-        }
-
-        // Propagate chain lengths back to all numbers in 'seen'
-        for (int i = 0; i < seen_count; ++i) {
-            chain_length_cache[seen[i]] = chain_length - i;
-            graph[seen[i]] = (i + 1 < seen_count) ? seen[i + 1] : current;
-        }
-
-        // Update max_chain_length and max_chain_length_count
-        if (chain_length_cache[start] > *max_chain_length) {
-#include "digit_factorial_chains.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-// Precomputed factorials for digits 0-9
-static const int digit_factorials[] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
-
-// Function to compute the sum of digit factorials for a given number
-static int sum_of_digit_factorials(int n) {
-    int result = 0;
-    while (n > 0) {
-        result += digit_factorials[n % 10];
-        n /= 10;
-    }
-    return result;
-}
-
-int count_digit_factorial_max_length_chains(int max_num, int *max_chain_length, int *max_chain_length_count) {
-    if (max_num < 2 || !max_chain_length || !max_chain_length_count) {
-        return -1; // Invalid input
-    }
-
-    int *chain_length_cache = (int *)calloc(max_num + 1, sizeof(int));
-    int *graph = (int *)calloc(max_num + 1, sizeof(int));
-
-    if (!chain_length_cache || !graph) {
-        if (chain_length_cache) free(chain_length_cache);
-        if (graph) free(graph);
-        return -1; // Memory allocation failure
-    }
-
-    *max_chain_length = 0;
-    *max_chain_length_count = 0;
-
-    for (int start = 2; start <= max_num; ++start) {
-        int seen[512]; // Temporary array to track visited numbers, increased capacity
-        int seen_count = 0;
-        int current = start;
-
-        // Chain generation until a loop or cache hit is found
-        while (current < max_num && chain_length_cache[current] == 0) {
-            if (seen_count >= 512) {
-                fprintf(stderr, "Error: Exceeded maximum chain length capacity.\n");
-                free(chain_length_cache);
-                free(graph);
-                return -1;
+            // append current to seen
+            if (seen_count == seen_capacity) {
+                int new_cap = seen_capacity * 2;
+                int *tmp = (int *)realloc(seen, (size_t)new_cap * sizeof(int));
+                if (!tmp) {
+                    free(seen);
+                    free(chain_length_cache);
+                    return 4;
+                }
+                seen = tmp;
+                seen_capacity = new_cap;
             }
             seen[seen_count++] = current;
-            if (current >= max_num) {
-                break;
-            }
-            if (graph[current] == 0) {
-                graph[current] = sum_of_digit_factorials(current);
-            }
-            current = graph[current];
-        }
-
-        int chain_length = 0;
-        if (current <= max_num && chain_length_cache[current] > 0) {
-            chain_length = chain_length_cache[current];
-        } else {
-            chain_length = seen_count; // Length is all non-repeating terms
-        }
-
-        // Propagate chain lengths back to all numbers in 'seen'
-        for (int i = 0; i < seen_count; ++i) {
-            chain_length_cache[seen[i]] = chain_length - i;
-            graph[seen[i]] = (i + 1 < seen_count) ? seen[i + 1] : current;
-        }
-
-        // Update max_chain_length and max_chain_length_count
-        if (chain_length_cache[start] > *max_chain_length) {
-#include "digit_factorial_chains.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-// Precomputed factorials for digits 0-9
-static const int digit_factorials[] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
-
-// Function to compute the sum of digit factorials for a given number
-int sum_of_digit_factorials(int n) {
-    int result = 0;
-    while (n > 0) {
-        result += digit_factorials[n % 10];
-        n /= 10;
-    }
-    return result;
-}
-
-int count_digit_factorial_max_length_chains(int max_num, int *max_chain_length, int *max_chain_length_count) {
-    if (max_num < 2 || !max_chain_length || !max_chain_length_count) {
-        return -1; // Invalid input
-    }
-
-    int *chain_length_cache = (int *)calloc(max_num + 1, sizeof(int));
-    int *graph = (int *)calloc(max_num + 1, sizeof(int));
-
-    if (chain_length_cache == NULL || graph == NULL) {
-        free(chain_length_cache);
-        free(graph);
-        return -1; // Memory allocation failure
-    }
-
-    *max_chain_length = 0;
-    *max_chain_length_count = 0;
-
-    for (int start = 2; start <= max_num; ++start) {
-        int seen[512]; // Temporary array to track visited numbers
-        int seen_count = 0;
-        int current = start;
-
-        // Chain generation until a loop or cache hit is found
-        while (current < max_num && chain_length_cache[current] == 0) {
-            if (seen_count >= 512) {
-                fprintf(stderr, "Error: Exceeded maximum chain length capacity.\n");
-                free(chain_length_cache);
-                free(graph);
-                return -1;
-            }
-            seen[seen_count++] = current;
-            if (graph[current] == 0) {
-                graph[current] = sum_of_digit_factorials(current);
-            }
-            current = graph[current];
-        }
-
-        int chain_length = 0;
-        if (current <= max_num && chain_length_cache[current] > 0) {
-            chain_length = chain_length_cache[current];
-        } else {
-            chain_length = seen_count; // Length is all non-repeating terms
-        }
-
-        // Propagate chain lengths back to all numbers in 'seen'
-        for (int i = 0; i < seen_count; ++i) {
-            chain_length_cache[seen[i]] = chain_length - i;
-            graph[seen[i]] = (i + 1 < seen_count) ? seen[i + 1] : current;
-        }
-
-        // Update max_chain_length and max_chain_length_count
-        if (chain_length_cache[start] > *max_chain_length) {
-            *max_chain_length = chain_length_cache[start];
-            *max_chain_length_count = 1;
-        } else if (chain_length_cache[start] == *max_chain_length) {
-            (*max_chain_length_count)++;
+            current = sum_of_digit_factorials_int(current);
         }
     }
+
+    free(seen);
+    *out_max_chain_length = max_chain_length;
+    *out_max_chain_length_count = max_chain_length_count;
 
     free(chain_length_cache);
-    free(graph);
-    return 0; // Success
+    return 0;
 }
 
-int main(int argc, char *argv[]) {
-    if (argc != 2) {
+int main(int argc, char **argv) {
+    if (argc < 2) {
         fprintf(stderr, "Usage: %s <max_num>\n", argv[0]);
-        return EXIT_FAILURE;
+        return 1;
     }
-
-    int max_num = atoi(argv[1]);
-    if (max_num < 2) {
-        fprintf(stderr, "Error: max_num must be >= 2.\n");
-        return EXIT_FAILURE;
+    char *endptr = NULL;
+    long val = strtol(argv[1], &endptr, 10);
+    if (endptr == argv[1] || val <= 0 || val > INT_MAX) {
+        fprintf(stderr, "Invalid max_num: %s\n", argv[1]);
+        return 2;
     }
+    int max_num = (int)val;
 
     int max_chain_length = 0;
     int max_chain_length_count = 0;
-
-    int result = count_digit_factorial_max_length_chains(max_num, &max_chain_length, &max_chain_length_count);
-    if (result != 0) {
-        fprintf(stderr, "Error: Failed to compute digit factorial chains.\n");
-        return EXIT_FAILURE;
+    int rc = count_digit_factorial_max_length_chains(max_num, &max_chain_length, &max_chain_length_count);
+    if (rc != 0) {
+        fprintf(stderr, "Error computing chains (rc=%d)\n", rc);
+        return rc;
     }
-
     printf("max_num=%d max_chain_length=%d max_chain_length_count=%d\n", max_num, max_chain_length, max_chain_length_count);
-    return EXIT_SUCCESS;
-}
-    if (max_num < 2) {
-        fprintf(stderr, "Error: max_num must be >= 2.\n");
-        return EXIT_FAILURE;
-    }
-
-    // Variables to store the results
-    int max_chain_length = 0;
-    int max_chain_length_count = 0;
-
-    // Call core function
-    int result = count_digit_factorial_max_length_chains(max_num, &max_chain_length, &max_chain_length_count);
-    if (result != 0) {
-        fprintf(stderr, "Error: Failed to compute digit factorial chains.\n");
-        return EXIT_FAILURE;
-    }
-
-    // Print results
-    printf("max_num=%d max_chain_length=%d max_chain_length_count=%d\n", max_num, max_chain_length, max_chain_length_count);
-    return EXIT_SUCCESS;
-}
-        fprintf(stderr, "Error: max_num must be >= 2.\n");
-        return EXIT_FAILURE;
-    }
-
-    int max_chain_length = 0;
-    int max_chain_length_count = 0;
-
-    int result = count_digit_factorial_max_length_chains(max_num, &max_chain_length, &max_chain_length_count);
-    if (result != 0) {
-        fprintf(stderr, "Error: Failed to compute digit factorial chains.\n");
-        return EXIT_FAILURE;
-    }
-
-    printf("max_num=%d max_chain_length=%d max_chain_length_count=%d\n", max_num, max_chain_length, max_chain_length_count);
-    return EXIT_SUCCESS;
+    return 0;
 }
