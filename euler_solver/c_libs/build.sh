@@ -35,15 +35,8 @@ build_c_file() {
     # Copy shared library to libs directory
     cp "$BUILD_DIR/lib${base_name}.so" "$LIBS_DIR/"
 
-    # Compile source for executable (with main)
-    gcc $CFLAGS -DDFCHAINS_BUILD_MAIN -c "$SRC_DIR/$c_file" -o "$BUILD_DIR/${base_name}_main.o"
-
-    # Create executable 
-    gcc $CFLAGS "$BUILD_DIR/${base_name}_main.o" -o "$BUILD_DIR/$base_name"
-
     echo "Build completed successfully:"
     echo " - Shared library: $BUILD_DIR/lib${base_name}.so"
-    echo " - Executable    : $BUILD_DIR/$base_name"
 }
 
 # Find and build all .c files in src directory

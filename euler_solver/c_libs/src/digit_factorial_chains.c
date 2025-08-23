@@ -9,12 +9,8 @@
  *
  * Copyright (c) 2025. All rights reserved.
  ******************************************************************************/
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <limits.h>
-
-#include "digit_factorial_chains.h"
 
 static const int DIGIT_FACTORIALS[10] = {
     1,        // 0!
@@ -156,28 +152,3 @@ int count_digit_factorial_max_length_chains(int max_num,
     return 0;
 }
 
-#ifdef DFCHAINS_BUILD_MAIN
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <max_num>\n", argv[0]);
-        return 1;
-    }
-    char *endptr = NULL;
-    long val = strtol(argv[1], &endptr, 10);
-    if (endptr == argv[1] || val <= 0 || val > INT_MAX) {
-        fprintf(stderr, "Invalid max_num: %s\n", argv[1]);
-        return 2;
-    }
-    int max_num = (int)val;
-
-    int max_chain_length = 0;
-    int max_chain_length_count = 0;
-    int rc = count_digit_factorial_max_length_chains(max_num, &max_chain_length, &max_chain_length_count);
-    if (rc != 0) {
-        fprintf(stderr, "Error computing chains (rc=%d)\n", rc);
-        return rc;
-    }
-    printf("max_num=%d max_chain_length=%d max_chain_length_count=%d\n", max_num, max_chain_length, max_chain_length_count);
-    return 0;
-}
-#endif
