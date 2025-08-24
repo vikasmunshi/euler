@@ -141,7 +141,10 @@ def add_chains(chains: Chains, number: int) -> bool:
     return True
 
 
-def count_max_length_digit_factorial_chains(chains: Chains) -> tuple[int, int]:
+def count_max_length_digit_factorial_chains(max_num: int) -> tuple[int, int]:
+    chains: Chains = {}
+    for num in range(2, max_num + 1):
+        add_chains(chains, num)
     chain_lengths = [len(c) for c in chains.values()]
     max_chain_length = max(chain_lengths)
     max_chain_length_count = chain_lengths.count(max_chain_length)
@@ -157,9 +160,9 @@ def get_chains(max_num: int) -> Chains:
 
 @register_solution(euler_problem=euler_problem, max_test_case=5)
 def solve_digit_factorial_chains_p0074_s2(*, max_num: int) -> int:
-    chains: Chains = get_chains(max_num)
-    max_chain_length, max_chain_length_count = count_max_length_digit_factorial_chains(chains)
+    max_chain_length, max_chain_length_count = count_max_length_digit_factorial_chains(max_num=max_num)
     if show_solution():
+        chains: Chains = get_chains(max_num)
         nums: list[int] = [i for c in chains.values() for i in c]
         unique_nums: set[int] = set(nums)
         print(f'{len(chains)=} {len(nums)=} {len(unique_nums)=} {len(nums)/len(unique_nums)=:.2f} {max_chain_length=}')
