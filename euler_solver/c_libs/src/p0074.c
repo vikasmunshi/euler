@@ -57,14 +57,8 @@ static int max_reachable_value(int max_num) {
         digits++;
         temp /= 10;
     }
-    long long max_val = (long long)digits * (long long)DIGIT_FACTORIALS[9];
-    if (max_val < max_num) {
-        return max_num; // cache at least up to max_num
-    }
-    if (max_val > INT_MAX - 1) {
-        return INT_MAX - 1; // avoid overflow
-    }
-    return (int)max_val;
+    int max_val = digits * DIGIT_FACTORIALS[9]; // for numbers with 7 or more digits, this is less than the number
+    return (max_val < max_num) ? max_num : max_val;
 }
 
 int count_digit_factorial_max_length_chains(int max_num,
