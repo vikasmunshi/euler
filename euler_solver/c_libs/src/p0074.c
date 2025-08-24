@@ -11,6 +11,12 @@
  ******************************************************************************/
 #include <stdlib.h>
 #include <limits.h>
+#include <stdbool.h>
+
+#define ERROR_NULL_OUTPUT_PTRS 1
+#define ERROR_MEMORY_ALLOCATION_CACHE 2
+#define ERROR_MEMORY_ALLOCATION_SEEN 3
+#define ERROR_MEMORY_REALLOCATION_SEEN 4
 
 static const int DIGIT_FACTORIALS[10] = {
     1,        // 0!
@@ -24,6 +30,12 @@ static const int DIGIT_FACTORIALS[10] = {
     40320,    // 8!
     362880    // 9!
 };
+
+// Function to clean up dynamically allocated memory
+static void cleanup(int *chain_length_cache, int *seen) {
+    if (chain_length_cache) free(chain_length_cache);
+    if (seen) free(seen);
+}
 
 static inline int sum_of_digit_factorials_int(int n) {
     int result = 0;
@@ -59,7 +71,7 @@ int count_digit_factorial_max_length_chains(int max_num,
                                             int *out_max_chain_length,
                                             int *out_max_chain_length_count) {
     if (!out_max_chain_length || !out_max_chain_length_count) {
-        return 1;
+        return ERROR_NULL_OUTPUT_PTRS;
     }
     if (max_num < 2) {
         *out_max_chain_length = 0;
@@ -72,7 +84,7 @@ int count_digit_factorial_max_length_chains(int max_num,
 
     int *chain_length_cache = (int *)calloc((size_t)cache_size, sizeof(int));
     if (!chain_length_cache) {
-        return 2;
+        return ERROR_MEMORY_ALLOCATION_CACHE;
     }
 
     int max_chain_length = 0;
@@ -83,7 +95,12 @@ int count_digit_factorial_max_length_chains(int max_num,
     int *seen = (int *)malloc((size_t)seen_capacity * sizeof(int));
     if (!seen) {
         free(chain_length_cache);
-        return 3;
+        return ERROR_MEMORY_ALLOCATION_SEEN;
+    }
+    bool *seen_bitmap = (bool *)calloc((size_t)cache_size, sizeof(bool));
+    if (!seen_bitmap) {
+        cleanup(chain_length_cache, seen);
+        return ERROR_MEMORY_ALLOCATION_SEEN;
     }
 
     for (int start = 2; start <= max_num; ++start) {
@@ -92,16 +109,10 @@ int count_digit_factorial_max_length_chains(int max_num,
 
         // Walk the chain until repeat or a cached value is found
         while (1) {
-            // If current exceeds cache, extend cache? It shouldn't if cache_limit computed properly,
-            // but guard anyway by computing directly without caching for out-of-range values.
             int cached_len = (current < cache_size) ? chain_length_cache[current] : 0;
 
-            // Check if current already in seen
-            int in_seen_index = -1;
-            for (int i = 0; i < seen_count; ++i) {
-                if (seen[i] == current) { in_seen_index = i; break; }
-            }
-            if (in_seen_index != -1 || cached_len > 0) {
+            // Check if current already in seen (using bitmap for optimization)
+            if ((current < cache_size && seen_bitmap[current]) || cached_len > 0) {
                 int length;
                 if (cached_len > 0) {
                     length = seen_count + cached_len;
@@ -132,23 +143,33 @@ int count_digit_factorial_max_length_chains(int max_num,
                 int new_cap = seen_capacity * 2;
                 int *tmp = (int *)realloc(seen, (size_t)new_cap * sizeof(int));
                 if (!tmp) {
-                    free(seen);
-                    free(chain_length_cache);
-                    return 4;
+                    cleanup(chain_length_cache, seen);
+                    free(seen_bitmap);
+                    return ERROR_MEMORY_REALLOCATION_SEEN;
                 }
                 seen = tmp;
                 seen_capacity = new_cap;
             }
             seen[seen_count++] = current;
+            if (current < cache_size) {
+                seen_bitmap[current] = true;
+            }
             current = sum_of_digit_factorials_int(current);
+        }
+
+        // Reset seen_bitmap for this iteration
+        for (int i = 0; i < seen_count; ++i) {
+            if (seen[i] < cache_size) {
+                seen_bitmap[seen[i]] = false;
+            }
         }
     }
 
     free(seen);
+    free(seen_bitmap);
     *out_max_chain_length = max_chain_length;
     *out_max_chain_length_count = max_chain_length_count;
 
     free(chain_length_cache);
     return 0;
 }
-
