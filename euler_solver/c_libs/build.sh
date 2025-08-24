@@ -14,7 +14,7 @@ LIBS_DIR="libs"
 CFLAGS="-Wall -Wextra -O3 -g"
 PICFLAGS="-fPIC"
 
-# Create build directory if it doesn't exist
+# Create build directory
 mkdir -p "${BUILD_DIR}"
 
 # Create libs directory if it doesn't exist
@@ -49,6 +49,9 @@ fi
 for c_file in "${c_files[@]}"; do
     build_c_file "$(basename "${c_file}")"
 done
+
+# Remove build directory
+rm -rf "${BUILD_DIR}"
     
 echo "All builds completed successfully"
 
