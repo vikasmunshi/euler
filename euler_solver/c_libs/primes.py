@@ -93,13 +93,13 @@ def primes_generator():
 
     @contextmanager
     def _state():
-        state = primes_generator_init_c()
-        if not state:
+        internal_state = primes_generator_init_c()
+        if not internal_state:
             raise MemoryError("Failed to allocate C state for prime generator")
         try:
-            yield state
+            yield internal_state
         finally:
-            primes_generator_free_c(state)
+            primes_generator_free_c(internal_state)
 
     with _state() as state:
         out_val = ctypes.c_uint64()
@@ -108,12 +108,3 @@ def primes_generator():
             if not ok:
                 return  # gracefully end if C cannot produce further primes
             yield int(out_val.value)
-
-
-if __name__ == '__main__':
-    print(is_prime(13))
-    print(is_prime(14))
-    print(primes_sundaram_sieve(100))
-    print(primes_eratosthenes_sieve_upto_max_num(100))
-    prime_generator = primes_generator()
-    print([next(prime_generator) for _ in range(100)])
