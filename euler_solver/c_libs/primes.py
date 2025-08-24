@@ -7,6 +7,8 @@ import ctypes
 
 from euler_solver.c_libs import import_c_lib
 
+__all__ = ['is_prime', 'primes_sundaram_sieve', 'primes_eratosthenes_sieve_upto_max_num', 'primes_generator']
+
 ERROR_MEMORY_ALLOCATION = -1
 UINT64_MAX = 2 ** 64 - 1
 
