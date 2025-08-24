@@ -52,7 +52,7 @@ primes_eratosthenes_sieve_c.argtypes = [ctypes.c_uint64, ctypes.POINTER(ctypes.c
 primes_eratosthenes_sieve_c.restype = ctypes.c_int
 
 
-def primes_eratosthenes_sieve(max_num: int) -> tuple[int, ...]:
+def primes_eratosthenes_sieve_upto_max_num(max_num: int) -> tuple[int, ...]:
     if not 0 <= max_num <= UINT64_MAX:
         raise ValueError(f"Number must be between 0 and {UINT64_MAX}")
     if max_num < 2:
@@ -66,3 +66,54 @@ def primes_eratosthenes_sieve(max_num: int) -> tuple[int, ...]:
     elif result < 0:  # Catch otherwise unspecified errors
         raise RuntimeError("An unexpected error occurred in the C library")
     return tuple(int(primes_out[i]) for i in range(result))
+
+
+# Indefinite prime generator via C stateful API
+primes_generator_init_c = c_lib.primes_generator_init
+primes_generator_init_c.argtypes = []
+primes_generator_init_c.restype = ctypes.c_void_p
+
+primes_generator_next_c = c_lib.primes_generator_next
+primes_generator_next_c.argtypes = [ctypes.c_void_p, ctypes.POINTER(ctypes.c_uint64)]
+primes_generator_next_c.restype = ctypes.c_bool
+
+primes_generator_free_c = c_lib.primes_generator_free
+primes_generator_free_c.argtypes = [ctypes.c_void_p]
+primes_generator_free_c.restype = None
+
+
+def primes_generator():
+    """Yield primes indefinitely using C-backed generator state.
+
+    This wraps a stateful C generator. Memory is always released via a
+    context-managed finalizer even if the consumer stops early.
+    """
+    # Local import to avoid adding a global dependency
+    from contextlib import contextmanager
+
+    @contextmanager
+    def _state():
+        state = primes_generator_init_c()
+        if not state:
+            raise MemoryError("Failed to allocate C state for prime generator")
+        try:
+            yield state
+        finally:
+            primes_generator_free_c(state)
+
+    with _state() as state:
+        out_val = ctypes.c_uint64()
+        while True:
+            ok = primes_generator_next_c(state, ctypes.byref(out_val))
+            if not ok:
+                return  # gracefully end if C cannot produce further primes
+            yield int(out_val.value)
+
+
+if __name__ == '__main__':
+    print(is_prime(13))
+    print(is_prime(14))
+    print(primes_sundaram_sieve(100))
+    print(primes_eratosthenes_sieve_upto_max_num(100))
+    prime_generator = primes_generator()
+    print([next(prime_generator) for _ in range(100)])

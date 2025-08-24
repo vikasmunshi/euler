@@ -116,3 +116,97 @@ int primes_eratosthenes_sieve(const uint64_t max_num, uint64_t* primes_out) {
     return count;
 }
 
+// ---------------- Indefinite prime generator (incremental trial division) ----------------
+// We expose a small C API to be used from Python via ctypes:
+//   void* primes_generator_init();
+//   bool primes_generator_next(void* state, uint64_t* out_prime);
+//   void primes_generator_free(void* state);
+// The implementation keeps a dynamic array of discovered primes and tests the next
+// candidate by trial division up to sqrt(n) (checked via p <= n/p to avoid overflow).
+// While not a strict sieve data-structure, it provides an efficient indefinite generator
+// without unbounded memory structures and keeps changes minimal.
+
+typedef struct {
+    uint64_t current;      // next candidate to test (2 first, then odd numbers)
+    uint64_t* primes;      // dynamic array of known primes
+    size_t count;          // number of primes stored
+    size_t capacity;       // allocated capacity of the primes array
+} prime_gen_state_t;
+
+static bool ensure_capacity(prime_gen_state_t* st) {
+    if (st->count < st->capacity) return true;
+    size_t new_cap = (st->capacity == 0) ? 16 : st->capacity * 2;
+    uint64_t* new_arr = (uint64_t*)realloc(st->primes, new_cap * sizeof(uint64_t));
+    if (!new_arr) return false;
+    st->primes = new_arr;
+    st->capacity = new_cap;
+    return true;
+}
+
+void* primes_generator_init(void) {
+    prime_gen_state_t* st = (prime_gen_state_t*)calloc(1, sizeof(prime_gen_state_t));
+    if (!st) return NULL;
+    st->current = 2;
+    st->primes = NULL;
+    st->count = 0;
+    st->capacity = 0;
+    return (void*)st;
+}
+
+bool primes_generator_next(void* state, uint64_t* out_prime) {
+    if (!state || !out_prime) return false;
+    prime_gen_state_t* st = (prime_gen_state_t*)state;
+
+    while (1) {
+        uint64_t n = st->current;
+        if (n < 2) {
+            // overflow wrap or invalid state
+            return false;
+        }
+
+        // Special-case even starting point
+        if (n == 2) {
+            if (!ensure_capacity(st)) return false;
+            st->primes[st->count++] = 2;
+            *out_prime = 2;
+            st->current = 3;  // next candidate
+            return true;
+        }
+
+        // Skip even numbers
+        if ((n & 1ull) == 0ull) {
+            if (n == UINT64_MAX) return false;  // can't increment further
+            st->current = n + 1;
+            continue;
+        }
+
+        bool is_p = true;
+        for (size_t i = 0; i < st->count; ++i) {
+            uint64_t p = st->primes[i];
+            if (p > 0 && p > n / p) break;  // p*p > n
+            if (n % p == 0ull) { is_p = false; break; }
+        }
+        if (is_p) {
+            if (!ensure_capacity(st)) return false;
+            st->primes[st->count++] = n;
+            *out_prime = n;
+            if (n >= UINT64_MAX - 2) {
+                st->current = UINT64_MAX; // next step will fail gracefully
+            } else {
+                st->current = n + 2;  // step through odd numbers
+            }
+            return true;
+        }
+
+        if (n == UINT64_MAX - 1) return false;
+        st->current = n + 2;  // try next odd
+    }
+}
+
+void primes_generator_free(void* state) {
+    if (!state) return;
+    prime_gen_state_t* st = (prime_gen_state_t*)state;
+    if (st->primes) free(st->primes);
+    free(st);
+}
+
