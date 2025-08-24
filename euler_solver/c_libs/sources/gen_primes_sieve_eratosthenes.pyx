@@ -3,8 +3,8 @@
 
 def gen_primes_sieve_eratosthenes():
     cdef dict known_composites = {}
-    cdef long long int current_number = 2
-    cdef long long int composite, p
+    cdef  int current_number = 2
+    cdef  int composite, p
 
     while True:
         if current_number not in known_composites:

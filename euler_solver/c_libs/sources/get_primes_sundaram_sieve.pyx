@@ -3,13 +3,13 @@
 
 from libc.stdlib cimport malloc, free
 
-cdef int primes_sundaram_sieve(const long long int max_num, long long int** primes_out):
-    cdef long long int max_number = (max_num - 1) // 2
-    cdef long long int i, j, index_limit
+cdef int primes_sundaram_sieve(const int max_num, int** primes_out):
+    cdef  int max_number = (max_num - 1) // 2
+    cdef  int i, j, index_limit
     cdef char* numbers = <char *> malloc((max_number + 1) * sizeof(char))  # Optimized C-level array
-    cdef long long int prime_count = 1  # Account for number 2 as prime
-    cdef long long int * primes
-    cdef long long int prime_idx
+    cdef  int prime_count = 1  # Account for number 2 as prime
+    cdef  int * primes
+    cdef  int prime_idx
 
     if not numbers:
         return -1  # Memory allocation failed
@@ -30,7 +30,7 @@ cdef int primes_sundaram_sieve(const long long int max_num, long long int** prim
             prime_count += 1
 
     # Allocate memory for the primes array
-    primes = <long long int *> malloc(prime_count * sizeof(long long int))
+    primes = < int *> malloc(prime_count * sizeof(int))
     if not primes:
         free(numbers)
         return -1  # Memory allocation failed
@@ -49,8 +49,8 @@ cdef int primes_sundaram_sieve(const long long int max_num, long long int** prim
     return prime_count  # Return the count of primes
 
 
-cpdef get_primes_sundaram_sieve(const long long int max_num):
-    cdef long long int * primes
+cpdef get_primes_sundaram_sieve(const  int max_num):
+    cdef  int * primes
     cdef int prime_count
     cdef list result
 
