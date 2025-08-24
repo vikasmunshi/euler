@@ -41,7 +41,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from euler_solver.c_libs.digit_factorial_chains import count_digit_factorial_max_length_chains_c
+from euler_solver.c_libs.p0074 import count_digit_factorial_max_length_chains_c
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution, show_solution
 

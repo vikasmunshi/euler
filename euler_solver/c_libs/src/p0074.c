@@ -1,5 +1,5 @@
 /*******************************************************************************
- * File: digit_factorial_chains.c
+ * File: p0074.c
  *
  * Description: Implementation of digit factorial chains calculator that finds
  *              chains where the sum of factorial of digits leads to loops.
@@ -37,7 +37,7 @@ static inline int sum_of_digit_factorials_int(int n) {
 /* Compute maximum possible value reachable from numbers up to max_num. */
 static int max_reachable_value(int max_num) {
     if (max_num < 10) {
-        return 9 * DIGIT_FACTORIALS[9];
+        return DIGIT_FACTORIALS[9];
     }
     int digits = 0;
     int temp = max_num;

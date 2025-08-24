@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Move to the directory where this script resides
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "${SCRIPT_DIR}"
 
 # Directories
 SRC_DIR="src"
@@ -15,10 +15,10 @@ CFLAGS="-Wall -Wextra -O3 -g"
 PICFLAGS="-fPIC"
 
 # Create build directory if it doesn't exist
-mkdir -p "$BUILD_DIR"
+mkdir -p "${BUILD_DIR}"
 
 # Create libs directory if it doesn't exist
-mkdir -p "$LIBS_DIR"
+mkdir -p "${LIBS_DIR}"
 
 
 build_c_file() {
@@ -27,28 +27,27 @@ build_c_file() {
     base_name=$(basename "$c_file" .c)
     
     # Compile source for shared library (without main)
-    gcc $CFLAGS $PICFLAGS -c "$SRC_DIR/$c_file" -o "$BUILD_DIR/${base_name}_lib.o"
+    gcc ${CFLAGS} ${PICFLAGS} -c "${SRC_DIR}/${c_file}" -o "${BUILD_DIR}/${base_name}.o"
 
     # Create shared library (.so)
-    gcc -shared "$BUILD_DIR/${base_name}_lib.o" -o "$BUILD_DIR/lib${base_name}.so"
+    gcc -shared "${BUILD_DIR}/${base_name}.o" -o "${BUILD_DIR}/lib_${base_name}.so"
 
     # Copy shared library to libs directory
-    cp "$BUILD_DIR/lib${base_name}.so" "$LIBS_DIR/"
+    cp "${BUILD_DIR}/lib_${base_name}.so" "${LIBS_DIR}/"
 
-    echo "Build completed successfully:"
-    echo " - Shared library: $BUILD_DIR/lib${base_name}.so"
+    echo "Build Shared Library: ${LIBS_DIR}/lib_${base_name}.so"
 }
 
 # Find and build all .c files in src directory
-mapfile -t c_files < <(find "$SRC_DIR" -name "*.c")
+mapfile -t c_files < <(find "${SRC_DIR}" -name "*.c")
 
 if [ ${#c_files[@]} -eq 0 ]; then
-    echo "No .c files found in $SRC_DIR"
+    echo "No .c files found in ${SRC_DIR}"
     exit 1
 fi
 
 for c_file in "${c_files[@]}"; do
-    build_c_file "$(basename "$c_file")"
+    build_c_file "$(basename "${c_file}")"
 done
     
 echo "All builds completed successfully"
