@@ -66,10 +66,3 @@ def primes_eratosthenes_sieve(max_num: int) -> tuple[int, ...]:
     elif result < 0:  # Catch otherwise unspecified errors
         raise RuntimeError("An unexpected error occurred in the C library")
     return tuple(int(primes_out[i]) for i in range(result))
-
-
-if __name__ == '__main__':
-    print(is_prime(13))
-    print(is_prime(14))
-    print(primes_sundaram_sieve(100))
-    print(primes_eratosthenes_sieve(100))
