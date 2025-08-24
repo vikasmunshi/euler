@@ -61,7 +61,7 @@ static int max_reachable_value(int max_num) {
     return (max_val < max_num) ? max_num : max_val;
 }
 
-int count_digit_factorial_max_length_chains(int max_num,
+int find_max_length_chains_digit_factorial(int max_num,
                                             int *out_max_chain_length,
                                             int *out_max_chain_length_count) {
     if (!out_max_chain_length || !out_max_chain_length_count) {
@@ -168,12 +168,7 @@ int count_digit_factorial_max_length_chains(int max_num,
     return 0;
 }
 
-/* New algorithm: explicit chain-building with loop detection using index mapping.
- * This differs from the memoization-first approach above by assigning loop lengths
- * to nodes in cycles and propagating pre-loop lengths accordingly, leveraging a
- * next_value array and visited indices.
- */
-int count_max_length_digit_factorial_chains(int max_num,
+int count_chains_with_max_length_digit_factorial(int max_num,
                                             int *out_max_chain_length,
                                             int *out_max_chain_length_count) {
     if (!out_max_chain_length || !out_max_chain_length_count) {

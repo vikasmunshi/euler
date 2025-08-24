@@ -67,7 +67,7 @@ def sum_of_digit_factorials(n: int) -> int:
 def add_chains(chains: dict[int, list[int]], number: int) -> bool:
     ...
 
-def count_digit_factorial_max_length_chains(max_num: int) -> tuple[int, int]:
+def find_max_length_chains_digit_factorial(max_num: int) -> tuple[int, int]:
     ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
