@@ -7,7 +7,8 @@ import ctypes
 
 from euler_solver.c_libs import import_c_lib
 
-__all__ = ['is_prime', 'primes_sundaram_sieve', 'primes_eratosthenes_sieve_upto_max_num', 'primes_generator']
+__all__ = ['is_prime', 'fast_is_prime', 'primes_sundaram_sieve', 'primes_eratosthenes_sieve_upto_max_num',
+           'primes_generator']
 
 ERROR_MEMORY_ALLOCATION = -1
 UINT64_MAX = 2 ** 64 - 1
@@ -15,19 +16,29 @@ UINT64_MAX = 2 ** 64 - 1
 # Import the C functions
 c_lib = import_c_lib('lib_primes')
 
+# C is_prime binding
 is_prime_c = c_lib.is_prime
 is_prime_c.argtypes = [ctypes.c_uint64]
 is_prime_c.restype = ctypes.c_bool
+# C fast_is_prime binding
+fast_is_prime_c = c_lib.fast_is_prime
+fast_is_prime_c.argtypes = [ctypes.c_uint64]
+fast_is_prime_c.restype = ctypes.c_bool
 
 
 def is_prime(num: int) -> bool:
     if not 0 <= num <= UINT64_MAX:
         raise ValueError(f"Number must be between 0 and {UINT64_MAX}")
-    num = ctypes.c_uint64(num)
-    result = is_prime_c(num)
-    return result
+    return bool(is_prime_c(ctypes.c_uint64(num)))
 
 
+def fast_is_prime(num: int) -> bool:
+    if not 0 <= num <= UINT64_MAX:
+        raise ValueError(f"Number must be between 0 and {UINT64_MAX}")
+    return bool(fast_is_prime_c(ctypes.c_uint64(num)))
+
+
+# C primes_sundaram_sieve bindings
 primes_sundaram_sieve_c = c_lib.primes_sundaram_sieve
 primes_sundaram_sieve_c.argtypes = [ctypes.c_uint64, ctypes.POINTER(ctypes.c_uint64)]
 primes_sundaram_sieve_c.restype = ctypes.c_int
@@ -49,6 +60,7 @@ def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
     return tuple(int(primes_out[i]) for i in range(result))
 
 
+# C primes_eratosthenes_sieve bindings
 primes_eratosthenes_sieve_c = c_lib.primes_eratosthenes_sieve
 primes_eratosthenes_sieve_c.argtypes = [ctypes.c_uint64, ctypes.POINTER(ctypes.c_uint64)]
 primes_eratosthenes_sieve_c.restype = ctypes.c_int

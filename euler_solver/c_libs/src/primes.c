@@ -19,6 +19,7 @@
 
 #define ERROR_MEMORY_ALLOCATION -1
 
+// ---------------- Trial Division Primality Test ----------------
 bool is_prime(uint64_t n) {
     if (n <= 1) return false;
     if (n <= 3) return true;
@@ -34,6 +35,57 @@ bool is_prime(uint64_t n) {
     return true;
 }
 
+// ---------------- Fast deterministic Miller–Rabin for 64-bit ----------------
+static inline uint64_t mulmod_u64(uint64_t a, uint64_t b, uint64_t mod) {
+    return (uint64_t)((__uint128_t)a * b % mod);
+}
+
+static uint64_t powmod_u64(uint64_t a, uint64_t e, uint64_t mod) {
+    uint64_t result = 1 % mod;
+    uint64_t base = a % mod;
+    while (e) {
+        if (e & 1ull) result = mulmod_u64(result, base, mod);
+        base = mulmod_u64(base, base, mod);
+        e >>= 1ull;
+    }
+    return result;
+}
+
+bool fast_is_prime(uint64_t n) {
+    if (n < 2) return false;
+
+    // Quick checks for small primes and divisibility
+    static const uint64_t small_primes[] = {2ull,3ull,5ull,7ull,11ull,13ull,17ull,19ull,23ull,29ull,31ull,37ull};
+    for (size_t i = 0; i < sizeof(small_primes)/sizeof(small_primes[0]); ++i) {
+        uint64_t p = small_primes[i];
+        if (n == p) return true;
+        if (n % p == 0ull) return false;
+    }
+
+    // Write n-1 = 2^s * d with d odd
+    uint64_t d = n - 1;
+    unsigned int s = 0;
+    while ((d & 1ull) == 0ull) { d >>= 1ull; ++s; }
+
+    // Deterministic set of bases for testing all 64-bit integers
+    static const uint64_t bases[] = {2ull, 325ull, 9375ull, 28178ull, 450775ull, 9780504ull, 1795265022ull};
+
+    for (size_t i = 0; i < sizeof(bases)/sizeof(bases[0]); ++i) {
+        uint64_t a = bases[i] % n;
+        if (a == 0ull) continue; // base not informative
+        uint64_t x = powmod_u64(a, d, n);
+        if (x == 1ull || x == n - 1) continue;
+        bool witness = true;
+        for (unsigned int r = 1; r < s; ++r) {
+            x = mulmod_u64(x, x, n);
+            if (x == n - 1) { witness = false; break; }
+        }
+        if (witness) return false;
+    }
+    return true;
+}
+
+// ---------------- Prime Generation Sundaram Sieve ----------------
 int primes_sundaram_sieve(const uint64_t max_num, uint64_t* primes_out) {
     if (max_num < 2) {
         return 0;  // No primes below 2
@@ -77,6 +129,7 @@ int primes_sundaram_sieve(const uint64_t max_num, uint64_t* primes_out) {
     return prime_idx;  // Return the count of primes written
 }
 
+// ---------------- Prime Generation Eratosthenes Sieve ----------------
 int primes_eratosthenes_sieve(const uint64_t max_num, uint64_t* primes_out) {
     if (max_num < 2) {
         return 0;  // No primes below 2

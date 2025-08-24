@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from euler_solver.c_libs import is_prime
+from euler_solver.c_libs.primes import is_prime
 from euler_solver.logger import logger
 from euler_solver.maths.pandigital_numbers import gen_n_digit_pandigital_numbers
 from euler_solver.setup import evaluate, register_solution
