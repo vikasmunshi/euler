@@ -17,168 +17,102 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define ERROR_MEMORY_ALLOCATION -1
+
 bool is_prime(uint64_t n) {
     if (n <= 1) return false;
     if (n <= 3) return true;
     if (n % 2 == 0 || n % 3 == 0) return false;
 
+    // Calculate the upper limit for trial division
     uint64_t limit = (uint64_t)sqrt((double)n);
+
+    // Check divisors of the form 6k ± 1, starting from 5
     for (uint64_t i = 5; i <= limit; i += 6) {
         if (n % i == 0 || n % (i + 2) == 0) return false;
     }
     return true;
 }
 
-uint64_t *prime_factors(uint64_t n, size_t *size) {
-    uint64_t *factors = malloc(64 * sizeof(uint64_t));
-    *size = 0;
-
-    while (n % 2 == 0) {
-        factors[(*size)++] = 2;
-        n = n / 2;
+int primes_sundaram_sieve(const uint64_t max_num, uint64_t* primes_out) {
+    if (max_num < 2) {
+        return 0;  // No primes below 2
     }
 
-    for (uint64_t i = 3; i <= sqrt(n); i += 2) {
-        while (n % i == 0) {
-            factors[(*size)++] = i;
-            n = n / i;
-        }
-    }
-
-    if (n > 2) {
-        factors[(*size)++] = n;
-    }
-
-    return factors;
-}
-
-uint64_t next_prime(uint64_t n) {
-    if (n <= 1) return 2;
-
-    uint64_t prime = n;
-    bool found = false;
-
-    while (!found) {
-        prime++;
-        if (is_prime(prime)) {
-            found = true;
-        }
-    }
-
-    return prime;
-}
-
-
-int primes_sundaram_sieve(const int max_num, int** primes_out) {
-    int max_number = (max_num - 1) / 2;
-    char* numbers = (char*)malloc((max_number + 1) * sizeof(char));
-    int prime_count = 1;  // Account for number 2 as prime
-    int* primes;
-    int prime_idx;
-    int i, j, index_limit;
-
+    // Sundaram sieve works on odd numbers up to max_num
+    uint64_t max_number = (max_num - 1) / 2;  // number of indices for odd numbers
+    char* numbers = (char*)malloc((size_t)(max_number + 1) * sizeof(char));
     if (!numbers) {
-        return -1;  // Memory allocation failed
+        return ERROR_MEMORY_ALLOCATION;  // Memory allocation failed
     }
 
     // Initialize all as 1 (true)
-    for (i = 0; i <= max_number; i++) {
+    for (uint64_t i = 0; i <= max_number; i++) {
         numbers[i] = 1;
     }
 
     // Mark non-primes using the Sundaram Sieve logic
-    for (i = 1; i <= max_number; i++) {
-        index_limit = (max_number - i) / (2 * i + 1);
-        for (j = i; j <= index_limit; j++) {
+    for (uint64_t i = 1; i <= max_number; i++) {
+        uint64_t denom = 2 * i + 1;
+        uint64_t index_limit = (max_number - i) / denom;
+        for (uint64_t j = i; j <= index_limit; j++) {
             numbers[i + j + 2 * i * j] = 0;
         }
     }
 
-    // Count primes
-    for (i = 1; i <= max_number; i++) {
+    // Populate output array with computed prime numbers
+    int prime_idx = 0;
+    primes_out[prime_idx++] = 2;  // The number 2 is the only even prime
+
+    for (uint64_t i = 1; i <= max_number; i++) {
         if (numbers[i]) {
-            prime_count++;
-        }
-    }
-
-    // Allocate memory for the primes array
-    primes = (int*)malloc(prime_count * sizeof(int));
-    if (!primes) {
-        free(numbers);
-        return -1;  // Memory allocation failed
-    }
-
-    // Populate primes array
-    primes[0] = 2;
-    prime_idx = 1;
-    for (i = 1; i <= max_number; i++) {
-        if (numbers[i]) {
-            primes[prime_idx] = 2 * i + 1;
-            prime_idx++;
-        }
-    }
-
-    *primes_out = primes;
-    free(numbers);
-
-    return prime_count;  // Return the count of primes
-}
-
-/**
- * Generates prime numbers up to max_num using the Sieve of Eratosthenes algorithm.
- * 
- * @param max_num The upper limit for generating prime numbers
- * @param primes_out Pointer to array where prime numbers will be stored
- * @return Number of prime numbers found, or -1 if memory allocation fails
- */
-int primes_eratosthenes_sieve(const int max_num, int** primes_out) {
-    bool* is_prime = (bool*)malloc((max_num + 1) * sizeof(bool));
-    int* primes;
-    int prime_count = 0;
-    int i, j;
-
-    if (!is_prime) {
-        return -1;  // Memory allocation failed
-    }
-
-    // Initialize all numbers as prime
-    memset(is_prime, true, (max_num + 1) * sizeof(bool));
-    is_prime[0] = is_prime[1] = false;
-
-    // Mark non-primes using Sieve of Eratosthenes
-    for (i = 2; i * i <= max_num; i++) {
-        if (is_prime[i]) {
-            for (j = i * i; j <= max_num; j += i) {
-                is_prime[j] = false;
+            uint64_t p = 2 * i + 1;  // Convert index back to the original number
+            if (p <= max_num) {
+                primes_out[prime_idx++] = p;
             }
         }
     }
 
-    // Count prime numbers
-    for (i = 2; i <= max_num; i++) {
-        if (is_prime[i]) {
-            prime_count++;
+    free(numbers);
+    return prime_idx;  // Return the count of primes written
+}
+
+int primes_eratosthenes_sieve(const uint64_t max_num, uint64_t* primes_out) {
+    if (max_num < 2) {
+        return 0;  // No primes below 2
+    }
+
+    // Sieve array for primality up to max_num
+    size_t sieve_size = (size_t)(max_num + 1);
+    bool* sieve = (bool*)malloc(sieve_size * sizeof(bool));
+    if (!sieve) {
+        return ERROR_MEMORY_ALLOCATION;  // Memory allocation failed
+    }
+
+    // Initialize all numbers as prime
+    memset(sieve, true, sieve_size * sizeof(bool));
+    sieve[0] = false;
+    sieve[1] = false;
+
+    // Mark non-primes using Sieve of Eratosthenes
+    for (uint64_t i = 2; i <= max_num / i; i++) {
+        if (sieve[i]) {
+            uint64_t start = i * i;
+            for (uint64_t j = start; j <= max_num; j += i) {
+                sieve[j] = false;
+            }
         }
     }
 
-    // Allocate memory for prime numbers array
-    primes = (int*)malloc(prime_count * sizeof(int));
-    if (!primes) {
-        free(is_prime);
-        return -1;  // Memory allocation failed
-    }
-
-    // Store prime numbers in array
-    j = 0;
-    for (i = 2; i <= max_num; i++) {
-        if (is_prime[i]) {
-            primes[j++] = i;
+    // Store prime numbers in the provided output buffer
+    int count = 0;
+    for (uint64_t i = 2; i <= max_num; i++) {
+        if (sieve[i]) {
+            primes_out[count++] = i;
         }
     }
 
-    *primes_out = primes;
-    free(is_prime);
-
-    return prime_count;
+    free(sieve);
+    return count;
 }
 
