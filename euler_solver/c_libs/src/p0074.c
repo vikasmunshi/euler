@@ -167,3 +167,167 @@ int count_digit_factorial_max_length_chains(int max_num,
     free(chain_length_cache);
     return 0;
 }
+
+/* New algorithm: explicit chain-building with loop detection using index mapping.
+ * This differs from the memoization-first approach above by assigning loop lengths
+ * to nodes in cycles and propagating pre-loop lengths accordingly, leveraging a
+ * next_value array and visited indices.
+ */
+int count_max_length_digit_factorial_chains(int max_num,
+                                            int *out_max_chain_length,
+                                            int *out_max_chain_length_count) {
+    if (!out_max_chain_length || !out_max_chain_length_count) {
+        return ERROR_NULL_OUTPUT_PTRS;
+    }
+    if (max_num < 2) {
+        *out_max_chain_length = 0;
+        *out_max_chain_length_count = 0;
+        return 0;
+    }
+
+    int cache_limit = max_reachable_value(max_num);
+    int cache_size = cache_limit + 1;
+
+    // Allocate arrays
+    int *length = (int *)calloc((size_t)cache_size, sizeof(int));
+    if (!length) {
+        return ERROR_MEMORY_ALLOCATION_CACHE; // reuse cache alloc error code
+    }
+    int *next_val = (int *)malloc((size_t)cache_size * sizeof(int));
+    if (!next_val) {
+        free(length);
+        return ERROR_MEMORY_ALLOCATION_CACHE;
+    }
+    for (int i = 0; i < cache_size; ++i) next_val[i] = -1;
+
+    int *visited_index = (int *)malloc((size_t)cache_size * sizeof(int));
+    if (!visited_index) {
+        free(length);
+        free(next_val);
+        return ERROR_MEMORY_ALLOCATION_SEEN;
+    }
+    for (int i = 0; i < cache_size; ++i) visited_index[i] = -1;
+
+    int path_capacity = 128;
+    int *path = (int *)malloc((size_t)path_capacity * sizeof(int));
+    if (!path) {
+        free(length);
+        free(next_val);
+        free(visited_index);
+        return ERROR_MEMORY_ALLOCATION_SEEN;
+    }
+
+    int max_chain_length = 0;
+    int max_chain_count = 0;
+
+    for (int start = 2; start <= max_num; ++start) {
+        // Fast path: already known
+        if (start < cache_size && length[start] > 0) {
+            int L = length[start];
+            if (L > max_chain_length) { max_chain_length = L; max_chain_count = 1; }
+            else if (L == max_chain_length) { max_chain_count += 1; }
+            continue;
+        }
+
+        // reset visited_index to -1 lazily as we use it
+        // we will only set for values we touch and then clear them afterwards
+
+        int current = start;
+        int path_len = 0;
+
+        while (1) {
+            if (current >= cache_size) {
+                // Should not happen due to cache_limit design, but guard anyway
+                // compute next and continue
+                int next = sum_of_digit_factorials_int(current);
+                // Ensure capacity
+                if (path_len == path_capacity) {
+                    int new_cap = path_capacity * 2;
+                    int *tmp = (int *)realloc(path, (size_t)new_cap * sizeof(int));
+                    if (!tmp) {
+                        free(length);
+                        free(next_val);
+                        free(visited_index);
+                        free(path);
+                        return ERROR_MEMORY_REALLOCATION_SEEN;
+                    }
+                    path = tmp;
+                    path_capacity = new_cap;
+                }
+                path[path_len++] = current;
+                current = next;
+                continue;
+            }
+
+            if (length[current] > 0) {
+                // Known tail length
+                int base = length[current];
+                for (int i = path_len - 1; i >= 0; --i) {
+                    int v = path[i];
+                    if (v < cache_size) length[v] = ++base;
+                }
+                break;
+            }
+
+            if (visited_index[current] != -1) {
+                // Loop detected starting at visited_index[current]
+                int loop_start = visited_index[current];
+                int loop_len = path_len - loop_start;
+                // Assign loop nodes
+                for (int i = loop_start; i < path_len; ++i) {
+                    int v = path[i];
+                    if (v < cache_size) length[v] = loop_len;
+                }
+                // Assign pre-loop nodes
+                for (int i = loop_start - 1; i >= 0; --i) {
+                    int v = path[i];
+                    if (v < cache_size) length[v] = length[path[i + 1]] + 1;
+                }
+                break;
+            }
+
+            // Mark and advance
+            visited_index[current] = path_len;
+            if (path_len == path_capacity) {
+                int new_cap = path_capacity * 2;
+                int *tmp = (int *)realloc(path, (size_t)new_cap * sizeof(int));
+                if (!tmp) {
+                    free(length);
+                    free(next_val);
+                    free(visited_index);
+                    free(path);
+                    return ERROR_MEMORY_REALLOCATION_SEEN;
+                }
+                path = tmp;
+                path_capacity = new_cap;
+            }
+            path[path_len++] = current;
+            if (next_val[current] == -1) {
+                next_val[current] = sum_of_digit_factorials_int(current);
+            }
+            current = next_val[current];
+        }
+
+        // Clear visited_index entries used in this path
+        for (int i = 0; i < path_len; ++i) {
+            int v = path[i];
+            if (v < cache_size) visited_index[v] = -1;
+        }
+
+        int Lstart = (start < cache_size) ? length[start] : 0;
+        if (Lstart > max_chain_length) {
+            max_chain_length = Lstart;
+            max_chain_count = 1;
+        } else if (Lstart == max_chain_length) {
+            max_chain_count += 1;
+        }
+    }
+
+    free(path);
+    free(visited_index);
+    free(next_val);
+    *out_max_chain_length = max_chain_length;
+    *out_max_chain_length_count = max_chain_count;
+    free(length);
+    return 0;
+}

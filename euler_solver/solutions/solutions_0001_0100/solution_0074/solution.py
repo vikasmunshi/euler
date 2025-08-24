@@ -41,7 +41,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from euler_solver.c_libs.p0074 import count_digit_factorial_max_length_chains_c
+from euler_solver.c_libs.p0074 import count_digit_factorial_max_length_chains_c, count_max_length_digit_factorial_chains_c
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution, show_solution
 
@@ -62,6 +62,14 @@ test_cases: list[dict[str, Any]] = [
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_digit_factorial_chains_p0074_s0(*, max_num: int) -> int:
     max_chain_length, max_chain_length_count = count_digit_factorial_max_length_chains_c(max_num)
+    if show_solution():
+        print(f'{max_num=} {max_chain_length=} {max_chain_length_count=}')
+    return max_chain_length_count
+
+
+@register_solution(euler_problem=euler_problem, max_test_case=None)
+def solve_digit_factorial_chains_p0074_s1(*, max_num: int) -> int:
+    max_chain_length, max_chain_length_count = count_max_length_digit_factorial_chains_c(max_num)
     if show_solution():
         print(f'{max_num=} {max_chain_length=} {max_chain_length_count=}')
     return max_chain_length_count
@@ -111,7 +119,7 @@ def count_digit_factorial_max_length_chains(max_num: int) -> tuple[int, int]:
 
 
 @register_solution(euler_problem=euler_problem, max_test_case=5)
-def solve_digit_factorial_chains_p0074_s1(*, max_num: int) -> int:
+def solve_digit_factorial_chains_p0074_s2(*, max_num: int) -> int:
     max_chain_length, max_chain_length_count = count_digit_factorial_max_length_chains(max_num)
     if show_solution():
         print(f'{max_num=} {max_chain_length=} {max_chain_length_count=}')
@@ -159,7 +167,7 @@ def get_chains(max_num: int) -> Chains:
 
 
 @register_solution(euler_problem=euler_problem, max_test_case=5)
-def solve_digit_factorial_chains_p0074_s2(*, max_num: int) -> int:
+def solve_digit_factorial_chains_p0074_s3(*, max_num: int) -> int:
     max_chain_length, max_chain_length_count = count_max_length_digit_factorial_chains(max_num=max_num)
     if show_solution():
         chains: Chains = get_chains(max_num)
