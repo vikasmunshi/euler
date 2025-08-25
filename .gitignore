@@ -6,6 +6,7 @@ __pycache__/
 
 # C extensions
 *.so
+!euler_solver/c_libs/libs/lib_*.so
 
 # Development artifacts
 *.cover
