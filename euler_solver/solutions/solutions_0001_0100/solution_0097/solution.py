@@ -24,10 +24,9 @@ URL: https://projecteuler.net/problem=97
 """
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
-from euler_solver.maths.c_lib.p0097 import large_non_mersenne_prime_p0097_s0
-
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
 
@@ -38,9 +37,24 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
+@use_wrapped_c_function('p0097')
+def large_non_mersenne_prime(*, num_digits: int, prime: str) -> int:
+    divisor: int = 10 ** num_digits
+    prime_parts: list[str] = prime.split()
+    number: int
+    exponent: int
+    number, exponent = (int(prime_parts[0]), int(prime_parts[2][2:]))
+    for _ in range(exponent):
+        number *= 2
+        number %= divisor
+    number += 1
+    number %= divisor
+    return number
+
+
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_large_non_mersenne_prime_p0097_s0(*, num_digits: int, prime: str) -> int:
-    return cast(int, large_non_mersenne_prime_p0097_s0(num_digits=num_digits, prime=prime))
+    return large_non_mersenne_prime(num_digits=num_digits, prime=prime)
 
 
 if __name__ == '__main__':
