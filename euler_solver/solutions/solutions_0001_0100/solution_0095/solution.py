@@ -36,8 +36,9 @@ from __future__ import annotations
 
 from typing import Any, Dict, List
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 95
 framework_version: str = '0.2.1'
@@ -46,13 +47,13 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
-@register_solution(euler_problem=euler_problem, max_test_case=None)
-def solve_amicable_chains_p0095_s0(*, max_num: int) -> int:
+@use_wrapped_c_function('p0095')
+def longest_amicable_chain(max_num: int) -> tuple[int, int]:
     divisor_sum: List[int] = [0] * (max_num + 1)
     for i in range(1, max_num // 2 + 1):
         for j in range(i * 2, max_num + 1, i):
             divisor_sum[j] += i
-    ans, longest = (0, 0)
+    smallest_member, longest_length = (0, 0)
     seen: Dict[int, int] = {}
     for i in range(1, max_num + 1):
         if i not in seen:
@@ -62,11 +63,19 @@ def solve_amicable_chains_p0095_s0(*, max_num: int) -> int:
                 path.append(c)
                 c = divisor_sum[c]
             if c == i:
-                if (len_ch := len(ch)) > longest:
-                    longest, ans = (len_ch, i)
+                if (len_ch := len(ch)) > longest_length:
+                    longest_length, smallest_member = (len_ch, i)
                 for x in path:
                     seen[x] = len_ch
-    return ans
+    return longest_length, smallest_member
+
+
+@register_solution(euler_problem=euler_problem, max_test_case=None)
+def solve_amicable_chains_p0095_s0(*, max_num: int) -> int:
+    longest_length, smallest_member = longest_amicable_chain(max_num)
+    if show_solution():
+        print(f'Smallest Member of longest chain of length {longest_length=} is {smallest_member=}')
+    return smallest_member
 
 
 if __name__ == '__main__':
