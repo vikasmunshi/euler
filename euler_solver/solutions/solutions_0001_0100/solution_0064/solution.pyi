@@ -39,7 +39,6 @@ URL: https://projecteuler.net/problem=64
 """
 from __future__ import annotations
 
-from math import isqrt, sqrt
 from typing import Any
 
 from euler_solver.logger import logger

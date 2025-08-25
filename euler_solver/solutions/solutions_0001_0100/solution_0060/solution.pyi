@@ -40,23 +40,18 @@ test_cases: list[dict[str, Any]] = [
 def concatenate_prime(a: int, b: int) -> bool:
     ...
 
-
 def extend_solution(current_list: List[int], primes: Tuple[int, ...]) -> Generator[List[int], None, None]:
     ...
-
 
 def print_solution(solution_list: List[int]) -> None:
     ...
 
-
 def solution_pairs(primes: Tuple[int, ...]) -> Generator[List[int], None, None]:
     ...
-
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_prime_pair_sets_p0060_s0(*, set_length: int) -> int:
     ...
-
 
 if __name__ == '__main__':
     logger.setLevel('ERROR')

@@ -28,11 +28,9 @@ URL: https://projecteuler.net/problem=50
 """
 from __future__ import annotations
 
-from itertools import accumulate
-from typing import Any, List, Set, Tuple
+from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.primes import get_pre_computed_primes_sundaram_sieve
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 50

@@ -3,8 +3,8 @@
     "max_d=1000000": 428570,
     "max_d=1000000000": 428571425,
     "max_d=1000000000000": 428571428570,
-    "solve_ordered_fractions_p0071_s0_max_d=10": "71.24 micro-sec",
-    "solve_ordered_fractions_p0071_s0_max_d=1000000": "85.60 micro-sec",
-    "solve_ordered_fractions_p0071_s0_max_d=1000000000": "121.84 micro-sec",
-    "solve_ordered_fractions_p0071_s0_max_d=1000000000000": "117.86 micro-sec"
+    "solve_ordered_fractions_p0071_s0_max_d=10": "105.18 micro-sec",
+    "solve_ordered_fractions_p0071_s0_max_d=1000000": "105.53 micro-sec",
+    "solve_ordered_fractions_p0071_s0_max_d=1000000000": "142.03 micro-sec",
+    "solve_ordered_fractions_p0071_s0_max_d=1000000000000": "154.01 micro-sec"
 }

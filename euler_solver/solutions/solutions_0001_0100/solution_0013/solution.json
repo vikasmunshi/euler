@@ -2,7 +2,7 @@
     "digits=10": "5537376230",
     "digits=100": "5537376230390876637302048746832985971773659831892672",
     "digits=20": "55373762303908766372",
-    "solve_large_sum_p0013_s0_digits=10": "99.43 micro-sec",
-    "solve_large_sum_p0013_s0_digits=100": "243.46 micro-sec",
-    "solve_large_sum_p0013_s0_digits=20": "152.39 micro-sec"
+    "solve_large_sum_p0013_s0_digits=10": "145.19 micro-sec",
+    "solve_large_sum_p0013_s0_digits=100": "210.54 micro-sec",
+    "solve_large_sum_p0013_s0_digits=20": "155.10 micro-sec"
 }

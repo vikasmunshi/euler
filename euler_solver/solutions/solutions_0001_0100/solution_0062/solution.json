@@ -7,12 +7,12 @@
     "num_permutations=7": 10569784298536,
     "num_permutations=8": 10314675896832,
     "num_permutations=9": 13465983902671,
-    "solve_cubic_permutations_p0062_s0_num_permutations=2": "132.76 micro-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=3": "670.83 micro-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=4": "3.17 milli-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=5": "18.40 milli-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=6": "34.81 milli-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=7": "73.27 milli-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=8": "67.99 milli-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=9": "75.84 milli-sec"
+    "solve_cubic_permutations_p0062_s0_num_permutations=2": "157.23 micro-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=3": "1.04 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=4": "5.47 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=5": "23.25 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=6": "51.15 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=7": "111.53 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=8": "107.57 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=9": "120.73 milli-sec"
 }

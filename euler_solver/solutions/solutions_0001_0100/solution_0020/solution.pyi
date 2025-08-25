@@ -23,7 +23,6 @@ URL: https://projecteuler.net/problem=20
 """
 from __future__ import annotations
 
-from math import factorial
 from typing import Any
 
 from euler_solver.logger import logger

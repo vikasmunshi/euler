@@ -5,10 +5,10 @@
     "max_digits=4": 18228,
     "max_digits=6": 872187,
     "max_digits=9": 2609044274,
-    "solve_double_base_palindromes_p0036_s0_max_digits=1": "46.46 micro-sec",
-    "solve_double_base_palindromes_p0036_s0_max_digits=2": "61.91 micro-sec",
-    "solve_double_base_palindromes_p0036_s0_max_digits=3": "150.33 micro-sec",
-    "solve_double_base_palindromes_p0036_s0_max_digits=4": "222.77 micro-sec",
-    "solve_double_base_palindromes_p0036_s0_max_digits=6": "1.68 milli-sec",
-    "solve_double_base_palindromes_p0036_s0_max_digits=9": "86.66 milli-sec"
+    "solve_double_base_palindromes_p0036_s0_max_digits=1": "80.15 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=2": "85.15 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=3": "195.84 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=4": "499.27 micro-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=6": "2.81 milli-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=9": "155.57 milli-sec"
 }

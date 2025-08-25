@@ -35,7 +35,6 @@ URL: https://projecteuler.net/problem=57
 """
 from __future__ import annotations
 
-from sys import set_int_max_str_digits
 from typing import Any
 
 from euler_solver.logger import logger

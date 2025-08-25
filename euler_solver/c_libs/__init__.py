@@ -49,12 +49,6 @@ def import_c_lib(lib_name: str) -> ctypes.CDLL:
                           f"Make sure the library is compiled and installed correctly: {e}")
 
 
-def to_bytes(s: str) -> bytes:
-    if not isinstance(s, str):
-        raise TypeError('prime must be a string')
-    return s.encode('utf-8')
-
-
 PS = ParamSpec('PS')
 RT = TypeVar('RT')
 FS = Callable[PS, RT]

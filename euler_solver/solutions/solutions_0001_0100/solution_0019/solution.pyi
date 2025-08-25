@@ -31,7 +31,6 @@ URL: https://projecteuler.net/problem=19
 """
 from __future__ import annotations
 
-from datetime import date
 from typing import Any
 
 from euler_solver.logger import logger

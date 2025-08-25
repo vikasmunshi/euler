@@ -1,6 +1,6 @@
 {
     "max_n=100, threshold=100": 4724,
     "max_n=100, threshold=1000000": 4075,
-    "solve_combinatoric_selections_p0053_s0_max_n=100, threshold=100": "50.56 micro-sec",
-    "solve_combinatoric_selections_p0053_s0_max_n=100, threshold=1000000": "82.49 micro-sec"
+    "solve_combinatoric_selections_p0053_s0_max_n=100, threshold=100": "76.15 micro-sec",
+    "solve_combinatoric_selections_p0053_s0_max_n=100, threshold=1000000": "127.10 micro-sec"
 }

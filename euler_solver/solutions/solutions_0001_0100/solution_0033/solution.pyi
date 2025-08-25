@@ -27,8 +27,6 @@ URL: https://projecteuler.net/problem=33
 """
 from __future__ import annotations
 
-from fractions import Fraction
-from functools import reduce
 from typing import Any
 
 from euler_solver.logger import logger

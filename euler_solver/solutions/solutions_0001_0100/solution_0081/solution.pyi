@@ -23,8 +23,9 @@ URL: https://projecteuler.net/problem=81
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Generator
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
 
@@ -35,6 +36,19 @@ test_cases: list[dict[str, Any]] = [
     {'category': 'main', 'input': {'file_url': 'https://projecteuler.net/resources/documents/0081_matrix.txt'}}
 ]
 
+default: str = ('131, 673, 234, 103, 18\n'
+                '201, 96, 342, 965, 150\n'
+                '630, 803, 746, 422, 111\n'
+                '537, 699, 497, 121, 956\n'
+                '805, 732, 524, 37, 331\n')
+
+
+@use_wrapped_c_function('matrix_path_sums')
+def path_sum_two_ways(content: str) -> int:
+    ...
+
+def move_diagonally(size: int) -> Generator[tuple[int, int], None, None]:
+    ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_path_sum_two_ways_p0081_s0(*, file_url: str) -> int:

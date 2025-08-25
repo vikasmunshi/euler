@@ -1,6 +1,6 @@
 {
     "max_number=1000000": 837799,
     "max_number=10000000": 8400511,
-    "solve_longest_collatz_sequence_p0014_s0_max_number=1000000": "870.64 milli-sec",
-    "solve_longest_collatz_sequence_p0014_s0_max_number=10000000": "10.68 sec"
+    "solve_longest_collatz_sequence_p0014_s0_max_number=1000000": "1.62 sec",
+    "solve_longest_collatz_sequence_p0014_s0_max_number=10000000": "13.85 sec"
 }

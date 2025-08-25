@@ -2,7 +2,7 @@
     "set_length=3": 107,
     "set_length=4": 792,
     "set_length=5": 26033,
-    "solve_prime_pair_sets_p0060_s0_set_length=3": "311.79 micro-sec",
-    "solve_prime_pair_sets_p0060_s0_set_length=4": "593.23 micro-sec",
-    "solve_prime_pair_sets_p0060_s0_set_length=5": "837.80 milli-sec"
+    "solve_prime_pair_sets_p0060_s0_set_length=3": "659.27 micro-sec",
+    "solve_prime_pair_sets_p0060_s0_set_length=4": "1.47 milli-sec",
+    "solve_prime_pair_sets_p0060_s0_set_length=5": "2.51 sec"
 }

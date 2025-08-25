@@ -33,7 +33,7 @@ from itertools import count
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.integer_partitions import num_partitions
+from euler_solver.maths.integer_partitions import num_partitions_recursive
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 78
@@ -47,7 +47,7 @@ test_cases: list[dict[str, Any]] = [
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_coin_partitions_p0078_s0(*, divisor: int) -> int:
     for n in count(2):
-        if num_partitions(number=n) % divisor == 0:
+        if num_partitions_recursive(number=n) % divisor == 0:
             return n
     return -1
 

@@ -2,10 +2,10 @@
     "digits=100, max_num=2": 475,
     "digits=100, max_num=99": 40886,
     "digits=100, max_num=999": 434576,
-    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=2": "387.28 micro-sec",
-    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=99": "20.23 milli-sec",
-    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=999": "210.18 milli-sec",
-    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=2": "620.35 micro-sec",
-    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=99": "36.62 milli-sec",
-    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=999": "320.74 milli-sec"
+    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=2": "437.52 micro-sec",
+    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=99": "48.48 milli-sec",
+    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=999": "376.59 milli-sec",
+    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=2": "763.42 micro-sec",
+    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=99": "61.62 milli-sec",
+    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=999": "742.14 milli-sec"
 }

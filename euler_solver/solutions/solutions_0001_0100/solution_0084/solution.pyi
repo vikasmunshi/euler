@@ -78,19 +78,17 @@ URL: https://projecteuler.net/problem=84
 """
 from __future__ import annotations
 
-from collections import defaultdict
-from itertools import cycle
-from random import randint, shuffle
-from typing import Any, Dict, Generator, Iterator, List, Protocol
+from typing import Any, Generator, Protocol
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 84
 framework_version: str = '0.2.1'
 test_cases: list[dict[str, Any]] = [
-    {'category': 'preliminary', 'input': {'dice_size': 6, 'simulations': 500_000}},
-    {'category': 'main', 'input': {'dice_size': 4, 'simulations': 500_000}}
+    {'category': 'preliminary', 'input': {'dice_size': 6, 'simulations': 1_000_000}},
+    {'category': 'main', 'input': {'dice_size': 4, 'simulations': 1_000_000}}
 ]
 
 board: tuple[str, ...] = ('GO', 'A1', 'CC1', 'A2', 'T1', 'R1', 'B1', 'CH1', 'B2', 'B3', 'JAIL', 'C1', 'U1', 'C2', 'C3',
@@ -121,6 +119,10 @@ def chance_cards() -> Generator[Movement, None, None]:
     ...
 
 def dice_roll(dice_size: int) -> int:
+    ...
+
+@use_wrapped_c_function('p0084')
+def simulate(*, dice_size: int, simulations: int) -> list[tuple[float, str, int]]:
     ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)

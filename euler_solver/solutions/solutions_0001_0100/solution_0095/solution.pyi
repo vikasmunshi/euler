@@ -34,8 +34,9 @@ URL: https://projecteuler.net/problem=95
 """
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
 
@@ -45,6 +46,10 @@ test_cases: list[dict[str, Any]] = [
     {'category': 'main', 'input': {'max_num': 1000000}}
 ]
 
+
+@use_wrapped_c_function('p0095')
+def longest_amicable_chain(max_num: int) -> tuple[int, int]:
+    ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_amicable_chains_p0095_s0(*, max_num: int) -> int:

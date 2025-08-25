@@ -20,7 +20,6 @@ URL: https://projecteuler.net/problem=7
 """
 from __future__ import annotations
 
-from math import log
 from typing import Any
 
 from euler_solver.logger import logger

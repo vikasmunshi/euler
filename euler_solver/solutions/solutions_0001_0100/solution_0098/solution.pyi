@@ -33,12 +33,10 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
-from itertools import product
-from math import ceil, floor, sqrt
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, Set
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, get_text_file, register_solution
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 98
 framework_version: str = '0.2.1'

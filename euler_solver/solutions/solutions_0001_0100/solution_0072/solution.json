@@ -7,12 +7,12 @@
     "max_d=1000000": 303963552391,
     "max_d=10000000": 30396356427241,
     "max_d=8": 21,
-    "solve_counting_fractions_p0072_s0_max_d=10": "17.70 micro-sec",
-    "solve_counting_fractions_p0072_s0_max_d=100": "49.47 micro-sec",
-    "solve_counting_fractions_p0072_s0_max_d=1000": "398.19 micro-sec",
-    "solve_counting_fractions_p0072_s0_max_d=10000": "7.37 milli-sec",
-    "solve_counting_fractions_p0072_s0_max_d=100000": "71.68 milli-sec",
-    "solve_counting_fractions_p0072_s0_max_d=1000000": "825.39 milli-sec",
-    "solve_counting_fractions_p0072_s0_max_d=10000000": "9.88 sec",
-    "solve_counting_fractions_p0072_s0_max_d=8": "19.61 micro-sec"
+    "solve_counting_fractions_p0072_s0_max_d=10": "25.82 micro-sec",
+    "solve_counting_fractions_p0072_s0_max_d=100": "64.44 micro-sec",
+    "solve_counting_fractions_p0072_s0_max_d=1000": "480.94 micro-sec",
+    "solve_counting_fractions_p0072_s0_max_d=10000": "7.06 milli-sec",
+    "solve_counting_fractions_p0072_s0_max_d=100000": "167.76 milli-sec",
+    "solve_counting_fractions_p0072_s0_max_d=1000000": "1.71 sec",
+    "solve_counting_fractions_p0072_s0_max_d=10000000": "13.32 sec",
+    "solve_counting_fractions_p0072_s0_max_d=8": "27.53 micro-sec"
 }

@@ -22,8 +22,6 @@ URL: https://projecteuler.net/problem=39
 """
 from __future__ import annotations
 
-from collections import Counter
-from math import gcd
 from typing import Any
 
 from euler_solver.logger import logger

@@ -32,7 +32,6 @@ URL: https://projecteuler.net/problem=26
 """
 from __future__ import annotations
 
-from math import gcd
 from typing import Any, Optional
 
 from euler_solver.logger import logger

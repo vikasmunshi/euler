@@ -29,7 +29,8 @@ from __future__ import annotations
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.integer_partitions import get_partitions, num_integer_partitions, num_partitions
+from euler_solver.maths.integer_partitions import (get_partitions_simple_recursion, num_partitions_recursive,
+                                                   num_partitions_simple_recursion)
 from euler_solver.setup import evaluate, register_solution, set_resource_limits
 
 euler_problem: int = 76
@@ -45,19 +46,19 @@ test_cases: list[dict[str, Any]] = [
 @register_solution(euler_problem=euler_problem, max_test_case=2)
 @set_resource_limits(recursion_var='num', multiplier=2, set_int_max_str=False, when='always')
 def solve_counting_summations_p0076_s0(*, num: int) -> int:
-    return num_integer_partitions(number=num, slots=num) - 1
+    return num_partitions_simple_recursion(number=num, slots=num) - 1
 
 
 @register_solution(euler_problem=euler_problem, max_test_case=2, allow_max_override=False)
 @set_resource_limits(recursion_var='num', multiplier=2, set_int_max_str=False, when='always')
 def solve_counting_summations_p0076_s1(*, num: int) -> int:
-    return len(get_partitions(number=num, slots=num)) - 1
+    return len(get_partitions_simple_recursion(number=num, slots=num)) - 1
 
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 @set_resource_limits(recursion_var='num', multiplier=2, set_int_max_str=False, when='always')
 def solve_counting_summations_p0076_s2(*, num: int) -> int:
-    result: int = num_partitions(number=num) - 1
+    result: int = num_partitions_recursive(number=num) - 1
     return result
 
 

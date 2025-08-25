@@ -3,8 +3,8 @@
     "n=100": 69720375229712477164533808935312303556800,
     "n=20": 232792560,
     "n=50": 3099044504245996706400,
-    "solve_smallest_multiple_p0005_s0_n=10": "26.58 micro-sec",
-    "solve_smallest_multiple_p0005_s0_n=100": "71.44 micro-sec",
-    "solve_smallest_multiple_p0005_s0_n=20": "24.20 micro-sec",
-    "solve_smallest_multiple_p0005_s0_n=50": "35.02 micro-sec"
+    "solve_smallest_multiple_p0005_s0_n=10": "34.38 micro-sec",
+    "solve_smallest_multiple_p0005_s0_n=100": "71.52 micro-sec",
+    "solve_smallest_multiple_p0005_s0_n=20": "78.62 micro-sec",
+    "solve_smallest_multiple_p0005_s0_n=50": "55.97 micro-sec"
 }

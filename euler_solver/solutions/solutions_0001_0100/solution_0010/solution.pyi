@@ -44,6 +44,10 @@ def solve_summation_of_primes_p0010_s1(*, max_num: int) -> int:  # sundaram siev
 def solve_summation_of_primes_p0010_s2(*, max_num: int) -> int:
     ...
 
+@register_solution(euler_problem=euler_problem, max_test_case=None)
+def solve_summation_of_primes_p0010_s3(*, max_num: int) -> int:  # sundaram sieve
+    ...
+
 if __name__ == '__main__':
     logger.setLevel('ERROR')
     raise SystemExit(evaluate(euler_problem=euler_problem, time_out_in_seconds=300, mode='evaluate'))

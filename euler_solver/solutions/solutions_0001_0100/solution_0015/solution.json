@@ -2,7 +2,7 @@
     "lattice_size=2": 6,
     "lattice_size=20": 137846528820,
     "lattice_size=200": 102952500135414432972975880320401986757210925381077648234849059575923332372651958598336595518976492951564048597506774120,
-    "solve_lattice_paths_p0015_s0_lattice_size=2": "22.14 micro-sec",
-    "solve_lattice_paths_p0015_s0_lattice_size=20": "20.82 micro-sec",
-    "solve_lattice_paths_p0015_s0_lattice_size=200": "49.74 micro-sec"
+    "solve_lattice_paths_p0015_s0_lattice_size=2": "25.44 micro-sec",
+    "solve_lattice_paths_p0015_s0_lattice_size=20": "77.64 micro-sec",
+    "solve_lattice_paths_p0015_s0_lattice_size=200": "413.35 micro-sec"
 }

@@ -41,8 +41,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution, show_solution
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 74
 framework_version: str = '0.2.1'
@@ -64,18 +65,36 @@ digit_factorials: tuple[int, ...] = (1, 1, 2, 6, 24, 120, 720, 5040, 40320, 3628
 def sum_of_digit_factorials(n: int) -> int:
     ...
 
-def add_chains(chains: dict[int, list[int]], number: int) -> bool:
-    ...
-
+@use_wrapped_c_function('p0074')
 def find_max_length_chains_digit_factorial(max_num: int) -> tuple[int, int]:
     ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
-def solve_digit_factorial_chains_p0074_s2(*, max_num: int) -> int:
+def solve_digit_factorial_chains_p0074_s0(*, max_num: int) -> int:
+    ...
+
+Chains = dict[int, list[int]]
+
+
+def add_chains(chains: Chains, number: int) -> bool:
+    ...
+
+def get_chain(max_num: int) -> Chains:
+    ...
+
+def print_chains(chains: Chains) -> None:
+    ...
+
+@use_wrapped_c_function('p0074')
+def count_chains_with_max_length_digit_factorial(max_num: int) -> tuple[int, int]:
     ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
-def solve_digit_factorial_chains_p0074_s3(*, max_num: int) -> int:
+def solve_digit_factorial_chains_p0074_s1(*, max_num: int) -> int:
+    ...
+
+@register_solution(euler_problem=euler_problem, max_test_case=5)
+def solve_digit_factorial_chains_p0074_s2(*, max_num: int) -> int:
     ...
 
 if __name__ == '__main__':

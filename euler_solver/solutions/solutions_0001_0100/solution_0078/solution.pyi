@@ -29,11 +29,9 @@ URL: https://projecteuler.net/problem=78
 """
 from __future__ import annotations
 
-from itertools import count
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.integer_partitions import num_partitions
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 78

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import ctypes
 
-from euler_solver.c_libs import to_bytes, import_c_lib
+from euler_solver.c_libs import import_c_lib
 
 __all__ = [
     'large_non_mersenne_prime',
@@ -28,4 +28,4 @@ _c_func.restype = ctypes.c_longlong
 def large_non_mersenne_prime(*, num_digits: int, prime: str) -> int:
     if not isinstance(num_digits, int) or num_digits <= 0:
         raise ValueError('num_digits must be a positive integer')
-    return int(_c_func(int(num_digits), to_bytes(prime)))
+    return int(_c_func(int(num_digits), prime.encode('utf-8')))

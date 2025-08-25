@@ -4,9 +4,9 @@
     "max_perimeter=10000": 5040,
     "max_perimeter=100000": 55440,
     "max_perimeter=1000000": 720720,
-    "solve_integer_right_triangles_p0039_s0_max_perimeter=100": "312.88 micro-sec",
-    "solve_integer_right_triangles_p0039_s0_max_perimeter=1000": "551.99 micro-sec",
-    "solve_integer_right_triangles_p0039_s0_max_perimeter=10000": "2.26 milli-sec",
-    "solve_integer_right_triangles_p0039_s0_max_perimeter=100000": "26.40 milli-sec",
-    "solve_integer_right_triangles_p0039_s0_max_perimeter=1000000": "321.46 milli-sec"
+    "solve_integer_right_triangles_p0039_s0_max_perimeter=100": "1.47 milli-sec",
+    "solve_integer_right_triangles_p0039_s0_max_perimeter=1000": "3.09 milli-sec",
+    "solve_integer_right_triangles_p0039_s0_max_perimeter=10000": "3.48 milli-sec",
+    "solve_integer_right_triangles_p0039_s0_max_perimeter=100000": "38.24 milli-sec",
+    "solve_integer_right_triangles_p0039_s0_max_perimeter=1000000": "683.92 milli-sec"
 }

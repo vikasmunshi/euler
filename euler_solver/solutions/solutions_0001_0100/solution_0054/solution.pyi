@@ -75,11 +75,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import IntEnum
-from functools import cached_property
-from typing import Any, Dict, Tuple, Union, cast
+from typing import Any, Dict, Tuple, Union
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, get_text_file, register_solution
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 54
 framework_version: str = '0.2.1'

@@ -34,7 +34,6 @@ from __future__ import annotations
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.collartz_sequence import collatz_sequence_length
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 14

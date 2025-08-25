@@ -24,13 +24,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import matplotlib
-import matplotlib.pyplot as plt
-import matplotlib.ticker
-import numpy as np
-
-from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution, set_resource_limits, show_solution
+from euler_solver.setup import evaluate, register_solution, set_resource_limits
 
 euler_problem: int = 56
 framework_version: str = '0.2.1'

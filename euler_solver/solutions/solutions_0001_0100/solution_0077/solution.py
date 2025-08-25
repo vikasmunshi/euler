@@ -30,7 +30,8 @@ from itertools import count
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.integer_partitions import get_prime_partitions, num_prime_integer_partitions
+from euler_solver.maths.integer_partitions import (get_prime_partitions_simple_recursion,
+                                                   num_prime_partitions_simple_recursion)
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 77
@@ -47,7 +48,7 @@ test_cases: list[dict[str, Any]] = [
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_prime_summations_p0077_s0(*, num_prime_partitions: int) -> int:
     for n in count(1):
-        if num_prime_integer_partitions(number=n, slots=n) >= num_prime_partitions:
+        if num_prime_partitions_simple_recursion(number=n, slots=n) >= num_prime_partitions:
             return n
     return -1
 
@@ -55,7 +56,7 @@ def solve_prime_summations_p0077_s0(*, num_prime_partitions: int) -> int:
 @register_solution(euler_problem=euler_problem, max_test_case=3, allow_max_override=False)
 def solve_prime_summations_p0077_s1(*, num_prime_partitions: int) -> int:
     for n in count(2):
-        if len(get_prime_partitions(number=n, slots=n)) >= num_prime_partitions:
+        if len(get_prime_partitions_simple_recursion(number=n, slots=n)) >= num_prime_partitions:
             return n
     return -1
 
