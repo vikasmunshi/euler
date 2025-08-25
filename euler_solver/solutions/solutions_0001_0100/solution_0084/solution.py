@@ -83,6 +83,7 @@ from itertools import cycle
 from random import randint, shuffle
 from typing import Any, Dict, Generator, Iterator, List, Protocol
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
 
@@ -148,6 +149,7 @@ def dice_roll(dice_size: int) -> int:
     return first + second
 
 
+@use_wrapped_c_function('p0084')
 def simulate(*, dice_size: int, simulations: int) -> list[tuple[float, str, int]]:
     position: int = 0
     visited_fields: Dict[str, int] = defaultdict(int)

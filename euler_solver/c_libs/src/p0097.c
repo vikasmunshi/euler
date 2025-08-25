@@ -1,4 +1,4 @@
-/*
+/*******************************************************************************
  * File: p0097.c
  *
  * Description: C implementation for Project Euler problem 97 (Large non-Mersenne prime).
@@ -8,7 +8,7 @@
  * Created: 2025-08-23
  *
  * Copyright (c) 2025. All rights reserved.
- */
+ ******************************************************************************/
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
