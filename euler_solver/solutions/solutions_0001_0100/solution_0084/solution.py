@@ -89,8 +89,8 @@ from euler_solver.setup import evaluate, register_solution
 euler_problem: int = 84
 framework_version: str = '0.2.1'
 test_cases: list[dict[str, Any]] = [
-    {'category': 'preliminary', 'input': {'dice_size': 6, 'simulations': 500_000}},
-    {'category': 'main', 'input': {'dice_size': 4, 'simulations': 500_000}}
+    {'category': 'preliminary', 'input': {'dice_size': 6, 'simulations': 1_000_000}},
+    {'category': 'main', 'input': {'dice_size': 4, 'simulations': 1_000_000}}
 ]
 
 board: tuple[str, ...] = ('GO', 'A1', 'CC1', 'A2', 'T1', 'R1', 'B1', 'CH1', 'B2', 'B3', 'JAIL', 'C1', 'U1', 'C2', 'C3',
@@ -148,8 +148,7 @@ def dice_roll(dice_size: int) -> int:
     return first + second
 
 
-@register_solution(euler_problem=euler_problem, max_test_case=None)
-def solve_monopoly_odds_p0084_s0(*, dice_size: int, simulations: int) -> str:
+def simulate(*, dice_size: int, simulations: int) -> list[tuple[float, str, int]]:
     position: int = 0
     visited_fields: Dict[str, int] = defaultdict(int)
     chance_cards_iter: Iterator[Movement] = chance_cards()
@@ -168,6 +167,12 @@ def solve_monopoly_odds_p0084_s0(*, dice_size: int, simulations: int) -> str:
         visited_fields[board[position]] += 1
     results = sorted([(100 * count / simulations, field, board.index(field))
                       for field, count in visited_fields.items()], reverse=True)
+    return results
+
+
+@register_solution(euler_problem=euler_problem, max_test_case=None)
+def solve_monopoly_odds_p0084_s0(*, dice_size: int, simulations: int) -> str:
+    results = simulate(dice_size=dice_size, simulations=simulations)
     return ''.join((f'{index:02d}' for percentage, field, index in results[:3]))
 
 

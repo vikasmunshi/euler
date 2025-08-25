@@ -23,12 +23,11 @@ URL: https://projecteuler.net/problem=81
 """
 from __future__ import annotations
 
-from typing import Any, List, cast
+from typing import Any, Generator, List
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
-from euler_solver.maths.c_lib.path_sums import path_sum_two_ways_p0081_s0
-from euler_solver.setup import evaluate, register_solution
-from euler_solver.utils.load_matrix import load_matrix
+from euler_solver.setup import evaluate, get_text_file, register_solution
 
 euler_problem: int = 81
 framework_version: str = '0.2.1'
@@ -37,11 +36,41 @@ test_cases: list[dict[str, Any]] = [
     {'category': 'main', 'input': {'file_url': 'https://projecteuler.net/resources/documents/0081_matrix.txt'}}
 ]
 
+default: str = ('131, 673, 234, 103, 18\n'
+                '201, 96, 342, 965, 150\n'
+                '630, 803, 746, 422, 111\n'
+                '537, 699, 497, 121, 956\n'
+                '805, 732, 524, 37, 331\n')
+
+
+@use_wrapped_c_function('matrix_path_sums')
+def path_sum_two_ways(content: str) -> int:
+    matrix: List[List[int]] = [[int(n) for n in line.split(',')] for line in content.splitlines(keepends=False) if line]
+    for row, col in move_diagonally((size := len(matrix))):
+        neighbors = []
+        if row < size - 1:
+            neighbors.append(matrix[row + 1][col])
+        if col < size - 1:
+            neighbors.append(matrix[row][col + 1])
+        matrix[row][col] += min(neighbors, default=0)
+    return matrix[0][0]
+
+
+def move_diagonally(size: int) -> Generator[tuple[int, int], None, None]:
+    row, col = (size - 1, size - 1)
+    while row >= 0:
+        yield row, col
+        row, col = (row - 1, col + 1)
+        if row < 0:
+            row, col = (col - 2, 0)
+        if col >= size:
+            col, row = (row, size - 1)
+
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_path_sum_two_ways_p0081_s0(*, file_url: str) -> int:
-    matrix: List[List[int]] = load_matrix(file_url)
-    return cast(int, path_sum_two_ways_p0081_s0(matrix))
+    content: str = get_text_file(file_url) if file_url else default
+    return path_sum_two_ways(content)
 
 
 if __name__ == '__main__':
