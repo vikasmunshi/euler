@@ -21,7 +21,7 @@ Public API
   partitions.
 
 Examples
->>> num_partitions_recursive(5)
+>>> num_partitions_recursive_pentagonal(5)
 7
 >>> num_partitions_simple_recursion(number=5, slots=5)
 7
@@ -45,15 +45,15 @@ from euler_solver.logger import logger
 
 
 @lru_cache(maxsize=None)
-def num_partitions_recursive(number: int) -> int:
+def num_partitions_recursive_pentagonal(number: int) -> int:
     if number <= 0:
         result = int(number == 0)
         return result
     result = 0
     for n in count(1):
         _n, sign = -n, (-1, +1)[n % 2]
-        p_1 = num_partitions_recursive(number - (n * (3 * n - 1) // 2))
-        p_2 = num_partitions_recursive(number - (_n * (3 * _n - 1) // 2))
+        p_1 = num_partitions_recursive_pentagonal(number - (n * (3 * n - 1) // 2))
+        p_2 = num_partitions_recursive_pentagonal(number - (_n * (3 * _n - 1) // 2))
         result += sign * (p_1 + p_2)
         if p_1 == 0 and p_2 == 0:
             break
@@ -174,7 +174,7 @@ def main() -> int:
         len_partitions = len(partitions)
         prime_partitions = [list_primes for list_primes in partitions if all(is_prime(n) for n in list_primes)]
         len_prime_partitions = len(prime_partitions)
-        num_partitions_ = num_partitions_recursive(number=number)
+        num_partitions_ = num_partitions_recursive_pentagonal(number=number)
         num_integer_partitions_ = num_partitions_simple_recursion(number=number, slots=number)
         num_prime_integer_partitions_ = num_prime_partitions_simple_recursion(number=number, slots=number)
         partitions_ = get_partitions_simple_recursion(number=number, slots=number)
@@ -192,7 +192,7 @@ def main() -> int:
         len_partitions = len(partitions)
         prime_partitions = get_prime_partitions_simple_recursion(number=number, slots=number)
         len_prime_partitions = len(prime_partitions)
-        num_partitions_ = num_partitions_recursive(number=number)
+        num_partitions_ = num_partitions_recursive_pentagonal(number=number)
         num_integer_partitions_ = num_partitions_simple_recursion(number=number, slots=number)
         num_prime_integer_partitions_ = num_prime_partitions_simple_recursion(number=number, slots=number)
         assert num_partitions_ == len_partitions, f'{num_partitions_=} != {len_partitions=}'

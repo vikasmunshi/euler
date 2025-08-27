@@ -32,8 +32,8 @@ from __future__ import annotations
 from itertools import count
 from typing import Any
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
-from euler_solver.maths.integer_partitions import num_partitions_recursive
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 78
@@ -44,12 +44,36 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
+@use_wrapped_c_function('p0078')
+def least_number_with_partitions_divisible_by(divisor: int) -> int:
+    partitions = [1]  # Initialize with p(0) = 1
+
+    for n in count(1):
+        partition_value = 0
+        k = 1
+        pentagonal = lambda k: k * (3 * k - 1) // 2  # Generalized pentagonal number formula
+
+        while True:
+            pent_k1 = pentagonal(k)
+            pent_k2 = pentagonal(-k)
+            if pent_k1 > n:
+                break
+            partition_value += (-1) ** (k - 1) * partitions[n - pent_k1]
+            if 0 < pent_k2 <= n:
+                partition_value += (-1) ** (k - 1) * partitions[n - pent_k2]
+            k += 1
+
+        partition_value %= divisor
+        partitions.append(partition_value)
+        if partition_value == 0:
+            return n
+
+    return -1  # Failsafe for unexpected cases
+
+
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_coin_partitions_p0078_s0(*, divisor: int) -> int:
-    for n in count(2):
-        if num_partitions_recursive(number=n) % divisor == 0:
-            return n
-    return -1
+    return least_number_with_partitions_divisible_by(divisor=divisor)
 
 
 if __name__ == '__main__':

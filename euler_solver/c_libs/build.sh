@@ -13,6 +13,11 @@ LIBS_DIR="libs"
 # Compilation flags
 CFLAGS="-Wall -Wextra -O3 -g"
 PICFLAGS="-fPIC"
+# GMP include and library paths
+GMP_INCLUDE="/usr/local/include"
+GMP_LIB="/usr/local/lib"
+LDFLAGS="-L${GMP_LIB} -lgmp"
+CPPFLAGS="-I${GMP_INCLUDE}"
 
 # Create build directory
 mkdir -p "${BUILD_DIR}"
@@ -25,17 +30,20 @@ build_c_file() {
     local c_file="$1"
     local base_name
     base_name=$(basename "$c_file" .c)
+
+    echo "Start Build Shared Library : ${SRC_DIR}/${c_file} -> ${LIBS_DIR}/lib_${base_name}.so"
     
     # Compile source for shared library (without main)
-    gcc ${CFLAGS} ${PICFLAGS} -c "${SRC_DIR}/${c_file}" -o "${BUILD_DIR}/${base_name}.o"
+    gcc ${CFLAGS} ${PICFLAGS} ${CPPFLAGS} -c "${SRC_DIR}/${c_file}" -o "${BUILD_DIR}/${base_name}.o"
 
     # Create shared library (.so)
-    gcc -shared "${BUILD_DIR}/${base_name}.o" -o "${BUILD_DIR}/lib_${base_name}.so"
+    gcc -shared "${BUILD_DIR}/${base_name}.o" -o "${BUILD_DIR}/lib_${base_name}.so" ${LDFLAGS}
 
     # Copy shared library to libs directory
     cp "${BUILD_DIR}/lib_${base_name}.so" "${LIBS_DIR}/"
 
-    echo "Build Shared Library: ${LIBS_DIR}/lib_${base_name}.so"
+    echo "Done Build Shared Library  : ${SRC_DIR}/${c_file} -> ${LIBS_DIR}/lib_${base_name}.so"
+    echo
 }
 
 # Find and build all .c files in src directory

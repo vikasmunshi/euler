@@ -8,7 +8,7 @@ from euler_solver.maths.integer_partitions import (
     get_prime_partitions_simple_recursion,
     main,
     num_partitions_simple_recursion,
-    num_partitions_recursive,
+    num_partitions_recursive_pentagonal,
     num_prime_partitions_simple_recursion,
 )
 
@@ -32,13 +32,13 @@ class TestIntegerPartitions(unittest.TestCase):
         }
         for n, expected in known.items():
             with self.subTest(n=n):
-                self.assertEqual(num_partitions_recursive(n), expected)
+                self.assertEqual(num_partitions_recursive_pentagonal(n), expected)
 
     def test_num_integer_partitions_unconstrained_matches_num_partitions(self):
         # When slots == number, the constrained count should equal p(n)
         for n in range(1, 11):
             with self.subTest(n=n):
-                self.assertEqual(num_partitions_simple_recursion(number=n, slots=n), num_partitions_recursive(n))
+                self.assertEqual(num_partitions_simple_recursion(number=n, slots=n), num_partitions_recursive_pentagonal(n))
 
     def test_num_integer_partitions_with_slot_constraint(self):
         # Example from docstring: 5 with slots=3 -> 5
@@ -75,7 +75,7 @@ class TestIntegerPartitions(unittest.TestCase):
         )
         # Verify sums and ordering are as expected for another small case
         parts_5 = get_partitions_simple_recursion(number=5, slots=5)
-        self.assertEqual(len(parts_5), num_partitions_recursive(5))
+        self.assertEqual(len(parts_5), num_partitions_recursive_pentagonal(5))
         for p in parts_5:
             self.assertEqual(sum(p), 5)
 
