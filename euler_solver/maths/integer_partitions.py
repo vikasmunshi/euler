@@ -49,12 +49,12 @@ def num_partitions_recursive_pentagonal(number: int) -> int:
     if number <= 0:
         result = int(number == 0)
         return result
+    pentagonal = lambda x: x * (3 * x - 1) // 2  # pentagonal number formula
     result = 0
     for n in count(1):
-        _n, sign = -n, (-1, +1)[n % 2]
-        p_1 = num_partitions_recursive_pentagonal(number - (n * (3 * n - 1) // 2))
-        p_2 = num_partitions_recursive_pentagonal(number - (_n * (3 * _n - 1) // 2))
-        result += sign * (p_1 + p_2)
+        p_1 = num_partitions_recursive_pentagonal(number - pentagonal(n))
+        p_2 = num_partitions_recursive_pentagonal(number - pentagonal(-n))
+        result += ((-1, +1)[n % 2]) * (p_1 + p_2)
         if p_1 == 0 and p_2 == 0:
             break
     return result

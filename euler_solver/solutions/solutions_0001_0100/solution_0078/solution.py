@@ -51,7 +51,7 @@ def least_number_with_partitions_divisible_by(divisor: int) -> int:
     for n in count(1):
         partition_value = 0
         k = 1
-        pentagonal = lambda k: k * (3 * k - 1) // 2  # Generalized pentagonal number formula
+        pentagonal = lambda x: x * (3 * x - 1) // 2  # Generalized pentagonal number formula
 
         while True:
             pent_k1 = pentagonal(k)
