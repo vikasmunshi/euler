@@ -22,21 +22,22 @@
 // go below 10^7, but using a large static array would bloat the binary.
 // We therefore pick a moderate cache size focused on the "hot" region.
 #ifndef P0014_CACHE_MAX
-#define P0014_CACHE_MAX 10000000  // 10 million entries (80 MB as int64_t) -> too big for many envs.
+#define P0014_CACHE_MAX 16000000  // 16 million entries (128 MB as int64_t = 16M * 8 bytes).
 #endif
 
 // To reduce memory pressure while preserving memoization benefits, we allocate
 // the cache dynamically on first use up to a safer default. Override with
 // compile-time -DP0014_CACHE_MAX=<value> if needed.
 #ifndef P0014_CACHE_MAX_RUNTIME
-#define P0014_CACHE_MAX_RUNTIME 2000000  // 2 million entries (~16 MB) safer default
+#define P0014_CACHE_MAX_RUNTIME 4000000  // 4 million entries (~32 MB) safer default
 #endif
 
 static int64_t *g_cache = NULL;
 static int64_t g_cache_size = 0;
 static int g_cache_initialized = 0;
 
-static void ensure_cache(void) {
+// Ensure the memoization cache is allocated (idempotent)
+void ensure_cache(void) {
     if (g_cache_initialized) return;
     int64_t size = P0014_CACHE_MAX_RUNTIME + 1; // include index == size-1
     g_cache = (int64_t *)calloc((size_t)size, sizeof(int64_t));
@@ -48,6 +49,16 @@ static void ensure_cache(void) {
         g_cache_size = 0;
     }
     g_cache_initialized = 1;
+}
+
+// Free the memoization cache if allocated (idempotent)
+void free_cache(void) {
+    if (g_cache) {
+        free(g_cache);
+        g_cache = NULL;
+    }
+    g_cache_size = 0;
+    g_cache_initialized = 0;
 }
 
 static int64_t collatz_recursive(int64_t n) {

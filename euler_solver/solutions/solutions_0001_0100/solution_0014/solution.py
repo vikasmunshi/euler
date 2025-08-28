@@ -31,12 +31,11 @@ URL: https://projecteuler.net/problem=14
 """
 from __future__ import annotations
 
-from functools import lru_cache
-from typing import Any
+from typing import Any, Callable
 
 import matplotlib.pyplot as plt
 
-from euler_solver.c_libs import use_wrapped_c_function
+from euler_solver.c_libs.p0014 import collatz_cache_context
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution, show_solution
 
@@ -48,10 +47,10 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
-def plot_collatz_sequence_lengths_upto(number: int) -> None:
+def plot_collatz_sequence_lengths_upto(number: int, lengths_func: Callable[[int], int]) -> None:
     """Plot the Collatz sequence lengths up to a given number."""
     numbers = range(1, number + 1)
-    lengths = [collatz_sequence_length(i) for i in numbers]
+    lengths = [lengths_func(i) for i in numbers]
     plt.title('Collatz Sequence Lengths')
     plt.plot(numbers, lengths)
     plt.xlabel('Number')
@@ -60,28 +59,17 @@ def plot_collatz_sequence_lengths_upto(number: int) -> None:
     plt.show()
 
 
-@use_wrapped_c_function('p0014')
-@lru_cache(maxsize=None)
-def collatz_sequence_length(number: int) -> int:
-    """Calculate the Collatz sequence length recursively with memoization."""
-    if number == 1:
-        return 1
-    elif number % 2 == 0:
-        return 1 + collatz_sequence_length(number // 2)
-    else:
-        return 1 + collatz_sequence_length(3 * number + 1)
-
-
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_longest_collatz_sequence_p0014_s0(*, max_number: int) -> int:
     max_length, starting_number = 0, 0
     power_of_two: int = 2 ** (max_number.bit_length() - 1)
-    for x in range(max_number, power_of_two, -1):  # Start from max_number and decrease
-        length = collatz_sequence_length(x)
-        if length > max_length:
-            max_length, starting_number = length, x
-    if show_solution():
-        plot_collatz_sequence_lengths_upto(number=max_number)
+    with collatz_cache_context() as collatz_sequence_length:
+        for x in range(max_number, power_of_two, -1):  # Start from max_number and decrease
+            length = collatz_sequence_length(x)
+            if length > max_length:
+                max_length, starting_number = length, x
+        if show_solution():
+            plot_collatz_sequence_lengths_upto(number=max_number, lengths_func=collatz_sequence_length)
     return starting_number
 
 
