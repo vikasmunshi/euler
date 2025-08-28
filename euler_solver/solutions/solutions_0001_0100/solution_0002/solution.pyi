@@ -22,7 +22,7 @@ URL: https://projecteuler.net/problem=2
 """
 from __future__ import annotations
 
-from typing import Any, Generator
+from typing import Any
 
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution

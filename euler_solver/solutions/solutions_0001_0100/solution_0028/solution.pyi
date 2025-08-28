@@ -28,10 +28,10 @@ URL: https://projecteuler.net/problem=28
 """
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution, show_solution
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 28
 framework_version: str = '0.2.1'

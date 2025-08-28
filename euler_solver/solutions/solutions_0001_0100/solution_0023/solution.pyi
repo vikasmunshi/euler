@@ -34,10 +34,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import numpy as np
-
 from euler_solver.logger import logger
-from euler_solver.maths.primes import sum_proper_divisors
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 23

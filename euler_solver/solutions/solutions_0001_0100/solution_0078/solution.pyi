@@ -29,7 +29,6 @@ URL: https://projecteuler.net/problem=78
 """
 from __future__ import annotations
 
-from itertools import count
 from typing import Any
 
 from euler_solver.c_libs import use_wrapped_c_function

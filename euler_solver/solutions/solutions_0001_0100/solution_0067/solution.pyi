@@ -35,12 +35,10 @@ URL: https://projecteuler.net/problem=67
 """
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.graph_traversal import max_path_sum_triangle
-from euler_solver.setup import evaluate, get_text_file, register_solution
-from euler_solver.utils.text_to_array import text2triangle
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 67
 framework_version: str = '0.2.1'

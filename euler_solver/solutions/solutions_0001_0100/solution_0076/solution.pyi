@@ -29,9 +29,6 @@ from __future__ import annotations
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.integer_partitions import (get_partitions_simple_recursion,
-                                                   num_partitions_recursive_pentagonal,
-                                                   num_partitions_simple_recursion)
 from euler_solver.setup import evaluate, register_solution, set_resource_limits
 
 euler_problem: int = 76

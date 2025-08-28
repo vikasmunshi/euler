@@ -25,7 +25,6 @@ URL: https://projecteuler.net/problem=44
 """
 from __future__ import annotations
 
-from math import sqrt
 from typing import Any
 
 from euler_solver.logger import logger

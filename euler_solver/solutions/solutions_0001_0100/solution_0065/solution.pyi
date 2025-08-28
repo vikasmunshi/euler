@@ -53,7 +53,6 @@ from fractions import Fraction
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.maths.sum_digits import sum_digits
 from euler_solver.setup import evaluate, register_solution, set_resource_limits
 
 euler_problem: int = 65

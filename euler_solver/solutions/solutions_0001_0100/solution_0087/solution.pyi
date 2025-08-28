@@ -27,11 +27,9 @@ URL: https://projecteuler.net/problem=87
 """
 from __future__ import annotations
 
-from math import sqrt
 from typing import Any, Generator, Tuple
 
 from euler_solver.logger import logger
-from euler_solver.maths.primes import get_pre_computed_primes_sundaram_sieve
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 87

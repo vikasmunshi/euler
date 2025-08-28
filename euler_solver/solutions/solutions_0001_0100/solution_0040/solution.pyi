@@ -26,7 +26,6 @@ URL: https://projecteuler.net/problem=40
 """
 from __future__ import annotations
 
-from functools import reduce
 from typing import Any
 
 from euler_solver.logger import logger

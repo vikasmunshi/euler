@@ -21,12 +21,10 @@ URL: https://projecteuler.net/problem=62
 """
 from __future__ import annotations
 
-from collections import defaultdict
-from math import ceil
-from typing import Any, Dict, Set, Tuple
+from typing import Any, Tuple
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution, show_solution
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 62
 framework_version: str = '0.2.1'

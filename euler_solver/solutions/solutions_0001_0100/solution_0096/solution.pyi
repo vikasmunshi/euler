@@ -38,14 +38,10 @@ URL: https://projecteuler.net/problem=96
 """
 from __future__ import annotations
 
-from concurrent.futures import Future, as_completed
-from concurrent.futures.process import ProcessPoolExecutor
-from copy import deepcopy
 from typing import Any, Generator
 
 from euler_solver.logger import logger
-from euler_solver.maths.su_doku import print_grid, solve_sudoku
-from euler_solver.setup import evaluate, get_text_file, register_solution, show_solution
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 96
 framework_version: str = '0.2.1'

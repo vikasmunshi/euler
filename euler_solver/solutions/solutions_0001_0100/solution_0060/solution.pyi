@@ -24,12 +24,10 @@ URL: https://projecteuler.net/problem=60
 from __future__ import annotations
 
 from functools import lru_cache
-from itertools import combinations
 from typing import Any, Generator, List, Tuple
 
-from euler_solver.c_libs.primes import is_prime, primes_sundaram_sieve
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution, show_solution
+from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 60
 framework_version: str = '0.2.1'

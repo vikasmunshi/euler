@@ -39,7 +39,6 @@ from __future__ import annotations
 
 from typing import Any, Generator, Tuple
 
-from euler_solver.c_libs.primes import is_prime
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
 

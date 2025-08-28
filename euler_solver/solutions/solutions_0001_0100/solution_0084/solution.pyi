@@ -78,10 +78,7 @@ URL: https://projecteuler.net/problem=84
 """
 from __future__ import annotations
 
-from collections import defaultdict
-from itertools import cycle
-from random import randint, shuffle
-from typing import Any, Dict, Generator, Iterator, List, Protocol
+from typing import Any, Generator, Protocol
 
 from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
