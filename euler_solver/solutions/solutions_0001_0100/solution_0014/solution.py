@@ -31,11 +31,12 @@ URL: https://projecteuler.net/problem=14
 """
 from __future__ import annotations
 
-from typing import Any
+from functools import lru_cache
+from typing import Any, Generator
 
 import matplotlib.pyplot as plt
 
-from euler_solver.c_libs.p0014 import collatz_cache_context, collatz_sequence_length
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution, show_solution
 
@@ -45,6 +46,24 @@ test_cases: list[dict[str, Any]] = [
     {'category': 'main', 'input': {'max_number': 1000000}},
     {'category': 'extended', 'input': {'max_number': 10000000}}
 ]
+
+
+@use_wrapped_c_function('p0014')
+def collatz_cache_context() -> Generator[None, None, None]:
+    """Context manager to ensure C cache is assigned before execution and cleared after execution."""
+    pass
+
+
+@use_wrapped_c_function('p0014')
+@lru_cache(maxsize=None)
+def collatz_sequence_length(number: int) -> int:
+    """Calculate the Collatz sequence length recursively with memoization."""
+    if number == 1:
+        return 1
+    elif number % 2 == 0:
+        return 1 + collatz_sequence_length(number // 2)
+    else:
+        return 1 + collatz_sequence_length(3 * number + 1)
 
 
 def plot_collatz_sequence_lengths_upto(number: int) -> None:

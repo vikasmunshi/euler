@@ -12,16 +12,13 @@
 #include <stdlib.h>
 
 // We implement a recursive Collatz sequence length with memoization.
-// To keep the interface simple and avoid exposing cache management to Python,
-// we maintain a static cache inside this translation unit. The cache stores
-// lengths for inputs up to a fixed bound. For values exceeding the bound, the
-// function still works correctly (recursively) but without caching those terms.
-
-// Reasonable default cache size: cache results for n in [0, CACHE_MAX].
-// For Project Euler usage (n <= 10^7), but the measured ratio
-// of python cache size to max_num was about 1.580.
+// The cache stores lengths for inputs up to a fixed bound.
+// For values exceeding the bound, the function still works correctly
+// (recursively) but without caching those terms.
+// Cache size: cache results for n in [0, CACHE_MAX].
+// For Project Euler usage (n <= 10^7)
 #ifndef P0014_CACHE_MAX
-#define P0014_CACHE_MAX 16000000  // 16 million entries (128 MB as int64_t = 16M * 8 bytes).
+#define P0014_CACHE_MAX 10000000  // 10 million entries (80 MB as int64_t = 10M * 8 bytes).
 #endif
 
 
@@ -81,6 +78,5 @@ static int64_t collatz_recursive(int64_t n) {
 // Public API
 int64_t collatz_sequence_length(int64_t n) {
     if (n <= 0) return 0;
-    ensure_cache();
     return collatz_recursive(n);
 }

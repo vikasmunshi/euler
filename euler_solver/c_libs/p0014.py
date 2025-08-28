@@ -6,6 +6,7 @@ from __future__ import annotations
 import contextlib
 import ctypes
 import sys
+from typing import Generator
 
 from euler_solver.c_libs import import_c_lib
 
@@ -27,7 +28,7 @@ _c_free_cache.restype = None
 
 
 @contextlib.contextmanager
-def collatz_cache_context():
+def collatz_cache_context() -> Generator[None, None, None]:
     try:
         _c_ensure_cache()
         yield
