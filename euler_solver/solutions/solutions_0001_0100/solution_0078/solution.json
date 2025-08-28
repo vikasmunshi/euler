@@ -2,5 +2,5 @@
     "divisor=1000": 449,
     "divisor=1000000": 55374,
     "solve_coin_partitions_p0078_s0_divisor=1000": "134.68 micro-sec",
-    "solve_coin_partitions_p0078_s0_divisor=1000000": "32.50 milli-sec"
+    "solve_coin_partitions_p0078_s0_divisor=1000000": "72.27 milli-sec"
 }

@@ -55,6 +55,7 @@ class SolutionRegistry:
     # Class attributes.
     framework_version: ClassVar[str] = '0.2.1'
     ignore_test_case_slices: ClassVar[bool] = False
+    ignore_non_main_test_cases: ClassVar[bool] = True
     instances: ClassVar[dict[int, SolutionRegistry]] = {}
     # Instance attributes
     euler_problem: int
@@ -114,8 +115,18 @@ class SolutionRegistry:
             if 'raise NotImplementedError()' in getsource(solution).splitlines()[-1]:
                 return solution
             instance: SolutionRegistry = cls.put(euler_problem, solution)
-            slice_end: int | None = None if (allow_max_override and cls.ignore_test_case_slices) else max_test_case
-            solution.test_cases = instance.test_cases[:slice_end]
+            if cls.ignore_non_main_test_cases:
+                try:
+                    slice_start: int = next(i for i, tc in enumerate(instance.test_cases) if tc.category == 'main')
+                except StopIteration:
+                    slice_start = 0
+                    slice_end: int | None = 0
+                else:
+                    slice_end = slice_start + 1
+            else:
+                slice_start = 0
+                slice_end = None if (allow_max_override and cls.ignore_test_case_slices) else max_test_case
+            solution.test_cases = instance.test_cases[slice_start:slice_end]
             return solution
 
         return wrapper

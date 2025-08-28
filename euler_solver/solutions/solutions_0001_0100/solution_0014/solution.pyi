@@ -31,10 +31,14 @@ URL: https://projecteuler.net/problem=14
 """
 from __future__ import annotations
 
-from typing import Any
+from functools import lru_cache
+from typing import Any, Generator
 
+import matplotlib.pyplot as plt
+
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 14
 framework_version: str = '0.2.1'
@@ -43,6 +47,18 @@ test_cases: list[dict[str, Any]] = [
     {'category': 'extended', 'input': {'max_number': 10000000}}
 ]
 
+
+@use_wrapped_c_function('p0014')
+def collatz_cache_context() -> Generator[None, None, None]:
+    ...
+
+@use_wrapped_c_function('p0014')
+@lru_cache(maxsize=None)
+def collatz_sequence_length(number: int) -> int:
+    ...
+
+def plot_collatz_sequence_lengths_upto(number: int) -> None:
+    ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_longest_collatz_sequence_p0014_s0(*, max_number: int) -> int:

@@ -6,5 +6,5 @@
     "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=0": "32.22 micro-sec",
     "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=1000": "1.33 milli-sec",
     "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=100000": "151.84 milli-sec",
-    "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=200": "156.86 micro-sec"
+    "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=200": "176.18 micro-sec"
 }

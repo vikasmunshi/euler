@@ -2,5 +2,5 @@
     "coordinate_limit=2": 14,
     "coordinate_limit=50": 14234,
     "solve_right_triangles_with_integer_coordinates_p0091_s0_coordinate_limit=2": "60.12 micro-sec",
-    "solve_right_triangles_with_integer_coordinates_p0091_s0_coordinate_limit=50": "1.39 milli-sec"
+    "solve_right_triangles_with_integer_coordinates_p0091_s0_coordinate_limit=50": "1.16 milli-sec"
 }

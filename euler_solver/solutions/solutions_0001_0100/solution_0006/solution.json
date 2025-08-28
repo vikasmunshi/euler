@@ -2,5 +2,5 @@
     "n=10": 2640,
     "n=100": 25164150,
     "solve_sum_square_difference_p0006_s0_n=10": "54.34 micro-sec",
-    "solve_sum_square_difference_p0006_s0_n=100": "15.57 micro-sec"
+    "solve_sum_square_difference_p0006_s0_n=100": "13.49 micro-sec"
 }

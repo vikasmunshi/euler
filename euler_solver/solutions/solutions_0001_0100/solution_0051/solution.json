@@ -4,5 +4,5 @@
     "num_digits=6, prime_run=8": 121313,
     "solve_prime_digit_replacements_p0051_s0_num_digits=6, prime_run=6": "725.57 milli-sec",
     "solve_prime_digit_replacements_p0051_s0_num_digits=6, prime_run=7": "927.86 milli-sec",
-    "solve_prime_digit_replacements_p0051_s0_num_digits=6, prime_run=8": "1.18 sec"
+    "solve_prime_digit_replacements_p0051_s0_num_digits=6, prime_run=8": "1.46 sec"
 }

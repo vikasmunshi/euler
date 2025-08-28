@@ -7,11 +7,11 @@
     "solve_prime_summations_p0077_s0_num_prime_partitions=5": "698.85 micro-sec",
     "solve_prime_summations_p0077_s0_num_prime_partitions=50": "1.47 milli-sec",
     "solve_prime_summations_p0077_s0_num_prime_partitions=500": "4.54 milli-sec",
-    "solve_prime_summations_p0077_s0_num_prime_partitions=5000": "12.70 milli-sec",
+    "solve_prime_summations_p0077_s0_num_prime_partitions=5000": "34.21 milli-sec",
     "solve_prime_summations_p0077_s0_num_prime_partitions=50000": "30.91 milli-sec",
     "solve_prime_summations_p0077_s1_num_prime_partitions=5": "656.66 micro-sec",
     "solve_prime_summations_p0077_s1_num_prime_partitions=50": "2.65 milli-sec",
     "solve_prime_summations_p0077_s1_num_prime_partitions=500": "33.51 milli-sec",
-    "solve_prime_summations_p0077_s1_num_prime_partitions=5000": "5.78 milli-sec",
+    "solve_prime_summations_p0077_s1_num_prime_partitions=5000": "502.77 milli-sec",
     "solve_prime_summations_p0077_s1_num_prime_partitions=50000": "15.25 milli-sec"
 }

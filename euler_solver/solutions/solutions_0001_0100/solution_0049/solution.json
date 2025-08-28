@@ -47,6 +47,6 @@
         "89387 93887 98387",
         "92381 92831 93281"
     ],
-    "solve_prime_permutations_p0049_s0_n=4": "35.76 milli-sec",
+    "solve_prime_permutations_p0049_s0_n=4": "42.13 milli-sec",
     "solve_prime_permutations_p0049_s0_n=5": "1.92 sec"
 }
