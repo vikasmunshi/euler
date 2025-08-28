@@ -8,7 +8,7 @@ from typing import Literal
 
 from euler_solver.logger import logger
 from euler_solver.setup.encryption import decrypt_solution_module, encrypt_solution_module
-from euler_solver.setup.evaluate import evaluate_range
+from euler_solver.setup.evaluate import evaluate_range, set_show_solution
 from euler_solver.setup.register import SolutionRegistry
 from euler_solver.setup.result import EvaluationResult
 from euler_solver.setup.summary import create_summary
@@ -135,6 +135,7 @@ def main() -> int:
     if args.summary:
         create_summary()
         return 0
+    set_show_solution(show=args.show_solution)
     if args.mode == 'evaluate-all':
         mode: Literal['evaluate', 'list', 'record'] = 'evaluate'
         SolutionRegistry.ignore_non_main_test_cases = False
@@ -144,6 +145,7 @@ def main() -> int:
         SolutionRegistry.ignore_non_main_test_cases = False
     else:
         mode = args.mode
+
     evaluation_result: EvaluationResult = evaluate_range(start_number, end_number,
                                                          mode=mode,
                                                          time_out_in_seconds=args.timeout,

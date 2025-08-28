@@ -23,12 +23,12 @@ URL: https://projecteuler.net/problem=60
 """
 from __future__ import annotations
 
+from functools import lru_cache
 from itertools import combinations
 from typing import Any, Generator, List, Tuple
 
-from euler_solver.c_libs.primes import is_prime
+from euler_solver.c_libs.primes import is_prime, primes_sundaram_sieve
 from euler_solver.logger import logger
-from euler_solver.maths.primes import get_pre_computed_primes_sundaram_sieve
 from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 60
@@ -40,13 +40,14 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
-def concatenate_prime(a: int, b: int) -> bool:
+def print_solution(solution_list: List[int]) -> None:
+    ...
+
+@lru_cache(maxsize=None)
+def concatenate_is_prime(a: int, b: int) -> bool:
     ...
 
 def extend_solution(current_list: List[int], primes: Tuple[int, ...]) -> Generator[List[int], None, None]:
-    ...
-
-def print_solution(solution_list: List[int]) -> None:
     ...
 
 def solution_pairs(primes: Tuple[int, ...]) -> Generator[List[int], None, None]:

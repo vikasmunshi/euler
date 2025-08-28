@@ -5,6 +5,6 @@
     "n=50": 3099044504245996706400,
     "solve_smallest_multiple_p0005_s0_n=10": "104.54 micro-sec",
     "solve_smallest_multiple_p0005_s0_n=100": "93.66 micro-sec",
-    "solve_smallest_multiple_p0005_s0_n=20": "47.17 micro-sec",
+    "solve_smallest_multiple_p0005_s0_n=20": "40.02 micro-sec",
     "solve_smallest_multiple_p0005_s0_n=50": "67.05 micro-sec"
 }

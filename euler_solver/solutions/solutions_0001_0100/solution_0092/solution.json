@@ -12,7 +12,7 @@
     "solve_square_digit_chains_p0092_s0_power_of_10=4": "1.33 milli-sec",
     "solve_square_digit_chains_p0092_s0_power_of_10=5": "1.79 milli-sec",
     "solve_square_digit_chains_p0092_s0_power_of_10=6": "2.98 milli-sec",
-    "solve_square_digit_chains_p0092_s0_power_of_10=7": "3.40 milli-sec",
+    "solve_square_digit_chains_p0092_s0_power_of_10=7": "2.16 milli-sec",
     "solve_square_digit_chains_p0092_s0_power_of_10=8": "4.31 milli-sec",
     "solve_square_digit_chains_p0092_s0_power_of_10=9": "5.38 milli-sec"
 }

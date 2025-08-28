@@ -8,5 +8,5 @@
     "solve_consecutive_prime_sum_p0050_s0_max_limit=1000": "714.62 micro-sec",
     "solve_consecutive_prime_sum_p0050_s0_max_limit=10000": "5.13 milli-sec",
     "solve_consecutive_prime_sum_p0050_s0_max_limit=100000": "69.85 milli-sec",
-    "solve_consecutive_prime_sum_p0050_s0_max_limit=1000000": "790.79 milli-sec"
+    "solve_consecutive_prime_sum_p0050_s0_max_limit=1000000": "484.10 milli-sec"
 }

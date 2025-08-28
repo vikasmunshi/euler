@@ -4,7 +4,7 @@
     "max_d=1000000000": 428571425,
     "max_d=1000000000000": 428571428570,
     "solve_ordered_fractions_p0071_s0_max_d=10": "125.13 micro-sec",
-    "solve_ordered_fractions_p0071_s0_max_d=1000000": "155.66 micro-sec",
+    "solve_ordered_fractions_p0071_s0_max_d=1000000": "90.31 micro-sec",
     "solve_ordered_fractions_p0071_s0_max_d=1000000000": "113.19 micro-sec",
     "solve_ordered_fractions_p0071_s0_max_d=1000000000000": "117.15 micro-sec"
 }

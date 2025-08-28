@@ -154,7 +154,8 @@ def evaluate_enforce_timeout(solution: Solution, test_case: TestCase,
         if item is None:
             raise Empty
     except Empty:
-        logger.error({'func': solution.__name__, 'test_case': test_case.key, 'error': 'timeout error', })
+        logger.error({'func': solution.__name__, 'test_case': test_case.key, 'return_code': process.exitcode,
+                      'error': 'killed or timeout', })
         return None, perf_counter() - start_time
     else:
         result, execution_time = item

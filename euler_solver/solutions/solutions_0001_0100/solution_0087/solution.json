@@ -2,5 +2,5 @@
     "max_num=50": 4,
     "max_num=50000000": 1097343,
     "solve_prime_power_triples_p0087_s0_max_num=50": "241.51 micro-sec",
-    "solve_prime_power_triples_p0087_s0_max_num=50000000": "953.64 milli-sec"
+    "solve_prime_power_triples_p0087_s0_max_num=50000000": "577.44 milli-sec"
 }

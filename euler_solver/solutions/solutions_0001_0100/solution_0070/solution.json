@@ -1,4 +1,4 @@
 {
     "limit=10000000": 8319823,
-    "solve_totient_permutation_p0070_s0_limit=10000000": "968.26 milli-sec"
+    "solve_totient_permutation_p0070_s0_limit=10000000": "517.89 milli-sec"
 }

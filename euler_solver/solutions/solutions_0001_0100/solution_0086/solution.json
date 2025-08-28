@@ -1,5 +1,5 @@
 {
-    "solve_cuboid_route_p0086_s0_target_solutions=1000000": "1.17 sec",
+    "solve_cuboid_route_p0086_s0_target_solutions=1000000": "678.50 milli-sec",
     "solve_cuboid_route_p0086_s0_target_solutions=1975": "2.51 milli-sec",
     "solve_cuboid_route_p0086_s0_target_solutions=2000": "2.61 milli-sec",
     "target_solutions=1000000": 1818,

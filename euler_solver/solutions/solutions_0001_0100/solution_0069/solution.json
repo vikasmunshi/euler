@@ -10,5 +10,5 @@
     "solve_totient_maximum_p0069_s0_limit=1000": "42.46 micro-sec",
     "solve_totient_maximum_p0069_s0_limit=10000": "37.48 micro-sec",
     "solve_totient_maximum_p0069_s0_limit=100000": "75.40 micro-sec",
-    "solve_totient_maximum_p0069_s0_limit=1000000": "58.96 micro-sec"
+    "solve_totient_maximum_p0069_s0_limit=1000000": "40.68 micro-sec"
 }

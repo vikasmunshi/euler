@@ -4,5 +4,5 @@
     "set_length=5": 26033,
     "solve_prime_pair_sets_p0060_s0_set_length=3": "881.15 micro-sec",
     "solve_prime_pair_sets_p0060_s0_set_length=4": "1.48 milli-sec",
-    "solve_prime_pair_sets_p0060_s0_set_length=5": "2.98 sec"
+    "solve_prime_pair_sets_p0060_s0_set_length=5": "309.66 milli-sec"
 }

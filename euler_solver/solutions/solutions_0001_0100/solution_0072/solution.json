@@ -12,7 +12,7 @@
     "solve_counting_fractions_p0072_s0_max_d=1000": "553.66 micro-sec",
     "solve_counting_fractions_p0072_s0_max_d=10000": "8.86 milli-sec",
     "solve_counting_fractions_p0072_s0_max_d=100000": "105.24 milli-sec",
-    "solve_counting_fractions_p0072_s0_max_d=1000000": "2.11 sec",
+    "solve_counting_fractions_p0072_s0_max_d=1000000": "864.35 milli-sec",
     "solve_counting_fractions_p0072_s0_max_d=10000000": "12.66 sec",
     "solve_counting_fractions_p0072_s0_max_d=8": "30.92 micro-sec"
 }

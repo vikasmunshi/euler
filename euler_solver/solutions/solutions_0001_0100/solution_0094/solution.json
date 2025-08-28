@@ -1,4 +1,4 @@
 {
     "max_perimeter=1000000000": 518408346,
-    "solve_almost_equilateral_triangles_p0094_s0_max_perimeter=1000000000": "35.04 micro-sec"
+    "solve_almost_equilateral_triangles_p0094_s0_max_perimeter=1000000000": "22.78 micro-sec"
 }

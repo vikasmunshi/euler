@@ -9,6 +9,6 @@
     "solve_double_base_palindromes_p0036_s0_max_digits=2": "127.49 micro-sec",
     "solve_double_base_palindromes_p0036_s0_max_digits=3": "191.17 micro-sec",
     "solve_double_base_palindromes_p0036_s0_max_digits=4": "3.35 milli-sec",
-    "solve_double_base_palindromes_p0036_s0_max_digits=6": "2.66 milli-sec",
+    "solve_double_base_palindromes_p0036_s0_max_digits=6": "1.72 milli-sec",
     "solve_double_base_palindromes_p0036_s0_max_digits=9": "160.52 milli-sec"
 }

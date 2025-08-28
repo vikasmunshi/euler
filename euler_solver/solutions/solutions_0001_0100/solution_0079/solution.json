@@ -1,4 +1,4 @@
 {
     "asked_characters=3, file_url=https://projecteuler.net/resources/documents/0079_keylog.txt": 73162890,
-    "solve_passcode_derivation_p0079_s0_asked_characters=3, file_url=https://projecteuler.net/resources/documents/0079_keylog.txt": "8.22 milli-sec"
+    "solve_passcode_derivation_p0079_s0_asked_characters=3, file_url=https://projecteuler.net/resources/documents/0079_keylog.txt": "716.51 micro-sec"
 }

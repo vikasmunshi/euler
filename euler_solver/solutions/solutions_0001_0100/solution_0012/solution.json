@@ -2,7 +2,7 @@
     "num_divisors=5": 28,
     "num_divisors=500": 76576500,
     "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=5": "68.96 micro-sec",
-    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=500": "168.42 milli-sec",
+    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=500": "60.19 milli-sec",
     "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=5": "73.61 micro-sec",
-    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=500": "5.20 sec"
+    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=500": "3.30 sec"
 }

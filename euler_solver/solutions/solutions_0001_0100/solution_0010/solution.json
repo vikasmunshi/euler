@@ -4,14 +4,14 @@
     "max_num=2000000": 142913828922,
     "solve_summation_of_primes_p0010_s0_max_num=10": "245.79 micro-sec",
     "solve_summation_of_primes_p0010_s0_max_num=10000000": "399.10 milli-sec",
-    "solve_summation_of_primes_p0010_s0_max_num=2000000": "111.44 milli-sec",
+    "solve_summation_of_primes_p0010_s0_max_num=2000000": "37.64 milli-sec",
     "solve_summation_of_primes_p0010_s1_max_num=10": "403.88 micro-sec",
     "solve_summation_of_primes_p0010_s1_max_num=10000000": "354.63 milli-sec",
-    "solve_summation_of_primes_p0010_s1_max_num=2000000": "86.63 milli-sec",
+    "solve_summation_of_primes_p0010_s1_max_num=2000000": "44.28 milli-sec",
     "solve_summation_of_primes_p0010_s2_max_num=10": "300.16 micro-sec",
     "solve_summation_of_primes_p0010_s2_max_num=10000000": "3.02 sec",
-    "solve_summation_of_primes_p0010_s2_max_num=2000000": "507.79 milli-sec",
+    "solve_summation_of_primes_p0010_s2_max_num=2000000": "322.57 milli-sec",
     "solve_summation_of_primes_p0010_s3_max_num=10": "120.88 micro-sec",
     "solve_summation_of_primes_p0010_s3_max_num=10000000": "9.33 sec",
-    "solve_summation_of_primes_p0010_s3_max_num=2000000": "2.68 sec"
+    "solve_summation_of_primes_p0010_s3_max_num=2000000": "1.47 sec"
 }

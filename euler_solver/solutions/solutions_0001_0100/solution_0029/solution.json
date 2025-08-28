@@ -2,7 +2,7 @@
     "a_max=100, a_min=2, b_max=100, b_min=2": 9183,
     "a_max=1000, a_min=2, b_max=1000, b_min=2": 977358,
     "a_max=5, a_min=2, b_max=5, b_min=2": 15,
-    "solve_distinct_powers_p0029_s0_a_max=100, a_min=2, b_max=100, b_min=2": "10.99 milli-sec",
+    "solve_distinct_powers_p0029_s0_a_max=100, a_min=2, b_max=100, b_min=2": "4.67 milli-sec",
     "solve_distinct_powers_p0029_s0_a_max=1000, a_min=2, b_max=1000, b_min=2": "4.59 sec",
     "solve_distinct_powers_p0029_s0_a_max=5, a_min=2, b_max=5, b_min=2": "65.72 micro-sec"
 }

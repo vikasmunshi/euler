@@ -1,6 +1,6 @@
 {
     "n=10001": 104743,
     "n=6": 13,
-    "solve__10_001st_prime_p0007_s0_n=10001": "204.98 milli-sec",
+    "solve__10_001st_prime_p0007_s0_n=10001": "93.72 milli-sec",
     "solve__10_001st_prime_p0007_s0_n=6": "249.08 micro-sec"
 }

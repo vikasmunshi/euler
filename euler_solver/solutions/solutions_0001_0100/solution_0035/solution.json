@@ -7,6 +7,6 @@
     "solve_circular_primes_p0035_s0_max_limit=10": "229.19 micro-sec",
     "solve_circular_primes_p0035_s0_max_limit=100": "549.27 micro-sec",
     "solve_circular_primes_p0035_s0_max_limit=1000": "1.06 milli-sec",
-    "solve_circular_primes_p0035_s0_max_limit=1000000": "865.29 milli-sec",
+    "solve_circular_primes_p0035_s0_max_limit=1000000": "519.26 milli-sec",
     "solve_circular_primes_p0035_s0_max_limit=10000000": "8.49 sec"
 }

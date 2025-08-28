@@ -4,5 +4,5 @@
     "digits=0123456789, permutation_number=1000000": "2783915460",
     "solve_lexicographic_permutations_p0024_s0_digits=012, permutation_number=4": "68.71 micro-sec",
     "solve_lexicographic_permutations_p0024_s0_digits=012, permutation_number=6": "51.96 micro-sec",
-    "solve_lexicographic_permutations_p0024_s0_digits=0123456789, permutation_number=1000000": "83.33 micro-sec"
+    "solve_lexicographic_permutations_p0024_s0_digits=0123456789, permutation_number=1000000": "56.77 micro-sec"
 }

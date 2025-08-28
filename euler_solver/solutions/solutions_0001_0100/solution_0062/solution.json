@@ -10,7 +10,7 @@
     "solve_cubic_permutations_p0062_s0_num_permutations=2": "198.03 micro-sec",
     "solve_cubic_permutations_p0062_s0_num_permutations=3": "1.02 milli-sec",
     "solve_cubic_permutations_p0062_s0_num_permutations=4": "10.89 milli-sec",
-    "solve_cubic_permutations_p0062_s0_num_permutations=5": "50.33 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=5": "15.08 milli-sec",
     "solve_cubic_permutations_p0062_s0_num_permutations=6": "54.99 milli-sec",
     "solve_cubic_permutations_p0062_s0_num_permutations=7": "115.86 milli-sec",
     "solve_cubic_permutations_p0062_s0_num_permutations=8": "155.78 milli-sec",

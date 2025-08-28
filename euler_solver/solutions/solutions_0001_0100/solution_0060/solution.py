@@ -23,12 +23,12 @@ URL: https://projecteuler.net/problem=60
 """
 from __future__ import annotations
 
+from functools import lru_cache
 from itertools import combinations
 from typing import Any, Generator, List, Tuple
 
-from euler_solver.c_libs.primes import is_prime
+from euler_solver.c_libs.primes import is_prime, primes_sundaram_sieve
 from euler_solver.logger import logger
-from euler_solver.maths.primes import get_pre_computed_primes_sundaram_sieve
 from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 60
@@ -40,7 +40,14 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
-def concatenate_prime(a: int, b: int) -> bool:
+def print_solution(solution_list: List[int]) -> None:
+    print(f'solution_list={solution_list!r}')
+    for p1, p2 in combinations(solution_list, 2):
+        print(f'concatenate_prime({p1}, {p2})={concatenate_is_prime(p1, p2)}')
+
+
+@lru_cache(maxsize=None)
+def concatenate_is_prime(a: int, b: int) -> bool:
     return is_prime(int(str(a) + str(b))) and is_prime(int(str(b) + str(a)))
 
 
@@ -48,50 +55,46 @@ def extend_solution(current_list: List[int], primes: Tuple[int, ...]) -> Generat
     for prime in primes:
         if prime <= current_list[-1]:
             continue
-        if all((concatenate_prime(p, prime) for p in current_list)):
+        for p in current_list:
+            if not concatenate_is_prime(p, prime):
+                break
+        else:
             yield current_list + [prime]
-
-
-def print_solution(solution_list: List[int]) -> None:
-    print(f'solution_list={solution_list!r}')
-    for p1, p2 in combinations(solution_list, 2):
-        print(f'concatenate_prime({p1}, {p2})={concatenate_prime(p1, p2)}')
 
 
 def solution_pairs(primes: Tuple[int, ...]) -> Generator[List[int], None, None]:
     for i, p1 in enumerate(primes):
         for p2 in primes[i + 1:]:
-            if concatenate_prime(p1, p2):
+            if concatenate_is_prime(p1, p2):
                 yield [p1, p2]
 
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_prime_pair_sets_p0060_s0(*, set_length: int) -> int:
-    primes: Tuple[int, ...] = (2, 3, 5, 7)
-    for i in range(2, 5):
-        primes = get_pre_computed_primes_sundaram_sieve(max_limit=10 ** (set_length - 1))
-        solution_generator = {3: (solution_3 for solution_2 in solution_pairs(primes=primes) for solution_3 in
-                                  extend_solution(current_list=solution_2, primes=primes)),
-                              4: (solution_4 for solution_2 in solution_pairs(primes=primes) for solution_3 in
-                                  extend_solution(current_list=solution_2, primes=primes) for solution_4 in
-                                  extend_solution(current_list=solution_3, primes=primes)),
-                              5: (solution_5 for solution_2 in solution_pairs(primes=primes) for solution_3 in
-                                  extend_solution(current_list=solution_2, primes=primes) for solution_4 in
-                                  extend_solution(current_list=solution_3, primes=primes) for solution_5 in
-                                  extend_solution(current_list=solution_4, primes=primes))}
-        try:
-            solution_list = next(solution_generator[set_length])
-        except KeyError:
-            raise OverflowError(f'No solution implemented for set_length={set_length!r}')
-        except StopIteration:
-            continue
-        else:
-            if show_solution():
-                print(f'max prime = {primes[-1]}')
-                print_solution(solution_list)
-            return sum(solution_list)
-    else:
+    primes = primes_sundaram_sieve(max_num=10 ** (set_length - 1))
+    solution_generator = {3: (solution_3
+                              for solution_2 in solution_pairs(primes=primes)
+                              for solution_3 in extend_solution(current_list=solution_2, primes=primes)),
+                          4: (solution_4
+                              for solution_2 in solution_pairs(primes=primes)
+                              for solution_3 in extend_solution(current_list=solution_2, primes=primes)
+                              for solution_4 in extend_solution(current_list=solution_3, primes=primes)),
+                          5: (solution_5
+                              for solution_2 in solution_pairs(primes=primes)
+                              for solution_3 in extend_solution(current_list=solution_2, primes=primes)
+                              for solution_4 in extend_solution(current_list=solution_3, primes=primes)
+                              for solution_5 in extend_solution(current_list=solution_4, primes=primes))}
+    try:
+        solution_list = next(solution_generator[set_length])
+    except KeyError:
+        raise OverflowError(f'No solution implemented for set_length={set_length!r}')
+    except StopIteration:
         raise ValueError(f'No solution found for set_length={set_length!r} within max prime = {primes[-1]}')
+    else:
+        if show_solution():
+            print(f'max prime = {primes[-1]} num_primes = {len(primes)}')
+            print_solution(solution_list)
+        return sum(solution_list)
 
 
 if __name__ == '__main__':
