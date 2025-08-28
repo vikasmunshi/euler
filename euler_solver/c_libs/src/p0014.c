@@ -1,5 +1,5 @@
 /*******************************************************************************
- * File: p0074.c
+ * File: p0014.c
  *
  * Description: Implementation of collatz_sequence_length for problem 14.
  *
