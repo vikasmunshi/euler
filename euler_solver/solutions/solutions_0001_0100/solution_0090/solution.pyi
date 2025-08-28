@@ -44,7 +44,8 @@ URL: https://projecteuler.net/problem=90
 """
 from __future__ import annotations
 
-from typing import Any
+from itertools import combinations
+from typing import Any, List, Tuple
 
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution

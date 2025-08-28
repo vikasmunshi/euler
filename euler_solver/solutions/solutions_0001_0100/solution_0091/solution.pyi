@@ -25,6 +25,7 @@ URL: https://projecteuler.net/problem=91
 """
 from __future__ import annotations
 
+from math import gcd
 from typing import Any
 
 from euler_solver.logger import logger

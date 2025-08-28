@@ -44,7 +44,8 @@ from __future__ import annotations
 from typing import Any
 
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.maths.sets import gen_close_by_ordered_sets, is_special_sum_set, next_near_optimum_set
+from euler_solver.setup import evaluate, register_solution, show_solution
 
 euler_problem: int = 103
 framework_version: str = '0.2.1'

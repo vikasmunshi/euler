@@ -43,7 +43,8 @@ from typing import Any
 
 from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
-from euler_solver.setup import evaluate, register_solution
+from euler_solver.setup import evaluate, register_solution, show_solution
+from euler_solver.utils.color_codes import Color
 
 euler_problem: int = 74
 framework_version: str = '0.2.1'

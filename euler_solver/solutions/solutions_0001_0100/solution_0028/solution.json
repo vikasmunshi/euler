@@ -3,8 +3,8 @@
     "size=5": 101,
     "size=7": 261,
     "size=9": 537,
-    "solve_number_spiral_diagonals_p0028_s0_size=1001": "22.29 micro-sec",
-    "solve_number_spiral_diagonals_p0028_s0_size=5": "29.66 micro-sec",
-    "solve_number_spiral_diagonals_p0028_s0_size=7": "24.35 micro-sec",
-    "solve_number_spiral_diagonals_p0028_s0_size=9": "61.27 micro-sec"
+    "solve_number_spiral_diagonals_p0028_s0_size=1001": "33.53 micro-sec",
+    "solve_number_spiral_diagonals_p0028_s0_size=5": "39.72 micro-sec",
+    "solve_number_spiral_diagonals_p0028_s0_size=7": "44.49 micro-sec",
+    "solve_number_spiral_diagonals_p0028_s0_size=9": "28.23 micro-sec"
 }

@@ -27,9 +27,12 @@ URL: https://projecteuler.net/problem=49
 """
 from __future__ import annotations
 
-from typing import Any
+from collections import defaultdict
+from itertools import combinations, permutations
+from typing import Any, Dict, Set
 
 from euler_solver.logger import logger
+from euler_solver.maths.primes import get_pre_computed_primes_sundaram_sieve
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 49

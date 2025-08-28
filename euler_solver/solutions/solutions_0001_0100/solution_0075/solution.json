@@ -2,7 +2,7 @@
     "max_perimeter=10000000": 1067080,
     "max_perimeter=1500000": 161667,
     "max_perimeter=50": 6,
-    "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=10000000": "6.71 sec",
-    "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=1500000": "1.19 sec",
-    "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=50": "124.76 micro-sec"
+    "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=10000000": "7.07 sec",
+    "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=1500000": "1.32 sec",
+    "solve_singular_integer_right_triangles_p0075_s0_max_perimeter=50": "109.60 micro-sec"
 }

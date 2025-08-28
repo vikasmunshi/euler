@@ -59,6 +59,8 @@ from __future__ import annotations
 from typing import Any
 
 from euler_solver.logger import logger
+from euler_solver.maths.interpolation import (construct_polynomial, eval_polynomial, lagrange_interpolation,
+                                              newton_interpolation)
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 101

@@ -4,9 +4,9 @@
     "number=20": 5,
     "number=600851475143": 6857,
     "number=79376318561249": 9999991,
-    "solve_largest_prime_factor_p0003_s0_number=10": "45.87 micro-sec",
-    "solve_largest_prime_factor_p0003_s0_number=13195": "67.27 micro-sec",
-    "solve_largest_prime_factor_p0003_s0_number=20": "90.81 micro-sec",
-    "solve_largest_prime_factor_p0003_s0_number=600851475143": "280.11 micro-sec",
-    "solve_largest_prime_factor_p0003_s0_number=79376318561249": "628.22 milli-sec"
+    "solve_largest_prime_factor_p0003_s0_number=10": "52.21 micro-sec",
+    "solve_largest_prime_factor_p0003_s0_number=13195": "136.92 micro-sec",
+    "solve_largest_prime_factor_p0003_s0_number=20": "48.85 micro-sec",
+    "solve_largest_prime_factor_p0003_s0_number=600851475143": "150.56 micro-sec",
+    "solve_largest_prime_factor_p0003_s0_number=79376318561249": "594.83 milli-sec"
 }

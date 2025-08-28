@@ -29,18 +29,24 @@ URL: https://projecteuler.net/problem=78
 """
 from __future__ import annotations
 
+from itertools import count
 from typing import Any
 
+from euler_solver.c_libs import use_wrapped_c_function
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 78
 framework_version: str = '0.2.1'
 test_cases: list[dict[str, Any]] = [
-    {'category': 'preliminary', 'input': {'divisor': 1000}},
-    {'category': 'main', 'input': {'divisor': 1000000}}
+    {'category': 'preliminary', 'input': {'divisor': 1_000}},
+    {'category': 'main', 'input': {'divisor': 1_000_000}}
 ]
 
+
+@use_wrapped_c_function('p0078')
+def least_number_with_partitions_divisible_by(divisor: int) -> int:
+    ...
 
 @register_solution(euler_problem=euler_problem, max_test_case=None)
 def solve_coin_partitions_p0078_s0(*, divisor: int) -> int:

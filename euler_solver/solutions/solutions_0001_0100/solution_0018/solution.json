@@ -1,6 +1,6 @@
 {
-    "solve_maximum_path_sum_i_p0018_s0_triangle_str=TRIANGLE_A": "189.47 micro-sec",
-    "solve_maximum_path_sum_i_p0018_s0_triangle_str=TRIANGLE_B": "376.79 micro-sec",
+    "solve_maximum_path_sum_i_p0018_s0_triangle_str=TRIANGLE_A": "476.63 micro-sec",
+    "solve_maximum_path_sum_i_p0018_s0_triangle_str=TRIANGLE_B": "371.21 micro-sec",
     "triangle_str=TRIANGLE_A": 23,
     "triangle_str=TRIANGLE_B": 1074
 }

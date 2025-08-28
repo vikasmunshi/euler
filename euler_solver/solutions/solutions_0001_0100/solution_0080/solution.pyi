@@ -28,6 +28,8 @@ from __future__ import annotations
 from typing import Any
 
 from euler_solver.logger import logger
+from euler_solver.maths.sqrt import sqrt_binary_search, sqrt_heron_method
+from euler_solver.maths.sum_digits import sum_digits
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 80

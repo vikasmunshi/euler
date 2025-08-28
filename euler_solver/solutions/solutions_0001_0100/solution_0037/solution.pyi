@@ -24,9 +24,10 @@ URL: https://projecteuler.net/problem=37
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, List, Set
 
 from euler_solver.logger import logger
+from euler_solver.maths.primes import gen_primes_sieve_eratosthenes
 from euler_solver.setup import evaluate, register_solution
 
 euler_problem: int = 37

@@ -1,6 +1,6 @@
 {
     "n=4": 19316,
     "n=5": 443839,
-    "solve_digit_fifth_powers_p0030_s0_n=4": "5.84 milli-sec",
-    "solve_digit_fifth_powers_p0030_s0_n=5": "18.35 milli-sec"
+    "solve_digit_fifth_powers_p0030_s0_n=4": "7.10 milli-sec",
+    "solve_digit_fifth_powers_p0030_s0_n=5": "19.66 milli-sec"
 }

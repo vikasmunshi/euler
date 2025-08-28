@@ -1,6 +1,6 @@
 {
     "n=1000": 4782,
     "n=3": 12,
-    "solve__1000_digit_fibonacci_number_p0025_s0_n=1000": "31.36 milli-sec",
-    "solve__1000_digit_fibonacci_number_p0025_s0_n=3": "23.28 micro-sec"
+    "solve__1000_digit_fibonacci_number_p0025_s0_n=1000": "30.43 milli-sec",
+    "solve__1000_digit_fibonacci_number_p0025_s0_n=3": "29.87 micro-sec"
 }

@@ -2,7 +2,7 @@
     "n=2": 14,
     "n=3": 644,
     "n=4": 134043,
-    "solve_distinct_primes_factors_p0047_s0_n=2": "176.83 micro-sec",
-    "solve_distinct_primes_factors_p0047_s0_n=3": "2.17 milli-sec",
-    "solve_distinct_primes_factors_p0047_s0_n=4": "895.47 milli-sec"
+    "solve_distinct_primes_factors_p0047_s0_n=2": "174.42 micro-sec",
+    "solve_distinct_primes_factors_p0047_s0_n=3": "2.27 milli-sec",
+    "solve_distinct_primes_factors_p0047_s0_n=4": "871.37 milli-sec"
 }

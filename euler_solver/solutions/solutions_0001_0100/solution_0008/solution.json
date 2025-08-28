@@ -1,6 +1,6 @@
 {
     "length=13": 23514624000,
     "length=4": 5832,
-    "solve_largest_product_in_a_series_p0008_s0_length=13": "5.72 milli-sec",
-    "solve_largest_product_in_a_series_p0008_s0_length=4": "1.78 milli-sec"
+    "solve_largest_product_in_a_series_p0008_s0_length=13": "2.43 milli-sec",
+    "solve_largest_product_in_a_series_p0008_s0_length=4": "1.97 milli-sec"
 }

@@ -28,9 +28,9 @@
         1,
         28684
     ],
-    "solve_cyclical_figurate_numbers_p0061_s0_length=2": "2.81 milli-sec",
-    "solve_cyclical_figurate_numbers_p0061_s0_length=3": "6.42 milli-sec",
-    "solve_cyclical_figurate_numbers_p0061_s0_length=4": "10.36 milli-sec",
-    "solve_cyclical_figurate_numbers_p0061_s0_length=5": "19.40 milli-sec",
-    "solve_cyclical_figurate_numbers_p0061_s0_length=6": "77.92 milli-sec"
+    "solve_cyclical_figurate_numbers_p0061_s0_length=2": "3.20 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=3": "7.77 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=4": "9.30 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=5": "22.18 milli-sec",
+    "solve_cyclical_figurate_numbers_p0061_s0_length=6": "82.01 milli-sec"
 }
