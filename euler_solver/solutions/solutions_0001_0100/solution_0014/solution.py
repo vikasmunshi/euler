@@ -31,6 +31,7 @@ URL: https://projecteuler.net/problem=14
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
 from functools import lru_cache
 from typing import Any, Generator
 
@@ -49,9 +50,13 @@ test_cases: list[dict[str, Any]] = [
 
 
 @use_wrapped_c_function('p0014')
+@contextmanager
 def collatz_cache_context() -> Generator[None, None, None]:
     """Context manager to ensure C cache is assigned before execution and cleared after execution."""
-    pass
+    try:
+        yield
+    finally:
+        return
 
 
 @use_wrapped_c_function('p0014')

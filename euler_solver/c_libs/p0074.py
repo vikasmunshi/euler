@@ -34,10 +34,10 @@ def find_max_length_chains_digit_factorial(max_num: int) -> tuple[int, int]:
     """
     if not (0 < max_num < MAX_VALID_INPUT):
         raise ValueError(f'max_num must be between 0 and {MAX_VALID_INPUT}')
-    max_num = ctypes.c_int(max_num)
+    max_num_c = ctypes.c_int(max_num)
     chain_count = ctypes.c_int()
     max_length = ctypes.c_int()
-    result = c_func_1(max_num, ctypes.byref(chain_count), ctypes.byref(max_length))
+    result = c_func_1(max_num_c, ctypes.byref(chain_count), ctypes.byref(max_length))
     if result != 0:
         error_messages = {
             ERROR_NULL_OUTPUT_PTRS: "Null output pointers provided",
@@ -46,7 +46,7 @@ def find_max_length_chains_digit_factorial(max_num: int) -> tuple[int, int]:
             ERROR_MEMORY_REALLOCATION_SEEN: "Failed to reallocate memory for seen array"
         }
         error_message = error_messages.get(result, f"Unknown error code: {result}")
-        raise DigitFactorialError(f'Error in C function: {error_message} (max_num={max_num.value})')
+        raise DigitFactorialError(f'Error in C function: {error_message} (max_num={int(max_num_c.value)})')
     return chain_count.value, max_length.value
 
 
@@ -61,10 +61,10 @@ def count_chains_with_max_length_digit_factorial(max_num: int) -> tuple[int, int
     """
     if not (0 < max_num < MAX_VALID_INPUT):
         raise ValueError(f'max_num must be between 0 and {MAX_VALID_INPUT}')
-    max_num = ctypes.c_int(max_num)
+    max_num_c = ctypes.c_int(max_num)
     chain_count = ctypes.c_int()
     max_length = ctypes.c_int()
-    result = c_func_2(max_num, ctypes.byref(chain_count), ctypes.byref(max_length))
+    result = c_func_2(max_num_c, ctypes.byref(chain_count), ctypes.byref(max_length))
     if result != 0:
         error_messages = {
             ERROR_NULL_OUTPUT_PTRS: "Null output pointers provided",
@@ -73,5 +73,5 @@ def count_chains_with_max_length_digit_factorial(max_num: int) -> tuple[int, int
             ERROR_MEMORY_REALLOCATION_SEEN: "Failed to reallocate memory for seen array"
         }
         error_message = error_messages.get(result, f"Unknown error code: {result}")
-        raise DigitFactorialError(f'Error in C function: {error_message} (max_num={max_num.value})')
+        raise DigitFactorialError(f'Error in C function: {error_message} (max_num={int(max_num_c.value)})')
     return chain_count.value, max_length.value

@@ -29,6 +29,7 @@ URL: https://projecteuler.net/problem=78
 """
 from __future__ import annotations
 
+from functools import lru_cache
 from itertools import count
 from typing import Any
 
@@ -44,6 +45,11 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
+@lru_cache(maxsize=None)
+def pentagonal(x: int) -> int:
+    return x * (3 * x - 1) // 2  # pentagonal number formula
+
+
 @use_wrapped_c_function('p0078')
 def least_number_with_partitions_divisible_by(divisor: int) -> int:
     partitions = [1]  # Initialize with p(0) = 1
@@ -51,7 +57,6 @@ def least_number_with_partitions_divisible_by(divisor: int) -> int:
     for n in count(1):
         partition_value = 0
         k = 1
-        pentagonal = lambda x: x * (3 * x - 1) // 2  # Generalized pentagonal number formula
 
         while True:
             pent_k1 = pentagonal(k)

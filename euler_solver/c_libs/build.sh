@@ -32,7 +32,7 @@ build_c_file() {
     base_name=$(basename "$c_file" .c)
 
     echo "Start Build Shared Library : ${SRC_DIR}/${c_file} -> ${LIBS_DIR}/lib_${base_name}.so"
-    
+
     # Compile source for shared library (without main)
     gcc ${CFLAGS} ${PICFLAGS} ${CPPFLAGS} -c "${SRC_DIR}/${c_file}" -o "${BUILD_DIR}/${base_name}.o"
 
@@ -60,6 +60,6 @@ done
 
 # Remove build directory
 rm -rf "${BUILD_DIR}"
-    
+
 echo "All builds completed successfully"
 

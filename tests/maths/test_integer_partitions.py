@@ -2,15 +2,10 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from euler_solver.maths.integer_partitions import (
-    IntegerPartitionError,
-    get_partitions_simple_recursion,
-    get_prime_partitions_simple_recursion,
-    main,
-    num_partitions_simple_recursion,
-    num_partitions_recursive_pentagonal,
-    num_prime_partitions_simple_recursion,
-)
+from euler_solver.maths.integer_partitions import (IntegerPartitionError, get_partitions_simple_recursion,
+                                                   get_prime_partitions_simple_recursion, main,
+                                                   num_partitions_recursive_pentagonal, num_partitions_simple_recursion,
+                                                   num_prime_partitions_simple_recursion)
 
 
 class TestIntegerPartitions(unittest.TestCase):
@@ -38,7 +33,8 @@ class TestIntegerPartitions(unittest.TestCase):
         # When slots == number, the constrained count should equal p(n)
         for n in range(1, 11):
             with self.subTest(n=n):
-                self.assertEqual(num_partitions_simple_recursion(number=n, slots=n), num_partitions_recursive_pentagonal(n))
+                self.assertEqual(num_partitions_simple_recursion(number=n, slots=n),
+                                 num_partitions_recursive_pentagonal(n))
 
     def test_num_integer_partitions_with_slot_constraint(self):
         # Example from docstring: 5 with slots=3 -> 5

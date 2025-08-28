@@ -51,7 +51,7 @@ def solve_counting_summations_p0076_s0(*, num: int) -> int:
     return result
 
 
-@register_solution(euler_problem=euler_problem, max_test_case=2)
+@register_solution(euler_problem=euler_problem, max_test_case=3)
 @set_resource_limits(recursion_var='num', multiplier=2, set_int_max_str=False, when='always')
 def solve_counting_summations_p0076_s1(*, num: int) -> int:
     return num_partitions_simple_recursion(number=num, slots=num) - 1

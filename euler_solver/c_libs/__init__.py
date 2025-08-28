@@ -75,7 +75,7 @@ def use_wrapped_c_function(module_name: str) -> Callable[[FS[PS, RT]], FS[PS, RT
     def decorator(func: FS[PS, RT]) -> FS[PS, RT]:
         func_name = func.__name__
         module: ModuleType = import_module(f'euler_solver.c_libs.{module_name}')
-        wrapped_c_func = getattr(module, func_name)
+        wrapped_c_func: FS[PS, RT] = getattr(module, func_name)
         if (py_sig := inspect.signature(func)) != (c_sig := inspect.signature(wrapped_c_func)):
             raise TypeError(f"Function signatures don't match: Python {py_sig} != C {c_sig}")
         return wrapped_c_func

@@ -45,11 +45,15 @@ from euler_solver.logger import logger
 
 
 @lru_cache(maxsize=None)
+def pentagonal(x: int) -> int:
+    return x * (3 * x - 1) // 2  # pentagonal number formula
+
+
+@lru_cache(maxsize=None)
 def num_partitions_recursive_pentagonal(number: int) -> int:
     if number <= 0:
         result = int(number == 0)
         return result
-    pentagonal = lambda x: x * (3 * x - 1) // 2  # pentagonal number formula
     result = 0
     for n in count(1):
         p_1 = num_partitions_recursive_pentagonal(number - pentagonal(n))
@@ -88,7 +92,7 @@ def num_prime_partitions_simple_recursion(*, number: int, slots: int) -> int:
 
 
 @lru_cache(maxsize=None)
-def get_partitions_simple_recursion(*, number: int, slots: int, safe_limit: int | None = None) -> List[List[int]]:
+def get_partitions_simple_recursion(*, number: int, slots: int, safe_limit: int | None = 50) -> List[List[int]]:
     if safe_limit and number > safe_limit:
         raise OverflowError(f'number must be less than {safe_limit=}')
     if number < 0 or slots < 0:
@@ -111,7 +115,7 @@ def get_partitions_simple_recursion(*, number: int, slots: int, safe_limit: int 
 
 
 @lru_cache(maxsize=None)
-def get_prime_partitions_simple_recursion(*, number: int, slots: int, safe_limit: int | None = None) -> List[List[int]]:
+def get_prime_partitions_simple_recursion(*, number: int, slots: int, safe_limit: int | None = 50) -> List[List[int]]:
     if safe_limit and number > safe_limit:
         raise OverflowError(f'number must be less than {safe_limit=}')
     if number < 0 or slots < 0:

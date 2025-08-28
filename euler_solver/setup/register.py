@@ -122,7 +122,7 @@ class SolutionRegistry:
                     slice_start = 0
                     slice_end: int | None = 0
                 else:
-                    slice_end = slice_start + 1
+                    slice_end = min(slice_start + 1, max_test_case or len(instance.test_cases))
             else:
                 slice_start = 0
                 slice_end = None if (allow_max_override and cls.ignore_test_case_slices) else max_test_case

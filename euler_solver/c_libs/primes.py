@@ -3,7 +3,9 @@
 """ C library for prime number generation and testing """
 from __future__ import annotations
 
+import contextlib
 import ctypes
+import typing
 
 from euler_solver.c_libs import import_c_lib
 
@@ -96,25 +98,23 @@ primes_generator_free_c.argtypes = [ctypes.c_void_p]
 primes_generator_free_c.restype = None
 
 
-def primes_generator():
+@contextlib.contextmanager
+def _state() -> typing.Generator[ctypes.c_void_p, None, None]:
+    internal_state = primes_generator_init_c()
+    if not internal_state:
+        raise MemoryError("Failed to allocate C state for prime generator")
+    try:
+        yield internal_state
+    finally:
+        primes_generator_free_c(internal_state)
+
+
+def primes_generator() -> typing.Generator[int, None, None]:
     """Yield primes indefinitely using C-backed generator state.
 
     This wraps a stateful C generator. Memory is always released via a
     context-managed finalizer even if the consumer stops early.
     """
-    # Local import to avoid adding a global dependency
-    from contextlib import contextmanager
-
-    @contextmanager
-    def _state():
-        internal_state = primes_generator_init_c()
-        if not internal_state:
-            raise MemoryError("Failed to allocate C state for prime generator")
-        try:
-            yield internal_state
-        finally:
-            primes_generator_free_c(internal_state)
-
     with _state() as state:
         out_val = ctypes.c_uint64()
         while True:
