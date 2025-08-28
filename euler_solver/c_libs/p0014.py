@@ -30,7 +30,7 @@ _c_free_cache.restype = None
 def collatz_cache_context():
     try:
         _c_ensure_cache()
-        yield collatz_sequence_length
+        yield
     finally:
         _c_free_cache()
 

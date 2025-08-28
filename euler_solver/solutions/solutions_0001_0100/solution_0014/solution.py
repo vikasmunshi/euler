@@ -31,11 +31,11 @@ URL: https://projecteuler.net/problem=14
 """
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
 
 import matplotlib.pyplot as plt
 
-from euler_solver.c_libs.p0014 import collatz_cache_context
+from euler_solver.c_libs.p0014 import collatz_cache_context, collatz_sequence_length
 from euler_solver.logger import logger
 from euler_solver.setup import evaluate, register_solution, show_solution
 
@@ -47,10 +47,10 @@ test_cases: list[dict[str, Any]] = [
 ]
 
 
-def plot_collatz_sequence_lengths_upto(number: int, lengths_func: Callable[[int], int]) -> None:
+def plot_collatz_sequence_lengths_upto(number: int) -> None:
     """Plot the Collatz sequence lengths up to a given number."""
     numbers = range(1, number + 1)
-    lengths = [lengths_func(i) for i in numbers]
+    lengths = [collatz_sequence_length(i) for i in numbers]
     plt.title('Collatz Sequence Lengths')
     plt.plot(numbers, lengths)
     plt.xlabel('Number')
@@ -63,13 +63,13 @@ def plot_collatz_sequence_lengths_upto(number: int, lengths_func: Callable[[int]
 def solve_longest_collatz_sequence_p0014_s0(*, max_number: int) -> int:
     max_length, starting_number = 0, 0
     power_of_two: int = 2 ** (max_number.bit_length() - 1)
-    with collatz_cache_context() as collatz_sequence_length:
+    with collatz_cache_context():
         for x in range(max_number, power_of_two, -1):  # Start from max_number and decrease
             length = collatz_sequence_length(x)
             if length > max_length:
                 max_length, starting_number = length, x
         if show_solution():
-            plot_collatz_sequence_lengths_upto(number=max_number, lengths_func=collatz_sequence_length)
+            plot_collatz_sequence_lengths_upto(number=max_number)
     return starting_number
 
 
