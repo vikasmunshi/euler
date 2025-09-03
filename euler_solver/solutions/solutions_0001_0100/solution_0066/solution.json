@@ -1,0 +1,8 @@
+{
+    "max_d=1000": 661,
+    "max_d=10000": 9949,
+    "max_d=7": 5,
+    "solve_diophantine_equation_p0066_s0_max_d=1000": "43.91 milli-sec",
+    "solve_diophantine_equation_p0066_s0_max_d=10000": "2.41 sec",
+    "solve_diophantine_equation_p0066_s0_max_d=7": "405.42 micro-sec"
+}

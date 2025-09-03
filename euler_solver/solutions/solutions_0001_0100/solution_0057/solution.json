@@ -1,0 +1,10 @@
+{
+    "expansions=10": 1,
+    "expansions=100": 15,
+    "expansions=1000": 153,
+    "expansions=10000": 1508,
+    "solve_square_root_convergents_p0057_s0_expansions=10": "29.10 micro-sec",
+    "solve_square_root_convergents_p0057_s0_expansions=100": "102.11 micro-sec",
+    "solve_square_root_convergents_p0057_s0_expansions=1000": "2.04 milli-sec",
+    "solve_square_root_convergents_p0057_s0_expansions=10000": "1.73 sec"
+}

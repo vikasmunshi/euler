@@ -1,0 +1,10 @@
+{
+    "convergent_num=10": 17,
+    "convergent_num=100": 272,
+    "convergent_num=1000": 4034,
+    "convergent_num=10000": 55322,
+    "solve_convergents_of_e_p0065_s0_convergent_num=10": "510.17 micro-sec",
+    "solve_convergents_of_e_p0065_s0_convergent_num=100": "705.22 micro-sec",
+    "solve_convergents_of_e_p0065_s0_convergent_num=1000": "24.18 milli-sec",
+    "solve_convergents_of_e_p0065_s0_convergent_num=10000": "14.83 sec"
+}

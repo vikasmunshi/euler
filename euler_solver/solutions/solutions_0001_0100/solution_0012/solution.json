@@ -1,0 +1,8 @@
+{
+    "num_divisors=5": 28,
+    "num_divisors=500": 76576500,
+    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=5": "68.96 micro-sec",
+    "solve_highly_divisible_triangular_number_p0012_s0_num_divisors=500": "24.86 milli-sec",
+    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=5": "73.61 micro-sec",
+    "solve_highly_divisible_triangular_number_p0012_s1_num_divisors=500": "130.02 milli-sec"
+}

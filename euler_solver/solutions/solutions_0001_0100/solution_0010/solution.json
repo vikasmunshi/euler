@@ -1,0 +1,10 @@
+{
+    "max_num=10": 17,
+    "max_num=10000000": 3203324994356,
+    "max_num=2000000": 142913828922,
+    "solve_summation_of_primes_p0010_s0_eratosthenes_sieve_max_num=2000000": "49.24 milli-sec",
+    "solve_summation_of_primes_p0010_s1_sundaram_sieve_max_num=2000000": "46.33 milli-sec",
+    "solve_summation_of_primes_p0010_s2_primes_generator_max_num=2000000": "350.44 milli-sec",
+    "solve_summation_of_primes_p0010_s3_is_prime_max_num=2000000": "1.48 sec",
+    "solve_summation_of_primes_p0010_s4_pps_max_num=2000000": "1.07 milli-sec"
+}

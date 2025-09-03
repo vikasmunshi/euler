@@ -1,0 +1,11 @@
+{
+    "digits=100, max_num=2": 475,
+    "digits=100, max_num=99": 40886,
+    "digits=100, max_num=999": 434576,
+    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=2": "393.64 micro-sec",
+    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=99": "19.55 milli-sec",
+    "solve_square_root_digital_expansion_p0080_s0_digits=100, max_num=999": "421.99 milli-sec",
+    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=2": "700.05 micro-sec",
+    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=99": "33.85 milli-sec",
+    "solve_square_root_digital_expansion_p0080_s1_digits=100, max_num=999": "739.30 milli-sec"
+}

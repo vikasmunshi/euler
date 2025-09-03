@@ -1,0 +1,4 @@
+{
+    "file_url=https://projecteuler.net/resources/documents/0059_cipher.txt, key_length=9, most_common_letters=eEaAnNtT": 129448,
+    "solve_xor_decryption_p0059_s0_file_url=https://projecteuler.net/resources/documents/0059_cipher.txt, key_length=9, most_common_letters=eEaAnNtT": "4.26 milli-sec"
+}

@@ -1,0 +1,12 @@
+{
+    "max_limit=100": 41,
+    "max_limit=1000": 953,
+    "max_limit=10000": 9521,
+    "max_limit=100000": 92951,
+    "max_limit=1000000": 997651,
+    "solve_consecutive_prime_sum_p0050_s0_max_limit=100": "236.44 micro-sec",
+    "solve_consecutive_prime_sum_p0050_s0_max_limit=1000": "714.62 micro-sec",
+    "solve_consecutive_prime_sum_p0050_s0_max_limit=10000": "5.13 milli-sec",
+    "solve_consecutive_prime_sum_p0050_s0_max_limit=100000": "69.85 milli-sec",
+    "solve_consecutive_prime_sum_p0050_s0_max_limit=1000000": "59.02 milli-sec"
+}
