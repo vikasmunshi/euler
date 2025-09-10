@@ -1,0 +1,6 @@
+{
+    "n=10": 27,
+    "n=100": 648,
+    "solve_factorial_digit_sum_p0020_s0_n=10": "39.03 micro-sec",
+    "solve_factorial_digit_sum_p0020_s0_n=100": "58.55 micro-sec"
+}

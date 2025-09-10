@@ -1,0 +1,13 @@
+{
+    "num_prime_partitions=5": 10,
+    "num_prime_partitions=50": 25,
+    "num_prime_partitions=500": 45,
+    "num_prime_partitions=5000": 71,
+    "num_prime_partitions=50000": 104,
+    "solve_prime_summations_p0077_s0_num_prime_partitions=5": "373.13 micro-sec",
+    "solve_prime_summations_p0077_s0_num_prime_partitions=50": "1.13 milli-sec",
+    "solve_prime_summations_p0077_s0_num_prime_partitions=500": "2.49 milli-sec",
+    "solve_prime_summations_p0077_s0_num_prime_partitions=5000": "13.06 milli-sec",
+    "solve_prime_summations_p0077_s0_num_prime_partitions=50000": "24.36 milli-sec",
+    "solve_prime_summations_p0077_s1_num_prime_partitions=5000": "129.55 milli-sec"
+}

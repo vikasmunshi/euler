@@ -1,0 +1,8 @@
+{
+    "solve_arranged_probability_p0100_s0_total_discs=1.000000e+12": "32.80 micro-sec",
+    "solve_arranged_probability_p0100_s0_total_discs=120": "17.59 micro-sec",
+    "solve_arranged_probability_p0100_s0_total_discs=21": "13.62 micro-sec",
+    "total_discs=1.000000e+12": 756872327473,
+    "total_discs=120": 85,
+    "total_discs=21": 15
+}

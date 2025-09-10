@@ -1,0 +1,6 @@
+{
+    "max_limit=10000": 1322,
+    "max_limit=13": 4,
+    "solve_odd_period_square_roots_p0064_s0_max_limit=10000": "234.11 milli-sec",
+    "solve_odd_period_square_roots_p0064_s0_max_limit=13": "77.09 micro-sec"
+}

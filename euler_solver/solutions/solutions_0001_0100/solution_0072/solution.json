@@ -1,0 +1,18 @@
+{
+    "max_d=10": 31,
+    "max_d=100": 3043,
+    "max_d=1000": 304191,
+    "max_d=10000": 30397485,
+    "max_d=100000": 3039650753,
+    "max_d=1000000": 303963552391,
+    "max_d=10000000": 30396356427241,
+    "max_d=8": 21,
+    "solve_counting_fractions_p0072_s0_max_d=10": "18.86 micro-sec",
+    "solve_counting_fractions_p0072_s0_max_d=100": "85.01 micro-sec",
+    "solve_counting_fractions_p0072_s0_max_d=1000": "436.88 micro-sec",
+    "solve_counting_fractions_p0072_s0_max_d=10000": "4.70 milli-sec",
+    "solve_counting_fractions_p0072_s0_max_d=100000": "77.99 milli-sec",
+    "solve_counting_fractions_p0072_s0_max_d=1000000": "910.93 milli-sec",
+    "solve_counting_fractions_p0072_s0_max_d=10000000": "10.87 sec",
+    "solve_counting_fractions_p0072_s0_max_d=8": "15.48 micro-sec"
+}

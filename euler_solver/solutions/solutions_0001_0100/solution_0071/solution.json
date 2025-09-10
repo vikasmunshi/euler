@@ -1,0 +1,10 @@
+{
+    "max_d=1.000000e+12": 428571428570,
+    "max_d=10": 2,
+    "max_d=1000000": 428570,
+    "max_d=1000000000": 428571425,
+    "solve_ordered_fractions_p0071_s0_max_d=1.000000e+12": "133.85 micro-sec",
+    "solve_ordered_fractions_p0071_s0_max_d=10": "100.28 micro-sec",
+    "solve_ordered_fractions_p0071_s0_max_d=1000000": "101.45 micro-sec",
+    "solve_ordered_fractions_p0071_s0_max_d=1000000000": "98.96 micro-sec"
+}

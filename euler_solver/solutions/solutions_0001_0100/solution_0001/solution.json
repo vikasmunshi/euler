@@ -1,0 +1,20 @@
+{
+    "max_limit=10": 23,
+    "max_limit=1000": 233168,
+    "max_limit=1000000000": 233333333166666668,
+    "solve_multiples_of_3_or_5_p0001_s0_max_limit=10": "13.31 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s0_max_limit=1000": "39.36 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s0_max_limit=1000000000": "31.57 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s1_max_limit=10": "14.00 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s1_max_limit=1000": "118.37 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s1_max_limit=1000000000": "92.75 sec",
+    "solve_multiples_of_3_or_5_p0001_s2_max_limit=10": "14.91 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s2_max_limit=1000": "38.03 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s2_max_limit=1000000000": "10.91 sec",
+    "solve_multiples_of_3_or_5_p0001_s3_max_limit=10": "40.43 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s3_max_limit=1000": "51.32 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s3_max_limit=1000000000": "31.24 sec",
+    "solve_multiples_of_3_or_5_p0001_s4_max_limit=10": "45.19 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s4_max_limit=1000": "57.79 micro-sec",
+    "solve_multiples_of_3_or_5_p0001_s4_max_limit=1000000000": "43.91 sec"
+}

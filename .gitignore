@@ -1,0 +1,111 @@
+# Byte-compiled and cached Python files
+*.py[cod]
+*.py.class
+__pycache__/
+.mypy_cache/
+
+# C extensions
+*.so
+!euler_solver/c_libs/libs/lib_*.so
+
+# Development artifacts
+*.cover
+*.log
+*.manifest
+*.pot
+*.mo
+*.spec
+
+# Test and coverage
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+
+# Notebooks
+.ipynb_checkpoints
+
+# Static and compiled files
+*.sage.py
+.cache
+.dmypy.json
+
+# Environment and virtualenvs
+.Python
+.env
+.env.bak/
+.venv/
+venv/
+ENV/
+.env/
+
+# Distribution/build directories
+build/
+dist/
+eggs/
+develop-eggs/
+downloads/
+sdist/
+wheels/
+
+# Installer logs
+pip-delete-this-directory.txt
+pip-log.txt
+
+# Package metadata
+*.egg-info/
+.installed.cfg
+.python-version
+pip-wheel-metadata/
+
+# IDE and editor files
+.idea/
+.euleriws/
+.ipython_config.py
+.ropeproject
+.scrapy/
+.spyderproject/
+.tox/
+.webassets-cache/
+euler.iml
+euler.ipr
+euler.iws
+
+# Specific files to ignore, with exceptions
+profile_default/
+celerybeat-schedule
+docs/_build/
+local_settings.py
+
+# Ignore project euler_solver files that cannot be published
+euler_solver/c_libs/src/p0[1-9][0-9][0-9].[c|cpp|c++]
+!euler_solver/c_libs/src/p0100.[c|cpp|c++]
+/euler_solver/c_libs/libs/*
+!/euler_solver/c_libs/libs/lib_matrix_path_sums.so
+!/euler_solver/c_libs/libs/lib_p0014.so
+!/euler_solver/c_libs/libs/lib_p0074.so
+!/euler_solver/c_libs/libs/lib_p0078.so
+!/euler_solver/c_libs/libs/lib_p0084.so
+!/euler_solver/c_libs/libs/lib_p0095.so
+!/euler_solver/c_libs/libs/lib_p0097.so
+!/euler_solver/c_libs/libs/lib_primes.so
+private.*
+!private.enc
+!private.pyi
+summary/
+
+# Project data
+db.sqlite3
+db.sqlite3-journal
+coverage.xml
+nosetests.xml
+
+# Libraries
+lib/
+lib64/
+
+# Temporary system data
+site/
+target/
+var/
+

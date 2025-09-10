@@ -1,0 +1,8 @@
+{
+    "set_length=3": 107,
+    "set_length=4": 792,
+    "set_length=5": 26033,
+    "solve_prime_pair_sets_p0060_s0_set_length=3": "373.12 micro-sec",
+    "solve_prime_pair_sets_p0060_s0_set_length=4": "4.35 milli-sec",
+    "solve_prime_pair_sets_p0060_s0_set_length=5": "294.53 milli-sec"
+}

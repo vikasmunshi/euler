@@ -1,0 +1,18 @@
+{
+    "num_permutations=2": 125,
+    "num_permutations=3": 41063625,
+    "num_permutations=4": 1006012008,
+    "num_permutations=5": 127035954683,
+    "num_permutations=6": 1000600120008,
+    "num_permutations=7": 10569784298536,
+    "num_permutations=8": 10314675896832,
+    "num_permutations=9": 13465983902671,
+    "solve_cubic_permutations_p0062_s0_num_permutations=2": "808.75 micro-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=3": "1.40 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=4": "4.94 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=5": "36.10 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=6": "43.73 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=7": "85.89 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=8": "94.78 milli-sec",
+    "solve_cubic_permutations_p0062_s0_num_permutations=9": "82.71 milli-sec"
+}

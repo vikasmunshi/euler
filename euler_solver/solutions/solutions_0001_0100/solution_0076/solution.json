@@ -1,0 +1,14 @@
+{
+    "num=100": 190569291,
+    "num=1000": 24061467864032622473692149727990,
+    "num=5": 6,
+    "num=50": 204225,
+    "solve_counting_summations_p0076_s0_num=100": "557.30 micro-sec",
+    "solve_counting_summations_p0076_s0_num=1000": "18.68 milli-sec",
+    "solve_counting_summations_p0076_s0_num=5": "76.24 micro-sec",
+    "solve_counting_summations_p0076_s0_num=50": "354.31 micro-sec",
+    "solve_counting_summations_p0076_s1_num=100": "13.11 milli-sec",
+    "solve_counting_summations_p0076_s1_num=5": "91.31 micro-sec",
+    "solve_counting_summations_p0076_s1_num=50": "1.79 milli-sec",
+    "solve_counting_summations_p0076_s2_num=100": "480.31 micro-sec"
+}

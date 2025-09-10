@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Project Euler Problem 523: First Sort I.
+
+Problem Statement:
+    Consider the following algorithm for sorting a list:
+
+    1. Starting from the beginning of the list, check each pair of adjacent elements in turn.
+    2. If the elements are out of order:
+        a. Move the smallest element of the pair at the beginning of the list.
+        b. Restart the process from step 1.
+    3. If all pairs are in order, stop.
+
+    For example, the list {4 1 3 2} is sorted as follows:
+    - 4 1 3 2 (4 and 1 are out of order so move 1 to the front of the list)
+    - 1 4 3 2 (4 and 3 are out of order so move 3 to the front of the list)
+    - 3 1 4 2 (3 and 1 are out of order so move 1 to the front of the list)
+    - 1 3 4 2 (4 and 2 are out of order so move 2 to the front of the list)
+    - 2 1 3 4 (2 and 1 are out of order so move 1 to the front of the list)
+    - 1 2 3 4 (The list is now sorted)
+
+    Let F(L) be the number of times step 2a is executed to sort list L.
+    For example, F({4 1 3 2}) = 5.
+
+    Let E(n) be the expected value of F(P) over all permutations P of the integers {1, 2, ..., n}.
+    You are given E(4) = 3.25 and E(10) = 115.725.
+
+    Find E(30). Give your answer rounded to two digits after the decimal point.
+
+Solution Approach:
+    Model the sorting process probabilistically over all permutations.
+    Use dynamic programming or combinatorial analysis to compute expected values efficiently.
+    Exploit properties of permutations and the position of moved elements.
+    Numerical methods for large n may be needed to handle E(30) due to complexity.
+    Avoid simulating all permutations due to factorial growth; seek formulas or recurrences.
+
+Answer: ...
+URL: https://projecteuler.net/problem=523
+"""
+from __future__ import annotations
+
+from typing import Any
+
+from euler_solver.logger import logger
+from euler_solver.setup import evaluate, register_solution
+
+euler_problem: int = 523
+framework_version: str = '0.2.1'
+test_cases: list[dict[str, Any]] = [
+    {'category': 'dev', 'input': {'n': 4}},
+    {'category': 'main', 'input': {'n': 30}}
+]
+
+
+@register_solution(euler_problem=euler_problem, max_test_case_index=None)
+def solve_first_sort_i_p0523_s0(*, n: int) -> int: ...
+
+if __name__ == '__main__':
+    logger.setLevel('ERROR')
+    raise SystemExit(evaluate(euler_problem=euler_problem, time_out_in_seconds=300, mode='evaluate'))

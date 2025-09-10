@@ -1,0 +1,10 @@
+{
+    "coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=0": 1,
+    "coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=1000": 321335886,
+    "coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=100000": 10056050940818192726001,
+    "coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=200": 73682,
+    "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=0": "23.58 micro-sec",
+    "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=1000": "1.04 milli-sec",
+    "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=100000": "114.72 milli-sec",
+    "solve_coin_sums_p0031_s0_coins=[1, 2, 5, 10, 20, 50, 100, 200], target_amount=200": "120.97 micro-sec"
+}

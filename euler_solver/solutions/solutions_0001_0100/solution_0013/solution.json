@@ -1,0 +1,8 @@
+{
+    "digits=10": "5537376230",
+    "digits=100": "5537376230390876637302048746832985971773659831892672",
+    "digits=20": "55373762303908766372",
+    "solve_large_sum_p0013_s0_digits=10": "103.30 micro-sec",
+    "solve_large_sum_p0013_s0_digits=100": "197.90 micro-sec",
+    "solve_large_sum_p0013_s0_digits=20": "115.14 micro-sec"
+}

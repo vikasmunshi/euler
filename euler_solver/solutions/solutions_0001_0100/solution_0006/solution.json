@@ -1,0 +1,6 @@
+{
+    "n=10": 2640,
+    "n=100": 25164150,
+    "solve_sum_square_difference_p0006_s0_n=10": "15.42 micro-sec",
+    "solve_sum_square_difference_p0006_s0_n=100": "12.25 micro-sec"
+}

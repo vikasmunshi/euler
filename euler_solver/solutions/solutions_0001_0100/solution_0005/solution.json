@@ -1,0 +1,10 @@
+{
+    "n=10": 2520,
+    "n=100": 69720375229712477164533808935312303556800,
+    "n=20": 232792560,
+    "n=50": 3099044504245996706400,
+    "solve_smallest_multiple_p0005_s0_n=10": "32.78 micro-sec",
+    "solve_smallest_multiple_p0005_s0_n=100": "67.44 micro-sec",
+    "solve_smallest_multiple_p0005_s0_n=20": "44.93 micro-sec",
+    "solve_smallest_multiple_p0005_s0_n=50": "61.54 micro-sec"
+}

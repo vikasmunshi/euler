@@ -1,0 +1,14 @@
+{
+    "limit=10": 6,
+    "limit=100": 30,
+    "limit=1000": 210,
+    "limit=10000": 2310,
+    "limit=100000": 30030,
+    "limit=1000000": 510510,
+    "solve_totient_maximum_p0069_s0_limit=10": "185.41 micro-sec",
+    "solve_totient_maximum_p0069_s0_limit=100": "147.16 micro-sec",
+    "solve_totient_maximum_p0069_s0_limit=1000": "194.44 micro-sec",
+    "solve_totient_maximum_p0069_s0_limit=10000": "181.07 micro-sec",
+    "solve_totient_maximum_p0069_s0_limit=100000": "171.22 micro-sec",
+    "solve_totient_maximum_p0069_s0_limit=1000000": "354.00 micro-sec"
+}
