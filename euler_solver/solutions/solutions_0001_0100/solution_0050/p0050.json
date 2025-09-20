@@ -1,0 +1,7 @@
+{
+  "solve_consecutive_prime_sum_p0050_s0(max_limit=100)": 0.0003495639975881204,
+  "solve_consecutive_prime_sum_p0050_s0(max_limit=1000)": 0.0006080949970055372,
+  "solve_consecutive_prime_sum_p0050_s0(max_limit=10000)": 0.0012682119995588437,
+  "solve_consecutive_prime_sum_p0050_s0(max_limit=100000)": 0.009383554999658372,
+  "solve_consecutive_prime_sum_p0050_s0(max_limit=1000000)": 0.059470722000696696
+}

@@ -1,0 +1,5 @@
+{
+  "solve_hopping_game_p0391_s0(max_limit=20)": 4.654900112655014e-05,
+  "solve_hopping_game_p0391_s0(max_limit=1000)": 4.5654996938537806e-05,
+  "solve_hopping_game_p0391_s0(max_limit=5000)": 5.586199404206127e-05
+}

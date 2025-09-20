@@ -1,0 +1,5 @@
+{
+  "solve_primes_with_runs_p0111_s0(n=4)": 0.00021596800070255995,
+  "solve_primes_with_runs_p0111_s0(n=10)": 0.0005465180001920089,
+  "solve_primes_with_runs_p0111_s0(n=11)": 0.0010151410024263896
+}

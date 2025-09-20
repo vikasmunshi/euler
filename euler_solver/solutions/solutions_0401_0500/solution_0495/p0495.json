@@ -1,0 +1,4 @@
+{
+  "solve_writing_n_as_the_product_of_k_distinct_positive_integers_p0495_s0(k=4, n_factorial=144)": 5.942399729974568e-05,
+  "solve_writing_n_as_the_product_of_k_distinct_positive_integers_p0495_s0(k=30, n_factorial=10000)": 4.409100074553862e-05
+}

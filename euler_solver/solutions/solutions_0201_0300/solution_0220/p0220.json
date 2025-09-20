@@ -1,0 +1,5 @@
+{
+  "solve_heighway_dragon_p0220_s0(order=10, steps=500)": 5.223000334808603e-05,
+  "solve_heighway_dragon_p0220_s0(order=50, steps=1.000000e+12)": 3.996399755124003e-05,
+  "solve_heighway_dragon_p0220_s0(order=25, steps=1000000)": 4.463399818632752e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_maximal_coprime_subset_p0355_s0(max_limit=10)": 4.744500620290637e-05,
+  "solve_maximal_coprime_subset_p0355_s0(max_limit=200000)": 3.6411001929081976e-05,
+  "solve_maximal_coprime_subset_p0355_s0(max_limit=1000000)": 3.810799535131082e-05
+}

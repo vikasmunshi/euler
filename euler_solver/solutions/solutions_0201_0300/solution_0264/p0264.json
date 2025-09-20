@@ -1,0 +1,5 @@
+{
+  "solve_triangle_centres_p0264_s0(max_limit=50)": 3.6858000385109335e-05,
+  "solve_triangle_centres_p0264_s0(max_limit=100000)": 7.163199916249141e-05,
+  "solve_triangle_centres_p0264_s0(max_limit=1000000)": 3.929300146410242e-05
+}

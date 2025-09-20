@@ -1,0 +1,5 @@
+{
+  "solve_bitwise_or_operations_on_random_integers_p0323_s0(bits=3)": 3.569899854483083e-05,
+  "solve_bitwise_or_operations_on_random_integers_p0323_s0(bits=32)": 4.116600030101836e-05,
+  "solve_bitwise_or_operations_on_random_integers_p0323_s0(bits=64)": 4.1195999074261636e-05
+}

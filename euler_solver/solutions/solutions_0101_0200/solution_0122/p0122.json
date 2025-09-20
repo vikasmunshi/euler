@@ -1,0 +1,5 @@
+{
+  "solve_efficient_exponentiation_p0122_s0(max_limit=200)": 0.0021118019976711366,
+  "solve_efficient_exponentiation_p0122_s0(max_limit=400)": 0.018031457999313716,
+  "solve_efficient_exponentiation_p0122_s0(max_limit=15)": 9.754499842529185e-05
+}

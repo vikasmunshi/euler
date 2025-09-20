@@ -1,0 +1,5 @@
+{
+  "solve_cuboid_route_p0086_s0(target_solutions=1975)": 0.0029287700017448515,
+  "solve_cuboid_route_p0086_s0(target_solutions=2000)": 0.002974283001094591,
+  "solve_cuboid_route_p0086_s0(target_solutions=1000000)": 0.6856419359974097
+}

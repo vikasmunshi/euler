@@ -1,0 +1,97 @@
+# Byte-compiled and cached Python files
+*.py[cod]
+*.py.class
+__pycache__/
+.mypy_cache/
+
+# C extensions
+*.so
+!euler_solver/c_libs/libs/lib_*.so
+
+# Development artifacts
+*.cover
+*.log
+*.manifest
+*.pot
+*.mo
+*.spec
+
+# Test and coverage
+.coverage
+.coverage.*
+.pytest_cache/
+htmlcov/
+
+# Notebooks
+.ipynb_checkpoints
+
+# Static and compiled files
+*.sage.py
+.cache
+.dmypy.json
+
+# Environment and virtualenvs
+.Python
+.env
+.env.bak/
+.venv/
+venv/
+ENV/
+.env/
+
+# Distribution/build directories
+build/
+dist/
+eggs/
+develop-eggs/
+downloads/
+sdist/
+wheels/
+
+# Installer logs
+pip-delete-this-directory.txt
+pip-log.txt
+
+# Package metadata
+*.egg-info/
+.installed.cfg
+.python-version
+pip-wheel-metadata/
+
+# IDE and editor files
+.idea/
+.euleriws/
+.ipython_config.py
+.ropeproject
+.scrapy/
+.spyderproject/
+.tox/
+.webassets-cache/
+euler.iml
+euler.ipr
+euler.iws
+
+# Specific files to ignore, with exceptions
+profile_default/
+celerybeat-schedule
+docs/_build/
+local_settings.py
+
+# euler_solver specific exclusions
+history/
+
+# Project data
+db.sqlite3
+db.sqlite3-journal
+coverage.xml
+nosetests.xml
+
+# Libraries
+lib/
+lib64/
+
+# Temporary system data
+site/
+target/
+var/
+

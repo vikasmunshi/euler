@@ -1,0 +1,4 @@
+{
+  "solve_triangular_pizza_p0747_s0(max_limit=10)": 0.0003220659928047098,
+  "solve_triangular_pizza_p0747_s0(max_limit=100000000)": 3.269099397584796e-05
+}

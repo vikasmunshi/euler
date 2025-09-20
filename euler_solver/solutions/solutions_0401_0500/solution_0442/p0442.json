@@ -1,0 +1,5 @@
+{
+  "solve_eleven_free_integers_p0442_s0(n=3)": 0.0001232959984918125,
+  "solve_eleven_free_integers_p0442_s0(n=200)": 3.896999987773597e-05,
+  "solve_eleven_free_integers_p0442_s0(n=1.000000e+18)": 4.592799814417958e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_three_similar_triangles_p0299_s0(max_limit=100)": 5.6646000302862376e-05,
+  "solve_three_similar_triangles_p0299_s0(max_limit=100000000)": 4.5916000090073794e-05,
+  "solve_three_similar_triangles_p0299_s0(max_limit=10000000)": 3.389400080777705e-05
+}

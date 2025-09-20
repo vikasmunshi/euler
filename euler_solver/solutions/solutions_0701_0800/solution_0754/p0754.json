@@ -1,0 +1,4 @@
+{
+  "solve_product_of_gauss_factorials_p0754_s0(max_limit=10)": 5.830499867442995e-05,
+  "solve_product_of_gauss_factorials_p0754_s0(max_limit=100000000)": 5.193200195208192e-05
+}

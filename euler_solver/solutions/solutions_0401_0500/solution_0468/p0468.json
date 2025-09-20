@@ -1,0 +1,5 @@
+{
+  "solve_smooth_divisors_of_binomial_coefficients_p0468_s0(n=11)": 4.872000135947019e-05,
+  "solve_smooth_divisors_of_binomial_coefficients_p0468_s0(n=11111111)": 4.156100476393476e-05,
+  "solve_smooth_divisors_of_binomial_coefficients_p0468_s0(n=111111111)": 3.3819000236690044e-05
+}

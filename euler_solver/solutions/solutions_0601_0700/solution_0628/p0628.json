@@ -1,0 +1,4 @@
+{
+  "solve_open_chess_positions_p0628_s0(n=3)": 5.065999721409753e-05,
+  "solve_open_chess_positions_p0628_s0(n=100000000)": 6.20949940639548e-05
+}

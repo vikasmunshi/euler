@@ -1,0 +1,4 @@
+{
+  "solve_beds_and_desks_p0673_s0(beds_file=resources/documents/0673_beds_sample.txt, desks_file=resources/documents/0673_desks_sample.txt)": 7.045600068522617e-05,
+  "solve_beds_and_desks_p0673_s0(beds_file=resources/documents/0673_beds.txt, desks_file=resources/documents/0673_desks.txt)": 6.588299584109336e-05
+}

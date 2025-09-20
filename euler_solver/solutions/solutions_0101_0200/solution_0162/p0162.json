@@ -1,0 +1,5 @@
+{
+  "solve_hexadecimal_numbers_p0162_s0(max_digits=3)": 6.089399539632723e-05,
+  "solve_hexadecimal_numbers_p0162_s0(max_digits=16)": 7.241000275826082e-05,
+  "solve_hexadecimal_numbers_p0162_s0(max_digits=20)": 4.621300467988476e-05
+}

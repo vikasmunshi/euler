@@ -1,0 +1,5 @@
+{
+  "solve_sum_of_squares_p0273_s0(prime_bound=30)": 4.79420050396584e-05,
+  "solve_sum_of_squares_p0273_s0(prime_bound=150)": 4.8522000724915415e-05,
+  "solve_sum_of_squares_p0273_s0(prime_bound=1000)": 4.080600047018379e-05
+}

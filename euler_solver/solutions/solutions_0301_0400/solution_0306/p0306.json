@@ -1,0 +1,5 @@
+{
+  "solve_paper_strip_game_p0306_s0(max_limit=10)": 2.7794994821306318e-05,
+  "solve_paper_strip_game_p0306_s0(max_limit=1000000)": 4.1366998630110174e-05,
+  "solve_paper_strip_game_p0306_s0(max_limit=2000000)": 7.944300159579143e-05
+}

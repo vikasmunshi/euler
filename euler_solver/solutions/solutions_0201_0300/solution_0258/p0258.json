@@ -1,0 +1,5 @@
+{
+  "solve_a_lagged_fibonacci_sequence_p0258_s0(k=10, modulus=1000)": 4.2740000935737044e-05,
+  "solve_a_lagged_fibonacci_sequence_p0258_s0(k=1.000000e+18, modulus=20092010)": 3.7329002225305885e-05,
+  "solve_a_lagged_fibonacci_sequence_p0258_s0(k=1.000000e+12, modulus=20092010)": 3.316000220365822e-05
+}

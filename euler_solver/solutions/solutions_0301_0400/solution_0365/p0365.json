@@ -1,0 +1,5 @@
+{
+  "solve_a_huge_binomial_coefficient_p0365_s0(max_prime=20, min_prime=2)": 3.9864004065748304e-05,
+  "solve_a_huge_binomial_coefficient_p0365_s0(max_prime=5000, min_prime=1000)": 4.1308994696009904e-05,
+  "solve_a_huge_binomial_coefficient_p0365_s0(max_prime=10000, min_prime=1000)": 6.44430037937127e-05
+}

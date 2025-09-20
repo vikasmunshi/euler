@@ -1,0 +1,15 @@
+[run]
+source = euler_solver
+omit =
+    */tests/*
+    euler_solver/solutions/*
+
+[report]
+# Exclude the following lines from the report
+exclude_lines =
+    # Ignore code with "pragma: no cover"
+    pragma: no cover
+    # Ignore `if __name__ == "__main__"` blocks
+    if __name__ == .__main__.:
+    # Ignore pass statements
+    pass

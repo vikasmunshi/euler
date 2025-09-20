@@ -1,0 +1,17 @@
+{
+  "solve_multiples_of_3_or_5_p0001_s0(max_limit=10)": 1.3193999620852992e-05,
+  "solve_multiples_of_3_or_5_p0001_s0(max_limit=1000)": 5.346999387256801e-06,
+  "solve_multiples_of_3_or_5_p0001_s0(max_limit=1000000000)": 1.586900179972872e-05,
+  "solve_multiples_of_3_or_5_p0001_s1(max_limit=10)": 1.8093996914103627e-05,
+  "solve_multiples_of_3_or_5_p0001_s1(max_limit=1000)": 8.461900142719969e-05,
+  "solve_multiples_of_3_or_5_p0001_s1(max_limit=1000000000)": 92.71713512100177,
+  "solve_multiples_of_3_or_5_p0001_s2(max_limit=10)": 1.54269982886035e-05,
+  "solve_multiples_of_3_or_5_p0001_s2(max_limit=1000)": 2.4288998247357085e-05,
+  "solve_multiples_of_3_or_5_p0001_s2(max_limit=1000000000)": 10.677843268997094,
+  "solve_multiples_of_3_or_5_p0001_s3(max_limit=10)": 2.072099960059859e-05,
+  "solve_multiples_of_3_or_5_p0001_s3(max_limit=1000)": 4.307600102038123e-05,
+  "solve_multiples_of_3_or_5_p0001_s3(max_limit=1000000000)": 32.228458903999126,
+  "solve_multiples_of_3_or_5_p0001_s4(max_limit=10)": 2.1948999346932396e-05,
+  "solve_multiples_of_3_or_5_p0001_s4(max_limit=1000)": 4.9220001528738067e-05,
+  "solve_multiples_of_3_or_5_p0001_s4(max_limit=1000000000)": 44.97040922400265
+}

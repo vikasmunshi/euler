@@ -1,0 +1,5 @@
+{
+  "solve_distances_in_a_bees_honeycomb_p0354_s0(max_limit=1000)": 3.6360994272399694e-05,
+  "solve_distances_in_a_bees_honeycomb_p0354_s0(max_limit=5.000000e+11)": 3.3632000850047916e-05,
+  "solve_distances_in_a_bees_honeycomb_p0354_s0(max_limit=1.000000e+12)": 3.602999640861526e-05
+}

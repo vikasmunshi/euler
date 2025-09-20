@@ -1,0 +1,5 @@
+{
+  "solve_infinite_string_tour_p0238_s0(max_limit=1000)": 3.4803997550625354e-05,
+  "solve_infinite_string_tour_p0238_s0(max_limit=2.000000e+15)": 2.9012000595685095e-05,
+  "solve_infinite_string_tour_p0238_s0(max_limit=2.000000e+16)": 3.24180000461638e-05
+}

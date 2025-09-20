@@ -1,0 +1,5 @@
+{
+  "solve_divisibility_comparison_between_factorials_p0383_s0(max_limit=1000)": 6.007699994370341e-05,
+  "solve_divisibility_comparison_between_factorials_p0383_s0(max_limit=1.000000e+18)": 7.481100328732282e-05,
+  "solve_divisibility_comparison_between_factorials_p0383_s0(max_limit=1.000000e+12)": 0.00022220400569494814
+}

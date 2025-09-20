@@ -1,0 +1,5 @@
+{
+  "solve_periodic_circles_p0843_s0(max_limit=6)": 4.187100421404466e-05,
+  "solve_periodic_circles_p0843_s0(max_limit=100)": 3.597899922169745e-05,
+  "solve_periodic_circles_p0843_s0(max_limit=200)": 4.091500159120187e-05
+}

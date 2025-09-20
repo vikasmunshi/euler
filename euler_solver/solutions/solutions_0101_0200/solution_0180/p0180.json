@@ -1,0 +1,5 @@
+{
+  "solve_golden_triplets_p0180_s0(max_limit=10)": 4.1687002521939576e-05,
+  "solve_golden_triplets_p0180_s0(max_limit=35)": 3.867399937007576e-05,
+  "solve_golden_triplets_p0180_s0(max_limit=50)": 4.873699799645692e-05
+}

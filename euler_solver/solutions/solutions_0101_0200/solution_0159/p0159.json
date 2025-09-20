@@ -1,0 +1,5 @@
+{
+  "solve_digital_root_sums_of_factorisations_p0159_s0(max_limit=10)": 3.9935002860147506e-05,
+  "solve_digital_root_sums_of_factorisations_p0159_s0(max_limit=1000000)": 2.9650997021235526e-05,
+  "solve_digital_root_sums_of_factorisations_p0159_s0(max_limit=2000000)": 4.0255996282212436e-05
+}

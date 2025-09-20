@@ -1,0 +1,5 @@
+{
+  "solve_amazing_mazes_p0380_s0(m=3, n=4)": 4.9196998588740826e-05,
+  "solve_amazing_mazes_p0380_s0(m=100, n=500)": 2.9989001632202417e-05,
+  "solve_amazing_mazes_p0380_s0(m=9, n=12)": 0.0005462990011437796
+}

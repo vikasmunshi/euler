@@ -1,0 +1,5 @@
+{
+  "solve_removing_bits_p0882_s0(n=2)": 5.939300172030926e-05,
+  "solve_removing_bits_p0882_s0(n=5)": 5.7985002058558166e-05,
+  "solve_removing_bits_p0882_s0(n=100000)": 5.298500036587939e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_sums_of_digit_factorials_p0254_s0(max_i=20)": 4.5336004404816777e-05,
+  "solve_sums_of_digit_factorials_p0254_s0(max_i=150)": 3.738899977179244e-05,
+  "solve_sums_of_digit_factorials_p0254_s0(max_i=500)": 4.999499651603401e-05
+}

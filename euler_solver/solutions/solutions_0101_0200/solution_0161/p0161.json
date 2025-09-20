@@ -1,0 +1,5 @@
+{
+  "solve_triominoes_p0161_s0(cols=9, rows=2)": 4.002499917987734e-05,
+  "solve_triominoes_p0161_s0(cols=12, rows=9)": 6.0212994867470115e-05,
+  "solve_triominoes_p0161_s0(cols=6, rows=6)": 5.528600013349205e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_duodigits_p0714_s0(max_limit=150)": 6.509100057883188e-05,
+  "solve_duodigits_p0714_s0(max_limit=50000)": 4.629199975170195e-05,
+  "solve_duodigits_p0714_s0(max_limit=100000)": 3.696399653563276e-05
+}

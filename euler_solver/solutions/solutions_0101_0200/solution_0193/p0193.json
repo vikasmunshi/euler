@@ -1,0 +1,5 @@
+{
+  "solve_squarefree_numbers_p0193_s0(max_limit=10)": 3.9254002331290394e-05,
+  "solve_squarefree_numbers_p0193_s0(max_limit=1125899906842624)": 7.151799945859239e-05,
+  "solve_squarefree_numbers_p0193_s0(max_limit=1099511627776)": 4.2158004362136126e-05
+}

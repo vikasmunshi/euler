@@ -1,0 +1,5 @@
+{
+  "solve_hybrid_integers_p0800_s0(n=800)": 5.7608005590736866e-05,
+  "solve_hybrid_integers_p0800_s0(n=800^800)": 4.685900057666004e-05,
+  "solve_hybrid_integers_p0800_s0(n=800800^800800)": 4.4806998630519956e-05
+}

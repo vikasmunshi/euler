@@ -1,0 +1,5 @@
+{
+  "solve_selective_amnesia_p0298_s0(turns=10)": 3.994999860879034e-05,
+  "solve_selective_amnesia_p0298_s0(turns=50)": 3.559800097718835e-05,
+  "solve_selective_amnesia_p0298_s0(turns=100)": 2.9791000997647643e-05
+}

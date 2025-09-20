@@ -1,0 +1,6 @@
+{
+  "solve_number_spiral_diagonals_p0028_s0(size=5)": 3.635000030044466e-05,
+  "solve_number_spiral_diagonals_p0028_s0(size=7)": 4.810000245925039e-05,
+  "solve_number_spiral_diagonals_p0028_s0(size=9)": 2.973400114569813e-05,
+  "solve_number_spiral_diagonals_p0028_s0(size=1001)": 1.6445002984255552e-05
+}

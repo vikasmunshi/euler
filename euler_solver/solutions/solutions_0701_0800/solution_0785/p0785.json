@@ -1,0 +1,4 @@
+{
+  "solve_symmetric_diophantine_equation_p0785_s0(max_limit=100)": 3.734599886229262e-05,
+  "solve_symmetric_diophantine_equation_p0785_s0(max_limit=1000000000)": 7.747699419269338e-05
+}

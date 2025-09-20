@@ -1,0 +1,5 @@
+{
+  "solve_hexagonal_tile_differences_p0128_s0(n=10)": 3.802100400207564e-05,
+  "solve_hexagonal_tile_differences_p0128_s0(n=2000)": 4.430399712873623e-05,
+  "solve_hexagonal_tile_differences_p0128_s0(n=5000)": 4.098199860891327e-05
+}

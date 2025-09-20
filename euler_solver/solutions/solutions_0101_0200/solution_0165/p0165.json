@@ -1,0 +1,5 @@
+{
+  "solve_intersections_p0165_s0(num_segments=3)": 3.182399814249948e-05,
+  "solve_intersections_p0165_s0(num_segments=5000)": 4.195799556327984e-05,
+  "solve_intersections_p0165_s0(num_segments=10000)": 4.988900036551058e-05
+}

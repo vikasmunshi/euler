@@ -1,0 +1,5 @@
+{
+  "solve_stacking_cups_p0907_s0(n=4)": 4.763500328408554e-05,
+  "solve_stacking_cups_p0907_s0(n=10000000)": 3.976900188717991e-05,
+  "solve_stacking_cups_p0907_s0(n=20000000)": 4.036300379084423e-05
+}

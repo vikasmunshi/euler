@@ -1,0 +1,4 @@
+{
+  "solve_generalised_hamming_numbers_p0204_s0(max_limit=100, n=5)": 4.7194997023325413e-05,
+  "solve_generalised_hamming_numbers_p0204_s0(max_limit=1000000000, n=100)": 5.3032999858260155e-05
+}

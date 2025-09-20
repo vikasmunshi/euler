@@ -1,0 +1,5 @@
+{
+  "solve_circumscribed_circles_p0373_s0(max_limit=100)": 4.8435002099722624e-05,
+  "solve_circumscribed_circles_p0373_s0(max_limit=10000000)": 3.693300095619634e-05,
+  "solve_circumscribed_circles_p0373_s0(max_limit=1200)": 6.230500002857298e-05
+}

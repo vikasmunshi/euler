@@ -1,0 +1,5 @@
+{
+  "solve_secret_santa_p0740_s0(n=3)": 3.340499824844301e-05,
+  "solve_secret_santa_p0740_s0(n=100)": 4.2532999941613525e-05,
+  "solve_secret_santa_p0740_s0(n=150)": 2.9625000024680048e-05
+}

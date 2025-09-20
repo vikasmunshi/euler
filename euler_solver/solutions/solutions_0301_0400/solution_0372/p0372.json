@@ -1,0 +1,5 @@
+{
+  "solve_pencils_of_rays_p0372_s0(max_limit=100, min_limit=0)": 4.0426995838060975e-05,
+  "solve_pencils_of_rays_p0372_s0(max_limit=1000000000, min_limit=2000000)": 3.932199615519494e-05,
+  "solve_pencils_of_rays_p0372_s0(max_limit=10000, min_limit=100)": 4.048599657835439e-05
+}

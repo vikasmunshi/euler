@@ -1,0 +1,5 @@
+{
+  "solve_mobius_function_and_intervals_p0464_s0(max_limit=10)": 3.618800110416487e-05,
+  "solve_mobius_function_and_intervals_p0464_s0(max_limit=20000000)": 3.502400068100542e-05,
+  "solve_mobius_function_and_intervals_p0464_s0(max_limit=50000000)": 5.080900155007839e-05
+}

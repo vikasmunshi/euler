@@ -1,0 +1,7 @@
+{
+  "solve_integer_right_triangles_p0039_s0(max_perimeter=100)": 0.022356852001394145,
+  "solve_integer_right_triangles_p0039_s0(max_perimeter=1000)": 0.0009111270046560094,
+  "solve_integer_right_triangles_p0039_s0(max_perimeter=10000)": 0.0029625870010931976,
+  "solve_integer_right_triangles_p0039_s0(max_perimeter=100000)": 0.04642723299912177,
+  "solve_integer_right_triangles_p0039_s0(max_perimeter=1000000)": 0.8095936340032495
+}

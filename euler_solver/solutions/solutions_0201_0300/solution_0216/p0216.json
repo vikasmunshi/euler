@@ -1,0 +1,5 @@
+{
+  "solve_the_primality_of_2n2_minus_1_p0216_s0(max_limit=10)": 0.0020854979957221076,
+  "solve_the_primality_of_2n2_minus_1_p0216_s0(max_limit=50000000)": 4.379200254334137e-05,
+  "solve_the_primality_of_2n2_minus_1_p0216_s0(max_limit=100000000)": 5.127800250193104e-05
+}

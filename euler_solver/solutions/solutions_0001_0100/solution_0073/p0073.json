@@ -1,0 +1,14 @@
+{
+  "solve_counting_fractions_in_a_range_p0073_s0(max_d=8)": 1.995499769691378e-05,
+  "solve_counting_fractions_in_a_range_p0073_s0(max_d=1000)": 0.02225652799825184,
+  "solve_counting_fractions_in_a_range_p0073_s0(max_d=12000)": 1.082499910997285,
+  "solve_counting_fractions_in_a_range_p0073_s0(max_d=100000)": 83.55190390200005,
+  "solve_counting_fractions_in_a_range_p0073_s1(max_d=8)": 5.028700252296403e-05,
+  "solve_counting_fractions_in_a_range_p0073_s1(max_d=1000)": 0.01894557799823815,
+  "solve_counting_fractions_in_a_range_p0073_s1(max_d=12000)": 2.1809168769977987,
+  "solve_counting_fractions_in_a_range_p0073_s1(max_d=100000)": 171.16109856699768,
+  "solve_counting_fractions_in_a_range_p0073_s2(max_d=8)": 6.753200432285666e-05,
+  "solve_counting_fractions_in_a_range_p0073_s2(max_d=1000)": 0.0017688039952190593,
+  "solve_counting_fractions_in_a_range_p0073_s2(max_d=12000)": 0.034080419995007105,
+  "solve_counting_fractions_in_a_range_p0073_s2(max_d=100000)": 0.34605593100422993
+}

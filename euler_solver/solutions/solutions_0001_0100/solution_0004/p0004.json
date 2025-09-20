@@ -1,0 +1,6 @@
+{
+  "solve_largest_palindrome_product_p0004_s0(n=2)": 9.300899546360597e-05,
+  "solve_largest_palindrome_product_p0004_s0(n=3)": 0.0006711950045428239,
+  "solve_largest_palindrome_product_p0004_s0(n=4)": 0.011410598999646027,
+  "solve_largest_palindrome_product_p0004_s0(n=5)": 0.0703660770013812
+}

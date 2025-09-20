@@ -1,0 +1,5 @@
+{
+  "solve_pseudo_square_root_p0266_s0(max_limit=10)": 4.8672998673282564e-05,
+  "solve_pseudo_square_root_p0266_s0(max_limit=190)": 4.383299528853968e-05,
+  "solve_pseudo_square_root_p0266_s0(max_limit=1000)": 4.3713000195566565e-05
+}

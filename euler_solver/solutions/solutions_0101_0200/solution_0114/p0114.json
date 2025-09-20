@@ -1,0 +1,6 @@
+{
+  "solve_counting_block_combinations_i_p0114_s0(min_red_block_length=3, row_length=7)": 0.00021230099810054526,
+  "solve_counting_block_combinations_i_p0114_s0(min_red_block_length=3, row_length=50)": 0.0003522369952406734,
+  "solve_counting_block_combinations_i_p0114_s1_c(min_red_block_length=3, row_length=7)": 0.00012193799921078607,
+  "solve_counting_block_combinations_i_p0114_s1_c(min_red_block_length=3, row_length=50)": 0.00012172100105090067
+}

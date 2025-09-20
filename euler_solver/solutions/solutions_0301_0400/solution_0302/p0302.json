@@ -1,0 +1,5 @@
+{
+  "solve_strong_achilles_numbers_p0302_s0(max_limit=10000)": 4.38739953096956e-05,
+  "solve_strong_achilles_numbers_p0302_s0(max_limit=1.000000e+18)": 3.566899977158755e-05,
+  "solve_strong_achilles_numbers_p0302_s0(max_limit=100000000)": 4.043399530928582e-05
+}

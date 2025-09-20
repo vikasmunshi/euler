@@ -1,0 +1,5 @@
+{
+  "solve_permuted_matrices_p0559_s0(n=5)": 3.324099816381931e-05,
+  "solve_permuted_matrices_p0559_s0(n=50000)": 4.454200097825378e-05,
+  "solve_permuted_matrices_p0559_s0(n=100000)": 3.644499520305544e-05
+}

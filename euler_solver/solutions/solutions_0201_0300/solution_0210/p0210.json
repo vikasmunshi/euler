@@ -1,0 +1,5 @@
+{
+  "solve_obtuse_angled_triangles_p0210_s0(max_limit=4)": 3.1112998840399086e-05,
+  "solve_obtuse_angled_triangles_p0210_s0(max_limit=1000000000)": 5.291300476528704e-05,
+  "solve_obtuse_angled_triangles_p0210_s0(max_limit=2.000000e+09)": 3.802999708568677e-05
+}

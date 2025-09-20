@@ -1,0 +1,4 @@
+{
+  "solve_best_approximations_p0192_s0(denominator_bound=1000, max_limit=10)": 3.27949965139851e-05,
+  "solve_best_approximations_p0192_s0(denominator_bound=1.000000e+12, max_limit=100000)": 3.12429983750917e-05
+}

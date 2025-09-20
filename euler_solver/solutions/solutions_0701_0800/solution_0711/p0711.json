@@ -1,0 +1,5 @@
+{
+  "solve_binary_blackboard_p0711_s0(N=4)": 4.741900193039328e-05,
+  "solve_binary_blackboard_p0711_s0(N=12345678)": 4.115600313525647e-05,
+  "solve_binary_blackboard_p0711_s0(N=1234)": 4.772999818669632e-05
+}

@@ -1,0 +1,8 @@
+{
+  "solve_totient_maximum_p0069_s0(limit=10)": 0.0002252549966215156,
+  "solve_totient_maximum_p0069_s0(limit=100)": 0.00032423599623143673,
+  "solve_totient_maximum_p0069_s0(limit=1000)": 0.00026617700495989993,
+  "solve_totient_maximum_p0069_s0(limit=10000)": 0.00024098299763863906,
+  "solve_totient_maximum_p0069_s0(limit=100000)": 0.00024478400155203417,
+  "solve_totient_maximum_p0069_s0(limit=1000000)": 0.00016218800010392442
+}

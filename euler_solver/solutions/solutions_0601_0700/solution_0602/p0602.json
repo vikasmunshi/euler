@@ -1,0 +1,5 @@
+{
+  "solve_product_of_head_counts_p0602_s0(k=2, mod=1000000007, n=3)": 6.292499892879277e-05,
+  "solve_product_of_head_counts_p0602_s0(k=40, mod=1000000007, n=100)": 4.5525994210038334e-05,
+  "solve_product_of_head_counts_p0602_s0(k=4000000, mod=1000000007, n=10000000)": 7.363400072790682e-05
+}

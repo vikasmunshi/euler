@@ -1,0 +1,5 @@
+{
+  "solve_prime_pair_connection_p0134_s0(max_limit=10)": 3.957100125262514e-05,
+  "solve_prime_pair_connection_p0134_s0(max_limit=1000000)": 4.1772000258788466e-05,
+  "solve_prime_pair_connection_p0134_s0(max_limit=2000000)": 4.055200406583026e-05
+}

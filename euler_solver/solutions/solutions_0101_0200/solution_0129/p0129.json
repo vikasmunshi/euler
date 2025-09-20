@@ -1,0 +1,5 @@
+{
+  "solve_repunit_divisibility_p0129_s0(max_limit=10)": 5.163800233276561e-05,
+  "solve_repunit_divisibility_p0129_s0(max_limit=1000000)": 5.201799649512395e-05,
+  "solve_repunit_divisibility_p0129_s0(max_limit=2000000)": 3.912099782610312e-05
+}

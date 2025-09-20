@@ -1,0 +1,8 @@
+{
+  "solve_double_base_palindromes_p0036_s0(max_digits=1)": 8.065399742918089e-05,
+  "solve_double_base_palindromes_p0036_s0(max_digits=2)": 0.00011269399692537263,
+  "solve_double_base_palindromes_p0036_s0(max_digits=3)": 0.00021315399499144405,
+  "solve_double_base_palindromes_p0036_s0(max_digits=4)": 0.0004429019973031245,
+  "solve_double_base_palindromes_p0036_s0(max_digits=6)": 0.001716680999379605,
+  "solve_double_base_palindromes_p0036_s0(max_digits=9)": 0.17300339000212261
+}

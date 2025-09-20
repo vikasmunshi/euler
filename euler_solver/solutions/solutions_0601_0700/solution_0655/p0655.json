@@ -1,0 +1,4 @@
+{
+  "solve_divisible_palindromes_p0655_s0(divisor=109, max_limit=100000.0)": 3.592600114643574e-05,
+  "solve_divisible_palindromes_p0655_s0(divisor=10000019, max_limit=1e+32)": 3.231799928471446e-05
+}

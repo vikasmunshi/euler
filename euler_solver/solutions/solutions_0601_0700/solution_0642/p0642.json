@@ -1,0 +1,16 @@
+{
+  "solve_sum_of_largest_prime_factors_p0642_s1_c(modulo=1000000000, num=10)": 8.689899550518021e-05,
+  "solve_sum_of_largest_prime_factors_p0642_s1_c(modulo=1000000000, num=100)": 9.545500506646931e-05,
+  "solve_sum_of_largest_prime_factors_p0642_s1_c(modulo=1000000000, num=10000)": 0.00012501700257416815,
+  "solve_sum_of_largest_prime_factors_p0642_s1_c(modulo=1000000000, num=100000)": 0.0002856799983419478,
+  "solve_sum_of_largest_prime_factors_p0642_s1_c(modulo=1000000000, num=1000000)": 0.0013414310014923103,
+  "solve_sum_of_largest_prime_factors_p0642_s1_c(modulo=1000000000, num=10000000)": 0.007099239999661222,
+  "solve_sum_of_largest_prime_factors_p0642_s1_c(modulo=1000000000, num=201820182018)": 60.026162904003286,
+  "solve_sum_of_largest_prime_factors_p0642_s1_lpf_sieve(modulo=1000000000, num=10)": 7.154700142564252e-05,
+  "solve_sum_of_largest_prime_factors_p0642_s1_lpf_sieve(modulo=1000000000, num=100)": 7.97829998191446e-05,
+  "solve_sum_of_largest_prime_factors_p0642_s1_lpf_sieve(modulo=1000000000, num=10000)": 0.007003513004747219,
+  "solve_sum_of_largest_prime_factors_p0642_s1_lpf_sieve(modulo=1000000000, num=100000)": 0.0753184070053976,
+  "solve_sum_of_largest_prime_factors_p0642_s1_lpf_sieve(modulo=1000000000, num=1000000)": 0.8327890189975733,
+  "solve_sum_of_largest_prime_factors_p0642_s1_lpf_sieve(modulo=1000000000, num=10000000)": NaN,
+  "solve_sum_of_largest_prime_factors_p0642_s1_lpf_sieve(modulo=1000000000, num=201820182018)": NaN
+}

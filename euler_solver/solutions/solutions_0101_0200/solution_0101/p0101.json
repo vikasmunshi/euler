@@ -1,0 +1,8 @@
+{
+  "solve_optimum_polynomial_p0101_s0(polynomial_coefficients=[0, 0, 0, 1])": 8.417999924859032e-05,
+  "solve_optimum_polynomial_p0101_s0(polynomial_coefficients=[1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1])": 0.00013170999955036677,
+  "solve_optimum_polynomial_p0101_s1(polynomial_coefficients=[0, 0, 0, 1])": 9.854199743131176e-05,
+  "solve_optimum_polynomial_p0101_s1(polynomial_coefficients=[1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1])": 0.00019132800298393704,
+  "solve_optimum_polynomial_p0101_s2(polynomial_coefficients=[0, 0, 0, 1])": 0.00011822899978142232,
+  "solve_optimum_polynomial_p0101_s2(polynomial_coefficients=[1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1])": 0.0006003790003887843
+}

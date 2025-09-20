@@ -1,0 +1,5 @@
+{
+  "solve_coloured_configurations_p0194_s0(a=1, b=0, c=3)": 5.540700658457354e-05,
+  "solve_coloured_configurations_p0194_s0(a=25, b=75, c=1984)": 5.264300125418231e-05,
+  "solve_coloured_configurations_p0194_s0(a=2, b=2, c=6)": 6.262699753278866e-05
+}

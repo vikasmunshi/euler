@@ -1,0 +1,5 @@
+{
+  "solve_divisors_of_binomial_product_p0650_s0(n=5)": 3.391600330360234e-05,
+  "solve_divisors_of_binomial_product_p0650_s0(n=20000)": 2.9515002097468823e-05,
+  "solve_divisors_of_binomial_product_p0650_s0(n=100000)": 2.9183000151533633e-05
+}

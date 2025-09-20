@@ -1,0 +1,5 @@
+{
+  "solve_divisibility_multipliers_p0274_s0(max_limit=1000)": 4.1548002627678216e-05,
+  "solve_divisibility_multipliers_p0274_s0(max_limit=10000000)": 4.199800605420023e-05,
+  "solve_divisibility_multipliers_p0274_s0(max_limit=100000)": 7.670199556741863e-05
+}

@@ -1,0 +1,4 @@
+{
+  "solve_order_modulo_factorial_p0952_s0(n=4, p=7)": 5.9523998061195016e-05,
+  "solve_order_modulo_factorial_p0952_s0(n=10000000, p=1000000007)": 4.391300171846524e-05
+}

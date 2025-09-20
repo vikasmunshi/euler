@@ -1,0 +1,5 @@
+{
+  "solve_billiard_p0786_s0(max_bounces=10)": 6.991600093897432e-05,
+  "solve_billiard_p0786_s0(max_bounces=1000000000)": 4.890999844064936e-05,
+  "solve_billiard_p0786_s0(max_bounces=1.000000e+10)": 4.913099837722257e-05
+}

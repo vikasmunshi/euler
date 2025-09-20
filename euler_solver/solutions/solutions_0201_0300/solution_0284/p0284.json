@@ -1,0 +1,5 @@
+{
+  "solve_steady_squares_p0284_s0(max_n=9)": 5.536699609365314e-05,
+  "solve_steady_squares_p0284_s0(max_n=10000)": 4.557600186672062e-05,
+  "solve_steady_squares_p0284_s0(max_n=20000)": 8.798299677437171e-05
+}

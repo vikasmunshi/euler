@@ -1,0 +1,5 @@
+{
+  "solve_tatami_free_rooms_p0256_s0(target_T=1)": 5.144900205777958e-05,
+  "solve_tatami_free_rooms_p0256_s0(target_T=200)": 6.565900548594072e-05,
+  "solve_tatami_free_rooms_p0256_s0(target_T=5)": 5.333199806045741e-05
+}

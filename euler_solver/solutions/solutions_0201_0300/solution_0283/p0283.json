@@ -1,0 +1,5 @@
+{
+  "solve_integer_sided_triangles_with_integral_area_perimeter_ratio_p0283_s0(max_ratio=2)": 6.0477999795693904e-05,
+  "solve_integer_sided_triangles_with_integral_area_perimeter_ratio_p0283_s0(max_ratio=1000)": 7.068899867590517e-05,
+  "solve_integer_sided_triangles_with_integral_area_perimeter_ratio_p0283_s0(max_ratio=2000)": 4.433200228959322e-05
+}

@@ -1,0 +1,74 @@
+[build-system]
+requires = ["poetry-core>=2.2"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "euler-solver"
+version = "0.2.1"
+description = "A Python package for solving and managing Project Euler mathematical and computational problems."
+authors = ["Vikas Munshi <vikas.munshi@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "euler_solver" }]
+
+[tool.poetry.dependencies]
+matplotlib = "^3.10"
+numpy = "^2.3"
+pandas = "^2.3"
+pycryptodome = "^3.23"
+pyprimesieve = "^0.1"
+python = "^3.12"
+requests = "^2.32"
+
+[tool.system-dependencies]
+debian = [
+    "python3-tk",
+    "g++",
+    "primesieve",
+    "libprimesieve-dev",
+    "python3.12-dev"
+]
+fedora = [
+    "python3-tkinter",
+    "gcc-c++",
+    "primesieve",
+    "primesieve-devel",
+    "python3.12-devel"
+]
+arch = [
+    "tk",
+    "gcc",
+    "primesieve",
+    "python"
+]
+macos = [
+    "python-tk",
+    "primesieve"
+]
+descriptions = [
+    "python3-tk: Required for matplotlib TkAgg backend visualization",
+    "primesieve and dev packages: Required for primesieve Python bindings"
+]
+notes = [
+    "tkinter comes bundled with Python on Windows"
+]
+
+[tool.poetry.group.dev.dependencies]
+cython = "^3.1"
+flake8 = "^7.3"
+mypy = "^1.17"
+openai-agents = "^0.2"
+pandas-stubs = "^2.3"
+poetry = "^2.1"
+pre-commit = "^4.3"
+types-requests = "^2.32"
+
+[tool.poetry.urls]
+Homepage = "https://github.com/vikasmunshi/euler"
+Repository = "https://github.com/vikasmunshi/euler.git"
+
+[tool.poetry.scripts]
+solver = "euler_solver.cli:main"
+
+[tool.flake8]
+max-line-length = 120

@@ -1,0 +1,5 @@
+{
+  "solve_largest_roots_of_cubic_polynomials_p0356_s0(max_n=3)": 5.2058996516279876e-05,
+  "solve_largest_roots_of_cubic_polynomials_p0356_s0(max_n=30)": 6.922999455127865e-05,
+  "solve_largest_roots_of_cubic_polynomials_p0356_s0(max_n=100)": 6.508499791380018e-05
+}

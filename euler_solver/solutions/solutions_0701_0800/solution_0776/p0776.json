@@ -1,0 +1,5 @@
+{
+  "solve_digit_sum_division_p0776_s0(max_limit=10)": 4.723799793282524e-05,
+  "solve_digit_sum_division_p0776_s0(max_limit=1234567890123456789)": 5.235400021774694e-05,
+  "solve_digit_sum_division_p0776_s0(max_limit=1.000000e+20)": 4.7378001909237355e-05
+}

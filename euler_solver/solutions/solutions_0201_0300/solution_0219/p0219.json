@@ -1,0 +1,5 @@
+{
+  "solve_skew_cost_coding_p0219_s0(n=6)": 2.9221999284345657e-05,
+  "solve_skew_cost_coding_p0219_s0(n=1000000000)": 3.445299807935953e-05,
+  "solve_skew_cost_coding_p0219_s0(n=10000000)": 2.7567999495659024e-05
+}

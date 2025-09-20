@@ -1,0 +1,4 @@
+{
+  "solve_coin_partitions_p0078_s0(divisor=1000)": 0.00023186900216387585,
+  "solve_coin_partitions_p0078_s0(divisor=1000000)": 0.016649225995934103
+}

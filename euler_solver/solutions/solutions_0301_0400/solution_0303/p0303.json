@@ -1,0 +1,5 @@
+{
+  "solve_multiples_with_small_digits_p0303_s0(max_limit=100)": 4.1848004912026227e-05,
+  "solve_multiples_with_small_digits_p0303_s0(max_limit=10000)": 4.58899958175607e-05,
+  "solve_multiples_with_small_digits_p0303_s0(max_limit=20000)": 6.232000305317342e-05
+}

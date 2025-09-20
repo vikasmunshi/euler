@@ -1,0 +1,5 @@
+{
+  "solve_divisor_square_sum_p0211_s0(max_limit=100)": 3.797299723373726e-05,
+  "solve_divisor_square_sum_p0211_s0(max_limit=64000000)": 2.7747999411076307e-05,
+  "solve_divisor_square_sum_p0211_s0(max_limit=100000000)": 3.337999805808067e-05
+}

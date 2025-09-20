@@ -1,0 +1,5 @@
+{
+  "solve_maximum_integer_partition_product_p0374_s0(max_limit=100)": 3.766600275412202e-05,
+  "solve_maximum_integer_partition_product_p0374_s0(max_limit=1.000000e+14)": 4.2915999074466527e-05,
+  "solve_maximum_integer_partition_product_p0374_s0(max_limit=1000000)": 4.955900658387691e-05
+}

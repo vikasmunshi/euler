@@ -1,0 +1,10 @@
+{
+  "solve_square_digit_chains_p0092_s0(power_of_10=2)": 0.0005667859950335696,
+  "solve_square_digit_chains_p0092_s0(power_of_10=3)": 0.0007583140031783842,
+  "solve_square_digit_chains_p0092_s0(power_of_10=4)": 0.0013871859991922975,
+  "solve_square_digit_chains_p0092_s0(power_of_10=5)": 0.0018982469991897233,
+  "solve_square_digit_chains_p0092_s0(power_of_10=6)": 0.0022362610034178942,
+  "solve_square_digit_chains_p0092_s0(power_of_10=7)": 0.002213984997069929,
+  "solve_square_digit_chains_p0092_s0(power_of_10=8)": 0.005036017006204929,
+  "solve_square_digit_chains_p0092_s0(power_of_10=9)": 0.005807886998809408
+}

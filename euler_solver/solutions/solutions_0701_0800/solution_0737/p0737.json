@@ -1,0 +1,5 @@
+{
+  "solve_coin_loops_p0737_s0(loops=1)": 4.308599454816431e-05,
+  "solve_coin_loops_p0737_s0(loops=2020)": 0.00010815599671332166,
+  "solve_coin_loops_p0737_s0(loops=10000)": 4.513599560596049e-05
+}

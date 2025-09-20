@@ -1,0 +1,5 @@
+{
+  "solve_sum_over_bitwise_operators_p0760_s0(max_limit=10)": 6.944400229258463e-05,
+  "solve_sum_over_bitwise_operators_p0760_s0(max_limit=1.000000e+18)": 4.356800491223112e-05,
+  "solve_sum_over_bitwise_operators_p0760_s0(max_limit=1.000000e+12)": 4.210999759379774e-05
+}

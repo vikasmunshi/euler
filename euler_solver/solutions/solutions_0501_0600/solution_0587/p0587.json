@@ -1,0 +1,5 @@
+{
+  "solve_concave_triangle_p0587_s0(max_n=2)": 3.7611003790516406e-05,
+  "solve_concave_triangle_p0587_s0(max_n=15)": 3.7470003007911146e-05,
+  "solve_concave_triangle_p0587_s0(max_n=100)": 2.9955001082271338e-05
+}

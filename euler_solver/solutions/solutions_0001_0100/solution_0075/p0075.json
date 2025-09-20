@@ -1,0 +1,5 @@
+{
+  "solve_singular_integer_right_triangles_p0075_s0(max_perimeter=50)": 0.00012013500236207619,
+  "solve_singular_integer_right_triangles_p0075_s0(max_perimeter=1500000)": 0.4846954079985153,
+  "solve_singular_integer_right_triangles_p0075_s0(max_perimeter=10000000)": 12.342654518004565
+}

@@ -1,0 +1,5 @@
+{
+  "solve_supernatural_triangles_p0835_s0(n=100)": 6.214300083229318e-05,
+  "solve_supernatural_triangles_p0835_s0(n=10000)": 5.1000999519601464e-05,
+  "solve_supernatural_triangles_p0835_s0(n=10^10^10)": 3.536499571055174e-05
+}

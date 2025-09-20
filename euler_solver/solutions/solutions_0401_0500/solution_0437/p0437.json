@@ -1,0 +1,4 @@
+{
+  "solve_fibonacci_primitive_roots_p0437_s0(max_limit=10000)": 4.615000216290355e-05,
+  "solve_fibonacci_primitive_roots_p0437_s0(max_limit=100000000)": 5.419199442258105e-05
+}

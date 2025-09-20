@@ -1,0 +1,4 @@
+{
+  "solve_divisor_sums_p0608_s0(m_factorial=3, n=100)": 4.603799607139081e-05,
+  "solve_divisor_sums_p0608_s0(m_factorial=200, n=1.000000e+12)": 5.014800262870267e-05
+}

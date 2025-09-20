@@ -1,0 +1,4 @@
+{
+  "solve_singleton_difference_p0136_s0(max_limit=100)": 3.55099982698448e-05,
+  "solve_singleton_difference_p0136_s0(max_limit=50000000)": 4.586500290315598e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_zeckendorf_representation_p0297_s0(max_limit=100)": 5.311600398272276e-05,
+  "solve_zeckendorf_representation_p0297_s0(max_limit=1.000000e+17)": 5.645499913953245e-05,
+  "solve_zeckendorf_representation_p0297_s0(max_limit=1.000000e+18)": 4.8467998567502946e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_sextuplet_norms_p0715_s0(max_limit=10)": 3.24200009345077e-05,
+  "solve_sextuplet_norms_p0715_s0(max_limit=1.000000e+12)": 3.18669990519993e-05,
+  "solve_sextuplet_norms_p0715_s0(max_limit=1.000000e+13)": 3.68430046364665e-05
+}

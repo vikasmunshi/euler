@@ -1,0 +1,5 @@
+{
+  "solve_polymorphic_bacteria_p0666_s0(k=2, m=2)": 4.36750051449053e-05,
+  "solve_polymorphic_bacteria_p0666_s0(k=500, m=10)": 3.7464000342879444e-05,
+  "solve_polymorphic_bacteria_p0666_s0(k=1000, m=10)": 0.005040240997914225
+}

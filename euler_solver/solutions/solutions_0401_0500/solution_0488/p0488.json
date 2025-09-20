@@ -1,0 +1,5 @@
+{
+  "solve_unbalanced_nim_p0488_s0(max_limit=10)": 4.107799759367481e-05,
+  "solve_unbalanced_nim_p0488_s0(max_limit=1.000000e+18)": 4.9293004849459976e-05,
+  "solve_unbalanced_nim_p0488_s0(max_limit=1000000000)": 4.655199882108718e-05
+}

@@ -1,0 +1,4 @@
+{
+  "solve_shifted_pythagorean_triples_p0730_s0(m=10, n=10000)": 3.548600216163322e-05,
+  "solve_shifted_pythagorean_triples_p0730_s0(m=100, n=100000000)": 3.2832002034410834e-05
+}

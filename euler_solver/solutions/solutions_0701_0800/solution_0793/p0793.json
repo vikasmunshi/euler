@@ -1,0 +1,5 @@
+{
+  "solve_median_of_products_p0793_s0(n=3)": 4.7743000322952867e-05,
+  "solve_median_of_products_p0793_s0(n=1000003)": 5.348499689716846e-05,
+  "solve_median_of_products_p0793_s0(n=10000030)": 4.135900235269219e-05
+}

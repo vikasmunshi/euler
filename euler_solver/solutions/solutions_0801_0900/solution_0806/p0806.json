@@ -1,0 +1,5 @@
+{
+  "solve_nim_on_towers_of_hanoi_p0806_s0(n=4)": 4.9635003961157054e-05,
+  "solve_nim_on_towers_of_hanoi_p0806_s0(n=100000)": 5.4259995522443205e-05,
+  "solve_nim_on_towers_of_hanoi_p0806_s0(n=200000)": 5.63709982088767e-05
+}

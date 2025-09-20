@@ -1,0 +1,5 @@
+{
+  "solve_eulerian_cycles_p0289_s0(m=1, mod=100, n=2)": 4.960699880030006e-05,
+  "solve_eulerian_cycles_p0289_s0(m=6, mod=1.000000e+10, n=10)": 4.9075999413616955e-05,
+  "solve_eulerian_cycles_p0289_s0(m=3, mod=1.000000e+10, n=3)": 4.178500239504501e-05
+}

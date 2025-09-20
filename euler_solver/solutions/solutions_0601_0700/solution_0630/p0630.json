@@ -1,0 +1,5 @@
+{
+  "solve_crossed_lines_p0630_s0(n=3)": 3.467699571046978e-05,
+  "solve_crossed_lines_p0630_s0(n=2500)": 3.873999958159402e-05,
+  "solve_crossed_lines_p0630_s0(n=5000)": 2.8359005227684975e-05
+}

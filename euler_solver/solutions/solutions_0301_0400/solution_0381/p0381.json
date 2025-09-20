@@ -1,0 +1,5 @@
+{
+  "solve_prime_k_factorial_p0381_s0(max_limit=100)": 4.723099846160039e-05,
+  "solve_prime_k_factorial_p0381_s0(max_limit=100000000)": 6.0006997955497354e-05,
+  "solve_prime_k_factorial_p0381_s0(max_limit=10000000)": 4.131900641368702e-05
+}

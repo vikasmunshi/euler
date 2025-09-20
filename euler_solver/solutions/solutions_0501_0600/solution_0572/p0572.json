@@ -1,0 +1,4 @@
+{
+  "solve_idempotent_matrices_p0572_s0(max_limit=2)": 7.14839989086613e-05,
+  "solve_idempotent_matrices_p0572_s0(max_limit=200)": 5.620500451186672e-05
+}

@@ -1,0 +1,4 @@
+{
+  "solve_alternating_gcd_sum_p0795_s0(max_limit=10)": 4.37520066043362e-05,
+  "solve_alternating_gcd_sum_p0795_s0(max_limit=12345678)": 3.5756995202973485e-05
+}

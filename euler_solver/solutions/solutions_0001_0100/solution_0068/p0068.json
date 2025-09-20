@@ -1,0 +1,9 @@
+{
+  "solve_magic_5_gon_ring_p0068_s0(result_length=9, ring_size=3)": 0.0011235199999646284,
+  "solve_magic_5_gon_ring_p0068_s0(result_length=12, ring_size=4)": 0.019438708004599903,
+  "solve_magic_5_gon_ring_p0068_s0(result_length=16, ring_size=5)": 0.042069500996149145,
+  "solve_magic_5_gon_ring_p0068_s0(result_length=21, ring_size=6)": 0.2647478850049083,
+  "solve_magic_5_gon_ring_p0068_s0(result_length=26, ring_size=7)": 0.8197680609955569,
+  "solve_magic_5_gon_ring_p0068_s0(result_length=31, ring_size=8)": 1.4816505870039691,
+  "solve_magic_5_gon_ring_p0068_s0(result_length=36, ring_size=9)": 1.3975339780008653
+}

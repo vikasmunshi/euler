@@ -1,0 +1,5 @@
+{
+  "solve_rudin_shapiro_sequence_p0384_s0(t_max=6)": 5.207799404161051e-05,
+  "solve_rudin_shapiro_sequence_p0384_s0(t_max=45)": 3.578000178094953e-05,
+  "solve_rudin_shapiro_sequence_p0384_s0(t_max=100)": 4.3959000322502106e-05
+}

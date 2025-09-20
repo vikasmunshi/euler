@@ -1,0 +1,5 @@
+{
+  "solve_repunit_nonfactors_p0133_s0(max_limit=100)": 4.023200017400086e-05,
+  "solve_repunit_nonfactors_p0133_s0(max_limit=100000)": 3.111700061708689e-05,
+  "solve_repunit_nonfactors_p0133_s0(max_limit=200000)": 2.8045004000887275e-05
+}

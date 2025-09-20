@@ -1,0 +1,5 @@
+{
+  "solve_factorials_divisible_by_a_huge_integer_p0320_s0(max_limit=10)": 3.384400042705238e-05,
+  "solve_factorials_divisible_by_a_huge_integer_p0320_s0(max_limit=1000000)": 2.9680995794478804e-05,
+  "solve_factorials_divisible_by_a_huge_integer_p0320_s0(max_limit=2000000)": 3.650200233096257e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_hexagonal_orchards_p0351_s0(max_limit=5)": 4.34219982707873e-05,
+  "solve_hexagonal_orchards_p0351_s0(max_limit=100000000)": 4.63719989056699e-05,
+  "solve_hexagonal_orchards_p0351_s0(max_limit=1000)": 8.498700481140986e-05
+}

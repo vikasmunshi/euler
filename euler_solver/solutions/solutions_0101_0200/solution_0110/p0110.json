@@ -1,0 +1,7 @@
+{
+  "solve_diophantine_reciprocals_ii_p0110_s0(min_number_of_solutions=10)": 0.000126856000861153,
+  "solve_diophantine_reciprocals_ii_p0110_s0(min_number_of_solutions=100)": 0.00018141400505555794,
+  "solve_diophantine_reciprocals_ii_p0110_s0(min_number_of_solutions=1000)": 0.00013846100046066567,
+  "solve_diophantine_reciprocals_ii_p0110_s0(min_number_of_solutions=100000)": 0.00018656100291991606,
+  "solve_diophantine_reciprocals_ii_p0110_s0(min_number_of_solutions=4000000)": 0.0002556510007707402
+}

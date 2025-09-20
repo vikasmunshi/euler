@@ -1,0 +1,4 @@
+{
+  "solve_idempotents_p0407_s0(max_limit=10)": 0.0001135200000135228,
+  "solve_idempotents_p0407_s0(max_limit=10000000)": 0.0005709050019504502
+}

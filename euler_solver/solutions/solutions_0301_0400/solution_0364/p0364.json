@@ -1,0 +1,5 @@
+{
+  "solve_comfortable_distance_p0364_s0(max_limit=4)": 5.244000203674659e-05,
+  "solve_comfortable_distance_p0364_s0(max_limit=1000000)": 0.0002028439994319342,
+  "solve_comfortable_distance_p0364_s0(max_limit=1000)": 5.7999001001007855e-05
+}

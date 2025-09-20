@@ -1,0 +1,5 @@
+{
+  "solve_special_partitions_p0333_s0(max_limit=100)": 5.0684997404459864e-05,
+  "solve_special_partitions_p0333_s0(max_limit=1000000)": 5.302199861034751e-05,
+  "solve_special_partitions_p0333_s0(max_limit=2000000)": 4.9510999815538526e-05
+}

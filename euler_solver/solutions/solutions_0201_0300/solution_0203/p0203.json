@@ -1,0 +1,5 @@
+{
+  "solve_squarefree_binomial_coefficients_p0203_s0(rows=8)": 4.44410034106113e-05,
+  "solve_squarefree_binomial_coefficients_p0203_s0(rows=51)": 3.692100290209055e-05,
+  "solve_squarefree_binomial_coefficients_p0203_s0(rows=100)": 3.81520003429614e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_digit_power_sum_p0119_s0(n=2)": 0.0016532209992874414,
+  "solve_digit_power_sum_p0119_s0(n=10)": 0.0016013920030673034,
+  "solve_digit_power_sum_p0119_s0(n=30)": 0.0008816999979899265
+}

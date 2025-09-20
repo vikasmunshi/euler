@@ -1,0 +1,5 @@
+{
+  "solve_youngs_game_a_p0922_s0(m=2, w=4)": 4.558300133794546e-05,
+  "solve_youngs_game_a_p0922_s0(m=8, w=64)": 5.896099901292473e-05,
+  "solve_youngs_game_a_p0922_s0(m=3, w=9)": 5.94629964325577e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_cutting_squares_p0270_s0(n=1)": 4.25000034738332e-05,
+  "solve_cutting_squares_p0270_s0(n=30)": 5.0306000048294663e-05,
+  "solve_cutting_squares_p0270_s0(n=50)": 4.769999941345304e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_lexicographic_permutations_p0024_s0(digits=012, permutation_number=4)": 7.24179990356788e-05,
+  "solve_lexicographic_permutations_p0024_s0(digits=012, permutation_number=6)": 4.180699761491269e-05,
+  "solve_lexicographic_permutations_p0024_s0(digits=0123456789, permutation_number=1000000)": 4.7033005103003234e-05
+}

@@ -1,0 +1,6 @@
+{
+  "solve_ordered_fractions_p0071_s0(max_d=10)": 0.00010404900240246207,
+  "solve_ordered_fractions_p0071_s0(max_d=1000000)": 8.958600665209815e-05,
+  "solve_ordered_fractions_p0071_s0(max_d=1000000000)": 0.0002959460034617223,
+  "solve_ordered_fractions_p0071_s0(max_d=1.000000e+12)": 0.0001238449985976331
+}

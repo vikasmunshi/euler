@@ -1,0 +1,5 @@
+{
+  "solve_square_remainders_p0120_s0(max_limit=10)": 4.3382999137975276e-05,
+  "solve_square_remainders_p0120_s0(max_limit=1000)": 0.00019408600201131776,
+  "solve_square_remainders_p0120_s0(max_limit=5000)": 0.0015151269981288351
+}

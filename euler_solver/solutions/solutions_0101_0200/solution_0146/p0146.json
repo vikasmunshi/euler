@@ -1,0 +1,5 @@
+{
+  "solve_investigating_a_prime_pattern_p0146_s0(max_limit=1000)": 2.8315997042227536e-05,
+  "solve_investigating_a_prime_pattern_p0146_s0(max_limit=150000000)": 3.261799429310486e-05,
+  "solve_investigating_a_prime_pattern_p0146_s0(max_limit=100000000)": 6.176500028232113e-05
+}

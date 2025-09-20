@@ -1,0 +1,6 @@
+{
+  "solve_convergents_of_e_p0065_s0(convergent_num=10)": 0.00036451599589781836,
+  "solve_convergents_of_e_p0065_s0(convergent_num=100)": 0.0010067440016428009,
+  "solve_convergents_of_e_p0065_s0(convergent_num=1000)": 0.04324171000189381,
+  "solve_convergents_of_e_p0065_s0(convergent_num=10000)": 20.34039573300106
+}

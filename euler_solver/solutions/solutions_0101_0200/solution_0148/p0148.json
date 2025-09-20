@@ -1,0 +1,5 @@
+{
+  "solve_exploring_pascals_triangle_p0148_s0(max_limit=10)": 3.209699934814125e-05,
+  "solve_exploring_pascals_triangle_p0148_s0(max_limit=1000000000)": 3.233699681004509e-05,
+  "solve_exploring_pascals_triangle_p0148_s0(max_limit=1.000000e+12)": 3.283700061729178e-05
+}

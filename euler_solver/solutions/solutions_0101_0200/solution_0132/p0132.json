@@ -1,0 +1,4 @@
+{
+  "solve_large_repunit_factors_p0132_s0(n=4, repunit_length=10)": 4.1191997297573835e-05,
+  "solve_large_repunit_factors_p0132_s0(n=40, repunit_length=1000000000)": 4.0291997720487416e-05
+}

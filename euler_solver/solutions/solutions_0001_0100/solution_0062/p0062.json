@@ -1,0 +1,10 @@
+{
+  "solve_cubic_permutations_p0062_s0(num_permutations=2)": 0.00016973799938568845,
+  "solve_cubic_permutations_p0062_s0(num_permutations=3)": 0.0009320780009147711,
+  "solve_cubic_permutations_p0062_s0(num_permutations=4)": 0.00909098800184438,
+  "solve_cubic_permutations_p0062_s0(num_permutations=5)": 0.015670467000745703,
+  "solve_cubic_permutations_p0062_s0(num_permutations=6)": 0.060725019000528846,
+  "solve_cubic_permutations_p0062_s0(num_permutations=7)": 0.1470298179992824,
+  "solve_cubic_permutations_p0062_s0(num_permutations=8)": 0.12307517800218193,
+  "solve_cubic_permutations_p0062_s0(num_permutations=9)": 0.1861346660007257
+}

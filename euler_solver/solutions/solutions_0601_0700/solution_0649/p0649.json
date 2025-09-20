@@ -1,0 +1,6 @@
+{
+  "solve_low_prime_chessboard_nim_p0649_s0(c=1, n=3)": 4.826700023841113e-05,
+  "solve_low_prime_chessboard_nim_p0649_s0(c=2, n=3)": 4.7462999646086246e-05,
+  "solve_low_prime_chessboard_nim_p0649_s0(c=3, n=9)": 4.7704001190140843e-05,
+  "solve_low_prime_chessboard_nim_p0649_s0(c=100, n=10000019)": 3.8307996874209493e-05
+}

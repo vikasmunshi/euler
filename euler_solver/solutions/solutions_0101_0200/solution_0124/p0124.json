@@ -1,0 +1,6 @@
+{
+  "solve_ordered_radicals_p0124_s0(k=4, max_limit=10)": 2.62079993262887e-05,
+  "solve_ordered_radicals_p0124_s0(k=6, max_limit=10)": 3.008800558745861e-05,
+  "solve_ordered_radicals_p0124_s0(k=10000, max_limit=100000)": 0.10006510200037155,
+  "solve_ordered_radicals_p0124_s0(k=20000, max_limit=200000)": 0.21330612999736331
+}

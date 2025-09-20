@@ -1,0 +1,5 @@
+{
+  "solve_mersennes_square_root_p0942_s0(q=5)": 4.749399522552267e-05,
+  "solve_mersennes_square_root_p0942_s0(q=17)": 4.080499638803303e-05,
+  "solve_mersennes_square_root_p0942_s0(q=74207281)": 4.468799306778237e-05
+}

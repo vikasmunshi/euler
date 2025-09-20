@@ -1,0 +1,4 @@
+{
+  "solve_cardano_triplets_p0251_s0(max_limit=1000)": 3.35000004270114e-05,
+  "solve_cardano_triplets_p0251_s0(max_limit=110000000)": 4.925400571664795e-05
+}

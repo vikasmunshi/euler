@@ -1,0 +1,4 @@
+{
+  "solve_shortest_lattice_vector_p0507_s0(max_n=10)": 5.1973998779430985e-05,
+  "solve_shortest_lattice_vector_p0507_s0(max_n=20000000)": 6.890299846418202e-05
+}

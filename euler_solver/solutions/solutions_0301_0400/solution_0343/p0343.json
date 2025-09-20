@@ -1,0 +1,5 @@
+{
+  "solve_fractional_sequences_p0343_s0(max_limit=100)": 4.700299905380234e-05,
+  "solve_fractional_sequences_p0343_s0(max_limit=2000000)": 4.998299846192822e-05,
+  "solve_fractional_sequences_p0343_s0(max_limit=5000000)": 9.829000191530213e-05
+}

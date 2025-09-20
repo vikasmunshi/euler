@@ -1,0 +1,5 @@
+{
+  "solve_convex_holes_p0252_s0(n=20)": 4.036499740323052e-05,
+  "solve_convex_holes_p0252_s0(n=500)": 4.034500307170674e-05,
+  "solve_convex_holes_p0252_s0(n=1000)": 6.244199903449044e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_constrained_permutations_p0631_s0(m=0, n=2)": 3.8127000152599066e-05,
+  "solve_constrained_permutations_p0631_s0(m=40, n=1.000000e+18)": 4.04780003009364e-05,
+  "solve_constrained_permutations_p0631_s0(m=50, n=1.000000e+18)": 2.7966998459305614e-05
+}

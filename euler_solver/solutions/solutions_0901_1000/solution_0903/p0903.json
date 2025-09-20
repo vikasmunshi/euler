@@ -1,0 +1,5 @@
+{
+  "solve_total_permutation_powers_p0903_s0(n=2)": 3.350300539750606e-05,
+  "solve_total_permutation_powers_p0903_s0(n=3)": 0.0023945029970491305,
+  "solve_total_permutation_powers_p0903_s0(n=1000000)": 5.138700362294912e-05
+}

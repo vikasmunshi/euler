@@ -1,0 +1,5 @@
+{
+  "solve_silver_dollar_game_p0344_s0(c=2, n=10)": 2.6982001145370305e-05,
+  "solve_silver_dollar_game_p0344_s0(c=100, n=1000000)": 2.9861999792046845e-05,
+  "solve_silver_dollar_game_p0344_s0(c=200, n=100000)": 2.773499727481976e-05
+}

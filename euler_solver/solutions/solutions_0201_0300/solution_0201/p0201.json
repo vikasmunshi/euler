@@ -1,0 +1,5 @@
+{
+  "solve_subsets_with_a_unique_sum_p0201_s0(k=3, size=6)": 3.3807002182584256e-05,
+  "solve_subsets_with_a_unique_sum_p0201_s0(k=50, size=100)": 7.123799878172576e-05,
+  "solve_subsets_with_a_unique_sum_p0201_s0(k=60, size=120)": 4.528200224740431e-05
+}

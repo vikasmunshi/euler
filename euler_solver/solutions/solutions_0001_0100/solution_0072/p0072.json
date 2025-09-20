@@ -1,0 +1,10 @@
+{
+  "solve_counting_fractions_p0072_s0(max_d=8)": 4.1665000026114285e-05,
+  "solve_counting_fractions_p0072_s0(max_d=10)": 3.791400376940146e-05,
+  "solve_counting_fractions_p0072_s0(max_d=100)": 6.463599856942892e-05,
+  "solve_counting_fractions_p0072_s0(max_d=1000)": 0.0004616549995262176,
+  "solve_counting_fractions_p0072_s0(max_d=10000)": 0.006861210997158196,
+  "solve_counting_fractions_p0072_s0(max_d=100000)": 0.10577158500382211,
+  "solve_counting_fractions_p0072_s0(max_d=1000000)": 0.9126307650003582,
+  "solve_counting_fractions_p0072_s0(max_d=10000000)": 19.58693472300365
+}

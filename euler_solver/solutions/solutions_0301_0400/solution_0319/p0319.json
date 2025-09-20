@@ -1,0 +1,5 @@
+{
+  "solve_bounded_sequences_p0319_s0(n=2)": 0.00012680800136877224,
+  "solve_bounded_sequences_p0319_s0(n=1.000000e+10)": 3.774499782593921e-05,
+  "solve_bounded_sequences_p0319_s0(n=20)": 4.6321001718752086e-05
+}

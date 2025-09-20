@@ -1,0 +1,5 @@
+{
+  "solve_tribonacci_non_divisors_p0225_s0(n=1)": 0.00010169500455958769,
+  "solve_tribonacci_non_divisors_p0225_s0(n=124)": 8.035999780986458e-05,
+  "solve_tribonacci_non_divisors_p0225_s0(n=100)": 0.00016399599553551525
+}

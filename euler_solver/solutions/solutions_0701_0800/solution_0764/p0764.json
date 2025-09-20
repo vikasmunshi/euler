@@ -1,0 +1,5 @@
+{
+  "solve_asymmetric_diophantine_equation_p0764_s0(max_limit=100)": 5.2835996029898524e-05,
+  "solve_asymmetric_diophantine_equation_p0764_s0(max_limit=1.000000e+16)": 4.076399636687711e-05,
+  "solve_asymmetric_diophantine_equation_p0764_s0(max_limit=10000000)": 4.2180996388196945e-05
+}

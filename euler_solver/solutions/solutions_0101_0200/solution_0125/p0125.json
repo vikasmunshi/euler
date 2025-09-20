@@ -1,0 +1,5 @@
+{
+  "solve_palindromic_sums_p0125_s0(max_limit=1000)": 0.00010191500041401014,
+  "solve_palindromic_sums_p0125_s0(max_limit=100000000)": 0.13970549399527954,
+  "solve_palindromic_sums_p0125_s0(max_limit=1000000000)": 0.6616869110002881
+}

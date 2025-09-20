@@ -1,0 +1,8 @@
+{
+  "solve_square_root_digital_expansion_p0080_s0(digits=100, max_num=2)": 0.0005313020010362379,
+  "solve_square_root_digital_expansion_p0080_s0(digits=100, max_num=99)": 0.019989983993582428,
+  "solve_square_root_digital_expansion_p0080_s0(digits=100, max_num=999)": 0.430181806004839,
+  "solve_square_root_digital_expansion_p0080_s1(digits=100, max_num=2)": 0.0008234659981098957,
+  "solve_square_root_digital_expansion_p0080_s1(digits=100, max_num=99)": 0.034493237995775416,
+  "solve_square_root_digital_expansion_p0080_s1(digits=100, max_num=999)": 0.6309411809997982
+}

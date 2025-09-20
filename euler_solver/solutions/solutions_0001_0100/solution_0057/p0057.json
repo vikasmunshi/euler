@@ -1,0 +1,6 @@
+{
+  "solve_square_root_convergents_p0057_s0(expansions=10)": 5.426300049293786e-05,
+  "solve_square_root_convergents_p0057_s0(expansions=100)": 8.402200182899833e-05,
+  "solve_square_root_convergents_p0057_s0(expansions=1000)": 0.002140599004633259,
+  "solve_square_root_convergents_p0057_s0(expansions=10000)": 1.619373135996284
+}

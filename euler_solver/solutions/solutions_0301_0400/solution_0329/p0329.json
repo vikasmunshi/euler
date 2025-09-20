@@ -1,0 +1,5 @@
+{
+  "solve_prime_frog_p0329_s0(sequence=PPPP, squares=10)": 3.6622004699893296e-05,
+  "solve_prime_frog_p0329_s0(sequence=PPPPNNPPPNPPNPN, squares=500)": 3.199799539288506e-05,
+  "solve_prime_frog_p0329_s0(sequence=PPPPNNPPPNPPNPN, squares=1000)": 3.841800207737833e-05
+}

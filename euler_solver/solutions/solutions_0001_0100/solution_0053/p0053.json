@@ -1,0 +1,4 @@
+{
+  "solve_combinatoric_selections_p0053_s0(max_n=100, threshold=100)": 7.968700083438307e-05,
+  "solve_combinatoric_selections_p0053_s0(max_n=100, threshold=1000000)": 8.985800377558917e-05
+}

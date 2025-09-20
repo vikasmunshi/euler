@@ -1,0 +1,5 @@
+{
+  "solve_linear_combinations_of_semiprimes_p0278_s0(max_limit=30)": 4.282999725546688e-05,
+  "solve_linear_combinations_of_semiprimes_p0278_s0(max_limit=5000)": 3.4272001357749104e-05,
+  "solve_linear_combinations_of_semiprimes_p0278_s0(max_limit=1000)": 3.333099448354915e-05
+}

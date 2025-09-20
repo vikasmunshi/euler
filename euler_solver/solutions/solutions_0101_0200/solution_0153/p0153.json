@@ -1,0 +1,5 @@
+{
+  "solve_investigating_gaussian_integers_p0153_s0(max_limit=10)": 3.4356999094597995e-05,
+  "solve_investigating_gaussian_integers_p0153_s0(max_limit=100000000)": 3.7001002056058496e-05,
+  "solve_investigating_gaussian_integers_p0153_s0(max_limit=1000000)": 4.0655999328009784e-05
+}

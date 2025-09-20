@@ -1,0 +1,5 @@
+{
+  "solve_circle_and_tangent_line_p0410_s0(max_a=5, max_r=1)": 4.866599920205772e-05,
+  "solve_circle_and_tangent_line_p0410_s0(max_a=1000000000, max_r=100000000)": 5.350299761630595e-05,
+  "solve_circle_and_tangent_line_p0410_s0(max_a=100000000, max_r=1000000000)": 4.846499359700829e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_powerful_digit_sum_p0056_s0(num_digits=1)": 0.00029435499891405925,
+  "solve_powerful_digit_sum_p0056_s0(num_digits=2)": 0.02206947299418971,
+  "solve_powerful_digit_sum_p0056_s0(num_digits=3)": 0.9151744019982289
+}

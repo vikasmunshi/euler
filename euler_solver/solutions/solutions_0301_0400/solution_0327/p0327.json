@@ -1,0 +1,5 @@
+{
+  "solve_rooms_of_doom_p0327_s0(max_capacity=4, min_capacity=3, rooms=6)": 5.383499956224114e-05,
+  "solve_rooms_of_doom_p0327_s0(max_capacity=40, min_capacity=3, rooms=30)": 5.6523000239394605e-05,
+  "solve_rooms_of_doom_p0327_s0(max_capacity=10, min_capacity=3, rooms=10)": 4.742500459542498e-05
+}
