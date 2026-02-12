@@ -95,3 +95,5 @@ site/
 target/
 var/
 
+/cache/
+/workspace/
