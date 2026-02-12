@@ -96,7 +96,7 @@ def add_resource(stack_dir: Path, manifest: dict[str, tuple[str, str]], resource
         stack_dir: The stack directory where the resource should be added.
         manifest: Dictionary mapping filename hashes to (content_hash, filename) tuples.
         resource: The resource path relative to projecteuler.net (e.g., 'resources/file.txt').
-        force_refresh: If True, bypass cache and re-download the resource. Defaults to False.
+        force_refresh: If True, bypass the cache and re-download the resource. Defaults to False.
 
     Returns:
         None
