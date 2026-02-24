@@ -1,0 +1,3 @@
+491cb095eaf11b3e6fe21558986f8dedd114b018f476028db8cf315e2fb2711f xor-equation c.html
+632e4ff4be9aad0be07271d5b3edd81b6d1296e3a7118d8e4ee9296cd2386811 xor-equation c.md
+56c69cc7cb8becfcc367c62ee8c35d314a085f57142c93b10df525627b1bdf1b xor-equation c.url

@@ -1,0 +1,3 @@
+62dacb748d75b9ba5e6b622ccec141a3bf82b8b5a0b9f4e07d0f2e009f1d8863 average and variance.html
+c80d3d37323ad46987f766ebb72869a8adf5c792014db054ee6988096a336c02 average and variance.md
+28d2ad1632f2511e6b832e449fb7abb2154ca8f9966981135407af844e9b71a4 average and variance.url

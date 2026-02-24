@@ -1,0 +1,3 @@
+e30db5e6b1e64d4a252821993d6d512f59d8cdae5880aa72657bdd296ac1ae24 flexible digit sum.html
+4747ec9157669a8f2bcf216ff5ff59c56421ed4f7aa2143f7a1d0b436f77a25a flexible digit sum.md
+48fa05e50555abadf5b9ed4804bd61d01129193eb3646aa1e999f982236565d6 flexible digit sum.url

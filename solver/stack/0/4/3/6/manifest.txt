@@ -1,0 +1,3 @@
+8dedc8930d086db74083fd8206c3fd7d84851030afd5452d2e6c9d219d8cfd3b unfair wager.html
+62c3706e6d7166d54bc942b2aa64fa3930b2e95fe1ea1bee47584d51d6cccdf4 unfair wager.md
+676747f2b7511566f04acf4feab770cfcaa0764949a0704a5e3f884ecfa12af7 unfair wager.url

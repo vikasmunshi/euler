@@ -1,0 +1,3 @@
+0a9deaef000c4a83815413d8ee4ed8b0e8fd3911f3d03b9ee9d91dd7dbca2267 expected minimal fractional value.html
+82572e58b1e4ff6bc37ca2140c674e35dd864c0ac0bec49f9f8ee280d48527bb expected minimal fractional value.md
+d7197339f16629c5f6641cf7cd213f09d427134c5fb3edff691108e5afa6c7d4 expected minimal fractional value.url

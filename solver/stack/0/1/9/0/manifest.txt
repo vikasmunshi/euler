@@ -1,0 +1,3 @@
+5c184f38745eaa4f4d951c9c65a3a59e09e25eaa7cbb55ef375c70a639577f69 maximising a weighted product.html
+ea96fae44fc30f31f1c1de7a137963c9fa2653538129391348802a09b9699a1d maximising a weighted product.md
+769a92a880d2cd3278a9a6836b288d44e9f33c4a0d9950b27113ab03e7c8bb93 maximising a weighted product.url

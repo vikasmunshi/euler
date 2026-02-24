@@ -1,0 +1,3 @@
+a7d8ff7a0f7504f0cb1b359522e15ab9a57be2d03bc8c79b723d025da6062228 the king's banquet.html
+526a1edaf81773857106816f12b920ddca13281dc7bed2b1cbbba7f4bbfedaeb the king's banquet.md
+ee21087e95972661c1f0ff76b14f9828d69ab4099d1308aaad3acfa9bd673b74 the king's banquet.url

@@ -1,0 +1,3 @@
+d483e8f3ddee199f66ec7a016b379979086ed9124375bdf40f61ae1433a21e17 pairwise coin-tossing game.html
+ef8c561ff953581718914099889e40505d610485fda62274b1bab74f46b35431 pairwise coin-tossing game.md
+c95f4657b20eb501e5d7376dd87420ade75cb146df51405733ce878bb5606578 pairwise coin-tossing game.url

@@ -1,0 +1,3 @@
+adc89bf50ca776ec8b1481c48dc8fb0cb455164089615947b2f288cba4fd7072 prime digit sum.html
+72a0a09522e8d8f59d0cb286bbbd695280606cf2291cb9a97df9f4dab46b11da prime digit sum.md
+d44fe6100d3afb85edcb8ac75da19fc5f0e51423f16d11d970c14be1495f7149 prime digit sum.url

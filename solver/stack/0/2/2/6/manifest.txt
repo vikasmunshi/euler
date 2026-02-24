@@ -1,0 +1,3 @@
+379f0068a37c1dce2dc74a47ebe6ec229b8bc1dae4e0093a6c4d04431ea3fe2c a scoop of blancmange.html
+5e191958baa4a3413d27fc5893dabcca50520fb06e3e8ae395dd19e88a9eff32 a scoop of blancmange.md
+95fc3cacca0a29e596c1d3ded4f3b9082fbdc69909b13e814b69712d40f753c4 a scoop of blancmange.url

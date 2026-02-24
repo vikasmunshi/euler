@@ -1,0 +1,3 @@
+0d15429f1e21923839d3c7b768d5b8edba668b2b6450a3348e596e9dcc3569ae power sets of power sets.html
+78c31403f758de73b3fc8548d6d392239555a7e7cdb5eef17e204f15d6b5a62e power sets of power sets.md
+a159690e54eeea9da2b545b08f8bcca4f14a5a7899c5b4d6f84809ad73a8fb4d power sets of power sets.url

@@ -1,0 +1,3 @@
+9fbf49506d79e50f11e1b67190149b56bd011551c0d39331179d1ed2093df6a2 inverse digit sum.html
+e4aad36c18120de17b47f1e7fe4aecb1e8c3056fd7792174cab59f1c6a0990c0 inverse digit sum.md
+dd84f99caa981590af4a8a545ccb6187c1dbb7065b4a6feef09fcc4072e83b9c inverse digit sum.url

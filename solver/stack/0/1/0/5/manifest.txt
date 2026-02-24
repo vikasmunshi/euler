@@ -1,0 +1,4 @@
+a217533d36f64ea6e60abc369028d3aeceb6e2fc7ece09475bee486dfa3cbed1 special subset sums- testing.html
+b1992080ea6d6abe79e1b2ec1405e9ba22d21f1a61711b1c03ee4fd9c13dc924 special subset sums- testing.md
+b112af9fb41146b4f4b9e38cad7ad440090c70ee3bc668cace85b523c4ecdc61 special subset sums- testing.url
+adbf7a9dfec0c137e387be59c69993e9e2564908be3a99f21144932a01368c32 resources/0105_sets.txt

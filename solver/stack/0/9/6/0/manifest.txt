@@ -1,0 +1,3 @@
+0a1af6401ce8c8cba15f3464b435da4e1a26bcf56976419136095a3120eb6f6c stone game solitaire.html
+f8537198fd1071bdc6eeb6bd8c1df9d37de5197c179ad4ea5f33de43233d4736 stone game solitaire.md
+90799a947d63d538d52e5f9a39c75cf3df49ec9525302c93ac19b2296449df26 stone game solitaire.url

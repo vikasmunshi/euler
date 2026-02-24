@@ -1,0 +1,3 @@
+8498d54fa7f4ebc0009a51a03448b7a9d2246aa0dafb6cc9f04cbfb55f71e018 exploring pascal's triangle.html
+04e2b855f78985a5dbc053291bc0ee80d60f63a3cd95ca9e068ee9d14a46a8c1 exploring pascal's triangle.md
+ee29412ce2b253e5a5d382cb23d61c0ce14531ca4397abd051ff2486727be320 exploring pascal's triangle.url

@@ -1,0 +1,3 @@
+f162d314351b26662cba360a5a1c4eb11680a494dd0f425b48d0120e28d6410f integer sided triangles with integral area-perimeter ratio.html
+a14ff46478dbd165dd507ddf48e0adb8885dbd66257bb587124aa23852ea715a integer sided triangles with integral area-perimeter ratio.md
+f4f15aacd0358510eabb8cc717c5c6f491c9370814beb3a2600bc91011479215 integer sided triangles with integral area-perimeter ratio.url

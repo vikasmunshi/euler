@@ -1,0 +1,3 @@
+5979ea8f2efd78a652fd3aa49659abb43a562a06db72357e3fa485adbc1d1d94 nontransitive sets of dice.html
+4b344b654282fd3a756023661fcc5d326d9b52b58df33c8ab14d2c96b0f7bafe nontransitive sets of dice.md
+cfb3bd8ae20ddbd8d63a75862c146b7e6f135e083529c6c4cddd8d3dda1b6a19 nontransitive sets of dice.url

@@ -1,0 +1,3 @@
+0e6eb723e24447cbe2adc0fc29ec051c930d3027a1277eaea2b6f83b67ae6635 cross-hatched triangles.html
+0316e9ad51795528b9dd91c11fc0b8409869c0c73df161fac7ec5712e8c0f3cf cross-hatched triangles.md
+d8469a26cf646ad517180508c6a675be2d63ae98c960df3745023d3ddec1e730 cross-hatched triangles.url

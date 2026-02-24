@@ -1,0 +1,3 @@
+1f710005e0de8d8ef639267871e41a48237933194cd98bb19aa94baa546de647 nim on towers of hanoi.html
+d80739d6505f0ec195ebb9485cdbb5a09a44814d14ee7badd0617b45bfcac815 nim on towers of hanoi.md
+7e3332d3d7682951c3101ba8f49a2005a014cee08ce2e5ba156fa00304c8b9c7 nim on towers of hanoi.url
