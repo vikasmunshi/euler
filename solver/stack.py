@@ -40,7 +40,7 @@ from typing import Generator
 
 from bs4 import BeautifulSoup
 
-from solver.cached_download import download_file
+from solver.download import download_file
 from solver.vault import decrypt, encrypt
 
 __all__ = [
