@@ -32,7 +32,7 @@ Dependencies:
     pycryptodome: pip install pycryptodome
 
 Example:
-    >>> from solver.vault import encrypt, decrypt
+    >>> from solver.vault import decrypt, encrypt
     >>> plaintext = "Secret problem content"
     >>> ciphertext = encrypt(plaintext)
     >>> decrypt(ciphertext) == plaintext
