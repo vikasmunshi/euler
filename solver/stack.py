@@ -97,12 +97,12 @@ def add_file(stack_dir: Path, manifest: dict[str, str], filename: str, content: 
         - Content hash in the manifest is computed from plaintext, not encrypted data
     """
     if (content_hash := sha256(content.encode('utf-8')).hexdigest()) != manifest.get(filename):
-        filepath: Path = stack_dir.joinpath(filename)
+        filepath: Path = stack_dir / filename
         filepath.parent.mkdir(parents=True, exist_ok=True)
         if is_public_problem(stack_dir):
             filepath.write_text(content)
         else:
-            enc_filepath: Path = filepath.parent.joinpath(filepath.name + '.enc')
+            enc_filepath: Path = filepath.parent / (filepath.name + '.enc')
             enc_filepath.write_text(encrypt(content))
         manifest[filename] = content_hash
         write_manifest(stack_dir, manifest=manifest)
@@ -152,7 +152,7 @@ def fill_stack(problems: list[int] | None = None, refresh_list: bool = False, re
         problems = [int(line.split('##')[0])
                     for line in download_file(PROBLEMS_LIST_URL, force_refresh=refresh_list).strip().splitlines()[1:]]
     for problem_number in problems:
-        stack_dir = get_stack_dir(problem_number)
+        stack_dir: Path = get_stack_dir(problem_number)
         init_from_projecteuler(problem_number, force_refresh=refresh_problems)
         manifest: dict[str, str] = read_manifest(stack_dir)
         print(f'Problem {problem_number} -> {stack_dir} ({len(manifest)} files)')
@@ -242,9 +242,9 @@ def get_problem_number(stack_dir: StackDir) -> ProblemNumber:
         This function is cached. Repeated calls with the same stack_dir
         will return the cached result without reparsing the path.
     """
-    parts = stack_dir.parts
+    parts: tuple[str, ...] = stack_dir.parts
     if len(parts) >= 5 and parts[-5] == 'stack':
-        digits = ''.join(parts[-4:])
+        digits: str = ''.join(parts[-4:])
         return int(digits)
     raise ValueError(f'Invalid stack directory path: {stack_dir}')
 
@@ -288,14 +288,14 @@ def init_from_projecteuler(problem_number: int, force_refresh: bool = False) -> 
     problem_soup: BeautifulSoup = BeautifulSoup(problem_html, 'html.parser')
 
     # Extract and validate problem content
-    problem_content_obj = problem_soup.find('div', {'class': 'problem_content'})
+    problem_content_obj: BeautifulSoup | None = problem_soup.find('div', {'class': 'problem_content'})
     if not problem_content_obj:
         raise ValueError(f'Problem {problem_number}: Could not find problem_content div in HTML')
 
     problem_content: str = problem_content_obj.text.strip()
 
     # Extract and validate problem title
-    title_obj = problem_soup.find('h2')
+    title_obj: BeautifulSoup | None = problem_soup.find('h2')
     if not title_obj:
         raise ValueError(f'Problem {problem_number}: Could not find h2 title element in HTML')
 
@@ -382,6 +382,29 @@ def iterdir_recursive(directory: Path) -> Generator[Path, None, None]:
     return None
 
 
+def read_file(stack_dir: Path, filename: str) -> str:
+    """Read a file from the stack directory.
+
+    For public problems (1-100), reads files directly as plaintext.
+    For private problems (101+), reads encrypted files (.enc) and decrypts them.
+
+    Args:
+        stack_dir: The stack directory containing the file.
+        filename: The relative filename within the stack directory (without .enc extension).
+
+    Returns:
+        str: The file content as plaintext.
+
+    Raises:
+        FileNotFoundError: If the file doesn't exist in the stack directory.
+    """
+    is_public: bool = is_public_problem(stack_dir)
+    file_path: Path = stack_dir / filename if is_public else stack_dir / (filename + '.enc')
+    if not file_path.exists():
+        raise FileNotFoundError(f'File {filename} not found in stack directory')
+    return file_path.read_text() if is_public else decrypt(file_path.read_text())
+
+
 def read_manifest(stack_dir: Path) -> dict[str, str]:
     """Load the manifest file for a given stack directory.
 
@@ -403,7 +426,7 @@ def read_manifest(stack_dir: Path) -> dict[str, str]:
     Note:
         Empty lines and lines that cannot be properly split are silently ignored.
     """
-    manifest_file = stack_dir / MANIFEST_FILENAME
+    manifest_file: Path = stack_dir / MANIFEST_FILENAME
     if not manifest_file.exists():
         return {}
     return {filename: content_hash
@@ -441,11 +464,11 @@ def sanitize_filename(filename: str) -> str:
     # Remove trailing periods and spaces (Windows restriction)
     filename = filename.rstrip('. ')
     # Avoid special/empty names and Windows reserved device names
-    reserved_names = {'', '.', '..', 'con', 'prn', 'aux', 'nul',
-                      'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
-                      'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9'}
+    reserved_names: set[str] = {'', '.', '..', 'con', 'prn', 'aux', 'nul',
+                                'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
+                                'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9'}
     # Check base name without extension for reserved names
-    base_name = filename.split('.')[0] if '.' in filename else filename
+    base_name: str = filename.split('.')[0] if '.' in filename else filename
     if base_name in reserved_names:
         filename = 'no-name' if not filename or filename in {'.', '..'} else '_' + filename
     # Avoid filenames that look like CLI flags
@@ -466,8 +489,8 @@ def stack_from_workspace() -> None:
         None
     """
     if PROBLEM_NUMBER_FILE.exists():
-        problem_number = int(PROBLEM_NUMBER_FILE.read_text())
-        stack_dir = get_stack_dir(problem_number)
+        problem_number: int = int(PROBLEM_NUMBER_FILE.read_text())
+        stack_dir: Path = get_stack_dir(problem_number)
         manifest: dict[str, str] = read_manifest(stack_dir)
         for filename in iterdir_recursive(WORKSPACE_DIR):
             if filename.name not in {MANIFEST_FILENAME, PROBLEM_NUMBER_FILE.name}:
@@ -483,6 +506,10 @@ def unstack_to_workspace(problem_number: int) -> None:
     it will be initialized from Project Euler first. A problem_number.txt file is
     created in the workspace to track which problem is currently active.
 
+    Before unstacking, verifies file integrity by comparing actual file hashes
+    against the manifest. Issues warnings for any modified, missing, or untracked
+    files but continues with the unstacking process.
+
     Args:
         problem_number: The Project Euler problem number to unstack.
 
@@ -492,23 +519,28 @@ def unstack_to_workspace(problem_number: int) -> None:
     if WORKSPACE_DIR.exists():
         rmtree(WORKSPACE_DIR, ignore_errors=True)
     WORKSPACE_DIR.mkdir(exist_ok=True, parents=True)
-    stack_dir = get_stack_dir(problem_number)
+    stack_dir: Path = get_stack_dir(problem_number)
     if not stack_dir.exists():
         init_from_projecteuler(problem_number, force_refresh=False)
-    for file in iterdir_recursive(stack_dir):
-        if file.name == MANIFEST_FILENAME:
-            continue
-        filename: str = file.relative_to(stack_dir).as_posix()
-        if is_public_problem(stack_dir):
-            content: str = file.read_text()
-        else:
-            content = decrypt(file.read_text())
-            if filename.endswith('.enc'):
-                filename = filename[:-4]
+
+    # Verify manifest and warn on integrity issues
+    verification_results = verify_manifest(stack_dir, verbose=False)
+    if verification_results['modified']:
+        print(f'Warning: Modified files detected: {", ".join(verification_results['modified'])}')
+    if verification_results['missing']:
+        print(f'Warning: Missing files detected: {", ".join(verification_results['missing'])}')
+    if verification_results['untracked']:
+        print(f'Warning: Untracked files detected: {", ".join(verification_results['untracked'])}')
+    if not any([verification_results['modified'], verification_results['missing'], verification_results['untracked']]):
+        print(f'All files verified successfully for problem {problem_number}')
+
+    manifest = read_manifest(stack_dir)
+    for filename, file_hash in manifest.items():
+        content: str = read_file(stack_dir, filename)
         target_file = WORKSPACE_DIR / filename
         target_file.parent.mkdir(parents=True, exist_ok=True)
         target_file.write_text(content)
-        print(f'Copied {file} to {target_file}')
+        print(f'Copied {filename} to {target_file}')
     PROBLEM_NUMBER_FILE.write_text(str(problem_number))
 
 
@@ -624,9 +656,18 @@ def write_manifest(stack_dir: Path, manifest: dict[str, str] | None = None) -> N
         None
     """
     if manifest is None:
-        manifest = {filename: sha256(file.read_text().encode('utf-8')).hexdigest()
-                    for file in iterdir_recursive(stack_dir)
-                    if file.name != MANIFEST_FILENAME
-                    if (filename := file.relative_to(stack_dir).as_posix())}
+        manifest = {}
+        is_public = is_public_problem(stack_dir)
+        for file in iterdir_recursive(stack_dir):
+            if file.name == MANIFEST_FILENAME:
+                continue
+            filename = file.relative_to(stack_dir).as_posix()
+            # Handle encrypted files
+            if not is_public and filename.endswith('.enc'):
+                filename = filename[:-4]
+                content = decrypt(file.read_text())
+            else:
+                content = file.read_text()
+            manifest[filename] = sha256(content.encode('utf-8')).hexdigest()
     manifest_file = stack_dir / MANIFEST_FILENAME
     manifest_file.write_text('\n'.join(f'{v} {k}' for k, v in manifest.items()))
