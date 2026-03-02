@@ -20,7 +20,6 @@ Key Management:
     - Multiple random hex tokens used as key material
 
 Module Constants:
-    KEY_DIR: Directory for storing encryption keys (keys/)
     KEY_FILE: Path to the encryption key file (keys/key.txt)
     KEY_SIZE: Size of the encryption key in bytes (32 = 256 bits)
 
@@ -40,7 +39,7 @@ Example:
 
 Security Notes:
     - keys/key.txt is protected by .gitignore (will not be committed)
-    - Loss of key file means encrypted data cannot be recovered
+    - Loss of the key file means encrypted data cannot be recovered
     - Same plaintext encrypts to different ciphertext each time (random IV)
     - This provides confidentiality but not authentication (no MAC/HMAC)
     - Backup keys/key.txt securely if protecting important data
@@ -60,9 +59,8 @@ import Crypto.Util.Padding
 
 __all__ = ['encrypt', 'decrypt']
 
-# Directory and file paths for key storage
-KEY_DIR: Path = Path.cwd() / 'keys'  # Directory for encryption keys
-KEY_FILE: Path = KEY_DIR / 'key.txt'  # Main encryption key file
+# File paths and key size
+KEY_FILE: Path = Path.cwd() / 'keys' / 'key.txt'  # Main encryption key file
 KEY_SIZE: int = 32  # AES-256 requires 32 bytes (256 bits)
 
 
@@ -84,8 +82,8 @@ def _get_key(*, key_file: Path = KEY_FILE, key_size: int = KEY_SIZE, genkey: boo
         key_file: Path to the key file. Defaults to KEY_FILE (keys/key.txt).
         key_size: Size in bytes for each random hex token. Defaults to KEY_SIZE (32).
                  Note: The final key is always 32 bytes (SHA-256 output).
-        genkey: If True, automatically generates a new key file if it doesn't exist.
-               If False, raises FileNotFoundError when key file is missing.
+        genkey: If True, it automatically generates a new key file if it doesn't exist.
+               If False, it raises FileNotFoundError when the key file is missing.
                Defaults to False (strict mode - requires key to exist).
 
     Returns:
@@ -93,7 +91,7 @@ def _get_key(*, key_file: Path = KEY_FILE, key_size: int = KEY_SIZE, genkey: boo
 
     Raises:
         FileNotFoundError: If key_file doesn't exist and genkey=False.
-        PermissionError: If unable to create key directory or write key file.
+        PermissionError: If unable to create the key directory or write the key file.
         OSError: If unable to read the key file.
 
     Side Effects:
@@ -107,13 +105,13 @@ def _get_key(*, key_file: Path = KEY_FILE, key_size: int = KEY_SIZE, genkey: boo
         which automatically call this function to retrieve the key.
 
     Security Notes:
-        - Key file contains 4 lines of random hex tokens for added entropy
-        - Each token is 32 bytes (64 hex chars) of cryptographically secure random data
-        - Final key derived via SHA-256 ensures uniform 256-bit output
-        - Key is cached in memory for the session duration
-        - Key file is protected by .gitignore (will not be committed to git)
-        - Default genkey=False prevents accidental key generation in production
-        - Use genkey=True only during initial setup or in development
+        - The key file contains 4 lines of random hex tokens for added entropy.
+        - Each token is 32 bytes (64 hex chars) of cryptographically secure random data.
+        - Final key derived via SHA-256 ensures uniform 256-bit output.
+        - Key is cached in memory for the session duration.
+        - The key file is protected by .gitignore (will not be committed to git).
+        - Default genkey=False prevents accidental key generation in production.
+        - Use genkey=True only during initial setup or in development.
 
     Note:
         Loss of the key file means all encrypted data becomes unrecoverable.
@@ -173,6 +171,7 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> bool:
         cipher_text: str = encrypt(plain_text, key=key)
         print('New cipher text:', cipher_text, sep='\n')
     else:
+        # noinspection SpellCheckingInspection
         cipher_text = (
             r'2T6wBeZ+yF9BR6NgVcWH0DRVEjTsurbPM+o+0y+6eTBNQ5n4Y7tDE7+zPqjprhVw2PAti/c93FNt6tx3Nf+IldauCsDxmZwy'
             r'd0PnUcGtWSb2h7DffZCmF4vt5B4ep7gZJaaS7IVcs5DEQ1Au8h+pgPqd6ardNIGYpPBzf0IhMAiR87TJD9UidYAdaZNEJ35T'
@@ -187,14 +186,14 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> bool:
 def decrypt(cypher_text: str, *, key: bytes = None) -> str:
     """Decrypt ciphertext that was encrypted using AES-256 in CBC mode.
 
-    Decrypts a base64-encoded ciphertext string that was produced by the encrypt()
+    Decrypts a base64-encoded ciphertext string produced by the encrypt()
     function. Extracts the IV from the beginning of the decoded data, then uses it
     to decrypt the remaining ciphertext and remove padding.
 
     Args:
         cypher_text: Base64-encoded string containing IV + encrypted data.
                      Must be in the format produced by encrypt().
-        key: Optional decryption key. If None, uses the default key from keys/key.txt.
+        key: Optional decryption key. If None, use the default key from keys/key.txt.
              Must be exactly 32 bytes for AES-256 and match the encryption key.
              Defaults to None.
 
@@ -207,12 +206,12 @@ def decrypt(cypher_text: str, *, key: bytes = None) -> str:
         UnicodeDecodeError: If the decrypted data is not valid UTF-8 text.
 
     Examples:
-        >>> plaintext = "Secret message"
+        >>> plaintext = 'Secret message'
         >>> ciphertext = encrypt(plaintext)
         >>> decrypt(ciphertext) == plaintext
         True
-        >>> decrypt("74OJw9v0E+jdUQsTv171F5KHRVnPhHrdd3HlfHr1Dbw=")
-        'Hello World!'
+        >>> decrypt(ciphertext)
+        'Secret message'
 
     Technical Details:
         - Algorithm: AES-256-CBC
@@ -248,7 +247,7 @@ def encrypt(plain_text: str, *, key: bytes = None) -> str:
 
     Args:
         plain_text: The plaintext string to encrypt.
-        key: Optional encryption key. If None, uses the default key from keys/key.txt.
+        key: Optional encryption key. If None, use the default key from keys/key.txt.
              Must be exactly 32 bytes for AES-256. Defaults to None.
 
     Returns:
