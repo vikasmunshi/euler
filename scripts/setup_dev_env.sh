@@ -4,7 +4,7 @@
 # Manages C/C++, Lua, Python, and Ruby development environments on Ubuntu/Debian.
 #
 # Usage:
-#   ./setup_dev_env [--dry-run] {install|uninstall|status} {all|c|lua|python|ruby} [...]
+#   ./setup_dev_env.sh [--dry-run] {install|uninstall|status} {all|c|lua|python|ruby} [...]
 #
 # Commands:
 #   install   - Install development environment(s) (default: all)
@@ -19,10 +19,10 @@
 #   ruby   - Ruby (runtime, dev, gems)
 #
 # Examples:
-#   ./setup_dev_env                    # Show status (all)
-#   ./setup_dev_env install c lua      # Install C/C++ and Lua
-#   ./setup_dev_env uninstall python   # Uninstall Python (protects system default)
-#   ./setup_dev_env --dry-run install all  # Test without changes
+#   ./setup_dev_env.sh                    # Show status (all)
+#   ./setup_dev_env.sh install c lua      # Install C/C++ and Lua
+#   ./setup_dev_env.sh uninstall python   # Uninstall Python (protects system default)
+#   ./setup_dev_env.sh --dry-run install all  # Test without changes
 #
 # Features:
 #   - Dry-run mode for safe testing
