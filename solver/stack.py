@@ -60,7 +60,7 @@ ProblemNumber: type = int  # Project Euler problem number (1-9999)
 
 # Directory constants
 BASE_DIR: Path = Path.cwd()  # Project root directory
-STACK_DIR: Path = Path(__file__).parent / 'stack'  # Base stack directory
+STACK_DIR: Path = BASE_DIR / 'stack'  # Base stack directory
 WORKSPACE_DIR: Path = BASE_DIR / 'workspace'  # Working/temporary files directory
 
 # Module-level constants
