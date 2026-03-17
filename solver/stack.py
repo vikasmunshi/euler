@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.14
+# -*- coding: utf-8 -*-
 """
 Stack module for managing Project Euler problem resources.
 

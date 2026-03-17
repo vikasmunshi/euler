@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.14
+# -*- coding: utf-8 -*-
 """
 Solver module entry point.
 

@@ -1,4 +1,5 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.14
+# -*- coding: utf-8 -*-
 """Vault module for AES-256 encryption/decryption of sensitive Project Euler content.
 
 This module provides cryptographic functions to protect private Project Euler problems
