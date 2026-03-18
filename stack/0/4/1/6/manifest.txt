@@ -1,3 +1,0 @@
-c448522ee535976a2ad06331bd421e881e6ffda77bc61c7108c6f7ebbb58b05f a frog's trip.html
-85e37d5f77e16162328d628f63e223defb0addf3c6b2d8cc8aff02887ce64c18 a frog's trip.md
-407e2b54a6d2012c7cf69e82d79acaad89a892c5f32b40aed0628fc90d428bce a frog's trip.url

@@ -1,3 +1,0 @@
-59f23e7e5058b8965f150ca7cf529d46303e1252092aea4e4706e83fcca5b82c twenty-two foolish primes.html
-7778a5879f8b4ae2aeaf92b8e73de415d80e7573247c8e295f728779ab2cd73f twenty-two foolish primes.md
-578b3a0930ef035eb6c4bd6daf712fb7ae5bd6ad893ed921b7d2b841e2e693a7 twenty-two foolish primes.url

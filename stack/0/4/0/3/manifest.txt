@@ -1,3 +1,0 @@
-23a4f5a7e5f3c438dc1774b4d2fca76a4258240a6598cdbdd6eb152b7f0925d8 lattice points enclosed by parabola and line.html
-0c1c7f2a6a7205b34813f3740768ceaf3dfbd6881b13d8067d3e27bea28874ea lattice points enclosed by parabola and line.md
-5ddea56470d8afef68b3a9c355784366ab1eae959e3c03548a693226ca169765 lattice points enclosed by parabola and line.url

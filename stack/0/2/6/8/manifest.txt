@@ -1,3 +1,0 @@
-682d1527733ffa21cdc85b37aa3c80a3cf11c1b583f50a4f13a2b60d78930f2e at least four distinct prime factors less than 100.html
-549790dbbcc1a9e53e8a24c06d58461fc0f98effdcb6148d5d13012f8d79e44f at least four distinct prime factors less than 100.md
-703da729c486e2af782d55f59db270e1c961656d936d8abfc49e51956bfacaf0 at least four distinct prime factors less than 100.url

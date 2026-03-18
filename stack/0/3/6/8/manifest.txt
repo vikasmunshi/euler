@@ -1,3 +1,0 @@
-188e811496ee39f003a46131174da595aeb05f02d902e87a5c70afd56f947bde a kempner-like series.html
-6548bdd8daae9c8a617d3a9c6b8010786056a320295ce6b2e781b72b4938ee8d a kempner-like series.md
-d415b60c5095cb224384d771b739a4364bafd1ba3bd6deb66894db6154fbbf6d a kempner-like series.url

@@ -1,3 +1,0 @@
-9da61d64f90c92298779a226218e4a64f7d8b03519468e015a52f3ce05f9da5e three similar triangles.html
-560b6101e573545536be5adbbaf52d5093c40ea5bcc66d03e87e09a159d40ebb three similar triangles.md
-f7ae9137db8cb21de807f9a9a4e8c5fe7662b875e052fff3a641fef1b554b3a2 three similar triangles.url

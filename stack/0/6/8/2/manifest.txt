@@ -1,3 +1,0 @@
-a18b3b02bbdda7e5345ffa3601df0f2ed86a2be155e3f8f76fe7b1e2c0767ffd $5$-smooth pairs.html
-4b25b8e55c35b5ef049028404bc82e3fac9434820481748a6439552414098a53 $5$-smooth pairs.md
-47fb28ba83d9349a2e60cda48bd443f3f382f5f55d1acd305bd3c37b61d0d4db $5$-smooth pairs.url

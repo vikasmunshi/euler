@@ -1,3 +1,0 @@
-0a6217cbaa0c2a4f27566f54d91f296f4a88ca11c17da44eb933f6151157efe7 nanobots on geodesics.html
-9b11311eb2745386e853a2cb35cada3678981d47ac378a608a555fbfdc4cf5c4 nanobots on geodesics.md
-b396e51ddeb7d13af3f592af390d96993ddf03e4275bcfbfe6c8f20af2802f90 nanobots on geodesics.url

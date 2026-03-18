@@ -1,3 +1,0 @@
-3a13aa0e8df76100f4bc970d2d048a09bf52b9d5bfcd579946b038c81b1b9618 summation of summations.html
-9aaae1b7e7e1ca15f8160f59be9a060a6804db8333616058e62dadc4796ca47a summation of summations.md
-aed7ed2ac97e3868227cce4ed9a74bd4caf5054fbc502166939752e7a1a04087 summation of summations.url

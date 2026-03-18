@@ -1,3 +1,0 @@
-11fd1de717c4819dc95cdf135f7cff4ceaf70c0d5b3a2fa183d14fa374a4c172 summing a multiplicative function.html
-16842469de9c6a12a8a111b5febf6045bb9500e24ded2517b8202edb62185451 summing a multiplicative function.md
-45948c5e01582e58d7cc6b0a5fa3d137a9feb46dddaaba0d6b0eb34be21925e4 summing a multiplicative function.url

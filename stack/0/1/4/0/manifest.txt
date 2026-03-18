@@ -1,3 +1,0 @@
-55d2b394026f628c7689d332cabb30b71cf75bce952fe9729fe9fe69f0784be4 modified fibonacci golden nuggets.html
-b660d161939c032431f2c935699cb02999ceed8dcd740efaae697f363e222866 modified fibonacci golden nuggets.md
-c214fb95053ed5e4633c18a93485552f4a98c8c4b45cfae31d8bfef4cda5156a modified fibonacci golden nuggets.url

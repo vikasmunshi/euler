@@ -1,3 +1,0 @@
-ba29ea73d32eed1c6cab26c12a81ab1b0a6300d2490325f9d7642f79cdf63717 powerful digit counts.html
-114dfe537e23af11d3c098b896e752efc630d558c1985ef078c92f873b458469 powerful digit counts.md
-fba52ce8dd3db58af775fcf14062da163eefcd76ff75ba337bb09c62ba85847a powerful digit counts.url

@@ -1,3 +1,0 @@
-0b3db1485f95682698783c7a090121a06748c36c5b3457d9ca6a341745c5b4c7 $47$-smooth triangular numbers.html
-97e27b694fd5d31c47f4f5c4060a873b74ec095da4f4113d75040552655a2029 $47$-smooth triangular numbers.md
-cd99f720265371cecefcf486bd37daa532543ce373dbb5a1a77012e28c00c67f $47$-smooth triangular numbers.url

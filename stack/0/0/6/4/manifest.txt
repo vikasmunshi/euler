@@ -1,3 +1,0 @@
-4e904e5cf3185220ca49235c5ec5ffeea5962d7862fc37c8dd9a0df86bcaeaf0 odd period square roots.html
-77a1ac587b2d5292d7811cabfc84bbd9fbd9914f3c349bce8914c292f04fa901 odd period square roots.md
-6c4d5588e77853791df8aa4ad11eaf330266072f1c20fe1adeafa49855c14964 odd period square roots.url

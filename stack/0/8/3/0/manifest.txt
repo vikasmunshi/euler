@@ -1,3 +1,0 @@
-158ee7a1d67ed21c1fb3f87bedd146b8eee26b0ce990bfda15b5144a6a2f12a3 binomials and powers.html
-46227cb0e081175af48c292b22174b676037b2abe61cfd0ccfdc8a27b90bd8f7 binomials and powers.md
-0531c9b1d1857bfd5854949c01538c0da51f4e3db446e832bbaf86b3627a8ed7 binomials and powers.url

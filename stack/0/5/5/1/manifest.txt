@@ -1,3 +1,0 @@
-e29338feaacc8e2d46f38a4451afc56cee6025475544673c2418d9e50afd6125 sum of digits sequence.html
-ee86591c3cbafb2bd72f5163f1e5aeb7685f8df32a6b550ac33ec230b72e9cf8 sum of digits sequence.md
-39b2f556ef198ff1aa84bf53045eea974b6d27280bf065d9f4311f54bcff8623 sum of digits sequence.url

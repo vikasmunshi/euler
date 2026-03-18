@@ -1,3 +1,0 @@
-aacb8574afa8a2c19dce7f011505a1e45f32ed83f0e9633560ef6f906a31609f largest product in a grid.html
-885d6aa1a132cf661b133a42c4c27f47ec2e3826118c5aa655cee690a07291c8 largest product in a grid.md
-b089523cb94d0017a7298ab8214d86ae022c657481e11206a0f33ef9c0ca4b22 largest product in a grid.url

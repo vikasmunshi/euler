@@ -1,3 +1,0 @@
-da5eadc97a216f1bc4af97c00df063a4aae235b452daf6b276abe6874855ce19 remainder of polynomial division.html
-13d9eaafab4f5645db058e9b16ef4ee0380d0781c7ff6bd92997b1ddc07cb0bb remainder of polynomial division.md
-88450ed5adf3935b2bebeda2233dbf62e5ee728ea6bc636f9968b7ea5da02ee7 remainder of polynomial division.url

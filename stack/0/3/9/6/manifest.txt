@@ -1,3 +1,0 @@
-05adc14220ba6bf25a9e25037bab1c0556891b8eebf8ef576d2120604285a2fe weak goodstein sequence.html
-6b22e298141ea11b8ed459418f0574fe836a10c266007191eaefab0eb7900975 weak goodstein sequence.md
-b089e760c0bffba338099f9c8aad4e94e138f775bb3b27a185ab472072e8cb61 weak goodstein sequence.url

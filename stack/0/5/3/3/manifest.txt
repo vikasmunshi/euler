@@ -1,3 +1,0 @@
-2e135b2b7cce5b57476d4042391f941d88d46c26e93a3b3a3f3913e0c02fbca1 minimum values of the carmichael function.html
-a1528e4bc0f4f57d0037d414e6fd4c1b0a562591a43e68bc229e71e2bcc12bf0 minimum values of the carmichael function.md
-47302793d9771c7749b1333b659005327b5d1b541c04a5c9b44c36c15909fa39 minimum values of the carmichael function.url

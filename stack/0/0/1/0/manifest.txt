@@ -1,3 +1,0 @@
-765b63b8fe24a1bc7b7ea110403553288e571aeb7441162f77d6bd6ae48d07d1 summation of primes.html
-d01c799f7d819ce36b357939a1557abde3eafe952be47538025c9e609b99d484 summation of primes.md
-e2d6ecc52857696a049e8d9d7dbbb6b9457930d37d44fb8763691b56ff4e2f5b summation of primes.url

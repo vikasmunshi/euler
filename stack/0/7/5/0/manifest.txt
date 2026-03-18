@@ -1,3 +1,0 @@
-1a9e758acd5c1bbcc7dbbadeb6d084f480f5404fa68f9d8fa018232935346d63 optimal card stacking.html
-9d64ea6301fb75b9966cb4ef912fc2452c105dee3e7aa26bf85d53248d997c48 optimal card stacking.md
-be6864ba7eb2fb1dcaf1c35cf9e33a4f350f9b1199f44739c43b5d91d5fb8f33 optimal card stacking.url

@@ -1,3 +1,0 @@
-0e5846c97495e029a00396e5080979f7e8459b2956d901791087a38e645e8161 lattice points on a circle.html
-be6359085d014bdd52c5cf4a114dc7125c2dd0dc1f0ad251e3e20f8ca401562a lattice points on a circle.md
-0fc8a03f5fbe598401c5501a512a8980ea5188fb0c7d98da1ccaafc5a40867fc lattice points on a circle.url

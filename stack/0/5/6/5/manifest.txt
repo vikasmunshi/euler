@@ -1,3 +1,0 @@
-2d2043632ceba5b49906b1a376add0da6b0b41283f4016fafbf8b49862095f36 divisibility of sum of divisors.html
-e4db644078c3c3ff1cb2f2fc5e6ea282ea2af34c2d64b58d2b9a017be9a716c6 divisibility of sum of divisors.md
-6e56fc310c7325dae79537baf254b0962fe3496d97685cae82cf49a33e558e65 divisibility of sum of divisors.url

@@ -1,3 +1,0 @@
-d9d2260ec917a7772322ae75284ae0fbe62307ee74c9c5c1df2af2269c93ccd9 triangle of circular arcs.html
-24fab3407050bb383bdab2450e05aa50bf89c778fbe7ffc993c7ead575f9d6ea triangle of circular arcs.md
-650916fb2a5e33b3a878989458c79a6c55f1167766dd4ae265242549ce30e6d3 triangle of circular arcs.url

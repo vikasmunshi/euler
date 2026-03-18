@@ -1,3 +1,0 @@
-aaa164cf8788155073f6f2d0742e7e3a19b3e3ae759b4a98cf1cc7767fa3cea4 $x^y -equiv y^x$.html
-92d71a090ae70cbd02f18ea6fd1f88e5e4401c90924b43bbebeb51dde7e58751 $x^y -equiv y^x$.md
-ce9f74558ecca67acf1cf085e3787179c1f58b4c16bff36082e7e5f969a8381f $x^y -equiv y^x$.url

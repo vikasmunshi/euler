@@ -1,3 +1,0 @@
-2ce2a31857327780ea4626959106aab5aa01d0ff217737acff136d74571afb09 cross flips.html
-3da39e0771f2bda5a01ecf3d190095ea8bf662cfad6f112076b2a7bb26f9f97d cross flips.md
-c2c48cb2b532cb4477febb29d17cebb570302db06b105e44fcbf81cffc34970d cross flips.url

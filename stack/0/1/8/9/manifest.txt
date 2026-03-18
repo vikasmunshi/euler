@@ -1,3 +1,0 @@
-7d540ad2d5a29fd1fca56e1c8f7f8db3fb3959d03de2cfc91dee0a773fe9dd11 tri-colouring a triangular grid.html
-ce4aaaad3c7526f05bf70643421196bed1aa8dc4f2a29a2c200691f088b447d4 tri-colouring a triangular grid.md
-b9aac58c5386a4817759f6f5473bd3f68dd2ea93e6fe2eaec51451fd341f58e3 tri-colouring a triangular grid.url

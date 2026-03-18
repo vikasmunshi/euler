@@ -1,3 +1,0 @@
-89f58c40fe37a2a8fc7e137a1fb5e49e818b4d4be38363b9c4cbae7dcaa04ca4 multiples with small digits.html
-403a93c977af3e7ba2367e20e791c0ed90b56e8f35dca158b5b54a607f5a18cd multiples with small digits.md
-fc6913eaba0ba1b57e9021a63e2580bb317506559bb3430e40f156c651142700 multiples with small digits.url

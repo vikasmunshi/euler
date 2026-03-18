@@ -1,3 +1,0 @@
-ea7f18638ccb134a18c807f6242168c1238241ada6e0b87017ba7a5aa84b7a92 colouring a loop.html
-b35e74c110262a2985c7ab29bc893613c740d14c59cea7c349ef51dee3b937c7 colouring a loop.md
-22fb6c25c887d12049696afb31dba205b77e22653a8be20fab0ac6dc7ff6a71d colouring a loop.url

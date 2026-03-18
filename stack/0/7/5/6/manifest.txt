@@ -1,3 +1,0 @@
-e868926784ce66210028e8b766d86def110ed632d8a7df0b928dc2a494602383 approximating a sum.html
-7249533362866a3afbcce850b3ed2f998d639cc6a6d35993ab2fb2a5dd2fcfff approximating a sum.md
-6ed57fcb197a4209caffbcc6e9ff6c6a80125358e72b4edbf0d37aced57e02a8 approximating a sum.url

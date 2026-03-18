@@ -1,3 +1,0 @@
-5fe02262631d853f5e7624313246cf96027e172d752e9321e58973e8d4f5af42 rudin-shapiro sequence.html
-36ee9f000ab650f9ba11214f333c2fee64882527c19c263458972dc802aa93c9 rudin-shapiro sequence.md
-baa3121f57a08abfe6d7f652de6868fa0f6d5e0cdc533fc7ed9fde5cb26b3e0f rudin-shapiro sequence.url

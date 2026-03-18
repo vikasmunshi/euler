@@ -1,3 +1,0 @@
-8939c64c7ae17c8ce8d2c88a6a8bc1529a4ccff5271c7f2cacb63596acff4344 shortest distance among points.html
-99c8a9dfd8e070dbaf7e88245a0d50787d4cc264dec442ba6abbb347abbac260 shortest distance among points.md
-1fa3a3f687b7a7256133589c475bf10694de98c592935c4bbe8fa870ea5f8b52 shortest distance among points.url

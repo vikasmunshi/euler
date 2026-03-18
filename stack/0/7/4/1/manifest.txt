@@ -1,3 +1,0 @@
-5cfb85d4fb8db10ed5d927446f50ad98493caa5afdb4a1ae5bb5b04e34d8c0f7 binary grid colouring.html
-fd40b3ff2787ca296d5fc2fac5a74ae840751999dcc788a0b91dd41ff4bb1d94 binary grid colouring.md
-67adbfba27d7eb0b5d02958ad4dfa7012a5697404999022a6496e50b5d29ff5f binary grid colouring.url

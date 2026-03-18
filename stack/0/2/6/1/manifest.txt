@@ -1,3 +1,0 @@
-be9fecb7ca7058ffe56d094ee252d78c850bb7528d9e3d2beafc23ecc8f1bc27 pivotal square sums.html
-220e506b6067479c4dab59e7d0690249e52dd8e2f49d36804ba38f711172c1d9 pivotal square sums.md
-711e711beaaf3384a86fa4b0f33fe9cefb8b7d62bdc0123a87aee82000fe2996 pivotal square sums.url

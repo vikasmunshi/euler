@@ -1,3 +1,0 @@
-6ba7f42cbe642e94c75d7aa194322cf85a96dad88967db39d22cb848231b91a6 stone game iii.html
-a3f7ef4ed03937a617837f2f408943b5f053c4f1861763d3b3dce31cc64ec863 stone game iii.md
-26f5c8eb2fd7324ebff9658b9819b37a07c4b8ff5d1c2a7f3d0f12a92bc7f45e stone game iii.url

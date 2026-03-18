@@ -1,3 +1,0 @@
-86dee0edf467d574feea6743f4d08cb875b50f09f02b0db504e54666797e94b0 stacking cups.html
-e9d1fd0cd89532d412e107361063202ae6ebece6e9b517f27b76d5fd43aabaec stacking cups.md
-efbb577e8db4fb8912d4bfc823ecd686c2d0c4451c26b478b7fc1bcd25d02033 stacking cups.url

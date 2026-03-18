@@ -1,3 +1,0 @@
-4cb12ed10c34d15425665bf638dabe27a5eb455b24462f2166475ac921b9fe46 angular bisector and tangent 2.html
-ab5b995e12e9e6ec4898e5dcaab9a2a2a2b6f9ba108e60a56f2397ce86a76ce9 angular bisector and tangent 2.md
-23a472fce49ff9fac52bd4465f5a2edf299c933b02ea832d6c5aba04e809e890 angular bisector and tangent 2.url

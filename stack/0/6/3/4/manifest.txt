@@ -1,3 +1,0 @@
-b0226215bea5cb0a6287924d4a29c07e097b2967ba14d9dbcd0948a56c000fea numbers of the form $a^2b^3$.html
-023ec6c04fb4ee25ea4d8575763a0629c2b92e1d01ea2158d979bbc8c87d13b0 numbers of the form $a^2b^3$.md
-034007af231c63cbfc3d2ca0c5b41f6afcc62e2c99a7bfe1846739bdfd813da5 numbers of the form $a^2b^3$.url

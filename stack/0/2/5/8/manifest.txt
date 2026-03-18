@@ -1,3 +1,0 @@
-23b785c3ed7a70ad14eb3d0b40071bc86f10b34d37e43e36b83e8302c303c494 a lagged fibonacci sequence.html
-59f4c95a1c49b1271b11760efc1521804d8fe65f3e27155c3281dc38641e2723 a lagged fibonacci sequence.md
-8edc3d4ad874a754cd4b9879b7ed47c67cce131b5e09f3145c72157a5a574e22 a lagged fibonacci sequence.url

@@ -1,3 +1,0 @@
-827875fef5423f7b4ad440781981a404d77ab28a51e98287478b1a45ba82da14 red, green, and blue tiles.html
-a134b0baae4e9ef5bb9b320603966678e155f4dfec4f18630f853033a58e39bb red, green, and blue tiles.md
-d23ebb6c9140dec727acf13d643878dae999ad6cdbdde0fdb9280f965d9dde7c red, green, and blue tiles.url

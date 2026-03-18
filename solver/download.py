@@ -8,6 +8,7 @@ Downloaded files are stored in a local cache directory using UUID-based filename
 derived from the URL. Subsequent requests for the same URL will use the cached
 version unless a force refresh is requested.
 """
+from __future__ import annotations
 from pathlib import Path
 from uuid import uuid5, NAMESPACE_URL
 

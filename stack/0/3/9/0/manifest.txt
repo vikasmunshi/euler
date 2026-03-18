@@ -1,3 +1,0 @@
-dd5c306aa04f6183f7775ecd2d34e0a8d2429fc5a7ddb30f69e8ac45260f3d61 triangles with non rational sides and integral area.html
-06b015eff7a273a0dc83967fd7aaad2f08c1470ad7b3e5b3199e3bb2323f844d triangles with non rational sides and integral area.md
-4a4a3935343154f62cb6c8ed54179e294305a8a24ac798d1c28fd1caaf2f668d triangles with non rational sides and integral area.url

@@ -1,3 +1,0 @@
-8ebb4f1a365ea12a77a77b34ec6971dd05ca9e9ddf63e97521e4f29f9cc1ce81 the gathering.html
-cf17fc14d3df3ecb431240764115a1a0d5fb3a589b34fc58c9e7a99018af58ed the gathering.md
-344e32d33d7fa7940f2c0bd80cb53b54c88873f7e0e007aaca368d50ef3b3857 the gathering.url

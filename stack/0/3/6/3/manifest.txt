@@ -1,3 +1,0 @@
-5324b4d2120d1a71aec3ba9b796e847a0e6b0fe4cf88dcae614d79b173d25233 bézier curves.html
-0a95e53dac5294c77d5211f9d8be7cd2328d62ffd094d1d2f41ca9ca0a605095 bézier curves.md
-ef99467c3e47afd6984ba479b81e5d3faaeae31b6e86dbecea750b556b146cde bézier curves.url

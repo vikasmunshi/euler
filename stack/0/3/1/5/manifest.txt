@@ -1,3 +1,0 @@
-a269aa7e968c9f396edb4da3b947c5eb99787d3459e93b039e95b7f85ab022ef digital root clocks.html
-ad43c943f2c592d3f858977a3284069cf4bae061894dbd24d97e7b13a83123d2 digital root clocks.md
-39585b0765fe7008ea110c080b9487ecfe1df045bf043e34de5e962cb65d7374 digital root clocks.url

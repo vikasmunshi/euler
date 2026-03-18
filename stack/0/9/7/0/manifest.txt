@@ -1,3 +1,0 @@
-8f50780b349300c68c5b24a6861e0cb038cead14efb99d7ab129e453da265be2 kangaroo hopping over sixes.html
-4e0661690562c2af97da3a31eb66cf7f937eb8c4b581c73226edfd3d84b7ed8d kangaroo hopping over sixes.md
-37d81d79fedacb19ce5ca53940297ab6db19953a709ce64b9321c68a27679257 kangaroo hopping over sixes.url

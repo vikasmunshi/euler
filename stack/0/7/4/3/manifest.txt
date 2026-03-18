@@ -1,3 +1,0 @@
-03436ed33f08a141b350f19a6907babfa01d4dfb7f53ee318b89c44535582736 window into a matrix.html
-d4ccee6586c55b80557670f78341b58ee0c85f985f6bb9807e77b5d6d0b02b8b window into a matrix.md
-075629f1253da6ad8cb25f0ac02acfd7f3068c78839263d2a45cdc84946ce17b window into a matrix.url

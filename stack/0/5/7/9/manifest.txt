@@ -1,3 +1,0 @@
-cc77197b95f27ad79580c4865424de453d76629f9ba73244c593cebeadcfbcb2 lattice points in lattice cubes.html
-00b07a5b9de0bd11318494c141fab72f0dc8873400e64def3eca802043d58bac lattice points in lattice cubes.md
-536b767d7c69131fde9c15a77fcaa3be912910d5389e50ac5187d8bf08e1e273 lattice points in lattice cubes.url

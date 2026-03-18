@@ -1,3 +1,0 @@
-74a8e61f957fd8ebb1ee4d3cae7be292298e23905b4ec1ce3b3a409b861ac8be sub-triangle sums.html
-46ba55519fff3d3e4507330433df71c3f4fb2d343a8df6393080843864662947 sub-triangle sums.md
-e75b5204dec697d4344c2fc8edba091ba66b7ed8235c23ffa24be25fe1f10766 sub-triangle sums.url

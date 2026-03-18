@@ -1,3 +1,0 @@
-a85d9a67ad17b6b49b2ca514b622cc85982cdf0117a06995cbacbb250ba4ed7d uphill paths.html
-cef03a26e6ed7b6206e4836fee3c815de5d401e0efe7ee918fd8305cf1c797c7 uphill paths.md
-bbf65a8ae2675cbfe9c308b4220e475107ac72c7ea2363e3cfaca6fa4186c047 uphill paths.url

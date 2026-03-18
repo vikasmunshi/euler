@@ -1,3 +1,0 @@
-c896d04262a5c0e6d3c02159c9a5d072276b2a74c20cafe080a46b0dccf75895 binary quadratic form.html
-94b334ece359085ad1899cd22b3e08c0639ab2b7ce9c740bc2c745f389b1ef0d binary quadratic form.md
-a5f30bf95cdbc5e331a1779635f9bc9440a07d048f989f96dfcf36f30612a5fc binary quadratic form.url

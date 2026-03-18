@@ -1,3 +1,0 @@
-a23dfd40b0c3061330ad62a0c87dadadee9e20d6e176cb111b1a7ae6a611da6e delphi paper.html
-ef33dcba88a0aa52fabb7edc03745048537a248502fb40e66d7bcdcb2ae6b4e4 delphi paper.md
-962ee3f18130073aa0889cbc6ddb451c95b02c2ad8ad2239b19e67f874cfc796 delphi paper.url

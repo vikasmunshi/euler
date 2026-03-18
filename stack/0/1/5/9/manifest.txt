@@ -1,3 +1,0 @@
-63f59bdf4bf3f8f191ba4d342b17a2641c909874c0b090ae2a0af02b0e6dfdb9 digital root sums of factorisations.html
-302447bae0f3a6081d64eacc6cc76ba9da03d25aecae60053fbac5f44211fa80 digital root sums of factorisations.md
-8b88322e3b8274460ce35951dceab7020ab5c8f96f7ccc04644d25b93045cc6c digital root sums of factorisations.url

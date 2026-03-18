@@ -1,3 +1,0 @@
-e815a06b103ffefa03e31e8c4d22e1e23588c4b9d05696fce89a04e1f421d7f8 two heads are better than one.html
-02765b0028de2382803db71cd3e42638d89af6be9a77854121b7176eab54d410 two heads are better than one.md
-382ded7680deedb2d9d0b53acb8ee26c62c09dab37861cf90e7cdcc4b61cc2b8 two heads are better than one.url

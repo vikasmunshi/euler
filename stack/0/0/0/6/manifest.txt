@@ -1,3 +1,0 @@
-eedcb7bd8a9f61652973bef79f0af3016112dedd80bfe3308de91efb9ed0cc99 sum square difference.html
-f065f272a8a4fc83ba250f59ee43d988a9ab9757fba8f4daafc8b7df9cab6ace sum square difference.md
-907eaa9caaaa09cb8db2c012fea30763af3d2a48ec5649402d0a9c52f26b2d65 sum square difference.url

@@ -1,3 +1,0 @@
-ff2a15e82e32a5b8665955ac67c5d0ddc8a8c6d3d23a2f9ebd0c748e5187c6ef digits in squares.html
-f4d06f1a13011783044ce32feb02d6ca7e25b329414cc712b0e9c85701ed56d3 digits in squares.md
-039b64d55a1a0549b9046258a407fa6fe6fb4b9d86aa179941f65f18976372dd digits in squares.url

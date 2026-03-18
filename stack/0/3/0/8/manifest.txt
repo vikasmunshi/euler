@@ -1,3 +1,0 @@
-c7d79dea949fb83950c95361b8a261d6d7d53d67944144c78b818eacaf57f7c4 an amazing prime-generating automaton.html
-7d8150b9d3567fff7143d257e52cf4ae50b8d7b8a236cd0d83d0205b13a61c40 an amazing prime-generating automaton.md
-d56781b6df7d37b073b93c7889386406dd5bc4b12023da2c9063200e7c2779b0 an amazing prime-generating automaton.url

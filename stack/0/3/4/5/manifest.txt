@@ -1,3 +1,0 @@
-a87c436102baf7c21d21d2cec0c29cc019068e20802b08c906fe8ed41fd9f71e matrix sum.html
-36b3dffc9e1b9aa3f82dcafdd2cd620c8b3d2947e870c1a1bdac8bffc0e5ffd4 matrix sum.md
-3a5438bf6f78d67a727855a97f7fd46dfd1320eb411d44f0696d959a7ccfb3a1 matrix sum.url

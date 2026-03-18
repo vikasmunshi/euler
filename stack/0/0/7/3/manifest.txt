@@ -1,3 +1,0 @@
-a1f78f1831c9de13104c252c9394687c37b4662fbdc0cdf6953987282c312adc counting fractions in a range.html
-86f77fe5a83e66728cc80c1398e72e76b96784be7263f63bddbd7be8bd074e3f counting fractions in a range.md
-7eb4a3bbf01d541195a3ca985760d0a3518fff17315a751fbeb830c8aa8a88b8 counting fractions in a range.url

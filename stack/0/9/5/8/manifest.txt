@@ -1,3 +1,0 @@
-81cf07c1d952c4ef5bd05662b9ee9bd7f4bf875dc66e9dc9b5a85ddf02bf2d26 euclid's labour.html
-cd5e5f5cd2d38eeb92cc1eefc3a9b6f43d26f369945c36e958f2e9d020e5c0e6 euclid's labour.md
-3f52c981a6a50fead08b653299c0b805e26222051057c89f5e3233b76b95b488 euclid's labour.url

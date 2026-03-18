@@ -1,3 +1,0 @@
-54c51f87bc2a634d75e4e390298c76b8286fa86e98f11bddc908ee42dd6e5941 prime power triples.html
-25cbb9871cbec207e4257681859b5f4c9fb034e773ee91a1ac49c30e41028e26 prime power triples.md
-4760d5b83066162cb84c84f19e221dd22a5fdd6e5a42c2daddd30ed8dc69bab5 prime power triples.url

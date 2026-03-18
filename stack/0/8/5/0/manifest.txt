@@ -1,3 +1,0 @@
-3fa7faea1cb24592fb3d4d9187c9b89bb3865c35fa510174cbf4bfe883dd733e fractions of powers.html
-70e1b8468e13ccf0ba4e7ba540f74b5093e9b26ce9b96e01745649a59f84a94f fractions of powers.md
-65c06e1aaef47f771400df1a322556c79dc3db2c893746ecb59d6298cc6abff0 fractions of powers.url

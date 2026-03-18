@@ -1,3 +1,0 @@
-cb7efc2f37cecd38ebd6747382933ea3bc509e7e8d860971b645113e96346da4 product of gauss factorials.html
-d8f06c7f4f65713bd999969bc190b30aa4ff4fe3b05b0c59bc95274438372c47 product of gauss factorials.md
-6ad8d42d7ce5edc59d589af85b711d82867326ee14db5d483c8bf6515c84a0bd product of gauss factorials.url

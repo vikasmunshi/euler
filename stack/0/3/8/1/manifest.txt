@@ -1,3 +1,0 @@
-d956c2dd82b8fe9bbcb144b94d4d7243c24ede7536a02b00683855985fb18ba9 $(-text{prime}-k)$ factorial.html
-b45841571cd33781f865d0931f5a242c2b8b0ca4a1a51577d133f0c633b73bf6 $(-text{prime}-k)$ factorial.md
-bb204567816bbd1a77fd490cdd481aeba78f47602618cf190e37f6befb4534ba $(-text{prime}-k)$ factorial.url

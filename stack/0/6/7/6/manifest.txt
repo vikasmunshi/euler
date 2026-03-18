@@ -1,3 +1,0 @@
-5db8524defa14d662b7383fb591e867b63e506a8944a2ac5953546d6f75f7dc1 matching digit sums.html
-d778e3079cf4c52f644151f019dd772bdc6f5b86f18348e1274cb47c716b5e0f matching digit sums.md
-b6b424a4c4d121034a81a8ecf9e8b1e25441e642ab9172378cc1632feeb18ba8 matching digit sums.url

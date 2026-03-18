@@ -1,3 +1,0 @@
-c8dc2760e2aff84afda492b8e3ca064c59079e56eae0eba5d22d0f0f81f0c534 right triangles with integer coordinates.html
-bae59380cb5848ae73a106e6033e8efd24a2a3445e66711092ef61458d72bbef right triangles with integer coordinates.md
-2765c59749e65a565cf938318e05e718b44629e85c52cb83ba4b997a2c3b9d10 right triangles with integer coordinates.url

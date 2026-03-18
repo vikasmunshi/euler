@@ -1,3 +1,0 @@
-0a046f4a6af6b27c828851bbe00de4278fd0a3ee485d874762cc9d01814e6742 divisor nim.html
-8a27f3f294fbbde7fe2a8d98daa3c61d3ababca79d8274cfc3b40ef9f4d7be03 divisor nim.md
-ff0e33b7d5c74aa3697b033f06c6688741360a2a10fd91c82f02ef0e0a5cb8db divisor nim.url

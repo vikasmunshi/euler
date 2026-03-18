@@ -1,3 +1,0 @@
-098bbd5a5d4fb9d9414dfa7f2422850cf481a5278b70914f4e55e0f1fa91e53a investigating a prime pattern.html
-132e6f35d57dfe9b83b459a5cfc4d89d2a81ad8b4cacea003e4c582f66da2139 investigating a prime pattern.md
-4930cf346aff72f1cb59ce8d1d909fa21ff8d3ecec91dc6c7eee3211c715cee2 investigating a prime pattern.url

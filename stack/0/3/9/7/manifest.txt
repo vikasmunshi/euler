@@ -1,3 +1,0 @@
-702dbc785ba9f6fda57a1281dff8ec01a96d3f71fc6561490f12f3256220f1f5 triangle on parabola.html
-adead75a0d4a42399dba67242f329bdbbb80f29b0642b73235005c39eabebef2 triangle on parabola.md
-977170b2f900a19c0b23cea6d0224feb4c894ec1ea9a1cf553059a0d18b93c57 triangle on parabola.url

@@ -1,3 +1,0 @@
-4bbcc6482d7b271996419cf55cef62cff9e8ce0e2471cd78fe32960933d98327 the primality of $2n^2 - 1$.html
-c1449cf5bb8cd45322d337dd9d70971a50537b3c6fd101bdfda1e113b4e5cc09 the primality of $2n^2 - 1$.md
-cc4516af8a982f9a6c4d341f93084558ac197c744d90c8907c8a58ed1a2c510f the primality of $2n^2 - 1$.url

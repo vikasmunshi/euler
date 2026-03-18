@@ -1,3 +1,0 @@
-29295ef9619bb484a142eddbf00e3dce6ab6e8463250d41317aa70d04a99e33f sums of totients of powers.html
-95450f603ecea9c46b04a80b1101d8638e512d26170210a77c27f486beac4922 sums of totients of powers.md
-ffc5cf309e5a3955110a02384956fc108a2b303caca9e362113d399936c1b399 sums of totients of powers.url

@@ -1,3 +1,0 @@
-bbc1bbdbece0baf7e0dafa1a2869afc3612c2fc580fa9b492c363d01fcfdce2a substring sums of prime concatenations.html
-4dbd3b8d032e5befbe866de2379c49dca4b2590ffa1126adaa4eb16e249681cf substring sums of prime concatenations.md
-20a34f05e6baee5cb7fce6bc96b5739ab8818b35c57126cd2fa0a93dbaa60aae substring sums of prime concatenations.url

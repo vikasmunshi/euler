@@ -1,3 +1,0 @@
-8725d787a9a0aeeb75fe05aa63a6ccbfcaaf9d7d8584c5aad56a535d26185bcc shortest lattice vector.html
-08eab68347eb7c539c5dbe8bf19ad4d7704b6d20a12e8d084a6cd685d6c7ec01 shortest lattice vector.md
-56d32b42e5de468a3ee3fb77f1c3d7c255042eb8896faf96d5852c79e40227f6 shortest lattice vector.url

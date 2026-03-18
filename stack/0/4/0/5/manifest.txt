@@ -1,3 +1,0 @@
-9dd74532169401a9d8e0b071df000555c54c9fd4bd143fe7ff1cc5aca6a64b1e a rectangular tiling.html
-b56b2a8c79699278868da6ac5711fa65dfa67b3d884ead82c176038ddd37b6e2 a rectangular tiling.md
-1ec73edbffdc21b8a4381782a25a215920f70007ee6cadcd341defcd0cf4dd4f a rectangular tiling.url

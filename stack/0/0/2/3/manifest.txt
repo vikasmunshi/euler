@@ -1,3 +1,0 @@
-ed3a8ebfe793b8df9117caa2291371d0293b77ebf686d50b62a7a93ffde205a9 non-abundant sums.html
-985e809c17716bf7d01ad74a96a229921c4e7e15e2f1c94d07fafad02eb520eb non-abundant sums.md
-76ab77f061e570582e892296a1306a177ad5e3ac6f69e1c4c5d93b1200fd931e non-abundant sums.url

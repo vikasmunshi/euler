@@ -1,3 +1,0 @@
-04b12bf5868f7c04e5e3fbf4701c932b81fecf1a95df3aaeb70079510abefec5 row-major vs column-major.html
-d196b23b5ca52f68c8bd0515c43f4c2c80ee6d39750efa75ad46b85c29dbe583 row-major vs column-major.md
-3b6b91f12de1ccbfb96758dde28d89e745b36bfa546d02c76482c8ebdc6724e3 row-major vs column-major.url

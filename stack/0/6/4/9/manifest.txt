@@ -1,3 +1,0 @@
-7d64c2078ab92bb0d43c8fa0117a30f1b165f92b96ffcb59e49084207e1394dd low-prime chessboard nim.html
-00bacff487dd26759853357a56d406088ddae3ef40584af4d679f64a3fe909f4 low-prime chessboard nim.md
-959717a3f92f9fc125034e702a5f63f22c6db2443479158aa81d9dd4e66c77f6 low-prime chessboard nim.url

@@ -1,3 +1,0 @@
-c01b94c8a79b5d41bfa6b65227f802b1238220bd920b1b09fa6517c078f75113 base-10 diophantine reciprocal.html
-0aca706d868f3d732ac0d7daa11208d1472880d1c9c20cd3266a61d231bb1689 base-10 diophantine reciprocal.md
-a4e9aa34b5b97fbe0faed5bc9f92a24d8dea216e415450dc967d737eb11a88a7 base-10 diophantine reciprocal.url

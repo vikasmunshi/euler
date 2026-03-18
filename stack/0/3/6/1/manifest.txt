@@ -1,3 +1,0 @@
-7ab38d60770144fb4b57739f9d810f29951d2ecb92e6613d7cbb6adc75c7e543 subsequence of thue-morse sequence.html
-baf4119f85a5efaee77b42407c25a874d9b942271c4b9d8f22d62a259553509d subsequence of thue-morse sequence.md
-6a0dc5981a3f4c43cf6d2f6f1482bdb8b371cc5058a310cf9bf69a7103004fb8 subsequence of thue-morse sequence.url

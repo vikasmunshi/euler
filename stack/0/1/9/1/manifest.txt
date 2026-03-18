@@ -1,3 +1,0 @@
-cc678574d81b11bc934a4d870d2d05cccbfaa1002d2ed1eaef08ca87aea38277 prize strings.html
-e82899c312931791b8f37607a8165204fbb0ebd9d9892cb5f1e8dd353fab1469 prize strings.md
-e74309affa9d93eef0be7fa4f647e86fd59366bad477a34ef8e32e92ad745393 prize strings.url

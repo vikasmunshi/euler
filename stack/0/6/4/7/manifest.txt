@@ -1,3 +1,0 @@
-6d329842ac3436d1a40529841c175a90869e246dfe985d59e9a0755e8fec5dfd linear transformations of polygonal numbers.html
-db11c0c498dcabf7ea26e9ee5619b3ea5c1120d30c3e52a049e415a55bf95b49 linear transformations of polygonal numbers.md
-9e62fa6ac6ee9ab50e1813dcfd8fb1b994654626abd7dc5f6387b930c1c4ce92 linear transformations of polygonal numbers.url

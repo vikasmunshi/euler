@@ -1,3 +1,0 @@
-c295927926e8b7244db11a03974066655304d4dc519914ae00c648e01624d6a3 expressing an integer as the sum of triangular numbers.html
-392b8c8f1d3700151b7aa8d30139a370245da163b63e49350149e24874f8a8bd expressing an integer as the sum of triangular numbers.md
-963d8b122fc3aef37bbd69380e917e6cf5f78ff21af3d5556dc03a7c695bdab5 expressing an integer as the sum of triangular numbers.url

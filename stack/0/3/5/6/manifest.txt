@@ -1,3 +1,0 @@
-c5703589046aae3f682d2d2eab0f5d9ae7e2fb3a25f44bfc5081cf774defa3fe largest roots of cubic polynomials.html
-12e588417fbff3043410e7d6e8a4ea9c5192eb1b3dde113fd24c8eb5ad8d31de largest roots of cubic polynomials.md
-983d653af1488bb82e1e9825ca45ff347e56e2b9676a58191b6afaffb9ca27f5 largest roots of cubic polynomials.url

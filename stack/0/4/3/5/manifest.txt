@@ -1,3 +1,0 @@
-4c9dc32ba34022ce829f003373f7bd0839aa1a2c0fafd048892010ba66ababdd polynomials of fibonacci numbers.html
-94496a65e3838d5816a252ecdacf8314c4c62cee3259de0aceebdf8b57e4067e polynomials of fibonacci numbers.md
-74d6783b8ac83cb4a2eb1dc1501c0ce851f79d7ec552c0822a8f6ab0a2cd2229 polynomials of fibonacci numbers.url

@@ -1,3 +1,0 @@
-769bd111de6ee229b21707414f18059d7d996da5ee68836f28347c494e55bee2 obtuse angled triangles.html
-cbd4b5a5891b76e2eb6697652183bd23ba84c4915745c88effd35b3a7a8d24ae obtuse angled triangles.md
-d33d6f3587bb54c44bcc8615d365c47d02da18fdb68eff22aa9da66fd78e06d3 obtuse angled triangles.url

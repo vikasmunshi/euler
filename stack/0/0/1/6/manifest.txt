@@ -1,3 +1,0 @@
-5aa26ea3e8c56c02243dfdbc69c5c7dd60ef8193a7e18833a23ba4a3aa4c06c6 power digit sum.html
-ebb696cc86c96e3b03337202ab7677f8bd1623cba27202d30d90693d59572abc power digit sum.md
-12e4d5d39494f56f1617d5b05ae450224f7ef6d70f6a0dfef45bb95c092a47d8 power digit sum.url

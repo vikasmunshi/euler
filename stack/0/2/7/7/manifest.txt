@@ -1,3 +1,0 @@
-10cb10c60ad5497cfd4f1466f8365424315f1df5b37b2a8510e2c5f5dc7a6922 a modified collatz sequence.html
-b655762affac861ee460aaf119bdf6b84b2caa7f8e3bf9fecacbf592aa578025 a modified collatz sequence.md
-88548f7a6a197496829c23389625a74d9c39985f22244435dc9716fb17920f88 a modified collatz sequence.url

@@ -1,3 +1,0 @@
-97a6ede3f872fb5bf30ce192ec9ad66908cfeaf430d3f9d63d9f2d2387e8ea3d gold and silver coin game.html
-57c1b20b9ddf374a0717a0d6b7ca561d7b765244d2435a0e6b12f96187a9e6ac gold and silver coin game.md
-b43db096332a3c1fcc74d809f9a0e62ab69b278d9a9b32bfa487d831b9c3097e gold and silver coin game.url

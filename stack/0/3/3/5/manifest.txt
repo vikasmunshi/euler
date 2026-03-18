@@ -1,3 +1,0 @@
-249f5ac7e3228735b71da8424d25159d54a6c1966f709e11491afa43237b2c88 gathering the beans.html
-fad8ce76100212770b5c4dc142989bd4f58648c6eeb81dbc22a586d658e33934 gathering the beans.md
-dca389adc044b87c7aae232675bb6184ac70b925ec6ae916bd69f6cebc5b4033 gathering the beans.url

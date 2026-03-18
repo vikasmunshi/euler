@@ -1,3 +1,0 @@
-f7486ea88452df68d4482668a931784d9f90fdab80f2960d2098dafa86e88371 polynomials with at least one integer root.html
-f299e662024b92bd2d615032ff22ef91b2fc8c1a05467a8666988374d989afbd polynomials with at least one integer root.md
-b3340ff969383925dd97a8a923e3176e8711249c9349d3953890ce2a43062650 polynomials with at least one integer root.url

@@ -1,3 +1,0 @@
-09b664f15a5f30bc887f70b466feb514a7e6bf6aa3d3cd2957a89df3940b9069 smallest prime factor.html
-0e7f577bd3aba7f7503dfaf95253eafad7c8184456a0b41afdb8feb964f9dd74 smallest prime factor.md
-d1d43b9535fffb5162c0e081fd4b390e80a6fd147ad7a7c124ba5a3ec0d9b940 smallest prime factor.url

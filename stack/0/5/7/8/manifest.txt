@@ -1,3 +1,0 @@
-eef3411333e3dd2a83c544269c5d1def75fba6eb7b78f657377b9af1f9f170f0 integers with decreasing prime powers.html
-bae72ab2704a6acd485cc8481fe8204f521dfc803ce0337dd5a134404dfbb575 integers with decreasing prime powers.md
-40daf46e376aac6c58db6871f040ac5726f28111c1c027b1e8ad043fbc8f9523 integers with decreasing prime powers.url

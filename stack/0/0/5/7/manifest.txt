@@ -1,3 +1,0 @@
-9c07467a5ea8fe1c0ed478a818620d977c4ab138ef5eeaaddedb3f557e737fc2 square root convergents.html
-da52c8a4fd01eeb78b4cc0be53fe20168510f81aa38501df6f39f6e4ca70e0e3 square root convergents.md
-75c33a0ae74f37f370cb35493f908cafad2eb73f1df263ff6fa624a54c16d751 square root convergents.url

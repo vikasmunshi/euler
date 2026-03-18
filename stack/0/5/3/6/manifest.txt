@@ -1,3 +1,0 @@
-2928d0cbb730c75343e63af753d9f74fb4b12643277692af4f3e3e84ad20f047 modulo power identity.html
-f76e80cfc1fc52aa215ec10aae2a58b74ffacdc4d0e7d9cfb3280c83276bbbe6 modulo power identity.md
-e47d3f7ff6a53855459e6386d94cf329fc59fb598a28dca9bafebb7132c0066f modulo power identity.url

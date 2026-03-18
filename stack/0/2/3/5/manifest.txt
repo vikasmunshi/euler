@@ -1,3 +1,0 @@
-ddea1364099f726a0d72a317c590259b9a59128507a048d3b5252d2c6a35231c an arithmetic geometric sequence.html
-3f0183292fb574caa13f11f90b3be2cbc40803a38f451d07965c7cc46d49e687 an arithmetic geometric sequence.md
-20a38a196bd9e446b0fe5dfbba08f1b1d1909ca71d8d0ee5946e56f8e6ccbcca an arithmetic geometric sequence.url

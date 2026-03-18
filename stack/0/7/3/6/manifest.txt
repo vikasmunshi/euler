@@ -1,3 +1,0 @@
-788f970aeccde48630ee2f5cb3401c6ce1aeb48ad7a2ec5b579547e8806ccab3 paths to equality.html
-75724b93e85b50d2ab33fbdbf780e26f325b96199421f22bd23a95876ca7bd40 paths to equality.md
-f2ca0346615168a65be8883a5dbe483a60ec1159e64c7ca95a3d111658072fdb paths to equality.url

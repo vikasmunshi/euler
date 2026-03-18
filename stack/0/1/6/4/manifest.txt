@@ -1,3 +1,0 @@
-0947e7ac6a7c74d38886aca8978034ce4ac2ec5e4d637caf10118f136b169811 three consecutive digital sum limit.html
-ed13ab9bb8363f105eac980b6d0a0e6a9a1d6105560e0a690854d263f2b1114c three consecutive digital sum limit.md
-0d34815edd9af1ea903cd35bd733f8214f34480577db7d5ff2868170d474b432 three consecutive digital sum limit.url

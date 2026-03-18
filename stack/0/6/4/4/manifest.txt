@@ -1,3 +1,0 @@
-03d1bdf3df0bfc17f09cc9e8636f4d3f2d836fb736d6a326bbf064c2ff62af69 squares on the line.html
-cc096309e4986ea463fb2e70a9b04240335a31c255aeac907cc4e381678f8f5d squares on the line.md
-6ad73c992c74f1ad8e8fec2b417440c772ccd98a18b9cf7480db2d7c8442fe1f squares on the line.url

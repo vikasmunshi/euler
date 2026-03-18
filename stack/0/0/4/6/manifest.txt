@@ -1,3 +1,0 @@
-99cb3cb13f49b2d07b5e98754bcb72526f398076db0c5ad05dbba2d5ecb60c21 goldbach's other conjecture.html
-a3d90698edb136f24e1f48b0ce9544202206ccd3054e1375bf12eab673c115db goldbach's other conjecture.md
-f6d3f81140b4130ae887de9a66fad7de2ce4c76453b088555857ae2fccd7d2b8 goldbach's other conjecture.url

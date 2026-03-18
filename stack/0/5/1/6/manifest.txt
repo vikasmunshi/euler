@@ -1,3 +1,0 @@
-c94d1a0d29de430b73303bb4b8535a0583d4e1a2ab803ac13f246c309daf87ec $5$-smooth totients.html
-7c930a9229ad3cb4b5877513845c7f1e3f174d55a953c1f033ae982d9ff9076b $5$-smooth totients.md
-cc091b777e9dd128a3ca33294e415b323d372c5cec35fea99809f5d82d8485be $5$-smooth totients.url

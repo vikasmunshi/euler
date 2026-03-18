@@ -1,3 +1,0 @@
-6dfc477659f12832610a70e4beb987e3b6682d72cace6e7cbfd4a64090ae55fc chess sliders.html
-d297797e10eb5a7a31bfd235c507790e58a044956e7eca998ba6b0ca6e693b81 chess sliders.md
-e857226c353581feb1eccd14293c92f36bb0b3aba340f4bc83460e1466e7ceeb chess sliders.url

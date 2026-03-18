@@ -1,3 +1,0 @@
-ea0defa1803d9a7735cb6c53c747b61c48f1bc5f26f009b56755f7567c2d8eba sum of elevisors.html
-d75b68dce33218bfea82ef6366b827cc1843243f625c04d5b5c8fad89ece45ed sum of elevisors.md
-655884782a298caed9ba7e4fd498ef910223f358244f1baa2b33e95d00f0bb3a sum of elevisors.url

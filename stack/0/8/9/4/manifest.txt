@@ -1,3 +1,0 @@
-4fe716347daa63e51080b364b20994b07c58a79694419de89fe7c38447bfb413 spiral of circles.html
-cfd140b47cf6b630a5417ec7b9d208c3da381511ba66238ee1a1a5c8a3442ed5 spiral of circles.md
-b9879f9edceabbc2c8b54ef52ab1c5ef5dd78feba2d88dd9ccd894fbbcb34ec3 spiral of circles.url

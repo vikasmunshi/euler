@@ -1,3 +1,0 @@
-553ba8a8814f2db2ad40ab73c87c24bed9f38f194d21b65bc8cc9925b0aaab77 prime subset sums.html
-8a0bcbf26563cc46f3d2f61771edd74d763449cebb5ae1381d207246c0f50a0d prime subset sums.md
-11c6816c50c5dc412540d5e91172ea78b1e81618689fb4c0107945140a9f4b7e prime subset sums.url

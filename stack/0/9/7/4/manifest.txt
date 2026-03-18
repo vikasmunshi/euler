@@ -1,3 +1,0 @@
-778c1d05729bb7dd8a7440146c860f69ad3ef2e9075ba4b42059b1b50bcc4627 very odd numbers.html
-5d0a837da4ef6f26bb75cc199db29cef8d2f5f18176025574a08f210aa8ab7c7 very odd numbers.md
-7db5b51619c2bd826129fe3f517fa975f6b1fc7fdf1206859dfaae414b753a41 very odd numbers.url

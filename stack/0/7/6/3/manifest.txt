@@ -1,3 +1,0 @@
-cdb9e0784bed6dce201afb0473933da56c3e3ce330a10132fb685c87d81fc3df amoebas in a 3d grid.html
-fbd96c475f4b1c8dca0d094bb743f06ab843d0591f2cb6fc2dbc32a1c1d552ec amoebas in a 3d grid.md
-7a44d8f07e7328c7858e9a7f0fc00ae25b9e129a5098ab8a53c51fe481053fc1 amoebas in a 3d grid.url

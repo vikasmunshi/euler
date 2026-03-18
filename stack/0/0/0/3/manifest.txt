@@ -1,3 +1,0 @@
-483f5251c781d3f6c83f0c9ee6d3e15269777fd4a3c3ad45118d6a54a4a767df largest prime factor.html
-4a3fea6b3ae83bb4425d075917e3e4725628b98d86b7dbc32cc3f987090bdd60 largest prime factor.md
-d68da42d40d15855bdcd415ee246a679d206174f2e25ec6f3b3419efa1d9672d largest prime factor.url
