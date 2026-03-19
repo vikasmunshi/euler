@@ -2,174 +2,168 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
-from typing import Generator, Literal
+from typing import Generator
 
-from solver.projecteuler import init_from_projecteuler, ProjectEulerFiles, DEFAULT_FILES_SET
+from solver.projecteuler import init_from_projecteuler, ProjectEulerFiles, PROBLEMS
 from solver.vault import decrypt, encrypt
-from solver.workspace import BASE_DIR, MANIFEST_FILENAME, STACK_DIR, WORKSPACE_DIR
+from solver.workspace import MANIFEST_FILENAME, STACK_DIR, WORKSPACE_DIR, iterdir_recursive
 
-__all__ = [
-    'add_file',
-    'get_stack_dir',
-    'stack_from_workspace',
-    'unstack_to_workspace',
-    'verify_manifest',
-]
+__all__ = ['Stack']
 
 
-def add_file(stack_dir: Path, manifest: dict[str, str], filename: str, content: str) -> None:
-    if (content_hash := sha256(content.encode('utf-8')).hexdigest()) != manifest.get(filename):
-        filepath: Path = stack_dir / filename
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        if is_public_problem(stack_dir):
-            filepath.write_text(content)
+class Stack:
+    __slots__ = ('__has_changes', '__manifest', '__manifest_file', 'problem_number', 'stack_dir', 'is_public',)
+
+    def __init__(self, problem_number: int) -> None:
+        if not isinstance(problem_number, int) or not PROBLEMS[0] <= problem_number <= PROBLEMS[-1]:
+            raise ValueError(f'Problem number must be between {PROBLEMS[0]} and {PROBLEMS[-1]}, got {problem_number}')
+        self.is_public: bool = problem_number <= 100
+        self.stack_dir: Path = STACK_DIR.joinpath(*f'{problem_number:04d}')
+        self.problem_number: int = problem_number
+        self.__manifest_file: Path = self.stack_dir / MANIFEST_FILENAME
+        self.__manifest: dict[str, str] = {}
+        self.__has_changes: bool = False
+        self.reload()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.save()
+
+    def __getitem__(self, key: str) -> str | None:
+        return self.__manifest.get(key, None)
+
+    def __setitem__(self, key: str, value: str) -> None:
+        self.__manifest[key] = value
+        self.__has_changes = True
+
+    def __delitem__(self, key: str) -> None:
+        try:
+            del self.__manifest[key]
+        except KeyError:
+            pass
         else:
-            enc_filepath: Path = filepath.parent / (filepath.name + '.enc')
-            enc_filepath.write_text(encrypt(content))
-        manifest[filename] = content_hash
-        write_manifest(stack_dir, manifest=manifest)
-        print(f'Added {filename} to {stack_dir.relative_to(BASE_DIR).as_posix()}')
+            self.__has_changes = True
 
+    def add_file(self, filename: str, content: str) -> None:
+        if (content_hash := sha256(content.encode('utf-8')).hexdigest()) == self[filename]:
+            print(f'Skipped {filename} (no changes in content)')
+            return
+        is_public, stackpath = self.stackpath(filename)
+        stackpath.parent.mkdir(parents=True, exist_ok=True)
+        stackpath.write_text(content if is_public else encrypt(content))
+        self[filename] = content_hash
+        print(f'Added {"un" if is_public else ""}encrypted file {filename} to stack and manifest')
 
-@lru_cache(maxsize=None)
-def get_stack_dir(problem_number: int) -> Path:
-    if not isinstance(problem_number, int) or not 1 <= problem_number <= 9999:
-        raise ValueError(f'Problem number must be between 1 and 9999, got {problem_number}')
-    return STACK_DIR.joinpath(*f'{problem_number:04d}')
-
-
-@lru_cache(maxsize=None)
-def get_problem_number(stack_dir: Path) -> int:
-    parts: tuple[str, ...] = stack_dir.parts
-    if len(parts) >= 5 and parts[-5] == 'stack':
-        digits: str = ''.join(parts[-4:])
-        return int(digits)
-    raise ValueError(f'Invalid stack directory path: {stack_dir}')
-
-
-@lru_cache(maxsize=None)
-def is_public_problem(stack_dir: Path) -> bool:
-    return get_problem_number(stack_dir) <= 100
-
-
-def iterdir_recursive(directory: Path) -> Generator[Path, None, None]:
-    if not directory.exists():
-        return None
-    if directory.is_file():
-        yield directory
-        return None
-    for path in directory.iterdir():
-        if path.is_dir():
-            yield from iterdir_recursive(path)
-        elif path.is_file():
-            yield path
-    return None
-
-
-def read_file(stack_dir: Path, filename: str) -> str:
-    is_public: bool = is_public_problem(stack_dir)
-    file_path: Path = stack_dir / filename if is_public else stack_dir / (filename + '.enc')
-    if not file_path.exists():
-        raise FileNotFoundError(f'File {filename} not found in stack directory')
-    return file_path.read_text() if is_public else decrypt(file_path.read_text())
-
-
-def read_manifest(stack_dir: Path) -> dict[str, str]:
-    manifest_file: Path = stack_dir / MANIFEST_FILENAME
-    if not manifest_file.exists():
-        return {}
-    return {filename: content_hash
-            for line in manifest_file.read_text().splitlines()
-            if line.strip()
-            for content_hash, filename in [line.split(' ', 1)]
-            if content_hash and filename}
-
-
-def stack_from_workspace() -> None:
-    try:
-        problem_number: int = int(ProjectEulerFiles.problem_number_file.path.read_text().strip())
-    except FileNotFoundError:
-        print('No problem number file found in the workspace')
-        return
-    except ValueError:
-        print('Invalid problem number in the workspace')
-        return
-    stack_dir: Path = get_stack_dir(problem_number)
-    manifest: dict[str, str] = read_manifest(stack_dir)
-    for filepath in iterdir_recursive(WORKSPACE_DIR):
-        if filepath.relative_to(WORKSPACE_DIR).as_posix().split('/')[0] not in DEFAULT_FILES_SET:
-            add_file(stack_dir, manifest, filepath.relative_to(WORKSPACE_DIR).as_posix(), filepath.read_text())
-    return
-
-
-def unstack_to_workspace(problem_number: int) -> None:
-    init_from_projecteuler(problem_number)
-    stack_dir: Path = get_stack_dir(problem_number)
-    if stack_dir.exists():
-        verify_manifest(stack_dir, verbose=True)
-        manifest = read_manifest(stack_dir)
-        for filename, file_hash in manifest.items():
-            content: str = read_file(stack_dir, filename)
-            target_file = WORKSPACE_DIR / filename
-            target_file.write_text(content)
-            print(f'Copied {filename} to {target_file}')
-
-
-def verify_manifest(stack_dir: Path, verbose: bool = False) -> dict[str, list[str]]:
-    manifest = read_manifest(stack_dir)
-    results: dict[str, list[str]] = {
-        'corrupted': [],
-        'valid': [],
-        'modified': [],
-        'missing': [],
-        'untracked': []
-    }
-
-    def add_to_results(category: Literal['corrupted', 'valid', 'modified', 'missing', 'untracked'], name: str) -> None:
-        results[category].append(name)
-        if verbose:
-            print(f'file {(stack_dir / name).as_posix()} is {category}')
-
-    for filename, expected_hash in manifest.items():
-        file_path = stack_dir / filename if is_public_problem(stack_dir) else stack_dir / (filename + '.enc')
-        if not file_path.exists():
-            add_to_results('missing', filename)
-        else:
+    def del_file(self, filename: str) -> None:
+        if filename in self.__manifest:
+            is_public, stackpath = self.stackpath(filename)
+            stackpath.unlink(missing_ok=True)
+            del self[filename]
             try:
-                content = file_path.read_text() if is_public_problem(stack_dir) else decrypt(file_path.read_text())
-            except (ValueError, UnicodeDecodeError) as e:
-                add_to_results('corrupted', filename)
-                print(f'Error reading {filename}: {e}')
-            else:
-                actual_hash = sha256(content.encode('utf-8')).hexdigest()
-                add_to_results('valid' if actual_hash == expected_hash else 'modified', filename)
-    for file_path in iterdir_recursive(stack_dir):
-        if file_path.name == MANIFEST_FILENAME:
-            continue
-        filename = file_path.relative_to(stack_dir).as_posix()
-        if filename.endswith('.enc'):
-            filename = filename[:-4]
-        if filename not in manifest:
-            add_to_results('untracked', filename)
-    return results
+                stackpath.parent.rmdir()
+            except OSError:
+                pass
+            print(f'Deleted {"un" if is_public else ""}encrypted file {filename} from stack and manifest')
 
+    def get_file(self, filename: str) -> str | None:
+        is_public, stackpath = self.stackpath(filename)
+        if not stackpath.exists():
+            print(f'Warning: {"un" if is_public else ""}encrypted file {filename} not found in stack directory')
+            return None
+        return stackpath.read_text() if is_public else decrypt(stackpath.read_text())
 
-def write_manifest(stack_dir: Path, manifest: dict[str, str] | None = None) -> None:
-    if manifest is None:
-        manifest = {}
-        is_public = is_public_problem(stack_dir)
-        for file in iterdir_recursive(stack_dir):
-            if file.name == MANIFEST_FILENAME:
+    def get_all_files(self) -> Generator[tuple[str, str], None, None]:
+        for filename, content_hash in self.__manifest.items():
+            if content := self.get_file(filename):
+                yield filename, content
+
+    def list_filenames(self) -> list[str]:
+        return list(self.__manifest.keys())
+
+    def reload(self) -> None:
+        if not self.__manifest_file.exists():
+            self.__manifest_file.parent.mkdir(parents=True, exist_ok=True)
+            self.__manifest_file.touch()
+        for line in self.__manifest_file.read_text().splitlines():
+            if not line:
                 continue
-            filename = file.relative_to(stack_dir).as_posix()
-            if not is_public and filename.endswith('.enc'):
-                filename = filename[:-4]
-                content = decrypt(file.read_text())
+            content_hash, filename = line.split(' ', 1)
+            if filename not in self.__manifest:
+                self.__manifest[filename] = content_hash
+
+    def save(self) -> None:
+        if self.__has_changes:
+            self.__manifest_file.write_text('\n'.join(f'{v} {k}' for k, v in self.__manifest.items()))
+            self.__has_changes = False
+            print('Manifest updated')
+
+    def stackpath(self, filename: str) -> tuple[bool, Path]:
+        if self.is_public or filename.split('/')[0] in ProjectEulerFiles:
+            return True, self.stack_dir / filename
+        return False, self.stack_dir / (filename + '.enc')
+
+    def verify(self) -> dict[str, list[str]]:
+        results: dict[str, list[str]] = {
+            'corrupted': [],
+            'valid': [],
+            'modified': [],
+            'missing': [],
+            'untracked': []
+        }
+        for filename, expected_hash in self.__manifest.items():
+            is_public, stackpath = self.stackpath(filename)
+            if not stackpath.exists():
+                results['missing'].append(filename)
             else:
-                content = file.read_text()
-            manifest[filename] = sha256(content.encode('utf-8')).hexdigest()
-    manifest_file = stack_dir / MANIFEST_FILENAME
-    manifest_file.write_text('\n'.join(f'{v} {k}' for k, v in manifest.items()))
+                try:
+                    content: str = stackpath.read_text() if is_public else decrypt(stackpath.read_text())
+                except (ValueError, UnicodeDecodeError):
+                    results['corrupted'].append(filename)
+                else:
+                    actual_hash = sha256(content.encode('utf-8')).hexdigest()
+                    if actual_hash == expected_hash:
+                        results['valid'].append(filename)
+                    else:
+                        results['modified'].append(filename)
+        for file_path in iterdir_recursive(self.stack_dir):
+            if file_path.name == MANIFEST_FILENAME:
+                continue
+            filename = file_path.relative_to(self.stack_dir).as_posix()
+            if filename.endswith('.enc'):
+                filename = filename[:-4]
+            if filename not in self.__manifest:
+                results['untracked'].append(filename)
+        return results
+
+    def unstack_to_workspace(self, force_refresh: bool = False) -> None:
+        print(f'Unstacking problem {self.problem_number} to workspace')
+        for filename, content in self.get_all_files():
+            target_file = WORKSPACE_DIR / filename
+            target_file.parent.mkdir(parents=True, exist_ok=True)
+            target_file.write_text(content)
+            print(f'\tCopied {filename} to {target_file}')
+        for filename in ProjectEulerFiles:
+            if filename == ProjectEulerFiles.problem_resources_dir:
+                continue
+            filepath = WORKSPACE_DIR / filename.value
+            if force_refresh or not filepath.exists():
+                init_from_projecteuler(self.problem_number, force_refresh=force_refresh)
+        print('Unstacking complete')
+
+    def update_stack_from_workspace(self, process_deletions: bool = False) -> None:
+        print(f'Stacking workspace files to stack for problem {self.problem_number}...')
+        files: set[str] = set()
+        with self:
+            for filepath in iterdir_recursive(WORKSPACE_DIR):
+                filename: str = filepath.relative_to(WORKSPACE_DIR).as_posix()
+                self.add_file(filename, filepath.read_text())
+                files.add(filename)
+            if process_deletions:
+                for filename in self.list_filenames():
+                    if filename not in files:
+                        self.del_file(filename)
+        print('Stacking complete')
