@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Passcode Derivation</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Passcode Derivation</h1>
+    <div class="problem_content" role="problem">
+<p>A common security method used for online banking is to ask the user for three random characters from a passcode. For example, if the passcode was 531278, they may ask for the 2nd, 3rd, and 5th characters; the expected reply would be: 317.</p>
+<p>The text file, <a href="resources/0079_keylog.txt">keylog.txt</a>, contains fifty successful login attempts.</p>
+<p>Given that the three characters are always asked for in order, analyse the file so as to determine the shortest possible secret passcode of unknown length.</p>
+</div>
+</body>
+</html>

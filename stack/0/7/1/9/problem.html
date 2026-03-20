@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Number Splitting</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Number Splitting</h1>
+    <div class="problem_content" role="problem">
+<p>
+We define an $S$-number to be a natural number, $n$, that is a perfect square and its square root can be obtained by splitting the decimal representation of $n$ into $2$ or more numbers then adding the numbers.
+</p>
+<p>
+For example, $81$ is an $S$-number because $\sqrt{81} = 8+1$.<br/>
+$6724$ is an $S$-number: $\sqrt{6724} = 6+72+4$. <br/>
+$8281$ is an $S$-number: $\sqrt{8281} = 8+2+81 = 82+8+1$.<br/>
+$9801$ is an $S$-number: $\sqrt{9801}=98+0+1$.
+</p>
+<p>
+Further we define $T(N)$ to be the sum of all $S$ numbers $n\le N$. You are given $T(10^4) = 41333$.
+</p>
+<p>
+Find $T(10^{12})$.
+</p>
+</div>
+</body>
+</html>

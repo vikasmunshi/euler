@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Smallest Prime Factor</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Smallest Prime Factor</h1>
+    <div class="problem_content" role="problem">
+<p>
+Let $\operatorname{smpf}(n)$ be the smallest prime factor of $n$.<br/>
+$\operatorname{smpf}(91)=7$ because $91=7\times 13$ and $\operatorname{smpf}(45)=3$ because $45=3\times 3\times 5$.<br/>
+Let $S(n)$ be the sum of $\operatorname{smpf}(i)$ for $2 \le i \le n$.<br/>
+E.g. $S(100)=1257$.
+</p>
+<p>
+Find $S(10^{12}) \bmod 10^9$.
+</p>
+</div>
+</body>
+</html>

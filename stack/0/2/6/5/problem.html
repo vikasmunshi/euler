@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Binary Circles</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Binary Circles</h1>
+    <div class="problem_content" role="problem">
+<p>$2^N$ binary digits can be placed in a circle so that all the $N$-digit clockwise subsequences are distinct.</p>
+<p>For $N=3$, two such circular arrangements are possible, ignoring rotations:</p>
+<div align="center"><img alt="0265_BinaryCircles.gif" class="dark_img" src="resources/0265_BinaryCircles.gif"/></div>
+<p>For the first arrangement, the $3$-digit subsequences, in clockwise order, are:<br/>$000$, $001$, $010$, $101$, $011$, $111$, $110$ and $100$.</p>
+<p>Each circular arrangement can be encoded as a number by concatenating the binary digits starting with the subsequence of all zeros as the most significant bits and proceeding clockwise. The two arrangements for $N=3$ are thus represented as $23$ and $29$:
+</p>
+$$\begin{align}
+00010111_2 &amp;= 23\\
+00011101_2 &amp;= 29
+\end{align}$$
+
+<p>Calling $S(N)$ the sum of the unique numeric representations, we can see that $S(3) = 23 + 29 = 52$.</p>
+<p>Find $S(5)$.</p>
+</div>
+</body>
+</html>

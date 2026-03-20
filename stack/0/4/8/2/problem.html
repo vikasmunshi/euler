@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>The Incenter of a Triangle</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>The Incenter of a Triangle</h1>
+    <div class="problem_content" role="problem">
+<p>
+$ABC$ is an integer sided triangle with incenter $I$ and perimeter $p$.<br/>
+The segments $IA$, $IB$ and $IC$ have integral length as well. 
+</p>
+<p>
+Let $L = p + |IA| + |IB| + |IC|$. 
+</p>
+<p>
+Let $S(P) = \sum L$ for all such triangles where $p \le P$. For example, $S(10^3) = 3619$.
+</p>
+<p>
+Find $S(10^7)$.
+</p>
+</div>
+</body>
+</html>

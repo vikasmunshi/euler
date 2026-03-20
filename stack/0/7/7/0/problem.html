@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Delphi Flip</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Delphi Flip</h1>
+    <div class="problem_content" role="problem">
+<p>
+A and B play a game. A has originally $1$ gram of gold and B has an unlimited amount.
+Each round goes as follows:
+</p>
+<ul>
+<li>
+A chooses and displays, $x$, a nonnegative real number no larger than the amount of gold that A has.</li>
+<li>
+Either B chooses to TAKE. Then A gives B $x$ grams of gold.</li>
+<li>
+Or B chooses to GIVE. Then B gives A $x$ grams of gold.</li>
+</ul>
+<p>
+B TAKEs $n$ times and GIVEs $n$ times after which the game finishes.</p>
+<p>
+Define $g(X)$ to be the smallest value of $n$ so that A can guarantee to have at least $X$ grams of gold at the end of the game. You are given $g(1.7) = 10$.
+</p>
+<p>
+Find $g(1.9999)$.
+</p>
+</div>
+</body>
+</html>

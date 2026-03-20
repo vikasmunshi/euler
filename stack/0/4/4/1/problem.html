@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>The Inverse Summation of Coprime Couples</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>The Inverse Summation of Coprime Couples</h1>
+    <div class="problem_content" role="problem">
+<p>
+For an integer $M$, we define $R(M)$ as the sum of $1/(p \cdot q)$ for all the integer pairs $p$ and $q$ which satisfy all of these conditions:
+</p>
+<ul><li> $1 \leq p \lt q \leq M$</li>
+<li> $p + q \geq M$</li>
+<li> $p$ and $q$ are coprime.</li>
+</ul><p>
+We also define $S(N)$ as the sum of $R(i)$ for $2 \leq i \leq N$.<br/>
+We can verify that $S(2) = R(2) = 1/2$, $S(10) \approx 6.9147$ and $S(100) \approx 58.2962$.
+</p>
+<p>
+Find $S(10^7)$. Give your answer rounded to four decimal places.
+</p>
+</div>
+</body>
+</html>

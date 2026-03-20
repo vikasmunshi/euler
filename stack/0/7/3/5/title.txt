@@ -1,0 +1,1 @@
+Divisors of $2n^2$

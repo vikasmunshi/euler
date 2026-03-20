@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sum of Digits Sequence</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Sum of Digits Sequence</h1>
+    <div class="problem_content" role="problem">
+<p>Let $a_0, a_1, \dots$ be an integer sequence defined by:</p>
+<ul>
+<li>$a_0 = 1$;</li>
+<li>for $n \ge 1$, $a_n$ is the sum of the digits of all preceding terms.</li>
+</ul>
+<p>The sequence starts with $1, 1, 2, 4, 8, 16, 23, 28, 38, 49, \dots$<br/>
+You are given $a_{10^6} = 31054319$.</p>
+<p>Find $a_{10^{15}}$.</p>
+</div>
+</body>
+</html>

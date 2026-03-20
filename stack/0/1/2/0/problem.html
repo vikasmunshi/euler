@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Square Remainders</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Square Remainders</h1>
+    <div class="problem_content" role="problem">
+<p>Let $r$ be the remainder when $(a - 1)^n + (a + 1)^n$ is divided by $a^2$.</p>
+<p>For example, if $a = 7$ and $n = 3$, then $r = 42$: $6^3 + 8^3 = 728 \equiv 42 \mod 49$. And as $n$ varies, so too will $r$, but for $a = 7$ it turns out that $r_{\mathrm{max}} = 42$.</p>
+<p>For $3 \le a \le 1000$, find $\sum r_{\mathrm{max}}$.</p>
+</div>
+</body>
+</html>

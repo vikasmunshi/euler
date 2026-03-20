@@ -33,7 +33,7 @@ Dependencies:
 
 Example:
     >>> from solver.vault import decrypt, encrypt
-    >>> plaintext = "Secret problem content"
+    >>> plaintext = b"Secret problem content"
     >>> ciphertext = encrypt(plaintext)
     >>> decrypt(ciphertext) == plaintext
     True
@@ -162,20 +162,20 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> bool:
         imported or used outside this module. It catches all exceptions and returns
         False instead of raising them, making it safe for internal validation.
     """
-    plain_text: str = (
-        'To see a World in a Grain of Sand'
-        'And a Heaven in a Wild Flower'
-        'Hold Infinity in the palm of your hand'
-        'And Eternity in an hour'
+    plain_text: bytes = (
+        b'To see a World in a Grain of Sand'
+        b'And a Heaven in a Wild Flower'
+        b'Hold Infinity in the palm of your hand'
+        b'And Eternity in an hour'
     )
     if is_new_key:
-        cipher_text: str = encrypt(plain_text, key=key)
-        print('New cipher text:', cipher_text, sep='\n')
+        cipher_text: bytes = encrypt(plain_text, key=key)
+        print('New cipher text:', cipher_text.decode(), sep='\n')
     else:
         # noinspection SpellCheckingInspection
         cipher_text = (
-            r'2T6wBeZ+yF9BR6NgVcWH0DRVEjTsurbPM+o+0y+6eTBNQ5n4Y7tDE7+zPqjprhVw2PAti/c93FNt6tx3Nf+IldauCsDxmZwy'
-            r'd0PnUcGtWSb2h7DffZCmF4vt5B4ep7gZJaaS7IVcs5DEQ1Au8h+pgPqd6ardNIGYpPBzf0IhMAiR87TJD9UidYAdaZNEJ35T'
+            rb'2T6wBeZ+yF9BR6NgVcWH0DRVEjTsurbPM+o+0y+6eTBNQ5n4Y7tDE7+zPqjprhVw2PAti/c93FNt6tx3Nf+IldauCsDxmZwy'
+            rb'd0PnUcGtWSb2h7DffZCmF4vt5B4ep7gZJaaS7IVcs5DEQ1Au8h+pgPqd6ardNIGYpPBzf0IhMAiR87TJD9UidYAdaZNEJ35T'
         )
     # noinspection PyBroadException
     try:
@@ -184,35 +184,34 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> bool:
         return False
 
 
-def decrypt(cypher_text: str, *, key: bytes = None) -> str:
+def decrypt(cypher_text: bytes, *, key: bytes = None) -> bytes:
     """Decrypt ciphertext that was encrypted using AES-256 in CBC mode.
 
-    Decrypts a base64-encoded ciphertext string produced by the encrypt()
+    Decrypts a base64-encoded ciphertext bytes produced by the encrypt()
     function. Extracts the IV from the beginning of the decoded data, then uses it
     to decrypt the remaining ciphertext and remove padding.
 
     Args:
-        cypher_text: Base64-encoded string containing IV + encrypted data.
+        cypher_text: Base64-encoded bytes containing IV + encrypted data.
                      Must be in the format produced by encrypt().
         key: Optional decryption key. If None, use the default key from keys/key.txt.
              Must be exactly 32 bytes for AES-256 and match the encryption key.
              Defaults to None.
 
     Returns:
-        str: The decrypted plaintext string.
+        bytes: The decrypted plaintext bytes.
 
     Raises:
         ValueError: If the ciphertext is malformed, padding is invalid, or
                     base64 decoding fails.
-        UnicodeDecodeError: If the decrypted data is not valid UTF-8 text.
 
     Examples:
-        >>> plaintext = 'Secret message'
+        >>> plaintext = b'Secret message'
         >>> ciphertext = encrypt(plaintext)
         >>> decrypt(ciphertext) == plaintext
         True
         >>> decrypt(ciphertext)
-        'Secret message'
+        b'Secret message'
 
     Technical Details:
         - Algorithm: AES-256-CBC
@@ -233,13 +232,13 @@ def decrypt(cypher_text: str, *, key: bytes = None) -> str:
     iv = decoded_cypher_text[:Crypto.Cipher.AES.block_size]
     cipher = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CBC, iv=iv)
     plain_text = cipher.decrypt(decoded_cypher_text[Crypto.Cipher.AES.block_size:])
-    return Crypto.Util.Padding.unpad(plain_text, Crypto.Cipher.AES.block_size).decode()
+    return Crypto.Util.Padding.unpad(plain_text, Crypto.Cipher.AES.block_size)
 
 
-def encrypt(plain_text: str, *, key: bytes = None) -> str:
+def encrypt(plain_text: bytes, *, key: bytes = None) -> bytes:
     """Encrypt plaintext using AES-256 in CBC mode.
 
-    Encrypts the input string using AES-256 encryption with a randomly generated
+    Encrypts the input bytes using AES-256 encryption with a randomly generated
     Initialization Vector (IV) for each encryption operation. The IV is prepended
     to the ciphertext, and the result is base64-encoded for text-safe storage.
 
@@ -247,17 +246,17 @@ def encrypt(plain_text: str, *, key: bytes = None) -> str:
     random IV, providing semantic security.
 
     Args:
-        plain_text: The plaintext string to encrypt.
+        plain_text: The plaintext bytes to encrypt.
         key: Optional encryption key. If None, use the default key from keys/key.txt.
              Must be exactly 32 bytes for AES-256. Defaults to None.
 
     Returns:
-        str: Base64-encoded string containing IV + ciphertext.
-             Format: base64(IV || encrypted_data)
-             Safe for storage in text files.
+        bytes: Base64-encoded bytes containing IV + ciphertext.
+               Format: base64(IV || encrypted_data)
+               Safe for storage in text files.
 
     Examples:
-        >>> plaintext = "Secret message"
+        >>> plaintext = b"Secret message"
         >>> encrypted1 = encrypt(plaintext)
         >>> encrypted2 = encrypt(plaintext)
         >>> encrypted1 != encrypted2  # Different due to random IV
@@ -278,8 +277,8 @@ def encrypt(plain_text: str, *, key: bytes = None) -> str:
     """
     key = key or _get_key()
     cipher = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CBC)
-    cipher_text = cipher.encrypt(Crypto.Util.Padding.pad(plain_text.encode(), Crypto.Cipher.AES.block_size))
-    return b64encode(cipher.iv + cipher_text).decode()
+    cipher_text = cipher.encrypt(Crypto.Util.Padding.pad(plain_text, Crypto.Cipher.AES.block_size))
+    return b64encode(cipher.iv + cipher_text)
 
 
 if __name__ == '__main__':

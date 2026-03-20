@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Music Festival</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Music Festival</h1>
+    <div class="problem_content" role="problem">
+<p>$12n$ musicians participate at a music festival. On the first day, they form $3n$ quartets and practice all day.</p>
+<p>It is a disaster. At the end of the day, all musicians decide they will never again agree to play with any member of their quartet.</p>
+<p>On the second day, they form $4n$ trios, with every musician avoiding any previous quartet partners.</p>
+<p>Let $f(12n)$ be the number of ways to organize the trios amongst the $12n$ musicians.</p>
+<p>You are given $f(12) = 576$ and $f(24) \bmod 1\,000\,000\,007 = 509089824$.</p>
+<p>Find $f(600) \bmod 1\,000\,000\,007$.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>The Floor's Revenge</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>The Floor's Revenge</h1>
+    <div class="problem_content" role="problem">
+<p>Define $f_k(n) = \sum_{i=0}^n f_k(\lfloor\frac i k \rfloor)$ where $f_k(0) = 1$ and $\lfloor x \rfloor$ denotes the floor function.</p>
+<p>For example, $f_5(10) = 18$, $f_7(100) = 1003$, and $f_2(10^3) = 264830889564$.</p>
+<p>Find $(\sum_{k=2}^{10} f_k(10^{14})) \bmod (10^9+7)$.</p>
+</div>
+</body>
+</html>

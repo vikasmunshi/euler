@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pseudo Square Root</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Pseudo Square Root</h1>
+    <div class="problem_content" role="problem">
+<p>
+The divisors of $12$ are: $1,2,3,4,6$ and $12$.<br/>
+The largest divisor of $12$ that does not exceed the square root of $12$ is $3$.<br/>
+We shall call the largest divisor of an integer $n$ that does not exceed the square root of $n$ the pseudo square root ($\operatorname{PSR}$) of $n$.<br/>
+It can be seen that $\operatorname{PSR}(3102)=47$.
+</p>
+<p>
+Let $p$ be the product of the primes below $190$.<br/>
+Find $\operatorname{PSR}(p) \bmod 10^{16}$.
+</p>
+</div>
+</body>
+</html>

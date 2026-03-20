@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Modulo Power Identity </title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Modulo Power Identity </h1>
+    <div class="problem_content" role="problem">
+<p>
+Let $S(n)$ be the sum of all positive integers $m$ not exceeding $n$ having the following property:<br/>
+$a^{m + 4} \equiv a \pmod m$ for all integers $a$.
+</p>
+<p>
+The values of $m \le 100$ that satisfy this property are $1, 2, 3, 5$ and $21$, thus $S(100) = 1+2+3+5+21 = 32$.<br/>
+You are given $S(10^6) = 22868117$.
+</p>
+<p>
+Find $S(10^{12})$.
+</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pizza Toppings</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Pizza Toppings</h1>
+    <div class="problem_content" role="problem">
+<p>You are given a pizza (perfect circle) that has been cut into $m \cdot n$ equal pieces and you want to have exactly one topping on each slice.</p>
+<p>Let $f(m, n)$ denote the number of ways you can have toppings on the pizza with $m$ different toppings ($m \ge 2$), using each topping on exactly $n$ slices ($n \ge 1$).<br/>Reflections are considered distinct, rotations are not. </p>
+<p>Thus, for instance, $f(2,1) = 1$, $f(2, 2) = f(3, 1) = 2$ and $f(3, 2) = 16$. <br/>$f(3, 2)$ is shown below:</p>
+<div align="center"><img alt="0281_pizza.gif" class="dark_img" src="resources/0281_pizza.gif"/></div>
+<p>Find the sum of all $f(m, n)$ such that $f(m, n) \le 10^{15}$.</p>
+</div>
+</body>
+</html>

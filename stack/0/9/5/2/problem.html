@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Order Modulo Factorial</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Order Modulo Factorial</h1>
+    <div class="problem_content" role="problem">
+<p>
+Given a prime $p$ and a positive integer $n \lt p$, let $R(p, n)$ be the <b>multiplicative order</b> of $p$ modulo $n!$.<br/>
+In other words, $R(p, n)$ is the minimal positive integer $r$ such that</p>
+
+$$p^r \equiv 1 \pmod{n!}$$
+
+<p>
+For example, $R(7, 4) = 2$ and $R(10^9 + 7, 12) = 17280$.</p>
+<p>
+Find $R(10^9 + 7, 10^7)$. Give your answer modulo $10^9 + 7$.</p>
+</div>
+</body>
+</html>

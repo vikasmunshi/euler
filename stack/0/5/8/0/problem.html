@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Squarefree Hilbert Numbers</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Squarefree Hilbert Numbers</h1>
+    <div class="problem_content" role="problem">
+<p>
+A <strong>Hilbert number</strong> is any positive integer of the form $4k+1$ for integer $k\geq 0$.  We shall define a <i>squarefree Hilbert number</i> as a Hilbert number which is not divisible by the square of any Hilbert number other than one.  For example, $117$ is a squarefree Hilbert number, equaling $9\times13$.  However $6237$ is a Hilbert number that is not squarefree in this sense, as it is divisible by $9^2$.  The number $3969$ is also not squarefree, as it is divisible by both $9^2$ and $21^2$.  
+</p>
+<p>
+There are $2327192$ squarefree Hilbert numbers below $10^7$. <br/>
+How many squarefree Hilbert numbers are there below $10^{16}$?
+</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Stealthy Numbers</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Stealthy Numbers</h1>
+    <div class="problem_content" role="problem">
+<p>
+A positive integer $N$ is <dfn>stealthy</dfn>, if there exist positive integers $a$, $b$, $c$, $d$ such that $ab = cd = N$ and $a+b = c+d+1$.<br/>
+For example, $36 = 4\times 9 = 6\times 6$ is stealthy.
+</p>
+<p>
+You are also given that there are 2851 stealthy numbers not exceeding $10^6$.
+</p>
+<p>
+How many stealthy numbers  are there that don't exceed $10^{14}$?
+</p>
+</div>
+</body>
+</html>

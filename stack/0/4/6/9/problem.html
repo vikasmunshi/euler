@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Empty Chairs</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Empty Chairs</h1>
+    <div class="problem_content" role="problem">
+<p>
+In a room $N$ chairs are placed around a round table.<br/>
+Knights enter the room one by one and choose at random an available empty chair.<br/>
+To have enough elbow room the knights always leave at least one empty chair between each other.
+</p>
+<p>
+When there aren't any suitable chairs left, the fraction $C$ of empty chairs is determined.<br/>
+We also define $E(N)$ as the expected value of $C$.<br/>
+We can verify that $E(4) = 1/2$ and $E(6) = 5/9$.
+</p>
+<p>
+Find $E(10^{18})$. Give your answer rounded to fourteen decimal places in the form 0.abcdefghijklmn.
+</p>
+</div>
+</body>
+</html>

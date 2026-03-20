@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Maximal $n$-gon in a region</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Maximal $n$-gon in a region</h1>
+    <div class="problem_content" role="problem">
+<p>
+Let $G(n)$ denote the largest possible area of an <strong class="tooltip">$n$-gon<span class="tooltiptext">a polygon with $n$ sides</span></strong> contained in the region $\{(x, y) \in \Bbb R^2: x^4 \leq y \leq 1\}$.<br/>
+For example, $G(3) = 1$ and $G(5)\approx 1.477309771$.<br/>
+Find $G(101)$ rounded to nine digits after the decimal point.</p>
+</div>
+</body>
+</html>

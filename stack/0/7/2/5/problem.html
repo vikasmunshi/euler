@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Digit Sum Numbers</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Digit Sum Numbers</h1>
+    <div class="problem_content" role="problem">
+<p>
+A number where one digit is the sum of the <b>other</b> digits is called a <dfn>digit sum number</dfn> or DS-number for short. For example, $352$, $3003$ and $32812$ are DS-numbers.
+</p>
+<p>
+We define $S(n)$ to be the sum of all DS-numbers of $n$ digits or less.
+</p>
+<p>
+You are given $S(3) = 63270$ and $S(7) = 85499991450$.
+</p>
+<p>
+Find $S(2020)$. Give your answer modulo $10^{16}$.
+</p>
+</div>
+</body>
+</html>

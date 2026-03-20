@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clock Sequence</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Clock Sequence</h1>
+    <div class="problem_content" role="problem">
+<p>Consider the infinite repeating sequence of digits:<br/>
+1234321234321234321...</p>
+<p>Amazingly, you can break this sequence of digits into a sequence of integers such that the sum of the digits in the $n$-th value is $n$.</p>
+<p>The sequence goes as follows:<br/>
+1, 2, 3, 4, 32, 123, 43, 2123, 432, 1234, 32123, ...</p>
+<p>Let $v_n$ be the $n$-th value in this sequence. For example, $v_2=2$, $v_5=32$ and $v_{11}=32123$.</p>
+<p>Let $S(n)$ be $v_1+v_2+\cdots+v_n$. For example, $S(11)=36120$, and $S(1000)\bmod 123454321=18232686$.</p>
+<p>Find $S(10^{14})\bmod 123454321$.</p>
+</div>
+</body>
+</html>

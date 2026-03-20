@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fibonacci Paths</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Fibonacci Paths</h1>
+    <div class="problem_content" role="problem">
+<p>
+Alice walks on a lattice grid. She can step from one lattice point $A (a,b)$ to another $B (a+x,b+y)$ providing distance $AB = \sqrt{x^2+y^2}$ is a Fibonacci number $\{1,2,3,5,8,13,\ldots\}$ and $x\ge 0,$  $y\ge 0$.
+</p>
+<p>
+
+In the lattice grid below Alice can step from the blue point to any of the red points.<br/>
+</p>
+<p align="center"><img alt="0662_fibonacciwalks.png" src="resources/0662_fibonacciwalks.png"/></p>
+<p>
+Let $F(W,H)$ be the number of paths Alice can take from $(0,0)$ to $(W,H)$.<br/>
+You are given $F(3,4) = 278$ and $F(10,10) = 215846462$.
+</p>
+<p>
+Find $F(10\,000,10\,000) \bmod 1\,000\,000\,007$.</p>
+</div>
+</body>
+</html>

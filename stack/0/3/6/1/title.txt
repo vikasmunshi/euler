@@ -1,0 +1,1 @@
+Subsequence of Thue-Morse Sequence

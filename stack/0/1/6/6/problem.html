@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Criss Cross</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Criss Cross</h1>
+    <div class="problem_content" role="problem">
+<p>A $4 \times 4$ grid is filled with digits $d$, $0 \le d \le 9$.</p>
+<p>It can be seen that in the grid
+$$\begin{matrix}
+6 &amp; 3 &amp; 3 &amp; 0\\
+5 &amp; 0 &amp; 4 &amp; 3\\
+0 &amp; 7 &amp; 1 &amp; 4\\
+1 &amp; 2 &amp; 4 &amp; 5
+\end{matrix}$$
+the sum of each row and each column has the value $12$. Moreover the sum of each diagonal is also $12$.</p>
+<p>In how many ways can you fill a $4 \times 4$ grid with the digits $d$, $0 \le d \le 9$ so that each row, each column, and both diagonals have the same sum?</p>
+</div>
+</body>
+</html>

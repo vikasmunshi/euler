@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Comfortable Distance</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Comfortable Distance</h1>
+    <div class="problem_content" role="problem">
+<p>
+There are $N$ seats in a row. $N$ people come after each other to fill the seats according to the following rules:
+</p><ol type="1"><li>If there is any seat whose adjacent seat(s) are not occupied take such a seat.</li>
+<li>If there is no such seat and there is any seat for which only one adjacent seat is occupied take such a seat.</li>
+<li>Otherwise take one of the remaining available seats. </li>
+</ol>
+Let $T(N)$ be the number of possibilities that $N$ seats are occupied by $N$ people with the given rules.<br/> The following figure shows $T(4)=8$.
+
+
+<div align="center">
+<img alt="0364_comf_dist.gif" class="dark_img" src="resources/0364_comf_dist.gif"/></div>
+<p>We can verify that $T(10) = 61632$ and $T(1\,000) \bmod 100\,000\,007 = 47255094$.</p>
+<p>Find $T(1\,000\,000) \bmod 100\,000\,007$.</p>
+</div>
+</body>
+</html>

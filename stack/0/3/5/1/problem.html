@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hexagonal Orchards</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Hexagonal Orchards</h1>
+    <div class="problem_content" role="problem">
+<p>A <dfn>hexagonal orchard</dfn> of order $n$ is a triangular lattice made up of points within a regular hexagon with side $n$. The following is an example of a hexagonal orchard of order $5$:
+</p>
+<div align="center">
+<img alt="0351_hexorchard.png" class="dark_img" src="resources/0351_hexorchard.png"/><br/></div>
+<p>
+Highlighted in green are the points which are hidden from the center by a point closer to it. It can be seen that for a hexagonal orchard of order $5$, $30$ points are hidden from the center.
+</p>
+<p>
+Let $H(n)$ be the number of points hidden from the center in a hexagonal orchard of order $n$.
+</p>
+<p>
+$H(5) = 30$. $H(10) = 138$. $H(1\,000) = 1177848$.
+</p>
+<p>
+Find $H(100\,000\,000)$.
+</p>
+</div>
+</body>
+</html>

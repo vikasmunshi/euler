@@ -1,0 +1,1 @@
+Distinct Colourings of a Rubik's Cube

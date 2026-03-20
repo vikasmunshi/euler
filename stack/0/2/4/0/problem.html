@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Top Dice</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Top Dice</h1>
+    <div class="problem_content" role="problem">
+<p>There are $1111$ ways in which five $6$-sided dice (sides numbered $1$ to $6$) can be rolled so that the top three sum to $15$. Some examples are:
+
+<br/><br/>
+$D_1,D_2,D_3,D_4,D_5 = 4,3,6,3,5$
+<br/>
+$D_1,D_2,D_3,D_4,D_5 = 4,3,3,5,6$
+<br/>
+$D_1,D_2,D_3,D_4,D_5 = 3,3,3,6,6$
+<br/>
+$D_1,D_2,D_3,D_4,D_5 = 6,6,3,3,3$
+<br/><br/>
+In how many ways can twenty $12$-sided dice (sides numbered $1$ to $12$) be rolled so that the top ten sum to $70$?</p>
+</div>
+</body>
+</html>

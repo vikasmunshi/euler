@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Square on the Inside</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Square on the Inside</h1>
+    <div class="problem_content" role="problem">
+<p>Let $ABCD$ be a quadrilateral whose vertices are lattice points lying on the coordinate axes as follows:</p>
+<p>$A(a, 0)$, $B(0, b)$, $C(-c, 0)$, $D(0, -d)$, where $1 \le a, b, c, d \le m$ and $a, b, c, d, m$ are integers.</p>
+<p>It can be shown that for $m = 4$ there are exactly $256$ valid ways to construct $ABCD$. Of these $256$ quadrilaterals, $42$ of them <u>strictly</u> contain a square number of lattice points.</p>
+<p>How many quadrilaterals $ABCD$ strictly contain a square number of lattice points for $m = 100$?</p>
+</div>
+</body>
+</html>

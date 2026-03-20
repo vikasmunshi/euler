@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Square Sum of the Digital Squares</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Square Sum of the Digital Squares</h1>
+    <div class="problem_content" role="problem">
+<p>For a positive integer $n$, let $f(n)$ be the sum of the squares of the digits (in base $10$) of $n$, e.g.</p>
+$$\begin{align}
+f(3) &amp;= 3^2 = 9,\\
+f(25) &amp;= 2^2 + 5^2 = 4 + 25 = 29,\\
+f(442) &amp;= 4^2 + 4^2 + 2^2 = 16 + 16 + 4 = 36\\
+\end{align}$$
+<p>Find the last nine digits of the sum of all $n$, $0 \lt n \lt 10^{20}$, such that $f(n)$ is a perfect square.</p>
+</div>
+</body>
+</html>

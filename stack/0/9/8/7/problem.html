@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Straight Eight</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Straight Eight</h1>
+    <div class="problem_content" role="problem">
+<p>
+In Poker a <b>straight</b> is exactly five cards of sequential rank NOT all of the same suit.
+In this problem an ace can rank either high as in A-K-Q-J-10 or low as in 5-4-3-2-A, but cannot simultaneously rank both high and low, so Q-K-A-2-3 is not allowed.</p>
+<p>
+There are $10200$ ways of choosing a straight from a normal $52$ card deck.<br/>
+There are $31832952$ ways of choosing two disjoint straights from a single $52$ card deck.</p>
+<p>
+Find the number of ways of choosing eight disjoint straights from a single $52$ card deck.<br/>
+In this the order of choosing the straights does not matter.</p>
+</div>
+</body>
+</html>

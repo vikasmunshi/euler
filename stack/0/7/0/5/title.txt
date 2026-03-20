@@ -1,0 +1,1 @@
+Total Inversion Count of Divided Sequences

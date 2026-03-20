@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Subset Sums</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Subset Sums</h1>
+    <div class="problem_content" role="problem">
+<p>
+Let $A_q(n)$ be the number of subsets, $B$, of the set $\{1, 2, ..., q \cdot n\}$ that satisfy two conditions:<br/>
+1) $B$ has exactly $n$ elements;<br/>
+2) the sum of the elements of $B$ is divisible by $n$.
+</p>
+<p>
+E.g. $A_2(5)=52$ and $A_3(5)=603$.
+</p>
+Let $S_q(L)$ be $\sum A_q(p)$ where the sum is taken over all primes $p \le L$.<br/>
+E.g. $S_2(10)=554$, $S_2(100)$ mod $1\,000\,000\,009=100433628$ and<br/> $S_3(100)$ mod $1\,000\,000\,009=855618282$.
+
+<p>
+Find $S_2(10^8)+S_3(10^8)$. Give your answer modulo $1\,000\,000\,009$.
+</p>
+</div>
+</body>
+</html>

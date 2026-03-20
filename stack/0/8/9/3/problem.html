@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Matchsticks</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Matchsticks</h1>
+    <div class="problem_content" role="problem">
+<p>
+Define $M(n)$ to be the minimum number of matchsticks needed to represent the number $n$.</p>
+<p>
+A number can be represented in digit form or as an expression involving addition and/or multiplication. Also order of operations must be followed, that is multiplication binding tighter than addition. Any other symbols or operations, such as brackets, subtraction, division or exponentiation, are not allowed.</p>
+<p>
+The valid digits and symbols are shown below:</p>
+<div style="text-align:center;">
+<img alt="0893_DigitDiagram.jpg" height="433" src="resources/0893_DigitDiagram.jpg" width="668"/></div>
+<p>
+For example, $28$ needs $12$ matchsticks to represent it in digit form but representing it as $4\times 7$ would only need $9$ matchsticks and as there is no way using fewer matchsticks $M(28) = 9$.</p>
+<p>
+Define $\displaystyle T(N) = \sum_{n=1}^N M(n)$. You are given $T(100) = 916$.</p>
+<p>
+Find $T(10^6)$.</p>
+</div>
+</body>
+</html>

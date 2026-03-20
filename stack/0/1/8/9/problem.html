@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Tri-colouring a Triangular Grid</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Tri-colouring a Triangular Grid</h1>
+    <div class="problem_content" role="problem">
+<p>Consider the following configuration of $64$ triangles:</p>
+<div class="center"><img alt="" class="dark_img" src="resources/0189_grid.gif"/></div>
+<p>We wish to colour the interior of each triangle with one of three colours: red, green or blue, so that no two neighbouring triangles have the same colour. Such a colouring shall be called valid. Here, two triangles are said to be neighbouring if they share an edge.<br/>
+Note: if they only share a vertex, then they are not neighbours.</p>
+<p>For example, here is a valid colouring of the above grid:</p>
+<div class="center"><img alt="" class="dark_img" src="resources/0189_colours.gif"/></div>
+<p>A colouring $C^\prime$ which is obtained from a colouring $C$ by rotation or reflection is considered <i>distinct</i> from $C$ unless the two are identical.</p>
+<p>How many distinct valid colourings are there for the above configuration?</p>
+</div>
+</body>
+</html>

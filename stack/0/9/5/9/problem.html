@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Asymmetric Random Walk</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <h1>Asymmetric Random Walk</h1>
+    <div class="problem_content" role="problem">
+<p>A frog is placed on the number line. Every step the frog jumps either $a$ units to the left or $b$ units to the right, both with $1/2$ probability.</p>
+<p>Define $f(a, b)$ as the limit $\lim_{n \to \infty} \frac{c_n}n$ where $c_n$ is the expected number of unique numbers visited in the first $n$ steps. You are given $f(1, 1) = 0$ and $f(1, 2) \approx 0.427050983$.</p>
+<p>Find $f(89, 97)$. Give your answer rounded to nine digits after the decimal point.</p>
+</div>
+</body>
+</html>
