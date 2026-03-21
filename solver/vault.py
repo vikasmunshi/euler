@@ -14,7 +14,7 @@ import Crypto.Cipher.AES
 import Crypto.Hash.SHA256
 import Crypto.Util.Padding
 
-__all__ = ['encrypt', 'decrypt']
+__all__ = ['KEY_FILE', 'REPO', 'encrypt', 'decrypt']
 
 # ============================================================================
 # Constants
