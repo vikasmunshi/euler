@@ -16,8 +16,8 @@ from solver.workspace import WORKSPACE_DIR, clear_workspace, write_file
 
 def main():
     test_file: Path = WORKSPACE_DIR / 'test_file.txt'
-    for problem_number in problem_numbers(check_validity=True).keys():
-        print(f'Processing problem {problem_number}...')
+    for problem_number in list(problem_numbers(check_validity=True).keys())[:]:
+        print(f'########## Processing problem {problem_number}... ########## ')
         clear_workspace()
         stack_from_workspace()
         unstack_to_workspace(problem_number, re_init=True, force_refresh=False)
@@ -36,7 +36,6 @@ def main():
         clear_workspace()
         print('Expect an error about file not found in stack.')
         read_stack_file(problem_number, test_file.name)
-        print('Expect an error about file not found in stack.')
 
 
 if __name__ == "__main__":

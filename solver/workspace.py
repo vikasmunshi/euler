@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
+"""Workspace and directory management utilities."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -19,6 +20,10 @@ __all__ = [
     'write_file',
 ]
 
+# ============================================================================
+# Constants
+# ============================================================================
+
 # Path constants
 BASE_DIR: Path = Path.cwd()  # Project root directory
 CACHE_DIR: Path = BASE_DIR / 'cache'
@@ -31,13 +36,29 @@ PROJECTEULER_URL: str = 'https://projecteuler.net'
 PROBLEMS_LIST_URL: str = f'{PROJECTEULER_URL}/minimal=problems'
 
 
+# ============================================================================
+# Workspace Management
+# ============================================================================
+
 def clear_workspace() -> None:
     """Clear the workspace directory."""
     print('Clearing workspace')
     rmtree(WORKSPACE_DIR, ignore_errors=True)
 
 
+# ============================================================================
+# File Operations
+# ============================================================================
+
 def iterdir_recursive(directory: Path) -> Generator[Path, None, None]:
+    """Recursively iterate over all files in a directory.
+
+    Args:
+        directory: Directory to iterate over
+
+    Yields:
+        Path objects for each file found
+    """
     if not directory.exists():
         return None
     if directory.is_file():
@@ -52,6 +73,13 @@ def iterdir_recursive(directory: Path) -> Generator[Path, None, None]:
 
 
 def write_file(path: Path, content: bytes, verbose: bool = False) -> None:
+    """Write content to file, creating parent directories if needed.
+
+    Args:
+        path: File path to write to
+        content: Byte content to write
+        verbose: Print a confirmation message if True
+    """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(content)
     if verbose:

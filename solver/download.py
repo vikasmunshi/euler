@@ -1,5 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
+"""File download and caching utilities for Project Euler solver."""
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -11,7 +12,21 @@ from requests import get
 from solver.workspace import CACHE_DIR, write_file
 
 
+# ============================================================================
+# Download Functions
+# ============================================================================
+
 def download_file(url: str, *, refresh: bool = False, check_validity: bool = False) -> bytes | None:
+    """Download a file from URL with caching support.
+
+    Args:
+        url: URL to download from
+        refresh: Force re-download even if cached
+        check_validity: Check if a cached file is outdated using Last-Modified header
+
+    Returns:
+        File content as bytes or None if download fails
+    """
     cache_path = CACHE_DIR / uuid5(NAMESPACE_URL, url).hex
     if not cache_path.exists():
         print(f'Info: {cache_path.name} not found for {url}, refreshing...')
