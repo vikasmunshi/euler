@@ -31,7 +31,7 @@ STACK_DIR: Path = BASE_DIR / 'stack'  # Base stack directory
 WORKSPACE_DIR: Path = BASE_DIR / 'workspace'  # Working/temporary files directory
 MANIFEST_FILENAME: str = 'manifest.txt'
 
-# URL constants
+# URL/Contact constants
 PROJECTEULER_URL: str = 'https://projecteuler.net'
 PROBLEMS_LIST_URL: str = f'{PROJECTEULER_URL}/minimal=problems'
 

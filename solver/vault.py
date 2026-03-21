@@ -1,29 +1,105 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""AES encryption and decryption for sensitive problem data."""
+"""
+AES-GCM encryption and secure offline key exchange for sensitive problem data.
+
+This module provides:
+1. **Data Encryption**: AES-256-GCM authenticated encryption for problem data
+2. **Key Exchange**: ECC-based (SECP384R1) offline key distribution via email
+
+## Architecture
+
+### Encryption
+- Algorithm: AES-256-GCM (authenticated encryption)
+- Key derivation: SHA-256 hash of key file content
+- Format: [12-byte nonce][ciphertext] → base64 encoded
+
+### Key Exchange (3-Step Process)
+Step 1 (Requestor): Generate ECC keypair → Email public key
+Step 2 (Contact):   Encrypt the key file using ECDH → Email encrypted response
+Step 3 (Requestor): Decrypt the key file using ECDH → Cleanup temporary files
+
+## Usage
+
+### Command Line
+```bash
+# End user (automatic key exchange if needed)
+python solver/vault.py user
+
+# Contact processing requests
+python solver/vault.py process
+
+# Generate new encryption key
+python solver/vault.py new
+
+# Run integration test
+python solver/vault.py verify
+```
+
+### Programmatic API
+```python
+from solver.vault import encrypt, decrypt
+
+# Encrypt data (uses the default key from KEY_FILE)
+ciphertext = encrypt(b"secret data")
+
+# Decrypt data
+plaintext = decrypt(ciphertext)
+
+# Use custom key
+custom_key = b"32-byte-key-here" * 2  # 32 bytes for AES-256
+ciphertext = encrypt(b"data", key=custom_key)
+plaintext = decrypt(ciphertext, key=custom_key)
+```
+
+## File Structure
+```
+keys/
+├── key.txt              # Main encryption key (SHA256 hashed)
+├── private_key.pem      # Temporary: ECC private key (Step 1)
+├── request.txt          # Temporary: Email to send (Step 1)
+└── response.txt         # Temporary: Email received (Step 2→3)
+```
+
+## Security Features
+- **AES-256-GCM**: Provides both confidentiality and authenticity
+- **SECP384R1**: 192-bit security level for elliptic curve operations
+- **ECDH + HKDF**: Proper key agreement and derivation
+- **Automatic cleanup**: Removes temporary files after successful exchange
+
+## Dependencies
+- cryptography: Modern cryptographic primitives (AES-GCM, ECC, ECDH, HKDF)
+
+Author: Vikas Munshi <vikas.munshi@gmail.com>
+Repository: https://github.com/vikasmunshi/euler
+"""
 from __future__ import annotations
 
 from base64 import b64decode, b64encode
 from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
-from secrets import token_hex
+from secrets import token_bytes, token_hex
+from typing import Literal
 
-import Crypto  # pip install pycryptodome
-import Crypto.Cipher.AES
-import Crypto.Hash.SHA256
-import Crypto.Util.Padding
+from cryptography.hazmat.primitives import hashes, serialization  # pip install cryptography
+from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric.ec import EllipticCurvePrivateKey, EllipticCurvePublicKey
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-__all__ = ['KEY_FILE', 'REPO', 'encrypt', 'decrypt']
+from solver.workspace import BASE_DIR
 
-# ============================================================================
-# Constants
-# ============================================================================
+__all__ = ['encrypt', 'decrypt']
 
-# File paths and key size
-KEY_FILE: Path = Path.cwd() / 'keys' / 'key.txt'  # Main encryption key file
-KEY_SIZE: int = 32  # AES-256 requires 32 bytes (256 bits)
-REPO: str = 'https://github.com/vikasmunshi/euler'
+# Encryption/Key exchange constants
+_key_file: Path = BASE_DIR / 'keys' / 'key.txt'  # Main encryption key file
+_key_size: int = 32  # AES-256 requires 32 bytes (256 bits)
+_private_key_file: Path = _key_file.parent / 'private_key.pem'
+_request_file: Path = _key_file.parent / 'request.txt'
+_response_file: Path = _key_file.parent / 'response.txt'
+repo: str = 'https://github.com/vikasmunshi/euler'
+contact: str = 'vikas.munshi@gmail.com'
 
 
 # ============================================================================
@@ -31,37 +107,38 @@ REPO: str = 'https://github.com/vikasmunshi/euler'
 # ============================================================================
 
 def decrypt(cypher_text: bytes, *, key: bytes = None) -> bytes:
-    """Decrypt AES-256 encrypted data.
+    """Decrypt AES-256-GCM encrypted data.
 
     Args:
-        cypher_text: Base64-encoded encrypted data
+        cypher_text: Base64-encoded encrypted data (nonce + ciphertext)
         key: Encryption key (uses default if not provided)
 
     Returns:
         Decrypted plaintext bytes
     """
     key = key or _get_key()
-    decoded_cypher_text = b64decode(cypher_text)
-    iv = decoded_cypher_text[:Crypto.Cipher.AES.block_size]
-    cipher = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CBC, iv=iv)
-    plain_text = cipher.decrypt(decoded_cypher_text[Crypto.Cipher.AES.block_size:])
-    return Crypto.Util.Padding.unpad(plain_text, Crypto.Cipher.AES.block_size)
+    combined: bytes = b64decode(cypher_text)
+    # Extract nonce (first 12 bytes) and ciphertext
+    nonce: bytes = combined[:12]
+    ciphertext: bytes = combined[12:]
+    return AESGCM(key).decrypt(nonce, ciphertext, None)
 
 
 def encrypt(plain_text: bytes, *, key: bytes = None) -> bytes:
-    """Encrypt data using AES-256.
+    """Encrypt data using AES-256-GCM.
 
     Args:
         plain_text: Data to encrypt
         key: Encryption key (uses default if not provided)
 
     Returns:
-        Base64-encoded encrypted data
+        Base64-encoded encrypted data (nonce + ciphertext)
     """
     key = key or _get_key()
-    cipher = Crypto.Cipher.AES.new(key, Crypto.Cipher.AES.MODE_CBC)
-    cipher_text = cipher.encrypt(Crypto.Util.Padding.pad(plain_text, Crypto.Cipher.AES.block_size))
-    return b64encode(cipher.iv + cipher_text)
+    nonce = token_bytes(12)
+    ciphertext = AESGCM(key).encrypt(nonce, plain_text, None)
+    # Combine nonce (12 bytes) and ciphertext
+    return b64encode(nonce + ciphertext)
 
 
 # ============================================================================
@@ -69,7 +146,7 @@ def encrypt(plain_text: bytes, *, key: bytes = None) -> bytes:
 # ============================================================================
 
 @lru_cache()
-def _get_key(*, key_file: Path = KEY_FILE, key_size: int = KEY_SIZE, genkey: bool = False) -> bytes:
+def _get_key(*, key_file: Path = _key_file, key_size: int = _key_size, genkey: bool = False) -> bytes:
     """Get or generate the encryption key.
 
     Args:
@@ -80,8 +157,11 @@ def _get_key(*, key_file: Path = KEY_FILE, key_size: int = KEY_SIZE, genkey: boo
     Returns:
         SHA-256 hash of key file content
     """
+    is_new_key: bool = False
     if not key_file.exists():
         if not genkey:
+            if _key_exchange() and key_file.exists():
+                return _get_key(key_file=key_file)
             raise FileNotFoundError(
                 f'Encryption key not found at {key_file.as_posix()}. '
                 f'Contact the project maintainer for the encryption key.')
@@ -89,12 +169,206 @@ def _get_key(*, key_file: Path = KEY_FILE, key_size: int = KEY_SIZE, genkey: boo
         key_file.parent.mkdir(parents=True, exist_ok=True)
         key_file.write_text(new_key)
         print(f'Generated new encryption key and saved it to {key_file.as_posix()}')
-        _verify_key(key=sha256(new_key.encode()).digest(), is_new_key=True)
+        is_new_key = True
     else:
         print(f'Using existing encryption key from {key_file.as_posix()}')
     key: bytes = sha256(key_file.read_text().encode()).digest()
-    _verify_key(key=key, is_new_key=False)
+    _verify_key(key=key, is_new_key=is_new_key)
     return key
+
+
+def _key_exchange() -> bool:
+    """Orchestrate the 3-step key exchange process.
+
+    Flow:
+    - If key_file exists: Nothing to do, return True
+    - If response_file exists: Step 3 (decrypt), return True
+    - Otherwise: Step 1 (create request), return False
+
+    Returns:
+        True if the key was obtained, False if a request was created
+    """
+    if _key_file.exists():
+        return True
+    if _response_file.exists():
+        _process_response()
+        return True
+    _create_request()
+    return False
+
+
+def _create_shared_key(private_key: EllipticCurvePrivateKey, public_key: EllipticCurvePublicKey) -> bytes:
+    """Perform ECDH key exchange and derive AES-256 key.
+
+    Args:
+        private_key: Local ECC private key
+        public_key: Remote ECC public key
+
+    Returns:
+        32-byte derived key suitable for AES-256-GCM
+    """
+    shared_key = private_key.exchange(ec.ECDH(), public_key)
+    derived_key: bytes = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b'key-exchange').derive(shared_key)
+    return derived_key
+
+
+def _extract_pem_block(content: str, marker: str) -> str | None:
+    """Extract text between PEM-style markers.
+
+    Args:
+        content: Text containing PEM blocks
+        marker: Block type (e.g., 'PUBLIC KEY', 'ENCRYPTED KEY')
+
+    Returns:
+        Text between markers, or None if not found
+    """
+    start_marker = f'-----BEGIN {marker}-----'
+    end_marker = f'-----END {marker}-----'
+    start_idx = content.find(start_marker)
+    end_idx = content.find(end_marker)
+    if start_idx == -1 or end_idx == -1:
+        return None
+    return content[start_idx + len(start_marker):end_idx].strip()
+
+
+def _decode_publickey(pem_block: str) -> EllipticCurvePublicKey:
+    """Reconstruct and load the ECC public key from PEM data.
+
+    Args:
+        pem_block: Base64-encoded public key data (without markers)
+
+    Returns:
+        EllipticCurvePublicKey object
+    """
+    pem_full: str = f'-----BEGIN PUBLIC KEY-----\n{pem_block}\n-----END PUBLIC KEY-----'
+    public_key: EllipticCurvePublicKey = serialization.load_pem_public_key(pem_full.encode('utf-8'))
+    return public_key
+
+
+def _create_request() -> None:
+    """Step 1: Generate the ECC keypair and create a key request email.
+
+    Creates:
+    - private_key.pem: Local ECC private key (saved for Step 3)
+    - request.txt: Email message with the public key for contact
+    """
+    if _key_file.exists():
+        print(f'Info: Key file {_key_file} already exists, skipping request creation.')
+        return
+    if _request_file.exists() and _private_key_file.exists():
+        print(f'Info: Request file {_request_file} already exists, skipping request creation.')
+        return
+    private_key: EllipticCurvePrivateKey = ec.generate_private_key(ec.SECP384R1())
+    private_pem: bytes = private_key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption()
+    )
+    public_key: EllipticCurvePublicKey = private_key.public_key()
+    public_pem: str = public_key.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode('utf-8')
+    _key_file.parent.mkdir(parents=True, exist_ok=True)
+    _private_key_file.write_bytes(private_pem)
+    request_email: str = (f'To: {contact}\n'
+                          f'Subject: Key Request for {repo}\n\n'
+                          f'Please encrypt and send the key file using the following public key:\n\n'
+                          f'{public_pem}\n'
+                          f'Thanks')
+    _request_file.write_text(request_email)
+    print(f'Request created at {_request_file}')
+    print(f'Private key saved at {_private_key_file}')
+    print(f'Please send the contents of {_request_file} to {contact}\n')
+
+
+def _process_request() -> None:
+    """Step 2: Encrypt the key file using requestor's public key.
+
+    Reads:
+    - request.txt: Requestor's public key
+    - key.txt: Local encryption key to share
+
+    Creates:
+    - response.txt: Email with the encrypted key file
+    """
+    if not _key_file.exists():
+        print(f'Error: Cannot process request, key file {_key_file} for {repo} not found.')
+        return
+    if not _request_file.exists():
+        print(f'Error: Request file {_request_file} not found.')
+        return
+    request_content: str = _request_file.read_text()
+    public_pem: str | None = _extract_pem_block(request_content, 'PUBLIC KEY')
+    if public_pem is None:
+        print('Error: Could not find public key in request file.')
+        return
+    public_key: EllipticCurvePublicKey = _decode_publickey(public_pem)
+    ephemeral_private: EllipticCurvePrivateKey = ec.generate_private_key(ec.SECP384R1())
+    ephemeral_public: EllipticCurvePublicKey = ephemeral_private.public_key()
+    ephemeral_public_pem: str = ephemeral_public.public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    ).decode('utf-8')
+    shared_key: bytes = _create_shared_key(ephemeral_private, public_key)
+    key_content: bytes = _key_file.read_bytes()
+    ciphertext: str = encrypt(key_content, key=shared_key).decode('utf-8')
+    encrypted_lines: str = '\n'.join(ciphertext[i:i + 64] for i in range(0, len(ciphertext), 64))
+    response_email: str = (f'To: [Requestor\'s email]\n'
+                           f'Subject: Re: Key Request for {repo}\n\n'
+                           f'Save the text contents of the email to {_key_file.parent.name}/{_response_file.name}\n\n'
+                           f'{ephemeral_public_pem}\n'
+                           f'-----BEGIN ENCRYPTED KEY-----\n'
+                           f'{encrypted_lines}\n'
+                           f'-----END ENCRYPTED KEY-----\n\n'
+                           f'Thanks')
+    _response_file.write_text(response_email)
+    print(f'Response created at {_response_file}')
+    print(f'Please send the contents of {_response_file} to the requestor\n')
+
+
+def _process_response() -> None:
+    """Step 3: Decrypt the received key file and clean up temporary files.
+
+    Reads:
+    - response.txt: Encrypted key file from contact
+    - private_key.pem: Local private key from Step 1
+
+    Creates:
+    - key.txt: Decrypted encryption key
+
+    Cleans up:
+    - private_key.pem, request.txt, response.txt
+    """
+    if not _response_file.exists():
+        print(f'Error: Nothing to do, response file {_response_file} not found.')
+        return
+    if not _private_key_file.exists():
+        print(f'Error: Private key file {_private_key_file} not found.')
+        return
+    private_key: EllipticCurvePrivateKey = serialization.load_pem_private_key(_private_key_file.read_bytes(), None)
+    response_content: str = _response_file.read_text()
+    ephemeral_public_pem_data: str | None = _extract_pem_block(response_content, 'PUBLIC KEY')
+    if ephemeral_public_pem_data is None:
+        print('Error: Could not find ephemeral public key in response file.')
+        return
+    ciphertext: str | None = _extract_pem_block(response_content, 'ENCRYPTED KEY')
+    if ciphertext is None:
+        print('Error: Could not find encrypted key in response file.')
+        return
+    ephemeral_public_key: EllipticCurvePublicKey = _decode_publickey(ephemeral_public_pem_data)
+    shared_key: bytes = _create_shared_key(private_key, ephemeral_public_key)
+    try:
+        key_content: bytes = decrypt(ciphertext.encode('utf-8'), key=shared_key)
+    except Exception as e:
+        print(f'Error: Decryption failed: {e}')
+        return
+    _key_file.write_bytes(key_content)
+    print(f'Key file successfully created at {_key_file}')
+    _private_key_file.unlink()
+    _request_file.unlink(missing_ok=True)
+    _response_file.unlink()
+    print('Cleaned up temporary files.\n')
 
 
 def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
@@ -107,8 +381,8 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
     Returns:
         None
     """
-    # Plain text used to generate the cipher text suing the default key
-    # Pre-computed cipher text for the above plain text using the default key
+    # Plain text used to generate the cipher text using the default key
+    # Pre-computed cipher text for the plain text using the default key
     # noinspection SpellCheckingInspection
     plain_text: bytes = (
         b'##############################################################\n'
@@ -120,7 +394,7 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
         b'######### First stanza from "Auguries of Innocence ##########"\n'
         b'##############################################################\n'
         b'To see a World in a Grain of Sand                             \n'
-        b'And a Heaven in a Wild Flower,                                \n'
+        b'And a Heaven in a Wild Flower;                                \n'
         b'Hold Infinity in the palm of your hand                        \n'
         b'And Eternity in an hour.                                      \n'
         b'                                        - William Blake (1803)\n'
@@ -141,72 +415,102 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
     )
     # noinspection SpellCheckingInspection
     cipher_text: bytes = (
-        rb'Npiys6KF7MHU8Ac/gF/IY4mnVfh4EZoI3eI1M07ma5hm6hzT2g1j8X2ILUrCNTak'
-        rb'Sq6e6GO7SsKy0uz+jp8jdzRCRA9aqx5AGcmQAbs4GVoH6deGmq78SyL5PNI6P/a8'
-        rb'3gWF7FHHdKR6cvXqPAUOSrx624Al5Y9/RB4/9j9LNyHBecbb8Jl7FPVZ83a36yyq'
-        rb'o2dpzx53c6B5TBHTk9xEHyQ3pbpfq4gj5AZVWVVDL6vEuPeuURPBTeVvku1W5K4B'
-        rb'QYtTX7jvmeGfuCTOkoneKQTPddALewiYl1YYSzWZP6gg7JD2n/hB00R70y9q5i+R'
-        rb'ZjJzTjBm6El5HXioNj+kU5NHGCIZE09CRZT58EnUJRdRLMJk51lvHdIMrMknPQmX'
-        rb'ImGQCzmLmHK9gokTFWLmH4sp4OunwEOgXWbEhLezUgF4+eT6X+5/dAGPbIbO7Fwh'
-        rb'VaREya+tPwM3Z1yXREjMEoBNXD+cju8/LmtJjMls+YMLX75sa2UcHSUJGN1+NOTe'
-        rb'zrigik4f+/AV8olsHEfpiccT7Mxd3Vqc6odHRAQ7RJufk8tQD55+Org7iFM/xkg6'
-        rb'rdx/q/aIxV9k3CDt0z+vDCXYgC0rRjnl53HcqRL+hVSpDNyu36x1AknHiHReSPap'
-        rb'oA9Uicp60+/xFH/vPQOjeZJ9EcvbkYGolxqZpJpyEpbQmpePJK1BHN1IGrGmama9'
-        rb'z8QC6neCu0SppmKfNQaIppEieysqAU4E9iO5ZCoyacjF56y2ylR50tHq+KmvdBPj'
-        rb'OQYqbPXC/F1aorG2fWRXs8AqXlvsYZtFZFpAQGrbYzRvWUNwzVEBLKfb8BHZMFfA'
-        rb'2MW3TyKSqKtpwgYCoVukE7gMLyLR7NeVF5jJxenGUILMGt23748jizXQ6vinDRdt'
-        rb'4c1+W7FhRF9HxuCAB41r4ap1x+3rPOUyehZUH5AGSBIjSzQzFINts482yZCYsTAi'
-        rb'UjIKHGDNVIyW7J0gBP1lZT+gN/Z9gxH/7/1bHT14U6Eg622TiXWt/mUEL8h7GBGj'
-        rb'CNv7rSIJS1/lxnHrUiV7XOelKwuNhX/XJG28tSeUiB56jx+2f1YTqTnTmPOHIiea'
-        rb'W3U5S8OMkuVf93giDJXHiEEdBiJFIYKdlU8QO1fJqWuO6jJv2AZG7EvBG/qkGf+P'
-        rb'D+I1iYy6DnFS7AIkC3EHZYvQ3POnbk8f2lC29DNdxMcJDvWNSRE4Bx+N/qwagvuB'
-        rb'bZ6e4GGGSG6AzwVC8CRYoFNWbJ6e6SQqLX40Scs43Jw2VlleuLWrfC9UXDoUGqUD'
-        rb'33azGCGXYYRjkSwJ+1YjDyCcerq/7d5zL+kiMqKwW6Ddh+pvvIsQS5cv/DErFUNU'
-        rb'OFx1N5qFlejVXWYN3gr5zD/Foils3P5QaMSy95+maDrtBIByUJnBHhMrF5utJqTY'
-        rb'0z61oB6i/jZIkaRVkiICBLf37YgFINlPB4e1A7wNrfq14cmCjYRatlEWYXaGOtdR'
-        rb'9mKIH5RDk9DC/RWthHynviIx21uXVKDeK6bvXWQe3mz2fGJA1FZrAc76jkwXr8Hg'
-        rb'8Xq1nfdO6smZFagQhX8i5W6f9Yb7yLqC3jOCXKug66IhR8TY+vlEKwDsM0NLvZEQ'
-        rb'1OvRLWtlWyfkYxUHZyrI8/u2MxvrF0RZzapfy9m864e3p7DX0zl32A7573y02aA7'
-        rb'ExvpA4fOchyibUZQ91YdqhMexjUNHzr1//xM1v7qsge0h7BwVoZvCxKRdNNVGdJs'
-        rb'hAYd/c8yGK4NtTBDNTVhVjYqqs+BF+W0kALu+1O7AlKCPlkkel8cv/hxWMUdLCMj'
-        rb'ah7wV8uL9NZmIikJSKMklTj4mo4l4fT2cKHP5Zuv8FIAh97CXc7y0jflFdy/vkWz'
-        rb'98O7qdGAbCB9H1yMafVMnsdYfQp/NifKwlaeez9ncytNBc/U6hEzf0fE1vqTMJ5P'
-        rb'qJSaCVHHGoVukZhjVEE7adNIS7CRLPL4teZqj0c6t1Rq6wQfPvFptMpb3Z7ocI8m'
-        rb'PKlfdKZqv4vzDR+1bF+pCX8A/Xyp7hTyZKGhNvRT5dVjHWRQreocCnT3gOlEp5Wt'
-        rb'ZodCxYOL72WtNvm8eJHViopeo6W67Fl8xi155g4VPfr7URVr4+anFAorg764EWZK'
-        rb'7p1db0tstclio/F588RIXlUbaRJouYjsEh0D38eAWxw5EYLoqdfrrNPbMP4Htt3I'
-        rb'EOFnQ9s99yne6Ex5gm2nTjELoGgXYgfnrKKvOWohq2bO7fkk1hxu7MPevslBIieg'
-        rb'IXy4iIkadUi8/JaRic17LhauafIqxImL1Rt0yzSs7Oj5AvjhikZpAuF1v52WCi+8'
+        rb'qO369KnBCxrlskDWgaEdqz5Ibng9yKpfLmU4vV3fjQZnd7m1yljVSlhbUA+0zxgW'
+        rb'I3zPLUycFfey4ce4dOObZ02IFhzX/aunkb06NRd1z0oF+5L+qZHoISDkUAYsXGcl'
+        rb'iqCzczbYgB0szxoVGJNsJUUWM71+0Z8O9lkM50kLSxXQGR2rbv9x/giMFaobZewb'
+        rb'mqT6vU9WSiOtJsOPMV+wuywPp01yDL5FL4oy3yBHSgfSmgooy6y4q0PtwOBTv9RK'
+        rb'x3sja2Lt1a17kRcqPjN9b444bQgSqbIL6M2P0SCqpmD+JOkAgpA74bmKI1n8XzW3'
+        rb'4nWE08qCZ4VP7Ja1XDTfH1KLalEr3UCZ03Qe/QNqDsOk70cyhTx+AdLeOpEzo5XO'
+        rb'wMV6lJRUNCRVy0yaTwLgmzONQMso8t3QMR3GWvdekya77/AAhOu/xOd0r21I3Slz'
+        rb'Jfk59HT2GZIVj4LAITVKax8Bkmj/191hPZjRC1rUkkxBtjpUGNL4pVnZmolaxs1r'
+        rb'w2Q8Sj6nCjRGpmZE+m148pIBr3zr4DpH/zf5EGmYOmQTP+wPqmlaN9FxF1Fys0LM'
+        rb'39bFjEKmiANO6GUi/Pe+sbIenVCBTGY2NtSDblnpoelmLI0ryD9nvEEgFsS9ftaf'
+        rb'ZGQHOvoMvJ+JDO2Zo3KKdh0oR3Wm4usoaiS2U0k3wKAA0Hrxg1L/9tm5Y+owliM9'
+        rb'Wk0cG2CiKl1+Sfj0uKMYXpe6XlBjBf+IQuxGvBDLoF4VnDbgtvHGxR8tdPyVx+Ga'
+        rb'zX+TJP8vzp7xDYWa4D2UvHbHjMRddBsbhVUN7gq5Cyuna0/3BNTECbJQ1hFYMf9J'
+        rb'h52mLjmPD+r7Wh0WseHwSZIZa5C/9k8ttAGEdMlSd5sp9EPE837SdFX7Wcs/CTlr'
+        rb'q6OH/SWd7wWzcnPhqBRzUQpvmgu+7SJcHLvg/45oBEd+IqBwvnDLtLbGayA/lDgi'
+        rb'a405Tj1Lag976fg5Ablhi/aWsIZAKfNMrbHWRbYibsMD1aZAO1XqcP62KUDALWcp'
+        rb'sL1SYq11B6BYnH9rZfWw952DYhwDeC7DjP6ss7VEj6eiDx9SvCujlpRV9alWvIh+'
+        rb'PglxsfKZ5EppoBW/7EY8u3UC6S6MzQf/DPZi2EF165DtHAoj/m5veE4GegSBIE+k'
+        rb'0YD/AOz+3IOPqpsn8lMdopwW73wYS+XBanaivb7EHD4oF6Y2YYSQd2w3j5n/Juam'
+        rb'nwk3KQ+NLgNmwT87Q5dLlhq40+bu5X+VqzErKPdjmjRLlaLVtyGO05b5arcUfCrf'
+        rb'zllx2qMrhQljE0sOMgybTYAjQ3ePjH2dZUL/vT+WUkxLlTAd9Fo5jksWsj2Iy9Hj'
+        rb'DsUM088hRJiWMR3NWd6EuhEbF5YNtqt2nwubrqVTIfYYUE+unAHnmKGcy9g2t+Zv'
+        rb'A89lZw8akrQi6Pi+0XnQi1qSA3h+eXdGn4R75Pftvq2oA/La2HGwJcIuvcilGi3z'
+        rb'lcIsUySsgXMmLHNmt+k4IPStMoWVV28K6zMKnyrNLZUSeN1HYopLp82yFqt1eRnk'
+        rb'mWz+ufOXUE++LNWnAG+sy/pZ30GXbtlUyAfDw4qQ9K0T+ZtkT0ooYvk1Dyp89vjH'
+        rb'gLa+QxLFTe4PUr3JQ4vH17t71ty+NBPZVz1LwVdvQS1Qyuuq+voe+U9SNnzcLMBJ'
+        rb'u6+z4bfc5rssIk7h8yHthVfBcO2XeU8bpjguTbKlZ3ASlidZlwNiiPRQqwxML0eo'
+        rb'Oa+nuR+WTjcJK/0mg02UgNzb0s6aePVmYtoDEx7COIW9JP49PbTTsmibhlhnjR55'
+        rb'OEFXPPmQXXtMT7AukBSIjlr6kmwRhyURGl+YMOddpqAk/UTcCiLwKwxQUuesB9f6'
+        rb'71enjI4KzXODPlOKaGQqb3AcpFW0O08G6HDXuIrfg0pFyOPxHpnfAzATuHrdPcgy'
+        rb'ziqHuBqj3oaF9Fze5S51fxq9PZSUywxnyqgXWeoduTeGKVw/rNyPnLj9Ey1yd5i2'
+        rb'Vk5rTUSnhNiDESZlvPApLTaWPMVYvZZV3zOVi4GXhdDEljVbtJ1FIJuO4GBTE+ml'
+        rb'tO98dCOn75DjbJRuHFJUcMkuZ414t100czvRDvl3tHb018a2l13WKajgtydEh07i'
+        rb'R4gtCAY6R3xhFBc0PxDpjGZgz4l1PRl30oYSqJfaBAIuDpJgD7hFI0VJ/JPfbDAJ'
+        rb'0Mr4mRvgnx3KvhSubXT24n6yL742z6tIbyXByafLvsVzuIVYMiGEmDDDmaHDUTZ8'
+        rb'EfYSCp2R/xNn5KSN+ldwuWR2C9SnBoEOBXjdVZxr1WvaYubjyE7rPtmKARx8BBo2'
+        rb'SA=='
     )
     if is_new_key:
         cipher_text = encrypt(plain_text, key=key)
         print('New cipher text:')
-        _print_cipher_text(cipher_text)
+        cipher_text_str: str = cipher_text.decode()
+        print('\n'.join(f"rb'{cipher_text_str[i:i + 64]}'" for i in range(0, len(cipher_text_str), 64)))
     try:
-        assert decrypt(cipher_text, key=key) == plain_text
+        assert decrypt(cipher_text, key=key) == plain_text, 'decrypted text does not match original text'
     except Exception as e:
         print(f'Error verifying key: {e}')
-        cipher_text = encrypt(plain_text, key=key)
-        print('Possible cipher text:')
-        _print_cipher_text(cipher_text)
-        print(f'\nError: please contact the project maintainer at {REPO} for the encryption key.')
+        print(f'Error: verifying key, please contact the project maintainer at {repo} for the encryption key.')
         raise
 
 
-def _print_cipher_text(cipher_text: bytes) -> None:
-    """Prints the cipher text in a readable format."""
-    cipher_text_str: str = cipher_text.decode()
-    cipher_text_len: int = len(cipher_text_str)
-    for line_len in range(60, 100):
-        if cipher_text_len % line_len == 0:
-            print('\n'.join(f"rb'{cipher_text_str[i:i + line_len]}'" for i in range(0, cipher_text_len, line_len)))
-            break
-
-
 # ============================================================================
-# Main Entry Point
+# Main Entry Point for vault
 # ============================================================================
+def vault_main(mode: Literal['user', 'process', 'new', 'verify']):
+    """Main entry point for vault operations.
+
+    Args:
+        mode: Operation mode
+            - 'user': End-user flow (auto key exchange if needed)
+            - 'process': Contact flow (process incoming request)
+            - 'new': Generate a new encryption key
+            - 'verify': Run integration test
+
+    Usage:
+        python solver/vault.py user
+        python solver/vault.py process
+        python solver/vault.py new
+        python solver/vault.py verify
+    """
+    if mode == 'user':
+        _key_exchange()
+        if _key_file.exists():
+            _verify_key(key=_get_key(genkey=False))
+    elif mode == 'process':
+        _process_request()
+    elif mode == 'new':
+        _verify_key(key=_get_key(genkey=True), is_new_key=True)
+    elif mode == 'verify':
+        _verify_key(key=_get_key())
+        temp_key_file: Path = _key_file.with_suffix('.tmp')
+        _key_file.rename(temp_key_file)
+        _key_exchange()
+        assert _private_key_file.exists()
+        assert _request_file.exists()
+        temp_key_file.rename(_key_file)
+        _process_request()
+        assert _response_file.exists()
+        _key_file.rename(temp_key_file)
+        _key_exchange()
+        assert _key_file.exists()
+        _verify_key(key=_get_key())
+        temp_key_file.unlink()
+
 
 if __name__ == '__main__':
-    # _ = _get_key(genkey=True)
-    raise SystemExit(0 if _verify_key(key=_get_key(genkey=True), is_new_key=False) else 1)
+    from sys import argv
+
+    raise SystemExit(vault_main(argv[1] if len(argv) > 1 else 'user'))
