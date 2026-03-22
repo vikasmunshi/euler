@@ -117,10 +117,13 @@ def read_stack_file(problem_number: int, filename: str) -> bytes | None:
 # Stack/Unstack Operations
 # ============================================================================
 
-def stack_from_workspace(process_deletions: bool = False) -> bool:
+def stack_from_workspace(*, workspace_dir: Path = WORKSPACE_DIR,
+                         process_deletions: bool = False,
+                         ) -> bool:
     """Save the current workspace to stack with encryption and verification.
 
     Args:
+        workspace_dir: Directory to stack, defaults to WORKSPACE_DIR
         process_deletions: If True, remove stack files deleted from workspace
 
     Returns:
@@ -131,14 +134,18 @@ def stack_from_workspace(process_deletions: bool = False) -> bool:
         - Auto-encrypts private problem solutions with AAD binding
         - Updates manifest with new/modified file hashes
     """
-    if (problem_number := ProjectEulerFiles.current_problem_number()) is None:
+    try:
+        problem_number = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
+    except (FileNotFoundError, ValueError):
+        problem_number = None
+    if problem_number is None:
         print('Warning: No problem number found in workspace, nothing to do.')
         return False
     print(f'Stacking workspace for problem {problem_number}...')
     manifest: dict[str, str] = read_manifest(problem_number)
-    files: set[Path] = set(iterdir_recursive(WORKSPACE_DIR))
+    files: set[Path] = set(iterdir_recursive(workspace_dir))
     for filepath in files:
-        filename: str = filepath.relative_to(WORKSPACE_DIR).as_posix()
+        filename: str = filepath.relative_to(workspace_dir).as_posix()
         content: bytes = filepath.read_bytes()
         content_hash: str = sha256(content).hexdigest()
         if filename in manifest and manifest[filename] == content_hash:
@@ -148,7 +155,7 @@ def stack_from_workspace(process_deletions: bool = False) -> bool:
         manifest[filename] = content_hash
         print(f'Added file {filename} to stack and manifest')
     if process_deletions:
-        for file in set(manifest.keys()) - set(f.relative_to(WORKSPACE_DIR).as_posix() for f in files):
+        for file in set(manifest.keys()) - set(f.relative_to(workspace_dir).as_posix() for f in files):
             _delete_stack_file(problem_number, file)
             del manifest[file]
             print(f'Deleted {file} from stack and manifest')
@@ -157,11 +164,16 @@ def stack_from_workspace(process_deletions: bool = False) -> bool:
     return _verify_manifest(problem_number)
 
 
-def unstack_to_workspace(problem_number: int, *, re_init: bool = False, force_refresh: bool = False) -> None:
+def unstack_to_workspace(problem_number: int, *,
+                         workspace_dir: Path = WORKSPACE_DIR,
+                         re_init: bool = False,
+                         force_refresh: bool = False,
+                         ) -> None:
     """Restore the workspace from stack storage.
 
     Args:
         problem_number: Project Euler problem number to restore
+        workspace_dir: Directory to restore workspace to, defaults to WORKSPACE_DIR
         re_init: Force re-initialization from Project Euler website
         force_refresh: Force re-download even if cached (requires re_init=True)
 
@@ -170,16 +182,20 @@ def unstack_to_workspace(problem_number: int, *, re_init: bool = False, force_re
         - Auto re-initializes if Project Euler files are missing
         - Decrypts private files automatically using AAD verification
     """
-    if (current := ProjectEulerFiles.current_problem_number()) and current != problem_number:
+    try:
+        current = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
+    except (FileNotFoundError, ValueError):
+        current = None
+    if current and current != problem_number:
         print(f'Error: workspace already exists for problem {current}, clear before unstacking {problem_number}')
         return
     print(f'Initializing workspace for problem {problem_number}...')
     for filename, content_hash in read_manifest(problem_number).items():
         if (content := read_stack_file(problem_number, filename)) is not None:
-            target_file: Path = WORKSPACE_DIR / filename
+            target_file: Path = workspace_dir / filename
             write_file(target_file, content)
             print(f'Copied {filename} to {target_file}')
-    re_init = re_init or any(not (WORKSPACE_DIR / filename.value).exists()
+    re_init = re_init or any(not (workspace_dir / filename.value).exists()
                              for filename in ProjectEulerFiles
                              if filename != ProjectEulerFiles.problem_resources_dir)
     if re_init:

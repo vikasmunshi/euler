@@ -405,83 +405,15 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
     Returns:
         None
     """
-    # Plain text used to generate the cipher text using the default key
-    # Pre-computed cipher text for the plain text using the default key
-    # noinspection SpellCheckingInspection
-    plain_text: bytes = (
-        b'##############################################################\n'
-        b'festival-ascertain-mouse-boasting-cherub-handcuff-hypocrisy-at\n'
-        b'cdmtfzdq3kmmfkt5cdybspypgxfafrdt4xrs3iygz5pb7szitpfndyymx5mypf\n'
-        b'unscathed-tubular-spectacle-mustang-staring-unheated-crimp-del\n'
-        b'k4e4f4lamdptxsrrf6m7ijdte85emzre35fszk6ncmhagje3rex5kqkd63dp6y\n'
-        b'##############################################################\n'
-        b'######### First stanza from "Auguries of Innocence ##########"\n'
-        b'##############################################################\n'
-        b'To see a World in a Grain of Sand                             \n'
-        b'And a Heaven in a Wild Flower;                                \n'
-        b'Hold Infinity in the palm of your hand                        \n'
-        b'And Eternity in an hour.                                      \n'
-        b'                                        - William Blake (1803)\n'
-        b'##############################################################\n'
-        b'## Last stanza from "Stopping by Woods on a Snowy Evening" ###\n'
-        b'##############################################################\n'
-        b'The woods are lovely, dark and deep,                          \n'
-        b'But I have promises to keep,                                  \n'
-        b'And miles to go before I sleep,                               \n'
-        b'And miles to go before I sleep.                               \n'
-        b'                                         - Robert Frost (1923)\n'
-        b'##############################################################\n'
-        b'distort-overload-composite-humbly-shore-immovably-sanitizer-an\n'
-        b'd9zsdisjdm9som6xkmczaxbnqglyfp3sskjhxzbgkdpmsga4gb6jypbqorkqa4\n'
-        b'chump-talcum-wrangle-defeat-riptide-speller-undocked-hear-many\n'
-        b'gggj9aphd3fmkyayqeqbxbjopsbgnxbjzrsz8igyccakxdngs4bja85ods9res\n'
-        b'##############################################################\n'
-    )
-    # noinspection SpellCheckingInspection
-    ciphertext: bytes = (
-        rb'qO369KnBCxrlskDWgaEdqz5Ibng9yKpfLmU4vV3fjQZnd7m1yljVSlhbUA+0zxgW'
-        rb'I3zPLUycFfey4ce4dOObZ02IFhzX/aunkb06NRd1z0oF+5L+qZHoISDkUAYsXGcl'
-        rb'iqCzczbYgB0szxoVGJNsJUUWM71+0Z8O9lkM50kLSxXQGR2rbv9x/giMFaobZewb'
-        rb'mqT6vU9WSiOtJsOPMV+wuywPp01yDL5FL4oy3yBHSgfSmgooy6y4q0PtwOBTv9RK'
-        rb'x3sja2Lt1a17kRcqPjN9b444bQgSqbIL6M2P0SCqpmD+JOkAgpA74bmKI1n8XzW3'
-        rb'4nWE08qCZ4VP7Ja1XDTfH1KLalEr3UCZ03Qe/QNqDsOk70cyhTx+AdLeOpEzo5XO'
-        rb'wMV6lJRUNCRVy0yaTwLgmzONQMso8t3QMR3GWvdekya77/AAhOu/xOd0r21I3Slz'
-        rb'Jfk59HT2GZIVj4LAITVKax8Bkmj/191hPZjRC1rUkkxBtjpUGNL4pVnZmolaxs1r'
-        rb'w2Q8Sj6nCjRGpmZE+m148pIBr3zr4DpH/zf5EGmYOmQTP+wPqmlaN9FxF1Fys0LM'
-        rb'39bFjEKmiANO6GUi/Pe+sbIenVCBTGY2NtSDblnpoelmLI0ryD9nvEEgFsS9ftaf'
-        rb'ZGQHOvoMvJ+JDO2Zo3KKdh0oR3Wm4usoaiS2U0k3wKAA0Hrxg1L/9tm5Y+owliM9'
-        rb'Wk0cG2CiKl1+Sfj0uKMYXpe6XlBjBf+IQuxGvBDLoF4VnDbgtvHGxR8tdPyVx+Ga'
-        rb'zX+TJP8vzp7xDYWa4D2UvHbHjMRddBsbhVUN7gq5Cyuna0/3BNTECbJQ1hFYMf9J'
-        rb'h52mLjmPD+r7Wh0WseHwSZIZa5C/9k8ttAGEdMlSd5sp9EPE837SdFX7Wcs/CTlr'
-        rb'q6OH/SWd7wWzcnPhqBRzUQpvmgu+7SJcHLvg/45oBEd+IqBwvnDLtLbGayA/lDgi'
-        rb'a405Tj1Lag976fg5Ablhi/aWsIZAKfNMrbHWRbYibsMD1aZAO1XqcP62KUDALWcp'
-        rb'sL1SYq11B6BYnH9rZfWw952DYhwDeC7DjP6ss7VEj6eiDx9SvCujlpRV9alWvIh+'
-        rb'PglxsfKZ5EppoBW/7EY8u3UC6S6MzQf/DPZi2EF165DtHAoj/m5veE4GegSBIE+k'
-        rb'0YD/AOz+3IOPqpsn8lMdopwW73wYS+XBanaivb7EHD4oF6Y2YYSQd2w3j5n/Juam'
-        rb'nwk3KQ+NLgNmwT87Q5dLlhq40+bu5X+VqzErKPdjmjRLlaLVtyGO05b5arcUfCrf'
-        rb'zllx2qMrhQljE0sOMgybTYAjQ3ePjH2dZUL/vT+WUkxLlTAd9Fo5jksWsj2Iy9Hj'
-        rb'DsUM088hRJiWMR3NWd6EuhEbF5YNtqt2nwubrqVTIfYYUE+unAHnmKGcy9g2t+Zv'
-        rb'A89lZw8akrQi6Pi+0XnQi1qSA3h+eXdGn4R75Pftvq2oA/La2HGwJcIuvcilGi3z'
-        rb'lcIsUySsgXMmLHNmt+k4IPStMoWVV28K6zMKnyrNLZUSeN1HYopLp82yFqt1eRnk'
-        rb'mWz+ufOXUE++LNWnAG+sy/pZ30GXbtlUyAfDw4qQ9K0T+ZtkT0ooYvk1Dyp89vjH'
-        rb'gLa+QxLFTe4PUr3JQ4vH17t71ty+NBPZVz1LwVdvQS1Qyuuq+voe+U9SNnzcLMBJ'
-        rb'u6+z4bfc5rssIk7h8yHthVfBcO2XeU8bpjguTbKlZ3ASlidZlwNiiPRQqwxML0eo'
-        rb'Oa+nuR+WTjcJK/0mg02UgNzb0s6aePVmYtoDEx7COIW9JP49PbTTsmibhlhnjR55'
-        rb'OEFXPPmQXXtMT7AukBSIjlr6kmwRhyURGl+YMOddpqAk/UTcCiLwKwxQUuesB9f6'
-        rb'71enjI4KzXODPlOKaGQqb3AcpFW0O08G6HDXuIrfg0pFyOPxHpnfAzATuHrdPcgy'
-        rb'ziqHuBqj3oaF9Fze5S51fxq9PZSUywxnyqgXWeoduTeGKVw/rNyPnLj9Ey1yd5i2'
-        rb'Vk5rTUSnhNiDESZlvPApLTaWPMVYvZZV3zOVi4GXhdDEljVbtJ1FIJuO4GBTE+ml'
-        rb'tO98dCOn75DjbJRuHFJUcMkuZ414t100czvRDvl3tHb018a2l13WKajgtydEh07i'
-        rb'R4gtCAY6R3xhFBc0PxDpjGZgz4l1PRl30oYSqJfaBAIuDpJgD7hFI0VJ/JPfbDAJ'
-        rb'0Mr4mRvgnx3KvhSubXT24n6yL742z6tIbyXByafLvsVzuIVYMiGEmDDDmaHDUTZ8'
-        rb'EfYSCp2R/xNn5KSN+ldwuWR2C9SnBoEOBXjdVZxr1WvaYubjyE7rPtmKARx8BBo2'
-        rb'SA=='
-    )
+    # Load plain text and ciphertext from the constants file
+    parts: list[bytes] = (Path(__file__).parent / 'constants').read_bytes().split(b'\n\n')
+    plain_text: bytes = parts[0].strip(b'\n')
+    ciphertext: bytes = parts[-1].strip(b'\n')
     if is_new_key:
-        ciphertext: bytes = encrypt(plain_text, key=key)
         print('New cipher text:')
-        cipher_text_str: str = ciphertext.decode()
-        print('\n'.join(f"rb'{cipher_text_str[i:i + 64]}'" for i in range(0, len(cipher_text_str), 64)))
+        ciphertext: str = encrypt(plain_text, key=key).decode('utf-8')
+        encrypted_lines: str = '\n'.join(ciphertext[i:i + 64] for i in range(0, len(ciphertext), 64))
+        print(encrypted_lines)
     try:
         assert decrypt(ciphertext, key=key) == plain_text, 'decrypted text does not match original text'
     except Exception as e:
