@@ -1,74 +1,69 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""
-AES-GCM encryption and secure offline key exchange for sensitive problem data.
+"""AES-GCM encryption and secure offline key exchange for sensitive problem data.
 
-This module provides:
-1. **Data Encryption**: AES-256-GCM authenticated encryption for problem data
-2. **Key Exchange**: ECC-based (SECP384R1) offline key distribution via email
+Provides AES-256-GCM authenticated encryption and ECC-based offline key distribution.
 
-## Architecture
+## Public API
 
-### Encryption
-- Algorithm: AES-256-GCM (authenticated encryption)
-- Key derivation: SHA-256 hash of key file content
-- Format: [12-byte nonce][ciphertext] → base64 encoded
+    decrypt(cypher_text, *, key=None, aad=None) -> bytes
+        Decrypt AES-256-GCM data with optional AAD verification
 
-### Key Exchange (3-Step Process)
-Step 1 (Requestor): Generate ECC keypair → Email public key
-Step 2 (Contact):   Encrypt the key file using ECDH → Email encrypted response
-Step 3 (Requestor): Decrypt the key file using ECDH → Cleanup temporary files
+    encrypt(plain_text, *, key=None, aad=None) -> bytes
+        Encrypt data using AES-256-GCM with optional AAD binding
 
-## Usage
+    key_exchange() -> bool
+        Orchestrate 3-step key exchange protocol (returns True if key obtained)
 
-### Command Line
-```bash
-# End user (automatic key exchange if needed)
-python solver/vault.py user
+## Command Line
 
-# Contact processing requests
-python solver/vault.py process
+    python solver/vault.py user      # End user: automatic key exchange
+    python solver/vault.py process   # Maintainer: process key requests
+    python solver/vault.py new       # Generate new encryption key
+    python solver/vault.py verify    # Run integration test
 
-# Generate new encryption key
-python solver/vault.py new
+## Encryption Details
 
-# Run integration test
-python solver/vault.py verify
-```
+    Algorithm:       AES-256-GCM (authenticated encryption with additional data)
+    Key size:        256 bits (32 bytes)
+    Nonce:           96 bits (12 bytes, randomly generated per encryption)
+    Authentication:  128-bit tag (included in ciphertext)
+    Key derivation:  SHA-256(key_file_content)
+    Format:          base64([12-byte nonce][ciphertext+tag])
+    AAD support:     Optional metadata binding (authenticated, not encrypted)
 
-### Programmatic API
-```python
-from solver.vault import encrypt, decrypt
+## Key Exchange Protocol
 
-# Encrypt data (uses the default key from KEY_FILE)
-ciphertext = encrypt(b"secret data")
+    Step 1 (Requestor):
+        - Generate SECP384R1 keypair, save private key
+        - Email public key to maintainer
 
-# Decrypt data
-plaintext = decrypt(ciphertext)
+    Step 2 (Maintainer):
+        - Generate ephemeral SECP384R1 keypair
+        - Derive shared key via ECDH + HKDF-SHA256
+        - Encrypt the key file with AAD = requestor's public key (DER)
+        - Email the ephemeral public key plus the encrypted key
 
-# Use custom key
-custom_key = b"32-byte-key-here" * 2  # 32 bytes for AES-256
-ciphertext = encrypt(b"data", key=custom_key)
-plaintext = decrypt(ciphertext, key=custom_key)
-```
+    Step 3 (Requestor):
+        - Derive shared key using the private key plus the ephemeral public key
+        - Decrypt with AAD = own public key (DER)
+        - Clean up temporary files
+
+## Security Properties
+
+    Confidentiality:   AES-256-GCM prevents unauthorized data access
+    Authenticity:      GCM tag prevents ciphertext tampering
+    Identity binding:  AAD ties encrypted key to recipient's public key
+    Forward secrecy:   Ephemeral keys prevent past decryption if compromised
+    Key strength:      SECP384R1 provides 192-bit security level
 
 ## File Structure
-```
-keys/
-├── key.txt              # Main encryption key (SHA256 hashed)
-├── private_key.pem      # Temporary: ECC private key (Step 1)
-├── request.txt          # Temporary: Email to send (Step 1)
-└── response.txt         # Temporary: Email received (Step 2→3)
-```
 
-## Security Features
-- **AES-256-GCM**: Provides both confidentiality and authenticity
-- **SECP384R1**: 192-bit security level for elliptic curve operations
-- **ECDH + HKDF**: Proper key agreement and derivation
-- **Automatic cleanup**: Removes temporary files after successful exchange
-
-## Dependencies
-- cryptography: Modern cryptographic primitives (AES-GCM, ECC, ECDH, HKDF)
+    keys/
+    ├── key.txt          # Main encryption key (SHA-256 hashed for use)
+    ├── private_key.pem  # Temporary: requestor's ECC private key
+    ├── request.txt      # Temporary: email with requestor's public key
+    └── response.txt     # Temporary: email with the encrypted key from maintainer
 
 Author: Vikas Munshi <vikas.munshi@gmail.com>
 Repository: https://github.com/vikasmunshi/euler
@@ -90,7 +85,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from solver.workspace import BASE_DIR
 
-__all__ = ['encrypt', 'decrypt']
+__all__ = ['decrypt', 'encrypt', 'key_exchange']
 
 # Encryption/Key exchange constants
 _key_file: Path = BASE_DIR / 'keys' / 'key.txt'  # Main encryption key file
@@ -103,81 +98,55 @@ contact: str = 'vikas.munshi@gmail.com'
 
 
 # ============================================================================
-# Encryption/Decryption Functions
+# Public API - Encryption/Decryption
 # ============================================================================
 
-def decrypt(cypher_text: bytes, *, key: bytes = None) -> bytes:
+def decrypt(cypher_text: bytes, *, key: bytes = None, aad: bytes = None) -> bytes:
     """Decrypt AES-256-GCM encrypted data.
 
     Args:
-        cypher_text: Base64-encoded encrypted data (nonce + ciphertext)
-        key: Encryption key (uses default if not provided)
+        cypher_text: Base64-encoded encrypted data (nonce + ciphertext + tag)
+        key: 32-byte AES-256 key (default: SHA-256 hash of keys/key.txt)
+        aad: Associated Authenticated Data (must match encryption AAD or None)
 
     Returns:
         Decrypted plaintext bytes
+
+    Raises:
+        ValueError: If authentication fails (wrong key, tampered data, or AAD mismatch)
     """
     key = key or _get_key()
     combined: bytes = b64decode(cypher_text)
-    # Extract nonce (first 12 bytes) and ciphertext
     nonce: bytes = combined[:12]
     ciphertext: bytes = combined[12:]
-    return AESGCM(key).decrypt(nonce, ciphertext, None)
+    return AESGCM(key).decrypt(nonce, ciphertext, aad)
 
 
-def encrypt(plain_text: bytes, *, key: bytes = None) -> bytes:
-    """Encrypt data using AES-256-GCM.
+def encrypt(plain_text: bytes, *, key: bytes = None, aad: bytes = None) -> bytes:
+    """Encrypt data using AES-256-GCM with optional AAD binding.
 
     Args:
-        plain_text: Data to encrypt
-        key: Encryption key (uses default if not provided)
+        plain_text: Data to encrypt (arbitrary bytes)
+        key: 32-byte AES-256 key (default: SHA-256 hash of keys/key.txt)
+        aad: Associated Authenticated Data (authenticated but not encrypted, e.g., metadata)
 
     Returns:
-        Base64-encoded encrypted data (nonce + ciphertext)
+        Base64-encoded encrypted data: base64(nonce + ciphertext + auth_tag)
+
+    Note:
+        AAD binds metadata to ciphertext. Decryption requires identical AAD or None.
     """
     key = key or _get_key()
     nonce = token_bytes(12)
-    ciphertext = AESGCM(key).encrypt(nonce, plain_text, None)
-    # Combine nonce (12 bytes) and ciphertext
+    ciphertext = AESGCM(key).encrypt(nonce, plain_text, aad)
     return b64encode(nonce + ciphertext)
 
 
 # ============================================================================
-# Key Management (Private)
+# Public API - Key Exchange
 # ============================================================================
 
-@lru_cache()
-def _get_key(*, key_file: Path = _key_file, key_size: int = _key_size, genkey: bool = False) -> bytes:
-    """Get or generate the encryption key.
-
-    Args:
-        key_file: Path to the key file
-        key_size: Size of the key in bytes
-        genkey: Generate a new key if the file is not found
-
-    Returns:
-        SHA-256 hash of key file content
-    """
-    is_new_key: bool = False
-    if not key_file.exists():
-        if not genkey:
-            if _key_exchange() and key_file.exists():
-                return _get_key(key_file=key_file)
-            raise FileNotFoundError(
-                f'Encryption key not found at {key_file.as_posix()}. '
-                f'Contact the project maintainer for the encryption key.')
-        new_key: str = '\n'.join(token_hex(key_size) for _ in range(16))
-        key_file.parent.mkdir(parents=True, exist_ok=True)
-        key_file.write_text(new_key)
-        print(f'Generated new encryption key and saved it to {key_file.as_posix()}')
-        is_new_key = True
-    else:
-        print(f'Using existing encryption key from {key_file.as_posix()}')
-    key: bytes = sha256(key_file.read_text().encode()).digest()
-    _verify_key(key=key, is_new_key=is_new_key)
-    return key
-
-
-def _key_exchange() -> bool:
+def key_exchange() -> bool:
     """Orchestrate the 3-step key exchange process.
 
     Flow:
@@ -197,6 +166,10 @@ def _key_exchange() -> bool:
     return False
 
 
+# ============================================================================
+# Private Helpers - Cryptographic Utilities
+# ============================================================================
+
 def _create_shared_key(private_key: EllipticCurvePrivateKey, public_key: EllipticCurvePublicKey) -> bytes:
     """Perform ECDH key exchange and derive AES-256 key.
 
@@ -210,6 +183,20 @@ def _create_shared_key(private_key: EllipticCurvePrivateKey, public_key: Ellipti
     shared_key = private_key.exchange(ec.ECDH(), public_key)
     derived_key: bytes = HKDF(algorithm=hashes.SHA256(), length=32, salt=None, info=b'key-exchange').derive(shared_key)
     return derived_key
+
+
+def _decode_publickey(pem_block: str) -> EllipticCurvePublicKey:
+    """Reconstruct and load the ECC public key from PEM data.
+
+    Args:
+        pem_block: Base64-encoded public key data (without markers)
+
+    Returns:
+        EllipticCurvePublicKey object
+    """
+    pem_full: str = f'-----BEGIN PUBLIC KEY-----\n{pem_block}\n-----END PUBLIC KEY-----'
+    public_key: EllipticCurvePublicKey = serialization.load_pem_public_key(pem_full.encode('utf-8'))
+    return public_key
 
 
 def _extract_pem_block(content: str, marker: str) -> str | None:
@@ -231,19 +218,9 @@ def _extract_pem_block(content: str, marker: str) -> str | None:
     return content[start_idx + len(start_marker):end_idx].strip()
 
 
-def _decode_publickey(pem_block: str) -> EllipticCurvePublicKey:
-    """Reconstruct and load the ECC public key from PEM data.
-
-    Args:
-        pem_block: Base64-encoded public key data (without markers)
-
-    Returns:
-        EllipticCurvePublicKey object
-    """
-    pem_full: str = f'-----BEGIN PUBLIC KEY-----\n{pem_block}\n-----END PUBLIC KEY-----'
-    public_key: EllipticCurvePublicKey = serialization.load_pem_public_key(pem_full.encode('utf-8'))
-    return public_key
-
+# ============================================================================
+# Private Helpers - Key Exchange Steps
+# ============================================================================
 
 def _create_request() -> None:
     """Step 1: Generate the ECC keypair and create a key request email.
@@ -312,7 +289,11 @@ def _process_request() -> None:
     ).decode('utf-8')
     shared_key: bytes = _create_shared_key(ephemeral_private, public_key)
     key_content: bytes = _key_file.read_bytes()
-    ciphertext: str = encrypt(key_content, key=shared_key).decode('utf-8')
+    aad: bytes = public_key.public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+    ciphertext: str = encrypt(key_content, key=shared_key, aad=aad).decode('utf-8')
     encrypted_lines: str = '\n'.join(ciphertext[i:i + 64] for i in range(0, len(ciphertext), 64))
     response_email: str = (f'To: [Requestor\'s email]\n'
                            f'Subject: Re: Key Request for {repo}\n\n'
@@ -358,8 +339,12 @@ def _process_response() -> None:
         return
     ephemeral_public_key: EllipticCurvePublicKey = _decode_publickey(ephemeral_public_pem_data)
     shared_key: bytes = _create_shared_key(private_key, ephemeral_public_key)
+    aad: bytes = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
     try:
-        key_content: bytes = decrypt(ciphertext.encode('utf-8'), key=shared_key)
+        key_content: bytes = decrypt(ciphertext.encode('utf-8'), key=shared_key, aad=aad)
     except Exception as e:
         print(f'Error: Decryption failed: {e}')
         return
@@ -369,6 +354,42 @@ def _process_response() -> None:
     _request_file.unlink(missing_ok=True)
     _response_file.unlink()
     print('Cleaned up temporary files.\n')
+
+
+# ============================================================================
+# Private Helpers - Key Management
+# ============================================================================
+
+@lru_cache()
+def _get_key(*, key_file: Path = _key_file, key_size: int = _key_size, genkey: bool = False) -> bytes:
+    """Get or generate the encryption key.
+
+    Args:
+        key_file: Path to the key file
+        key_size: Size of the key in bytes
+        genkey: Generate a new key if the file is not found
+
+    Returns:
+        SHA-256 hash of key file content
+    """
+    is_new_key: bool = False
+    if not key_file.exists():
+        if not genkey:
+            if key_exchange() and key_file.exists():
+                return _get_key(key_file=key_file)
+            raise FileNotFoundError(
+                f'Encryption key not found at {key_file.as_posix()}. '
+                f'Contact the project maintainer for the encryption key.')
+        new_key: str = '\n'.join(token_hex(key_size) for _ in range(16))
+        key_file.parent.mkdir(parents=True, exist_ok=True)
+        key_file.write_text(new_key)
+        print(f'Generated new encryption key and saved it to {key_file.as_posix()}')
+        is_new_key = True
+    else:
+        print(f'Using existing encryption key from {key_file.as_posix()}')
+    key: bytes = sha256(key_file.read_text().encode()).digest()
+    _verify_key(key=key, is_new_key=is_new_key)
+    return key
 
 
 def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
@@ -414,7 +435,7 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
         b'##############################################################\n'
     )
     # noinspection SpellCheckingInspection
-    cipher_text: bytes = (
+    ciphertext: bytes = (
         rb'qO369KnBCxrlskDWgaEdqz5Ibng9yKpfLmU4vV3fjQZnd7m1yljVSlhbUA+0zxgW'
         rb'I3zPLUycFfey4ce4dOObZ02IFhzX/aunkb06NRd1z0oF+5L+qZHoISDkUAYsXGcl'
         rb'iqCzczbYgB0szxoVGJNsJUUWM71+0Z8O9lkM50kLSxXQGR2rbv9x/giMFaobZewb'
@@ -454,12 +475,12 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
         rb'SA=='
     )
     if is_new_key:
-        cipher_text = encrypt(plain_text, key=key)
+        ciphertext: bytes = encrypt(plain_text, key=key)
         print('New cipher text:')
-        cipher_text_str: str = cipher_text.decode()
+        cipher_text_str: str = ciphertext.decode()
         print('\n'.join(f"rb'{cipher_text_str[i:i + 64]}'" for i in range(0, len(cipher_text_str), 64)))
     try:
-        assert decrypt(cipher_text, key=key) == plain_text, 'decrypted text does not match original text'
+        assert decrypt(ciphertext, key=key) == plain_text, 'decrypted text does not match original text'
     except Exception as e:
         print(f'Error verifying key: {e}')
         print(f'Error: verifying key, please contact the project maintainer at {repo} for the encryption key.')
@@ -467,10 +488,11 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
 
 
 # ============================================================================
-# Main Entry Point for vault
+# Main Entry Point
 # ============================================================================
+
 def vault_main(mode: Literal['user', 'process', 'new', 'verify']):
-    """Main entry point for vault operations.
+    """Main cli entry point for vault operations.
 
     Args:
         mode: Operation mode
@@ -486,7 +508,7 @@ def vault_main(mode: Literal['user', 'process', 'new', 'verify']):
         python solver/vault.py verify
     """
     if mode == 'user':
-        _key_exchange()
+        key_exchange()
         if _key_file.exists():
             _verify_key(key=_get_key(genkey=False))
     elif mode == 'process':
@@ -497,17 +519,23 @@ def vault_main(mode: Literal['user', 'process', 'new', 'verify']):
         _verify_key(key=_get_key())
         temp_key_file: Path = _key_file.with_suffix('.tmp')
         _key_file.rename(temp_key_file)
-        _key_exchange()
+        key_exchange()
         assert _private_key_file.exists()
         assert _request_file.exists()
         temp_key_file.rename(_key_file)
         _process_request()
         assert _response_file.exists()
         _key_file.rename(temp_key_file)
-        _key_exchange()
-        assert _key_file.exists()
-        _verify_key(key=_get_key())
-        temp_key_file.unlink()
+        key_exchange()
+        if not _key_file.exists():
+            temp_key_file.rename(_key_file)
+            _private_key_file.unlink(missing_ok=True)
+            _request_file.unlink(missing_ok=True)
+            _response_file.unlink(missing_ok=True)
+            print('Error: Key file not found after key exchange.')
+        else:
+            temp_key_file.unlink()
+            _verify_key(key=_get_key())
 
 
 if __name__ == '__main__':
