@@ -15,6 +15,9 @@ Provides AES-256-GCM authenticated encryption and ECC-based offline key distribu
     key_exchange() -> bool
         Orchestrate 3-step key exchange protocol (returns True if key obtained)
 
+    vault_main(mode: str) -> None
+        Execute vault operations from CLI (modes: 'user', 'process', 'new', 'verify')
+
 ## Command Line
 
     python solver/vault.py user      # End user: automatic key exchange
@@ -85,7 +88,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from solver.workspace import BASE_DIR
 
-__all__ = ['decrypt', 'encrypt', 'key_exchange']
+__all__ = ['decrypt', 'encrypt', 'key_exchange', 'vault_main']
 
 # Encryption/Key exchange constants
 _key_file: Path = BASE_DIR / 'keys' / 'key.txt'  # Main encryption key file
@@ -491,7 +494,7 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
 # Main Entry Point
 # ============================================================================
 
-def vault_main(mode: Literal['user', 'process', 'new', 'verify']):
+def vault_main(mode: Literal['user', 'process', 'new', 'verify']) -> None:
     """Main cli entry point for vault operations.
 
     Args:

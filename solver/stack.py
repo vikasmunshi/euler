@@ -250,7 +250,7 @@ def _is_private(problem_number: int) -> bool:
     Returns:
         True if the problem is private
     """
-    return problem_number > 100
+    return ProjectEulerFiles.is_private(problem_number)
 
 
 @lru_cache(maxsize=None)

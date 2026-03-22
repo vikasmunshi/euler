@@ -49,6 +49,22 @@ class ProjectEulerFiles(StrEnum):
         except (FileNotFoundError, ValueError):
             return None
 
+    @classmethod
+    def is_private(cls, problem_number: int | None = None) -> bool | None:
+        """ Check if a problem number indicates a private problem (number > 100).
+
+        Args:
+            problem_number (Optional[int]): Problem number to check. 
+                Uses current problem number if None.
+
+        Returns:
+            Optional[bool]: True if private, False if public, None if no valid problem number.
+        """
+        problem_number = problem_number or cls.current_problem_number()
+        if problem_number is None:
+            return None
+        return problem_number > 100
+
 
 # ============================================================================
 # Problem Initialization
