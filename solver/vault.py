@@ -15,6 +15,9 @@ Provides AES-256-GCM authenticated encryption and ECC-based offline key distribu
     key_exchange() -> bool
         Orchestrate 3-step key exchange protocol (returns True if key obtained)
 
+    key_is_valid() -> bool
+        Check if the encryption key file exists and is valid
+
     vault_main(mode: str) -> None
         Execute vault operations from CLI (modes: 'user', 'process', 'new', 'verify')
 
@@ -88,7 +91,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
 from solver.workspace import BASE_DIR
 
-__all__ = ['decrypt', 'encrypt', 'key_exchange', 'vault_main']
+__all__ = ['decrypt', 'encrypt', 'key_exchange', 'key_is_valid', 'vault_main']
 
 # Encryption/Key exchange constants
 _key_file: Path = BASE_DIR / 'keys' / 'key.txt'  # Main encryption key file
@@ -167,6 +170,22 @@ def key_exchange() -> bool:
         return True
     _create_request()
     return False
+
+
+def key_is_valid() -> bool:
+    """Check if the encryption key file exists and is valid.
+
+    Returns:
+        True if the key file exists and passes verification, False otherwise
+    """
+    if not _key_file.exists():
+        return False
+    try:
+        _verify_key(key=_get_key(genkey=False))
+    except RuntimeError:
+        return False
+    else:
+        return True
 
 
 # ============================================================================
@@ -416,10 +435,10 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
         print(encrypted_lines)
     try:
         assert decrypt(ciphertext, key=key) == plain_text, 'decrypted text does not match original text'
-    except Exception as e:
+    except (AssertionError, ValueError) as e:
         print(f'Error verifying key: {e}')
         print(f'Error: verifying key, please contact the project maintainer at {repo} for the encryption key.')
-        raise
+        raise RuntimeError('Key verification failed') from e
 
 
 # ============================================================================

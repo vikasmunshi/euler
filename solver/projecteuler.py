@@ -82,7 +82,7 @@ def init_from_projecteuler(problem_number: int, force_refresh: bool = False) -> 
     if (current := ProjectEulerFiles.current_problem_number()) and current != problem_number:
         print(f'Workspace already exists for problem {current}, clear before initializing {problem_number}')
         return
-    if (problem_title := problem_numbers(check_validity=False).get(problem_number)) is None:
+    if (problem_title := problem_numbers(check_last_modified=False).get(problem_number)) is None:
         print(f'Error: Problem {problem_number} not found in Project Euler list of problems.')
         return
     problem_url: str = urljoin(PROJECTEULER_URL, f'problem={problem_number}')
@@ -103,16 +103,16 @@ def init_from_projecteuler(problem_number: int, force_refresh: bool = False) -> 
 
 
 @lru_cache(maxsize=2)
-def problem_numbers(check_validity: bool = True) -> dict[int, str]:
+def problem_numbers(check_last_modified: bool = True) -> dict[int, str]:
     """Get mapping of problem numbers to titles.
 
     Args:
-        check_validity: Check if a cached list is outdated
+        check_last_modified: Check if a cached list is outdated
 
     Returns:
         Dict mapping problem number to title
     """
-    content: bytes = download_file(PROBLEMS_LIST_URL, check_validity=check_validity)
+    content: bytes = download_file(PROBLEMS_LIST_URL, check_last_modified=check_last_modified)
     if not content:
         print('Error: Failed to download problem list from Project Euler')
         return {}

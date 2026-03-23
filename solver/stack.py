@@ -135,10 +135,8 @@ def stack_from_workspace(*, workspace_dir: Path = WORKSPACE_DIR,
         - Updates manifest with new/modified file hashes
     """
     try:
-        problem_number = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
+        problem_number: int = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
     except (FileNotFoundError, ValueError):
-        problem_number = None
-    if problem_number is None:
         print('Warning: No problem number found in workspace, nothing to do.')
         return False
     print(f'Stacking workspace for problem {problem_number}...')
@@ -183,7 +181,7 @@ def unstack_to_workspace(problem_number: int, *,
         - Decrypts private files automatically using AAD verification
     """
     try:
-        current = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
+        current: int | None = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
     except (FileNotFoundError, ValueError):
         current = None
     if current and current != problem_number:

@@ -10,9 +10,10 @@ from __future__ import annotations
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from hashlib import sha256
 
+from solver.backup import backup_stack, restore_stack
 from solver.projecteuler import ProjectEulerFiles
 from solver.stack import read_manifest, stack_from_workspace, unstack_to_workspace
-from solver.vault import key_exchange, vault_main
+from solver.vault import key_is_valid, vault_main
 from solver.workspace import WORKSPACE_DIR, clear_workspace, iterdir_recursive
 
 
@@ -48,8 +49,8 @@ def cmd_show(args: Namespace) -> int:
                 print(separator)
                 for filename, status in file_entries:
                     print(f'{filename:<{max_filename_len}}  {status}')
-    if not key_exchange():
-        print('Note: Key file not found')
+    if not key_is_valid():
+        print('Note: Key file not found or invalid')
         print('Note: Ensure key_exchange is completed before working with private problems (>100)')
 
     return 0
@@ -57,7 +58,7 @@ def cmd_show(args: Namespace) -> int:
 
 def cmd_stack(args: Namespace) -> int:
     """Stack the current workspace."""
-    if ProjectEulerFiles.is_private() is True and key_exchange() is False:
+    if ProjectEulerFiles.is_private() is True and key_is_valid() is False:
         print('Error: Private problem, ensure key_exchange is completed first')
         return 2
     stack_from_workspace()
@@ -70,7 +71,7 @@ def cmd_stack(args: Namespace) -> int:
 def cmd_clear(args: Namespace) -> int:
     """Clear the workspace."""
     if args.stack:
-        if ProjectEulerFiles.is_private() is True and key_exchange() is False:
+        if ProjectEulerFiles.is_private() is True and key_is_valid() is False:
             print('Error: Private problem, ensure key_exchange is completed first')
             return 2
         stack_from_workspace()
@@ -85,7 +86,7 @@ def cmd_clear(args: Namespace) -> int:
 
 def cmd_unstack(args: Namespace) -> int:
     """Unstack a problem to workspace."""
-    if ProjectEulerFiles.is_private(problem_number=args.problem_number) is True and key_exchange() is False:
+    if ProjectEulerFiles.is_private(problem_number=args.problem_number) is True and key_is_valid() is False:
         print('Error: Private problem, ensure key_exchange is completed first')
         return 2
     workspace_problem_number: int | None = ProjectEulerFiles.current_problem_number()
@@ -93,7 +94,7 @@ def cmd_unstack(args: Namespace) -> int:
         if args.force is False:
             print('Error: Workspace is not empty, use --force to override')
             return 3
-        if ProjectEulerFiles.is_private() is True and key_exchange() is False:
+        if ProjectEulerFiles.is_private() is True and key_is_valid() is False:
             print('Error: Private problem, ensure key_exchange is completed first')
             return 2
         stack_from_workspace()
@@ -105,6 +106,18 @@ def cmd_unstack(args: Namespace) -> int:
 def cmd_vault(args: Namespace) -> int:
     """Manage vault key exchange."""
     vault_main(args.mode)
+    return 0
+
+
+def cmd_backup(args: Namespace) -> int:
+    """Backup and restore stack."""
+    if not key_is_valid():
+        print('Error: Key file not found or invalid, ensure key_exchange is completed first')
+        return 2
+    if args.restore:
+        restore_stack()
+    else:
+        backup_stack()
     return 0
 
 
@@ -140,7 +153,6 @@ def main():
     # ============================================================================
     parser_stack = subparsers.add_parser(
         'stack',
-        aliases=['s'],
         help='Stack current workspace',
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
@@ -173,7 +185,6 @@ def main():
     # ============================================================================
     parser_unstack = subparsers.add_parser(
         'unstack',
-        aliases=['u'],
         help='Unstack a problem to workspace',
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
@@ -206,6 +217,21 @@ def main():
         help='Vault operation mode',
     )
     parser_vault.set_defaults(func=cmd_vault)
+
+    # ============================================================================
+    # Command: backup - Backup and restore stack
+    # ============================================================================
+    parser_backup = subparsers.add_parser(
+        'backup',
+        help='Backup the stack; use --restore to restore',
+        formatter_class=ArgumentDefaultsHelpFormatter,
+    )
+    parser_backup.add_argument(
+        '--restore',
+        action='store_true',
+        help='Restore the stack from backup',
+    )
+    parser_backup.set_defaults(func=cmd_backup)
 
     # ============================================================================
     # Parse and execute

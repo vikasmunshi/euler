@@ -95,6 +95,7 @@ site/
 target/
 var/
 
+/backup/
 /cache/
 /workspace/
 /keys/

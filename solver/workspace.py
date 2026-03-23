@@ -8,6 +8,7 @@ from shutil import rmtree
 from typing import Generator
 
 __all__ = [
+    'BACKUP_DIR',
     'BASE_DIR',
     'CACHE_DIR',
     'MANIFEST_FILENAME',
@@ -29,6 +30,7 @@ BASE_DIR: Path = Path.cwd()  # Project root directory
 CACHE_DIR: Path = BASE_DIR / 'cache'
 STACK_DIR: Path = BASE_DIR / 'stack'  # Base stack directory
 WORKSPACE_DIR: Path = BASE_DIR / 'workspace'  # Working/temporary files directory
+BACKUP_DIR: Path = BASE_DIR / 'backup' # Backup directory
 MANIFEST_FILENAME: str = 'manifest.txt'
 
 # URL/Contact constants

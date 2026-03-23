@@ -16,13 +16,13 @@ from solver.workspace import CACHE_DIR, write_file
 # Download Functions
 # ============================================================================
 
-def download_file(url: str, *, refresh: bool = False, check_validity: bool = False) -> bytes | None:
+def download_file(url: str, *, refresh: bool = False, check_last_modified: bool = False) -> bytes | None:
     """Download a file from URL with caching support.
 
     Args:
         url: URL to download from
         refresh: Force re-download even if cached
-        check_validity: Check if a cached file is outdated using Last-Modified header
+        check_last_modified: Check if a cached file is outdated using Last-Modified header
 
     Returns:
         File content as bytes or None if download fails
@@ -31,7 +31,7 @@ def download_file(url: str, *, refresh: bool = False, check_validity: bool = Fal
     if not cache_path.exists():
         print(f'Info: {cache_path.name} not found for {url}, refreshing...')
         refresh = True
-    elif check_validity and (modified := get(url, stream=True).headers.get('Last-Modified')):
+    elif check_last_modified and (modified := get(url, stream=True).headers.get('Last-Modified')):
         modified_dt = parsedate_to_datetime(modified)
         cached_dt = datetime.fromtimestamp(cache_path.stat().st_mtime, tz=timezone.utc)
         if modified_dt > cached_dt:
