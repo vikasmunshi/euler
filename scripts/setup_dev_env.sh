@@ -38,9 +38,9 @@
 # Package Array Definitions
 # ============================================================================
 # Base packages (git, build-essential, software-properties-common) - never removed
-declare -a base_packages=("git" "build-essential" "software-properties-common")
+declare -a base_packages=("git" "gh" "build-essential" "software-properties-common")
 # shellcheck disable=SC2034 # used dynamically
-declare -a base_commands=("git" "make")
+declare -a base_commands=("git" "gh" "make")
 
 # PPAs (deadsnakes/ppa for Python) - never removed
 # PPAs (deadsnakes/ppa for Python) - never removed
@@ -170,18 +170,9 @@ find_python_system_version() {
 }
 
 # Function: ensure_essentials
-# Description: Installs base packages and adds PPAs if missing (idempotent)
+# Description: Add PPAs and repos and install packages if missing (idempotent)
 ensure_essentials() {
     execute_with_dry_run sudo apt update >/dev/null 2>&1
-    local -a packages_to_install=()
-    for pkg in "${base_packages[@]}"; do
-        if ! dpkg -l | grep -q "^ii\s\+${pkg}\s"; then
-            packages_to_install+=("$pkg")
-        fi
-    done
-    if [[ ${#packages_to_install[@]} -gt 0 ]]; then
-        execute_with_dry_run sudo apt install -y "${packages_to_install[@]}"
-    fi
     for ppa in "${package_ppas[@]}"; do
         local ppa_name="${ppa#ppa:}"
         local ppa_user="${ppa_name%%/*}"
@@ -192,6 +183,32 @@ ensure_essentials() {
             execute_with_dry_run sudo apt update >/dev/null 2>&1
         fi
     done
+    if ! grep -q "cli.github.com/packages" /etc/apt/sources.list.d/github-cli.list 2>/dev/null; then
+        execute_with_dry_run sudo mkdir -p -m 755 /etc/apt/keyrings
+        local gh_keyring="/etc/apt/keyrings/githubcli-archive-keyring.gpg"
+        if [[ ! -f "$gh_keyring" ]]; then
+            local tmp_key
+            tmp_key=$(mktemp)
+            execute_with_dry_run wget -nv -O"$tmp_key" https://cli.github.com/packages/githubcli-archive-keyring.gpg
+            execute_with_dry_run sudo tee "$gh_keyring" < "$tmp_key" >/dev/null
+            execute_with_dry_run rm -f "$tmp_key"
+            execute_with_dry_run sudo chmod go+r "$gh_keyring"
+        fi
+        execute_with_dry_run sudo mkdir -p -m 755 /etc/apt/sources.list.d
+        printf "deb [arch=%s signed-by=%s] https://cli.github.com/packages stable main\n" \
+            "$(dpkg --print-architecture)" "$gh_keyring" | \
+            execute_with_dry_run sudo tee /etc/apt/sources.list.d/github-cli.list >/dev/null
+        execute_with_dry_run sudo apt update >/dev/null 2>&1
+    fi
+    local -a packages_to_install=()
+    for pkg in "${base_packages[@]}"; do
+        if ! dpkg -l | grep -q "^ii\s\+${pkg}\s"; then
+            packages_to_install+=("$pkg")
+        fi
+    done
+    if [[ ${#packages_to_install[@]} -gt 0 ]]; then
+        execute_with_dry_run sudo apt install -y "${packages_to_install[@]}"
+    fi
 }
 
 # Function: python_ensurepip ($1=version)
@@ -228,6 +245,7 @@ python_uninstall_user_site_packages() {
 # Function: install ($@=targets)
 # Description: Installs packages for targets (ensures base packages/PPAs, runs ensurepip for non-system Python)
 install() {
+    ensure_essentials
     populate_packages "$@"
     populate_installed
     local -a packages_to_install=()
@@ -240,7 +258,6 @@ install() {
         printf "→ No packages to install\n"
         return 0
     fi
-    ensure_essentials
     printf "→ Installing packages: %s\n" "${packages_to_install[*]}"
     execute_with_dry_run sudo apt install -y "${packages_to_install[@]}"
     if printf '%s\n' "$@" | grep -q "^python$"; then
