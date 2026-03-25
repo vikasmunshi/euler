@@ -24,11 +24,11 @@ def cmd_show(args: Namespace) -> int:
         print('Workspace is empty / no problem number found in workspace')
         print('Available problems:')
         for problem_number, title in problem_numbers().items():
-            print(f'  {problem_number} - {title}')
+            difficulty_level = ProjectEulerFiles.difficulty_level_file.stack_path(problem_number).read_text().strip()
+            print(f'  {problem_number} - {title} (level {difficulty_level})')
     else:
-        current_problem_title: str = ProjectEulerFiles.problem_title_file.path.read_text().strip()
-        print(f'Current problem number: {workspace_problem_number}')
-        print(f'Problem title: {current_problem_title}')
+        title = ProjectEulerFiles.problem_title_file.path.read_text().strip()
+        difficulty_level = ProjectEulerFiles.difficulty_level_file.path.read_text().strip()
         if args.verbose:
             manifest: dict[str, str] = read_manifest(workspace_problem_number)
             file_entries: list[tuple[str, str]] = []
@@ -44,17 +44,25 @@ def cmd_show(args: Namespace) -> int:
                 manifest.pop(filename, None)
             for filename in manifest.keys():
                 file_entries.append((filename, 'deleted'))
-            if file_entries:
-                max_filename_len = max(len(filename) for filename, _ in file_entries)
-                header = f'{"Filename":<{max_filename_len}}  Status'
-                separator = f'{"-" * max_filename_len}  {"-" * 10}'
-                print(header)
-                print(separator)
-                for filename, status in file_entries:
-                    print(f'{filename:<{max_filename_len}}  {status}')
+            max_filename_len = max(len(filename) for filename, _ in file_entries)
+            max_filename_len = max(max_filename_len, len('Difficulty level') + 1)
+            print(f'{"Problem number":<{max_filename_len}}: {workspace_problem_number}'
+                  f' of (1...{max(problem_numbers().keys())})')
+            print(f'{"Problem title":<{max_filename_len}}: {title}')
+            print(f'{"Difficulty level":<{max_filename_len}}: {difficulty_level}')
+            print()
+            header = f'{"Filename":<{max_filename_len}}  Status'
+            separator = f'{"-" * max_filename_len}  {"-" * 10}'
+            print(header)
+            print(separator)
+            for filename, status in file_entries:
+                print(f'{filename:<{max_filename_len}}  {status}')
+        else:
+            print(f'Problem number   : {workspace_problem_number}')
+            print(f'Problem title    : {title}')
+            print(f'Difficulty level : {difficulty_level}')
     if not default_key_is_valid():
-        print('Note: Ensure key_exchange is completed before working with private problems (>100)')
-
+        print('\nNote: Ensure key_exchange is completed before working with private problems (>100)')
     return 0
 
 
@@ -68,9 +76,9 @@ def cmd_stack(args: Namespace) -> int:
             print('#' * 80)
             print(f'Processing problem {problem_number}: {title}')
             print('#' * 80)
-            unstack_to_workspace(problem_number, re_init=True)
-            stack_from_workspace()
             clear_workspace()
+            unstack_to_workspace(problem_number, re_init=args.init, force_refresh=args.refresh)
+            stack_from_workspace()
             print('#' * 80)
             print(f'Stacked {problem_number}: {title}')
             print('#' * 80)
@@ -117,7 +125,7 @@ def cmd_unstack(args: Namespace) -> int:
             return 2
         stack_from_workspace()
         clear_workspace()
-    unstack_to_workspace(args.problem_number)
+    unstack_to_workspace(args.problem_number, re_init=args.init, force_refresh=args.refresh)
     return 0
 
 
@@ -179,6 +187,16 @@ def main():
         action='store_true',
         help='Fill the stack with all problems, initializing where required.',
     )
+    parser_stack.add_argument(
+        '--init',
+        action='store_true',
+        help='Re-initialize project euler problem description files (use with --all).',
+    )
+    parser_stack.add_argument(
+        '--refresh',
+        action='store_true',
+        help='Refresh project euler problem description files (use with --all).',
+    )
     parser_stack.set_defaults(func=cmd_stack)
 
     # ============================================================================
@@ -215,6 +233,16 @@ def main():
         '-f',
         action='store_true',
         help='Force unstack if workspace is not empty',
+    )
+    parser_unstack.add_argument(
+        '--init',
+        action='store_true',
+        help='Re-initialize project euler problem description files.',
+    )
+    parser_unstack.add_argument(
+        '--refresh',
+        action='store_true',
+        help='Refresh project euler problem description files.',
     )
     parser_unstack.set_defaults(func=cmd_unstack)
 
