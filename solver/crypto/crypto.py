@@ -2,8 +2,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-__all__ = ['encrypt', 'decrypt']
-
 from functools import wraps
 from pathlib import Path
 from secrets import token_bytes
@@ -11,7 +9,9 @@ from uuid import uuid7
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-from solver.crypto.keys import Key, get_default_key, get_key
+from solver.crypto.keys import SymmetricalKey, get_default_key, get_key
+
+__all__ = ['encrypt', 'decrypt', 'default_key_is_valid']
 
 
 def _handle_crypto_exceptions(operation: str):
@@ -50,12 +50,12 @@ def _handle_crypto_exceptions(operation: str):
 
 
 @_handle_crypto_exceptions('encrypt')
-def encrypt(plain_text: bytes, /, *, key: bytes | Key = None, aad: bytes = None) -> bytes:
+def encrypt(plain_text: bytes, /, *, key: bytes | SymmetricalKey = None, aad: bytes = None) -> bytes:
     if key is None:
         key = get_default_key()
     elif isinstance(key, bytes):
-        key = Key(id=uuid7().hex, value=key, status='unmanaged')
-    elif not isinstance(key, Key):
+        key = SymmetricalKey(id=uuid7().hex, value=key, status='unmanaged')
+    elif not isinstance(key, SymmetricalKey):
         raise TypeError('key must be bytes or Key')
     if aad is None:
         aad = bytes.fromhex(key.id)
@@ -67,12 +67,12 @@ def encrypt(plain_text: bytes, /, *, key: bytes | Key = None, aad: bytes = None)
 
 
 @_handle_crypto_exceptions('decrypt')
-def decrypt(cypher_text: bytes, /, *, key: bytes | Key = None, aad: bytes = None) -> bytes:
+def decrypt(cypher_text: bytes, /, *, key: bytes | SymmetricalKey = None, aad: bytes = None) -> bytes:
     if key is None:
-        key = get_key(key_id=cypher_text[0:16].hex())
+        key = get_key(cypher_text[0:16].hex())
     elif isinstance(key, bytes):
-        key = Key(id=cypher_text[0:16].hex(), value=key, status='unmanaged')
-    elif not isinstance(key, Key):
+        key = SymmetricalKey(id=cypher_text[0:16].hex(), value=key, status='unmanaged')
+    elif not isinstance(key, SymmetricalKey):
         raise TypeError('key must be bytes or Key')
     if aad is None:
         aad = bytes.fromhex(key.id)
@@ -83,13 +83,14 @@ def decrypt(cypher_text: bytes, /, *, key: bytes | Key = None, aad: bytes = None
     return AESGCM(key.value).decrypt(nonce, ciphertext, aad)
 
 
-if __name__ == '__main__':
-    for _key in (None, token_bytes(32)):
-        _plain_text: bytes = (Path(__file__).parent / 'constants').read_bytes()
-        _cipher_text: bytes = encrypt(_plain_text, key=_key)
-        _decrypted_text: bytes = decrypt(_cipher_text, key=_key)
-        try:
-            _ = decrypt(_cipher_text, key=None)
-        except ValueError:
-            pass
-        print(_plain_text == _decrypted_text)
+def default_key_is_valid() -> bool:
+    # noinspection PyBroadException
+    try:
+        get_default_key()
+    except:
+        return False
+    else:
+        plain_text: bytes = (Path(__file__).parent / 'text_plain.txt').read_bytes()
+        cipher_text: str = ''.join((Path(__file__).parent / 'text_cipher.txt').read_text().splitlines())
+        decrypted_text: bytes = decrypt(bytes.fromhex(cipher_text))
+        return plain_text == decrypted_text

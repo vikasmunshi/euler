@@ -300,7 +300,7 @@ Return ONLY a single Python file’s text with this structure:
 
    from euler_solver.framework import evaluate, logger, register_solution, show_solution
 
-4) Module constants (exact names):
+4) Module text_plain.txt (exact names):
    euler_problem: int = {N}
    framework_version: str = '0.2.1'
 

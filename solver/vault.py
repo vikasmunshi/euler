@@ -93,7 +93,7 @@ from solver.workspace import BASE_DIR
 
 __all__ = ['decrypt', 'encrypt', 'key_exchange', 'key_is_valid', 'vault_main']
 
-# Encryption/Key exchange constants
+# Encryption/Key exchange text_plain.txt
 _key_file: Path = BASE_DIR / 'keys' / 'key.txt'  # Main encryption key file
 _key_size: int = 32  # AES-256 requires 32 bytes (256 bits)
 _private_key_file: Path = _key_file.parent / 'private_key.pem'
@@ -424,8 +424,8 @@ def _verify_key(*, key: bytes, is_new_key: bool = False) -> None:
     Returns:
         None
     """
-    # Load plain text and ciphertext from the constants file
-    parts: list[bytes] = (Path(__file__).parent / 'constants').read_bytes().split(b'\n\n')
+    # Load plain text and ciphertext from the text_plain.txt file
+    parts: list[bytes] = (Path(__file__).parent / 'text_plain.txt').read_bytes().split(b'\n\n')
     plain_text: bytes = parts[0].strip(b'\n')
     ciphertext: bytes = parts[-1].strip(b'\n')
     if is_new_key:

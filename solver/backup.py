@@ -6,14 +6,14 @@ from pathlib import Path
 
 from solver.projecteuler import problem_numbers
 from solver.stack import stack_from_workspace, unstack_to_workspace
-from solver.vault import key_is_valid
+from solver.crypto import default_key_is_valid
 from solver.workspace import BACKUP_DIR, STACK_DIR
 
 __all__ = ['backup_stack', 'restore_stack']
 
 
 def backup_stack() -> None:
-    if not key_is_valid():
+    if not default_key_is_valid():
         print('Error: Key not found/invalid, run key_exchange first')
         return
     for problem_number, title in problem_numbers().items():
@@ -27,7 +27,7 @@ def backup_stack() -> None:
 
 
 def restore_stack() -> None:
-    if not key_is_valid():
+    if not default_key_is_valid():
         print('Error: Key not found/invalid, run key_exchange first')
         return
     for problem_number, title in problem_numbers().items():

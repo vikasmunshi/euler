@@ -25,7 +25,7 @@ __all__ = [
 # Constants
 # ============================================================================
 
-# Path constants
+# Path text_plain.txt
 BASE_DIR: Path = Path.cwd()  # Project root directory
 CACHE_DIR: Path = BASE_DIR / 'cache'
 STACK_DIR: Path = BASE_DIR / 'stack'  # Base stack directory
@@ -33,7 +33,7 @@ WORKSPACE_DIR: Path = BASE_DIR / 'workspace'  # Working/temporary files director
 BACKUP_DIR: Path = BASE_DIR / 'backup' # Backup directory
 MANIFEST_FILENAME: str = 'manifest.txt'
 
-# URL/Contact constants
+# URL/Contact text_plain.txt
 PROJECTEULER_URL: str = 'https://projecteuler.net'
 PROBLEMS_LIST_URL: str = f'{PROJECTEULER_URL}/minimal=problems'
 

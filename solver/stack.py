@@ -54,7 +54,7 @@ from hashlib import sha256
 from pathlib import Path
 
 from solver.projecteuler import ProjectEulerFiles, init_from_projecteuler
-from solver.vault import decrypt, encrypt
+from solver.crypto import decrypt, encrypt
 from solver.workspace import MANIFEST_FILENAME, STACK_DIR, WORKSPACE_DIR, iterdir_recursive, write_file
 
 __all__ = ['read_manifest', 'read_stack_file', 'stack_from_workspace', 'unstack_to_workspace']

@@ -9,7 +9,7 @@ Problem Statement:
             n - 10 if n > 100
             M_91(M_91(n + 11)) if 0 <= n <= 100
 
-    We can generalize this definition by abstracting away the constants into
+    We can generalize this definition by abstracting away the text_plain.txt into
     new variables:
         M_m,k,s(n) =
             n - s if n > m

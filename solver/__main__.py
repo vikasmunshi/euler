@@ -11,9 +11,9 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from hashlib import sha256
 
 from solver.backup import backup_stack, restore_stack
-from solver.projecteuler import ProjectEulerFiles
+from solver.crypto import default_key_is_valid
+from solver.projecteuler import ProjectEulerFiles, problem_numbers
 from solver.stack import read_manifest, stack_from_workspace, unstack_to_workspace
-from solver.vault import key_is_valid, vault_main
 from solver.workspace import WORKSPACE_DIR, clear_workspace, iterdir_recursive
 
 
@@ -22,6 +22,9 @@ def cmd_show(args: Namespace) -> int:
     workspace_problem_number: int | None = ProjectEulerFiles.current_problem_number()
     if workspace_problem_number is None:
         print('Workspace is empty / no problem number found in workspace')
+        print('Available problems:')
+        for problem_number, title in problem_numbers().items():
+            print(f'  {problem_number} - {title}')
     else:
         current_problem_title: str = ProjectEulerFiles.problem_title_file.path.read_text().strip()
         print(f'Current problem number: {workspace_problem_number}')
@@ -49,8 +52,7 @@ def cmd_show(args: Namespace) -> int:
                 print(separator)
                 for filename, status in file_entries:
                     print(f'{filename:<{max_filename_len}}  {status}')
-    if not key_is_valid():
-        print('Note: Key file not found or invalid')
+    if not default_key_is_valid():
         print('Note: Ensure key_exchange is completed before working with private problems (>100)')
 
     return 0
@@ -58,7 +60,23 @@ def cmd_show(args: Namespace) -> int:
 
 def cmd_stack(args: Namespace) -> int:
     """Stack the current workspace."""
-    if ProjectEulerFiles.is_private() is True and key_is_valid() is False:
+    if args.all:
+        if not default_key_is_valid():
+            print('Error: ensure key_exchange is completed first')
+            return 2
+        for problem_number, title in problem_numbers().items():
+            print('#' * 80)
+            print(f'Processing problem {problem_number}: {title}')
+            print('#' * 80)
+            unstack_to_workspace(problem_number, re_init=True)
+            stack_from_workspace()
+            clear_workspace()
+            print('#' * 80)
+            print(f'Stacked {problem_number}: {title}')
+            print('#' * 80)
+        clear_workspace()
+        return 0
+    if ProjectEulerFiles.is_private() is True and default_key_is_valid() is False:
         print('Error: Private problem, ensure key_exchange is completed first')
         return 2
     stack_from_workspace()
@@ -71,7 +89,7 @@ def cmd_stack(args: Namespace) -> int:
 def cmd_clear(args: Namespace) -> int:
     """Clear the workspace."""
     if args.stack:
-        if ProjectEulerFiles.is_private() is True and key_is_valid() is False:
+        if ProjectEulerFiles.is_private() is True and default_key_is_valid() is False:
             print('Error: Private problem, ensure key_exchange is completed first')
             return 2
         stack_from_workspace()
@@ -86,7 +104,7 @@ def cmd_clear(args: Namespace) -> int:
 
 def cmd_unstack(args: Namespace) -> int:
     """Unstack a problem to workspace."""
-    if ProjectEulerFiles.is_private(problem_number=args.problem_number) is True and key_is_valid() is False:
+    if ProjectEulerFiles.is_private(problem_number=args.problem_number) is True and default_key_is_valid() is False:
         print('Error: Private problem, ensure key_exchange is completed first')
         return 2
     workspace_problem_number: int | None = ProjectEulerFiles.current_problem_number()
@@ -94,7 +112,7 @@ def cmd_unstack(args: Namespace) -> int:
         if args.force is False:
             print('Error: Workspace is not empty, use --force to override')
             return 3
-        if ProjectEulerFiles.is_private() is True and key_is_valid() is False:
+        if ProjectEulerFiles.is_private() is True and default_key_is_valid() is False:
             print('Error: Private problem, ensure key_exchange is completed first')
             return 2
         stack_from_workspace()
@@ -103,16 +121,10 @@ def cmd_unstack(args: Namespace) -> int:
     return 0
 
 
-def cmd_vault(args: Namespace) -> int:
-    """Manage vault key exchange."""
-    vault_main(args.mode)
-    return 0
-
-
 def cmd_backup(args: Namespace) -> int:
     """Backup and restore stack."""
-    if not key_is_valid():
-        print('Error: Key file not found or invalid, ensure key_exchange is completed first')
+    if not default_key_is_valid():
+        print('Error: ensure key_exchange is completed first')
         return 2
     if args.restore:
         restore_stack()
@@ -162,6 +174,11 @@ def main():
         action='store_true',
         help='Clear workspace after stacking without prompting',
     )
+    parser_stack.add_argument(
+        '--all',
+        action='store_true',
+        help='Fill the stack with all problems, initializing where required.',
+    )
     parser_stack.set_defaults(func=cmd_stack)
 
     # ============================================================================
@@ -200,23 +217,6 @@ def main():
         help='Force unstack if workspace is not empty',
     )
     parser_unstack.set_defaults(func=cmd_unstack)
-
-    # ============================================================================
-    # Command: vault - Manage encryption key exchange for private problems
-    # ============================================================================
-    parser_vault = subparsers.add_parser(
-        'vault',
-        help='Manage vault key exchange',
-        formatter_class=ArgumentDefaultsHelpFormatter,
-    )
-    parser_vault.add_argument(
-        'mode',
-        nargs='?',
-        choices=['user', 'process', 'new', 'verify'],
-        default='user',
-        help='Vault operation mode',
-    )
-    parser_vault.set_defaults(func=cmd_vault)
 
     # ============================================================================
     # Command: backup - Backup and restore stack
