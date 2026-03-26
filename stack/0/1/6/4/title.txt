@@ -1,1 +1,0 @@
-Three Consecutive Digital Sum Limit

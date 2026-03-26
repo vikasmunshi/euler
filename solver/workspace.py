@@ -8,16 +8,28 @@ from shutil import rmtree
 from typing import Generator
 
 __all__ = [
-    'BACKUP_DIR',
-    'BASE_DIR',
-    'CACHE_DIR',
-    'MANIFEST_FILENAME',
-    'PROBLEMS_LIST_URL',
-    'PROJECTEULER_URL',
-    'STACK_DIR',
-    'WORKSPACE_DIR',
+    'admin_user',
+    'backup_dir',
+    'base_dir',
+    'cache_dir',
     'clear_workspace',
+    'crypto_dir',
     'iterdir_recursive',
+    'keys_file',
+    'keys_version',
+    'manifest_filename',
+    'package_dir',
+    'private_key_file',
+    'problems_list_url',
+    'projecteuler_url',
+    'push_script_path',
+    'repo_https',
+    'repo_ssh',
+    'sample_cipher_text_file',
+    'sample_plain_text_file',
+    'schema_file',
+    'stack_dir',
+    'workspace_dir',
     'write_file',
 ]
 
@@ -25,17 +37,30 @@ __all__ = [
 # Constants
 # ============================================================================
 
-# Path text_plain.txt
-BASE_DIR: Path = Path.cwd()  # Project root directory
-CACHE_DIR: Path = BASE_DIR / 'cache'
-STACK_DIR: Path = BASE_DIR / 'stack'  # Base stack directory
-WORKSPACE_DIR: Path = BASE_DIR / 'workspace'  # Working/temporary files directory
-BACKUP_DIR: Path = BASE_DIR / 'backup' # Backup directory
-MANIFEST_FILENAME: str = 'manifest.txt'
+# Paths and constants
+base_dir: Path = Path.cwd()  # Project root directory
+package_dir: Path = Path(__file__).parent
+crypto_dir: Path = package_dir / 'crypto'
+repo_https: str = 'https://github.com/vikasmunshi/euler.git'
+repo_ssh: str = 'git@github.com:vikasmunshi/euler.git'
 
-# URL/Contact text_plain.txt
-PROJECTEULER_URL: str = 'https://projecteuler.net'
-PROBLEMS_LIST_URL: str = f'{PROJECTEULER_URL}/minimal=problems'
+admin_user: str = 'vikas.munshi@gmail.com'
+backup_dir: Path = base_dir / 'backup'  # Backup directory
+cache_dir: Path = base_dir / 'cache'
+keys_file: Path = crypto_dir / 'keys.json'
+keys_version: str = '1.0.1'
+manifest_filename: str = 'manifest.txt'
+private_key_file: Path = Path.home() / '.ssh' / 'id_x25519.json'
+push_script_path: Path = crypto_dir / 'push_keys_file.sh'
+sample_cipher_text_file: Path = crypto_dir / 'text_cipher.txt'
+sample_plain_text_file: Path = crypto_dir / 'text_plain.txt'
+schema_file: Path = crypto_dir / 'keys.schema.json'
+stack_dir: Path = package_dir / 'stack'  # Base stack directory
+workspace_dir: Path = base_dir / 'workspace'  # Working/temporary files directory
+
+# URL/Contact
+projecteuler_url: str = 'https://projecteuler.net'
+problems_list_url: str = f'{projecteuler_url}/minimal=problems'
 
 
 # ============================================================================
@@ -45,7 +70,7 @@ PROBLEMS_LIST_URL: str = f'{PROJECTEULER_URL}/minimal=problems'
 def clear_workspace() -> None:
     """Clear the workspace directory."""
     print('Clearing workspace')
-    rmtree(WORKSPACE_DIR, ignore_errors=True)
+    rmtree(workspace_dir, ignore_errors=True)
 
 
 # ============================================================================
@@ -84,5 +109,4 @@ def write_file(path: Path, content: bytes, verbose: bool = False) -> None:
     """
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(content)
-    if verbose:
-        print(f'Wrote {len(content)} bytes to {path}')
+    verbose and print(f'Wrote {len(content)} bytes to {path}')

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>762 - Amoebas in a 2D Grid</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>762 - Amoebas in a 2D Grid (level 22)</h1>
+    <div class="problem_content" role="problem">
+<p>Consider a two dimensional grid of squares. The grid has 4 rows but infinitely many columns.</p>
+<p>An amoeba in square $(x, y)$ can divide itself into two amoebas to occupy the squares $(x+1,y)$ and $(x+1,(y+1) \bmod 4)$, provided these squares are empty.</p>
+<p>The following diagrams show two cases of an amoeba placed in square <b>A</b> of each grid. When it divides, it is replaced with two amoebas, one at each of the squares marked with <b>B</b>:</p>
+<div style="text-align:center;">
+<img alt="" class="dark_img" src="resources/0762_table_a.png"/>
+<img alt="" class="dark_img" src="resources/0762_table_b.png"/>
+</div>
+<p>Originally there is only one amoeba in the square $(0, 0)$. After $N$ divisions there will be $N+1$ amoebas arranged in the grid. An arrangement may be reached in several different ways but it is only counted once. Let $C(N)$ be the number of different possible arrangements after $N$ divisions.</p>
+<p>For example, $C(2) = 2$, $C(10) = 1301$, $C(20)=5895236$ and the last nine digits of $C(100)$ are $125923036$.</p>
+<p>Find $C(100\,000)$, enter the last nine digits as your answer.</p>
+</div>
+</body>
+</html>

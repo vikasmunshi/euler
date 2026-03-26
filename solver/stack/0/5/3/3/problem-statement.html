@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>533 - Minimum Values of the Carmichael Function</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>533 - Minimum Values of the Carmichael Function (level 23)</h1>
+    <div class="problem_content" role="problem">
+<p>The <strong>Carmichael function</strong> $\lambda(n)$ is defined as the smallest positive integer $m$ such that $a^m = 1$ modulo $n$ for all integers $a$ coprime with $n$.<br/>
+For example $\lambda(8) = 2$ and $\lambda(240) = 4$.</p>
+<p>Define $L(n)$ as the smallest positive integer $m$ such that $\lambda(k) \ge n$ for all $k \ge m$.<br/>
+For example, $L(6) = 241$ and $L(100) = 20\,174\,525\,281$.</p>
+<p>Find $L(20\,000\,000)$. Give the last $9$ digits of your answer.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>273 - Sum of Squares</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>273 - Sum of Squares (level 30)</h1>
+    <div class="problem_content" role="problem">
+<p>Consider equations of the form: $a^2 + b^2 = N$, $0 \le a \le b$, $a$, $b$ and $N$ integer.</p>
+<p>For $N=65$ there are two solutions:</p>
+<p>$a=1$, $b=8$ and $a=4$, $b=7$.</p>
+<p>We call $S(N)$ the sum of the values of $a$ of all solutions of $a^2 + b^2 = N$, $0 \le a \le b$, $a$, $b$ and $N$ integer.</p>
+<p>Thus $S(65) = 1 + 4 = 5$.</p>
+<p>Find $\sum S(N)$, for all squarefree $N$ only divisible by primes of the form $4k+1$ with $4k+1 \lt 150$.</p>
+</div>
+</body>
+</html>

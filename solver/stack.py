@@ -53,9 +53,9 @@ from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
 
-from solver.projecteuler import ProjectEulerFiles, init_from_projecteuler
 from solver.crypto import decrypt, encrypt
-from solver.workspace import MANIFEST_FILENAME, STACK_DIR, WORKSPACE_DIR, iterdir_recursive, write_file
+from solver.projecteuler import ProjectEulerFiles, init_from_projecteuler
+from solver.workspace import iterdir_recursive, manifest_filename, stack_dir, workspace_dir, write_file
 
 __all__ = ['read_manifest', 'read_stack_file', 'stack_from_workspace', 'unstack_to_workspace']
 
@@ -73,7 +73,7 @@ def read_manifest(problem_number: int) -> dict[str, str]:
     Returns:
         Dict mapping filename to SHA-256 hex digest (empty dict if not found)
     """
-    manifest_file: Path = _stack_dir(problem_number) / MANIFEST_FILENAME
+    manifest_file: Path = _stack_dir(problem_number) / manifest_filename
     try:
         return dict(line.split(' ', 1)[::-1] for line in manifest_file.read_text().splitlines() if line)
     except FileNotFoundError:
@@ -117,13 +117,14 @@ def read_stack_file(problem_number: int, filename: str) -> bytes | None:
 # Stack/Unstack Operations
 # ============================================================================
 
-def stack_from_workspace(*, workspace_dir: Path = WORKSPACE_DIR,
+def stack_from_workspace(*,
+                         workspace_path: Path = workspace_dir,
                          process_deletions: bool = False,
                          ) -> bool:
     """Save the current workspace to stack with encryption and verification.
 
     Args:
-        workspace_dir: Directory to stack, defaults to WORKSPACE_DIR
+        workspace_path: Directory to stack, defaults to WORKSPACE_DIR
         process_deletions: If True, remove stack files deleted from workspace
 
     Returns:
@@ -135,15 +136,15 @@ def stack_from_workspace(*, workspace_dir: Path = WORKSPACE_DIR,
         - Updates manifest with new/modified file hashes
     """
     try:
-        problem_number: int = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
+        problem_number: int = int((workspace_path / ProjectEulerFiles.problem_number_file).read_text())
     except (FileNotFoundError, ValueError):
         print('Warning: No problem number found in workspace, nothing to do.')
         return False
     print(f'Stacking workspace for problem {problem_number}...')
     manifest: dict[str, str] = read_manifest(problem_number)
-    files: set[Path] = set(iterdir_recursive(workspace_dir))
+    files: set[Path] = set(iterdir_recursive(workspace_path))
     for filepath in files:
-        filename: str = filepath.relative_to(workspace_dir).as_posix()
+        filename: str = filepath.relative_to(workspace_path).as_posix()
         content: bytes = filepath.read_bytes()
         content_hash: str = sha256(content).hexdigest()
         if filename in manifest and manifest[filename] == content_hash:
@@ -153,7 +154,7 @@ def stack_from_workspace(*, workspace_dir: Path = WORKSPACE_DIR,
         manifest[filename] = content_hash
         print(f'Added file {filename} to stack and manifest')
     if process_deletions:
-        for file in set(manifest.keys()) - set(f.relative_to(workspace_dir).as_posix() for f in files):
+        for file in set(manifest.keys()) - set(f.relative_to(workspace_path).as_posix() for f in files):
             _delete_stack_file(problem_number, file)
             del manifest[file]
             print(f'Deleted {file} from stack and manifest')
@@ -163,15 +164,14 @@ def stack_from_workspace(*, workspace_dir: Path = WORKSPACE_DIR,
 
 
 def unstack_to_workspace(problem_number: int, *,
-                         workspace_dir: Path = WORKSPACE_DIR,
+                         workspace_path: Path = workspace_dir,
                          re_init: bool = False,
-                         force_refresh: bool = False,
-                         ) -> None:
+                         force_refresh: bool = False) -> None:
     """Restore the workspace from stack storage.
 
     Args:
         problem_number: Project Euler problem number to restore
-        workspace_dir: Directory to restore workspace to, defaults to WORKSPACE_DIR
+        workspace_path: Directory to restore workspace to, defaults to WORKSPACE_DIR
         re_init: Force re-initialization from Project Euler website
         force_refresh: Force re-download even if cached (requires re_init=True)
 
@@ -181,7 +181,7 @@ def unstack_to_workspace(problem_number: int, *,
         - Decrypts private files automatically using AAD verification
     """
     try:
-        current: int | None = int((workspace_dir / ProjectEulerFiles.problem_number_file).read_text())
+        current: int | None = int((workspace_path / ProjectEulerFiles.problem_number_file).read_text())
     except (FileNotFoundError, ValueError):
         current = None
     if current and current != problem_number:
@@ -190,12 +190,12 @@ def unstack_to_workspace(problem_number: int, *,
     print(f'Initializing workspace for problem {problem_number}...')
     for filename, content_hash in read_manifest(problem_number).items():
         if (content := read_stack_file(problem_number, filename)) is not None:
-            target_file: Path = workspace_dir / filename
+            target_file: Path = workspace_path / filename
             write_file(target_file, content)
             print(f'Copied {filename} to {target_file}')
-    re_init = re_init or any(not (workspace_dir / filename.value).exists()
+    re_init = re_init or any(not (workspace_path / filename.value).exists()
                              for filename in ProjectEulerFiles
-                             if filename != ProjectEulerFiles.problem_resources_dir)
+                             if filename != ProjectEulerFiles.resources_dir)
     if re_init:
         init_from_projecteuler(problem_number, force_refresh=force_refresh)
     print('Unstacking complete')
@@ -264,7 +264,7 @@ def _is_private(problem_number: int) -> bool:
     Returns:
         True if the problem is private
     """
-    return ProjectEulerFiles.is_private(problem_number)
+    return ProjectEulerFiles.is_private(problem_number) is True
 
 
 @lru_cache(maxsize=None)
@@ -290,7 +290,7 @@ def _stack_dir(problem_number: int) -> Path:
     Returns:
         Path to stack directory
     """
-    return STACK_DIR.joinpath(*f'{problem_number:04d}')
+    return stack_dir.joinpath(*f'{problem_number:04d}')
 
 
 def _verify_manifest(problem_number: int) -> bool:
@@ -313,7 +313,7 @@ def _verify_manifest(problem_number: int) -> bool:
             results['modified'].append(filename)
     stack_path: Path = _stack_dir(problem_number)
     for file_path in iterdir_recursive(stack_path):
-        if file_path.name == MANIFEST_FILENAME:
+        if file_path.name == manifest_filename:
             continue
         filename = file_path.relative_to(stack_path).as_posix()
         if filename.endswith('.enc'):
@@ -338,7 +338,7 @@ def _write_manifest(problem_number: int, manifest: dict[str, str]) -> None:
         problem_number: Problem number
         manifest: Dict mapping filename to SHA-256 hash
     """
-    manifest_file: Path = _stack_dir(problem_number) / MANIFEST_FILENAME
+    manifest_file: Path = _stack_dir(problem_number) / manifest_filename
     write_file(manifest_file, b'\n'.join(f'{v} {k}'.encode() for k, v in manifest.items()))
 
 

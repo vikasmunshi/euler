@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>767 - Window into a Matrix II</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>767 - Window into a Matrix II (level 27)</h1>
+    <div class="problem_content" role="problem">
+<p>A window into a matrix is a contiguous sub matrix.</p>
+<p>Consider a $16\times n$ matrix where every entry is either $0$ or $1$.
+Let $B(k,n)$ be the total number of these matrices such that the sum of the entries in every $2\times k$ window is $k$.</p>
+<p>You are given that $B(2,4) = 65550$ and $B(3,9) \equiv 87273560 \pmod{1\,000\,000\,007}$.</p>
+<p>Find $B(10^5,10^{16})$. Give your answer modulo $1\,000\,000\,007$.</p>
+</div>
+</body>
+</html>

@@ -1,1 +1,0 @@
-Minimum Values of the Carmichael Function

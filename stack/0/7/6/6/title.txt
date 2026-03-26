@@ -1,1 +1,0 @@
-Sliding Block Puzzle

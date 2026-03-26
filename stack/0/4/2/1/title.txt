@@ -1,1 +1,0 @@
-Prime Factors of $n^{15}+1$

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>765 - Trillionaire</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>765 - Trillionaire (level 32)</h1>
+    <div class="problem_content" role="problem">
+<p>
+Starting with $1$ gram of gold you play a game. Each round you bet a certain amount of your gold: if you have $x$ grams you can bet $b$ grams for any $0 \le b \le x$. You then toss an unfair coin: with a probability of $0.6$ you double your bet (so you now have $x+b$), otherwise you lose your bet (so you now have $x-b$).
+</p>
+<p>
+Choosing your bets to maximize your probability of having at least a trillion ($10^{12}$) grams of gold after $1000$ rounds, what is the probability that you become a trillionaire?
+</p>
+<p>
+All computations are assumed to be exact (no rounding), but give your answer rounded to $10$ digits behind the decimal point.
+</p>
+</div>
+</body>
+</html>

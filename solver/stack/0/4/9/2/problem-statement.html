@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>492 - Exploding Sequence</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>492 - Exploding Sequence (level 28)</h1>
+    <div class="problem_content" role="problem">
+<p>Define the sequence $a_1, a_2, a_3, \dots$ as:</p>
+<ul><li>$a_1 = 1$</li>
+<li>$a_{n+1} = 6a_n^2 + 10a_n + 3$ for $n \ge 1$.</li>
+</ul><p>
+Examples:<br/>
+$a_3 = 2359$<br/>
+$a_6 = 269221280981320216750489044576319$<br/>
+$a_6 \bmod 1\,000\,000\,007 = 203064689$<br/>
+$a_{100} \bmod 1\,000\,000\,007 = 456482974$
+</p>
+<p>
+Define $B(x,y,n)$ as $\sum (a_n \bmod p)$ for every prime $p$ such that $x \le p \le x+y$.
+</p>
+<p>
+Examples:<br/>
+$B(10^9, 10^3, 10^3) = 23674718882$<br/>
+$B(10^9, 10^3, 10^{15}) = 20731563854$
+</p>
+<p>Find $B(10^9, 10^7, 10^{15})$.</p>
+</div>
+</body>
+</html>

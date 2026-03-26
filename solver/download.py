@@ -9,7 +9,7 @@ from uuid import NAMESPACE_URL, uuid5
 
 from requests import get
 
-from solver.workspace import CACHE_DIR, write_file
+from solver.workspace import cache_dir, write_file
 
 
 # ============================================================================
@@ -31,7 +31,7 @@ def download_file(url: str, *,
     Returns:
         File content as bytes or None if download fails
     """
-    cache_path = CACHE_DIR / uuid5(NAMESPACE_URL, url).hex
+    cache_path = cache_dir / uuid5(NAMESPACE_URL, url).hex
     if not cache_path.exists():
         verbose and print(f'Info: {cache_path.name} not found for {url}, refreshing...')
         refresh = True

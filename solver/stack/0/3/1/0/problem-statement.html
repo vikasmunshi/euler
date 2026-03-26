@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>310 - Nim Square</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>310 - Nim Square (level 14)</h1>
+    <div class="problem_content" role="problem">
+<p>
+Alice and Bob play the game Nim Square.<br/>
+Nim Square is just like ordinary three-heap normal play Nim, but the players may only remove a square number of stones from a heap.<br/>
+The number of stones in the three heaps is represented by the ordered triple $(a,b,c)$.<br/>
+If $0 \le a \le b \le c \le 29$ then the number of losing positions for the next player is $1160$.
+</p>
+<p>
+Find the number of losing positions for the next player if $0 \le a \le b \le c \le 100\,000$.
+</p>
+</div>
+</body>
+</html>

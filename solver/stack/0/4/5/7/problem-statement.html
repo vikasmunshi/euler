@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>457 - A Polynomial Modulo the Square of a Prime</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>457 - A Polynomial Modulo the Square of a Prime (level 14)</h1>
+    <div class="problem_content" role="problem">
+<p>
+Let $f(n) = n^2 - 3n - 1$.<br/>
+Let $p$ be a prime.<br/>
+Let $R(p)$ be the smallest positive integer $n$ such that $f(n) \bmod p^2 = 0$ if such an integer $n$ exists, otherwise $R(p) = 0$.
+</p>
+<p>
+Let $SR(L)$ be $\sum R(p)$ for all primes not exceeding $L$.
+</p>
+<p>
+Find $SR(10^7)$.
+</p>
+</div>
+</body>
+</html>

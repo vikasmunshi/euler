@@ -1,1 +1,0 @@
-The Primality of $2n^2 - 1$

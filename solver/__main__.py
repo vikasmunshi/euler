@@ -11,10 +11,10 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from hashlib import sha256
 
 from solver.backup import backup_stack, restore_stack
-from solver.crypto import default_key_is_valid
+from solver.crypto import check_self, get_user_email
 from solver.projecteuler import ProjectEulerFiles, problem_numbers
 from solver.stack import read_manifest, stack_from_workspace, unstack_to_workspace
-from solver.workspace import WORKSPACE_DIR, clear_workspace, iterdir_recursive
+from solver.workspace import admin_user, clear_workspace, iterdir_recursive, workspace_dir
 
 
 def cmd_show(args: Namespace) -> int:
@@ -24,17 +24,14 @@ def cmd_show(args: Namespace) -> int:
         print('Workspace is empty / no problem number found in workspace')
         print('Available problems:')
         for problem_number, title in problem_numbers().items():
-            difficulty_level = ProjectEulerFiles.difficulty_level_file.stack_path(problem_number).read_text().strip()
-            print(f'  {problem_number} - {title} (level {difficulty_level})')
+            print(f'  {problem_number} - {title}')
     else:
-        title = ProjectEulerFiles.problem_title_file.path.read_text().strip()
-        difficulty_level = ProjectEulerFiles.difficulty_level_file.path.read_text().strip()
         if args.verbose:
             manifest: dict[str, str] = read_manifest(workspace_problem_number)
             file_entries: list[tuple[str, str]] = []
-            for workspace_file_path in iterdir_recursive(WORKSPACE_DIR):
+            for workspace_file_path in iterdir_recursive(workspace_dir):
                 status: str = 'unchanged'
-                filename: str = workspace_file_path.relative_to(WORKSPACE_DIR).as_posix()
+                filename: str = workspace_file_path.relative_to(workspace_dir).as_posix()
                 stack_hash: str | None = manifest.get(filename, None)
                 if stack_hash is None:
                     status = 'new'
@@ -48,8 +45,6 @@ def cmd_show(args: Namespace) -> int:
             max_filename_len = max(max_filename_len, len('Difficulty level') + 1)
             print(f'{"Problem number":<{max_filename_len}}: {workspace_problem_number}'
                   f' of (1...{max(problem_numbers().keys())})')
-            print(f'{"Problem title":<{max_filename_len}}: {title}')
-            print(f'{"Difficulty level":<{max_filename_len}}: {difficulty_level}')
             print()
             header = f'{"Filename":<{max_filename_len}}  Status'
             separator = f'{"-" * max_filename_len}  {"-" * 10}'
@@ -59,33 +54,27 @@ def cmd_show(args: Namespace) -> int:
                 print(f'{filename:<{max_filename_len}}  {status}')
         else:
             print(f'Problem number   : {workspace_problem_number}')
-            print(f'Problem title    : {title}')
-            print(f'Difficulty level : {difficulty_level}')
-    if not default_key_is_valid():
-        print('\nNote: Ensure key_exchange is completed before working with private problems (>100)')
     return 0
 
 
 def cmd_stack(args: Namespace) -> int:
     """Stack the current workspace."""
     if args.all:
-        if not default_key_is_valid():
-            print('Error: ensure key_exchange is completed first')
+        if not check_self():
             return 2
         for problem_number, title in problem_numbers().items():
             print('#' * 80)
             print(f'Processing problem {problem_number}: {title}')
             print('#' * 80)
             clear_workspace()
-            unstack_to_workspace(problem_number, re_init=args.init, force_refresh=args.refresh)
+            unstack_to_workspace(problem_number)
             stack_from_workspace()
             print('#' * 80)
             print(f'Stacked {problem_number}: {title}')
             print('#' * 80)
         clear_workspace()
         return 0
-    if ProjectEulerFiles.is_private() is True and default_key_is_valid() is False:
-        print('Error: Private problem, ensure key_exchange is completed first')
+    if ProjectEulerFiles.is_private() is True and check_self() is False:
         return 2
     stack_from_workspace()
     if args.clear:
@@ -97,7 +86,7 @@ def cmd_stack(args: Namespace) -> int:
 def cmd_clear(args: Namespace) -> int:
     """Clear the workspace."""
     if args.stack:
-        if ProjectEulerFiles.is_private() is True and default_key_is_valid() is False:
+        if ProjectEulerFiles.is_private() is True and check_self() is False:
             print('Error: Private problem, ensure key_exchange is completed first')
             return 2
         stack_from_workspace()
@@ -112,16 +101,14 @@ def cmd_clear(args: Namespace) -> int:
 
 def cmd_unstack(args: Namespace) -> int:
     """Unstack a problem to workspace."""
-    if ProjectEulerFiles.is_private(problem_number=args.problem_number) is True and default_key_is_valid() is False:
-        print('Error: Private problem, ensure key_exchange is completed first')
+    if ProjectEulerFiles.is_private(problem_number=args.problem_number) is True and check_self() is False:
         return 2
     workspace_problem_number: int | None = ProjectEulerFiles.current_problem_number()
     if workspace_problem_number is not None:
         if args.force is False:
             print('Error: Workspace is not empty, use --force to override')
             return 3
-        if ProjectEulerFiles.is_private() is True and default_key_is_valid() is False:
-            print('Error: Private problem, ensure key_exchange is completed first')
+        if ProjectEulerFiles.is_private() is True and check_self() is False:
             return 2
         stack_from_workspace()
         clear_workspace()
@@ -131,8 +118,7 @@ def cmd_unstack(args: Namespace) -> int:
 
 def cmd_backup(args: Namespace) -> int:
     """Backup and restore stack."""
-    if not default_key_is_valid():
-        print('Error: ensure key_exchange is completed first')
+    if not check_self():
         return 2
     if args.restore:
         restore_stack()
@@ -141,7 +127,25 @@ def cmd_backup(args: Namespace) -> int:
     return 0
 
 
-def main():
+def cmd_ops(args: Namespace) -> int:
+    """Key exchange operations."""
+    from solver.crypto.ops import add_self, authorize_users, add_keys
+    match args.command:
+        case 'check-self':
+            if check_self(verbose=True):
+                print('Everything looks good!')
+        case 'add-self':
+            add_self()
+        case 'add-keys':
+            add_keys(8)
+        case 'authorize-users':
+            authorize_users()
+        case _:
+            raise ValueError(f'Invalid command: {args.command}')
+    return 0
+
+
+def main() -> int:
     # ============================================================================
     # Main parser setup
     # ============================================================================
@@ -186,16 +190,6 @@ def main():
         '--all',
         action='store_true',
         help='Fill the stack with all problems, initializing where required.',
-    )
-    parser_stack.add_argument(
-        '--init',
-        action='store_true',
-        help='Re-initialize project euler problem description files (use with --all).',
-    )
-    parser_stack.add_argument(
-        '--refresh',
-        action='store_true',
-        help='Refresh project euler problem description files (use with --all).',
     )
     parser_stack.set_defaults(func=cmd_stack)
 
@@ -262,6 +256,26 @@ def main():
     parser_backup.set_defaults(func=cmd_backup)
 
     # ============================================================================
+    # Command: ops - key exchange ops
+    # ============================================================================
+    parser_ops = subparsers.add_parser(
+        'ops',
+        help='Key exchange operations',
+        formatter_class=ArgumentDefaultsHelpFormatter,
+    )
+    commands: list[str] = ['add-self', 'check-self']
+    if get_user_email() == admin_user:
+        commands.append('add-keys')
+        commands.append('authorize-users')
+    parser_ops.add_argument(
+        'command',
+        choices=commands,
+        default=commands[-1],
+        help='Key exchange operation to perform',
+    )
+    parser_ops.set_defaults(func=cmd_ops)
+
+    # ============================================================================
     # Parse and execute
     # ============================================================================
     args = parser.parse_args()
@@ -275,7 +289,7 @@ def main():
         return 1
 
     # Execute the command
-    return args.func(args)
+    return args.func(args)  # type: ignore [no-any-return]
 
 
 if __name__ == "__main__":

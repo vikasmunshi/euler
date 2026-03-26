@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>319 - Bounded Sequences</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>319 - Bounded Sequences (level 36)</h1>
+    <div class="problem_content" role="problem">
+<p>
+Let $x_1, x_2, \dots, x_n$ be a sequence of length $n$ such that:
+</p><ul><li>$x_1 = 2$</li>
+<li>for all $1 \lt i \le n$: $x_{i - 1} \lt x_i$</li>
+<li>for all $i$ and $j$ with $1 \le i, j \le n$: $(x_i)^j \lt (x_j + 1)^i$.</li>
+</ul><p>
+There are only five such sequences of length $2$, namely:
+$\{2,4\}$, $\{2,5\}$, $\{2,6\}$, $\{2,7\}$ and $\{2,8\}$.<br/>
+There are $293$ such sequences of length $5$; three examples are given below:<br/>
+$\{2,5,11,25,55\}$, $\{2,6,14,36,88\}$, $\{2,8,22,64,181\}$.
+</p>
+<p>
+Let $t(n)$ denote the number of such sequences of length $n$.<br/>
+You are given that $t(10) = 86195$ and $t(20) = 5227991891$.
+</p>
+<p>
+Find $t(10^{10})$ and give your answer modulo $10^9$.
+</p>
+</div>
+</body>
+</html>

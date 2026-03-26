@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>973 - Random Dealings</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>973 - Random Dealings (level 33)</h1>
+    <div class="problem_content" role="problem">
+<p>
+A game is played with $n$ cards.
+At the start the cards are dealt out onto a table to get $n$ piles of size one.</p>
+<p>
+Each round proceeds as follows:</p>
+<ol>
+<li>Select a pile at random and pick it up.</li>
+<li>Randomly choose a pile from the table and add the top card of the picked-up pile to it.</li>
+<li>Redistribute any remaining cards from the picked-up pile by dealing them into new single-card piles.</li></ol>
+<p>
+The game ends when all cards are in a single pile.</p>
+<p>
+At the end of each round a score is obtained by bitwise-XORing the size of each pile. The score is summed across the rounds. Let $X(n)$ be the expected total score at the end of the game.</p>
+<p>
+You are given $X(2) = 2$, $X(4) = 14$ and $X(10) = 1418$.</p>
+<p>
+Find $X(10^4)$. Give your answer modulo $10^9+7$.</p>
+</div>
+</body>
+</html>

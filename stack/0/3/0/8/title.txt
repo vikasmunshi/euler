@@ -1,1 +1,0 @@
-An Amazing Prime-generating Automaton

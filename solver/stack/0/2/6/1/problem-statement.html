@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>261 - Pivotal Square Sums</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>261 - Pivotal Square Sums (level 37)</h1>
+    <div class="problem_content" role="problem">
+<p>Let us call a positive integer $k$ a <dfn>square-pivot</dfn>, if there is a pair of integers $m \gt 0$ and $n \ge k$, such that the sum of the $(m+1)$ consecutive squares up to $k$ equals the sum of the $m$ consecutive squares from $(n+1)$ on:</p>
+$$(k - m)^2 + \cdots + k^2 = (n + 1)^2 + \cdots + (n + m)^2.$$
+
+<p>Some small square-pivots are
+</p><ul><li>$\mathbf 4$: $3^2 + \mathbf 4^2 = 5^2$</li>
+<li>$\mathbf{21}$: $20^2 + \mathbf{21}^2 = 29^2$</li>
+<li>$\mathbf{24}$: $21^2 + 22^2 + 23^2 + \mathbf{24}^2 = 25^2 + 26^2 + 27^2$</li>
+<li>$\mathbf{110}$: $108^2 + 109^2 + \mathbf{110}^2 = 133^2 + 134^2$</li></ul><p>Find the sum of all <b>distinct</b> square-pivots $\le 10^{10}$.</p>
+</div>
+</body>
+</html>

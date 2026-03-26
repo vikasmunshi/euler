@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>577 - Counting Hexagons</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>577 - Counting Hexagons (level 6)</h1>
+    <div class="problem_content" role="problem">
+<p>An equilateral triangle with integer side length $n \ge 3$ is divided into $n^2$ equilateral triangles with side length 1 as shown in the diagram below.<br/>
+The vertices of these triangles constitute a triangular lattice with $\frac{(n+1)(n+2)} 2$ lattice points.</p>
+<p>Let $H(n)$ be the number of all regular hexagons that can be found by connecting 6 of these points.</p>
+<div class="center">
+<img alt="0577_counting_hexagons.png" src="resources/0577_counting_hexagons.png"/>
+</div>
+<p>
+For example, $H(3)=1$, $H(6)=12$ and $H(20)=966$.</p>
+<p>Find $\displaystyle \sum_{n=3}^{12345} H(n)$.</p>
+</div>
+</body>
+</html>

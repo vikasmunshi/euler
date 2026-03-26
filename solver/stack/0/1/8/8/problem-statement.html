@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>188 - Hyperexponentiation</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>188 - Hyperexponentiation (level 9)</h1>
+    <div class="problem_content" role="problem">
+<p>The <strong>hyperexponentiation</strong> or <strong>tetration</strong> of a number $a$ by a positive integer $b$, denoted by $a\mathbin{\uparrow \uparrow}b$ or $^b a$, is recursively defined by:<br/><br/>
+$a \mathbin{\uparrow \uparrow} 1 = a$,<br/>
+$a \mathbin{\uparrow \uparrow} (k+1) = a^{(a \mathbin{\uparrow \uparrow} k)}$.</p>
+<p>
+Thus we have e.g. $3 \mathbin{\uparrow \uparrow} 2 = 3^3 = 27$, hence $3 \mathbin{\uparrow \uparrow} 3 = 3^{27} = 7625597484987$ and $3 \mathbin{\uparrow \uparrow} 4$ is roughly $10^{3.6383346400240996 \cdot 10^{12}}$.</p>
+<p>Find the last $8$ digits of $1777 \mathbin{\uparrow \uparrow} 1855$.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>199 - Iterative Circle Packing</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>199 - Iterative Circle Packing (level 24)</h1>
+    <div class="problem_content" role="problem">
+<p>Three circles of equal radius are placed inside a larger circle such that each pair of circles is tangent to one another and the inner circles do not overlap. There are four uncovered "gaps" which are to be filled iteratively with more tangent circles.</p>
+<div class="center">
+<img alt="" class="dark_img" src="resources/0199_circles_in_circles.gif"/></div>
+<p>
+At each iteration, a maximally sized circle is placed in each gap, which creates more gaps for the next iteration. After $3$ iterations (pictured), there are $108$ gaps and the fraction of the area which is not covered by circles is $0.06790342$, rounded to eight decimal places.
+</p>
+<p>
+What fraction of the area is not covered by circles after $10$ iterations?<br/>
+Give your answer rounded to eight decimal places using the format x.xxxxxxxx .
+</p>
+</div>
+</body>
+</html>

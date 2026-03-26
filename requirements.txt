@@ -1,4 +1,6 @@
 beautifulsoup4
 cryptography
 jsonschema
+mypy
 requests
+types-requests

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>349 - Langton's Ant</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>349 - Langton's Ant (level 11)</h1>
+    <div class="problem_content" role="problem">
+<p>
+An ant moves on a regular grid of squares that are coloured either black or white.<br/> 
+The ant is always oriented in one of the cardinal directions (left, right, up or down) and moves from square to adjacent square according to the following rules:<br/>
+- if it is on a black square, it flips the colour of the square to white, rotates $90$ degrees counterclockwise and moves forward one square.<br/>
+- if it is on a white square, it flips the colour of the square to black, rotates $90$ degrees clockwise and moves forward one square.<br/></p>
+<p>
+Starting with a grid that is entirely white, how many squares are black after $10^{18}$ moves of the ant?
+</p>
+</div>
+</body>
+</html>

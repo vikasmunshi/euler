@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>403 - Lattice Points Enclosed by Parabola and Line</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>403 - Lattice Points Enclosed by Parabola and Line (level 24)</h1>
+    <div class="problem_content" role="problem">
+<p>
+For integers $a$ and $b$, we define $D(a, b)$ as the domain enclosed by the parabola $y = x^2$ and the line $y = a\cdot x + b$:<br/>$D(a, b) = \{(x, y) \mid x^2 \leq y \leq a\cdot x + b \}$.
+</p>
+<p>
+$L(a, b)$ is defined as the number of lattice points contained in $D(a, b)$.<br/>
+For example, $L(1, 2) = 8$ and $L(2, -1) = 1$.
+</p>
+<p>
+We also define $S(N)$ as the sum of $L(a, b)$ for all the pairs $(a, b)$ such that the area of $D(a, b)$ is a rational number and $|a|,|b| \leq N$.<br/>
+We can verify that $S(5) = 344$ and $S(100) = 26709528$.
+</p>
+<p>
+Find $S(10^{12})$. Give your answer mod $10^8$.
+</p>
+</div>
+</body>
+</html>

@@ -1,12 +1,11 @@
 {
   "$schema": "./keys.schema.json",
   "version": "1.0.1",
-  "default": "019d251e6ede7076bc5ded5c52036bcf",
   "keys": [
     {
       "id": "019d251e6ede7076bc5ded5b43ff6c70",
       "value": "7fbe46a15ac9be34a83c4f3136a2a7798310b80c7b2a9832f9a322769e4b9fcd7574384241ac6af6773cc5bf05f06fa57da8301a55a0be920c7f89fb",
-      "status": "retired"
+      "status": "active"
     },
     {
       "id": "019d251e6ede7076bc5ded5c52036bcf",

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>116 - Red, Green or Blue Tiles</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>116 - Red, Green or Blue Tiles (level 6)</h1>
+    <div class="problem_content" role="problem">
+<p>A row of five grey square tiles is to have a number of its tiles replaced with coloured oblong tiles chosen from red (length two), green (length three), or blue (length four).</p>
+<p>If red tiles are chosen there are exactly seven ways this can be done.</p>
+<div class="center">
+<img alt="png116_1.png" src="resources/0116_1.png"/>
+</div>
+<p>If green tiles are chosen there are three ways.</p>
+<div class="center">
+<img alt="png116_2.png" src="resources/0116_2.png"/>
+</div>
+<p>And if blue tiles are chosen there are two ways.</p>
+<div class="center">
+<img alt="png116_3.png" src="resources/0116_3.png"/>
+</div>
+<p>Assuming that colours cannot be mixed there are $7 + 3 + 2 = 12$ ways of replacing the grey tiles in a row measuring five units in length.</p>
+<p>How many different ways can the grey tiles in a row measuring fifty units in length be replaced if colours cannot be mixed and at least one coloured tile must be used?</p>
+<p class="note">NOTE: This is related to <a href="problem=117">Problem 117</a>.</p>
+</div>
+</body>
+</html>

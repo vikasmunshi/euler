@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>531 - Chinese Leftovers</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>531 - Chinese Leftovers (level 6)</h1>
+    <div class="problem_content" role="problem">
+<p>
+Let $g(a, n, b, m)$ be the smallest non-negative solution $x$ to the system:<br/>
+$x = a \bmod n$<br/>
+$x = b \bmod m$<br/>
+if such a solution exists, otherwise $0$.
+</p>
+<p>
+E.g. $g(2,4,4,6)=10$, but $g(3,4,4,6)=0$.
+</p>
+<p>
+Let $\phi(n)$ be Euler's totient function.
+</p>
+<p>
+Let $f(n,m)=g(\phi(n),n,\phi(m),m)$
+</p>
+<p>
+Find $\sum f(n,m)$ for $1000000 \le n \lt m \lt 1005000$.
+</p>
+</div>
+</body>
+</html>

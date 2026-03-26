@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>883 - Remarkable Triangles</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>883 - Remarkable Triangles (level 36)</h1>
+    <div class="problem_content" role="problem">
+<p>
+In this problem we consider triangles drawn on a <b>hexagonal lattice</b>, where each lattice point in the plane has six neighbouring points equally spaced around it, all distance $1$ away.</p>
+<p>
+We call a triangle <i>remarkable</i> if</p>
+<ul>
+<li>All three vertices and its <b>incentre</b> lie on lattice points</li>
+<li>At least one of its angles is $60^\circ$</li>
+</ul>
+<img alt="0883_diagram.png" src="resources/0883_diagram.png"/>
+<p>
+Above are four examples of remarkable triangles, with $60^\circ$ angles illustrated in red. Triangles A and B have inradius $1$; C has inradius $\sqrt{3}$; D has inradius $2$.</p>
+<p>
+Define $T(r)$ to be the number of remarkable triangles with inradius $\le r$. Rotations and reflections, such as triangles A and B above, are counted separately; however direct translations are not. That is, the same triangle drawn in different positions of the lattice is only counted once.</p>
+<p>
+You are given $T(0.5)=2$, $T(2)=44$, and $T(10)=1302$.</p>
+<p>
+Find $T(10^6)$.</p>
+</div>
+</body>
+</html>

@@ -1,1 +1,0 @@
-Writing $n$ as the Product of $k$ Distinct Positive Integers

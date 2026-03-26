@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>722 - Slowly Converging Series</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>722 - Slowly Converging Series (level 14)</h1>
+    <div class="problem_content" role="problem">
+<p>For a non-negative integer $k$, define
+$$
+E_k(q) = \sum\limits_{n = 1}^\infty \sigma_k(n)q^n
+$$
+where $\sigma_k(n) = \sum_{d \mid n} d^k$ is the sum of the $k$-th powers of the positive divisors of $n$.</p>
+<p>It can be shown that, for every $k$, the series $E_k(q)$ converges for any $0 &lt; q &lt; 1$.</p>
+<p>For example,<br/>
+$E_1(1 - \frac{1}{2^4}) = 3.872155809243\mathrm e2$<br/>
+$E_3(1 - \frac{1}{2^8}) = 2.767385314772\mathrm e10$<br/>
+$E_7(1 - \frac{1}{2^{15}}) = 6.725803486744\mathrm e39$<br/>
+All the above values are given in scientific notation rounded to twelve digits after the decimal point.</p>
+<p>Find the value of $E_{15}(1 - \frac{1}{2^{25}})$.<br/>
+Give the answer in scientific notation rounded to twelve digits after the decimal point.</p>
+</div>
+</body>
+</html>

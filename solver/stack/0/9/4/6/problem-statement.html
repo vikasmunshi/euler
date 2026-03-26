@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>946 - Continued Fraction Fraction</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>946 - Continued Fraction Fraction (level 10)</h1>
+    <div class="problem_content" role="problem">
+<p>Given the representation of a continued fraction
+$$ a_0+ \cfrac 1{a_1+ \cfrac 1{a_2+\cfrac 1{a_3+\ddots }}}= [a_0;a_1,a_2,a_3,\ldots] $$</p>
+<p>
+$\alpha$ is a real number with continued fraction representation:
+$\alpha = [2;1,1,2,1,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,2,\ldots]$<br/> where the number of $1$'s between each of the $2$'s are consecutive prime numbers.</p>
+<p>
+$\beta$ is another real number defined as
+$$	\beta = \frac{2\alpha+3}{3\alpha+2} $$</p>
+<p>
+The first ten coefficients of the continued fraction of $\beta$ are $[0;1,5,6,16,9,1,10,16,11]$ with sum $75$.</p>
+<p>
+Find the sum of the first $10^8$ coefficients of the continued fraction of $\beta$.</p>
+</div>
+</body>
+</html>

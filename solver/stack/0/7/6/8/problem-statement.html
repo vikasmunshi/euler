@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>768 - Chandelier</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>768 - Chandelier (level 38)</h1>
+    <div class="problem_content" role="problem">
+<p>A certain type of chandelier contains a circular ring of $n$ evenly spaced candleholders.<br/>
+If only one candle is fitted, then the chandelier will be imbalanced. However, if a second identical candle is placed in the opposite candleholder (assuming $n$ is even) then perfect balance will be achieved and the chandelier will hang level.</p>
+<p>Let $f(n,m)$ be the number of ways of arranging $m$ identical candles in distinct sockets of a chandelier with $n$ candleholders such that the chandelier is perfectly balanced.</p>
+<p>For example, $f(4, 2) = 2$: assuming the chandelier's four candleholders are aligned with the compass points, the two valid arrangements are "North &amp; South" and "East &amp; West". Note that these are considered to be different arrangements even though they are related by rotation.</p>
+<p>You are given that $f(12,4) = 15$ and $f(36, 6) = 876$.</p>
+<p>Find $f(360, 20)$.</p>
+</div>
+</body>
+</html>

@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import subprocess
 from functools import lru_cache
-from json import dumps, loads
-from pathlib import Path
+from json import loads
 from re import match
 from typing import NamedTuple
 
@@ -17,11 +16,10 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, PublicFormat
 
-from solver.workspace import BASE_DIR
+from solver.crypto.error import error_handler
+from solver.workspace import private_key_file
 
 __all__ = ['UserIdentity', 'get_user', 'lock', 'unlock']
-
-_private_key_file: Path = BASE_DIR / 'keys' / 'id_x25519.json'
 
 
 class UserIdentity(NamedTuple):
@@ -54,13 +52,13 @@ class UserIdentity(NamedTuple):
                 f'private_key={self.private_key_str}, public_key={self.public_key_str})')
 
     @classmethod
-    def new(cls) -> UserIdentity:
+    def new(cls, email: str | None = None) -> UserIdentity:
         private_key: PrivateKey = x25519.X25519PrivateKey.generate()
         public_key: PublicKey = private_key.public_key()
-        return cls(algorithm='x25519', email=_get_user_email(), private_key=private_key, public_key=public_key)
+        return cls(algorithm='x25519', email=email or _get_user_email(), private_key=private_key, public_key=public_key)
 
     @classmethod
-    def from_dict(cls, data: dict[str, ...]) -> UserIdentity:
+    def from_dict(cls, data: dict[str, str]) -> UserIdentity:
         if 'algorithm' not in data:
             data['algorithm'] = 'x25519'
         if data['algorithm'] != 'x25519':
@@ -74,25 +72,7 @@ class UserIdentity(NamedTuple):
         public_key: PublicKey = x25519.X25519PublicKey.from_public_bytes(bytes.fromhex(data['public_key']))
         return cls(algorithm=data['algorithm'], email=email, private_key=private_key, public_key=public_key)
 
-    @classmethod
-    def load(cls) -> UserIdentity:
-        try:
-            instance = cls.from_dict(loads(_private_key_file.read_text()))
-        except (KeyError, ValueError, NotImplementedError, FileNotFoundError):
-            email: str = _get_user_email()
-            private_key: PrivateKey = x25519.X25519PrivateKey.generate()
-            public_key: PublicKey = private_key.public_key()
-            instance: UserIdentity = cls(algorithm='x25519',
-                                         email=email,
-                                         private_key=private_key,
-                                         public_key=public_key)
-            _private_key_file.parent.mkdir(parents=True, exist_ok=True)
-            _private_key_file.write_text(dumps(instance.as_dict(), indent=2))
-            _private_key_file.chmod(0o600)
-            print(f'Created new private key file: {_private_key_file}')
-        return instance
-
-    def as_dict(self) -> dict[str, ...]:
+    def as_dict(self) -> dict[str, str | None]:
         return {'algorithm': self.algorithm,
                 'email': self.email,
                 'private_key': self.private_key_str,
@@ -120,34 +100,39 @@ def _validate_email(email: str) -> bool:
 
 
 @lru_cache(maxsize=None)
+@error_handler('get user')
 def get_user() -> UserIdentity:
-    return UserIdentity.load()
+    return UserIdentity.from_dict(loads(private_key_file.read_text()))
 
 
-def lock(aes_master_key: bytes, /, *, user_key: UserIdentity = None) -> str:
+@error_handler('lock aes key')
+def lock(aes_master_key: bytes, /, *, user: UserIdentity | None = None) -> str:
     """ Encrypt the aes_key using the user's public key."""
-    if user_key is None:
-        user_key = get_user()
+    if user is None:
+        user = get_user()
     ephemeral: UserIdentity = UserIdentity.new()
-    shared_secret: bytes = ephemeral.private_key.exchange(user_key.public_key)
+    ephemeral_private: PrivateKey = ephemeral.private_key  # type: ignore [assignment]
+    shared_secret: bytes = ephemeral_private.exchange(user.public_key)
     derived_key: bytes = HKDF(algorithm=SHA256(), length=32, salt=None, info=b'key-encryption').derive(shared_secret)
     cipher: ChaCha20Poly1305 = ChaCha20Poly1305(derived_key)
-    nonce = b'\x00' * 12
+    nonce: bytes = b'\x00' * 12
     ciphertext: bytes = cipher.encrypt(nonce, aes_master_key, None)
     ephemeral_public_bytes: bytes = ephemeral.public_key.public_bytes(encoding=Encoding.Raw, format=PublicFormat.Raw)
     return (ephemeral_public_bytes + ciphertext).hex()
 
 
-def unlock(encrypted_aes_master_key: str, /, ) -> bytes:
+@error_handler('unlock aes key')
+def unlock(encrypted_aes_master_key: str, /, *, user: UserIdentity | None = None) -> bytes:
     """ Decrypt the aes_key using the user's private key."""
-    user_key: UserIdentity = get_user()
+    if user is None:
+        user = get_user()
     encrypted_bytes: bytes = bytes.fromhex(encrypted_aes_master_key)
     ephemeral_public_bytes: bytes = encrypted_bytes[:32]
     ciphertext: bytes = encrypted_bytes[32:]
-    ephemeral_public = x25519.X25519PublicKey.from_public_bytes(ephemeral_public_bytes)
-    shared_secret: bytes = user_key.private_key.exchange(ephemeral_public)
+    ephemeral_public: PublicKey = x25519.X25519PublicKey.from_public_bytes(ephemeral_public_bytes)
+    user_private: PrivateKey = user.private_key  # type: ignore [assignment]
+    shared_secret: bytes = user_private.exchange(ephemeral_public)
     derived_key: bytes = HKDF(algorithm=SHA256(), length=32, salt=None, info=b'key-encryption').derive(shared_secret)
     cipher: ChaCha20Poly1305 = ChaCha20Poly1305(derived_key)
-    nonce = b'\x00' * 12
-    aes_key = cipher.decrypt(nonce, ciphertext, None)
-    return aes_key
+    nonce: bytes = b'\x00' * 12
+    return cipher.decrypt(nonce, ciphertext, None)

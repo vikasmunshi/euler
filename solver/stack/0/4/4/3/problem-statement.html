@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>443 - GCD Sequence</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+    <h1>443 - GCD Sequence (level 9)</h1>
+    <div class="problem_content" role="problem">
+<p>Let $g(n)$ be a sequence defined as follows:<br/>
+$g(4) = 13$,<br/>
+$g(n) = g(n-1) + \gcd(n, g(n-1))$ for $n \gt 4$.</p>
+<p>The first few values are:</p>
+<div align="center">
+<table align="center" border="0" cellpadding="5" cellspacing="1"><tr><td>$n$</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>...</td>
+</tr><tr><td>$g(n)$</td><td>13</td><td>14</td><td>16</td><td>17</td><td>18</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td>32</td><td>33</td><td>34</td><td>51</td><td>54</td><td>55</td><td>60</td><td>...</td>
+</tr></table></div>
+<p>You are given that $g(1\,000) = 2524$ and $g(1\,000\,000) = 2624152$.</p>
+<p>Find $g(10^{15})$.</p>
+</div>
+</body>
+</html>

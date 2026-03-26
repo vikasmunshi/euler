@@ -1,0 +1,3 @@
+# 279 - Triangles with Integral Sides and an Integral Angle  (level 28)
+
+How many triangles are there with integral sides, at least one integral angle (measured in degrees), and a perimeter that does not exceed $10^8$?
