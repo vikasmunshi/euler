@@ -64,6 +64,16 @@ def authorize_users() -> None:
 @lru_cache(maxsize=None)
 def check_self(verbose: bool = False) -> bool:
     err_msg: str = ''
+    if verbose:
+        print('Checking self...\n')
+        for cmd in ('git fetch', 'git pull', 'git status'):
+            print(f'Running command: {cmd}')
+            try:
+                result = get_cmd_result(cmd)
+            except RuntimeError as e:
+                print(f'Error: {e}\n')
+            else:
+                print(f'Output: {result}\n')
     try:
         err_msg = 'Private key file not found'
         assert private_key_file.exists(), err_msg
@@ -73,7 +83,7 @@ def check_self(verbose: bool = False) -> bool:
         assert user.private_key is not None
         err_msg = f'Keys file {keys_file.name} missing or corrupted'
         data: dict[str, Any] = read_keys_file()
-        err_msg = f'User {user.email} not found in users, please run "python solver ops add-self" first.'
+        err_msg = f'User {user.email} not found in users, please run "python solver ops add" first.'
         raw_user: dict[str, str] = next(raw_user for raw_user in data['users'] if raw_user['email'] == user.email)
         err_msg = f'User {user.email} has no master key, please try later or contact {admin_user}.'
         assert (enc_master_key := raw_user['master_key']) is not None, err_msg
@@ -168,7 +178,7 @@ def add_self() -> None:
         enc_master_key = raw_user['master_key']
     except StopIteration:
         raw_user = {'email': user_email, 'public_key': user.public_key_str,
-                    'master_key': enc_master_key} # type: ignore [dict-item]
+                    'master_key': enc_master_key}  # type: ignore [dict-item]
         users.append(raw_user)
         print(f'Added new user to keys file: {user_email}')
         has_changes = True

@@ -102,7 +102,11 @@ def _validate_email(email: str) -> bool:
 @lru_cache(maxsize=None)
 @error_handler('get user')
 def get_user() -> UserIdentity:
-    return UserIdentity.from_dict(loads(private_key_file.read_text()))
+    private_key_data: dict[str, str] = loads(private_key_file.read_text())
+    print(f'read private key from {private_key_file.name} for user {private_key_data["email"]}')
+    user: UserIdentity = UserIdentity.from_dict(private_key_data)
+    assert user.private_key is not None, f'Private key not found in {private_key_file.name}'
+    return user
 
 
 @error_handler('lock aes key')

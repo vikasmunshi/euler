@@ -131,10 +131,10 @@ def cmd_ops(args: Namespace) -> int:
     """Key exchange operations."""
     from solver.crypto.ops import add_self, authorize_users, add_keys
     match args.command:
-        case 'check-self':
+        case 'check':
             if check_self(verbose=True):
                 print('Everything looks good!')
-        case 'add-self':
+        case 'add':
             add_self()
         case 'add-keys':
             add_keys(8)
@@ -263,7 +263,7 @@ def main() -> int:
         help='Key exchange operations',
         formatter_class=ArgumentDefaultsHelpFormatter,
     )
-    commands: list[str] = ['add-self', 'check-self']
+    commands: list[str] = ['add', 'check']
     if get_user_email() == admin_user:
         commands.append('add-keys')
         commands.append('authorize-users')
