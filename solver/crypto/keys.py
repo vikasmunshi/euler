@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from jsonschema import validate
 
 from solver.crypto.error import error_handler
-from solver.crypto.user import UserIdentity, get_user, unlock
+from solver.crypto.user import User, get_user, unlock
 from solver.workspace import keys_file, schema_file
 
 __all__ = ['SymmetricalKey', 'get_key', 'get_key', 'read_keys_file', 'write_keys_file']
@@ -33,8 +33,8 @@ class SymmetricalKey(NamedTuple):
     value: bytes
     status: Status
 
-    def __repr__(self) -> str:
-        return f'Key(id=...{self.id[-8:]}, value={self.value.hex()[:8]}..., status={self.status})'
+    def __str__(self) -> str:
+        return f'{self.__class__.__name__}(id=...{self.id[-8:]}, value={self.value.hex()[:8]}..., status={self.status})'
 
     @classmethod
     def new(cls, status: Status = 'unmanaged') -> SymmetricalKey:
@@ -79,7 +79,7 @@ def write_keys_file(data: dict[str, Any]) -> None:
 @lru_cache(maxsize=None)
 @error_handler('get key')
 def get_key(key_id: str | None = None) -> SymmetricalKey:
-    user: UserIdentity = get_user()
+    user: User = get_user()
     data: dict[str, Any] = read_keys_file()
     user_data = next(raw_user for raw_user in data['users'] if raw_user['email'] == user.email)
     enc_master_key: str = user_data['master_key']

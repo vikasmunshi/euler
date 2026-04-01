@@ -19,10 +19,10 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 from solver.crypto.error import error_handler
 from solver.workspace import private_key_file
 
-__all__ = ['UserIdentity', 'get_user', 'lock', 'unlock']
+__all__ = ['User', 'get_user', 'lock', 'unlock']
 
 
-class UserIdentity(NamedTuple):
+class User(NamedTuple):
     """Named tuple representing a user's asymmetrical key with email, private key, and public key.
 
         Attributes:
@@ -47,18 +47,18 @@ class UserIdentity(NamedTuple):
     def public_key_str(self) -> str:
         return self.public_key.public_bytes(encoding=Encoding.Raw, format=PublicFormat.Raw, ).hex()
 
-    def __repr__(self) -> str:
-        return (f'AsymmetricalKey(email={self.email}, '
-                f'private_key={self.private_key_str}, public_key={self.public_key_str})')
+    def __str__(self) -> str:
+        return (f'{self.__class__.__name__}(email={self.email}, public_key={self.public_key_str} '
+                f'private_key={self.private_key is not None})')
 
     @classmethod
-    def new(cls, email: str | None = None) -> UserIdentity:
+    def new(cls, email: str | None = None) -> User:
         private_key: PrivateKey = x25519.X25519PrivateKey.generate()
         public_key: PublicKey = private_key.public_key()
         return cls(algorithm='x25519', email=email or _get_user_email(), private_key=private_key, public_key=public_key)
 
     @classmethod
-    def from_dict(cls, data: dict[str, str]) -> UserIdentity:
+    def from_dict(cls, data: dict[str, str]) -> User:
         if 'algorithm' not in data:
             data['algorithm'] = 'x25519'
         if data['algorithm'] != 'x25519':
@@ -87,7 +87,7 @@ def _get_user_email() -> str:
         result = subprocess.run(cmd, shell=True, capture_output=True, check=True, text=True)
     except subprocess.CalledProcessError as e:
         print(f'Failed to get user email: {e}')
-        raise
+        raise ValueError('Failed to get user email') from e
     email: str = result.stdout.strip()
     if not _validate_email(email):
         raise ValueError(f'Invalid email address: {email}')
@@ -101,20 +101,18 @@ def _validate_email(email: str) -> bool:
 
 @lru_cache(maxsize=None)
 @error_handler('get user')
-def get_user() -> UserIdentity:
-    private_key_data: dict[str, str] = loads(private_key_file.read_text())
-    print(f'read private key from {private_key_file.name} for user {private_key_data["email"]}')
-    user: UserIdentity = UserIdentity.from_dict(private_key_data)
+def get_user() -> User:
+    user: User = User.from_dict(loads(private_key_file.read_text()))
     assert user.private_key is not None, f'Private key not found in {private_key_file.name}'
     return user
 
 
 @error_handler('lock aes key')
-def lock(aes_master_key: bytes, /, *, user: UserIdentity | None = None) -> str:
+def lock(aes_master_key: bytes, /, *, user: User | None = None) -> str:
     """ Encrypt the aes_key using the user's public key."""
     if user is None:
         user = get_user()
-    ephemeral: UserIdentity = UserIdentity.new()
+    ephemeral: User = User.new()
     ephemeral_private: PrivateKey = ephemeral.private_key  # type: ignore [assignment]
     shared_secret: bytes = ephemeral_private.exchange(user.public_key)
     derived_key: bytes = HKDF(algorithm=SHA256(), length=32, salt=None, info=b'key-encryption').derive(shared_secret)
@@ -126,7 +124,7 @@ def lock(aes_master_key: bytes, /, *, user: UserIdentity | None = None) -> str:
 
 
 @error_handler('unlock aes key')
-def unlock(encrypted_aes_master_key: str, /, *, user: UserIdentity | None = None) -> bytes:
+def unlock(encrypted_aes_master_key: str, /, *, user: User | None = None) -> bytes:
     """ Decrypt the aes_key using the user's private key."""
     if user is None:
         user = get_user()

@@ -11,7 +11,7 @@ from subprocess import CalledProcessError, run as subprocess_run
 from typing import Any
 
 from solver.crypto.keys import SymmetricalKey, read_keys_file, write_keys_file
-from solver.crypto.user import UserIdentity, get_user, lock, unlock
+from solver.crypto.user import User, get_user, lock, unlock
 from solver.workspace import (admin_user, keys_file, keys_version, private_key_file, push_script_path, repo_https,
                               repo_ssh)
 
@@ -21,7 +21,7 @@ __all__ = ['add_keys', 'authorize_users', 'add_self', 'check_self', 'get_user_em
 def add_keys(num_new_keys: int) -> None:
     if num_new_keys < 1:
         return
-    user: UserIdentity = get_user()
+    user: User = get_user()
     if user.email != admin_user:
         return
     if keys_file.exists():
@@ -48,7 +48,7 @@ def add_keys(num_new_keys: int) -> None:
 
 
 def authorize_users() -> None:
-    user: UserIdentity = get_user()
+    user: User = get_user()
     if user.email != admin_user:
         return
     data: dict[str, Any] = read_keys_file()
@@ -57,7 +57,7 @@ def authorize_users() -> None:
     for raw_user in data['users']:
         if raw_user['email'] == admin_user:
             continue
-        raw_user['master_key'] = lock(master_key, user=UserIdentity.from_dict(raw_user))
+        raw_user['master_key'] = lock(master_key, user=User.from_dict(raw_user))
     write_keys_file(data)
 
 
@@ -78,7 +78,7 @@ def check_self(verbose: bool = False) -> bool:
         err_msg = 'Private key file not found'
         assert private_key_file.exists(), err_msg
         err_msg = 'Private key file is not readable or is corrupted'
-        user: UserIdentity = UserIdentity.from_dict(loads(private_key_file.read_text()))
+        user: User = User.from_dict(loads(private_key_file.read_text()))
         err_msg = 'Private key file does not contain a valid private key'
         assert user.private_key is not None
         err_msg = f'Keys file {keys_file.name} missing or corrupted'
@@ -127,7 +127,7 @@ def get_user_email() -> str | None:
 
 def add_self() -> None:
     repo_remote: str
-    user: UserIdentity
+    user: User
     raw_user: dict[str, str]
     errors: list[str] = []
     user_email: str = ''
@@ -162,14 +162,14 @@ def add_self() -> None:
     repo_root: str = get_cmd_result('git rev-parse --show-toplevel')
 
     if not private_key_file.exists():
-        user = UserIdentity.new(email=user_email)
+        user = User.new(email=user_email)
         private_key_file.parent.mkdir(parents=True, exist_ok=True)
         private_key_file.parent.chmod(0o700)
         private_key_file.write_text(dumps(user.as_dict(), indent=2))
         private_key_file.chmod(0o600)
         print(f'Created new private key file: {private_key_file}')
     else:
-        user = UserIdentity.from_dict(loads(private_key_file.read_text()))
+        user = User.from_dict(loads(private_key_file.read_text()))
     user_email = user.email
     data: dict[str, Any] = read_keys_file()
     users: list[dict[str, str]] = data['users']

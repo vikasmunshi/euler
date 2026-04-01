@@ -10,11 +10,12 @@
 # Features:
 # - Checks for existing Chrome installation
 # - Installs latest stable Chrome package
-# - Creates browser control script at ~/.local/bin/browser for Chrome management
+# - Creates browser control script at /usr/local/bin/browser for Chrome management
 # - Uninstalls Chrome cleanly
 # - Handles package dependencies
 # - Cleans up temporary files
 #
+# Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2024. All rights reserved.
 # Licensed under the MIT License.
 
@@ -22,6 +23,7 @@ set -euo pipefail
 
 CHROME_PKG="google-chrome-stable"
 DEB_URL="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+BROWSER_SCRIPT="/usr/local/bin/browser"
 
 usage() {
     echo "Usage: $0 [install|uninstall]"
@@ -30,19 +32,40 @@ usage() {
     echo "  uninstall Remove Google Chrome and its configuration"
 }
 
+# Verifies that sudo is available and the current user has sudo privileges
+# Prints an error and returns 1 if sudo is missing or the user is not authorised
+check_can_sudo() {
+    if ! command -v sudo &> /dev/null; then
+        echo "Error: sudo is not installed or not found in PATH" >&2
+        return 1
+    fi
+    if ! sudo -v 2>/dev/null; then
+        echo "Error: current user does not have sudo privileges" >&2
+        return 1
+    fi
+}
+
+# Returns 0 if Google Chrome is installed and fully configured, 1 otherwise
+chrome_is_installed() {
+    dpkg-query -W -f='${Status}' "${CHROME_PKG}" 2>/dev/null | grep -q "install ok installed" \
+        && command -v "${CHROME_PKG}" &> /dev/null
+}
+
 # Installs Google Chrome browser and creates a control script
 # Downloads the latest stable Chrome .deb package, installs it with dpkg,
 # fixes any dependency issues, and creates a browser control script at ~/.local/bin/browser
 install_chrome() {
-    if command -v google-chrome-stable &> /dev/null; then
+    check_can_sudo || return 1
+
+    if chrome_is_installed; then
         echo "Google Chrome is already installed"
         install_browser_script
         return 0
     fi
 
     echo "Installing Google Chrome..."
-    wget -O google-chrome-stable_current_amd64.deb "$DEB_URL"
-    sudo dpkg -i google-chrome-stable_current_amd64.deb
+    wget -O google-chrome-stable_current_amd64.deb "${DEB_URL}"
+    sudo dpkg -i google-chrome-stable_current_amd64.deb || true
     sudo apt --fix-broken install -y
     rm -f google-chrome-stable_current_amd64.deb
     echo "Google Chrome installation completed"
@@ -50,12 +73,12 @@ install_chrome() {
 }
 
 install_browser_script() {
-    if [ -x "$HOME/.local/bin/browser" ]; then
+    if [ -x "${BROWSER_SCRIPT}" ]; then
         echo "Browser Script is already installed"
         return 0
     fi
-    mkdir -p "$HOME/.local/bin/"
-    cat > "$HOME/.local/bin/browser" <<'EOF'
+    sudo mkdir -p "/usr/local/bin/"
+    sudo tee "${BROWSER_SCRIPT}" <<'EOF' > /dev/null
 #!/usr/bin/env bash
 # Chrome Browser Control Script
 # =============================
@@ -72,12 +95,13 @@ install_browser_script() {
 # - Supports private browsing (incognito), reusing existing incognito windows
 #
 # Usage:
-#   ./browser                     → Print Chrome status
-#   ./browser start               → Start Chrome (nohup)
-#   ./browser open <URL>          → Open URL in new tab/window
-#   ./browser private <URL>       → Open URL in incognito tab/window
-#   ./browser kill                → Kill all Chrome instances
+#   browser                     → Print Chrome status
+#   browser start               → Start Chrome (nohup)
+#   browser open <URL>          → Open URL in new tab/window
+#   browser private <URL>       → Open URL in incognito tab/window
+#   browser kill                → Kill all Chrome instances
 #
+# Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2024. All rights reserved.
 # Licensed under the MIT License.
 
@@ -85,23 +109,23 @@ get_browser_binary() {
   # Pick the best available Chrome binary and use it consistently
   BROWSER_BIN="$(command -v google-chrome-stable || command -v google-chrome || true)"
 
-  if [ -z "$BROWSER_BIN" ]; then
+  if [ -z "${BROWSER_BIN}" ]; then
     echo "Google Chrome is not installed or not found in PATH." >&2
     return 1
   fi
 
   # Follow symlink and derive a good pgrep pattern
   local realpath basename pattern
-  realpath="$(readlink -f "$BROWSER_BIN" 2>/dev/null || echo "$BROWSER_BIN")"
-  basename="$(basename "$realpath")"
+  realpath="$(readlink -f "${BROWSER_BIN}" 2>/dev/null || echo "${BROWSER_BIN}")"
+  basename="$(basename "${realpath}")"
 
-  pattern="$basename"
+  pattern="${basename}"
   # Optional: normalize the common 'stable' wrapper to the real binary name
-  if [ "$pattern" = "google-chrome-stable" ]; then
+  if [ "${pattern}" = "google-chrome-stable" ]; then
     pattern="google-chrome"
   fi
 
-  BROWSER_PGREP_PATTERN="$pattern"
+  BROWSER_PGREP_PATTERN="${pattern}"
   BROWSER_NAME="Chrome"
   export BROWSER_BIN
   export BROWSER_PGREP_PATTERN
@@ -110,60 +134,60 @@ get_browser_binary() {
 
 check_running() {
   # Use -f so it matches anywhere in the command line
-  pgrep -f "$BROWSER_PGREP_PATTERN" >/dev/null 2>&1
+  pgrep -f "${BROWSER_PGREP_PATTERN}" >/dev/null 2>&1
 }
 
 print_status() {
   if check_running; then
-    echo "$BROWSER_NAME is running."
+    echo "${BROWSER_NAME} is running."
   else
-    echo "$BROWSER_NAME is NOT running."
+    echo "${BROWSER_NAME} is NOT running."
   fi
 }
 
 start_browser() {
   if check_running; then
-    echo "$BROWSER_NAME is already running."
+    echo "${BROWSER_NAME} is already running."
   else
-    echo "Starting $BROWSER_NAME using $BROWSER_BIN ..."
-    nohup "$BROWSER_BIN" >/dev/null 2>&1 &
+    echo "Starting ${BROWSER_NAME} using ${BROWSER_BIN} ..."
+    nohup "${BROWSER_BIN}" >/dev/null 2>&1 &
     sleep 1
-    echo "$BROWSER_NAME started."
+    echo "${BROWSER_NAME} started."
   fi
 }
 
 kill_browser() {
   if check_running; then
-    echo "Killing all $BROWSER_NAME instances..."
-    pkill -f "$BROWSER_PGREP_PATTERN"
+    echo "Killing all ${BROWSER_NAME} instances..."
+    pkill -f "${BROWSER_PGREP_PATTERN}"
 
     # Wait up to 5 seconds for processes to terminate
     # shellcheck disable=SC2034
     for i in {1..5}; do
       if ! check_running; then
-        echo "$BROWSER_NAME processes successfully terminated."
+        echo "${BROWSER_NAME} processes successfully terminated."
         return 0
       fi
       sleep 1
     done
 
     if check_running; then
-      echo "WARNING: Some $BROWSER_NAME processes could not be terminated!"
+      echo "WARNING: Some ${BROWSER_NAME} processes could not be terminated!"
       return 1
     fi
   else
-    echo "No $BROWSER_NAME instances found running."
+    echo "No ${BROWSER_NAME} instances found running."
   fi
 }
 
 open_url() {
   local url="$1"
   if check_running; then
-    echo "Opening URL in existing $BROWSER_NAME session..."
-    "$BROWSER_BIN" --new-tab "$url" >/dev/null 2>&1 &
+    echo "Opening URL in existing ${BROWSER_NAME} window..."
+    "${BROWSER_BIN}" --new-tab "${url}" >/dev/null 2>&1 &
   else
-    echo "$BROWSER_NAME not running; starting with URL..."
-    nohup "$BROWSER_BIN" "$url" >/dev/null 2>&1 &
+    echo "${BROWSER_NAME} not running; starting with URL..."
+    nohup "${BROWSER_BIN}" "${url}" >/dev/null 2>&1 &
     sleep 1
   fi
 }
@@ -173,11 +197,11 @@ open_private_url() {
   # For Chrome, using --incognito will reuse any existing incognito profile;
   # if no incognito window exists, a new one is created.
   if check_running; then
-    echo "Opening URL in existing $BROWSER_NAME incognito session..."
-    "$BROWSER_BIN" --incognito "$url" >/dev/null 2>&1 &
+    echo "Opening URL in existing ${BROWSER_NAME} incognito window..."
+    "${BROWSER_BIN}" --incognito "${url}" >/dev/null 2>&1 &
   else
-    echo "$BROWSER_NAME not running; starting incognito with URL..."
-    nohup "$BROWSER_BIN" --incognito "$url" >/dev/null 2>&1 &
+    echo "${BROWSER_NAME} not running; starting incognito with URL..."
+    nohup "${BROWSER_BIN}" --incognito "${url}" >/dev/null 2>&1 &
     sleep 1
   fi
 }
@@ -201,6 +225,7 @@ browser_main() {
   case $# in
     0)  # No arguments → print status
       print_status
+      show_browser_usage
       return 0
       ;;
     1)  # One argument: start | kill | help | -h
@@ -264,33 +289,38 @@ else
   browser_main "$@"
 fi
 EOF
-    chmod +x "$HOME/.local/bin/browser"
-    echo "Browser start/stop script installed at $HOME/.local/bin/browser"
+    sudo chmod +x "${BROWSER_SCRIPT}"
+    echo "Browser start/stop script installed at ${BROWSER_SCRIPT}"
 }
 
 # Uninstalls Google Chrome browser and removes configuration
 # Removes the Chrome package, user configuration files, and the browser control script
 # Note: User configuration removal can be disabled by commenting out that section
 uninstall_chrome() {
-    if ! dpkg -l | grep -q "^ii  $CHROME_PKG"; then
-        echo "Google Chrome ($CHROME_PKG) does not appear to be installed"
+    check_can_sudo || return 1
+
+    if ! chrome_is_installed; then
+        echo "Google Chrome (${CHROME_PKG}) does not appear to be installed"
     else
         echo "Uninstalling Google Chrome..."
-        sudo apt --purge remove -y "$CHROME_PKG"
+        sudo apt --purge remove -y "${CHROME_PKG}"
         sudo apt autoremove -y
         echo "Google Chrome package removed"
     fi
 
-    # Remove user config (comment out if you want to keep profile)
-    if [ -d "$HOME/.config/google-chrome" ]; then
-        echo "Removing Google Chrome user configuration under ~/.config/google-chrome"
-        rm -rf "$HOME/.config/google-chrome"
+    if [ -f "${BROWSER_SCRIPT}" ]; then
+        echo "Removing browser start/stop script from ${BROWSER_SCRIPT}"
+        sudo rm -f "${BROWSER_SCRIPT}"
     fi
 
-    # Remove the browser start/stop script
-    if [ -f "$HOME/.local/bin/browser" ]; then
-        echo "Removing browser start/stop script from ~/.local/bin/browser"
-        rm -f "$HOME/.local/bin/browser"
+    if [ -d "$HOME/.config/google-chrome" ]; then
+        read -r -p "Remove Google Chrome user configuration (~/.config/google-chrome)? [y/N] " reply
+        if [[ "${reply}" =~ ^[Yy]$ ]]; then
+            echo "Removing Google Chrome user configuration under ~/.config/google-chrome"
+            rm -rf "$HOME/.config/google-chrome"
+        else
+            echo "Keeping Google Chrome user configuration"
+        fi
     fi
 
     echo "Google Chrome uninstallation completed"
@@ -300,7 +330,7 @@ uninstall_chrome() {
 # Defaults to 'install' if no argument provided
 ACTION="${1:-install}"
 
-case "$ACTION" in
+case "${ACTION}" in
     install)
         install_chrome
         ;;
@@ -311,7 +341,7 @@ case "$ACTION" in
         usage
         ;;
     *)
-        echo "Unknown action: $ACTION"
+        echo "Unknown action: ${ACTION}"
         usage
         exit 1
         ;;
