@@ -16,9 +16,7 @@ from solver.crypto.error import error_handler
 from solver.crypto.user import User, get_user, unlock
 from solver.workspace import keys_file, schema_file
 
-__all__ = ['SymmetricalKey', 'get_key', 'get_key', 'read_keys_file', 'write_keys_file']
-
-Status = Literal['active', 'reserved', 'retired', 'unmanaged']
+__all__ = ['SymmetricalKey', 'get_key', 'read_keys_file', 'write_keys_file']
 
 
 class SymmetricalKey(NamedTuple):
@@ -27,17 +25,17 @@ class SymmetricalKey(NamedTuple):
     Attributes:
         id: UUID7 hex string
         value: 32-byte AES-256 key
-        status: default or active or retired
+        status: active, reserved, retired, or unmanaged
     """
     id: str
     value: bytes
-    status: Status
+    status: Literal['active', 'reserved', 'retired', 'unmanaged']
 
     def __str__(self) -> str:
         return f'{self.__class__.__name__}(id=...{self.id[-8:]}, value={self.value.hex()[:8]}..., status={self.status})'
 
     @classmethod
-    def new(cls, status: Status = 'unmanaged') -> SymmetricalKey:
+    def new(cls, status: Literal['active', 'reserved', 'retired', 'unmanaged'] = 'unmanaged') -> SymmetricalKey:
         value: bytes = bytes.fromhex(sha256(b''.join(token_bytes(32) for _ in range(32 // 4))).hexdigest())
         return cls(id=uuid7().hex, value=value, status=status)
 
@@ -49,7 +47,8 @@ class SymmetricalKey(NamedTuple):
         ciphertext: bytes = value_bytes[12:]
         key_bytes: bytes = AESGCM(master_key).decrypt(nonce, ciphertext, None)
         assert len(key_bytes) == 32, f"key '{data['id']}' must be 32 bytes long"
-        return cls(id=data['id'], value=key_bytes, status=cast(Status, data['status']))
+        status = cast(Literal['active', 'reserved', 'retired', 'unmanaged'], data['status'])
+        return cls(id=data['id'], value=key_bytes, status=status)
 
     def as_dict(self, master_key: bytes) -> dict[str, str]:
         nonce: bytes = token_bytes(12)
@@ -72,8 +71,8 @@ def read_keys_file() -> dict[str, Any]:
 def write_keys_file(data: dict[str, Any]) -> None:
     _validate_data(data)
     keys_file.write_text(dumps(data, indent=2))
-    for func in (read_keys_file, get_key):
-        func.cache_clear()
+    read_keys_file.cache_clear()
+    get_key.cache_clear()
 
 
 @lru_cache(maxsize=None)

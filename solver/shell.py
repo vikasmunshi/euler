@@ -14,7 +14,6 @@ from typing import Any, Callable
 
 from solver.backup import backup_stack, restore_stack
 from solver.crypto import SymmetricalKey, User, get_key, get_user
-from solver.crypto.ops import add_keys, authorize_users
 from solver.projecteuler import ProjectEulerFiles, problem_numbers
 from solver.stack import stack_from_workspace, unstack_to_workspace
 from solver.workspace import admin_user, clear_workspace, workspace_dir

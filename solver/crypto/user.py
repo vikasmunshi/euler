@@ -36,19 +36,16 @@ class User(NamedTuple):
     private_key: PrivateKey | None = None
     algorithm: str = 'x25519'
 
-    @property
-    def private_key_str(self) -> str | None:
-        return self.private_key.private_bytes(encoding=Encoding.Raw,
-                                              format=PrivateFormat.Raw,
-                                              encryption_algorithm=NoEncryption(),
-                                              ).hex() if self.private_key is not None else None
+    def private_key_as_str(self) -> str | None:
+        if self.private_key is None:
+            return None
+        return self.private_key.private_bytes(Encoding.Raw, PrivateFormat.Raw, NoEncryption()).hex()
 
-    @property
-    def public_key_str(self) -> str:
-        return self.public_key.public_bytes(encoding=Encoding.Raw, format=PublicFormat.Raw, ).hex()
+    def public_key_as_str(self) -> str:
+        return self.public_key.public_bytes(Encoding.Raw, PublicFormat.Raw).hex()
 
     def __str__(self) -> str:
-        return (f'{self.__class__.__name__}(email={self.email}, public_key={self.public_key_str} '
+        return (f'{self.__class__.__name__}(email={self.email}, public_key={self.public_key_as_str()} '
                 f'private_key={self.private_key is not None})')
 
     @classmethod
@@ -67,16 +64,18 @@ class User(NamedTuple):
             raise ValueError(f'Invalid email address: {email}')
         if 'private_key' not in data:
             private_key: PrivateKey | None = None
+            public_key: PublicKey = x25519.X25519PublicKey.from_public_bytes(bytes.fromhex(data['public_key']))
         else:
             private_key = x25519.X25519PrivateKey.from_private_bytes(bytes.fromhex(data['private_key']))
-        public_key: PublicKey = x25519.X25519PublicKey.from_public_bytes(bytes.fromhex(data['public_key']))
+            public_key = private_key.public_key()
+            assert public_key == x25519.X25519PublicKey.from_public_bytes(bytes.fromhex(data['public_key']))
         return cls(algorithm=data['algorithm'], email=email, private_key=private_key, public_key=public_key)
 
     def as_dict(self) -> dict[str, str | None]:
         return {'algorithm': self.algorithm,
                 'email': self.email,
-                'private_key': self.private_key_str,
-                'public_key': self.public_key_str}
+                'private_key': self.private_key_as_str(),
+                'public_key': self.public_key_as_str()}
 
 
 @lru_cache(maxsize=None)

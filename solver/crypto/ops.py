@@ -38,7 +38,7 @@ def add_keys(num_new_keys: int) -> None:
             'keys': [],
             'users': [
                 {'email': user.email,
-                 'public_key': user.public_key_str,
+                 'public_key': user.public_key_as_str(),
                  'master_key': enc_master_key, },
             ],
         }
@@ -177,7 +177,7 @@ def add_self() -> None:
         raw_user = next(raw_user for raw_user in users if raw_user['email'] == user_email)
         enc_master_key = raw_user['master_key']
     except StopIteration:
-        raw_user = {'email': user_email, 'public_key': user.public_key_str,
+        raw_user = {'email': user_email, 'public_key': user.public_key_as_str(),
                     'master_key': enc_master_key}  # type: ignore [dict-item]
         users.append(raw_user)
         print(f'Added new user to keys file: {user_email}')
@@ -190,7 +190,7 @@ def add_self() -> None:
             print(f'master key is valid, nothing more to do for user {user_email}')
         except RuntimeError:
             raw_user['master_key'] = enc_master_key = None  # type: ignore [assignment]
-            raw_user['public_key'] = user.public_key_str
+            raw_user['public_key'] = user.public_key_as_str()
             print(f'Reset master key for user {user_email} due to invalid key')
             has_changes = True
     if has_changes:

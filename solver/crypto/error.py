@@ -3,15 +3,12 @@
 from __future__ import annotations
 
 from functools import wraps
-from typing import Callable, ParamSpec, TypeVar
+from typing import Callable
 
 __all__ = ['error_handler']
 
-P = ParamSpec('P')
-T = TypeVar('T')
 
-
-def error_handler(operation: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
+def error_handler[P, T](operation: str) -> Callable[[Callable[P, T]], Callable[P, T]]:
     """Decorator to convert exceptions in crypto functions to RuntimeError."""
 
     def decorator(func: Callable[P, T]) -> Callable[P, T]:
