@@ -11,10 +11,10 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from hashlib import sha256
 
 from solver.backup import backup_stack, restore_stack
-from solver.crypto import check_self, get_user_email
+from solver.crypto import check_self
 from solver.projecteuler import ProjectEulerFiles, problem_numbers
 from solver.stack import read_manifest, stack_from_workspace, unstack_to_workspace
-from solver.workspace import admin_user, clear_workspace, iterdir_recursive, workspace_dir
+from solver.workspace import clear_workspace, iterdir_recursive, workspace_dir
 
 
 def cmd_show(args: Namespace) -> int:
@@ -127,24 +127,6 @@ def cmd_backup(args: Namespace) -> int:
     return 0
 
 
-def cmd_ops(args: Namespace) -> int:
-    """Key exchange operations."""
-    from solver.crypto.ops import add_self, authorize_users, add_keys
-    match args.command:
-        case 'check':
-            if check_self(verbose=True):
-                print('Everything looks good!')
-        case 'add':
-            add_self()
-        case 'add-keys':
-            add_keys(8)
-        case 'authorize-users':
-            authorize_users()
-        case _:
-            raise ValueError(f'Invalid command: {args.command}')
-    return 0
-
-
 def main() -> int:
     # ============================================================================
     # Main parser setup
@@ -254,26 +236,6 @@ def main() -> int:
         help='Restore the stack from backup',
     )
     parser_backup.set_defaults(func=cmd_backup)
-
-    # ============================================================================
-    # Command: ops - key exchange ops
-    # ============================================================================
-    parser_ops = subparsers.add_parser(
-        'ops',
-        help='Key exchange operations',
-        formatter_class=ArgumentDefaultsHelpFormatter,
-    )
-    commands: list[str] = ['add', 'check']
-    if get_user_email() == admin_user:
-        commands.append('add-keys')
-        commands.append('authorize-users')
-    parser_ops.add_argument(
-        'command',
-        choices=commands,
-        default=commands[-1],
-        help='Key exchange operation to perform',
-    )
-    parser_ops.set_defaults(func=cmd_ops)
 
     # ============================================================================
     # Parse and execute

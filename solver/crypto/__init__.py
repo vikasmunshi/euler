@@ -7,12 +7,10 @@ from solver.crypto.user import User, get_user, lock, unlock
 __all__ = [
     'SymmetricalKey',
     'User',
-    'check_self',
     'decrypt',
     'encrypt',
     'get_key',
     'get_user',
-    'get_user_email',
     'lock',
     'unlock',
 ]
