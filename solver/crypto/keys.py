@@ -26,10 +26,11 @@ from solver.crypto.error import error_handler
 
 __all__ = ['SymmetricalKey', 'AsymmetricalKey', 'get_key', 'get_user_key', 'get_user_email', 'lock', 'unlock', ]
 
-admin_user: str = 'vikas.munshi@gmail.com'
+admin_flag: Path = Path.cwd() / 'admin.txt'
 keys_file: Path = Path(__file__).parent / 'keys.json'
 keys_version: str = '1.0.1'
 private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
+push_keys_to_pr_script: Path = Path(__file__).parent / 'keys.sh'
 schema_file: Path = Path(__file__).parent / 'schema.json'
 
 
@@ -54,20 +55,20 @@ class SymmetricalKey(NamedTuple):
         return cls(id=uuid7().hex, value=value, status=status)
 
     @classmethod
-    def from_dict(cls, data: dict[str, str], master_key: bytes) -> SymmetricalKey:
-        assert UUID(hex=data['id']).version == 7, f"key id '{data['id']}' must be UUID version 7"
+    def from_dict(cls, key_id: str, data: dict[str, str], master_key: bytes) -> SymmetricalKey:
+        assert UUID(hex=key_id).version == 7, f"key id '{key_id}' must be UUID version 7"
         value_bytes: bytes = bytes.fromhex(data['value'])
         nonce: bytes = value_bytes[:12]
         ciphertext: bytes = value_bytes[12:]
         key_bytes: bytes = AESGCM(master_key).decrypt(nonce, ciphertext, None)
-        assert len(key_bytes) == 32, f"key '{data['id']}' must be 32 bytes long"
+        assert len(key_bytes) == 32, f"key '{key_id}' must be 32 bytes long"
         status = cast(Literal['active', 'reserved', 'retired', 'unmanaged'], data['status'])
-        return cls(id=data['id'], value=key_bytes, status=status)
+        return cls(id=key_id, value=key_bytes, status=status)
 
     def as_dict(self, master_key: bytes) -> dict[str, str]:
         nonce: bytes = token_bytes(12)
         ciphertext: bytes = AESGCM(master_key).encrypt(nonce, self.value, None)
-        return {'id': self.id, 'value': (nonce + ciphertext).hex(), 'status': self.status}
+        return {'value': (nonce + ciphertext).hex(), 'status': self.status}
 
 
 class AsymmetricalKey(NamedTuple):
@@ -131,9 +132,7 @@ class AsymmetricalPublicKey(NamedTuple):
     public_key: X25519PublicKey
 
     @classmethod
-    def from_dict(cls, data: dict[str, str]) -> AsymmetricalPublicKey:
-        if not _validate_email(email := data['email']):
-            raise ValueError(f'Invalid email address: {email}')
+    def from_dict(cls, email: str, data: dict[str, str]) -> AsymmetricalPublicKey:
         public_key: X25519PublicKey = X25519PublicKey.from_public_bytes(bytes.fromhex(data['public_key']))
         return cls(user_email=email, public_key=public_key)
 
@@ -143,7 +142,6 @@ class AsymmetricalPublicKey(NamedTuple):
 
     def as_dict(self, master_key: bytes | None = None) -> dict[str, str | None]:
         return {
-            'email': self.user_email,
             'public_key': self.public_key.public_bytes(Encoding.Raw, PublicFormat.Raw).hex(),
             'master_key': lock(master_key, public_key=self.public_key) if master_key else None,
         }
@@ -159,15 +157,11 @@ def get_user_email() -> str:
         print(f'Failed to get user email: {e}')
         raise ValueError('Failed to get user email') from e
     email: str = result.stdout.strip()
-    if not _validate_email(email):
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    if match(pattern, email) is None:
         print(f'Invalid email address: {email}; use git config user.email <email> to set it')
         raise ValueError(f'Invalid email address: {email}')
     return email
-
-
-def _validate_email(email: str) -> bool:
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return match(pattern, email) is not None
 
 
 @lru_cache(maxsize=None)
@@ -220,9 +214,11 @@ def read_keys_file() -> dict[str, Any]:
 def write_keys_file(data: dict[str, Any]) -> None:
     _validate_data(data)
     keys_file.write_text(dumps(data, indent=2))
+    print(f'Keys file {keys_file} updated; num users: {len(data["users"])}, num keys: {len(data["keys"])}')
     get_key.cache_clear()
     read_keys_file.cache_clear()
     _ = read_keys_file()
+    subprocess_run([push_keys_to_pr_script.as_posix()])
 
 
 @lru_cache(maxsize=None)
@@ -230,58 +226,72 @@ def write_keys_file(data: dict[str, Any]) -> None:
 def get_key(key_id: str | None = None) -> SymmetricalKey:
     user_key: AsymmetricalKey = get_user_key()
     data: dict[str, Any] = read_keys_file()
-    user_data = next(raw_user for raw_user in data['users'] if raw_user['email'] == user_key.user_email)
+    user_data = data['users'][user_key.user_email]
     enc_master_key: str = user_data['master_key']
     assert enc_master_key is not None, f"Master key not found for user with email '{user_key.user_email}'"
     master_key: bytes = unlock(enc_master_key, private_key=user_key.private_key)
     if key_id is None:
-        selected: dict[str, str] = choice([raw for raw in data['keys'] if raw['status'] == 'active'])
+        selected_id, selected = choice([(k, v) for k, v in data['keys'].items() if v['status'] == 'active'])
     else:
-        selected = next(raw for raw in data['keys'] if raw['id'] == key_id)
-    return SymmetricalKey.from_dict(selected, master_key)
+        selected_id, selected = key_id, data['keys'][key_id]
+    return SymmetricalKey.from_dict(selected_id, selected, master_key)
 
 
-def init_user_private_key_file() -> None:
-    if private_key_file.exists():
+@lru_cache(maxsize=None)
+def is_admin() -> bool:
+    if admin_flag.exists():
+        return admin_flag.read_text().strip() == get_user_email()
+    return False
+
+
+def init_user_private_key_file(rekey: bool = False) -> None:
+    if rekey is False and private_key_file.exists():
         return
-    user_email = get_user_email()
-    AsymmetricalKey.new(user_email=user_email).to_file()
+    master_key: bytes | None = None
+    if private_key_file.exists() and keys_file.exists():
+        user_key: AsymmetricalKey = get_user_key()
+        data: dict[str, Any] = read_keys_file()
+        enc_master_key: str | None = data['users'].get(user_key.user_email, {}).get('master_key')
+        if enc_master_key:
+            master_key = unlock(enc_master_key, private_key=user_key.private_key)
+    AsymmetricalKey.new().to_file()
+    if keys_file.exists():
+        user_key = get_user_key()
+        data = read_keys_file()
+        data['users'][user_key.user_email] = AsymmetricalPublicKey.from_key_pair(user_key).as_dict(master_key)
+        write_keys_file(data)
 
 
-def rekey_keys_file(num_new_keys: int = 0) -> int:
-    if get_user_email() != admin_user:
-        print(f'only admin user {admin_user} should initialize keys file')
+def rekey_keys_file(num_total_keys: int = 32) -> int:
+    if not is_admin():
+        print('only admin user should initialize keys file')
         return 1
     init_user_private_key_file()
     user_key: AsymmetricalKey = get_user_key()
     new_master_key: bytes = token_bytes(32)
     if keys_file.exists():
         data: dict[str, Any] = read_keys_file()
-        user_data = next(raw_user for raw_user in data['users'] if raw_user['email'] == user_key.user_email)
+        user_data = data['users'][user_key.user_email]
         master_key: bytes = unlock(user_data['master_key'], private_key=user_key.private_key)
-        for raw_key in data['keys']:
-            raw_key['value'] = SymmetricalKey.from_dict(raw_key, master_key).as_dict(new_master_key)['value']
+        for key_id, raw_key in data['keys'].items():
+            raw_key['value'] = SymmetricalKey.from_dict(key_id, raw_key, master_key).as_dict(new_master_key)['value']
     else:
-        backup_user_key = AsymmetricalKey.new(user_email=admin_user)
-        backup_user_key.to_file(private_key_file.with_suffix('.backup'))
         data = {
             '$schema': schema_file.name,
             'version': keys_version,
-            'users': [AsymmetricalPublicKey.from_key_pair(user_key).as_dict(new_master_key),
-                      AsymmetricalPublicKey.from_key_pair(backup_user_key).as_dict(new_master_key)],
-            'keys': [SymmetricalKey.new('active').as_dict(new_master_key) for _ in range(32)]
+            'users': {user_key.user_email: AsymmetricalPublicKey.from_key_pair(user_key).as_dict(new_master_key)},
+            'keys': {}
         }
-    data['keys'].extend([SymmetricalKey.new('active').as_dict(new_master_key) for _ in range(num_new_keys)])
-    for raw_user in data['users']:
+    num_new_keys: int = num_total_keys - len(data['keys'])
+    data['keys'].update({skey.id: skey.as_dict(new_master_key)
+                         for skey in (SymmetricalKey.new('active') for _ in range(num_new_keys))})
+    for email, raw_user in data['users'].items():
         user_public_key = X25519PublicKey.from_public_bytes(bytes.fromhex(raw_user['public_key']))
         raw_user['master_key'] = lock(new_master_key, public_key=user_public_key)
     write_keys_file(data)
     return 0
 
 
-def rekey_user_private_key_file() -> None:
-    AsymmetricalKey.new(user_email=get_user_email()).to_file()
-
-
 if __name__ == '__main__':
-    rekey_keys_file(0)
+    rekey_keys_file(32)
+    init_user_private_key_file(rekey=True)

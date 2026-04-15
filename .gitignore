@@ -95,6 +95,7 @@ site/
 target/
 var/
 
+/admin.txt
 /backup/
 /cache/
 /workspace/

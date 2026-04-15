@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
 set -e  # Exit on error
 
-# This script pushes known_keys file to a new branch and creates a PR
-# Required environment variables:
-#   USER_ID: email address of the user
-#   BRANCH_NAME: name of the branch to create
-#   FILE_TO_PUSH: absolute path to the keys.json file
-
-# Validate required environment variables
-if [[ -z "${USER_ID}" ]] || [[ -z "${BRANCH_NAME}" ]] || [[ -z "${FILE_TO_PUSH}" ]]; then
-    echo "Error: Required environment variables not set"
-    echo "Required: USER_ID, BRANCH_NAME, FILE_TO_PUSH"
-    exit 1
+user_email=$(git config user.email)
+if [[ -z "${user_email}" ]]; then
+  echo "Error: could not get user email"
+  exit 1
 fi
+
+branch_name="keys_json_file_for_${user_email//[^a-zA-Z0-9._-]/_}"
+file_to_push="$(dirname "${BASH_SOURCE[0]}")/keys.json"
 
 # Check if gh CLI is authenticated
 if ! gh auth status >/dev/null 2>&1; then
@@ -37,39 +33,42 @@ cleanup() {
 trap cleanup EXIT
 
 # Add known_keys to staging so it can be stashed
-git add "${FILE_TO_PUSH}"
+git add "${file_to_push}"
 
 # Stash all changes including staged files
-git stash push -m "temp stash for ${BRANCH_NAME}"
+git stash push -m "temp stash for ${branch_name}"
 
 # Delete branch if it exists
-git branch -D "${BRANCH_NAME}" 2>/dev/null || true
+git branch -D "${branch_name}" 2>/dev/null || true
 
-# Create and checkout branch
-git checkout -b "${BRANCH_NAME}"
+# Fetch to ensure origin/master is current before branching
+git fetch origin master
+
+# Create and checkout branch from origin/master so local commits are not included
+git checkout -b "${branch_name}" origin/master
 
 # Apply only the known_keys file from stash
-git checkout "stash@{0}" -- "${FILE_TO_PUSH}"
+git checkout "stash@{0}" -- "${file_to_push}"
 
 # Commit only the known_keys file
-git commit -m "Add known keys for ${USER_ID}"
+git commit -m "Add/update public key for ${user_email}"
 
 # Push the branch (force push to overwrite if exists)
-git push -f origin "${BRANCH_NAME}"
+git push -f origin "${branch_name}"
 
-echo "Successfully pushed known keys for ${USER_ID} to branch ${BRANCH_NAME}"
+echo "Successfully pushed keys.json for ${user_email} to branch ${branch_name}"
 
 # Create pull request
-PR_TITLE="Add known keys for ${USER_ID}"
-PR_BODY="This PR adds the public key for ${USER_ID} to the known_keys file.
+PR_TITLE="Add/update public key for ${user_email}"
+PR_BODY="This PR adds the public key for ${user_email} to the keys.json file.
 
-- User: ${USER_ID}
-- Branch: ${BRANCH_NAME}
+- User: ${user_email}
+- Branch: ${branch_name}
 
 Please review and merge."
 
-if gh pr create --title "${PR_TITLE}" --body "${PR_BODY}" --base master --head "${BRANCH_NAME}"; then
+if gh pr create --title "${PR_TITLE}" --body "${PR_BODY}" --base master --head "${branch_name}"; then
     echo "Pull request created successfully!"
 else
-    echo "Failed to create pull request. You can manually create one for branch: ${BRANCH_NAME}"
+    echo "Failed to create pull request. You can manually create one for branch: ${branch_name}"
 fi
