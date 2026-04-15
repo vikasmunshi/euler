@@ -44,17 +44,12 @@ crypto_dir: Path = package_dir / 'crypto'
 repo_https: str = 'https://github.com/vikasmunshi/euler.git'
 repo_ssh: str = 'git@github.com:vikasmunshi/euler.git'
 
-admin_user: str = 'vikas.munshi@gmail.com'
 backup_dir: Path = base_dir / 'backup'  # Backup directory
 cache_dir: Path = base_dir / 'cache'
-keys_file: Path = crypto_dir / 'keys.json'
-keys_version: str = '1.0.1'
 manifest_filename: str = 'manifest.txt'
-private_key_file: Path = Path.home() / '.ssh' / 'id_x25519.json'
 push_script_path: Path = crypto_dir / 'keys.sh'
 sample_cipher_text_file: Path = crypto_dir / 'text_cipher.txt'
 sample_plain_text_file: Path = crypto_dir / 'text_plain.txt'
-schema_file: Path = crypto_dir / 'keys.schema.json'
 stack_dir: Path = package_dir / 'stack'  # Base stack directory
 workspace_dir: Path = base_dir / 'workspace'  # Working/temporary files directory
 

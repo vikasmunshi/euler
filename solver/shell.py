@@ -13,7 +13,7 @@ from subprocess import run as subprocess_run
 from typing import Any, Callable
 
 from solver.backup import backup_stack, restore_stack
-from solver.crypto import SymmetricalKey, User, get_key, get_user
+from solver.crypto import SymmetricalKey, AsymmetricalKey, get_key, get_user_key
 from solver.projecteuler import ProjectEulerFiles, problem_numbers
 from solver.stack import stack_from_workspace, unstack_to_workspace
 from solver.workspace import admin_user, clear_workspace, workspace_dir
@@ -103,14 +103,14 @@ def init() -> dict[str, Any]:
         run_cmd('git fetch && git pull')
     git_status: str | None = run_cmd('git status -b --porcelain') if git_branch else None
     try:
-        user: User | None = get_user()
+        user: AsymmetricalKey | None = get_user_key()
         enc_key: SymmetricalKey | None = get_key()
         can_decrypt: bool = True
     except RuntimeError:
         user = None
         enc_key = None
         can_decrypt: bool = False
-    is_admin: bool = user and (user.email == admin_user)
+    is_admin: bool = user and (user.user_email == admin_user)
 
     def problem_number_is_valid(n: int) -> bool:
         return n in problem_numbers() and (can_decrypt or n <= 100)
