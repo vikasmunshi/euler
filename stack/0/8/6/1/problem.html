@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 861: "Products of Bi-Unitary Divisors" (level 18)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 861: "Products of Bi-Unitary Divisors" (level 18)</h2>
+<div class="problem_content" role="problem">
+<p>A <i>unitary divisor</i> of a positive integer $n$ is a divisor $d$ of $n$ such that $\gcd\left(d,\frac{n}{d}\right)=1$.</p>
+<p>A <i>bi-unitary divisor</i> of $n$ is a divisor $d$ for which $1$ is the only unitary divisor of $d$ that is also a unitary divisor of $\frac{n}{d}$.</p>
+<p>For example, $2$ is a bi-unitary divisor of $8$, because the unitary divisors of $2$ are $\{1,2\}$, and the unitary divisors of $8/2$ are $\{1,4\}$, with $1$ being the only unitary divisor in common.</p>
+<p>The bi-unitary divisors of $240$ are $\{1,2,3,5,6,8,10,15,16,24,30,40,48,80,120,240\}$.</p>
+<p>Let $P(n)$ be the product of all bi-unitary divisors of $n$. Define $Q_k(N)$ as the number of positive integers $1 \lt n \leq N$ such that $P(n)=n^k$. For example, $Q_2\left(10^2\right)=51$ and $Q_6\left(10^6\right)=6189$.</p>
+<p>Find $\sum_{k=2}^{10}Q_k\left(10^{12}\right)$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=1000000000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

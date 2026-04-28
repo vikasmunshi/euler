@@ -1,0 +1,2 @@
+dev  : solve_path_sum_three_ways_p0082_s0.py  -> 994 (correct) [0.047s]
+main : solve_path_sum_three_ways_p0082_s0.py https://projecteuler.net/resources/documents/0082_matrix.txt -> 260324 (correct) [0.985s]

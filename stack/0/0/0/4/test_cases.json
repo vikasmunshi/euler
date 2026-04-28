@@ -1,0 +1,30 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "n": 2
+        },
+        "answer": 9009
+    },
+    {
+        "category": "main",
+        "input": {
+            "n": 3
+        },
+        "answer": 906609
+    },
+    {
+        "category": "extra",
+        "input": {
+            "n": 4
+        },
+        "answer": 99000099
+    },
+    {
+        "category": "extra",
+        "input": {
+            "n": 5
+        },
+        "answer": 9966006699
+    }
+]

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 472: "Comfortable Distance II" (level 29)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 472: "Comfortable Distance II" (level 29)</h2>
+<div class="problem_content" role="problem">
+<p>There are $N$ seats in a row. $N$ people come one after another to fill the seats according to the following rules:
+</p><ol><li>No person sits beside another.</li>
+<li>The first person chooses any seat.</li>
+<li>Each subsequent person chooses the seat furthest from anyone else already seated, as long as it does not violate rule 1. If there is more than one choice satisfying this condition, then the person chooses the leftmost choice.</li>
+</ol><p>Note that due to rule 1, some seats will surely be left unoccupied, and the maximum number of people that can be seated is less than $N$ (for $N \gt 1$).</p>
+<p>Here are the possible seating arrangements for $N = 15$:
+</p><p align="center"><img alt="0472_n15.png" class="dark_img" src="resources/0472_n15.png"/></p>
+<p>We see that if the first person chooses correctly, the $15$ seats can seat up to $7$ people.<br/>
+We can also see that the first person has $9$ choices to maximize the number of people that may be seated.</p>
+<p>Let $f(N)$ be the number of choices the first person has to maximize the number of occupants for $N$ seats in a row. Thus, $f(1) = 1$, $f(15) = 9$, $f(20) = 6$, and $f(500) = 16$.</p>
+<p>Also, $\sum f(N) = 83$ for $1 \le N \le 20$ and  $\sum f(N) = 13343$ for $1 \le N \le 500$.</p>
+<p>Find $\sum f(N)$ for $1 \le N \le 10^{12}$. Give the last $8$ digits of your answer.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=20)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=1000000000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

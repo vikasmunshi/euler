@@ -1,0 +1,58 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "num_permutations": 2
+        },
+        "answer": 125
+    },
+    {
+        "category": "dev",
+        "input": {
+            "num_permutations": 3
+        },
+        "answer": 41063625
+    },
+    {
+        "category": "dev",
+        "input": {
+            "num_permutations": 4
+        },
+        "answer": 1006012008
+    },
+    {
+        "category": "main",
+        "input": {
+            "num_permutations": 5
+        },
+        "answer": 127035954683
+    },
+    {
+        "category": "extra",
+        "input": {
+            "num_permutations": 6
+        },
+        "answer": 1000600120008
+    },
+    {
+        "category": "extra",
+        "input": {
+            "num_permutations": 7
+        },
+        "answer": 10569784298536
+    },
+    {
+        "category": "extra",
+        "input": {
+            "num_permutations": 8
+        },
+        "answer": 10314675896832
+    },
+    {
+        "category": "extra",
+        "input": {
+            "num_permutations": 9
+        },
+        "answer": 13465983902671
+    }
+]

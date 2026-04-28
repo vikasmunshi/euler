@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_num": 10
+        },
+        "answer": 17
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_num": 2000000
+        },
+        "answer": 142913828922
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_num": 10000000
+        },
+        "answer": 3203324994356
+    }
+]

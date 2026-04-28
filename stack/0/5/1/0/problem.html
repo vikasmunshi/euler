@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 510: "Tangent Circles" (level 10)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 510: "Tangent Circles" (level 10)</h2>
+<div class="problem_content" role="problem">
+<p>Circles $A$ and $B$ are tangent to each other and to line $L$ at three distinct points.<br/>
+Circle $C$ is inside the space between $A$, $B$ and $L$, and tangent to all three.<br/>
+Let $r_A$, $r_B$ and $r_C$ be the radii of $A$, $B$ and $C$ respectively.<br/></p><div align="center"><img alt="0510_tangent_circles.png" src="resources/0510_tangent_circles.png"/></div>
+<p>Let $S(n) = \sum r_A + r_B + r_C$, for $0 \lt r_A \le r_B \le n$ where $r_A$, $r_B$ and $r_C$ are integers.
+The only solution for $0 \lt r_A \le r_B \le 5$ is $r_A = 4$, $r_B = 4$ and $r_C = 1$, so $S(5) = 4 + 4 + 1 = 9$.
+You are also given $S(100) = 3072$.</p>
+<p>Find $S(10^9)$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=5)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=1000000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

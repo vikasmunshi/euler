@@ -1,0 +1,9 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "file_url": "https://projecteuler.net/project/resources/0096_sudoku.txt"
+        },
+        "answer": 24702
+    }
+]

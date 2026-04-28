@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 402: "Integer-valued Polynomials" (level 27)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 402: "Integer-valued Polynomials" (level 27)</h2>
+<div class="problem_content" role="problem">
+<p>
+It can be shown that the polynomial $n^4 + 4n^3 + 2n^2 + 5n$ is a multiple of $6$ for every integer $n$. It can also be shown that $6$ is the largest integer satisfying this property.
+</p>
+<p>
+Define $M(a, b, c)$ as the maximum $m$ such that $n^4 + an^3 + bn^2 + cn$ is a multiple of $m$ for all integers $n$. For example, $M(4, 2, 5) = 6$.
+</p>
+<p>
+Also, define $S(N)$ as the sum of $M(a, b, c)$ for all $0 \lt a, b, c \leq N$.
+</p>
+<p>
+We can verify that $S(10) = 1972$ and $S(10000) = 2024258331114$.
+</p>
+<p>
+Let $F_k$ be the Fibonacci sequence:<br/>
+$F_0 = 0$, $F_1 = 1$ and<br/>
+$F_k = F_{k-1} + F_{k-2}$ for $k \geq 2$.
+</p>
+<p>
+Find the last $9$ digits of $\sum S(F_k)$ for $2 \leq k \leq 1234567890123$.
+</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Main</h3>
+<ul>
+<li><code>solve(k_start=2, k_end=1234567890123)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

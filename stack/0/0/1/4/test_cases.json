@@ -1,0 +1,16 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "max_number": 1000000
+        },
+        "answer": 837799
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_number": 10000000
+        },
+        "answer": 8400511
+    }
+]

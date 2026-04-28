@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "num_digits": 1
+        },
+        "answer": 45
+    },
+    {
+        "category": "main",
+        "input": {
+            "num_digits": 2
+        },
+        "answer": 972
+    },
+    {
+        "category": "extra",
+        "input": {
+            "num_digits": 3
+        },
+        "answer": 13888
+    }
+]

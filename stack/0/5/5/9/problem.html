@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 559: "Permuted Matrices" (level 37)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 559: "Permuted Matrices" (level 37)</h2>
+<div class="problem_content" role="problem">
+<p>An <dfn>ascent</dfn> of a column $j$ in a matrix occurs if the value of column $j$ is smaller than the value of column $j + 1$ in all rows.
+</p><p>
+Let $P(k, r, n)$ be the number of $r \times n$ matrices with the following properties:</p>
+<ul><li>The rows are permutations of $\{1, 2, 3, \dots, n\}$.</li>
+<li> Numbering the first column as $1$, a column ascent occurs at column $j \lt n$ <b>if and only if</b> $j$ is not a multiple of $k$.</li>
+</ul><p>For example, $P(1, 2, 3) = 19$, $P(2, 4, 6) = 65508751$ and $P(7, 5, 30) \bmod 1000000123 = 161858102$.</p>
+
+Let $Q(n) = \displaystyle \sum_{k=1}^n P(k, n, n)$.<br/>
+For example, $Q(5) = 21879393751$ and $Q(50) \bmod 1000000123 = 819573537$.
+
+<p>Find $Q(50000) \bmod 1000000123$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(n=5)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=50000)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(n=100000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

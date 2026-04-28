@@ -1,0 +1,2 @@
+dev  : solve_number_letter_counts_p0017_s0.py 5 -> 19 (correct) [0.025s]
+main : solve_number_letter_counts_p0017_s0.py 1000 -> 21124 (correct) [0.030s]

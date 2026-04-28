@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 790: "Clock Grid" (level 19)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 790: "Clock Grid" (level 19)</h2>
+<div class="problem_content" role="problem">
+<p>There is a grid of length and width $50515093$ points. A clock is placed on each grid point. The clocks are all analogue showing a single hour hand initially pointing at $12$.</p>
+<p>A sequence $S_t$ is created where:
+$$
+\begin{align}
+S_0 &amp;= 290797\\
+S_t &amp;= S_{t-1}^2 \bmod 50515093 &amp;t&gt;0
+\end{align}
+$$
+The four numbers $N_t = (S_{4t-4}, S_{4t-3}, S_{4t-2}, S_{4t-1})$ represent a range within the grid, with the first pair of numbers representing the x-bounds and the second pair representing the y-bounds. For example, if $N_t = (3,9,47,20)$, the range would be $3\le x\le 9$ and $20\le y\le47$, and would include $196$ clocks.</p>
+<p>For each $t$ $(t&gt;0)$, the clocks within the range represented by $N_t$ are moved to the next hour $12\rightarrow 1\rightarrow 2\rightarrow \cdots $.</p>
+<p>We define $C(t)$ to be the sum of the hours that the clock hands are pointing to after timestep $t$.<br/>
+You are given $C(0) = 30621295449583788$, $C(1) =  30613048345941659$, $C(10) = 21808930308198471$ and $C(100) = 16190667393984172$.</p>
+<p>Find $C(10^5)$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(timesteps=10)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(timesteps=100000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

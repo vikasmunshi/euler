@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_num": 50
+        },
+        "answer": 4
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_num": 50000000
+        },
+        "answer": 1097343
+    }
+]

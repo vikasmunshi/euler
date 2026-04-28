@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 306: "Paper-strip Game" (level 23)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 306: "Paper-strip Game" (level 23)</h2>
+<div class="problem_content" role="problem">
+<p>The following game is a classic example of Combinatorial Game Theory:</p>
+<p>Two players start with a strip of $n$ white squares and they take alternate turns.<br/>
+On each turn, a player picks two contiguous white squares and paints them black.<br/>
+The first player who cannot make a move loses.</p>
+<ul>
+<li>$n = 1$: No valid moves, so the first player loses automatically.</li>
+<li>$n = 2$: Only one valid move, after which the second player loses.</li>
+<li>$n = 3$: Two valid moves, but both leave a situation where the second player loses.</li>
+<li>$n = 4$: Three valid moves for the first player, who is able to win the game by painting the two middle squares.</li>
+<li>$n = 5$: Four valid moves for the first player (shown below in red), but no matter what the player does, the second player (blue) wins.</li>
+</ul>
+<div class="center"><img alt="0306_pstrip.gif" class="dark_img" src="resources/0306_pstrip.gif"/></div>
+<p>So, for $1 \le n \le 5$, there are 3 values of $n$ for which the first player can force a win.<br/>
+Similarly, for $1 \le n \le 50$, there are 40 values of $n$ for which the first player can force a win.</p>
+<p>For $1 \le n \le 1 000 000$, how many values of $n$ are there for which the first player can force a win?</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=10)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=1000000)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(max_limit=2000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

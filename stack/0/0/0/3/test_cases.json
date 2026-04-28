@@ -1,0 +1,37 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "number": 13195
+        },
+        "answer": 29
+    },
+    {
+        "category": "dev",
+        "input": {
+            "number": 10
+        },
+        "answer": 5
+    },
+    {
+        "category": "dev",
+        "input": {
+            "number": 20
+        },
+        "answer": 5
+    },
+    {
+        "category": "main",
+        "input": {
+            "number": 600851475143
+        },
+        "answer": 6857
+    },
+    {
+        "category": "extra",
+        "input": {
+            "number": 79376318561249
+        },
+        "answer": 9999991
+    }
+]

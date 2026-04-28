@@ -1,348 +1,212 @@
-#!/usr/bin/env python3
-"""
-Stack module for managing Project Euler problem resources.
-
-This module provides functionality for downloading, organizing, and caching Project Euler
-problems and their associated resources. Each problem is stored in its own directory with
-HTML, Markdown, and resource files, with a manifest tracking all downloaded files using
-SHA-256 hashes for content verification.
-
-The module uses a stack-based approach where problems are downloaded to a 'stack' directory
-and can be unstacked to a 'workspace' directory for active work. Changes in the workspace
-can be stacked back to update the problem files.
-
-Directory Structure:
-    stack/
-        0/0/0/1/          # Problem 1
-            manifest.txt  # File manifest with hashes
-            *.html        # Problem HTML
-            *.md          # Problem Markdown
-            *.url         # Problem URL
-            resources/    # Associated resources
-
-Usage:
-    # Download and organize problems
-    fill_stack(problems=[1, 2, 3])
-
-    # Work with a specific problem
-    unstack_to_workspace(problem_number=1)
-    # ... make changes in workspace ...
-    stack_from_workspace()
-"""
+#!/usr/bin/env python3.14
+# -*- coding: utf-8 -*-
+"""Stack directory management: file read/write, transparent encryption, and path resolution."""
 from __future__ import annotations
 
 from functools import lru_cache
-from hashlib import sha256
+from os import X_OK, access
 from pathlib import Path
-from re import sub
 from shutil import rmtree
-from typing import Generator
+from typing import TYPE_CHECKING
 
-from bs4 import BeautifulSoup
+from solver.config import (backup_dirname, root_dir, problem_number_filename, problem_statement_filename,
+                           resource_dirname, stack_dir)
+from solver.problems import problems
+from solver.utils import iterdir_recursive, write_file
 
-from solver.cached_download import download_file
+if TYPE_CHECKING:
+    from solver.crypto.symmetrical import EncKey
 
 __all__ = [
-    'add_file',
-    'fill_stack',
-    'read_manifest',
-    'stack_from_workspace',
-    'unstack_to_workspace',
-    'write_manifest',
+    'backup_the_stack',
+    'read_stack_file',
+    'restore_the_stack',
+    'stack',
+    'stack_base_dir',
+    'stack_path',
+    'unstack',
+    'write_stack_file',
 ]
-
-# Module-level constants
-BASE_DIR: Path = Path.cwd()
-PROJECTEULER_URL: str = 'https://projecteuler.net'
-PROBLEMS_LIST_URL: str = f'{PROJECTEULER_URL}/minimal=problems'
-WORKSPACE_DIR: Path = BASE_DIR / 'workspace'
-PROBLEM_NUMBER_FILE: Path = WORKSPACE_DIR / 'problem_number.txt'
-MANIFEST_FILENAME: str = 'manifest.txt'
-
-
-def add_file(stack_dir: Path, manifest: dict[str, tuple[str, str]], filename: str, content: str) -> None:
-    """Add a file to the stack directory and update the manifest.
-
-    Creates the file in the stack directory if the content hash differs from what's
-    recorded in the manifest. The manifest is updated with the new content hash.
-
-    Args:
-        stack_dir: The stack directory where the file should be added.
-        manifest: Dictionary mapping filename hashes to (content_hash, filename) tuples.
-        filename: The relative filename within the stack directory.
-        content: The text content to write to the file.
-
-    Returns:
-        None
-    """
-    filename_hash = sha256(filename.encode('utf-8')).hexdigest()
-    content_hash = sha256(content.encode('utf-8')).hexdigest()
-    if content_hash != manifest.get(filename_hash, ('', ''))[0]:
-        filepath: Path = stack_dir / filename
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        filepath.write_text(content)
-        manifest[filename_hash] = content_hash, filename
-        print(f'Added {filename} to {stack_dir.relative_to(BASE_DIR).as_posix()}')
-
-
-def add_resource(stack_dir: Path, manifest: dict[str, tuple[str, str]], resource: str,
-                 force_refresh: bool = False) -> None:
-    """Add a resource file to the stack directory.
-
-    Downloads a resource from Project Euler and adds it to the stack directory
-    with a sanitized filename.
-
-    Args:
-        stack_dir: The stack directory where the resource should be added.
-        manifest: Dictionary mapping filename hashes to (content_hash, filename) tuples.
-        resource: The resource path relative to projecteuler.net (e.g., 'resources/file.txt').
-        force_refresh: If True, bypass cache and re-download the resource. Defaults to False.
-
-    Returns:
-        None
-    """
-    filename: str = sanitize_filename(resource.split('/')[-1])
-    content: str = download_file(f'{PROJECTEULER_URL}/{resource.lstrip('/')}', force_refresh=force_refresh)
-    add_file(stack_dir=stack_dir, manifest=manifest, filename=f'resources/{filename}', content=content)
-
-
-def fill_stack(problems: list[int] | None = None, refresh_list: bool = False, refresh_problems: bool = False) -> None:
-    """Fill the stack with Project Euler problems.
-
-    Downloads and organizes the specified problems (or all available problems if none specified)
-    into their respective stack directories. Each problem's manifest is read and updated,
-    and the number of files is reported.
-
-    Args:
-        problems: List of problem numbers to download. If None, downloads all available problems
-                 from the Project Euler minimal problems list. Defaults to None.
-        refresh_list: If True, forces a refresh of the problems list from Project Euler.
-                     Defaults to False.
-        refresh_problems: If True, forces a refresh of all problem content from Project Euler.
-                         Defaults to False.
-
-    Returns:
-        None
-    """
-    if problems is None:
-        problems = [int(line.split('##')[0])
-                    for line in download_file(PROBLEMS_LIST_URL, force_refresh=refresh_list).strip().splitlines()[1:]]
-    for problem_number in problems:
-        stack_dir = get_stack_dir(problem_number)
-        init_from_projecteuler(problem_number, force_refresh=refresh_problems)
-        manifest: dict[str, tuple[str, str]] = read_manifest(stack_dir)
-        print(f'Problem {problem_number} -> {stack_dir} ({len(manifest)} files)')
 
 
 @lru_cache(maxsize=None)
-def get_stack_dir(problem_number: int) -> Path:
-    """Get the stack directory path for a given problem number.
+def get_enc_key(key_id: bytes | None = None) -> EncKey:
+    """
+    Look up an encryption key, returning the active key when no ID is given.
 
-    Returns a path with the format: stack/d1/d2/d3/d4/ where d1-d4 are the
-    individual digits of the zero-padded 4-digit problem number.
-    Results are cached for performance.
+    Args:
+        key_id: Raw 16-byte key identifier. If None, the current active key is returned.
+
+    Returns:
+        The EncKey matching the given ID, or the active key if key_id is None.
+    """
+    from solver.crypto.keys import get_key
+    if key_id is None:
+        return get_key()
+    else:
+        return get_key(key_id.hex())
+
+
+@lru_cache(maxsize=None)
+def stack_base_dir(problem_number: int) -> Path:
+    """Return the stack directory for a problem, rooted one digit-level deep per digit of its zero-padded number."""
+    return stack_dir.joinpath(*f'{problem_number:04d}')
+
+
+@lru_cache(maxsize=None)
+def stack_path(problem_number: int, filename: str) -> tuple[bool, Path]:
+    """
+    Resolve the on-disk path for a stack file and determine whether it must be encrypted.
+
+    Encryption is required for all files belonging to problems above 100, except for
+    the problem number file, problem statement (Markdown and HTML), and resource files.
 
     Args:
         problem_number: The Project Euler problem number.
+        filename:       Logical filename within the problem's stack directory (without .enc suffix).
 
     Returns:
-        Path: The stack directory path for the problem.
-
-    Example:
-        >>> get_stack_dir(1)
-        PosixPath('stack/0/0/0/1')
-        >>> get_stack_dir(123)
-        PosixPath('stack/0/1/2/3')
+        A 2-tuple of (encryption_required, path), where the path already includes the .enc
+        suffix when encryption is required.
     """
-    return BASE_DIR / 'stack' / '/'.join(f'{problem_number:04d}')
+    encryption_required: bool = not (
+            problem_number <= 100
+            or filename == problem_number_filename
+            or filename == problem_statement_filename
+            or filename == problem_statement_filename
+            or filename.startswith(resource_dirname)
+    )
+    stack_file_path: Path = stack_base_dir(problem_number) / (filename + '.enc' if encryption_required else filename)
+    return encryption_required, stack_file_path
 
 
-def init_from_projecteuler(problem_number: int, force_refresh: bool = False) -> None:
-    """Initialize a problem stack from the Project Euler website.
-
-    Downloads the problem HTML, extracts the problem content, title, and resources,
-    then saves them to the stack directory in multiple formats (HTML, Markdown, URL).
-    All associated resource files are also downloaded and added to the stack.
-    The manifest is updated to track all files.
+def read_stack_file(problem_number: int, filename: str) -> tuple[bytes, bool]:
+    """
+    Read a file from the stack, decrypting it if required.
 
     Args:
-        problem_number: The Project Euler problem number to initialize.
-        force_refresh: If True, bypasses cache and re-downloads all content and resources.
-                      Defaults to False.
+        problem_number: The Project Euler problem number.
+        filename:       Logical filename within the problem's stack directory.
 
     Returns:
-        None
+        A 2-tuple of (content, is_executable), where content is the decrypted file bytes
+        and is_executable reflects the file's 'execute' permission bit.
+
+    Raises:
+        FileNotFoundError: If the stack file does not exist.
     """
-    stack_dir: Path = get_stack_dir(problem_number)
-    stack_dir.mkdir(parents=True, exist_ok=True)
-    manifest: dict[str, tuple[str, str]] = read_manifest(stack_dir)
-    problem_url: str = f'{PROJECTEULER_URL}/problem={problem_number}'
-    problem_html: str = download_file(problem_url, force_refresh=force_refresh)
-    problem_soup: BeautifulSoup = BeautifulSoup(problem_html, 'html.parser')
-    problem_content_obj = problem_soup.find('div', {'class': 'problem_content'})
-    problem_content: str = problem_content_obj.text.strip()
-    problem_title: str = sanitize_filename(problem_soup.find('h2').text.strip())
-    add_file(stack_dir, manifest, f'{problem_title}.html', problem_html)
-    add_file(stack_dir, manifest, f'{problem_title}.md', problem_title + '\n\n' + problem_content)
-    add_file(stack_dir, manifest, f'{problem_title}.url', problem_url)
-    for resource in (u for a in problem_content_obj.find_all('a') if (u := a.get('href')).startswith('resources/')):
-        add_resource(stack_dir, manifest, resource, force_refresh=force_refresh)
-    write_manifest(stack_dir, manifest=manifest)
+    encryption_required, stack_file_path = stack_path(problem_number, filename)
+    content: bytes = stack_file_path.read_bytes()
+    is_executable: bool = access(stack_file_path, X_OK)
+    if encryption_required:
+        key_id, enc_content = content[:16], content[16:]
+        key = get_enc_key(key_id)
+        content = key.decrypt(enc_content, aad=filename.encode())
+    return content, is_executable
 
 
-def iterdir_recursive(directory: Path) -> Generator[Path, None, None]:
-    """Recursively iterate over all files in a directory and its subdirectories."""
-    if not directory.exists():
-        return None
-    if directory.is_file():
-        yield directory
-        return None
-    for path in directory.iterdir():
-        if path.is_dir():
-            yield from iterdir_recursive(path)
-        elif path.is_file():
-            yield path
-    return None
+def write_stack_file(problem_number: int, filename: str, content: bytes, is_executable: bool) -> None:
+    """
+    Write a file to the stack, encrypting it if required.
 
-
-def read_manifest(stack_dir: Path) -> dict[str, tuple[str, str]]:
-    """Load the manifest file for a given stack directory.
-
-    Reads the manifest.txt file and parses it into a dictionary mapping filename hashes
-    to content hashes and filenames. Each line in the manifest has the format:
-    '<filename_hash> <content_hash> <filename>'.
+    Encrypted files are prefixed with the 16-byte key ID so the correct key can be
+    looked up at read time.
 
     Args:
-        stack_dir: The stack directory containing the manifest file.
-
-    Returns:
-        dict[str, tuple[str, str]]: Dictionary mapping filename hashes (SHA-256) to tuples
-                                    of (content_hash, filename). Returns an empty dict if
-                                    the manifest file doesn't exist.
+        problem_number: The Project Euler problem number.
+        filename:       Logical filename within the problem's stack directory.
+        content:        Raw file bytes to write (plaintext; encryption is applied automatically).
+        is_executable:  If True, the file's 'execute' permission bit (0o755) is set after writing.
     """
-    manifest_file = stack_dir / MANIFEST_FILENAME
-    if not manifest_file.exists():
-        return {}
-    return {filename_hash: (content_hash, filename)
-            for line in manifest_file.read_text().splitlines()
-            for filename_hash, content_hash, filename in (line.split(' ', 2),)
-            if content_hash and filename_hash and filename}
+    try:
+        stack_content: bytes | None = read_stack_file(problem_number, filename)[0]
+    except (FileNotFoundError, ValueError):
+        stack_content = None
+    if stack_content and stack_content == content:
+        return
+    encryption_required, stack_file_path = stack_path(problem_number, filename)
+    if encryption_required:
+        key = get_enc_key()
+        content = bytes.fromhex(key.id) + key.encrypt(content, aad=filename.encode())  # first 16 bytes are key id
+    write_file(stack_file_path, content)
+    if is_executable:
+        stack_file_path.chmod(0o755)
 
 
-def sanitize_filename(filename: str) -> str:
-    """Sanitize a filename to be POSIX-compliant and human-readable.
-
-    Converts the filename to lowercase, removes invalid characters (NUL, path separators),
-    normalizes whitespace, and handles special cases like empty names or CLI flag-like names.
+def stack(problem_number: int, workspace_dir: Path) -> None:
+    """
+    Read all files from the workspace directory and write them into the stack, encrypting as required.
+    This is the inverse of 'unstack'; executable bits are preserved.
 
     Args:
-        filename: The original filename string to sanitize.
-
-    Returns:
-        str: A sanitized filename that is safe to use on POSIX filesystems.
-
-    Example:
-        >>> sanitize_filename("Problem 1: Multiples / 3 or 5")
-        'problem 1: multiples - 3 or 5'
-        >>> sanitize_filename("--dangerous")
-        '_--dangerous'
+        problem_number: The Project Euler problem number.
+        workspace_dir:  Source directory containing the plaintext backup files.
     """
-    filename = filename.lower()
-    # Make it POSIX and Windows valid: forbid NUL, path separators, and Windows reserved chars
-    for char in '\0/<>:"|?*\\':
-        filename = filename.replace(char, '-')
-    # Normalize whitespace for nicer filenames
-    filename = sub(r'\s+', ' ', filename).strip()
-    # Remove trailing periods and spaces (Windows restriction)
-    filename = filename.rstrip('. ')
-    # Avoid special/empty names and Windows reserved device names
-    reserved_names = {'', '.', '..', 'con', 'prn', 'aux', 'nul',
-                      'com1', 'com2', 'com3', 'com4', 'com5', 'com6', 'com7', 'com8', 'com9',
-                      'lpt1', 'lpt2', 'lpt3', 'lpt4', 'lpt5', 'lpt6', 'lpt7', 'lpt8', 'lpt9'}
-    # Check base name without extension for reserved names
-    base_name = filename.split('.')[0] if '.' in filename else filename
-    if base_name in reserved_names:
-        filename = 'no-name' if not filename or filename in {'.', '..'} else '_' + filename
-    # Avoid filenames that look like CLI flags
-    if filename.startswith('-'):
-        filename = '_' + filename
-    return filename
+    for workspace_file_path in iterdir_recursive(workspace_dir):
+        filename: str = workspace_file_path.relative_to(workspace_dir).as_posix()
+        content: bytes = workspace_file_path.read_bytes()
+        if not filename.startswith(resource_dirname):
+            try:
+                content.decode()
+            except UnicodeDecodeError:
+                continue
+        is_executable: bool = access(workspace_file_path, X_OK)
+        write_stack_file(problem_number, filename, content, is_executable)
 
 
-def stack_from_workspace() -> None:
-    """Copy workspace content back to the stack and update the manifest.
-
-    Reads the problem number from the workspace, then copies all files (except the
-    manifest and problem_number.txt) from the workspace back to the corresponding
-    stack directory. The stack's manifest is updated to reflect any changes.
-    If no problem number file exists in the workspace, no action is taken.
-
-    Returns:
-        None
+def unstack(problem_number: int, workspace_dir: Path) -> None:
     """
-    if PROBLEM_NUMBER_FILE.exists():
-        problem_number = int(PROBLEM_NUMBER_FILE.read_text())
-        stack_dir = get_stack_dir(problem_number)
-        manifest: dict[str, tuple[str, str]] = read_manifest(stack_dir)
-        for filename in iterdir_recursive(WORKSPACE_DIR):
-            if filename.name not in {MANIFEST_FILENAME, PROBLEM_NUMBER_FILE.name}:
-                add_file(stack_dir, manifest, filename.relative_to(WORKSPACE_DIR).as_posix(), filename.read_text())
-    return None
-
-
-def unstack_to_workspace(problem_number: int) -> None:
-    """Unstack a problem to the workspace directory.
-
-    Clears the workspace directory and copies all files from the specified problem's
-    stack directory to the workspace. If the problem hasn't been downloaded yet,
-    it will be initialized from Project Euler first. A problem_number.txt file is
-    created in the workspace to track which problem is currently active.
+    Read all files from the stack and write them into the workspace, decrypting as required.
+    This is the inverse of 'stack'; executable bits are preserved.
 
     Args:
-        problem_number: The Project Euler problem number to unstack.
-
-    Returns:
-        None
+        problem_number: The Project Euler problem number.
+        workspace_dir:  Destination directory; intermediate directories are created as needed.
     """
-    if WORKSPACE_DIR.exists():
-        rmtree(WORKSPACE_DIR, ignore_errors=True)
-    WORKSPACE_DIR.mkdir(exist_ok=True, parents=True)
-    stack_dir = get_stack_dir(problem_number)
-    if not stack_dir.exists():
-        init_from_projecteuler(problem_number, force_refresh=False)
-    for file in iterdir_recursive(stack_dir):
-        if file.name == MANIFEST_FILENAME:
+    problem_stack_dir: Path = stack_base_dir(problem_number)
+    for filename in iterdir_recursive(problem_stack_dir, rt='str'):
+        filename = filename.removesuffix('.enc')
+        content, is_executable = read_stack_file(problem_number, filename)
+        workspace_file_path: Path = workspace_dir.joinpath(filename)
+        write_file(workspace_file_path, content)
+        if is_executable:
+            workspace_file_path.chmod(0o755)
+
+
+def backup_the_stack() -> None:
+    """
+    Back up problem files from the stack to the 'backup' folder (unencrypted).
+    Ensures '/backup/' is listed in .gitignore, then iterates over all problems,
+    decrypting and copying their stack files into backup/<one digit-level per digit of zero-padded problem number>/.
+    """
+    try:
+        gitignore: str = root_dir.joinpath('.gitignore').read_text()
+    except FileNotFoundError:
+        gitignore = ''
+    if f'/{backup_dirname}/' not in gitignore:
+        root_dir.joinpath('.gitignore').write_text(gitignore.strip('\n') + f'\n/{backup_dirname}/\n')
+    for problem in problems:
+        problem_backup_dir = root_dir.joinpath(backup_dirname, *f'{problem.number:04d}')
+        problem_stack_dir: Path = stack_base_dir(problem.number)
+        if not problem_stack_dir.exists():
+            print(f'No stack found for "{problem.number}: {problem.title}"')
             continue
-        filename: str = file.relative_to(stack_dir).as_posix()
-        target_file = WORKSPACE_DIR / filename
-        target_file.parent.mkdir(parents=True, exist_ok=True)
-        file.copy(target_file)
-        print(f'Copied {file} to {target_file}')
-    PROBLEM_NUMBER_FILE.write_text(str(problem_number))
+        if problem_backup_dir.exists():
+            rmtree(problem_backup_dir, ignore_errors=True)
+        unstack(problem.number, workspace_dir=problem_backup_dir)
+        print(f'Created backup for "{problem!s}": {problem_backup_dir.relative_to(root_dir).as_posix()}')
 
 
-def write_manifest(stack_dir: Path, manifest: dict[str, tuple[str, str]] | None = None) -> None:
-    """Update the manifest file for a given stack directory.
-
-    Writes the manifest dictionary to manifest.txt in the format:
-    '<filename_hash> <content_hash> <filename>' (one entry per line).
-    If no manifest is provided, generates one by scanning all files in the stack directory
-    (excluding the manifest file itself) and computing their SHA-256 hashes.
-
-    Args:
-        stack_dir: The stack directory where the manifest file should be written.
-        manifest: Optional dictionary mapping filename hashes to (content_hash, filename) tuples.
-                 If None, the manifest is generated from the current directory contents.
-                 Defaults to None.
-
-    Returns:
-        None
+def restore_the_stack() -> None:
     """
-    if manifest is None:
-        manifest = {sha256(filename.encode('utf-8')).hexdigest():
-                        (sha256(file.read_text().encode('utf-8')).hexdigest(), filename)
-                    for file in iterdir_recursive(stack_dir)
-                    if file.name != MANIFEST_FILENAME
-                    if (filename := file.relative_to(stack_dir).as_posix())}
-    manifest_file = stack_dir / MANIFEST_FILENAME
-    manifest_file.write_text('\n'.join(f'{k} {v[0]} {v[1]}' for k, v in manifest.items()))
+    Restore problem files from the 'backup' folder (unencrypted) to the stack (encrypted).
+    Inverse of 'backup_the_stack'.
+    """
+    for problem in problems:
+        problem_backup_dir = root_dir.joinpath(backup_dirname, *f'{problem.number:04d}')
+        problem_stack_dir: Path = stack_base_dir(problem.number)
+        if not problem_backup_dir.exists():
+            print(f'No backup found for "{problem!s}"')
+            continue
+        stack(problem.number, workspace_dir=problem_backup_dir)
+        print(f'Restored backup for "{problem!s}": {problem_stack_dir.relative_to(root_dir).as_posix()}')

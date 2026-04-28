@@ -1,0 +1,37 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_limit": 10
+        },
+        "answer": 4
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_limit": 100
+        },
+        "answer": 13
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_limit": 1000
+        },
+        "answer": 25
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_limit": 1000000
+        },
+        "answer": 55
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_limit": 10000000
+        },
+        "answer": 55
+    }
+]

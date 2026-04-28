@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "sum_sides": 12
+        },
+        "answer": 60
+    },
+    {
+        "category": "main",
+        "input": {
+            "sum_sides": 1000
+        },
+        "answer": 31875000
+    }
+]

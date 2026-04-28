@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 261: "Pivotal Square Sums" (level 37)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 261: "Pivotal Square Sums" (level 37)</h2>
+<div class="problem_content" role="problem">
+<p>Let us call a positive integer $k$ a <dfn>square-pivot</dfn>, if there is a pair of integers $m \gt 0$ and $n \ge k$, such that the sum of the $(m+1)$ consecutive squares up to $k$ equals the sum of the $m$ consecutive squares from $(n+1)$ on:</p>
+$$(k - m)^2 + \cdots + k^2 = (n + 1)^2 + \cdots + (n + m)^2.$$
+
+<p>Some small square-pivots are
+</p><ul><li>$\mathbf 4$: $3^2 + \mathbf 4^2 = 5^2$</li>
+<li>$\mathbf{21}$: $20^2 + \mathbf{21}^2 = 29^2$</li>
+<li>$\mathbf{24}$: $21^2 + 22^2 + 23^2 + \mathbf{24}^2 = 25^2 + 26^2 + 27^2$</li>
+<li>$\mathbf{110}$: $108^2 + 109^2 + \mathbf{110}^2 = 133^2 + 134^2$</li></ul><p>Find the sum of all <b>distinct</b> square-pivots $\le 10^{10}$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=1000)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=10000000000)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(max_limit=100000000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

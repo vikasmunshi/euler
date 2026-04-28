@@ -1,0 +1,5 @@
+dev  : solve_permuted_multiples_p0052_s0.py 2 -> 125874 (correct) [0.162s]
+dev  : solve_permuted_multiples_p0052_s0.py 3 -> 142857 (correct) [0.250s]
+dev  : solve_permuted_multiples_p0052_s0.py 4 -> 142857 (correct) [0.353s]
+dev  : solve_permuted_multiples_p0052_s0.py 5 -> 142857 (correct) [0.438s]
+main : solve_permuted_multiples_p0052_s0.py 6 -> 142857 (correct) [0.487s]

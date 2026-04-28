@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 159: "Digital Root Sums of Factorisations" (level 18)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 159: "Digital Root Sums of Factorisations" (level 18)</h2>
+<div class="problem_content" role="problem">
+<p>A composite number can be factored many different ways.
+For instance, not including multiplication by one, $24$ can be factored in $7$ distinct ways:</p>
+$$\begin{align}
+24 &amp;= 2 \times 2 \times 2 \times 3\\
+24 &amp;= 2 \times 3 \times 4\\
+24 &amp;= 2 \times 2 \times 6\\
+24 &amp;= 4 \times 6\\
+24 &amp;= 3 \times 8\\
+24 &amp;= 2 \times 12\\
+24 &amp;= 24
+\end{align}$$
+
+<p>Recall that the digital root of a number, in base $10$, is found by adding together the digits of that number,
+and repeating that process until a number is arrived at that is less than $10$.
+Thus the digital root of $467$ is $8$.</p>
+<p>We shall call a Digital Root Sum (DRS) the sum of the digital roots of the individual factors of our number.<br/>
+The chart below demonstrates all of the DRS values for $24$.</p>
+<table class="grid center">
+<tr><th>Factorisation</th><th>Digital Root Sum</th></tr>
+<tr><td>$2 \times 2 \times 2 \times 3$</td><td>$9$</td></tr>
+<tr><td>$2 \times 3 \times 4$</td><td>$9$</td></tr>
+<tr><td>$2 \times 2 \times 6$</td><td>$10$</td></tr>
+<tr><td>$4 \times 6$</td><td>$10$</td></tr>
+<tr><td>$3 \times 8$</td><td>$11$</td></tr>
+<tr><td>$2 \times 12$</td><td>$5$</td></tr>
+<tr><td>$24$</td><td>$6$</td></tr>
+</table>
+<p>The maximum Digital Root Sum of $24$ is $11$.<br/>
+The function $\operatorname{mdrs}(n)$ gives the maximum Digital Root Sum of $n$. So $\operatorname{mdrs}(24)=11$.<br/>
+Find $\sum \operatorname{mdrs}(n)$ for $1 \lt n \lt 1\,000\,000$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<p><em>No test cases available.</em></p>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

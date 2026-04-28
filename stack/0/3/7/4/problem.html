@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 374: "Maximum Integer Partition Product" (level 15)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 374: "Maximum Integer Partition Product" (level 15)</h2>
+<div class="problem_content" role="problem">
+<p>An integer partition of a number $n$ is a way of writing $n$ as a sum of positive integers.</p>
+<p>Partitions that differ only in the order of their summands are considered the same.
+A partition of $n$ into <b>distinct parts</b> is a partition of $n$ in which every part occurs at most once.</p>
+<p>The partitions of $5$ into distinct parts are:
+<br/>$5$, $4+1$ and $3+2$.</p>
+<p>Let $f(n)$ be the maximum product of the parts of any such partition of $n$ into distinct parts and let $m(n)$ be the number of elements of any such partition of $n$ with that product.</p>
+<p>So $f(5)=6$ and $m(5)=2$.</p>
+<p>For $n=10$ the partition with the largest product is $10=2+3+5$, which gives $f(10)=30$ and $m(10)=3$.
+<br/>And their product, $f(10) \cdot m(10) = 30 \cdot 3 = 90$.</p>
+<p>It can be verified that
+<br/>$\sum f(n) \cdot m(n)$ for $1 \le n \le 100 = 1683550844462$.</p>
+<p>Find $\sum f(n) \cdot m(n)$ for $1 \le n \le 10^{14}$.
+<br/>Give your answer modulo $982451653$, the $50$ millionth prime.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=100)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=100000000000000)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(max_limit=1000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

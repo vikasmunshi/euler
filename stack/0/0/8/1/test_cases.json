@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "file_url": ""
+        },
+        "answer": 2427
+    },
+    {
+        "category": "main",
+        "input": {
+            "file_url": "https://projecteuler.net/resources/documents/0081_matrix.txt"
+        },
+        "answer": 427337
+    }
+]

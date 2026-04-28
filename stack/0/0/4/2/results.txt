@@ -1,0 +1,1 @@
+main : solve_coded_triangle_numbers_p0042_s0.py https://projecteuler.net/resources/documents/0042_words.txt -> 162 (correct) [0.050s]

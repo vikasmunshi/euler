@@ -1,0 +1,9 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "max_perimeter": 1000000000
+        },
+        "answer": 518408346
+    }
+]

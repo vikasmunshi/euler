@@ -1,0 +1,30 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "convergent_num": 10
+        },
+        "answer": 17
+    },
+    {
+        "category": "main",
+        "input": {
+            "convergent_num": 100
+        },
+        "answer": 272
+    },
+    {
+        "category": "extra",
+        "input": {
+            "convergent_num": 1000
+        },
+        "answer": 4034
+    },
+    {
+        "category": "extra",
+        "input": {
+            "convergent_num": 10000
+        },
+        "answer": 55322
+    }
+]

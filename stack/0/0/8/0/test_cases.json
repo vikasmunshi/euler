@@ -1,0 +1,26 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "digits": 100,
+            "max_num": 2
+        },
+        "answer": 475
+    },
+    {
+        "category": "main",
+        "input": {
+            "digits": 100,
+            "max_num": 99
+        },
+        "answer": 40886
+    },
+    {
+        "category": "extra",
+        "input": {
+            "digits": 100,
+            "max_num": 999
+        },
+        "answer": 434576
+    }
+]

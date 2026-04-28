@@ -1,0 +1,18 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_n": 100,
+            "threshold": 100
+        },
+        "answer": 4724
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_n": 100,
+            "threshold": 1000000
+        },
+        "answer": 4075
+    }
+]

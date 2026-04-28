@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "target_solutions": 1975
+        },
+        "answer": 99
+    },
+    {
+        "category": "dev",
+        "input": {
+            "target_solutions": 2000
+        },
+        "answer": 100
+    },
+    {
+        "category": "main",
+        "input": {
+            "target_solutions": 1000000
+        },
+        "answer": 1818
+    }
+]

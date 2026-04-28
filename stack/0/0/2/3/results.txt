@@ -1,0 +1,2 @@
+main : solve_non_abundant_sums_p0023_s0.py  -> 4179871 (correct) [0.243s]
+main : solve_non_abundant_sums_p0023_s1.py  -> 4179871 (correct) [0.879s]

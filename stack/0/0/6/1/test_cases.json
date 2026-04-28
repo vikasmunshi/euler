@@ -1,0 +1,61 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "length": 2
+        },
+        "answer": [
+            1,
+            8181
+        ]
+    },
+    {
+        "category": "dev",
+        "input": {
+            "length": 3
+        },
+        "answer": [
+            1,
+            19291
+        ]
+    },
+    {
+        "category": "dev",
+        "input": {
+            "length": 4
+        },
+        "answer": [
+            2,
+            [
+                12524,
+                16160
+            ]
+        ]
+    },
+    {
+        "category": "dev",
+        "input": {
+            "length": 5
+        },
+        "answer": [
+            5,
+            [
+                12019,
+                15857,
+                18685,
+                19493,
+                26058
+            ]
+        ]
+    },
+    {
+        "category": "main",
+        "input": {
+            "length": 6
+        },
+        "answer": [
+            1,
+            28684
+        ]
+    }
+]

@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "length": 4
+        },
+        "answer": 5832
+    },
+    {
+        "category": "main",
+        "input": {
+            "length": 13
+        },
+        "answer": 23514624000
+    }
+]

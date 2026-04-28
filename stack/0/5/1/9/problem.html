@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 519: "Tricoloured Coin Fountains" (level 24)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 519: "Tricoloured Coin Fountains" (level 24)</h2>
+<div class="problem_content" role="problem">
+<p>An arrangement of coins in one or more rows with the bottom row being a block without gaps and every coin in a higher row touching exactly two coins in the row below is called a <dfn>fountain</dfn> of coins. Let $f(n)$ be the number of possible fountains with $n$ coins. For $4$ coins there are three possible arrangements:</p>
+<div align="center"><img alt="0519_coin_fountain.png" src="resources/0519_coin_fountain.png"/></div>
+<p>Therefore $f(4) = 3$ while $f(10) = 78$.</p>
+<p>Let $T(n)$ be the number of all possible colourings with three colours for all $f(n)$ different fountains with $n$ coins, given the condition that no two touching coins have the same colour. Below you see the possible colourings for one of the three valid fountains for $4$ coins:</p>
+<div align="center"><img alt="0519_tricolored_coin_fountain.png" src="resources/0519_tricolored_coin_fountain.png"/></div>
+<p>You are given that $T(4) = 48$ and $T(10) = 17760$.</p>
+<p>Find the last $9$ digits of $T(20000)$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(n=4)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=20000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

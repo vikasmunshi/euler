@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_perimeter": 50
+        },
+        "answer": 6
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_perimeter": 1500000
+        },
+        "answer": 161667
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_perimeter": 10000000
+        },
+        "answer": 1067080
+    }
+]

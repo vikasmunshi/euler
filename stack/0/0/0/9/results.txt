@@ -1,0 +1,2 @@
+dev  : solve_special_pythagorean_triplet_p0009_s0.py 12 -> 60 (correct) [0.026s]
+main : solve_special_pythagorean_triplet_p0009_s0.py 1000 -> 31875000 (correct) [0.049s]

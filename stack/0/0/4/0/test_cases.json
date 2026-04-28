@@ -1,0 +1,79 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "i": 1
+        },
+        "answer": 1
+    },
+    {
+        "category": "dev",
+        "input": {
+            "i": 2
+        },
+        "answer": 5
+    },
+    {
+        "category": "dev",
+        "input": {
+            "i": 3
+        },
+        "answer": 15
+    },
+    {
+        "category": "dev",
+        "input": {
+            "i": 4
+        },
+        "answer": 105
+    },
+    {
+        "category": "dev",
+        "input": {
+            "i": 5
+        },
+        "answer": 210
+    },
+    {
+        "category": "dev",
+        "input": {
+            "i": 6
+        },
+        "answer": 210
+    },
+    {
+        "category": "main",
+        "input": {
+            "i": 7
+        },
+        "answer": 1470
+    },
+    {
+        "category": "extra",
+        "input": {
+            "i": 8
+        },
+        "answer": 11760
+    },
+    {
+        "category": "extra",
+        "input": {
+            "i": 9
+        },
+        "answer": 11760
+    },
+    {
+        "category": "extra",
+        "input": {
+            "i": 10
+        },
+        "answer": 11760
+    },
+    {
+        "category": "extra",
+        "input": {
+            "i": 11
+        },
+        "answer": 0
+    }
+]

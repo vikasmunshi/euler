@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 411: "Uphill Paths" (level 22)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 411: "Uphill Paths" (level 22)</h2>
+<div class="problem_content" role="problem">
+<p>
+Let $n$ be a positive integer. Suppose there are stations at the coordinates $(x, y) = (2^i \bmod n, 3^i \bmod n)$ for $0 \leq i \leq 2n$. We will consider stations with the same coordinates as the same station.
+</p><p>
+We wish to form a path from $(0, 0)$ to $(n, n)$ such that the $x$ and $y$ coordinates never decrease.<br/>
+Let $S(n)$ be the maximum number of stations such a path can pass through.
+</p><p>
+For example, if $n = 22$, there are $11$ distinct stations, and a valid path can pass through at most $5$ stations. Therefore, $S(22) = 5$.
+The case is illustrated below, with an example of an optimal path:
+</p>
+<p align="center"><img alt="0411_longpath.png" src="resources/0411_longpath.png"/></p>
+<p>
+It can also be verified that $S(123) = 14$ and $S(10000) = 48$.
+</p><p>
+Find $\sum S(k^5)$ for $1 \leq k \leq 30$.
+</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=22)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=6436343)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "triangle_str": "TRIANGLE_A"
+        },
+        "answer": 23
+    },
+    {
+        "category": "main",
+        "input": {
+            "triangle_str": "TRIANGLE_B"
+        },
+        "answer": 1074
+    }
+]

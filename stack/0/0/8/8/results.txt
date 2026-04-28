@@ -1,0 +1,2 @@
+dev  : solve_product_sum_numbers_p0088_s0.py 6 2 -> 30 (correct) [0.032s]
+main : solve_product_sum_numbers_p0088_s0.py 12000 2 -> 7587457 (correct) [0.106s]

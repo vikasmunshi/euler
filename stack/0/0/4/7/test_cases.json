@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "n": 2
+        },
+        "answer": 14
+    },
+    {
+        "category": "dev",
+        "input": {
+            "n": 3
+        },
+        "answer": 644
+    },
+    {
+        "category": "main",
+        "input": {
+            "n": 4
+        },
+        "answer": 134043
+    }
+]

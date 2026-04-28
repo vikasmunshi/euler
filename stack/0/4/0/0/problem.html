@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 400: "Fibonacci Tree Game" (level 23)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 400: "Fibonacci Tree Game" (level 23)</h2>
+<div class="problem_content" role="problem">
+<p>
+A <b>Fibonacci tree</b> is a binary tree recursively defined as:</p><ul><li>$T(0)$ is the empty tree.
+</li><li>$T(1)$ is the binary tree with only one node.
+</li><li>$T(k)$ consists of a root node that has $T(k-1)$ and $T(k-2)$ as children.
+</li></ul><p>
+On such a tree two players play a take-away game. On each turn a player selects a node and removes that node along with the subtree rooted at that node.<br/>
+The player who is forced to take the root node of the entire tree loses.</p><p>
+</p><p>
+Here are the winning moves of the first player on the first turn for $T(k)$ from $k=1$ to $k=6$.
+</p><p align="center"><img alt="0400_winning.png" class="dark_img" src="resources/0400_winning.png"/></p>
+
+
+
+Let $f(k)$ be the number of winning moves of the first player (i.e. the moves for which the second player has no winning strategy) on the first turn of the game when this game is played on $T(k)$.
+
+
+<p>
+For example, $f(5) = 1$ and $f(10) = 17$.
+</p>
+<p>
+Find $f(10000)$. Give the last $18$ digits of your answer.
+</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(k=5)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(k=10000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

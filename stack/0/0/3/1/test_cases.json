@@ -1,0 +1,70 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "coins": [
+                1,
+                2,
+                5,
+                10,
+                20,
+                50,
+                100,
+                200
+            ],
+            "target_amount": 0
+        },
+        "answer": 1
+    },
+    {
+        "category": "main",
+        "input": {
+            "coins": [
+                1,
+                2,
+                5,
+                10,
+                20,
+                50,
+                100,
+                200
+            ],
+            "target_amount": 200
+        },
+        "answer": 73682
+    },
+    {
+        "category": "extra",
+        "input": {
+            "coins": [
+                1,
+                2,
+                5,
+                10,
+                20,
+                50,
+                100,
+                200
+            ],
+            "target_amount": 1000
+        },
+        "answer": 321335886
+    },
+    {
+        "category": "extra",
+        "input": {
+            "coins": [
+                1,
+                2,
+                5,
+                10,
+                20,
+                50,
+                100,
+                200
+            ],
+            "target_amount": 100000
+        },
+        "answer": 10056050940818192726001
+    }
+]

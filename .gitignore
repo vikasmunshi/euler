@@ -95,5 +95,11 @@ site/
 target/
 var/
 
+/.solver_history
+/backup/
 /cache/
+/venv_3.12/
+/venv_3.13/
+/venv_3.14/
+/venv_3.15/
 /workspace/

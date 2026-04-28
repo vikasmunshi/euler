@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 477: "Number Sequence Game" (level 31)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 477: "Number Sequence Game" (level 31)</h2>
+<div class="problem_content" role="problem">
+<p>The number sequence game starts with a sequence $S$ of $N$ numbers written on a line.</p>
+<p>Two players alternate turns. The players on their respective turns must select and remove either the first or the last number remaining in the sequence.</p>
+<p>A player's own score is (determined by) the sum of all the numbers that player has taken. Each player attempts to maximize their own sum.</p>
+If $N = 4$ and $S = \{1, 2, 10, 3\}$, then each player maximizes their own score as follows:
+<ul><li>Player 1: removes the first number ($1$)</li>
+<li>Player 2: removes the last number from the remaining sequence ($3$)</li>
+<li>Player 1: removes the last number from the remaining sequence ($10$)</li>
+<li>Player 2: removes the remaining number ($2$)</li>
+</ul><p>Player 1 score is $1 + 10 = 11$.</p>
+<p>Let $F(N)$ be the score of player 1 if both players follow the optimal strategy for the sequence $S = \{s_1, s_2, \dots, s_N\}$ defined as:</p>
+<ul><li>$s_1 = 0$</li>
+<li>$s_{i + 1} = (s_i^2 + 45)$ modulo $1\,000\,000\,007$</li>
+</ul><p>The sequence begins with $S=\{0, 45, 2070, 4284945, 753524550, 478107844, 894218625, \dots\}$.</p>
+<p>You are given $F(2)=45$, $F(4)=4284990$, $F(100)=26365463243$, $F(10^4)=2495838522951$.</p>
+<p>Find $F(10^8)$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(n=4)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=100000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

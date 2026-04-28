@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "num_divisors": 5
+        },
+        "answer": 28
+    },
+    {
+        "category": "main",
+        "input": {
+            "num_divisors": 500
+        },
+        "answer": 76576500
+    }
+]

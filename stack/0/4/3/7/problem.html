@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 437: "Fibonacci Primitive Roots" (level 11)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 437: "Fibonacci Primitive Roots" (level 11)</h2>
+<div class="problem_content" role="problem">
+<p>
+When we calculate $8^n$ modulo $11$ for $n=0$ to $9$ we get: $1, 8, 9, 6, 4, 10, 3, 2, 5, 7$.<br/>
+As we see all possible values from $1$ to $10$ occur. So $8$ is a <strong>primitive root</strong> of $11$.<br/>
+But there is more:<br/>
+If we take a closer look we see:<br/>
+$1+8=9$<br/>
+$8+9=17 \equiv 6 \bmod 11$<br/>
+$9+6=15 \equiv 4 \bmod 11$<br/>
+$6+4=10$<br/>
+$4+10=14 \equiv 3 \bmod 11$<br/>
+$10+3=13 \equiv 2 \bmod 11$<br/>
+$3+2=5$<br/>
+$2+5=7$<br/>
+$5+7=12 \equiv 1 \bmod 11$.
+</p>
+So the powers of $8 \bmod 11$ are cyclic with period $10$, and $8^n + 8^{n+1} \equiv 8^{n+2} \pmod{11}$.<br/>
+$8$ is called a <strong>Fibonacci primitive root</strong> of $11$.<br/>
+Not every prime has a Fibonacci primitive root.<br/>
+There are $323$ primes less than $10000$ with one or more Fibonacci primitive roots and the sum of these primes is $1480491$.<br/>
+Find the sum of the primes less than $100\,000\,000$ with at least one Fibonacci primitive root.
+
+
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=10000)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=100000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

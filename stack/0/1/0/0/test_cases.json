@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "total_discs": 21
+        },
+        "answer": 15
+    },
+    {
+        "category": "dev",
+        "input": {
+            "total_discs": 120
+        },
+        "answer": 85
+    },
+    {
+        "category": "main",
+        "input": {
+            "total_discs": 1000000000000
+        },
+        "answer": 756872327473
+    }
+]

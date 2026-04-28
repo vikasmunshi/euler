@@ -1,0 +1,1 @@
+main : solve_totient_permutation_p0070_s0.py 10000000 -> 8319823 (correct) [0.225s]

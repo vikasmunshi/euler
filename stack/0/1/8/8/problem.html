@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 188: "Hyperexponentiation" (level 9)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 188: "Hyperexponentiation" (level 9)</h2>
+<div class="problem_content" role="problem">
+<p>The <strong>hyperexponentiation</strong> or <strong>tetration</strong> of a number $a$ by a positive integer $b$, denoted by $a\mathbin{\uparrow \uparrow}b$ or $^b a$, is recursively defined by:<br/><br/>
+$a \mathbin{\uparrow \uparrow} 1 = a$,<br/>
+$a \mathbin{\uparrow \uparrow} (k+1) = a^{(a \mathbin{\uparrow \uparrow} k)}$.</p>
+<p>
+Thus we have e.g. $3 \mathbin{\uparrow \uparrow} 2 = 3^3 = 27$, hence $3 \mathbin{\uparrow \uparrow} 3 = 3^{27} = 7625597484987$ and $3 \mathbin{\uparrow \uparrow} 4$ is roughly $10^{3.6383346400240996 \cdot 10^{12}}$.</p>
+<p>Find the last $8$ digits of $1777 \mathbin{\uparrow \uparrow} 1855$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(base=3, height=3, mod_digits=8)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(base=1777, height=1855, mod_digits=8)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(base=2, height=10000, mod_digits=8)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

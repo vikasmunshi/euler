@@ -1,0 +1,26 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "digits": "012",
+            "permutation_number": 4
+        },
+        "answer": "120"
+    },
+    {
+        "category": "dev",
+        "input": {
+            "digits": "012",
+            "permutation_number": 6
+        },
+        "answer": "210"
+    },
+    {
+        "category": "main",
+        "input": {
+            "digits": "0123456789",
+            "permutation_number": 1000000
+        },
+        "answer": "2783915460"
+    }
+]

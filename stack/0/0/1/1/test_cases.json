@@ -1,0 +1,9 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "num_adjacent": 4
+        },
+        "answer": 70600674
+    }
+]

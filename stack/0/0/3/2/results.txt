@@ -1,0 +1,1 @@
+main : solve_pandigital_products_p0032_s0.py  -> 45228 (correct) [0.058s]

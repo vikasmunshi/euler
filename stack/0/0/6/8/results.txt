@@ -1,0 +1,3 @@
+dev  : solve_magic_5_gon_ring_p0068_s0.py 9 3 -> 432621513 (correct) [0.046s]
+dev  : solve_magic_5_gon_ring_p0068_s0.py 12 4 -> 462723831516 (correct) [0.061s]
+main : solve_magic_5_gon_ring_p0068_s0.py 16 5 -> 6531031914842725 (correct) [0.097s]

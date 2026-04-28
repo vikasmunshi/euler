@@ -1,0 +1,1 @@
+main : solve_amicable_chains_p0095_s0.py 1000000 -> 14316 (correct) [1.904s]

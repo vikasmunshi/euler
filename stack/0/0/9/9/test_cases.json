@@ -1,0 +1,9 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "file_url": "https://projecteuler.net/resources/documents/0099_base_exp.txt"
+        },
+        "answer": 709
+    }
+]

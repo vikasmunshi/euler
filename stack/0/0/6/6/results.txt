@@ -1,0 +1,2 @@
+dev  : solve_diophantine_equation_p0066_s0.py 7 -> 5 (correct) [0.053s]
+main : solve_diophantine_equation_p0066_s0.py 1000 -> 661 (correct) [0.106s]

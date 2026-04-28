@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 557: "Cutting Triangles" (level 26)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 557: "Cutting Triangles" (level 26)</h2>
+<div class="problem_content" role="problem">
+<p>
+A triangle is cut into four pieces by two straight lines, each starting at one vertex and ending on the opposite edge. This results in forming three smaller triangular pieces, and one quadrilateral.  If the original triangle has an integral area, it is often possible to choose cuts such that all of the four pieces also have integral area.  For example, the diagram below shows a triangle of area $55$ that has been cut in this way.
+</p>
+<div align="center"><img alt="0557-triangle.gif" src="resources/0557-triangle.gif"/></div>
+<p>
+Representing the areas as $a, b, c$ and $d$, in the example above, the individual areas are $a = 22$, $b = 8$, $c = 11$ and $d = 14$.  It is also possible to cut a triangle of area $55$ such that $a = 20$, $b = 2$, $c = 24$, $d = 9$.</p>
+<p>
+Define a triangle cutting quadruple $(a, b, c, d)$ as a valid integral division of a triangle, where $a$ is the area of the triangle between the two cut vertices, $d$ is the area of the quadrilateral and $b$ and $c$ are the areas of the two other triangles, with the restriction that $b \le c$.  The two solutions described above are $(22,8,11,14)$ and $(20,2,24,9)$.  These are the only two possible quadruples that have a total area of $55$.
+</p>
+<p>
+Define $S(n)$ as the sum of the area of the uncut triangles represented by all valid quadruples with $a+b+c+d \le n$.<br/> For example, $S(20) = 259$.
+</p>
+<p>
+Find $S(10000)$.
+</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<p><em>No test cases available.</em></p>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

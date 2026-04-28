@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 438: "Integer Part of Polynomial Equation's Solutions" (level 38)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 438: "Integer Part of Polynomial Equation's Solutions" (level 38)</h2>
+<div class="problem_content" role="problem">
+<p>
+For an $n$-tuple of integers $t = (a_1, \dots, a_n)$, let $(x_1, \dots, x_n)$ be the solutions of the polynomial equation $x^n + a_1 x^{n-1} + a_2 x^{n-2} + \cdots + a_{n-1}x + a_n = 0$.
+</p>
+<p>
+Consider the following two conditions:
+</p><ul><li>$x_1, \dots, x_n$ are all real.
+</li><li>If $x_1, \dots, x_n$ are sorted, $\lfloor x_i\rfloor = i$ for $1 \leq i \leq n$. ($\lfloor \cdot \rfloor$: floor function.)
+</li></ul><p>
+In the case of $n = 4$, there are $12$ $n$-tuples of integers which satisfy both conditions.<br/>
+We define $S(t)$ as the sum of the absolute values of the integers in $t$.<br/>
+For $n = 4$ we can verify that $\sum S(t) = 2087$ for all $n$-tuples $t$ which satisfy both conditions.
+</p>
+<p>
+Find $\sum S(t)$ for $n = 7$.
+</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=7)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

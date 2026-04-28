@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 295: "Lenticular Holes" (level 34)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 295: "Lenticular Holes" (level 34)</h2>
+<div class="problem_content" role="problem">
+<p>We call the convex area enclosed by two circles a <dfn>lenticular hole</dfn> if:
+</p><ul><li>The centres of both circles are on lattice points.</li>
+<li>The two circles intersect at two distinct lattice points.</li>
+<li>The interior of the convex area enclosed by both circles does not contain any lattice points.
+</li>
+</ul><p>Consider the circles:<br/>
+$C_0$: $x^2 + y^2 = 25$<br/>
+$C_1$: $(x + 4)^2 + (y - 4)^2 = 1$<br/>
+$C_2$: $(x - 12)^2 + (y - 4)^2 = 65$
+</p>
+<p>
+The circles $C_0$, $C_1$ and $C_2$ are drawn in the picture below.</p>
+<div align="center"><img alt="0295_lenticular.gif" src="resources/0295_lenticular.gif"/></div>
+<p>
+$C_0$ and $C_1$ form a lenticular hole, as well as $C_0$ and $C_2$.</p>
+<p>
+We call an ordered pair of positive real numbers $(r_1, r_2)$ a <dfn>lenticular pair</dfn> if there exist two circles with radii $r_1$ and $r_2$ that form a lenticular hole.
+We can verify that $(1, 5)$ and $(5, \sqrt{65})$ are the lenticular pairs of the example above.</p>
+<p>
+Let $L(N)$ be the number of <b>distinct</b> lenticular pairs $(r_1, r_2)$ for which $0 \lt r_1 \le r_2 \le N$.<br/>
+We can verify that $L(10) = 30$ and $L(100) = 3442$.</p>
+<p>
+Find $L(100\,000)$.
+</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=10)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=100000)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(max_limit=200000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

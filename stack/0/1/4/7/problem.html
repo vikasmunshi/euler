@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 147: "Rectangles in Cross-hatched Grids" (level 24)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 147: "Rectangles in Cross-hatched Grids" (level 24)</h2>
+<div class="problem_content" role="problem">
+<p>In a $3 \times 2$ cross-hatched grid, a total of $37$ different rectangles could be situated within that grid as indicated in the sketch.</p>
+<div class="center"><img alt="" class="dark_img" src="resources/0147.png"/></div>
+<p>There are $5$ grids smaller than $3 \times 2$, vertical and horizontal dimensions being important, i.e. $1 \times 1$, $2 \times 1$, $3 \times 1$, $1 \times 2$ and $2 \times 2$. If each of them is cross-hatched, the following number of different rectangles could be situated within those smaller grids:</p>
+<table class="grid" style="margin:0 auto;">
+<tr><td align="center" style="width:50px;">$1 \times 1$</td><td align="right" style="width:50px;">$1$</td></tr>
+<tr><td align="center">$2 \times 1$</td><td align="right">$4$</td></tr>
+<tr><td align="center">$3 \times 1$</td><td align="right">$8$</td></tr>
+<tr><td align="center">$1 \times 2$</td><td align="right">$4$</td></tr>
+<tr><td align="center">$2 \times 2$</td><td align="right">$18$</td></tr>
+</table>
+<p>Adding those to the $37$ of the $3 \times 2$ grid, a total of $72$ different rectangles could be situated within $3 \times 2$ and smaller grids.</p>
+<p>How many different rectangles could be situated within $47 \times 43$ and smaller grids?</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_rows=3, max_cols=2)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_rows=47, max_cols=43)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(max_rows=100, max_cols=100)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

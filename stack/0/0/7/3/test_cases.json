@@ -1,0 +1,30 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 8
+        },
+        "answer": 3
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 1000
+        },
+        "answer": 50695
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_d": 12000
+        },
+        "answer": 7295372
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_d": 100000
+        },
+        "answer": 506608484
+    }
+]

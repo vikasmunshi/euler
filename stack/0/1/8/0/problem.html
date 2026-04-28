@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 180: "Golden Triplets" (level 30)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 180: "Golden Triplets" (level 30)</h2>
+<div class="problem_content" role="problem">
+<p>For any integer $n$, consider the three functions</p>
+$$\begin{align}
+f_{1, n}(x, y, z) &amp;= x^{n + 1} + y^{n + 1} - z^{n + 1}\\
+f_{2, n}(x, y, z) &amp;= (xy + yz + zx) \cdot (x^{n - 1} + y^{n - 1} - z^{n - 1})\\
+f_{3, n}(x, y, z) &amp;= xyz \cdot (x^{n - 2} + y^{n - 2} - z^{n - 2})
+\end{align}$$
+
+<p>and their combination
+$$f_n(x, y, z) = f_{1, n}(x, y, z) + f_{2, n}(x, y, z) - f_{3, n}(x, y, z).$$</p>
+<p>We call $(x, y, z)$ a golden triple of order $k$ if $x$, $y$, and $z$ are all rational numbers of the form $a / b$ with $0 \lt a \lt b \le k$ and there is (at least) one integer $n$, so that $f_n(x, y, z) = 0$.</p>
+<p>Let $s(x, y, z) = x + y + z$.<br/>
+Let $t = u / v$ be the sum of all distinct $s(x, y, z)$ for all golden triples $(x, y, z)$ of order $35$.<br/> All the $s(x, y, z)$ and $t$ must be in reduced form.</p>
+<p>Find $u + v$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=10)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=35)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(max_limit=50)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

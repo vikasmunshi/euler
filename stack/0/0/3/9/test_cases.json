@@ -1,0 +1,37 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_perimeter": 100
+        },
+        "answer": 60
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_perimeter": 1000
+        },
+        "answer": 840
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_perimeter": 10000
+        },
+        "answer": 5040
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_perimeter": 100000
+        },
+        "answer": 55440
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_perimeter": 1000000
+        },
+        "answer": 720720
+    }
+]

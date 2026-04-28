@@ -1,0 +1,44 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "limit": 10
+        },
+        "answer": 6
+    },
+    {
+        "category": "dev",
+        "input": {
+            "limit": 100
+        },
+        "answer": 30
+    },
+    {
+        "category": "dev",
+        "input": {
+            "limit": 1000
+        },
+        "answer": 210
+    },
+    {
+        "category": "dev",
+        "input": {
+            "limit": 10000
+        },
+        "answer": 2310
+    },
+    {
+        "category": "dev",
+        "input": {
+            "limit": 100000
+        },
+        "answer": 30030
+    },
+    {
+        "category": "main",
+        "input": {
+            "limit": 1000000
+        },
+        "answer": 510510
+    }
+]

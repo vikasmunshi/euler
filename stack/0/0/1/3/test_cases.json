@@ -1,0 +1,23 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "digits": 10
+        },
+        "answer": "5537376230"
+    },
+    {
+        "category": "extra",
+        "input": {
+            "digits": 20
+        },
+        "answer": "55373762303908766372"
+    },
+    {
+        "category": "extra",
+        "input": {
+            "digits": 100
+        },
+        "answer": "5537376230390876637302048746832985971773659831892672"
+    }
+]

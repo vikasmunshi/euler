@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "set_length": 3
+        },
+        "answer": 107
+    },
+    {
+        "category": "dev",
+        "input": {
+            "set_length": 4
+        },
+        "answer": 792
+    },
+    {
+        "category": "main",
+        "input": {
+            "set_length": 5
+        },
+        "answer": 26033
+    }
+]

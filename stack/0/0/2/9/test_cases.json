@@ -1,0 +1,32 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "a_min": 2,
+            "a_max": 5,
+            "b_min": 2,
+            "b_max": 5
+        },
+        "answer": 15
+    },
+    {
+        "category": "main",
+        "input": {
+            "a_min": 2,
+            "a_max": 100,
+            "b_min": 2,
+            "b_max": 100
+        },
+        "answer": 9183
+    },
+    {
+        "category": "extra",
+        "input": {
+            "a_min": 2,
+            "a_max": 1000,
+            "b_min": 2,
+            "b_max": 1000
+        },
+        "answer": 977358
+    }
+]

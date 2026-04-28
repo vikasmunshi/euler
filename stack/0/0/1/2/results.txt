@@ -1,0 +1,4 @@
+dev  : solve_highly_divisible_triangular_number_p0012_s0.py 5 -> 28 (correct) [0.021s]
+dev  : solve_highly_divisible_triangular_number_p0012_s1.py 5 -> 28 (correct) [0.020s]
+main : solve_highly_divisible_triangular_number_p0012_s0.py 500 -> 76576500 (correct) [0.080s]
+main : solve_highly_divisible_triangular_number_p0012_s1.py 500 -> 76576500 (correct) [0.230s]

@@ -1,0 +1,37 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "multiples": 2
+        },
+        "answer": 125874
+    },
+    {
+        "category": "dev",
+        "input": {
+            "multiples": 3
+        },
+        "answer": 142857
+    },
+    {
+        "category": "dev",
+        "input": {
+            "multiples": 4
+        },
+        "answer": 142857
+    },
+    {
+        "category": "dev",
+        "input": {
+            "multiples": 5
+        },
+        "answer": 142857
+    },
+    {
+        "category": "main",
+        "input": {
+            "multiples": 6
+        },
+        "answer": 142857
+    }
+]

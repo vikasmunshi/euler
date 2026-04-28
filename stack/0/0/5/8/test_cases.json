@@ -1,0 +1,9 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "threshold": 0.1
+        },
+        "answer": 26241
+    }
+]

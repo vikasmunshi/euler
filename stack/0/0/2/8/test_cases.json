@@ -1,0 +1,30 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "size": 5
+        },
+        "answer": 101
+    },
+    {
+        "category": "dev",
+        "input": {
+            "size": 7
+        },
+        "answer": 261
+    },
+    {
+        "category": "dev",
+        "input": {
+            "size": 9
+        },
+        "answer": 537
+    },
+    {
+        "category": "main",
+        "input": {
+            "size": 1001
+        },
+        "answer": 669171001
+    }
+]

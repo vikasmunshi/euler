@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 534: "Weak Queens" (level 25)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 534: "Weak Queens" (level 25)</h2>
+<div class="problem_content" role="problem">
+<p>The classical <b>eight queens puzzle</b> is the well known problem of placing eight chess queens on an $8 \times 8$ chessboard so that no two queens threaten each other. Allowing configurations to reappear in rotated or mirrored form, a total of $92$ distinct configurations can be found for eight queens. The general case asks for the number of distinct ways of placing $n$ queens on an $n \times n$ board, e.g. you can find $2$ distinct configurations for $n=4$.</p>
+<p>Let's define a <dfn>weak queen</dfn> on an $n \times n$ board to be a piece which can move any number of squares if moved horizontally, but a maximum of $n - 1 - w$ squares if moved vertically or diagonally, $0 \le w \lt n$ being the "weakness factor". For example, a weak queen on an $n \times n$ board with a weakness factor of $w=1$ located in the bottom row will not be able to threaten any square in the top row as the weak queen would need to move $n - 1$ squares vertically or diagonally to get there, but may only move $n - 2$ squares in these directions. In contrast, the weak queen is not handicapped horizontally, thus threatening every square in its own row, independently from its current position in that row.</p>
+<p>Let $Q(n,w)$ be the number of ways $n$ weak queens with weakness factor $w$ can be placed on an $n \times n$ board so that no two queens threaten each other. It can be shown, for example, that $Q(4,0)=2$, $Q(4,2)=16$ and $Q(4,3)=256$.</p>
+<p>Let $S(n)=\displaystyle\sum_{w=0}^{n-1} Q(n,w)$.</p>
+<p>You are given that $S(4)=276$ and $S(5)=3347$.</p>
+<p>Find $S(14)$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(n=4)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=14)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

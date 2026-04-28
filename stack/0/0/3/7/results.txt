@@ -1,0 +1,1 @@
+main : solve_truncatable_primes_p0037_s0.py  -> 748317 (correct) [0.424s]

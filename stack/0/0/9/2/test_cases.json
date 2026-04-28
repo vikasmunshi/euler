@@ -1,0 +1,58 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "power_of_10": 2
+        },
+        "answer": 80
+    },
+    {
+        "category": "dev",
+        "input": {
+            "power_of_10": 3
+        },
+        "answer": 857
+    },
+    {
+        "category": "dev",
+        "input": {
+            "power_of_10": 4
+        },
+        "answer": 8558
+    },
+    {
+        "category": "dev",
+        "input": {
+            "power_of_10": 5
+        },
+        "answer": 85623
+    },
+    {
+        "category": "dev",
+        "input": {
+            "power_of_10": 6
+        },
+        "answer": 856929
+    },
+    {
+        "category": "main",
+        "input": {
+            "power_of_10": 7
+        },
+        "answer": 8581146
+    },
+    {
+        "category": "extra",
+        "input": {
+            "power_of_10": 8
+        },
+        "answer": 85744333
+    },
+    {
+        "category": "extra",
+        "input": {
+            "power_of_10": 9
+        },
+        "answer": 854325192
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "base": 2,
+            "power": 15
+        },
+        "answer": 26
+    },
+    {
+        "category": "main",
+        "input": {
+            "base": 2,
+            "power": 1000
+        },
+        "answer": 1366
+    },
+    {
+        "category": "extra",
+        "input": {
+            "base": 2,
+            "power": 10000
+        },
+        "answer": 13561
+    }
+]

@@ -1,0 +1,30 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "expansions": 10
+        },
+        "answer": 1
+    },
+    {
+        "category": "dev",
+        "input": {
+            "expansions": 100
+        },
+        "answer": 15
+    },
+    {
+        "category": "main",
+        "input": {
+            "expansions": 1000
+        },
+        "answer": 153
+    },
+    {
+        "category": "extra",
+        "input": {
+            "expansions": 10000
+        },
+        "answer": 1508
+    }
+]

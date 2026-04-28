@@ -1,0 +1,9 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "file_url": "https://projecteuler.net/resources/documents/0098_words.txt"
+        },
+        "answer": 18769
+    }
+]

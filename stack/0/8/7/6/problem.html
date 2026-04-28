@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 876: "Triplet Tricks" (level 36)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 876: "Triplet Tricks" (level 36)</h2>
+<div class="problem_content" role="problem">
+<p>
+Starting with three numbers $a, b, c$, at each step do one of the three operations:</p>
+<ul>
+<li>change $a$ to $2(b + c) - a$;
+</li><li>change $b$ to $2(c + a) - b$;
+</li><li>change $c$ to $2(a + b) - c$;
+</li></ul>
+<p>
+Define $f(a, b, c)$ to be the minimum number of steps required for one number to become zero. If this is not possible then $f(a, b, c)=0$.</p>
+<p>
+For example, $f(6,10,35)=3$:
+$$(6,10,35) \to (6,10,-3) \to (8,10,-3) \to (8,0,-3).$$
+However, $f(6,10,36)=0$ as no series of operations leads to a zero number.</p>
+<p>
+Also define $F(a, b)=\sum_{c=1}^\infty f(a,b,c)$.
+You are given $F(6,10)=17$ and $F(36,100)=179$.</p>
+<p>
+Find $\displaystyle\sum_{k=1}^{18}F(6^k,10^k)$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_k=1)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_k=18)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

@@ -1,0 +1,9 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "max_limit": 1000
+        },
+        "answer": -59231
+    }
+]

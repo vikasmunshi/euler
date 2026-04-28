@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "divisor": 1000
+        },
+        "answer": 449
+    },
+    {
+        "category": "main",
+        "input": {
+            "divisor": 1000000
+        },
+        "answer": 55374
+    }
+]

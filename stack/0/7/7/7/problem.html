@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 777: "Lissajous Curves" (level 36)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 4px; }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 777: "Lissajous Curves" (level 36)</h2>
+<div class="problem_content" role="problem">
+<p>For coprime positive integers $a$ and $b$, let $C_{a,b}$ be the curve defined by:
+$$
+\begin{align}
+x &amp;= \cos \left(at\right) \\
+y &amp;= \cos \left(b\left(t-\frac{\pi}{10}\right)\right)
+\end{align}
+$$
+where $t$ varies between $0$ and $2\pi$.</p>
+<p>For example, the images below show $C_{2,5}$ (left) and $C_{7,4}$ (right):</p>
+<div style="text-align:center;">
+<img alt="" class="dark_img" height="300" src="resources/0777_lissajous-pair-25-74.png"/>
+</div>
+<p>Define $d(a,b) = \sum (x^2 + y^2)$, where the sum is over all points (x, y) at which $C_{a,b}$ crosses itself.</p>
+<p>For example, in the case of $C_{2,5}$ illustrated above, the curve crosses itself at two points: $(0.31, 0)$ and $(-0.81, 0)$, rounding coordinates to two decimal places, yielding $d(2, 5)=0.75$. Some other examples are $d(2,3)=4.5$, $d(7,4)=39.5$, <span style="white-space:nowrap;">$d(7,5)=52$,</span> and $d(10,7)=23.25$.</p>
+<p>Let $s(m) = \sum d(a,b)$, where this sum is over all pairs of coprime integers $a,b$ with $2\le a\le m$ and $2\le b\le m$.<br/>
+You are given that $s(10) = 1602.5$ and $s(100) = 24256505$.</p>
+<p>Find $s(10^6)$. Give your answer in scientific notation rounded to $10$ significant digits; for example $s(100)$ would be given as 2.425650500e7.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=10)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=1000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-approach">
+<h2>Solution Approach</h2>
+<div id="solution-approach-content">
+
+</div>
+</section>
+</body>
+</html>

@@ -1,0 +1,44 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_digits": 1
+        },
+        "answer": 25
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_digits": 2
+        },
+        "answer": 157
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_digits": 3
+        },
+        "answer": 1772
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_digits": 4
+        },
+        "answer": 18228
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_digits": 6
+        },
+        "answer": 872187
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_digits": 9
+        },
+        "answer": 2609044274
+    }
+]

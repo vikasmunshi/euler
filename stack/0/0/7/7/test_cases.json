@@ -1,0 +1,37 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "num_prime_partitions": 5
+        },
+        "answer": 10
+    },
+    {
+        "category": "dev",
+        "input": {
+            "num_prime_partitions": 50
+        },
+        "answer": 25
+    },
+    {
+        "category": "dev",
+        "input": {
+            "num_prime_partitions": 500
+        },
+        "answer": 45
+    },
+    {
+        "category": "main",
+        "input": {
+            "num_prime_partitions": 5000
+        },
+        "answer": 71
+    },
+    {
+        "category": "extra",
+        "input": {
+            "num_prime_partitions": 50000
+        },
+        "answer": 104
+    }
+]

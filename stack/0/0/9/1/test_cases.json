@@ -1,0 +1,16 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "coordinate_limit": 2
+        },
+        "answer": 14
+    },
+    {
+        "category": "main",
+        "input": {
+            "coordinate_limit": 50
+        },
+        "answer": 14234
+    }
+]

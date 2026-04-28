@@ -1,0 +1,26 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "num_digits": 6,
+            "prime_run": 6
+        },
+        "answer": 13
+    },
+    {
+        "category": "dev",
+        "input": {
+            "num_digits": 6,
+            "prime_run": 7
+        },
+        "answer": 56003
+    },
+    {
+        "category": "main",
+        "input": {
+            "num_digits": 6,
+            "prime_run": 8
+        },
+        "answer": 121313
+    }
+]

@@ -1,0 +1,58 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_num": 10
+        },
+        "answer": 1
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_num": 100
+        },
+        "answer": 2
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_num": 1000
+        },
+        "answer": 12
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_num": 10000
+        },
+        "answer": 42
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_num": 100000
+        },
+        "answer": 42
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_num": 1000000
+        },
+        "answer": 402
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_num": 5000000
+        },
+        "answer": 3240
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_num": 10000000
+        },
+        "answer": 4680
+    }
+]

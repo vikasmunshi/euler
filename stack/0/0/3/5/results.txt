@@ -1,0 +1,8 @@
+dev  : solve_circular_primes_p0035_s0.py 10 -> 4 (correct) [0.045s]
+dev  : solve_circular_primes_p0035_s1_pps.py 10 -> 4 (correct) [0.051s]
+dev  : solve_circular_primes_p0035_s0.py 100 -> 13 (correct) [0.040s]
+dev  : solve_circular_primes_p0035_s1_pps.py 100 -> 13 (correct) [0.048s]
+dev  : solve_circular_primes_p0035_s0.py 1000 -> 25 (correct) [0.037s]
+dev  : solve_circular_primes_p0035_s1_pps.py 1000 -> 25 (correct) [0.050s]
+main : solve_circular_primes_p0035_s0.py 1000000 -> 55 (correct) [0.390s]
+main : solve_circular_primes_p0035_s1_pps.py 1000000 -> 55 (correct) [0.139s]

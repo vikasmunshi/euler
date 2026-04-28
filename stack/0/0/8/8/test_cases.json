@@ -1,0 +1,18 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_k": 6,
+            "min_k": 2
+        },
+        "answer": 30
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_k": 12000,
+            "min_k": 2
+        },
+        "answer": 7587457
+    }
+]

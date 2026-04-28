@@ -1,0 +1,23 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 7
+        },
+        "answer": 5
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_d": 1000
+        },
+        "answer": 661
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_d": 10000
+        },
+        "answer": 9949
+    }
+]
