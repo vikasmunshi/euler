@@ -11,10 +11,10 @@ from typing import Any
 
 from jsonschema import validate
 
-from solver.config import keys_file, keys_version, schema_file, upload_keys_to_origin
+from solver.config import keys_file, keys_version, schema_file
 from solver.crypto.asymmetrical import UserKeyPair
 from solver.crypto.symmetrical import EncKey
-from solver.utils import is_admin, is_unchanged, run_script
+from solver.utils import is_admin
 
 __all__ = ['get_key', 'get_master_key', 'get_user_key', 'read_keys_file', 'rekey_keys_file', 'write_keys_file']
 
@@ -37,8 +37,7 @@ def write_keys_file(data: dict[str, Any]) -> None:
     """
     Validate and write data to the keys file, then sync it with the remote origin.
 
-    Clears the read and get_key caches after writing. If the file has changed relative
-    to origin/master, the upload script is run (push for admin users, pull otherwise).
+    Clears the read and get_key caches after writing.
 
     Args:
         data: The full keys file contents to validate and persist.
@@ -48,8 +47,6 @@ def write_keys_file(data: dict[str, Any]) -> None:
     print(f'Keys file {keys_file} updated; num users: {len(data["users"])}, num keys: {len(data["keys"])}')
     get_key.cache_clear()
     read_keys_file.cache_clear()
-    if not is_unchanged(keys_file):
-        run_script(upload_keys_to_origin, cmd_line_args=['push' if is_admin() else 'pull'])
 
 
 @lru_cache(maxsize=None)

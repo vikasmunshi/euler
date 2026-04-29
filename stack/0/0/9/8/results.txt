@@ -1,1 +1,1 @@
-main : solve_anagramic_squares_p0098_s0.py https://projecteuler.net/resources/documents/0098_words.txt -> 18769 (correct) [0.342s]
+main : solve_anagramic_squares_p0098_s0.py https://projecteuler.net/resources/documents/0098_words.txt -> 18769 (correct) [0.341s]

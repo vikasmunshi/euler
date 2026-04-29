@@ -1,2 +1,2 @@
-dev  : solve__10_001st_prime_p0007_s0.py 6 -> 13 (correct) [0.028s]
-main : solve__10_001st_prime_p0007_s0.py 10001 -> 104743 (correct) [0.106s]
+dev  : solve__10_001st_prime_p0007_s0.py 6 -> 13 (correct) [0.041s]
+main : solve__10_001st_prime_p0007_s0.py 10001 -> 104743 (correct) [0.094s]

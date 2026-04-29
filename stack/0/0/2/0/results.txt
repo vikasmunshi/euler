@@ -1,2 +1,2 @@
-dev  : solve_factorial_digit_sum_p0020_s0.py 10 -> 27 (correct) [0.023s]
-main : solve_factorial_digit_sum_p0020_s0.py 100 -> 648 (correct) [0.020s]
+dev  : solve_factorial_digit_sum_p0020_s0.py 10 -> 27 (correct) [0.040s]
+main : solve_factorial_digit_sum_p0020_s0.py 100 -> 648 (correct) [0.035s]

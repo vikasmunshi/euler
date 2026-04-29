@@ -13,11 +13,10 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, PublicFormat
 
+from solver.config import private_key_file
 from solver.utils import get_gh_user_email
 
-__all__ = ['UserKeyPair', 'private_key_file']
-
-private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
+__all__ = ['UserKeyPair']
 
 
 class UserKeyPair(NamedTuple):

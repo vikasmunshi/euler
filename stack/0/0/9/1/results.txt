@@ -1,2 +1,2 @@
-dev  : solve_right_triangles_with_integer_coordinates_p0091_s0.py 2 -> 14 (correct) [0.023s]
-main : solve_right_triangles_with_integer_coordinates_p0091_s0.py 50 -> 14234 (correct) [0.031s]
+dev  : solve_right_triangles_with_integer_coordinates_p0091_s0.py 2 -> 14 (correct) [0.046s]
+main : solve_right_triangles_with_integer_coordinates_p0091_s0.py 50 -> 14234 (correct) [0.035s]

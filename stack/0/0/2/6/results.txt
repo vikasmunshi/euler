@@ -1,2 +1,2 @@
-dev  : solve_reciprocal_cycles_p0026_s0.py 10 -> 7 (correct) [0.032s]
-main : solve_reciprocal_cycles_p0026_s0.py 1000 -> 983 (correct) [0.042s]
+dev  : solve_reciprocal_cycles_p0026_s0.py 10 -> 7 (correct) [0.043s]
+main : solve_reciprocal_cycles_p0026_s0.py 1000 -> 983 (correct) [0.039s]

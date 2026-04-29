@@ -6,7 +6,6 @@ __pycache__/
 
 # C extensions
 *.so
-!euler_solver/c_libs/libs/lib_*.so
 
 # Development artifacts
 *.cover
@@ -77,9 +76,6 @@ celerybeat-schedule
 docs/_build/
 local_settings.py
 
-# euler_solver specific exclusions
-history/
-
 # Project data
 db.sqlite3
 db.sqlite3-journal
@@ -95,11 +91,11 @@ site/
 target/
 var/
 
-/.solver_history
+# solver specific files and folders to exclude
+/*.csv
+/.*
+/.*/
 /backup/
 /cache/
-/venv_3.12/
-/venv_3.13/
-/venv_3.14/
-/venv_3.15/
-/workspace/
+/euler/
+/venv*/

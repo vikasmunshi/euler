@@ -1,2 +1,2 @@
-dev  : solve_power_digit_sum_p0016_s0.py 2 15 -> 26 (correct) [0.021s]
-main : solve_power_digit_sum_p0016_s0.py 2 1000 -> 1366 (correct) [0.021s]
+dev  : solve_power_digit_sum_p0016_s0.py 2 15 -> 26 (correct) [0.053s]
+main : solve_power_digit_sum_p0016_s0.py 2 1000 -> 1366 (correct) [0.041s]

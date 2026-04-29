@@ -1,2 +1,2 @@
-dev  : solve_powerful_digit_sum_p0056_s0.py 1 -> 45 (correct) [0.708s]
-main : solve_powerful_digit_sum_p0056_s0.py 2 -> 972 (correct) [0.719s]
+dev  : solve_powerful_digit_sum_p0056_s0.py 1 -> 45 (correct) [0.674s]
+main : solve_powerful_digit_sum_p0056_s0.py 2 -> 972 (correct) [0.641s]

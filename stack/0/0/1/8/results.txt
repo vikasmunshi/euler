@@ -1,2 +1,2 @@
-dev  : solve_maximum_path_sum_i_p0018_s0.py TRIANGLE_A -> 23 (correct) [0.044s]
-main : solve_maximum_path_sum_i_p0018_s0.py TRIANGLE_B -> 1074 (correct) [0.041s]
+dev  : solve_maximum_path_sum_i_p0018_s0.py TRIANGLE_A -> 23 (correct) [0.052s]
+main : solve_maximum_path_sum_i_p0018_s0.py TRIANGLE_B -> 1074 (correct) [0.042s]

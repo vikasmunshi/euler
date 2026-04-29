@@ -3,6 +3,6 @@
 """Entry point: runs the interactive solver shell."""
 
 if __name__ == '__main__':
-    from solver.cli import SolverShell
+    from solver.cli import cli
 
-    raise SystemExit(SolverShell().execute())
+    raise SystemExit(cli())

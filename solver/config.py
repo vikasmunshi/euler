@@ -30,7 +30,8 @@ test_cases_filename: str = 'test_cases.json'
 timeout: float = 300  # timeout in seconds
 
 cache_dir: Path = root_dir / 'cache'
-workspace_dir: Path = root_dir / 'workspace'  # Working/temporary files directory
+workspace_dir: Path = root_dir / 'euler'  # Working/temporary files directory
+private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
 problem_number_file: Path = workspace_dir / problem_number_filename
 results_file: Path = workspace_dir / 'results.txt'
 stack_dir: Path = root_dir / 'stack'

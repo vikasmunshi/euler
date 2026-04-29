@@ -1,2 +1,2 @@
-dev  : solve_lattice_paths_p0015_s0.py 2 -> 6 (correct) [0.022s]
-main : solve_lattice_paths_p0015_s0.py 20 -> 137846528820 (correct) [0.038s]
+dev  : solve_lattice_paths_p0015_s0.py 2 -> 6 (correct) [0.049s]
+main : solve_lattice_paths_p0015_s0.py 20 -> 137846528820 (correct) [0.056s]

@@ -1,2 +1,2 @@
-dev  : solve_convergents_of_e_p0065_s0.py 10 -> 17 (correct) [0.046s]
-main : solve_convergents_of_e_p0065_s0.py 100 -> 272 (correct) [0.043s]
+dev  : solve_convergents_of_e_p0065_s0.py 10 -> 17 (correct) [0.040s]
+main : solve_convergents_of_e_p0065_s0.py 100 -> 272 (correct) [0.037s]

@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "solver"
+version = "0.1.0"
+description = "Interactive shell for solving and managing Project Euler problems"
+authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
+license = { text = "MIT" }
+requires-python = ">=3.14"
+dependencies = [
+    "PyQt5",
+    "beautifulsoup4",
+    "cryptography",
+    "flake8",
+    "jsonschema",
+    "matplotlib",
+    "mypy",
+    "numpy",
+    "pre-commit",
+    "pyprimesieve",
+    "requests",
+    "types-requests",
+]
+
+# System-level dependencies (apt) required before `pip install`.
+# Install with: ./scripts/setup_dev_env.sh install python primesieve c
+#
+#   python      — Python 3.14 runtime + venv (via ppa:deadsnakes/ppa)
+#   primesieve  — primesieve, libprimesieve-dev (required to build pyprimesieve)
+#   c           — gcc, build-essential, etc. (required to compile C extensions)
+[tool.setup.system-dependencies]
+script = "./scripts/setup_dev_env.sh"
+targets = ["python", "primesieve", "c"]
+apt = [
+    "python3.14",
+    "python3.14-dev",
+    "python3.14-venv",
+    "primesieve",
+    "libprimesieve-dev",
+    "build-essential",
+    "gcc",
+]
+
+[project.scripts]
+solver = "solver.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["solver*"]

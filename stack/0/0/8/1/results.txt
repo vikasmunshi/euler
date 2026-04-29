@@ -1,2 +1,2 @@
-dev  : solve_path_sum_two_ways_p0081_s0.py  -> 2427 (correct) [0.045s]
-main : solve_path_sum_two_ways_p0081_s0.py https://projecteuler.net/resources/documents/0081_matrix.txt -> 427337 (correct) [0.048s]
+dev  : solve_path_sum_two_ways_p0081_s0.py  -> 2427 (correct) [0.059s]
+main : solve_path_sum_two_ways_p0081_s0.py https://projecteuler.net/resources/documents/0081_matrix.txt -> 427337 (correct) [0.047s]
