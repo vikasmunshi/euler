@@ -248,6 +248,11 @@ class SolverShell(Cmd):
         return []
 
     @continue_on_error
+    def do_echo(self, line: str) -> None:
+        """Print the given text to the console"""
+        print(line)
+
+    @continue_on_error
     def do_for(self, line: str) -> None:
         """Use "for <var> in <start> to <end>: <cmd>; <cmd> <var>; ..." for looping"""
         if line.strip() in ('-h', '--help'):
@@ -529,7 +534,7 @@ def make_shell_command(name: str, command: str) -> Callable:
     return run
 
 
-methods: dict[str, Callable] = {
+_commands: dict[str, Callable] = {
     'eval': evaluate,
     'full-stack-backup': backup_the_stack,
     'full-stack-restore': restore_the_stack,
@@ -547,40 +552,70 @@ methods: dict[str, Callable] = {
     'upload_keys': upload_keys,
     'user': user,
 }
-for _name, _func in methods.items():
-    setattr(SolverShell, f'do_{_name}', make_do(_name, _func))
-    setattr(SolverShell, f'complete_{_name}', make_complete(_name, _func))
-setattr(SolverShell, 'post', 'do_ls')
-SolverShell.aliases['eval-pub'] = ('for n in 1 to 100: '
-                                   'init n --silent; '
-                                   'eval --record; '
-                                   'stack-clear --silent; '
-                                   'shell echo processed n')
-SolverShell.aliases['restack'] = (f'for n in 1 to {max(problems, key=lambda p: p.number).number}: '
-                                  'init n; '
-                                  'stack-clear --silent; '
-                                  'shell echo processed n')
-SolverShell.aliases['pre-commit'] = 'shell pre-commit run --all-files'
+
+_aliases: dict[str, str] = {
+    'eval-pub': ('for n in 1 to 100: '
+                 'init n --silent; '
+                 'eval --record; '
+                 'stack-clear --silent; '
+                 'echo processed n'),
+    'restack': (f'for n in 1 to {max(problems, key=lambda p: p.number).number}: '
+                'init n; '
+                'stack-clear --silent; '
+                'echo processed n'),
+    'pre-commit': 'shell pre-commit run --all-files'
+}
 
 
-def cli() -> int:
-    """Launch the solver shell, optionally preloading commands from the command line.
+def cli(
+        commands: dict[str, Callable] | None = None,
+        aliases: dict[str, str] | None = None,
+        pre: str | None = None,
+        post: str | None = 'do_ls',
+) -> int:
+    """Configure and launch the solver shell.
 
-    Usage:
+    Registers commands and aliases on SolverShell, then parses argv to extract any
+    startup commands before entering the interactive loop.
+
+    Args:
+        commands: Mapping of command names to callables. Defaults to the built-in
+                  command set (_commands) when None.
+        aliases:  Mapping of alias names to command strings. Defaults to the built-in
+                  alias set (_aliases) when None.
+        pre:      Name of a do_<pre> method to invoke during preloop, before the
+                  prompt appears. Defaults to None (no pre-hook).
+        post:     Name of a do_<post> method to invoke during postloop, after the
+                  session ends. Defaults to 'do_ls'.
+
+    Command-line usage (argv parsing):
         solver                      # interactive shell
         solver "cmd"                # run cmd, then stay interactive
         solver "cmd1; cmd2"         # run cmd1 then cmd2, then stay interactive
         solver -c "cmd1; cmd2"      # run cmd1 then cmd2, then exit
 
     The -c flag must be the first argument; the command string must be a single
-    quoted argument. Only one command string is accepted — additional arguments
-    after the command string are ignored.
+    quoted argument (the shell interprets bare semicolons before the process sees
+    them). Only one command string is accepted — additional argv tokens are ignored.
+
+    Returns:
+        0 on clean exit.
     """
+    commands = commands or _commands
+    aliases = aliases or _aliases
+    for name, func in commands.items():
+        setattr(SolverShell, f'do_{name}', make_do(name, func))
+        setattr(SolverShell, f'complete_{name}', make_complete(name, func))
+    for name, alias in aliases.items():
+        SolverShell.aliases[name] = alias
+    setattr(SolverShell, 'pre', pre)
+    setattr(SolverShell, 'post', post)
+
     i: int = 1 + int(argv[1:2] == ['-c'])
-    commands = [c for r in ' '.join(argv[i:i + 1]).split(';') if (c := r.strip())]
-    if commands and i == 2:
-        commands.append('exit')
-    return SolverShell().execute(commands=commands or None)
+    startup_commands = [c for r in ' '.join(argv[i:i + 1]).split(';') if (c := r.strip())]
+    if startup_commands and i == 2:
+        startup_commands.append('exit')
+    return SolverShell().execute(commands=startup_commands or None)
 
 
 if __name__ == '__main__':
