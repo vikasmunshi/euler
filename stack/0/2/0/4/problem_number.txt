@@ -1,1 +1,1 @@
-204
+204:Generalised Hamming Numbers:8

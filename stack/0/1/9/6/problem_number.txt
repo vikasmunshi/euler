@@ -1,1 +1,1 @@
-196
+196:Prime Triplets:21

@@ -1,1 +1,1 @@
-386
+386:Maximum Length of an Antichain:17

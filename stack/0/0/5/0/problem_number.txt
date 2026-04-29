@@ -1,1 +1,1 @@
-50
+50:Consecutive Prime Sum:2

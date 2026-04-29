@@ -1,1 +1,1 @@
-642
+642:Sum of Largest Prime Factors:19

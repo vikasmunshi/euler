@@ -1,1 +1,1 @@
-396
+396:Weak Goodstein Sequence:16

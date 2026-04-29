@@ -1,1 +1,1 @@
-419
+419:Look and Say Sequence:22

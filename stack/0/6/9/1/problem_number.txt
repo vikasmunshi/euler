@@ -1,1 +1,1 @@
-691
+691:Long Substring with Many Repetitions:17

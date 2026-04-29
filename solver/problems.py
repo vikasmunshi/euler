@@ -24,43 +24,29 @@ class Problem(NamedTuple):
 
     @classmethod
     def from_workspace(cls) -> Problem | None:
-        """
-        Read the current workspace's problem number file and return the matching Problem.
-
-        Returns:
-            The Problem for the active workspace, or None if no workspace is initialised
-            or the problem number file is missing or invalid.
-        """
+        """ Read the current workspace's problem number file and return the matching Problem. """
         try:
-            return cls.from_number(int(problem_number_file.read_text()))
+            problem_text = problem_number_file.read_text()
+            number, title, difficulty = problem_text.split(':', maxsplit=2)
+            return Problem(int(number), title, difficulty or None)
         except (FileNotFoundError, ValueError):
             return None
 
     @classmethod
     def from_number(cls, problem_number: int) -> Problem | None:
-        """
-        Create a Problem instance from a given problem number.
-
-        Args:
-            problem_number: The problem number to create the Problem for.
-
-        Returns:
-            The Problem for the given number, or None if the number is invalid or not found.
-        """
+        """ Create a Problem instance from a given problem number. """
         try:
             return problems_dict[problem_number]
         except KeyError:
             return None
 
+    def to_workspace(self) -> None:
+        """Write the problem number to the workspace's problem number file."""
+        problem_number_file.write_text(f'{self.number}:{self.title}:{self.difficulty or ""}')
+
 
 def _problems() -> list[Problem]:
-    """
-    Fetch and parse the list of all Project Euler problems.
-
-    Returns:
-        A list of Problem instances for all available problems.
-        Returns an empty list if the download fails.
-    """
+    """ Fetch and parse the list of all Project Euler problems. """
     content: bytes | None = download_file(problems_list_url, check_last_modified=True)
     if content is None:
         print('Error: Failed to download problem list from Project Euler')

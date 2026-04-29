@@ -1,1 +1,1 @@
-874
+874:Maximal Prime Score:23

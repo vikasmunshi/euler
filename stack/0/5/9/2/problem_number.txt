@@ -1,1 +1,1 @@
-592
+592:Factorial Trailing Digits 2:30

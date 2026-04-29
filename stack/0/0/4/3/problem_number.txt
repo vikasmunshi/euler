@@ -1,1 +1,1 @@
-43
+43:Sub-string Divisibility:1

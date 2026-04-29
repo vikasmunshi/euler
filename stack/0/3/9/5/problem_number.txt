@@ -1,1 +1,1 @@
-395
+395:Pythagorean Tree:20

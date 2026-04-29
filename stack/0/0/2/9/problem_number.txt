@@ -1,1 +1,1 @@
-29
+29:Distinct Powers:1

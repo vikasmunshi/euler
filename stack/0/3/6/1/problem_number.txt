@@ -1,1 +1,1 @@
-361
+361:Subsequence of Thue-Morse Sequence:37

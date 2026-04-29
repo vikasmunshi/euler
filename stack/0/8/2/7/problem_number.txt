@@ -1,1 +1,1 @@
-827
+827:Pythagorean Triple Occurrence:22

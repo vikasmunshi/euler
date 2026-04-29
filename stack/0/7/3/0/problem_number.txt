@@ -1,1 +1,1 @@
-730
+730:Shifted Pythagorean Triples:31

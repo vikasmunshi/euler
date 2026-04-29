@@ -1,1 +1,1 @@
-287
+287:Quadtree Encoding (a Simple Compression Algorithm):14

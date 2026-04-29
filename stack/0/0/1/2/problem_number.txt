@@ -1,1 +1,1 @@
-12
+12:Highly Divisible Triangular Number:0

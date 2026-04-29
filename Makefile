@@ -4,14 +4,15 @@ VENV   := .venv
 PYTHON := $(VENV)/bin/python
 PIP    := $(VENV)/bin/pip
 
-## Full install: system deps → venv → python deps
-install: install-system $(VENV)
+## Full install: system deps → venv → python deps → pre-commit hooks
+install: system-install $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install --upgrade -e .
 	rm -rf solver.egg-info
+	$(VENV)/bin/pre-commit install
 
 ## Install system packages (apt) via setup script
-install-system:
+system-install:
 	./scripts/setup_dev_env.sh install python primesieve c
 
 ## Create venv if it doesn't exist

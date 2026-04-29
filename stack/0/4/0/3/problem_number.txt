@@ -1,1 +1,1 @@
-403
+403:Lattice Points Enclosed by Parabola and Line:24

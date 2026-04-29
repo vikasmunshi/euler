@@ -1,1 +1,1 @@
-292
+292:Pythagorean Polygons:28

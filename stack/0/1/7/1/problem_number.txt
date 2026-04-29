@@ -1,1 +1,1 @@
-171
+171:Square Sum of the Digital Squares:24

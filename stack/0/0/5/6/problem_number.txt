@@ -1,1 +1,1 @@
-56
+56:Powerful Digit Sum:1

@@ -1,1 +1,1 @@
-21
+21:Amicable Numbers:1

@@ -1,1 +1,1 @@
-157
+157:Base-10 Diophantine Reciprocal:22

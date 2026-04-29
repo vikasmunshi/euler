@@ -1,1 +1,1 @@
-39
+39:Integer Right Triangles:1

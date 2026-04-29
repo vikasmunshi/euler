@@ -1,1 +1,1 @@
-466
+466:Distinct Terms in a Multiplication Table:31

@@ -1,1 +1,1 @@
-760
+760:Sum over Bitwise Operators:11

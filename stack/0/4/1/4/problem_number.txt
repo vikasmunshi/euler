@@ -1,1 +1,1 @@
-414
+414:Kaprekar Constant:28

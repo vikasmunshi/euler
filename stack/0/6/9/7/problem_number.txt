@@ -1,1 +1,1 @@
-697
+697:Randomly Decaying Sequence:10

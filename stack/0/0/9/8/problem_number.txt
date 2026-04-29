@@ -1,1 +1,1 @@
-98
+98:Anagramic Squares:8

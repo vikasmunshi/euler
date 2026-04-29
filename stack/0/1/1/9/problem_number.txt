@@ -1,1 +1,1 @@
-119
+119:Digit Power Sum:6

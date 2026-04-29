@@ -1,1 +1,1 @@
-516
+516:$5$-smooth Totients:8

@@ -6,7 +6,8 @@ from __future__ import annotations
 from json import dumps
 from typing import Any
 
-from solver.config import ColorCodes, private_key_file, root_dir
+from solver.config import ColorCodes, keys_backup_file, private_key_file
+from solver.utils import write_file
 
 __all__ = ['rekey', 'user']
 
@@ -24,19 +25,20 @@ def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, b
                                Defaults to True.
         backup:                If True, print the backup keys for offline vault. Defaults to False.
     """
-    from solver.crypto.keys import rekey_keys_file
+    from solver.crypto.keys import rekey_keys_file, get_user_key, read_keys_file
+
+    confirmation = input("Are you sure you want to rekey? Type 'Yes' to confirm: ")
+    if confirmation != "Yes":
+        print("Rekeying cancelled.")
+        return
 
     rekey_keys_file(num_total_active_keys, preserve_master=preserve_master)
-
     if backup:
-        from solver.crypto.keys import get_user_key, read_keys_file
-        from solver.utils import write_file
-
         lines: dict[str, str] = {
             'private_key': private_key_file.read_text().strip(),
             **read_keys_file()['users'][get_user_key().user_email]
         }
-        write_file(root_dir / 'backup/keys_backup.json', dumps(lines, indent=4).encode(), msg='keys backup')
+        write_file(keys_backup_file, dumps(lines, indent=4).encode(), msg='keys backup')
 
 
 def user(regen: bool = False) -> str:

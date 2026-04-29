@@ -1,1 +1,1 @@
-521
+521:Smallest Prime Factor:21

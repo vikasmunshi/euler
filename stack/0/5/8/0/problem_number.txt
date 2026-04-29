@@ -1,1 +1,1 @@
-580
+580:Squarefree Hilbert Numbers:34

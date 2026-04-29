@@ -1,1 +1,1 @@
-283
+283:Integer Sided Triangles with Integral Area/perimeter Ratio:35

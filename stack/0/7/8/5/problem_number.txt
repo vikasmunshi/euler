@@ -1,1 +1,1 @@
-785
+785:Symmetric Diophantine Equation:29

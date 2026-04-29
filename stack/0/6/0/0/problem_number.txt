@@ -1,1 +1,1 @@
-600
+600:Integer Sided Equiangular Hexagons:11

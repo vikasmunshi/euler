@@ -1,1 +1,1 @@
-903
+903:Total Permutation Powers:37

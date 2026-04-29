@@ -1,1 +1,1 @@
-540
+540:Counting Primitive Pythagorean Triples:16

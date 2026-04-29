@@ -1,1 +1,1 @@
-685
+685:Inverse Digit Sum II:30

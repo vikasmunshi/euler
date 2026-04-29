@@ -1,1 +1,1 @@
-487
+487:Sums of Power Sums:16

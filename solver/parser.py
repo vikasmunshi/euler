@@ -11,8 +11,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
-from solver.config import (problem_statement_filename, projecteuler_url, resource_dirname,
-                           test_cases_filename)
+from solver.config import problem_statement_filename, projecteuler_url, resource_dirname, test_cases_filename
 from solver.download import download_file
 from solver.problems import Problem
 from solver.stack import read_stack_file
@@ -20,7 +19,7 @@ from solver.stack import read_stack_file
 __all__ = ['problem_statement']
 
 
-def problem_statement(problem_number: int, /, *, force_refresh: bool) -> dict[str, bytes]:
+def problem_statement(problem_number: int, /, *, force_refresh: bool) -> tuple[Problem, dict[str, bytes]]:
     """
     Fetch and assemble the full problem statement for a Project Euler problem.
 
@@ -69,7 +68,7 @@ def problem_statement(problem_number: int, /, *, force_refresh: bool) -> dict[st
                                      test_cases=test_cases,
                                      solution_approach=solution_approach)
     results[problem_statement_filename] = html.encode()
-    return results
+    return problem, results
 
 
 def extract_resources(problem_content: BeautifulSoup, *, force_refresh: bool) -> dict[str, bytes]:

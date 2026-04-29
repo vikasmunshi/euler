@@ -1,1 +1,1 @@
-30
+30:Digit Fifth Powers:0

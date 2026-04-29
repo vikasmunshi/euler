@@ -1,1 +1,1 @@
-91
+91:Right Triangles with Integer Coordinates:6

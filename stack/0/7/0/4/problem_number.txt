@@ -1,1 +1,1 @@
-704
+704:Factors of Two in Binomial Coefficients:4

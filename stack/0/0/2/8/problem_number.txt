@@ -1,1 +1,1 @@
-28
+28:Number Spiral Diagonals:0

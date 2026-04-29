@@ -9,7 +9,7 @@ from os import X_OK, access
 from pathlib import Path
 from shutil import rmtree
 
-from solver.config import ColorCodes, root_dir, problem_number_file, workspace_dir
+from solver.config import ColorCodes, root_dir, workspace_dir
 from solver.parser import problem_statement
 from solver.problems import Problem
 from solver.stack import read_stack_file, stack, stack_base_dir, stack_path, unstack
@@ -70,10 +70,10 @@ def init_the_workspace(problem_number: int, /, *, force_refresh: bool = False) -
     stack_dir: Path = stack_base_dir(problem.number)
     if stack_dir.exists():
         unstack(problem.number, workspace_dir=workspace_dir)
-    problem_statement_files: dict[str, bytes] = problem_statement(problem.number, force_refresh=force_refresh)
+    problem, problem_statement_files = problem_statement(problem.number, force_refresh=force_refresh)
     for filename, content in problem_statement_files.items():
         write_file(workspace_dir / filename, content)
-    problem_number_file.write_text(str(problem.number))
+    problem.to_workspace()
     print(f'Workspace init complete for problem {problem}')
     list_the_workspace()
 
@@ -91,7 +91,7 @@ def list_the_workspace() -> bool:
         print('No workspace initialized. Use init to initialize the workspace')
         return False
     has_changes: bool = False
-    print(msg := f'Workspace for problem {problem}:')
+    print(msg := f'Workspace for problem {problem!s}:')
     print('=' * len(msg))
     stack_dir: Path = stack_base_dir(problem.number)
     stack_files: set[str] = set(f.removesuffix('.enc') for f in iterdir_recursive(stack_dir, rt='str'))

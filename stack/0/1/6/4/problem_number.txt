@@ -1,1 +1,1 @@
-164
+164:Three Consecutive Digital Sum Limit:11

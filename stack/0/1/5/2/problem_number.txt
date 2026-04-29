@@ -1,1 +1,1 @@
-152
+152:Sums of Square Reciprocals:26

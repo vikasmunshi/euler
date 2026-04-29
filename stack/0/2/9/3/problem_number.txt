@@ -1,1 +1,1 @@
-293
+293:Pseudo-Fortunate Numbers:8

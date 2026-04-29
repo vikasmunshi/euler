@@ -1,1 +1,1 @@
-51
+51:Prime Digit Replacements:2

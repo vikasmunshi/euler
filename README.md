@@ -56,7 +56,7 @@ cd euler
 ./scripts/setup_dev_env.sh install python primesieve c
 python3.14 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[dev]"
+pip install -e .
 solver
 ```
 

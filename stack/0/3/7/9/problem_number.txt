@@ -1,1 +1,1 @@
-379
+379:Least Common Multiple Count:31

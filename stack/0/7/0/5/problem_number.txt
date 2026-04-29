@@ -1,1 +1,1 @@
-705
+705:Total Inversion Count of Divided Sequences:8

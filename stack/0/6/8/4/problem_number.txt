@@ -1,1 +1,1 @@
-684
+684:Inverse Digit Sum:14

@@ -9,8 +9,8 @@ from pathlib import Path
 from shutil import rmtree
 from typing import TYPE_CHECKING
 
-from solver.config import (backup_dirname, root_dir, problem_number_filename, problem_statement_filename,
-                           resource_dirname, stack_dir)
+from solver.config import (backup_dirname, problem_number_filename, problem_statement_filename, resource_dirname,
+                           root_dir, stack_dir)
 from solver.problems import problems
 from solver.utils import iterdir_recursive, write_file
 
@@ -202,6 +202,10 @@ def restore_the_stack() -> None:
     Restore problem files from the 'backup' folder (unencrypted) to the stack (encrypted).
     Inverse of 'backup_the_stack'.
     """
+    confirmation = input('Type "Yes" to confirm stack restoration: ')
+    if confirmation != 'Yes':
+        print('Stack restoration cancelled.')
+        return
     for problem in problems:
         problem_backup_dir = root_dir.joinpath(backup_dirname, *f'{problem.number:04d}')
         problem_stack_dir: Path = stack_base_dir(problem.number)

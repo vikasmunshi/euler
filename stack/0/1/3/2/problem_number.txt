@@ -1,1 +1,1 @@
-132
+132:Large Repunit Factors:10

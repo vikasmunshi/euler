@@ -1,1 +1,1 @@
-312
+312:Cyclic Paths on Sierpiński Graphs:19

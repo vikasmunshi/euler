@@ -1,1 +1,1 @@
-248
+248:Euler's Totient Function Equals 13!:30

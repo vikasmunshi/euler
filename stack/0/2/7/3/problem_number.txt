@@ -1,1 +1,1 @@
-273
+273:Sum of Squares:30

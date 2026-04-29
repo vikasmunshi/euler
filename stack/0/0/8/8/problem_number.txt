@@ -1,1 +1,1 @@
-88
+88:Product-sum Numbers:8

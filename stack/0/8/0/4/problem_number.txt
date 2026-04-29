@@ -1,1 +1,1 @@
-804
+804:Counting Binary Quadratic Representations:10
