@@ -3,9 +3,10 @@
 """Project Euler scraper: fetches problem pages and builds standalone HTML with test cases and solution approach."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import NamedTuple
 
-from solver.config import problem_number_file, problems_list_url
+from solver.config import problem_number_filename, problems_list_url
 from solver.download import download_file
 
 __all__ = ['Problem', 'problems']
@@ -23,10 +24,10 @@ class Problem(NamedTuple):
         return f'{self.number}:"{self.title}"'
 
     @classmethod
-    def from_workspace(cls) -> Problem | None:
+    def from_workspace(cls, workspace_dir: Path) -> Problem | None:
         """ Read the current workspace's problem number file and return the matching Problem. """
         try:
-            problem_text = problem_number_file.read_text()
+            problem_text = (workspace_dir / problem_number_filename).read_text()
             number, title, difficulty = problem_text.split(':', maxsplit=2)
             return Problem(int(number), title, difficulty or None)
         except (FileNotFoundError, ValueError):
@@ -40,9 +41,9 @@ class Problem(NamedTuple):
         except KeyError:
             return None
 
-    def to_workspace(self) -> None:
+    def to_workspace(self, workspace_dir: Path) -> None:
         """Write the problem number to the workspace's problem number file."""
-        problem_number_file.write_text(f'{self.number}:{self.title}:{self.difficulty or ""}')
+        (workspace_dir / problem_number_filename).write_text(f'{self.number}:{self.title}:{self.difficulty or ""}')
 
 
 def _problems() -> list[Problem]:

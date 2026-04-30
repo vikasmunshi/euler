@@ -6,78 +6,63 @@ from __future__ import annotations
 from cmd import Cmd
 from contextlib import redirect_stdout
 from functools import partial
-from inspect import get_annotations, signature
 from os import X_OK, access, devnull, environ
 from pathlib import Path
 from re import escape as re_escape, search as re_search, sub as re_sub
-from readline import (add_history, backend as readline_backend, clear_history, get_completer,
-                      get_completer_delims, get_current_history_length, get_history_item,
-                      parse_and_bind, read_history_file, set_completer, set_completer_delims, set_history_length,
-                      write_history_file)
-from shlex import split
+from readline import (backend as readline_backend, get_completer, get_completer_delims, parse_and_bind,
+                      read_history_file, set_completer, set_completer_delims, set_history_length, write_history_file)
+from subprocess import CalledProcessError, run
 from sys import argv
-from typing import Any, Callable, Literal, NamedTuple, get_args, get_origin
+from typing import Any, Callable, ClassVar, Literal, get_args, get_origin
 
-from solver.config import ColorCodes, root_dir, stack_dir, workspace_dir
+from solver.cli_utils import bool_flags, coerce, dedup_history, func_info, safe_split
+from solver.config import ColorCodes, root_dir, stack_dir
 from solver.crypto import rekey, user
 from solver.evaluate import evaluate
 from solver.problems import problems
 from solver.stack import backup_the_stack, restore_the_stack
-from solver.utils import continue_on_error, format_command_line, run_command, show_value, upload_keys
+from solver.utils import continue_on_error, format_command_line, show_value, upload_keys
 from solver.workspace import clear_the_workspace, init_the_workspace, list_the_workspace, stack_the_workspace
 
 __all__ = ['SolverShell', 'cli']
 
-CYAN, GREEN, YELLOW, BLUE, GRAY, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW,
-                                          ColorCodes.BLUE, ColorCodes.GRAY, ColorCodes.RESET)
+CYAN, GREEN, YELLOW, BLUE, GRAY, RED, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW, ColorCodes.BLUE,
+                                               ColorCodes.GRAY, ColorCodes.RED, ColorCodes.RESET)
+BOLD = ColorCodes.BOLD
+C_CMD = BLUE
+C_LBL = YELLOW
+C_TXT = GRAY
 _lw, _cw = 7, 31  # label column width, command column width
-_banner: str = f"""\
+banner: str = f"""\
 {CYAN}{"─" * 100}
-{GREEN}{ColorCodes.BOLD}Project Euler Solver Shell{RESET}
+{GREEN}{BOLD}Project Euler Solver Shell{RESET}
 {CYAN}{"─" * 100}
-{YELLOW}{"Help":<{_lw}}  {BLUE}{"? | help | ?<cmd> | <cmd> -h":<{_cw}}  {GRAY}list commands or describe a command
-{YELLOW}{"Exit":<{_lw}}  {BLUE}Ctrl-D | exit
-{YELLOW}{"Launch":<{_lw}}  {BLUE}{"solver \"cmd1; cmd2\"":<{_cw}}  {GRAY}preload commands and stay interactive
-{" ":<{_lw}}  {BLUE}{"solver -c \"cmd1; cmd2\"":<{_cw}}  {GRAY}preload commands and exit when done
-{YELLOW}{"Flags":<{_lw}}  {BLUE}{"--key-word | --no-key-word":<{_cw}}  {GRAY}boolean True / False
-{" ":<{_lw}}  {BLUE}{"--silent":<{_cw}}  {GRAY}suppress command output{RESET}"""
-
-
-class FuncInfo(NamedTuple):
-    """Cached inspection of a callable's signature and categorized parameters."""
-    sig: Any
-    hints: dict[str, Any]
-    pos_params: list[Any]
-    var_positional: Any
-    kw_params: list[Any]
+{C_LBL}{"Help":<{_lw}} {C_CMD}{"? | help":<{_cw}} {C_TXT}list commands and aliases
+{C_LBL}{" ":<{_lw}} {C_CMD}{"?<cmd> | help <cmd>":<{_cw}} {C_TXT}show help on command
+{C_LBL}{"Exit":<{_lw}} {C_CMD}Ctrl-D | exit
+{C_LBL}{"Launch":<{_lw}} {C_CMD}{"solver":<{_cw}} {C_TXT}launch interactive shell
+{C_LBL}{" ":<{_lw}} {C_CMD}{"solver \"cmd1; cmd2\"":<{_cw}} {C_TXT}preload commands and stay interactive
+{C_LBL}{" ":<{_lw}} {C_CMD}{"solver -c \"cmdline\"":<{_cw}} {C_TXT}execute cmdline and exit
+{C_LBL}{"Flags":<{_lw}} {C_CMD}{"--key-word | --no-key-word":<{_cw}} {C_TXT}boolean True / False
+{C_LBL}{" ":<{_lw}} {C_CMD}{"--silent":<{_cw}} {C_TXT}suppress command output{RESET}"""
 
 
 class SolverShell(Cmd):
     """The solver shell."""
-    aliases: dict[str, str] = {}
-    allowed_prefixes: tuple[str, ...] = ('/bin', '/sbin', '/usr', '/home')
-    banner: str = _banner
+    aliases: ClassVar[dict[str, str]] = {}
+    allowed_prefixes: ClassVar[tuple[str, ...]] = ('/bin', '/sbin', '/usr', '/home')
+    banner: ClassVar[str] = banner
+    exe_cache: ClassVar[list[str]] = []
+    history_file: ClassVar[Path] = root_dir / '.solver_history'
     identchars: str = Cmd.identchars + ':-'
-    doc_header: str = 'Commands:'
-    exe_cache: list[str] = []
-    func_info_cache: dict[str, FuncInfo] = {}
-    history_file: Path = root_dir / '.solver_history'
-    last_result: Any = None
-    post: Any | None = 'do_ls'
-    pre: Any | None = None
-    prompt: str = 'euler$ '
+    prompt = 'euler$ '
+    workspace_dir: ClassVar[Path] = root_dir / 'euler'
 
-    def execute(self,
-                intro: Any | None = None,
-                pre: str | None = None,
-                post: str | None = None,
-                commands: list[str] | None = None,
-                ) -> int:
+    def __str__(self) -> str:
+        return f'SolverShell(workspace_dir={self.workspace_dir.as_posix()!r})'
+
+    def execute(self, intro: Any | None = None, commands: list[str] | None = None) -> int:
         """Run the shell session, invoking the 'pre/post' method hooks by name, and return 0 on clean exit."""
-        if pre:
-            self.pre = pre
-        if post:
-            self.post = post
         if commands:
             self.cmdqueue.extend(commands)
         self.cmdloop(intro=intro)
@@ -91,47 +76,25 @@ class SolverShell(Cmd):
         except FileNotFoundError:
             pass
         self.do_help('')
-        if isinstance(self.pre, str) and (cmd := getattr(self, self.pre, None)):
-            cmd('')
-            print(f'{CYAN}{"─" * 100}{RESET}')
 
     def postloop(self) -> None:
         """Deduplicate, cap at 1000 entries, and persist readline history when the command loop exits."""
-        self.dedup_history()
+        dedup_history()
         set_history_length(1000)
         write_history_file(self.history_file)
+        if hasattr(self, 'do_ls'):
+            print(f'\n{CYAN}{"─" * 100}')
+            self.do_ls('')
         print(f'\n{CYAN}{"─" * 100}\n'
-              f'{GREEN}{ColorCodes.BOLD}Session complete — goodbye!{RESET}')
-        if isinstance(self.post, str) and (cmd := getattr(self, self.post, None)):
-            cmd('')
-        print(f'{CYAN}{"─" * 100}{RESET}')
-
-    def do_help(self, arg: str) -> None:
-        if arg == '':
-            print(self.banner)
-            names = sorted(name[3:] for name in self.get_names() if name.startswith('do_'))
-            col_w = max(len(n) for n in names) + 2
-            cols = max(1, 100 // col_w)
-            print(f'{CYAN}{"─" * 100}\n'
-                  f'{YELLOW}Commands:{RESET}')
-            num_rows = -(-len(names) // cols)  # ceil division
-            rows = [[names[r + c * num_rows] for c in range(cols) if r + c * num_rows < len(names)]
-                    for r in range(num_rows)]
-            for row in rows:
-                print(''.join(f'{GREEN}{n:<{col_w}}{RESET}' for n in row))
-            print(f'{CYAN}{"─" * 100}\n'
-                  f'{YELLOW}Aliases:{RESET}')
-            self.do_alias('')
-            print(f'{CYAN}{"─" * 100}{RESET}')
-        else:
-            super().do_help(arg)
+              f'{GREEN}{BOLD}Session complete — goodbye!\n'
+              f'{CYAN}{"─" * 100}{RESET}')
 
     def completenames(self, text: str, *ignored: Any) -> list[str]:
         """Return command names and alias names that start with text."""
         return super().completenames(text, *ignored) + [a for a in self.aliases if a.startswith(text)]
 
     def precmd(self, line: str) -> str:
-        """Expand aliases before execution: exact match first, then first-word match."""
+        """Expand aliases before execution: exact match only."""
         if alias := self.aliases.get(line.strip()):
             return alias
         return line
@@ -173,33 +136,12 @@ class SolverShell(Cmd):
             if self.use_rawinput and self.completekey:
                 set_completer(self.old_completer)
 
-    @staticmethod
-    def dedup_history() -> None:
-        """Remove duplicate entries from readline history, keeping the most recent occurrence of each."""
-        length = get_current_history_length()
-        items = [get_history_item(i) for i in range(1, length + 1)]
-        seen: set[str] = set()
-        unique: list[str] = []
-        for item in reversed(items):
-            if item not in seen:
-                seen.add(item)
-                unique.append(item)
-        clear_history()
-        for item in reversed(unique):
-            add_history(item)
-
-    def handle_command_help(self, command: str, line: str) -> bool | None:
-        """Handle -h | --help comand line argument"""
+    def handle_help_on_command(self, command: str, line: str) -> bool:
+        """Handle -h | --help command line argument"""
         if line.strip() in ('-h', '--help'):
             self.do_help(command)
             return True
-        return None
-
-    def do_exit(self, line: str) -> bool | None:
-        """ Exit the shell and return to the command line."""
-        if self.handle_command_help('exit', line):
-            return None
-        return True
+        return False
 
     @continue_on_error
     def do_alias(self, line: str) -> None:
@@ -212,26 +154,33 @@ class SolverShell(Cmd):
         examples:
             alias eval-all='for n in 1 to 100: init n --silent; eval --record; stack --silent; clear --silent'
         """
-        if self.handle_command_help('alias', line):
+        if self.handle_help_on_command('alias', line):
             return
         alias_name, sep, alias_command = line.partition('=')
         if not alias_name:
+            if not self.aliases:
+                print('no aliases defined')
+                return
             longest_name = max(len(name) for name in self.aliases)
             for alias_name, alias_command in self.aliases.items():
-                print(f'{YELLOW}{alias_name:<{longest_name}}{RESET}  {GRAY}->{RESET}  {BLUE}{alias_command}{RESET}')
+                print(f'{C_LBL}{alias_name:<{longest_name}} {C_TXT}-> {C_CMD}{alias_command}{RESET}')
             return
         alias_name = alias_name.strip()
         if not sep:
             if alias_command := self.aliases.get(alias_name, ''):
-                print(f'{YELLOW}{alias_name}{RESET}  {GRAY}->{RESET}  {BLUE}{alias_command}{RESET}')
+                print(f'{C_LBL}{alias_name} {C_TXT}-> {C_CMD}{alias_command}{RESET}')
+            else:
+                print(f'{BOLD}{RED}[not defined] {RESET}{C_LBL}{alias_name} {C_TXT}->{RESET}')
             return
         if not alias_command:
             if alias_command := self.aliases.pop(alias_name, ''):
-                print(f'{ColorCodes.RED}removed{RESET}  {YELLOW}{alias_name}{RESET}  {GRAY}->{RESET}  {alias_command}')
+                print(f'{BOLD}{RED}[removed] {RESET}{C_LBL}{alias_name} {C_TXT}-> {C_CMD}{alias_command}{RESET}')
+            else:
+                print(f'{BOLD}{RED}[not defined] {RESET}{C_LBL}{alias_name} {C_TXT}->{RESET}')
             return
         alias_command = alias_command.strip()
         self.aliases[alias_name] = alias_command
-        print(f'{GREEN}set{RESET}  {YELLOW}{alias_name}{RESET}  {GRAY}->{RESET}  {BLUE}{alias_command}{RESET}')
+        print(f'{BOLD}{GREEN}[set] {RESET}{C_LBL}{alias_name} {C_TXT}-> {C_CMD}{alias_command}{RESET}')
 
     @continue_on_error
     def complete_alias(self, text: str, line: str, begidx: int, _endidx: int) -> list[str]:
@@ -243,7 +192,7 @@ class SolverShell(Cmd):
         cmd_fragment = pre[eq_pos + 1:].lstrip()
         if ' ' not in cmd_fragment:
             return self.completenames(text)
-        cmd_name = self.safe_split(cmd_fragment)[0]
+        cmd_name = safe_split(cmd_fragment)[0]
         completer = getattr(self, f'complete_{cmd_name}', None)
         if completer is not None:
             synthetic_line = cmd_fragment + text
@@ -255,14 +204,20 @@ class SolverShell(Cmd):
     @continue_on_error
     def do_echo(self, line: str) -> None:
         """Print the given text to the console"""
-        if self.handle_command_help('echo', line):
+        if self.handle_help_on_command('echo', line):
             return
         print(line)
+
+    def do_exit(self, line: str) -> bool | None:
+        """ Exit the shell and return to the command line."""
+        if self.handle_help_on_command('exit', line):
+            return None
+        return True
 
     @continue_on_error
     def do_for(self, line: str) -> None:
         """Use "for <var> in <start> to <end>: <cmd>; <cmd> <var>; ..." for looping"""
-        if self.handle_command_help('for', line):
+        if self.handle_help_on_command('for', line):
             return
         syntax = 'for <var> in <start> to <end>: <cmd>; <cmd> <var>; ...'
         header, sep, body = line.partition(':')
@@ -294,7 +249,7 @@ class SolverShell(Cmd):
         colon_pos = pre.find(':')
         if colon_pos == -1:
             # In the header: for <var> in <start> to <end>
-            tokens = self.safe_split(pre)[1:]  # drop 'for'
+            tokens = safe_split(pre)[1:]  # drop 'for'
             n = len(tokens)
             if n == 1:
                 return ['in'] if 'in'.startswith(text) else []
@@ -307,7 +262,7 @@ class SolverShell(Cmd):
             if ' ' not in cmd_fragment:
                 return self.completenames(text)
             # Delegate to the command's own completer
-            cmd_name = self.safe_split(cmd_fragment)[0]
+            cmd_name = safe_split(cmd_fragment)[0]
             completer = getattr(self, f'complete_{cmd_name}', None)
             if completer is not None:
                 synthetic_line = cmd_fragment + text
@@ -317,73 +272,61 @@ class SolverShell(Cmd):
                 return cmd_completer  # type: ignore [no-any-return]
         return []
 
+    def do_help(self, arg: str) -> None:
+        """Show help for all commands, or detailed help for a specific command."""
+        if arg == '' or arg[0] == '?':
+            print(self.banner)
+            names = sorted(name[3:] for name in self.get_names() if name.startswith('do_'))
+            col_w = max(len(n) for n in names) + 2
+            cols = max(1, 100 // col_w)
+            print(f'{CYAN}{"─" * 100}\n'
+                  f'{C_LBL}{ColorCodes.UNDERLINE}Commands:{RESET}')
+            num_rows = -(-len(names) // cols)  # ceil division
+            rows = [[names[r + c * num_rows] for c in range(cols) if r + c * num_rows < len(names)]
+                    for r in range(num_rows)]
+            for row in rows:
+                print(''.join(f'{C_CMD}{n:<{col_w}}{RESET}' for n in row))
+            print(f'{CYAN}{"─" * 100}\n'
+                  f'{C_LBL}{ColorCodes.UNDERLINE}Aliases:{RESET}')
+            self.do_alias('')
+            print(f'{CYAN}{"─" * 100}{RESET}')
+        else:
+            super().do_help(arg)
+
     @continue_on_error
     def do_shell(self, line: str) -> None:
-        """Run a bash command: !<command>"""
-        if self.handle_command_help('shell', line):
+        """Run a shell command: !<command>"""
+        if self.handle_help_on_command('shell', line):
             return
-        result = run_command(line, cwd=workspace_dir, silent=False)
-        if result:
-            print(result)
-        self.last_result = result
+        try:
+            process = run(line, shell=True, check=True, cwd=self.workspace_dir)
+        except CalledProcessError as e:
+            result = e.returncode
+            print(f'> {line} -> {RED}{result}{RESET}')
+        else:
+            result = process.returncode
+            print(f'> {line} -> {GREEN if result == 0 else RED}{result}{RESET}')
 
     @continue_on_error
     def complete_shell(self, text: str, line: str, begidx: int, _endidx: int) -> list[str]:
         """Tab completion for shell (!) commands: executables for the first token, workspace files thereafter."""
-        tokens = self.safe_split(line[:begidx])
+        tokens = safe_split(line[:begidx])
         if len(tokens) <= 1:
             if len(tokens) == 1 and (tokens[0] == '!' or tokens[0] == 'shell'):
                 return self.executable_names(text)
         return self.workspace_files(text)
 
-    @classmethod
-    def inspect_func(cls, name: str, func: Callable) -> FuncInfo:
-        """Return cached signature metadata for func, computing it on first access."""
-        if name not in cls.func_info_cache:
-            sig = signature(func)
-            try:
-                hints = get_annotations(func, eval_str=True)
-            except NameError:
-                hints = {}
-            params = list(sig.parameters.values())
-            cls.func_info_cache[name] = FuncInfo(
-                sig=sig,
-                hints=hints,
-                pos_params=[p for p in params if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)],
-                var_positional=next((p for p in params if p.kind == p.VAR_POSITIONAL), None),
-                kw_params=[p for p in params if p.kind in (p.KEYWORD_ONLY, p.POSITIONAL_OR_KEYWORD)],
-            )
-        return cls.func_info_cache[name]
-
     @staticmethod
-    def coerce(value: str, annotation: Any) -> Any:
-        """Coerce a raw string token to the type described by annotation."""
-        if annotation is bool:
-            return value.lower() in ('true', '1', 'yes')
-        if annotation is int:
-            try:
-                return int(value.split(':')[0]) if ':' in value else int(value)
-            except ValueError:
-                return value
-        if get_origin(annotation) is Literal:
-            allowed = get_args(annotation)
-            if value not in allowed:
-                raise ValueError(f'got unexpected val {value!r}, expected one of {allowed}')
-        return value
-
-    @staticmethod
-    def safe_split(s: str) -> list[str]:
-        """Split a shell-style string, falling back to str.split on parse errors."""
-        try:
-            return split(s)
-        except ValueError:
-            return s.split()
-
-    @staticmethod
-    def bool_flags(p_name: str, text: str) -> list[str]:
-        """Return --<name> and --no-<name> flag suggestions that start with text."""
-        flag, no_flag = f'--{p_name.replace("_", "-")}', f'--no-{p_name.replace("_", "-")}'
-        return [f for f in (flag, no_flag) if f.startswith(text)]
+    def completions_for_param(param_name: str, hints: dict, partial_val: str) -> list[str]:
+        """Return tab-completion candidates for a named parameter given a partial value."""
+        ann = hints.get(param_name)
+        if ann is bool:
+            return [v for v in ('true', 'false') if v.startswith(partial_val)]
+        if ann is int and param_name == 'problem_number':
+            return [v for p in problems if (v := str(p)).startswith(partial_val)]
+        if get_origin(ann) is Literal:
+            return [str(v) for v in get_args(ann) if str(v).startswith(partial_val)]
+        return []
 
     @classmethod
     def executable_names(cls, text: str) -> list[str]:
@@ -402,30 +345,17 @@ class SolverShell(Cmd):
             cls.exe_cache.extend(sorted(names))
         return [n for n in cls.exe_cache if n.startswith(text)]
 
-    @staticmethod
-    def workspace_files(text: str) -> list[str]:
+    def workspace_files(self, text: str) -> list[str]:
         """Return filenames in the workspace directory that start with text."""
         try:
-            return sorted(item.name for item in workspace_dir.iterdir() if item.name.startswith(text))
+            return sorted(item.name for item in self.workspace_dir.iterdir() if item.name.startswith(text))
         except OSError:
             return []
 
-    @staticmethod
-    def completions_for_param(param_name: str, hints: dict, partial_val: str) -> list[str]:
-        """Return tab-completion candidates for a named parameter given a partial value."""
-        ann = hints.get(param_name)
-        if ann is bool:
-            return [v for v in ('true', 'false') if v.startswith(partial_val)]
-        if ann is int and param_name == 'problem_number':
-            return [v for p in problems if (v := str(p)).startswith(partial_val)]
-        if get_origin(ann) is Literal:
-            return [str(v) for v in get_args(ann) if str(v).startswith(partial_val)]
-        return []
-
     @classmethod
-    def make_cmd(cls, name: str, func: Callable) -> None:
+    def make_cmd(cls, f: Callable, /, *, name: str) -> None:
         """Build a do_<name> and complete_<name> Cmd method that parses CLI tokens and dispatches to func."""
-        sig, hints, pos_params, var_positional, kw_params = cls.inspect_func(name, func)
+        sig, hints, pos_params, var_positional, kw_params, func = func_info(f, workspace_dir=cls.workspace_dir)
 
         def token_processor(token: str, pos: int) -> Any:
             """Process a token from the command line."""
@@ -434,7 +364,7 @@ class SolverShell(Cmd):
             if '=' in token:
                 key, val = token.split('=', 1)
                 norm_key = key.replace('-', '_')
-                value = cls.coerce(val, hints.get(norm_key, str))
+                value = coerce(val, hints.get(norm_key, str))
                 return 'k', norm_key, value
             if token.startswith('--'):
                 key = token[2:].replace('-', '_')
@@ -442,16 +372,16 @@ class SolverShell(Cmd):
                     return 'k', key[3:], False
                 return 'k', key, True
             if pos < len(pos_params):
-                return 'a', cls.coerce(token, hints.get(pos_params[pos].name, str))
+                return 'a', coerce(token, hints.get(pos_params[pos].name, str))
             if var_positional is not None:
-                return 'a', cls.coerce(token, hints.get(var_positional.name, str))
+                return 'a', coerce(token, hints.get(var_positional.name, str))
             raise TypeError(f'{name}() takes {len(pos_params)} argument(s) but got extra: {token!r}')
 
         def do_cmd(self: SolverShell, line: str) -> None:
-            if self.handle_command_help(name, line):
+            if self.handle_help_on_command(name, line):
                 return
             try:
-                tokens = self.safe_split(line)
+                tokens = safe_split(line)
                 args: list[Any] = []
                 kwargs: dict[str, Any] = {}
                 silent: bool = False
@@ -472,7 +402,6 @@ class SolverShell(Cmd):
                     result = func(*args, **kwargs)
                 if result:
                     print(f'> {format_command_line(name, args, kwargs)} -> {result!s}')
-                self.last_result = result
             except KeyboardInterrupt:
                 print('^C')
             except Exception as e:
@@ -485,7 +414,7 @@ class SolverShell(Cmd):
             kw_match = re_search(r'(\w+)=$', pre)
             if kw_match:
                 return self.completions_for_param(kw_match.group(1), hints, text)
-            tokens = self.safe_split(pre)[1:]
+            tokens = safe_split(pre)[1:]
             pos_count = sum(1 for t in tokens if '=' not in t and not t.startswith('--'))
             completions: list[str] = []
             if text.startswith('--'):
@@ -493,41 +422,30 @@ class SolverShell(Cmd):
                     completions.append('--silent')
                 for p in kw_params:
                     if hints.get(p.name) is bool:
-                        completions.extend(self.bool_flags(p.name, text))
+                        completions.extend(bool_flags(p.name, text))
             else:
                 if pos_count < len(pos_params):
                     completions.extend(self.completions_for_param(pos_params[pos_count].name, hints, text))
                 elif var_positional is not None:
                     completions.extend(self.completions_for_param(var_positional.name, hints, text))
+                if '--silent'.startswith(text):
+                    completions.append('--silent')
                 for p in kw_params:
                     kw_sug = f'{p.name}='
                     if kw_sug.startswith(text):
                         completions.append(kw_sug)
                     if hints.get(p.name) is bool:
-                        completions.extend(self.bool_flags(p.name, text))
+                        completions.extend(bool_flags(p.name, text))
             return completions
 
         do_cmd.__name__ = f'do_{name}'
         complete_cmd.__name__ = f'complete_{name}'
-        if isinstance(func, partial) and func.func.__name__ == show_value.__name__:
-            do_cmd.__doc__ = f'Show the value of "{name}"'
+        if isinstance(func, partial):
+            do_cmd.__doc__ = f'{name}{sig}\n{getattr(func.func, "__doc__", None) or ""}'
         else:
-            do_cmd.__doc__ = f'{name}{sig}\n{getattr(func, "__doc__", ) or ""}'
+            do_cmd.__doc__ = f'{name}{sig}\n{getattr(func, "__doc__", None) or ""}'
         setattr(cls, do_cmd.__name__, do_cmd)
         setattr(cls, complete_cmd.__name__, complete_cmd)
-
-
-def make_shell_command(name: str, command: str) -> Callable:
-    """Wrap a fixed shell command as a zero-argument callable that runs in the workspace."""
-
-    @continue_on_error
-    def run() -> None:
-        result = run_command(command, cwd=workspace_dir)
-        if result:
-            print(result)
-
-    run.__doc__ = f'{name}: shell command wrapper for "{command}"'
-    return run
 
 
 _commands: dict[str, Callable] = {
@@ -535,11 +453,6 @@ _commands: dict[str, Callable] = {
     'eval': evaluate,
     'full-stack-backup': backup_the_stack,
     'full-stack-restore': restore_the_stack,
-    'gh-login': make_shell_command('gh-login', 'gh auth status || gh auth login'),
-    'gh-status': make_shell_command('gh-status', 'gh auth status'),
-    'git-add-stack': make_shell_command('add', f'git add {stack_dir.as_posix()}/'),
-    'git-merge': make_shell_command('git-merge', 'git fetch origin && git merge --ff-only origin/master'),
-    'git-status': make_shell_command('git-status', 'git status'),
     'init': init_the_workspace,
     'ls': list_the_workspace,
     'problems': partial(show_value, problems),
@@ -550,16 +463,14 @@ _commands: dict[str, Callable] = {
 }
 
 _aliases: dict[str, str] = {
-    'eval-pub': ('for n in 1 to 100: '
-                 'init n --silent; '
-                 'eval --record; '
-                 'clear --silent; '
-                 'echo processed n'),
-    'restack': (f'for n in 1 to {max(problems, key=lambda p: p.number).number}: '
-                'init n; '
-                'clear --silent; '
-                'echo processed n'),
-    'pre-commit': 'shell pre-commit run --all-files'
+    'eval-pub': 'for n in 1 to 100: init n --silent; eval --record; clear --silent; echo evaluated n',
+    'gh-login': 'shell gh auth status || gh auth login',
+    'gh-status': 'shell gh auth status',
+    'git-add-stack': f'shell git add {stack_dir.as_posix()}/',
+    'git-merge': 'shell git fetch origin && git merge --ff-only origin/master',
+    'git-status': 'shell git status | less',
+    'pre-commit': 'shell pre-commit run --all-files',
+    'restack': f'for n in 1 to {max(p.number for p in problems)}: init n --silent; clear; echo restacked n',
 }
 
 
@@ -588,10 +499,9 @@ def cli(commands: dict[str, Callable] | None = None, aliases: dict[str, str] | N
         0 on clean exit.
     """
     for name, func in (commands or _commands).items():
-        SolverShell.make_cmd(name, func)
+        SolverShell.make_cmd(func, name=name)
     for name, alias in (aliases or _aliases).items():
         SolverShell.aliases[name] = alias
-
     i: int = 1 + int(argv[1:2] == ['-c'])
     startup_commands = [c for r in ' '.join(argv[i:i + 1]).split(';') if (c := r.strip())]
     if startup_commands and i == 2:

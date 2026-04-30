@@ -377,23 +377,24 @@ def migrate_python_solutions(problem_number: int) -> int:
 
 @disabled
 def main() -> None:
+    workspace_dir: Path = root_dir / 'workspace'
     failed_problems: list[int] = []
     not_migrated: list[int] = []
     for n in range(1, 101):
-        clear_the_workspace()
+        clear_the_workspace(workspace_dir=workspace_dir)
         rmtree(stack_base_dir(n), ignore_errors=True)
-        init_the_workspace(n)
-        stack_the_workspace()
+        init_the_workspace(n, workspace_dir=workspace_dir)
+        stack_the_workspace(workspace_dir=workspace_dir)
         num = migrate_python_solutions(n)
         if num > 0:
-            init_the_workspace(n)
-            result = evaluate()
+            init_the_workspace(n, workspace_dir=workspace_dir)
+            result = evaluate(workspace_dir=workspace_dir)
             if not result:
                 failed_problems.append(n)
         else:
             print(f'  No solutions for problem {n}')
             not_migrated.append(n)
-        clear_the_workspace()
+        clear_the_workspace(workspace_dir=workspace_dir)
     if failed_problems:
         print(f'Failed to migrate {len(failed_problems)} problems')
         print(f'  {failed_problems}')

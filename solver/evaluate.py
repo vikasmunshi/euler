@@ -10,7 +10,7 @@ from subprocess import TimeoutExpired, run
 from time import perf_counter
 from typing import Any, Literal
 
-from solver.config import ColorCodes, root_dir, results_file, test_cases_filename, timeout, workspace_dir
+from solver.config import ColorCodes, results_filename, root_dir, test_cases_filename, timeout
 
 __all__ = ['evaluate']
 
@@ -60,12 +60,16 @@ def as_input_args(test_case: dict[str, Any]) -> list[str]:
     return [str(v) for v in test_case['input'].values()]
 
 
-def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'], show: bool = False, record: bool = False) -> bool:
+def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
+             workspace_dir: Path,
+             show: bool = False,
+             record: bool = False) -> bool:
     """
     Evaluates solutions against the provided test cases by filtering test cases based on specified categories and
     executing each solution with test case inputs. Results of the evaluation can be displayed, and outputs can be saved.
 
     Args:
+    workspace_dir: Path to the workspace directory.
     *categories (Literal['all', 'dev', 'main', 'extra']):
         Categories of test cases to include, defaults to ('dev', 'main') if no categories are provided.
     show (bool):
@@ -135,6 +139,6 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'], show: bool = F
             else:
                 collect_output(f'{msg}{answer} (wrong) [{elapsed:.3f}s] expected={expected!r}', ColorCodes.RED)
     if record:
-        results_file.write_text('\n'.join(output) + '\n')
+        (results_file := workspace_dir / results_filename).write_text('\n'.join(output) + '\n')
         print(f'Results saved to {results_file.relative_to(root_dir).as_posix()}')
     return result

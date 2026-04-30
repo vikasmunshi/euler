@@ -62,11 +62,11 @@ def problem_statement(problem_number: int, /, *, force_refresh: bool) -> tuple[P
         test_cases: str = test_cases_html(problem.number, loads(test_cases_str))
     except (FileNotFoundError, JSONDecodeError):
         test_cases = ''
-    solution_approach: str = extract_solution_approach(problem.number)
+    solution_notes: str = extract_solution_notes(problem.number)
     html: str = clean_html_for_local(problem_content,
                                      problem=problem,
                                      test_cases=test_cases,
-                                     solution_approach=solution_approach)
+                                     solution_notes=solution_notes)
     results[problem_statement_filename] = html.encode()
     return problem, results
 
@@ -94,7 +94,7 @@ def extract_resources(problem_content: BeautifulSoup, *, force_refresh: bool) ->
         if isinstance(src, str) and (src.startswith('resources/') or src.startswith('project/images/')):
             url: str = urljoin(projecteuler_url, src)
             local_filename: str = resource_dirname + '/' + src.split("/")[-1].split("?")[0]
-            if (content := download_file(url, refresh=force_refresh, verbose=True)) is None:
+            if (content := download_file(url, refresh=force_refresh)) is None:
                 print(f'Error: Failed to download {local_filename} from {url}')
                 continue
             results[local_filename] = content
@@ -105,7 +105,7 @@ def extract_resources(problem_content: BeautifulSoup, *, force_refresh: bool) ->
 def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
                          problem: Problem,
                          test_cases: str = '',
-                         solution_approach: str = '',
+                         solution_notes: str = '',
                          ) -> str:
     """
     Wrap problem content in a self-contained HTML page suitable for local viewing.
@@ -119,14 +119,14 @@ def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
         problem:             The Project Euler problem number.
         difficulty_level:    The problem difficulty level string (e.g. '20' or '??').
         test_cases:          Inner HTML for the test cases section. Defaults to empty.
-        solution_approach:   Inner HTML for the solution approach div. Defaults to empty.
+        solution_notes:   Inner HTML for the solution approach div. Defaults to empty.
 
     Returns:
         A complete HTML document string.
     """
     content = BeautifulSoup(str(problem_content_obj), 'html.parser')
     test_cases = test_cases or '<p><em>No test cases available.</em></p>'
-    solution_approach = solution_approach or '\n\n'
+    solution_notes = solution_notes or '\n\n'
     return (
         '<!DOCTYPE html>\n'
         '<html>\n'
@@ -171,10 +171,10 @@ def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
         f'{test_cases}\n'
         '</section>\n'
         '<hr>\n'
-        '<section id="solution-approach">\n'
-        '<h2>Solution Approach</h2>\n'
-        '<div id="solution-approach-content">\n'
-        f'{solution_approach}'
+        '<section id="solution-notes">\n'
+        '<h2>Solution Notes</h2>\n'
+        '<div id="solution-notes-content">\n'
+        f'{solution_notes}'
         '</div>\n'
         '</section>\n'
         '</body>\n'
@@ -213,21 +213,21 @@ def test_cases_html(problem_number: int, test_cases: list[dict]) -> str:
     return '\n'.join(parts)
 
 
-def extract_solution_approach(problem_number: int) -> str:
+def extract_solution_notes(problem_number: int) -> str:
     """
-    Extract the inner HTML of the solution approach div from the existing HTML stack file.
+    Extract the inner HTML of the solution notes div from the existing HTML stack file.
 
     Args:
         problem_number: The Project Euler problem number.
 
     Returns:
-        The inner HTML string of the solution approach div, or an empty string if the
+        The inner HTML string of the solution notes div, or an empty string if the
         file does not exist or the div is absent.
     """
     try:
         html_bytes: bytes = read_stack_file(problem_number, problem_statement_filename)[0]
         soup: BeautifulSoup = BeautifulSoup(html_bytes.decode(), 'html.parser')
-        if div := soup.find('div', id='solution-approach-content'):
+        if div := soup.find('div', id='solution-notes-content'):
             return div.decode_contents()
         return ''
     except FileNotFoundError:

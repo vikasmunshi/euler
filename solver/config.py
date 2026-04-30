@@ -27,14 +27,12 @@ problems_list_url: str = 'https://projecteuler.net/minimal=problems'
 projecteuler_url: str = 'https://projecteuler.net'
 resource_dirname: str = 'resources'
 test_cases_filename: str = 'test_cases.json'
+results_filename: str = 'results.txt'
 timeout: float = 300  # timeout in seconds
 
 cache_dir: Path = root_dir / 'cache'
 keys_backup_file: Path = root_dir / 'backup/keys_backup.json'
 private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
-workspace_dir: Path = root_dir / 'euler'  # Working/temporary files directory
-problem_number_file: Path = workspace_dir / problem_number_filename
-results_file: Path = workspace_dir / 'results.txt'
 stack_dir: Path = root_dir / 'stack'
 
 keys_file: Path = root_dir / 'keys' / 'keys.json'
