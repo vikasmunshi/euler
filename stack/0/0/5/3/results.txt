@@ -1,2 +1,2 @@
-dev  : solve_combinatoric_selections_p0053_s0.py 100 100 -> 4724 (correct) [0.038s]
-main : solve_combinatoric_selections_p0053_s0.py 100 1000000 -> 4075 (correct) [0.037s]
+dev  : solve_combinatoric_selections_p0053_s0.py 100 100 -> 4724 (correct) [0.047s]
+main : solve_combinatoric_selections_p0053_s0.py 100 1000000 -> 4075 (correct) [0.034s]

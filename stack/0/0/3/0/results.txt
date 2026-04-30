@@ -1,2 +1,2 @@
-dev  : solve_digit_fifth_powers_p0030_s0.py 4 -> 19316 (correct) [0.048s]
-main : solve_digit_fifth_powers_p0030_s0.py 5 -> 443839 (correct) [0.049s]
+dev  : solve_digit_fifth_powers_p0030_s0.py 4 -> 19316 (correct) [0.045s]
+main : solve_digit_fifth_powers_p0030_s0.py 5 -> 443839 (correct) [0.052s]

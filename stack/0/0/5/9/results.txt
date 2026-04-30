@@ -1,1 +1,1 @@
-main : solve_xor_decryption_p0059_s0.py https://projecteuler.net/resources/documents/0059_cipher.txt 9 eEaAnNtT -> 129448 (correct) [0.260s]
+main : solve_xor_decryption_p0059_s0.py https://projecteuler.net/resources/documents/0059_cipher.txt 9 eEaAnNtT -> 129448 (correct) [0.052s]

@@ -163,10 +163,10 @@ def stack_the_workspace(workspace_dir: Path, *, process_deletions: bool = False)
     if process_deletions:
         print('Processing deletions...')
         stack_dir: Path = stack_base_dir(problem.number)
-        for filename in iterdir_recursive(stack_dir, rt='str'):
-            filename = filename.removesuffix('.enc')
-            if not (workspace_dir / filename).exists():
-                print(f'Deleting {filename} from stack...')
-                (stack_dir / filename).unlink(missing_ok=True)
+        for stack_filename in iterdir_recursive(stack_dir, rt='str'):
+            ws_filename = stack_filename.removesuffix('.enc')
+            if not (workspace_dir / ws_filename).exists():
+                print(f'Deleting {ws_filename} from stack...')
+                (stack_dir / stack_filename).unlink()
     stack(problem.number, workspace_dir=workspace_dir)
     print('Stacking complete')

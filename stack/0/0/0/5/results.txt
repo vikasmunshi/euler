@@ -1,2 +1,2 @@
-dev  : solve_smallest_multiple_p0005_s0.py 10 -> 2520 (correct) [0.051s]
-main : solve_smallest_multiple_p0005_s0.py 20 -> 232792560 (correct) [0.040s]
+dev  : solve_smallest_multiple_p0005_s0.py 10 -> 2520 (correct) [0.049s]
+main : solve_smallest_multiple_p0005_s0.py 20 -> 232792560 (correct) [0.042s]

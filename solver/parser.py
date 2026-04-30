@@ -127,7 +127,7 @@ def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
     content = BeautifulSoup(str(problem_content_obj), 'html.parser')
     test_cases = test_cases or '<p><em>No test cases available.</em></p>'
     solution_notes = solution_notes or '\n\n'
-    return (
+    html: str = (
         '<!DOCTYPE html>\n'
         '<html>\n'
         '<head>\n'
@@ -145,8 +145,12 @@ def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
         '        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }\n'
         '        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }\n'
         '        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }\n'
-        '        #solution-approach-content { min-height: 80px; padding: 12px; background: #f9f9f9; '
-        'border: 1px solid #e0e0e0; border-radius: 4px; }\n'
+        '        #solution-notes-content { min-height: 80px;\n'
+        '                                  padding: 12px;\n'
+        '                                  background: #f9f9f9;\n'
+        '                                  border: 1px solid #e0e0e0;\n'
+        '                                  border-radius: 4px;\n'
+        '                                }\n'
         '    </style>\n'
         '    <script>\n'
         '        MathJax = {\n'
@@ -174,12 +178,13 @@ def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
         '<section id="solution-notes">\n'
         '<h2>Solution Notes</h2>\n'
         '<div id="solution-notes-content">\n'
-        f'{solution_notes}'
+        f'{solution_notes}\n'
         '</div>\n'
         '</section>\n'
         '</body>\n'
         '</html>'
     )
+    return '\n'.join(line.rstrip() for line in html.splitlines())
 
 
 def test_cases_html(problem_number: int, test_cases: list[dict]) -> str:

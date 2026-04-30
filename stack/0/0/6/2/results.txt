@@ -1,4 +1,4 @@
-dev  : solve_cubic_permutations_p0062_s0.py 2 -> 125 (correct) [0.045s]
-dev  : solve_cubic_permutations_p0062_s0.py 3 -> 41063625 (correct) [0.045s]
-dev  : solve_cubic_permutations_p0062_s0.py 4 -> 1006012008 (correct) [0.046s]
-main : solve_cubic_permutations_p0062_s0.py 5 -> 127035954683 (correct) [0.053s]
+dev  : solve_cubic_permutations_p0062_s0.py 2 -> 125 (correct) [0.047s]
+dev  : solve_cubic_permutations_p0062_s0.py 3 -> 41063625 (correct) [0.039s]
+dev  : solve_cubic_permutations_p0062_s0.py 4 -> 1006012008 (correct) [0.047s]
+main : solve_cubic_permutations_p0062_s0.py 5 -> 127035954683 (correct) [0.058s]

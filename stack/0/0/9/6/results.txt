@@ -1,1 +1,1 @@
-main : solve_su_doku_p0096_s0.py https://projecteuler.net/project/resources/0096_sudoku.txt -> 24702 (correct) [0.374s]
+main : solve_su_doku_p0096_s0.py https://projecteuler.net/project/resources/0096_sudoku.txt -> 24702 (correct) [0.301s]

@@ -1,1 +1,1 @@
-main : solve_quadratic_primes_p0027_s0.py 1000 -> -59231 (correct) [0.514s]
+main : solve_quadratic_primes_p0027_s0.py 1000 -> -59231 (correct) [0.504s]
