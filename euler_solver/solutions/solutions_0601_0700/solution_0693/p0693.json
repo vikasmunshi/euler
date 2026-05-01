@@ -1,0 +1,4 @@
+{
+  "solve_finite_sequence_generator_p0693_s0(max_limit=10)": 6.132099952083081e-05,
+  "solve_finite_sequence_generator_p0693_s0(max_limit=3000000)": 8.369900024263188e-05
+}

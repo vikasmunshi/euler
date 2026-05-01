@@ -1,0 +1,18 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "dice_size": 6,
+            "simulations": 1000000
+        },
+        "answer": "102400"
+    },
+    {
+        "category": "main",
+        "input": {
+            "dice_size": 4,
+            "simulations": 1000000
+        },
+        "answer": "101524"
+    }
+]

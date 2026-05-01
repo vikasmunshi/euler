@@ -1,0 +1,5 @@
+{
+  "solve_stone_game_iii_p0366_s0(max_limit=100, mod=100000000)": 5.015199712943286e-05,
+  "solve_stone_game_iii_p0366_s0(max_limit=1.000000e+18, mod=100000000)": 3.861999721266329e-05,
+  "solve_stone_game_iii_p0366_s0(max_limit=1.000000e+12, mod=100000000)": 5.417600186774507e-05
+}

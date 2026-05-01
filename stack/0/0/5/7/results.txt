@@ -1,3 +1,3 @@
-dev  : solve_square_root_convergents_p0057_s0.py 10 -> 1 (correct) [0.044s]
-dev  : solve_square_root_convergents_p0057_s0.py 100 -> 15 (correct) [0.042s]
-main : solve_square_root_convergents_p0057_s0.py 1000 -> 153 (correct) [0.055s]
+dev  : solve_square_root_convergents_p0057_s0.py 10 -> 1 (correct) [0.039s]
+dev  : solve_square_root_convergents_p0057_s0.py 100 -> 15 (correct) [0.040s]
+main : solve_square_root_convergents_p0057_s0.py 1000 -> 153 (correct) [0.045s]

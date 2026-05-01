@@ -1,0 +1,4 @@
+{
+  "solve_consecutive_positive_divisors_p0179_s0(max_limit=100)": 2.8679998649749905e-05,
+  "solve_consecutive_positive_divisors_p0179_s0(max_limit=10000000)": 3.0371003958862275e-05
+}

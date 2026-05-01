@@ -1,0 +1,4 @@
+{
+  "solve_card_stacking_game_p0798_s0(n=3, s=2)": 5.59290056116879e-05,
+  "solve_card_stacking_game_p0798_s0(n=10000000, s=10000000)": 5.220800085226074e-05
+}

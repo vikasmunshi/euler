@@ -1,43 +1,16 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0067/p0067.py :: solve_maximum_path_sum_ii_p0067_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0067/p0067.py
+  func: solve_maximum_path_sum_ii_p0067_s0
+"""
 
-Project Euler Problem 67: Maximum Path Sum II.
-
-Problem Statement:
-    By starting at the top of the triangle below and moving to adjacent numbers
-    on the row below, the maximum total from top to bottom is 23.
-
-        3
-        7 4
-        2 4 6
-        8 5 9 3
-
-    That is, 3 + 7 + 4 + 9 = 23.
-
-    Find the maximum total from top to bottom in triangle.txt (right click and
-    'Save Link/Target As...'), a 15K text file containing a triangle with
-    one-hundred rows.
-
-    NOTE: This is a much more difficult version of Problem 18. It is not possible
-    to try every route to solve this problem, as there are 2^99 altogether! If
-    you could check one trillion (10^12) routes every second it would take over
-    twenty billion years to check them all. There is an efficient algorithm to
-    solve it. ;o)
-
-Solution Approach:
-    Use dynamic programming from the bottom up to compute max path sums. Move
-    upward, at each step summing the current value with the max of the two
-    adjacent numbers below. The complexity is O(n^2) for n rows, feasible for
-    100 rows. File reading and triangle parsing are needed.
-
-Answer: 7273
-URL: https://projecteuler.net/problem=67"""
 from __future__ import annotations
 
-from pathlib import Path
 from copy import deepcopy
+from pathlib import Path
+from sys import argv
 from typing import List
 
 
@@ -50,13 +23,13 @@ def max_path_sum_triangle(triangle: List[List[int]]) -> int:
 
 
 def get_text_file(url: str) -> str:
-    """ Return the contents of a file from the 'resources' directory. """
-    local_filename: str = 'resources' + '/' + url.split('/')[-1].split('?')[0]
+    """Return the contents of a file from the 'resources' directory."""
+    local_filename: str = "resources" + "/" + url.split("/")[-1].split("?")[0]
     return (Path(__file__).parent / local_filename).read_text()
 
 
 def text2triangle(text: str) -> List[List[int]]:
-    return [[int(num) for num in line.split(' ')] for line in text.splitlines() if line != '']
+    return [[int(num) for num in line.split(" ")] for line in text.splitlines() if line != ""]
 
 
 def solve(*, file_url: str) -> int:
@@ -65,7 +38,10 @@ def solve(*, file_url: str) -> int:
     return max_path_sum_triangle(triangle)
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(file_url=str(argv[1])))
+    return 0
 
-    print(solve(file_url=str(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

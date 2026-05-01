@@ -1,0 +1,5 @@
+{
+  "solve_robot_walks_p0208_s0(num_arcs=25)": 3.6010002077091485e-05,
+  "solve_robot_walks_p0208_s0(num_arcs=70)": 5.951200000708923e-05,
+  "solve_robot_walks_p0208_s0(num_arcs=100)": 0.0026311930050724186
+}

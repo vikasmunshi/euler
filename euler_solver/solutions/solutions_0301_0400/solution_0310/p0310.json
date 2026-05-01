@@ -1,0 +1,5 @@
+{
+  "solve_nim_square_p0310_s0(max_limit=29)": 3.483600448817015e-05,
+  "solve_nim_square_p0310_s0(max_limit=100000)": 3.9220001781359315e-05,
+  "solve_nim_square_p0310_s0(max_limit=200000)": 3.483700129436329e-05
+}

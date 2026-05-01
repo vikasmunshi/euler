@@ -1,0 +1,5 @@
+{
+  "solve_even_fibonacci_numbers_p0002_s0(max_limit=10)": 1.569400046719238e-05,
+  "solve_even_fibonacci_numbers_p0002_s0(max_limit=100)": 1.7272999684792012e-05,
+  "solve_even_fibonacci_numbers_p0002_s0(max_limit=4000000)": 2.140600554412231e-05
+}

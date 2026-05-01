@@ -1,0 +1,5 @@
+{
+  "solve_maximal_area_p0681_s0(max_limit=10)": 3.6247998650651425e-05,
+  "solve_maximal_area_p0681_s0(max_limit=1000000)": 3.1765994208399206e-05,
+  "solve_maximal_area_p0681_s0(max_limit=10000000)": 3.682100214064121e-05
+}

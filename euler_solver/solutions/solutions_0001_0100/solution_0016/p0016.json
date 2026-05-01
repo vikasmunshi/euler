@@ -1,0 +1,5 @@
+{
+  "solve_power_digit_sum_p0016_s0(base=2, power=15)": 3.788000321947038e-05,
+  "solve_power_digit_sum_p0016_s0(base=2, power=1000)": 7.291099609574303e-05,
+  "solve_power_digit_sum_p0016_s0(base=2, power=10000)": 0.0008119759950204752
+}

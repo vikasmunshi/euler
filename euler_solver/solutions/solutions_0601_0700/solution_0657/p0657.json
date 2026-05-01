@@ -1,0 +1,4 @@
+{
+  "solve_incomplete_words_p0657_s0(alpha=3, max_length=2)": 4.497000190895051e-05,
+  "solve_incomplete_words_p0657_s0(alpha=10000000, max_length=1.000000e+12)": 5.876900104340166e-05
+}

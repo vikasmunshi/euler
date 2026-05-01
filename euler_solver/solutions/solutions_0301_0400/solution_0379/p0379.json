@@ -1,0 +1,5 @@
+{
+  "solve_least_common_multiple_count_p0379_s0(max_limit=10)": 4.452100256457925e-05,
+  "solve_least_common_multiple_count_p0379_s0(max_limit=1.000000e+12)": 3.74449955415912e-05,
+  "solve_least_common_multiple_count_p0379_s0(max_limit=1000000)": 3.5969998862128705e-05
+}

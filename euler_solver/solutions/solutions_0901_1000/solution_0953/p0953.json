@@ -1,0 +1,5 @@
+{
+  "solve_factorisation_nim_p0953_s0(max_limit=10)": 3.618800110416487e-05,
+  "solve_factorisation_nim_p0953_s0(max_limit=1.000000e+14)": 4.2776999180205166e-05,
+  "solve_factorisation_nim_p0953_s0(max_limit=1.000000e+15)": 3.603799996199086e-05
+}

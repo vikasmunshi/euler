@@ -1,24 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0001/p0001.py :: solve_multiples_of_3_or_5_p0001_s3.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0001/p0001.py
+  func: solve_multiples_of_3_or_5_p0001_s3
+"""
 
-Project Euler Problem 1: Multiples of 3 or 5.
-
-Problem Statement:
-    If we list all the natural numbers below 10 that are multiples of 3 or 5, we
-    get 3, 5, 6 and 9. The sum of these multiples is 23.
-
-    Find the sum of all the multiples of 3 or 5 below 1000.
-
-Solution Approach:
-    Use inclusion–exclusion principle. Sum multiples of 3 and 5, then subtract multiples
-    of 15 to avoid double counting. Employ arithmetic progression sums for constant time.
-
-Answer: 233168
-URL: https://projecteuler.net/problem=1"""
 from __future__ import annotations
 
+from sys import argv
 from typing import Generator
 
 
@@ -28,12 +18,17 @@ def generate_arithmetic_series_range(common_difference: int, *, max_limit: int) 
 
 
 def solve(*, max_limit: int) -> int:
-    return sum(generate_arithmetic_series_range(3, max_limit=max_limit)) + sum(
-        generate_arithmetic_series_range(5, max_limit=max_limit)) - sum(
-        generate_arithmetic_series_range(15, max_limit=max_limit))
+    return (
+        sum(generate_arithmetic_series_range(3, max_limit=max_limit))
+        + sum(generate_arithmetic_series_range(5, max_limit=max_limit))
+        - sum(generate_arithmetic_series_range(15, max_limit=max_limit))
+    )
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(max_limit=int(argv[1])))
+    return 0
 
-    print(solve(max_limit=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

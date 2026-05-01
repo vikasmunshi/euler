@@ -1,0 +1,5 @@
+{
+  "solve_pizza_toppings_p0281_s0(max_limit=1000)": 0.00010139399819308892,
+  "solve_pizza_toppings_p0281_s0(max_limit=1.000000e+15)": 3.170700074406341e-05,
+  "solve_pizza_toppings_p0281_s0(max_limit=1.000000e+18)": 3.5484998079482466e-05
+}

@@ -1,0 +1,4 @@
+{
+  "solve_an_enormous_factorial_p0288_s0(p=3, q=10000)": 4.269700002623722e-05,
+  "solve_an_enormous_factorial_p0288_s0(p=61, q=10000000)": 4.593700577970594e-05
+}

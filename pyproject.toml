@@ -10,17 +10,29 @@ authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
 license = { text = "MIT" }
 requires-python = ">=3.14"
 dependencies = [
-    "PyQt5",
     "beautifulsoup4",
     "cryptography",
-    "flake8",
     "jsonschema",
-    "matplotlib",
-    "mypy",
-    "numpy",
-    "pre-commit",
-    "pyprimesieve",
     "requests",
+]
+
+[project.optional-dependencies]
+show = [
+    "matplotlib",
+    "PyQt5",
+]
+solutions = [
+    "numpy",
+    "pyprimesieve",
+]
+dev = [
+    "autoflake",
+    "autopep8",
+    "black",
+    "flake8",
+    "isort",
+    "mypy",
+    "pre-commit",
     "types-requests",
 ]
 

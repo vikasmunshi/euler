@@ -1,0 +1,4 @@
+{
+  "solve_maximum_number_of_divisors_p0485_s0(k=10, u=1000)": 6.793899956392124e-05,
+  "solve_maximum_number_of_divisors_p0485_s0(k=100000, u=100000000)": 5.702400085283443e-05
+}

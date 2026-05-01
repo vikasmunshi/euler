@@ -1,0 +1,12 @@
+{
+  "solve_prime_summations_p0077_s0(num_prime_partitions=5)": 0.0007418109962600283,
+  "solve_prime_summations_p0077_s0(num_prime_partitions=50)": 0.002158944000257179,
+  "solve_prime_summations_p0077_s0(num_prime_partitions=500)": 0.008833239000523463,
+  "solve_prime_summations_p0077_s0(num_prime_partitions=5000)": 0.005559858000196982,
+  "solve_prime_summations_p0077_s0(num_prime_partitions=50000)": 0.04936574400198879,
+  "solve_prime_summations_p0077_s1(num_prime_partitions=5)": 0.0008404830005019903,
+  "solve_prime_summations_p0077_s1(num_prime_partitions=50)": NaN,
+  "solve_prime_summations_p0077_s1(num_prime_partitions=500)": NaN,
+  "solve_prime_summations_p0077_s1(num_prime_partitions=5000)": NaN,
+  "solve_prime_summations_p0077_s1(num_prime_partitions=50000)": NaN
+}

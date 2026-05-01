@@ -1,0 +1,5 @@
+{
+  "solve_cross_flips_p0331_s0(i_end=3, i_start=3)": 2.9268994694575667e-05,
+  "solve_cross_flips_p0331_s0(i_end=31, i_start=3)": 3.279999509686604e-05,
+  "solve_cross_flips_p0331_s0(i_end=20, i_start=3)": 3.6370998714119196e-05
+}

@@ -1,0 +1,4 @@
+{
+  "solve_monopoly_odds_p0084_s0(dice_size=6, simulations=1000000)": 0.05299046899745008,
+  "solve_monopoly_odds_p0084_s0(dice_size=4, simulations=1000000)": 0.013458927001920529
+}

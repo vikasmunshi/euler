@@ -1,0 +1,4 @@
+{
+  "solve_maximum_length_of_an_antichain_p0386_s0(max_limit=10)": 3.926199860870838e-05,
+  "solve_maximum_length_of_an_antichain_p0386_s0(max_limit=100000000)": 4.595599602907896e-05
+}

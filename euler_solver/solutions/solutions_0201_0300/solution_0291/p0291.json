@@ -1,0 +1,5 @@
+{
+  "solve_panaitopol_primes_p0291_s0(max_limit=1000)": 3.0404000426642597e-05,
+  "solve_panaitopol_primes_p0291_s0(max_limit=5.000000e+15)": 4.699899727711454e-05,
+  "solve_panaitopol_primes_p0291_s0(max_limit=5.000000e+16)": 3.053399996133521e-05
+}

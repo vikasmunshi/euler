@@ -1,0 +1,10 @@
+[
+    {
+        "category": "main",
+        "input": {
+            "asked_characters": 3,
+            "file_url": "https://projecteuler.net/resources/documents/0079_keylog.txt"
+        },
+        "answer": 73162890
+    }
+]

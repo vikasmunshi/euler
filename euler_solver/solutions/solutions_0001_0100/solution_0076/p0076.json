@@ -1,0 +1,14 @@
+{
+  "solve_counting_summations_p0076_s0(num=5)": 0.00014136800018604845,
+  "solve_counting_summations_p0076_s0(num=50)": 0.0045326260005822405,
+  "solve_counting_summations_p0076_s0(num=100)": 0.0005677810040651821,
+  "solve_counting_summations_p0076_s0(num=1000)": 0.027034370999899693,
+  "solve_counting_summations_p0076_s1(num=5)": 0.000167342004715465,
+  "solve_counting_summations_p0076_s1(num=50)": 0.01023859000270022,
+  "solve_counting_summations_p0076_s1(num=100)": 0.011193924001418054,
+  "solve_counting_summations_p0076_s1(num=1000)": NaN,
+  "solve_counting_summations_p0076_s2(num=5)": 0.00011786100367316976,
+  "solve_counting_summations_p0076_s2(num=50)": 1.759285797998018,
+  "solve_counting_summations_p0076_s2(num=100)": NaN,
+  "solve_counting_summations_p0076_s2(num=1000)": NaN
+}

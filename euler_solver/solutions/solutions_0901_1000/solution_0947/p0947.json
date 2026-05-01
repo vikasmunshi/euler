@@ -1,0 +1,4 @@
+{
+  "solve_fibonacci_residues_p0947_s0(max_limit=10)": 6.141500489320606e-05,
+  "solve_fibonacci_residues_p0947_s0(max_limit=1000000)": 5.207100184634328e-05
+}

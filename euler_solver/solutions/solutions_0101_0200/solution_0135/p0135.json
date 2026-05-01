@@ -1,0 +1,5 @@
+{
+  "solve_same_differences_p0135_s0(max_limit=10)": 4.441400233190507e-05,
+  "solve_same_differences_p0135_s0(max_limit=1000000)": 3.357799869263545e-05,
+  "solve_same_differences_p0135_s0(max_limit=2000000)": 4.1373001295141876e-05
+}

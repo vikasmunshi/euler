@@ -1,0 +1,5 @@
+{
+  "solve_tours_on_a_4_x_n_playing_board_p0237_s0(n=10)": 5.044599674874917e-05,
+  "solve_tours_on_a_4_x_n_playing_board_p0237_s0(n=1.000000e+12)": 3.606599784689024e-05,
+  "solve_tours_on_a_4_x_n_playing_board_p0237_s0(n=1000000)": 3.954300336772576e-05
+}

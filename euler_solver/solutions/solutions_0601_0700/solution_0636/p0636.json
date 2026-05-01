@@ -1,0 +1,4 @@
+{
+  "solve_restricted_factorisations_p0636_s0(n_factorial=25)": 5.360400245990604e-05,
+  "solve_restricted_factorisations_p0636_s0(n_factorial=1000000)": 3.901200398104265e-05
+}

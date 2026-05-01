@@ -1,34 +1,16 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0076/p0076.py :: solve_counting_summations_p0076_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0076/p0076.py
+  func: solve_counting_summations_p0076_s0
+"""
 
-Project Euler Problem 76: Counting Summations.
-
-Problem Statement:
-    It is possible to write five as a sum in exactly six different ways:
-    4 + 1
-    3 + 2
-    3 + 1 + 1
-    2 + 2 + 1
-    2 + 1 + 1 + 1
-    1 + 1 + 1 + 1 + 1
-
-    How many different ways can one hundred be written as a sum of at least
-    two positive integers?
-
-Solution Approach:
-    Use number theory and combinatorics related to integer partitions.
-    Employ dynamic programming to count partitions efficiently.
-    Utilize the generating function or recurrence relations for partitions.
-    Expected time complexity is O(n²) with n=100 feasible in Python.
-
-Answer: 190569291
-URL: https://projecteuler.net/problem=76"""
 from __future__ import annotations
 
 from functools import lru_cache
 from itertools import count
+from sys import argv, setrecursionlimit
 
 
 @lru_cache(maxsize=None)
@@ -56,8 +38,11 @@ def solve(*, num: int) -> int:
     return result
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    setrecursionlimit(10**6)
+    print(solve(num=int(argv[1])))
+    return 0
 
-    sys.setrecursionlimit(10 ** 6)
-    print(solve(num=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

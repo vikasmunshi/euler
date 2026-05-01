@@ -1,0 +1,4 @@
+{
+  "solve_integral_median_p0513_s0(max_limit=10)": 3.638999623944983e-05,
+  "solve_integral_median_p0513_s0(max_limit=100000)": 3.505400673020631e-05
+}

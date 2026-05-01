@@ -1,0 +1,4 @@
+{
+  "solve_bezouts_game_p0787_s0(max_limit=4)": 3.3736003388185054e-05,
+  "solve_bezouts_game_p0787_s0(max_limit=1000000000)": 5.5919001169968396e-05
+}

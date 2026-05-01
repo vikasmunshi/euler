@@ -1,30 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0069/p0069.py :: solve_totient_maximum_p0069_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0069/p0069.py
+  func: solve_totient_maximum_p0069_s0
+"""
 
-Project Euler Problem 69: Totient Maximum.
-
-Problem Statement:
-    Euler's totient function, phi(n) [sometimes called the phi function], is defined as the
-    number of positive integers not exceeding n which are relatively prime to n. For example,
-    as 1, 2, 4, 5, 7, and 8, are all less than or equal to nine and relatively prime to nine,
-    phi(9) = 6.
-
-    It can be seen that n = 6 produces a maximum n/phi(n) for n ≤ 10.
-
-    Find the value of n ≤ 1000000 for which n/phi(n) is a maximum.
-
-Solution Approach:
-    Use number theory properties of Euler's totient function.
-    Maximize n/phi(n) by choosing n as product of small distinct primes.
-    Iteratively multiply primes until limit is exceeded.
-    Time complexity is efficient given small prime generation.
-
-Answer: 510510
-URL: https://projecteuler.net/problem=69"""
 from __future__ import annotations
 
+from sys import argv
 from typing import Generator
 
 
@@ -54,7 +38,10 @@ def solve(*, limit: int) -> int:
     return result
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(limit=int(argv[1])))
+    return 0
 
-    print(solve(limit=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

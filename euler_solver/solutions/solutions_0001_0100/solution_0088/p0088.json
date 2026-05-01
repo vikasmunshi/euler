@@ -1,0 +1,4 @@
+{
+  "solve_product_sum_numbers_p0088_s0(max_k=6, min_k=2)": 0.0001049899947247468,
+  "solve_product_sum_numbers_p0088_s0(max_k=12000, min_k=2)": 0.17137009400175884
+}

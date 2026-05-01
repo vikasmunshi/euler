@@ -1,0 +1,5 @@
+{
+  "solve_prime_generating_integers_p0357_s0(max_limit=30)": 4.616699879989028e-05,
+  "solve_prime_generating_integers_p0357_s0(max_limit=100000000)": 3.911100066034123e-05,
+  "solve_prime_generating_integers_p0357_s0(max_limit=200000000)": 6.17929981672205e-05
+}

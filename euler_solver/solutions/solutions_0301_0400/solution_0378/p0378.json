@@ -1,0 +1,6 @@
+{
+  "solve_triangle_triples_p0378_s0(n=20)": 5.113500083098188e-05,
+  "solve_triangle_triples_p0378_s0(n=100)": 3.584999649319798e-05,
+  "solve_triangle_triples_p0378_s0(n=60000000)": 5.210900417296216e-05,
+  "solve_triangle_triples_p0378_s0(n=1000)": 3.5909004509449005e-05
+}

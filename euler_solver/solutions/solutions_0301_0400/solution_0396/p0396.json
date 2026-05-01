@@ -1,0 +1,5 @@
+{
+  "solve_weak_goodstein_sequence_p0396_s0(max_limit=8)": 3.565900260582566e-05,
+  "solve_weak_goodstein_sequence_p0396_s0(max_limit=16)": 5.902399425394833e-05,
+  "solve_weak_goodstein_sequence_p0396_s0(max_limit=20)": 3.769599425140768e-05
+}

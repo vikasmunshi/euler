@@ -1,0 +1,5 @@
+{
+  "solve_colouring_a_loop_p0671_s0(k=4, n=3)": 3.331400512252003e-05,
+  "solve_colouring_a_loop_p0671_s0(k=10, n=10004003002001)": 3.811700298683718e-05,
+  "solve_colouring_a_loop_p0671_s0(k=6, n=101)": 5.470799806062132e-05
+}

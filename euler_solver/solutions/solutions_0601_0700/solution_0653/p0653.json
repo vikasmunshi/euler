@@ -1,0 +1,6 @@
+{
+  "solve_frictionless_tube_p0653_s0(L=5000, N=3, j=2)": 5.239700112724677e-05,
+  "solve_frictionless_tube_p0653_s0(L=10000, N=11, j=6)": 6.834600208094344e-05,
+  "solve_frictionless_tube_p0653_s0(L=100000, N=101, j=51)": 4.208599420962855e-05,
+  "solve_frictionless_tube_p0653_s0(L=1000000000, N=1000001, j=500001)": 5.076000525150448e-05
+}

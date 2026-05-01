@@ -1,0 +1,5 @@
+{
+  "solve_magic_bracelets_p0846_s0(max_limit=20)": 4.740100121125579e-05,
+  "solve_magic_bracelets_p0846_s0(max_limit=1000000)": 3.804999869316816e-05,
+  "solve_magic_bracelets_p0846_s0(max_limit=10000000)": 0.0007525390028604306
+}

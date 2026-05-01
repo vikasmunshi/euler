@@ -1,0 +1,5 @@
+{
+  "solve_alexandrian_integers_p0221_s0(n=6)": 3.4441996831446886e-05,
+  "solve_alexandrian_integers_p0221_s0(n=150000)": 4.3141000787727535e-05,
+  "solve_alexandrian_integers_p0221_s0(n=100000)": 3.8471000152640045e-05
+}

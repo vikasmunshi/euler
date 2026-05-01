@@ -1,0 +1,5 @@
+{
+  "solve_sum_of_digits_experience_13_p0377_s0(base=13, max_power=1)": 0.00012545400386443362,
+  "solve_sum_of_digits_experience_13_p0377_s0(base=13, max_power=17)": 5.701599729945883e-05,
+  "solve_sum_of_digits_experience_13_p0377_s0(base=13, max_power=20)": 3.0440001864917576e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_pivotal_square_sums_p0261_s0(max_limit=1000)": 3.417200059629977e-05,
+  "solve_pivotal_square_sums_p0261_s0(max_limit=1.000000e+10)": 3.527399530867115e-05,
+  "solve_pivotal_square_sums_p0261_s0(max_limit=1.000000e+11)": 5.0697002734523267e-05
+}

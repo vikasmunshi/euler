@@ -1,0 +1,4 @@
+{
+  "solve_restricted_permutations_p0916_s0(n=2)": 5.943300493527204e-05,
+  "solve_restricted_permutations_p0916_s0(n=100000000)": 5.631499516312033e-05
+}

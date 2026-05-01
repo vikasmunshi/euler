@@ -1,0 +1,5 @@
+{
+  "solve_semiprimes_p0187_s0(max_limit=30)": 5.57570019736886e-05,
+  "solve_semiprimes_p0187_s0(max_limit=100000000)": 4.745500336866826e-05,
+  "solve_semiprimes_p0187_s0(max_limit=1000000)": 5.3524003305938095e-05
+}

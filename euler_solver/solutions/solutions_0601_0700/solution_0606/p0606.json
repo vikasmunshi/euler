@@ -1,0 +1,5 @@
+{
+  "solve_gozinta_chains_ii_p0606_s0(max_limit=1000)": 4.292499943403527e-05,
+  "solve_gozinta_chains_ii_p0606_s0(max_limit=1000000)": 0.00037795700336573645,
+  "solve_gozinta_chains_ii_p0606_s0(max_limit=1.000000e+12)": 5.1875002100132406e-05
+}

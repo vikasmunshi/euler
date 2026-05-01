@@ -1,0 +1,5 @@
+{
+  "solve_licence_plates_p0371_s0(num_values=10)": 4.353700205683708e-05,
+  "solve_licence_plates_p0371_s0(num_values=1000)": 3.364200529176742e-05,
+  "solve_licence_plates_p0371_s0(num_values=10000)": 4.040599742438644e-05
+}

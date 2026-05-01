@@ -3,17 +3,24 @@
 """AST-based migration of old euler_solver solutions into standalone Python modules."""
 from __future__ import annotations
 
-from ast import (AnnAssign, Assign, Attribute, Call, ClassDef, Expression, FunctionDef, Import, ImportFrom,
-                 Name, NodeTransformer, NodeVisitor, fix_missing_locations, get_docstring, parse, unparse, walk, )
+from ast import (AnnAssign, Assign, Attribute, Call, ClassDef, Constant, Expression, FunctionDef, Import,
+                 ImportFrom, Name, NodeTransformer, NodeVisitor, fix_missing_locations, parse, unparse, walk, )
+from contextlib import redirect_stdout
 from copy import deepcopy
 from json import dumps
+from os.path import devnull
 from pathlib import Path
-from shutil import rmtree
+from sys import stderr
 from typing import Any
+
+from autoflake import fix_code as fix_code_autoflake
+from autopep8 import fix_code as fix_code_autopep8
+from isort import code as isort_code
+from black import format_str as black_format_str, Mode as BlackMode
 
 from solver.config import root_dir, test_cases_filename
 from solver.evaluate import evaluate
-from solver.stack import stack_base_dir, write_stack_file
+from solver.stack import write_stack_file
 from solver.utils import disabled
 from solver.workspace import clear_the_workspace, init_the_workspace, stack_the_workspace
 
@@ -24,9 +31,9 @@ _LIB_PRIMES_MODULE: str = 'euler_solver.lib_primes'
 
 # Replacement for show_solution() that came from euler_solver.framework
 _SHOW_SOLUTION_SRC: str = (
-    'import sys\n'
+    'from sys import argv\n'
     'def show_solution() -> bool:\n'
-    "    return '--show' in sys.argv\n"
+    "    return '--show' in argv\n"
 )
 _SHOW_SOLUTION_NODES: list[Any] = parse(_SHOW_SOLUTION_SRC).body  # [Import, FunctionDef]
 
@@ -42,11 +49,11 @@ _GET_TEXT_FILE_NODES: list[Any] = parse(_GET_TEXT_FILE_SRC).body  # [ImportFrom,
 
 # Replacement for pps.primes() that avoids pyprimesieve segfaults on small inputs
 _GET_PRIMES_FROM_PPS_SRC: str = (
-    'import bisect\n'
+    'from bisect import bisect_right\n'
     'import pyprimesieve as pps\n'
     'def get_primes_from_pps(max_limit: int) -> list[int]:\n'
     '    all_primes = pps.primes(max(max_limit, 10 ** 6))\n'
-    '    return all_primes[:bisect.bisect_right(all_primes, max_limit)]\n'
+    '    return all_primes[:bisect_right(all_primes, max_limit)]\n'
 )
 _GET_PRIMES_FROM_PPS_NODES: list[Any] = parse(_GET_PRIMES_FROM_PPS_SRC).body  # [Import, Import, FunctionDef]
 
@@ -213,41 +220,108 @@ def _annotation_to_type(annotation: Any) -> str:
 
 
 def _has_any_recursion(node: FunctionDef) -> bool:
-    """Return True if node or any nested function definition calls itself."""
+    """Return True if the node or any nested function definition calls itself."""
     for n in walk(node):
         if isinstance(n, FunctionDef) and n.name in _names_used(n):
             return True
     return False
 
 
+def _build_main_imports(func: FunctionDef, *, needs_recursion_limit: bool) -> list[str]:
+    """Return import lines for the generated main() to be placed with module-level imports."""
+    params = func.args.args + func.args.kwonlyargs
+    needs_literal_eval = any(_annotation_to_type(p.annotation) == 'literal_eval' for p in params)
+    imports: list[str] = []
+    if needs_literal_eval:
+        imports.append('from ast import literal_eval')
+    imports.append('from sys import argv')
+    if needs_recursion_limit:
+        imports.append('from sys import setrecursionlimit')
+    return imports
+
+
 def _build_main_block(func: FunctionDef, *, needs_recursion_limit: bool) -> str:
-    """Generate the if __name__ == '__main__': block for a solve function."""
+    """Generate the main() function and __main__ block for a solve function."""
     params = func.args.args + func.args.kwonlyargs
     call_args: list[str] = []
-    needs_literal_eval: bool = False
     for i, param in enumerate(params, start=1):
         t = _annotation_to_type(param.annotation)
-        if t == 'literal_eval':
-            needs_literal_eval = True
         if param in func.args.kwonlyargs:
-            call_args.append(f'{param.arg}={t}(sys.argv[{i}])')
+            call_args.append(f'{param.arg}={t}(argv[{i}])')
         else:
-            call_args.append(f'{t}(sys.argv[{i}])')
-    lines: list[str] = []
-    if needs_literal_eval:
-        lines.append('from ast import literal_eval')
-    lines.append("if __name__ == '__main__':")
-    lines.append('    import sys')
+            call_args.append(f'{t}(argv[{i}])')
+    lines: list[str] = ['def main() -> int:']
     if needs_recursion_limit:
-        lines.append('    sys.setrecursionlimit(10 ** 6)')
+        lines.append('    setrecursionlimit(10 ** 6)')
     lines.append(f'    print(solve({", ".join(call_args)}))')
+    lines.append('    return 0')
+    lines.extend(('', '', "if __name__ == '__main__':", '    raise SystemExit(main())'))
     return '\n'.join(lines) + '\n'
+
+
+def _try_break_string_line(line: str, max_line_length: int) -> str:
+    """Reformat 'lhs = "very_long_string"' as a parenthesised adjacent-literal block.
+
+    Formatters (autopep8, black) refuse to split single string constants, so we must
+    do it ourselves before handing the code to the formatter.
+    """
+    indent = len(line) - len(line.lstrip())
+    indent_str = ' ' * indent
+    try:
+        tree = parse(line.strip())
+    except SyntaxError:
+        return line
+    if len(tree.body) != 1:
+        return line
+    stmt = tree.body[0]
+    if isinstance(stmt, Assign) and len(stmt.targets) == 1:
+        lhs, val = unparse(stmt.targets[0]), stmt.value
+    elif isinstance(stmt, AnnAssign) and stmt.value is not None:
+        lhs, val = unparse(stmt.target) + ': ' + unparse(stmt.annotation), stmt.value
+    else:
+        return line
+    if not isinstance(val, Constant) or not isinstance(val.value, str):
+        return line
+    raw: str = val.value
+    # Prefer splitting on embedded '\n' so each logical row stays together.
+    rows = raw.split('\n')
+    if len(rows) > 1:
+        chunks = [repr(r + '\n') for r in rows[:-1]]
+        if rows[-1]:
+            chunks.append(repr(rows[-1]))
+    else:
+        # Fixed-size chunks; leave room for indent + 4-space inner indent + two quotes.
+        chunk_size = max(max_line_length - indent - 6, 20)
+        chunks = [repr(raw[i:i + chunk_size]) for i in range(0, len(raw), chunk_size)]
+    if len(chunks) <= 1:
+        return line
+    inner = indent_str + '    '
+    return f'{indent_str}{lhs} = (\n' + '\n'.join(f'{inner}{c}' for c in chunks) + f'\n{indent_str})\n'
+
+
+def _break_long_string_constants(code: str, max_line_length: int = 120) -> str:
+    """Pre-process lines that are too long solely because of a string-constant value."""
+    return ''.join(
+        _try_break_string_line(line, max_line_length)
+        if len(line.rstrip('\n')) > max_line_length else line
+        for line in code.splitlines(keepends=True)
+    )
+
+
+def _format_code(code: str, max_line_length: int = 120) -> str:
+    """Reformat generated code: remove unused imports, sort imports, then apply PEP 8 fixes."""
+    code = fix_code_autoflake(code, remove_all_unused_imports=True)
+    code = isort_code(code, line_length=max_line_length, profile='black')
+    # Pre-split long string constants before formatting (no formatter handles these).
+    code = _break_long_string_constants(code, max_line_length)
+    code = black_format_str(code, mode=BlackMode(line_length=max_line_length))
+    code = fix_code_autopep8(code, options={'max_line_length': max_line_length, 'aggressive': 2})
+    return code
 
 
 def extract_solutions(ast_tree: Any, *, source_file: str = '') -> list[tuple[str, str]]:
     """Parse an old-style solution file and return (filename, source) for each solution."""
     _ReplacePpsPrimes().visit(ast_tree)  # pps.primes(x) → get_primes_from_pps(x) in-place
-    source_docstring: str = get_docstring(ast_tree) or ''
 
     # Pre-populate framework replacements so _collect_deps picks them up if referenced
     module_defs: dict[str, Any] = {
@@ -310,23 +384,35 @@ def extract_solutions(ast_tree: Any, *, source_file: str = '') -> list[tuple[str
         if any(isinstance(d, FunctionDef) and d.name == 'primes_generator' for d in deps):
             filtered_imports.append(parse('from typing import Generator').body[0])
 
+        needs_recursion_limit = any(_has_any_recursion(n) for n in deps + [solve] if isinstance(n, FunctionDef))
+        # Deduplicate main imports against already-included filtered imports (avoids F811 for argv)
+        existing_import_strs: set[str] = {unparse(imp) for imp in filtered_imports}
+        deduped_main_imports = [
+            s for s in _build_main_imports(func, needs_recursion_limit=needs_recursion_limit)
+            if s not in existing_import_strs
+        ]
         parts: list[str] = [
             '#!/usr/bin/env python3.14',
             '# -*- coding: utf-8 -*-',
-            f'"""Migrated from\n    {source_file} :: {func.name}.\n\n{source_docstring}"""'.strip('\n'),
+            '"""',
+            'Migrated from:',
+            f'  file: {source_file}',
+            f'  func: {func.name}',
+            '"""',
             'from __future__ import annotations',
             '',
         ]
         for imp in filtered_imports:
             parts.append(unparse(imp))
+        for imp_str in deduped_main_imports:
+            parts.append(imp_str)
         for dep in deps:
-            parts.extend(('', unparse(dep)))
+            parts.extend(('', '', unparse(dep)))  # 2 blank lines before each top-level def/class (E302/E305)
         parts.extend(('', '', unparse(solve), '', ''))
-        needs_recursion_limit = any(_has_any_recursion(n) for n in deps + [solve] if isinstance(n, FunctionDef))
         parts.append(_build_main_block(func, needs_recursion_limit=needs_recursion_limit))
 
         filename = func.name + '.py'
-        results.append((filename, '\n'.join(parts)))
+        results.append((filename, _format_code('\n'.join(parts))))
 
     return results
 
@@ -375,33 +461,42 @@ def migrate_python_solutions(problem_number: int) -> int:
     return len(solutions)
 
 
+def print_e(s: str) -> None:
+    print(s, file=stderr)
+
+
 @disabled
-def main() -> None:
-    workspace_dir: Path = root_dir / 'workspace'
+def main(first: int = 1, last: int = 100) -> None:
+    workspace_dir: Path = root_dir / 'euler'
     failed_problems: list[int] = []
     not_migrated: list[int] = []
-    for n in range(1, 101):
+    for n in range(first, last + 1):
         clear_the_workspace(workspace_dir=workspace_dir)
-        rmtree(stack_base_dir(n), ignore_errors=True)
+        # rmtree(stack_base_dir(n), ignore_errors=True)
         init_the_workspace(n, workspace_dir=workspace_dir)
         stack_the_workspace(workspace_dir=workspace_dir)
         num = migrate_python_solutions(n)
         if num > 0:
+            print_e(f'  Migrated problem {n}')
             init_the_workspace(n, workspace_dir=workspace_dir)
             result = evaluate(workspace_dir=workspace_dir)
             if not result:
                 failed_problems.append(n)
+                print_e(f'  Failed to evaluate problem {n}')
+            else:
+                print_e(f'  Successfully evaluated problem {n}')
         else:
-            print(f'  No solutions for problem {n}')
+            print_e(f'  No solutions for problem {n}')
             not_migrated.append(n)
         clear_the_workspace(workspace_dir=workspace_dir)
     if failed_problems:
-        print(f'Failed to migrate {len(failed_problems)} problems')
+        print_e(f'Failed to migrate {len(failed_problems)} problems')
         print(f'  {failed_problems}')
     if not_migrated:
-        print(f'Not migrated {len(not_migrated)} problems')
-        print(f'  {not_migrated}')
+        print_e(f'Not migrated {len(not_migrated)} problems: {not_migrated}')
+        print_e(f'  {not_migrated}')
 
 
 if __name__ == '__main__':
-    main()
+    with open(devnull, 'w') as f, redirect_stdout(f):
+        main()

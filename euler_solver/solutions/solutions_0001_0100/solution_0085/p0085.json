@@ -1,0 +1,6 @@
+{
+  "solve_counting_rectangles_p0085_s0(max_error=0, max_side=10, target_num_rectangles=18)": 0.0001151489996118471,
+  "solve_counting_rectangles_p0085_s0(max_error=2, max_side=100, target_num_rectangles=2000000)": 0.2662702809975599,
+  "solve_counting_rectangles_p0085_s1(max_error=0, max_side=10, target_num_rectangles=18)": 0.0001622380004846491,
+  "solve_counting_rectangles_p0085_s1(max_error=2, max_side=100, target_num_rectangles=2000000)": 0.0008908980016713031
+}

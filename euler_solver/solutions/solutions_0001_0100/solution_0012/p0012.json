@@ -1,0 +1,6 @@
+{
+  "solve_highly_divisible_triangular_number_p0012_s0(num_divisors=5)": 0.0001777910001692362,
+  "solve_highly_divisible_triangular_number_p0012_s0(num_divisors=500)": 0.022261719997914042,
+  "solve_highly_divisible_triangular_number_p0012_s1(num_divisors=5)": 0.00016576900088693947,
+  "solve_highly_divisible_triangular_number_p0012_s1(num_divisors=500)": 0.12987335299840197
+}

@@ -1,0 +1,4 @@
+{
+  "solve_quadruple_congruence_p0875_s0(max_limit=10)": 0.00014087800082052127,
+  "solve_quadruple_congruence_p0875_s0(max_limit=12345678)": 4.929400165565312e-05
+}

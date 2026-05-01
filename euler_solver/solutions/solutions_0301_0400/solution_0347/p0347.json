@@ -1,0 +1,4 @@
+{
+  "solve_largest_integer_divisible_by_two_primes_p0347_s0(max_limit=100)": 3.3692995202727616e-05,
+  "solve_largest_integer_divisible_by_two_primes_p0347_s0(max_limit=10000000)": 0.0004297539999242872
+}

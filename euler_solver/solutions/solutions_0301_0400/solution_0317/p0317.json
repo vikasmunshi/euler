@@ -1,0 +1,5 @@
+{
+  "solve_firecracker_p0317_s0(g=9.81, height=10.0, speed=5.0)": 2.9560003895312548e-05,
+  "solve_firecracker_p0317_s0(g=9.81, height=100.0, speed=20.0)": 3.97709954995662e-05,
+  "solve_firecracker_p0317_s0(g=9.81, height=500.0, speed=50.0)": 4.4917003833688796e-05
+}

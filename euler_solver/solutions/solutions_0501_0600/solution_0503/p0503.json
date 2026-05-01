@@ -1,0 +1,5 @@
+{
+  "solve_compromise_or_persist_p0503_s0(n=3)": 4.3467996874824166e-05,
+  "solve_compromise_or_persist_p0503_s0(n=4)": 5.594999674940482e-05,
+  "solve_compromise_or_persist_p0503_s0(n=1000000)": 5.184300243854523e-05
+}

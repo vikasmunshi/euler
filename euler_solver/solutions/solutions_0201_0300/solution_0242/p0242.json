@@ -1,0 +1,5 @@
+{
+  "solve_odd_triplets_p0242_s0(max_limit=10)": 0.002658564000739716,
+  "solve_odd_triplets_p0242_s0(max_limit=1.000000e+12)": 3.856200055452064e-05,
+  "solve_odd_triplets_p0242_s0(max_limit=1.000000e+15)": 3.7268997402861714e-05
+}

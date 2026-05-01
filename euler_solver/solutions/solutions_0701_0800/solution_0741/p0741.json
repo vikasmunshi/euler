@@ -1,0 +1,5 @@
+{
+  "solve_binary_grid_colouring_p0741_s0(n=4)": 5.5791999329812825e-05,
+  "solve_binary_grid_colouring_p0741_s0(n=823543)": 3.286200080765411e-05,
+  "solve_binary_grid_colouring_p0741_s0(n=16777216)": 4.395999712869525e-05
+}

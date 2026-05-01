@@ -1,0 +1,5 @@
+{
+  "solve_connectedness_of_a_network_p0186_s0(max_users=10, pm_number=7, target_fraction=0.99)": 5.0048998673446476e-05,
+  "solve_connectedness_of_a_network_p0186_s0(max_users=1000000, pm_number=524287, target_fraction=0.99)": 8.153299859259278e-05,
+  "solve_connectedness_of_a_network_p0186_s0(max_users=200000, pm_number=524287, target_fraction=0.99)": 4.5982997107785195e-05
+}

@@ -1,0 +1,4 @@
+{
+  "solve_fibonacci_paths_p0662_s0(H=4, W=3)": 4.286000330466777e-05,
+  "solve_fibonacci_paths_p0662_s0(H=10000, W=10000)": 2.8791000659111887e-05
+}

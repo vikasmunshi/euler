@@ -1,0 +1,5 @@
+{
+  "solve_exploring_pascals_pyramid_p0154_s0(n=3)": 4.0875995182432234e-05,
+  "solve_exploring_pascals_pyramid_p0154_s0(n=200000)": 0.00011992500367341563,
+  "solve_exploring_pascals_pyramid_p0154_s0(n=500000)": 8.145299943862483e-05
+}

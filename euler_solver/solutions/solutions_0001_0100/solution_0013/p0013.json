@@ -1,0 +1,5 @@
+{
+  "solve_large_sum_p0013_s0(digits=10)": 0.00015434999659191817,
+  "solve_large_sum_p0013_s0(digits=20)": 0.00012955000420333818,
+  "solve_large_sum_p0013_s0(digits=100)": 0.00013944700185675174
+}

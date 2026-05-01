@@ -1,0 +1,7 @@
+dev  : solve_counting_fractions_p0072_s0.py 8 -> 21 (correct) [0.049s]
+dev  : solve_counting_fractions_p0072_s0.py 10 -> 31 (correct) [0.041s]
+dev  : solve_counting_fractions_p0072_s0.py 100 -> 3043 (correct) [0.047s]
+dev  : solve_counting_fractions_p0072_s0.py 1000 -> 304191 (correct) [0.047s]
+dev  : solve_counting_fractions_p0072_s0.py 10000 -> 30397485 (correct) [0.053s]
+dev  : solve_counting_fractions_p0072_s0.py 100000 -> 3039650753 (correct) [0.081s]
+main : solve_counting_fractions_p0072_s0.py 1000000 -> 303963552391 (correct) [0.683s]

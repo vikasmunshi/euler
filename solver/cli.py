@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from cmd import Cmd
 from contextlib import redirect_stdout
+from datetime import datetime
 from functools import partial
 from os import X_OK, access, devnull, environ
 from pathlib import Path
@@ -12,8 +13,10 @@ from re import escape as re_escape, search as re_search, sub as re_sub
 from readline import (backend as readline_backend, get_completer, get_completer_delims, parse_and_bind,
                       read_history_file, set_completer, set_completer_delims, set_history_length, write_history_file)
 from subprocess import CalledProcessError, run
-from sys import argv
-from typing import Any, Callable, ClassVar, Literal, get_args, get_origin
+from sys import argv, modules as sys_modules
+from types import TracebackType
+from typing import Any, Callable, ClassVar, IO, Literal, cast, get_args, get_origin
+from uuid import uuid7
 
 from solver.cli_utils import bool_flags, coerce, dedup_history, func_info, safe_split
 from solver.config import ColorCodes, root_dir, stack_dir
@@ -26,11 +29,12 @@ from solver.workspace import clear_the_workspace, init_the_workspace, list_the_w
 
 __all__ = ['SolverShell', 'cli']
 
-CYAN, GREEN, YELLOW, BLUE, GRAY, RED, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW, ColorCodes.BLUE,
-                                               ColorCodes.GRAY, ColorCodes.RED, ColorCodes.RESET)
-BOLD = ColorCodes.BOLD
+CYAN, GREEN, YELLOW, BLUE, BLACK, GRAY, RED, BOLD, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW,
+                                                            ColorCodes.BLUE, ColorCodes.BLACK, ColorCodes.GRAY,
+                                                            ColorCodes.RED, ColorCodes.BOLD, ColorCodes.RESET)
+BOLD = BOLD
 C_CMD = BLUE
-C_LBL = YELLOW
+C_LBL = BLACK
 C_TXT = GRAY
 _lw, _cw = 7, 31  # label column width, command column width
 banner: str = f"""\
@@ -41,10 +45,56 @@ banner: str = f"""\
 {C_LBL}{" ":<{_lw}} {C_CMD}{"?<cmd> | help <cmd>":<{_cw}} {C_TXT}show help on command
 {C_LBL}{"Exit":<{_lw}} {C_CMD}Ctrl-D | exit
 {C_LBL}{"Launch":<{_lw}} {C_CMD}{"solver":<{_cw}} {C_TXT}launch interactive shell
-{C_LBL}{" ":<{_lw}} {C_CMD}{"solver \"cmd1; cmd2\"":<{_cw}} {C_TXT}preload commands and stay interactive
-{C_LBL}{" ":<{_lw}} {C_CMD}{"solver -c \"cmdline\"":<{_cw}} {C_TXT}execute cmdline and exit
+{C_LBL}{" ":<{_lw}} {C_CMD}{"solver \"cmd1; cmd2\"":<{_cw}} {C_TXT}execute commands and exit
+{C_LBL}{" ":<{_lw}} {C_CMD}{"solver -c \"cmdline\"":<{_cw}} {C_TXT}execute cmdline continue in interactive shell
 {C_LBL}{"Flags":<{_lw}} {C_CMD}{"--key-word | --no-key-word":<{_cw}} {C_TXT}boolean True / False
 {C_LBL}{" ":<{_lw}} {C_CMD}{"--silent":<{_cw}} {C_TXT}suppress command output{RESET}"""
+
+
+class SessionCapture:
+    """Context-managed stdout tee: writes to both the terminal and a session log file."""
+    __slots__ = ('_file', '_filename', 'original', 'solver')
+    _file: IO[str]
+    _filename: str
+    original: IO[str]
+    solver: SolverShell
+
+    def __init__(self, solver: SolverShell) -> None:
+        self._filename = f'{uuid7().hex}.txt'
+        self.solver = solver
+
+    def __enter__(self) -> SessionCapture:
+        _sys = sys_modules['sys']
+        (root_dir / 'sessions').mkdir(exist_ok=True)
+        self.original = _sys.stdout
+        self._file = (root_dir / 'sessions' / self._filename).open('w')
+        _sys.stdout = cast(IO[str], cast(object, self))  # type: ignore [attr-defined]
+        self.solver.stdout = _sys.stdout
+        return self
+
+    def __exit__(self,
+                 exc_type: type[BaseException] | None,
+                 exc_value: BaseException | None,
+                 tb: TracebackType | None) -> None:
+        _sys = sys_modules['sys']
+        _sys.stdout = self.original  # type: ignore [attr-defined]
+        self.solver.stdout = _sys.stdout
+        self._file.close()
+
+    def write(self, s: str) -> int:
+        self.original.write(s)
+        self._file.write(s)
+        return len(s)
+
+    def flush(self) -> None:
+        self.original.flush()
+        self._file.flush()
+
+    def writable(self) -> bool:
+        return self.original.writable() and self._file.writable()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.original, name)
 
 
 class SolverShell(Cmd):
@@ -76,6 +126,9 @@ class SolverShell(Cmd):
         except FileNotFoundError:
             pass
         self.do_help('')
+        print(f'\n{CYAN}{"─" * 100}\n'
+              f'{GREEN}{BOLD}Session started at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.\n'
+              f'{CYAN}{"─" * 100}{RESET}')
 
     def postloop(self) -> None:
         """Deduplicate, cap at 1000 entries, and persist readline history when the command loop exits."""
@@ -464,6 +517,7 @@ _commands: dict[str, Callable] = {
 
 _aliases: dict[str, str] = {
     'eval-pub': 'for n in 1 to 100: init n --silent; eval --record; clear --silent; echo evaluated n',
+    'eval-show': 'for n in 1 to 100: init n --silent; eval --show; clear --silent; echo evaluated n',
     'gh-login': 'shell gh auth status || gh auth login',
     'gh-status': 'shell gh auth status',
     'git-add-stack': f'shell git add {stack_dir.as_posix()}/',
@@ -474,7 +528,11 @@ _aliases: dict[str, str] = {
 }
 
 
-def cli(commands: dict[str, Callable] | None = None, aliases: dict[str, str] | None = None) -> int:
+def cli(
+        commands: dict[str, Callable] | None = None,
+        aliases: dict[str, str] | None = None,
+        capture: bool = True,
+) -> int:
     """Configure and launch the solver shell.
 
     Registers commands and aliases on SolverShell, then parses argv to extract any
@@ -485,6 +543,7 @@ def cli(commands: dict[str, Callable] | None = None, aliases: dict[str, str] | N
                   command set (_commands) when None.
         aliases:  Mapping of alias names to command strings. Defaults to the built-in
                   alias set (_aliases) when None.
+        capture:  Whether to capture stdout to a file. Defaults to True.
     Command-line usage (argv parsing):
         solver                      # interactive shell
         solver "cmd"                # run cmd, then stay interactive
@@ -504,9 +563,13 @@ def cli(commands: dict[str, Callable] | None = None, aliases: dict[str, str] | N
         SolverShell.aliases[name] = alias
     i: int = 1 + int(argv[1:2] == ['-c'])
     startup_commands = [c for r in ' '.join(argv[i:i + 1]).split(';') if (c := r.strip())]
-    if startup_commands and i == 2:
+    if startup_commands and i == 1:
         startup_commands.append('exit')
-    return SolverShell().execute(commands=startup_commands or None)
+    if capture:
+        with SessionCapture(SolverShell()) as session:
+            return session.solver.execute(commands=startup_commands or None)
+    else:
+        return SolverShell().execute(commands=startup_commands or None)
 
 
 if __name__ == '__main__':

@@ -1,39 +1,15 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0026/p0026.py :: solve_reciprocal_cycles_p0026_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0026/p0026.py
+  func: solve_reciprocal_cycles_p0026_s0
+"""
 
-Project Euler Problem 26: Reciprocal Cycles.
-
-Problem Statement:
-    A unit fraction contains 1 in the numerator. The decimal representation of
-    the unit fractions with denominators 2 to 10 are given:
-        1/2 = 0.5
-        1/3 = 0.(3)
-        1/4 = 0.25
-        1/5 = 0.2
-        1/6 = 0.1(6)
-        1/7 = 0.(142857)
-        1/8 = 0.125
-        1/9 = 0.(1)
-        1/10 = 0.1
-    Where 0.1(6) means 0.166666..., and has a 1-digit recurring cycle. It can
-    be seen that 1/7 has a 6-digit recurring cycle.
-
-    Find the value of d < 1000 for which 1/d contains the longest recurring
-    cycle in its decimal fraction part.
-
-Solution Approach:
-    Apply number theory observing that the length of the recurring cycle of
-    1/d is the order of 10 modulo d. Use modular arithmetic to find the cycle
-    length efficiently for each d. Compare and track the maximum length.
-    Time complexity: O(N^2) worst, but efficient for N=1000.
-
-Answer: 983
-URL: https://projecteuler.net/problem=26"""
 from __future__ import annotations
 
 from math import gcd
+from sys import argv
 from typing import Optional
 
 
@@ -48,11 +24,19 @@ def multiplicative_order(a: int, modulus: int) -> Optional[int]:
 
 
 def solve(*, limit: int) -> int:
-    return max(((multiplicative_order(a=10, modulus=d), d) for i in range(max(limit // 10, 10)) if
-                (d := (limit - i)) > 6 and gcd(d, 10) == 1))[1]
+    return max(
+        (
+            (multiplicative_order(a=10, modulus=d), d)
+            for i in range(max(limit // 10, 10))
+            if (d := (limit - i)) > 6 and gcd(d, 10) == 1
+        )
+    )[1]
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(limit=int(argv[1])))
+    return 0
 
-    print(solve(limit=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

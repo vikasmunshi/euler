@@ -1,0 +1,5 @@
+{
+  "solve_perfection_quotients_p0241_s0(max_limit=1000)": 3.2659001590218395e-05,
+  "solve_perfection_quotients_p0241_s0(max_limit=1.000000e+18)": 3.000399738084525e-05,
+  "solve_perfection_quotients_p0241_s0(max_limit=1.000000e+12)": 3.539500175975263e-05
+}

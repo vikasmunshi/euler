@@ -1,0 +1,5 @@
+{
+  "solve_subsequence_of_thue_morse_sequence_p0361_s0(k_max=2)": 7.233199721667916e-05,
+  "solve_subsequence_of_thue_morse_sequence_p0361_s0(k_max=18)": 4.450100095709786e-05,
+  "solve_subsequence_of_thue_morse_sequence_p0361_s0(k_max=20)": 3.9653001294936985e-05
+}

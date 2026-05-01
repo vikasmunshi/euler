@@ -1,0 +1,5 @@
+{
+  "solve_lenticular_holes_p0295_s0(max_limit=10)": 4.4633001380134374e-05,
+  "solve_lenticular_holes_p0295_s0(max_limit=100000)": 8.688999514561146e-05,
+  "solve_lenticular_holes_p0295_s0(max_limit=200000)": 3.2951000321190804e-05
+}

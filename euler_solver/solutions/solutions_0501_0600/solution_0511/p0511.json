@@ -1,0 +1,5 @@
+{
+  "solve_sequences_with_nice_divisibility_properties_p0511_s0(k=4, n=3)": 3.530499816406518e-05,
+  "solve_sequences_with_nice_divisibility_properties_p0511_s0(k=4321, n=1234567898765)": 3.0305003747344017e-05,
+  "solve_sequences_with_nice_divisibility_properties_p0511_s0(k=24, n=1111)": 0.005051515996456146
+}

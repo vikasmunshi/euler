@@ -1,0 +1,5 @@
+{
+  "solve_constraining_the_least_greatest_and_the_greatest_least_p0350_s0(G=10, L=100, N=1)": 5.7185003242921084e-05,
+  "solve_constraining_the_least_greatest_and_the_greatest_least_p0350_s0(G=1000000, L=1.000000e+12, N=1.000000e+18)": 6.069499795557931e-05,
+  "solve_constraining_the_least_greatest_and_the_greatest_least_p0350_s0(G=1000, L=1000000, N=1000000000)": 0.00010515099711483344
+}

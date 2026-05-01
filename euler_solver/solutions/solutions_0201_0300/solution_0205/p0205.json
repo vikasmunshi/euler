@@ -1,0 +1,5 @@
+{
+  "solve_dice_game_p0205_s0(c_dice=1, c_sides=6, p_dice=1, p_sides=4, precision=7)": 3.826300235232338e-05,
+  "solve_dice_game_p0205_s0(c_dice=6, c_sides=6, p_dice=9, p_sides=4, precision=7)": 4.5022003178019077e-05,
+  "solve_dice_game_p0205_s0(c_dice=9, c_sides=6, p_dice=12, p_sides=4, precision=7)": 5.0159003876615316e-05
+}

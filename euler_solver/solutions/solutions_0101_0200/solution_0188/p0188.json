@@ -1,0 +1,5 @@
+{
+  "solve_hyperexponentiation_p0188_s0(base=3, height=3, mod_digits=8)": 4.357000580057502e-05,
+  "solve_hyperexponentiation_p0188_s0(base=1777, height=1855, mod_digits=8)": 5.495600635185838e-05,
+  "solve_hyperexponentiation_p0188_s0(base=2, height=10000, mod_digits=8)": 4.438099858816713e-05
+}

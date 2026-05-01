@@ -1,0 +1,5 @@
+{
+  "solve_nontransitive_sets_of_dice_p0376_s0(max_limit=7)": 4.904699744656682e-05,
+  "solve_nontransitive_sets_of_dice_p0376_s0(max_limit=30)": 5.499899998540059e-05,
+  "solve_nontransitive_sets_of_dice_p0376_s0(max_limit=50)": 3.344099968671799e-05
+}

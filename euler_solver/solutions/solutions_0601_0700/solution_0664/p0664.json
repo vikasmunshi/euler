@@ -1,0 +1,5 @@
+{
+  "solve_an_infinite_game_p0664_s0(n=0)": 4.119200457353145e-05,
+  "solve_an_infinite_game_p0664_s0(n=1234567)": 4.510200233198702e-05,
+  "solve_an_infinite_game_p0664_s0(n=10000000)": 5.9181002143304795e-05
+}

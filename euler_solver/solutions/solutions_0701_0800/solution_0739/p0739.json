@@ -1,0 +1,5 @@
+{
+  "solve_summation_of_summations_p0739_s0(n=8)": 4.2071005736943334e-05,
+  "solve_summation_of_summations_p0739_s0(n=100000000)": 5.585300095845014e-05,
+  "solve_summation_of_summations_p0739_s0(n=200000000)": 6.626699905609712e-05
+}

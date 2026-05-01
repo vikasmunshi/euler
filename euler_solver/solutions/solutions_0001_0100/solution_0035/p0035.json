@@ -1,0 +1,12 @@
+{
+  "solve_circular_primes_p0035_s0(max_limit=10)": 0.0002601870000944473,
+  "solve_circular_primes_p0035_s0(max_limit=100)": 0.00045843899715691805,
+  "solve_circular_primes_p0035_s0(max_limit=1000)": 0.00540027700481005,
+  "solve_circular_primes_p0035_s0(max_limit=1000000)": 0.08349801199801732,
+  "solve_circular_primes_p0035_s0(max_limit=10000000)": 1.3304865160025656,
+  "solve_circular_primes_p0035_s1_pps(max_limit=10)": 9.46990039665252e-05,
+  "solve_circular_primes_p0035_s1_pps(max_limit=100)": 0.00026793799770530313,
+  "solve_circular_primes_p0035_s1_pps(max_limit=1000)": 0.0005679860041709617,
+  "solve_circular_primes_p0035_s1_pps(max_limit=1000000)": 0.07249595600296743,
+  "solve_circular_primes_p0035_s1_pps(max_limit=10000000)": 1.1070310680006514
+}

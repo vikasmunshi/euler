@@ -1,45 +1,33 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0030/p0030.py :: solve_digit_fifth_powers_p0030_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0030/p0030.py
+  func: solve_digit_fifth_powers_p0030_s0
+"""
 
-Project Euler Problem 30: Digit Fifth Powers.
-
-Problem Statement:
-    Surprisingly there are only three numbers that can be written as the sum of
-    fourth powers of their digits:
-        1634 = 1^4 + 6^4 + 3^4 + 4^4
-        8208 = 8^4 + 2^4 + 0^4 + 8^4
-        9474 = 9^4 + 4^4 + 7^4 + 4^4
-
-    As 1 = 1^4 is not a sum it is not included.
-
-    The sum of these numbers is 1634 + 8208 + 9474 = 19316.
-
-    Find the sum of all the numbers that can be written as the sum of fifth powers
-    of their digits.
-
-Solution Approach:
-    Enumerate numbers up to a reasoned upper bound based on digit count and 9^5 max
-    contribution. For each number, sum the fifth powers of its digits and check equality.
-    Use precomputed digit fifth powers for efficiency.
-    Expected complexity depends on the upper bound but feasible with simple iteration.
-
-Answer: 443839
-URL: https://projecteuler.net/problem=30"""
 from __future__ import annotations
 
 from itertools import combinations_with_replacement
 from math import ceil, log
+from sys import argv
 
 
 def solve(*, n: int) -> int:
-    upper_bound_num_digits = ceil(log(n * 9 ** n, 10))
-    return sum((num for digits in combinations_with_replacement(range(10), upper_bound_num_digits) if
-                (num := sum((x ** n for x in digits))) > 9 and num == sum((int(x) ** n for x in str(num)))))
+    upper_bound_num_digits = ceil(log(n * 9**n, 10))
+    return sum(
+        (
+            num
+            for digits in combinations_with_replacement(range(10), upper_bound_num_digits)
+            if (num := sum((x**n for x in digits))) > 9 and num == sum((int(x) ** n for x in str(num)))
+        )
+    )
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(n=int(argv[1])))
+    return 0
 
-    print(solve(n=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

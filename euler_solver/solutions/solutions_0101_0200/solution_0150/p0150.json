@@ -1,0 +1,5 @@
+{
+  "solve_sub_triangle_sums_p0150_s0(rows=5)": 3.3078002161346376e-05,
+  "solve_sub_triangle_sums_p0150_s0(rows=1000)": 0.0002079270052490756,
+  "solve_sub_triangle_sums_p0150_s0(rows=1500)": 3.188399568898603e-05
+}

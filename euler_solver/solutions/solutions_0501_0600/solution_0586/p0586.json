@@ -1,0 +1,5 @@
+{
+  "solve_binary_quadratic_form_p0586_s0(max_limit=100000, r=4)": 8.103699656203389e-05,
+  "solve_binary_quadratic_form_p0586_s0(max_limit=1.000000e+15, r=40)": 4.352699761511758e-05,
+  "solve_binary_quadratic_form_p0586_s0(max_limit=100000000, r=6)": 7.858599565224722e-05
+}

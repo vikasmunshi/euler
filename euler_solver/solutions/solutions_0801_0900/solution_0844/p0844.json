@@ -1,0 +1,4 @@
+{
+  "solve_k_markov_numbers_p0844_s0(K=4, N=100)": 9.056000271812081e-05,
+  "solve_k_markov_numbers_p0844_s0(K=10, N=100000000)": 4.113699833396822e-05
+}

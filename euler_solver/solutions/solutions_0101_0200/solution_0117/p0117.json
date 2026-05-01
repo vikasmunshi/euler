@@ -1,0 +1,5 @@
+{
+  "solve_red_green_and_blue_tiles_p0117_s0(max_limit=5)": 4.263300070306286e-05,
+  "solve_red_green_and_blue_tiles_p0117_s0(max_limit=50)": 6.563300121342763e-05,
+  "solve_red_green_and_blue_tiles_p0117_s0(max_limit=500)": 0.0004165339996688999
+}

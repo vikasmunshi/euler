@@ -1,50 +1,27 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0014/p0014.py :: solve_longest_collatz_sequence_p0014_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0014/p0014.py
+  func: solve_longest_collatz_sequence_p0014_s0
+"""
 
-Project Euler Problem 14: Longest Collatz Sequence.
-
-Problem Statement:
-    The following iterative sequence is defined for the set of positive integers:
-
-        n → n/2  (n is even)
-        n → 3n + 1  (n is odd)
-
-    Using the rule above and starting with 13, we generate the following sequence:
-    13 → 40 → 20 → 10 → 5 → 16 → 8 → 4 → 2 → 1.
-
-    It can be seen that this sequence (starting at 13 and finishing at 1) contains 10 terms.
-    Although it has not been proved yet (Collatz Problem), it is thought that all starting
-    numbers finish at 1.
-
-    Which starting number, under one million, produces the longest chain?
-
-    NOTE: Once the chain starts the terms are allowed to go above one million.
-
-Solution Approach:
-    Use iterative computation with memoization to compute chain lengths efficiently.
-    For each number under one million, compute the Collatz sequence length and store in a
-    cache to avoid recomputation. Track the number with the longest sequence.
-    Time complexity roughly O(N) with memoization; space O(N).
-
-Answer: 837799
-URL: https://projecteuler.net/problem=14"""
 from __future__ import annotations
 
-import sys
 from contextlib import contextmanager
 from functools import lru_cache
+from sys import argv, setrecursionlimit
 from typing import Generator
 
-import matplotlib
 import matplotlib.pyplot as plt
 
-matplotlib.use('Qt5Agg')
 
-
-def show_solution() -> bool:
-    return '--show' in sys.argv
+@contextmanager
+def collatz_cache_context() -> Generator[None, None, None]:
+    try:
+        yield
+    finally:
+        return
 
 
 @lru_cache(maxsize=None)
@@ -62,17 +39,16 @@ def plot_collatz_sequence_lengths_upto(number: int) -> None:
     """Plot the Collatz sequence lengths up to a given number."""
     numbers = range(1, number + 1)
     lengths = [collatz_sequence_length(i) for i in numbers]
-    plt.title('Collatz Sequence Lengths')
+    plt.title("Collatz Sequence Lengths")
     plt.plot(numbers, lengths)
-    plt.xlabel('Number')
-    plt.ylabel('Collatz Sequence Length')
+    plt.xlabel("Number")
+    plt.ylabel("Collatz Sequence Length")
     plt.tight_layout()
     plt.show()
 
 
-@contextmanager
-def collatz_cache_context() -> Generator[None, None, None]:
-    yield
+def show_solution() -> bool:
+    return "--show" in argv
 
 
 def solve(*, max_number: int) -> int:
@@ -88,6 +64,11 @@ def solve(*, max_number: int) -> int:
     return starting_number
 
 
-if __name__ == '__main__':
-    sys.setrecursionlimit(10 ** 6)
-    print(solve(max_number=int(sys.argv[1])))
+def main() -> int:
+    setrecursionlimit(10**6)
+    print(solve(max_number=int(argv[1])))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

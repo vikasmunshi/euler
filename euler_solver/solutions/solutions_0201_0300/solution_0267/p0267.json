@@ -1,0 +1,5 @@
+{
+  "solve_billionaire_p0267_s0(num_flips=10, target=1000)": 3.6858000385109335e-05,
+  "solve_billionaire_p0267_s0(num_flips=1000, target=1000000000)": 3.747900336747989e-05,
+  "solve_billionaire_p0267_s0(num_flips=2000, target=1000000000)": 3.276899951742962e-05
+}

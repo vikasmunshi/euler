@@ -1,35 +1,15 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0050/p0050.py :: solve_consecutive_prime_sum_p0050_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0050/p0050.py
+  func: solve_consecutive_prime_sum_p0050_s0
+"""
 
-Project Euler Problem 50: Consecutive Prime Sum.
-
-Problem Statement:
-    The prime 41, can be written as the sum of six consecutive primes:
-    41 = 2 + 3 + 5 + 7 + 11 + 13.
-    This is the longest sum of consecutive primes that adds to a prime below
-    one-hundred.
-
-    The longest sum of consecutive primes below one-thousand that adds to a
-    prime, contains 21 terms, and is equal to 953.
-
-    Which prime, below one-million, can be written as the sum of the most
-    consecutive primes?
-
-Solution Approach:
-    Use prime generation with a sieve (e.g., Sieve of Eratosthenes) up to the
-    limit. Employ prefix sums for consecutive primes and check primality
-    efficiently. A nested iteration over start and end indices with pruning
-    will yield the longest consecutive prime sum. Expected complexity is near
-    O(N log log N) for sieve plus O(N^2) in worst case for sums, reduced by
-    pruning.
-
-Answer: 997651
-URL: https://projecteuler.net/problem=50"""
 from __future__ import annotations
 
 from itertools import accumulate
+from sys import argv
 from typing import List, Set, Tuple
 
 
@@ -64,7 +44,10 @@ def solve(*, max_limit: int) -> int:
     return prime
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(max_limit=int(argv[1])))
+    return 0
 
-    print(solve(max_limit=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

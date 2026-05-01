@@ -1,36 +1,29 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0081/p0081.py :: solve_path_sum_two_ways_p0081_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0081/p0081.py
+  func: solve_path_sum_two_ways_p0081_s0
+"""
 
-Project Euler Problem 81: Path Sum: Two Ways.
-
-Problem Statement:
-    In the 5 by 5 matrix below, the minimal path sum from the top left to the bottom
-    right, by only moving to the right and down, is indicated in bold red and is equal
-    to 2427.
-
-    Find the minimal path sum from the top left to the bottom right by only moving
-    right and down in matrix.txt (right click and "Save Link/Target As..."), a 31K text
-    file containing an 80 by 80 matrix.
-
-Solution Approach:
-    Use dynamic programming to build up the minimal path sums starting from the top-left
-    corner, adding only right and down moves. Store intermediate sums in a 2D array.
-    This uses O(n^2) time and space for an n x n matrix. Efficiently read and parse the
-    input file.
-
-Answer: 427337
-URL: https://projecteuler.net/problem=81"""
 from __future__ import annotations
 
 from pathlib import Path
+from sys import argv
 from typing import Generator, List
+
+default: str = (
+    "131, 673, 234, 103, 18\n"
+    "201, 96, 342, 965, 150\n"
+    "630, 803, 746, 422, 111\n"
+    "537, 699, 497, 121, 956\n"
+    "805, 732, 524, 37, 331\n"
+)
 
 
 def get_text_file(url: str) -> str:
-    """ Return the contents of a file from the 'resources' directory. """
-    local_filename: str = 'resources' + '/' + url.split('/')[-1].split('?')[0]
+    """Return the contents of a file from the 'resources' directory."""
+    local_filename: str = "resources" + "/" + url.split("/")[-1].split("?")[0]
     return (Path(__file__).parent / local_filename).read_text()
 
 
@@ -46,8 +39,7 @@ def move_diagonally(size: int) -> Generator[tuple[int, int], None, None]:
 
 
 def path_sum_two_ways(content: str) -> int:
-    matrix: List[List[int]] = [[int(n) for n in line.split(',')]
-                               for line in content.splitlines(keepends=False) if line]
+    matrix: List[List[int]] = [[int(n) for n in line.split(",")] for line in content.splitlines(keepends=False) if line]
     for row, col in move_diagonally((size := len(matrix))):
         neighbors = []
         if row < size - 1:
@@ -58,19 +50,15 @@ def path_sum_two_ways(content: str) -> int:
     return matrix[0][0]
 
 
-default: str = ('131, 673, 234, 103, 18\n'
-                '201, 96, 342, 965, 150\n'
-                '630, 803, 746, 422, 111\n'
-                '537, 699, 497, 121, 956\n'
-                '805, 732, 524, 37, 331\n')
-
-
 def solve(*, file_url: str) -> int:
     content: str = get_text_file(file_url) if file_url else default
     return path_sum_two_ways(content)
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(file_url=str(argv[1])))
+    return 0
 
-    print(solve(file_url=str(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

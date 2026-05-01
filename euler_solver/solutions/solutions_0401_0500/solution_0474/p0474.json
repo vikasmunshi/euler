@@ -1,0 +1,4 @@
+{
+  "solve_last_digits_of_divisors_p0474_s0(last_digits=12, n_factorial=12)": 3.90210043406114e-05,
+  "solve_last_digits_of_divisors_p0474_s0(last_digits=65432, n_factorial=1000000)": 3.6539997381623834e-05
+}

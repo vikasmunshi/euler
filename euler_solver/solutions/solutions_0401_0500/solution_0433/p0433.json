@@ -1,0 +1,4 @@
+{
+  "solve_steps_in_euclids_algorithm_p0433_s0(max_limit=10)": 5.39760003448464e-05,
+  "solve_steps_in_euclids_algorithm_p0433_s0(max_limit=5000000)": 3.993400605395436e-05
+}

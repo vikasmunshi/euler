@@ -1,0 +1,5 @@
+{
+  "solve_strong_repunits_p0346_s0(max_limit=50)": 8.807900303509086e-05,
+  "solve_strong_repunits_p0346_s0(max_limit=1.000000e+12)": 3.8348000089172274e-05,
+  "solve_strong_repunits_p0346_s0(max_limit=1000000)": 5.4737000027671456e-05
+}

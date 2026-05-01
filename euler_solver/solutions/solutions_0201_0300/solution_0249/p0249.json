@@ -1,0 +1,5 @@
+{
+  "solve_prime_subset_sums_p0249_s0(max_limit=30)": 4.047500260639936e-05,
+  "solve_prime_subset_sums_p0249_s0(max_limit=5000)": 4.418300522956997e-05,
+  "solve_prime_subset_sums_p0249_s0(max_limit=10000)": 3.845200262730941e-05
+}

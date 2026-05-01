@@ -1,0 +1,5 @@
+{
+  "solve_angular_bisector_and_tangent_p0296_s0(max_limit=30)": 3.4445001801941544e-05,
+  "solve_angular_bisector_and_tangent_p0296_s0(max_limit=100000)": 2.9861999792046845e-05,
+  "solve_angular_bisector_and_tangent_p0296_s0(max_limit=200000)": 3.2699994335416704e-05
+}

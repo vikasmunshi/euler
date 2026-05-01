@@ -1,0 +1,5 @@
+{
+  "solve_laserbeam_p0202_s0(bounces=11)": 4.3519998143892735e-05,
+  "solve_laserbeam_p0202_s0(bounces=12017639147)": 5.106099706608802e-05,
+  "solve_laserbeam_p0202_s0(bounces=1000001)": 7.920899952296168e-05
+}

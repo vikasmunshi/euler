@@ -1,0 +1,4 @@
+{
+  "solve_xor_equation_b_p0878_s0(max_limit_m=100, max_limit_n=1000)": 4.224399890517816e-05,
+  "solve_xor_equation_b_p0878_s0(max_limit_m=1000000, max_limit_n=1.000000e+17)": 5.7884004490915686e-05
+}

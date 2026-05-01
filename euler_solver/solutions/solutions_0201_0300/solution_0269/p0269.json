@@ -1,0 +1,5 @@
+{
+  "solve_polynomials_with_at_least_one_integer_root_p0269_s0(max_limit=100000)": 3.149699477944523e-05,
+  "solve_polynomials_with_at_least_one_integer_root_p0269_s0(max_limit=1.000000e+16)": 4.547600110527128e-05,
+  "solve_polynomials_with_at_least_one_integer_root_p0269_s0(max_limit=1.000000e+12)": 2.8449998353607953e-05
+}

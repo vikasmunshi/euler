@@ -1,37 +1,16 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0078/p0078.py :: solve_coin_partitions_p0078_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0078/p0078.py
+  func: solve_coin_partitions_p0078_s0
+"""
 
-Project Euler Problem 78: Coin Partitions.
-
-Problem Statement:
-    Let p(n) represent the number of different ways in which n coins can be separated
-    into piles. For example, five coins can be separated into piles in exactly seven
-    different ways, so p(5) = 7.
-
-    OOOOO
-    OOOO   O
-    OOO   OO
-    OOO   O   O
-    OO   OO   O
-    OO   O   O   O
-    O   O   O   O   O
-
-    Find the least value of n for which p(n) is divisible by one million.
-
-Solution Approach:
-    Use number theory and partition function properties. Implement a dynamic programming
-    approach to compute p(n) efficiently using Euler’s pentagonal number theorem.
-    Detect the smallest n where p(n) modulo 1,000,000 is zero. The algorithm is typically
-    O(n * sqrt(n)) time complexity.
-
-Answer: 55374
-URL: https://projecteuler.net/problem=78"""
 from __future__ import annotations
 
 from functools import lru_cache
 from itertools import count
+from sys import argv
 
 
 @lru_cache(maxsize=None)
@@ -64,7 +43,10 @@ def solve(*, divisor: int) -> int:
     return least_number_with_partitions_divisible_by(divisor=divisor)
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(divisor=int(argv[1])))
+    return 0
 
-    print(solve(divisor=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

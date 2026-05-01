@@ -1,0 +1,5 @@
+{
+  "solve_lattice_paths_p0015_s0(lattice_size=2)": 2.779100032057613e-05,
+  "solve_lattice_paths_p0015_s0(lattice_size=20)": 2.3114000214263797e-05,
+  "solve_lattice_paths_p0015_s0(lattice_size=200)": 7.999900117283687e-05
+}

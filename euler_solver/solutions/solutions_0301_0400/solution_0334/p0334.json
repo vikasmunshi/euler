@@ -1,0 +1,5 @@
+{
+  "solve_spilling_the_beans_p0334_s0(num_bowls=2)": 5.4104995797388256e-05,
+  "solve_spilling_the_beans_p0334_s0(num_bowls=1500)": 0.00015148399688769132,
+  "solve_spilling_the_beans_p0334_s0(num_bowls=5000)": 5.139700078871101e-05
+}

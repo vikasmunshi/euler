@@ -1,0 +1,4 @@
+{
+  "solve_resilience_p0243_s0(threshold_denom=10, threshold_numer=4)": 3.462300082901493e-05,
+  "solve_resilience_p0243_s0(threshold_denom=94744, threshold_numer=15499)": 3.976399602834135e-05
+}

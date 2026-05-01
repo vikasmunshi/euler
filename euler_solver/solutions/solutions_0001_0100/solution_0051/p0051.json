@@ -1,0 +1,5 @@
+{
+  "solve_prime_digit_replacements_p0051_s0(num_digits=6, prime_run=6)": 0.056314342000405304,
+  "solve_prime_digit_replacements_p0051_s0(num_digits=6, prime_run=7)": 0.3495281980067375,
+  "solve_prime_digit_replacements_p0051_s0(num_digits=6, prime_run=8)": 0.2751028260026942
+}

@@ -1,0 +1,5 @@
+{
+  "solve_counting_block_combinations_ii_p0115_s0(limit=1000000, m=3)": 0.00038006000249879435,
+  "solve_counting_block_combinations_ii_p0115_s0(limit=1000000, m=10)": 0.0007053899971651845,
+  "solve_counting_block_combinations_ii_p0115_s0(limit=1000000, m=50)": 0.0005560459976550192
+}

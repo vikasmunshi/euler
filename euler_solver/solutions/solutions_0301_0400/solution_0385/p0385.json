@@ -1,0 +1,5 @@
+{
+  "solve_ellipses_inside_triangles_p0385_s0(max_limit=8)": 4.297499981475994e-05,
+  "solve_ellipses_inside_triangles_p0385_s0(max_limit=1000000000)": 4.913700104225427e-05,
+  "solve_ellipses_inside_triangles_p0385_s0(max_limit=1000)": 3.538800228852779e-05
+}

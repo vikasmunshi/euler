@@ -1,0 +1,4 @@
+{
+  "solve_admissible_paths_through_a_grid_p0408_s0(n=5)": 4.297499981475994e-05,
+  "solve_admissible_paths_through_a_grid_p0408_s0(n=10000000)": 4.182100383331999e-05
+}

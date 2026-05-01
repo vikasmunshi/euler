@@ -1,52 +1,27 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0068/p0068.py :: solve_magic_5_gon_ring_p0068_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0068/p0068.py
+  func: solve_magic_5_gon_ring_p0068_s0
+"""
 
-Project Euler Problem 68: Magic 5-gon Ring.
-
-Problem Statement:
-    Consider the following "magic" 3-gon ring, filled with the numbers 1 to 6, and each line
-    adding to nine.
-
-    Working clockwise, and starting from the group of three with the numerically lowest external
-    node (4,3,2 in this example), each solution can be described uniquely. For example, the above
-    solution can be described by the set: 4,3,2; 6,2,1; 5,1,3.
-
-    It is possible to complete the ring with four different totals: 9, 10, 11, and 12. There are
-    eight solutions in total.
-
-    By concatenating each group it is possible to form 9-digit strings; the maximum string for a
-    3-gon ring is 432621513.
-
-    Using the numbers 1 to 10, and depending on arrangements, it is possible to form 16- and
-    17-digit strings. What is the maximum 16-digit string for a "magic" 5-gon ring?
-
-Solution Approach:
-    Use combinatorial enumeration with backtracking to arrange numbers 1 to 10 in the 5-gon ring.
-    Represent the ring as pairs of internal nodes and one external node per line summing equally.
-    Generate all valid magic 5-gon rings, ensure the starting external node is the lowest for
-    uniqueness, and form concatenated strings.
-    Track the maximum 16-digit string lexicographically.
-    Key techniques: combinatorics, backtracking, string manipulation. Expected to be solved
-    efficiently with pruning.
-
-Answer: 6531031914842725
-URL: https://projecteuler.net/problem=68"""
 from __future__ import annotations
 
 from collections import namedtuple
 from itertools import permutations
+from sys import argv
 from typing import List, Set, Tuple
-
-Line = namedtuple('Line', ['outer', 'inner_1', 'inner_2'])
 
 
 def show_solution() -> bool:
-    return '--show' in sys.argv
+    return "--show" in argv
 
 
-Ring = namedtuple('Ring', ['outer', 'inner'])
+Ring = namedtuple("Ring", ["outer", "inner"])
+
+
+Line = namedtuple("Line", ["outer", "inner_1", "inner_2"])
 
 
 def solve(*, result_length: int, ring_size: int) -> int:
@@ -75,19 +50,25 @@ def solve(*, result_length: int, ring_size: int) -> int:
                 outer_choice.append(required)
         else:
             lines = tuple(zip(outer_choice, inner_choice, inner_choice[1:] + inner_choice[:1]))
-            magic_number: int = int(''.join((''.join((str(num) for num in line)) for line in lines)))
+            magic_number: int = int("".join(("".join((str(num) for num in line)) for line in lines)))
             if max_magic_number < magic_number:
                 max_magic_number = magic_number
                 max_ring = Ring(outer=tuple(outer_choice), inner=tuple(inner_choice))
                 max_lines = tuple((Line(*line) for line in lines))
     if show_solution():
-        print(f'Ring Size: {ring_size}; Inner Loop Count: {inner_loop_count}; Outer Loop Count: {outer_loop_count}; '
-              f'Magic Number: {max_magic_number}; Ring: {max_ring}; Lines: {max_lines}', file=sys.stderr)
-    assert result_length == len(str(max_magic_number)), 'Result length does not match expected value'
+        print(f"Ring Size: {ring_size}; "
+              f"Inner Loop Count: {inner_loop_count}; "
+              f"Outer Loop Count: {outer_loop_count}; "
+              f"Magic Number: {max_magic_number}; "
+              f"Ring: {max_ring}; Lines: {max_lines}")
+    assert result_length == len(str(max_magic_number)), "Result length does not match expected value"
     return max_magic_number
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(result_length=int(argv[1]), ring_size=int(argv[2])))
+    return 0
 
-    print(solve(result_length=int(sys.argv[1]), ring_size=int(sys.argv[2])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

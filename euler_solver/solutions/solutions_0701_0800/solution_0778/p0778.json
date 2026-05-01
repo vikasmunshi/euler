@@ -1,0 +1,5 @@
+{
+  "solve_freshmans_product_p0778_s0(M=7, R=2)": 5.1820999942719936e-05,
+  "solve_freshmans_product_p0778_s0(M=765432, R=234567)": 4.4502994569484144e-05,
+  "solve_freshmans_product_p0778_s0(M=1000000, R=1000000)": 5.9068996051792055e-05
+}

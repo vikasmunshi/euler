@@ -1,0 +1,5 @@
+{
+  "solve_stone_game_p0260_s0(max_limit=10)": 3.326000296510756e-05,
+  "solve_stone_game_p0260_s0(max_limit=1000)": 3.6416997318156064e-05,
+  "solve_stone_game_p0260_s0(max_limit=2000)": 4.362199979368597e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_non_bouncy_numbers_p0113_s0(num_max_digits=6)": 5.833499744767323e-05,
+  "solve_non_bouncy_numbers_p0113_s0(num_max_digits=10)": 3.9302998629864305e-05,
+  "solve_non_bouncy_numbers_p0113_s0(num_max_digits=100)": 2.8726004529744387e-05
+}

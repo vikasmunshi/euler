@@ -1,0 +1,5 @@
+{
+  "solve_diophantine_equation_p0066_s0(max_d=7)": 0.00031804000172996894,
+  "solve_diophantine_equation_p0066_s0(max_d=1000)": 0.03898154199850978,
+  "solve_diophantine_equation_p0066_s0(max_d=10000)": 2.1510799690004205
+}

@@ -1,0 +1,5 @@
+{
+  "solve_flea_circus_p0213_s0(rings=1)": 4.158799856668338e-05,
+  "solve_flea_circus_p0213_s0(rings=50)": 3.3259995689149946e-05,
+  "solve_flea_circus_p0213_s0(rings=100)": 5.142800364410505e-05
+}

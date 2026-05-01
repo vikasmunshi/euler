@@ -1,4 +1,4 @@
-dev  : solve_square_root_digital_expansion_p0080_s0.py 100 2 -> 475 (correct) [0.050s]
-dev  : solve_square_root_digital_expansion_p0080_s1.py 100 2 -> 475 (correct) [0.042s]
-main : solve_square_root_digital_expansion_p0080_s0.py 100 99 -> 40886 (correct) [0.067s]
-main : solve_square_root_digital_expansion_p0080_s1.py 100 99 -> 40886 (correct) [0.067s]
+dev  : solve_square_root_digital_expansion_p0080_s0.py 100 2 -> 475 (correct) [0.037s]
+dev  : solve_square_root_digital_expansion_p0080_s1.py 100 2 -> 475 (correct) [0.040s]
+main : solve_square_root_digital_expansion_p0080_s0.py 100 99 -> 40886 (correct) [0.070s]
+main : solve_square_root_digital_expansion_p0080_s1.py 100 99 -> 40886 (correct) [0.080s]

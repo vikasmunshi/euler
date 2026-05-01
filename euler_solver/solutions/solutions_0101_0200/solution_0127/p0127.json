@@ -1,0 +1,5 @@
+{
+  "solve_abc_hits_p0127_s0(max_limit=1000)": 2.839499939000234e-05,
+  "solve_abc_hits_p0127_s0(max_limit=120000)": 2.3411994334310293e-05,
+  "solve_abc_hits_p0127_s0(max_limit=200000)": 2.9696006095036864e-05
+}

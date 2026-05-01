@@ -1,0 +1,5 @@
+{
+  "solve_pythagorean_odds_p0285_s0(max_k=10)": 4.2579995351843536e-05,
+  "solve_pythagorean_odds_p0285_s0(max_k=100000)": 7.015300070634112e-05,
+  "solve_pythagorean_odds_p0285_s0(max_k=200000)": 2.9320995963644236e-05
+}

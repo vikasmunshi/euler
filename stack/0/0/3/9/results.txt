@@ -1,2 +1,2 @@
-dev  : solve_integer_right_triangles_p0039_s0.py 100 -> 60 (correct) [0.041s]
-main : solve_integer_right_triangles_p0039_s0.py 1000 -> 840 (correct) [0.036s]
+dev  : solve_integer_right_triangles_p0039_s0.py 100 -> 60 (correct) [0.040s]
+main : solve_integer_right_triangles_p0039_s0.py 1000 -> 840 (correct) [0.035s]

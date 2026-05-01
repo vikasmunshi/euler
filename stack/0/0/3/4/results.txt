@@ -1,1 +1,1 @@
-main : solve_digit_factorials_p0034_s0.py  -> 40730 (correct) [0.051s]
+main : solve_digit_factorials_p0034_s0.py  -> 40730 (correct) [0.093s]

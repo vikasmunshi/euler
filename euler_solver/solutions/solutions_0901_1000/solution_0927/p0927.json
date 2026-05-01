@@ -1,0 +1,5 @@
+{
+  "solve_prime_ary_tree_p0927_s0(max_limit=20)": 4.07859988627024e-05,
+  "solve_prime_ary_tree_p0927_s0(max_limit=10000000)": 3.771699994103983e-05,
+  "solve_prime_ary_tree_p0927_s0(max_limit=1000)": 4.075500328326598e-05
+}

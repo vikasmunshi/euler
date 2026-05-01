@@ -1,0 +1,5 @@
+{
+  "solve_rsa_encryption_p0182_s0(p=19, q=37)": 5.446500290418044e-05,
+  "solve_rsa_encryption_p0182_s0(p=1009, q=3643)": 3.6189994716551155e-05,
+  "solve_rsa_encryption_p0182_s0(p=10007, q=10009)": 4.3779997213277966e-05
+}

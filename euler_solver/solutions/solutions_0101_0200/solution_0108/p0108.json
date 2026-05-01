@@ -1,0 +1,10 @@
+{
+  "solve_diophantine_reciprocals_i_p0108_s1(min_solutions=3)": 0.00017204700270667672,
+  "solve_diophantine_reciprocals_i_p0108_s1(min_solutions=10)": 0.0002526930038584396,
+  "solve_diophantine_reciprocals_i_p0108_s1(min_solutions=100)": 0.003061834999243729,
+  "solve_diophantine_reciprocals_i_p0108_s1(min_solutions=1000)": 0.33130047300073784,
+  "solve_diophantine_reciprocals_i_p0108_s0(min_solutions=3)": 0.00014373800513567403,
+  "solve_diophantine_reciprocals_i_p0108_s0(min_solutions=10)": 0.0011171189980814233,
+  "solve_diophantine_reciprocals_i_p0108_s0(min_solutions=100)": 0.000154972993186675,
+  "solve_diophantine_reciprocals_i_p0108_s0(min_solutions=1000)": 0.00013555899931816384
+}

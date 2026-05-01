@@ -1,0 +1,5 @@
+{
+  "solve_equiproduct_partition_p0937_s0(n=4)": 4.6568995458073914e-05,
+  "solve_equiproduct_partition_p0937_s0(n=100000000)": 5.8226003602612764e-05,
+  "solve_equiproduct_partition_p0937_s0(n=1000)": 4.672000068239868e-05
+}

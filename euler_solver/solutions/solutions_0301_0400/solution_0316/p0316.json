@@ -1,0 +1,4 @@
+{
+  "solve_numbers_in_decimal_expansions_p0316_s0(n_max=10, ten_power=6)": 3.194700548192486e-05,
+  "solve_numbers_in_decimal_expansions_p0316_s0(n_max=999999, ten_power=16)": 3.469600051175803e-05
+}

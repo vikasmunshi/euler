@@ -1,0 +1,5 @@
+{
+  "solve_rectangles_in_cross_hatched_grids_p0147_s0(max_cols=2, max_rows=3)": 5.6019998737610877e-05,
+  "solve_rectangles_in_cross_hatched_grids_p0147_s0(max_cols=43, max_rows=47)": 6.737600051565096e-05,
+  "solve_rectangles_in_cross_hatched_grids_p0147_s0(max_cols=100, max_rows=100)": 7.059800554998219e-05
+}

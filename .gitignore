@@ -98,4 +98,5 @@ var/
 /backup/
 /cache/
 /euler/
+/sessions/
 /venv*/

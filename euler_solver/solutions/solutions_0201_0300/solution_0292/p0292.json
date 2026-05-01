@@ -1,0 +1,5 @@
+{
+  "solve_pythagorean_polygons_p0292_s0(max_limit=4)": 3.315199865028262e-05,
+  "solve_pythagorean_polygons_p0292_s0(max_limit=120)": 3.983900387538597e-05,
+  "solve_pythagorean_polygons_p0292_s0(max_limit=240)": 3.020300209755078e-05
+}

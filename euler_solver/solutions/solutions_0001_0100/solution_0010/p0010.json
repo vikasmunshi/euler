@@ -1,0 +1,17 @@
+{
+  "solve_summation_of_primes_p0010_s0_eratosthenes_sieve(max_num=10)": 0.0002597339989733882,
+  "solve_summation_of_primes_p0010_s0_eratosthenes_sieve(max_num=2000000)": 0.0490030540022417,
+  "solve_summation_of_primes_p0010_s0_eratosthenes_sieve(max_num=10000000)": 0.39229112699831603,
+  "solve_summation_of_primes_p0010_s1_sundaram_sieve(max_num=10)": 0.0003095560023211874,
+  "solve_summation_of_primes_p0010_s1_sundaram_sieve(max_num=2000000)": 0.04798780499550048,
+  "solve_summation_of_primes_p0010_s1_sundaram_sieve(max_num=10000000)": 0.35384604800492525,
+  "solve_summation_of_primes_p0010_s2_primes_generator(max_num=10)": 0.00025790100335143507,
+  "solve_summation_of_primes_p0010_s2_primes_generator(max_num=2000000)": 0.3319196299999021,
+  "solve_summation_of_primes_p0010_s2_primes_generator(max_num=10000000)": 3.001612692998606,
+  "solve_summation_of_primes_p0010_s3_is_prime(max_num=10)": 0.0001272709996555932,
+  "solve_summation_of_primes_p0010_s3_is_prime(max_num=2000000)": 1.4934502000032808,
+  "solve_summation_of_primes_p0010_s3_is_prime(max_num=10000000)": 15.039737014005368,
+  "solve_summation_of_primes_p0010_s4_pps(max_num=10)": 9.426399628864601e-05,
+  "solve_summation_of_primes_p0010_s4_pps(max_num=2000000)": 0.0009535010030958802,
+  "solve_summation_of_primes_p0010_s4_pps(max_num=10000000)": 0.004698787997767795
+}

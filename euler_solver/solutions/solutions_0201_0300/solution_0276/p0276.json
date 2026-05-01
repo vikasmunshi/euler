@@ -1,0 +1,5 @@
+{
+  "solve_primitive_triangles_p0276_s0(max_limit=10)": 0.0003196749967173673,
+  "solve_primitive_triangles_p0276_s0(max_limit=10000000)": 4.6087996452115476e-05,
+  "solve_primitive_triangles_p0276_s0(max_limit=20000000)": 6.176000169944018e-05
+}

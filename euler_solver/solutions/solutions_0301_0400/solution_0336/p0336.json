@@ -1,0 +1,5 @@
+{
+  "solve_maximix_arrangements_p0336_s0(n=10, num_carriages=6)": 4.632099444279447e-05,
+  "solve_maximix_arrangements_p0336_s0(n=2011, num_carriages=11)": 3.3712996810209006e-05,
+  "solve_maximix_arrangements_p0336_s0(n=100, num_carriages=8)": 0.0006174250011099502
+}

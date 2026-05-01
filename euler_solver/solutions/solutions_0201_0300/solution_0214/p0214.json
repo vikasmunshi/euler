@@ -1,0 +1,5 @@
+{
+  "solve_totient_chains_p0214_s0(max_limit=100)": 4.987599822925404e-05,
+  "solve_totient_chains_p0214_s0(max_limit=40000000)": 6.246200064197183e-05,
+  "solve_totient_chains_p0214_s0(max_limit=100000000)": 4.745100159198046e-05
+}

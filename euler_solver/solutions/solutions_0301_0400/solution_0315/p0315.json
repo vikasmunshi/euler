@@ -1,0 +1,5 @@
+{
+  "solve_digital_root_clocks_p0315_s0(max_limit=100, min_limit=10)": 0.0003581450000638142,
+  "solve_digital_root_clocks_p0315_s0(max_limit=20000000, min_limit=10000000)": 4.3342995923012495e-05,
+  "solve_digital_root_clocks_p0315_s0(max_limit=30000000, min_limit=20000000)": 3.5317993024364114e-05
+}

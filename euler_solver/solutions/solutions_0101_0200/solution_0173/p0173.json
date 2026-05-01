@@ -1,0 +1,5 @@
+{
+  "solve_hollow_square_laminae_i_p0173_s0(max_limit=32)": 4.3820000428240746e-05,
+  "solve_hollow_square_laminae_i_p0173_s0(max_limit=1000000)": 2.3792999854777008e-05,
+  "solve_hollow_square_laminae_i_p0173_s0(max_limit=2000000)": 3.197399928467348e-05
+}

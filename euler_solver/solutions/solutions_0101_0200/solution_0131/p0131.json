@@ -1,0 +1,5 @@
+{
+  "solve_prime_cube_partnership_p0131_s0(max_limit=100)": 2.9545997676905245e-05,
+  "solve_prime_cube_partnership_p0131_s0(max_limit=1000000)": 3.107700467808172e-05,
+  "solve_prime_cube_partnership_p0131_s0(max_limit=10000000)": 2.872500044759363e-05
+}

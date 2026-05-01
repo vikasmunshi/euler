@@ -1,0 +1,5 @@
+{
+  "solve_nearly_isosceles_120_degree_triangles_p0582_s0(max_limit=1000)": 5.0258000555913895e-05,
+  "solve_nearly_isosceles_120_degree_triangles_p0582_s0(max_limit=100000000)": 4.0422994061373174e-05,
+  "solve_nearly_isosceles_120_degree_triangles_p0582_s0(max_limit=1.000000e+12)": 3.909799852408469e-05
+}

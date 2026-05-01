@@ -1,32 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0037/p0037.py :: solve_truncatable_primes_p0037_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0037/p0037.py
+  func: solve_truncatable_primes_p0037_s0
+"""
 
-Project Euler Problem 37: Truncatable Primes.
-
-Problem Statement:
-    The number 3797 has an interesting property. Being prime itself, it is possible
-    to continuously remove digits from left to right, and remain prime at each stage:
-    3797, 797, 97, and 7. Similarly we can work from right to left: 3797, 379, 37,
-    and 3.
-
-    Find the sum of the only eleven primes that are both truncatable from left to
-    right and right to left.
-
-    NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
-
-Solution Approach:
-    Use prime checking and truncation checks for both left and right digit removal.
-    Efficient primality tests and caching found primes can improve performance.
-    Brute force search with pruning is feasible due to the rarity of truncatable primes.
-
-Answer: 748317
-URL: https://projecteuler.net/problem=37"""
 from __future__ import annotations
 
-from typing import Generator
-from typing import List, Set
+from typing import Generator, List, Set
 
 
 def primes_generator() -> Generator[int, None, None]:
@@ -54,13 +36,19 @@ def solve() -> int:
         primes.add(prime)
         if int(prime) < 10:
             continue
-        if not any((pl not in primes or pr not in primes for pl, pr in
-                    [(prime[i:], prime[:i]) for i in range(1, len(prime))])):
+        if not any(
+            (pl not in primes or pr not in primes for pl, pr in [(prime[i:], prime[:i]) for i in range(1, len(prime))])
+        ):
             truncatable_primes.append(prime_num)
         if len(truncatable_primes) == 11:
             break
     return sum(truncatable_primes)
 
 
-if __name__ == '__main__':
+def main() -> int:
     print(solve())
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

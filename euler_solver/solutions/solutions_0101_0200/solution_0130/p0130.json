@@ -1,0 +1,5 @@
+{
+  "solve_composites_with_prime_repunit_property_p0130_s0(count=5)": 2.6323999918531626e-05,
+  "solve_composites_with_prime_repunit_property_p0130_s0(count=25)": 5.1158000133000314e-05,
+  "solve_composites_with_prime_repunit_property_p0130_s0(count=100)": 3.1146999390330166e-05
+}

@@ -1,0 +1,5 @@
+{
+  "solve_triangles_with_non_rational_sides_and_integral_area_p0390_s0(n=1000000)": 5.2600000344682485e-05,
+  "solve_triangles_with_non_rational_sides_and_integral_area_p0390_s0(n=1.000000e+10)": 3.431399818509817e-05,
+  "solve_triangles_with_non_rational_sides_and_integral_area_p0390_s0(n=100000000)": 3.7957004678901285e-05
+}

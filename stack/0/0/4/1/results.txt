@@ -1,1 +1,1 @@
-main : solve_pandigital_prime_p0041_s0.py  -> 7652413 (correct) [0.044s]
+main : solve_pandigital_prime_p0041_s0.py  -> 7652413 (correct) [0.042s]

@@ -1,0 +1,5 @@
+{
+  "solve_square_the_smallest_p0822_s0(m=3, n=5)": 3.905600169673562e-05,
+  "solve_square_the_smallest_p0822_s0(m=1.000000e+16, n=10000)": 6.122800550656393e-05,
+  "solve_square_the_smallest_p0822_s0(m=100, n=10)": 4.4637003156822175e-05
+}

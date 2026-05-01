@@ -1,0 +1,4 @@
+{
+  "solve_prime_factorisation_of_binomial_coefficients_p0231_s0(k=3, n=10)": 3.171700518578291e-05,
+  "solve_prime_factorisation_of_binomial_coefficients_p0231_s0(k=15000000, n=20000000)": 4.3400999857112765e-05
+}

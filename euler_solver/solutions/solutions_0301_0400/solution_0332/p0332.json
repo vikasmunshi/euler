@@ -1,0 +1,5 @@
+{
+  "solve_spherical_triangles_p0332_s0(max_limit=5)": 3.5568999010138214e-05,
+  "solve_spherical_triangles_p0332_s0(max_limit=50)": 3.7383993912953883e-05,
+  "solve_spherical_triangles_p0332_s0(max_limit=100)": 3.3562995668035e-05
+}

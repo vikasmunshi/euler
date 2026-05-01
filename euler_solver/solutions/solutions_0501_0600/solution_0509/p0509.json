@@ -1,0 +1,5 @@
+{
+  "solve_divisor_nim_p0509_s0(max_limit=10)": 4.828799865208566e-05,
+  "solve_divisor_nim_p0509_s0(max_limit=123456787654321)": 3.944200580008328e-05,
+  "solve_divisor_nim_p0509_s0(max_limit=1000000)": 6.661400402663276e-05
+}

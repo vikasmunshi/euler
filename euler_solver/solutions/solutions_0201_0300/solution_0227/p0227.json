@@ -1,0 +1,5 @@
+{
+  "solve_the_chase_p0227_s0(num_players=4)": 3.1907999073155224e-05,
+  "solve_the_chase_p0227_s0(num_players=100)": 4.595700011122972e-05,
+  "solve_the_chase_p0227_s0(num_players=200)": 5.7582001318223774e-05
+}

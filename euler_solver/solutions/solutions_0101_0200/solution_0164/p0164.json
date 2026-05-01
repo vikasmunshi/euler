@@ -1,0 +1,5 @@
+{
+  "solve_three_consecutive_digital_sum_limit_p0164_s0(num_digits=3)": 5.354399763746187e-05,
+  "solve_three_consecutive_digital_sum_limit_p0164_s0(num_digits=20)": 3.377700340934098e-05,
+  "solve_three_consecutive_digital_sum_limit_p0164_s0(num_digits=25)": 3.924399788957089e-05
+}

@@ -1,4 +1,4 @@
-dev  : solve_largest_prime_factor_p0003_s0.py 13195 -> 29 (correct) [0.043s]
+dev  : solve_largest_prime_factor_p0003_s0.py 13195 -> 29 (correct) [0.048s]
 dev  : solve_largest_prime_factor_p0003_s0.py 10 -> 5 (correct) [0.039s]
-dev  : solve_largest_prime_factor_p0003_s0.py 20 -> 5 (correct) [0.048s]
-main : solve_largest_prime_factor_p0003_s0.py 600851475143 -> 6857 (correct) [0.046s]
+dev  : solve_largest_prime_factor_p0003_s0.py 20 -> 5 (correct) [0.044s]
+main : solve_largest_prime_factor_p0003_s0.py 600851475143 -> 6857 (correct) [0.047s]

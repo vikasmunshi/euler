@@ -1,1 +1,1 @@
-main : solve_large_non_mersenne_prime_p0097_s0.py 10 28433 × 2^7830457 + 1 -> 8739992577 (correct) [0.701s]
+main : solve_large_non_mersenne_prime_p0097_s0.py 10 28433 × 2^7830457 + 1 -> 8739992577 (correct) [0.702s]

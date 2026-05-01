@@ -1,0 +1,5 @@
+{
+  "solve_colouring_a_strip_p0670_s0(n=2)": 4.7130997700151056e-05,
+  "solve_colouring_a_strip_p0670_s0(n=1.000000e+16)": 5.322100332705304e-05,
+  "solve_colouring_a_strip_p0670_s0(n=1.000000e+17)": 4.2539002606645226e-05
+}

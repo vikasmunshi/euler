@@ -1,2 +1,2 @@
-dev  : solve_singular_integer_right_triangles_p0075_s0.py 50 -> 6 (correct) [0.046s]
-main : solve_singular_integer_right_triangles_p0075_s0.py 1500000 -> 161667 (correct) [0.518s]
+dev  : solve_singular_integer_right_triangles_p0075_s0.py 50 -> 6 (correct) [0.048s]
+main : solve_singular_integer_right_triangles_p0075_s0.py 1500000 -> 161667 (correct) [0.431s]

@@ -1,0 +1,5 @@
+{
+  "solve_coloured_graphs_p0677_s0(n=4)": 4.911199357593432e-05,
+  "solve_coloured_graphs_p0677_s0(n=10000)": 4.022800567327067e-05,
+  "solve_coloured_graphs_p0677_s0(n=20000)": 4.3412997911218554e-05
+}

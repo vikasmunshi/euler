@@ -1,0 +1,5 @@
+{
+  "solve_perfect_right_angled_triangles_p0218_s0(max_limit=1000)": 3.998399915872142e-05,
+  "solve_perfect_right_angled_triangles_p0218_s0(max_limit=1.000000e+16)": 3.995400038547814e-05,
+  "solve_perfect_right_angled_triangles_p0218_s0(max_limit=1000000000)": 4.021499626105651e-05
+}

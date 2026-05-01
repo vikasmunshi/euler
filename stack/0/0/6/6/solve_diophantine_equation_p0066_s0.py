@@ -1,43 +1,17 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0066/p0066.py :: solve_diophantine_equation_p0066_s0.
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0066/p0066.py
+  func: solve_diophantine_equation_p0066_s0
+"""
 
-Project Euler Problem 66: Diophantine Equation.
-
-Problem Statement:
-    Consider quadratic Diophantine equations of the form:
-    x^2 - Dy^2 = 1
-
-    For example, when D=13, the minimal solution in x is 649^2 - 13 x 180^2 = 1.
-
-    It can be assumed that there are no solutions in positive integers when D is square.
-
-    By finding minimal solutions in x for D = {2, 3, 5, 6, 7}, we obtain the following:
-        3^2 - 2 x 2^2 = 1
-        2^2 - 3 x 1^2 = 1
-        9^2 - 5 x 4^2 = 1
-        5^2 - 6 x 2^2 = 1
-        8^2 - 7 x 3^2 = 1
-
-    Hence, by considering minimal solutions in x for D ≤ 7, the largest x is obtained when D=5.
-
-    Find the value of D ≤ 1000 in minimal solutions of x for which the largest value of x is obtained.
-
-Solution Approach:
-    Use the theory of Pell's equation and continued fraction expansions of sqrt(D).
-    For each non-square D ≤ 1000, compute the minimal solution (x,y) using
-    periodic continued fractions. Track the largest x of these minimal solutions.
-    This approach uses number theory and efficient continued fraction expansions.
-    Time complexity is roughly O(D * sqrt(D)) or better depending on implementation.
-
-Answer: 661
-URL: https://projecteuler.net/problem=66"""
 from __future__ import annotations
 
 from fractions import Fraction
 from math import floor, sqrt
 from operator import itemgetter
+from sys import argv
 from typing import Tuple
 
 
@@ -69,11 +43,20 @@ def find_fundamental_solution_to_pell_equation(d: int) -> Tuple[int, int]:
 
 
 def solve(*, max_d: int) -> int:
-    return max(((find_fundamental_solution_to_pell_equation(d)[0], d) for d in range(2, max_d + 1) if
-                sqrt(d).is_integer() is False), key=itemgetter(0))[-1]
+    return max(
+        (
+            (find_fundamental_solution_to_pell_equation(d)[0], d)
+            for d in range(2, max_d + 1)
+            if sqrt(d).is_integer() is False
+        ),
+        key=itemgetter(0),
+    )[-1]
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(max_d=int(argv[1])))
+    return 0
 
-    print(solve(max_d=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

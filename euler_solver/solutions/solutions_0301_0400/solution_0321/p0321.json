@@ -1,0 +1,5 @@
+{
+  "solve_swapping_counters_p0321_s0(terms=5)": 3.949100209865719e-05,
+  "solve_swapping_counters_p0321_s0(terms=40)": 3.588999970816076e-05,
+  "solve_swapping_counters_p0321_s0(terms=100)": 0.0010651359989424236
+}

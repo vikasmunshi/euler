@@ -1,0 +1,5 @@
+{
+  "solve_totient_stairstep_sequences_p0337_s0(max_limit=10)": 2.8276997909415513e-05,
+  "solve_totient_stairstep_sequences_p0337_s0(max_limit=20000000)": 4.1095001506619155e-05,
+  "solve_totient_stairstep_sequences_p0337_s0(max_limit=100000)": 3.1215000490192324e-05
+}

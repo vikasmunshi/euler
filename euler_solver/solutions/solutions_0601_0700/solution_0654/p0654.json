@@ -1,0 +1,5 @@
+{
+  "solve_neighbourly_constraints_p0654_s0(m=4, n=3)": 4.720199649455026e-05,
+  "solve_neighbourly_constraints_p0654_s0(m=1.000000e+12, n=5000)": 0.00010930700227618217,
+  "solve_neighbourly_constraints_p0654_s0(m=1.000000e+12, n=10000)": 5.6396995205432177e-05
+}

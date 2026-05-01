@@ -1,0 +1,5 @@
+{
+  "solve_modulo_summations_p0326_s0(M=10, N=10)": 4.7184999857563525e-05,
+  "solve_modulo_summations_p0326_s0(M=1000000, N=1.000000e+12)": 7.026499952189624e-05,
+  "solve_modulo_summations_p0326_s0(M=1000, N=1000000)": 5.01629983773455e-05
+}

@@ -1,2 +1,2 @@
-dev  : solve_largest_product_in_a_series_p0008_s0.py 4 -> 5832 (correct) [0.047s]
-main : solve_largest_product_in_a_series_p0008_s0.py 13 -> 23514624000 (correct) [0.049s]
+dev  : solve_largest_product_in_a_series_p0008_s0.py 4 -> 5832 (correct) [0.043s]
+main : solve_largest_product_in_a_series_p0008_s0.py 13 -> 23514624000 (correct) [0.040s]

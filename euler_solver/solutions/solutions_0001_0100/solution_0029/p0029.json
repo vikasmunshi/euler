@@ -1,0 +1,8 @@
+{
+  "solve_distinct_powers_p0029_s0(a_max=5, a_min=2, b_max=5, b_min=2)": 3.273499896749854e-05,
+  "solve_distinct_powers_p0029_s0(a_max=100, a_min=2, b_max=100, b_min=2)": 0.004663480998715386,
+  "solve_distinct_powers_p0029_s0(a_max=1000, a_min=2, b_max=1000, b_min=2)": 4.307251335005276,
+  "solve_distinct_powers_p0029_s1_pps(a_max=5, a_min=2, b_max=5, b_min=2)": 3.7907004298176616e-05,
+  "solve_distinct_powers_p0029_s1_pps(a_max=100, a_min=2, b_max=100, b_min=2)": 0.004575949002173729,
+  "solve_distinct_powers_p0029_s1_pps(a_max=1000, a_min=2, b_max=1000, b_min=2)": 5.1257669429978705
+}

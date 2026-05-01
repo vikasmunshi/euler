@@ -1,2 +1,2 @@
-dev  : solve_odd_period_square_roots_p0064_s0.py 13 -> 4 (correct) [0.048s]
-main : solve_odd_period_square_roots_p0064_s0.py 10000 -> 1322 (correct) [0.161s]
+dev  : solve_odd_period_square_roots_p0064_s0.py 13 -> 4 (correct) [0.044s]
+main : solve_odd_period_square_roots_p0064_s0.py 10000 -> 1322 (correct) [0.171s]

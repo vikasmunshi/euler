@@ -1,24 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Migrated from
-    euler_solver/solutions/solutions_0001_0100/solution_0010/p0010.py
+"""
+Migrated from:
+  file: euler_solver/solutions/solutions_0001_0100/solution_0010/p0010.py
+  func: solve_summation_of_primes_p0010_s2_primes_generator
+"""
 
-Project Euler Problem 10: Summation of Primes.
-
-Problem Statement:
-    The sum of the primes below 10 is 2 + 3 + 5 + 7 = 17.
-
-    Find the sum of all the primes below two million.
-
-Solution Approach:
-    Use a prime sieve (e.g., Sieve of Eratosthenes) to efficiently find all primes below
-    the given limit. Sum these primes. This approach runs in O(n log log n) time and uses
-    O(n) space for the sieve.
-
-Answer: 142913828922
-URL: https://projecteuler.net/problem=10"""
 from __future__ import annotations
 
+from sys import argv
 from typing import Generator
 
 
@@ -47,7 +37,10 @@ def solve(*, max_num: int) -> int:
     return result
 
 
-if __name__ == '__main__':
-    import sys
+def main() -> int:
+    print(solve(max_num=int(argv[1])))
+    return 0
 
-    print(solve(max_num=int(sys.argv[1])))
+
+if __name__ == "__main__":
+    raise SystemExit(main())

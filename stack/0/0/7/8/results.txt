@@ -1,2 +1,2 @@
 dev  : solve_coin_partitions_p0078_s0.py 1000 -> 449 (correct) [0.049s]
-main : solve_coin_partitions_p0078_s0.py 1000000 -> 55374 (correct) [2.853s]
+main : solve_coin_partitions_p0078_s0.py 1000000 -> 55374 (correct) [2.783s]

@@ -1,18 +1,24 @@
-.PHONY: install install-system install-python run clean
+.PHONY: install install-dev install-system install-python run clean
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
 PIP    := $(VENV)/bin/pip
 
-## Full install: system deps → venv → python deps → pre-commit hooks
-install: system-install $(VENV)
+## Full developer install: system deps → venv → all dependency groups → pre-commit hooks
+install: install-system $(VENV)
 	$(PIP) install --upgrade pip
-	$(PIP) install --upgrade -e .
+	$(PIP) install --upgrade -e ".[show,solutions,dev]"
 	rm -rf solver.egg-info
 	$(VENV)/bin/pre-commit install
 
+## Minimal install: base + solutions + show (no dev tools)
+install-user: install-system $(VENV)
+	$(PIP) install --upgrade pip
+	$(PIP) install --upgrade -e ".[show,solutions]"
+	rm -rf solver.egg-info
+
 ## Install system packages (apt) via setup script
-system-install:
+install-system:
 	./scripts/setup_dev_env.sh install python primesieve c
 
 ## Create venv if it doesn't exist

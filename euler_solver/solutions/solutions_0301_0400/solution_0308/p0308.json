@@ -1,0 +1,5 @@
+{
+  "solve_an_amazing_prime_generating_automaton_p0308_s0(n=3)": 4.057399928569794e-05,
+  "solve_an_amazing_prime_generating_automaton_p0308_s0(n=10001)": 0.00016963900270638987,
+  "solve_an_amazing_prime_generating_automaton_p0308_s0(n=20000)": 4.5048000174574554e-05
+}

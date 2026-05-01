@@ -1,3 +1,3 @@
-dev  : solve_distinct_primes_factors_p0047_s0.py 2 -> 14 (correct) [0.042s]
-dev  : solve_distinct_primes_factors_p0047_s0.py 3 -> 644 (correct) [0.035s]
-main : solve_distinct_primes_factors_p0047_s0.py 4 -> 134043 (correct) [0.745s]
+dev  : solve_distinct_primes_factors_p0047_s0.py 2 -> 14 (correct) [0.043s]
+dev  : solve_distinct_primes_factors_p0047_s0.py 3 -> 644 (correct) [0.037s]
+main : solve_distinct_primes_factors_p0047_s0.py 4 -> 134043 (correct) [0.737s]

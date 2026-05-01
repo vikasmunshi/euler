@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from functools import lru_cache, partial, wraps
 from inspect import signature
+from os import getenv
 from pathlib import Path
 from subprocess import run
 from typing import Any, Callable, Generator, Literal, overload
@@ -132,6 +133,8 @@ def disabled[**P, T](func: Callable[P, T]) -> Callable[P, T]:
 
     @wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        if getenv('disabled') == 'false':
+            return func(*args, **kwargs)
         raise NotImplementedError(f'{func.__name__} is disabled')
 
     return wrapper

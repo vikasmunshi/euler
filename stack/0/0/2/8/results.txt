@@ -1,4 +1,4 @@
-dev  : solve_number_spiral_diagonals_p0028_s0.py 5 -> 101 (correct) [0.047s]
-dev  : solve_number_spiral_diagonals_p0028_s0.py 7 -> 261 (correct) [0.039s]
-dev  : solve_number_spiral_diagonals_p0028_s0.py 9 -> 537 (correct) [0.049s]
-main : solve_number_spiral_diagonals_p0028_s0.py 1001 -> 669171001 (correct) [0.040s]
+dev  : solve_number_spiral_diagonals_p0028_s0.py 5 -> 101 (correct) [0.061s]
+dev  : solve_number_spiral_diagonals_p0028_s0.py 7 -> 261 (correct) [0.041s]
+dev  : solve_number_spiral_diagonals_p0028_s0.py 9 -> 537 (correct) [0.045s]
+main : solve_number_spiral_diagonals_p0028_s0.py 1001 -> 669171001 (correct) [0.042s]

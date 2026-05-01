@@ -1,0 +1,58 @@
+[
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 8
+        },
+        "answer": 21
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 10
+        },
+        "answer": 31
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 100
+        },
+        "answer": 3043
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 1000
+        },
+        "answer": 304191
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 10000
+        },
+        "answer": 30397485
+    },
+    {
+        "category": "dev",
+        "input": {
+            "max_d": 100000
+        },
+        "answer": 3039650753
+    },
+    {
+        "category": "main",
+        "input": {
+            "max_d": 1000000
+        },
+        "answer": 303963552391
+    },
+    {
+        "category": "extra",
+        "input": {
+            "max_d": 10000000
+        },
+        "answer": 30396356427241
+    }
+]
