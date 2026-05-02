@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_coded_triangle_numbers_p0042_s0.py", "args": "https://projecteuler.net/resources/documents/0042_words.txt", "answer": 162, "verdict": "Correct", "elapsed": 0.047419426002306864}]
+[
+  {
+    "category": "main",
+    "solution": "solve_coded_triangle_numbers_p0042_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0042_words.txt",
+    "answer": 162,
+    "verdict": "Correct",
+    "elapsed": 0.05665050499374047
+  }
+]

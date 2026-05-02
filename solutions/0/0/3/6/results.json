@@ -1,1 +1,42 @@
-[{"category": "dev", "solution": "solve_double_base_palindromes_p0036_s0.py", "args": "1", "answer": 25, "verdict": "Correct", "elapsed": 0.050024625001242384}, {"category": "dev", "solution": "solve_double_base_palindromes_p0036_s0.py", "args": "2", "answer": 157, "verdict": "Correct", "elapsed": 0.04486681200796738}, {"category": "dev", "solution": "solve_double_base_palindromes_p0036_s0.py", "args": "3", "answer": 1772, "verdict": "Correct", "elapsed": 0.044723622006131336}, {"category": "dev", "solution": "solve_double_base_palindromes_p0036_s0.py", "args": "4", "answer": 18228, "verdict": "Correct", "elapsed": 0.0446240890014451}, {"category": "main", "solution": "solve_double_base_palindromes_p0036_s0.py", "args": "6", "answer": 872187, "verdict": "Correct", "elapsed": 0.048371902987128124}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_double_base_palindromes_p0036_s0.py",
+    "args": "1",
+    "answer": 25,
+    "verdict": "Correct",
+    "elapsed": 0.05474518402479589
+  },
+  {
+    "category": "dev",
+    "solution": "solve_double_base_palindromes_p0036_s0.py",
+    "args": "2",
+    "answer": 157,
+    "verdict": "Correct",
+    "elapsed": 0.053815491002751514
+  },
+  {
+    "category": "dev",
+    "solution": "solve_double_base_palindromes_p0036_s0.py",
+    "args": "3",
+    "answer": 1772,
+    "verdict": "Correct",
+    "elapsed": 0.05167944499407895
+  },
+  {
+    "category": "dev",
+    "solution": "solve_double_base_palindromes_p0036_s0.py",
+    "args": "4",
+    "answer": 18228,
+    "verdict": "Correct",
+    "elapsed": 0.05759557499550283
+  },
+  {
+    "category": "main",
+    "solution": "solve_double_base_palindromes_p0036_s0.py",
+    "args": "6",
+    "answer": 872187,
+    "verdict": "Correct",
+    "elapsed": 0.04696521797450259
+  }
+]

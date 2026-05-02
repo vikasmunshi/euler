@@ -1,1 +1,34 @@
-[{"category": "dev", "solution": "solve_cubic_permutations_p0062_s0.py", "args": "2", "answer": 125, "verdict": "Correct", "elapsed": 0.04741703500621952}, {"category": "dev", "solution": "solve_cubic_permutations_p0062_s0.py", "args": "3", "answer": 41063625, "verdict": "Correct", "elapsed": 0.038960431003943086}, {"category": "dev", "solution": "solve_cubic_permutations_p0062_s0.py", "args": "4", "answer": 1006012008, "verdict": "Correct", "elapsed": 0.05143344699172303}, {"category": "main", "solution": "solve_cubic_permutations_p0062_s0.py", "args": "5", "answer": 127035954683, "verdict": "Correct", "elapsed": 0.057185722020221874}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "2",
+    "answer": 125,
+    "verdict": "Correct",
+    "elapsed": 0.052271872002165765
+  },
+  {
+    "category": "dev",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "3",
+    "answer": 41063625,
+    "verdict": "Correct",
+    "elapsed": 0.044241305004106835
+  },
+  {
+    "category": "dev",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "4",
+    "answer": 1006012008,
+    "verdict": "Correct",
+    "elapsed": 0.04869444400537759
+  },
+  {
+    "category": "main",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "5",
+    "answer": 127035954683,
+    "verdict": "Correct",
+    "elapsed": 0.056137014005798846
+  }
+]

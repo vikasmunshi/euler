@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_pandigital_multiples_p0038_s0.py", "args": "", "answer": 932718654, "verdict": "Correct", "elapsed": 0.047084029007237405}]
+[
+  {
+    "category": "main",
+    "solution": "solve_pandigital_multiples_p0038_s0.py",
+    "args": "",
+    "answer": 932718654,
+    "verdict": "Correct",
+    "elapsed": 0.05039440799737349
+  }
+]

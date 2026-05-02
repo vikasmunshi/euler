@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_large_sum_p0013_s0.py", "args": "10", "answer": "5537376230", "verdict": "Correct", "elapsed": 0.05178745399462059}]
+[
+  {
+    "category": "main",
+    "solution": "solve_large_sum_p0013_s0.py",
+    "args": "10",
+    "answer": "5537376230",
+    "verdict": "Correct",
+    "elapsed": 0.04360408798675053
+  }
+]

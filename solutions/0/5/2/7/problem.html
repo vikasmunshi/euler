@@ -1,34 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Problem 527: "Randomized Binary Search" (level 11)</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
-        .problem_content { line-height: 1.6; }
-        var { font-style: italic; }
-        sup { vertical-align: super; font-size: smaller; }
-        sub { vertical-align: sub; font-size: smaller; }
-        img { max-width: 100%; height: auto; }
-        table { border-collapse: collapse; margin: 20px 0; }
-        td, th { border: 1px solid #ddd; padding: 8px; }
-        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
-        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
-        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
-        #solution-notes-content { min-height: 80px;
-                                  padding: 12px;
-                                  background: #f9f9f9;
-                                  border: 1px solid #e0e0e0;
-                                  border-radius: 4px;
-                                }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+
+        h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        #problem-statement-content {
+            line-height: 1.6;
+            padding: 4px 0 4px 16px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #test-cases-content {
+            padding: 12px;
+            background: #f0f7ff;
+            border: 1px solid #c8e0f4;
+            border-radius: 4px;
+        }
+
+        #results-content {
+            min-height: 60px;
+            padding: 12px;
+            background: #f0fff4;
+            border: 1px solid #b2dfca;
+            border-radius: 4px;
+            color: #777;
+        }
+
+        #solution-notes-content {
+            min-height: 80px;
+            padding: 12px;
+            background: #fffdf0;
+            border: 1px solid #e8e0c0;
+            border-radius: 4px;
+        }
     </style>
     <script>
-        MathJax = {
-            tex: {
-                inlineMath: [["$", "$"]],
-                displayMath: [["$$", "$$"]]
-            }
-        };
+        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
     </script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
@@ -36,8 +97,10 @@
 </head>
 <body>
 <section id="problem-statement">
-<h2>Problem 527: "Randomized Binary Search" (level 11)</h2>
-<div class="problem_content" role="problem">
+    <h2>Problem 527: "Randomized Binary Search" (level 11)</h2>
+    <p><a href="https://projecteuler.net/problem=527" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
+    <div id="problem-statement-content">
+        <div class="problem_content" role="problem">
 <p>A secret integer $t$ is selected at random within the range $1 \le t \le n$. </p>
 <p>The goal is to guess the value of $t$ by making repeated guesses, via integer $g$. After a guess is made, there are three possible outcomes, in which it will be revealed that either $g \lt t$, $g = t$, or $g \gt t$. Then the process can repeat as necessary.</p>
 <p>Normally, the number of guesses required on average can be minimized with a binary search: Given a lower bound $L$ and upper bound $H$ (initialized to $L = 1$ and $H = n$), let $g = \lfloor(L+H)/2\rfloor$ where $\lfloor \cdot \rfloor$ is the integer floor function. If $g = t$, the process ends. Otherwise, if $g \lt t$, set $L = g+1$, but if $g \gt t$ instead, set $H = g - 1$. After setting the new bounds, the search process repeats, and ultimately ends once $t$ is found. Even if $t$ can be deduced without searching, assume that a search will be required anyway to confirm the value.</p>
@@ -45,22 +108,33 @@
 <p>Given that $1 \le t \le n$ for random $t$, let $B(n)$ be the expected number of guesses needed to find $t$ using the standard binary search, and let $R(n)$ be the expected number of guesses needed to find $t$ using the random binary search. For example, $B(6) = 2.33333333$ and $R(6) = 2.71666667$ when rounded to $8$ decimal places.</p>
 <p>Find $R(10^{10}) - B(10^{10})$ rounded to $8$ decimal places.</p>
 </div>
+    </div>
 </section>
 <hr>
 <section id="test-cases">
-<h2>Test Cases</h2>
-<h3>Main</h3>
+    <h2>Test Cases</h2>
+    <div id="test-cases-content">
+        <h3>Main</h3>
 <ul>
 <li><code>solve(n=10000000000)</code> → <code>?</code></li>
 </ul>
+    </div>
+</section>
+<hr>
+<section id="results">
+    <h2>Results</h2>
+    <div id="results-content">
+        <!-- @ @ results -->
+    </div>
 </section>
 <hr>
 <section id="solution-notes">
-<h2>Solution Notes</h2>
-<div id="solution-notes-content">
+    <h2>Solution Notes</h2>
+    <div id="solution-notes-content">
 
 
-</div>
+    </div>
 </section>
+<hr>
 </body>
 </html>

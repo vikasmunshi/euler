@@ -54,6 +54,7 @@ solver
 git clone https://github.com/vikasmunshi/euler.git
 cd euler
 ./scripts/setup_dev_env.sh install python primesieve c
+./scripts/setup_chrome.sh install
 python3.14 -m venv .venv
 source .venv/bin/activate
 pip install -e ".[show,solutions,dev]"   # all groups; omit dev for user-only install
@@ -84,29 +85,29 @@ Invoke it with `solver` (or `python -m solver`) and type `help` at the prompt to
 ```
 $ solver
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-Project Euler Solver Shell  
+Project Euler Solver Shell
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-Help    ? | help                        list commands and aliases  
-        ?<cmd> | help <cmd>             show help on command  
-Exit    Ctrl-D | exit  
-Launch  solver                          launch interactive shell  
-        solver "cmd1; cmd2"             execute commands and exit  
-        solver -c "cmdline"             execute cmdline continue in interactive shell  
-Flags   --key-word | --no-key-word      boolean True / False  
-        --silent                        suppress command output  
+Help    ? | help                        list commands and aliases
+        ?<cmd> | help <cmd>             show help on command
+Exit    Ctrl-D | exit
+Launch  solver                          launch interactive shell
+        solver "cmd1; cmd2"             execute commands and exit
+        solver -c "cmdline"             execute cmdline, then continue in interactive shell
+Flags   --key-word | --no-key-word      boolean True / False
+        --silent                        suppress command output
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-Commands:  
-alias               exit                help                rekey               user  
-clear               for                 init                shell  
-echo                full-stack-backup   ls                  stack  
-eval                full-stack-restore  problems            upload_keys  
+Commands:
+alias               exit                help                rekey               upload_keys  
+clear               for                 init                shell               user  
+echo                full-stack-backup   ls                  show  
+eval                full-stack-restore  problems            stack  
 ────────────────────────────────────────────────────────────────────────────────────────────────────
-Aliases:  
+Aliases:
 eval-pub      -> for n in 1 to 100: init n --silent; eval --record; clear --silent; echo evaluated n
-eval-show     -> for n in 1 to 100: init n --silent; eval --show; clear --silent; echo evaluated n
+eval-show     -> for n in 1 to 100: init n --silent; eval --show; clear --discard-changes --silent; echo evaluated n
 gh-login      -> shell gh auth status || gh auth login
 gh-status     -> shell gh auth status
-git-add-stack -> shell git add /home/vikas/PycharmProjects/euler/stack/
+git-add-stack -> shell git add <path>/euler/solutions/
 git-merge     -> shell git fetch origin && git merge --ff-only origin/master
 git-status    -> shell git status | less
 pre-commit    -> shell pre-commit run --all-files

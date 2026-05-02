@@ -1,34 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Problem 579: "Lattice Points in Lattice Cubes" (level 38)</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
-        .problem_content { line-height: 1.6; }
-        var { font-style: italic; }
-        sup { vertical-align: super; font-size: smaller; }
-        sub { vertical-align: sub; font-size: smaller; }
-        img { max-width: 100%; height: auto; }
-        table { border-collapse: collapse; margin: 20px 0; }
-        td, th { border: 1px solid #ddd; padding: 8px; }
-        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
-        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
-        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
-        #solution-notes-content { min-height: 80px;
-                                  padding: 12px;
-                                  background: #f9f9f9;
-                                  border: 1px solid #e0e0e0;
-                                  border-radius: 4px;
-                                }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+
+        h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        #problem-statement-content {
+            line-height: 1.6;
+            padding: 4px 0 4px 16px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #test-cases-content {
+            padding: 12px;
+            background: #f0f7ff;
+            border: 1px solid #c8e0f4;
+            border-radius: 4px;
+        }
+
+        #results-content {
+            min-height: 60px;
+            padding: 12px;
+            background: #f0fff4;
+            border: 1px solid #b2dfca;
+            border-radius: 4px;
+            color: #777;
+        }
+
+        #solution-notes-content {
+            min-height: 80px;
+            padding: 12px;
+            background: #fffdf0;
+            border: 1px solid #e8e0c0;
+            border-radius: 4px;
+        }
     </style>
     <script>
-        MathJax = {
-            tex: {
-                inlineMath: [["$", "$"]],
-                displayMath: [["$$", "$$"]]
-            }
-        };
+        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
     </script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
@@ -36,8 +97,10 @@
 </head>
 <body>
 <section id="problem-statement">
-<h2>Problem 579: "Lattice Points in Lattice Cubes" (level 38)</h2>
-<div class="problem_content" role="problem">
+    <h2>Problem 579: "Lattice Points in Lattice Cubes" (level 38)</h2>
+    <p><a href="https://projecteuler.net/problem=579" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
+    <div id="problem-statement-content">
+        <div class="problem_content" role="problem">
 <p>A <strong>lattice cube</strong> is a cube in which all vertices have integer coordinates. Let $C(n)$ be the number of different lattice cubes in which the coordinates of all vertices range between (and including) $0$ and $n$. Two cubes are hereby considered different if any of their vertices have different coordinates.<br/>
 For example, $C(1)=1$, $C(2)=9$, $C(4)=100$, $C(5)=229$, $C(10)=4469$ and $C(50)=8154671$.
 </p>
@@ -53,11 +116,13 @@ Let $S(n)$ be the sum of the lattice points contained in the different lattice c
 <p>For example, $S(1)=8$, $S(2)=91$, $S(4)=1878$, $S(5)=5832$, $S(10)=387003$ and $S(50)=29948928129$.</p>
 <p>Find $S(5000) \bmod 10^9$.</p>
 </div>
+    </div>
 </section>
 <hr>
 <section id="test-cases">
-<h2>Test Cases</h2>
-<h3>Dev</h3>
+    <h2>Test Cases</h2>
+    <div id="test-cases-content">
+        <h3>Dev</h3>
 <ul>
 <li><code>solve(max_limit=10)</code> → <code>?</code></li>
 </ul>
@@ -65,14 +130,23 @@ Let $S(n)$ be the sum of the lattice points contained in the different lattice c
 <ul>
 <li><code>solve(max_limit=5000)</code> → <code>?</code></li>
 </ul>
+    </div>
+</section>
+<hr>
+<section id="results">
+    <h2>Results</h2>
+    <div id="results-content">
+        <!-- @ @ results -->
+    </div>
 </section>
 <hr>
 <section id="solution-notes">
-<h2>Solution Notes</h2>
-<div id="solution-notes-content">
+    <h2>Solution Notes</h2>
+    <div id="solution-notes-content">
 
 
-</div>
+    </div>
 </section>
+<hr>
 </body>
 </html>

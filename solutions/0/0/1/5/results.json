@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_lattice_paths_p0015_s0.py", "args": "2", "answer": 6, "verdict": "Correct", "elapsed": 0.05241015102365054}, {"category": "main", "solution": "solve_lattice_paths_p0015_s0.py", "args": "20", "answer": 137846528820, "verdict": "Correct", "elapsed": 0.039197164005599916}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_lattice_paths_p0015_s0.py",
+    "args": "2",
+    "answer": 6,
+    "verdict": "Correct",
+    "elapsed": 0.0746703049808275
+  },
+  {
+    "category": "main",
+    "solution": "solve_lattice_paths_p0015_s0.py",
+    "args": "20",
+    "answer": 137846528820,
+    "verdict": "Correct",
+    "elapsed": 0.05020141298882663
+  }
+]

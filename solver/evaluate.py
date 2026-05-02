@@ -11,7 +11,8 @@ from subprocess import TimeoutExpired, run
 from time import perf_counter
 from typing import Any, Literal
 
-from solver.config import ColorCodes, results_filename, root_dir, test_cases_filename, timeout
+from solver.config import ColorCodes, results_filename, test_cases_filename, timeout
+from solver.utils import canonical_path
 
 RESET = ColorCodes.RESET
 
@@ -44,7 +45,7 @@ def eval_solution[T](filename: str, input_args: list[str], work_dir: Path, expec
     elapsed: float = perf_counter() - t_start
     if result.returncode != 0:
         return None, elapsed, result.stderr
-    raw: str = result.stdout.strip()
+    raw: str = result.stdout.splitlines()[-1]
     try:
         answer: T = literal_eval(raw) if expected_type in (list, tuple, dict) else expected_type(raw)
     except (ValueError, SyntaxError) as e:
@@ -149,8 +150,8 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
             else:
                 collect(answer=_answer, verdict='Wrong', elapsed=_elapsed, color=ColorCodes.RED)
     if record:
-        (results_file := workspace_dir / results_filename).write_text(dumps(output, indent=None))
-        print(f'Results saved to {results_file.relative_to(root_dir).as_posix()}')
+        (results_file := workspace_dir / results_filename).write_text(dumps(output, indent=2))
+        print(f'Results saved to {canonical_path(results_file)}')
     return no_errors
 
 

@@ -1,1 +1,26 @@
-[{"category": "dev", "solution": "solve_square_root_convergents_p0057_s0.py", "args": "10", "answer": 1, "verdict": "Correct", "elapsed": 0.04548639600398019}, {"category": "dev", "solution": "solve_square_root_convergents_p0057_s0.py", "args": "100", "answer": 15, "verdict": "Correct", "elapsed": 0.035102027002722025}, {"category": "main", "solution": "solve_square_root_convergents_p0057_s0.py", "args": "1000", "answer": 153, "verdict": "Correct", "elapsed": 0.04391008400125429}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_square_root_convergents_p0057_s0.py",
+    "args": "10",
+    "answer": 1,
+    "verdict": "Correct",
+    "elapsed": 0.03817208300461061
+  },
+  {
+    "category": "dev",
+    "solution": "solve_square_root_convergents_p0057_s0.py",
+    "args": "100",
+    "answer": 15,
+    "verdict": "Correct",
+    "elapsed": 0.042586160998325795
+  },
+  {
+    "category": "main",
+    "solution": "solve_square_root_convergents_p0057_s0.py",
+    "args": "1000",
+    "answer": 153,
+    "verdict": "Correct",
+    "elapsed": 0.0463403910107445
+  }
+]

@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_ordered_fractions_p0071_s0.py", "args": "10", "answer": 2, "verdict": "Correct", "elapsed": 0.04260282198083587}, {"category": "main", "solution": "solve_ordered_fractions_p0071_s0.py", "args": "1000000", "answer": 428570, "verdict": "Correct", "elapsed": 0.042967357992893085}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_ordered_fractions_p0071_s0.py",
+    "args": "10",
+    "answer": 2,
+    "verdict": "Correct",
+    "elapsed": 0.04923166200751439
+  },
+  {
+    "category": "main",
+    "solution": "solve_ordered_fractions_p0071_s0.py",
+    "args": "1000000",
+    "answer": 428570,
+    "verdict": "Correct",
+    "elapsed": 0.04285655601415783
+  }
+]

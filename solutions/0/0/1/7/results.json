@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_number_letter_counts_p0017_s0.py", "args": "5", "answer": 19, "verdict": "Correct", "elapsed": 0.05089810999925248}, {"category": "main", "solution": "solve_number_letter_counts_p0017_s0.py", "args": "1000", "answer": 21124, "verdict": "Correct", "elapsed": 0.04500819600070827}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_number_letter_counts_p0017_s0.py",
+    "args": "5",
+    "answer": 19,
+    "verdict": "Correct",
+    "elapsed": 0.09138707601232454
+  },
+  {
+    "category": "main",
+    "solution": "solve_number_letter_counts_p0017_s0.py",
+    "args": "1000",
+    "answer": 21124,
+    "verdict": "Correct",
+    "elapsed": 0.06962654500966892
+  }
+]

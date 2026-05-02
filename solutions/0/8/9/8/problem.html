@@ -1,34 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Problem 898: "Claire Voyant" (level 17)</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
-        .problem_content { line-height: 1.6; }
-        var { font-style: italic; }
-        sup { vertical-align: super; font-size: smaller; }
-        sub { vertical-align: sub; font-size: smaller; }
-        img { max-width: 100%; height: auto; }
-        table { border-collapse: collapse; margin: 20px 0; }
-        td, th { border: 1px solid #ddd; padding: 8px; }
-        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
-        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
-        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
-        #solution-notes-content { min-height: 80px;
-                                  padding: 12px;
-                                  background: #f9f9f9;
-                                  border: 1px solid #e0e0e0;
-                                  border-radius: 4px;
-                                }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+
+        h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        #problem-statement-content {
+            line-height: 1.6;
+            padding: 4px 0 4px 16px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #test-cases-content {
+            padding: 12px;
+            background: #f0f7ff;
+            border: 1px solid #c8e0f4;
+            border-radius: 4px;
+        }
+
+        #results-content {
+            min-height: 60px;
+            padding: 12px;
+            background: #f0fff4;
+            border: 1px solid #b2dfca;
+            border-radius: 4px;
+            color: #777;
+        }
+
+        #solution-notes-content {
+            min-height: 80px;
+            padding: 12px;
+            background: #fffdf0;
+            border: 1px solid #e8e0c0;
+            border-radius: 4px;
+        }
     </style>
     <script>
-        MathJax = {
-            tex: {
-                inlineMath: [["$", "$"]],
-                displayMath: [["$$", "$$"]]
-            }
-        };
+        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
     </script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
@@ -36,8 +97,10 @@
 </head>
 <body>
 <section id="problem-statement">
-<h2>Problem 898: "Claire Voyant" (level 17)</h2>
-<div class="problem_content" role="problem">
+    <h2>Problem 898: "Claire Voyant" (level 17)</h2>
+    <p><a href="https://projecteuler.net/problem=898" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
+    <div id="problem-statement-content">
+        <div class="problem_content" role="problem">
 <p>
 Claire Voyant is a teacher playing a game with a class of students.
 A fair coin is tossed on the table. All the students can see the outcome of the toss, but Claire cannot.
@@ -55,11 +118,13 @@ Find the probability that Claire guesses correctly for a class of 51 students ea
 Give your answer rounded to 10 digits after the decimal point.
 </p>
 </div>
+    </div>
 </section>
 <hr>
 <section id="test-cases">
-<h2>Test Cases</h2>
-<h3>Dev</h3>
+    <h2>Test Cases</h2>
+    <div id="test-cases-content">
+        <h3>Dev</h3>
 <ul>
 <li><code>solve(lying_probabilities=[0.2, 0.4, 0.6, 0.8])</code> → <code>?</code></li>
 </ul>
@@ -67,14 +132,23 @@ Give your answer rounded to 10 digits after the decimal point.
 <ul>
 <li><code>solve(lying_probabilities=[0.25, 0.26, 0.27, 0.28, 0.29, 0.3, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4, 0.41, 0.42, 0.43, 0.44, 0.45, 0.46, 0.47, 0.48, 0.49, 0.5, 0.51, 0.52, 0.53, 0.54, 0.55, 0.56, 0.57, 0.58, 0.59, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75])</code> → <code>?</code></li>
 </ul>
+    </div>
+</section>
+<hr>
+<section id="results">
+    <h2>Results</h2>
+    <div id="results-content">
+        <!-- @ @ results -->
+    </div>
 </section>
 <hr>
 <section id="solution-notes">
-<h2>Solution Notes</h2>
-<div id="solution-notes-content">
+    <h2>Solution Notes</h2>
+    <div id="solution-notes-content">
 
 
-</div>
+    </div>
 </section>
+<hr>
 </body>
 </html>

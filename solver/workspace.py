@@ -8,11 +8,11 @@ from itertools import chain
 from os import X_OK, access
 from pathlib import Path
 
-from solver.config import ColorCodes, root_dir
+from solver.config import ColorCodes
 from solver.parser import problem_statement
 from solver.problems import Problem
 from solver.stack import read_stack_file, stack, stack_base_dir, stack_path, unstack
-from solver.utils import iterdir_recursive, run_command, write_file
+from solver.utils import canonical_path, iterdir_recursive, run_command, write_file
 
 
 def clear_the_workspace(workspace_dir: Path, *, discard_changes: bool = False) -> None:
@@ -100,7 +100,7 @@ def list_the_workspace(workspace_dir: Path) -> bool:
         workspace_file_is_executable: bool = access(filepath, X_OK)
         workspace_file_part: str = (
             f'{"★" if workspace_file_is_executable else "○"} '
-            f'{filepath.relative_to(root_dir).as_posix():<{max_filename_length}}'
+            f'{canonical_path(filepath):<{max_filename_length}}'
         )
         workspace_file_content: bytes = filepath.read_bytes()
         workspace_file_content_hash: str = sha256(workspace_file_content).hexdigest()
@@ -110,7 +110,7 @@ def list_the_workspace(workspace_dir: Path) -> bool:
         is_modified: bool = workspace_file_content_hash != stack_file_content_hash
         stack_file_part: str = (
             f'{"★" if stack_file_is_executable else "○"} '
-            f'{stack_file_path.relative_to(root_dir).as_posix():<{max_filename_length}}'
+            f'{canonical_path(stack_file_path):<{max_filename_length}}'
         )
         status: str = f'{ColorCodes.RED}≠{ColorCodes.RESET}' if is_modified else '='
         line: str = f'{workspace_file_part}{status} {stack_file_part}'
@@ -122,7 +122,7 @@ def list_the_workspace(workspace_dir: Path) -> bool:
         workspace_file_is_executable = access(filepath, X_OK)
         workspace_file_part = (
             f'{"★" if workspace_file_is_executable else "○"} '
-            f'{filepath.relative_to(root_dir).as_posix():<{max_filename_length}}'
+            f'{canonical_path(filepath):<{max_filename_length}}'
         )
         line = f'{workspace_file_part}{ColorCodes.RED}+{ColorCodes.RESET}'
         lines.append(line)
@@ -132,7 +132,7 @@ def list_the_workspace(workspace_dir: Path) -> bool:
         stack_file_is_executable = access(stack_file_path, X_OK)
         stack_file_part = (
             f'{"★" if stack_file_is_executable else "○"} '
-            f'{stack_file_path.relative_to(root_dir).as_posix():<{max_filename_length}}'
+            f'{canonical_path(stack_file_path):<{max_filename_length}}'
         )
         line = f'{" " * 2}{"":<{max_filename_length}}{ColorCodes.RED}-{ColorCodes.RESET} {stack_file_part}'
         lines.append(line)

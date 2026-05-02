@@ -1,1 +1,26 @@
-[{"category": "dev", "solution": "solve_cuboid_route_p0086_s0.py", "args": "1975", "answer": 99, "verdict": "Correct", "elapsed": 0.04128025099635124}, {"category": "dev", "solution": "solve_cuboid_route_p0086_s0.py", "args": "2000", "answer": 100, "verdict": "Correct", "elapsed": 0.038467448990559205}, {"category": "main", "solution": "solve_cuboid_route_p0086_s0.py", "args": "1000000", "answer": 1818, "verdict": "Correct", "elapsed": 0.3916330620122608}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_cuboid_route_p0086_s0.py",
+    "args": "1975",
+    "answer": 99,
+    "verdict": "Correct",
+    "elapsed": 0.04442788602318615
+  },
+  {
+    "category": "dev",
+    "solution": "solve_cuboid_route_p0086_s0.py",
+    "args": "2000",
+    "answer": 100,
+    "verdict": "Correct",
+    "elapsed": 0.04568004302564077
+  },
+  {
+    "category": "main",
+    "solution": "solve_cuboid_route_p0086_s0.py",
+    "args": "1000000",
+    "answer": 1818,
+    "verdict": "Correct",
+    "elapsed": 0.42819845498888753
+  }
+]

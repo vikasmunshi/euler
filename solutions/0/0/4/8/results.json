@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_self_powers_p0048_s0.py", "args": "10", "answer": 405071317, "verdict": "Correct", "elapsed": 0.04896991598070599}, {"category": "main", "solution": "solve_self_powers_p0048_s0.py", "args": "1000", "answer": 9110846700, "verdict": "Correct", "elapsed": 0.034611538983881474}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_self_powers_p0048_s0.py",
+    "args": "10",
+    "answer": 405071317,
+    "verdict": "Correct",
+    "elapsed": 0.03840778997982852
+  },
+  {
+    "category": "main",
+    "solution": "solve_self_powers_p0048_s0.py",
+    "args": "1000",
+    "answer": 9110846700,
+    "verdict": "Correct",
+    "elapsed": 0.04579280101461336
+  }
+]

@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_digit_factorials_p0034_s0.py", "args": "", "answer": 40730, "verdict": "Correct", "elapsed": 0.06461549599771388}]
+[
+  {
+    "category": "main",
+    "solution": "solve_digit_factorials_p0034_s0.py",
+    "args": "",
+    "answer": 40730,
+    "verdict": "Correct",
+    "elapsed": 0.06793314899550751
+  }
+]

@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_power_digit_sum_p0016_s0.py", "args": "2 15", "answer": 26, "verdict": "Correct", "elapsed": 0.044135447998996824}, {"category": "main", "solution": "solve_power_digit_sum_p0016_s0.py", "args": "2 1000", "answer": 1366, "verdict": "Correct", "elapsed": 0.04170728399185464}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_power_digit_sum_p0016_s0.py",
+    "args": "2 15",
+    "answer": 26,
+    "verdict": "Correct",
+    "elapsed": 0.045789123978465796
+  },
+  {
+    "category": "main",
+    "solution": "solve_power_digit_sum_p0016_s0.py",
+    "args": "2 1000",
+    "answer": 1366,
+    "verdict": "Correct",
+    "elapsed": 0.04774411901598796
+  }
+]

@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_singular_integer_right_triangles_p0075_s0.py", "args": "50", "answer": 6, "verdict": "Correct", "elapsed": 0.04863488400587812}, {"category": "main", "solution": "solve_singular_integer_right_triangles_p0075_s0.py", "args": "1500000", "answer": 161667, "verdict": "Correct", "elapsed": 0.4303529880126007}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_singular_integer_right_triangles_p0075_s0.py",
+    "args": "50",
+    "answer": 6,
+    "verdict": "Correct",
+    "elapsed": 0.05902489798609167
+  },
+  {
+    "category": "main",
+    "solution": "solve_singular_integer_right_triangles_p0075_s0.py",
+    "args": "1500000",
+    "answer": 161667,
+    "verdict": "Correct",
+    "elapsed": 0.4920497599814553
+  }
+]

@@ -1,1 +1,13 @@
-[{"category": "main", "solution": "solve_prime_permutations_p0049_s0.py", "args": "4", "answer": ["1487 4817 8147", "2969 6299 9629"], "verdict": "Correct", "elapsed": 0.06027013799757697}]
+[
+  {
+    "category": "main",
+    "solution": "solve_prime_permutations_p0049_s0.py",
+    "args": "4",
+    "answer": [
+      "1487 4817 8147",
+      "2969 6299 9629"
+    ],
+    "verdict": "Correct",
+    "elapsed": 0.05972607000148855
+  }
+]

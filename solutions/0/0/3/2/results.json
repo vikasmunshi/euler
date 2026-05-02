@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_pandigital_products_p0032_s0.py", "args": "", "answer": 45228, "verdict": "Correct", "elapsed": 0.05397388798883185}]
+[
+  {
+    "category": "main",
+    "solution": "solve_pandigital_products_p0032_s0.py",
+    "args": "",
+    "answer": 45228,
+    "verdict": "Correct",
+    "elapsed": 0.06432956299977377
+  }
+]

@@ -1,34 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Problem 260: "Stone Game" (level 28)</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
-        .problem_content { line-height: 1.6; }
-        var { font-style: italic; }
-        sup { vertical-align: super; font-size: smaller; }
-        sub { vertical-align: sub; font-size: smaller; }
-        img { max-width: 100%; height: auto; }
-        table { border-collapse: collapse; margin: 20px 0; }
-        td, th { border: 1px solid #ddd; padding: 8px; }
-        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
-        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
-        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
-        #solution-notes-content { min-height: 80px;
-                                  padding: 12px;
-                                  background: #f9f9f9;
-                                  border: 1px solid #e0e0e0;
-                                  border-radius: 4px;
-                                }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+
+        h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        #problem-statement-content {
+            line-height: 1.6;
+            padding: 4px 0 4px 16px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #test-cases-content {
+            padding: 12px;
+            background: #f0f7ff;
+            border: 1px solid #c8e0f4;
+            border-radius: 4px;
+        }
+
+        #results-content {
+            min-height: 60px;
+            padding: 12px;
+            background: #f0fff4;
+            border: 1px solid #b2dfca;
+            border-radius: 4px;
+            color: #777;
+        }
+
+        #solution-notes-content {
+            min-height: 80px;
+            padding: 12px;
+            background: #fffdf0;
+            border: 1px solid #e8e0c0;
+            border-radius: 4px;
+        }
     </style>
     <script>
-        MathJax = {
-            tex: {
-                inlineMath: [["$", "$"]],
-                displayMath: [["$$", "$$"]]
-            }
-        };
+        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
     </script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
@@ -36,8 +97,10 @@
 </head>
 <body>
 <section id="problem-statement">
-<h2>Problem 260: "Stone Game" (level 28)</h2>
-<div class="problem_content" role="problem">
+    <h2>Problem 260: "Stone Game" (level 28)</h2>
+    <p><a href="https://projecteuler.net/problem=260" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
+    <div id="problem-statement-content">
+        <div class="problem_content" role="problem">
 <p>A game is played with three piles of stones and two players.<br/>
 On each player's turn, the player may remove one or more stones from the piles. However, if the player takes stones from more than one pile, then the same number of stones must be removed from each of the selected piles.</p>
 <p>In other words, the player chooses some $N \gt 0$ and removes:</p>
@@ -55,11 +118,13 @@ For example, $(0,1,2)$ and $(1,3,3)$ are losing configurations: any legal move l
 We can verify that $\sum (x_i + y_i + z_i) = 173895$ for these.</p>
 <p>Find $\sum (x_i + y_i + z_i)$ where $(x_i, y_i, z_i)$ ranges over the losing configurations with $x_i \le y_i \le z_i \le 1000$.</p>
 </div>
+    </div>
 </section>
 <hr>
 <section id="test-cases">
-<h2>Test Cases</h2>
-<h3>Dev</h3>
+    <h2>Test Cases</h2>
+    <div id="test-cases-content">
+        <h3>Dev</h3>
 <ul>
 <li><code>solve(max_limit=10)</code> → <code>?</code></li>
 </ul>
@@ -71,14 +136,23 @@ We can verify that $\sum (x_i + y_i + z_i) = 173895$ for these.</p>
 <ul>
 <li><code>solve(max_limit=2000)</code> → <code>?</code></li>
 </ul>
+    </div>
+</section>
+<hr>
+<section id="results">
+    <h2>Results</h2>
+    <div id="results-content">
+        <!-- @ @ results -->
+    </div>
 </section>
 <hr>
 <section id="solution-notes">
-<h2>Solution Notes</h2>
-<div id="solution-notes-content">
+    <h2>Solution Notes</h2>
+    <div id="solution-notes-content">
 
 
-</div>
+    </div>
 </section>
+<hr>
 </body>
 </html>

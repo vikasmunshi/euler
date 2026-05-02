@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_truncatable_primes_p0037_s0.py", "args": "", "answer": 748317, "verdict": "Correct", "elapsed": 0.26158797298558056}]
+[
+  {
+    "category": "main",
+    "solution": "solve_truncatable_primes_p0037_s0.py",
+    "args": "",
+    "answer": 748317,
+    "verdict": "Correct",
+    "elapsed": 0.354098892014008
+  }
+]

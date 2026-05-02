@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_quadratic_primes_p0027_s0.py", "args": "1000", "answer": -59231, "verdict": "Correct", "elapsed": 0.5433126269781496}]
+[
+  {
+    "category": "main",
+    "solution": "solve_quadratic_primes_p0027_s0.py",
+    "args": "1000",
+    "answer": -59231,
+    "verdict": "Correct",
+    "elapsed": 0.516815635986859
+  }
+]

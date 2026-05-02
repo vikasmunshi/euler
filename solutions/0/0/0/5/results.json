@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_smallest_multiple_p0005_s0.py", "args": "10", "answer": 2520, "verdict": "Correct", "elapsed": 0.04856595100136474}, {"category": "main", "solution": "solve_smallest_multiple_p0005_s0.py", "args": "20", "answer": 232792560, "verdict": "Correct", "elapsed": 0.04161106399260461}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_smallest_multiple_p0005_s0.py",
+    "args": "10",
+    "answer": 2520,
+    "verdict": "Correct",
+    "elapsed": 0.04890362999867648
+  },
+  {
+    "category": "main",
+    "solution": "solve_smallest_multiple_p0005_s0.py",
+    "args": "20",
+    "answer": 232792560,
+    "verdict": "Correct",
+    "elapsed": 0.052657649997854605
+  }
+]

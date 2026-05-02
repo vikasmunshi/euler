@@ -1,1 +1,82 @@
-[{"category": "dev", "solution": "solve_summation_of_primes_p0010_s0_eratosthenes_sieve.py", "args": "10", "answer": 17, "verdict": "Correct", "elapsed": 0.05041481298394501}, {"category": "dev", "solution": "solve_summation_of_primes_p0010_s1_sundaram_sieve.py", "args": "10", "answer": 17, "verdict": "Correct", "elapsed": 0.04093437801930122}, {"category": "dev", "solution": "solve_summation_of_primes_p0010_s2_primes_generator.py", "args": "10", "answer": 17, "verdict": "Correct", "elapsed": 0.052554495981894433}, {"category": "dev", "solution": "solve_summation_of_primes_p0010_s3_is_prime.py", "args": "10", "answer": 17, "verdict": "Correct", "elapsed": 0.03786108299391344}, {"category": "dev", "solution": "solve_summation_of_primes_p0010_s4_pps.py", "args": "10", "answer": 17, "verdict": "Correct", "elapsed": 0.05417781398864463}, {"category": "main", "solution": "solve_summation_of_primes_p0010_s0_eratosthenes_sieve.py", "args": "2000000", "answer": 142913828922, "verdict": "Correct", "elapsed": 0.12618592000217177}, {"category": "main", "solution": "solve_summation_of_primes_p0010_s1_sundaram_sieve.py", "args": "2000000", "answer": 142913828922, "verdict": "Correct", "elapsed": 0.5318036430107895}, {"category": "main", "solution": "solve_summation_of_primes_p0010_s2_primes_generator.py", "args": "2000000", "answer": 142913828922, "verdict": "Correct", "elapsed": 0.5074178499926347}, {"category": "main", "solution": "solve_summation_of_primes_p0010_s3_is_prime.py", "args": "2000000", "answer": 142913828922, "verdict": "Correct", "elapsed": 5.221995627012802}, {"category": "main", "solution": "solve_summation_of_primes_p0010_s4_pps.py", "args": "2000000", "answer": 142913828922, "verdict": "Correct", "elapsed": 0.04421303598792292}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_summation_of_primes_p0010_s0_eratosthenes_sieve.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "Correct",
+    "elapsed": 0.042710928013548255
+  },
+  {
+    "category": "dev",
+    "solution": "solve_summation_of_primes_p0010_s1_sundaram_sieve.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "Correct",
+    "elapsed": 0.04345031297998503
+  },
+  {
+    "category": "dev",
+    "solution": "solve_summation_of_primes_p0010_s2_primes_generator.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "Correct",
+    "elapsed": 0.03899239198653959
+  },
+  {
+    "category": "dev",
+    "solution": "solve_summation_of_primes_p0010_s3_is_prime.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "Correct",
+    "elapsed": 0.04532168200239539
+  },
+  {
+    "category": "dev",
+    "solution": "solve_summation_of_primes_p0010_s4_pps.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "Correct",
+    "elapsed": 0.0399795490084216
+  },
+  {
+    "category": "main",
+    "solution": "solve_summation_of_primes_p0010_s0_eratosthenes_sieve.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "Correct",
+    "elapsed": 0.11890154200955294
+  },
+  {
+    "category": "main",
+    "solution": "solve_summation_of_primes_p0010_s1_sundaram_sieve.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "Correct",
+    "elapsed": 0.5435394159867428
+  },
+  {
+    "category": "main",
+    "solution": "solve_summation_of_primes_p0010_s2_primes_generator.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "Correct",
+    "elapsed": 0.5142014499870129
+  },
+  {
+    "category": "main",
+    "solution": "solve_summation_of_primes_p0010_s3_is_prime.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "Correct",
+    "elapsed": 5.235265178984264
+  },
+  {
+    "category": "main",
+    "solution": "solve_summation_of_primes_p0010_s4_pps.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "Correct",
+    "elapsed": 0.042548785015242174
+  }
+]

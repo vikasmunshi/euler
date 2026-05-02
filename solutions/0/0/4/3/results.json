@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_sub_string_divisibility_p0043_s0.py", "args": "", "answer": 16695334890, "verdict": "Correct", "elapsed": 0.05105483901570551}]
+[
+  {
+    "category": "main",
+    "solution": "solve_sub_string_divisibility_p0043_s0.py",
+    "args": "",
+    "answer": 16695334890,
+    "verdict": "Correct",
+    "elapsed": 0.05730263199075125
+  }
+]

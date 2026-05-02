@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_roman_numerals_p0089_s0.py", "args": "https://projecteuler.net/resources/documents/0089_roman.txt", "answer": 743, "verdict": "Correct", "elapsed": 0.06257940200157464}]
+[
+  {
+    "category": "main",
+    "solution": "solve_roman_numerals_p0089_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0089_roman.txt",
+    "answer": 743,
+    "verdict": "Correct",
+    "elapsed": 0.05573954599094577
+  }
+]

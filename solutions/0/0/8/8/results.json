@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_product_sum_numbers_p0088_s0.py", "args": "6 2", "answer": 30, "verdict": "Correct", "elapsed": 0.04675626498647034}, {"category": "main", "solution": "solve_product_sum_numbers_p0088_s0.py", "args": "12000 2", "answer": 7587457, "verdict": "Correct", "elapsed": 0.12218305599526502}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_product_sum_numbers_p0088_s0.py",
+    "args": "6 2",
+    "answer": 30,
+    "verdict": "Correct",
+    "elapsed": 0.044546065997565165
+  },
+  {
+    "category": "main",
+    "solution": "solve_product_sum_numbers_p0088_s0.py",
+    "args": "12000 2",
+    "answer": 7587457,
+    "verdict": "Correct",
+    "elapsed": 0.12295367900514975
+  }
+]

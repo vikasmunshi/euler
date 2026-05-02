@@ -1,34 +1,95 @@
 <!DOCTYPE html>
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Problem 111: "Primes with Runs" (level 11)</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
-        .problem_content { line-height: 1.6; }
-        var { font-style: italic; }
-        sup { vertical-align: super; font-size: smaller; }
-        sub { vertical-align: sub; font-size: smaller; }
-        img { max-width: 100%; height: auto; }
-        table { border-collapse: collapse; margin: 20px 0; }
-        td, th { border: 1px solid #ddd; padding: 8px; }
-        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
-        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
-        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
-        #solution-notes-content { min-height: 80px;
-                                  padding: 12px;
-                                  background: #f9f9f9;
-                                  border: 1px solid #e0e0e0;
-                                  border-radius: 4px;
-                                }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        td, th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+
+        h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 6px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        #problem-statement-content {
+            line-height: 1.6;
+            padding: 4px 0 4px 16px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #test-cases-content {
+            padding: 12px;
+            background: #f0f7ff;
+            border: 1px solid #c8e0f4;
+            border-radius: 4px;
+        }
+
+        #results-content {
+            min-height: 60px;
+            padding: 12px;
+            background: #f0fff4;
+            border: 1px solid #b2dfca;
+            border-radius: 4px;
+            color: #777;
+        }
+
+        #solution-notes-content {
+            min-height: 80px;
+            padding: 12px;
+            background: #fffdf0;
+            border: 1px solid #e8e0c0;
+            border-radius: 4px;
+        }
     </style>
     <script>
-        MathJax = {
-            tex: {
-                inlineMath: [["$", "$"]],
-                displayMath: [["$$", "$$"]]
-            }
-        };
+        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
     </script>
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
@@ -36,8 +97,10 @@
 </head>
 <body>
 <section id="problem-statement">
-<h2>Problem 111: "Primes with Runs" (level 11)</h2>
-<div class="problem_content" role="problem">
+    <h2>Problem 111: "Primes with Runs" (level 11)</h2>
+    <p><a href="https://projecteuler.net/problem=111" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
+    <div id="problem-statement-content">
+        <div class="problem_content" role="problem">
 <p>Considering $4$-digit primes containing repeated digits it is clear that they cannot all be the same: $1111$ is divisible by $11$, $2222$ is divisible by $22$, and so on. But there are nine $4$-digit primes containing three ones:
 $$1117, 1151, 1171, 1181, 1511, 1811, 2111, 4111, 8111.$$</p>
 <p>We shall say that $M(n, d)$ represents the maximum number of repeated digits for an $n$-digit prime where $d$ is the repeated digit, $N(n, d)$ represents the number of such primes, and $S(n, d)$ represents the sum of these primes.</p>
@@ -92,11 +155,13 @@ $$1117, 1151, 1171, 1181, 1511, 1811, 2111, 4111, 8111.$$</p>
 <p>For $d = 0$ to $9$, the sum of all $S(4, d)$ is $273700$.</p>
 <p>Find the sum of all $S(10, d)$.</p>
 </div>
+    </div>
 </section>
 <hr>
 <section id="test-cases">
-<h2>Test Cases</h2>
-<h3>Dev</h3>
+    <h2>Test Cases</h2>
+    <div id="test-cases-content">
+        <h3>Dev</h3>
 <ul>
 <li><code>solve(n=4)</code> → <code>?</code></li>
 </ul>
@@ -108,14 +173,23 @@ $$1117, 1151, 1171, 1181, 1511, 1811, 2111, 4111, 8111.$$</p>
 <ul>
 <li><code>solve(n=11)</code> → <code>?</code></li>
 </ul>
+    </div>
+</section>
+<hr>
+<section id="results">
+    <h2>Results</h2>
+    <div id="results-content">
+        <!-- @ @ results -->
+    </div>
 </section>
 <hr>
 <section id="solution-notes">
-<h2>Solution Notes</h2>
-<div id="solution-notes-content">
+    <h2>Solution Notes</h2>
+    <div id="solution-notes-content">
 
 
-</div>
+    </div>
 </section>
+<hr>
 </body>
 </html>

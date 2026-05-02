@@ -13,6 +13,11 @@ from typing import Callable, Generator, Literal, overload
 from solver.config import keys_file, root_dir, upload_keys_to_origin
 
 
+def canonical_path(path: Path) -> str:
+    """Return a POSIX path string relative to root_dir."""
+    return path.relative_to(root_dir).as_posix()
+
+
 def disabled[**P, T](func: Callable[P, T]) -> Callable[P, T]:
     """
     Decorator to conditionally disable a function based on an environment variable.
@@ -67,7 +72,7 @@ def is_admin() -> bool:
 
 def is_unchanged(file: Path) -> bool:
     """Return True if the file has no diff against origin/master."""
-    changes = run_command(f'git --no-pager diff origin/master -- {file.relative_to(root_dir).as_posix()}')
+    changes = run_command(f'git --no-pager diff origin/master -- {canonical_path(file)}')
     return changes is not None and changes.strip().strip('\n') == ''
 
 
@@ -118,7 +123,7 @@ def run_command(command: str, *, cwd: Path | None = None, silent: bool = False) 
 
 def run_script(script_path: Path, cmd_line_args: list[str] | None = None, check: bool = True) -> None:
     """Run a script file in the repository root, optionally passing command-line arguments."""
-    command = f'{script_path.relative_to(root_dir).as_posix()} {" ".join(cmd_line_args or [])}'
+    command = f'{canonical_path(script_path)} {" ".join(cmd_line_args or [])}'
     run(command, shell=True, check=check, cwd=root_dir)
 
 
@@ -155,6 +160,7 @@ def write_file(path: Path, content: bytes, msg: str | None = None) -> None:
 
 
 __all__ = (
+    'canonical_path',
     'disabled',
     'get_gh_user_email',
     'get_repo_owner_email',

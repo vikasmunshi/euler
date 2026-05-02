@@ -11,8 +11,9 @@ from functools import lru_cache
 from pathlib import Path
 from subprocess import CalledProcessError, run
 
-from solver.config import root_dir, workspace_dir
+from solver.config import workspace_dir
 from solver.stack import stack_path
+from solver.utils import canonical_path
 
 
 @lru_cache(maxsize=None)
@@ -52,7 +53,7 @@ def show_in_browser(problem_number: int = 0) -> None:
         if problem_number == 0:
             print('Error: workspace is empty; use init <problem_number> to initialize it')
             return
-        print(f'Error: {filepath.relative_to(root_dir).as_posix()} does not exist')
+        print(f'Error: {canonical_path(filepath)} does not exist')
         return
     run(f'browser open {filepath.as_posix()!r}', shell=True)
 

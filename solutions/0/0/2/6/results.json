@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_reciprocal_cycles_p0026_s0.py", "args": "10", "answer": 7, "verdict": "Correct", "elapsed": 0.05145704801543616}, {"category": "main", "solution": "solve_reciprocal_cycles_p0026_s0.py", "args": "1000", "answer": 983, "verdict": "Correct", "elapsed": 0.05537377702421509}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_reciprocal_cycles_p0026_s0.py",
+    "args": "10",
+    "answer": 7,
+    "verdict": "Correct",
+    "elapsed": 0.049634325987426564
+  },
+  {
+    "category": "main",
+    "solution": "solve_reciprocal_cycles_p0026_s0.py",
+    "args": "1000",
+    "answer": 983,
+    "verdict": "Correct",
+    "elapsed": 0.043919746996834874
+  }
+]

@@ -1,1 +1,66 @@
-[{"category": "dev", "solution": "solve_cyclical_figurate_numbers_p0061_s0.py", "args": "2", "answer": [1, 8181], "verdict": "Correct", "elapsed": 0.052436216006753966}, {"category": "dev", "solution": "solve_cyclical_figurate_numbers_p0061_s0.py", "args": "3", "answer": [1, 19291], "verdict": "Correct", "elapsed": 0.04178960499120876}, {"category": "dev", "solution": "solve_cyclical_figurate_numbers_p0061_s0.py", "args": "4", "answer": [2, [12524, 16160]], "verdict": "Correct", "elapsed": 0.048098351020598784}, {"category": "dev", "solution": "solve_cyclical_figurate_numbers_p0061_s0.py", "args": "5", "answer": [5, [12019, 15857, 18685, 19493, 26058]], "verdict": "Correct", "elapsed": 0.05611731199314818}, {"category": "main", "solution": "solve_cyclical_figurate_numbers_p0061_s0.py", "args": "6", "answer": [1, 28684], "verdict": "Correct", "elapsed": 0.07494990099803545}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_cyclical_figurate_numbers_p0061_s0.py",
+    "args": "2",
+    "answer": [
+      1,
+      8181
+    ],
+    "verdict": "Correct",
+    "elapsed": 0.047973319015000015
+  },
+  {
+    "category": "dev",
+    "solution": "solve_cyclical_figurate_numbers_p0061_s0.py",
+    "args": "3",
+    "answer": [
+      1,
+      19291
+    ],
+    "verdict": "Correct",
+    "elapsed": 0.05110105097992346
+  },
+  {
+    "category": "dev",
+    "solution": "solve_cyclical_figurate_numbers_p0061_s0.py",
+    "args": "4",
+    "answer": [
+      2,
+      [
+        12524,
+        16160
+      ]
+    ],
+    "verdict": "Correct",
+    "elapsed": 0.05283161799889058
+  },
+  {
+    "category": "dev",
+    "solution": "solve_cyclical_figurate_numbers_p0061_s0.py",
+    "args": "5",
+    "answer": [
+      5,
+      [
+        12019,
+        15857,
+        18685,
+        19493,
+        26058
+      ]
+    ],
+    "verdict": "Correct",
+    "elapsed": 0.05741639097686857
+  },
+  {
+    "category": "main",
+    "solution": "solve_cyclical_figurate_numbers_p0061_s0.py",
+    "args": "6",
+    "answer": [
+      1,
+      28684
+    ],
+    "verdict": "Correct",
+    "elapsed": 0.07423678200575523
+  }
+]

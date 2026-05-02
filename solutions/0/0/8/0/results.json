@@ -1,1 +1,34 @@
-[{"category": "dev", "solution": "solve_square_root_digital_expansion_p0080_s0.py", "args": "100 2", "answer": 475, "verdict": "Correct", "elapsed": 0.04861639000591822}, {"category": "dev", "solution": "solve_square_root_digital_expansion_p0080_s1.py", "args": "100 2", "answer": 475, "verdict": "Correct", "elapsed": 0.043785337009467185}, {"category": "main", "solution": "solve_square_root_digital_expansion_p0080_s0.py", "args": "100 99", "answer": 40886, "verdict": "Correct", "elapsed": 0.05977833399083465}, {"category": "main", "solution": "solve_square_root_digital_expansion_p0080_s1.py", "args": "100 99", "answer": 40886, "verdict": "Correct", "elapsed": 0.06369629298569635}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_square_root_digital_expansion_p0080_s0.py",
+    "args": "100 2",
+    "answer": 475,
+    "verdict": "Correct",
+    "elapsed": 0.04378071700921282
+  },
+  {
+    "category": "dev",
+    "solution": "solve_square_root_digital_expansion_p0080_s1.py",
+    "args": "100 2",
+    "answer": 475,
+    "verdict": "Correct",
+    "elapsed": 0.04562556999735534
+  },
+  {
+    "category": "main",
+    "solution": "solve_square_root_digital_expansion_p0080_s0.py",
+    "args": "100 99",
+    "answer": 40886,
+    "verdict": "Correct",
+    "elapsed": 0.0542512770043686
+  },
+  {
+    "category": "main",
+    "solution": "solve_square_root_digital_expansion_p0080_s1.py",
+    "args": "100 99",
+    "answer": 40886,
+    "verdict": "Correct",
+    "elapsed": 0.06711412200820632
+  }
+]

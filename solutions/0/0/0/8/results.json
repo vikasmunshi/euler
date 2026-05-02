@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_largest_product_in_a_series_p0008_s0.py", "args": "4", "answer": 5832, "verdict": "Correct", "elapsed": 0.05611806001979858}, {"category": "main", "solution": "solve_largest_product_in_a_series_p0008_s0.py", "args": "13", "answer": 23514624000, "verdict": "Correct", "elapsed": 0.04384150399710052}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_largest_product_in_a_series_p0008_s0.py",
+    "args": "4",
+    "answer": 5832,
+    "verdict": "Correct",
+    "elapsed": 0.04527866799617186
+  },
+  {
+    "category": "main",
+    "solution": "solve_largest_product_in_a_series_p0008_s0.py",
+    "args": "13",
+    "answer": 23514624000,
+    "verdict": "Correct",
+    "elapsed": 0.044306461000815034
+  }
+]

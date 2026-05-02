@@ -61,3 +61,6 @@ solver = "solver.__main__:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["solver*"]
+
+[tool.setuptools.package-data]
+solver = ["*.html"]

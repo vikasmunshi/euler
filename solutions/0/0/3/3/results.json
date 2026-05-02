@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_digit_cancelling_fractions_p0033_s0.py", "args": "", "answer": 100, "verdict": "Correct", "elapsed": 0.04343198300921358}]
+[
+  {
+    "category": "main",
+    "solution": "solve_digit_cancelling_fractions_p0033_s0.py",
+    "args": "",
+    "answer": 100,
+    "verdict": "Correct",
+    "elapsed": 0.044950154988327995
+  }
+]

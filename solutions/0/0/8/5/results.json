@@ -1,1 +1,34 @@
-[{"category": "dev", "solution": "solve_counting_rectangles_p0085_s0.py", "args": "0 10 18", "answer": 6, "verdict": "Correct", "elapsed": 0.04506026700255461}, {"category": "dev", "solution": "solve_counting_rectangles_p0085_s1.py", "args": "0 10 18", "answer": 6, "verdict": "Correct", "elapsed": 0.040586962015368044}, {"category": "main", "solution": "solve_counting_rectangles_p0085_s0.py", "args": "2 100 2000000", "answer": 2772, "verdict": "Correct", "elapsed": 0.2697706040053163}, {"category": "main", "solution": "solve_counting_rectangles_p0085_s1.py", "args": "2 100 2000000", "answer": 2772, "verdict": "Correct", "elapsed": 0.045586533000459895}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_counting_rectangles_p0085_s0.py",
+    "args": "0 10 18",
+    "answer": 6,
+    "verdict": "Correct",
+    "elapsed": 0.05530568998074159
+  },
+  {
+    "category": "dev",
+    "solution": "solve_counting_rectangles_p0085_s1.py",
+    "args": "0 10 18",
+    "answer": 6,
+    "verdict": "Correct",
+    "elapsed": 0.0496364280115813
+  },
+  {
+    "category": "main",
+    "solution": "solve_counting_rectangles_p0085_s0.py",
+    "args": "2 100 2000000",
+    "answer": 2772,
+    "verdict": "Correct",
+    "elapsed": 0.29554750001989305
+  },
+  {
+    "category": "main",
+    "solution": "solve_counting_rectangles_p0085_s1.py",
+    "args": "2 100 2000000",
+    "answer": 2772,
+    "verdict": "Correct",
+    "elapsed": 0.04408909601625055
+  }
+]

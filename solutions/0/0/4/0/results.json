@@ -1,1 +1,58 @@
-[{"category": "dev", "solution": "solve_champernownes_constant_p0040_s0.py", "args": "1", "answer": 1, "verdict": "Correct", "elapsed": 0.0434073329961393}, {"category": "dev", "solution": "solve_champernownes_constant_p0040_s0.py", "args": "2", "answer": 5, "verdict": "Correct", "elapsed": 0.035612795007182285}, {"category": "dev", "solution": "solve_champernownes_constant_p0040_s0.py", "args": "3", "answer": 15, "verdict": "Correct", "elapsed": 0.037901887990301475}, {"category": "dev", "solution": "solve_champernownes_constant_p0040_s0.py", "args": "4", "answer": 105, "verdict": "Correct", "elapsed": 0.037984872004017234}, {"category": "dev", "solution": "solve_champernownes_constant_p0040_s0.py", "args": "5", "answer": 210, "verdict": "Correct", "elapsed": 0.036565157992299646}, {"category": "dev", "solution": "solve_champernownes_constant_p0040_s0.py", "args": "6", "answer": 210, "verdict": "Correct", "elapsed": 0.04058196998084895}, {"category": "main", "solution": "solve_champernownes_constant_p0040_s0.py", "args": "7", "answer": 1470, "verdict": "Correct", "elapsed": 0.04081634900649078}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "1",
+    "answer": 1,
+    "verdict": "Correct",
+    "elapsed": 0.0660957159998361
+  },
+  {
+    "category": "dev",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "2",
+    "answer": 5,
+    "verdict": "Correct",
+    "elapsed": 0.05932307499460876
+  },
+  {
+    "category": "dev",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "3",
+    "answer": 15,
+    "verdict": "Correct",
+    "elapsed": 0.05851284202071838
+  },
+  {
+    "category": "dev",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "4",
+    "answer": 105,
+    "verdict": "Correct",
+    "elapsed": 0.05297598900506273
+  },
+  {
+    "category": "dev",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "5",
+    "answer": 210,
+    "verdict": "Correct",
+    "elapsed": 0.05609684801311232
+  },
+  {
+    "category": "dev",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "6",
+    "answer": 210,
+    "verdict": "Correct",
+    "elapsed": 0.044037629006197676
+  },
+  {
+    "category": "main",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "7",
+    "answer": 1470,
+    "verdict": "Correct",
+    "elapsed": 0.06042753398651257
+  }
+]

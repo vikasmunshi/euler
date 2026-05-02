@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_coin_sums_p0031_s0.py", "args": "[1, 2, 5, 10, 20, 50, 100, 200] 0", "answer": 1, "verdict": "Correct", "elapsed": 0.04387409100309014}, {"category": "main", "solution": "solve_coin_sums_p0031_s0.py", "args": "[1, 2, 5, 10, 20, 50, 100, 200] 200", "answer": 73682, "verdict": "Correct", "elapsed": 0.04092527998727746}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_coin_sums_p0031_s0.py",
+    "args": "[1, 2, 5, 10, 20, 50, 100, 200] 0",
+    "answer": 1,
+    "verdict": "Correct",
+    "elapsed": 0.04444304702337831
+  },
+  {
+    "category": "main",
+    "solution": "solve_coin_sums_p0031_s0.py",
+    "args": "[1, 2, 5, 10, 20, 50, 100, 200] 200",
+    "answer": 73682,
+    "verdict": "Correct",
+    "elapsed": 0.04170180100481957
+  }
+]

@@ -1,1 +1,26 @@
-[{"category": "dev", "solution": "solve_distinct_primes_factors_p0047_s0.py", "args": "2", "answer": 14, "verdict": "Correct", "elapsed": 0.04855499797849916}, {"category": "dev", "solution": "solve_distinct_primes_factors_p0047_s0.py", "args": "3", "answer": 644, "verdict": "Correct", "elapsed": 0.036963264021323994}, {"category": "main", "solution": "solve_distinct_primes_factors_p0047_s0.py", "args": "4", "answer": 134043, "verdict": "Correct", "elapsed": 0.7390984590165317}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_distinct_primes_factors_p0047_s0.py",
+    "args": "2",
+    "answer": 14,
+    "verdict": "Correct",
+    "elapsed": 0.043387133977375925
+  },
+  {
+    "category": "dev",
+    "solution": "solve_distinct_primes_factors_p0047_s0.py",
+    "args": "3",
+    "answer": 644,
+    "verdict": "Correct",
+    "elapsed": 0.04752508498495445
+  },
+  {
+    "category": "main",
+    "solution": "solve_distinct_primes_factors_p0047_s0.py",
+    "args": "4",
+    "answer": 134043,
+    "verdict": "Correct",
+    "elapsed": 0.7844281220168341
+  }
+]

@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_largest_exponential_p0099_s0.py", "args": "https://projecteuler.net/resources/documents/0099_base_exp.txt", "answer": 709, "verdict": "Correct", "elapsed": 0.04643723598564975}]
+[
+  {
+    "category": "main",
+    "solution": "solve_largest_exponential_p0099_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0099_base_exp.txt",
+    "answer": 709,
+    "verdict": "Correct",
+    "elapsed": 0.061726788990199566
+  }
+]

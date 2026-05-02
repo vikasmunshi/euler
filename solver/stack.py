@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from solver.config import (backup_dirname, problem_number_filename, problem_statement_filename, resource_dirname,
                            root_dir, stack_dir)
 from solver.problems import problems
-from solver.utils import iterdir_recursive, write_file
+from solver.utils import iterdir_recursive, canonical_path, write_file
 
 if TYPE_CHECKING:
     from solver.crypto.symmetrical import EncKey
@@ -194,7 +194,7 @@ def backup_the_stack() -> None:
         if problem_backup_dir.exists():
             rmtree(problem_backup_dir, ignore_errors=True)
         unstack(problem.number, workspace_dir=problem_backup_dir)
-        print(f'Created backup for "{problem!s}": {problem_backup_dir.relative_to(root_dir).as_posix()}')
+        print(f'Created backup for "{problem!s}": {canonical_path(problem_backup_dir)}')
 
 
 def restore_the_stack() -> None:
@@ -213,7 +213,7 @@ def restore_the_stack() -> None:
             print(f'No backup found for "{problem!s}"')
             continue
         stack(problem.number, workspace_dir=problem_backup_dir)
-        print(f'Restored backup for "{problem!s}": {problem_stack_dir.relative_to(root_dir).as_posix()}')
+        print(f'Restored backup for "{problem!s}": {canonical_path(problem_stack_dir)}')
 
 
 # ==================================================================================================================== #

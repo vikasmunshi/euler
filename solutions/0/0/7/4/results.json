@@ -1,1 +1,146 @@
-[{"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s0.py", "args": "10", "answer": 1, "verdict": "Correct", "elapsed": 0.042036776983877644}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s1.py", "args": "10", "answer": 1, "verdict": "Correct", "elapsed": 0.040610618016216904}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s2.py", "args": "10", "answer": 1, "verdict": "Correct", "elapsed": 0.039235083997482434}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s0.py", "args": "100", "answer": 2, "verdict": "Correct", "elapsed": 0.0370535550173372}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s1.py", "args": "100", "answer": 2, "verdict": "Correct", "elapsed": 0.042797944974154234}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s2.py", "args": "100", "answer": 2, "verdict": "Correct", "elapsed": 0.04143852202105336}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s0.py", "args": "1000", "answer": 12, "verdict": "Correct", "elapsed": 0.039154903002781793}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s1.py", "args": "1000", "answer": 12, "verdict": "Correct", "elapsed": 0.04434234800282866}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s2.py", "args": "1000", "answer": 12, "verdict": "Correct", "elapsed": 0.04391679499531165}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s0.py", "args": "10000", "answer": 42, "verdict": "Correct", "elapsed": 0.049981949996436015}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s1.py", "args": "10000", "answer": 42, "verdict": "Correct", "elapsed": 0.07272178001585416}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s2.py", "args": "10000", "answer": 42, "verdict": "Correct", "elapsed": 0.06813648299430497}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s0.py", "args": "100000", "answer": 42, "verdict": "Correct", "elapsed": 0.15162283601239324}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s1.py", "args": "100000", "answer": 42, "verdict": "Correct", "elapsed": 0.37461632199119776}, {"category": "dev", "solution": "solve_digit_factorial_chains_p0074_s2.py", "args": "100000", "answer": 42, "verdict": "Correct", "elapsed": 0.3675765870139003}, {"category": "main", "solution": "solve_digit_factorial_chains_p0074_s0.py", "args": "1000000", "answer": 402, "verdict": "Correct", "elapsed": 1.311016480991384}, {"category": "main", "solution": "solve_digit_factorial_chains_p0074_s1.py", "args": "1000000", "answer": 402, "verdict": "Correct", "elapsed": 4.0169461609912105}, {"category": "main", "solution": "solve_digit_factorial_chains_p0074_s2.py", "args": "1000000", "answer": 402, "verdict": "Correct", "elapsed": 3.843221258983249}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "10",
+    "answer": 1,
+    "verdict": "Correct",
+    "elapsed": 0.03891367602045648
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "10",
+    "answer": 1,
+    "verdict": "Correct",
+    "elapsed": 0.04354678699746728
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "10",
+    "answer": 1,
+    "verdict": "Correct",
+    "elapsed": 0.043903865007450804
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "100",
+    "answer": 2,
+    "verdict": "Correct",
+    "elapsed": 0.041335330985020846
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "100",
+    "answer": 2,
+    "verdict": "Correct",
+    "elapsed": 0.044300273002590984
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "100",
+    "answer": 2,
+    "verdict": "Correct",
+    "elapsed": 0.04960097401635721
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "Correct",
+    "elapsed": 0.04111037700204179
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "Correct",
+    "elapsed": 0.04908775899093598
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "Correct",
+    "elapsed": 0.050651895988266915
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "Correct",
+    "elapsed": 0.04826413598493673
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "Correct",
+    "elapsed": 0.07648628897732124
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "Correct",
+    "elapsed": 0.07263030801550485
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "Correct",
+    "elapsed": 0.16060557099990547
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "Correct",
+    "elapsed": 0.3655544170178473
+  },
+  {
+    "category": "dev",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "Correct",
+    "elapsed": 0.46401446199161
+  },
+  {
+    "category": "main",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "Correct",
+    "elapsed": 1.2931876450020354
+  },
+  {
+    "category": "main",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "Correct",
+    "elapsed": 3.9471263519953936
+  },
+  {
+    "category": "main",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "Correct",
+    "elapsed": 4.473709610989317
+  }
+]

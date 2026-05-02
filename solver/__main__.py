@@ -38,11 +38,9 @@ def main() -> int:
     parser = ArgumentParser(prog='solver', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
     parser.add_argument('-c', '--continue', action='store_true', help='stay interactive after running cmdline commands')
+    parser.add_argument('-s', '--save-session', action='store_true', default=False, help='save session to a log-file')
     parser.add_argument('cmdline', nargs='?', metavar='COMMANDS',
                         help='optional commands to run at startup (semicolon-separated)')
-    parser.add_argument('--capture', action='store_true', default=True, help='capture stdout to a session log')
-    parser.add_argument('--no-capture', dest='capture', action='store_false', help='disable session capture')
-
     args = parser.parse_args()
     startup: list[str] = []
 
@@ -52,8 +50,8 @@ def main() -> int:
         if not getattr(args, 'continue'):
             startup.append('exit')
 
-    if args.capture:
-        with SessionCapture(SolverShell()) as session:
+    if args.save_session:
+        with SessionCapture() as session:
             return session.shell.execute(commands=startup or None)
     return SolverShell().execute(commands=startup or None)
 

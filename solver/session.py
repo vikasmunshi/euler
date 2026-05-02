@@ -6,14 +6,11 @@ from __future__ import annotations
 from pathlib import Path
 from sys import modules as sys_modules
 from types import TracebackType
-from typing import Any, IO, TYPE_CHECKING, cast
+from typing import Any, IO, cast
 from uuid import uuid7
 
+from solver.cli import SolverShell
 from solver.config import root_dir
-from solver.utils import iterdir_recursive
-
-if TYPE_CHECKING:
-    from solver.cli import SolverShell
 
 
 class SessionCapture:
@@ -25,10 +22,12 @@ class SessionCapture:
     sessions_dir: Path
     shell: SolverShell
 
-    def __init__(self, shell: SolverShell) -> None:
-        self._filename = f'{uuid7().hex}.txt'
+    def __init__(self, shell: SolverShell | None = None) -> None:
+        session_id: str = uuid7().hex
+        self._filename = f'{session_id}.txt'
         self.sessions_dir = root_dir / 'sessions'
-        self.shell = shell
+        self.shell = shell or SolverShell()
+        self.shell.session_id = session_id
 
     def __enter__(self) -> SessionCapture:
         _sys = sys_modules['sys']
@@ -47,18 +46,7 @@ class SessionCapture:
         _sys.stdout = self.original  # type: ignore [attr-defined]
         self.shell.stdout = _sys.stdout
         self._file.close()
-        self.clean_up()
-
-    def clean_up(self) -> None:
-        """Delete all but the 10 most-recent session log files.
-
-        Files are named with a UUID7 hex string, so lexicographic descending
-        order equals newest-first chronological order.  The first 10 entries
-        after sorting are kept; everything beyond that is deleted.
-        """
-        sessions_files: list[Path] = sorted(iterdir_recursive(self.sessions_dir), reverse=True)
-        for session_file in sessions_files[10:]:
-            session_file.unlink()
+        print(f'Session log written to sessions/{self._filename}')
 
     def write(self, s: str) -> int:
         self.original.write(s)

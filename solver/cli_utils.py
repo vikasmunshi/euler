@@ -11,7 +11,7 @@ from shlex import split
 from typing import Any, Callable, Literal, NamedTuple, get_args, get_origin
 
 from solver.config import workspace_dir
-from solver.utils import iterdir_recursive
+from solver.utils import iterdir_recursive, canonical_path
 
 
 class FuncInfo(NamedTuple):
@@ -162,7 +162,7 @@ def show_value[T](value: T) -> None:
     elif isinstance(value, dict):
         print('\n'.join(f'{k}: {v!s}' for k, v in value.items()))
     elif isinstance(value, Path):
-        print(value.relative_to(Path.cwd()).as_posix())
+        print(canonical_path(value))
     else:
         print(str(value))
 

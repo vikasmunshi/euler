@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_convergents_of_e_p0065_s0.py", "args": "10", "answer": 17, "verdict": "Correct", "elapsed": 0.04324023699155077}, {"category": "main", "solution": "solve_convergents_of_e_p0065_s0.py", "args": "100", "answer": 272, "verdict": "Correct", "elapsed": 0.03749676499865018}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_convergents_of_e_p0065_s0.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "Correct",
+    "elapsed": 0.04603638098342344
+  },
+  {
+    "category": "main",
+    "solution": "solve_convergents_of_e_p0065_s0.py",
+    "args": "100",
+    "answer": 272,
+    "verdict": "Correct",
+    "elapsed": 0.04391195802600123
+  }
+]

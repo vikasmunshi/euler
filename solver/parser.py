@@ -5,6 +5,8 @@ from __future__ import annotations
 
 from itertools import chain
 from json import JSONDecodeError, loads
+from pathlib import Path
+from string import Template
 from typing import Any
 from urllib.parse import urljoin
 
@@ -15,6 +17,13 @@ from solver.config import problem_statement_filename, projecteuler_url, resource
 from solver.download import download_file
 from solver.problems import Problem
 from solver.stack import read_stack_file
+
+
+class HtmlTemplate(Template):
+    delimiter = '@@'
+
+
+template = HtmlTemplate((Path(__file__).parent / 'template.html').read_text())
 
 
 def problem_statement(problem_number: int, /, *, force_refresh: bool) -> tuple[Problem, dict[str, bytes]]:
@@ -54,19 +63,19 @@ def problem_statement(problem_number: int, /, *, force_refresh: bool) -> tuple[P
     problem_content: BeautifulSoup = problem_soup.find('div', {'class': 'problem_content'})  # type: ignore [assignment]
     if not problem_content:
         raise ValueError(f'Problem {problem.number}: Could not find problem_content div in HTML')
-    results: dict[str, bytes] = extract_resources(problem_content, force_refresh=force_refresh)
+    files: dict[str, bytes] = extract_resources(problem_content, force_refresh=force_refresh)
     try:
-        test_cases_str: str = read_stack_file(problem.number, test_cases_filename)[0].decode()
-        test_cases: str = test_cases_html(problem.number, loads(test_cases_str))
+        test_cases = test_cases_html(problem.number, loads(read_stack_file(problem.number, test_cases_filename)[0]))
     except (FileNotFoundError, JSONDecodeError):
         test_cases = ''
     solution_notes: str = extract_solution_notes(problem.number)
     html: str = clean_html_for_local(problem_content,
                                      problem=problem,
+                                     problem_url=problem_url,
                                      test_cases=test_cases,
                                      solution_notes=solution_notes)
-    results[problem_statement_filename] = html.encode()
-    return problem, results
+    files[problem_statement_filename] = html.encode()
+    return problem, files
 
 
 def extract_resources(problem_content: BeautifulSoup, *, force_refresh: bool) -> dict[str, bytes]:
@@ -102,6 +111,7 @@ def extract_resources(problem_content: BeautifulSoup, *, force_refresh: bool) ->
 
 def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
                          problem: Problem,
+                         problem_url: str,
                          test_cases: str = '',
                          solution_notes: str = '',
                          ) -> str:
@@ -114,73 +124,22 @@ def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
 
     Args:
         problem_content_obj: Parsed HTML of the problem content div.
-        problem:             The Project Euler problem number.
-        difficulty_level:    The problem difficulty level string (e.g. '20' or '??').
+        problem:             The Project Euler problem metadata.
+        problem_url:         The canonical URL of the problem on projecteuler.net.
         test_cases:          Inner HTML for the test cases section. Defaults to empty.
-        solution_notes:   Inner HTML for the solution approach div. Defaults to empty.
+        solution_notes:      Inner HTML for the solution approach div. Defaults to empty.
 
     Returns:
         A complete HTML document string.
     """
     content = BeautifulSoup(str(problem_content_obj), 'html.parser')
-    test_cases = test_cases or '<p><em>No test cases available.</em></p>'
-    solution_notes = solution_notes or '\n\n'
-    html: str = (
-        '<!DOCTYPE html>\n'
-        '<html>\n'
-        '<head>\n'
-        '    <meta charset="UTF-8">\n'
-        f'    <title>Problem {problem!s}</title>\n'
-        '    <style>\n'
-        '        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }\n'
-        '        .problem_content { line-height: 1.6; }\n'
-        '        var { font-style: italic; }\n'
-        '        sup { vertical-align: super; font-size: smaller; }\n'
-        '        sub { vertical-align: sub; font-size: smaller; }\n'
-        '        img { max-width: 100%; height: auto; }\n'
-        '        table { border-collapse: collapse; margin: 20px 0; }\n'
-        '        td, th { border: 1px solid #ddd; padding: 8px; }\n'
-        '        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }\n'
-        '        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }\n'
-        '        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }\n'
-        '        #solution-notes-content { min-height: 80px;\n'
-        '                                  padding: 12px;\n'
-        '                                  background: #f9f9f9;\n'
-        '                                  border: 1px solid #e0e0e0;\n'
-        '                                  border-radius: 4px;\n'
-        '                                }\n'
-        '    </style>\n'
-        '    <script>\n'
-        '        MathJax = {\n'
-        '            tex: {\n'
-        '                inlineMath: [["$", "$"]],\n'
-        '                displayMath: [["$$", "$$"]]\n'
-        '            }\n'
-        '        };\n'
-        '    </script>\n'
-        '    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>\n'
-        '    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">\n'
-        '    </script>\n'
-        '</head>\n'
-        '<body>\n'
-        '<section id="problem-statement">\n'
-        f'<h2>Problem {problem!s}</h2>\n'
-        f'{content}\n'
-        '</section>\n'
-        '<hr>\n'
-        '<section id="test-cases">\n'
-        '<h2>Test Cases</h2>\n'
-        f'{test_cases}\n'
-        '</section>\n'
-        '<hr>\n'
-        '<section id="solution-notes">\n'
-        '<h2>Solution Notes</h2>\n'
-        '<div id="solution-notes-content">\n'
-        f'{solution_notes}\n'
-        '</div>\n'
-        '</section>\n'
-        '</body>\n'
-        '</html>'
+    html = template.substitute(
+        title=f'Problem {problem!s}',
+        heading=f'Problem {problem!s}',
+        problem_url=problem_url,
+        content=str(content),
+        test_cases=test_cases or '<p><em>No test cases available.</em></p>',
+        solution_notes=solution_notes or '\n\n',
     )
     return '\n'.join(line.rstrip() for line in html.splitlines())
 

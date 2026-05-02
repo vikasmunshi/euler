@@ -23,7 +23,7 @@ from solver.crypto import rekey, user
 from solver.evaluate import evaluate
 from solver.problems import problems
 from solver.stack import backup_the_stack, restore_the_stack
-from solver.utils import upload_keys
+from solver.utils import canonical_path, upload_keys
 from solver.workspace import clear_the_workspace, init_the_workspace, list_the_workspace, stack_the_workspace
 
 CYAN, GREEN, YELLOW, BLUE, BLACK, GRAY, RED, BOLD, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW,
@@ -43,7 +43,7 @@ banner: str = f"""\
 {C_LBL}{"Exit":<{_lw}} {C_CMD}Ctrl-D | exit
 {C_LBL}{"Launch":<{_lw}} {C_CMD}{"solver":<{_cw}} {C_TXT}launch interactive shell
 {C_LBL}{" ":<{_lw}} {C_CMD}{"solver \"cmd1; cmd2\"":<{_cw}} {C_TXT}execute commands and exit
-{C_LBL}{" ":<{_lw}} {C_CMD}{"solver -c \"cmdline\"":<{_cw}} {C_TXT}execute cmdline continue in interactive shell
+{C_LBL}{" ":<{_lw}} {C_CMD}{"solver -c \"cmdline\"":<{_cw}} {C_TXT}execute cmdline, then continue in interactive shell
 {C_LBL}{"Flags":<{_lw}} {C_CMD}{"--key-word | --no-key-word":<{_cw}} {C_TXT}boolean True / False
 {C_LBL}{" ":<{_lw}} {C_CMD}{"--silent":<{_cw}} {C_TXT}suppress command output{RESET}"""
 
@@ -56,7 +56,8 @@ class SolverShell(Cmd):
     exe_cache: ClassVar[list[str]] = []
     history_file: ClassVar[Path] = root_dir / '.solver_history'
     identchars: str = Cmd.identchars + ':-'
-    prompt = f'{workspace_dir.relative_to(root_dir).as_posix()}$ '
+    prompt = f'{canonical_path(workspace_dir)}$ '
+    session_id: str | None = None
 
     def __str__(self) -> str:
         return f'SolverShell(workspace={self.prompt[:-2]})'
@@ -65,6 +66,9 @@ class SolverShell(Cmd):
         """Run the shell session, invoking the 'pre/post' method hooks by name, and return 0 on clean exit."""
         if commands:
             self.cmdqueue.extend(commands)
+            if commands[-1] == 'exit':
+                setattr(self, 'preloop', lambda: None)
+                setattr(self, 'postloop', lambda: None)
         self.cmdloop(intro=intro)
         return 0
 
@@ -89,7 +93,7 @@ class SolverShell(Cmd):
             print(f'\n{CYAN}{"─" * 100}')
             self.do_ls('')
         print(f'\n{CYAN}{"─" * 100}\n'
-              f'{GREEN}{BOLD}Session complete — goodbye!\n'
+              f'{GREEN}{BOLD}Session{" " if self.session_id is None else f" {self.session_id} "}complete — goodbye!\n'
               f'{CYAN}{"─" * 100}{RESET}')
 
     def completenames(self, text: str, *ignored: Any) -> list[str]:
@@ -466,7 +470,7 @@ for _name, _func in _commands.items():
 
 for _name, _alias in {
     'eval-pub': 'for n in 1 to 100: init n --silent; eval --record; clear --silent; echo evaluated n',
-    'eval-show': 'for n in 1 to 100: init n --silent; eval --show; clear --silent; echo evaluated n',
+    'eval-show': 'for n in 1 to 100: init n --silent; eval --show; clear --discard-changes --silent; echo evaluated n',
     'gh-login': 'shell gh auth status || gh auth login',
     'gh-status': 'shell gh auth status',
     'git-add-stack': f'shell git add {stack_dir.as_posix()}/',

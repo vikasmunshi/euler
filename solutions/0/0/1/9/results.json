@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_counting_sundays_p0019_s0.py", "args": "2000 1901", "answer": 171, "verdict": "Correct", "elapsed": 0.05413458601105958}]
+[
+  {
+    "category": "main",
+    "solution": "solve_counting_sundays_p0019_s0.py",
+    "args": "2000 1901",
+    "answer": 171,
+    "verdict": "Correct",
+    "elapsed": 0.0888350140012335
+  }
+]

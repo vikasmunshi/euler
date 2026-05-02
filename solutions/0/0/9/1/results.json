@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_right_triangles_with_integer_coordinates_p0091_s0.py", "args": "2", "answer": 14, "verdict": "Correct", "elapsed": 0.04210958001203835}, {"category": "main", "solution": "solve_right_triangles_with_integer_coordinates_p0091_s0.py", "args": "50", "answer": 14234, "verdict": "Correct", "elapsed": 0.038582779990974814}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_right_triangles_with_integer_coordinates_p0091_s0.py",
+    "args": "2",
+    "answer": 14,
+    "verdict": "Correct",
+    "elapsed": 0.04481466198922135
+  },
+  {
+    "category": "main",
+    "solution": "solve_right_triangles_with_integer_coordinates_p0091_s0.py",
+    "args": "50",
+    "answer": 14234,
+    "verdict": "Correct",
+    "elapsed": 0.03935320899472572
+  }
+]

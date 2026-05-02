@@ -1,1 +1,18 @@
-[{"category": "dev", "solution": "solve_prime_power_triples_p0087_s0.py", "args": "50", "answer": 4, "verdict": "Correct", "elapsed": 0.06128825800260529}, {"category": "main", "solution": "solve_prime_power_triples_p0087_s0.py", "args": "50000000", "answer": 1097343, "verdict": "Correct", "elapsed": 0.5033351099991705}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_prime_power_triples_p0087_s0.py",
+    "args": "50",
+    "answer": 4,
+    "verdict": "Correct",
+    "elapsed": 0.05113732098834589
+  },
+  {
+    "category": "main",
+    "solution": "solve_prime_power_triples_p0087_s0.py",
+    "args": "50000000",
+    "answer": 1097343,
+    "verdict": "Correct",
+    "elapsed": 0.4580550160026178
+  }
+]

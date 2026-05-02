@@ -1,1 +1,82 @@
-[{"category": "dev", "solution": "solve_multiples_of_3_or_5_p0001_s0.py", "args": "10", "answer": 23, "verdict": "Correct", "elapsed": 0.04660269999294542}, {"category": "dev", "solution": "solve_multiples_of_3_or_5_p0001_s1.py", "args": "10", "answer": 23, "verdict": "Correct", "elapsed": 0.04388731298968196}, {"category": "dev", "solution": "solve_multiples_of_3_or_5_p0001_s2.py", "args": "10", "answer": 23, "verdict": "Correct", "elapsed": 0.04874371099867858}, {"category": "dev", "solution": "solve_multiples_of_3_or_5_p0001_s3.py", "args": "10", "answer": 23, "verdict": "Correct", "elapsed": 0.0484886399935931}, {"category": "dev", "solution": "solve_multiples_of_3_or_5_p0001_s4.py", "args": "10", "answer": 23, "verdict": "Correct", "elapsed": 0.05016393499681726}, {"category": "main", "solution": "solve_multiples_of_3_or_5_p0001_s0.py", "args": "1000", "answer": 233168, "verdict": "Correct", "elapsed": 0.051989291998324916}, {"category": "main", "solution": "solve_multiples_of_3_or_5_p0001_s1.py", "args": "1000", "answer": 233168, "verdict": "Correct", "elapsed": 0.0469349609920755}, {"category": "main", "solution": "solve_multiples_of_3_or_5_p0001_s2.py", "args": "1000", "answer": 233168, "verdict": "Correct", "elapsed": 0.0527031350065954}, {"category": "main", "solution": "solve_multiples_of_3_or_5_p0001_s3.py", "args": "1000", "answer": 233168, "verdict": "Correct", "elapsed": 0.058446998009458184}, {"category": "main", "solution": "solve_multiples_of_3_or_5_p0001_s4.py", "args": "1000", "answer": 233168, "verdict": "Correct", "elapsed": 0.0473774179990869}]
+[
+  {
+    "category": "dev",
+    "solution": "solve_multiples_of_3_or_5_p0001_s0.py",
+    "args": "10",
+    "answer": 23,
+    "verdict": "Correct",
+    "elapsed": 0.04668045599828474
+  },
+  {
+    "category": "dev",
+    "solution": "solve_multiples_of_3_or_5_p0001_s1.py",
+    "args": "10",
+    "answer": 23,
+    "verdict": "Correct",
+    "elapsed": 0.042199921008432284
+  },
+  {
+    "category": "dev",
+    "solution": "solve_multiples_of_3_or_5_p0001_s2.py",
+    "args": "10",
+    "answer": 23,
+    "verdict": "Correct",
+    "elapsed": 0.04624131598393433
+  },
+  {
+    "category": "dev",
+    "solution": "solve_multiples_of_3_or_5_p0001_s3.py",
+    "args": "10",
+    "answer": 23,
+    "verdict": "Correct",
+    "elapsed": 0.06942173698917031
+  },
+  {
+    "category": "dev",
+    "solution": "solve_multiples_of_3_or_5_p0001_s4.py",
+    "args": "10",
+    "answer": 23,
+    "verdict": "Correct",
+    "elapsed": 0.058650755003327504
+  },
+  {
+    "category": "main",
+    "solution": "solve_multiples_of_3_or_5_p0001_s0.py",
+    "args": "1000",
+    "answer": 233168,
+    "verdict": "Correct",
+    "elapsed": 0.055175774003146216
+  },
+  {
+    "category": "main",
+    "solution": "solve_multiples_of_3_or_5_p0001_s1.py",
+    "args": "1000",
+    "answer": 233168,
+    "verdict": "Correct",
+    "elapsed": 0.04224362500826828
+  },
+  {
+    "category": "main",
+    "solution": "solve_multiples_of_3_or_5_p0001_s2.py",
+    "args": "1000",
+    "answer": 233168,
+    "verdict": "Correct",
+    "elapsed": 0.04552210800466128
+  },
+  {
+    "category": "main",
+    "solution": "solve_multiples_of_3_or_5_p0001_s3.py",
+    "args": "1000",
+    "answer": 233168,
+    "verdict": "Correct",
+    "elapsed": 0.05074765800964087
+  },
+  {
+    "category": "main",
+    "solution": "solve_multiples_of_3_or_5_p0001_s4.py",
+    "args": "1000",
+    "answer": 233168,
+    "verdict": "Correct",
+    "elapsed": 0.04567596598644741
+  }
+]

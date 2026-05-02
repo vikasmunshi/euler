@@ -1,1 +1,10 @@
-[{"category": "main", "solution": "solve_almost_equilateral_triangles_p0094_s0.py", "args": "1000000000", "answer": 518408346, "verdict": "Correct", "elapsed": 0.04434559599030763}]
+[
+  {
+    "category": "main",
+    "solution": "solve_almost_equilateral_triangles_p0094_s0.py",
+    "args": "1000000000",
+    "answer": 518408346,
+    "verdict": "Correct",
+    "elapsed": 0.03721147801843472
+  }
+]
