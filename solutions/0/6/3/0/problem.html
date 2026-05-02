@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 630: "Crossed Lines" (level 7)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-notes-content { min-height: 80px;
+                                  padding: 12px;
+                                  background: #f9f9f9;
+                                  border: 1px solid #e0e0e0;
+                                  border-radius: 4px;
+                                }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 630: "Crossed Lines" (level 7)</h2>
+<div class="problem_content" role="problem">
+<p>
+Given a set, $L$, of unique lines, let $M(L)$ be the number of lines in the set and let $S(L)$ be the sum over every line of the number of times that line is crossed by another line in the set.  For example, two sets of three lines are shown below:
+</p>
+<div align="center"><img alt="crossed lines" src="resources/0630_threelines.png"/></div>
+<p>
+In both cases $M(L)$ is $3$ and $S(L)$ is $6$: each of the three lines is crossed by two other lines. Note that even if the lines cross at a single point, all of the separate crossings of lines are counted.
+</p>
+<p>
+Consider points $(T_{2k-1}, T_{2k})$, for integer $k \ge 1$, generated in the following way:
+</p>
+<p>
+$S_0 	=  	290797$<br/>
+$S_{n+1} 	=  	S_n^2 \bmod 50515093$<br/>
+$T_n 	=  	(S_n \bmod 2000) - 1000$
+</p>
+<p>
+For example, the first three points are: $(527, 144)$, $(-488, 732)$, $(-454, -947)$. Given the first $n$ points generated in this manner, let $L_n$ be the set of <b>unique</b> lines that can be formed by joining each point with every other point, the lines being extended indefinitely in both directions.  We can then define $M(L_n)$ and $S(L_n)$ as described above.
+</p>
+<p>
+For example, $M(L_3) = 3$ and $S(L_3) = 6$. Also $M(L_{100}) = 4948$ and $S(L_{100}) = 24477690$.
+</p><p>
+Find $S(L_{2500})$.
+</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(n=3)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=2500)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(n=5000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-notes">
+<h2>Solution Notes</h2>
+<div id="solution-notes-content">
+
+
+</div>
+</section>
+</body>
+</html>

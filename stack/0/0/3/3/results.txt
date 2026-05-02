@@ -1,1 +1,0 @@
-main : solve_digit_cancelling_fractions_p0033_s0.py  -> 100 (correct) [0.050s]

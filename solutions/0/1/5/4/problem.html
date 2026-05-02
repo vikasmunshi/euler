@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 154: "Exploring Pascal's Pyramid" (level 25)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-notes-content { min-height: 80px;
+                                  padding: 12px;
+                                  background: #f9f9f9;
+                                  border: 1px solid #e0e0e0;
+                                  border-radius: 4px;
+                                }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 154: "Exploring Pascal's Pyramid" (level 25)</h2>
+<div class="problem_content" role="problem">
+<p>A triangular pyramid is constructed using spherical balls so that each ball rests on exactly three balls of the next lower level.</p>
+<div class="center"><img alt="" class="dark_img" src="resources/0154_pyramid.png"/></div>
+<p>Then, we calculate the number of paths leading from the apex to each position:</p>
+<p>A path starts at the apex and progresses downwards to any of the three spheres directly below the current position.</p>
+<p>Consequently, the number of paths to reach a certain position is the sum of the numbers immediately above it (depending on the position, there are up to three numbers above it).</p>
+<p>The result is <strong>Pascal's pyramid</strong> and the numbers at each level $n$ are the coefficients of the trinomial expansion
+$(x + y + z)^n$.</p>
+<p>How many coefficients in the expansion of $(x + y + z)^{200000}$ are multiples of $10^{12}$?</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(n=3)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=200000)</code> → <code>?</code></li>
+</ul>
+<h3>Extra</h3>
+<ul>
+<li><code>solve(n=500000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-notes">
+<h2>Solution Notes</h2>
+<div id="solution-notes-content">
+
+
+</div>
+</section>
+</body>
+</html>

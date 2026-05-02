@@ -1,1 +1,0 @@
-main : solve_amicable_numbers_p0021_s0.py 10000 -> 31626 (correct) [0.087s]

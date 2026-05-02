@@ -9,8 +9,6 @@ from typing import NamedTuple
 from solver.config import problem_number_filename, problems_list_url
 from solver.download import download_file
 
-__all__ = ['Problem', 'problems']
-
 
 class Problem(NamedTuple):
     number: int
@@ -66,3 +64,5 @@ def _problems() -> list[Problem]:
 
 problems: list[Problem] = _problems()
 problems_dict: dict[int, Problem] = {p.number: p for p in problems}
+
+__all__ = ('Problem', 'problems')

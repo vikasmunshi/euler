@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_factorial_digit_sum_p0020_s0.py", "args": "10", "answer": 27, "verdict": "Correct", "elapsed": 0.05944748499314301}, {"category": "main", "solution": "solve_factorial_digit_sum_p0020_s0.py", "args": "100", "answer": 648, "verdict": "Correct", "elapsed": 0.04573941900162026}]

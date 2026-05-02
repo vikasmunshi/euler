@@ -1,3 +1,0 @@
-dev  : solve_prime_digit_replacements_p0051_s0.py 6 6 -> 13 (correct) [0.271s]
-dev  : solve_prime_digit_replacements_p0051_s0.py 6 7 -> 56003 (correct) [0.742s]
-main : solve_prime_digit_replacements_p0051_s0.py 6 8 -> 121313 (correct) [1.160s]

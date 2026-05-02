@@ -3,43 +3,33 @@
 """Shared utilities: directory helpers, git integration, and shell command wrappers."""
 from __future__ import annotations
 
-from functools import lru_cache, partial, wraps
-from inspect import signature
+from functools import lru_cache, wraps
 from os import getenv
 from pathlib import Path
 from subprocess import run
-from typing import Any, Callable, Generator, Literal, overload
+from sys import argv
+from typing import Callable, Generator, Literal, overload
 
 from solver.config import keys_file, root_dir, upload_keys_to_origin
 
-__all__ = [
-    'continue_on_error',
-    'disabled',
-    'format_command_line',
-    'get_gh_user_email',
-    'get_gh_user_email',
-    'get_repo_owner_email',
-    'is_admin',
-    'is_unchanged',
-    'iterdir_recursive',
-    'run_command',
-    'run_script',
-    'show_value',
-    'upload_keys',
-    'write_file',
-]
 
+def disabled[**P, T](func: Callable[P, T]) -> Callable[P, T]:
+    """
+    Decorator to conditionally disable a function based on an environment variable.
 
-@lru_cache(maxsize=None)
-def get_repo_owner_email() -> str:
-    """Return the GitHub repository owner's email, cached after the first lookup."""
-    repo_owner: str | None = run_command('gh repo view --json owner --jq .owner.login')
-    if not repo_owner:
-        raise ValueError('Error: could not get repository owner')
-    owner_email: str | None = run_command(f'gh api users/{repo_owner} --jq .email')
-    if not owner_email:
-        raise ValueError('Error: could not get owner email')
-    return owner_email
+    This decorator checks if the environment variable 'disabled' is set to 'false'
+    and allows the execution of the decorated function only when the condition is met.
+    If the condition is not met, it raises a NotImplementedError indicating that the
+    function is disabled.
+    """
+    if getenv('disabled') == 'false' or 'disabled=false' in argv[1:]:
+        return func
+
+    @wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        raise NotImplementedError(f'{func.__name__} is disabled; use disabled=false to enable')
+
+    return wrapper
 
 
 @lru_cache(maxsize=None)
@@ -55,6 +45,18 @@ def get_gh_user_email() -> str:
     if not gh_user_email:
         raise ValueError("Error: could not get GitHub authenticated user's email")
     return gh_user_email
+
+
+@lru_cache(maxsize=None)
+def get_repo_owner_email() -> str:
+    """Return the GitHub repository owner's email, cached after the first lookup."""
+    repo_owner: str | None = run_command('gh repo view --json owner --jq .owner.login')
+    if not repo_owner:
+        raise ValueError('Error: could not get repository owner')
+    owner_email: str | None = run_command(f'gh api users/{repo_owner} --jq .email')
+    if not owner_email:
+        raise ValueError('Error: could not get owner email')
+    return owner_email
 
 
 @lru_cache(maxsize=None)
@@ -120,71 +122,6 @@ def run_script(script_path: Path, cmd_line_args: list[str] | None = None, check:
     run(command, shell=True, check=check, cwd=root_dir)
 
 
-def write_file(path: Path, content: bytes, msg: str | None = None) -> None:
-    """Write bytes to the path, creating parent directories as needed, and optionally print a status message."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_bytes(content)
-    if msg is not None:
-        print(f'{msg}, wrote {len(content)} bytes to {path}')
-
-
-def disabled[**P, T](func: Callable[P, T]) -> Callable[P, T]:
-    """Decorator that disables func by raising NotImplementedError on every call."""
-
-    @wraps(func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        if getenv('disabled') == 'false':
-            return func(*args, **kwargs)
-        raise NotImplementedError(f'{func.__name__} is disabled')
-
-    return wrapper
-
-
-def format_command_line(func: str | Callable, args: list[Any], kwargs: dict[str, Any]) -> str:
-    """Format a function call as a readable string suitable for display or logging."""
-    if isinstance(func, str):
-        func_name: str = func
-    elif isinstance(func, partial):
-        func_name = func.func.__name__
-    elif callable(func) and not isinstance(func, type):
-        func_name = func.__name__
-    else:
-        func_name = '<unknown>'
-    args_str: str = ', '.join(map(str, args))
-    kwargs_str: str = ', '.join(f"{k}={v!s}" for k, v in kwargs.items())
-    return f'{func_name}({args_str}{", " if args and kwargs else ""}{kwargs_str})'
-
-
-def show_value[T](value: T) -> None:
-    """Print value to stdout, formatting lists, dicts, and Paths for readability."""
-    if isinstance(value, list):
-        print('\n'.join(map(str, value)))
-    elif isinstance(value, dict):
-        print('\n'.join(f'{k}: {v!s}' for k, v in value.items()))
-    elif isinstance(value, Path):
-        print(value.relative_to(Path.cwd()).as_posix())
-    else:
-        print(str(value))
-
-
-def continue_on_error[**P, T](func: Callable[P, T]) -> Callable[P, T | None]:
-    """Decorator that catches exceptions from func, prints them, and returns None instead of raising."""
-
-    @wraps(func)
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | None:
-        try:
-            return func(*args, **kwargs)
-        except KeyboardInterrupt:
-            print('^C')
-            return None
-        except Exception as err:
-            print(f'{func.__name__}{signature(func)}\n{getattr(func, "__doc__", ) or ""}')
-            print(format_command_line(func, list(args), kwargs), f'Error: {err!s}', sep='\n')
-            return None
-
-    return wrapper
-
-
 def upload_keys() -> None:
     """Upload changes to keys/keys.json to the remote repository via the GitHub CLI.
 
@@ -207,3 +144,25 @@ def upload_keys() -> None:
         return
     run_script(upload_keys_to_origin, cmd_line_args=['push' if is_admin() else 'pull'])
     print('Keys/keys.json updated. Once the pull request is merged, run "solver git-merge" to refresh.')
+
+
+def write_file(path: Path, content: bytes, msg: str | None = None) -> None:
+    """Write bytes to the path, creating parent directories as needed, and optionally print a status message."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(content)
+    if msg is not None:
+        print(f'{msg}, wrote {len(content)} bytes to {path}')
+
+
+__all__ = (
+    'disabled',
+    'get_gh_user_email',
+    'get_repo_owner_email',
+    'is_admin',
+    'is_unchanged',
+    'iterdir_recursive',
+    'run_command',
+    'run_script',
+    'upload_keys',
+    'write_file',
+)

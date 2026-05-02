@@ -13,21 +13,18 @@ from re import escape as re_escape, search as re_search, sub as re_sub
 from readline import (backend as readline_backend, get_completer, get_completer_delims, parse_and_bind,
                       read_history_file, set_completer, set_completer_delims, set_history_length, write_history_file)
 from subprocess import CalledProcessError, run
-from sys import argv, modules as sys_modules
-from types import TracebackType
-from typing import Any, Callable, ClassVar, IO, Literal, cast, get_args, get_origin
-from uuid import uuid7
+from typing import Any, Callable, ClassVar, Literal, get_args, get_origin
 
-from solver.cli_utils import bool_flags, coerce, dedup_history, func_info, safe_split
-from solver.config import ColorCodes, root_dir, stack_dir
+from solver.browser import show_in_browser
+from solver.cli_utils import (bool_flags, coerce, continue_on_error, dedup_history, format_command_line, func_info,
+                              safe_split, show_value, workspace_files)
+from solver.config import ColorCodes, root_dir, stack_dir, workspace_dir
 from solver.crypto import rekey, user
 from solver.evaluate import evaluate
 from solver.problems import problems
 from solver.stack import backup_the_stack, restore_the_stack
-from solver.utils import continue_on_error, format_command_line, show_value, upload_keys
+from solver.utils import upload_keys
 from solver.workspace import clear_the_workspace, init_the_workspace, list_the_workspace, stack_the_workspace
-
-__all__ = ['SolverShell', 'cli']
 
 CYAN, GREEN, YELLOW, BLUE, BLACK, GRAY, RED, BOLD, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW,
                                                             ColorCodes.BLUE, ColorCodes.BLACK, ColorCodes.GRAY,
@@ -51,52 +48,6 @@ banner: str = f"""\
 {C_LBL}{" ":<{_lw}} {C_CMD}{"--silent":<{_cw}} {C_TXT}suppress command output{RESET}"""
 
 
-class SessionCapture:
-    """Context-managed stdout tee: writes to both the terminal and a session log file."""
-    __slots__ = ('_file', '_filename', 'original', 'solver')
-    _file: IO[str]
-    _filename: str
-    original: IO[str]
-    solver: SolverShell
-
-    def __init__(self, solver: SolverShell) -> None:
-        self._filename = f'{uuid7().hex}.txt'
-        self.solver = solver
-
-    def __enter__(self) -> SessionCapture:
-        _sys = sys_modules['sys']
-        (root_dir / 'sessions').mkdir(exist_ok=True)
-        self.original = _sys.stdout
-        self._file = (root_dir / 'sessions' / self._filename).open('w')
-        _sys.stdout = cast(IO[str], cast(object, self))  # type: ignore [attr-defined]
-        self.solver.stdout = _sys.stdout
-        return self
-
-    def __exit__(self,
-                 exc_type: type[BaseException] | None,
-                 exc_value: BaseException | None,
-                 tb: TracebackType | None) -> None:
-        _sys = sys_modules['sys']
-        _sys.stdout = self.original  # type: ignore [attr-defined]
-        self.solver.stdout = _sys.stdout
-        self._file.close()
-
-    def write(self, s: str) -> int:
-        self.original.write(s)
-        self._file.write(s)
-        return len(s)
-
-    def flush(self) -> None:
-        self.original.flush()
-        self._file.flush()
-
-    def writable(self) -> bool:
-        return self.original.writable() and self._file.writable()
-
-    def __getattr__(self, name: str) -> Any:
-        return getattr(self.original, name)
-
-
 class SolverShell(Cmd):
     """The solver shell."""
     aliases: ClassVar[dict[str, str]] = {}
@@ -105,11 +56,10 @@ class SolverShell(Cmd):
     exe_cache: ClassVar[list[str]] = []
     history_file: ClassVar[Path] = root_dir / '.solver_history'
     identchars: str = Cmd.identchars + ':-'
-    prompt = 'euler$ '
-    workspace_dir: ClassVar[Path] = root_dir / 'euler'
+    prompt = f'{workspace_dir.relative_to(root_dir).as_posix()}$ '
 
     def __str__(self) -> str:
-        return f'SolverShell(workspace_dir={self.workspace_dir.as_posix()!r})'
+        return f'SolverShell(workspace={self.prompt[:-2]})'
 
     def execute(self, intro: Any | None = None, commands: list[str] | None = None) -> int:
         """Run the shell session, invoking the 'pre/post' method hooks by name, and return 0 on clean exit."""
@@ -352,7 +302,7 @@ class SolverShell(Cmd):
         if self.handle_help_on_command('shell', line):
             return
         try:
-            process = run(line, shell=True, check=True, cwd=self.workspace_dir)
+            process = run(line, shell=True, check=True, cwd=workspace_dir)
         except CalledProcessError as e:
             result = e.returncode
             print(f'> {line} -> {RED}{result}{RESET}')
@@ -367,7 +317,7 @@ class SolverShell(Cmd):
         if len(tokens) <= 1:
             if len(tokens) == 1 and (tokens[0] == '!' or tokens[0] == 'shell'):
                 return self.executable_names(text)
-        return self.workspace_files(text)
+        return workspace_files(text)
 
     @staticmethod
     def completions_for_param(param_name: str, hints: dict, partial_val: str) -> list[str]:
@@ -398,17 +348,10 @@ class SolverShell(Cmd):
             cls.exe_cache.extend(sorted(names))
         return [n for n in cls.exe_cache if n.startswith(text)]
 
-    def workspace_files(self, text: str) -> list[str]:
-        """Return filenames in the workspace directory that start with text."""
-        try:
-            return sorted(item.name for item in self.workspace_dir.iterdir() if item.name.startswith(text))
-        except OSError:
-            return []
-
     @classmethod
     def make_cmd(cls, f: Callable, /, *, name: str) -> None:
         """Build a do_<name> and complete_<name> Cmd method that parses CLI tokens and dispatches to func."""
-        sig, hints, pos_params, var_positional, kw_params, func = func_info(f, workspace_dir=cls.workspace_dir)
+        sig, hints, pos_params, var_positional, kw_params, func = func_info(f, workspace_dir=workspace_dir)
 
         def token_processor(token: str, pos: int) -> Any:
             """Process a token from the command line."""
@@ -494,7 +437,10 @@ class SolverShell(Cmd):
         do_cmd.__name__ = f'do_{name}'
         complete_cmd.__name__ = f'complete_{name}'
         if isinstance(func, partial):
-            do_cmd.__doc__ = f'{name}{sig}\n{getattr(func.func, "__doc__", None) or ""}'
+            if func.func is show_value:
+                do_cmd.__doc__ = f'{name}{sig}\nprint {name}'
+            else:
+                do_cmd.__doc__ = f'{name}{sig}\n{getattr(func.func, "__doc__", None) or ""}'
         else:
             do_cmd.__doc__ = f'{name}{sig}\n{getattr(func, "__doc__", None) or ""}'
         setattr(cls, do_cmd.__name__, do_cmd)
@@ -510,12 +456,15 @@ _commands: dict[str, Callable] = {
     'ls': list_the_workspace,
     'problems': partial(show_value, problems),
     'rekey': rekey,
+    'show': show_in_browser,
     'stack': stack_the_workspace,
     'upload_keys': upload_keys,
     'user': user,
 }
+for _name, _func in _commands.items():
+    SolverShell.make_cmd(_func, name=_name)
 
-_aliases: dict[str, str] = {
+for _name, _alias in {
     'eval-pub': 'for n in 1 to 100: init n --silent; eval --record; clear --silent; echo evaluated n',
     'eval-show': 'for n in 1 to 100: init n --silent; eval --show; clear --silent; echo evaluated n',
     'gh-login': 'shell gh auth status || gh auth login',
@@ -525,52 +474,7 @@ _aliases: dict[str, str] = {
     'git-status': 'shell git status | less',
     'pre-commit': 'shell pre-commit run --all-files',
     'restack': f'for n in 1 to {max(p.number for p in problems)}: init n --silent; clear; echo restacked n',
-}
+}.items():
+    SolverShell.aliases[_name] = _alias
 
-
-def cli(
-        commands: dict[str, Callable] | None = None,
-        aliases: dict[str, str] | None = None,
-        capture: bool = True,
-) -> int:
-    """Configure and launch the solver shell.
-
-    Registers commands and aliases on SolverShell, then parses argv to extract any
-    startup commands before entering the interactive loop.
-
-    Args:
-        commands: Mapping of command names to callables. Defaults to the built-in
-                  command set (_commands) when None.
-        aliases:  Mapping of alias names to command strings. Defaults to the built-in
-                  alias set (_aliases) when None.
-        capture:  Whether to capture stdout to a file. Defaults to True.
-    Command-line usage (argv parsing):
-        solver                      # interactive shell
-        solver "cmd"                # run cmd, then stay interactive
-        solver "cmd1; cmd2"         # run cmd1 then cmd2, then stay interactive
-        solver -c "cmd1; cmd2"      # run cmd1 then cmd2, then exit
-
-    The -c flag must be the first argument; the command string must be a single
-    quoted argument (the shell interprets bare semicolons before the process sees
-    them). Only one command string is accepted — additional argv tokens are ignored.
-
-    Returns:
-        0 on clean exit.
-    """
-    for name, func in (commands or _commands).items():
-        SolverShell.make_cmd(func, name=name)
-    for name, alias in (aliases or _aliases).items():
-        SolverShell.aliases[name] = alias
-    i: int = 1 + int(argv[1:2] == ['-c'])
-    startup_commands = [c for r in ' '.join(argv[i:i + 1]).split(';') if (c := r.strip())]
-    if startup_commands and i == 1:
-        startup_commands.append('exit')
-    if capture:
-        with SessionCapture(SolverShell()) as session:
-            return session.solver.execute(commands=startup_commands or None)
-    else:
-        return SolverShell().execute(commands=startup_commands or None)
-
-
-if __name__ == '__main__':
-    raise SystemExit(cli())
+__all__ = ('SolverShell',)

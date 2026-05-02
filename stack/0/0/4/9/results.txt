@@ -1,1 +1,0 @@
-main : solve_prime_permutations_p0049_s0.py 4 -> ['1487 4817 8147', '2969 6299 9629'] (correct) [0.055s]

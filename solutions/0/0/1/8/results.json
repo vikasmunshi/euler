@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_maximum_path_sum_i_p0018_s0.py", "args": "TRIANGLE_A", "answer": 23, "verdict": "Correct", "elapsed": 0.05420137901091948}, {"category": "main", "solution": "solve_maximum_path_sum_i_p0018_s0.py", "args": "TRIANGLE_B", "answer": 1074, "verdict": "Correct", "elapsed": 0.04824621099396609}]

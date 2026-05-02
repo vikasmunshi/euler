@@ -9,8 +9,6 @@ from typing import Any
 from solver.config import ColorCodes, keys_backup_file, private_key_file
 from solver.utils import write_file
 
-__all__ = ['rekey', 'user']
-
 
 def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, backup: bool = False) -> None:
     """
@@ -88,3 +86,6 @@ def user(regen: bool = False) -> str:
     return (f'{user_key!s} '
             f'{(ColorCodes.RED + "(✗ cannot") if master_key is None else (ColorCodes.GREEN + "(✓ can")} '
             f'encrypt/decrypt){ColorCodes.RESET}')
+
+
+__all__ = ('rekey', 'user',)

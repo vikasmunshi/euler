@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_powerful_digit_sum_p0056_s0.py", "args": "1", "answer": 45, "verdict": "Correct", "elapsed": 0.5975465549854562}, {"category": "main", "solution": "solve_powerful_digit_sum_p0056_s0.py", "args": "2", "answer": 972, "verdict": "Correct", "elapsed": 0.571290992986178}]

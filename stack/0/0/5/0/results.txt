@@ -1,5 +1,0 @@
-dev  : solve_consecutive_prime_sum_p0050_s0.py 100 -> 41 (correct) [0.048s]
-dev  : solve_consecutive_prime_sum_p0050_s0.py 1000 -> 953 (correct) [0.043s]
-dev  : solve_consecutive_prime_sum_p0050_s0.py 10000 -> 9521 (correct) [0.049s]
-dev  : solve_consecutive_prime_sum_p0050_s0.py 100000 -> 92951 (correct) [0.073s]
-main : solve_consecutive_prime_sum_p0050_s0.py 1000000 -> 997651 (correct) [0.297s]

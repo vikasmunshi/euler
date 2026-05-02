@@ -12,8 +12,6 @@ from requests import get
 from solver.config import cache_dir
 from solver.utils import write_file
 
-__all__ = ['download_file']
-
 
 def download_file(url: str, *,
                   refresh: bool = False,
@@ -68,3 +66,6 @@ def download_file(url: str, *,
     finally:
         if verbose:
             print(f'Read {len(cache_path.read_bytes())} bytes for {url} from cache {cache_path.name}')
+
+
+__all__ = ('download_file',)

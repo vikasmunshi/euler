@@ -1,3 +1,0 @@
-dev  : solve_arranged_probability_p0100_s0.py 21 -> 15 (correct) [0.036s]
-dev  : solve_arranged_probability_p0100_s0.py 120 -> 85 (correct) [0.044s]
-main : solve_arranged_probability_p0100_s0.py 1000000000000 -> 756872327473 (correct) [0.041s]

@@ -8,7 +8,7 @@ from pathlib import Path
 from subprocess import run
 
 
-def _root_dir() -> Path:
+def __root_dir() -> Path:
     """Return the git repository root directory, cached after the first lookup."""
     a_package_dir = Path(__file__).parent.resolve()
     result = run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True, cwd=a_package_dir)
@@ -18,7 +18,7 @@ def _root_dir() -> Path:
     raise ValueError('Failed to get git root')
 
 
-root_dir: Path = _root_dir()
+root_dir: Path = __root_dir()
 
 backup_dirname: str = 'backup'
 problem_number_filename: str = 'problem_number.txt'
@@ -27,13 +27,14 @@ problems_list_url: str = 'https://projecteuler.net/minimal=problems'
 projecteuler_url: str = 'https://projecteuler.net'
 resource_dirname: str = 'resources'
 test_cases_filename: str = 'test_cases.json'
-results_filename: str = 'results.txt'
+results_filename: str = 'results.json'
 timeout: float = 300  # timeout in seconds
 
 cache_dir: Path = root_dir / 'cache'
 keys_backup_file: Path = root_dir / 'backup/keys_backup.json'
 private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
-stack_dir: Path = root_dir / 'stack'
+stack_dir: Path = root_dir / 'solutions'
+workspace_dir: Path = root_dir / 'euler'
 
 keys_file: Path = root_dir / 'keys' / 'keys.json'
 keys_version: str = '1.0.1'

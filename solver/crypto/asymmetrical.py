@@ -16,8 +16,6 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 from solver.config import private_key_file
 from solver.utils import get_gh_user_email
 
-__all__ = ['UserKeyPair']
-
 
 class UserKeyPair(NamedTuple):
     """
@@ -180,3 +178,6 @@ class UserKeyPair(NamedTuple):
         cipher: ChaCha20Poly1305 = ChaCha20Poly1305(derived)
         nonce: bytes = b'\x00' * 12
         return cipher.decrypt(nonce, ciphertext, None)
+
+
+__all__ = ('UserKeyPair',)

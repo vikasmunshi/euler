@@ -17,18 +17,10 @@ from solver.utils import iterdir_recursive, write_file
 if TYPE_CHECKING:
     from solver.crypto.symmetrical import EncKey
 
-__all__ = [
-    'backup_the_stack',
-    'read_stack_file',
-    'restore_the_stack',
-    'stack',
-    'stack_base_dir',
-    'stack_path',
-    'unstack',
-    'write_stack_file',
-]
 
-
+# ==================================================================================================================== #
+#                                               file read/write
+# ==================================================================================================================== #
 @lru_cache(maxsize=None)
 def get_enc_key(key_id: bytes | None = None) -> EncKey:
     """
@@ -133,6 +125,10 @@ def write_stack_file(problem_number: int, filename: str, content: bytes, is_exec
         stack_file_path.chmod(0o755)
 
 
+# ==================================================================================================================== #
+#                                               stack / unstack
+# ==================================================================================================================== #
+
 def stack(problem_number: int, workspace_dir: Path) -> None:
     """
     Read all files from the workspace directory and write them into the stack, encrypting as required.
@@ -172,6 +168,10 @@ def unstack(problem_number: int, workspace_dir: Path) -> None:
         if is_executable:
             workspace_file_path.chmod(0o755)
 
+
+# ==================================================================================================================== #
+#                                               backup / restore
+# ==================================================================================================================== #
 
 def backup_the_stack() -> None:
     """
@@ -214,3 +214,19 @@ def restore_the_stack() -> None:
             continue
         stack(problem.number, workspace_dir=problem_backup_dir)
         print(f'Restored backup for "{problem!s}": {problem_stack_dir.relative_to(root_dir).as_posix()}')
+
+
+# ==================================================================================================================== #
+#                                               exports
+# ==================================================================================================================== #
+
+__all__ = (
+    'backup_the_stack',
+    'read_stack_file',
+    'restore_the_stack',
+    'stack',
+    'stack_base_dir',
+    'stack_path',
+    'unstack',
+    'write_stack_file',
+)

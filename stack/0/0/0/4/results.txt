@@ -1,2 +1,0 @@
-dev  : solve_largest_palindrome_product_p0004_s0.py 2 -> 9009 (correct) [0.044s]
-main : solve_largest_palindrome_product_p0004_s0.py 3 -> 906609 (correct) [0.041s]

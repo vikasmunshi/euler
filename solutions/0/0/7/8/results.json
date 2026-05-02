@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_coin_partitions_p0078_s0.py", "args": "1000", "answer": 449, "verdict": "Correct", "elapsed": 0.04942980100167915}, {"category": "main", "solution": "solve_coin_partitions_p0078_s0.py", "args": "1000000", "answer": 55374, "verdict": "Correct", "elapsed": 2.7222144070256036}]

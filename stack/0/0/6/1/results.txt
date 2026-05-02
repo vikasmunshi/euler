@@ -1,5 +1,0 @@
-dev  : solve_cyclical_figurate_numbers_p0061_s0.py 2 -> [1, 8181] (correct) [0.047s]
-dev  : solve_cyclical_figurate_numbers_p0061_s0.py 3 -> [1, 19291] (correct) [0.052s]
-dev  : solve_cyclical_figurate_numbers_p0061_s0.py 4 -> [2, [12524, 16160]] (correct) [0.046s]
-dev  : solve_cyclical_figurate_numbers_p0061_s0.py 5 -> [5, [12019, 15857, 18685, 19493, 26058]] (correct) [0.060s]
-main : solve_cyclical_figurate_numbers_p0061_s0.py 6 -> [1, 28684] (correct) [0.075s]

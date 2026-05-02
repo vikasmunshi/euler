@@ -1,2 +1,0 @@
-dev  : solve_sum_square_difference_p0006_s0.py 10 -> 2640 (correct) [0.041s]
-main : solve_sum_square_difference_p0006_s0.py 100 -> 25164150 (correct) [0.039s]

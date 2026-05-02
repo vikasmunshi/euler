@@ -1,3 +1,0 @@
-dev  : solve_lexicographic_permutations_p0024_s0.py 012 4 -> 120 (correct) [0.040s]
-dev  : solve_lexicographic_permutations_p0024_s0.py 012 6 -> 210 (correct) [0.037s]
-main : solve_lexicographic_permutations_p0024_s0.py 0123456789 1000000 -> 2783915460 (correct) [0.040s]

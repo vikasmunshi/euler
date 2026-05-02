@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_digit_fifth_powers_p0030_s0.py", "args": "4", "answer": 19316, "verdict": "Correct", "elapsed": 0.04391466800007038}, {"category": "main", "solution": "solve_digit_fifth_powers_p0030_s0.py", "args": "5", "answer": 443839, "verdict": "Correct", "elapsed": 0.04695224200258963}]

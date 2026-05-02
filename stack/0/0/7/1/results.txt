@@ -1,2 +1,0 @@
-dev  : solve_ordered_fractions_p0071_s0.py 10 -> 2 (correct) [0.038s]
-main : solve_ordered_fractions_p0071_s0.py 1000000 -> 428570 (correct) [0.041s]

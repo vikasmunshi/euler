@@ -3,13 +3,15 @@
 """Utility functions for the interactive solver shell."""
 from __future__ import annotations
 
-from functools import partial
+from functools import partial, wraps
 from inspect import get_annotations, signature
+from pathlib import Path
 from readline import add_history, clear_history, get_current_history_length, get_history_item
 from shlex import split
 from typing import Any, Callable, Literal, NamedTuple, get_args, get_origin
 
-__all__ = ['FuncInfo', 'bool_flags', 'coerce', 'dedup_history', 'func_info', 'safe_split']
+from solver.config import workspace_dir
+from solver.utils import iterdir_recursive
 
 
 class FuncInfo(NamedTuple):
@@ -44,6 +46,24 @@ def coerce(value: str, annotation: Any) -> Any:
     return value
 
 
+def continue_on_error[**P, T](func: Callable[P, T]) -> Callable[P, T | None]:
+    """Decorator that catches exceptions from func, prints them, and returns None instead of raising."""
+
+    @wraps(func)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T | None:
+        try:
+            return func(*args, **kwargs)
+        except KeyboardInterrupt:
+            print('^C')
+            return None
+        except Exception as err:
+            print(f'{func.__name__}{signature(func)}\n{getattr(func, "__doc__", ) or ""}')
+            print(format_command_line(func, list(args), kwargs), f'Error: {err!s}', sep='\n')
+            return None
+
+    return wrapper
+
+
 def dedup_history() -> None:
     """Remove duplicate entries from readline history, keeping the most recent occurrence of each."""
     length = get_current_history_length()
@@ -57,6 +77,21 @@ def dedup_history() -> None:
     clear_history()
     for item in reversed(unique):
         add_history(item)
+
+
+def format_command_line(func: str | Callable, args: list[Any], kwargs: dict[str, Any]) -> str:
+    """Format a function call as a readable string suitable for display or logging."""
+    if isinstance(func, str):
+        func_name: str = func
+    elif isinstance(func, partial):
+        func_name = func.func.__name__
+    elif callable(func) and not isinstance(func, type):
+        func_name = func.__name__
+    else:
+        func_name = '<unknown>'
+    args_str: str = ', '.join(map(str, args))
+    kwargs_str: str = ', '.join(f"{k}={v!s}" for k, v in kwargs.items())
+    return f'{func_name}({args_str}{", " if args and kwargs else ""}{kwargs_str})'
 
 
 def func_info(f: Callable, /, **defaults: Any) -> FuncInfo:
@@ -87,7 +122,7 @@ def func_info(f: Callable, /, **defaults: Any) -> FuncInfo:
     if to_apply:
         sig = sig.replace(parameters=[param for name, param in sig.parameters.items() if name not in to_apply])
         hints = {name: annotation for name, annotation in hints.items() if name not in to_apply}
-        func_doc = '\n'.join(line for line in (f.__doc__ or '').splitlines()
+        func_doc = '\n'.join(line for line in (getattr(f, '__doc__', None) or '').splitlines()
                              if not any(line.lstrip().startswith(f'{name}:') for name in to_apply))
 
         def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -118,3 +153,36 @@ def safe_split(s: str) -> list[str]:
         return split(s)
     except ValueError:
         return s.split()
+
+
+def show_value[T](value: T) -> None:
+    """Print value to stdout, formatting lists, dicts, and Paths for readability."""
+    if isinstance(value, list):
+        print('\n'.join(map(str, value)))
+    elif isinstance(value, dict):
+        print('\n'.join(f'{k}: {v!s}' for k, v in value.items()))
+    elif isinstance(value, Path):
+        print(value.relative_to(Path.cwd()).as_posix())
+    else:
+        print(str(value))
+
+
+def workspace_files(text: str) -> list[str]:
+    """Return filenames in the workspace directory that start with text."""
+    try:
+        return sorted(f for f in iterdir_recursive(workspace_dir, rt='str') if f.startswith(text))
+    except OSError:
+        return []
+
+
+__all__ = (
+    'bool_flags',
+    'coerce',
+    'continue_on_error',
+    'dedup_history',
+    'format_command_line',
+    'func_info',
+    'safe_split',
+    'show_value',
+    'workspace_files',
+)

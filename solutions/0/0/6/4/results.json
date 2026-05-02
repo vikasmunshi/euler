@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_odd_period_square_roots_p0064_s0.py", "args": "13", "answer": 4, "verdict": "Correct", "elapsed": 0.04554199401172809}, {"category": "main", "solution": "solve_odd_period_square_roots_p0064_s0.py", "args": "10000", "answer": 1322, "verdict": "Correct", "elapsed": 0.16642413201043382}]

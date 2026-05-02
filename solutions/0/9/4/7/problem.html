@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 947: "Fibonacci Residues" (level 31)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-notes-content { min-height: 80px;
+                                  padding: 12px;
+                                  background: #f9f9f9;
+                                  border: 1px solid #e0e0e0;
+                                  border-radius: 4px;
+                                }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 947: "Fibonacci Residues" (level 31)</h2>
+<div class="problem_content" role="problem">
+<p>
+The $(a,b,m)$-sequence, where $0 \leq a,b \lt m$, is defined as</p>
+<div style="text-align:center;">
+$\begin{align*}
+g(0)&amp;=a\\
+g(1)&amp;=b\\
+g(n)&amp;= \big(g(n-1) + g(n-2)\big) \bmod m
+\end{align*}$
+</div>
+<p>
+All $(a,b,m)$-sequences are periodic with period denoted by $p(a,b,m)$.<br/>
+The first few terms of the $(0,1,8)$-sequence are $(0,1,1,2,3,5,0,5,5,2,7,1,0,1,1,2,\ldots )$ and so $p(0,1,8)=12$.</p>
+<p>
+Let $\displaystyle s(m)=\sum_{a=0}^{m-1}\sum_{b=0}^{m-1} p(a,b,m)^2$. For example, $s(3)=513$ and $s(10)=225820$.</p>
+<p>
+Define $\displaystyle S(M)=\sum_{m=1}^{M}s(m)$. You are given, $S(3)=542$ and $S(10)=310897$.</p>
+<p>
+Find $S(10^6)$. Give your answer modulo $999\,999\,893$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(max_limit=10)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(max_limit=1000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-notes">
+<h2>Solution Notes</h2>
+<div id="solution-notes-content">
+
+
+</div>
+</section>
+</body>
+</html>

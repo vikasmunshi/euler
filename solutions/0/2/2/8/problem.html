@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 228: "Minkowski Sums" (level 27)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-notes-content { min-height: 80px;
+                                  padding: 12px;
+                                  background: #f9f9f9;
+                                  border: 1px solid #e0e0e0;
+                                  border-radius: 4px;
+                                }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 228: "Minkowski Sums" (level 27)</h2>
+<div class="problem_content" role="problem">
+<p>Let $S_n$ be the regular $n$-sided polygon – or <dfn>shape</dfn> – whose vertices
+
+$v_k$ ($k = 1, 2, \dots, n$) have coordinates:</p>
+$$\begin{align}
+x_k &amp;= \cos((2k - 1)/n \times 180^\circ)\\
+y_k &amp;= \sin((2k - 1)/n \times 180^\circ)
+\end{align}$$
+
+<p>Each $S_n$ is to be interpreted as a filled shape consisting of all points on the perimeter and in the interior.</p>
+<p>The <strong>Minkowski sum</strong>, $S + T$, of two shapes $S$ and $T$ is the result of adding every point in $S$ to every point in $T$, where point addition is performed coordinate-wise: $(u, v) + (x, y) = (u + x, v + y)$.</p>
+<p>For example, the sum of $S_3$ and $S_4$ is the six-sided shape shown in pink below:</p>
+<div class="center">
+<img alt="picture showing S_3 + S_4" class="dark_img" src="resources/0228.png"/></div>
+<p>How many sides does $S_{1864} + S_{1865} + \cdots + S_{1909}$ have?</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(start=3, end=4)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(start=1864, end=1909)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-notes">
+<h2>Solution Notes</h2>
+<div id="solution-notes-content">
+
+
+</div>
+</section>
+</body>
+</html>

@@ -4,7 +4,8 @@
 from __future__ import annotations
 
 from ast import literal_eval
-from json import JSONDecodeError, loads
+from functools import partial
+from json import JSONDecodeError, dumps, loads
 from pathlib import Path
 from subprocess import TimeoutExpired, run
 from time import perf_counter
@@ -12,7 +13,7 @@ from typing import Any, Literal
 
 from solver.config import ColorCodes, results_filename, root_dir, test_cases_filename, timeout
 
-__all__ = ['evaluate']
+RESET = ColorCodes.RESET
 
 
 def eval_solution[T](filename: str, input_args: list[str], work_dir: Path, expected: T) -> tuple[T | None, float, str]:
@@ -32,7 +33,7 @@ def eval_solution[T](filename: str, input_args: list[str], work_dir: Path, expec
 
     Returns:
         A 3-tuple of (answer, elapsed_seconds, error_message).
-        answer is None on timeout or non-zero exit; error_message is empty on success.
+        The answer is None on timeout or non-zero exit; error_message is empty on success.
     """
     expected_type: type = type(expected) if expected is not None else int
     t_start: float = perf_counter()
@@ -106,39 +107,51 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     if not solutions:
         print('Error: no solutions found, skipping evaluation')
         return False
-    result: bool = True
-    output: list[str] = []
+    no_errors: bool = True
+    output: list[dict[str, Any]] = []
 
-    def collect_output(line: str, color: ColorCodes) -> None:
-        print(f'{color}{line}{ColorCodes.RESET}')
-        output.append(line)
+    def collect_output(*,
+                       category: str,
+                       args: str,
+                       solution: str,
+                       answer: str,
+                       verdict: str,
+                       elapsed: float,
+                       color: ColorCodes,
+                       error: str = '',
+                       ) -> None:
+        print(f'{color}{category} {solution} {args} -> {answer} ({verdict}) [{elapsed:.3f}s] {error}{RESET}')
+        if record:
+            output.append({'category': category, 'solution': solution, 'args': args, 'answer': answer,
+                           'verdict': verdict, 'elapsed': elapsed})
 
     for test_case in filtered:
         expected: Any = test_case.get('answer')
         input_args: list[str] = as_input_args(test_case)
         if show:
             input_args.append('--show')
-        args_str: str = ' '.join(input_args)
-        for solution in solutions:
-            msg: str = f'{test_case['category']:<5}: {solution} {args_str} -> '
-            answer, elapsed, error = eval_solution(solution, input_args, workspace_dir, expected)
-            if answer is None:
-                if 'OverflowError:' in error:
-                    collect_output(f'{msg}Overflow', ColorCodes.RED)
-                elif 'Timed out' in error:
-                    collect_output(f'{msg}Timed out', ColorCodes.RED)
+        collect_partial = partial(collect_output, category=test_case['category'], args=' '.join(input_args))
+        for _solution in solutions:
+            collect = partial(collect_partial, solution=_solution)
+            _answer, _elapsed, _error = eval_solution(_solution, input_args, workspace_dir, expected)
+            if _answer is None:
+                if 'OverflowError:' in _error:
+                    collect(answer='', verdict='Overflow', elapsed=_elapsed, color=ColorCodes.RED)
+                elif 'Timed out' in _error:
+                    collect(answer='', verdict='Timeout', elapsed=_elapsed, color=ColorCodes.RED)
                 else:
-                    collect_output(f'{msg}Error:', ColorCodes.RED)
-                    for err_line in error.splitlines():
-                        collect_output(f'  {err_line}', ColorCodes.RED)
-                    result = False
+                    collect(answer='', verdict='Error', elapsed=_elapsed, color=ColorCodes.RED, error=_error)
+                    no_errors = False
             elif expected is None:
-                collect_output(f'{msg}{answer} (unknown) [{elapsed:.3f}s]', ColorCodes.BLUE)
-            elif answer == expected:
-                collect_output(f'{msg}{answer} (correct) [{elapsed:.3f}s]', ColorCodes.GREEN)
+                collect(answer=_answer, verdict='Unknown', elapsed=_elapsed, color=ColorCodes.BLUE)
+            elif _answer == expected:
+                collect(answer=_answer, verdict='Correct', elapsed=_elapsed, color=ColorCodes.GREEN)
             else:
-                collect_output(f'{msg}{answer} (wrong) [{elapsed:.3f}s] expected={expected!r}', ColorCodes.RED)
+                collect(answer=_answer, verdict='Wrong', elapsed=_elapsed, color=ColorCodes.RED)
     if record:
-        (results_file := workspace_dir / results_filename).write_text('\n'.join(output) + '\n')
+        (results_file := workspace_dir / results_filename).write_text(dumps(output, indent=None))
         print(f'Results saved to {results_file.relative_to(root_dir).as_posix()}')
-    return result
+    return no_errors
+
+
+__all__ = ('evaluate',)

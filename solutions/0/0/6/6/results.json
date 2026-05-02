@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_diophantine_equation_p0066_s0.py", "args": "7", "answer": 5, "verdict": "Correct", "elapsed": 0.05414926999947056}, {"category": "main", "solution": "solve_diophantine_equation_p0066_s0.py", "args": "1000", "answer": 661, "verdict": "Correct", "elapsed": 0.06821610001497902}]

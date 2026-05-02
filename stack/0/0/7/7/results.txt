@@ -1,8 +1,0 @@
-dev  : solve_prime_summations_p0077_s0.py 5 -> 10 (correct) [0.038s]
-dev  : solve_prime_summations_p0077_s1.py 5 -> 10 (correct) [0.048s]
-dev  : solve_prime_summations_p0077_s0.py 50 -> 25 (correct) [0.040s]
-dev  : solve_prime_summations_p0077_s1.py 50 -> 25 (correct) [0.042s]
-dev  : solve_prime_summations_p0077_s0.py 500 -> 45 (correct) [0.044s]
-dev  : solve_prime_summations_p0077_s1.py 500 -> 45 (correct) [0.052s]
-main : solve_prime_summations_p0077_s0.py 5000 -> 71 (correct) [0.037s]
-main : solve_prime_summations_p0077_s1.py 5000 -> Overflow

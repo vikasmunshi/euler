@@ -16,8 +16,10 @@ from solver.crypto.asymmetrical import UserKeyPair
 from solver.crypto.symmetrical import EncKey
 from solver.utils import is_admin
 
-__all__ = ['get_key', 'get_master_key', 'get_user_key', 'read_keys_file', 'rekey_keys_file', 'write_keys_file']
 
+# ==================================================================================================================== #
+#                                               keys-file read/write
+# ==================================================================================================================== #
 
 def _validate_schema(data: dict[str, Any]) -> None:
     """Validate data against the keys file JSON schema, raising jsonschema.ValidationError on failure."""
@@ -48,6 +50,10 @@ def write_keys_file(data: dict[str, Any]) -> None:
     get_key.cache_clear()
     read_keys_file.cache_clear()
 
+
+# ==================================================================================================================== #
+#                                               get key / master key / user key
+# ==================================================================================================================== #
 
 @lru_cache(maxsize=None)
 def get_key(key_id: str | None = None) -> EncKey:
@@ -91,6 +97,10 @@ def get_user_key() -> UserKeyPair:
     """Load and cache the user key pair from the private key file on disk."""
     return UserKeyPair.from_file()
 
+
+# ==================================================================================================================== #
+#                                               rekey keys file
+# ==================================================================================================================== #
 
 def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = True) -> None:
     """
@@ -136,3 +146,12 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
         if preserve_master is False or raw_user['master_key'] is None:
             raw_user['master_key'] = UserKeyPair.from_public_dict(email, raw_user).lock(new_master_key)
     write_keys_file(data)
+
+
+__all__ = (
+    'get_key',
+    'get_master_key',
+    'get_user_key',
+    'rekey_keys_file',
+    'write_keys_file',
+)

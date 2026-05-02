@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Problem 628: "Open Chess Positions" (level 9)</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+        .problem_content { line-height: 1.6; }
+        var { font-style: italic; }
+        sup { vertical-align: super; font-size: smaller; }
+        sub { vertical-align: sub; font-size: smaller; }
+        img { max-width: 100%; height: auto; }
+        table { border-collapse: collapse; margin: 20px 0; }
+        td, th { border: 1px solid #ddd; padding: 8px; }
+        hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+        h2 { border-bottom: 1px solid #eee; padding-bottom: 6px; }
+        code { background: #f0f0f0; padding: 2px 5px; border-radius: 3px; font-family: monospace; }
+        #solution-notes-content { min-height: 80px;
+                                  padding: 12px;
+                                  background: #f9f9f9;
+                                  border: 1px solid #e0e0e0;
+                                  border-radius: 4px;
+                                }
+    </style>
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [["$", "$"]],
+                displayMath: [["$$", "$$"]]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+</head>
+<body>
+<section id="problem-statement">
+<h2>Problem 628: "Open Chess Positions" (level 9)</h2>
+<div class="problem_content" role="problem">
+<p>
+A position in chess is an (orientated) arrangement of chess pieces placed on a chessboard of given size. In the following, we consider all positions in which $n$ pawns are placed on a  $n \times n$
+board in such a way, that there is a single pawn in every row and every column.
+
+</p>
+<p>
+We call such a position an <dfn>open</dfn> position, if a rook, starting at the (empty) lower left corner and using only moves towards the right or upwards, can reach the upper right corner without moving onto any field occupied by a pawn.
+</p>
+<p>Let $f(n)$ be the number of open positions for a $n \times n$ chessboard.<br/>
+For example, $f(3)=2$, illustrated by the two open positions for a $3 \times 3$ chessboard below.
+
+</p>
+<table align="center"><tr>
+<td><img alt="Open position 1" src="resources/0628_chess4.png"/></td><td width="60"></td><td><img alt="Open position 2" src="resources/0628_chess5.png"/></td>
+</tr>
+</table>
+<p>
+You are also given $f(5)=70$.</p>
+<p>Find $f(10^8)$ modulo $1\,008\,691\,207$.</p>
+</div>
+</section>
+<hr>
+<section id="test-cases">
+<h2>Test Cases</h2>
+<h3>Dev</h3>
+<ul>
+<li><code>solve(n=3)</code> → <code>?</code></li>
+</ul>
+<h3>Main</h3>
+<ul>
+<li><code>solve(n=100000000)</code> → <code>?</code></li>
+</ul>
+</section>
+<hr>
+<section id="solution-notes">
+<h2>Solution Notes</h2>
+<div id="solution-notes-content">
+
+
+</div>
+</section>
+</body>
+</html>

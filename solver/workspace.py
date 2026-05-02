@@ -14,13 +14,6 @@ from solver.problems import Problem
 from solver.stack import read_stack_file, stack, stack_base_dir, stack_path, unstack
 from solver.utils import iterdir_recursive, run_command, write_file
 
-__all__ = [
-    'clear_the_workspace',
-    'init_the_workspace',
-    'list_the_workspace',
-    'stack_the_workspace',
-]
-
 
 def clear_the_workspace(workspace_dir: Path, *, discard_changes: bool = False) -> None:
     """
@@ -170,3 +163,11 @@ def stack_the_workspace(workspace_dir: Path, *, process_deletions: bool = False)
                 (stack_dir / stack_filename).unlink()
     stack(problem.number, workspace_dir=workspace_dir)
     print('Stacking complete')
+
+
+__all__ = (
+    'clear_the_workspace',
+    'init_the_workspace',
+    'list_the_workspace',
+    'stack_the_workspace',
+)

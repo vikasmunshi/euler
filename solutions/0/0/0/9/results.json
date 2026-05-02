@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_special_pythagorean_triplet_p0009_s0.py", "args": "12", "answer": 60, "verdict": "Correct", "elapsed": 0.05127983301645145}, {"category": "main", "solution": "solve_special_pythagorean_triplet_p0009_s0.py", "args": "1000", "answer": 31875000, "verdict": "Correct", "elapsed": 0.06282707798527554}]

@@ -1,2 +1,0 @@
-dev  : solve_path_sum_four_ways_p0083_s0.py  -> 2297 (correct) [0.041s]
-main : solve_path_sum_four_ways_p0083_s0.py https://projecteuler.net/resources/documents/0083_matrix.txt -> 425185 (correct) [2.547s]

@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_path_sum_three_ways_p0082_s0.py", "args": "", "answer": 994, "verdict": "Correct", "elapsed": 0.0742254100041464}, {"category": "main", "solution": "solve_path_sum_three_ways_p0082_s0.py", "args": "https://projecteuler.net/resources/documents/0082_matrix.txt", "answer": 260324, "verdict": "Correct", "elapsed": 0.9986652219959069}]

@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve__1000_digit_fibonacci_number_p0025_s0.py", "args": "3", "answer": 12, "verdict": "Correct", "elapsed": 0.04641195500153117}, {"category": "main", "solution": "solve__1000_digit_fibonacci_number_p0025_s0.py", "args": "1000", "answer": 4782, "verdict": "Correct", "elapsed": 0.05711915000574663}]

@@ -1,1 +1,0 @@
-main : solve_pentagon_numbers_p0044_s0.py  -> 5482660 (correct) [0.539s]

@@ -1,7 +1,0 @@
-dev  : solve_champernownes_constant_p0040_s0.py 1 -> 1 (correct) [0.042s]
-dev  : solve_champernownes_constant_p0040_s0.py 2 -> 5 (correct) [0.035s]
-dev  : solve_champernownes_constant_p0040_s0.py 3 -> 15 (correct) [0.043s]
-dev  : solve_champernownes_constant_p0040_s0.py 4 -> 105 (correct) [0.043s]
-dev  : solve_champernownes_constant_p0040_s0.py 5 -> 210 (correct) [0.040s]
-dev  : solve_champernownes_constant_p0040_s0.py 6 -> 210 (correct) [0.040s]
-main : solve_champernownes_constant_p0040_s0.py 7 -> 1470 (correct) [0.040s]

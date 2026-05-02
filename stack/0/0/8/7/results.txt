@@ -1,2 +1,0 @@
-dev  : solve_prime_power_triples_p0087_s0.py 50 -> 4 (correct) [0.047s]
-main : solve_prime_power_triples_p0087_s0.py 50000000 -> 1097343 (correct) [0.469s]

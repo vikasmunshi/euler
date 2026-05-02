@@ -1,4 +1,0 @@
-dev  : solve_counting_rectangles_p0085_s0.py 0 10 18 -> 6 (correct) [0.044s]
-dev  : solve_counting_rectangles_p0085_s1.py 0 10 18 -> 6 (correct) [0.043s]
-main : solve_counting_rectangles_p0085_s0.py 2 100 2000000 -> 2772 (correct) [0.263s]
-main : solve_counting_rectangles_p0085_s1.py 2 100 2000000 -> 2772 (correct) [0.042s]

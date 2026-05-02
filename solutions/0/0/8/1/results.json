@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_path_sum_two_ways_p0081_s0.py", "args": "", "answer": 2427, "verdict": "Correct", "elapsed": 0.06432355399010703}, {"category": "main", "solution": "solve_path_sum_two_ways_p0081_s0.py", "args": "https://projecteuler.net/resources/documents/0081_matrix.txt", "answer": 427337, "verdict": "Correct", "elapsed": 0.07079405200784095}]

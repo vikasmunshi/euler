@@ -5,24 +5,21 @@ from __future__ import annotations
 
 from ast import (AnnAssign, Assign, Attribute, Call, ClassDef, Constant, Expression, FunctionDef, Import,
                  ImportFrom, Name, NodeTransformer, NodeVisitor, fix_missing_locations, parse, unparse, walk, )
-from contextlib import redirect_stdout
 from copy import deepcopy
 from json import dumps
-from os.path import devnull
 from pathlib import Path
-from sys import stderr
 from typing import Any
 
 from autoflake import fix_code as fix_code_autoflake
 from autopep8 import fix_code as fix_code_autopep8
+from black import Mode as BlackMode, format_str as black_format_str
 from isort import code as isort_code
-from black import format_str as black_format_str, Mode as BlackMode
 
 from solver.config import root_dir, test_cases_filename
 from solver.evaluate import evaluate
 from solver.stack import write_stack_file
 from solver.utils import disabled
-from solver.workspace import clear_the_workspace, init_the_workspace, stack_the_workspace
+from solver.workspace import clear_the_workspace, init_the_workspace
 
 _SKIP_NAMES: frozenset[str] = frozenset({'test_cases', 'euler_problem', 'framework_version'})
 _FRAMEWORK_MODULE: str = 'euler_solver.framework'
@@ -431,38 +428,34 @@ def migrate_test_cases(problem_number: int) -> list[dict[str, Any]]:
 
 
 @disabled
-def migrate_python_solutions(problem_number: int) -> int:
+def migrate_python_solutions(problem_number: int) -> tuple[int, int]:
     print(f'Migrating {problem_number} ...')
     try:
         ast_tree, source_file = _get_source_ast_tree(problem_number)
     except FileNotFoundError:
         print(f'  Source not found for problem {problem_number}')
-        return 0
+        return 0, 0
     try:
         test_cases: list[dict[str, Any]] = extract_test_cases(ast_tree)
     except ValueError as e:
         print(f'  Error processing test cases, skipping {problem_number}: {e}')
-        return 0
+        return 0, 0
     if not test_cases:
         print(f'  No test cases, skipping {problem_number}')
-        return 0
+        return 0, 0
     main_tc: dict[str, Any] = next((tc for tc in test_cases if tc.get('category') == 'main'), {})
     if not main_tc:
         print(f'  No main test case, skipping {problem_number}')
-        return 0
+        return 0, 0
+    write_stack_file(problem_number, test_cases_filename, dumps(test_cases, indent=4).encode(), is_executable=False)
     solutions: list[tuple[str, str]] = extract_solutions(ast_tree, source_file=source_file)
     if not solutions:
         print(f'  No portable solutions (lib deps?), skipping {problem_number}')
-        return 0
-    write_stack_file(problem_number, test_cases_filename, dumps(test_cases, indent=4).encode(), is_executable=False)
+        return 0, len(test_cases)
     for name, code in solutions:
         write_stack_file(problem_number, name, code.encode(), is_executable=True)
     print(f'  Migrated {len(solutions)} solution(s) for problem {problem_number}')
-    return len(solutions)
-
-
-def print_e(s: str) -> None:
-    print(s, file=stderr)
+    return len(solutions), len(test_cases)
 
 
 @disabled
@@ -471,32 +464,33 @@ def main(first: int = 1, last: int = 100) -> None:
     failed_problems: list[int] = []
     not_migrated: list[int] = []
     for n in range(first, last + 1):
-        clear_the_workspace(workspace_dir=workspace_dir)
-        # rmtree(stack_base_dir(n), ignore_errors=True)
-        init_the_workspace(n, workspace_dir=workspace_dir)
-        stack_the_workspace(workspace_dir=workspace_dir)
-        num = migrate_python_solutions(n)
-        if num > 0:
-            print_e(f'  Migrated problem {n}')
+        num_solutions, num_test_cases = migrate_python_solutions(n)
+        if num_solutions > 0:
+            print(f'  Migrated problem {n}')
             init_the_workspace(n, workspace_dir=workspace_dir)
             result = evaluate(workspace_dir=workspace_dir)
             if not result:
                 failed_problems.append(n)
-                print_e(f'  Failed to evaluate problem {n}')
+                print(f'  Failed to evaluate problem {n}')
             else:
-                print_e(f'  Successfully evaluated problem {n}')
+                print(f'  Successfully evaluated problem {n}')
+        elif num_test_cases > 0:
+            print(f'  Migrated test cases only for problem {n}')
         else:
-            print_e(f'  No solutions for problem {n}')
+            print(f'  No solutions for problem {n}')
             not_migrated.append(n)
         clear_the_workspace(workspace_dir=workspace_dir)
     if failed_problems:
-        print_e(f'Failed to migrate {len(failed_problems)} problems')
+        print(f'Failed to migrate {len(failed_problems)} problems')
         print(f'  {failed_problems}')
     if not_migrated:
-        print_e(f'Not migrated {len(not_migrated)} problems: {not_migrated}')
-        print_e(f'  {not_migrated}')
+        print(f'Not migrated {len(not_migrated)} problems:]\n{not_migrated}')
 
 
 if __name__ == '__main__':
-    with open(devnull, 'w') as f, redirect_stdout(f):
-        main()
+    if not Path(root_dir).joinpath('euler_solver/solutions').exists():
+        print('Error: restore euler_solver/solutions before re-running the migration script')
+        exit(1)
+    start, finish = 101, 988
+    print(f'migrating problems {start} to {finish}')
+    main(start, finish)

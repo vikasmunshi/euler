@@ -1,0 +1,1 @@
+[{"category": "dev", "solution": "solve_sum_square_difference_p0006_s0.py", "args": "10", "answer": 2640, "verdict": "Correct", "elapsed": 0.057167088001733646}, {"category": "main", "solution": "solve_sum_square_difference_p0006_s0.py", "args": "100", "answer": 25164150, "verdict": "Correct", "elapsed": 0.05148398000164889}]

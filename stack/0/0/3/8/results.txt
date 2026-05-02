@@ -1,1 +1,0 @@
-main : solve_pandigital_multiples_p0038_s0.py  -> 932718654 (correct) [0.042s]

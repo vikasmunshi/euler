@@ -1,2 +1,0 @@
-dev  : solve_self_powers_p0048_s0.py 10 -> 405071317 (correct) [0.044s]
-main : solve_self_powers_p0048_s0.py 1000 -> 9110846700 (correct) [0.039s]

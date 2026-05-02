@@ -10,8 +10,6 @@ from uuid import UUID, uuid7
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-__all__ = ['EncKey']
-
 
 class EncKey(NamedTuple):
     """An AES-256-GCM symmetric encryption key with a UUID7 identifier and lifecycle status."""
@@ -124,3 +122,6 @@ class EncKey(NamedTuple):
         nonce: bytes = token_bytes(12)
         ciphertext: bytes = AESGCM(self.value).encrypt(nonce, plain_text, self.__aad(aad))
         return bytes.fromhex(self.id) + nonce + ciphertext  # 16 bytes key id + 12 bytes nonce + ciphertext
+
+
+__all__ = ('EncKey',)

@@ -56,7 +56,7 @@ apt = [
 ]
 
 [project.scripts]
-solver = "solver.cli:cli"
+solver = "solver.__main__:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

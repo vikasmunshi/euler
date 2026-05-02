@@ -16,8 +16,6 @@ from solver.download import download_file
 from solver.problems import Problem
 from solver.stack import read_stack_file
 
-__all__ = ['problem_statement']
-
 
 def problem_statement(problem_number: int, /, *, force_refresh: bool) -> tuple[Problem, dict[str, bytes]]:
     """
@@ -237,3 +235,6 @@ def extract_solution_notes(problem_number: int) -> str:
         return ''
     except FileNotFoundError:
         return ''
+
+
+__all__ = ('problem_statement',)

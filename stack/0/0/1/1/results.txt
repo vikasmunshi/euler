@@ -1,1 +1,0 @@
-main : solve_largest_product_in_a_grid_p0011_s0.py 4 -> 70600674 (correct) [0.041s]
