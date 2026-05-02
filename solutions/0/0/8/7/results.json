@@ -4,15 +4,15 @@
     "solution": "solve_prime_power_triples_p0087_s0.py",
     "args": "50",
     "answer": 4,
-    "verdict": "Correct",
-    "elapsed": 0.05113732098834589
+    "verdict": "correct",
+    "elapsed": 0.04503631399711594
   },
   {
     "category": "main",
     "solution": "solve_prime_power_triples_p0087_s0.py",
     "args": "50000000",
     "answer": 1097343,
-    "verdict": "Correct",
-    "elapsed": 0.4580550160026178
+    "verdict": "correct",
+    "elapsed": 0.4748332090093754
   }
 ]

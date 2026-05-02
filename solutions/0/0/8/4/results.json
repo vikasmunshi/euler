@@ -4,15 +4,15 @@
     "solution": "solve_monopoly_odds_p0084_s0.py",
     "args": "6 1000000",
     "answer": "102400",
-    "verdict": "Correct",
-    "elapsed": 0.6924303070118185
+    "verdict": "correct",
+    "elapsed": 0.6911003760178573
   },
   {
     "category": "main",
     "solution": "solve_monopoly_odds_p0084_s0.py",
     "args": "4 1000000",
     "answer": "101524",
-    "verdict": "Correct",
-    "elapsed": 0.7548031229816843
+    "verdict": "correct",
+    "elapsed": 0.752684887003852
   }
 ]

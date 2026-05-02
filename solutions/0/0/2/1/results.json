@@ -4,7 +4,7 @@
     "solution": "solve_amicable_numbers_p0021_s0.py",
     "args": "10000",
     "answer": 31626,
-    "verdict": "Correct",
-    "elapsed": 0.13608113999362104
+    "verdict": "correct",
+    "elapsed": 0.08264539300580509
   }
 ]

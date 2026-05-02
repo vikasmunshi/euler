@@ -4,7 +4,7 @@
     "solution": "solve_pentagon_numbers_p0044_s0.py",
     "args": "",
     "answer": 5482660,
-    "verdict": "Correct",
-    "elapsed": 0.5866573219827842
+    "verdict": "correct",
+    "elapsed": 0.5696536839823239
   }
 ]

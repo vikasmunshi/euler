@@ -4,7 +4,7 @@
     "solution": "solve_amicable_chains_p0095_s0.py",
     "args": "1000000",
     "answer": 14316,
-    "verdict": "Correct",
-    "elapsed": 1.7888341849902645
+    "verdict": "correct",
+    "elapsed": 1.7445578630140517
   }
 ]

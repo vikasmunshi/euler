@@ -4,55 +4,55 @@
     "solution": "solve_champernownes_constant_p0040_s0.py",
     "args": "1",
     "answer": 1,
-    "verdict": "Correct",
-    "elapsed": 0.0660957159998361
+    "verdict": "correct",
+    "elapsed": 0.04460233400459401
   },
   {
     "category": "dev",
     "solution": "solve_champernownes_constant_p0040_s0.py",
     "args": "2",
     "answer": 5,
-    "verdict": "Correct",
-    "elapsed": 0.05932307499460876
+    "verdict": "correct",
+    "elapsed": 0.038227333017857745
   },
   {
     "category": "dev",
     "solution": "solve_champernownes_constant_p0040_s0.py",
     "args": "3",
     "answer": 15,
-    "verdict": "Correct",
-    "elapsed": 0.05851284202071838
+    "verdict": "correct",
+    "elapsed": 0.042328167997766286
   },
   {
     "category": "dev",
     "solution": "solve_champernownes_constant_p0040_s0.py",
     "args": "4",
     "answer": 105,
-    "verdict": "Correct",
-    "elapsed": 0.05297598900506273
+    "verdict": "correct",
+    "elapsed": 0.03400523099116981
   },
   {
     "category": "dev",
     "solution": "solve_champernownes_constant_p0040_s0.py",
     "args": "5",
     "answer": 210,
-    "verdict": "Correct",
-    "elapsed": 0.05609684801311232
+    "verdict": "correct",
+    "elapsed": 0.04209606201038696
   },
   {
     "category": "dev",
     "solution": "solve_champernownes_constant_p0040_s0.py",
     "args": "6",
     "answer": 210,
-    "verdict": "Correct",
-    "elapsed": 0.044037629006197676
+    "verdict": "correct",
+    "elapsed": 0.037680525972973555
   },
   {
     "category": "main",
     "solution": "solve_champernownes_constant_p0040_s0.py",
     "args": "7",
     "answer": 1470,
-    "verdict": "Correct",
-    "elapsed": 0.06042753398651257
+    "verdict": "correct",
+    "elapsed": 0.039731970988214016
   }
 ]

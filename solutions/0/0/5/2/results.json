@@ -4,39 +4,39 @@
     "solution": "solve_permuted_multiples_p0052_s0.py",
     "args": "2",
     "answer": 125874,
-    "verdict": "Correct",
-    "elapsed": 0.1701919210026972
+    "verdict": "correct",
+    "elapsed": 0.15622215601615608
   },
   {
     "category": "dev",
     "solution": "solve_permuted_multiples_p0052_s0.py",
     "args": "3",
     "answer": 142857,
-    "verdict": "Correct",
-    "elapsed": 0.24344700100482441
+    "verdict": "correct",
+    "elapsed": 0.23297642098623328
   },
   {
     "category": "dev",
     "solution": "solve_permuted_multiples_p0052_s0.py",
     "args": "4",
     "answer": 142857,
-    "verdict": "Correct",
-    "elapsed": 0.3213639830064494
+    "verdict": "correct",
+    "elapsed": 0.3255107279983349
   },
   {
     "category": "dev",
     "solution": "solve_permuted_multiples_p0052_s0.py",
     "args": "5",
     "answer": 142857,
-    "verdict": "Correct",
-    "elapsed": 0.39258478800184093
+    "verdict": "correct",
+    "elapsed": 0.3853345949901268
   },
   {
     "category": "main",
     "solution": "solve_permuted_multiples_p0052_s0.py",
     "args": "6",
     "answer": 142857,
-    "verdict": "Correct",
-    "elapsed": 0.4496149889891967
+    "verdict": "correct",
+    "elapsed": 0.4664587580191437
   }
 ]

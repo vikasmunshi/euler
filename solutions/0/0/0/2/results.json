@@ -4,23 +4,23 @@
     "solution": "solve_even_fibonacci_numbers_p0002_s0.py",
     "args": "10",
     "answer": 10,
-    "verdict": "Correct",
-    "elapsed": 0.05545911900117062
+    "verdict": "correct",
+    "elapsed": 0.048792565998155624
   },
   {
     "category": "dev",
     "solution": "solve_even_fibonacci_numbers_p0002_s0.py",
     "args": "100",
     "answer": 44,
-    "verdict": "Correct",
-    "elapsed": 0.05904686599387787
+    "verdict": "correct",
+    "elapsed": 0.052310453000245616
   },
   {
     "category": "main",
     "solution": "solve_even_fibonacci_numbers_p0002_s0.py",
     "args": "4000000",
     "answer": 4613732,
-    "verdict": "Correct",
-    "elapsed": 0.05558056800509803
+    "verdict": "correct",
+    "elapsed": 0.05977808401803486
   }
 ]

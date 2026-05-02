@@ -4,15 +4,15 @@
     "solution": "solve__1000_digit_fibonacci_number_p0025_s0.py",
     "args": "3",
     "answer": 12,
-    "verdict": "Correct",
-    "elapsed": 0.04174759201123379
+    "verdict": "correct",
+    "elapsed": 0.04135397801292129
   },
   {
     "category": "main",
     "solution": "solve__1000_digit_fibonacci_number_p0025_s0.py",
     "args": "1000",
     "answer": 4782,
-    "verdict": "Correct",
-    "elapsed": 0.05473658299888484
+    "verdict": "correct",
+    "elapsed": 0.06048380499123596
   }
 ]

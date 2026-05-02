@@ -4,7 +4,7 @@
     "solution": "solve_pandigital_prime_p0041_s0.py",
     "args": "",
     "answer": 7652413,
-    "verdict": "Correct",
-    "elapsed": 0.06198154602316208
+    "verdict": "correct",
+    "elapsed": 0.050082050991477445
   }
 ]

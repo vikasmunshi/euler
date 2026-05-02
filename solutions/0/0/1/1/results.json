@@ -4,7 +4,7 @@
     "solution": "solve_largest_product_in_a_grid_p0011_s0.py",
     "args": "4",
     "answer": 70600674,
-    "verdict": "Correct",
-    "elapsed": 0.04044528500526212
+    "verdict": "correct",
+    "elapsed": 0.040890865988330916
   }
 ]

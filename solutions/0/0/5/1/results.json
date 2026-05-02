@@ -4,23 +4,23 @@
     "solution": "solve_prime_digit_replacements_p0051_s0.py",
     "args": "6 6",
     "answer": 13,
-    "verdict": "Correct",
-    "elapsed": 0.2874539149925113
+    "verdict": "correct",
+    "elapsed": 0.2771196019893978
   },
   {
     "category": "dev",
     "solution": "solve_prime_digit_replacements_p0051_s0.py",
     "args": "6 7",
     "answer": 56003,
-    "verdict": "Correct",
-    "elapsed": 0.9259069019753952
+    "verdict": "correct",
+    "elapsed": 0.7385841519862879
   },
   {
     "category": "main",
     "solution": "solve_prime_digit_replacements_p0051_s0.py",
     "args": "6 8",
     "answer": 121313,
-    "verdict": "Correct",
-    "elapsed": 1.2506362180283759
+    "verdict": "correct",
+    "elapsed": 1.1646106530097313
   }
 ]

@@ -4,7 +4,7 @@
     "solution": "solve_goldbachs_other_conjecture_p0046_s0.py",
     "args": "",
     "answer": 5777,
-    "verdict": "Correct",
-    "elapsed": 0.06623672600835562
+    "verdict": "correct",
+    "elapsed": 0.062287747976370156
   }
 ]

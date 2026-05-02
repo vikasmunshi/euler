@@ -9,10 +9,9 @@ from pathlib import Path
 from shutil import rmtree
 from typing import TYPE_CHECKING
 
-from solver.config import (backup_dirname, problem_number_filename, problem_statement_filename, resource_dirname,
-                           root_dir, stack_dir)
+from solver.config import backup_dir, number_filename, resource_dirname, root_dir, solutions_dir, statement_filename
 from solver.problems import problems
-from solver.utils import iterdir_recursive, canonical_path, write_file
+from solver.utils import canonical_path, iterdir_recursive, write_file
 
 if TYPE_CHECKING:
     from solver.crypto.symmetrical import EncKey
@@ -33,16 +32,13 @@ def get_enc_key(key_id: bytes | None = None) -> EncKey:
         The EncKey matching the given ID, or the active key if key_id is None.
     """
     from solver.crypto.keys import get_key
-    if key_id is None:
-        return get_key()
-    else:
-        return get_key(key_id.hex())
+    return get_key(None if key_id is None else key_id.hex())
 
 
 @lru_cache(maxsize=None)
 def stack_base_dir(problem_number: int) -> Path:
     """Return the stack directory for a problem, rooted one digit-level deep per digit of its zero-padded number."""
-    return stack_dir.joinpath(*f'{problem_number:04d}')
+    return solutions_dir.joinpath(*f'{problem_number:04d}')
 
 
 @lru_cache(maxsize=None)
@@ -63,9 +59,9 @@ def stack_path(problem_number: int, filename: str) -> tuple[bool, Path]:
     """
     encryption_required: bool = not (
             problem_number <= 100
-            or filename == problem_number_filename
-            or filename == problem_statement_filename
-            or filename == problem_statement_filename
+            or filename == number_filename
+            or filename == statement_filename
+            or filename == statement_filename
             or filename.startswith(resource_dirname)
     )
     stack_file_path: Path = stack_base_dir(problem_number) / (filename + '.enc' if encryption_required else filename)
@@ -183,10 +179,10 @@ def backup_the_stack() -> None:
         gitignore: str = root_dir.joinpath('.gitignore').read_text()
     except FileNotFoundError:
         gitignore = ''
-    if f'/{backup_dirname}/' not in gitignore:
-        root_dir.joinpath('.gitignore').write_text(gitignore.strip('\n') + f'\n/{backup_dirname}/\n')
+    if f'/{backup_dir.name}/' not in gitignore:
+        root_dir.joinpath('.gitignore').write_text(gitignore.strip('\n') + f'\n/{backup_dir.name}/\n')
     for problem in problems:
-        problem_backup_dir = root_dir.joinpath(backup_dirname, *f'{problem.number:04d}')
+        problem_backup_dir = backup_dir.joinpath(*f'{problem.number:04d}')
         problem_stack_dir: Path = stack_base_dir(problem.number)
         if not problem_stack_dir.exists():
             print(f'No stack found for "{problem.number}: {problem.title}"')
@@ -207,7 +203,7 @@ def restore_the_stack() -> None:
         print('Stack restoration cancelled.')
         return
     for problem in problems:
-        problem_backup_dir = root_dir.joinpath(backup_dirname, *f'{problem.number:04d}')
+        problem_backup_dir = backup_dir.joinpath(*f'{problem.number:04d}')
         problem_stack_dir: Path = stack_base_dir(problem.number)
         if not problem_backup_dir.exists():
             print(f'No backup found for "{problem!s}"')

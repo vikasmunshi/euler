@@ -4,15 +4,15 @@
     "solution": "solve__10_001st_prime_p0007_s0.py",
     "args": "6",
     "answer": 13,
-    "verdict": "Correct",
-    "elapsed": 0.050357051979517564
+    "verdict": "correct",
+    "elapsed": 0.04754567000782117
   },
   {
     "category": "main",
     "solution": "solve__10_001st_prime_p0007_s0.py",
     "args": "10001",
     "answer": 104743,
-    "verdict": "Correct",
-    "elapsed": 0.10449805500684306
+    "verdict": "correct",
+    "elapsed": 0.11390891397604719
   }
 ]

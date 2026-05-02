@@ -6,7 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import NamedTuple
 
-from solver.config import problem_number_filename, problems_list_url
+from solver.config import number_filename, problems_list_url
 from solver.download import download_file
 
 
@@ -25,7 +25,7 @@ class Problem(NamedTuple):
     def from_workspace(cls, workspace_dir: Path) -> Problem | None:
         """ Read the current workspace's problem number file and return the matching Problem. """
         try:
-            problem_text = (workspace_dir / problem_number_filename).read_text()
+            problem_text = (workspace_dir / number_filename).read_text()
             number, title, difficulty = problem_text.split(':', maxsplit=2)
             return Problem(int(number), title, difficulty or None)
         except (FileNotFoundError, ValueError):
@@ -41,7 +41,7 @@ class Problem(NamedTuple):
 
     def to_workspace(self, workspace_dir: Path) -> None:
         """Write the problem number to the workspace's problem number file."""
-        (workspace_dir / problem_number_filename).write_text(f'{self.number}:{self.title}:{self.difficulty or ""}')
+        (workspace_dir / number_filename).write_text(f'{self.number}:{self.title}:{self.difficulty or ""}')
 
 
 def _problems() -> list[Problem]:

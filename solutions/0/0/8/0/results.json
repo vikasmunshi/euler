@@ -4,31 +4,31 @@
     "solution": "solve_square_root_digital_expansion_p0080_s0.py",
     "args": "100 2",
     "answer": 475,
-    "verdict": "Correct",
-    "elapsed": 0.04378071700921282
-  },
-  {
-    "category": "dev",
-    "solution": "solve_square_root_digital_expansion_p0080_s1.py",
-    "args": "100 2",
-    "answer": 475,
-    "verdict": "Correct",
-    "elapsed": 0.04562556999735534
+    "verdict": "correct",
+    "elapsed": 0.039153212012024596
   },
   {
     "category": "main",
     "solution": "solve_square_root_digital_expansion_p0080_s0.py",
     "args": "100 99",
     "answer": 40886,
-    "verdict": "Correct",
-    "elapsed": 0.0542512770043686
+    "verdict": "correct",
+    "elapsed": 0.0560260729980655
+  },
+  {
+    "category": "dev",
+    "solution": "solve_square_root_digital_expansion_p0080_s1.py",
+    "args": "100 2",
+    "answer": 475,
+    "verdict": "correct",
+    "elapsed": 0.033711280004354194
   },
   {
     "category": "main",
     "solution": "solve_square_root_digital_expansion_p0080_s1.py",
     "args": "100 99",
     "answer": 40886,
-    "verdict": "Correct",
-    "elapsed": 0.06711412200820632
+    "verdict": "correct",
+    "elapsed": 0.06719971398706548
   }
 ]

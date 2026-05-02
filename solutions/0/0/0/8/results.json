@@ -4,15 +4,15 @@
     "solution": "solve_largest_product_in_a_series_p0008_s0.py",
     "args": "4",
     "answer": 5832,
-    "verdict": "Correct",
-    "elapsed": 0.04527866799617186
+    "verdict": "correct",
+    "elapsed": 0.051722559990594164
   },
   {
     "category": "main",
     "solution": "solve_largest_product_in_a_series_p0008_s0.py",
     "args": "13",
     "answer": 23514624000,
-    "verdict": "Correct",
-    "elapsed": 0.044306461000815034
+    "verdict": "correct",
+    "elapsed": 0.04353875498054549
   }
 ]

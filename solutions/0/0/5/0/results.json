@@ -4,39 +4,39 @@
     "solution": "solve_consecutive_prime_sum_p0050_s0.py",
     "args": "100",
     "answer": 41,
-    "verdict": "Correct",
-    "elapsed": 0.051686032995348796
+    "verdict": "correct",
+    "elapsed": 0.04762951101292856
   },
   {
     "category": "dev",
     "solution": "solve_consecutive_prime_sum_p0050_s0.py",
     "args": "1000",
     "answer": 953,
-    "verdict": "Correct",
-    "elapsed": 0.0418124669813551
+    "verdict": "correct",
+    "elapsed": 0.04552512397640385
   },
   {
     "category": "dev",
     "solution": "solve_consecutive_prime_sum_p0050_s0.py",
     "args": "10000",
     "answer": 9521,
-    "verdict": "Correct",
-    "elapsed": 0.04674333301954903
+    "verdict": "correct",
+    "elapsed": 0.047445607982808724
   },
   {
     "category": "dev",
     "solution": "solve_consecutive_prime_sum_p0050_s0.py",
     "args": "100000",
     "answer": 92951,
-    "verdict": "Correct",
-    "elapsed": 0.06879473099252209
+    "verdict": "correct",
+    "elapsed": 0.07306073801009916
   },
   {
     "category": "main",
     "solution": "solve_consecutive_prime_sum_p0050_s0.py",
     "args": "1000000",
     "answer": 997651,
-    "verdict": "Correct",
-    "elapsed": 0.3052402170142159
+    "verdict": "correct",
+    "elapsed": 0.3041749300027732
   }
 ]

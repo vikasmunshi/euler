@@ -4,63 +4,63 @@
     "solution": "solve_prime_summations_p0077_s0.py",
     "args": "5",
     "answer": 10,
-    "verdict": "Correct",
-    "elapsed": 0.041873230977216735
-  },
-  {
-    "category": "dev",
-    "solution": "solve_prime_summations_p0077_s1.py",
-    "args": "5",
-    "answer": 10,
-    "verdict": "Correct",
-    "elapsed": 0.041526884015183896
+    "verdict": "correct",
+    "elapsed": 0.050134104007156566
   },
   {
     "category": "dev",
     "solution": "solve_prime_summations_p0077_s0.py",
     "args": "50",
     "answer": 25,
-    "verdict": "Correct",
-    "elapsed": 0.04173905000789091
-  },
-  {
-    "category": "dev",
-    "solution": "solve_prime_summations_p0077_s1.py",
-    "args": "50",
-    "answer": 25,
-    "verdict": "Correct",
-    "elapsed": 0.04118216098868288
+    "verdict": "correct",
+    "elapsed": 0.04257380298804492
   },
   {
     "category": "dev",
     "solution": "solve_prime_summations_p0077_s0.py",
     "args": "500",
     "answer": 45,
-    "verdict": "Correct",
-    "elapsed": 0.04764349601464346
-  },
-  {
-    "category": "dev",
-    "solution": "solve_prime_summations_p0077_s1.py",
-    "args": "500",
-    "answer": 45,
-    "verdict": "Correct",
-    "elapsed": 0.060038198018446565
+    "verdict": "correct",
+    "elapsed": 0.046681131003424525
   },
   {
     "category": "main",
     "solution": "solve_prime_summations_p0077_s0.py",
     "args": "5000",
     "answer": 71,
-    "verdict": "Correct",
-    "elapsed": 0.04341216300963424
+    "verdict": "correct",
+    "elapsed": 0.05197762799798511
+  },
+  {
+    "category": "dev",
+    "solution": "solve_prime_summations_p0077_s1.py",
+    "args": "5",
+    "answer": 10,
+    "verdict": "correct",
+    "elapsed": 0.039550757996039465
+  },
+  {
+    "category": "dev",
+    "solution": "solve_prime_summations_p0077_s1.py",
+    "args": "50",
+    "answer": 25,
+    "verdict": "correct",
+    "elapsed": 0.040011688019149005
+  },
+  {
+    "category": "dev",
+    "solution": "solve_prime_summations_p0077_s1.py",
+    "args": "500",
+    "answer": 45,
+    "verdict": "correct",
+    "elapsed": 0.04665535900858231
   },
   {
     "category": "main",
     "solution": "solve_prime_summations_p0077_s1.py",
     "args": "5000",
     "answer": "",
-    "verdict": "Overflow",
-    "elapsed": 0.07725229900097474
+    "verdict": "overflow",
+    "elapsed": 0.07243510699481703
   }
 ]

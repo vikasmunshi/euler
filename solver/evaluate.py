@@ -4,15 +4,14 @@
 from __future__ import annotations
 
 from ast import literal_eval
-from functools import partial
-from json import JSONDecodeError, dumps, loads
+from json import JSONDecodeError, loads
 from pathlib import Path
 from subprocess import TimeoutExpired, run
 from time import perf_counter
 from typing import Any, Literal
 
-from solver.config import ColorCodes, results_filename, test_cases_filename, timeout
-from solver.utils import canonical_path
+from solver.config import ColorCodes, test_cases_filename, timeout
+from solver.results import ResultsCollector
 
 RESET = ColorCodes.RESET
 
@@ -108,50 +107,39 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     if not solutions:
         print('Error: no solutions found, skipping evaluation')
         return False
-    no_errors: bool = True
-    output: list[dict[str, Any]] = []
-
-    def collect_output(*,
-                       category: str,
-                       args: str,
-                       solution: str,
-                       answer: str,
-                       verdict: str,
-                       elapsed: float,
-                       color: ColorCodes,
-                       error: str = '',
-                       ) -> None:
-        print(f'{color}{category} {solution} {args} -> {answer} ({verdict}) [{elapsed:.3f}s] {error}{RESET}')
-        if record:
-            output.append({'category': category, 'solution': solution, 'args': args, 'answer': answer,
-                           'verdict': verdict, 'elapsed': elapsed})
-
+    len_input_args_str: int = 0
     for test_case in filtered:
-        expected: Any = test_case.get('answer')
-        input_args: list[str] = as_input_args(test_case)
+        input_args = as_input_args(test_case)
+        input_args_str = ' '.join(input_args)
+        len_input_args_str = max(len_input_args_str, len(input_args_str))
         if show:
             input_args.append('--show')
-        collect_partial = partial(collect_output, category=test_case['category'], args=' '.join(input_args))
-        for _solution in solutions:
-            collect = partial(collect_partial, solution=_solution)
-            _answer, _elapsed, _error = eval_solution(_solution, input_args, workspace_dir, expected)
-            if _answer is None:
-                if 'OverflowError:' in _error:
-                    collect(answer='', verdict='Overflow', elapsed=_elapsed, color=ColorCodes.RED)
-                elif 'Timed out' in _error:
-                    collect(answer='', verdict='Timeout', elapsed=_elapsed, color=ColorCodes.RED)
-                else:
-                    collect(answer='', verdict='Error', elapsed=_elapsed, color=ColorCodes.RED, error=_error)
-                    no_errors = False
-            elif expected is None:
-                collect(answer=_answer, verdict='Unknown', elapsed=_elapsed, color=ColorCodes.BLUE)
-            elif _answer == expected:
-                collect(answer=_answer, verdict='Correct', elapsed=_elapsed, color=ColorCodes.GREEN)
-            else:
-                collect(answer=_answer, verdict='Wrong', elapsed=_elapsed, color=ColorCodes.RED)
-    if record:
-        (results_file := workspace_dir / results_filename).write_text(dumps(output, indent=2))
-        print(f'Results saved to {canonical_path(results_file)}')
+        test_case['input_args'] = input_args
+        test_case['input_args_str'] = input_args_str
+    for test_case in filtered:
+        test_case['input_args_str'] = f'{test_case["input_args_str"]:<{len_input_args_str}}'
+    no_errors: bool = True
+    with ResultsCollector(record=record) as collector:
+        for solution in solutions:
+            for test_case in filtered:
+                expected: Any = test_case.get('answer')
+                answer, elapsed, error = eval_solution(solution, test_case['input_args'], workspace_dir, expected)
+                match (answer, expected, error):
+                    case (None, _, error_msg) if 'OverflowError:' in error_msg:
+                        verdict = 'overflow'
+                    case (None, _, error_msg) if 'Timed out' in error_msg:
+                        verdict = 'timeout'
+                    case (None, _, _):
+                        verdict = 'error'
+                        no_errors = False
+                    case (_, None, _):
+                        verdict = 'unknown'
+                    case (ans, exp, _) if ans == exp:
+                        verdict = 'correct'
+                    case _:
+                        verdict = 'incorrect'
+                collector.record(category=test_case['category'], solution=solution, args=test_case['input_args_str'],
+                                 answer=answer, verdict=verdict, elapsed=elapsed, )
     return no_errors
 
 

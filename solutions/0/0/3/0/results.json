@@ -4,15 +4,15 @@
     "solution": "solve_digit_fifth_powers_p0030_s0.py",
     "args": "4",
     "answer": 19316,
-    "verdict": "Correct",
-    "elapsed": 0.04151130499667488
+    "verdict": "correct",
+    "elapsed": 0.04774732998339459
   },
   {
     "category": "main",
     "solution": "solve_digit_fifth_powers_p0030_s0.py",
     "args": "5",
     "answer": 443839,
-    "verdict": "Correct",
-    "elapsed": 0.050162101979367435
+    "verdict": "correct",
+    "elapsed": 0.04570512298960239
   }
 ]

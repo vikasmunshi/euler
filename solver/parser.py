@@ -13,7 +13,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
-from solver.config import problem_statement_filename, projecteuler_url, resource_dirname, test_cases_filename
+from solver.config import projecteuler_url, resource_dirname, statement_filename, test_cases_filename
 from solver.download import download_file
 from solver.problems import Problem
 from solver.stack import read_stack_file
@@ -74,7 +74,7 @@ def problem_statement(problem_number: int, /, *, force_refresh: bool) -> tuple[P
                                      problem_url=problem_url,
                                      test_cases=test_cases,
                                      solution_notes=solution_notes)
-    files[problem_statement_filename] = html.encode()
+    files[statement_filename] = html.encode()
     return problem, files
 
 
@@ -187,7 +187,7 @@ def extract_solution_notes(problem_number: int) -> str:
         file does not exist or the div is absent.
     """
     try:
-        html_bytes: bytes = read_stack_file(problem_number, problem_statement_filename)[0]
+        html_bytes: bytes = read_stack_file(problem_number, statement_filename)[0]
         soup: BeautifulSoup = BeautifulSoup(html_bytes.decode(), 'html.parser')
         if div := soup.find('div', id='solution-notes-content'):
             return div.decode_contents()

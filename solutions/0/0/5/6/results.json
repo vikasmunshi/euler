@@ -4,15 +4,15 @@
     "solution": "solve_powerful_digit_sum_p0056_s0.py",
     "args": "1",
     "answer": 45,
-    "verdict": "Correct",
-    "elapsed": 0.6143736219964921
+    "verdict": "correct",
+    "elapsed": 0.6354286629939452
   },
   {
     "category": "main",
     "solution": "solve_powerful_digit_sum_p0056_s0.py",
     "args": "2",
     "answer": 972,
-    "verdict": "Correct",
-    "elapsed": 0.5983934350078925
+    "verdict": "correct",
+    "elapsed": 0.6118186060048174
   }
 ]

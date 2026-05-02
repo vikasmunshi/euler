@@ -20,26 +20,26 @@ def __root_dir() -> Path:
 
 root_dir: Path = __root_dir()
 
-backup_dirname: str = 'backup'
-problem_number_filename: str = 'problem_number.txt'
-problem_statement_filename: str = 'problem.html'
+keys_version: str = '1.0.1'
+number_filename: str = 'problem_number.txt'
 problems_list_url: str = 'https://projecteuler.net/minimal=problems'
 projecteuler_url: str = 'https://projecteuler.net'
 resource_dirname: str = 'resources'
-test_cases_filename: str = 'test_cases.json'
 results_filename: str = 'results.json'
+statement_filename: str = 'problem.html'
+test_cases_filename: str = 'test_cases.json'
 timeout: float = 300  # timeout in seconds
 
+backup_dir: Path = root_dir / 'backup'
 cache_dir: Path = root_dir / 'cache'
 keys_backup_file: Path = root_dir / 'backup/keys_backup.json'
-private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
-stack_dir: Path = root_dir / 'solutions'
-workspace_dir: Path = root_dir / 'euler'
-
 keys_file: Path = root_dir / 'keys' / 'keys.json'
-keys_version: str = '1.0.1'
+private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
 schema_file: Path = root_dir / 'keys' / 'schema.json'
+solutions_dir: Path = root_dir / 'solutions'
+solutions_history_file: Path = solutions_dir / 'history.csv'
 upload_keys_to_origin: Path = root_dir / 'scripts' / 'upload_keys_to_origin.sh'
+workspace_dir: Path = root_dir / 'euler'
 
 
 class ColorCodes(StrEnum):
@@ -56,3 +56,28 @@ class ColorCodes(StrEnum):
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     RESET = '\033[0m'
+
+
+__all__ = (
+    'ColorCodes',
+    'backup_dir',
+    'cache_dir',
+    'keys_backup_file',
+    'keys_file',
+    'keys_version',
+    'number_filename',
+    'private_key_file',
+    'problems_list_url',
+    'projecteuler_url',
+    'resource_dirname',
+    'results_filename',
+    'root_dir',
+    'schema_file',
+    'solutions_dir',
+    'solutions_history_file',
+    'statement_filename',
+    'test_cases_filename',
+    'timeout',
+    'upload_keys_to_origin',
+    'workspace_dir',
+)

@@ -4,15 +4,15 @@
     "solution": "solve_largest_palindrome_product_p0004_s0.py",
     "args": "2",
     "answer": 9009,
-    "verdict": "Correct",
-    "elapsed": 0.051846688002115116
+    "verdict": "correct",
+    "elapsed": 0.044176163006341085
   },
   {
     "category": "main",
     "solution": "solve_largest_palindrome_product_p0004_s0.py",
     "args": "3",
     "answer": 906609,
-    "verdict": "Correct",
-    "elapsed": 0.04524176401901059
+    "verdict": "correct",
+    "elapsed": 0.044935629004612565
   }
 ]

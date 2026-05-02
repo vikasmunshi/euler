@@ -4,31 +4,31 @@
     "solution": "solve_distinct_powers_p0029_s0.py",
     "args": "2 5 2 5",
     "answer": 15,
-    "verdict": "Correct",
-    "elapsed": 0.04566286300541833
-  },
-  {
-    "category": "dev",
-    "solution": "solve_distinct_powers_p0029_s1_pps.py",
-    "args": "2 5 2 5",
-    "answer": 15,
-    "verdict": "Correct",
-    "elapsed": 0.042785956989973783
+    "verdict": "correct",
+    "elapsed": 0.039491614006692544
   },
   {
     "category": "main",
     "solution": "solve_distinct_powers_p0029_s0.py",
     "args": "2 100 2 100",
     "answer": 9183,
-    "verdict": "Correct",
-    "elapsed": 0.04733001798740588
+    "verdict": "correct",
+    "elapsed": 0.04650691102142446
+  },
+  {
+    "category": "dev",
+    "solution": "solve_distinct_powers_p0029_s1_pps.py",
+    "args": "2 5 2 5",
+    "answer": 15,
+    "verdict": "correct",
+    "elapsed": 0.042007258016383275
   },
   {
     "category": "main",
     "solution": "solve_distinct_powers_p0029_s1_pps.py",
     "args": "2 100 2 100",
     "answer": 9183,
-    "verdict": "Correct",
-    "elapsed": 0.05129047800437547
+    "verdict": "correct",
+    "elapsed": 0.047103093995247036
   }
 ]

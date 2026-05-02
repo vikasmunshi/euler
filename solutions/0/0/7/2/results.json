@@ -4,55 +4,55 @@
     "solution": "solve_counting_fractions_p0072_s0.py",
     "args": "8",
     "answer": 21,
-    "verdict": "Correct",
-    "elapsed": 0.04519058999721892
+    "verdict": "correct",
+    "elapsed": 0.04902513400884345
   },
   {
     "category": "dev",
     "solution": "solve_counting_fractions_p0072_s0.py",
     "args": "10",
     "answer": 31,
-    "verdict": "Correct",
-    "elapsed": 0.049172144004842266
+    "verdict": "correct",
+    "elapsed": 0.043506433023139834
   },
   {
     "category": "dev",
     "solution": "solve_counting_fractions_p0072_s0.py",
     "args": "100",
     "answer": 3043,
-    "verdict": "Correct",
-    "elapsed": 0.05219595500966534
+    "verdict": "correct",
+    "elapsed": 0.042596770013915375
   },
   {
     "category": "dev",
     "solution": "solve_counting_fractions_p0072_s0.py",
     "args": "1000",
     "answer": 304191,
-    "verdict": "Correct",
-    "elapsed": 0.04954434701357968
+    "verdict": "correct",
+    "elapsed": 0.04920096800196916
   },
   {
     "category": "dev",
     "solution": "solve_counting_fractions_p0072_s0.py",
     "args": "10000",
     "answer": 30397485,
-    "verdict": "Correct",
-    "elapsed": 0.052577353984816
+    "verdict": "correct",
+    "elapsed": 0.05456260300707072
   },
   {
     "category": "dev",
     "solution": "solve_counting_fractions_p0072_s0.py",
     "args": "100000",
     "answer": 3039650753,
-    "verdict": "Correct",
-    "elapsed": 0.09754073299700394
+    "verdict": "correct",
+    "elapsed": 0.07907774299383163
   },
   {
     "category": "main",
     "solution": "solve_counting_fractions_p0072_s0.py",
     "args": "1000000",
     "answer": 303963552391,
-    "verdict": "Correct",
-    "elapsed": 0.672166403994197
+    "verdict": "correct",
+    "elapsed": 0.6080506299913395
   }
 ]

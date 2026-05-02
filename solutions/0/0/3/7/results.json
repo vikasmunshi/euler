@@ -4,7 +4,7 @@
     "solution": "solve_truncatable_primes_p0037_s0.py",
     "args": "",
     "answer": 748317,
-    "verdict": "Correct",
-    "elapsed": 0.354098892014008
+    "verdict": "correct",
+    "elapsed": 0.2781889920006506
   }
 ]

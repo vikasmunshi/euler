@@ -18,7 +18,7 @@ from typing import Any, Callable, ClassVar, Literal, get_args, get_origin
 from solver.browser import show_in_browser
 from solver.cli_utils import (bool_flags, coerce, continue_on_error, dedup_history, format_command_line, func_info,
                               safe_split, show_value, workspace_files)
-from solver.config import ColorCodes, root_dir, stack_dir, workspace_dir
+from solver.config import ColorCodes, root_dir, solutions_dir, workspace_dir
 from solver.crypto import rekey, user
 from solver.evaluate import evaluate
 from solver.problems import problems
@@ -473,7 +473,7 @@ for _name, _alias in {
     'eval-show': 'for n in 1 to 100: init n --silent; eval --show; clear --discard-changes --silent; echo evaluated n',
     'gh-login': 'shell gh auth status || gh auth login',
     'gh-status': 'shell gh auth status',
-    'git-add-stack': f'shell git add {stack_dir.as_posix()}/',
+    'git-add-stack': f'shell git add {solutions_dir.as_posix()}/',
     'git-merge': 'shell git fetch origin && git merge --ff-only origin/master',
     'git-status': 'shell git status | less',
     'pre-commit': 'shell pre-commit run --all-files',

@@ -4,63 +4,63 @@
     "solution": "solve_circular_primes_p0035_s0.py",
     "args": "10",
     "answer": 4,
-    "verdict": "Correct",
-    "elapsed": 0.04657038699951954
+    "verdict": "correct",
+    "elapsed": 0.04411203201743774
+  },
+  {
+    "category": "dev",
+    "solution": "solve_circular_primes_p0035_s0.py",
+    "args": "100",
+    "answer": 13,
+    "verdict": "correct",
+    "elapsed": 0.04808087198762223
+  },
+  {
+    "category": "dev",
+    "solution": "solve_circular_primes_p0035_s0.py",
+    "args": "1000",
+    "answer": 25,
+    "verdict": "correct",
+    "elapsed": 0.03918439499102533
+  },
+  {
+    "category": "main",
+    "solution": "solve_circular_primes_p0035_s0.py",
+    "args": "1000000",
+    "answer": 55,
+    "verdict": "correct",
+    "elapsed": 0.33057089400244877
   },
   {
     "category": "dev",
     "solution": "solve_circular_primes_p0035_s1_pps.py",
     "args": "10",
     "answer": 4,
-    "verdict": "Correct",
-    "elapsed": 0.056675206986255944
-  },
-  {
-    "category": "dev",
-    "solution": "solve_circular_primes_p0035_s0.py",
-    "args": "100",
-    "answer": 13,
-    "verdict": "Correct",
-    "elapsed": 0.0459708490234334
+    "verdict": "correct",
+    "elapsed": 0.056286928011104465
   },
   {
     "category": "dev",
     "solution": "solve_circular_primes_p0035_s1_pps.py",
     "args": "100",
     "answer": 13,
-    "verdict": "Correct",
-    "elapsed": 0.05648390599526465
-  },
-  {
-    "category": "dev",
-    "solution": "solve_circular_primes_p0035_s0.py",
-    "args": "1000",
-    "answer": 25,
-    "verdict": "Correct",
-    "elapsed": 0.042027776973554865
+    "verdict": "correct",
+    "elapsed": 0.05502170498948544
   },
   {
     "category": "dev",
     "solution": "solve_circular_primes_p0035_s1_pps.py",
     "args": "1000",
     "answer": 25,
-    "verdict": "Correct",
-    "elapsed": 0.05283187600434758
-  },
-  {
-    "category": "main",
-    "solution": "solve_circular_primes_p0035_s0.py",
-    "args": "1000000",
-    "answer": 55,
-    "verdict": "Correct",
-    "elapsed": 0.3222880730172619
+    "verdict": "correct",
+    "elapsed": 0.056662333983695135
   },
   {
     "category": "main",
     "solution": "solve_circular_primes_p0035_s1_pps.py",
     "args": "1000000",
     "answer": 55,
-    "verdict": "Correct",
-    "elapsed": 0.10240852399147116
+    "verdict": "correct",
+    "elapsed": 0.09305342499283142
   }
 ]

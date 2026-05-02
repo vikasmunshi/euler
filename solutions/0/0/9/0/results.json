@@ -4,7 +4,7 @@
     "solution": "solve_cube_digit_pairs_p0090_s0.py",
     "args": "",
     "answer": 1217,
-    "verdict": "Correct",
-    "elapsed": 0.05762169498484582
+    "verdict": "correct",
+    "elapsed": 0.061947503010742366
   }
 ]

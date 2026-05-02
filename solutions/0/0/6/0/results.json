@@ -4,23 +4,23 @@
     "solution": "solve_prime_pair_sets_p0060_s0.py",
     "args": "3",
     "answer": 107,
-    "verdict": "Correct",
-    "elapsed": 0.046666895010275766
+    "verdict": "correct",
+    "elapsed": 0.04286824297741987
   },
   {
     "category": "dev",
     "solution": "solve_prime_pair_sets_p0060_s0.py",
     "args": "4",
     "answer": 792,
-    "verdict": "Correct",
-    "elapsed": 0.0451067480025813
+    "verdict": "correct",
+    "elapsed": 0.04514194102375768
   },
   {
     "category": "main",
     "solution": "solve_prime_pair_sets_p0060_s0.py",
     "args": "5",
     "answer": 26033,
-    "verdict": "Correct",
-    "elapsed": 0.8684659709979314
+    "verdict": "correct",
+    "elapsed": 0.8675450310111046
   }
 ]

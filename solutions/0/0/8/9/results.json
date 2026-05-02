@@ -4,7 +4,7 @@
     "solution": "solve_roman_numerals_p0089_s0.py",
     "args": "https://projecteuler.net/resources/documents/0089_roman.txt",
     "answer": 743,
-    "verdict": "Correct",
-    "elapsed": 0.05573954599094577
+    "verdict": "correct",
+    "elapsed": 0.055851070006610826
   }
 ]

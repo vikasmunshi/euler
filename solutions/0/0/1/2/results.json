@@ -4,31 +4,31 @@
     "solution": "solve_highly_divisible_triangular_number_p0012_s0.py",
     "args": "5",
     "answer": 28,
-    "verdict": "Correct",
-    "elapsed": 0.041120189998764545
-  },
-  {
-    "category": "dev",
-    "solution": "solve_highly_divisible_triangular_number_p0012_s1.py",
-    "args": "5",
-    "answer": 28,
-    "verdict": "Correct",
-    "elapsed": 0.04277298698434606
+    "verdict": "correct",
+    "elapsed": 0.04010959601146169
   },
   {
     "category": "main",
     "solution": "solve_highly_divisible_triangular_number_p0012_s0.py",
     "args": "500",
     "answer": 76576500,
-    "verdict": "Correct",
-    "elapsed": 0.08757379700546153
+    "verdict": "correct",
+    "elapsed": 0.08174073600093834
+  },
+  {
+    "category": "dev",
+    "solution": "solve_highly_divisible_triangular_number_p0012_s1.py",
+    "args": "5",
+    "answer": 28,
+    "verdict": "correct",
+    "elapsed": 0.036121145996730775
   },
   {
     "category": "main",
     "solution": "solve_highly_divisible_triangular_number_p0012_s1.py",
     "args": "500",
     "answer": 76576500,
-    "verdict": "Correct",
-    "elapsed": 0.2269340279744938
+    "verdict": "correct",
+    "elapsed": 0.22373624899773858
   }
 ]

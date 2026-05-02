@@ -4,7 +4,7 @@
     "solution": "solve_large_non_mersenne_prime_p0097_s0.py",
     "args": "10 28433 \u00d7 2^7830457 + 1",
     "answer": 8739992577,
-    "verdict": "Correct",
-    "elapsed": 0.6860354829987045
+    "verdict": "correct",
+    "elapsed": 0.6875815730018076
   }
 ]

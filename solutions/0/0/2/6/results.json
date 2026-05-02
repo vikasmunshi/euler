@@ -4,15 +4,15 @@
     "solution": "solve_reciprocal_cycles_p0026_s0.py",
     "args": "10",
     "answer": 7,
-    "verdict": "Correct",
-    "elapsed": 0.049634325987426564
+    "verdict": "correct",
+    "elapsed": 0.045711093000136316
   },
   {
     "category": "main",
     "solution": "solve_reciprocal_cycles_p0026_s0.py",
     "args": "1000",
     "answer": 983,
-    "verdict": "Correct",
-    "elapsed": 0.043919746996834874
+    "verdict": "correct",
+    "elapsed": 0.05113634199369699
   }
 ]

@@ -4,31 +4,31 @@
     "solution": "solve_number_spiral_diagonals_p0028_s0.py",
     "args": "5",
     "answer": 101,
-    "verdict": "Correct",
-    "elapsed": 0.04968539800029248
+    "verdict": "correct",
+    "elapsed": 0.046348415984539315
   },
   {
     "category": "dev",
     "solution": "solve_number_spiral_diagonals_p0028_s0.py",
     "args": "7",
     "answer": 261,
-    "verdict": "Correct",
-    "elapsed": 0.04742624799837358
+    "verdict": "correct",
+    "elapsed": 0.04621343198232353
   },
   {
     "category": "dev",
     "solution": "solve_number_spiral_diagonals_p0028_s0.py",
     "args": "9",
     "answer": 537,
-    "verdict": "Correct",
-    "elapsed": 0.04627222300041467
+    "verdict": "correct",
+    "elapsed": 0.04615705902688205
   },
   {
     "category": "main",
     "solution": "solve_number_spiral_diagonals_p0028_s0.py",
     "args": "1001",
     "answer": 669171001,
-    "verdict": "Correct",
-    "elapsed": 0.045806564012309536
+    "verdict": "correct",
+    "elapsed": 0.042756212991662323
   }
 ]

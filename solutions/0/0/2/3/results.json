@@ -4,15 +4,15 @@
     "solution": "solve_non_abundant_sums_p0023_s0.py",
     "args": "",
     "answer": 4179871,
-    "verdict": "Correct",
-    "elapsed": 0.3578399459947832
+    "verdict": "correct",
+    "elapsed": 0.2358324340020772
   },
   {
     "category": "main",
     "solution": "solve_non_abundant_sums_p0023_s1.py",
     "args": "",
     "answer": 4179871,
-    "verdict": "Correct",
-    "elapsed": 0.9306262000172865
+    "verdict": "correct",
+    "elapsed": 0.854889235983137
   }
 ]

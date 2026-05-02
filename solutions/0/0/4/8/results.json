@@ -4,15 +4,15 @@
     "solution": "solve_self_powers_p0048_s0.py",
     "args": "10",
     "answer": 405071317,
-    "verdict": "Correct",
-    "elapsed": 0.03840778997982852
+    "verdict": "correct",
+    "elapsed": 0.0430622780113481
   },
   {
     "category": "main",
     "solution": "solve_self_powers_p0048_s0.py",
     "args": "1000",
     "answer": 9110846700,
-    "verdict": "Correct",
-    "elapsed": 0.04579280101461336
+    "verdict": "correct",
+    "elapsed": 0.0402493049914483
   }
 ]

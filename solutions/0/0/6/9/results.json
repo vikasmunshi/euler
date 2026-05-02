@@ -4,47 +4,47 @@
     "solution": "solve_totient_maximum_p0069_s0.py",
     "args": "10",
     "answer": 6,
-    "verdict": "Correct",
-    "elapsed": 0.049665708997054026
+    "verdict": "correct",
+    "elapsed": 0.044332592020509765
   },
   {
     "category": "dev",
     "solution": "solve_totient_maximum_p0069_s0.py",
     "args": "100",
     "answer": 30,
-    "verdict": "Correct",
-    "elapsed": 0.04646277500432916
+    "verdict": "correct",
+    "elapsed": 0.0501636280096136
   },
   {
     "category": "dev",
     "solution": "solve_totient_maximum_p0069_s0.py",
     "args": "1000",
     "answer": 210,
-    "verdict": "Correct",
-    "elapsed": 0.05387222100398503
+    "verdict": "correct",
+    "elapsed": 0.04136574600124732
   },
   {
     "category": "dev",
     "solution": "solve_totient_maximum_p0069_s0.py",
     "args": "10000",
     "answer": 2310,
-    "verdict": "Correct",
-    "elapsed": 0.04581900598714128
+    "verdict": "correct",
+    "elapsed": 0.047145623015239835
   },
   {
     "category": "dev",
     "solution": "solve_totient_maximum_p0069_s0.py",
     "args": "100000",
     "answer": 30030,
-    "verdict": "Correct",
-    "elapsed": 0.0497283750155475
+    "verdict": "correct",
+    "elapsed": 0.044146205007564276
   },
   {
     "category": "main",
     "solution": "solve_totient_maximum_p0069_s0.py",
     "args": "1000000",
     "answer": 510510,
-    "verdict": "Correct",
-    "elapsed": 0.046953440993092954
+    "verdict": "correct",
+    "elapsed": 0.0424727920035366
   }
 ]

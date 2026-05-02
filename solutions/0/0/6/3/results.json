@@ -4,7 +4,7 @@
     "solution": "solve_powerful_digit_counts_p0063_s0.py",
     "args": "",
     "answer": 49,
-    "verdict": "Correct",
-    "elapsed": 0.04382671101484448
+    "verdict": "correct",
+    "elapsed": 0.04948484300985001
   }
 ]

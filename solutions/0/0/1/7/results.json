@@ -4,15 +4,15 @@
     "solution": "solve_number_letter_counts_p0017_s0.py",
     "args": "5",
     "answer": 19,
-    "verdict": "Correct",
-    "elapsed": 0.09138707601232454
+    "verdict": "correct",
+    "elapsed": 0.0437383959942963
   },
   {
     "category": "main",
     "solution": "solve_number_letter_counts_p0017_s0.py",
     "args": "1000",
     "answer": 21124,
-    "verdict": "Correct",
-    "elapsed": 0.06962654500966892
+    "verdict": "correct",
+    "elapsed": 0.03938689100323245
   }
 ]

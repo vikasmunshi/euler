@@ -4,7 +4,7 @@
     "solution": "solve_pandigital_multiples_p0038_s0.py",
     "args": "",
     "answer": 932718654,
-    "verdict": "Correct",
-    "elapsed": 0.05039440799737349
+    "verdict": "correct",
+    "elapsed": 0.04099177100579254
   }
 ]

@@ -4,7 +4,7 @@
     "solution": "solve_spiral_primes_p0058_s0.py",
     "args": "0.1",
     "answer": 26241,
-    "verdict": "Correct",
-    "elapsed": 3.2357815819850657
+    "verdict": "correct",
+    "elapsed": 3.1984573260124307
   }
 ]

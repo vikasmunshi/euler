@@ -4,7 +4,7 @@
     "solution": "solve_sub_string_divisibility_p0043_s0.py",
     "args": "",
     "answer": 16695334890,
-    "verdict": "Correct",
-    "elapsed": 0.05730263199075125
+    "verdict": "correct",
+    "elapsed": 0.045496077014831826
   }
 ]

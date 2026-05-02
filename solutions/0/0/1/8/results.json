@@ -4,15 +4,15 @@
     "solution": "solve_maximum_path_sum_i_p0018_s0.py",
     "args": "TRIANGLE_A",
     "answer": 23,
-    "verdict": "Correct",
-    "elapsed": 0.08079032899695449
+    "verdict": "correct",
+    "elapsed": 0.04383351400610991
   },
   {
     "category": "main",
     "solution": "solve_maximum_path_sum_i_p0018_s0.py",
     "args": "TRIANGLE_B",
     "answer": 1074,
-    "verdict": "Correct",
-    "elapsed": 0.07661735100555234
+    "verdict": "correct",
+    "elapsed": 0.042814822983928025
   }
 ]

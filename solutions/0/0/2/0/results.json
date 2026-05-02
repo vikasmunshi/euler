@@ -4,15 +4,15 @@
     "solution": "solve_factorial_digit_sum_p0020_s0.py",
     "args": "10",
     "answer": 27,
-    "verdict": "Correct",
-    "elapsed": 0.06796790400403552
+    "verdict": "correct",
+    "elapsed": 0.042960982013028115
   },
   {
     "category": "main",
     "solution": "solve_factorial_digit_sum_p0020_s0.py",
     "args": "100",
     "answer": 648,
-    "verdict": "Correct",
-    "elapsed": 0.05597392999334261
+    "verdict": "correct",
+    "elapsed": 0.03984914597822353
   }
 ]

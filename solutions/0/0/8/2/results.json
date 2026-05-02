@@ -4,15 +4,15 @@
     "solution": "solve_path_sum_three_ways_p0082_s0.py",
     "args": "",
     "answer": 994,
-    "verdict": "Correct",
-    "elapsed": 0.053144910983974114
+    "verdict": "correct",
+    "elapsed": 0.05249179599923082
   },
   {
     "category": "main",
     "solution": "solve_path_sum_three_ways_p0082_s0.py",
     "args": "https://projecteuler.net/resources/documents/0082_matrix.txt",
     "answer": 260324,
-    "verdict": "Correct",
-    "elapsed": 0.9741701539896894
+    "verdict": "correct",
+    "elapsed": 0.9116750489920378
   }
 ]

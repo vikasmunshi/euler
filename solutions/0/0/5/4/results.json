@@ -4,7 +4,7 @@
     "solution": "solve_poker_hands_p0054_s0.py",
     "args": "https://projecteuler.net/resources/documents/0054_poker.txt",
     "answer": 376,
-    "verdict": "Correct",
-    "elapsed": 0.08560266098356806
+    "verdict": "correct",
+    "elapsed": 0.07908074400620535
   }
 ]

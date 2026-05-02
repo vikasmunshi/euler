@@ -4,23 +4,23 @@
     "solution": "solve_lexicographic_permutations_p0024_s0.py",
     "args": "012 4",
     "answer": "120",
-    "verdict": "Correct",
-    "elapsed": 0.04684443000587635
+    "verdict": "correct",
+    "elapsed": 0.04207887500524521
   },
   {
     "category": "dev",
     "solution": "solve_lexicographic_permutations_p0024_s0.py",
     "args": "012 6",
     "answer": "210",
-    "verdict": "Correct",
-    "elapsed": 0.04482136701699346
+    "verdict": "correct",
+    "elapsed": 0.038449994986876845
   },
   {
     "category": "main",
     "solution": "solve_lexicographic_permutations_p0024_s0.py",
     "args": "0123456789 1000000",
     "answer": "2783915460",
-    "verdict": "Correct",
-    "elapsed": 0.050107519986340776
+    "verdict": "correct",
+    "elapsed": 0.039624944009119645
   }
 ]

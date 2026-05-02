@@ -4,7 +4,7 @@
     "solution": "solve_totient_permutation_p0070_s0.py",
     "args": "10000000",
     "answer": 8319823,
-    "verdict": "Correct",
-    "elapsed": 0.1887650339922402
+    "verdict": "correct",
+    "elapsed": 0.18383032799465582
   }
 ]

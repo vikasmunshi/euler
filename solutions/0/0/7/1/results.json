@@ -4,15 +4,15 @@
     "solution": "solve_ordered_fractions_p0071_s0.py",
     "args": "10",
     "answer": 2,
-    "verdict": "Correct",
-    "elapsed": 0.04923166200751439
+    "verdict": "correct",
+    "elapsed": 0.043346346996258944
   },
   {
     "category": "main",
     "solution": "solve_ordered_fractions_p0071_s0.py",
     "args": "1000000",
     "answer": 428570,
-    "verdict": "Correct",
-    "elapsed": 0.04285655601415783
+    "verdict": "correct",
+    "elapsed": 0.04134538699872792
   }
 ]

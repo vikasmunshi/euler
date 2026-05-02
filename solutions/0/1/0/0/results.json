@@ -4,23 +4,23 @@
     "solution": "solve_arranged_probability_p0100_s0.py",
     "args": "21",
     "answer": 15,
-    "verdict": "Correct",
-    "elapsed": 0.04829580499790609
+    "verdict": "correct",
+    "elapsed": 0.04419431302812882
   },
   {
     "category": "dev",
     "solution": "solve_arranged_probability_p0100_s0.py",
     "args": "120",
     "answer": 85,
-    "verdict": "Correct",
-    "elapsed": 0.04418719100067392
+    "verdict": "correct",
+    "elapsed": 0.04099770699394867
   },
   {
     "category": "main",
     "solution": "solve_arranged_probability_p0100_s0.py",
     "args": "1000000000000",
     "answer": 756872327473,
-    "verdict": "Correct",
-    "elapsed": 0.0485360269958619
+    "verdict": "correct",
+    "elapsed": 0.039482822990976274
   }
 ]

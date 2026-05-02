@@ -4,15 +4,15 @@
     "solution": "solve_diophantine_equation_p0066_s0.py",
     "args": "7",
     "answer": 5,
-    "verdict": "Correct",
-    "elapsed": 0.04852905700681731
+    "verdict": "correct",
+    "elapsed": 0.048570607003057376
   },
   {
     "category": "main",
     "solution": "solve_diophantine_equation_p0066_s0.py",
     "args": "1000",
     "answer": 661,
-    "verdict": "Correct",
-    "elapsed": 0.07412632001796737
+    "verdict": "correct",
+    "elapsed": 0.07551548897754401
   }
 ]

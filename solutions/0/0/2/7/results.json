@@ -4,7 +4,7 @@
     "solution": "solve_quadratic_primes_p0027_s0.py",
     "args": "1000",
     "answer": -59231,
-    "verdict": "Correct",
-    "elapsed": 0.516815635986859
+    "verdict": "correct",
+    "elapsed": 0.5354954529902898
   }
 ]

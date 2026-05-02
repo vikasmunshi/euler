@@ -4,7 +4,7 @@
     "solution": "solve_xor_decryption_p0059_s0.py",
     "args": "https://projecteuler.net/resources/documents/0059_cipher.txt 9 eEaAnNtT",
     "answer": 129448,
-    "verdict": "Correct",
-    "elapsed": 0.05423153701121919
+    "verdict": "correct",
+    "elapsed": 0.048072509991470724
   }
 ]

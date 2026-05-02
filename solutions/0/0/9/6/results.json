@@ -4,7 +4,7 @@
     "solution": "solve_su_doku_p0096_s0.py",
     "args": "https://projecteuler.net/project/resources/0096_sudoku.txt",
     "answer": 24702,
-    "verdict": "Correct",
-    "elapsed": 0.30277276900596917
+    "verdict": "correct",
+    "elapsed": 0.31261955000809394
   }
 ]

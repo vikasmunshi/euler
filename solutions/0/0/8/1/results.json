@@ -4,15 +4,15 @@
     "solution": "solve_path_sum_two_ways_p0081_s0.py",
     "args": "",
     "answer": 2427,
-    "verdict": "Correct",
-    "elapsed": 0.0675162739935331
+    "verdict": "correct",
+    "elapsed": 0.044738580007106066
   },
   {
     "category": "main",
     "solution": "solve_path_sum_two_ways_p0081_s0.py",
     "args": "https://projecteuler.net/resources/documents/0081_matrix.txt",
     "answer": 427337,
-    "verdict": "Correct",
-    "elapsed": 0.048464719991898164
+    "verdict": "correct",
+    "elapsed": 0.04715008899802342
   }
 ]

@@ -4,7 +4,7 @@
     "solution": "solve_digit_factorials_p0034_s0.py",
     "args": "",
     "answer": 40730,
-    "verdict": "Correct",
-    "elapsed": 0.06793314899550751
+    "verdict": "correct",
+    "elapsed": 0.052428410010179505
   }
 ]

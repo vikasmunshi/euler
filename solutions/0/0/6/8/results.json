@@ -4,23 +4,23 @@
     "solution": "solve_magic_5_gon_ring_p0068_s0.py",
     "args": "9 3",
     "answer": 432621513,
-    "verdict": "Correct",
-    "elapsed": 0.05264357299893163
+    "verdict": "correct",
+    "elapsed": 0.04715615001623519
   },
   {
     "category": "dev",
     "solution": "solve_magic_5_gon_ring_p0068_s0.py",
     "args": "12 4",
     "answer": 462723831516,
-    "verdict": "Correct",
-    "elapsed": 0.04955150402383879
+    "verdict": "correct",
+    "elapsed": 0.04710505701950751
   },
   {
     "category": "main",
     "solution": "solve_magic_5_gon_ring_p0068_s0.py",
     "args": "16 5",
     "answer": 6531031914842725,
-    "verdict": "Correct",
-    "elapsed": 0.07405663700774312
+    "verdict": "correct",
+    "elapsed": 0.07548276599845849
   }
 ]

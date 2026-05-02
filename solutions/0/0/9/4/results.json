@@ -4,7 +4,7 @@
     "solution": "solve_almost_equilateral_triangles_p0094_s0.py",
     "args": "1000000000",
     "answer": 518408346,
-    "verdict": "Correct",
-    "elapsed": 0.03721147801843472
+    "verdict": "correct",
+    "elapsed": 0.03621318200021051
   }
 ]

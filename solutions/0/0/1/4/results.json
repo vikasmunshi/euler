@@ -4,7 +4,7 @@
     "solution": "solve_longest_collatz_sequence_p0014_s0.py",
     "args": "1000000",
     "answer": 837799,
-    "verdict": "Correct",
-    "elapsed": 1.8610380080062896
+    "verdict": "correct",
+    "elapsed": 2.104252388002351
   }
 ]

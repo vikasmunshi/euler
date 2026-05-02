@@ -4,23 +4,23 @@
     "solution": "solve_distinct_primes_factors_p0047_s0.py",
     "args": "2",
     "answer": 14,
-    "verdict": "Correct",
-    "elapsed": 0.043387133977375925
+    "verdict": "correct",
+    "elapsed": 0.03896845199051313
   },
   {
     "category": "dev",
     "solution": "solve_distinct_primes_factors_p0047_s0.py",
     "args": "3",
     "answer": 644,
-    "verdict": "Correct",
-    "elapsed": 0.04752508498495445
+    "verdict": "correct",
+    "elapsed": 0.03898811698309146
   },
   {
     "category": "main",
     "solution": "solve_distinct_primes_factors_p0047_s0.py",
     "args": "4",
     "answer": 134043,
-    "verdict": "Correct",
-    "elapsed": 0.7844281220168341
+    "verdict": "correct",
+    "elapsed": 0.7268784620100632
   }
 ]

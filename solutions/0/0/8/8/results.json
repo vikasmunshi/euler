@@ -4,15 +4,15 @@
     "solution": "solve_product_sum_numbers_p0088_s0.py",
     "args": "6 2",
     "answer": 30,
-    "verdict": "Correct",
-    "elapsed": 0.044546065997565165
+    "verdict": "correct",
+    "elapsed": 0.046608478005509824
   },
   {
     "category": "main",
     "solution": "solve_product_sum_numbers_p0088_s0.py",
     "args": "12000 2",
     "answer": 7587457,
-    "verdict": "Correct",
-    "elapsed": 0.12295367900514975
+    "verdict": "correct",
+    "elapsed": 0.118167816021014
   }
 ]

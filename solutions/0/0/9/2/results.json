@@ -4,47 +4,47 @@
     "solution": "solve_square_digit_chains_p0092_s0.py",
     "args": "2",
     "answer": 80,
-    "verdict": "Correct",
-    "elapsed": 0.04554781600018032
+    "verdict": "correct",
+    "elapsed": 0.0480032830091659
   },
   {
     "category": "dev",
     "solution": "solve_square_digit_chains_p0092_s0.py",
     "args": "3",
     "answer": 857,
-    "verdict": "Correct",
-    "elapsed": 0.049909127003047615
+    "verdict": "correct",
+    "elapsed": 0.0404999429883901
   },
   {
     "category": "dev",
     "solution": "solve_square_digit_chains_p0092_s0.py",
     "args": "4",
     "answer": 8558,
-    "verdict": "Correct",
-    "elapsed": 0.042282592999981716
+    "verdict": "correct",
+    "elapsed": 0.04252545701456256
   },
   {
     "category": "dev",
     "solution": "solve_square_digit_chains_p0092_s0.py",
     "args": "5",
     "answer": 85623,
-    "verdict": "Correct",
-    "elapsed": 0.042920456995489076
+    "verdict": "correct",
+    "elapsed": 0.04515125398756936
   },
   {
     "category": "dev",
     "solution": "solve_square_digit_chains_p0092_s0.py",
     "args": "6",
     "answer": 856929,
-    "verdict": "Correct",
-    "elapsed": 0.04473374897497706
+    "verdict": "correct",
+    "elapsed": 0.046687564987223595
   },
   {
     "category": "main",
     "solution": "solve_square_digit_chains_p0092_s0.py",
     "args": "7",
     "answer": 8581146,
-    "verdict": "Correct",
-    "elapsed": 0.044871260004583746
+    "verdict": "correct",
+    "elapsed": 0.04761684298864566
   }
 ]

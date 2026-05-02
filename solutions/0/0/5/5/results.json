@@ -4,7 +4,7 @@
     "solution": "solve_lychrel_numbers_p0055_s0.py",
     "args": "50 10000",
     "answer": 249,
-    "verdict": "Correct",
-    "elapsed": 0.06424226600211114
+    "verdict": "correct",
+    "elapsed": 0.05221732400241308
   }
 ]

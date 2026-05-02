@@ -4,15 +4,15 @@
     "solution": "solve_lattice_paths_p0015_s0.py",
     "args": "2",
     "answer": 6,
-    "verdict": "Correct",
-    "elapsed": 0.0746703049808275
+    "verdict": "correct",
+    "elapsed": 0.04580945600173436
   },
   {
     "category": "main",
     "solution": "solve_lattice_paths_p0015_s0.py",
     "args": "20",
     "answer": 137846528820,
-    "verdict": "Correct",
-    "elapsed": 0.05020141298882663
+    "verdict": "correct",
+    "elapsed": 0.04230220097815618
   }
 ]

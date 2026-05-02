@@ -4,15 +4,15 @@
     "solution": "solve_singular_integer_right_triangles_p0075_s0.py",
     "args": "50",
     "answer": 6,
-    "verdict": "Correct",
-    "elapsed": 0.05902489798609167
+    "verdict": "correct",
+    "elapsed": 0.04354460499598645
   },
   {
     "category": "main",
     "solution": "solve_singular_integer_right_triangles_p0075_s0.py",
     "args": "1500000",
     "answer": 161667,
-    "verdict": "Correct",
-    "elapsed": 0.4920497599814553
+    "verdict": "correct",
+    "elapsed": 0.45882247400004417
   }
 ]

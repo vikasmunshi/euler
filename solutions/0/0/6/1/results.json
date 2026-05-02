@@ -7,8 +7,8 @@
       1,
       8181
     ],
-    "verdict": "Correct",
-    "elapsed": 0.047973319015000015
+    "verdict": "correct",
+    "elapsed": 0.053636185999494046
   },
   {
     "category": "dev",
@@ -18,8 +18,8 @@
       1,
       19291
     ],
-    "verdict": "Correct",
-    "elapsed": 0.05110105097992346
+    "verdict": "correct",
+    "elapsed": 0.047438945999601856
   },
   {
     "category": "dev",
@@ -32,8 +32,8 @@
         16160
       ]
     ],
-    "verdict": "Correct",
-    "elapsed": 0.05283161799889058
+    "verdict": "correct",
+    "elapsed": 0.04401946798316203
   },
   {
     "category": "dev",
@@ -49,8 +49,8 @@
         26058
       ]
     ],
-    "verdict": "Correct",
-    "elapsed": 0.05741639097686857
+    "verdict": "correct",
+    "elapsed": 0.057801151007879525
   },
   {
     "category": "main",
@@ -60,7 +60,7 @@
       1,
       28684
     ],
-    "verdict": "Correct",
-    "elapsed": 0.07423678200575523
+    "verdict": "correct",
+    "elapsed": 0.07897967501776293
   }
 ]

@@ -92,7 +92,6 @@ target/
 var/
 
 # solver specific files and folders to exclude
-/*.csv
 /.*
 /.*/
 /backup/

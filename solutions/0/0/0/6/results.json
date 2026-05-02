@@ -4,15 +4,15 @@
     "solution": "solve_sum_square_difference_p0006_s0.py",
     "args": "10",
     "answer": 2640,
-    "verdict": "Correct",
-    "elapsed": 0.04342805198393762
+    "verdict": "correct",
+    "elapsed": 0.04615780001040548
   },
   {
     "category": "main",
     "solution": "solve_sum_square_difference_p0006_s0.py",
     "args": "100",
     "answer": 25164150,
-    "verdict": "Correct",
-    "elapsed": 0.043232319003436714
+    "verdict": "correct",
+    "elapsed": 0.041096966015174985
   }
 ]
