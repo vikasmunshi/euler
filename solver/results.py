@@ -12,7 +12,7 @@ from typing import Generator, NamedTuple, Protocol
 
 from solver.config import ColorCodes, results_filename, solutions_history_file, workspace_dir
 from solver.stack import read_stack_file, write_stack_file
-from solver.utils import canonical_path
+from solver.util.utils import canonical_path
 
 color_map: dict[str, ColorCodes] = {
     'correct': ColorCodes.GREEN,
@@ -44,15 +44,29 @@ class Result(NamedTuple):
 
 
 def read_results(problem_number: int = 0) -> list[Result]:
-    """Read problem results from a JSON file."""
+    """Read problem results from a JSON file.
+
+    Supports both old format (elapsed) and new format (average, number_runs).
+    The elapsed field of each Result is populated from average (or elapsed for legacy records).
+    """
     try:
         if problem_number == 0:
-            results = loads((workspace_dir / results_filename).read_bytes())
+            raw = loads((workspace_dir / results_filename).read_bytes())
         else:
-            results = loads(read_stack_file(problem_number, results_filename)[0])
+            raw = loads(read_stack_file(problem_number, results_filename)[0])
     except (FileNotFoundError, JSONDecodeError):
-        results = []
-    return [Result(**r) for r in results]
+        raw = []
+    return [
+        Result(
+            category=r['category'],
+            solution=r['solution'],
+            args=r['args'],
+            answer=r['answer'],
+            verdict=r['verdict'],
+            elapsed=r.get('average') or r.get('elapsed') or float('nan'),
+        )
+        for r in raw
+    ]
 
 
 @contextmanager
@@ -88,15 +102,52 @@ def solutions_history() -> dict[int, str]:
             for row in reader(f):
                 problem_number, _, date_with_time = int(row[0]), row[1], row[2]
                 date_str = date_with_time.split(' (')[0].strip()
-                history[problem_number] = datetime.strptime(date_str, '%d %b %y').strftime('%Y-%m-%d')
+                history[problem_number] = datetime.strptime(date_str, '%d %b %y').strftime('%a %d. %b %Y')
     except FileNotFoundError:
         pass
     return history
 
 
 def write_results(results: list[Result], problem_number: int = 0) -> None:
-    """Write problem results to a JSON file."""
-    results_str = dumps([r._asdict() for r in results], indent=2)
+    """Write problem results to a JSON file, updating running averages.
+
+    Reads existing records first and uses them to maintain a cumulative average
+    and run count per (category, solution, args, verdict) key.
+    Persists average and number_runs in place of the raw elapsed time.
+    """
+    try:
+        if problem_number == 0:
+            existing_raw = loads((workspace_dir / results_filename).read_bytes())
+        else:
+            existing_raw = loads(read_stack_file(problem_number, results_filename)[0])
+    except (FileNotFoundError, JSONDecodeError):
+        existing_raw = []
+
+    existing: dict[tuple[str, str, str, str], tuple[float, int]] = {}
+    for r in existing_raw:
+        key = (r['category'], r['solution'], r['args'], r['verdict'])
+        if 'average' in r:
+            existing[key] = (r['average'], r['number_runs'])
+        elif 'elapsed' in r:
+            existing[key] = (r['elapsed'], 1)
+
+    updated: list[dict] = []
+    for r in results:
+        key = (r.category, r.solution, r.args, r.verdict)
+        if key in existing:
+            old_avg, old_n = existing[key]
+            new_avg = (old_avg * old_n + r.elapsed) / (old_n + 1)
+            new_n = old_n + 1
+        else:
+            new_avg = r.elapsed
+            new_n = 1
+        d = r._asdict()
+        del d['elapsed']
+        d['average'] = new_avg
+        d['number_runs'] = new_n
+        updated.append(d)
+
+    results_str = dumps(updated, indent=2)
     if problem_number == 0:
         (workspace_dir / results_filename).write_text(results_str)
     else:

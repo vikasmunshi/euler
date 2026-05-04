@@ -5,7 +5,8 @@
     "args": "TRIANGLE_A",
     "answer": 23,
     "verdict": "correct",
-    "elapsed": 0.4002298009581864
+    "average": 0.048230245666673,
+    "number_runs": 3
   },
   {
     "category": "main",
@@ -13,6 +14,7 @@
     "args": "TRIANGLE_B",
     "answer": 1074,
     "verdict": "correct",
-    "elapsed": 0.5298921270295978
+    "average": 0.051385958666590646,
+    "number_runs": 3
   }
 ]

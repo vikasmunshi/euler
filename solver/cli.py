@@ -15,15 +15,15 @@ from readline import (backend as readline_backend, get_completer, get_completer_
 from subprocess import CalledProcessError, run
 from typing import Any, Callable, ClassVar, Literal, get_args, get_origin
 
-from solver.browser import show_in_browser
-from solver.cli_utils import (bool_flags, coerce, continue_on_error, dedup_history, format_command_line, func_info,
-                              safe_split, show_value, workspace_files)
 from solver.config import ColorCodes, history_file, solutions_dir, workspace_dir
 from solver.crypto import rekey, user
 from solver.evaluate import evaluate
 from solver.problems import problems
 from solver.stack import backup_the_stack, restore_the_stack
-from solver.utils import canonical_path, upload_keys
+from solver.util.browser import show_in_browser
+from solver.util.cli_utils import (bool_flags, coerce, continue_on_error, dedup_history, format_command_line, func_info,
+                                   safe_split, show_value, workspace_files)
+from solver.util.utils import canonical_path, upload_keys
 from solver.workspace import clear_the_workspace, init_the_workspace, list_the_workspace, stack_the_workspace
 
 CYAN, GREEN, YELLOW, BLUE, BLACK, GRAY, RED, BOLD, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW,

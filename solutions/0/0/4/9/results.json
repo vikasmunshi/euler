@@ -8,7 +8,8 @@
       "2969 6299 9629"
     ],
     "verdict": "correct",
-    "elapsed": 0.1810781949898228
+    "average": 0.10991255599783471,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -59,6 +60,7 @@
       "92381 92831 93281"
     ],
     "verdict": "correct",
-    "elapsed": 0.917872233025264
+    "average": 0.726766524004961,
+    "number_runs": 5
   }
 ]

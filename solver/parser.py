@@ -5,26 +5,17 @@ from __future__ import annotations
 
 from itertools import chain
 from json import JSONDecodeError, loads
-from pathlib import Path
-from string import Template
 from typing import Any
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
-from solver.config import projecteuler_url, resource_dirname, statement_filename, test_cases_filename
-from solver.download import download_file
+from solver.config import html_template, projecteuler_url, resource_dirname, statement_filename, test_cases_filename
 from solver.problems import Problem
 from solver.results import read_results, solutions_history
 from solver.stack import read_stack_file
-
-
-class HtmlTemplate(Template):
-    delimiter = '@@'
-
-
-html_template = HtmlTemplate((Path(__file__).parent / 'template.html').read_text())
+from solver.util.download import download_file
 
 
 def clean_html_for_local(problem_content_obj: BeautifulSoup, *,
@@ -111,20 +102,26 @@ def get_results_html(problem: Problem) -> str:
     if not results:
         return header + '\n<p><em>Solution to be restored.</em></p>'
     correct = [r for r in results if r.verdict == 'correct']
-    best_main_elapsed: float | None = min((r.elapsed for r in correct if r.category == 'main'), default=None)
-    rows: list[str] = []
+    args_best_elapsed: dict[str, float] = {}
     for r in correct:
+        if r.args not in args_best_elapsed or r.elapsed < args_best_elapsed[r.args]:
+            args_best_elapsed[r.args] = r.elapsed
+    rows: list[str] = []
+    prev_solution: str | None = None
+    for r in correct:
+        if prev_solution is not None and r.solution != prev_solution:
+            rows.append('<tr class="result-spacer"><td colspan="6"></td></tr>')
+        prev_solution = r.solution
         answer = r.answer if problem.number <= 100 or r.category == 'dev' else '█'
-        css = ''
-        if r.category == 'main':
-            css = ' class="result-best"' if r.elapsed == best_main_elapsed else ' class="result-main"'
-        rows.append(f'<tr{css}>'
+        row_css = f' class="result-{r.category}"'
+        elapsed_flag = ' ⚡' if r.elapsed == args_best_elapsed.get(r.args) else ''
+        rows.append(f'<tr{row_css}>'
                     f'<td>{r.category}</td>'
                     f'<td>{r.solution}</td>'
                     f'<td>{r.args}</td>'
                     f'<td>→</td>'
                     f'<td>{answer}</td>'
-                    f'<td>{r.elapsed:.3f}s</td>'
+                    f'<td>{r.elapsed:.3f}s{elapsed_flag}</td>'
                     f'</tr>')
     if not rows:
         return header + '\n<p><em>Solution to be restored.</em></p>'

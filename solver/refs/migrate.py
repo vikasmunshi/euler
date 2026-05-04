@@ -18,7 +18,7 @@ from isort import code as isort_code
 from solver.config import root_dir, test_cases_filename
 from solver.evaluate import evaluate
 from solver.stack import write_stack_file
-from solver.utils import disabled
+from solver.util.utils import disabled
 from solver.workspace import clear_the_workspace, init_the_workspace
 
 _SKIP_NAMES: frozenset[str] = frozenset({'test_cases', 'euler_problem', 'framework_version'})

@@ -5,6 +5,7 @@
     "args": "10 28433 \u00d7 2^7830457 + 1",
     "answer": 8739992577,
     "verdict": "correct",
-    "elapsed": 0.9230511410278268
+    "average": 0.7483731876054662,
+    "number_runs": 5
   }
 ]

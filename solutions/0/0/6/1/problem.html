@@ -123,15 +123,28 @@
             padding-top: 6px;
         }
 
-        #results-content tr.result-main td {
+        #results-content tr.result-dev td {
             background: #e6f4ec;
             color: #2a6040;
+            font-weight: 600;
         }
 
-        #results-content tr.result-best td {
+        #results-content tr.result-main td {
             background: #c8ecd6;
             color: #1a4a30;
             font-weight: 700;
+        }
+
+        #results-content tr.result-extra td {
+            background: #a8dab8;
+            color: #0f3525;
+            font-weight: 700;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
         }
 
         #solution-notes-content {
@@ -324,11 +337,11 @@
      <strong>
       First Solved:
      </strong>
-     2020-03-10
+     Tue 10. Mar 2020
     </h3>
     <table>
      <tbody>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -345,10 +358,10 @@
         [1, 8181]
        </td>
        <td>
-        0.123s
+        0.067s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -365,10 +378,10 @@
         [1, 19291]
        </td>
        <td>
-        0.147s
+        0.071s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -385,10 +398,10 @@
         [2, [12524, 16160]]
        </td>
        <td>
-        0.134s
+        0.069s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -405,10 +418,10 @@
         [5, [12019, 15857, 18685, 19493, 26058]]
        </td>
        <td>
-        0.133s
+        0.073s ⚡
        </td>
       </tr>
-      <tr class="result-best">
+      <tr class="result-main">
        <td>
         main
        </td>
@@ -425,7 +438,7 @@
         [1, 28684]
        </td>
        <td>
-        0.160s
+        0.096s ⚡
        </td>
       </tr>
      </tbody>

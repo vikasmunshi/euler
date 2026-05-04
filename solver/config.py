@@ -5,43 +5,8 @@ from __future__ import annotations
 from enum import StrEnum
 from os import chdir
 from pathlib import Path
+from string import Template
 from subprocess import run
-
-
-def __root_dir() -> Path:
-    """Return the git repository root directory, cached after the first lookup."""
-    a_package_dir = Path(__file__).parent.resolve()
-    result = run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True, cwd=a_package_dir)
-    if result.returncode == 0 and (git_root := result.stdout.strip()) != '':
-        chdir(git_root)
-        return Path(git_root)
-    raise ValueError('Failed to get git root')
-
-
-root_dir: Path = __root_dir()
-
-keys_version: str = '1.0.1'
-number_filename: str = 'problem_number.txt'
-problems_list_url: str = 'https://projecteuler.net/minimal=problems'
-projecteuler_url: str = 'https://projecteuler.net'
-resource_dirname: str = 'resources'
-results_filename: str = 'results.json'
-statement_filename: str = 'problem.html'
-test_cases_filename: str = 'test_cases.json'
-timeout: float = 300  # timeout in seconds
-
-backup_dir: Path = root_dir / '.backup'
-cache_dir: Path = root_dir / '.cache'
-history_file: Path = root_dir / '.history'
-keys_backup_file: Path = root_dir / 'backup/keys_backup.json'
-keys_file: Path = root_dir / 'keys' / 'keys.json'
-private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
-schema_file: Path = root_dir / 'keys' / 'schema.json'
-sessions_dir: Path = root_dir / '.sessions'
-solutions_dir: Path = root_dir / 'solutions'
-solutions_history_file: Path = solutions_dir / 'history.csv'
-upload_keys_to_origin: Path = root_dir / 'scripts' / 'upload_keys_to_origin.sh'
-workspace_dir: Path = root_dir / 'euler'
 
 
 class ColorCodes(StrEnum):
@@ -60,11 +25,48 @@ class ColorCodes(StrEnum):
     RESET = '\033[0m'
 
 
+def __root_dir() -> Path:
+    """Return the git repository root directory, cached after the first lookup."""
+    a_package_dir = Path(__file__).parent.resolve()
+    result = run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True, cwd=a_package_dir)
+    if result.returncode == 0 and (git_root := result.stdout.strip()) != '':
+        chdir(git_root)
+        return Path(git_root)
+    raise ValueError('Failed to get git root')
+
+
+html_template: Template = Template((Path(__file__).parent / 'refs/template.html').read_text())
+keys_version: str = '1.0.1'
+number_filename: str = 'problem_number.txt'
+problems_list_url: str = 'https://projecteuler.net/minimal=problems'
+projecteuler_url: str = 'https://projecteuler.net'
+resource_dirname: str = 'resources'
+results_filename: str = 'results.json'
+statement_filename: str = 'problem.html'
+test_cases_filename: str = 'test_cases.json'
+timeout: float = 300  # timeout in seconds
+
+root_dir: Path = __root_dir()
+
+backup_dir: Path = root_dir / '.backup'
+cache_dir: Path = root_dir / '.cache'
+history_file: Path = root_dir / '.history'
+keys_backup_file: Path = root_dir / 'backup/keys_backup.json'
+keys_file: Path = root_dir / 'keys' / 'keys.json'
+private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
+schema_file: Path = root_dir / 'keys' / 'schema.json'
+sessions_dir: Path = root_dir / '.sessions'
+solutions_dir: Path = root_dir / 'solutions'
+solutions_history_file: Path = solutions_dir / 'history.csv'
+upload_keys_to_origin: Path = root_dir / 'scripts' / 'upload_keys_to_origin.sh'
+workspace_dir: Path = root_dir / 'euler'
+
 __all__ = (
     'ColorCodes',
     'backup_dir',
     'cache_dir',
     'history_file',
+    'html_template',
     'keys_backup_file',
     'keys_file',
     'keys_version',

@@ -5,6 +5,7 @@
     "args": "10000",
     "answer": 31626,
     "verdict": "correct",
-    "elapsed": 0.705730019020848
+    "average": 0.2233236760041109,
+    "number_runs": 5
   }
 ]

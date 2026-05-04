@@ -123,15 +123,28 @@
             padding-top: 6px;
         }
 
-        #results-content tr.result-main td {
+        #results-content tr.result-dev td {
             background: #e6f4ec;
             color: #2a6040;
+            font-weight: 600;
         }
 
-        #results-content tr.result-best td {
+        #results-content tr.result-main td {
             background: #c8ecd6;
             color: #1a4a30;
             font-weight: 700;
+        }
+
+        #results-content tr.result-extra td {
+            background: #a8dab8;
+            color: #0f3525;
+            font-weight: 700;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
         }
 
         #solution-notes-content {
@@ -213,11 +226,11 @@
      <strong>
       First Solved:
      </strong>
-     2019-10-09
+     Wed 09. Oct 2019
     </h3>
     <table>
      <tbody>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -234,10 +247,10 @@
         6
        </td>
        <td>
-        0.141s
+        0.066s ⚡
        </td>
       </tr>
-      <tr class="result-best">
+      <tr class="result-main">
        <td>
         main
        </td>
@@ -254,10 +267,10 @@
         137846528820
        </td>
        <td>
-        0.119s
+        0.058s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -274,7 +287,7 @@
         102952500135414432972975880320401986757210925381077648234849059575923332372651958598336595518976492951564048597506774120
        </td>
        <td>
-        0.097s
+        0.052s ⚡
        </td>
       </tr>
      </tbody>

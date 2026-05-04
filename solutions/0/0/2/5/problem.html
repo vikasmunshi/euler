@@ -123,15 +123,28 @@
             padding-top: 6px;
         }
 
-        #results-content tr.result-main td {
+        #results-content tr.result-dev td {
             background: #e6f4ec;
             color: #2a6040;
+            font-weight: 600;
         }
 
-        #results-content tr.result-best td {
+        #results-content tr.result-main td {
             background: #c8ecd6;
             color: #1a4a30;
             font-weight: 700;
+        }
+
+        #results-content tr.result-extra td {
+            background: #a8dab8;
+            color: #0f3525;
+            font-weight: 700;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
         }
 
         #solution-notes-content {
@@ -226,11 +239,11 @@ F_{12} &amp;= 144
      <strong>
       First Solved:
      </strong>
-     2019-10-28
+     Mon 28. Oct 2019
     </h3>
     <table>
      <tbody>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -247,10 +260,10 @@ F_{12} &amp;= 144
         12
        </td>
        <td>
-        0.138s
+        0.080s ⚡
        </td>
       </tr>
-      <tr class="result-best">
+      <tr class="result-main">
        <td>
         main
        </td>
@@ -267,7 +280,7 @@ F_{12} &amp;= 144
         4782
        </td>
        <td>
-        0.166s
+        0.109s ⚡
        </td>
       </tr>
      </tbody>

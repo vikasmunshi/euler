@@ -5,7 +5,8 @@
     "args": "10",
     "answer": 4,
     "verdict": "correct",
-    "elapsed": 0.12187941401498392
+    "average": 0.0599977474028492,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -13,7 +14,8 @@
     "args": "100",
     "answer": 13,
     "verdict": "correct",
-    "elapsed": 0.1318180219968781
+    "average": 0.0628220511995096,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -21,7 +23,8 @@
     "args": "1000",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.14403485000366345
+    "average": 0.0632252426008563,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -29,7 +32,8 @@
     "args": "1000000",
     "answer": 55,
     "verdict": "correct",
-    "elapsed": 0.5867324349819683
+    "average": 0.37660997299681187,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -37,7 +41,8 @@
     "args": "10000000",
     "answer": 55,
     "verdict": "correct",
-    "elapsed": 11.0081873399904
+    "average": 5.752546064797935,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -45,7 +50,8 @@
     "args": "10",
     "answer": 4,
     "verdict": "correct",
-    "elapsed": 0.0884371530264616
+    "average": 0.08832849120553873,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -53,7 +59,8 @@
     "args": "100",
     "answer": 13,
     "verdict": "correct",
-    "elapsed": 0.10010978201171383
+    "average": 0.08823754160221142,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -61,7 +68,8 @@
     "args": "1000",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.08910810499219224
+    "average": 0.07930399399829184,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -69,7 +77,8 @@
     "args": "1000000",
     "answer": 55,
     "verdict": "correct",
-    "elapsed": 0.1455736820353195
+    "average": 0.12650386660698132,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -77,6 +86,7 @@
     "args": "10000000",
     "answer": 55,
     "verdict": "correct",
-    "elapsed": 0.7222492399741895
+    "average": 0.6339409881946267,
+    "number_runs": 5
   }
 ]

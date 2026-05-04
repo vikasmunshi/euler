@@ -123,15 +123,28 @@
             padding-top: 6px;
         }
 
-        #results-content tr.result-main td {
+        #results-content tr.result-dev td {
             background: #e6f4ec;
             color: #2a6040;
+            font-weight: 600;
         }
 
-        #results-content tr.result-best td {
+        #results-content tr.result-main td {
             background: #c8ecd6;
             color: #1a4a30;
             font-weight: 700;
+        }
+
+        #results-content tr.result-extra td {
+            background: #a8dab8;
+            color: #0f3525;
+            font-weight: 700;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
         }
 
         #solution-notes-content {
@@ -255,11 +268,11 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
      <strong>
       First Solved:
      </strong>
-     2025-07-16
+     Wed 16. Jul 2025
     </h3>
     <table>
      <tbody>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -276,10 +289,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         1
        </td>
        <td>
-        0.086s
+        0.053s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -296,10 +309,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         2
        </td>
        <td>
-        0.124s
+        0.061s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -316,10 +329,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         12
        </td>
        <td>
-        0.106s
+        0.062s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -336,10 +349,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         42
        </td>
        <td>
-        0.111s
+        0.067s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -356,7 +369,7 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         42
        </td>
        <td>
-        0.248s
+        0.188s ⚡
        </td>
       </tr>
       <tr class="result-main">
@@ -376,10 +389,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         402
        </td>
        <td>
-        7.887s
+        2.661s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -396,10 +409,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         3240
        </td>
        <td>
-        9.533s
+        8.776s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -416,10 +429,14 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         4680
        </td>
        <td>
-        18.909s
+        17.227s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -436,10 +453,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         1
        </td>
        <td>
-        0.066s
+        0.049s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -456,10 +473,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         2
        </td>
        <td>
-        0.085s
+        0.055s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -476,10 +493,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         12
        </td>
        <td>
-        0.128s
+        0.061s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -496,10 +513,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         42
        </td>
        <td>
-        0.302s
+        0.124s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -516,7 +533,7 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         42
        </td>
        <td>
-        0.842s
+        0.500s
        </td>
       </tr>
       <tr class="result-main">
@@ -536,10 +553,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         402
        </td>
        <td>
-        11.122s
+        5.564s
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -556,10 +573,34 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         3240
        </td>
        <td>
-        58.641s
+        33.640s
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        57.192s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -576,10 +617,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         1
        </td>
        <td>
-        0.280s
+        0.166s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -596,10 +637,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         2
        </td>
        <td>
-        0.141s
+        0.063s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -616,10 +657,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         12
        </td>
        <td>
-        0.161s
+        0.070s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -636,10 +677,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         42
        </td>
        <td>
-        0.257s
+        0.114s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -656,10 +697,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         42
        </td>
        <td>
-        1.421s
+        0.608s
        </td>
       </tr>
-      <tr class="result-best">
+      <tr class="result-main">
        <td>
         main
        </td>
@@ -676,10 +717,10 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         402
        </td>
        <td>
-        7.086s
+        4.613s
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -696,7 +737,27 @@ $$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
         3240
        </td>
        <td>
-        30.714s
+        24.869s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        50.764s
        </td>
       </tr>
      </tbody>

@@ -1,11 +1,48 @@
 [
   {
     "category": "dev",
+    "solution": "solve_even_fibonacci_numbers_p0002_s0.py",
+    "args": "2",
+    "answer": 0,
+    "verdict": "incorrect",
+    "average": 0.09699647566655283,
+    "number_runs": 3
+  },
+  {
+    "category": "main",
+    "solution": "solve_even_fibonacci_numbers_p0002_s0.py",
+    "args": "3",
+    "answer": 2,
+    "verdict": "incorrect",
+    "average": 0.08359141999972053,
+    "number_runs": 3
+  },
+  {
+    "category": "extra",
+    "solution": "solve_even_fibonacci_numbers_p0002_s0.py",
+    "args": "4",
+    "answer": 2,
+    "verdict": "incorrect",
+    "average": 0.09643558833310333,
+    "number_runs": 3
+  },
+  {
+    "category": "extra",
+    "solution": "solve_even_fibonacci_numbers_p0002_s0.py",
+    "args": "5",
+    "answer": 2,
+    "verdict": "incorrect",
+    "average": 0.08310261233297449,
+    "number_runs": 3
+  },
+  {
+    "category": "dev",
     "solution": "solve_largest_palindrome_product_p0004_s0.py",
     "args": "2",
     "answer": 9009,
     "verdict": "correct",
-    "elapsed": 0.07796836300985888
+    "average": 0.058009895000092605,
+    "number_runs": 3
   },
   {
     "category": "main",
@@ -13,7 +50,8 @@
     "args": "3",
     "answer": 906609,
     "verdict": "correct",
-    "elapsed": 0.12427172099705786
+    "average": 0.04396295500040045,
+    "number_runs": 3
   },
   {
     "category": "extra",
@@ -21,7 +59,8 @@
     "args": "4",
     "answer": 99000099,
     "verdict": "correct",
-    "elapsed": 0.13331070699496195
+    "average": 0.04052081333308403,
+    "number_runs": 3
   },
   {
     "category": "extra",
@@ -29,6 +68,7 @@
     "args": "5",
     "answer": 9966006699,
     "verdict": "correct",
-    "elapsed": 0.1577032459899783
+    "average": 0.060686311666055794,
+    "number_runs": 3
   }
 ]

@@ -5,7 +5,8 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.2227582450141199
+    "average": 0.08302065720235988,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -13,7 +14,8 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.2347030880046077
+    "average": 0.08758310780140163,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -21,7 +23,8 @@
     "args": "100",
     "answer": 190569291,
     "verdict": "correct",
-    "elapsed": 0.2003319559735246
+    "average": 0.0803310305947889,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -29,7 +32,8 @@
     "args": "1000",
     "answer": 24061467864032622473692149727990,
     "verdict": "correct",
-    "elapsed": 0.2720135860145092
+    "average": 0.11778671060255874,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -37,7 +41,8 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.18512118596117944
+    "average": 0.0884059447922482,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -45,7 +50,8 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.2905280769919045
+    "average": 0.10620434439824748,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -53,7 +59,8 @@
     "args": "100",
     "answer": 190569291,
     "verdict": "correct",
-    "elapsed": 0.3820551170501858
+    "average": 0.12659075701012626,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -61,7 +68,8 @@
     "args": "1000",
     "answer": 24061467864032622473692149727990,
     "verdict": "correct",
-    "elapsed": 37.35111982800299
+    "average": 15.31344343860037,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -69,7 +77,8 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.2655425349948928
+    "average": 0.08586239139895042,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -77,7 +86,8 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 2.9423702920321375
+    "average": 1.1552220044062778,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -85,7 +95,8 @@
     "args": "100",
     "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.31273687700740993
+    "average": 0.12417145980125496,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -93,6 +104,7 @@
     "args": "1000",
     "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.2915912159951404
+    "average": 0.1159274491987162,
+    "number_runs": 5
   }
 ]

@@ -8,7 +8,8 @@
       8181
     ],
     "verdict": "correct",
-    "elapsed": 0.12321837100898847
+    "average": 0.06660334020161826,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -19,7 +20,8 @@
       19291
     ],
     "verdict": "correct",
-    "elapsed": 0.14658873702865094
+    "average": 0.07065715680546418,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -33,7 +35,8 @@
       ]
     ],
     "verdict": "correct",
-    "elapsed": 0.13434707099804655
+    "average": 0.06881276479962253,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -50,7 +53,8 @@
       ]
     ],
     "verdict": "correct",
-    "elapsed": 0.13293409103062004
+    "average": 0.07266414920595707,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -61,6 +65,7 @@
       28684
     ],
     "verdict": "correct",
-    "elapsed": 0.15972263703588396
+    "average": 0.09631300040746282,
+    "number_runs": 5
   }
 ]

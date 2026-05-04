@@ -5,6 +5,7 @@
     "args": "https://projecteuler.net/resources/documents/0089_roman.txt",
     "answer": 743,
     "verdict": "correct",
-    "elapsed": 0.354946959996596
+    "average": 0.11761444279927673,
+    "number_runs": 5
   }
 ]

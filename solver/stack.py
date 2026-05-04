@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from solver.config import backup_dir, number_filename, resource_dirname, root_dir, solutions_dir, statement_filename
 from solver.problems import problems
-from solver.utils import canonical_path, iterdir_recursive, write_file
+from solver.util.utils import canonical_path, iterdir_recursive, write_file
 
 if TYPE_CHECKING:
     from solver.crypto.symmetrical import EncKey

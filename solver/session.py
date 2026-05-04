@@ -11,7 +11,7 @@ from uuid import uuid7
 
 from solver.cli import SolverShell
 from solver.config import sessions_dir
-from solver.utils import canonical_path
+from solver.util.utils import canonical_path
 
 
 class SessionCapture:

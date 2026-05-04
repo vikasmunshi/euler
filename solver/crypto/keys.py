@@ -14,7 +14,7 @@ from jsonschema import validate
 from solver.config import keys_file, keys_version, schema_file
 from solver.crypto.asymmetrical import UserKeyPair
 from solver.crypto.symmetrical import EncKey
-from solver.utils import is_admin
+from solver.util.utils import is_admin
 
 
 # ==================================================================================================================== #

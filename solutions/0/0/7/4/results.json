@@ -5,7 +5,8 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.08636340702651069
+    "average": 0.052770789405258256,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -13,7 +14,8 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.1236819249461405
+    "average": 0.060741986589346195,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -21,7 +23,8 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.10643093899125233
+    "average": 0.06177304179836938,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -29,7 +32,8 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.1112095009884797
+    "average": 0.06719730059776338,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -37,7 +41,8 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.24806896899826825
+    "average": 0.18810439039971244,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -45,7 +50,8 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 7.886893336020876
+    "average": 2.6606913108045775,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -53,7 +59,8 @@
     "args": "5000000",
     "answer": 3240,
     "verdict": "correct",
-    "elapsed": 9.533072236983571
+    "average": 8.775635384196903,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -61,7 +68,8 @@
     "args": "10000000",
     "answer": 4680,
     "verdict": "correct",
-    "elapsed": 18.90943012997741
+    "average": 17.227357738795217,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -69,7 +77,8 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.0660639299894683
+    "average": 0.04861472959764797,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -77,7 +86,8 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.08476306399097666
+    "average": 0.05472506339847314,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -85,7 +95,8 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.12846674805041403
+    "average": 0.060833923210157084,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -93,7 +104,8 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.30249961698427796
+    "average": 0.12388773099701211,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -101,7 +113,8 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.8424665160127915
+    "average": 0.500230939402536,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -109,7 +122,8 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 11.121815769991372
+    "average": 5.5638430831986625,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -117,15 +131,17 @@
     "args": "5000000",
     "answer": 3240,
     "verdict": "correct",
-    "elapsed": 58.64113385602832
+    "average": 33.640064668605916,
+    "number_runs": 5
   },
   {
     "category": "extra",
     "solution": "solve_digit_factorial_chains_p0074_s1.py",
     "args": "10000000",
-    "answer": null,
-    "verdict": "timeout",
-    "elapsed": 306.2028927979991
+    "answer": 4680,
+    "verdict": "correct",
+    "average": 57.19248774599964,
+    "number_runs": 4
   },
   {
     "category": "dev",
@@ -133,7 +149,8 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.2798710290226154
+    "average": 0.16644468960475933,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -141,7 +158,8 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.14106647099833935
+    "average": 0.06321374500003003,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -149,7 +167,8 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.16057025402551517
+    "average": 0.06981839800500893,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -157,7 +176,8 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.2574833770049736
+    "average": 0.11426553440123825,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -165,7 +185,8 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 1.4212642590282485
+    "average": 0.6076235104057559,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -173,7 +194,8 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 7.086414788034745
+    "average": 4.613283842607234,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -181,14 +203,16 @@
     "args": "5000000",
     "answer": 3240,
     "verdict": "correct",
-    "elapsed": 30.714487399032805
+    "average": 24.868610955606528,
+    "number_runs": 5
   },
   {
     "category": "extra",
     "solution": "solve_digit_factorial_chains_p0074_s2.py",
     "args": "10000000",
-    "answer": null,
-    "verdict": "timeout",
-    "elapsed": 305.12728354102
+    "answer": 4680,
+    "verdict": "correct",
+    "average": 50.764139745999955,
+    "number_runs": 4
   }
 ]

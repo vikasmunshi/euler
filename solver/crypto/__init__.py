@@ -7,7 +7,9 @@ from json import dumps
 from typing import Any
 
 from solver.config import ColorCodes, keys_backup_file, private_key_file
-from solver.utils import write_file
+from solver.crypto.asymmetrical import UserKeyPair
+from solver.crypto.keys import get_master_key, get_user_key, read_keys_file, rekey_keys_file, write_keys_file
+from solver.util.utils import write_file
 
 
 def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, backup: bool = False) -> None:
@@ -23,8 +25,6 @@ def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, b
                                Defaults to True.
         backup:                If True, print the backup keys for offline vault. Defaults to False.
     """
-    from solver.crypto.keys import rekey_keys_file, get_user_key, read_keys_file
-
     confirmation = input("Are you sure you want to rekey? Type 'Yes' to confirm: ")
     if confirmation != "Yes":
         print("Rekeying cancelled.")
@@ -66,9 +66,6 @@ def user(regen: bool = False) -> str:
         A colour-coded string identifying the user and indicating whether they have
         access to the master key (✓ can encrypt/decrypt in green, ✗ cannot in red).
     """
-    from solver.crypto.asymmetrical import UserKeyPair
-    from solver.crypto.keys import get_master_key, get_user_key, read_keys_file, write_keys_file
-
     try:
         user_key: UserKeyPair | None = get_user_key()
     except (AssertionError, FileNotFoundError):

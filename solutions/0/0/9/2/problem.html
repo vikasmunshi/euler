@@ -123,15 +123,28 @@
             padding-top: 6px;
         }
 
-        #results-content tr.result-main td {
+        #results-content tr.result-dev td {
             background: #e6f4ec;
             color: #2a6040;
+            font-weight: 600;
         }
 
-        #results-content tr.result-best td {
+        #results-content tr.result-main td {
             background: #c8ecd6;
             color: #1a4a30;
             font-weight: 700;
+        }
+
+        #results-content tr.result-extra td {
+            background: #a8dab8;
+            color: #0f3525;
+            font-weight: 700;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
         }
 
         #solution-notes-content {
@@ -245,11 +258,11 @@ $$\begin{align}
      <strong>
       First Solved:
      </strong>
-     2025-07-18
+     Fri 18. Jul 2025
     </h3>
     <table>
      <tbody>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -266,10 +279,10 @@ $$\begin{align}
         80
        </td>
        <td>
-        0.322s
+        0.101s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -286,10 +299,10 @@ $$\begin{align}
         857
        </td>
        <td>
-        0.220s
+        0.080s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -306,10 +319,10 @@ $$\begin{align}
         8558
        </td>
        <td>
-        0.271s
+        0.094s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -326,10 +339,10 @@ $$\begin{align}
         85623
        </td>
        <td>
-        0.282s
+        0.100s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -346,10 +359,10 @@ $$\begin{align}
         856929
        </td>
        <td>
-        0.233s
+        0.090s ⚡
        </td>
       </tr>
-      <tr class="result-best">
+      <tr class="result-main">
        <td>
         main
        </td>
@@ -366,10 +379,10 @@ $$\begin{align}
         8581146
        </td>
        <td>
-        0.234s
+        0.087s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -386,10 +399,10 @@ $$\begin{align}
         85744333
        </td>
        <td>
-        0.186s
+        0.074s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -406,7 +419,7 @@ $$\begin{align}
         854325192
        </td>
        <td>
-        0.205s
+        0.080s ⚡
        </td>
       </tr>
      </tbody>

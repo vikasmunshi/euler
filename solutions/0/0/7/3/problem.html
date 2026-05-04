@@ -123,15 +123,28 @@
             padding-top: 6px;
         }
 
-        #results-content tr.result-main td {
+        #results-content tr.result-dev td {
             background: #e6f4ec;
             color: #2a6040;
+            font-weight: 600;
         }
 
-        #results-content tr.result-best td {
+        #results-content tr.result-main td {
             background: #c8ecd6;
             color: #1a4a30;
             font-weight: 700;
+        }
+
+        #results-content tr.result-extra td {
+            background: #a8dab8;
+            color: #0f3525;
+            font-weight: 700;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
         }
 
         #solution-notes-content {
@@ -222,11 +235,11 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
      <strong>
       First Solved:
      </strong>
-     2025-07-16
+     Wed 16. Jul 2025
     </h3>
     <table>
      <tbody>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -243,10 +256,10 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         3
        </td>
        <td>
-        0.070s
+        0.049s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -263,7 +276,7 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         50695
        </td>
        <td>
-        0.108s
+        0.061s
        </td>
       </tr>
       <tr class="result-main">
@@ -283,10 +296,10 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         7295372
        </td>
        <td>
-        0.818s
+        0.625s
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -303,10 +316,14 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         506608484
        </td>
        <td>
-        56.787s
+        45.524s
        </td>
       </tr>
-      <tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -323,10 +340,10 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         3
        </td>
        <td>
-        0.060s
+        0.043s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -343,7 +360,7 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         50695
        </td>
        <td>
-        0.105s
+        0.058s ⚡
        </td>
       </tr>
       <tr class="result-main">
@@ -363,10 +380,10 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         7295372
        </td>
        <td>
-        1.322s
+        1.088s
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -383,10 +400,14 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         506608484
        </td>
        <td>
-        93.086s
+        76.467s
        </td>
       </tr>
-      <tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -403,10 +424,10 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         3
        </td>
        <td>
-        0.079s
+        0.053s
        </td>
       </tr>
-      <tr>
+      <tr class="result-dev">
        <td>
         dev
        </td>
@@ -423,10 +444,10 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         50695
        </td>
        <td>
-        0.110s
+        0.059s
        </td>
       </tr>
-      <tr class="result-best">
+      <tr class="result-main">
        <td>
         main
        </td>
@@ -443,10 +464,10 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         7295372
        </td>
        <td>
-        0.159s
+        0.081s ⚡
        </td>
       </tr>
-      <tr>
+      <tr class="result-extra">
        <td>
         extra
        </td>
@@ -463,7 +484,7 @@ $$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \
         506608484
        </td>
        <td>
-        0.508s
+        0.308s ⚡
        </td>
       </tr>
      </tbody>

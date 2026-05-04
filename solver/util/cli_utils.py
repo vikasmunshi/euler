@@ -11,7 +11,7 @@ from shlex import split
 from typing import Any, Callable, Literal, NamedTuple, get_args, get_origin
 
 from solver.config import workspace_dir
-from solver.utils import iterdir_recursive, canonical_path
+from solver.util.utils import iterdir_recursive, canonical_path
 
 
 class FuncInfo(NamedTuple):

@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, PublicFormat
 
 from solver.config import private_key_file
-from solver.utils import get_gh_user_email
+from solver.util.utils import get_gh_user_email
 
 
 class UserKeyPair(NamedTuple):

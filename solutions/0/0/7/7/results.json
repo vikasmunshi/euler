@@ -5,7 +5,8 @@
     "args": "5",
     "answer": 10,
     "verdict": "correct",
-    "elapsed": 0.15042661200277507
+    "average": 0.06620575680062757,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -13,7 +14,8 @@
     "args": "50",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.20839304896071553
+    "average": 0.07476479639208264,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -21,7 +23,8 @@
     "args": "500",
     "answer": 45,
     "verdict": "correct",
-    "elapsed": 0.13569009100319818
+    "average": 0.06349488880077843,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -29,7 +32,8 @@
     "args": "5000",
     "answer": 71,
     "verdict": "correct",
-    "elapsed": 0.21549780201166868
+    "average": 0.08794264180269237,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -37,7 +41,8 @@
     "args": "50000",
     "answer": 104,
     "verdict": "correct",
-    "elapsed": 0.18596895900554955
+    "average": 0.0884592632013664,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -45,7 +50,8 @@
     "args": "5",
     "answer": 10,
     "verdict": "correct",
-    "elapsed": 0.19941198400920257
+    "average": 0.08259131740178419,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -53,7 +59,8 @@
     "args": "50",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.13320993800880387
+    "average": 0.06758406680146437,
+    "number_runs": 5
   },
   {
     "category": "dev",
@@ -61,7 +68,8 @@
     "args": "500",
     "answer": 45,
     "verdict": "correct",
-    "elapsed": 0.12477090797619894
+    "average": 0.07399614719506645,
+    "number_runs": 5
   },
   {
     "category": "main",
@@ -69,7 +77,8 @@
     "args": "5000",
     "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.19688861502800137
+    "average": 0.11079502580541885,
+    "number_runs": 5
   },
   {
     "category": "extra",
@@ -77,6 +86,7 @@
     "args": "50000",
     "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.22086116898572072
+    "average": 0.12206953879722278,
+    "number_runs": 5
   }
 ]

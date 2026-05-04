@@ -5,6 +5,7 @@
     "args": "https://projecteuler.net/resources/documents/0098_words.txt",
     "answer": 18769,
     "verdict": "correct",
-    "elapsed": 0.5548769760061987
+    "average": 0.3893974346010509,
+    "number_runs": 5
   }
 ]

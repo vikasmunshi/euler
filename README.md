@@ -57,11 +57,12 @@ cd euler
 ./scripts/setup_chrome.sh install
 python3.14 -m venv .venv
 source .venv/bin/activate
-pip install -e ".[show,solutions,dev]"   # all groups; omit dev for user-only install
+pip install -e ".[show,solutions]"   # add dev group for full install
 solver
 ```
 
 </details>
+
 
 <details>
 <summary>or, if you enjoy living dangerously, don't install</summary>

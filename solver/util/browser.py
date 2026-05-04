@@ -13,7 +13,7 @@ from subprocess import CalledProcessError, run
 
 from solver.config import workspace_dir
 from solver.stack import stack_path
-from solver.utils import canonical_path
+from solver.util.utils import canonical_path
 
 
 @lru_cache(maxsize=None)
