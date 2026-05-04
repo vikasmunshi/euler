@@ -3,10 +3,14 @@
 """ Results: save and retrieve problem results."""
 from __future__ import annotations
 
+from contextlib import contextmanager
+from csv import reader
+from datetime import datetime
+from functools import lru_cache
 from json import JSONDecodeError, dumps, loads
-from types import TracebackType
+from typing import Generator, NamedTuple, Protocol
 
-from solver.config import ColorCodes, results_filename, workspace_dir
+from solver.config import ColorCodes, results_filename, solutions_history_file, workspace_dir
 from solver.stack import read_stack_file, write_stack_file
 from solver.utils import canonical_path
 
@@ -20,46 +24,27 @@ color_map: dict[str, ColorCodes] = {
 }
 
 
-class ResultsCollector:
-    __slots__ = ('__record', '__results',)
-    __record: bool
-    __results: list[dict[str, str | float]]
-
-    def __init__(self, record: bool) -> None:
-        self.__record = record
-        self.__results = []
-
-    def __enter__(self) -> ResultsCollector:
-        return self
-
-    def __exit__(self, exc_type: type[BaseException] | None, exc_value: BaseException | None,
-                 tb: TracebackType | None) -> None:
-        if self.__record:
-            write_results(self.__results, problem_number=0)
-            print(f'Results written to {canonical_path(workspace_dir / results_filename)}')
-
-    def record(self, *, category: str, solution: str, args: str, answer: str | None, verdict: str,
-               elapsed: float, ) -> None:
-        self.__results.append({'category': category, 'solution': solution, 'args': args.strip(), 'answer': answer or '',
-                               'verdict': verdict, 'elapsed': elapsed, })
-        print(f'{color_map.get(verdict, ColorCodes.RED)} {category:<6} {f"({verdict})":<11} [{elapsed:.3f}s] '
-              f'{solution} {args} -> {answer or ""}{ColorCodes.RESET}')
+class Recorder(Protocol):
+    def __call__(self, *, category: str, solution: str, args: str, answer: str | None,
+                 verdict: str, elapsed: float) -> None: ...
 
 
-def best_correct_main_result(problem_number: int = 0) -> dict[str, str | float] | None:
-    results = [r for r in read_results(problem_number) if r['category'] == 'main' and r['verdict'] == 'correct']
-    if not results:
-        return None
-    return min(results, key=lambda x: x['elapsed'])
+class Result(NamedTuple):
+    category: str
+    solution: str
+    args: str
+    answer: str | None
+    verdict: str
+    elapsed: float
+
+    def __str__(self) -> str:
+        return (f'{color_map.get(self.verdict, ColorCodes.RED)} '
+                f'{self.category:<6} {f"({self.verdict})":<11} [{self.elapsed:.3f}s] '
+                f'{self.solution} {self.args} -> {self.answer or ""}{ColorCodes.RESET}')
 
 
-def correct_main_results(problem_number: int = 0) -> list[dict[str, str | float]]:
-    return [r for r in read_results(problem_number) if r['category'] == 'main' and r['verdict'] == 'correct']
-
-
-def read_results(problem_number: int = 0) -> list[dict[str, str | float]]:
+def read_results(problem_number: int = 0) -> list[Result]:
     """Read problem results from a JSON file."""
-    results: list[dict[str, str | float]]
     try:
         if problem_number == 0:
             results = loads((workspace_dir / results_filename).read_bytes())
@@ -67,21 +52,64 @@ def read_results(problem_number: int = 0) -> list[dict[str, str | float]]:
             results = loads(read_stack_file(problem_number, results_filename)[0])
     except (FileNotFoundError, JSONDecodeError):
         results = []
-    return results
+    return [Result(**r) for r in results]
 
 
-def write_results(results: list[dict[str, str | float]], problem_number: int = 0) -> None:
+@contextmanager
+def results_collector(record: bool) -> Generator[Recorder, None, None]:
+    """Context manager that collects run results and optionally persists them on a clean exit from the with block."""
+    results: list[Result] = []
+
+    def recorder(*, category: str, solution: str, args: str, answer: str | None, verdict: str,
+                 elapsed: float, ) -> None:
+        result = Result(category=category, solution=solution, args=args.strip(), answer=answer, verdict=verdict,
+                        elapsed=elapsed)
+        results.append(result)
+        print(str(result))
+
+    yield recorder
+
+    if record:
+        write_results(results, problem_number=0)
+        print(f'Results written to {canonical_path(workspace_dir / results_filename)}')
+    return None
+
+
+@lru_cache(maxsize=None)
+def solutions_history() -> dict[int, str]:
+    """Return a mapping of problem number -> solve date read from solutions_history_file.
+
+    The CSV has no header; columns are: problem_number, title, date_with_time.
+    The date field looks like "20 Sep 25 (12:48)"; only the date portion is kept.
+    """
+    history: dict[int, str] = {}
+    try:
+        with solutions_history_file.open(newline='') as f:
+            for row in reader(f):
+                problem_number, _, date_with_time = int(row[0]), row[1], row[2]
+                date_str = date_with_time.split(' (')[0].strip()
+                history[problem_number] = datetime.strptime(date_str, '%d %b %y').strftime('%Y-%m-%d')
+    except FileNotFoundError:
+        pass
+    return history
+
+
+def write_results(results: list[Result], problem_number: int = 0) -> None:
     """Write problem results to a JSON file."""
+    results_str = dumps([r._asdict() for r in results], indent=2)
     if problem_number == 0:
-        (workspace_dir / results_filename).write_text(dumps(results, indent=2))
+        (workspace_dir / results_filename).write_text(results_str)
     else:
-        write_stack_file(problem_number, results_filename, dumps(results, indent=2).encode(), is_executable=False)
+        write_stack_file(problem_number, results_filename, results_str.encode(), is_executable=False)
 
 
 __all__ = (
-    'ResultsCollector',
-    'best_correct_main_result',
-    'correct_main_results',
+    'Result',
     'read_results',
+    'results_collector',
+    'solutions_history',
     'write_results',
 )
+
+if __name__ == '__main__':
+    print(solutions_history())

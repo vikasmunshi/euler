@@ -8,7 +8,7 @@
       8181
     ],
     "verdict": "correct",
-    "elapsed": 0.053636185999494046
+    "elapsed": 0.05116975196870044
   },
   {
     "category": "dev",
@@ -19,7 +19,7 @@
       19291
     ],
     "verdict": "correct",
-    "elapsed": 0.047438945999601856
+    "elapsed": 0.050324115029070526
   },
   {
     "category": "dev",
@@ -33,7 +33,7 @@
       ]
     ],
     "verdict": "correct",
-    "elapsed": 0.04401946798316203
+    "elapsed": 0.052745872002560645
   },
   {
     "category": "dev",
@@ -50,7 +50,7 @@
       ]
     ],
     "verdict": "correct",
-    "elapsed": 0.057801151007879525
+    "elapsed": 0.057156399998348206
   },
   {
     "category": "main",
@@ -61,6 +61,6 @@
       28684
     ],
     "verdict": "correct",
-    "elapsed": 0.07897967501776293
+    "elapsed": 0.07592147396644577
   }
 ]

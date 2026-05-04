@@ -5,7 +5,7 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.04268435700214468
+    "elapsed": 0.04512383695691824
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.0474966169858817
+    "elapsed": 0.041874094982631505
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.044639315019594505
+    "elapsed": 0.04121303599094972
   },
   {
     "category": "dev",
@@ -29,7 +29,7 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.048967304988764226
+    "elapsed": 0.05782800598535687
   },
   {
     "category": "dev",
@@ -37,7 +37,7 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.1740118429879658
+    "elapsed": 0.16632971999933943
   },
   {
     "category": "main",
@@ -45,7 +45,7 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 1.305400565994205
+    "elapsed": 2.1956362170167267
   },
   {
     "category": "dev",
@@ -53,7 +53,7 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.03950784300104715
+    "elapsed": 0.057182916963938624
   },
   {
     "category": "dev",
@@ -61,7 +61,7 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.03858636599034071
+    "elapsed": 0.044454792980104685
   },
   {
     "category": "dev",
@@ -69,7 +69,7 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.04031590299564414
+    "elapsed": 0.048005204007495195
   },
   {
     "category": "dev",
@@ -77,7 +77,7 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.06865046700113453
+    "elapsed": 0.07108927104854956
   },
   {
     "category": "dev",
@@ -85,7 +85,7 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.3409970630018506
+    "elapsed": 0.37940852402243763
   },
   {
     "category": "main",
@@ -93,7 +93,7 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 3.8655264739936683
+    "elapsed": 8.029228430008516
   },
   {
     "category": "dev",
@@ -101,7 +101,7 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.03471482699387707
+    "elapsed": 0.052858281997032464
   },
   {
     "category": "dev",
@@ -109,7 +109,7 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.04318846299429424
+    "elapsed": 0.059882265981286764
   },
   {
     "category": "dev",
@@ -117,7 +117,7 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.04135084600420669
+    "elapsed": 0.05578973196679726
   },
   {
     "category": "dev",
@@ -125,7 +125,7 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.06995734001975507
+    "elapsed": 0.07702760997926816
   },
   {
     "category": "dev",
@@ -133,7 +133,7 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.34537198598263785
+    "elapsed": 0.4347022180445492
   },
   {
     "category": "main",
@@ -141,6 +141,6 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 3.730040263995761
+    "elapsed": 3.8367108200327493
   }
 ]

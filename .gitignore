@@ -93,9 +93,7 @@ var/
 
 # solver specific files and folders to exclude
 /.*
-/.*/
-/backup/
-/cache/
+!.gitignore
+!.pre-commit-config.yaml
 /euler/
-/sessions/
 /venv*/

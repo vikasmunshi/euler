@@ -38,7 +38,8 @@ def clear_the_workspace(workspace_dir: Path, *, discard_changes: bool = False) -
         print('Workspace cleared.')
 
 
-def init_the_workspace(problem_number: int, /, *, workspace_dir: Path, force_refresh: bool = False) -> None:
+def init_the_workspace(problem_number: int, /, *, workspace_dir: Path, reinit: bool = False,
+                       force_refresh: bool = False) -> None:
     """
     Initialize the workspace for the specified problem number.
 
@@ -48,6 +49,8 @@ def init_the_workspace(problem_number: int, /, *, workspace_dir: Path, force_ref
     Args:
         workspace_dir:  Path to the workspace directory.
         problem_number: Problem number of the projecteuler problem to initialize in the workspace.
+        reinit:          Whether to reinitialize problem statement files
+                        Defaults to False, which will skip re-downloading the problem statement files.
         force_refresh:  Whether to force a refresh of the projecteuler files if they are already cached.
                         Defaults to False.
     """
@@ -61,13 +64,16 @@ def init_the_workspace(problem_number: int, /, *, workspace_dir: Path, force_ref
         print(f'Restoring stack files for problem {problem}...')
     else:
         print(f'Initializing workspace for problem {problem}...')
-    stack_dir: Path = stack_base_dir(problem.number)
-    if stack_dir.exists():
+    if stack_base_dir(problem.number).exists():
         unstack(problem.number, workspace_dir=workspace_dir)
-    problem, problem_statement_files = problem_statement(problem.number, force_refresh=force_refresh)
-    for filename, content in problem_statement_files.items():
-        write_file(workspace_dir / filename, content)
-    problem.to_workspace(workspace_dir)
+    else:
+        reinit = True
+    if reinit:
+        print('Downloading problem statement files...')
+        problem, problem_statement_files = problem_statement(problem.number, force_refresh=force_refresh)
+        for filename, content in problem_statement_files.items():
+            write_file(workspace_dir / filename, content)
+        problem.to_workspace(workspace_dir)
     print(f'Workspace init complete for problem {problem}')
     list_the_workspace(workspace_dir)
 

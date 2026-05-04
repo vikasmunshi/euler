@@ -5,7 +5,7 @@
     "args": "5",
     "answer": 10,
     "verdict": "correct",
-    "elapsed": 0.050134104007156566
+    "elapsed": 0.042954204021953046
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "50",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.04257380298804492
+    "elapsed": 0.05058813403593376
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "500",
     "answer": 45,
     "verdict": "correct",
-    "elapsed": 0.046681131003424525
+    "elapsed": 0.045280603982973844
   },
   {
     "category": "main",
@@ -29,7 +29,7 @@
     "args": "5000",
     "answer": 71,
     "verdict": "correct",
-    "elapsed": 0.05197762799798511
+    "elapsed": 0.04320358397671953
   },
   {
     "category": "dev",
@@ -37,7 +37,7 @@
     "args": "5",
     "answer": 10,
     "verdict": "correct",
-    "elapsed": 0.039550757996039465
+    "elapsed": 0.03651234298013151
   },
   {
     "category": "dev",
@@ -45,7 +45,7 @@
     "args": "50",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.040011688019149005
+    "elapsed": 0.04866259201662615
   },
   {
     "category": "dev",
@@ -53,14 +53,14 @@
     "args": "500",
     "answer": 45,
     "verdict": "correct",
-    "elapsed": 0.04665535900858231
+    "elapsed": 0.052051195001695305
   },
   {
     "category": "main",
     "solution": "solve_prime_summations_p0077_s1.py",
     "args": "5000",
-    "answer": "",
+    "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.07243510699481703
+    "elapsed": 0.08439753501443192
   }
 ]

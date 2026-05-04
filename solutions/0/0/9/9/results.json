@@ -5,6 +5,6 @@
     "args": "https://projecteuler.net/resources/documents/0099_base_exp.txt",
     "answer": 709,
     "verdict": "correct",
-    "elapsed": 0.04913925501750782
+    "elapsed": 0.06239400600316003
   }
 ]

@@ -10,30 +10,29 @@ from typing import Any, IO, cast
 from uuid import uuid7
 
 from solver.cli import SolverShell
-from solver.config import root_dir
+from solver.config import sessions_dir
+from solver.utils import canonical_path
 
 
 class SessionCapture:
     """Context-managed stdout tee: writes to both the terminal and a session log file."""
-    __slots__ = ('_file', '_filename', 'original', 'sessions_dir', 'shell')
+    __slots__ = ('_file', '_filepath', 'original', 'shell')
     _file: IO[str]
-    _filename: str
+    _filepath: Path
     original: IO[str]
-    sessions_dir: Path
     shell: SolverShell
 
     def __init__(self, shell: SolverShell | None = None) -> None:
         session_id: str = uuid7().hex
-        self._filename = f'{session_id}.txt'
-        self.sessions_dir = root_dir / 'sessions'
+        self._filepath = sessions_dir / f'{session_id}.txt'
         self.shell = shell or SolverShell()
         self.shell.session_id = session_id
 
     def __enter__(self) -> SessionCapture:
         _sys = sys_modules['sys']
-        self.sessions_dir.mkdir(exist_ok=True)
+        sessions_dir.mkdir(exist_ok=True)
         self.original = _sys.stdout
-        self._file = (root_dir / 'sessions' / self._filename).open('w')
+        self._file = self._filepath.open('w')
         _sys.stdout = cast(IO[str], cast(object, self))  # type: ignore [attr-defined]
         self.shell.stdout = _sys.stdout
         return self
@@ -46,7 +45,7 @@ class SessionCapture:
         _sys.stdout = self.original  # type: ignore [attr-defined]
         self.shell.stdout = _sys.stdout
         self._file.close()
-        print(f'Session log written to sessions/{self._filename}')
+        print(f'Session log written to {canonical_path(self._filepath)}')
 
     def write(self, s: str) -> int:
         self.original.write(s)

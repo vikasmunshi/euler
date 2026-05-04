@@ -5,7 +5,7 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.038016311009414494
+    "elapsed": 0.046558333036955446
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.03888824599562213
+    "elapsed": 0.05574699299177155
   },
   {
     "category": "main",
@@ -21,7 +21,7 @@
     "args": "100",
     "answer": 190569291,
     "verdict": "correct",
-    "elapsed": 0.041495654004393145
+    "elapsed": 0.0461676039849408
   },
   {
     "category": "dev",
@@ -29,7 +29,7 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.039975516992853954
+    "elapsed": 0.03824703802820295
   },
   {
     "category": "dev",
@@ -37,7 +37,7 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.050327178003499284
+    "elapsed": 0.050828189007006586
   },
   {
     "category": "main",
@@ -45,7 +45,7 @@
     "args": "100",
     "answer": 190569291,
     "verdict": "correct",
-    "elapsed": 0.04279082201537676
+    "elapsed": 0.05674431100487709
   },
   {
     "category": "dev",
@@ -53,7 +53,7 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.037485312001081184
+    "elapsed": 0.047856930003035814
   },
   {
     "category": "dev",
@@ -61,14 +61,14 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.6471409120131284
+    "elapsed": 0.63444316200912
   },
   {
     "category": "main",
     "solution": "solve_counting_summations_p0076_s2.py",
     "args": "100",
-    "answer": "",
+    "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.07161017999169417
+    "elapsed": 0.06185450102202594
   }
 ]

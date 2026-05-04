@@ -30,12 +30,14 @@ statement_filename: str = 'problem.html'
 test_cases_filename: str = 'test_cases.json'
 timeout: float = 300  # timeout in seconds
 
-backup_dir: Path = root_dir / 'backup'
-cache_dir: Path = root_dir / 'cache'
+backup_dir: Path = root_dir / '.backup'
+cache_dir: Path = root_dir / '.cache'
+history_file: Path = root_dir / '.history'
 keys_backup_file: Path = root_dir / 'backup/keys_backup.json'
 keys_file: Path = root_dir / 'keys' / 'keys.json'
 private_key_file: Path = Path.home() / '.ssh' / 'id_solver'
 schema_file: Path = root_dir / 'keys' / 'schema.json'
+sessions_dir: Path = root_dir / '.sessions'
 solutions_dir: Path = root_dir / 'solutions'
 solutions_history_file: Path = solutions_dir / 'history.csv'
 upload_keys_to_origin: Path = root_dir / 'scripts' / 'upload_keys_to_origin.sh'
@@ -62,6 +64,7 @@ __all__ = (
     'ColorCodes',
     'backup_dir',
     'cache_dir',
+    'history_file',
     'keys_backup_file',
     'keys_file',
     'keys_version',
@@ -73,6 +76,7 @@ __all__ = (
     'results_filename',
     'root_dir',
     'schema_file',
+    'sessions_dir',
     'solutions_dir',
     'solutions_history_file',
     'statement_filename',

@@ -18,7 +18,7 @@ from typing import Any, Callable, ClassVar, Literal, get_args, get_origin
 from solver.browser import show_in_browser
 from solver.cli_utils import (bool_flags, coerce, continue_on_error, dedup_history, format_command_line, func_info,
                               safe_split, show_value, workspace_files)
-from solver.config import ColorCodes, root_dir, solutions_dir, workspace_dir
+from solver.config import ColorCodes, history_file, solutions_dir, workspace_dir
 from solver.crypto import rekey, user
 from solver.evaluate import evaluate
 from solver.problems import problems
@@ -54,7 +54,6 @@ class SolverShell(Cmd):
     allowed_prefixes: ClassVar[tuple[str, ...]] = ('/bin', '/sbin', '/usr', '/home')
     banner: ClassVar[str] = banner
     exe_cache: ClassVar[list[str]] = []
-    history_file: ClassVar[Path] = root_dir / '.solver_history'
     identchars: str = Cmd.identchars + ':-'
     prompt = f'{canonical_path(workspace_dir)}$ '
     session_id: str | None = None
@@ -76,7 +75,7 @@ class SolverShell(Cmd):
         """Load readline history and print the welcome banner before the command loop starts."""
         set_completer_delims(get_completer_delims().replace(':', '').replace('-', ''))
         try:
-            read_history_file(self.history_file)
+            read_history_file(history_file)
         except FileNotFoundError:
             pass
         self.do_help('')
@@ -88,7 +87,7 @@ class SolverShell(Cmd):
         """Deduplicate, cap at 1000 entries, and persist readline history when the command loop exits."""
         dedup_history()
         set_history_length(1000)
-        write_history_file(self.history_file)
+        write_history_file(history_file)
         if hasattr(self, 'do_ls'):
             print(f'\n{CYAN}{"─" * 100}')
             self.do_ls('')

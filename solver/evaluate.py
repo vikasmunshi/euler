@@ -11,7 +11,7 @@ from time import perf_counter
 from typing import Any, Literal
 
 from solver.config import ColorCodes, test_cases_filename, timeout
-from solver.results import ResultsCollector
+from solver.results import results_collector
 
 RESET = ColorCodes.RESET
 
@@ -119,27 +119,26 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     for test_case in filtered:
         test_case['input_args_str'] = f'{test_case["input_args_str"]:<{len_input_args_str}}'
     no_errors: bool = True
-    with ResultsCollector(record=record) as collector:
-        for solution in solutions:
-            for test_case in filtered:
-                expected: Any = test_case.get('answer')
-                answer, elapsed, error = eval_solution(solution, test_case['input_args'], workspace_dir, expected)
-                match (answer, expected, error):
-                    case (None, _, error_msg) if 'OverflowError:' in error_msg:
-                        verdict = 'overflow'
-                    case (None, _, error_msg) if 'Timed out' in error_msg:
-                        verdict = 'timeout'
-                    case (None, _, _):
-                        verdict = 'error'
-                        no_errors = False
-                    case (_, None, _):
-                        verdict = 'unknown'
-                    case (ans, exp, _) if ans == exp:
-                        verdict = 'correct'
-                    case _:
-                        verdict = 'incorrect'
-                collector.record(category=test_case['category'], solution=solution, args=test_case['input_args_str'],
-                                 answer=answer, verdict=verdict, elapsed=elapsed, )
+    with results_collector(record=record) as recorder:
+        for solution, test_case in ((s, tc) for s in solutions for tc in filtered):
+            expected: Any = test_case.get('answer')
+            answer, elapsed, error = eval_solution(solution, test_case['input_args'], workspace_dir, expected)
+            match (answer, expected, error):
+                case (None, _, error_msg) if 'OverflowError:' in error_msg:
+                    verdict = 'overflow'
+                case (None, _, error_msg) if 'Timed out' in error_msg:
+                    verdict = 'timeout'
+                case (None, _, _):
+                    verdict = 'error'
+                    no_errors = False
+                case (_, None, _):
+                    verdict = 'unknown'
+                case (ans, exp, _) if ans == exp:
+                    verdict = 'correct'
+                case _:
+                    verdict = 'incorrect'
+            recorder(category=test_case['category'], solution=solution, args=test_case['input_args_str'],
+                     answer=answer, verdict=verdict, elapsed=elapsed)
     return no_errors
 
 
