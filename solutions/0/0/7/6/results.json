@@ -5,7 +5,7 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.046558333036955446
+    "elapsed": 0.2227582450141199
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.05574699299177155
+    "elapsed": 0.2347030880046077
   },
   {
     "category": "main",
@@ -21,7 +21,15 @@
     "args": "100",
     "answer": 190569291,
     "verdict": "correct",
-    "elapsed": 0.0461676039849408
+    "elapsed": 0.2003319559735246
+  },
+  {
+    "category": "extra",
+    "solution": "solve_counting_summations_p0076_s0.py",
+    "args": "1000",
+    "answer": 24061467864032622473692149727990,
+    "verdict": "correct",
+    "elapsed": 0.2720135860145092
   },
   {
     "category": "dev",
@@ -29,7 +37,7 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.03824703802820295
+    "elapsed": 0.18512118596117944
   },
   {
     "category": "dev",
@@ -37,7 +45,7 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.050828189007006586
+    "elapsed": 0.2905280769919045
   },
   {
     "category": "main",
@@ -45,7 +53,15 @@
     "args": "100",
     "answer": 190569291,
     "verdict": "correct",
-    "elapsed": 0.05674431100487709
+    "elapsed": 0.3820551170501858
+  },
+  {
+    "category": "extra",
+    "solution": "solve_counting_summations_p0076_s1.py",
+    "args": "1000",
+    "answer": 24061467864032622473692149727990,
+    "verdict": "correct",
+    "elapsed": 37.35111982800299
   },
   {
     "category": "dev",
@@ -53,7 +69,7 @@
     "args": "5",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.047856930003035814
+    "elapsed": 0.2655425349948928
   },
   {
     "category": "dev",
@@ -61,7 +77,7 @@
     "args": "50",
     "answer": 204225,
     "verdict": "correct",
-    "elapsed": 0.63444316200912
+    "elapsed": 2.9423702920321375
   },
   {
     "category": "main",
@@ -69,6 +85,14 @@
     "args": "100",
     "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.06185450102202594
+    "elapsed": 0.31273687700740993
+  },
+  {
+    "category": "extra",
+    "solution": "solve_counting_summations_p0076_s2.py",
+    "args": "1000",
+    "answer": null,
+    "verdict": "overflow",
+    "elapsed": 0.2915912159951404
   }
 ]

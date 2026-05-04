@@ -5,7 +5,7 @@
     "args": "10",
     "answer": 2520,
     "verdict": "correct",
-    "elapsed": 0.04933041799813509
+    "elapsed": 0.1234333969769068
   },
   {
     "category": "main",
@@ -13,6 +13,22 @@
     "args": "20",
     "answer": 232792560,
     "verdict": "correct",
-    "elapsed": 0.04753531399182975
+    "elapsed": 0.1281121310312301
+  },
+  {
+    "category": "extra",
+    "solution": "solve_smallest_multiple_p0005_s0.py",
+    "args": "50",
+    "answer": 3099044504245996706400,
+    "verdict": "correct",
+    "elapsed": 0.10932604497065768
+  },
+  {
+    "category": "extra",
+    "solution": "solve_smallest_multiple_p0005_s0.py",
+    "args": "100",
+    "answer": 69720375229712477164533808935312303556800,
+    "verdict": "correct",
+    "elapsed": 0.1010306149837561
   }
 ]

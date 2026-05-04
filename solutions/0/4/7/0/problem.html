@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 470: "Super Ramvok" (level 31)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 470: "Super Ramvok" (level 31)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,58 +141,99 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 470: "Super Ramvok" (level 31)</h2>
-    <p><a href="https://projecteuler.net/problem=470" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Consider a single game of Ramvok:</p>
-<p>Let $t$ represent the maximum number of turns the game lasts. If $t = 0$, then the game ends immediately. Otherwise, on each turn $i$, the player rolls a die. After rolling, if $i \lt t$ the player can either stop the game and receive a prize equal to the value of the current roll, or discard the roll and try again next turn. If $i = t$, then the roll cannot be discarded and the prize must be accepted. Before the game begins, $t$ is chosen by the player, who must then pay an up-front cost $ct$ for some constant $c$. For $c = 0$, $t$ can be chosen to be infinite (with an up-front cost of $0$). Let $R(d, c)$ be the expected profit (i.e. net gain) that the player receives from a single game of optimally-played Ramvok, given a fair $d$-sided die and cost constant $c$. For example, $R(4, 0.2) = 2.65$. Assume that the player has sufficient funds for paying any/all up-front costs.</p>
-<p>Now consider a game of Super Ramvok:</p>
-<p>In Super Ramvok, the game of Ramvok is played repeatedly, but with a slight modification. After each game, the die is altered. The alteration process is as follows: The die is rolled once, and if the resulting face has its pips visible, then that face is altered to be blank instead. If the face is already blank, then it is changed back to its original value. After the alteration is made, another game of Ramvok can begin (and during such a game, at each turn, the die is rolled until a face with a value on it appears). The player knows which faces are blank and which are not at all times. The game of Super Ramvok ends once all faces of the die are blank.</p>
-<p>Let $S(d, c)$ be the expected profit that the player receives from an optimally-played game of Super Ramvok, given a fair $d$-sided die to start (with all sides visible), and cost constant $c$. For example, $S(6, 1) = 208.3$.</p>
-<p>Let $F(n) = \sum_{4 \le d \le n} \sum_{0 \le c \le n} S(d, c)$.</p>
-<p>Calculate $F(20)$, rounded to the nearest integer.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 470: "Super Ramvok" (level 31)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=470" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Consider a single game of Ramvok:
+     </p>
+     <p>
+      Let $t$ represent the maximum number of turns the game lasts. If $t = 0$, then the game ends immediately. Otherwise, on each turn $i$, the player rolls a die. After rolling, if $i \lt t$ the player can either stop the game and receive a prize equal to the value of the current roll, or discard the roll and try again next turn. If $i = t$, then the roll cannot be discarded and the prize must be accepted. Before the game begins, $t$ is chosen by the player, who must then pay an up-front cost $ct$ for some constant $c$. For $c = 0$, $t$ can be chosen to be infinite (with an up-front cost of $0$). Let $R(d, c)$ be the expected profit (i.e. net gain) that the player receives from a single game of optimally-played Ramvok, given a fair $d$-sided die and cost constant $c$. For example, $R(4, 0.2) = 2.65$. Assume that the player has sufficient funds for paying any/all up-front costs.
+     </p>
+     <p>
+      Now consider a game of Super Ramvok:
+     </p>
+     <p>
+      In Super Ramvok, the game of Ramvok is played repeatedly, but with a slight modification. After each game, the die is altered. The alteration process is as follows: The die is rolled once, and if the resulting face has its pips visible, then that face is altered to be blank instead. If the face is already blank, then it is changed back to its original value. After the alteration is made, another game of Ramvok can begin (and during such a game, at each turn, the die is rolled until a face with a value on it appears). The player knows which faces are blank and which are not at all times. The game of Super Ramvok ends once all faces of the die are blank.
+     </p>
+     <p>
+      Let $S(d, c)$ be the expected profit that the player receives from an optimally-played game of Super Ramvok, given a fair $d$-sided die to start (with all sides visible), and cost constant $c$. For example, $S(6, 1) = 208.3$.
+     </p>
+     <p>
+      Let $F(n) = \sum_{4 \le d \le n} \sum_{0 \le c \le n} S(d, c)$.
+     </p>
+     <p>
+      Calculate $F(20)$, rounded to the nearest integer.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(max_d=4, max_c=1)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(max_d=20, max_c=20)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(max_d=4, max_c=1) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(max_d=20, max_c=20) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

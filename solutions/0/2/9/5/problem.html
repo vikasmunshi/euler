@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 295: "Lenticular Holes" (level 34)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 295: "Lenticular Holes" (level 34)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,79 +141,141 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 295: "Lenticular Holes" (level 34)</h2>
-    <p><a href="https://projecteuler.net/problem=295" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>We call the convex area enclosed by two circles a <dfn>lenticular hole</dfn> if:
-</p><ul><li>The centres of both circles are on lattice points.</li>
-<li>The two circles intersect at two distinct lattice points.</li>
-<li>The interior of the convex area enclosed by both circles does not contain any lattice points.
-</li>
-</ul><p>Consider the circles:<br/>
-$C_0$: $x^2 + y^2 = 25$<br/>
-$C_1$: $(x + 4)^2 + (y - 4)^2 = 1$<br/>
-$C_2$: $(x - 12)^2 + (y - 4)^2 = 65$
-</p>
-<p>
-The circles $C_0$, $C_1$ and $C_2$ are drawn in the picture below.</p>
-<div align="center"><img alt="0295_lenticular.gif" src="resources/0295_lenticular.gif"/></div>
-<p>
-$C_0$ and $C_1$ form a lenticular hole, as well as $C_0$ and $C_2$.</p>
-<p>
-We call an ordered pair of positive real numbers $(r_1, r_2)$ a <dfn>lenticular pair</dfn> if there exist two circles with radii $r_1$ and $r_2$ that form a lenticular hole.
-We can verify that $(1, 5)$ and $(5, \sqrt{65})$ are the lenticular pairs of the example above.</p>
-<p>
-Let $L(N)$ be the number of <b>distinct</b> lenticular pairs $(r_1, r_2)$ for which $0 \lt r_1 \le r_2 \le N$.<br/>
-We can verify that $L(10) = 30$ and $L(100) = 3442$.</p>
-<p>
-Find $L(100\,000)$.
-</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 295: "Lenticular Holes" (level 34)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=295" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      We call the convex area enclosed by two circles a
+      <dfn>
+       lenticular hole
+      </dfn>
+      if:
+     </p>
+     <ul>
+      <li>
+       The centres of both circles are on lattice points.
+      </li>
+      <li>
+       The two circles intersect at two distinct lattice points.
+      </li>
+      <li>
+       The interior of the convex area enclosed by both circles does not contain any lattice points.
+      </li>
+     </ul>
+     <p>
+      Consider the circles:
+      <br/>
+      $C_0$: $x^2 + y^2 = 25$
+      <br/>
+      $C_1$: $(x + 4)^2 + (y - 4)^2 = 1$
+      <br/>
+      $C_2$: $(x - 12)^2 + (y - 4)^2 = 65$
+     </p>
+     <p>
+      The circles $C_0$, $C_1$ and $C_2$ are drawn in the picture below.
+     </p>
+     <div align="center">
+      <img alt="0295_lenticular.gif" src="resources/0295_lenticular.gif"/>
+     </div>
+     <p>
+      $C_0$ and $C_1$ form a lenticular hole, as well as $C_0$ and $C_2$.
+     </p>
+     <p>
+      We call an ordered pair of positive real numbers $(r_1, r_2)$ a
+      <dfn>
+       lenticular pair
+      </dfn>
+      if there exist two circles with radii $r_1$ and $r_2$ that form a lenticular hole.
+We can verify that $(1, 5)$ and $(5, \sqrt{65})$ are the lenticular pairs of the example above.
+     </p>
+     <p>
+      Let $L(N)$ be the number of
+      <b>
+       distinct
+      </b>
+      lenticular pairs $(r_1, r_2)$ for which $0 \lt r_1 \le r_2 \le N$.
+      <br/>
+      We can verify that $L(10) = 30$ and $L(100) = 3442$.
+     </p>
+     <p>
+      Find $L(100\,000)$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(max_limit=10)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(max_limit=100000)</code> → <code>█</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(max_limit=200000)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(max_limit=10) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(max_limit=100000) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(max_limit=200000) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

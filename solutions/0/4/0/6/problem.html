@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 406: "Guessing Game" (level 24)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 406: "Guessing Game" (level 24)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,66 +141,192 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 406: "Guessing Game" (level 24)</h2>
-    <p><a href="https://projecteuler.net/problem=406" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>We are trying to find a hidden number selected from the set of integers $\{1, 2, \dots, n\}$ by asking questions.
-Each number (question) we ask, we get one of three possible answers:<br/></p><ul><li> "Your guess is lower than the hidden number" (and you incur a cost of $a$), or</li>
-<li> "Your guess is higher than the hidden number" (and you incur a cost of $b$), or</li>
-<li> "Yes, that's it!" (and the game ends).</li>
-</ul><p>Given the value of $n$, $a$, and $b$, an <dfn>optimal strategy</dfn> minimizes the total cost <u>for the worst possible case</u>.</p>
-<p>For example, if $n = 5$, $a = 2$, and $b = 3$, then we may begin by asking "<b>2</b>" as our first question.</p>
-<p>If we are told that 2 is higher than the hidden number (for a cost of <var>b</var>=3), then we are sure that "<b>1</b>" is the hidden number (for a total cost of <span style="color:#3333ff;"><b>3</b></span>).<br/>
-If we are told that 2 is lower than the hidden number (for a cost of <var>a</var>=2), then our next question will be "<b>4</b>".<br/>
-If we are told that 4 is higher than the hidden number (for a cost of <var>b</var>=3), then we are sure that "<b>3</b>" is the hidden number (for a total cost of 2+3=<span style="color:#3333ff;"><b>5</b></span>).<br/>
-If we are told that 4 is lower than the hidden number (for a cost of <var>a</var>=2), then we are sure that "<b>5</b>" is the hidden number (for a total cost of 2+2=<span style="color:#3333ff;"><b>4</b></span>).<br/>
-Thus, the worst-case cost achieved by this strategy is <span style="color:#FF0000;"><b>5</b></span>. It can also be shown that this is the lowest worst-case cost that can be achieved.
-So, in fact, we have just described an optimal strategy for the given values of $n$, $a$, and $b$.</p>
-<p>Let $C(n, a, b)$ be the worst-case cost achieved by an optimal strategy for the given values of $n$, $a$ and $b$.</p>
-<p>Here are a few examples:<br/>
-$C(5, 2, 3) = 5$<br/>
-$C(500, \sqrt 2, \sqrt 3) = 13.22073197\dots$<br/>
-$C(20000, 5, 7) = 82$<br/>
-$C(2000000, \sqrt 5, \sqrt 7) = 49.63755955\dots$</p>
-<p>Let $F_k$ be the Fibonacci numbers: $F_k=F_{k-1}+F_{k-2}$ with base cases $F_1=F_2= 1$.<br/>Find $\displaystyle \sum \limits_{k = 1}^{30} {C \left (10^{12}, \sqrt{k}, \sqrt{F_k} \right )}$, and give your answer rounded to 8 decimal places behind the decimal point.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 406: "Guessing Game" (level 24)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=406" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      We are trying to find a hidden number selected from the set of integers $\{1, 2, \dots, n\}$ by asking questions.
+Each number (question) we ask, we get one of three possible answers:
+      <br/>
+     </p>
+     <ul>
+      <li>
+       "Your guess is lower than the hidden number" (and you incur a cost of $a$), or
+      </li>
+      <li>
+       "Your guess is higher than the hidden number" (and you incur a cost of $b$), or
+      </li>
+      <li>
+       "Yes, that's it!" (and the game ends).
+      </li>
+     </ul>
+     <p>
+      Given the value of $n$, $a$, and $b$, an
+      <dfn>
+       optimal strategy
+      </dfn>
+      minimizes the total cost
+      <u>
+       for the worst possible case
+      </u>
+      .
+     </p>
+     <p>
+      For example, if $n = 5$, $a = 2$, and $b = 3$, then we may begin by asking "
+      <b>
+       2
+      </b>
+      " as our first question.
+     </p>
+     <p>
+      If we are told that 2 is higher than the hidden number (for a cost of
+      <var>
+       b
+      </var>
+      =3), then we are sure that "
+      <b>
+       1
+      </b>
+      " is the hidden number (for a total cost of
+      <span style="color:#3333ff;">
+       <b>
+        3
+       </b>
+      </span>
+      ).
+      <br/>
+      If we are told that 2 is lower than the hidden number (for a cost of
+      <var>
+       a
+      </var>
+      =2), then our next question will be "
+      <b>
+       4
+      </b>
+      ".
+      <br/>
+      If we are told that 4 is higher than the hidden number (for a cost of
+      <var>
+       b
+      </var>
+      =3), then we are sure that "
+      <b>
+       3
+      </b>
+      " is the hidden number (for a total cost of 2+3=
+      <span style="color:#3333ff;">
+       <b>
+        5
+       </b>
+      </span>
+      ).
+      <br/>
+      If we are told that 4 is lower than the hidden number (for a cost of
+      <var>
+       a
+      </var>
+      =2), then we are sure that "
+      <b>
+       5
+      </b>
+      " is the hidden number (for a total cost of 2+2=
+      <span style="color:#3333ff;">
+       <b>
+        4
+       </b>
+      </span>
+      ).
+      <br/>
+      Thus, the worst-case cost achieved by this strategy is
+      <span style="color:#FF0000;">
+       <b>
+        5
+       </b>
+      </span>
+      . It can also be shown that this is the lowest worst-case cost that can be achieved.
+So, in fact, we have just described an optimal strategy for the given values of $n$, $a$, and $b$.
+     </p>
+     <p>
+      Let $C(n, a, b)$ be the worst-case cost achieved by an optimal strategy for the given values of $n$, $a$ and $b$.
+     </p>
+     <p>
+      Here are a few examples:
+      <br/>
+      $C(5, 2, 3) = 5$
+      <br/>
+      $C(500, \sqrt 2, \sqrt 3) = 13.22073197\dots$
+      <br/>
+      $C(20000, 5, 7) = 82$
+      <br/>
+      $C(2000000, \sqrt 5, \sqrt 7) = 49.63755955\dots$
+     </p>
+     <p>
+      Let $F_k$ be the Fibonacci numbers: $F_k=F_{k-1}+F_{k-2}$ with base cases $F_1=F_2= 1$.
+      <br/>
+      Find $\displaystyle \sum \limits_{k = 1}^{30} {C \left (10^{12}, \sqrt{k}, \sqrt{F_k} \right )}$, and give your answer rounded to 8 decimal places behind the decimal point.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Main</h3>
-<ul>
-<li><code>solve(n=1000000000000, k=30)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       main: solve(n=1000000000000, k=30) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

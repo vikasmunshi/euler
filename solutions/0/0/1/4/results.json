@@ -5,6 +5,14 @@
     "args": "1000000",
     "answer": 837799,
     "verdict": "correct",
-    "elapsed": 2.148457798990421
+    "elapsed": 8.620327512966469
+  },
+  {
+    "category": "extra",
+    "solution": "solve_longest_collatz_sequence_p0014_s0.py",
+    "args": "10000000",
+    "answer": 8400511,
+    "verdict": "correct",
+    "elapsed": 20.767736506997608
   }
 ]

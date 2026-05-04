@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 860: "Gold and Silver Coin Game" (level 6)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 860: "Gold and Silver Coin Game" (level 6)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,64 +141,100 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 860: "Gold and Silver Coin Game" (level 6)</h2>
-    <p><a href="https://projecteuler.net/problem=860" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>
-Gary and Sally play a game using gold and silver coins arranged into a number of vertical stacks, alternating turns. On Gary's turn he chooses a gold coin and removes it from the game along with any other coins sitting on top. Sally does the same on her turn by removing a silver coin. The first player unable to make a move loses.</p>
-<p>
-An arrangement is called <dfn>fair</dfn> if the person moving first, whether it be Gary or Sally, will lose the game if both play optimally.</p>
-<p>
-Define $F(n)$ to be the number of fair arrangements of $n$ stacks, all of size $2$. Different orderings of the stacks are to be counted separately, so $F(2) = 4$ due to the following four arrangements:</p>
-<div class="center">
-<img alt="0860_diag3.jpg" src="resources/0860_diag3.jpg"/>
-</div>
-<p>
-You are also given $F(10) = 63594$.</p>
-<p>
-Find $F(9898)$. Give your answer modulo $989898989$</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 860: "Gold and Silver Coin Game" (level 6)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=860" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Gary and Sally play a game using gold and silver coins arranged into a number of vertical stacks, alternating turns. On Gary's turn he chooses a gold coin and removes it from the game along with any other coins sitting on top. Sally does the same on her turn by removing a silver coin. The first player unable to make a move loses.
+     </p>
+     <p>
+      An arrangement is called
+      <dfn>
+       fair
+      </dfn>
+      if the person moving first, whether it be Gary or Sally, will lose the game if both play optimally.
+     </p>
+     <p>
+      Define $F(n)$ to be the number of fair arrangements of $n$ stacks, all of size $2$. Different orderings of the stacks are to be counted separately, so $F(2) = 4$ due to the following four arrangements:
+     </p>
+     <div class="center">
+      <img alt="0860_diag3.jpg" src="resources/0860_diag3.jpg"/>
+     </div>
+     <p>
+      You are also given $F(10) = 63594$.
+     </p>
+     <p>
+      Find $F(9898)$. Give your answer modulo $989898989$
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(n=2)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(n=9898)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(n=2) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(n=9898) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

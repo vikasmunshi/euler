@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 566: "Cake Icing Puzzle" (level 39)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 566: "Cake Icing Puzzle" (level 39)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,63 +141,110 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 566: "Cake Icing Puzzle" (level 39)</h2>
-    <p><a href="https://projecteuler.net/problem=566" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Adam plays the following game with his birthday cake.</p>
-<p>He cuts a piece forming a circular sector of $60$ degrees and flips the piece upside down, with the icing on the bottom.<br/>
-He then rotates the cake by $60$ degrees counterclockwise, cuts an adjacent $60$ degree piece and flips it upside down.<br/>
-He keeps repeating this, until after a total of twelve steps, all the icing is back on top.</p>
-<p>Amazingly, this works for any piece size, even if the cutting angle is an irrational number: all the icing will be back on top after a finite number of steps.</p>
-<p>Now, Adam tries something different: he alternates cutting pieces of size $x=\frac{360}{9}$ degrees, $y=\frac{360}{10}$ degrees and $z=\frac{360 }{\sqrt{11}}$ degrees. The first piece he cuts has size $x$ and he flips it. The second has size $y$ and he flips it. The third has size $z$ and he flips it. He repeats this with pieces of size $x$, $y$ and $z$ in that order until all the icing is back on top, and discovers he needs $60$ flips altogether.</p>
-<div align="center"><img alt="0566-cakeicingpuzzle.gif" src="resources/0566-cakeicingpuzzle.gif"/></div>
-<p>Let $F(a, b, c)$ be the minimum number of piece flips needed to get all the icing back on top for pieces of size $x=\frac{360}{a}$ degrees, $y=\frac{360}{b}$ degrees and $z=\frac{360}{\sqrt{c}}$ degrees.<br/>
-Let $G(n) = \sum_{9 \le a \lt b \lt c \le n} F(a,b,c)$, for integers $a$, $b$ and $c$.</p>
-<p>You are given that $F(9, 10, 11) = 60$, $F(10, 14, 16) = 506$, $F(15, 16, 17) = 785232$.<br/>
-You are also given $G(11) = 60$, $G(14) = 58020$ and $G(17) = 1269260$.</p>
-<p>Find $G(53)$.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 566: "Cake Icing Puzzle" (level 39)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=566" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Adam plays the following game with his birthday cake.
+     </p>
+     <p>
+      He cuts a piece forming a circular sector of $60$ degrees and flips the piece upside down, with the icing on the bottom.
+      <br/>
+      He then rotates the cake by $60$ degrees counterclockwise, cuts an adjacent $60$ degree piece and flips it upside down.
+      <br/>
+      He keeps repeating this, until after a total of twelve steps, all the icing is back on top.
+     </p>
+     <p>
+      Amazingly, this works for any piece size, even if the cutting angle is an irrational number: all the icing will be back on top after a finite number of steps.
+     </p>
+     <p>
+      Now, Adam tries something different: he alternates cutting pieces of size $x=\frac{360}{9}$ degrees, $y=\frac{360}{10}$ degrees and $z=\frac{360 }{\sqrt{11}}$ degrees. The first piece he cuts has size $x$ and he flips it. The second has size $y$ and he flips it. The third has size $z$ and he flips it. He repeats this with pieces of size $x$, $y$ and $z$ in that order until all the icing is back on top, and discovers he needs $60$ flips altogether.
+     </p>
+     <div align="center">
+      <img alt="0566-cakeicingpuzzle.gif" src="resources/0566-cakeicingpuzzle.gif"/>
+     </div>
+     <p>
+      Let $F(a, b, c)$ be the minimum number of piece flips needed to get all the icing back on top for pieces of size $x=\frac{360}{a}$ degrees, $y=\frac{360}{b}$ degrees and $z=\frac{360}{\sqrt{c}}$ degrees.
+      <br/>
+      Let $G(n) = \sum_{9 \le a \lt b \lt c \le n} F(a,b,c)$, for integers $a$, $b$ and $c$.
+     </p>
+     <p>
+      You are given that $F(9, 10, 11) = 60$, $F(10, 14, 16) = 506$, $F(15, 16, 17) = 785232$.
+      <br/>
+      You are also given $G(11) = 60$, $G(14) = 58020$ and $G(17) = 1269260$.
+     </p>
+     <p>
+      Find $G(53)$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(n=11)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(n=53)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(n=11) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(n=53) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

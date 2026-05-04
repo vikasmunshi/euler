@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 196: "Prime Triplets" (level 21)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 196: "Prime Triplets" (level 21)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,70 +141,200 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 196: "Prime Triplets" (level 21)</h2>
-    <p><a href="https://projecteuler.net/problem=196" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Build a triangle from all positive integers in the following way:</p>
-<p style="font-family:'courier new', monospace;font-weight:bold;margin-left:50px;"> 1<br/>
- <span style="color:#FF0000;">2</span>  <span style="color:#FF0000;">3</span><br/>
- 4  <span style="color:#FF0000;">5</span>  6<br/>
- <span style="color:#FF0000;">7</span>  8  9 10<br/><span style="color:#FF0000;">11</span> 12 <span style="color:#FF0000;">13</span> 14 15<br/>
-16 <span style="color:#FF0000;">17</span> 18 <span style="color:#FF0000;">19</span> 20 21<br/>
-22 <span style="color:#FF0000;">23</span> 24 25 26 27 28<br/><span style="color:#FF0000;">29</span> 30 <span style="color:#FF0000;">31</span> 32 33 34 35 36<br/><span style="color:#FF0000;">37</span> 38 39 40 <span style="color:#FF0000;">41</span> 42 <span style="color:#FF0000;">43</span> 44 45<br/>
-46 <span style="color:#FF0000;">47</span> 48 49 50 51 52 <span style="color:#FF0000;">53</span> 54 55<br/>
-56 57 58 <span style="color:#FF0000;">59</span> 60 <span style="color:#FF0000;">61</span> 62 63 64 65 66<br/>
-. . .</p>
-<p>Each positive integer has up to eight neighbours in the triangle.</p>
-<p>A set of three primes is called a <dfn>prime triplet</dfn> if one of the three primes has the other two as neighbours in the triangle.</p>
-<p>For example, in the second row, the prime numbers $2$ and $3$ are elements of some prime triplet.</p>
-<p>If row $8$ is considered, it contains two primes which are elements of some prime triplet, i.e. $29$ and $31$.<br/>
-If row $9$ is considered, it contains only one prime which is an element of some prime triplet: $37$.</p>
-<p>Define $S(n)$ as the sum of the primes in row $n$ which are elements of any prime triplet.<br/>
-Then $S(8)=60$ and $S(9)=37$.</p>
-<p>You are given that $S(10000)=950007619$.</p>
-<p>Find $S(5678027) + S(7208785)$.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 196: "Prime Triplets" (level 21)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=196" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Build a triangle from all positive integers in the following way:
+     </p>
+     <p style="font-family:'courier new', monospace;font-weight:bold;margin-left:50px;">
+      1
+      <br/>
+      <span style="color:#FF0000;">
+       2
+      </span>
+      <span style="color:#FF0000;">
+       3
+      </span>
+      <br/>
+      4
+      <span style="color:#FF0000;">
+       5
+      </span>
+      6
+      <br/>
+      <span style="color:#FF0000;">
+       7
+      </span>
+      8  9 10
+      <br/>
+      <span style="color:#FF0000;">
+       11
+      </span>
+      12
+      <span style="color:#FF0000;">
+       13
+      </span>
+      14 15
+      <br/>
+      16
+      <span style="color:#FF0000;">
+       17
+      </span>
+      18
+      <span style="color:#FF0000;">
+       19
+      </span>
+      20 21
+      <br/>
+      22
+      <span style="color:#FF0000;">
+       23
+      </span>
+      24 25 26 27 28
+      <br/>
+      <span style="color:#FF0000;">
+       29
+      </span>
+      30
+      <span style="color:#FF0000;">
+       31
+      </span>
+      32 33 34 35 36
+      <br/>
+      <span style="color:#FF0000;">
+       37
+      </span>
+      38 39 40
+      <span style="color:#FF0000;">
+       41
+      </span>
+      42
+      <span style="color:#FF0000;">
+       43
+      </span>
+      44 45
+      <br/>
+      46
+      <span style="color:#FF0000;">
+       47
+      </span>
+      48 49 50 51 52
+      <span style="color:#FF0000;">
+       53
+      </span>
+      54 55
+      <br/>
+      56 57 58
+      <span style="color:#FF0000;">
+       59
+      </span>
+      60
+      <span style="color:#FF0000;">
+       61
+      </span>
+      62 63 64 65 66
+      <br/>
+      . . .
+     </p>
+     <p>
+      Each positive integer has up to eight neighbours in the triangle.
+     </p>
+     <p>
+      A set of three primes is called a
+      <dfn>
+       prime triplet
+      </dfn>
+      if one of the three primes has the other two as neighbours in the triangle.
+     </p>
+     <p>
+      For example, in the second row, the prime numbers $2$ and $3$ are elements of some prime triplet.
+     </p>
+     <p>
+      If row $8$ is considered, it contains two primes which are elements of some prime triplet, i.e. $29$ and $31$.
+      <br/>
+      If row $9$ is considered, it contains only one prime which is an element of some prime triplet: $37$.
+     </p>
+     <p>
+      Define $S(n)$ as the sum of the primes in row $n$ which are elements of any prime triplet.
+      <br/>
+      Then $S(8)=60$ and $S(9)=37$.
+     </p>
+     <p>
+      You are given that $S(10000)=950007619$.
+     </p>
+     <p>
+      Find $S(5678027) + S(7208785)$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(n1=8, n2=9)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(n1=5678027, n2=7208785)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(n1=8, n2=9) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(n1=5678027, n2=7208785) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

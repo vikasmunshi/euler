@@ -5,6 +5,6 @@
     "args": "https://projecteuler.net/resources/documents/0067_triangle.txt",
     "answer": 7273,
     "verdict": "correct",
-    "elapsed": 0.05492029996821657
+    "elapsed": 0.14762192498892546
   }
 ]

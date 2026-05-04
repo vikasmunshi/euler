@@ -5,7 +5,7 @@
     "args": "2 5 2 5",
     "answer": 15,
     "verdict": "correct",
-    "elapsed": 0.05122165399370715
+    "elapsed": 0.09184949402697384
   },
   {
     "category": "main",
@@ -13,7 +13,15 @@
     "args": "2 100 2 100",
     "answer": 9183,
     "verdict": "correct",
-    "elapsed": 0.05462352896574885
+    "elapsed": 0.1082022909540683
+  },
+  {
+    "category": "extra",
+    "solution": "solve_distinct_powers_p0029_s0.py",
+    "args": "2 1000 2 1000",
+    "answer": 977358,
+    "verdict": "correct",
+    "elapsed": 8.946240170975216
   },
   {
     "category": "dev",
@@ -21,7 +29,7 @@
     "args": "2 5 2 5",
     "answer": 15,
     "verdict": "correct",
-    "elapsed": 0.04772021702956408
+    "elapsed": 0.09525521704927087
   },
   {
     "category": "main",
@@ -29,6 +37,14 @@
     "args": "2 100 2 100",
     "answer": 9183,
     "verdict": "correct",
-    "elapsed": 0.05125279095955193
+    "elapsed": 0.13536868803203106
+  },
+  {
+    "category": "extra",
+    "solution": "solve_distinct_powers_p0029_s1_pps.py",
+    "args": "2 1000 2 1000",
+    "answer": 977358,
+    "verdict": "correct",
+    "elapsed": 4.564002107013948
   }
 ]

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 705: "Total Inversion Count of Divided Sequences" (level 8)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 705: "Total Inversion Count of Divided Sequences" (level 8)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,67 +141,103 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 705: "Total Inversion Count of Divided Sequences" (level 8)</h2>
-    <p><a href="https://projecteuler.net/problem=705" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>
-The <dfn>inversion count</dfn> of a sequence of digits is the smallest number of adjacent pairs that must be swapped to sort the sequence.<br/>
-For example, $34214$ has inversion count of $5$:
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 705: "Total Inversion Count of Divided Sequences" (level 8)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=705" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      The
+      <dfn>
+       inversion count
+      </dfn>
+      of a sequence of digits is the smallest number of adjacent pairs that must be swapped to sort the sequence.
+      <br/>
+      For example, $34214$ has inversion count of $5$:
 $34214 \to 32414 \to 23414 \to 23144 \to 21344 \to12344$.
-</p>
-<p>
-If each digit of a sequence is replaced by one of its divisors a <dfn>divided sequence</dfn> is obtained. <br/>
-For example, the sequence $332$ has $8$ divided sequences: $\{332,331,312,311,132,131,112,111\}$.
-</p>
-<p>
-Define $G(N)$ to be the concatenation of all primes less than $N$, ignoring any zero digit. <br/>
-For example, $G(20) = 235711131719$.
-</p>
-<p>
-Define $F(N)$ to be the sum of the inversion count for all possible divided sequences from the master sequence $G(N)$. <br/>
-You are given $F(20) = 3312$ and $F(50) = 338079744$.
-</p>
-<p>
-Find $F(10^8)$. Give your answer modulo $1\,000\,000\,007$.
-</p>
-</div>
+     </p>
+     <p>
+      If each digit of a sequence is replaced by one of its divisors a
+      <dfn>
+       divided sequence
+      </dfn>
+      is obtained.
+      <br/>
+      For example, the sequence $332$ has $8$ divided sequences: $\{332,331,312,311,132,131,112,111\}$.
+     </p>
+     <p>
+      Define $G(N)$ to be the concatenation of all primes less than $N$, ignoring any zero digit.
+      <br/>
+      For example, $G(20) = 235711131719$.
+     </p>
+     <p>
+      Define $F(N)$ to be the sum of the inversion count for all possible divided sequences from the master sequence $G(N)$.
+      <br/>
+      You are given $F(20) = 3312$ and $F(50) = 338079744$.
+     </p>
+     <p>
+      Find $F(10^8)$. Give your answer modulo $1\,000\,000\,007$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Main</h3>
-<ul>
-<li><code>solve()</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       main: solve() → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

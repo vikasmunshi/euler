@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 256: "Tatami-Free Rooms" (level 33)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 256: "Tatami-Free Rooms" (level 33)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,73 +141,136 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 256: "Tatami-Free Rooms" (level 33)</h2>
-    <p><a href="https://projecteuler.net/problem=256" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Tatami are rectangular mats, used to completely cover the floor of a room, without overlap.</p>
-<p>Assuming that the only type of available tatami has dimensions $1 \times 2$, there are obviously some limitations for the shape and size of the rooms that can be covered.</p>
-<p>For this problem, we consider only rectangular rooms with integer dimensions $a, b$ and even size $s = a \cdot b$.<br/>
-We use the term 'size' to denote the floor surface area of the room, and — without loss of generality — we add the condition $a \le b$.</p>
-<p>There is one rule to follow when laying out tatami: there must be no points where corners of four different mats meet.<br/>
-For example, consider the two arrangements below for a $4 \times 4$ room:</p>
-<div align="center">
-<img alt="0256_tatami3.gif" src="resources/0256_tatami3.gif"/><br/></div>
-<p>The arrangement on the left is acceptable, whereas the one on the right is not: a red "<span style="color:#FF0000;"><b>X</b></span>" in the middle, marks the point where four tatami meet.</p>
-<p>Because of this rule, certain even-sized rooms cannot be covered with tatami: we call them tatami-free rooms.<br/>
-Further, we define $T(s)$ as the number of tatami-free rooms of size $s$.</p>
-<p>The smallest tatami-free room has size $s = 70$ and dimensions $7 \times 10$.<br/>
-All the other rooms of size $s = 70$ can be covered with tatami; they are: $1 \times 70$, $2 \times 35$ and $5 \times 14$.<br/>
-Hence, $T(70) = 1$.</p>
-<p>Similarly, we can verify that $T(1320) = 5$ because there are exactly $5$ tatami-free rooms of size $s = 1320$:<br/>
-$20 \times 66$, $22 \times 60$, $24 \times 55$, $30 \times 44$ and $33 \times 40$.<br/>
-In fact, $s = 1320$ is the smallest room-size $s$ for which $T(s) = 5$.</p>
-<p>Find the smallest room-size $s$ for which $T(s) = 200$.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 256: "Tatami-Free Rooms" (level 33)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=256" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Tatami are rectangular mats, used to completely cover the floor of a room, without overlap.
+     </p>
+     <p>
+      Assuming that the only type of available tatami has dimensions $1 \times 2$, there are obviously some limitations for the shape and size of the rooms that can be covered.
+     </p>
+     <p>
+      For this problem, we consider only rectangular rooms with integer dimensions $a, b$ and even size $s = a \cdot b$.
+      <br/>
+      We use the term 'size' to denote the floor surface area of the room, and — without loss of generality — we add the condition $a \le b$.
+     </p>
+     <p>
+      There is one rule to follow when laying out tatami: there must be no points where corners of four different mats meet.
+      <br/>
+      For example, consider the two arrangements below for a $4 \times 4$ room:
+     </p>
+     <div align="center">
+      <img alt="0256_tatami3.gif" src="resources/0256_tatami3.gif"/>
+      <br/>
+     </div>
+     <p>
+      The arrangement on the left is acceptable, whereas the one on the right is not: a red "
+      <span style="color:#FF0000;">
+       <b>
+        X
+       </b>
+      </span>
+      " in the middle, marks the point where four tatami meet.
+     </p>
+     <p>
+      Because of this rule, certain even-sized rooms cannot be covered with tatami: we call them tatami-free rooms.
+      <br/>
+      Further, we define $T(s)$ as the number of tatami-free rooms of size $s$.
+     </p>
+     <p>
+      The smallest tatami-free room has size $s = 70$ and dimensions $7 \times 10$.
+      <br/>
+      All the other rooms of size $s = 70$ can be covered with tatami; they are: $1 \times 70$, $2 \times 35$ and $5 \times 14$.
+      <br/>
+      Hence, $T(70) = 1$.
+     </p>
+     <p>
+      Similarly, we can verify that $T(1320) = 5$ because there are exactly $5$ tatami-free rooms of size $s = 1320$:
+      <br/>
+      $20 \times 66$, $22 \times 60$, $24 \times 55$, $30 \times 44$ and $33 \times 40$.
+      <br/>
+      In fact, $s = 1320$ is the smallest room-size $s$ for which $T(s) = 5$.
+     </p>
+     <p>
+      Find the smallest room-size $s$ for which $T(s) = 200$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(target_T=1)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(target_T=200)</code> → <code>█</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(target_T=5)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(target_T=1) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(target_T=200) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(target_T=5) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

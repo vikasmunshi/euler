@@ -5,7 +5,7 @@
     "args": "5",
     "answer": 10,
     "verdict": "correct",
-    "elapsed": 0.042954204021953046
+    "elapsed": 0.15042661200277507
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "50",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.05058813403593376
+    "elapsed": 0.20839304896071553
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "500",
     "answer": 45,
     "verdict": "correct",
-    "elapsed": 0.045280603982973844
+    "elapsed": 0.13569009100319818
   },
   {
     "category": "main",
@@ -29,7 +29,15 @@
     "args": "5000",
     "answer": 71,
     "verdict": "correct",
-    "elapsed": 0.04320358397671953
+    "elapsed": 0.21549780201166868
+  },
+  {
+    "category": "extra",
+    "solution": "solve_prime_summations_p0077_s0.py",
+    "args": "50000",
+    "answer": 104,
+    "verdict": "correct",
+    "elapsed": 0.18596895900554955
   },
   {
     "category": "dev",
@@ -37,7 +45,7 @@
     "args": "5",
     "answer": 10,
     "verdict": "correct",
-    "elapsed": 0.03651234298013151
+    "elapsed": 0.19941198400920257
   },
   {
     "category": "dev",
@@ -45,7 +53,7 @@
     "args": "50",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.04866259201662615
+    "elapsed": 0.13320993800880387
   },
   {
     "category": "dev",
@@ -53,7 +61,7 @@
     "args": "500",
     "answer": 45,
     "verdict": "correct",
-    "elapsed": 0.052051195001695305
+    "elapsed": 0.12477090797619894
   },
   {
     "category": "main",
@@ -61,6 +69,14 @@
     "args": "5000",
     "answer": null,
     "verdict": "overflow",
-    "elapsed": 0.08439753501443192
+    "elapsed": 0.19688861502800137
+  },
+  {
+    "category": "extra",
+    "solution": "solve_prime_summations_p0077_s1.py",
+    "args": "50000",
+    "answer": null,
+    "verdict": "overflow",
+    "elapsed": 0.22086116898572072
   }
 ]

@@ -5,7 +5,7 @@
     "args": "13195",
     "answer": 29,
     "verdict": "correct",
-    "elapsed": 0.06960770703153685
+    "elapsed": 0.12570244999369606
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "10",
     "answer": 5,
     "verdict": "correct",
-    "elapsed": 0.04726024903357029
+    "elapsed": 0.07787634199485183
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "20",
     "answer": 5,
     "verdict": "correct",
-    "elapsed": 0.06321985099930316
+    "elapsed": 0.08919607097050175
   },
   {
     "category": "main",
@@ -29,6 +29,14 @@
     "args": "600851475143",
     "answer": 6857,
     "verdict": "correct",
-    "elapsed": 0.05486429197480902
+    "elapsed": 0.08555736998096108
+  },
+  {
+    "category": "extra",
+    "solution": "solve_largest_prime_factor_p0003_s0.py",
+    "args": "79376318561249",
+    "answer": 9999991,
+    "verdict": "correct",
+    "elapsed": 0.4128453520243056
   }
 ]

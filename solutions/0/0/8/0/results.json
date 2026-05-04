@@ -5,7 +5,7 @@
     "args": "100 2",
     "answer": 475,
     "verdict": "correct",
-    "elapsed": 0.06300320598529652
+    "elapsed": 0.13640802400186658
   },
   {
     "category": "main",
@@ -13,7 +13,15 @@
     "args": "100 99",
     "answer": 40886,
     "verdict": "correct",
-    "elapsed": 0.07686043297871947
+    "elapsed": 0.15018100896850228
+  },
+  {
+    "category": "extra",
+    "solution": "solve_square_root_digital_expansion_p0080_s0.py",
+    "args": "100 999",
+    "answer": 434576,
+    "verdict": "correct",
+    "elapsed": 0.31750864698551595
   },
   {
     "category": "dev",
@@ -21,7 +29,7 @@
     "args": "100 2",
     "answer": 475,
     "verdict": "correct",
-    "elapsed": 0.04084992402931675
+    "elapsed": 0.07087244000285864
   },
   {
     "category": "main",
@@ -29,6 +37,14 @@
     "args": "100 99",
     "answer": 40886,
     "verdict": "correct",
-    "elapsed": 0.08527763199526817
+    "elapsed": 0.13808745401911438
+  },
+  {
+    "category": "extra",
+    "solution": "solve_square_root_digital_expansion_p0080_s1.py",
+    "args": "100 999",
+    "answer": 434576,
+    "verdict": "correct",
+    "elapsed": 0.5020215560216457
   }
 ]

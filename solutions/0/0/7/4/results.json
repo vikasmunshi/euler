@@ -5,7 +5,7 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.04512383695691824
+    "elapsed": 0.08636340702651069
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.041874094982631505
+    "elapsed": 0.1236819249461405
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.04121303599094972
+    "elapsed": 0.10643093899125233
   },
   {
     "category": "dev",
@@ -29,7 +29,7 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.05782800598535687
+    "elapsed": 0.1112095009884797
   },
   {
     "category": "dev",
@@ -37,7 +37,7 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.16632971999933943
+    "elapsed": 0.24806896899826825
   },
   {
     "category": "main",
@@ -45,7 +45,23 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 2.1956362170167267
+    "elapsed": 7.886893336020876
+  },
+  {
+    "category": "extra",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "5000000",
+    "answer": 3240,
+    "verdict": "correct",
+    "elapsed": 9.533072236983571
+  },
+  {
+    "category": "extra",
+    "solution": "solve_digit_factorial_chains_p0074_s0.py",
+    "args": "10000000",
+    "answer": 4680,
+    "verdict": "correct",
+    "elapsed": 18.90943012997741
   },
   {
     "category": "dev",
@@ -53,7 +69,7 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.057182916963938624
+    "elapsed": 0.0660639299894683
   },
   {
     "category": "dev",
@@ -61,7 +77,7 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.044454792980104685
+    "elapsed": 0.08476306399097666
   },
   {
     "category": "dev",
@@ -69,7 +85,7 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.048005204007495195
+    "elapsed": 0.12846674805041403
   },
   {
     "category": "dev",
@@ -77,7 +93,7 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.07108927104854956
+    "elapsed": 0.30249961698427796
   },
   {
     "category": "dev",
@@ -85,7 +101,7 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.37940852402243763
+    "elapsed": 0.8424665160127915
   },
   {
     "category": "main",
@@ -93,7 +109,23 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 8.029228430008516
+    "elapsed": 11.121815769991372
+  },
+  {
+    "category": "extra",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "5000000",
+    "answer": 3240,
+    "verdict": "correct",
+    "elapsed": 58.64113385602832
+  },
+  {
+    "category": "extra",
+    "solution": "solve_digit_factorial_chains_p0074_s1.py",
+    "args": "10000000",
+    "answer": null,
+    "verdict": "timeout",
+    "elapsed": 306.2028927979991
   },
   {
     "category": "dev",
@@ -101,7 +133,7 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.052858281997032464
+    "elapsed": 0.2798710290226154
   },
   {
     "category": "dev",
@@ -109,7 +141,7 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.059882265981286764
+    "elapsed": 0.14106647099833935
   },
   {
     "category": "dev",
@@ -117,7 +149,7 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "elapsed": 0.05578973196679726
+    "elapsed": 0.16057025402551517
   },
   {
     "category": "dev",
@@ -125,7 +157,7 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.07702760997926816
+    "elapsed": 0.2574833770049736
   },
   {
     "category": "dev",
@@ -133,7 +165,7 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "elapsed": 0.4347022180445492
+    "elapsed": 1.4212642590282485
   },
   {
     "category": "main",
@@ -141,6 +173,22 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "elapsed": 3.8367108200327493
+    "elapsed": 7.086414788034745
+  },
+  {
+    "category": "extra",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "5000000",
+    "answer": 3240,
+    "verdict": "correct",
+    "elapsed": 30.714487399032805
+  },
+  {
+    "category": "extra",
+    "solution": "solve_digit_factorial_chains_p0074_s2.py",
+    "args": "10000000",
+    "answer": null,
+    "verdict": "timeout",
+    "elapsed": 305.12728354102
   }
 ]

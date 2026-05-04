@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 984: "Knights and Horses" (level --)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 984: "Knights and Horses" (level --)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,59 +141,92 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 984: "Knights and Horses" (level --)</h2>
-    <p><a href="https://projecteuler.net/problem=984" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>
-In Western chess, a knight is a piece that moves either two squares horizontally and one square vertically, or one square horizontally and two squares vertically, and is capable of jumping over any intervening pieces.</p>
-<p>
-Chinese chess has a similar piece called the horse, whose moves have an identical displacement as a knight's move; however, a horse, unlike a knight, is unable to jump over intervening pieces.</p>
-<p>
-More specifically, a horse's move consists of two steps: An orthogonal move of one square, followed by a diagonal move by one square in the same direction as the orthogonal move. If the orthogonal square is occupied by another piece, the horse is unable to move in that direction.
-<img alt="0984_KnightHorsesDiag1.jpg" src="resources/0984_KnightHorsesDiag1.jpg"/>
-Specifically the horse in the centre of the above board can move to the squares $b_{11},b_{12},b_{21},b_{22},b_{31},b_{32},b_{41},b_{42}$ providing the squares $a_{1},a_{2},a_{3},a_{4}$ are unoccupied. For example, if $a_2$ was occupied then it could not move to $b_{21}$ or $b_{22}$.</p>
-<p>
-A set of squares on a chessboard is called <dfn>knight-connected</dfn> if a knight can travel between any two squares in the set using only legal moves without using any squares not in the set.
-A set of squares on a chessboard is called <dfn>horse-disjoint</dfn> if, when a horse is placed on every square in the set (and no other square), no horse can attack any other.
-<img alt="0984_KnightHorsesDiag2.jpg" src="resources/0984_KnightHorsesDiag2.jpg"/>
-Let $f(N)$ be the number of knight-connected, horse-disjoint non-empty subsets of an $N\times N$ chessboard. For example, $f(3) = 9$, consisting of the nine singleton sets. You are also given that $f(5) = 903, f(100) = 8658918531876$, and $f(10000) \equiv 377956308 \bmod 10^9+7$.</p>
-<p>
-Find $f(10^{18})$. Give your answer modulo $10^9+7$.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 984: "Knights and Horses" (level --)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=984" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      In Western chess, a knight is a piece that moves either two squares horizontally and one square vertically, or one square horizontally and two squares vertically, and is capable of jumping over any intervening pieces.
+     </p>
+     <p>
+      Chinese chess has a similar piece called the horse, whose moves have an identical displacement as a knight's move; however, a horse, unlike a knight, is unable to jump over intervening pieces.
+     </p>
+     <p>
+      More specifically, a horse's move consists of two steps: An orthogonal move of one square, followed by a diagonal move by one square in the same direction as the orthogonal move. If the orthogonal square is occupied by another piece, the horse is unable to move in that direction.
+      <img alt="0984_KnightHorsesDiag1.jpg" src="resources/0984_KnightHorsesDiag1.jpg"/>
+      Specifically the horse in the centre of the above board can move to the squares $b_{11},b_{12},b_{21},b_{22},b_{31},b_{32},b_{41},b_{42}$ providing the squares $a_{1},a_{2},a_{3},a_{4}$ are unoccupied. For example, if $a_2$ was occupied then it could not move to $b_{21}$ or $b_{22}$.
+     </p>
+     <p>
+      A set of squares on a chessboard is called
+      <dfn>
+       knight-connected
+      </dfn>
+      if a knight can travel between any two squares in the set using only legal moves without using any squares not in the set.
+A set of squares on a chessboard is called
+      <dfn>
+       horse-disjoint
+      </dfn>
+      if, when a horse is placed on every square in the set (and no other square), no horse can attack any other.
+      <img alt="0984_KnightHorsesDiag2.jpg" src="resources/0984_KnightHorsesDiag2.jpg"/>
+      Let $f(N)$ be the number of knight-connected, horse-disjoint non-empty subsets of an $N\times N$ chessboard. For example, $f(3) = 9$, consisting of the nine singleton sets. You are also given that $f(5) = 903, f(100) = 8658918531876$, and $f(10000) \equiv 377956308 \bmod 10^9+7$.
+     </p>
+     <p>
+      Find $f(10^{18})$. Give your answer modulo $10^9+7$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

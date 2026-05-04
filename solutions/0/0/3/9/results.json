@@ -5,7 +5,7 @@
     "args": "100",
     "answer": 60,
     "verdict": "correct",
-    "elapsed": 0.044839472975581884
+    "elapsed": 0.11317901301663369
   },
   {
     "category": "main",
@@ -13,6 +13,30 @@
     "args": "1000",
     "answer": 840,
     "verdict": "correct",
-    "elapsed": 0.0412563220015727
+    "elapsed": 0.09234312601620331
+  },
+  {
+    "category": "extra",
+    "solution": "solve_integer_right_triangles_p0039_s0.py",
+    "args": "10000",
+    "answer": 5040,
+    "verdict": "correct",
+    "elapsed": 0.07941124303033575
+  },
+  {
+    "category": "extra",
+    "solution": "solve_integer_right_triangles_p0039_s0.py",
+    "args": "100000",
+    "answer": 55440,
+    "verdict": "correct",
+    "elapsed": 0.10020856000483036
+  },
+  {
+    "category": "extra",
+    "solution": "solve_integer_right_triangles_p0039_s0.py",
+    "args": "1000000",
+    "answer": 720720,
+    "verdict": "correct",
+    "elapsed": 0.4329136910382658
   }
 ]

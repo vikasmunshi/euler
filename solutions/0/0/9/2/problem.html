@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 92: "Square Digit Chains" (level 1)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 92: "Square Digit Chains" (level 1)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,71 +141,291 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 92: "Square Digit Chains" (level 1)</h2>
-    <p><a href="https://projecteuler.net/problem=92" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>A number chain is created by continuously adding the square of the digits in a number to form a new number until it has been seen before.</p>
-<p>For example,
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 92: "Square Digit Chains" (level 1)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=92" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      A number chain is created by continuously adding the square of the digits in a number to form a new number until it has been seen before.
+     </p>
+     <p>
+      For example,
 $$\begin{align}
 &amp;44 \to 32 \to 13 \to 10 \to \mathbf 1 \to \mathbf 1\\
 &amp;85 \to \mathbf{89} \to 145 \to 42 \to 20 \to 4 \to 16 \to 37 \to 58 \to \mathbf{89}
 \end{align}$$
-</p><p>Therefore any chain that arrives at $1$ or $89$ will become stuck in an endless loop. What is most amazing is that EVERY starting number will eventually arrive at $1$ or $89$.</p>
-<p>How many starting numbers below ten million will arrive at $89$?</p>
-</div>
+     </p>
+     <p>
+      Therefore any chain that arrives at $1$ or $89$ will become stuck in an endless loop. What is most amazing is that EVERY starting number will eventually arrive at $1$ or $89$.
+     </p>
+     <p>
+      How many starting numbers below ten million will arrive at $89$?
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(power_of_10=2)</code> → <code>80</code></li>
-<li><code>solve(power_of_10=3)</code> → <code>857</code></li>
-<li><code>solve(power_of_10=4)</code> → <code>8558</code></li>
-<li><code>solve(power_of_10=5)</code> → <code>85623</code></li>
-<li><code>solve(power_of_10=6)</code> → <code>856929</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(power_of_10=7)</code> → <code>8581146</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(power_of_10=8)</code> → <code>85744333</code></li>
-<li><code>solve(power_of_10=9)</code> → <code>854325192</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><strong>Solved:</strong> 2025-07-18</p>
-<ul>
-<li><code>solve_square_digit_chains_p0092_s0.py 7</code> → <code>8581146</code> [0.050s]</li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(power_of_10=2) → 80
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(power_of_10=3) → 857
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(power_of_10=4) → 8558
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(power_of_10=5) → 85623
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(power_of_10=6) → 856929
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(power_of_10=7) → 8581146
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(power_of_10=8) → 85744333
+      </code>
+     </li>
+     <li>
+      <code>
+       extra: solve(power_of_10=9) → 854325192
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <h3>
+     <strong>
+      First Solved:
+     </strong>
+     2025-07-18
+    </h3>
+    <table>
+     <tbody>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        80
+       </td>
+       <td>
+        0.322s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        857
+       </td>
+       <td>
+        0.220s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8558
+       </td>
+       <td>
+        0.271s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        85623
+       </td>
+       <td>
+        0.282s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        856929
+       </td>
+       <td>
+        0.233s
+       </td>
+      </tr>
+      <tr class="result-best">
+       <td>
+        main
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8581146
+       </td>
+       <td>
+        0.234s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        85744333
+       </td>
+       <td>
+        0.186s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_square_digit_chains_p0092_s0.py
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        854325192
+       </td>
+       <td>
+        0.205s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

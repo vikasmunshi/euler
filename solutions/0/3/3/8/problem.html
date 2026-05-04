@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 338: "Cutting Rectangular Grid Paper" (level 37)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 338: "Cutting Rectangular Grid Paper" (level 37)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,64 +141,110 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 338: "Cutting Rectangular Grid Paper" (level 37)</h2>
-    <p><a href="https://projecteuler.net/problem=338" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>A rectangular sheet of grid paper with integer dimensions $w \times h$ is given. Its grid spacing is $1$.<br/>
-When we cut the sheet along the grid lines into two pieces and rearrange those pieces without overlap, we can make new rectangles with different dimensions.</p>
-<p>For example, from a sheet with dimensions $9 \times 4$, we can make rectangles with dimensions $18 \times 2$, $12 \times 3$ and $6 \times 6$ by cutting and rearranging as below:</p>
-<div align="center">
-<img alt="0338_gridpaper.gif" src="resources/0338_gridpaper.gif"/><br/></div>
-<p>Similarly, from a sheet with dimensions $9 \times 8$, we can make rectangles with dimensions $18 \times 4$ and $12 \times 6$.</p>
-<p>For a pair $w$ and $h$, let $F(w, h)$ be the number of distinct rectangles that can be made from a sheet with dimensions $w \times h$.<br/>
-For example, $F(2,1) = 0$, $F(2,2) = 1$, $F(9,4) = 3$ and $F(9,8) = 2$. <br/>
-Note that rectangles congruent to the initial one are not counted in $F(w, h)$.<br/>
-Note also that rectangles with dimensions $w \times h$ and dimensions $h \times w$ are not considered distinct.</p>
-<p>For an integer $N$, let $G(N)$ be the sum of $F(w, h)$ for all pairs $w$ and $h$ which satisfy $0 \lt h \le w \le N$.<br/>
-We can verify that $G(10) = 55$, $G(10^3) = 971745$ and $G(10^5) = 9992617687$.</p>
-<p>Find $G(10^{12})$. Give your answer modulo $10^8$.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 338: "Cutting Rectangular Grid Paper" (level 37)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=338" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      A rectangular sheet of grid paper with integer dimensions $w \times h$ is given. Its grid spacing is $1$.
+      <br/>
+      When we cut the sheet along the grid lines into two pieces and rearrange those pieces without overlap, we can make new rectangles with different dimensions.
+     </p>
+     <p>
+      For example, from a sheet with dimensions $9 \times 4$, we can make rectangles with dimensions $18 \times 2$, $12 \times 3$ and $6 \times 6$ by cutting and rearranging as below:
+     </p>
+     <div align="center">
+      <img alt="0338_gridpaper.gif" src="resources/0338_gridpaper.gif"/>
+      <br/>
+     </div>
+     <p>
+      Similarly, from a sheet with dimensions $9 \times 8$, we can make rectangles with dimensions $18 \times 4$ and $12 \times 6$.
+     </p>
+     <p>
+      For a pair $w$ and $h$, let $F(w, h)$ be the number of distinct rectangles that can be made from a sheet with dimensions $w \times h$.
+      <br/>
+      For example, $F(2,1) = 0$, $F(2,2) = 1$, $F(9,4) = 3$ and $F(9,8) = 2$.
+      <br/>
+      Note that rectangles congruent to the initial one are not counted in $F(w, h)$.
+      <br/>
+      Note also that rectangles with dimensions $w \times h$ and dimensions $h \times w$ are not considered distinct.
+     </p>
+     <p>
+      For an integer $N$, let $G(N)$ be the sum of $F(w, h)$ for all pairs $w$ and $h$ which satisfy $0 \lt h \le w \le N$.
+      <br/>
+      We can verify that $G(10) = 55$, $G(10^3) = 971745$ and $G(10^5) = 9992617687$.
+     </p>
+     <p>
+      Find $G(10^{12})$. Give your answer modulo $10^8$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(max_limit=10)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(max_limit=1000000000000)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(max_limit=10) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(max_limit=1000000000000) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 502: "Counting Castles" (level 37)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 502: "Counting Castles" (level 37)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,60 +141,120 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 502: "Counting Castles" (level 37)</h2>
-    <p><a href="https://projecteuler.net/problem=502" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>We define a <dfn>block</dfn> to be a rectangle with a height of $1$ and an integer-valued length. Let a <dfn>castle</dfn> be a configuration of stacked blocks.</p>
-<p>Given a game grid that is $w$ units wide and $h$ units tall, a castle is generated according to the following rules:</p>
-<ol><li>Blocks can be placed on top of other blocks as long as nothing sticks out past the edges or hangs out over open space.</li>
-<li>All blocks are aligned/snapped to the grid.</li>
-<li>Any two neighboring blocks on the same row have at least one unit of space between them.</li>
-<li>The bottom row is occupied by a block of length $w$.</li>
-<li>The maximum achieved height of the entire castle is exactly $h$.</li>
-<li>The castle is made from an even number of blocks.</li>
-</ol><p>The following is a sample castle for $w=8$ and $h=5$:</p>
-<p align="center"><img alt="0502_castles.png" src="resources/0502_castles.png"/></p>
-<p>Let $F(w,h)$ represent the number of valid castles, given grid parameters $w$ and $h$.</p>
-<p>For example, $F(4,2) = 10$, $F(13,10) = 3729050610636$, $F(10,13) = 37959702514$, and $F(100,100) \bmod 1\,000\,000\,007 = 841913936$.</p>
-<p>Find $(F(10^{12},100) + F(10000,10000) + F(100,10^{12})) \bmod 1\,000\,000\,007$.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 502: "Counting Castles" (level 37)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=502" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      We define a
+      <dfn>
+       block
+      </dfn>
+      to be a rectangle with a height of $1$ and an integer-valued length. Let a
+      <dfn>
+       castle
+      </dfn>
+      be a configuration of stacked blocks.
+     </p>
+     <p>
+      Given a game grid that is $w$ units wide and $h$ units tall, a castle is generated according to the following rules:
+     </p>
+     <ol>
+      <li>
+       Blocks can be placed on top of other blocks as long as nothing sticks out past the edges or hangs out over open space.
+      </li>
+      <li>
+       All blocks are aligned/snapped to the grid.
+      </li>
+      <li>
+       Any two neighboring blocks on the same row have at least one unit of space between them.
+      </li>
+      <li>
+       The bottom row is occupied by a block of length $w$.
+      </li>
+      <li>
+       The maximum achieved height of the entire castle is exactly $h$.
+      </li>
+      <li>
+       The castle is made from an even number of blocks.
+      </li>
+     </ol>
+     <p>
+      The following is a sample castle for $w=8$ and $h=5$:
+     </p>
+     <p align="center">
+      <img alt="0502_castles.png" src="resources/0502_castles.png"/>
+     </p>
+     <p>
+      Let $F(w,h)$ represent the number of valid castles, given grid parameters $w$ and $h$.
+     </p>
+     <p>
+      For example, $F(4,2) = 10$, $F(13,10) = 3729050610636$, $F(10,13) = 37959702514$, and $F(100,100) \bmod 1\,000\,000\,007 = 841913936$.
+     </p>
+     <p>
+      Find $(F(10^{12},100) + F(10000,10000) + F(100,10^{12})) \bmod 1\,000\,000\,007$.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Main</h3>
-<ul>
-<li><code>solve()</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       main: solve() → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

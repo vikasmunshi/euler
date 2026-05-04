@@ -5,7 +5,7 @@
     "args": "8",
     "answer": 3,
     "verdict": "correct",
-    "elapsed": 0.04440918000182137
+    "elapsed": 0.06974368303781375
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "1000",
     "answer": 50695,
     "verdict": "correct",
-    "elapsed": 0.04702259902842343
+    "elapsed": 0.10795887501444668
   },
   {
     "category": "main",
@@ -21,7 +21,15 @@
     "args": "12000",
     "answer": 7295372,
     "verdict": "correct",
-    "elapsed": 0.5377709610038437
+    "elapsed": 0.8179897039663047
+  },
+  {
+    "category": "extra",
+    "solution": "solve_counting_fractions_in_a_range_p0073_s0.py",
+    "args": "100000",
+    "answer": 506608484,
+    "verdict": "correct",
+    "elapsed": 56.786659893987235
   },
   {
     "category": "dev",
@@ -29,7 +37,7 @@
     "args": "8",
     "answer": 3,
     "verdict": "correct",
-    "elapsed": 0.04671024199342355
+    "elapsed": 0.05963199998950586
   },
   {
     "category": "dev",
@@ -37,7 +45,7 @@
     "args": "1000",
     "answer": 50695,
     "verdict": "correct",
-    "elapsed": 0.05023141298443079
+    "elapsed": 0.10503842402249575
   },
   {
     "category": "main",
@@ -45,7 +53,15 @@
     "args": "12000",
     "answer": 7295372,
     "verdict": "correct",
-    "elapsed": 1.007212898985017
+    "elapsed": 1.321678234031424
+  },
+  {
+    "category": "extra",
+    "solution": "solve_counting_fractions_in_a_range_p0073_s1.py",
+    "args": "100000",
+    "answer": 506608484,
+    "verdict": "correct",
+    "elapsed": 93.0859717450221
   },
   {
     "category": "dev",
@@ -53,7 +69,7 @@
     "args": "8",
     "answer": 3,
     "verdict": "correct",
-    "elapsed": 0.056978541950229555
+    "elapsed": 0.07902969000861049
   },
   {
     "category": "dev",
@@ -61,7 +77,7 @@
     "args": "1000",
     "answer": 50695,
     "verdict": "correct",
-    "elapsed": 0.05048155802069232
+    "elapsed": 0.11033120797947049
   },
   {
     "category": "main",
@@ -69,6 +85,14 @@
     "args": "12000",
     "answer": 7295372,
     "verdict": "correct",
-    "elapsed": 0.06471487105591223
+    "elapsed": 0.15885794797213748
+  },
+  {
+    "category": "extra",
+    "solution": "solve_counting_fractions_in_a_range_p0073_s2.py",
+    "args": "100000",
+    "answer": 506608484,
+    "verdict": "correct",
+    "elapsed": 0.507592490001116
   }
 ]

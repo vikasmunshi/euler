@@ -5,6 +5,6 @@
     "args": "https://projecteuler.net/project/resources/0096_sudoku.txt",
     "answer": 24702,
     "verdict": "correct",
-    "elapsed": 0.3329652459942736
+    "elapsed": 0.5406625159666874
   }
 ]

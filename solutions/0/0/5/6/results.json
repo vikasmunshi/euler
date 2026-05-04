@@ -5,7 +5,7 @@
     "args": "1",
     "answer": 45,
     "verdict": "correct",
-    "elapsed": 0.8382821180275641
+    "elapsed": 1.4457295849570073
   },
   {
     "category": "main",
@@ -13,6 +13,14 @@
     "args": "2",
     "answer": 972,
     "verdict": "correct",
-    "elapsed": 0.6519028949551284
+    "elapsed": 0.8883484670077451
+  },
+  {
+    "category": "extra",
+    "solution": "solve_powerful_digit_sum_p0056_s0.py",
+    "args": "3",
+    "answer": 13888,
+    "verdict": "correct",
+    "elapsed": 1.1262776589719579
   }
 ]

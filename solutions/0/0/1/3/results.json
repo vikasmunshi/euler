@@ -5,6 +5,22 @@
     "args": "10",
     "answer": "5537376230",
     "verdict": "correct",
-    "elapsed": 0.044551632017828524
+    "elapsed": 0.08604239003034309
+  },
+  {
+    "category": "extra",
+    "solution": "solve_large_sum_p0013_s0.py",
+    "args": "20",
+    "answer": "55373762303908766372",
+    "verdict": "correct",
+    "elapsed": 0.11717967002186924
+  },
+  {
+    "category": "extra",
+    "solution": "solve_large_sum_p0013_s0.py",
+    "args": "100",
+    "answer": "5537376230390876637302048746832985971773659831892672",
+    "verdict": "correct",
+    "elapsed": 0.11476670601405203
   }
 ]

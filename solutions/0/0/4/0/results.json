@@ -5,7 +5,7 @@
     "args": "1",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.04762877302709967
+    "elapsed": 0.07744446099968627
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "2",
     "answer": 5,
     "verdict": "correct",
-    "elapsed": 0.04482484899926931
+    "elapsed": 0.14602960099000484
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "3",
     "answer": 15,
     "verdict": "correct",
-    "elapsed": 0.0402785410406068
+    "elapsed": 0.1333581079961732
   },
   {
     "category": "dev",
@@ -29,7 +29,7 @@
     "args": "4",
     "answer": 105,
     "verdict": "correct",
-    "elapsed": 0.04340518900426105
+    "elapsed": 0.13235433801310137
   },
   {
     "category": "dev",
@@ -37,7 +37,7 @@
     "args": "5",
     "answer": 210,
     "verdict": "correct",
-    "elapsed": 0.0411847960203886
+    "elapsed": 0.11043535300996155
   },
   {
     "category": "dev",
@@ -45,7 +45,7 @@
     "args": "6",
     "answer": 210,
     "verdict": "correct",
-    "elapsed": 0.04562518099555746
+    "elapsed": 0.09527613094542176
   },
   {
     "category": "main",
@@ -53,6 +53,38 @@
     "args": "7",
     "answer": 1470,
     "verdict": "correct",
-    "elapsed": 0.043323067016899586
+    "elapsed": 0.06598979700356722
+  },
+  {
+    "category": "extra",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "8",
+    "answer": 11760,
+    "verdict": "correct",
+    "elapsed": 0.06376877095317468
+  },
+  {
+    "category": "extra",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "9",
+    "answer": 11760,
+    "verdict": "correct",
+    "elapsed": 0.06659493001643568
+  },
+  {
+    "category": "extra",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "10",
+    "answer": 11760,
+    "verdict": "correct",
+    "elapsed": 0.12660355801926926
+  },
+  {
+    "category": "extra",
+    "solution": "solve_champernownes_constant_p0040_s0.py",
+    "args": "11",
+    "answer": 0,
+    "verdict": "correct",
+    "elapsed": 0.1848451230325736
   }
 ]

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 316: "Numbers in Decimal Expansions" (level 26)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 316: "Numbers in Decimal Expansions" (level 26)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,62 +141,108 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 316: "Numbers in Decimal Expansions" (level 26)</h2>
-    <p><a href="https://projecteuler.net/problem=316" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Let $p = p_1 p_2 p_3 \cdots$ be an infinite sequence of random digits, selected from $\{0,1,2,3,4,5,6,7,8,9\}$ with equal probability.<br/>
-It can be seen that $p$ corresponds to the real number $0.p_1 p_2 p_3 \cdots$ <br/>
-It can also be seen that choosing a random real number from the interval $[0,1)$ is equivalent to choosing an infinite sequence of random digits selected from $\{0,1,2,3,4,5,6,7,8,9\}$ with equal probability.</p>
-<p>For any positive integer $n$ with $d$ decimal digits, let $k$ be the smallest index such that $p_k, p_{k + 1}, \dots, p_{k + d - 1}$ are the decimal digits of $n$, in the same order.<br/>
-Also, let $g(n)$ be the expected value of $k$; it can be proven that $g(n)$ is always finite and, interestingly, always an integer number.</p>
-<p>For example, if $n = 535$, then<br/>
-for $p = 31415926\mathbf{535}897\cdots$, we get $k = 9$<br/>
-for $p = 35528714365004956000049084876408468\mathbf{535}4\cdots$, we get $k = 36$<br/>
-etc and we find that $g(535) = 1008$.</p>
-<p>Given that $\displaystyle\sum_{n = 2}^{999} g \left(\left\lfloor\frac{10^6} n \right\rfloor\right) = 27280188$, find $\displaystyle\sum_{n = 2}^{999999} g \left(\left\lfloor\frac{10^{16}} n \right\rfloor\right)$.</p>
-<u><i>Note</i></u>: $\lfloor x \rfloor$ represents the floor function.
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 316: "Numbers in Decimal Expansions" (level 26)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=316" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Let $p = p_1 p_2 p_3 \cdots$ be an infinite sequence of random digits, selected from $\{0,1,2,3,4,5,6,7,8,9\}$ with equal probability.
+      <br/>
+      It can be seen that $p$ corresponds to the real number $0.p_1 p_2 p_3 \cdots$
+      <br/>
+      It can also be seen that choosing a random real number from the interval $[0,1)$ is equivalent to choosing an infinite sequence of random digits selected from $\{0,1,2,3,4,5,6,7,8,9\}$ with equal probability.
+     </p>
+     <p>
+      For any positive integer $n$ with $d$ decimal digits, let $k$ be the smallest index such that $p_k, p_{k + 1}, \dots, p_{k + d - 1}$ are the decimal digits of $n$, in the same order.
+      <br/>
+      Also, let $g(n)$ be the expected value of $k$; it can be proven that $g(n)$ is always finite and, interestingly, always an integer number.
+     </p>
+     <p>
+      For example, if $n = 535$, then
+      <br/>
+      for $p = 31415926\mathbf{535}897\cdots$, we get $k = 9$
+      <br/>
+      for $p = 35528714365004956000049084876408468\mathbf{535}4\cdots$, we get $k = 36$
+      <br/>
+      etc and we find that $g(535) = 1008$.
+     </p>
+     <p>
+      Given that $\displaystyle\sum_{n = 2}^{999} g \left(\left\lfloor\frac{10^6} n \right\rfloor\right) = 27280188$, find $\displaystyle\sum_{n = 2}^{999999} g \left(\left\lfloor\frac{10^{16}} n \right\rfloor\right)$.
+     </p>
+     <u>
+      <i>
+       Note
+      </i>
+     </u>
+     : $\lfloor x \rfloor$ represents the floor function.
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(n_max=10, ten_power=6)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(n_max=999999, ten_power=16)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(n_max=10, ten_power=6) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(n_max=999999, ten_power=16) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

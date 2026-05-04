@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 329: "Prime Frog" (level 9)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 329: "Prime Frog" (level 9)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,68 +141,102 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 329: "Prime Frog" (level 9)</h2>
-    <p><a href="https://projecteuler.net/problem=329" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Susan has a prime frog.<br/>
-Her frog is jumping around over $500$ squares numbered $1$ to $500$.
-He can only jump one square to the left or to the right, with equal probability, and he cannot jump outside the range $[1;500]$.<br/>(if it lands at either end, it automatically jumps to the only available square on the next move.)
-</p>
-<p>
-When he is on a square with a prime number on it, he croaks 'P' (PRIME) with probability $2/3$ or 'N' (NOT PRIME) with probability $1/3$ just before jumping to the next square.<br/>
-When he is on a square with a number on it that is not a prime he croaks 'P' with probability $1/3$ or 'N' with probability $2/3$ just before jumping to the next square.
-</p>
-<p>
-Given that the frog's starting position is random with the same probability for every square, and given that she listens to his first $15$ croaks, what is the probability that she hears the sequence PPPPNNPPPNPPNPN?
-</p>
-Give your answer as a fraction $p/q$ in reduced form.
-
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 329: "Prime Frog" (level 9)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=329" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Susan has a prime frog.
+      <br/>
+      Her frog is jumping around over $500$ squares numbered $1$ to $500$.
+He can only jump one square to the left or to the right, with equal probability, and he cannot jump outside the range $[1;500]$.
+      <br/>
+      (if it lands at either end, it automatically jumps to the only available square on the next move.)
+     </p>
+     <p>
+      When he is on a square with a prime number on it, he croaks 'P' (PRIME) with probability $2/3$ or 'N' (NOT PRIME) with probability $1/3$ just before jumping to the next square.
+      <br/>
+      When he is on a square with a number on it that is not a prime he croaks 'P' with probability $1/3$ or 'N' with probability $2/3$ just before jumping to the next square.
+     </p>
+     <p>
+      Given that the frog's starting position is random with the same probability for every square, and given that she listens to his first $15$ croaks, what is the probability that she hears the sequence PPPPNNPPPNPPNPN?
+     </p>
+     Give your answer as a fraction $p/q$ in reduced form.
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(squares=10, sequence='PPPP')</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(squares=500, sequence='PPPPNNPPPNPPNPN')</code> → <code>█</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(squares=1000, sequence='PPPPNNPPPNPPNPN')</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(squares=10, sequence='PPPP') → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(squares=500, sequence='PPPPNNPPPNPPNPN') → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(squares=1000, sequence='PPPPNNPPPNPPNPN') → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

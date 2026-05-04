@@ -5,6 +5,6 @@
     "args": "3 https://projecteuler.net/resources/documents/0079_keylog.txt",
     "answer": 73162890,
     "verdict": "correct",
-    "elapsed": 0.05509329604683444
+    "elapsed": 0.12167344603221864
   }
 ]

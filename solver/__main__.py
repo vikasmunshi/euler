@@ -37,16 +37,15 @@ def main() -> int:
     """
     parser = ArgumentParser(prog='solver', formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
-    parser.add_argument('-c', '--continue', action='store_true', help='stay interactive after running cmdline commands')
+    parser.add_argument('-c', '--continue', action='store_true', help='stay interactive after running cmdline')
     parser.add_argument('-s', '--save-session', action='store_true', default=False, help='save session to a log-file')
-    parser.add_argument('cmdline', nargs='?', metavar='COMMANDS',
-                        help='optional commands to run at startup (semicolon-separated)')
+    parser.add_argument('cmdline', nargs='*', help='run cmdline; quote and semicolon-separate multiple commands')
     args = parser.parse_args()
     startup: list[str] = []
 
-    # positional cmdline: split on ';' and queue; exit after unless -c
+    # positional cmdline: split on ';' exit after unless -c
     if args.cmdline:
-        startup.extend(c.strip() for c in args.cmdline.split(';') if c.strip())
+        startup.extend(c.strip() for c in ' '.join(args.cmdline).split(';') if c.strip())
         if not getattr(args, 'continue'):
             startup.append('exit')
 

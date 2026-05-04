@@ -5,7 +5,7 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "elapsed": 0.04921177896903828
+    "elapsed": 0.06732543400721624
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "100",
     "answer": 15,
     "verdict": "correct",
-    "elapsed": 0.04522590700071305
+    "elapsed": 0.09122696501435712
   },
   {
     "category": "main",
@@ -21,6 +21,14 @@
     "args": "1000",
     "answer": 153,
     "verdict": "correct",
-    "elapsed": 0.04588563198922202
+    "elapsed": 0.12741989397909492
+  },
+  {
+    "category": "extra",
+    "solution": "solve_square_root_convergents_p0057_s0.py",
+    "args": "10000",
+    "answer": 1508,
+    "verdict": "correct",
+    "elapsed": 2.019408665015362
   }
 ]

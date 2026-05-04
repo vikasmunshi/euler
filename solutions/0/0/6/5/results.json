@@ -5,7 +5,7 @@
     "args": "10",
     "answer": 17,
     "verdict": "correct",
-    "elapsed": 0.04651443799957633
+    "elapsed": 0.0953806530451402
   },
   {
     "category": "main",
@@ -13,6 +13,22 @@
     "args": "100",
     "answer": 272,
     "verdict": "correct",
-    "elapsed": 0.04622151097282767
+    "elapsed": 0.1471477599698119
+  },
+  {
+    "category": "extra",
+    "solution": "solve_convergents_of_e_p0065_s0.py",
+    "args": "1000",
+    "answer": 4034,
+    "verdict": "correct",
+    "elapsed": 0.18754820397589356
+  },
+  {
+    "category": "extra",
+    "solution": "solve_convergents_of_e_p0065_s0.py",
+    "args": "10000",
+    "answer": 55322,
+    "verdict": "correct",
+    "elapsed": 18.292712719994597
   }
 ]

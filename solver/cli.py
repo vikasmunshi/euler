@@ -80,7 +80,8 @@ class SolverShell(Cmd):
             pass
         self.do_help('')
         print(f'\n{CYAN}{"─" * 100}\n'
-              f'{GREEN}{BOLD}Session started at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.\n'
+              f'{GREEN}{BOLD}Session{" " if self.session_id is None else f" {self.session_id} "}'
+              f'started at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}.\n'
               f'{CYAN}{"─" * 100}{RESET}')
 
     def postloop(self) -> None:
@@ -169,12 +170,19 @@ class SolverShell(Cmd):
                 return
             longest_name = max(len(name) for name in self.aliases)
             for alias_name, alias_command in self.aliases.items():
-                print(f'{C_LBL}{alias_name:<{longest_name}} {C_TXT}-> {C_CMD}{alias_command}{RESET}')
+                if alias_command.startswith('for'):
+                    lines: list[str] = [item.strip() for line in alias_command.split(':')
+                                        for item in line.split(';')]
+                    tab: str = ' ' * (longest_name + 5)
+                    command_str: str = f'{lines[0]}:\n' + '\n'.join(f'{tab}{line};' for line in lines[1:])
+                    print(f'{C_LBL}{alias_name:<{longest_name}} {C_TXT}→ {C_CMD}{command_str}{RESET}')
+                else:
+                    print(f'{C_LBL}{alias_name:<{longest_name}} {C_TXT}→ {C_CMD}{alias_command}{RESET}')
             return
         alias_name = alias_name.strip()
         if not sep:
             if alias_command := self.aliases.get(alias_name, ''):
-                print(f'{C_LBL}{alias_name} {C_TXT}-> {C_CMD}{alias_command}{RESET}')
+                print(f'{C_LBL}{alias_name} {C_TXT}→ {C_CMD}{alias_command}{RESET}')
             else:
                 print(f'{BOLD}{RED}[not defined] {RESET}{C_LBL}{alias_name} {C_TXT}->{RESET}')
             return
@@ -468,15 +476,28 @@ for _name, _func in _commands.items():
     SolverShell.make_cmd(_func, name=_name)
 
 for _name, _alias in {
-    'eval-pub': 'for n in 1 to 100: init n --silent; eval --record; clear --silent; echo evaluated n',
-    'eval-show': 'for n in 1 to 100: init n --silent; eval --show; clear --discard-changes --silent; echo evaluated n',
+    'eval-pub': ('for n in 1 to 100: '
+                 'init n --silent; '
+                 'eval all --record; '
+                 'stack --process-deletions --silent; '
+                 'clear --silent; '
+                 'echo evaluated n'),
+    'eval-show': ('for n in 1 to 100: '
+                  'init n --silent; '
+                  'eval all --show; '
+                  'clear --discard-changes --silent; '
+                  'echo evaluated n'),
     'gh-login': 'shell gh auth status || gh auth login',
     'gh-status': 'shell gh auth status',
     'git-add-stack': f'shell git add {solutions_dir.as_posix()}/',
     'git-merge': 'shell git fetch origin && git merge --ff-only origin/master',
     'git-status': 'shell git status | less',
     'pre-commit': 'shell pre-commit run --all-files',
-    'restack': f'for n in 1 to {max(p.number for p in problems)}: init n --silent; clear; echo restacked n',
+    'restack': (f'for n in 1 to {max(p.number for p in problems)}: '
+                'init n --reinit; '
+                'stack --process-deletions; '
+                'clear; '
+                'echo restacked n'),
 }.items():
     SolverShell.aliases[_name] = _alias
 

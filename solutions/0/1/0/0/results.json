@@ -5,7 +5,7 @@
     "args": "21",
     "answer": 15,
     "verdict": "correct",
-    "elapsed": 0.04991359502309933
+    "elapsed": 0.12740398303139955
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "120",
     "answer": 85,
     "verdict": "correct",
-    "elapsed": 0.04940961900865659
+    "elapsed": 0.11419100797502324
   },
   {
     "category": "main",
@@ -21,6 +21,6 @@
     "args": "1000000000000",
     "answer": 756872327473,
     "verdict": "correct",
-    "elapsed": 0.04564611701061949
+    "elapsed": 0.0824460790026933
   }
 ]

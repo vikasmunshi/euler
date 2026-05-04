@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 287: "Quadtree Encoding (a Simple Compression Algorithm)" (level 14)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 287: "Quadtree Encoding (a Simple Compression Algorithm)" (level 14)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,66 +141,153 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 287: "Quadtree Encoding (a Simple Compression Algorithm)" (level 14)</h2>
-    <p><a href="https://projecteuler.net/problem=287" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>The quadtree encoding allows us to describe a $2^N \times 2^N$  black and white image as a sequence of bits (0 and 1). Those sequences are to be read from left to right like this:
-</p><ul><li>the first bit deals with the complete $2^N \times 2^N$ region;</li>
-<li>"0" denotes a split:
-<br/>the current $2^n \times 2^n$ region is divided into $4$ sub-regions of dimension $2^{n - 1} \times 2^{n - 1}$,<br/>
-the next bits contains the description of the top left, top right, bottom left and bottom right sub-regions - in that order;</li>
-<li>"10" indicates that the current region contains only black pixels;</li>
-<li>"11" indicates that the current region contains only white pixels.</li></ul><p>Consider the following $4 \times 4$ image (colored marks denote places where a split can occur):</p>
-<div class="center"><img alt="0287_quadtree.gif" class="dark_img" src="resources/0287_quadtree.gif"/></div>
-<p>This image can be described by several sequences, for example :
-"<span class="red strong">0</span><span class="blue strong">0</span>10101010<span class="green strong">0</span>1011111011<span class="orange strong">0</span>10101010", of length $30$, or<br/>
-"<span class="red strong">0</span>10<span class="green strong"><b>0</b></span>101111101110", of length $16$, which is the minimal sequence for this image.</p>
-<p>For a positive integer $N$, define $D_N$ as the $2^N \times 2^N$ image with the following coloring scheme:
-</p><ul><li>the pixel with coordinates $x = 0, y = 0$ corresponds to the bottom left pixel,</li>
-<li>if $(x - 2^{N - 1})^2 + (y - 2^{N - 1})^2 \le 2^{2N - 2}$ then the pixel is black,</li>
-<li>otherwise the pixel is white.</li></ul><p>What is the length of the minimal sequence describing $D_{24}$?</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 287: "Quadtree Encoding (a Simple Compression Algorithm)" (level 14)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=287" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      The quadtree encoding allows us to describe a $2^N \times 2^N$  black and white image as a sequence of bits (0 and 1). Those sequences are to be read from left to right like this:
+     </p>
+     <ul>
+      <li>
+       the first bit deals with the complete $2^N \times 2^N$ region;
+      </li>
+      <li>
+       "0" denotes a split:
+       <br/>
+       the current $2^n \times 2^n$ region is divided into $4$ sub-regions of dimension $2^{n - 1} \times 2^{n - 1}$,
+       <br/>
+       the next bits contains the description of the top left, top right, bottom left and bottom right sub-regions - in that order;
+      </li>
+      <li>
+       "10" indicates that the current region contains only black pixels;
+      </li>
+      <li>
+       "11" indicates that the current region contains only white pixels.
+      </li>
+     </ul>
+     <p>
+      Consider the following $4 \times 4$ image (colored marks denote places where a split can occur):
+     </p>
+     <div class="center">
+      <img alt="0287_quadtree.gif" class="dark_img" src="resources/0287_quadtree.gif"/>
+     </div>
+     <p>
+      This image can be described by several sequences, for example :
+"
+      <span class="red strong">
+       0
+      </span>
+      <span class="blue strong">
+       0
+      </span>
+      10101010
+      <span class="green strong">
+       0
+      </span>
+      1011111011
+      <span class="orange strong">
+       0
+      </span>
+      10101010", of length $30$, or
+      <br/>
+      "
+      <span class="red strong">
+       0
+      </span>
+      10
+      <span class="green strong">
+       <b>
+        0
+       </b>
+      </span>
+      101111101110", of length $16$, which is the minimal sequence for this image.
+     </p>
+     <p>
+      For a positive integer $N$, define $D_N$ as the $2^N \times 2^N$ image with the following coloring scheme:
+     </p>
+     <ul>
+      <li>
+       the pixel with coordinates $x = 0, y = 0$ corresponds to the bottom left pixel,
+      </li>
+      <li>
+       if $(x - 2^{N - 1})^2 + (y - 2^{N - 1})^2 \le 2^{2N - 2}$ then the pixel is black,
+      </li>
+      <li>
+       otherwise the pixel is white.
+      </li>
+     </ul>
+     <p>
+      What is the length of the minimal sequence describing $D_{24}$?
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(n=2)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(n=24)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(n=2) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(n=24) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

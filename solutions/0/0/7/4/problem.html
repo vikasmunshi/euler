@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 74: "Digit Factorial Chains" (level 2)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 74: "Digit Factorial Chains" (level 2)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,81 +141,581 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 74: "Digit Factorial Chains" (level 2)</h2>
-    <p><a href="https://projecteuler.net/problem=74" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>The number $145$ is well known for the property that the sum of the factorial of its digits is equal to $145$:
-$$1! + 4! + 5! = 1 + 24 + 120 = 145.$$</p>
-<p>Perhaps less well known is $169$, in that it produces the longest chain of numbers that link back to $169$; it turns out that there are only three such loops that exist:</p>
-$$\begin{align}
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 74: "Digit Factorial Chains" (level 2)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=74" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      The number $145$ is well known for the property that the sum of the factorial of its digits is equal to $145$:
+$$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
+     </p>
+     <p>
+      Perhaps less well known is $169$, in that it produces the longest chain of numbers that link back to $169$; it turns out that there are only three such loops that exist:
+     </p>
+     $$\begin{align}
 &amp;169 \to 363601 \to 1454 \to 169\\
 &amp;871 \to 45361 \to 871\\
 &amp;872 \to 45362 \to 872
 \end{align}$$
-<p>It is not difficult to prove that EVERY starting number will eventually get stuck in a loop. For example,</p>
-$$\begin{align}
+     <p>
+      It is not difficult to prove that EVERY starting number will eventually get stuck in a loop. For example,
+     </p>
+     $$\begin{align}
 &amp;69 \to 363600 \to 1454 \to 169 \to 363601 (\to 1454)\\
 &amp;78 \to 45360 \to 871 \to 45361 (\to 871)\\
 &amp;540 \to 145 (\to 145)
 \end{align}$$
-<p>Starting with $69$ produces a chain of five non-repeating terms, but the longest non-repeating chain with a starting number below one million is sixty terms.</p>
-<p>How many chains, with a starting number below one million, contain exactly sixty non-repeating terms?</p>
-</div>
+     <p>
+      Starting with $69$ produces a chain of five non-repeating terms, but the longest non-repeating chain with a starting number below one million is sixty terms.
+     </p>
+     <p>
+      How many chains, with a starting number below one million, contain exactly sixty non-repeating terms?
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(max_num=10)</code> → <code>1</code></li>
-<li><code>solve(max_num=100)</code> → <code>2</code></li>
-<li><code>solve(max_num=1000)</code> → <code>12</code></li>
-<li><code>solve(max_num=10000)</code> → <code>42</code></li>
-<li><code>solve(max_num=100000)</code> → <code>42</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(max_num=1000000)</code> → <code>402</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(max_num=5000000)</code> → <code>3240</code></li>
-<li><code>solve(max_num=10000000)</code> → <code>4680</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><strong>Solved:</strong> 2025-07-16</p>
-<ul>
-<li><code>solve_digit_factorial_chains_p0074_s0.py 1000000</code> → <code>402</code> [1.350s]</li>
-<li><code>solve_digit_factorial_chains_p0074_s2.py 1000000</code> → <code>402</code> [3.817s]</li>
-<li><code>solve_digit_factorial_chains_p0074_s1.py 1000000</code> → <code>402</code> [3.860s]</li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(max_num=10) → 1
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_num=100) → 2
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_num=1000) → 12
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_num=10000) → 42
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_num=100000) → 42
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(max_num=1000000) → 402
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(max_num=5000000) → 3240
+      </code>
+     </li>
+     <li>
+      <code>
+       extra: solve(max_num=10000000) → 4680
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <h3>
+     <strong>
+      First Solved:
+     </strong>
+     2025-07-16
+    </h3>
+    <table>
+     <tbody>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.086s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.124s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.106s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.111s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.248s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        7.887s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        9.533s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s0.py
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        18.909s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.066s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.085s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.128s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.302s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.842s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        11.122s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s1.py
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        58.641s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.280s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.141s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.161s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.257s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        1.421s
+       </td>
+      </tr>
+      <tr class="result-best">
+       <td>
+        main
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        7.086s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_digit_factorial_chains_p0074_s2.py
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        30.714s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

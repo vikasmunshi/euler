@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 40: "Champernowne's Constant" (level 1)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 40: "Champernowne's Constant" (level 1)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,71 +141,369 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 40: "Champernowne's Constant" (level 1)</h2>
-    <p><a href="https://projecteuler.net/problem=40" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>An irrational decimal fraction is created by concatenating the positive integers:
-$$0.12345678910{\color{red}\mathbf 1}112131415161718192021\cdots$$</p>
-<p>It can be seen that the $12$<sup>th</sup> digit of the fractional part is $1$.</p>
-<p>If $d_n$ represents the $n$<sup>th</sup> digit of the fractional part, find the value of the following expression.
-$$d_1 \times d_{10} \times d_{100} \times d_{1000} \times d_{10000} \times d_{100000} \times d_{1000000}$$</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 40: "Champernowne's Constant" (level 1)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=40" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      An irrational decimal fraction is created by concatenating the positive integers:
+$$0.12345678910{\color{red}\mathbf 1}112131415161718192021\cdots$$
+     </p>
+     <p>
+      It can be seen that the $12$
+      <sup>
+       th
+      </sup>
+      digit of the fractional part is $1$.
+     </p>
+     <p>
+      If $d_n$ represents the $n$
+      <sup>
+       th
+      </sup>
+      digit of the fractional part, find the value of the following expression.
+$$d_1 \times d_{10} \times d_{100} \times d_{1000} \times d_{10000} \times d_{100000} \times d_{1000000}$$
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(i=1)</code> → <code>1</code></li>
-<li><code>solve(i=2)</code> → <code>5</code></li>
-<li><code>solve(i=3)</code> → <code>15</code></li>
-<li><code>solve(i=4)</code> → <code>105</code></li>
-<li><code>solve(i=5)</code> → <code>210</code></li>
-<li><code>solve(i=6)</code> → <code>210</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(i=7)</code> → <code>1470</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(i=8)</code> → <code>11760</code></li>
-<li><code>solve(i=9)</code> → <code>11760</code></li>
-<li><code>solve(i=10)</code> → <code>11760</code></li>
-<li><code>solve(i=11)</code> → <code>0</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><strong>Solved:</strong> 2019-12-02</p>
-<ul>
-<li><code>solve_champernownes_constant_p0040_s0.py 7</code> → <code>1470</code> [0.039s]</li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(i=1) → 1
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(i=2) → 5
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(i=3) → 15
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(i=4) → 105
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(i=5) → 210
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(i=6) → 210
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(i=7) → 1470
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(i=8) → 11760
+      </code>
+     </li>
+     <li>
+      <code>
+       extra: solve(i=9) → 11760
+      </code>
+     </li>
+     <li>
+      <code>
+       extra: solve(i=10) → 11760
+      </code>
+     </li>
+     <li>
+      <code>
+       extra: solve(i=11) → 0
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <h3>
+     <strong>
+      First Solved:
+     </strong>
+     2019-12-02
+    </h3>
+    <table>
+     <tbody>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.077s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        0.146s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        15
+       </td>
+       <td>
+        0.133s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        105
+       </td>
+       <td>
+        0.132s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        210
+       </td>
+       <td>
+        0.110s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        210
+       </td>
+       <td>
+        0.095s
+       </td>
+      </tr>
+      <tr class="result-best">
+       <td>
+        main
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1470
+       </td>
+       <td>
+        0.066s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        11760
+       </td>
+       <td>
+        0.064s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        11760
+       </td>
+       <td>
+        0.067s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        11760
+       </td>
+       <td>
+        0.127s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_champernownes_constant_p0040_s0.py
+       </td>
+       <td>
+        11
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        0
+       </td>
+       <td>
+        0.185s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

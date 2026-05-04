@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 186: "Connectedness of a Network" (level 21)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 186: "Connectedness of a Network" (level 21)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,65 +141,164 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 186: "Connectedness of a Network" (level 21)</h2>
-    <p><a href="https://projecteuler.net/problem=186" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Here are the records from a busy telephone system with one million users:</p>
-<div class="center">
-<table class="grid" style="margin:0 auto;"><tr><th>RecNr</th><th align="center" width="60">Caller</th><th align="center" width="60">Called</th></tr>
-<tr><td align="center">$1$</td><td align="center">$200007$</td><td align="center">$100053$</td></tr><tr><td align="center">$2$</td><td align="center">$600183$</td><td align="center">$500439$</td></tr><tr><td align="center">$3$</td><td align="center">$600863$</td><td align="center">$701497$</td></tr><tr><td align="center">$\cdots$</td><td align="center">$\cdots$</td><td align="center">$\cdots$</td></tr></table></div>
-<p>The telephone number of the caller and the called number in record $n$ are $\operatorname{Caller}(n) = S_{2n-1}$ and $\operatorname{Called}(n) = S_{2n}$ where $S_{1,2,3,\dots}$ come from the "Lagged Fibonacci Generator":</p>
-<p>For $1 \le k \le 55$, $S_k = [100003 - 200003k + 300007k^3] \pmod{1000000}$.<br/>
-For $56 \le k$, $S_k = [S_{k-24} + S_{k-55}] \pmod{1000000}$.</p>
-<p>If $\operatorname{Caller}(n) = \operatorname{Called}(n)$ then the user is assumed to have misdialled and the call fails; otherwise the call is successful.</p>
-<p>From the start of the records, we say that any pair of users $X$ and $Y$ are friends if $X$ calls $Y$ or vice-versa. Similarly, $X$ is a friend of a friend of $Z$ if $X$ is a friend of $Y$ and $Y$ is a friend of $Z$; and so on for longer chains.</p>
-<p>The Prime Minister's phone number is $524287$. After how many successful calls, not counting misdials, will $99\%$ of the users (including the PM) be a friend, or a friend of a friend etc., of the Prime Minister?</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 186: "Connectedness of a Network" (level 21)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=186" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Here are the records from a busy telephone system with one million users:
+     </p>
+     <div class="center">
+      <table class="grid" style="margin:0 auto;">
+       <tr>
+        <th>
+         RecNr
+        </th>
+        <th align="center" width="60">
+         Caller
+        </th>
+        <th align="center" width="60">
+         Called
+        </th>
+       </tr>
+       <tr>
+        <td align="center">
+         $1$
+        </td>
+        <td align="center">
+         $200007$
+        </td>
+        <td align="center">
+         $100053$
+        </td>
+       </tr>
+       <tr>
+        <td align="center">
+         $2$
+        </td>
+        <td align="center">
+         $600183$
+        </td>
+        <td align="center">
+         $500439$
+        </td>
+       </tr>
+       <tr>
+        <td align="center">
+         $3$
+        </td>
+        <td align="center">
+         $600863$
+        </td>
+        <td align="center">
+         $701497$
+        </td>
+       </tr>
+       <tr>
+        <td align="center">
+         $\cdots$
+        </td>
+        <td align="center">
+         $\cdots$
+        </td>
+        <td align="center">
+         $\cdots$
+        </td>
+       </tr>
+      </table>
+     </div>
+     <p>
+      The telephone number of the caller and the called number in record $n$ are $\operatorname{Caller}(n) = S_{2n-1}$ and $\operatorname{Called}(n) = S_{2n}$ where $S_{1,2,3,\dots}$ come from the "Lagged Fibonacci Generator":
+     </p>
+     <p>
+      For $1 \le k \le 55$, $S_k = [100003 - 200003k + 300007k^3] \pmod{1000000}$.
+      <br/>
+      For $56 \le k$, $S_k = [S_{k-24} + S_{k-55}] \pmod{1000000}$.
+     </p>
+     <p>
+      If $\operatorname{Caller}(n) = \operatorname{Called}(n)$ then the user is assumed to have misdialled and the call fails; otherwise the call is successful.
+     </p>
+     <p>
+      From the start of the records, we say that any pair of users $X$ and $Y$ are friends if $X$ calls $Y$ or vice-versa. Similarly, $X$ is a friend of a friend of $Z$ if $X$ is a friend of $Y$ and $Y$ is a friend of $Z$; and so on for longer chains.
+     </p>
+     <p>
+      The Prime Minister's phone number is $524287$. After how many successful calls, not counting misdials, will $99\%$ of the users (including the PM) be a friend, or a friend of a friend etc., of the Prime Minister?
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(max_users=10, pm_number=7, target_fraction=0.99)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(max_users=1000000, pm_number=524287, target_fraction=0.99)</code> → <code>█</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(max_users=200000, pm_number=524287, target_fraction=0.99)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(max_users=10, pm_number=7, target_fraction=0.99) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(max_users=1000000, pm_number=524287, target_fraction=0.99) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(max_users=200000, pm_number=524287, target_fraction=0.99) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

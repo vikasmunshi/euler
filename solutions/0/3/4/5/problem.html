@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 345: "Matrix Sum" (level 5)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 345: "Matrix Sum" (level 5)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,72 +141,157 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 345: "Matrix Sum" (level 5)</h2>
-    <p><a href="https://projecteuler.net/problem=345" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>We define the <dfn>Matrix Sum</dfn> of a matrix as the maximum possible sum of matrix elements such that none of the selected elements share the same row or column.</p>
-<p>For example, the Matrix Sum of the matrix below equals 3315 ( = 863 + 383 + 343 + 959 + 767):</p>
-<p style="text-align:center;font-family:'courier new';">
-  7  53 183 439 <span style="color:#00ff00;font-family:'courier new';"><b>863</b></span><br/>
-497 <span style="color:#00ff00;font-family:'courier new';"><b>383</b></span> 563  79 973<br/>
-287  63 <span style="color:#00ff00;font-family:'courier new';"><b>343</b></span> 169 583<br/>
-627 343 773 <span style="color:#00ff00;font-family:'courier new';"><b>959</b></span> 943<br/><span style="color:#00ff00;font-family:'courier new';"><b>767</b></span> 473 103 699 303<br/></p>
-<p>
-Find the Matrix Sum of:<br/></p>
-<p style="text-align:center;font-family:'courier new';">
-  7  53 183 439 863 497 383 563  79 973 287  63 343 169 583<br/>
-627 343 773 959 943 767 473 103 699 303 957 703 583 639 913<br/>
-447 283 463  29  23 487 463 993 119 883 327 493 423 159 743<br/>
-217 623   3 399 853 407 103 983  89 463 290 516 212 462 350<br/>
-960 376 682 962 300 780 486 502 912 800 250 346 172 812 350<br/>
-870 456 192 162 593 473 915  45 989 873 823 965 425 329 803<br/>
-973 965 905 919 133 673 665 235 509 613 673 815 165 992 326<br/>
-322 148 972 962 286 255 941 541 265 323 925 281 601  95 973<br/>
-445 721  11 525 473  65 511 164 138 672  18 428 154 448 848<br/>
-414 456 310 312 798 104 566 520 302 248 694 976 430 392 198<br/>
-184 829 373 181 631 101 969 613 840 740 778 458 284 760 390<br/>
-821 461 843 513  17 901 711 993 293 157 274  94 192 156 574<br/>
- 34 124   4 878 450 476 712 914 838 669 875 299 823 329 699<br/>
-815 559 813 459 522 788 168 586 966 232 308 833 251 631 107<br/>
-813 883 451 509 615  77 281 613 459 205 380 274 302  35 805<br/></p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 345: "Matrix Sum" (level 5)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=345" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      We define the
+      <dfn>
+       Matrix Sum
+      </dfn>
+      of a matrix as the maximum possible sum of matrix elements such that none of the selected elements share the same row or column.
+     </p>
+     <p>
+      For example, the Matrix Sum of the matrix below equals 3315 ( = 863 + 383 + 343 + 959 + 767):
+     </p>
+     <p style="text-align:center;font-family:'courier new';">
+      7  53 183 439
+      <span style="color:#00ff00;font-family:'courier new';">
+       <b>
+        863
+       </b>
+      </span>
+      <br/>
+      497
+      <span style="color:#00ff00;font-family:'courier new';">
+       <b>
+        383
+       </b>
+      </span>
+      563  79 973
+      <br/>
+      287  63
+      <span style="color:#00ff00;font-family:'courier new';">
+       <b>
+        343
+       </b>
+      </span>
+      169 583
+      <br/>
+      627 343 773
+      <span style="color:#00ff00;font-family:'courier new';">
+       <b>
+        959
+       </b>
+      </span>
+      943
+      <br/>
+      <span style="color:#00ff00;font-family:'courier new';">
+       <b>
+        767
+       </b>
+      </span>
+      473 103 699 303
+      <br/>
+     </p>
+     <p>
+      Find the Matrix Sum of:
+      <br/>
+     </p>
+     <p style="text-align:center;font-family:'courier new';">
+      7  53 183 439 863 497 383 563  79 973 287  63 343 169 583
+      <br/>
+      627 343 773 959 943 767 473 103 699 303 957 703 583 639 913
+      <br/>
+      447 283 463  29  23 487 463 993 119 883 327 493 423 159 743
+      <br/>
+      217 623   3 399 853 407 103 983  89 463 290 516 212 462 350
+      <br/>
+      960 376 682 962 300 780 486 502 912 800 250 346 172 812 350
+      <br/>
+      870 456 192 162 593 473 915  45 989 873 823 965 425 329 803
+      <br/>
+      973 965 905 919 133 673 665 235 509 613 673 815 165 992 326
+      <br/>
+      322 148 972 962 286 255 941 541 265 323 925 281 601  95 973
+      <br/>
+      445 721  11 525 473  65 511 164 138 672  18 428 154 448 848
+      <br/>
+      414 456 310 312 798 104 566 520 302 248 694 976 430 392 198
+      <br/>
+      184 829 373 181 631 101 969 613 840 740 778 458 284 760 390
+      <br/>
+      821 461 843 513  17 901 711 993 293 157 274  94 192 156 574
+      <br/>
+      34 124   4 878 450 476 712 914 838 669 875 299 823 329 699
+      <br/>
+      815 559 813 459 522 788 168 586 966 232 308 833 251 631 107
+      <br/>
+      813 883 451 509 615  77 281 613 459 205 380 274 302  35 805
+      <br/>
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Main</h3>
-<ul>
-<li><code>solve()</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       main: solve() → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

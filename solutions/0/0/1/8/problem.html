@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 18: "Maximum Path Sum I" (level 1)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 18: "Maximum Path Sum I" (level 1)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,76 +141,203 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 18: "Maximum Path Sum I" (level 1)</h2>
-    <p><a href="https://projecteuler.net/problem=18" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is $23$.</p>
-<p class="monospace center"><span class="red"><b>3</b></span><br/><span class="red"><b>7</b></span> 4<br/>
-2 <span class="red"><b>4</b></span> 6<br/>
-8 5 <span class="red"><b>9</b></span> 3</p>
-<p>That is, $3 + 7 + 4 + 9 = 23$.</p>
-<p>Find the maximum total from top to bottom of the triangle below:</p>
-<p class="monospace center">75<br/>
-95 64<br/>
-17 47 82<br/>
-18 35 87 10<br/>
-20 04 82 47 65<br/>
-19 01 23 75 03 34<br/>
-88 02 77 73 07 63 67<br/>
-99 65 04 28 06 16 70 92<br/>
-41 41 26 56 83 40 80 70 33<br/>
-41 48 72 33 47 32 37 16 94 29<br/>
-53 71 44 65 25 43 91 52 97 51 14<br/>
-70 11 33 28 77 73 17 78 39 68 17 57<br/>
-91 71 52 38 17 14 91 43 58 50 27 29 48<br/>
-63 66 04 68 89 53 67 30 73 16 69 87 40 31<br/>
-04 62 98 27 23 09 70 98 73 93 38 53 60 04 23</p>
-<p class="note"><b>NOTE:</b> As there are only $16384$ routes, it is possible to solve this problem by trying every route. However, <a href="problem=67">Problem 67</a>, is the same challenge with a triangle containing one-hundred rows; it cannot be solved by brute force, and requires a clever method! ;o)</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 18: "Maximum Path Sum I" (level 1)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=18" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is $23$.
+     </p>
+     <p class="monospace center">
+      <span class="red">
+       <b>
+        3
+       </b>
+      </span>
+      <br/>
+      <span class="red">
+       <b>
+        7
+       </b>
+      </span>
+      4
+      <br/>
+      2
+      <span class="red">
+       <b>
+        4
+       </b>
+      </span>
+      6
+      <br/>
+      8 5
+      <span class="red">
+       <b>
+        9
+       </b>
+      </span>
+      3
+     </p>
+     <p>
+      That is, $3 + 7 + 4 + 9 = 23$.
+     </p>
+     <p>
+      Find the maximum total from top to bottom of the triangle below:
+     </p>
+     <p class="monospace center">
+      75
+      <br/>
+      95 64
+      <br/>
+      17 47 82
+      <br/>
+      18 35 87 10
+      <br/>
+      20 04 82 47 65
+      <br/>
+      19 01 23 75 03 34
+      <br/>
+      88 02 77 73 07 63 67
+      <br/>
+      99 65 04 28 06 16 70 92
+      <br/>
+      41 41 26 56 83 40 80 70 33
+      <br/>
+      41 48 72 33 47 32 37 16 94 29
+      <br/>
+      53 71 44 65 25 43 91 52 97 51 14
+      <br/>
+      70 11 33 28 77 73 17 78 39 68 17 57
+      <br/>
+      91 71 52 38 17 14 91 43 58 50 27 29 48
+      <br/>
+      63 66 04 68 89 53 67 30 73 16 69 87 40 31
+      <br/>
+      04 62 98 27 23 09 70 98 73 93 38 53 60 04 23
+     </p>
+     <p class="note">
+      <b>
+       NOTE:
+      </b>
+      As there are only $16384$ routes, it is possible to solve this problem by trying every route. However,
+      <a href="problem=67">
+       Problem 67
+      </a>
+      , is the same challenge with a triangle containing one-hundred rows; it cannot be solved by brute force, and requires a clever method! ;o)
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(triangle_str='TRIANGLE_A')</code> → <code>23</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(triangle_str='TRIANGLE_B')</code> → <code>1074</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><strong>Solved:</strong> 2019-10-10</p>
-<ul>
-<li><code>solve_maximum_path_sum_i_p0018_s0.py TRIANGLE_B</code> → <code>1074</code> [0.047s]</li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(triangle_str='TRIANGLE_A') → 23
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(triangle_str='TRIANGLE_B') → 1074
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <h3>
+     <strong>
+      First Solved:
+     </strong>
+     2019-10-10
+    </h3>
+    <table>
+     <tbody>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_maximum_path_sum_i_p0018_s0.py
+       </td>
+       <td>
+        TRIANGLE_A
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        23
+       </td>
+       <td>
+        0.400s
+       </td>
+      </tr>
+      <tr class="result-best">
+       <td>
+        main
+       </td>
+       <td>
+        solve_maximum_path_sum_i_p0018_s0.py
+       </td>
+       <td>
+        TRIANGLE_B
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1074
+       </td>
+       <td>
+        0.530s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

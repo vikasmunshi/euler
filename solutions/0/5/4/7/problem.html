@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 547: "Distance of Random Points Within Hollow Square Laminae" (level 33)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 547: "Distance of Random Points Within Hollow Square Laminae" (level 33)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,65 +141,127 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 547: "Distance of Random Points Within Hollow Square Laminae" (level 33)</h2>
-    <p><a href="https://projecteuler.net/problem=547" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Assuming that two points are chosen randomly (with <strong>uniform distribution</strong>) within a rectangle, it is possible to determine the <strong>expected value</strong> of the distance between these two points.</p>
-<p>For example, the expected distance between two random points in a unit square is about $0.521405$, while the expected distance between two random points in a rectangle with side lengths $2$ and $3$ is about $1.317067$.</p>
-<p>Now we define a <dfn>hollow square lamina</dfn> of size $n$ to be an integer sized square with side length $n \ge 3$ consisting of $n^2$ unit squares from which a rectangle consisting of $x \times y$ unit squares ($1 \le x,y \le n - 2$) within the original square has been removed.</p>
-<p>For $n = 3$ there exists only one hollow square lamina:</p>
-<p align="center"><img alt="0547-holes-1.png" src="resources/0547-holes-1.png"/></p>
-<p>For $n = 4$ you can find $9$ distinct hollow square laminae, allowing shapes to reappear in rotated or mirrored form:</p>
-<p align="center"><img alt="0547-holes-2.png" src="resources/0547-holes-2.png"/></p>
-<p>Let $S(n)$ be the sum of the expected distance between two points chosen randomly within each of the possible hollow square laminae of size $n$. The two points have to lie within the area left after removing the inner rectangle, i.e. the gray-colored areas in the illustrations above.</p>
-<p>For example, $S(3) = 1.6514$ and $S(4) = 19.6564$, rounded to four digits after the decimal point.</p>
-<p>Find $S(40)$ rounded to four digits after the decimal point.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 547: "Distance of Random Points Within Hollow Square Laminae" (level 33)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=547" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Assuming that two points are chosen randomly (with
+      <strong>
+       uniform distribution
+      </strong>
+      ) within a rectangle, it is possible to determine the
+      <strong>
+       expected value
+      </strong>
+      of the distance between these two points.
+     </p>
+     <p>
+      For example, the expected distance between two random points in a unit square is about $0.521405$, while the expected distance between two random points in a rectangle with side lengths $2$ and $3$ is about $1.317067$.
+     </p>
+     <p>
+      Now we define a
+      <dfn>
+       hollow square lamina
+      </dfn>
+      of size $n$ to be an integer sized square with side length $n \ge 3$ consisting of $n^2$ unit squares from which a rectangle consisting of $x \times y$ unit squares ($1 \le x,y \le n - 2$) within the original square has been removed.
+     </p>
+     <p>
+      For $n = 3$ there exists only one hollow square lamina:
+     </p>
+     <p align="center">
+      <img alt="0547-holes-1.png" src="resources/0547-holes-1.png"/>
+     </p>
+     <p>
+      For $n = 4$ you can find $9$ distinct hollow square laminae, allowing shapes to reappear in rotated or mirrored form:
+     </p>
+     <p align="center">
+      <img alt="0547-holes-2.png" src="resources/0547-holes-2.png"/>
+     </p>
+     <p>
+      Let $S(n)$ be the sum of the expected distance between two points chosen randomly within each of the possible hollow square laminae of size $n$. The two points have to lie within the area left after removing the inner rectangle, i.e. the gray-colored areas in the illustrations above.
+     </p>
+     <p>
+      For example, $S(3) = 1.6514$ and $S(4) = 19.6564$, rounded to four digits after the decimal point.
+     </p>
+     <p>
+      Find $S(40)$ rounded to four digits after the decimal point.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(n=3)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(n=40)</code> → <code>█</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(n=50)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(n=3) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(n=40) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(n=50) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

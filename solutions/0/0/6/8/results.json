@@ -5,7 +5,7 @@
     "args": "9 3",
     "answer": 432621513,
     "verdict": "correct",
-    "elapsed": 0.05216220096917823
+    "elapsed": 0.19102497200947255
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "12 4",
     "answer": 462723831516,
     "verdict": "correct",
-    "elapsed": 0.06216842797584832
+    "elapsed": 0.20336420997045934
   },
   {
     "category": "main",
@@ -21,6 +21,38 @@
     "args": "16 5",
     "answer": 6531031914842725,
     "verdict": "correct",
-    "elapsed": 0.07702338299714029
+    "elapsed": 0.39638720301445574
+  },
+  {
+    "category": "extra",
+    "solution": "solve_magic_5_gon_ring_p0068_s0.py",
+    "args": "21 6",
+    "answer": 692122310348451151719,
+    "verdict": "correct",
+    "elapsed": 0.5262180509744212
+  },
+  {
+    "category": "extra",
+    "solution": "solve_magic_5_gon_ring_p0068_s0.py",
+    "args": "26 7",
+    "answer": 87494612611315115314321027,
+    "verdict": "correct",
+    "elapsed": 0.8575512900133617
+  },
+  {
+    "category": "extra",
+    "solution": "solve_magic_5_gon_ring_p0068_s0.py",
+    "args": "31 8",
+    "answer": 5981381151614621624114712731039,
+    "verdict": "correct",
+    "elapsed": 0.7393626350094564
+  },
+  {
+    "category": "extra",
+    "solution": "solve_magic_5_gon_ring_p0068_s0.py",
+    "args": "36 9",
+    "answer": 109518511716166215271473133812841149,
+    "verdict": "correct",
+    "elapsed": 0.7067854869528674
   }
 ]

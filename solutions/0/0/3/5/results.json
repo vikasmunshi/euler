@@ -5,7 +5,7 @@
     "args": "10",
     "answer": 4,
     "verdict": "correct",
-    "elapsed": 0.04652782599441707
+    "elapsed": 0.12187941401498392
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "100",
     "answer": 13,
     "verdict": "correct",
-    "elapsed": 0.03899860999081284
+    "elapsed": 0.1318180219968781
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "1000",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.05050687998300418
+    "elapsed": 0.14403485000366345
   },
   {
     "category": "main",
@@ -29,7 +29,15 @@
     "args": "1000000",
     "answer": 55,
     "verdict": "correct",
-    "elapsed": 0.32939296297263354
+    "elapsed": 0.5867324349819683
+  },
+  {
+    "category": "extra",
+    "solution": "solve_circular_primes_p0035_s0.py",
+    "args": "10000000",
+    "answer": 55,
+    "verdict": "correct",
+    "elapsed": 11.0081873399904
   },
   {
     "category": "dev",
@@ -37,7 +45,7 @@
     "args": "10",
     "answer": 4,
     "verdict": "correct",
-    "elapsed": 0.0568456610199064
+    "elapsed": 0.0884371530264616
   },
   {
     "category": "dev",
@@ -45,7 +53,7 @@
     "args": "100",
     "answer": 13,
     "verdict": "correct",
-    "elapsed": 0.05686509300721809
+    "elapsed": 0.10010978201171383
   },
   {
     "category": "dev",
@@ -53,7 +61,7 @@
     "args": "1000",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.0555100740166381
+    "elapsed": 0.08910810499219224
   },
   {
     "category": "main",
@@ -61,6 +69,14 @@
     "args": "1000000",
     "answer": 55,
     "verdict": "correct",
-    "elapsed": 0.09960578300524503
+    "elapsed": 0.1455736820353195
+  },
+  {
+    "category": "extra",
+    "solution": "solve_circular_primes_p0035_s1_pps.py",
+    "args": "10000000",
+    "answer": 55,
+    "verdict": "correct",
+    "elapsed": 0.7222492399741895
   }
 ]

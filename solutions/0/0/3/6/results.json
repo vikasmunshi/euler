@@ -5,7 +5,7 @@
     "args": "1",
     "answer": 25,
     "verdict": "correct",
-    "elapsed": 0.04808511200826615
+    "elapsed": 0.13728809100575745
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "2",
     "answer": 157,
     "verdict": "correct",
-    "elapsed": 0.048155524011235684
+    "elapsed": 0.11306289897765964
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "3",
     "answer": 1772,
     "verdict": "correct",
-    "elapsed": 0.0418299000011757
+    "elapsed": 0.11219891801010817
   },
   {
     "category": "dev",
@@ -29,7 +29,7 @@
     "args": "4",
     "answer": 18228,
     "verdict": "correct",
-    "elapsed": 0.04779835598310456
+    "elapsed": 0.09304382704431191
   },
   {
     "category": "main",
@@ -37,6 +37,14 @@
     "args": "6",
     "answer": 872187,
     "verdict": "correct",
-    "elapsed": 0.04936982598155737
+    "elapsed": 0.11211145698325709
+  },
+  {
+    "category": "extra",
+    "solution": "solve_double_base_palindromes_p0036_s0.py",
+    "args": "9",
+    "answer": 2609044274,
+    "verdict": "correct",
+    "elapsed": 0.2798511330038309
   }
 ]

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 483: "Repeated Permutation" (level 39)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 483: "Repeated Permutation" (level 39)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,73 +141,167 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 483: "Repeated Permutation" (level 39)</h2>
-    <p><a href="https://projecteuler.net/problem=483" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>
-We define a <dfn>permutation</dfn> as an operation that rearranges the order of the elements $\{1, 2, 3, ..., n\}$.
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 483: "Repeated Permutation" (level 39)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=483" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      We define a
+      <dfn>
+       permutation
+      </dfn>
+      as an operation that rearranges the order of the elements $\{1, 2, 3, ..., n\}$.
 There are $n!$ such permutations, one of which leaves the elements in their initial order.
 For $n = 3$ we have $3! = 6$ permutations:
-</p><ul>
-<li>$P_1 =$ keep the initial order</li>
-<li>$P_2 =$ exchange the 1<sup>st</sup> and 2<sup>nd</sup> elements</li>
-<li>$P_3 =$ exchange the 1<sup>st</sup> and 3<sup>rd</sup> elements</li>
-<li>$P_4 =$ exchange the 2<sup>nd</sup> and 3<sup>rd</sup> elements</li>
-<li>$P_5 =$ rotate the elements to the right</li>
-<li>$P_6 =$ rotate the elements to the left</li></ul>
-<p>
-If we select one of these permutations, and we re-apply the <u>same</u> permutation repeatedly, we eventually restore the initial order.<br/>For a permutation $P_i$, let $f(P_i)$ be the number of steps required to restore the initial order by applying the permutation $P_i$ repeatedly.<br/>For $n = 3$, we obtain:</p>
-<ul>
-<li>$f(P_1) = 1$ : $(1,2,3) \to (1,2,3)$</li>
-<li>$f(P_2) = 2$ : $(1,2,3) \to (2,1,3) \to (1,2,3)$</li>
-<li>$f(P_3) = 2$ : $(1,2,3) \to (3,2,1) \to (1,2,3)$</li>
-<li>$f(P_4) = 2$ : $(1,2,3) \to (1,3,2) \to (1,2,3)$</li>
-<li>$f(P_5) = 3$ : $(1,2,3) \to (3,1,2) \to (2,3,1) \to (1,2,3)$</li>
-<li>$f(P_6) = 3$ : $(1,2,3) \to (2,3,1) \to (3,1,2) \to (1,2,3)$</li></ul>
-<p>
-Let $g(n)$ be the average value of $f^2(P_i)$ over all permutations $P_i$ of length $n$.<br/>$g(3) = (1^2 + 2^2 + 2^2 + 2^2 + 3^2 + 3^2)/3! = 31/6 \approx 5.166666667\mathrm e0$<br/>$g(5) = 2081/120 \approx 1.734166667\mathrm e1$<br/>$g(20) = 12422728886023769167301/2432902008176640000 \approx 5.106136147\mathrm e3$
-</p>
-<p>
-Find $g(350)$ and write the answer in scientific notation rounded to $10$ significant digits, using a lowercase e to separate mantissa and exponent, as in the examples above.
-</p>
-</div>
+     </p>
+     <ul>
+      <li>
+       $P_1 =$ keep the initial order
+      </li>
+      <li>
+       $P_2 =$ exchange the 1
+       <sup>
+        st
+       </sup>
+       and 2
+       <sup>
+        nd
+       </sup>
+       elements
+      </li>
+      <li>
+       $P_3 =$ exchange the 1
+       <sup>
+        st
+       </sup>
+       and 3
+       <sup>
+        rd
+       </sup>
+       elements
+      </li>
+      <li>
+       $P_4 =$ exchange the 2
+       <sup>
+        nd
+       </sup>
+       and 3
+       <sup>
+        rd
+       </sup>
+       elements
+      </li>
+      <li>
+       $P_5 =$ rotate the elements to the right
+      </li>
+      <li>
+       $P_6 =$ rotate the elements to the left
+      </li>
+     </ul>
+     <p>
+      If we select one of these permutations, and we re-apply the
+      <u>
+       same
+      </u>
+      permutation repeatedly, we eventually restore the initial order.
+      <br/>
+      For a permutation $P_i$, let $f(P_i)$ be the number of steps required to restore the initial order by applying the permutation $P_i$ repeatedly.
+      <br/>
+      For $n = 3$, we obtain:
+     </p>
+     <ul>
+      <li>
+       $f(P_1) = 1$ : $(1,2,3) \to (1,2,3)$
+      </li>
+      <li>
+       $f(P_2) = 2$ : $(1,2,3) \to (2,1,3) \to (1,2,3)$
+      </li>
+      <li>
+       $f(P_3) = 2$ : $(1,2,3) \to (3,2,1) \to (1,2,3)$
+      </li>
+      <li>
+       $f(P_4) = 2$ : $(1,2,3) \to (1,3,2) \to (1,2,3)$
+      </li>
+      <li>
+       $f(P_5) = 3$ : $(1,2,3) \to (3,1,2) \to (2,3,1) \to (1,2,3)$
+      </li>
+      <li>
+       $f(P_6) = 3$ : $(1,2,3) \to (2,3,1) \to (3,1,2) \to (1,2,3)$
+      </li>
+     </ul>
+     <p>
+      Let $g(n)$ be the average value of $f^2(P_i)$ over all permutations $P_i$ of length $n$.
+      <br/>
+      $g(3) = (1^2 + 2^2 + 2^2 + 2^2 + 3^2 + 3^2)/3! = 31/6 \approx 5.166666667\mathrm e0$
+      <br/>
+      $g(5) = 2081/120 \approx 1.734166667\mathrm e1$
+      <br/>
+      $g(20) = 12422728886023769167301/2432902008176640000 \approx 5.106136147\mathrm e3$
+     </p>
+     <p>
+      Find $g(350)$ and write the answer in scientific notation rounded to $10$ significant digits, using a lowercase e to separate mantissa and exponent, as in the examples above.
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Main</h3>
-<ul>
-<li><code>solve(n=350)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><em>Solution pending... the mathematician is still thinking.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       main: solve(n=350) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <p>
+     <em>
+      Solution pending... the mathematician is still thinking.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

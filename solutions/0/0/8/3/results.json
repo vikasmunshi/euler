@@ -5,7 +5,7 @@
     "args": "",
     "answer": 2297,
     "verdict": "correct",
-    "elapsed": 0.05291432101512328
+    "elapsed": 0.0846407650387846
   },
   {
     "category": "main",
@@ -13,6 +13,6 @@
     "args": "https://projecteuler.net/resources/documents/0083_matrix.txt",
     "answer": 425185,
     "verdict": "correct",
-    "elapsed": 2.508018388005439
+    "elapsed": 11.171947331051342
   }
 ]

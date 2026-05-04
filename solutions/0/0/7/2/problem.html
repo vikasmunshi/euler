@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 72: "Counting Fractions" (level 4)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 72: "Counting Fractions" (level 4)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,68 +141,288 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 72: "Counting Fractions" (level 4)</h2>
-    <p><a href="https://projecteuler.net/problem=72" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Consider the fraction, $\dfrac n d$, where $n$ and $d$ are positive integers. If $n \lt d$ and $\operatorname{HCF}(n,d)=1$, it is called a reduced proper fraction.</p>
-<p>If we list the set of reduced proper fractions for $d \le 8$ in ascending order of size, we get:
-$$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \frac 3 8, \frac 2 5, \frac 3 7, \frac 1 2, \frac 4 7, \frac 3 5, \frac 5 8, \frac 2 3, \frac 5 7, \frac 3 4, \frac 4 5, \frac 5 6, \frac 6 7, \frac 7 8$$</p>
-<p>It can be seen that there are $21$ elements in this set.</p>
-<p>How many elements would be contained in the set of reduced proper fractions for $d \le 1\,000\,000$?</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 72: "Counting Fractions" (level 4)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=72" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Consider the fraction, $\dfrac n d$, where $n$ and $d$ are positive integers. If $n \lt d$ and $\operatorname{HCF}(n,d)=1$, it is called a reduced proper fraction.
+     </p>
+     <p>
+      If we list the set of reduced proper fractions for $d \le 8$ in ascending order of size, we get:
+$$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \frac 3 8, \frac 2 5, \frac 3 7, \frac 1 2, \frac 4 7, \frac 3 5, \frac 5 8, \frac 2 3, \frac 5 7, \frac 3 4, \frac 4 5, \frac 5 6, \frac 6 7, \frac 7 8$$
+     </p>
+     <p>
+      It can be seen that there are $21$ elements in this set.
+     </p>
+     <p>
+      How many elements would be contained in the set of reduced proper fractions for $d \le 1\,000\,000$?
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(max_d=8)</code> → <code>21</code></li>
-<li><code>solve(max_d=10)</code> → <code>31</code></li>
-<li><code>solve(max_d=100)</code> → <code>3043</code></li>
-<li><code>solve(max_d=1000)</code> → <code>304191</code></li>
-<li><code>solve(max_d=10000)</code> → <code>30397485</code></li>
-<li><code>solve(max_d=100000)</code> → <code>3039650753</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(max_d=1000000)</code> → <code>303963552391</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(max_d=10000000)</code> → <code>30396356427241</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><strong>Solved:</strong> 2025-07-16</p>
-<ul>
-<li><code>solve_counting_fractions_p0072_s0.py 1000000</code> → <code>303963552391</code> [0.658s]</li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(max_d=8) → 21
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_d=10) → 31
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_d=100) → 3043
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_d=1000) → 304191
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_d=10000) → 30397485
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(max_d=100000) → 3039650753
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(max_d=1000000) → 303963552391
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(max_d=10000000) → 30396356427241
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <h3>
+     <strong>
+      First Solved:
+     </strong>
+     2025-07-16
+    </h3>
+    <table>
+     <tbody>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        21
+       </td>
+       <td>
+        0.153s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        31
+       </td>
+       <td>
+        0.132s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3043
+       </td>
+       <td>
+        0.101s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        304191
+       </td>
+       <td>
+        0.092s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30397485
+       </td>
+       <td>
+        0.113s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3039650753
+       </td>
+       <td>
+        0.159s
+       </td>
+      </tr>
+      <tr class="result-best">
+       <td>
+        main
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        303963552391
+       </td>
+       <td>
+        1.177s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        extra
+       </td>
+       <td>
+        solve_counting_fractions_p0072_s0.py
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30396356427241
+       </td>
+       <td>
+        13.177s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

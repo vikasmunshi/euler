@@ -5,7 +5,7 @@
     "args": "2 15",
     "answer": 26,
     "verdict": "correct",
-    "elapsed": 0.03968325903406367
+    "elapsed": 0.13091595500009134
   },
   {
     "category": "main",
@@ -13,6 +13,14 @@
     "args": "2 1000",
     "answer": 1366,
     "verdict": "correct",
-    "elapsed": 0.04142647300614044
+    "elapsed": 0.11291656899265945
+  },
+  {
+    "category": "extra",
+    "solution": "solve_power_digit_sum_p0016_s0.py",
+    "args": "2 10000",
+    "answer": 13561,
+    "verdict": "correct",
+    "elapsed": 0.14175779197830707
   }
 ]

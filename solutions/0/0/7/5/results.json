@@ -5,7 +5,7 @@
     "args": "50",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.05170387600082904
+    "elapsed": 0.38520688499556854
   },
   {
     "category": "main",
@@ -13,6 +13,14 @@
     "args": "1500000",
     "answer": 161667,
     "verdict": "correct",
-    "elapsed": 0.5976760850171559
+    "elapsed": 1.6375794149935246
+  },
+  {
+    "category": "extra",
+    "solution": "solve_singular_integer_right_triangles_p0075_s0.py",
+    "args": "10000000",
+    "answer": 1067080,
+    "verdict": "correct",
+    "elapsed": 13.59446376102278
   }
 ]

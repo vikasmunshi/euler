@@ -5,7 +5,7 @@
     "args": "10",
     "answer": 2,
     "verdict": "correct",
-    "elapsed": 0.04535218799719587
+    "elapsed": 0.09107460599625483
   },
   {
     "category": "main",
@@ -13,6 +13,22 @@
     "args": "1000000",
     "answer": 428570,
     "verdict": "correct",
-    "elapsed": 0.044764335034415126
+    "elapsed": 0.10233187198173255
+  },
+  {
+    "category": "extra",
+    "solution": "solve_ordered_fractions_p0071_s0.py",
+    "args": "1000000000",
+    "answer": 428571425,
+    "verdict": "correct",
+    "elapsed": 0.07777554396307096
+  },
+  {
+    "category": "extra",
+    "solution": "solve_ordered_fractions_p0071_s0.py",
+    "args": "1000000000000",
+    "answer": 428571428570,
+    "verdict": "correct",
+    "elapsed": 0.09651891002431512
   }
 ]

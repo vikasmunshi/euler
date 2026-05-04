@@ -5,7 +5,7 @@
     "args": "2",
     "answer": 125,
     "verdict": "correct",
-    "elapsed": 0.04835354600800201
+    "elapsed": 0.12372357299318537
   },
   {
     "category": "dev",
@@ -13,7 +13,7 @@
     "args": "3",
     "answer": 41063625,
     "verdict": "correct",
-    "elapsed": 0.05219440598739311
+    "elapsed": 0.1241448920336552
   },
   {
     "category": "dev",
@@ -21,7 +21,7 @@
     "args": "4",
     "answer": 1006012008,
     "verdict": "correct",
-    "elapsed": 0.04977403103839606
+    "elapsed": 0.11858707800274715
   },
   {
     "category": "main",
@@ -29,6 +29,38 @@
     "args": "5",
     "answer": 127035954683,
     "verdict": "correct",
-    "elapsed": 0.05829684599302709
+    "elapsed": 0.11637734400574118
+  },
+  {
+    "category": "extra",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "6",
+    "answer": 1000600120008,
+    "verdict": "correct",
+    "elapsed": 0.13289406895637512
+  },
+  {
+    "category": "extra",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "7",
+    "answer": 10569784298536,
+    "verdict": "correct",
+    "elapsed": 0.1695522770169191
+  },
+  {
+    "category": "extra",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "8",
+    "answer": 10314675896832,
+    "verdict": "correct",
+    "elapsed": 0.1556470729992725
+  },
+  {
+    "category": "extra",
+    "solution": "solve_cubic_permutations_p0062_s0.py",
+    "args": "9",
+    "answer": 13465983902671,
+    "verdict": "correct",
+    "elapsed": 0.15411889302777126
   }
 ]

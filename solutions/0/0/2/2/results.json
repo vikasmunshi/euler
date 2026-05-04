@@ -5,6 +5,6 @@
     "args": "https://projecteuler.net/resources/documents/0022_names.txt",
     "answer": 871198282,
     "verdict": "correct",
-    "elapsed": 0.04667936300393194
+    "elapsed": 0.4181430909666233
   }
 ]

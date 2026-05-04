@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 103: "Special Subset Sums" (level 11)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 103: "Special Subset Sums" (level 11)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,77 +141,181 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 103: "Special Subset Sums" (level 11)</h2>
-    <p><a href="https://projecteuler.net/problem=103" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>Let $S(A)$ represent the sum of elements in set $A$ of size $n$. We shall call it a special sum set if for any two non-empty disjoint subsets, $B$ and $C$, the following properties are true:</p>
-<ol><li>$S(B) \ne S(C)$; that is, sums of subsets cannot be equal.</li>
-<li>If $B$ contains more elements than $C$ then $S(B) \gt S(C)$.</li>
-</ol><p>If $S(A)$ is minimised for a given $n$, we shall call it an optimum special sum set. The first five optimum special sum sets are given below.</p>
-<ul style="list-style-type:none;">
-<li>$n = 1$: $\{1\}$</li>
-<li>$n = 2$: $\{1, 2\}$</li>
-<li>$n = 3$: $\{2, 3, 4\}$</li>
-<li>$n = 4$: $\{3, 5, 6, 7\}$</li>
-<li>$n = 5$: $\{6, 9, 11, 12, 13\}$</li></ul>
-<p>It <i>seems</i> that for a given optimum set, $A = \{a_1, a_2, \dots, a_n\}$, the next optimum set is of the form $B = \{b, a_1 + b, a_2 + b, \dots, a_n + b\}$, where $b$ is the "middle" element on the previous row.</p>
-<p>By applying this "rule" we would expect the optimum set for $n = 6$ to be $A = \{11, 17, 20, 22, 23, 24\}$, with $S(A) = 117$. However, this is not the optimum set, as we have merely applied an algorithm to provide a near optimum set. The optimum set for $n = 6$ is $A = \{11, 18, 19, 20, 22, 25\}$, with $S(A) = 115$ and corresponding set string: 111819202225.</p>
-<p>Given that $A$ is an optimum special sum set for $n = 7$, find its set string.</p>
-<p class="smaller">NOTE: This problem is related to <a href="problem=105">Problem 105</a> and <a href="problem=106">Problem 106</a>.</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 103: "Special Subset Sums" (level 11)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=103" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      Let $S(A)$ represent the sum of elements in set $A$ of size $n$. We shall call it a special sum set if for any two non-empty disjoint subsets, $B$ and $C$, the following properties are true:
+     </p>
+     <ol>
+      <li>
+       $S(B) \ne S(C)$; that is, sums of subsets cannot be equal.
+      </li>
+      <li>
+       If $B$ contains more elements than $C$ then $S(B) \gt S(C)$.
+      </li>
+     </ol>
+     <p>
+      If $S(A)$ is minimised for a given $n$, we shall call it an optimum special sum set. The first five optimum special sum sets are given below.
+     </p>
+     <ul style="list-style-type:none;">
+      <li>
+       $n = 1$: $\{1\}$
+      </li>
+      <li>
+       $n = 2$: $\{1, 2\}$
+      </li>
+      <li>
+       $n = 3$: $\{2, 3, 4\}$
+      </li>
+      <li>
+       $n = 4$: $\{3, 5, 6, 7\}$
+      </li>
+      <li>
+       $n = 5$: $\{6, 9, 11, 12, 13\}$
+      </li>
+     </ul>
+     <p>
+      It
+      <i>
+       seems
+      </i>
+      that for a given optimum set, $A = \{a_1, a_2, \dots, a_n\}$, the next optimum set is of the form $B = \{b, a_1 + b, a_2 + b, \dots, a_n + b\}$, where $b$ is the "middle" element on the previous row.
+     </p>
+     <p>
+      By applying this "rule" we would expect the optimum set for $n = 6$ to be $A = \{11, 17, 20, 22, 23, 24\}$, with $S(A) = 117$. However, this is not the optimum set, as we have merely applied an algorithm to provide a near optimum set. The optimum set for $n = 6$ is $A = \{11, 18, 19, 20, 22, 25\}$, with $S(A) = 115$ and corresponding set string: 111819202225.
+     </p>
+     <p>
+      Given that $A$ is an optimum special sum set for $n = 7$, find its set string.
+     </p>
+     <p class="smaller">
+      NOTE: This problem is related to
+      <a href="problem=105">
+       Problem 105
+      </a>
+      and
+      <a href="problem=106">
+       Problem 106
+      </a>
+      .
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(n=1)</code> → <code>█</code></li>
-<li><code>solve(n=2)</code> → <code>█</code></li>
-<li><code>solve(n=3)</code> → <code>█</code></li>
-<li><code>solve(n=4)</code> → <code>█</code></li>
-<li><code>solve(n=5)</code> → <code>█</code></li>
-<li><code>solve(n=6)</code> → <code>█</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(n=7)</code> → <code>█</code></li>
-</ul>
-<h3>Extra</h3>
-<ul>
-<li><code>solve(n=8)</code> → <code>█</code></li>
-<li><code>solve(n=9)</code> → <code>█</code></li>
-<li><code>solve(n=10)</code> → <code>█</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><strong>Solved:</strong> 2025-08-06</p>
-<p><em>Solution to be restored.</em></p>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(n=1) → █
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(n=2) → █
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(n=3) → █
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(n=4) → █
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(n=5) → █
+      </code>
+     </li>
+     <li>
+      <code>
+       dev: solve(n=6) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(n=7) → █
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       extra: solve(n=8) → █
+      </code>
+     </li>
+     <li>
+      <code>
+       extra: solve(n=9) → █
+      </code>
+     </li>
+     <li>
+      <code>
+       extra: solve(n=10) → █
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <h3>
+     <strong>
+      First Solved:
+     </strong>
+     2025-08-06
+    </h3>
+    <p>
+     <em>
+      Solution to be restored.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>

@@ -5,7 +5,7 @@
     "args": "2",
     "answer": 6,
     "verdict": "correct",
-    "elapsed": 0.04221299896016717
+    "elapsed": 0.1414524620049633
   },
   {
     "category": "main",
@@ -13,6 +13,14 @@
     "args": "20",
     "answer": 137846528820,
     "verdict": "correct",
-    "elapsed": 0.03866931202355772
+    "elapsed": 0.119450765021611
+  },
+  {
+    "category": "extra",
+    "solution": "solve_lattice_paths_p0015_s0.py",
+    "args": "200",
+    "answer": 102952500135414432972975880320401986757210925381077648234849059575923332372651958598336595518976492951564048597506774120,
+    "verdict": "correct",
+    "elapsed": 0.09712295298231766
   }
 ]

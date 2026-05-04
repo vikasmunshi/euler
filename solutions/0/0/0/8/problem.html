@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/html">
-<head>
-    <meta charset="UTF-8">
-    <title>Problem 8: "Largest Product in a Series" (level 0)</title>
-    <style>
-        body {
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 8: "Largest Product in a Series" (level 0)
+  </title>
+  <style>
+   body {
             font-family: Arial, sans-serif;
             max-width: 800px;
             margin: 40px auto;
@@ -51,6 +53,22 @@
             padding-bottom: 6px;
         }
 
+        h3 {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #555;
+            margin: 12px 0 4px;
+        }
+
+        h4 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #3a7a50;
+            letter-spacing: 0.03em;
+            margin: 8px 0 2px;
+        }
+
+
         code {
             background: #f0f0f0;
             padding: 2px 5px;
@@ -80,6 +98,42 @@
             color: #777;
         }
 
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 4px 16px 4px 0;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+
+        #results-content tr:not(:last-child) td {
+            padding-bottom: 6px;
+        }
+
+        #results-content tr + tr td {
+            border-top: 1px solid #d4edd9;
+            padding-top: 6px;
+        }
+
+        #results-content tr.result-main td {
+            background: #e6f4ec;
+            color: #2a6040;
+        }
+
+        #results-content tr.result-best td {
+            background: #c8ecd6;
+            color: #1a4a30;
+            font-weight: 700;
+        }
+
         #solution-notes-content {
             min-height: 80px;
             padding: 12px;
@@ -87,77 +141,171 @@
             border: 1px solid #e8e0c0;
             border-radius: 4px;
         }
-    </style>
-    <script>
-        MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
-    </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-</head>
-<body>
-<section id="problem-statement">
-    <h2>Problem 8: "Largest Product in a Series" (level 0)</h2>
-    <p><a href="https://projecteuler.net/problem=8" target="_blank" rel="noopener noreferrer">View on Project Euler</a></p>
-    <div id="problem-statement-content">
-        <div class="problem_content" role="problem">
-<p>The four adjacent digits in the $1000$-digit number that have the greatest product are $9 \times 9 \times 8 \times 9 = 5832$.</p>
-<p class="monospace center">
-73167176531330624919225119674426574742355349194934<br/>
-96983520312774506326239578318016984801869478851843<br/>
-85861560789112949495459501737958331952853208805511<br/>
-12540698747158523863050715693290963295227443043557<br/>
-66896648950445244523161731856403098711121722383113<br/>
-62229893423380308135336276614282806444486645238749<br/>
-30358907296290491560440772390713810515859307960866<br/>
-70172427121883998797908792274921901699720888093776<br/>
-65727333001053367881220235421809751254540594752243<br/>
-52584907711670556013604839586446706324415722155397<br/>
-53697817977846174064955149290862569321978468622482<br/>
-83972241375657056057490261407972968652414535100474<br/>
-82166370484403199890008895243450658541227588666881<br/>
-16427171479924442928230863465674813919123162824586<br/>
-17866458359124566529476545682848912883142607690042<br/>
-24219022671055626321111109370544217506941658960408<br/>
-07198403850962455444362981230987879927244284909188<br/>
-84580156166097919133875499200524063689912560717606<br/>
-05886116467109405077541002256983155200055935729725<br/>
-71636269561882670428252483600823257530420752963450<br/></p>
-<p>Find the thirteen adjacent digits in the $1000$-digit number that have the greatest product. What is the value of this product?</p>
-</div>
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <section id="problem-statement">
+   <h2>
+    Problem 8: "Largest Product in a Series" (level 0)
+   </h2>
+   <p>
+    <a href="https://projecteuler.net/problem=8" rel="noopener noreferrer" target="_blank">
+     View on Project Euler
+    </a>
+   </p>
+   <div id="problem-statement-content">
+    <div class="problem_content" role="problem">
+     <p>
+      The four adjacent digits in the $1000$-digit number that have the greatest product are $9 \times 9 \times 8 \times 9 = 5832$.
+     </p>
+     <p class="monospace center">
+      73167176531330624919225119674426574742355349194934
+      <br/>
+      96983520312774506326239578318016984801869478851843
+      <br/>
+      85861560789112949495459501737958331952853208805511
+      <br/>
+      12540698747158523863050715693290963295227443043557
+      <br/>
+      66896648950445244523161731856403098711121722383113
+      <br/>
+      62229893423380308135336276614282806444486645238749
+      <br/>
+      30358907296290491560440772390713810515859307960866
+      <br/>
+      70172427121883998797908792274921901699720888093776
+      <br/>
+      65727333001053367881220235421809751254540594752243
+      <br/>
+      52584907711670556013604839586446706324415722155397
+      <br/>
+      53697817977846174064955149290862569321978468622482
+      <br/>
+      83972241375657056057490261407972968652414535100474
+      <br/>
+      82166370484403199890008895243450658541227588666881
+      <br/>
+      16427171479924442928230863465674813919123162824586
+      <br/>
+      17866458359124566529476545682848912883142607690042
+      <br/>
+      24219022671055626321111109370544217506941658960408
+      <br/>
+      07198403850962455444362981230987879927244284909188
+      <br/>
+      84580156166097919133875499200524063689912560717606
+      <br/>
+      05886116467109405077541002256983155200055935729725
+      <br/>
+      71636269561882670428252483600823257530420752963450
+      <br/>
+     </p>
+     <p>
+      Find the thirteen adjacent digits in the $1000$-digit number that have the greatest product. What is the value of this product?
+     </p>
     </div>
-</section>
-<hr>
-<section id="test-cases">
-    <h2>Test Cases</h2>
-    <div id="test-cases-content">
-        <h3>Dev</h3>
-<ul>
-<li><code>solve(length=4)</code> → <code>5832</code></li>
-</ul>
-<h3>Main</h3>
-<ul>
-<li><code>solve(length=13)</code> → <code>23514624000</code></li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="results">
-    <h2>Results</h2>
-    <div id="results-content">
-        <p><strong>Solved:</strong> 2019-10-08</p>
-<ul>
-<li><code>solve_largest_product_in_a_series_p0008_s0.py 13</code> → <code>23514624000</code> [0.044s]</li>
-</ul>
-    </div>
-</section>
-<hr>
-<section id="solution-notes">
-    <h2>Solution Notes</h2>
-    <div id="solution-notes-content">
-        <p><em>Nothing here yet - come back when the dust has settled.</em></p>
-    </div>
-</section>
-<hr>
-</body>
+   </div>
+  </section>
+  <hr/>
+  <section id="test-cases">
+   <h2>
+    Test Cases
+   </h2>
+   <div id="test-cases-content">
+    <ul>
+     <li>
+      <code>
+       dev: solve(length=4) → 5832
+      </code>
+     </li>
+    </ul>
+    <ul>
+     <li>
+      <code>
+       main: solve(length=13) → 23514624000
+      </code>
+     </li>
+    </ul>
+   </div>
+  </section>
+  <hr/>
+  <section id="results">
+   <h2>
+    Results
+   </h2>
+   <div id="results-content">
+    <h3>
+     <strong>
+      First Solved:
+     </strong>
+     2019-10-08
+    </h3>
+    <table>
+     <tbody>
+      <tr>
+       <td>
+        dev
+       </td>
+       <td>
+        solve_largest_product_in_a_series_p0008_s0.py
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5832
+       </td>
+       <td>
+        0.087s
+       </td>
+      </tr>
+      <tr class="result-best">
+       <td>
+        main
+       </td>
+       <td>
+        solve_largest_product_in_a_series_p0008_s0.py
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        23514624000
+       </td>
+       <td>
+        0.137s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <hr/>
+  <section id="solution-notes">
+   <h2>
+    Solution Notes
+   </h2>
+   <div id="solution-notes-content">
+    <p>
+     <em>
+      Nothing here yet - come back when the dust has settled.
+     </em>
+    </p>
+   </div>
+  </section>
+  <hr/>
+ </body>
 </html>
