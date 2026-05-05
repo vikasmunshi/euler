@@ -267,10 +267,14 @@ publish_files() {
         fi
     fi
 
-    git -C "${worktree_path}" commit -m "Publish files updated by ${gh_user_name} on $(date +%y%m%d)"
+    local files_list
+    printf -v files_list '%s, ' "${target_files[@]}"
+    git -C "${worktree_path}" commit -m "Publish ${files_list%, }; updated by ${gh_user_name} on $(date +%y%m%d)"
 
     if [[ "${gh_user_email}" == "${repo_owner_email}" ]]; then
         eval_with_dry_run git -C "${worktree_path}" push -f origin "${branch_name}":master
+        eval_with_dry_run git fetch origin master
+        eval_with_dry_run git reset --soft origin/master
     else
         eval_with_dry_run git -C "${worktree_path}" push -f origin "${branch_name}"
         if ! eval_with_dry_run gh pr create \
@@ -281,6 +285,7 @@ publish_files() {
             echo "Error: could not create pull request" >&2
             return 1
         fi
+        echo "After the PR is merged, run: git fetch origin master && git reset --soft origin/master"
     fi
 }
 
@@ -334,31 +339,21 @@ Behaviour:
   - If the authenticated user is the repo owner: force-pushes to origin/master
   - Otherwise: pushes to a named branch and opens a pull request
   - Cleans up the worktree and local branch on exit
-  - Fast-forwards the current branch to origin/master to stay in sync
+  - Syncs current branch to origin/master with reset --soft (owner path only)
 EOF
 }
 
+declare -a target_files
 main() {
-    local -a files=()
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -h|--help)    usage; exit 0 ;;
-            --dry-run)    dry_run=1 ;;
-            --)           shift; files+=("$@"); break ;;
-            -*)           echo "Error: unknown option: $1" >&2; usage; exit 1 ;;
-            *)            files+=("$1") ;;
-        esac
-        shift
-    done
-
-    if [[ ${#files[@]} -eq 0 ]]; then
+    target_files=("$@")
+    if [[ ${#target_files[@]} -eq 0 ]]; then
         echo "Error: no files or directories specified" >&2
         usage
         exit 1
     fi
 
-    check_not_gitignored "${files[@]}" || exit 1
-    expand_target_files "${files[@]}" || exit 2
+    check_not_gitignored "${target_files[@]}" || exit 1
+    expand_target_files "${target_files[@]}" || exit 2
     get_changed_target_files "${expanded_target_files[@]}" || exit 3
 
     if [[ ${#changed_target_files[@]} -eq 0 ]]; then
@@ -368,13 +363,12 @@ main() {
 
     init_gh_git_identity || exit 4
     publish_files "${changed_target_files[@]}" || exit 5
-
-    if [[ "${dry_run}" -eq 0 ]]; then
-        git fetch origin master 2>/dev/null
-        git merge --ff-only origin/master || echo "Warning: could not fast-forward current branch to origin/master" >&2
-    fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
+    [[ " $* " == *" -h "* || " $* " == *" --help "* ]] && { usage; exit 0; }
+    [[ " $* " == *" --dry-run "* ]] && dry_run=1
+    declare -a _args=()
+    for _arg in "$@"; do [[ "${_arg}" != -* ]] && _args+=("${_arg}"); done
+    main "${_args[@]}"
 fi
