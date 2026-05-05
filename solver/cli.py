@@ -169,15 +169,8 @@ class SolverShell(Cmd):
                 print('no aliases defined')
                 return
             longest_name = max(len(name) for name in self.aliases)
-            for alias_name, alias_command in self.aliases.items():
-                if alias_command.startswith('for'):
-                    lines: list[str] = [item.strip() for line in alias_command.split(':')
-                                        for item in line.split(';')]
-                    tab: str = ' ' * (longest_name + 5)
-                    command_str: str = f'{lines[0]}:\n' + '\n'.join(f'{tab}{line};' for line in lines[1:])
-                    print(f'{C_LBL}{alias_name:<{longest_name}} {C_TXT}→ {C_CMD}{command_str}{RESET}')
-                else:
-                    print(f'{C_LBL}{alias_name:<{longest_name}} {C_TXT}→ {C_CMD}{alias_command}{RESET}')
+            print('\n'.join(f'{C_LBL}{alias_name:<{longest_name}} {C_TXT}→ {C_CMD}{alias_command}{RESET}'
+                            for alias_name, alias_command in self.aliases.items()))
             return
         alias_name = alias_name.strip()
         if not sep:
@@ -489,8 +482,9 @@ for _name, _alias in {
                   'echo evaluated n'),
     'gh-login': 'shell gh auth status || gh auth login',
     'gh-status': 'shell gh auth status',
-    'git-add-stack': f'shell git add {solutions_dir.as_posix()}/',
+    'git-add-solutions': f'shell git add {solutions_dir.as_posix()}/',
     'git-merge': 'shell git fetch origin && git merge --ff-only origin/master',
+    'git-reset': 'shell git fetch origin && git reset --soft origin/master',
     'git-status': 'shell git status | less',
     'pre-commit': 'shell pre-commit run --all-files',
     'restack': (f'for n in 1 to {max(p.number for p in problems)}: '

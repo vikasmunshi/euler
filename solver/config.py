@@ -35,7 +35,7 @@ def __root_dir() -> Path:
     raise ValueError('Failed to get git root')
 
 
-html_template: Template = Template((Path(__file__).parent / 'refs/template.html').read_text())
+html_template: Template = Template((Path(__file__).parent / 'data/template.html').read_text())
 keys_version: str = '1.0.1'
 number_filename: str = 'problem_number.txt'
 problems_list_url: str = 'https://projecteuler.net/minimal=problems'
