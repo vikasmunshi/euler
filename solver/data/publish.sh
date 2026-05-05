@@ -130,22 +130,26 @@ expand_target_files() {
     #
     # Returns:
     #   0  At least one file resolved successfully
-    #   1  A path does not exist, or no files were found in the specified paths
+    #   1  A path does not exist and is not a tracked deleted file, or no files found
     expanded_target_files=()
     local path
     for path in "$@"; do
-        if [[ ! -e "${path}" ]]; then
-            echo "Error: path does not exist: ${path}" >&2
-            return 1
-        fi
         if [[ -f "${path}" ]]; then
             expanded_target_files+=("${path}")
         elif [[ -d "${path}" ]]; then
             local -a dir_files=()
             mapfile -t dir_files < <(git ls-files -- "${path}" 2>/dev/null)
             expanded_target_files+=("${dir_files[@]+"${dir_files[@]}"}")
+            mapfile -t dir_files < <(git ls-files --deleted -- "${path}" 2>/dev/null)
+            expanded_target_files+=("${dir_files[@]+"${dir_files[@]}"}")
             mapfile -t dir_files < <(git ls-files --others --exclude-standard -- "${path}" 2>/dev/null)
             expanded_target_files+=("${dir_files[@]+"${dir_files[@]}"}")
+        elif git ls-files --error-unmatch -- "${path}" &>/dev/null; then
+            # path does not exist on disk but is tracked — it has been deleted
+            expanded_target_files+=("${path}")
+        else
+            echo "Error: path does not exist: ${path}" >&2
+            return 1
         fi
     done
     if [[ ${#expanded_target_files[@]} -eq 0 ]]; then
@@ -250,17 +254,26 @@ publish_files() {
         git branch -D '${branch_name}' || true
     " EXIT
 
+    local -a existing_files=() deleted_files=()
     local f
     for f in "${files[@]}"; do
-        cp --parents "${f}" "${worktree_path}/"
+        if [[ -e "${f}" ]]; then
+            existing_files+=("${f}")
+        else
+            deleted_files+=("${f}")
+        fi
     done
 
-    git -C "${worktree_path}" add -- "${files[@]}"
+    for f in "${existing_files[@]+"${existing_files[@]}"}"; do
+        cp --parents "${f}" "${worktree_path}/"
+    done
+    [[ ${#existing_files[@]} -gt 0 ]] && git -C "${worktree_path}" add -- "${existing_files[@]}"
+    [[ ${#deleted_files[@]} -gt 0 ]] && git -C "${worktree_path}" rm -f -- "${deleted_files[@]}"
 
     # Run pre-commit against the target files. Hooks may auto-fix files and exit
     # non-zero on the first run; re-stage and retry once to allow for that.
     if ! ( cd "${worktree_path}" && pre-commit run --files "${files[@]}" ); then
-        git -C "${worktree_path}" add -- "${files[@]}"
+        [[ ${#existing_files[@]} -gt 0 ]] && git -C "${worktree_path}" add -- "${existing_files[@]}"
         if ! ( cd "${worktree_path}" && pre-commit run --files "${files[@]}" ); then
             echo "Error: pre-commit checks failed; fix the issues and re-run" >&2
             return 1
