@@ -12,7 +12,7 @@ from solver.config import ColorCodes
 from solver.parser import problem_statement
 from solver.problems import Problem
 from solver.stack import read_stack_file, stack, stack_base_dir, stack_path, unstack
-from solver.util.utils import canonical_path, iterdir_recursive, run_command, write_file
+from solver.utils.utils import canonical_path, iterdir_recursive, run_command, write_file
 
 
 def clear_the_workspace(workspace_dir: Path, *, discard_changes: bool = False) -> None:

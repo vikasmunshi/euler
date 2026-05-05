@@ -35,7 +35,9 @@ def __root_dir() -> Path:
     raise ValueError('Failed to get git root')
 
 
-html_template: Template = Template((Path(__file__).parent / 'data/template.html').read_text())
+root_dir: Path = __root_dir()
+
+html_template: Template = Template((root_dir / 'solver/data/template.html').read_text())
 keys_version: str = '1.0.1'
 number_filename: str = 'problem_number.txt'
 problems_list_url: str = 'https://projecteuler.net/minimal=problems'
@@ -45,8 +47,6 @@ results_filename: str = 'results.json'
 statement_filename: str = 'problem.html'
 test_cases_filename: str = 'test_cases.json'
 timeout: float = 300  # timeout in seconds
-
-root_dir: Path = __root_dir()
 
 backup_dir: Path = root_dir / '.backup'
 cache_dir: Path = root_dir / '.cache'
@@ -58,7 +58,6 @@ schema_file: Path = root_dir / 'keys' / 'schema.json'
 sessions_dir: Path = root_dir / '.sessions'
 solutions_dir: Path = root_dir / 'solutions'
 solutions_history_file: Path = solutions_dir / 'history.csv'
-upload_keys_to_origin: Path = root_dir / 'scripts' / 'upload_keys_to_origin.sh'
 workspace_dir: Path = root_dir / 'euler'
 
 __all__ = (
@@ -84,6 +83,5 @@ __all__ = (
     'statement_filename',
     'test_cases_filename',
     'timeout',
-    'upload_keys_to_origin',
     'workspace_dir',
 )

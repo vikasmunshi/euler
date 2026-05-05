@@ -11,10 +11,10 @@ from typing import TYPE_CHECKING
 
 from solver.config import backup_dir, number_filename, resource_dirname, root_dir, solutions_dir, statement_filename
 from solver.problems import problems
-from solver.util.utils import canonical_path, iterdir_recursive, write_file
+from solver.utils.utils import canonical_path, iterdir_recursive, write_file
 
 if TYPE_CHECKING:
-    from solver.crypto.symmetrical import EncKey
+    from solver.keys.symmetrical import EncKey
 
 
 # ==================================================================================================================== #
@@ -31,7 +31,7 @@ def get_enc_key(key_id: bytes | None = None) -> EncKey:
     Returns:
         The EncKey matching the given ID, or the active key if key_id is None.
     """
-    from solver.crypto.keys import get_key
+    from solver.keys.keys import get_key
     return get_key(None if key_id is None else key_id.hex())
 
 

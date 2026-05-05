@@ -10,7 +10,7 @@ from uuid import NAMESPACE_URL, uuid5
 from requests import get
 
 from solver.config import cache_dir
-from solver.util.utils import write_file
+from solver.utils.utils import write_file
 
 
 def download_file(url: str, *,

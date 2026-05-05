@@ -12,7 +12,7 @@ from typing import Generator, NamedTuple, Protocol
 
 from solver.config import ColorCodes, results_filename, solutions_history_file, workspace_dir
 from solver.stack import read_stack_file, write_stack_file
-from solver.util.utils import canonical_path
+from solver.utils.utils import canonical_path
 
 color_map: dict[str, ColorCodes] = {
     'correct': ColorCodes.GREEN,

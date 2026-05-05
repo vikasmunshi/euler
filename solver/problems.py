@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 from solver.config import number_filename, problems_list_url
-from solver.util.download import download_file
+from solver.utils.download import download_file
 
 
 class Problem(NamedTuple):

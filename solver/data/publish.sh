@@ -285,7 +285,7 @@ publish_files() {
             echo "Error: could not create pull request" >&2
             return 1
         fi
-        echo "After the PR is merged, run: git fetch origin master && git reset --soft origin/master"
+        echo "After the PR is merged, run: solver refresh"
     fi
 }
 

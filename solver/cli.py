@@ -15,15 +15,16 @@ from readline import (backend as readline_backend, get_completer, get_completer_
 from subprocess import CalledProcessError, run
 from typing import Any, Callable, ClassVar, Literal, get_args, get_origin
 
-from solver.config import ColorCodes, history_file, solutions_dir, workspace_dir
-from solver.crypto import rekey, user
+from solver.config import ColorCodes, history_file, workspace_dir
 from solver.evaluate import evaluate
+from solver.keys.keys import rekey, user
 from solver.problems import problems
 from solver.stack import backup_the_stack, restore_the_stack
-from solver.util.browser import show_in_browser
-from solver.util.cli_utils import (bool_flags, coerce, continue_on_error, dedup_history, format_command_line, func_info,
-                                   safe_split, show_value, workspace_files)
-from solver.util.utils import canonical_path, upload_keys
+from solver.utils.browser import show_in_browser
+from solver.utils.cli_utils import (bool_flags, coerce, continue_on_error, dedup_history, format_command_line,
+                                    func_info, safe_split, show_value, workspace_files)
+from solver.utils.git import git_publish, git_refresh, git_status
+from solver.utils.utils import canonical_path
 from solver.workspace import clear_the_workspace, init_the_workspace, list_the_workspace, stack_the_workspace
 
 CYAN, GREEN, YELLOW, BLUE, BLACK, GRAY, RED, BOLD, RESET = (ColorCodes.CYAN, ColorCodes.GREEN, ColorCodes.YELLOW,
@@ -454,15 +455,17 @@ class SolverShell(Cmd):
 _commands: dict[str, Callable] = {
     'clear': clear_the_workspace,
     'eval': evaluate,
-    'full-stack-backup': backup_the_stack,
-    'full-stack-restore': restore_the_stack,
+    'git-publish': git_publish,
+    'git-refresh': git_refresh,
+    'git-status': git_status,
     'init': init_the_workspace,
     'ls': list_the_workspace,
     'problems': partial(show_value, problems),
     'rekey': rekey,
     'show': show_in_browser,
     'stack': stack_the_workspace,
-    'upload_keys': upload_keys,
+    'stack-backup': backup_the_stack,
+    'stack-restore': restore_the_stack,
     'user': user,
 }
 for _name, _func in _commands.items():
@@ -482,10 +485,6 @@ for _name, _alias in {
                   'echo evaluated n'),
     'gh-login': 'shell gh auth status || gh auth login',
     'gh-status': 'shell gh auth status',
-    'git-add-solutions': f'shell git add {solutions_dir.as_posix()}/',
-    'git-merge': 'shell git fetch origin && git merge --ff-only origin/master',
-    'git-reset': 'shell git fetch origin && git reset --soft origin/master',
-    'git-status': 'shell git status | less',
     'pre-commit': 'shell pre-commit run --all-files',
     'restack': (f'for n in 1 to {max(p.number for p in problems)}: '
                 'init n --reinit; '

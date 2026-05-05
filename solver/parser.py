@@ -15,7 +15,7 @@ from solver.config import html_template, projecteuler_url, resource_dirname, sta
 from solver.problems import Problem
 from solver.results import read_results, solutions_history
 from solver.stack import read_stack_file
-from solver.util.download import download_file
+from solver.utils.download import download_file
 
 
 def clean_html_for_local(problem_content_obj: BeautifulSoup, *,

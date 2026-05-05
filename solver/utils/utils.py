@@ -10,7 +10,7 @@ from subprocess import run
 from sys import argv
 from typing import Callable, Generator, Literal, overload
 
-from solver.config import keys_file, root_dir, upload_keys_to_origin
+from solver.config import root_dir
 
 
 def canonical_path(path: Path) -> str:
@@ -127,30 +127,6 @@ def run_script(script_path: Path, cmd_line_args: list[str] | None = None, check:
     run(command, shell=True, check=check, cwd=root_dir)
 
 
-def upload_keys() -> None:
-    """Upload changes to keys/keys.json to the remote repository via the GitHub CLI.
-
-    Does nothing if keys/keys.json has not been modified.
-
-    Behavior depends on whether the authenticated GitHub user is the repository owner:
-      - Admin (owner): pushes directly to master.
-      - Regular user:  creates a pull request from a dedicated branch
-                       (keys_json_file_updated_by_<email>); the administrator
-                       reviews and merges it to grant master key access.
-
-    Requires the GitHub CLI (gh) to be authenticated (gh auth login).
-    """
-    if is_unchanged(keys_file):
-        print('Keys/keys.json unchanged, no need to push.')
-        return
-    result = run_command('gh auth status || gh auth login')
-    if result is None or result.strip() == '':
-        print('Error: GitHub CLI (gh) is not authenticated. Please run "solver gh-login" first.')
-        return
-    run_script(upload_keys_to_origin, cmd_line_args=['push' if is_admin() else 'pull'])
-    print('Keys/keys.json updated. Once the pull request is merged, run "solver git-merge" to refresh.')
-
-
 def write_file(path: Path, content: bytes, msg: str | None = None) -> None:
     """Write bytes to the path, creating parent directories as needed, and optionally print a status message."""
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -169,6 +145,5 @@ __all__ = (
     'iterdir_recursive',
     'run_command',
     'run_script',
-    'upload_keys',
     'write_file',
 )
