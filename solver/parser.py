@@ -11,10 +11,11 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
-from solver.config import html_template, projecteuler_url, resource_dirname, statement_filename, test_cases_filename
+from solver.config import projecteuler_url, resource_dirname, statement_filename, test_cases_filename
 from solver.problems import Problem
 from solver.results import read_results, solutions_history
 from solver.stack import read_stack_file
+from solver.templates import html_template
 from solver.utils.download import download_file
 
 

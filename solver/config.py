@@ -5,7 +5,6 @@ from __future__ import annotations
 from enum import StrEnum
 from os import chdir
 from pathlib import Path
-from string import Template
 from subprocess import run
 
 
@@ -37,7 +36,6 @@ def __root_dir() -> Path:
 
 root_dir: Path = __root_dir()
 
-html_template: Template = Template((root_dir / 'solver/data/template.html').read_text())
 keys_version: str = '1.0.1'
 number_filename: str = 'problem_number.txt'
 problems_list_url: str = 'https://projecteuler.net/minimal=problems'
@@ -65,7 +63,6 @@ __all__ = (
     'backup_dir',
     'cache_dir',
     'history_file',
-    'html_template',
     'keys_backup_file',
     'keys_file',
     'keys_version',

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-""" git utilities for solver"""
+"""Git operations for the solver repository: publish, refresh, and status."""
 from __future__ import annotations
 
 from subprocess import CalledProcessError, run
@@ -8,13 +8,17 @@ from typing import Literal
 
 from solver.config import ColorCodes, root_dir
 
-publish_script: str = './solver/data/publish.sh'
-refresh_script: str = './solver/data/refresh.sh'
-status_script: str = './solver/data/status.sh'
+publish_script: str = './scripts/git-publish.sh'
+refresh_script: str = './scripts/git-refresh.sh'
+status_script: str = './scripts/git-status.sh'
 
 
 def run_cmdline(cmdline: str) -> None:
-    """Run a command line in the root directory."""
+    """Run a shell command in the repository root and print its exit code.
+
+    Args:
+        cmdline: The shell command string to execute.
+    """
     try:
         process = run(cmdline, shell=True, check=True, cwd=root_dir)
     except CalledProcessError as e:
@@ -24,26 +28,29 @@ def run_cmdline(cmdline: str) -> None:
     print(f'> {cmdline} -> {ColorCodes.GREEN if result == 0 else ColorCodes.RED}{result}{ColorCodes.RESET}')
 
 
-def git_publish(target: Literal['keys', 'scripts', 'solver', 'solutions'], dry_run: bool = True) -> None:
-    """Publish changes to the remote repository.
+def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'], dry_run: bool = False) -> None:
+    """Publish changed files for named targets to the remote repository.
 
     Args:
-        target (Literal['keys', 'scripts', 'solver', 'solutions']): The target to publish.
-        dry_run (bool, optional): Whether to perform a dry run. Defaults to True.
+        targets: Scopes of files to publish — one or more of 'keys', 'scripts', 'solutions', or 'solver'.
+        dry_run: Print the push and pull-request commands instead of running them.  Defaults to False.
+
+    Raises:
+        ValueError: If any target is not one of the accepted values.
     """
-    if target not in ['keys', 'scripts', 'solver', 'solutions']:
-        raise ValueError(f'Invalid target: {target}')
+    if not all(target in ['keys', 'scripts', 'solutions', 'solver'] for target in targets):
+        raise ValueError(f'Invalid targets: {", ".join(targets)}')
     if dry_run:
-        run_cmdline(f'{publish_script} --dry-run {target}')
+        run_cmdline(f'{publish_script} --dry-run {" ".join(targets)}')
     else:
-        run_cmdline(f'{publish_script} {target}')
+        run_cmdline(f'{publish_script} {" ".join(targets)}')
 
 
-def git_refresh(dry_run: bool = True) -> None:
-    """Refresh the local repository.
+def git_refresh(dry_run: bool = False) -> None:
+    """Bring the local repository in sync with origin/master.
 
     Args:
-        dry_run (bool, optional): Whether to perform a dry run. Defaults to True.
+        dry_run: Print the sync commands instead of running them. Defaults to False.
     """
     if dry_run:
         run_cmdline(f'{refresh_script} --dry-run')
@@ -52,11 +59,11 @@ def git_refresh(dry_run: bool = True) -> None:
 
 
 def git_status(details: bool = False) -> None:
-    """ Shows git status. The status may display detailed information or a summary based on the input parameter.
+    """Display the sync state between the local branch and origin/master.
 
     Args:
-        details (bool): If set to True, displays detailed status information.
-                        If False, displays a summary.
+        details:    When True, lists every differing file and uncommitted change.
+                    When False (default), shows file counts only.
     """
     if details:
         run_cmdline(status_script)
