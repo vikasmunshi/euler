@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 41: Pandigital Prime [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../0/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=41" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/4/1/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../2/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 41: Pandigital Prime [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      We shall say that an $n$-digit number is pandigital if it makes use of all the digits $1$ to $n$ exactly once. For example, $2143$ is a $4$-digit pandigital and is also prime.
+     </p>
+     <p>
+      What is the largest $n$-digit pandigital prime that exists?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve() → 7652413</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 3 Dec 2019, 21:22
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0041_s0_c" rel="noopener noreferrer" target="_blank" title="p0041_s0_c">
+         p0041_s0_c
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7652413
+       </td>
+       <td>
+        0.000003093s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0041_s0.py" rel="noopener noreferrer" target="_blank" title="p0041_s0.py">
+         p0041_s0.py
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7652413
+       </td>
+       <td>
+        0.000100912s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The key insight is a divisibility pre-filter based on digit sums. For an n-digit pandigital number, the digit sum is always exactly n(n+1)/2, regardless of how the digits are arranged. If that sum is divisible by 3, then every permutation of those digits is divisible by 3 and therefore composite. Checking each length: n=9 gives sum 45, n=8 gives 36, n=7 gives 28, n=6 gives 21, n=5 gives 15, n=4 gives 10, n=3 gives 6, n=2 gives 3, n=1 gives 1. Only n=4 (sum 10) and n=7 (sum 28) are not multiples of 3. The single-digit n=1 case yields only the number 1, which is not prime. This pruning eliminates lengths 2, 3, 5, 6, 8, and 9 entirely before generating a single candidate.
+     </p>
+     <p>
+      After pruning, the worst-case search space is 7! + 4! = 5040 + 24 = 5064 permutations, though in practice the search terminates much earlier because I iterate in descending order and stop at the first prime found. Each primality test uses trial division costing O(sqrt(N)), where N is at most a 7-digit number (sqrt(9999999) is roughly 3162 divisions). Total work is therefore a few thousand trial-division checks at most, placing the entire solution comfortably in the sub-millisecond range.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Descending Permutation Search with Digit-Sum Pruning (s0 - Python and C)
+     </h4>
+     <p>
+      Both the Python and C implementations share the same core algorithm: generate permutations of the valid digit sets in strictly descending order and return the first candidate that passes a trial-division primality test. Iterating largest-first means the very first prime encountered is guaranteed to be the answer, giving a clean early-exit search with no need to collect and sort results afterward.
+     </p>
+     <p>
+      In the Python version, I use <code>itertools.permutations</code> on a reversed digit tuple inside <code>gen_n_digit_pandigital_numbers</code>. Because <code>itertools.permutations</code> yields in lexicographic order relative to its input, reversing the input tuple causes the output to arrive in descending numeric order. I wrap the search in a lazy generator expression over lengths <code>(7, 4)</code> and call <code>next()</code> to stop at the first prime found. I also defined a <code>fast_is_prime</code> alias that simply delegates to <code>is_prime</code>, leaving a hook open for a future drop-in replacement such as Miller-Rabin if the candidate space ever grew.
+     </p>
+     <p>
+      The C version implements the same descent explicitly using a <code>prev_permutation</code> function, which is the mirror image of the standard next-permutation algorithm: find the rightmost index where the element is greater than its right neighbour, find the largest element to its right that is smaller, swap them, then reverse the suffix. The digit array is initialised in descending order (e.g. 7, 6, 5, 4, 3, 2, 1) and <code>prev_permutation</code> is called in a do-while loop until it signals that all permutations have been visited. A shared helper <code>digits_to_number</code> converts the digit array to an integer at each step. The C version is entirely stack-based with no dynamic allocation, contributing to its near-zero measured runtime.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was recognising that the divisibility-by-3 rule applied to the digit sum n(n+1)/2 collapses the problem from a broad search over hundreds of thousands of permutations down to just two candidate lengths. Without this observation the problem looks expensive; with it the answer falls out almost instantly. Checking digit sums for divisibility before generating any permutations is a broadly useful pattern whenever combinatorial enumeration intersects with divisibility constraints.
+     </p>
+     <p>
+      Generating permutations in reverse lexicographic order combined with lazy evaluation via <code>next()</code> in Python or an early <code>return</code> inside the loop in C gives a clean early-exit maximum search. This avoids materialising the full result set and sorting it afterward, which matters when the search space is even moderately large.
+     </p>
+     <p>
+      Only one algorithm is implemented (identical in both languages), so there is no algorithmic trade-off to compare. The benchmark results confirm the approach is essentially free: the Python solution measures at 0.0001 s and the C solution at 0.0000 s. The C version is faster purely due to the absence of interpreter overhead, but Python is already well within any practical time budget. Trial division is entirely sufficient for 7-digit candidates; there is no motivation to introduce Miller-Rabin here.
+     </p>
+     <ul>
+      <li>
+       Digit-sum divisibility by 3 is a powerful pre-filter - compute n(n+1)/2 and check divisibility before generating any permutations.
+      </li>
+      <li>
+       Reversing the input to <code>itertools.permutations</code> produces descending-order output, enabling a simple early-exit maximum search via <code>next()</code>.
+      </li>
+      <li>
+       The <code>prev_permutation</code> pattern (find rightmost descent, find floor element to its right, swap, reverse suffix) is the mirror image of <code>next_permutation</code> and equally useful for descending enumeration in C.
+      </li>
+      <li>
+       For primes up to 7 digits, trial division is fast enough; Miller-Rabin would only matter if candidate sizes or search spaces were significantly larger.
+      </li>
+      <li>
+       Combining a mathematical pre-filter with an ordered lazy search is a broadly reusable pattern for combinatorial prime problems.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

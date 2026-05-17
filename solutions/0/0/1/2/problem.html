@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 12: Highly Divisible Triangular Number [Level 0]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../1/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=12" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/1/2/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../3/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 12: Highly Divisible Triangular Number [Level 0]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The sequence of triangle numbers is generated by adding the natural numbers. So the $7$
+      <sup>
+       th
+      </sup>
+      triangle number would be $1 + 2 + 3 + 4 + 5 + 6 + 7 = 28$. The first ten terms would be:
+$$1, 3, 6, 10, 15, 21, 28, 36, 45, 55, \dots$$
+     </p>
+     <p>
+      Let us list the factors of the first seven triangle numbers:
+     </p>
+     $$\begin{align}
+\mathbf 1 &amp;\colon 1\\
+\mathbf 3 &amp;\colon 1,3\\
+\mathbf 6 &amp;\colon 1,2,3,6\\
+\mathbf{10} &amp;\colon 1,2,5,10\\
+\mathbf{15} &amp;\colon 1,3,5,15\\
+\mathbf{21} &amp;\colon 1,3,7,21\\
+\mathbf{28} &amp;\colon 1,2,4,7,14,28
+\end{align}$$
+     <p>
+      We can see that $28$ is the first triangle number to have over five divisors.
+     </p>
+     <p>
+      What is the value of the first triangle number to have over five hundred divisors?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(num_divisors=5) → 28</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(num_divisors=500) → 76576500</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 8 Oct 2019, 14:54
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0012_s0_c" rel="noopener noreferrer" target="_blank" title="p0012_s0_c">
+         p0012_s0_c
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        28
+       </td>
+       <td>
+        0.000000149s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0012_s1_c" rel="noopener noreferrer" target="_blank" title="p0012_s1_c">
+         p0012_s1_c
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        28
+       </td>
+       <td>
+        0.000000142s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0012_s0.py" rel="noopener noreferrer" target="_blank" title="p0012_s0.py">
+         p0012_s0.py
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        28
+       </td>
+       <td>
+        0.000009568s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0012_s1.py" rel="noopener noreferrer" target="_blank" title="p0012_s1.py">
+         p0012_s1.py
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        28
+       </td>
+       <td>
+        0.000008514s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0012_s0_c" rel="noopener noreferrer" target="_blank" title="p0012_s0_c">
+         p0012_s0_c
+        </a>
+       </td>
+       <td>
+        500
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        76576500
+       </td>
+       <td>
+        0.002062373s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0012_s1_c" rel="noopener noreferrer" target="_blank" title="p0012_s1_c">
+         p0012_s1_c
+        </a>
+       </td>
+       <td>
+        500
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        76576500
+       </td>
+       <td>
+        0.008349323s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0012_s0.py" rel="noopener noreferrer" target="_blank" title="p0012_s0.py">
+         p0012_s0.py
+        </a>
+       </td>
+       <td>
+        500
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        76576500
+       </td>
+       <td>
+        0.045809090s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0012_s1.py" rel="noopener noreferrer" target="_blank" title="p0012_s1.py">
+         p0012_s1.py
+        </a>
+       </td>
+       <td>
+        500
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        76576500
+       </td>
+       <td>
+        0.212740985s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core mathematical tool here is the divisor-counting function d(n), sometimes written sigma-0. For a number n
+with prime factorisation p1^e1 * p2^e2 * ... * pk^ek, the number of divisors is (e1+1)(e2+1)...(ek+1), because
+each divisor is formed by independently choosing an exponent from 0 to ei for each prime. The property that made
+my optimised solution possible is that d is multiplicative: whenever gcd(a, b) = 1, d(a*b) = d(a)*d(b).
+     </p>
+     <p>
+      The i-th triangle number is T(i) = i*(i+1)/2. Because i and i+1 are consecutive integers their GCD is always 1,
+so the factor of 2 can be absorbed cleanly into whichever of i or i+1 is even. If i is even, T(i) = (i/2)*(i+1)
+and the two factors are coprime; if i is odd, T(i) = i*((i+1)/2) and again the two factors are coprime. Trial
+division runs in O(sqrt(n)), so factorising the full triangle number T(i) directly costs O(sqrt(i^2/2)) = O(i/sqrt(2)),
+whereas factorising the two coprime halves each of size roughly i/2 costs about 2*O(sqrt(i/2)) = O(sqrt(2*i)).
+The split approach therefore becomes increasingly cheaper compared with the naive approach as i grows.
+     </p>
+     <h3>
+      Solution Approaches
+     </h3>
+     <h4>
+      Split Coprime Factorisation (s0)
+     </h4>
+     <p>
+      I exploited the coprimality of consecutive integers to avoid ever factorising the full triangle number. At each
+step I check whether i is even or odd, split T(i) = i*(i+1)/2 into its two coprime halves, call my <code>num_factors</code> helper on each half, and multiply the results. The loop exits as soon as the divisor
+count strictly exceeds the threshold, returning the current triangle number. Both the Python version
+(p0012_s0.py) and the C version (p0012_s0_c) implement exactly the same parity check and two <code>num_factors</code> calls; the C version benefits from compiled arithmetic to reach 0.0021 s on the main
+case, roughly 22x faster than the Python equivalent at 0.0458 s. The Python and C code are direct translations
+of each other, which I find is a useful property to maintain when comparing language overhead in isolation.
+     </p>
+     <h4>
+      Naive Direct Factorisation (s1)
+     </h4>
+     <p>
+      My simpler baseline computes each triangle number T(i) = i*(i+1)//2 directly and passes the full value to <code>num_factors</code>. The loop in both Python (p0012_s1.py) and C (p0012_s1_c) advances while the divisor
+count is strictly less than the threshold and returns as soon as it meets or exceeds it. This is easier to read
+at a glance, but pays the full O(sqrt(T(i))) trial-division cost at every candidate. The Python version takes
+0.2127 s on the main case and the C version takes 0.0083 s - both meaningfully slower than their s0 counterparts.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that the formula T(i) = i*(i+1)/2 already hands you a factorisation into two
+coprime parts for free. Once I recalled that the divisor function is multiplicative, the rest followed
+immediately: never factorise the big product when you can factorise each coprime piece separately and multiply
+the counts.
+     </p>
+     <p>
+      Comparing the benchmark results makes the trade-offs concrete:
+     </p>
+     <table>
+      <tr>
+       <th>
+        Solution
+       </th>
+       <th>
+        Approach
+       </th>
+       <th>
+        Language
+       </th>
+       <th>
+        Main elapsed (s)
+       </th>
+      </tr>
+      <tr>
+       <td>
+        p0012_s0_c
+       </td>
+       <td>
+        Split coprime factorisation
+       </td>
+       <td>
+        C
+       </td>
+       <td>
+        0.0021
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0012_s0.py
+       </td>
+       <td>
+        Split coprime factorisation
+       </td>
+       <td>
+        Python
+       </td>
+       <td>
+        0.0458
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0012_s1_c
+       </td>
+       <td>
+        Direct factorisation
+       </td>
+       <td>
+        C
+       </td>
+       <td>
+        0.0083
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0012_s1.py
+       </td>
+       <td>
+        Direct factorisation
+       </td>
+       <td>
+        Python
+       </td>
+       <td>
+        0.2127
+       </td>
+      </tr>
+     </table>
+     <p>
+      The split approach is about 4x faster than the naive approach within C and about 4.6x faster within Python.
+Within the same algorithm, C is roughly 22x faster than Python for the split variant and about 26x faster for
+the naive variant - consistent with typical compiled-versus-interpreted overhead. The split coprime approach is
+the clear winner on both correctness grounds and performance grounds.
+     </p>
+     <p>
+      Key techniques worth remembering for future problems:
+     </p>
+     <ul>
+      <li>
+       The divisor-count function d(n) is multiplicative: d(a*b) = d(a)*d(b) whenever gcd(a, b) = 1.
+      </li>
+      <li>
+       Consecutive integers are always coprime, so any product of the form n*(n+1) or n*(n+1)/2 can be split into
+coprime factors before applying multiplicative arithmetic functions.
+      </li>
+      <li>
+       Trial division is O(sqrt(n)), so halving the argument saves a factor of sqrt(2) per call - modest on its own
+but meaningful when the loop runs thousands of iterations.
+      </li>
+      <li>
+       When a product formula provides coprime factors for free, always prefer factorising the pieces over
+factorising the assembled product.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

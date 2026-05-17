@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 58: Spiral Primes [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../7/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=58" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/5/8/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../9/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 58: Spiral Primes [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Starting with $1$ and spiralling anticlockwise in the following way, a square spiral with side length $7$ is formed.
+     </p>
+     <p class="center monospace">
+      <span class="red">
+       <b>
+        37
+       </b>
+      </span>
+      36 35 34 33 32
+      <span class="red">
+       <b>
+        31
+       </b>
+      </span>
+      <br/>
+      38
+      <span class="red">
+       <b>
+        17
+       </b>
+      </span>
+      16 15 14
+      <span class="red">
+       <b>
+        13
+       </b>
+      </span>
+      30
+      <br/>
+      39 18
+      <span class="red">
+       <b>
+        5
+       </b>
+      </span>
+      4
+      <span class="red">
+       <b>
+        3
+       </b>
+      </span>
+      12 29
+      <br/>
+      40 19  6  1  2 11 28
+      <br/>
+      41 20
+      <span class="red">
+       <b>
+        7
+       </b>
+      </span>
+      8  9 10 27
+      <br/>
+      42 21 22 23 24 25 26
+      <br/>
+      <span class="red">
+       <b>
+        43
+       </b>
+      </span>
+      44 45 46 47 48 49
+     </p>
+     <p>
+      It is interesting to note that the odd squares lie along the bottom right diagonal, but what is more interesting is that $8$ out of the $13$ numbers lying along both diagonals are prime; that is, a ratio of $8/13 \approx 62\%$.
+     </p>
+     <p>
+      If one complete new layer is wrapped around the spiral above, a square spiral with side length $9$ will be formed. If this process is continued, what is the side length of the square spiral for which the ratio of primes along both diagonals first falls below $10\%$?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(threshold=0.1) → 26241</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 12 Dec 2019, 13:13
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0058_s0_c" rel="noopener noreferrer" target="_blank" title="p0058_s0_c">
+         p0058_s0_c
+        </a>
+       </td>
+       <td>
+        0.1
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        26241
+       </td>
+       <td>
+        0.120900300s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0058_s0.py" rel="noopener noreferrer" target="_blank" title="p0058_s0.py">
+         p0058_s0.py
+        </a>
+       </td>
+       <td>
+        0.1
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        26241
+       </td>
+       <td>
+        3.236191241s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The key insight is that the four diagonal corners produced by each new spiral layer can be derived algebraically from the side length alone. For a layer that produces a square of side length <code>s = 2k + 1</code>, the bottom-right corner is always <code>s²</code> (a perfect square, never prime for <code>s &gt; 1</code>), and the remaining three corners are obtained by subtracting successive multiples of <code>s - 1</code>: the values are <code>s² - (s-1)</code>, <code>s² - 2(s-1)</code>, and <code>s² - 3(s-1)</code>. This means no spiral simulation is needed at all - all four corners per layer are O(1) arithmetic. Primality testing each corner via trial division costs O(sqrt(corner)) per call, and since corner values grow as O(s²), each individual test costs O(s). Summing this cost across all layers up to the answer at side length 26241 gives roughly O(S²) total trial divisions, which is consistent with the observed ~3-second Python runtime.
+     </p>
+     <p>
+      The problem has no fixed upper bound, so termination must be guaranteed analytically. Because the bottom-right corner is always a perfect square (contributing zero primes), at most three of the four new corners per layer can be prime. The total count of diagonal elements grows by exactly 4 per layer, so the denominator always increases by 4 while the numerator increases by at most 3. This means the ratio is eventually forced below any positive threshold, guaranteeing the loop always terminates regardless of the chosen threshold value.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Layer-by-Layer Corner Generator with Trial Division (Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python and C. The core idea is to avoid all grid simulation by computing corner values directly from the side length. In the Python version I factored the corner generation into a dedicated generator, <code>generator_spiral_corners</code>, that yields the side length and all four corner values for each successive layer. The main <code>solve</code> function accumulates a running count of diagonal elements (initialised to 1 for the centre) and a running count of prime corners, then checks the ratio after each layer. Primality is tested with a straightforward trial division routine: short-circuit on even numbers, then test odd divisors up to the square root. Since the bottom-right corner is always <code>s²</code>, it fails the primality check almost immediately, so in practice only up to three meaningful trial-division calls are made per layer. Separating the generator from the ratio logic kept the Python code readable and allowed the threshold to be passed in as a parameter, making the solution easy to test with different values.
+     </p>
+     <p>
+      The C translation follows exactly the same algorithm, replacing the generator with a plain <code>for</code> loop and using <code>long long</code> for corner values to avoid overflow as the spiral grows. The threshold is read from <code>argv[1]</code> via <code>atof</code>, and the ratio comparison uses an explicit cast to <code>double</code>. There are no algorithmic differences between the two versions - the speedup of roughly 27x (0.121 s versus 3.236 s) is attributable entirely to native compilation and the absence of Python interpreter overhead on the inner trial division loop.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that unlocked this solution was recognising that no spiral walk is needed at all. Once I noticed that the step between consecutive corners on the same layer is a constant <code>s - 1</code>, the closed-form corner formulas followed immediately and the generator wrote itself in a few lines. A secondary observation - that the bottom-right corner is always <code>s²</code> and therefore always composite for <code>s &gt; 1</code> - means that corner could be skipped as an optimisation, though treating all four corners uniformly keeps the code cleaner with negligible cost.
+     </p>
+     <p>
+      Since both solution files implement the same algorithm, the comparison is purely about language overhead. The benchmark shows C running at 0.121 s versus Python at 3.236 s, a factor of about 27x, which is typical for tight arithmetic loops with no memory-intensive data structures. For much larger spirals, switching to a Miller-Rabin primality test would reduce the per-corner cost from O(sqrt(n)) to O(log²(n)) and would matter for very deep searches, but trial division is perfectly adequate for the side lengths encountered here.
+     </p>
+     <ul>
+      <li>
+       Closed-form corner formulas eliminate all grid simulation overhead and make the generator trivially simple to implement.
+      </li>
+      <li>
+       A generator-based design in Python lets the stopping condition live in the caller, keeping concerns cleanly separated.
+      </li>
+      <li>
+       Parameterising the threshold rather than hardcoding 0.1 made the solution easy to test and reuse with different inputs.
+      </li>
+      <li>
+       Guaranteeing termination analytically - the ratio must eventually fall below any positive threshold - removes the need for a hard iteration cap and makes the loop provably correct.
+      </li>
+      <li>
+       For problems with quadratically growing numbers and trial division as the inner loop, C provides a large constant-factor speedup that is worth having when Python runtimes approach several seconds.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

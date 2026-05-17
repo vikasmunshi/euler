@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 64: Odd Period Square Roots [Level 3]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../3/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=64" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/6/4/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../5/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 64: Odd Period Square Roots [Level 3]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      All square roots are periodic when written as continued fractions and can be written in the form:
+     </p>
+     $$\sqrt{N}=a_0 + \dfrac 1 {a_1 + \dfrac 1 {a_2 + \dfrac 1 {a_3 + \dots}}}$$
+     <p>
+      For example, let us consider $\sqrt{23}:$
+     </p>
+     $$\sqrt{23} = 4 + \sqrt{23}-4=4 + \dfrac 1 {\dfrac 1 {\sqrt{23}-4}} = 4+\dfrac 1  {1 + \dfrac{\sqrt{23}-3}7}$$
+     <p>
+      If we continue we would get the following expansion:
+     </p>
+     $$\sqrt{23}=4 + \dfrac 1 {1 + \dfrac 1 {3+ \dfrac 1 {1 + \dfrac 1 {8+ \dots}}}}$$
+     <p>
+      The process can be summarised as follows:
+     </p>
+     $$\begin{align} \quad \quad a_0 &amp;= 4, \frac 1 {\sqrt{23}-4}=\frac {\sqrt{23}+4} 7=1+\frac {\sqrt{23}-3} 7 \\
+\quad \quad a_1 &amp;= 1, \frac 7 {\sqrt{23}-3}=\frac {7(\sqrt{23}+3)} {14}=3+\frac {\sqrt{23}-3} 2 \\
+\quad \quad a_2 &amp;= 3, \frac 2 {\sqrt{23}-3}=\frac {2(\sqrt{23}+3)} {14}=1+\frac {\sqrt{23}-4} 7 \\
+\quad \quad a_3 &amp;= 1, \frac 7 {\sqrt{23}-4}=\frac {7(\sqrt{23}+4)} 7=8+\sqrt{23}-4 \\
+\quad \quad a_4 &amp;= 8, \frac 1 {\sqrt{23}-4}=\frac {\sqrt{23}+4} 7=1+\frac {\sqrt{23}-3} 7 \\
+\quad \quad a_5 &amp;= 1, \frac 7 {\sqrt{23}-3}=\frac {7 (\sqrt{23}+3)} {14}=3+\frac {\sqrt{23}-3} 2 \\
+\quad \quad a_6 &amp;= 3, \frac 2 {\sqrt{23}-3}=\frac {2(\sqrt{23}+3)} {14}=1+\frac {\sqrt{23}-4} 7 \\
+\quad \quad a_7 &amp;= 1, \frac 7 {\sqrt{23}-4}=\frac {7(\sqrt{23}+4)} {7}=8+\sqrt{23}-4 \end{align}$$
+     <p>
+      It can be seen that the sequence is repeating. For conciseness, we use the notation $\sqrt{23}=[4;(1,3,1,8)]$, to indicate that the block (1,3,1,8) repeats indefinitely.
+     </p>
+     <p>
+      The first ten continued fraction representations of (irrational) square roots are:
+     </p>
+     <p>
+      $\quad \quad \sqrt{2}=[1;(2)]$, period=$1$
+      <br/>
+      $\quad \quad \sqrt{3}=[1;(1,2)]$, period=$2$
+      <br/>
+      $\quad \quad \sqrt{5}=[2;(4)]$, period=$1$
+      <br/>
+      $\quad \quad \sqrt{6}=[2;(2,4)]$, period=$2$
+      <br/>
+      $\quad \quad \sqrt{7}=[2;(1,1,1,4)]$, period=$4$
+      <br/>
+      $\quad \quad \sqrt{8}=[2;(1,4)]$, period=$2$
+      <br/>
+      $\quad \quad \sqrt{10}=[3;(6)]$, period=$1$
+      <br/>
+      $\quad \quad \sqrt{11}=[3;(3,6)]$, period=$2$
+      <br/>
+      $\quad \quad \sqrt{12}=[3;(2,6)]$, period=$2$
+      <br/>
+      $\quad \quad \sqrt{13}=[3;(1,1,1,1,6)]$, period=$5$
+     </p>
+     <p>
+      Exactly four continued fractions, for $N \le 13$, have an odd period.
+     </p>
+     <p>
+      How many continued fractions for $N \le 10\,000$ have an odd period?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_limit=13) → 4</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_limit=10000) → 1322</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 11 Mar 2020, 14:39
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0064_s0_c" rel="noopener noreferrer" target="_blank" title="p0064_s0_c">
+         p0064_s0_c
+        </a>
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000000411s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0064_s0.py" rel="noopener noreferrer" target="_blank" title="p0064_s0.py">
+         p0064_s0.py
+        </a>
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000012049s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0064_s0_c" rel="noopener noreferrer" target="_blank" title="p0064_s0_c">
+         p0064_s0_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1322
+       </td>
+       <td>
+        0.007725268s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0064_s0.py" rel="noopener noreferrer" target="_blank" title="p0064_s0.py">
+         p0064_s0.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1322
+       </td>
+       <td>
+        0.139348747s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem sits in the theory of continued fractions for quadratic irrationals. Every irrational square root sqrt(N) has a periodic continued fraction [a0; (a1, a2, ..., ak)] where the repeating block always ends with the term 2*a0. The standard algorithm for computing the period tracks a triple (m, d, a) representing the residual (sqrt(N) + m) / d at each step, updated via the recurrence m = d*a - m, d = (N - m^2) / d, a = floor((a0 + m) / d). Because both m and d are bounded by O(sqrt(N)), the triple must eventually repeat, and the period length is at most O(sqrt(N)). Accumulating this work over all non-square N up to a limit L gives total complexity of roughly O(L * sqrt(L)), placing the solution in the O(N^(3/2)) complexity class.
+     </p>
+     <p>
+      A deeper number-theoretic connection is worth noting: the parity of the continued fraction period determines solvability of the negative Pell equation x^2 - N*y^2 = -1. This equation has integer solutions if and only if the continued fraction period of sqrt(N) is odd. Counting odd-period square roots is therefore directly equivalent to counting those N for which the negative Pell equation is solvable - the problem is more deeply rooted in Diophantine equation theory than it first appears, and this connection resurfaces in Problem 66.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      State-Tracking Continued Fraction Period Detection (Python and C)
+     </h4>
+     <p>
+      Both p0064_s0.py and p0064_s0.c implement the same standard textbook recurrence. I seed a0 = floor(sqrt(N)), then iteratively apply m = d*a - m, d = (N - m^2) / d, a = floor((a0 + m) / d), accumulating visited (m, d, a) triples until a triple appears for the second time. The count of distinct triples accumulated before the repeat is exactly the period length. I then count all non-square N in [2, max_limit] for which that period is odd.
+     </p>
+     <p>
+      In the Python version I use <code>math.isqrt</code> to seed a0 and filter perfect squares with <code>math.sqrt(n).is_integer()</code>. The visited triples are stored in a list <code>p</code> and membership is tested with the <code>in</code> operator, making cycle detection O(period^2) per N rather than O(period). For N up to 10,000 the periods are short enough that this is not a bottleneck in practice, but replacing the list with a set would be a cleaner and asymptotically better choice.
+     </p>
+     <p>
+      The C version mirrors the algorithm exactly. I maintain a dynamically allocated array of (m, d, a) triples, doubling its capacity as needed via <code>realloc</code>. The inner linear scan for duplicates carries the same O(period^2) per-N characteristic as the Python list approach. I use an integer square root correction loop rather than relying on floating-point <code>sqrt</code> alone, which avoids rounding errors near large perfect squares. Both solutions produce the correct answer of 1322 for N up to 10,000.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight for me was that the entire period computation is pure integer arithmetic once the initial triple is established. I only need one approximate square root call to seed a0; everything after that is exact integer division that never accumulates floating-point error. The reason d always divides (N - m^2) exactly is that the algebra of rationalising the denominator at each step guarantees integer quotients - once I convinced myself of this, the algorithm felt completely trustworthy.
+     </p>
+     <p>
+      The C solution runs the main case in about 0.0077 seconds versus 0.139 seconds for Python, a roughly 18x speedup. This is expected given C's tight arithmetic loop and manual memory management versus Python's interpreted overhead and object allocation for tuples. Both are fast enough for the given limit, but the C version would scale considerably better if the limit were raised significantly.
+     </p>
+     <ul>
+      <li>
+       The triple (m, d, a) is a complete state descriptor for the continued fraction iteration; once it repeats, the period is exactly the number of distinct triples accumulated before that repetition.
+      </li>
+      <li>
+       Replacing the list membership check with a set would reduce cycle detection from O(period^2) to O(period) per N - a worthwhile cleanup, especially at larger limits.
+      </li>
+      <li>
+       Using <code>math.sqrt(n).is_integer()</code> for perfect-square filtering is readable but <code>math.isqrt(n)**2 == n</code> is more numerically robust and worth preferring for large N.
+      </li>
+      <li>
+       In C, correcting the integer square root with a small adjustment loop after <code>sqrt()</code> is a reliable pattern for avoiding off-by-one errors from floating-point rounding near perfect squares.
+      </li>
+      <li>
+       The connection between odd continued fraction period and solvability of x^2 - N*y^2 = -1 is a key fact to keep in mind for Problem 66 and related Pell equation problems.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

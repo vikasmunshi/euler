@@ -1,0 +1,110 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0036_s0.py",
+    "args": "1",
+    "answer": 25,
+    "verdict": "correct",
+    "average": 6.812777369548582e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0036_s0.py",
+    "args": "2",
+    "answer": 157,
+    "verdict": "correct",
+    "average": 1.2438035111829646e-05,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0036_s0.py",
+    "args": "3",
+    "answer": 1772,
+    "verdict": "correct",
+    "average": 6.14662668313924e-05,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0036_s0.py",
+    "args": "4",
+    "answer": 18228,
+    "verdict": "correct",
+    "average": 0.00011512432070657854,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0036_s0.py",
+    "args": "6",
+    "answer": 872187,
+    "verdict": "correct",
+    "average": 0.0010906928651689533,
+    "number_runs": 111
+  },
+  {
+    "category": "extra",
+    "solution": "p0036_s0.py",
+    "args": "9",
+    "answer": 2609044274,
+    "verdict": "correct",
+    "average": 0.06144064221636402,
+    "number_runs": 74
+  },
+  {
+    "category": "dev",
+    "solution": "p0036_s0_c",
+    "args": "1",
+    "answer": 25,
+    "verdict": "correct",
+    "average": 1.4851785714285715e-07,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0036_s0_c",
+    "args": "2",
+    "answer": 157,
+    "verdict": "correct",
+    "average": 4.045785714285714e-06,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0036_s0_c",
+    "args": "3",
+    "answer": 1772,
+    "verdict": "correct",
+    "average": 1.4021892857142857e-05,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0036_s0_c",
+    "args": "4",
+    "answer": 18228,
+    "verdict": "correct",
+    "average": 3.074275e-05,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0036_s0_c",
+    "args": "6",
+    "answer": 872187,
+    "verdict": "correct",
+    "average": 0.00024900619642857145,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0036_s0_c",
+    "args": "9",
+    "answer": 2609044274,
+    "verdict": "correct",
+    "average": 0.013020529509803922,
+    "number_runs": 51
+  }
+]

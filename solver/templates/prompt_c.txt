@@ -1,0 +1,85 @@
+You are a skilled C programmer translating Python Project Euler solutions to C.
+
+## Problem
+Number : $number
+Title  : $title
+Level  : $difficulty
+Solved : $solved_date
+
+## Problem statement (HTML)
+$problem_content
+
+## Existing Solution Notes (HTML)
+$solution_notes
+
+## Existing Solution files
+Solutions may be written in Python or C. Each filename encodes the problem number and solution
+index (e.g. p0001_s0.py, p0001_s0.c). Python and C files with the same index implement the same
+algorithm in different languages; files with different indices use different algorithms.
+
+$solutions
+
+## Test cases
+$test_cases
+
+## Current benchmark results
+In the results table, the solution name convention is:
+- Python solutions: `p000N_sM.py` (e.g. `p0001_s0.py`)
+- C solutions: `p000N_sM_c` (e.g. `p0001_s0_c`) — note the `_c` suffix and no file extension
+
+$results
+
+## Solution Template
+Use the following C template as the structural basis for each generated file:
+
+$solution_template
+
+---
+
+Generate only the files listed below. Each corresponds to the Python solution with the same index.
+Use the existing solution files above for context; do not regenerate files that already exist.
+
+Files to generate: $files_to_generate
+
+Requirements:
+
+1. Each C file must implement a `solve` function and a `main` block following the template.
+   The `solve` signature and `main` block must be adapted to match the Python return type:
+
+   - `int` or `bool` → `long long solve(int argc, char *argv[])`, print result with `%lld`.
+   - `str`           → `char *solve(int argc, char *argv[])`, print result with `%s`;
+                        free the returned pointer in `main()` if heap-allocated.
+   - `list` / other  → encode the result as a JSON string (e.g. `[1, 2, 3]`),
+                        return `char *`, print with `%s`; free if heap-allocated.
+
+   In all cases `main()` passes only the problem input arguments to `solve()`: argv[0] is the
+   program name, argv[1] is the first input, argv[2] the second, etc.
+   The output line must always follow the format: `"<runs> <avg_seconds> <result>"`.
+
+2. Parse arguments with atoi(argv[N]) for int, atoll(argv[N]) for long long,
+   atof(argv[N]) for double.
+
+3. Skip matplotlib and any graphical visualization code entirely.
+
+4. If a Python solution uses primesieve, use the C primesieve library:
+     #include <primesieve.h>     (link with -lprimesieve)
+   Key functions:
+     - primesieve_nth_prime(n, start)            -- n-th prime >= start (1-indexed from start)
+     - primesieve_count_primes(start, stop)      -- count primes in [start, stop]
+     - primesieve_generate_primes(start, stop, &size, INT_PRIMES)
+                                                 -- malloc'd array; free with primesieve_free()
+
+5. If a Python solution contains a `get_text_file` function, include and use the
+    `char *get_text_file` function from the template. Otherwise, remove this function.
+
+6. Translate each algorithm faithfully -- do not change the approach.
+
+7. Include only the headers you actually use and remove any unused headers from the template.
+
+8. Begin each file with a comment: /* Solution to Euler Problem $number: $title. */
+
+9. Output each C file wrapped in delimiter lines, one after another, no other text:
+
+// BEGIN <filename>
+[c source]
+// END <filename>

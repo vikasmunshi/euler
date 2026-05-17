@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 110: Diophantine Reciprocals II [Level 11]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../../0/9/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=110" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/1/0/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../1/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 110: Diophantine Reciprocals II [Level 11]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      In the following equation $x$, $y$, and $n$ are positive integers.
+     </p>
+     <p>
+      $$\dfrac{1}{x} + \dfrac{1}{y} = \dfrac{1}{n}$$
+     </p>
+     <p>
+      It can be verified that when $n = 1260$ there are $113$ distinct solutions and this is the least value of $n$ for which the total number of distinct solutions exceeds one hundred.
+     </p>
+     <p>
+      What is the least value of $n$ for which the number of distinct solutions exceeds four million?
+     </p>
+     <p class="smaller">
+      NOTE: This problem is a much more difficult version of
+      <a href="problem=108">
+       Problem 108
+      </a>
+      and as it is well beyond the limitations of a brute force approach it requires a clever implementation.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(min_number_of_solutions=113) → 1260</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(min_number_of_solutions=4000000) → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Sun, 31 Aug 2025, 08:37
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0110_s0_c" rel="noopener noreferrer" target="_blank" title="p0110_s0_c">
+         p0110_s0_c
+        </a>
+       </td>
+       <td>
+        113
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1260
+       </td>
+       <td>
+        0.000002593s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0110_s0.py" rel="noopener noreferrer" target="_blank" title="p0110_s0.py">
+         p0110_s0.py
+        </a>
+       </td>
+       <td>
+        113
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1260
+       </td>
+       <td>
+        0.000825163s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0110_s0_c" rel="noopener noreferrer" target="_blank" title="p0110_s0_c">
+         p0110_s0_c
+        </a>
+       </td>
+       <td>
+        4000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000360402s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0110_s0.py" rel="noopener noreferrer" target="_blank" title="p0110_s0.py">
+         p0110_s0.py
+        </a>
+       </td>
+       <td>
+        4000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.054444135s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The key algebraic step is rewriting <code>1/x + 1/y = 1/n</code> as <code>(x-n)(y-n) = n²</code>.
+    Each distinct solution pair corresponds to a factorisation of <code>n²</code>, and because the equation
+    is symmetric in x and y, the number of distinct solutions is <code>ceil(tau(n²) / 2)</code>, where <code>tau</code> is the divisor-counting function. For <code>n = p1^a1 * p2^a2 * ...</code> we have <code>tau(n²) = prod(2*ai + 1)</code>. The problem therefore reduces to: find the smallest positive
+    integer n whose prime factorisation yields <code>prod(2*ai + 1) &gt;= 2K - 1</code>, where K is the
+    target solution count. Because the optimal n is always a product of small primes in non-increasing
+    order of exponent (any other arrangement would be dominated), the search space is a tree over the
+    first handful of primes with bounded, decreasing exponent sequences.
+     </p>
+     <p>
+      The asymptotic complexity is hard to state cleanly because the search tree size depends on the target
+    threshold. In practice the depth is bounded by the number of primes needed (at most 17 primes up to 59
+    suffice for targets up to four million solutions), and aggressive branch-and-bound pruning keeps the
+    explored nodes tiny. The dominant cost is effectively constant for any fixed target of this magnitude.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Branch-and-Bound DFS over Prime Exponent Sequences (s0 - Python and C)
+     </h4>
+     <p>
+      I implemented a depth-first search over exponent assignments to the first 17 primes. The state at each
+    step is the current prime index, the accumulated product n, the accumulated tau value <code>prod(2*ai + 1)</code>, and the maximum exponent allowed at this depth (enforced non-increasing
+    to avoid counting the same n twice via different orderings). Two pruning rules fire at every node:
+     </p>
+     <ul>
+      <li>
+       <strong>
+        Upper-bound prune on n:
+       </strong>
+       if the partial product already meets or exceeds the current
+      best answer, the branch is abandoned immediately.
+      </li>
+      <li>
+       <strong>
+        Lower-bound prune on tau:
+       </strong>
+       if - even assuming every remaining prime is assigned the
+      same current exponent e - the total tau still cannot reach the target, then e and all smaller values
+      for this slot are skipped with a <code>break</code>.
+      </li>
+     </ul>
+     <p>
+      When <code>tau &gt;= target_tau</code> is first satisfied, n is recorded as a candidate best and the
+    subtree is not explored further. I seed <code>best</code> with a conservative upper bound (the product
+    of the first k primes where k is just enough to exceed the target with all exponents equal to 1) so
+    that pruning is effective from the very first DFS call.
+     </p>
+     <p>
+      The Python and C implementations follow identical logic. The C version handles potential overflow
+    explicitly with pre-multiply checks against <code>best</code> and a ceiling of <code>9e18</code>,
+    while Python's arbitrary-precision integers avoid that concern entirely. Both produce the same result;
+    the C version simply runs roughly 100x faster in wall-clock time.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central "aha moment" was recognising that counting solutions to the reciprocal equation is purely
+    a divisor-counting problem on n², and that minimising n subject to a tau lower bound is equivalent to
+    choosing a prime factorisation whose exponents are non-increasing and whose product of <code>(2*ai + 1)</code> terms is large enough. Once I saw that, the DFS with branch-and-bound was a
+    natural fit - exactly the same pattern as Problem 108 but with a target four orders of magnitude
+    larger, which is why brute force fails and the pruning is essential.
+     </p>
+     <p>
+      The benchmark comparison is instructive. The Python solution solves the main case in about 54 ms and
+    the C solution in about 0.4 ms - a roughly 135x speedup. For a problem the note explicitly warns
+    requires a "clever implementation", even the Python solution is fast enough because the algorithmic
+    work is genuinely small; the C version is just a nice-to-have for archival completeness. The technique
+    of bounding the remaining tau contribution with <code>factor^remaining * current_tau</code> is worth
+    remembering for any future problem that requires minimising a multiplicative function over exponent
+    vectors - it turns an exponential search into something effectively linear in practice.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

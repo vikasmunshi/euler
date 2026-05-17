@@ -1,0 +1,38 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0018_s0.py",
+    "args": "TRIANGLE_A",
+    "answer": 23,
+    "verdict": "correct",
+    "average": 1.5023080316772008e-05,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0018_s0.py",
+    "args": "TRIANGLE_B",
+    "answer": 1074,
+    "verdict": "correct",
+    "average": 6.215951308551159e-05,
+    "number_runs": 111
+  },
+  {
+    "category": "dev",
+    "solution": "p0018_s0_c",
+    "args": "TRIANGLE_A",
+    "answer": 23,
+    "verdict": "correct",
+    "average": 3.231607142857143e-06,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0018_s0_c",
+    "args": "TRIANGLE_B",
+    "answer": 1074,
+    "verdict": "correct",
+    "average": 1.2833750000000002e-05,
+    "number_runs": 56
+  }
+]

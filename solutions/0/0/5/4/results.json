@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0054_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0054_poker.txt",
+    "answer": 376,
+    "verdict": "correct",
+    "average": 0.0007254536,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0054_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0054_poker.txt",
+    "answer": 376,
+    "verdict": "correct",
+    "average": 0.01287322040006984,
+    "number_runs": 10
+  }
+]

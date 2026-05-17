@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 86: Cuboid Route [Level 7]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../5/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=86" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/8/6/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../7/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 86: Cuboid Route [Level 7]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      A spider, S, sits in one corner of a cuboid room, measuring $6$ by $5$ by $3$, and a fly, F, sits in the opposite corner. By travelling on the surfaces of the room the shortest "straight line" distance from S to F is $10$ and the path is shown on the diagram.
+     </p>
+     <div class="center">
+      <img alt="" class="dark_img" src="resources/0086.png"/>
+      <br/>
+     </div>
+     <p>
+      However, there are up to three "shortest" path candidates for any given cuboid and the shortest route doesn't always have integer length.
+     </p>
+     <p>
+      It can be shown that there are exactly $2060$ distinct cuboids, ignoring rotations, with integer dimensions, up to a maximum size of $M$ by $M$ by $M$, for which the shortest route has integer length when $M = 100$. This is the least value of $M$ for which the number of solutions first exceeds two thousand; the number of solutions when $M = 99$ is $1975$.
+     </p>
+     <p>
+      Find the least value of $M$ such that the number of solutions first exceeds one million.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(target_solutions=1975) → 99</code></li>
+     <li><code>dev: solve(target_solutions=2000) → 100</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(target_solutions=1000000) → 1818</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 18 Jul 2025, 19:02
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0086_s0_c" rel="noopener noreferrer" target="_blank" title="p0086_s0_c">
+         p0086_s0_c
+        </a>
+       </td>
+       <td>
+        1975
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        99
+       </td>
+       <td>
+        0.000033148s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0086_s0.py" rel="noopener noreferrer" target="_blank" title="p0086_s0.py">
+         p0086_s0.py
+        </a>
+       </td>
+       <td>
+        1975
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        99
+       </td>
+       <td>
+        0.001560124s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0086_s0_c" rel="noopener noreferrer" target="_blank" title="p0086_s0_c">
+         p0086_s0_c
+        </a>
+       </td>
+       <td>
+        2000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        0.000033810s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0086_s0.py" rel="noopener noreferrer" target="_blank" title="p0086_s0.py">
+         p0086_s0.py
+        </a>
+       </td>
+       <td>
+        2000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        0.001446163s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0086_s0_c" rel="noopener noreferrer" target="_blank" title="p0086_s0_c">
+         p0086_s0_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1818
+       </td>
+       <td>
+        0.010929498s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0086_s0.py" rel="noopener noreferrer" target="_blank" title="p0086_s0.py">
+         p0086_s0.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1818
+       </td>
+       <td>
+        0.387231551s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core geometric insight is surface unfolding: the shortest path along the surface of a cuboid from one corner to the opposite can be found by cutting along an edge and flattening two adjacent faces into a single rectangle. The shortest surface path becomes a straight Euclidean line across that rectangle, whose length follows directly from the Pythagorean theorem. For a cuboid with integer dimensions a &gt;= b &gt;= c, the three candidate unfoldings yield distances sqrt(a^2 + (b+c)^2), sqrt(b^2 + (a+c)^2), and sqrt(c^2 + (a+b)^2). Under the canonical ordering a &gt;= b &gt;= c, the minimum is always the first expression, so I only need to check whether a^2 + (b+c)^2 is a perfect square. This collapses the problem from a three-variable search to a double loop over (a, s) where s = b+c.
+     </p>
+     <p>
+      Once a Pythagorean triple is confirmed for a given pair (a, s), counting the valid integer splits (b, c) with b+c = s, b &gt;= c &gt;= 1, and b &lt;= a is a closed-form O(1) calculation using floor arithmetic: the count is s//2 when s &lt;= a+1, and (2*a - s + 2)//2 when s &gt; a+1. The outer loop iterates a from 1 upward and s from 1 to 2*a, giving O(M^2) total iterations where M is the answer. For M = 1818 this amounts to roughly three million (a, s) pairs, each requiring only a single integer square-root check and an O(1) count.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Pythagorean Triple Scan with Closed-Form Pair Counting (s0)
+     </h4>
+     <p>
+      I iterate a from 1 upward using an infinite loop, and for each a I scan every possible value of b_plus_c from 1 to 2*a. For each (a, b_plus_c) pair I test whether a^2 + b_plus_c^2 is a perfect square. In Python I use <code>math.sqrt(...).is_integer()</code> for this check, which is clean and readable. In C I compute the floating-point square root and use the round-and-verify pattern: <code>long long isq = (long long)(sq + 0.5)</code> followed by <code>isq * isq == (long long)val</code>, which avoids floating-point ambiguity in direct equality tests on doubles.
+     </p>
+     <p>
+      When the Pythagorean check passes, I add the closed-form count directly to a running total without any inner loop over individual (b, c) pairs. The moment the running total meets or exceeds the target I immediately return a. No solution list is stored and no redundant work is done beyond the crossing point. The Python and C implementations are algorithmically identical; the only differences are the square-root check idiom and the usual loop structure syntax.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that unlocked the solution was recognising that fixing a as the largest dimension and treating b+c as a single variable s reduces a three-dimensional problem to a two-dimensional one. Instead of triple-nested loops over (a, b, c), I only need a double loop over (a, s), and within that the only non-trivial work is a single integer square-root check. Once that check passes, counting the valid (b, c) splits of s is a trivial closed-form calculation - no second inner loop is ever needed.
+     </p>
+     <p>
+      The benchmarks show a clear language difference: Python solves the main case in about 387 ms while C solves it in about 11 ms - roughly a 35x speedup, which is expected for arithmetic-heavy inner loops. Both are fully correct across all test cases.
+     </p>
+     <p>
+      Key techniques and concepts worth remembering for future problems:
+     </p>
+     <ul>
+      <li>
+       Surface-path minimisation on a polyhedron reduces to Euclidean geometry by unfolding faces into a plane - the shortest path becomes a straight line across the unfolded net.
+      </li>
+      <li>
+       For a &gt;= b &gt;= c, only one of the three candidate unfoldings needs to be checked; the others are provably longer under the canonical ordering.
+      </li>
+      <li>
+       Treating a multi-variable sum as a single variable (s = b+c here) can reduce a higher-dimensional search to a lower-dimensional one with no loss of correctness.
+      </li>
+      <li>
+       Counting integer pairs with a fixed sum and ordering constraints is always O(1) via floor arithmetic - an inner loop over individual pairs is never necessary.
+      </li>
+      <li>
+       Maintaining a running total and terminating the moment a threshold is crossed avoids precomputing or storing the full solution set, saving both time and memory.
+      </li>
+      <li>
+       When using floating-point square roots for integer Pythagorean checks in C, the round-and-verify pattern <code>isq = (long long)(sq + 0.5); isq * isq == val</code> is safer than a direct equality test on the double.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 87: Prime Power Triples [Level 3]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../6/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=87" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/8/7/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../8/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 87: Prime Power Triples [Level 3]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The smallest number expressible as the sum of a prime square, prime cube, and prime fourth power is $28$. In fact, there are exactly four numbers below fifty that can be expressed in such a way:
+     </p>
+     $$\begin{align}
+28 &amp;= 2^2 + 2^3 + 2^4\\
+33 &amp;= 3^2 + 2^3 + 2^4\\
+49 &amp;= 5^2 + 2^3 + 2^4\\
+47 &amp;= 2^2 + 3^3 + 2^4
+\end{align}$$
+     <p>
+      How many numbers below fifty million can be expressed as the sum of a prime square, prime cube, and prime fourth power?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_num=50) → 4</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_num=50000000) → 1097343</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 18 Jul 2025, 19:49
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0087_s0_c" rel="noopener noreferrer" target="_blank" title="p0087_s0_c">
+         p0087_s0_c
+        </a>
+       </td>
+       <td>
+        50
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000000290s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0087_s0.py" rel="noopener noreferrer" target="_blank" title="p0087_s0.py">
+         p0087_s0.py
+        </a>
+       </td>
+       <td>
+        50
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000006216s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0087_s0_c" rel="noopener noreferrer" target="_blank" title="p0087_s0_c">
+         p0087_s0_c
+        </a>
+       </td>
+       <td>
+        50000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1097343
+       </td>
+       <td>
+        0.095274847s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0087_s0.py" rel="noopener noreferrer" target="_blank" title="p0087_s0.py">
+         p0087_s0.py
+        </a>
+       </td>
+       <td>
+        50000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1097343
+       </td>
+       <td>
+        0.405379251s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem belongs to additive number theory: I need to count integers below a limit N that can be expressed as
+p^2 + q^3 + r^4 for primes p, q, r. The three exponents impose natural ceilings on the size each base prime can
+reach before the partial sum alone exceeds N. For N = 50,000,000 the fourth-power base is capped at roughly
+N^(1/4) ~ 84, the cube base at N^(1/3) ~ 368, and the square base at N^(1/2) ~ 7071, so the outer loops each
+visit only a small number of primes while the innermost loop carries the bulk of the iterations. A critical
+subtlety is that the same integer can be produced by more than one distinct prime triple, so a deduplication step
+is mandatory to avoid overcounting.
+     </p>
+     <p>
+      The asymptotic cost of the triple enumeration is O(pi(N^(1/4)) * pi(N^(1/3)) * pi(N^(1/2))), where pi is the
+prime counting function. Each factor is tiny relative to N, making the nested loop extremely fast in practice.
+The sieve used to produce candidate primes runs in O(N / 2) time and O(N / 2) space and dominates for large N,
+but it is still linear in N.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Nested Prime-Power Enumeration with Deduplication (s0 - Python and C)
+     </h4>
+     <p>
+      Both the Python and C implementations share the same core algorithm. I first generate all primes up to sqrt(N)
+using a Sieve of Sundaram, which operates on a half-sized boolean array and marks composite indices k of the form
+i + j + 2ij, then recovers odd primes as 2k + 1 and prepends 2. A single sieve run is sufficient to supply all
+three power families, since the largest base prime needed is bounded by sqrt(N).
+     </p>
+     <p>
+      I then iterate over the three families of prime powers in three nested loops ordered from the most constraining
+term outward: fourth powers in the outermost loop, cubes in the middle, squares in the innermost loop. Each loop
+breaks as soon as its running partial sum exceeds the remaining budget. I precompute two sentinel constants - <code>max_quadruple</code> (N minus the smallest possible cube and square, i.e. N - 8 - 4) and <code>max_quadruple_cube</code> (N minus the smallest possible square, i.e. N - 4) - so the break conditions
+involve no repeated arithmetic inside the loops.
+     </p>
+     <p>
+      The language-specific difference lies in deduplication. The Python version inserts every valid sum into a <code>set</code> and returns its length. The C version allocates a flat <code>unsigned char</code> array of
+length N: on the first visit to any value the byte is set to 1 and a counter is incremented; subsequent visits
+are silently ignored. The C approach avoids Python's hash-table overhead and replaces it with a 50 MB byte array
+that supports cache-friendly sequential writes. The benchmark confirms this: the C solution finishes in about
+0.095 s versus roughly 0.405 s for Python - a speedup of approximately 4x on the main input.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that the three exponents impose very different upper bounds on their respective
+prime bases. Ordering the loops from the most constraining exponent (fourth power) outward means each outer loop
+iterates over only a handful of values and each break fires as early as possible. Reversing the order - squares
+outermost, fourth powers innermost - would make the pruning far less effective because the square loop is the
+longest of the three.
+     </p>
+     <p>
+      Choosing the right deduplication structure was the other critical decision. In Python a <code>set</code> is the
+natural tool: it collapses multiple representations of the same integer at essentially no extra code cost. In C a
+flat boolean array indexed directly by value is faster and simpler than a hash set: for N = 50,000,000 the array
+is 50 MB, which fits comfortably in memory, and random writes into it are still fast enough that they do not
+become a bottleneck. The benchmark result of 0.095 s versus 0.405 s shows that Python set overhead and
+interpreted loop cost together account for roughly a 4x slowdown.
+     </p>
+     <ul>
+      <li>
+       When enumerating multi-term sums, nest loops from the most restrictive term outward to enable the earliest
+possible pruning and minimise total iterations.
+      </li>
+      <li>
+       Precompute partial-sum budget constants outside inner loops to avoid redundant arithmetic on every
+iteration.
+      </li>
+      <li>
+       A <code>set</code> in Python and a flat boolean array in C are both clean deduplication tools; the array
+wins on speed when the value range is small enough to fit comfortably in memory.
+      </li>
+      <li>
+       The Sieve of Sundaram is a useful alternative to the Sieve of Eratosthenes when a compact half-sized array
+is preferable; the only extra cost is a 2k + 1 decode step when recovering primes.
+      </li>
+      <li>
+       For a problem where the answer must be a count of distinct values in a bounded integer range, a direct
+boolean array is often the simplest and fastest deduplication mechanism available in C.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,21 +1,59 @@
-#!/usr/bin/env python3
-"""
-Solver module entry point.
+#!/usr/bin/env python3.14
+# -*- coding: utf-8 -*-
+"""Entry point for the "solver" CLI.
 
-This module serves as the main entry point for the solver package.
+Parses command-line arguments and launches: class:`solver.cli.SolverShell`.
+
+Usage:
+
+    solver                          # interactive shell
+    solver "cmd1; cmd2"             # run commands, then exit
+    solver -c "cmd1; cmd2"          # run commands, stay interactive
+    solver --no-capture "cmd1"      # run without session capture
 """
 from __future__ import annotations
 
-from solver.stack import stack_from_workspace, unstack_to_workspace, fill_stack
+from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+
+from solver.core.cli import SolverShell
+from solver.core.session import SessionCapture
 
 
-def main():
-    """Main function for the solver application."""
-    fill_stack(problems=[42])
-    problem_number: int = 42
-    unstack_to_workspace(problem_number)
-    stack_from_workspace()
+def main() -> int:
+    """Parse CLI arguments and launch the solver shell.
+
+    Arguments:
+        (none)      Launch an interactive shell session.
+        COMMANDS    Semicolon-separated commands to queue at startup; exits when done
+                    unless "-c" is also given.
+
+    Flags:
+        -c / --continue     Stay interactive after the queued commands finish.
+        --capture           Tee all output to a timestamped session log (default).
+        --no-capture        Disable session capture.
+
+    Returns:
+        0 on clean exit.
+    """
+    parser = ArgumentParser(prog='solver', formatter_class=ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-v', '--version', action='version', version='%(prog)s 0.1.0')
+    parser.add_argument('-c', '--continue', action='store_true', help='stay interactive after running cmdline')
+    parser.add_argument('-s', '--save-session', action='store_true', default=False, help='save session to a log-file')
+    parser.add_argument('cmdline', nargs='*', help='run cmdline; quote and semicolon-separate multiple commands')
+    args = parser.parse_args()
+    startup: list[str] = []
+
+    # positional cmdline: split on ';' exit after unless -c
+    if args.cmdline:
+        startup.extend(c.strip() for c in ' '.join(args.cmdline).split(';') if c.strip())
+        if not getattr(args, 'continue'):
+            startup.append('exit')
+
+    if args.save_session:
+        with SessionCapture() as solver_session:
+            return solver_session.shell.execute(commands=startup or None)
+    return SolverShell().execute(commands=startup or None)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     raise SystemExit(main())

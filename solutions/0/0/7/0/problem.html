@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 70: Totient Permutation [Level 3]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../../6/9/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=70" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/7/0/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../1/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 70: Totient Permutation [Level 3]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Euler's totient function, $\phi(n)$ [sometimes called the phi function], is used to determine the number of positive numbers less than or equal to $n$ which are relatively prime to $n$. For example, as $1, 2, 4, 5, 7$, and $8$, are all less than nine and relatively prime to nine, $\phi(9)=6$.
+      <br/>
+      The number $1$ is considered to be relatively prime to every positive number, so $\phi(1)=1$.
+     </p>
+     <p>
+      Interestingly, $\phi(87109)=79180$, and it can be seen that $87109$ is a permutation of $79180$.
+     </p>
+     <p>
+      Find the value of $n$, $1 \lt n \lt 10^7$, for which $\phi(n)$ is a permutation of $n$ and the ratio $n/\phi(n)$ produces a minimum.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(limit=10000000) → 8319823</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 16 Jul 2025, 12:40
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0070_s0_c" rel="noopener noreferrer" target="_blank" title="p0070_s0_c">
+         p0070_s0_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8319823
+       </td>
+       <td>
+        0.044954189s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0070_s0.py" rel="noopener noreferrer" target="_blank" title="p0070_s0.py">
+         p0070_s0.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8319823
+       </td>
+       <td>
+        0.141426692s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      Euler's totient function phi(n) counts integers up to n that are coprime to n. For a semi-prime
+n = p1 * p2 with two distinct primes, phi(n) = (p1 - 1)(p2 - 1), and the ratio n / phi(n) factors
+as (p1 * p2) / ((p1 - 1)(p2 - 1)). Each prime factor p contributes a multiplicative term p/(p-1)
+to this ratio, and that term grows large as p shrinks, so any factorisation involving small primes
+inflates the ratio badly. To minimise the ratio while keeping n below 10^7, I need both prime factors
+as large as possible - ideally near sqrt(10^7) ~ 3162. Prime n can be ruled out immediately: phi(p) = p - 1,
+and p and p - 1 differ by exactly one, so they virtually never share the same digit multiset. The
+search therefore collapses to a nested loop over semi-prime pairs (p1, p2) with p1 in (sqrt_n / 2, sqrt_n]
+and p2 in (p1 + 2, limit / p1], which involves only a few hundred primes and makes the effective
+runtime negligible.
+     </p>
+     <p>
+      A full Euler totient sieve over all n below 10^7 would run in O(N log log N) time and O(N) space.
+By restricting to the semi-prime structure described above, the search collapses to a tiny nested
+loop. The digit-permutation check for each candidate is O(d) where d is the number of decimal digits,
+which is a constant for numbers below 10^7. Prime generation up to the limit dominates the actual
+runtime in both implementations.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Semi-prime Pair Search with Digit Permutation Check (s0 - Python and C)
+     </h4>
+     <p>
+      Both implementations share the same algorithm. I set the outer loop over primes p1 in the range
+(sqrt_n / 2, sqrt_n] and the inner loop over primes p2 in (p1 + 2, limit / p1]. For each pair I
+compute <code>number = p1 * p2</code> and <code>totient = (p1 - 1) * (p2 - 1)</code>, check whether
+the two values are digit permutations of each other, and track the pair with the smallest ratio
+number / totient among all passing candidates.
+     </p>
+     <p>
+      The Python version uses an on-demand infinite prime generator backed by a dictionary of composites.
+This avoids allocating a full sieve array and is memory-efficient at the cost of some per-prime
+overhead. The permutation check uses <code>sorted(str(x)) == sorted(str(y))</code>, which is concise
+and fast enough given the small number of candidates to evaluate. The Python solution runs in about
+0.14 seconds.
+     </p>
+     <p>
+      The C version uses a classical Sieve of Eratosthenes to precompute all primes up to the limit and
+then walks the prime array with index arithmetic rather than re-generating primes for each inner loop.
+The digit permutation check uses a digit frequency array of length 10: it increments counts for one
+number and decrements for the other, then verifies all entries are zero. This avoids any string
+allocation and is slightly faster than sorting. The C version runs in about 0.045 seconds, roughly
+3.1 times faster than Python, a modest gap that reflects the fact that the inner loop is tiny in
+both cases and prime generation overhead dominates.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The critical insight was recognising that minimising n / phi(n) and satisfying the digit-permutation
+constraint simultaneously almost forces n to be a semi-prime with both factors clustered near
+sqrt(limit). Once I accepted that restriction, the brute-force sieve became unnecessary and the
+problem reduced to a small nested loop over a handful of primes near 3162.
+     </p>
+     <p>
+      Both solutions implement the same algorithm, so the benchmark comparison reflects language and
+implementation overhead rather than algorithmic differences. The C version is about 3x faster, which
+is a modest gap compared to problems where the algorithm itself is more compute-heavy. The Python
+version is arguably more elegant because the on-demand prime generator never materialises a full
+sieve array, which is a useful pattern when only primes in a bounded range are needed.
+     </p>
+     <ul>
+      <li>
+       For ratio minimisation problems involving phi(n), factor the ratio expression first - the
+factored form immediately reveals which prime structures minimise it and allows you to prune the
+search space dramatically before writing any code.
+      </li>
+      <li>
+       Prime n can be ruled out for the permutation condition because phi(p) = p - 1, and consecutive
+integers almost never share the same digit multiset; checking digit sums mod 9 is a fast pre-filter
+if needed.
+      </li>
+      <li>
+       The digit frequency array trick - <code>count[digit]++</code> for one number, <code>count[digit]--</code> for the other, then check all zero - is faster and allocation-free
+compared to sorting digit strings, and is worth reaching for in any C digit-permutation check.
+      </li>
+      <li>
+       An on-demand prime generator backed by a dictionary of composites is a clean Python pattern when
+only a bounded prefix of primes is needed and avoiding large memory allocation matters.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

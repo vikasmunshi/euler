@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 106: Special Subset Sums [Level 13]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../5/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=106" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/0/6/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../7/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 106: Special Subset Sums [Level 13]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Let $S(A)$ represent the sum of elements in set $A$ of size $n$. We shall call it a special sum set if for any two non-empty disjoint subsets, $B$ and $C$, the following properties are true:
+     </p>
+     <ol>
+      <li>
+       $S(B) \ne S(C)$; that is, sums of subsets cannot be equal.
+      </li>
+      <li>
+       If $B$ contains more elements than $C$ then $S(B) \gt S(C)$.
+      </li>
+     </ol>
+     <p>
+      For this problem we shall assume that a given set contains $n$ strictly increasing elements and it already satisfies the second rule.
+     </p>
+     <p>
+      Surprisingly, out of the $25$ possible subset pairs that can be obtained from a set for which $n = 4$, only $1$ of these pairs need to be tested for equality (first rule). Similarly, when $n = 7$, only $70$ out of the $966$ subset pairs need to be tested.
+     </p>
+     <p>
+      For $n = 12$, how many of the $261625$ subset pairs that can be obtained need to be tested for equality?
+     </p>
+     <p class="smaller">
+      NOTE: This problem is related to
+      <a href="problem=103">
+       Problem 103
+      </a>
+      and
+      <a href="problem=105">
+       Problem 105
+      </a>
+      .
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(n=4) → 1</code></li>
+     <li><code>dev: solve(n=7) → 70</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(n=12) → █</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(n=16) → █</code></li>
+     <li><code>extra: solve(n=32) → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 28 Aug 2025, 16:23
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0106_s0_c" rel="noopener noreferrer" target="_blank" title="p0106_s0_c">
+         p0106_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.000000047s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0106_s0.py" rel="noopener noreferrer" target="_blank" title="p0106_s0.py">
+         p0106_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.000002166s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0106_s0_c" rel="noopener noreferrer" target="_blank" title="p0106_s0_c">
+         p0106_s0_c
+        </a>
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        70
+       </td>
+       <td>
+        0.000000067s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0106_s0.py" rel="noopener noreferrer" target="_blank" title="p0106_s0.py">
+         p0106_s0.py
+        </a>
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        70
+       </td>
+       <td>
+        0.000004019s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0106_s0_c" rel="noopener noreferrer" target="_blank" title="p0106_s0_c">
+         p0106_s0_c
+        </a>
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000000143s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0106_s0.py" rel="noopener noreferrer" target="_blank" title="p0106_s0.py">
+         p0106_s0.py
+        </a>
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000003564s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0106_s0_c" rel="noopener noreferrer" target="_blank" title="p0106_s0_c">
+         p0106_s0_c
+        </a>
+       </td>
+       <td>
+        16
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000000263s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0106_s0.py" rel="noopener noreferrer" target="_blank" title="p0106_s0.py">
+         p0106_s0.py
+        </a>
+       </td>
+       <td>
+        16
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000006326s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0106_s0_c" rel="noopener noreferrer" target="_blank" title="p0106_s0_c">
+         p0106_s0_c
+        </a>
+       </td>
+       <td>
+        32
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000000851s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0106_s0.py" rel="noopener noreferrer" target="_blank" title="p0106_s0.py">
+         p0106_s0.py
+        </a>
+       </td>
+       <td>
+        32
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000006382s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The problem asks how many equal-sized disjoint subset pairs from an n-element sorted set cannot be ruled out by positional dominance alone and therefore must be explicitly tested for sum equality. Because rule 2 (larger set implies larger sum) is assumed to hold, only pairs of equal size k matter, and only those where neither subset positionally dominates the other. Given 2k elements in sorted order a_1 &lt; a_2 &lt; ... &lt; a_{2k}, a split into sets B and C of size k is "safe" when B_i &gt; C_i for all i (or vice versa) in sorted order, which guarantees S(B) != S(C) from the ordering property alone. The count of such safe unordered pairs is the Catalan number C_k = C(2k, k) / (k+1). So the unsafe (must-test) unordered pairs for a fixed 2k-element pool is C(2k,k)/2 - C(2k,k)/(k+1) = C(2k,k)*(k-1)/(2*(k+1)). Summing over all choices of 2k elements from n gives a closed-form answer computable in O(n) arithmetic operations with no search required.
+     </p>
+     <p>
+      The Catalan number connection is the central insight: the number of ways to partition 2k ranked items into two equal groups such that one group completely dominates the other positionally follows a Catalan recurrence. Recognising this turns what initially sounds like an exponential enumeration into a handful of binomial coefficient evaluations. The overall complexity is O(n) loop iterations, each involving O(k) multiplications for the binomial coefficients, giving O(n^2) total arithmetic - effectively instant for any n of practical interest.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Closed-form Catalan Subtraction (s0 - Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python ( <code>p0106_s0.py</code>) and C ( <code>p0106_s0.c</code>). The core loop runs k from 2 to n/2 and accumulates:
+     </p>
+     <ul>
+      <li>
+       C(n, 2k) - ways to choose 2k elements from the full set of n
+      </li>
+      <li>
+       multiplied by C(2k, k)*(k-1) / (2*(k+1)) - unsafe unordered pairs within those 2k elements
+      </li>
+     </ul>
+     <p>
+      The numerator factor (k-1) equals zero when k=1, so pairs of size 1 vs 1 automatically contribute nothing - they are always ruled safe by the positional argument (a single-element set always has a definite order). The Python version uses <code>math.comb</code> and integer floor division; the C version computes binomial coefficients iteratively with the standard multiplicative formula, using integer division at each step to keep intermediate values exact. Both return identical results across all test cases including the large extra case n=32.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key "aha moment" was recognising that "positional dominance" (every element of B is greater than the corresponding sorted element of C) is exactly what the Catalan numbers count. The total unordered equal-size pairs is C(2k,k)/2; subtracting the Catalan number C(2k,k)/(k+1) leaves precisely the pairs that cannot be decided by ordering alone. Factoring C(2k,k)/2 - C(2k,k)/(k+1) = C(2k,k)*(k-1)/(2*(k+1)) makes the cancellation algebraically clean and avoids any floating-point issues because the result is always an integer.
+     </p>
+     <p>
+      I only used one algorithmic approach here since the closed form is both obvious once the Catalan connection is found and already O(n) - there is nothing meaningful to optimise further. Both the Python and C solutions run in effectively zero time (well under a millisecond even for n=32), so benchmarking does not distinguish them in any useful way. The C solution exists mainly for consistency with the rest of the archive. For future problems, this problem is a good reminder to look for Catalan numbers whenever counting non-crossing or dominance-preserving partitions of sorted sequences.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

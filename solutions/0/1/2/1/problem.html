@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 121: Disc Game Prize Fund [Level 10]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../0/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=121" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/2/1/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../2/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 121: Disc Game Prize Fund [Level 10]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      A bag contains one red disc and one blue disc. In a game of chance a player takes a disc at random and its colour is noted. After each turn the disc is returned to the bag, an extra red disc is added, and another disc is taken at random.
+     </p>
+     <p>
+      The player pays £1 to play and wins if they have taken more blue discs than red discs at the end of the game.
+     </p>
+     <p>
+      If the game is played for four turns, the probability of a player winning is exactly 11/120, and so the maximum prize fund the banker should allocate for winning in this game would be £10 before they would expect to incur a loss. Note that any payout will be a whole number of pounds and also includes the original £1 paid to play the game, so in the example given the player actually wins £9.
+     </p>
+     <p>
+      Find the maximum prize fund that should be allocated to a single game in which fifteen turns are played.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(turns=4) → 10</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(turns=15) → █</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(turns=25) → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 19 Sep 2025, 10:59
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0121_s0_c" rel="noopener noreferrer" target="_blank" title="p0121_s0_c">
+         p0121_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        0.000000228s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0121_s0.py" rel="noopener noreferrer" target="_blank" title="p0121_s0.py">
+         p0121_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        0.000004432s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0121_s0_c" rel="noopener noreferrer" target="_blank" title="p0121_s0_c">
+         p0121_s0_c
+        </a>
+       </td>
+       <td>
+        15
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000000831s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0121_s0.py" rel="noopener noreferrer" target="_blank" title="p0121_s0.py">
+         p0121_s0.py
+        </a>
+       </td>
+       <td>
+        15
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000023026s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0121_s0_c" rel="noopener noreferrer" target="_blank" title="p0121_s0_c">
+         p0121_s0_c
+        </a>
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000001121s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0121_s0.py" rel="noopener noreferrer" target="_blank" title="p0121_s0.py">
+         p0121_s0.py
+        </a>
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000069590s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core challenge is computing the exact probability that a player takes more blue discs than red over <code>n</code> turns. On turn <code>i</code> (0-indexed), the bag holds 1 blue and <code>i+1</code> red
+discs, giving a total of <code>i+2</code> discs. The probability of drawing blue on that turn is <code>1/(i+2)</code> and red is <code>(i+1)/(i+2)</code>. The product of all turn denominators is <code>2 * 3 * ... * (n+1) = (n+1)!</code>, so the overall probability of any specific sequence of outcomes
+has this factorial as its denominator. Working in integer numerators over this common denominator avoids
+floating-point issues entirely. The player wins if the number of blue draws exceeds <code>n/2</code>, so
+I need the sum of numerators for all winning configurations. The maximum prize fund is then <code>floor((n+1)! / favorable)</code> - the largest whole number such that the expected payout does not
+exceed the £1 entry fee.
+     </p>
+     <p>
+      The dynamic programming recurrence runs over <code>n</code> turns, maintaining a state vector of size <code>n+1</code> (one entry per possible blue count). Each turn updates every reachable state in <code>O(n)</code> work, giving an overall time complexity of <code>O(n^2)</code> and space complexity
+of <code>O(n)</code>. For the problem's target of 15 turns this is trivially fast; even the extra test
+case at 25 turns finishes in under a millisecond.
+     </p>
+     <h4>
+      Dynamic Programming on Numerator Products (s0 - Python and C)
+     </h4>
+     <p>
+      I chose to work entirely with integer numerator products rather than rational fractions or floating-point
+probabilities. The DP array <code>dp[j]</code> accumulates the sum of all numerator products for paths
+that have drawn exactly <code>j</code> blue discs so far. Initially <code>dp[0] = 1</code>. At each
+turn <code>i</code>, two transitions fire for every reachable state <code>j</code>:
+     </p>
+     <ul>
+      <li>
+       Draw red: multiply the current value by the red numerator <code>i+1</code> and keep the blue count at <code>j</code>.
+      </li>
+      <li>
+       Draw blue: multiply by 1 (blue numerator) and increment the blue count to <code>j+1</code>.
+      </li>
+     </ul>
+     <p>
+      After all turns, the denominator is <code>(turns+1)!</code>. I sum <code>dp[j]</code> for all <code>j &gt;= turns//2 + 1</code> to get the favorable numerator, then take <code>floor((turns+1)! / favorable)</code> as the prize fund. The Python implementation uses arbitrary
+precision integers natively. The C implementation uses <code>__int128</code>, which is wide enough because
+for 15 turns the factorial is 16! = 20,922,789,888,000 (fits in 64 bits), and for 25 turns the numerator
+products stay within 128-bit range.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that working with integer numerators over the common denominator <code>(n+1)!</code> is cleaner and exact. Trying to track probabilities as floats would accumulate
+rounding error and make the floor division unreliable. The DP formulation - treating each turn's
+outcomes as polynomial multiplication steps - is a standard technique for exact probability counting
+over variable-probability Bernoulli trials, and it avoids enumerating all <code>2^n</code> outcome
+sequences explicitly. The prize fund formula itself follows directly from the requirement that <code>prize * P(win) &lt;= 1</code>, i.e., the bank's expected loss per game must not exceed the entry fee.
+This pattern - find the exact rational probability, then invert and floor - recurs in a number of
+probability-based Euler problems and is worth keeping in mind.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

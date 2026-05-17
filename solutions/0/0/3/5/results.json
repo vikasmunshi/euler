@@ -1,0 +1,182 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0035_s0.py",
+    "args": "10",
+    "answer": 4,
+    "verdict": "correct",
+    "average": 5.1668031610623596e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s0.py",
+    "args": "100",
+    "answer": 13,
+    "verdict": "correct",
+    "average": 5.011532147847219e-05,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s0.py",
+    "args": "1000",
+    "answer": 25,
+    "verdict": "correct",
+    "average": 0.00032497840194878336,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0035_s0.py",
+    "args": "1000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 0.29458794356732526,
+    "number_runs": 111
+  },
+  {
+    "category": "extra",
+    "solution": "p0035_s0.py",
+    "args": "10000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 3.392738876891304,
+    "number_runs": 74
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s1.py",
+    "args": "10",
+    "answer": 4,
+    "verdict": "correct",
+    "average": 0.004091054687796105,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s1.py",
+    "args": "100",
+    "answer": 13,
+    "verdict": "correct",
+    "average": 0.003975798435825644,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s1.py",
+    "args": "1000",
+    "answer": 25,
+    "verdict": "correct",
+    "average": 0.004236893266536868,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0035_s1.py",
+    "args": "1000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 0.04563744712608105,
+    "number_runs": 111
+  },
+  {
+    "category": "extra",
+    "solution": "p0035_s1.py",
+    "args": "10000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 0.4803361761337144,
+    "number_runs": 74
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s0_c",
+    "args": "10",
+    "answer": 4,
+    "verdict": "correct",
+    "average": 2.6067857142857144e-07,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s0_c",
+    "args": "100",
+    "answer": 13,
+    "verdict": "correct",
+    "average": 5.80964285714286e-06,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s0_c",
+    "args": "1000",
+    "answer": 25,
+    "verdict": "correct",
+    "average": 1.873573214285714e-05,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0035_s0_c",
+    "args": "1000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 0.006789661482142857,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0035_s0_c",
+    "args": "10000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 0.06996631349019608,
+    "number_runs": 51
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s1_c",
+    "args": "10",
+    "answer": 4,
+    "verdict": "correct",
+    "average": 0.0022869708392857144,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s1_c",
+    "args": "100",
+    "answer": 13,
+    "verdict": "correct",
+    "average": 0.0023614937499999997,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0035_s1_c",
+    "args": "1000",
+    "answer": 25,
+    "verdict": "correct",
+    "average": 0.0023526949107142855,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0035_s1_c",
+    "args": "1000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 0.0077900852321428566,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0035_s1_c",
+    "args": "10000000",
+    "answer": 55,
+    "verdict": "correct",
+    "average": 0.07534617186274511,
+    "number_runs": 51
+  }
+]

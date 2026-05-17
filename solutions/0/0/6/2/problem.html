@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 62: Cubic Permutations [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../1/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=62" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/6/2/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../3/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 62: Cubic Permutations [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The cube, $41063625$ ($345^3$), can be permuted to produce two other cubes: $56623104$ ($384^3$) and $66430125$ ($405^3$). In fact, $41063625$ is the smallest cube which has exactly three permutations of its digits which are also cube.
+     </p>
+     <p>
+      Find the smallest cube for which exactly five permutations of its digits are cube.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(num_permutations=2) → 125</code></li>
+     <li><code>dev: solve(num_permutations=3) → 41063625</code></li>
+     <li><code>dev: solve(num_permutations=4) → 1006012008</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(num_permutations=5) → 127035954683</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(num_permutations=6) → 1000600120008</code></li>
+     <li><code>extra: solve(num_permutations=7) → 10569784298536</code></li>
+     <li><code>extra: solve(num_permutations=8) → 10314675896832</code></li>
+     <li><code>extra: solve(num_permutations=9) → 13465983902671</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 11 Mar 2020, 12:16
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        125
+       </td>
+       <td>
+        0.000412684s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        125
+       </td>
+       <td>
+        0.000022102s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        41063625
+       </td>
+       <td>
+        0.001196066s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        41063625
+       </td>
+       <td>
+        0.000474759s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1006012008
+       </td>
+       <td>
+        0.002372617s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1006012008
+       </td>
+       <td>
+        0.002093517s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        127035954683
+       </td>
+       <td>
+        0.006762996s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        127035954683
+       </td>
+       <td>
+        0.010676965s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1000600120008
+       </td>
+       <td>
+        0.014747213s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1000600120008
+       </td>
+       <td>
+        0.024155111s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        10569784298536
+       </td>
+       <td>
+        0.032915724s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        10569784298536
+       </td>
+       <td>
+        0.056180525s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        10314675896832
+       </td>
+       <td>
+        0.032773358s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        10314675896832
+       </td>
+       <td>
+        0.056797740s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0_c" rel="noopener noreferrer" target="_blank" title="p0062_s0_c">
+         p0062_s0_c
+        </a>
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13465983902671
+       </td>
+       <td>
+        0.031572904s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0062_s0.py" rel="noopener noreferrer" target="_blank" title="p0062_s0.py">
+         p0062_s0.py
+        </a>
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13465983902671
+       </td>
+       <td>
+        0.056416999s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The central observation is that two integers are digit-permutations of each other if and only if sorting their decimal digits produces the same string. This turns an otherwise expensive combinatorial search into a simple equivalence-class problem: assign every cube a canonical key and count how many cubes share each key. A second observation tightens the search further - digit-permutations of a number must all have the same digit count, so permutation families can never straddle two different digit lengths. This means I can process one digit-length bucket at a time and stop as soon as a qualifying group appears, keeping each pass finite and closed.
+     </p>
+     <p>
+      Let N be the number of cubes examined before a solution is found and d the number of digits in those cubes, so d = O(log N). Generating each cube is O(1); sorting its digits costs O(d log d); inserting into a hash map costs O(d) amortised. Total work is O(N d log d), effectively O(N log N) in the digit count. In practice the search terminates quickly - even the hardest extra cases requiring nine permutations finish in well under 60 ms in Python and around 32 ms in C.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Digit-Sorted Canonical Key with Digit-Length Bucketing (s0, Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python ( <code>p0062_s0.py</code>) and C ( <code>p0062_s0.c</code>). The core idea is identical: iterate over digit-length buckets, group cubes by their sorted-digit string, then check whether any group has exactly the target number of members. The permutation count is passed as a command-line argument in both versions, making it straightforward to run every test case without modification.
+     </p>
+     <p>
+      In the Python version I wrote a helper <code>n_digit_cubes</code> that computes the integer range whose cubes have exactly <code>digit_length_n</code> digits by inverting the cube root at the boundary values using <code>math.ceil</code>, with a deliberate overshoot of <code>+1</code> on the upper boundary to guard against floating-point rounding errors near exact integer cube roots. Inside the main loop I use a <code>collections.defaultdict(list)</code> keyed on <code>"".join(sorted(str(cube_number)))</code>. After processing the full bucket a set comprehension collects the minimum cube from every qualifying group, and I return the overall minimum.
+     </p>
+     <p>
+      The C version mirrors this logic but requires a hand-rolled hash map because no standard equivalent of <code>defaultdict</code> exists in C. I built an open-chaining hash map with 65536 buckets using djb2 hashing. Each entry stores the sorted-digit key as a fixed-length <code>char</code> array and a dynamically resized <code>long long</code> array of cube values, grown with <code>realloc</code> as needed. The sorted-digit key is produced with <code>snprintf</code> followed by <code>qsort</code> on the character array. After filling the map for a given digit length I scan all buckets for groups matching the target count and track the minimum cube found. Memory is freed explicitly after each digit-length pass. The <code>long long</code> type is sufficient for all test cases including the nine-permutation case, where the answer is around 1.3 x 10^13.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that digit-permutation equivalence has a trivially computable canonical form: sort the digits. Once I had that, the problem collapsed entirely into frequency counting with a dictionary, and no explicit permutation enumeration was needed. The digit-length bucketing was equally important - it converted an open-ended search into a series of finite closed sets and provided a clean early-termination condition.
+     </p>
+     <p>
+      A practical subtlety worth remembering is the cube-root boundary calculation. Using <code>ceil(cbrt(10^(n-1)))</code> for the lower bound and <code>ceil(cbrt(10^n - 1)) + 1</code> for the upper bound avoids off-by-one errors caused by floating-point imprecision near exact integer cube roots. The extra <code>+1</code> is a deliberate safety margin; any harmless duplicate at the boundary costs nothing.
+     </p>
+     <p>
+      Comparing the two implementations using the benchmark results, the C version is roughly 1.7-1.8x faster across all test categories. For the main case Python takes 10.7 ms versus 6.8 ms for C; for the hardest extra cases Python sits around 56-57 ms versus about 32-33 ms for C. The speedup is modest and consistent with Python's interpreter and object-allocation overhead rather than any algorithmic difference. I consider the Python version more elegant for its brevity - the entire grouping logic fits in five readable lines using only standard library constructs, with no manual memory management. The C version is worth having if sub-10 ms latency is required, but it offers nothing algorithmically new and the hash map boilerplate is considerable.
+     </p>
+     <ul>
+      <li>
+       A sorted-digit string as a canonical permutation key is a reusable pattern for any "same digits" problem on Project Euler.
+      </li>
+      <li>
+       Bucketing by digit length turns an open-ended search into a series of finite closed sets, enabling clean early termination.
+      </li>
+      <li>
+       Python's <code>defaultdict(list)</code> paired with a set comprehension makes grouping concise and readable with no boilerplate.
+      </li>
+      <li>
+       Floating-point cube-root boundaries need ceiling plus a small overshoot on the upper end to be numerically safe.
+      </li>
+      <li>
+       For a straightforward grouping problem the Python solution is fast enough for all practical inputs and substantially easier to read than the equivalent C hash map implementation.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

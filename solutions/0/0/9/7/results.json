@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0097_s0.py",
+    "args": "10 28433 \u00d7 2^7830457 + 1",
+    "answer": 8739992577,
+    "verdict": "correct",
+    "average": 0.698418391189707,
+    "number_runs": 100
+  },
+  {
+    "category": "main",
+    "solution": "p0097_s0_c",
+    "args": "10 28433 \u00d7 2^7830457 + 1",
+    "answer": 8739992577,
+    "verdict": "correct",
+    "average": 5.855714285714286e-07,
+    "number_runs": 21
+  }
+]

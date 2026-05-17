@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0096_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
+    "answer": 24702,
+    "verdict": "correct",
+    "average": 0.0086304234,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0096_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
+    "answer": 24702,
+    "verdict": "correct",
+    "average": 0.06127810460020555,
+    "number_runs": 10
+  }
+]

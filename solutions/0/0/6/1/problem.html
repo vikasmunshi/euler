@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 61: Cyclical Figurate Numbers [Level 3]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../0/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=61" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/6/1/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../2/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 61: Cyclical Figurate Numbers [Level 3]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Triangle, square, pentagonal, hexagonal, heptagonal, and octagonal numbers are all figurate (polygonal) numbers and are generated by the following formulae:
+     </p>
+     <table>
+      <tr>
+       <td>
+        Triangle
+       </td>
+       <td>
+       </td>
+       <td>
+        $P_{3,n}=n(n+1)/2$
+       </td>
+       <td>
+       </td>
+       <td>
+        $1, 3, 6, 10, 15, \dots$
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Square
+       </td>
+       <td>
+       </td>
+       <td>
+        $P_{4,n}=n^2$
+       </td>
+       <td>
+       </td>
+       <td>
+        $1, 4, 9, 16, 25, \dots$
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Pentagonal
+       </td>
+       <td>
+       </td>
+       <td>
+        $P_{5,n}=n(3n-1)/2$
+       </td>
+       <td>
+       </td>
+       <td>
+        $1, 5, 12, 22, 35, \dots$
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Hexagonal
+       </td>
+       <td>
+       </td>
+       <td>
+        $P_{6,n}=n(2n-1)$
+       </td>
+       <td>
+       </td>
+       <td>
+        $1, 6, 15, 28, 45, \dots$
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Heptagonal
+       </td>
+       <td>
+       </td>
+       <td>
+        $P_{7,n}=n(5n-3)/2$
+       </td>
+       <td>
+       </td>
+       <td>
+        $1, 7, 18, 34, 55, \dots$
+       </td>
+      </tr>
+      <tr>
+       <td>
+        Octagonal
+       </td>
+       <td>
+       </td>
+       <td>
+        $P_{8,n}=n(3n-2)$
+       </td>
+       <td>
+       </td>
+       <td>
+        $1, 8, 21, 40, 65, \dots$
+       </td>
+      </tr>
+     </table>
+     <p>
+      The ordered set of three $4$-digit numbers: $8128$, $2882$, $8281$, has three interesting properties.
+     </p>
+     <ol>
+      <li>
+       The set is cyclic, in that the last two digits of each number is the first two digits of the next number (including the last number with the first).
+      </li>
+      <li>
+       Each polygonal type: triangle ($P_{3,127}=8128$), square ($P_{4,91}=8281$), and pentagonal ($P_{5,44}=2882$), is represented by a different number in the set.
+      </li>
+      <li>
+       This is the only set of $4$-digit numbers with this property.
+      </li>
+     </ol>
+     <p>
+      Find the sum of the only ordered set of six cyclic $4$-digit numbers for which each polygonal type: triangle, square, pentagonal, hexagonal, heptagonal, and octagonal, is represented by a different number in the set.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(length=2) → [1, 8181]</code></li>
+     <li><code>dev: solve(length=3) → [1, 19291]</code></li>
+     <li><code>dev: solve(length=4) → [2, [12524, 16160]]</code></li>
+     <li><code>dev: solve(length=5) → [5, [12019, 15857, 18685, 19493, 26058]]</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(length=6) → [1, 28684]</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 10 Mar 2020, 14:56
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0_c" rel="noopener noreferrer" target="_blank" title="p0061_s0_c">
+         p0061_s0_c
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [1, 8181]
+       </td>
+       <td>
+        0.000153831s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0.py" rel="noopener noreferrer" target="_blank" title="p0061_s0.py">
+         p0061_s0.py
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [1, 8181]
+       </td>
+       <td>
+        0.001296832s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0_c" rel="noopener noreferrer" target="_blank" title="p0061_s0_c">
+         p0061_s0_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [1, 19291]
+       </td>
+       <td>
+        0.000171855s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0.py" rel="noopener noreferrer" target="_blank" title="p0061_s0.py">
+         p0061_s0.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [1, 19291]
+       </td>
+       <td>
+        0.002722612s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0_c" rel="noopener noreferrer" target="_blank" title="p0061_s0_c">
+         p0061_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [2, [12524, 16160]]
+       </td>
+       <td>
+        0.000168235s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0.py" rel="noopener noreferrer" target="_blank" title="p0061_s0.py">
+         p0061_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [2, [12524, 16160]]
+       </td>
+       <td>
+        0.003135354s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0_c" rel="noopener noreferrer" target="_blank" title="p0061_s0_c">
+         p0061_s0_c
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [5, [12019, 15857, 18685, 19493, 26058]]
+       </td>
+       <td>
+        0.000395155s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0061_s0.py" rel="noopener noreferrer" target="_blank" title="p0061_s0.py">
+         p0061_s0.py
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [5, [12019, 15857, 18685, 19493, 26058]]
+       </td>
+       <td>
+        0.009280005s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0061_s0_c" rel="noopener noreferrer" target="_blank" title="p0061_s0_c">
+         p0061_s0_c
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [1, 28684]
+       </td>
+       <td>
+        0.001843684s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0061_s0.py" rel="noopener noreferrer" target="_blank" title="p0061_s0.py">
+         p0061_s0.py
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        [1, 28684]
+       </td>
+       <td>
+        0.035042656s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      Each of the six polygonal families - triangle, square, pentagonal, hexagonal, heptagonal, and octagonal - is defined by a closed-form quadratic formula. Within the four-digit range 1000 to 9999, each family contains roughly 40 to 90 members, so the total pool of candidate numbers is only a few hundred. The structural insight is that the "last two digits equal first two digits of the next" linking rule defines a directed edge between numbers, converting the problem into a constrained directed cycle search: find a directed cycle of exactly length k that uses exactly one representative from each of k polygon families. Because every hexagonal number is also triangular, some numbers belong to multiple families simultaneously, introducing a coverage assignment problem on top of the cycle search.
+     </p>
+     <p>
+      Finding a Hamiltonian cycle in a directed graph is NP-hard in general, but here k is at most 6 and the node count is at most a few hundred, so a depth-limited depth-first search with backtracking finishes in negligible time. Building the successor adjacency structure is O(V^2) in the number of distinct figurate numbers V, which dominates the overall runtime. The polygon-type coverage verification after each candidate cycle is found is O(k times max_family_size), also trivial at this scale.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Graph Construction and Depth-First Cycle Search with Polygon-Type Verification (Python and C)
+     </h4>
+     <p>
+      I implemented exactly the same algorithm in both Python and C; the C version is a direct translation included for benchmarking. My approach proceeds in four phases: generate, link, search, and verify.
+     </p>
+     <p>
+      In the generation phase I produce every four-digit figurate number for each polygon type up to the requested chain length. In Python I used a <code>FigurateNumber</code> enum as a type-safe key and stored results in a <code>dict[FigurateNumber, set[int]]</code>. I paired each generator with an inverse "closest" function that computes the continuous index for a given value, allowing tight bounding of iteration ranges without starting from n=1 every time. In C I used a static array of function pointers and two-dimensional static arrays, avoiding heap allocation for the number lists entirely.
+     </p>
+     <p>
+      In the linking phase I built a directed successor graph over all unique figurate numbers in the pool. For every pair of numbers A and B, I added an edge A to B when <code>A % 100 == B // 100</code> and the shared two-digit prefix is at least 10, eliminating degenerate leading-zero cases. Python stored successors in a <code>dict[int, list[int]]</code>; C used a static two-dimensional adjacency array with per-node counts.
+     </p>
+     <p>
+      The search is a recursive DFS function - <code>find_cyclic_paths</code> in Python and <code>dfs</code> in C. Starting from each node that has at least one outgoing edge, I explore paths of exactly <code>length</code> nodes while tracking visited nodes to prevent revisits. At depth <code>length</code> I check the closure condition: the last two digits of the current tail must equal the first two digits of the starting head. I canonicalise each found cycle by sorting its elements and inserting it into a set, which deduplicates all rotations of the same cycle without explicitly enumerating all k cyclic shifts.
+     </p>
+     <p>
+      The final verification step, <code>verify_polygon_types</code>, checks two things: that every polygon family contributes at least one member to the cycle, and that no number belonging to multiple families creates an unresolvable conflict where it is simultaneously the sole representative of two different families. In Python this is implemented with dictionary comprehensions and set intersections; in C it is a pair of nested loops over static arrays. Both versions implement identical logic.
+     </p>
+     <p>
+      I parameterised the solver by <code>length</code>, which let me validate against smaller cases before trusting the length-6 answer. The dev test cases confirm that lengths 2, 3, 4, and 5 return 1, 1, 2, and 5 valid cycles respectively.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that unlocked the solution was recognising the digit-link condition as a directed graph edge. Once I framed "last two digits equal first two digits" as an adjacency relation rather than an arithmetic property, the whole structure became clear: build the graph, run a depth-limited DFS, and post-filter for polygon-type coverage. Without that reframing, the problem appears to require bespoke case analysis for each chain position.
+     </p>
+     <p>
+      A subtlety I had to handle carefully was numbers belonging to multiple polygon families. Every hexagonal number is also triangular, so a naive "each number in the cycle is figurate" check is insufficient. The <code>verify_polygon_types</code> function handles this by checking coverage at the family level and additionally rejecting cycles where a multi-family number is the sole representative of all its families simultaneously, because in that case the family assignment is unresolvable regardless of how one tries to label it.
+     </p>
+     <p>
+      Canonicalising cycles by sorting their elements is a clean trick for deduplicating rotations. It works because all four-digit integers in any valid cycle are distinct, so the sorted tuple is a unique canonical form - there is no need to explicitly generate all k cyclic shifts and check each one for prior existence.
+     </p>
+     <p>
+      The C version runs at roughly 0.0002-0.0018 s against Python's 0.0013-0.0350 s across all test cases, a speedup of around 17x to 20x on the heavier inputs. Both are fast enough that the difference is practically irrelevant for a one-shot solve, but the C port was a useful exercise in translating Python's dynamic data structures - enums, dict comprehensions, set intersections - into static arrays and function pointers. The translation is almost purely mechanical: every Python container maps to a fixed-size static array with an accompanying count variable, and every generator expression maps to a bounded for loop.
+     </p>
+     <ul>
+      <li>
+       Modelling digit-link constraints as directed graph edges is a broadly reusable technique for any chaining or word-ladder style problem.
+      </li>
+      <li>
+       Inverse formulae for figurate numbers allow tight bounding of generator ranges without iterating from n=1, which matters more when the range is large.
+      </li>
+      <li>
+       Parameterising the solver over the chain length and testing against smaller instances is a reliable strategy for gaining confidence before committing to the full-scale answer.
+      </li>
+      <li>
+       Sorting cycle members for deduplication is simpler and cheaper than generating all rotations explicitly, as long as all cycle elements are distinct.
+      </li>
+      <li>
+       Coverage constraints on multi-valued assignments - one number, multiple family memberships - require explicit conflict detection, not just a membership presence check.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

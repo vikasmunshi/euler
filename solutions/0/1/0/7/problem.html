@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 107: Minimal Network [Level 7]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../6/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=107" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/0/7/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../8/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 107: Minimal Network [Level 7]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The following undirected network consists of seven vertices and twelve edges with a total weight of 243.
+     </p>
+     <div class="center">
+      <img alt="" class="dark_img" src="resources/0107_1.png"/>
+      <br/>
+     </div>
+     <p>
+      The same network can be represented by the matrix below.
+     </p>
+     <table align="center" border="1" cellpadding="5" cellspacing="0">
+      <tr>
+       <td>
+       </td>
+       <td>
+        <b>
+         A
+        </b>
+       </td>
+       <td>
+        <b>
+         B
+        </b>
+       </td>
+       <td>
+        <b>
+         C
+        </b>
+       </td>
+       <td>
+        <b>
+         D
+        </b>
+       </td>
+       <td>
+        <b>
+         E
+        </b>
+       </td>
+       <td>
+        <b>
+         F
+        </b>
+       </td>
+       <td>
+        <b>
+         G
+        </b>
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <b>
+         A
+        </b>
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        16
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        21
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <b>
+         B
+        </b>
+       </td>
+       <td>
+        16
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        17
+       </td>
+       <td>
+        20
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <b>
+         C
+        </b>
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        28
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        31
+       </td>
+       <td>
+        -
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <b>
+         D
+        </b>
+       </td>
+       <td>
+        21
+       </td>
+       <td>
+        17
+       </td>
+       <td>
+        28
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        18
+       </td>
+       <td>
+        19
+       </td>
+       <td>
+        23
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <b>
+         E
+        </b>
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        20
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        18
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        11
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <b>
+         F
+        </b>
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        31
+       </td>
+       <td>
+        19
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        27
+       </td>
+      </tr>
+      <tr>
+       <td>
+        <b>
+         G
+        </b>
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        -
+       </td>
+       <td>
+        23
+       </td>
+       <td>
+        11
+       </td>
+       <td>
+        27
+       </td>
+       <td>
+        -
+       </td>
+      </tr>
+     </table>
+     <p>
+      However, it is possible to optimise the network by removing some edges and still ensure that all points on the network remain connected. The network which achieves the maximum saving is shown below. It has a weight of 93, representing a saving of 243 − 93 = 150 from the original network.
+     </p>
+     <div class="center">
+      <img alt="" class="dark_img" src="resources/0107_2.png"/>
+      <br/>
+     </div>
+     <p>
+      Using
+      <a href="resources/0107_network.txt">
+       network.txt
+      </a>
+      (right click and 'Save Link/Target As...'), a 6K text file containing a network with forty vertices, and given in matrix form, find the maximum saving which can be achieved by removing redundant edges whilst ensuring that the network remains connected.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(file_url='') → 150</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(file_url='0107_network.txt') → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 29 Aug 2025, 13:44
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0107_s0_c" rel="noopener noreferrer" target="_blank" title="p0107_s0_c">
+         p0107_s0_c
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        150
+       </td>
+       <td>
+        0.000074214s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0107_s0.py" rel="noopener noreferrer" target="_blank" title="p0107_s0.py">
+         p0107_s0.py
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        150
+       </td>
+       <td>
+        0.000012576s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0107_s0_c" rel="noopener noreferrer" target="_blank" title="p0107_s0_c">
+         p0107_s0_c
+        </a>
+       </td>
+       <td>
+        0107_network.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000294063s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0107_s0.py" rel="noopener noreferrer" target="_blank" title="p0107_s0.py">
+         p0107_s0.py
+        </a>
+       </td>
+       <td>
+        0107_network.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.001446610s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem reduces directly to the classical Minimum Spanning Tree (MST) problem from graph theory. Given a connected, weighted, undirected graph, the MST is the spanning subgraph that connects all vertices with the minimum possible total edge weight and no cycles. The maximum saving is simply the difference between the total weight of all original edges and the weight of the MST. For a graph with V vertices and E edges, Kruskal's algorithm runs in O(E log E) time (dominated by sorting the edges), and the Union-Find operations with path compression add only nearly O(E alpha(V)) time, where alpha is the inverse Ackermann function - effectively constant. The 40-vertex problem file has at most 40*39/2 = 780 possible edges, so even a naive approach would be fast.
+     </p>
+     <p>
+      The key mathematical insight is that a spanning tree on V vertices always has exactly V-1 edges, and any connected subgraph with fewer than V-1 edges is disconnected while any connected subgraph with more than V-1 edges contains a cycle. Removing all edges not in the MST therefore achieves the maximum possible saving while preserving full connectivity.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Kruskal's Algorithm with Union-Find (s0 - Python and C)
+     </h4>
+     <p>
+      I chose Kruskal's algorithm as the single approach for both the Python and C implementations. The algorithm proceeds as follows:
+     </p>
+     <ul>
+      <li>
+       Parse the adjacency matrix, reading only the upper triangle (i &lt; j) to avoid counting each edge twice, accumulating the total edge weight as I go.
+      </li>
+      <li>
+       Sort all collected edges by weight in ascending order.
+      </li>
+      <li>
+       Use a Union-Find (disjoint-set) structure with path compression to greedily add the cheapest edge that does not form a cycle, until V-1 edges have been accepted.
+      </li>
+      <li>
+       Return <code>total - mst</code> as the maximum saving.
+      </li>
+     </ul>
+     <p>
+      In Python, I implemented <code>find</code> as a nested function using path halving (assigning <code>parent[x] = parent[parent[x]]</code> before moving up). The matrix parsing uses a list comprehension over <code>str.splitlines()</code> and <code>str.split(',')</code>. In C, I implemented the same logic with a static <code>par[]</code> array and a manual iterative <code>find</code> function with the same path-halving trick. The C version also includes a file-loading helper that tries several path conventions relative to the executable directory before falling back to a hardcoded default matrix for the dev test case. Both versions accept either an empty file URL (triggering the built-in 7-node example) or a path to the 40-node network file.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key "aha moment" here was recognising immediately that "maximum saving by removing redundant edges while keeping the network connected" is precisely the definition of MST savings - there is no need for any custom search or pruning. Once I framed it that way, Kruskal's algorithm was the obvious choice because the input is given as an edge list (after parsing the matrix), making sorting and greedy selection straightforward.
+     </p>
+     <p>
+      I only implemented one algorithmic approach (Kruskal with Union-Find) for this problem, in both Python and C. The benchmark results show the Python solution solving the main case in about 1.4 ms and the C solution in about 0.3 ms - roughly a 5x speedup for C, which is typical for this kind of simple graph algorithm where Python's interpreter overhead on small inputs is noticeable but not severe. Both are fast enough that the choice of language is purely a matter of preference here.
+     </p>
+     <p>
+      A technique worth remembering: path compression in Union-Find (even the simple path-halving variant rather than full two-pass compression) is sufficient to make the structure essentially O(1) per operation in practice. Also, parsing only the upper triangle of a symmetric adjacency matrix is an easy way to deduplicate edges without any extra bookkeeping.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 85: Counting Rectangles [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../4/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=85" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/8/5/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../6/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 85: Counting Rectangles [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      By counting carefully it can be seen that a rectangular grid measuring $3$ by $2$ contains eighteen rectangles:
+     </p>
+     <div class="center">
+      <img alt="" class="dark_img" src="resources/0085.png"/>
+     </div>
+     <p>
+      Although there exists no rectangular grid that contains exactly two million rectangles, find the area of the grid with the nearest solution.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_error=0, max_side=10, target_num_rectangles=18) → 6</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_error=2, max_side=100, target_num_rectangles=2000000) → 2772</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 18 Jul 2025, 17:30
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0085_s0_c" rel="noopener noreferrer" target="_blank" title="p0085_s0_c">
+         p0085_s0_c
+        </a>
+       </td>
+       <td>
+        0 10 18
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000000135s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0085_s1_c" rel="noopener noreferrer" target="_blank" title="p0085_s1_c">
+         p0085_s1_c
+        </a>
+       </td>
+       <td>
+        0 10 18
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000000218s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0085_s0.py" rel="noopener noreferrer" target="_blank" title="p0085_s0.py">
+         p0085_s0.py
+        </a>
+       </td>
+       <td>
+        0 10 18
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000012490s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0085_s1.py" rel="noopener noreferrer" target="_blank" title="p0085_s1.py">
+         p0085_s1.py
+        </a>
+       </td>
+       <td>
+        0 10 18
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000029005s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0085_s0_c" rel="noopener noreferrer" target="_blank" title="p0085_s0_c">
+         p0085_s0_c
+        </a>
+       </td>
+       <td>
+        2 100 2000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2772
+       </td>
+       <td>
+        0.001389729s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0085_s1_c" rel="noopener noreferrer" target="_blank" title="p0085_s1_c">
+         p0085_s1_c
+        </a>
+       </td>
+       <td>
+        2 100 2000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2772
+       </td>
+       <td>
+        0.000000821s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0085_s0.py" rel="noopener noreferrer" target="_blank" title="p0085_s0.py">
+         p0085_s0.py
+        </a>
+       </td>
+       <td>
+        2 100 2000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2772
+       </td>
+       <td>
+        0.226929427s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0085_s1.py" rel="noopener noreferrer" target="_blank" title="p0085_s1.py">
+         p0085_s1.py
+        </a>
+       </td>
+       <td>
+        2 100 2000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2772
+       </td>
+       <td>
+        0.000356713s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The key combinatorial insight is that every rectangle in an m-by-n grid is uniquely determined by choosing two distinct horizontal grid lines and two distinct vertical grid lines. An m-row grid has (m+1) horizontal lines, giving C(m+1, 2) = m(m+1)/2 ways to pick a horizontal pair, and similarly n(n+1)/2 for the vertical pair. So the total rectangle count is T(m) * T(n), where T(k) = k(k+1)/2 is the k-th triangular number. This factorisation decouples the two dimensions entirely and is the structural property that makes the problem tractable.
+     </p>
+     <p>
+      The search space is bounded because T(k) grows as O(k^2), so T(m)*T(n) reaches two million well before either dimension exceeds roughly 100 units. A naive approach that re-derives the count by summing all sub-rectangle positions costs O(h*w) per pair and O(S^4) overall for a grid of side bound S. Applying the closed form brings this down to O(S^2) with O(1) per pair. The optimised approach precomputes the triangular sequence and uses binary search, reducing the height scan to O(log S) per width and giving O(S log S) overall.
+     </p>
+     <h3>
+      Solution Approaches
+     </h3>
+     <h4>
+      Brute-Force Double Product Scan (s0)
+     </h4>
+     <p>
+      In the Python version I used <code>itertools.product</code> to iterate over all (height, width) pairs and computed the rectangle count with a nested generator that explicitly sums (height - h + 1) * (width - w + 1) over all sub-rectangle positions - effectively re-deriving T(h)*T(w) term by term rather than applying the closed form. Results were accumulated in a dictionary keyed by rectangle count, and at the end I selected the entry closest to the target with <code>min(..., key=delta)</code>. An early <code>break</code> fires when the running count falls within <code>max_error</code> of the target. The C version follows the same nested loop structure with explicit inner loops, tracking the best delta inline rather than using a dictionary, and uses <code>goto done</code> to break out of the double loop early. Both versions are correct but carry the O(h*w) cost of the inner sum for every pair: the Python implementation takes about 0.23 s on the main case and the C implementation takes about 0.0014 s.
+     </p>
+     <h4>
+      Precomputed Triangular Numbers with Binary Search (s1)
+     </h4>
+     <p>
+      I first built a sequence <code>numbers</code> where <code>numbers[k-1]</code> = T(k) = k(k+1)/2 for each side length from 1 to <code>max_side - 1</code>. Then for each width I retrieved its triangular value <code>num_width</code> and used <code>bisect_left</code> to find the insertion point for <code>target // num_width</code> in the sorted triangular-number sequence. Because the insertion point j marks the first index where the value is at least the quotient, the exact solution for the height lies at either index j or j+1 in zero-indexed terms - I checked both one-indexed heights j+1 and j+2, which straddles any exact solution. The Python version uses <code>bisect.bisect_left</code> from the standard library and stores candidates in a dictionary; the C version implements its own binary search with a straightforward lo/hi loop and tracks the running best delta inline. Both versions return the area of the closest grid found. On the main case the Python version runs in about 0.0004 s and the C version is effectively instant at under 0.0001 s - roughly 570x and 14000x faster than their s0 counterparts respectively.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that unlocked the problem was recognising that the rectangle count factors completely along each axis as T(m) * T(n). Before seeing that, I was recomputing an O(h*w) double sum for every pair, which is both slow and hides the structure. Once I had the factorisation, the 2-D search collapsed into a 1-D nearest-value lookup for each width - exactly the scenario where binary search on a precomputed sorted list shines.
+     </p>
+     <p>
+      Comparing the approaches using the benchmark results: s0 in Python averages about 0.23 s on the main case while s1 in Python averages about 0.0004 s, a speedup of roughly 570x. In C, s0 averages 0.0014 s while s1 is under 0.0001 s, a speedup of over an order of magnitude. The gain comes from two compounding improvements: replacing the O(h*w) inner sum with an O(1) precomputed triangular-number lookup, and replacing an O(S) height scan with an O(log S) bisect. The s1 approach is both faster and more elegant because it makes the mathematical structure of the problem visible in the code itself.
+     </p>
+     <ul>
+      <li>
+       Counting rectangles in a grid reduces to choosing pairs of grid lines: the result is always a product of two triangular numbers T(m) * T(n).
+      </li>
+      <li>
+       When one dimension of a 2-D search is monotone given the other, binary search converts an O(S^2) scan into O(S log S).
+      </li>
+      <li><code>bisect_left</code> returns the insertion point; checking the element just before and just after that point covers both neighbours of a target value in a sorted sequence.
+      </li>
+      <li>
+       Precomputing an intermediate sequence and binary-searching it is a broadly applicable pattern whenever a closed form exists but iteration is otherwise the natural approach.
+      </li>
+      <li>
+       The C implementations show the same algorithmic gains as Python but with much lower absolute times; the relative speedup between s0 and s1 is consistent across both languages.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

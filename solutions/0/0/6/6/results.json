@@ -1,0 +1,56 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0066_s0.py",
+    "args": "7",
+    "answer": 5,
+    "verdict": "correct",
+    "average": 4.0821875824040686e-05,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0066_s0.py",
+    "args": "1000",
+    "answer": 661,
+    "verdict": "correct",
+    "average": 0.026859136441073118,
+    "number_runs": 111
+  },
+  {
+    "category": "extra",
+    "solution": "p0066_s0.py",
+    "args": "10000",
+    "answer": 9949,
+    "verdict": "correct",
+    "average": 0.8742667081220945,
+    "number_runs": 74
+  },
+  {
+    "category": "dev",
+    "solution": "p0066_s0_c",
+    "args": "7",
+    "answer": 5,
+    "verdict": "correct",
+    "average": 1.1007571428571427e-05,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0066_s0_c",
+    "args": "1000",
+    "answer": 661,
+    "verdict": "correct",
+    "average": 0.0005838445,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0066_s0_c",
+    "args": "10000",
+    "answer": 9949,
+    "verdict": "correct",
+    "average": 0.01567843919607843,
+    "number_runs": 51
+  }
+]

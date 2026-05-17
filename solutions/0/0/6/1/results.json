@@ -1,0 +1,140 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0061_s0_c",
+    "args": "2",
+    "answer": [
+      1,
+      8181
+    ],
+    "verdict": "correct",
+    "average": 0.00015383050000000002,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0061_s0.py",
+    "args": "2",
+    "answer": [
+      1,
+      8181
+    ],
+    "verdict": "correct",
+    "average": 0.001296831900071993,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0061_s0_c",
+    "args": "3",
+    "answer": [
+      1,
+      19291
+    ],
+    "verdict": "correct",
+    "average": 0.000171855,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0061_s0.py",
+    "args": "3",
+    "answer": [
+      1,
+      19291
+    ],
+    "verdict": "correct",
+    "average": 0.0027226118998441963,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0061_s0_c",
+    "args": "4",
+    "answer": [
+      2,
+      [
+        12524,
+        16160
+      ]
+    ],
+    "verdict": "correct",
+    "average": 0.0001682354,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0061_s0.py",
+    "args": "4",
+    "answer": [
+      2,
+      [
+        12524,
+        16160
+      ]
+    ],
+    "verdict": "correct",
+    "average": 0.003135353799916629,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0061_s0_c",
+    "args": "5",
+    "answer": [
+      5,
+      [
+        12019,
+        15857,
+        18685,
+        19493,
+        26058
+      ]
+    ],
+    "verdict": "correct",
+    "average": 0.00039515490000000003,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0061_s0.py",
+    "args": "5",
+    "answer": [
+      5,
+      [
+        12019,
+        15857,
+        18685,
+        19493,
+        26058
+      ]
+    ],
+    "verdict": "correct",
+    "average": 0.009280004900392668,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0061_s0_c",
+    "args": "6",
+    "answer": [
+      1,
+      28684
+    ],
+    "verdict": "correct",
+    "average": 0.0018436836000000002,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0061_s0.py",
+    "args": "6",
+    "answer": [
+      1,
+      28684
+    ],
+    "verdict": "correct",
+    "average": 0.035042656100085876,
+    "number_runs": 10
+  }
+]

@@ -1,0 +1,38 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0081_s0_c",
+    "args": "",
+    "answer": 2427,
+    "verdict": "correct",
+    "average": 1.7884000000000007e-06,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0081_s0.py",
+    "args": "",
+    "answer": 2427,
+    "verdict": "correct",
+    "average": 1.5587699817842803e-05,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0081_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0081_matrix.txt",
+    "answer": 427337,
+    "verdict": "correct",
+    "average": 0.0002948466,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0081_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0081_matrix.txt",
+    "answer": 427337,
+    "verdict": "correct",
+    "average": 0.003502202300114732,
+    "number_runs": 10
+  }
+]

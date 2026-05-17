@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 33: Digit Cancelling Fractions [Level 0]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=33" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/3/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 33: Digit Cancelling Fractions [Level 0]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The fraction $49/98$ is a curious fraction, as an inexperienced mathematician in attempting to simplify it may incorrectly believe that $49/98 = 4/8$, which is correct, is obtained by cancelling the $9$s.
+     </p>
+     <p>
+      We shall consider fractions like, $30/50 = 3/5$, to be trivial examples.
+     </p>
+     <p>
+      There are exactly four non-trivial examples of this type of fraction, less than one in value, and containing two digits in the numerator and denominator.
+     </p>
+     <p>
+      If the product of these four fractions is given in its lowest common terms, find the value of the denominator.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve() → 100</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 12 Nov 2019, 14:14
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0033_s0_c" rel="noopener noreferrer" target="_blank" title="p0033_s0_c">
+         p0033_s0_c
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        0.000000877s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0033_s0.py" rel="noopener noreferrer" target="_blank" title="p0033_s0.py">
+         p0033_s0.py
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        0.000043244s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core question is when naive digit cancellation accidentally produces the correct result. For a two-digit
+numerator and denominator sharing one digit x, the interesting case is x appearing in the units place of the
+numerator (10n + x) and the tens place of the denominator (10x + d), such that (10n + x) / (10x + d) happens
+to equal n / d. Cross-multiplying that equality gives the exact integer condition
+(10n + x) * d = (10x + d) * n, which rearranges to 9nd = x(n - d). This collapses the entire search to
+single-digit loops over n, d, and x, capping the candidate space at 9 * 9 * 9 = 729 triples. The problem is
+effectively O(1) - a bounded exhaustive search with a closed algebraic filter.
+     </p>
+     <p>
+      Once the four valid fractions are found, their product must be reduced to lowest terms. Given the small values
+involved this is a trivial GCD computation. No asymptotic analysis beyond O(1) is meaningful here.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Algebraic Constraint Enumeration with Fraction Accumulation (Python and C)
+     </h4>
+     <p>
+      Both solutions share the same algorithm. I enumerate all triples (numerator, denominator, shared digit x)
+with 1 &lt;= numerator &lt; denominator &lt;= 9 and 1 &lt;= x &lt;= 9, skipping cases where x equals either
+digit to exclude trivial cancellations such as 33/33. For each triple I test the cross-multiplication
+condition <code>(10 * numerator + x) * denominator == (10 * x + denominator) * numerator</code>, which
+is the exact algebraic statement that cancelling x from (10n+x)/(10x+d) yields the correct simplified
+fraction n/d. The constraint numerator &lt; denominator ensures the fraction is less than one.
+     </p>
+     <p>
+      In the Python solution I accumulate matching fractions directly as <code>fractions.Fraction</code> objects
+using <code>functools.reduce</code> with a lambda multiplier, starting from an identity of <code>Fraction(1, 1)</code>. Python's <code>Fraction</code> type maintains lowest terms automatically at
+every multiplication step, so reading the final <code>.denominator</code> attribute gives the answer with no
+extra GCD work. The entire solve function is a single expression, which I find clean and expressive for a
+search space this small.
+     </p>
+     <p>
+      In the C solution I instead accumulate the raw numerator and denominator products as <code>long long</code> integers, then apply one explicit GCD reduction at the end using the standard Euclidean algorithm. The logic
+is otherwise identical to the Python version. The C solution is more explicit about the GCD mechanics while
+the Python version is more concise due to the standard library's <code>Fraction</code> type doing the
+bookkeeping automatically.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <ul>
+      <li>
+       The key insight was to immediately write out the cross-multiplication condition (10n + x) * d = (10x + d) * n
+rather than reasoning informally about digit positions. Once I had that equation the search space collapsed to
+a handful of single-digit loops and the problem became straightforward.
+      </li>
+      <li>
+       Excluding x == n and x == d is essential to filter out trivial cancellations. The problem statement flags the
+30/50 family as trivial; my loop starting x at 1 already excludes x = 0, and the equality guards handle the
+remaining degenerate cases naturally.
+      </li>
+      <li>
+       Python's <code>fractions.Fraction</code> combined with <code>functools.reduce</code> lets me express
+accumulation and automatic reduction as a single expression, with no risk of forgetting a final GCD step.
+For problems involving products of small rational numbers it is an excellent tool.
+      </li>
+      <li>
+       Both solutions report elapsed time of 0.0000 seconds, so there is no meaningful performance distinction to
+draw. The C version is marginally more explicit about mechanics while the Python version is more concise. I
+chose to implement both as the algorithm is short enough that the translation adds no real complexity.
+      </li>
+      <li>
+       For future problems involving accidental arithmetic identities it is worth remembering to translate the
+coincidence into an exact integer equation immediately. Cross-multiplication is almost always the right first
+step, and it typically reduces an open-ended digit-search to a constant-bounded loop.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

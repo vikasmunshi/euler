@@ -1,0 +1,110 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0029_s0.py",
+    "args": "2 5 2 5",
+    "answer": 15,
+    "verdict": "correct",
+    "average": 3.0070618026099638e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0029_s0.py",
+    "args": "2 100 2 100",
+    "answer": 9183,
+    "verdict": "correct",
+    "average": 0.003713840081742616,
+    "number_runs": 111
+  },
+  {
+    "category": "extra",
+    "solution": "p0029_s0.py",
+    "args": "2 1000 2 1000",
+    "answer": 977358,
+    "verdict": "correct",
+    "average": 2.629332158161408,
+    "number_runs": 74
+  },
+  {
+    "category": "dev",
+    "solution": "p0029_s1.py",
+    "args": "2 5 2 5",
+    "answer": 15,
+    "verdict": "correct",
+    "average": 3.2182063266970673e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0029_s1.py",
+    "args": "2 100 2 100",
+    "answer": 9183,
+    "verdict": "correct",
+    "average": 0.0036337334235252267,
+    "number_runs": 111
+  },
+  {
+    "category": "extra",
+    "solution": "p0029_s1.py",
+    "args": "2 1000 2 1000",
+    "answer": 977358,
+    "verdict": "correct",
+    "average": 2.6779423086354748,
+    "number_runs": 74
+  },
+  {
+    "category": "dev",
+    "solution": "p0029_s0_c",
+    "args": "2 5 2 5",
+    "answer": 15,
+    "verdict": "correct",
+    "average": 0.015977919107142854,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0029_s0_c",
+    "args": "2 100 2 100",
+    "answer": 9183,
+    "verdict": "correct",
+    "average": 0.023829841285714283,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0029_s0_c",
+    "args": "2 1000 2 1000",
+    "answer": 977358,
+    "verdict": "correct",
+    "average": 0.7939982971764705,
+    "number_runs": 51
+  },
+  {
+    "category": "dev",
+    "solution": "p0029_s1_c",
+    "args": "2 5 2 5",
+    "answer": 15,
+    "verdict": "correct",
+    "average": 0.01469802385714286,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0029_s1_c",
+    "args": "2 100 2 100",
+    "answer": 9183,
+    "verdict": "correct",
+    "average": 0.024390383696428566,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0029_s1_c",
+    "args": "2 1000 2 1000",
+    "answer": 977358,
+    "verdict": "correct",
+    "average": 0.7638640861960784,
+    "number_runs": 51
+  }
+]

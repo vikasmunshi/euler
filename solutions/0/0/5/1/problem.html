@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 51: Prime Digit Replacements [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../0/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=51" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/5/1/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../2/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 51: Prime Digit Replacements [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      By replacing the 1
+      <sup>
+       st
+      </sup>
+      digit of the 2-digit number *3, it turns out that six of the nine possible values: 13, 23, 43, 53, 73, and 83, are all prime.
+     </p>
+     <p>
+      By replacing the 3
+      <sup>
+       rd
+      </sup>
+      and 4
+      <sup>
+       th
+      </sup>
+      digits of 56**3 with the same digit, this 5-digit number is the first example having seven primes among the ten generated numbers, yielding the family: 56003, 56113, 56333, 56443, 56663, 56773, and 56993. Consequently 56003, being the first member of this family, is the smallest prime with this property.
+     </p>
+     <p>
+      Find the smallest prime which, by replacing part of the number (not necessarily adjacent digits) with the same digit, is part of an eight prime value family.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(num_digits=6, prime_run=6) → 13</code></li>
+     <li><code>dev: solve(num_digits=6, prime_run=7) → 56003</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(num_digits=6, prime_run=8) → 121313</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 5 Dec 2019, 22:13
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0051_s0_c" rel="noopener noreferrer" target="_blank" title="p0051_s0_c">
+         p0051_s0_c
+        </a>
+       </td>
+       <td>
+        6 6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        0.003311032s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0051_s0.py" rel="noopener noreferrer" target="_blank" title="p0051_s0.py">
+         p0051_s0.py
+        </a>
+       </td>
+       <td>
+        6 6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        0.239294807s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0051_s0_c" rel="noopener noreferrer" target="_blank" title="p0051_s0_c">
+         p0051_s0_c
+        </a>
+       </td>
+       <td>
+        6 7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        56003
+       </td>
+       <td>
+        0.008044242s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0051_s0.py" rel="noopener noreferrer" target="_blank" title="p0051_s0.py">
+         p0051_s0.py
+        </a>
+       </td>
+       <td>
+        6 7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        56003
+       </td>
+       <td>
+        0.725587758s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0051_s0_c" rel="noopener noreferrer" target="_blank" title="p0051_s0_c">
+         p0051_s0_c
+        </a>
+       </td>
+       <td>
+        6 8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        121313
+       </td>
+       <td>
+        0.014160870s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0051_s0.py" rel="noopener noreferrer" target="_blank" title="p0051_s0.py">
+         p0051_s0.py
+        </a>
+       </td>
+       <td>
+        6 8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        121313
+       </td>
+       <td>
+        1.163258218s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core challenge sits at the intersection of prime number theory and combinatorial digit manipulation. When I
+replace every occurrence of a chosen digit across all its positions simultaneously, I generate a family of up to
+ten related integers, and I need the smallest prime that belongs to an eight-member prime family of this kind. A
+useful modular arithmetic observation constrained my search considerably: if the replaced digit occupies k
+positions, then as the substitution digit cycles through 0-9, the ten resulting numbers hit every residue mod 3
+with a period of 3, meaning roughly three of the ten candidates must be divisible by 3 and therefore composite.
+To achieve eight primes, at most two failures are tolerable, which forces k to be a multiple of 3 - specifically
+k = 3 for the answer. This explains why the answer involves exactly three repeated digits and why eight-prime
+families are rare enough to make the problem non-trivial.
+     </p>
+     <p>
+      The search space is all primes up to 10^num_digits. By the prime number theorem there are roughly
+10^num_digits / (num_digits * ln 10) such primes. For each prime I test at most 10 - prime_run candidate
+replacement digits, and for each candidate I perform at most ten trial-division primality checks on numbers of
+the same magnitude. The dominant cost is therefore sieve construction at O(N log log N), with O(N / log N)
+additional primality checks, where N = 10^num_digits.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Sundaram Sieve with Forward Substitution Scan (Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python and C, so I cover them together. I generate all primes up to
+10^num_digits using a Sundaram sieve, which I find to be a compact alternative to the Eratosthenes sieve: it
+marks composites of the form i + j + 2ij and recovers primes as 2i + 1 for unmarked indices. Because the sieve
+produces primes in strictly ascending order, the first match found is automatically the correct minimal answer
+with no post-processing sort needed.
+     </p>
+     <p>
+      For each prime I iterate over candidate replacement digits in the range <code>"0123456789"[: 10 - prime_run]</code>.
+The upper bound prunes digits for which there are not enough higher substitutions remaining to form a full
+family - there is no point trying digit 5 if I need eight primes and only digits 5-9 remain. If the candidate
+digit appears anywhere in the decimal representation of the prime, I then iterate over all replacement digits
+from the candidate value upward, replace every occurrence of the candidate simultaneously - using <code>str.replace</code> in Python or a character-swap loop in C - and check whether the result is both at
+least the original prime and prime itself. Requiring the result to be at least the original prime avoids
+attributing the same family to a lower member; it ensures each family is counted exactly once, assigned to its
+smallest prime. If exactly <code>prime_run</code> such results accumulate, the current prime is returned as the
+answer.
+     </p>
+     <p>
+      The C version follows the same logic precisely, using <code>snprintf</code> and a manual character loop instead
+of Python string methods, and <code>atoi</code> to parse the substituted string back to an integer. The
+trial-division <code>is_prime</code> helper is identical in structure in both languages. The sieve bookkeeping
+uses a plain <code>calloc</code> byte array in C versus a <code>bytearray</code> in Python.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that made the solution straightforward was recognising that Python's <code>str.replace</code> substitutes all occurrences of a substring simultaneously. This gives the multi-position replacement described
+in the problem for free - I do not need to enumerate subsets of digit positions explicitly. The C equivalent is
+a simple loop that rewrites every matching character in one pass, achieving the same effect with no extra
+bookkeeping.
+     </p>
+     <p>
+      A subtlety I handled carefully was the counting direction: by only counting replacements where the new digit is
+at least the replaced digit and the resulting number is at least the original prime, each family is attributed
+to its smallest prime member exactly once. This keeps the scan monotonically forward through digit space without
+any deduplication step.
+     </p>
+     <p>
+      The benchmark results show a large performance gap between the two implementations. On the main test case
+(num_digits=6, prime_run=8, answer=121313) the C solution runs in about 0.014 seconds versus 1.16 seconds for
+Python - roughly an 82x speedup. Both the sieve construction and the repeated trial-division checks benefit
+enormously from compiled arithmetic. Python is still comfortably within a two-second budget for this problem
+size, but the C version demonstrates that the same algorithm scales much further without algorithmic changes.
+     </p>
+     <ul>
+      <li>
+       Python's <code>str.replace</code> is a natural tool for simultaneous multi-position digit substitution, eliminating the need to enumerate position subsets explicitly.
+      </li>
+      <li>
+       Restricting the replacement digit range to <code>10 - prime_run</code> candidates prunes obviously hopeless starting digits early and keeps the inner loop tight.
+      </li>
+      <li>
+       Iterating primes in ascending sieve order guarantees the first match is the correct minimal answer with no sorting required.
+      </li>
+      <li>
+       The mod-3 divisibility argument explains why exactly three replaced digits are required for an eight-prime family, and is worth remembering when reasoning about achievable family sizes in digit-replacement problems.
+      </li>
+      <li>
+       The Sundaram sieve is a compact, cache-friendly alternative to the Eratosthenes sieve and produces primes in sorted order with minimal bookkeeping.
+      </li>
+      <li>
+       Counting a family only from the direction of the smallest replaced digit value prevents double-counting without any set or deduplication data structure.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

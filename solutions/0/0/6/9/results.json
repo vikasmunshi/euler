@@ -1,0 +1,110 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0069_s0.py",
+    "args": "10",
+    "answer": 6,
+    "verdict": "correct",
+    "average": 1.7890628559566072e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0.py",
+    "args": "100",
+    "answer": 30,
+    "verdict": "correct",
+    "average": 2.3333480661286946e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0.py",
+    "args": "1000",
+    "answer": 210,
+    "verdict": "correct",
+    "average": 2.242294540012933e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0.py",
+    "args": "10000",
+    "answer": 2310,
+    "verdict": "correct",
+    "average": 2.308811986040382e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0.py",
+    "args": "100000",
+    "answer": 30030,
+    "verdict": "correct",
+    "average": 3.1356865751571865e-06,
+    "number_runs": 112
+  },
+  {
+    "category": "main",
+    "solution": "p0069_s0.py",
+    "args": "1000000",
+    "answer": 510510,
+    "verdict": "correct",
+    "average": 3.318532224528115e-06,
+    "number_runs": 111
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0_c",
+    "args": "10",
+    "answer": 6,
+    "verdict": "correct",
+    "average": 7.251785714285713e-08,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0_c",
+    "args": "100",
+    "answer": 30,
+    "verdict": "correct",
+    "average": 7.196428571428574e-08,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0_c",
+    "args": "1000",
+    "answer": 210,
+    "verdict": "correct",
+    "average": 9.044642857142859e-08,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0_c",
+    "args": "10000",
+    "answer": 2310,
+    "verdict": "correct",
+    "average": 1.0191071428571431e-07,
+    "number_runs": 56
+  },
+  {
+    "category": "dev",
+    "solution": "p0069_s0_c",
+    "args": "100000",
+    "answer": 30030,
+    "verdict": "correct",
+    "average": 1.0228571428571429e-07,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0069_s0_c",
+    "args": "1000000",
+    "answer": 510510,
+    "verdict": "correct",
+    "average": 1.23125e-07,
+    "number_runs": 56
+  }
+]

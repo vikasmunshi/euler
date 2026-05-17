@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 13: Large Sum [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=13" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/1/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 13: Large Sum [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Work out the first ten digits of the sum of the following one-hundred $50$-digit numbers.
+     </p>
+     <div class="monospace center">
+      37107287533902102798797998220837590246510135740250
+      <br/>
+      46376937677490009712648124896970078050417018260538
+      <br/>
+      74324986199524741059474233309513058123726617309629
+      <br/>
+      91942213363574161572522430563301811072406154908250
+      <br/>
+      23067588207539346171171980310421047513778063246676
+      <br/>
+      89261670696623633820136378418383684178734361726757
+      <br/>
+      28112879812849979408065481931592621691275889832738
+      <br/>
+      44274228917432520321923589422876796487670272189318
+      <br/>
+      47451445736001306439091167216856844588711603153276
+      <br/>
+      70386486105843025439939619828917593665686757934951
+      <br/>
+      62176457141856560629502157223196586755079324193331
+      <br/>
+      64906352462741904929101432445813822663347944758178
+      <br/>
+      92575867718337217661963751590579239728245598838407
+      <br/>
+      58203565325359399008402633568948830189458628227828
+      <br/>
+      80181199384826282014278194139940567587151170094390
+      <br/>
+      35398664372827112653829987240784473053190104293586
+      <br/>
+      86515506006295864861532075273371959191420517255829
+      <br/>
+      71693888707715466499115593487603532921714970056938
+      <br/>
+      54370070576826684624621495650076471787294438377604
+      <br/>
+      53282654108756828443191190634694037855217779295145
+      <br/>
+      36123272525000296071075082563815656710885258350721
+      <br/>
+      45876576172410976447339110607218265236877223636045
+      <br/>
+      17423706905851860660448207621209813287860733969412
+      <br/>
+      81142660418086830619328460811191061556940512689692
+      <br/>
+      51934325451728388641918047049293215058642563049483
+      <br/>
+      62467221648435076201727918039944693004732956340691
+      <br/>
+      15732444386908125794514089057706229429197107928209
+      <br/>
+      55037687525678773091862540744969844508330393682126
+      <br/>
+      18336384825330154686196124348767681297534375946515
+      <br/>
+      80386287592878490201521685554828717201219257766954
+      <br/>
+      78182833757993103614740356856449095527097864797581
+      <br/>
+      16726320100436897842553539920931837441497806860984
+      <br/>
+      48403098129077791799088218795327364475675590848030
+      <br/>
+      87086987551392711854517078544161852424320693150332
+      <br/>
+      59959406895756536782107074926966537676326235447210
+      <br/>
+      69793950679652694742597709739166693763042633987085
+      <br/>
+      41052684708299085211399427365734116182760315001271
+      <br/>
+      65378607361501080857009149939512557028198746004375
+      <br/>
+      35829035317434717326932123578154982629742552737307
+      <br/>
+      94953759765105305946966067683156574377167401875275
+      <br/>
+      88902802571733229619176668713819931811048770190271
+      <br/>
+      25267680276078003013678680992525463401061632866526
+      <br/>
+      36270218540497705585629946580636237993140746255962
+      <br/>
+      24074486908231174977792365466257246923322810917141
+      <br/>
+      91430288197103288597806669760892938638285025333403
+      <br/>
+      34413065578016127815921815005561868836468420090470
+      <br/>
+      23053081172816430487623791969842487255036638784583
+      <br/>
+      11487696932154902810424020138335124462181441773470
+      <br/>
+      63783299490636259666498587618221225225512486764533
+      <br/>
+      67720186971698544312419572409913959008952310058822
+      <br/>
+      95548255300263520781532296796249481641953868218774
+      <br/>
+      76085327132285723110424803456124867697064507995236
+      <br/>
+      37774242535411291684276865538926205024910326572967
+      <br/>
+      23701913275725675285653248258265463092207058596522
+      <br/>
+      29798860272258331913126375147341994889534765745501
+      <br/>
+      18495701454879288984856827726077713721403798879715
+      <br/>
+      38298203783031473527721580348144513491373226651381
+      <br/>
+      34829543829199918180278916522431027392251122869539
+      <br/>
+      40957953066405232632538044100059654939159879593635
+      <br/>
+      29746152185502371307642255121183693803580388584903
+      <br/>
+      41698116222072977186158236678424689157993532961922
+      <br/>
+      62467957194401269043877107275048102390895523597457
+      <br/>
+      23189706772547915061505504953922979530901129967519
+      <br/>
+      86188088225875314529584099251203829009407770775672
+      <br/>
+      11306739708304724483816533873502340845647058077308
+      <br/>
+      82959174767140363198008187129011875491310547126581
+      <br/>
+      97623331044818386269515456334926366572897563400500
+      <br/>
+      42846280183517070527831839425882145521227251250327
+      <br/>
+      55121603546981200581762165212827652751691296897789
+      <br/>
+      32238195734329339946437501907836945765883352399886
+      <br/>
+      75506164965184775180738168837861091527357929701337
+      <br/>
+      62177842752192623401942399639168044983993173312731
+      <br/>
+      32924185707147349566916674687634660915035914677504
+      <br/>
+      99518671430235219628894890102423325116913619626622
+      <br/>
+      73267460800591547471830798392868535206946944540724
+      <br/>
+      76841822524674417161514036427982273348055556214818
+      <br/>
+      97142617910342598647204516893989422179826088076852
+      <br/>
+      87783646182799346313767754307809363333018982642090
+      <br/>
+      10848802521674670883215120185883543223812876952786
+      <br/>
+      71329612474782464538636993009049310363619763878039
+      <br/>
+      62184073572399794223406235393808339651327408011116
+      <br/>
+      66627891981488087797941876876144230030984490851411
+      <br/>
+      60661826293682836764744779239180335110989069790714
+      <br/>
+      85786944089552990653640447425576083659976645795096
+      <br/>
+      66024396409905389607120198219976047599490197230297
+      <br/>
+      64913982680032973156037120041377903785566085089252
+      <br/>
+      16730939319872750275468906903707539413042652315011
+      <br/>
+      94809377245048795150954100921645863754710598436791
+      <br/>
+      78639167021187492431995700641917969777599028300699
+      <br/>
+      15368713711936614952811305876380278410754449733078
+      <br/>
+      40789923115535562561142322423255033685442488917353
+      <br/>
+      44889911501440648020369068063960672322193204149535
+      <br/>
+      41503128880339536053299340368006977710650566631954
+      <br/>
+      81234880673210146739058568557934581403627822703280
+      <br/>
+      82616570773948327592232845941706525094512325230608
+      <br/>
+      22918802058777319719839450180888072429661980811197
+      <br/>
+      77158542502016545090413245809786882778948721859617
+      <br/>
+      72107838435069186155435662884062257473692284509516
+      <br/>
+      20849603980134001723930671666823555245252804609722
+      <br/>
+      53503534226472524250874054075591789781264330331690
+      <br/>
+     </div>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(digits=10) → '5537376230'</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(digits=20) → '55373762303908766372'</code></li>
+     <li><code>extra: solve(digits=100) → '5537376230390876637302048746832985971773659831892672'</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 8 Oct 2019, 19:55
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0013_s0_c" rel="noopener noreferrer" target="_blank" title="p0013_s0_c">
+         p0013_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5537376230
+       </td>
+       <td>
+        0.000001185s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0013_s0.py" rel="noopener noreferrer" target="_blank" title="p0013_s0.py">
+         p0013_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5537376230
+       </td>
+       <td>
+        0.000026046s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0013_s0_c" rel="noopener noreferrer" target="_blank" title="p0013_s0_c">
+         p0013_s0_c
+        </a>
+       </td>
+       <td>
+        20
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55373762303908766372
+       </td>
+       <td>
+        0.000001594s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0013_s0.py" rel="noopener noreferrer" target="_blank" title="p0013_s0.py">
+         p0013_s0.py
+        </a>
+       </td>
+       <td>
+        20
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55373762303908766372
+       </td>
+       <td>
+        0.000026119s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0013_s0_c" rel="noopener noreferrer" target="_blank" title="p0013_s0_c">
+         p0013_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5537376230390876637302048746832985971773659831892672
+       </td>
+       <td>
+        0.000004382s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0013_s0.py" rel="noopener noreferrer" target="_blank" title="p0013_s0.py">
+         p0013_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5537376230390876637302048746832985971773659831892672
+       </td>
+       <td>
+        0.000028002s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core mathematical operation is multi-precision integer addition. Summing one hundred 50-digit numbers produces
+a result of at most 52 digits, so the work is O(n * d) where n = 100 addends and d = 50 digits each - a fixed
+and trivially small workload. The interesting mathematical observation is the carry-propagation bound: when
+summing n numbers in base 10, carries can ripple at most ceil(log10(n)) digit positions to the left of the
+addend width. With n = 100 that bound is exactly 2, meaning the result has at most 52 digits. A practical
+consequence is that summing only the first <code>digits + 1</code> leading characters of each addend is
+sufficient to obtain the correct first <code>digits</code> characters of the total - no need to process all
+50 digits when only 10 are asked for. This prefix-truncation idea is essential in environments without
+arbitrary-precision integers, as it keeps intermediate values inside native types.
+     </p>
+     <p>
+      The problem has no hidden depth in number theory or combinatorics; it is fundamentally an exercise in handling
+large integers correctly. The asymptotic class is O(n * d) which, for fixed n and d, is O(1) in any practical
+sense.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Digit-prefix sum (Python and C, solution index 0)
+     </h4>
+     <p>
+      Both the Python and C solutions implement the same conceptual algorithm: slice only the leading <code>digits + 1</code> characters from each 50-digit string, sum those truncated values as integers, and
+return the first <code>digits</code> characters of the result. The extra leading character absorbs any carry
+that propagates out of the truncated sum. When the requested digit count is 50 or more, <code>use_digits</code> is capped at the full <code>NUM_DIGITS</code> width so no information is lost.
+     </p>
+     <p>
+      In Python I stored all one hundred numbers as a single triple-quoted newline-separated string constant.
+The <code>solve</code> function splits on newlines, filters blank entries, slices each line to <code>digits + 1</code> characters, converts each slice to <code>int</code>, and passes the list to the
+built-in <code>sum()</code>. Python's arbitrary-precision integers handle all carry propagation invisibly, so
+the entire logic fits in a single expression. The function is parameterised on <code>digits</code>, which makes
+it straightforward to verify the result at different precisions using the extra test cases.
+     </p>
+     <p>
+      In C there are no arbitrary-precision integers, so I implemented the addition manually using a flat array of
+base-10 digits. Each of the 100 number strings is stored as a <code>const char *</code> in a static array.
+The <code>solve</code> function allocates an integer accumulator array of length <code>use_digits + 4</code> (the extra four cells absorb all possible carries from 100 addends), iterates over every number adding its
+digits into the right-aligned accumulator, then makes a single right-to-left carry-propagation pass after all
+addends have been processed. Finally it scans past any leading zeros, copies <code>digits</code> characters
+into a heap-allocated result string, and returns it. Doing one carry sweep at the end rather than propagating
+after every addend is cleaner and equally correct.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <ul>
+      <li>
+       The key insight is that Python's arbitrary-precision integers reduce what looks like a daunting problem to a
+one-liner. No manual carry arithmetic is needed at all in Python; the language does the heavy lifting invisibly.
+      </li>
+      <li>
+       The carry-propagation bound - summing n numbers introduces at most ceil(log10(n)) extra digits of carry - is a
+useful mental model to keep. It means only a short prefix of each addend is needed when only a short prefix of
+the answer is required, which matters in constrained environments such as C without a big-integer library.
+      </li>
+      <li>
+       Both solutions produce identical results across all three test cases (10-digit, 20-digit, and 100-digit). The
+100-digit case is particularly useful as a correctness check because it exercises the code path where <code>use_digits</code> is capped at <code>NUM_DIGITS</code> and no truncation occurs.
+      </li>
+      <li>
+       Writing the C version forced me to think explicitly about array sizing and carry propagation in a way the Python
+version hides. Allocating <code>use_digits + 4</code> cells is a safe upper bound: even if every digit position
+accumulated a sum of 9 * 100 = 900, the carry chain cannot exceed 3 extra positions, so 4 spare cells is always
+sufficient.
+      </li>
+      <li>
+       Deferring carry propagation until after all addends are accumulated, rather than propagating after each one, is
+a cleaner pattern: it separates the accumulation phase from the normalisation phase and requires only a single
+right-to-left pass over the digit array.
+      </li>
+      <li>
+       Embedding static input data as a string constant and splitting at runtime is a clean pattern for self-contained
+Euler problems where the data never changes. In C the equivalent is a static array of string literals, which
+the compiler places in read-only memory with no runtime overhead.
+      </li>
+      <li>
+       Both solutions benchmark at effectively zero elapsed time, as expected for an O(100 * 50) workload. The Python
+version is more elegant given the language's built-in support for arbitrary-precision integers; the C version
+is useful mainly as an exercise in manual big-integer addition and explicit memory management, and as a
+demonstration that the same algorithm can be expressed without any library dependency.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

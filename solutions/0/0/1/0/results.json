@@ -1,0 +1,272 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0010_s0.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 1.0356291827113497e-05,
+    "number_runs": 123
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s0.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.07882575087742653,
+    "number_runs": 122
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s0.py",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 0.39098350561294715,
+    "number_runs": 75
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s1.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 4.619918471009471e-06,
+    "number_runs": 123
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s1.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.5206519551475364,
+    "number_runs": 122
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s1.py",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 2.912391847787053,
+    "number_runs": 75
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s2.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 2.3769015407322707e-06,
+    "number_runs": 123
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s2.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.3669743073368759,
+    "number_runs": 122
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s2.py",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 2.3039761463734356,
+    "number_runs": 75
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s3.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 2.6257002059722485e-06,
+    "number_runs": 123
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s3.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 4.978704258721093,
+    "number_runs": 72
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s3.py",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 50.7449261052534,
+    "number_runs": 4
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s4.py",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 9.605940680635619e-05,
+    "number_runs": 123
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s4.py",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.0007045955981550191,
+    "number_runs": 122
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s4.py",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 0.002982628733155555,
+    "number_runs": 75
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s0_c",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 2.491428571428571e-07,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s0_c",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.006648467696428573,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s0_c",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 0.037860305941176474,
+    "number_runs": 51
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s1_c",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 2.542142857142858e-07,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s1_c",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.0052268160000000004,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s1_c",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 0.02736182184313726,
+    "number_runs": 51
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s2_c",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 5.65925e-06,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s2_c",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.11618600941071429,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s2_c",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 0.7374028657254902,
+    "number_runs": 51
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s3_c",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 1.0564285714285717e-07,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s3_c",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.166411753875,
+    "number_runs": 56
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s3_c",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 1.600862256352941,
+    "number_runs": 51
+  },
+  {
+    "category": "dev",
+    "solution": "p0010_s4_c",
+    "args": "10",
+    "answer": 17,
+    "verdict": "correct",
+    "average": 2.0023809523809527e-07,
+    "number_runs": 42
+  },
+  {
+    "category": "main",
+    "solution": "p0010_s4_c",
+    "args": "2000000",
+    "answer": 142913828922,
+    "verdict": "correct",
+    "average": 0.005975938714285712,
+    "number_runs": 42
+  },
+  {
+    "category": "extra",
+    "solution": "p0010_s4_c",
+    "args": "10000000",
+    "answer": 3203324994356,
+    "verdict": "correct",
+    "average": 0.03527245597499999,
+    "number_runs": 40
+  }
+]

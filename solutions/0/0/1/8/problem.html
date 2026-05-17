@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 18: Maximum Path Sum I [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../7/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=18" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/1/8/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../9/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 18: Maximum Path Sum I [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from top to bottom is $23$.
+     </p>
+     <p class="monospace center">
+      <span class="red">
+       <b>
+        3
+       </b>
+      </span>
+      <br/>
+      <span class="red">
+       <b>
+        7
+       </b>
+      </span>
+      4
+      <br/>
+      2
+      <span class="red">
+       <b>
+        4
+       </b>
+      </span>
+      6
+      <br/>
+      8 5
+      <span class="red">
+       <b>
+        9
+       </b>
+      </span>
+      3
+     </p>
+     <p>
+      That is, $3 + 7 + 4 + 9 = 23$.
+     </p>
+     <p>
+      Find the maximum total from top to bottom of the triangle below:
+     </p>
+     <p class="monospace center">
+      75
+      <br/>
+      95 64
+      <br/>
+      17 47 82
+      <br/>
+      18 35 87 10
+      <br/>
+      20 04 82 47 65
+      <br/>
+      19 01 23 75 03 34
+      <br/>
+      88 02 77 73 07 63 67
+      <br/>
+      99 65 04 28 06 16 70 92
+      <br/>
+      41 41 26 56 83 40 80 70 33
+      <br/>
+      41 48 72 33 47 32 37 16 94 29
+      <br/>
+      53 71 44 65 25 43 91 52 97 51 14
+      <br/>
+      70 11 33 28 77 73 17 78 39 68 17 57
+      <br/>
+      91 71 52 38 17 14 91 43 58 50 27 29 48
+      <br/>
+      63 66 04 68 89 53 67 30 73 16 69 87 40 31
+      <br/>
+      04 62 98 27 23 09 70 98 73 93 38 53 60 04 23
+     </p>
+     <p class="note">
+      <b>
+       NOTE:
+      </b>
+      As there are only $16384$ routes, it is possible to solve this problem by trying every route. However,
+      <a href="problem=67">
+       Problem 67
+      </a>
+      , is the same challenge with a triangle containing one-hundred rows; it cannot be solved by brute force, and requires a clever method! ;o)
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(triangle_str='TRIANGLE_A') → 23</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(triangle_str='TRIANGLE_B') → 1074</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 10 Oct 2019, 09:30
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0018_s0_c" rel="noopener noreferrer" target="_blank" title="p0018_s0_c">
+         p0018_s0_c
+        </a>
+       </td>
+       <td>
+        TRIANGLE_A
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        23
+       </td>
+       <td>
+        0.000003232s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0018_s0.py" rel="noopener noreferrer" target="_blank" title="p0018_s0.py">
+         p0018_s0.py
+        </a>
+       </td>
+       <td>
+        TRIANGLE_A
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        23
+       </td>
+       <td>
+        0.000015023s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0018_s0_c" rel="noopener noreferrer" target="_blank" title="p0018_s0_c">
+         p0018_s0_c
+        </a>
+       </td>
+       <td>
+        TRIANGLE_B
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1074
+       </td>
+       <td>
+        0.000012834s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0018_s0.py" rel="noopener noreferrer" target="_blank" title="p0018_s0.py">
+         p0018_s0.py
+        </a>
+       </td>
+       <td>
+        TRIANGLE_B
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1074
+       </td>
+       <td>
+        0.000062160s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The problem asks for the maximum sum along any root-to-leaf path through a triangular grid. A naive approach enumerates every path by making a binary left-or-right choice at each row, producing O(2^n) distinct routes for an n-row triangle. For the 15-row triangle here that is only 16384 routes - still feasible - but the problem explicitly flags Problem 67 with 100 rows, where brute force yields roughly 2^99 paths and is completely impractical. The efficient strategy exploits optimal substructure: the maximum path sum passing through any node equals that node's value plus the larger of the two maximum sub-path sums rooted at its two children. This recurrence supports bottom-up dynamic programming, which resolves the entire triangle in O(n^2) time - linear in the total number of elements.
+     </p>
+     <p>
+      A critical observation is that greedy top-down selection - always stepping to the larger immediate neighbour - does not guarantee a global optimum. A locally smaller child can sit above a much larger subtree, so purely greedy descent can be misled. Bottom-up DP sidesteps this entirely: by the time a decision at level k is considered, the optimal totals for all subtrees below it are already fully folded in.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Bottom-Up Dynamic Programming - In-Place Row Collapse (s0, Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python and C. The triangle is stored as a list of rows - a list of lists in Python, and a jagged array of individually malloc'd int arrays in C. The reduction loop repeatedly targets the second-to-last row: for each element at position i, I replace its value with itself plus the maximum of positions i and i+1 in the final row. The final row is then discarded. After n-1 such iterations only the apex remains and its value is the answer.
+     </p>
+     <p>
+      In the Python version I use <code>copy.deepcopy</code> before the reduction loop to avoid mutating the caller's triangle data, which matters when the same parsed triangle might be reused by test harnesses. The collapse step itself is written as a list comprehension with <code>enumerate</code>, and the exhausted row is removed with <code>del triangle[-1]</code>. In the C version I operate directly on the <code>int **triangle</code> array without a defensive copy - the data is freshly allocated inside each call to <code>solve</code>, so mutation is safe - and I track a <code>current_rows</code> counter rather than physically removing array entries. The C parsing requires more ceremony: I count rows by scanning for newlines, then process each line twice using <code>strdup</code> and <code>strtok</code> - once to count tokens and allocate the row array, and once to populate it. All heap memory is freed explicitly before returning the result. Despite these language-level differences, the algorithmic core is identical in both.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that unlocked this solution is recognising optimal substructure: once I understood that the best path through any node is determined purely by that node's value and the best paths available below it, the bottom-up DP formulation followed immediately. The in-place collapse pattern - progressively shrinking the triangle by one row at a time until only the apex scalar remains - is especially clean because it repurposes the input array as the DP table with no auxiliary storage.
+     </p>
+     <p>
+      Since I only implemented one algorithm (index s0), there is no algorithmic comparison to draw. The benchmark results do confirm the expected language-level gap: the C build records 0.0000 s on both test cases while Python records 0.0001 s on the main triangle, though both are effectively instantaneous at this scale. The real payoff of the DP approach appears at scale - the same code, unchanged, will handle Problem 67's 100-row triangle without modification or any meaningful increase in runtime.
+     </p>
+     <ul>
+      <li>
+       Optimal substructure is the condition that makes DP applicable: max path through a node = node value + max of children's optimal values.
+      </li>
+      <li>
+       Bottom-up traversal (leaves to root) avoids the exponential branching of top-down enumeration.
+      </li>
+      <li>
+       Greedy descent is not equivalent to DP here - this is a useful concrete example to remember when evaluating whether greedy is safe for a new problem.
+      </li>
+      <li>
+       Defensive copying in Python ( <code>deepcopy</code>) is worth the minor overhead when an algorithm mutates its input and the same data structure may be referenced again by tests or callers.
+      </li>
+      <li>
+       The in-place row-collapse pattern - iteratively reducing a hierarchical structure until only the answer remains - is worth remembering for similar problems.
+      </li>
+      <li>
+       This solution scales directly to Problem 67 with 100 rows, making it the correct general approach to internalise rather than the brute-force alternative.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

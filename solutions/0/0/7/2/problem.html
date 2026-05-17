@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 72: Counting Fractions [Level 3]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../1/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=72" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/7/2/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../3/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 72: Counting Fractions [Level 3]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Consider the fraction, $\dfrac n d$, where $n$ and $d$ are positive integers. If $n \lt d$ and $\operatorname{HCF}(n,d)=1$, it is called a reduced proper fraction.
+     </p>
+     <p>
+      If we list the set of reduced proper fractions for $d \le 8$ in ascending order of size, we get:
+$$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \frac 3 8, \frac 2 5, \frac 3 7, \frac 1 2, \frac 4 7, \frac 3 5, \frac 5 8, \frac 2 3, \frac 5 7, \frac 3 4, \frac 4 5, \frac 5 6, \frac 6 7, \frac 7 8$$
+     </p>
+     <p>
+      It can be seen that there are $21$ elements in this set.
+     </p>
+     <p>
+      How many elements would be contained in the set of reduced proper fractions for $d \le 1\,000\,000$?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_d=8) → 21</code></li>
+     <li><code>dev: solve(max_d=10) → 31</code></li>
+     <li><code>dev: solve(max_d=100) → 3043</code></li>
+     <li><code>dev: solve(max_d=1000) → 304191</code></li>
+     <li><code>dev: solve(max_d=10000) → 30397485</code></li>
+     <li><code>dev: solve(max_d=100000) → 3039650753</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_d=1000000) → 303963552391</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(max_d=10000000) → 30396356427241</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 16 Jul 2025, 21:07
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        21
+       </td>
+       <td>
+        0.000000201s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        21
+       </td>
+       <td>
+        0.000002924s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        31
+       </td>
+       <td>
+        0.000000182s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        31
+       </td>
+       <td>
+        0.000003926s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3043
+       </td>
+       <td>
+        0.000000693s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3043
+       </td>
+       <td>
+        0.000016091s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        304191
+       </td>
+       <td>
+        0.000007237s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        304191
+       </td>
+       <td>
+        0.000210384s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30397485
+       </td>
+       <td>
+        0.000081999s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30397485
+       </td>
+       <td>
+        0.002399271s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3039650753
+       </td>
+       <td>
+        0.001081341s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3039650753
+       </td>
+       <td>
+        0.029968499s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        303963552391
+       </td>
+       <td>
+        0.012458544s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        303963552391
+       </td>
+       <td>
+        0.616671412s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0072_s0_c" rel="noopener noreferrer" target="_blank" title="p0072_s0_c">
+         p0072_s0_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30396356427241
+       </td>
+       <td>
+        0.360819628s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0072_s0.py" rel="noopener noreferrer" target="_blank" title="p0072_s0.py">
+         p0072_s0.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30396356427241
+       </td>
+       <td>
+        7.329444534s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The central insight is that counting reduced proper fractions n/d with n &lt; d and HCF(n, d) = 1 for a fixed denominator d is exactly what Euler's totient function φ(d) measures: it counts the integers from 1 to d that are coprime to d. Summing φ(d) for d from 2 to N therefore gives the total number of elements in the Farey-like set for all denominators up to N. This reframes the combinatorics problem about reduced fractions into a number-theory problem about efficiently computing and summing totient values.
+     </p>
+     <p>
+      Computing each totient individually via GCD checks would cost O(N²). A sieve-based approach propagates the multiplicative identity φ(n) = n · ∏(1 - 1/p) over all prime factors p of n using nested loops whose total work follows a harmonic series, yielding O(N log log N) overall - the same asymptotic class as the Sieve of Eratosthenes. For N = 1,000,000 this is comfortably fast even in Python, and for the extended input of N = 10,000,000 it finishes in roughly 7 seconds in Python and under 0.4 seconds in C.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Euler Totient Sieve (s0 - Python and C)
+     </h4>
+     <p>
+      Both <code>p0072_s0.py</code> and <code>p0072_s0.c</code> implement the same multiplicative totient sieve. I initialise an array <code>euler_totients[i] = i</code> for every index from 0 to <code>max_d</code>. I then iterate n from 2 to <code>max_d</code>. The sentinel condition <code>euler_totients[n] == n</code> detects that n has not yet been modified by any smaller prime factor, which means n is itself prime. For each such prime n I walk through all multiples j in steps of n and apply the update <code>euler_totients[j] = euler_totients[j] / n * (n - 1)</code>, folding in the contribution of that prime factor via the multiplicative property of φ. After processing n, I add <code>euler_totients[n]</code> to a running total. The entire computation is a single forward pass with no separate prime list needed.
+     </p>
+     <p>
+      The Python version uses a plain <code>list[int]</code> with floor division ( <code>//</code>), while the C version uses a heap-allocated <code>long long</code> array with equivalent integer division. The logic is otherwise identical. The C version is roughly 50x faster at the smaller benchmark size and about 20x faster at the larger one: 0.0125 s versus 0.6167 s at N = 1,000,000, and 0.3608 s versus 7.3294 s at N = 10,000,000.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key "aha moment" was recognising that counting elements in the Farey sequence is equivalent to summing Euler totients. Once that equivalence is established, the problem reduces to a well-known algorithmic exercise: adapt a prime sieve to propagate a multiplicative arithmetic function instead of just marking composites. The outer loop structure is identical to the Sieve of Eratosthenes.
+     </p>
+     <p>
+      A subtle but important correctness detail is the order of operations in the sieve update. I write <code>euler_totients[j] // n * (n - 1)</code> rather than <code>euler_totients[j] * (n - 1) // n</code>. Because the sieve processes prime factors in order, p already divides <code>euler_totients[j]</code> at the point the update is applied - all earlier prime factors of j have already been folded in. The floor division is therefore exact and introduces no rounding error. Reversing the order would multiply first by a potentially non-integer factor and could silently produce a wrong result.
+     </p>
+     <p>
+      Since I only implemented one algorithm (the multiplicative totient sieve), there is no algorithmic comparison to make. The Python and C ports are direct translations of each other, and the benchmark confirms expected scaling. The roughly 20x to 50x speedup of the C version is typical for array-intensive sieve work where Python's interpreter overhead and list indexing costs accumulate over millions of iterations.
+     </p>
+     <ul>
+      <li>
+       Summing φ(d) for d = 2 to N counts all reduced proper fractions with denominator at most N - Farey sequence cardinality equals a totient sum.
+      </li>
+      <li>
+       A multiplicative totient sieve runs in O(N log log N) and requires only a single integer array of size N+1.
+      </li>
+      <li>
+       The sentinel <code>euler_totients[n] == n</code> is a lightweight primality check that avoids storing a separate prime list.
+      </li>
+      <li>
+       Division order in the sieve update ( <code>val // p * (p - 1)</code>) must be respected to guarantee exact integer arithmetic at each step.
+      </li>
+      <li>
+       The same sieve skeleton used for marking primes can be adapted to propagate any multiplicative arithmetic function, making it a reusable pattern for totient, Mobius function, and related sieves.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

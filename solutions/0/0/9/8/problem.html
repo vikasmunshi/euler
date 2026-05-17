@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 98: Anagramic Squares [Level 8]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../7/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=98" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/9/8/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../9/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 98: Anagramic Squares [Level 8]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      By replacing each of the letters in the word CARE with $1$, $2$, $9$, and $6$ respectively, we form a square number: $1296 = 36^2$. What is remarkable is that, by using the same digital substitutions, the anagram, RACE, also forms a square number: $9216 = 96^2$. We shall call CARE (and RACE) a square anagram word pair and specify further that leading zeroes are not permitted, neither may a different letter have the same digital value as another letter.
+     </p>
+     <p>
+      Using
+      <a href="resources/0098_words.txt">
+       words.txt
+      </a>
+      (right click and 'Save Link/Target As...'), a 16K text file containing nearly two-thousand common English words, find all the square anagram word pairs (a palindromic word is NOT considered to be an anagram of itself).
+     </p>
+     <p>
+      What is the largest square number formed by any member of such a pair?
+     </p>
+     <p class="smaller">
+      NOTE: All anagrams formed must be contained in the given text file.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(file_url='0098_words.txt') → 18769</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Sat, 19 Jul 2025, 14:04
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0098_s0_c" rel="noopener noreferrer" target="_blank" title="p0098_s0_c">
+         p0098_s0_c
+        </a>
+       </td>
+       <td>
+        0098_words.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        18769
+       </td>
+       <td>
+        0.061097451s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0098_s0.py" rel="noopener noreferrer" target="_blank" title="p0098_s0.py">
+         p0098_s0.py
+        </a>
+       </td>
+       <td>
+        0098_words.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        18769
+       </td>
+       <td>
+        0.359103650s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core challenge is finding a bijective character-to-digit mapping that simultaneously converts two anagram words into perfect squares. The bijection is strict: each distinct letter must map to a unique digit, no two letters may share a digit, and no leading zero is permitted. A critical structural observation is that any valid mapping must preserve the repetition pattern of the source word - if a letter appears twice, the corresponding digit positions in the mapped square must carry identical digits. I encode this as a frequency-signature: I count per-symbol frequencies, sort the counts in descending order, and concatenate them into a short string. If the frequency-signature of a word differs from that of a candidate square, no valid bijection can exist, and I skip the pair entirely without any mapping work.
+     </p>
+     <p>
+      The asymptotic complexity is manageable at this problem size. The word file contains under two thousand words, and for each word length n the number of n-digit perfect squares is O(10^(n/2)). Grouping words into anagram buckets by their sorted-character canonical form reduces the set of candidate pairs to only genuine anagrams, so the expensive bijection checks are attempted only for promising (word, square) pairs. Processing word lengths from largest to smallest and stopping as soon as any valid pair is found at the longest matching length exploits the problem structure - the largest square must come from the longest word pair - turning a potentially full exhaustive scan into one that terminates very quickly in practice.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Anagram-Bucketed Bijection Search with Frequency-Signature Pruning (s0, Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python and C under index s0. Both follow identical logic; the C version is a manual translation that replaces Python's built-in dictionaries and sets with fixed-size arrays and linear scans.
+     </p>
+     <p>
+      I first parse the word list and assign every word to a bucket keyed by its sorted-letter canonical form. Buckets containing only a single word are discarded immediately, since a lone word cannot form an anagram pair. For each surviving bucket I precompute all perfect squares of the matching digit length as strings. Before attempting a full character-to-digit mapping for a (word, square) pair, I apply the cheap <code>str_hash</code> pre-filter, which counts per-symbol frequencies, sorts them descending, and concatenates the counts into a string. Only pairs whose <code>str_hash</code> values agree can possibly yield a valid bijection.
+     </p>
+     <p>
+      For pairs that pass the filter, I build an explicit <code>char_map</code> by zipping the word's characters against the square's digits. I then verify two things: consistency (no character mapped to two different digits) and injectivity (no two distinct characters share a digit). If the mapping is valid, I apply it to every other word in the same anagram bucket and check whether the resulting digit string also appears in the precomputed set of squares. When a match is found I record the maximum of the two square values and return after finishing the current word length.
+     </p>
+     <p>
+      The Python version uses a <code>frozen=True</code> dataclass whose field holds a mutable <code>set</code>. The frozen flag prevents reassigning the field reference but does not stop mutation of the set itself via <code>.add()</code>; a plain dictionary keyed by the canonical form would have been simpler and clearer. The C version avoids this entirely with fixed-size character arrays and flat arrays of <code>Bucket</code> structs. The C version also resolves the resource file path by reading the executable path via <code>/proc/self/exe</code> and constructing a sibling <code>resources/</code> path, making the binary portable across different working-directory conventions without hard-coded absolute paths.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that unlocked the solution was recognising that a valid character-to-digit mapping must preserve the repetition structure of the word. If the word has two identical letters, the corresponding digit positions in the mapped square must be identical, and globally the multiset of character frequencies must equal the multiset of digit frequencies. Encoding this as a sorted tuple of counts gives a very cheap pre-filter that eliminates the vast majority of (word, square) candidates before any mapping work is done.
+     </p>
+     <p>
+      A second important realisation was that once I derive a mapping from one specific (word, square) pairing, I can reuse that same mapping to test every other word in the bucket at negligible extra cost, rather than independently re-deriving a mapping for each word-pair combination. Because an anagram bucket groups all words sharing the same letter set, one derived mapping already encodes all letter-to-digit assignments for every word in the group.
+     </p>
+     <p>
+      The benchmark results show the C version completing in about 0.061 seconds versus 0.359 seconds for Python - roughly a six-fold speedup. The C version benefits from eliminating Python's dictionary and set overhead, replacing them with linear scans over small fixed-size arrays that are cache-friendly for the word lengths involved in this file.
+     </p>
+     <ul>
+      <li>
+       Frequency-signature hashing is a broadly reusable technique for filtering any problem that requires bijective symbol substitutions; it prunes invalid candidates in O(n log n) before doing any mapping work.
+      </li>
+      <li>
+       Grouping candidates by a canonical key before doing expensive pairwise checks is a pattern worth applying whenever the raw pairwise count is much larger than the grouped count.
+      </li>
+      <li>
+       Processing candidates in decreasing order of a metric and returning early at the first successful length turns a full exhaustive search into one that terminates quickly when the answer lies at the largest candidate size.
+      </li>
+      <li>
+       Applying a derived mapping to all other members of a group - rather than re-deriving mappings independently for every pair - avoids redundant work and is worth recognising as a general optimisation whenever a shared structure links multiple candidates.
+      </li>
+      <li>
+       Using <code>frozen=True</code> on a Python dataclass that contains a mutable container field such as a <code>set</code> is misleading: the field reference is frozen but the object itself remains mutable. A plain dictionary keyed by the canonical form is simpler and clearer.
+      </li>
+      <li>
+       In C, resolving resource file paths relative to the executable via <code>/proc/self/exe</code> is a practical pattern for making binaries portable across different working-directory conventions without hard-coded absolute paths.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

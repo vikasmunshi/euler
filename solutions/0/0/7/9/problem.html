@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 79: Passcode Derivation [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../8/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=79" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/7/9/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../../8/0/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 79: Passcode Derivation [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      A common security method used for online banking is to ask the user for three random characters from a passcode. For example, if the passcode was 531278, they may ask for the 2nd, 3rd, and 5th characters; the expected reply would be: 317.
+     </p>
+     <p>
+      The text file,
+      <a href="resources/0079_keylog.txt">
+       keylog.txt
+      </a>
+      , contains fifty successful login attempts.
+     </p>
+     <p>
+      Given that the three characters are always asked for in order, analyse the file so as to determine the shortest possible secret passcode of unknown length.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(asked_characters=3, file_url='0079_keylog.txt') → 73162890</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 18 Jul 2025, 09:26
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0079_s0_c" rel="noopener noreferrer" target="_blank" title="p0079_s0_c">
+         p0079_s0_c
+        </a>
+       </td>
+       <td>
+        3 0079_keylog.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        73162890
+       </td>
+       <td>
+        0.000030188s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0079_s0.py" rel="noopener noreferrer" target="_blank" title="p0079_s0.py">
+         p0079_s0.py
+        </a>
+       </td>
+       <td>
+        3 0079_keylog.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        73162890
+       </td>
+       <td>
+        0.000155637s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      Each three-character login attempt encodes strict ordering constraints: if digit A appears before digit B in an attempt, then A must precede B somewhere in the full passcode. These pairwise constraints are exactly the edges of a directed acyclic graph (DAG) whose nodes are the distinct digit characters seen across all attempts. Recovering the shortest passcode is therefore a topological ordering problem - find the unique linear extension of the partial order defined by the union of all observed constraints. The problem guarantees a unique shortest solution, which means the induced DAG must have a unique topological ordering, implying the partial order is in fact a total order.
+     </p>
+     <p>
+      Let D be the number of distinct digit characters and L the number of login attempts, with k characters per attempt (k = 3 here). Building the constraint graph takes O(L * (k - 1)) time. The topological sort I use repeatedly scans all remaining nodes to find one with an empty active-successor set, giving O(D^2) for that phase. Since D is at most 10 and L is 50 for this input, the entire computation is effectively constant-time regardless of implementation language.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Topological Sort via Reverse Leaf Removal (Successor-Graph Method) - Python and C
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python ( <code>p0079_s0.py</code>) and C ( <code>p0079_s0.c</code>) and cover them together here. My approach was to build a successor graph - a mapping from each digit character to the set of characters that must appear after it in the passcode. For every deduplicated login attempt I added a directed edge from the character at position i to the character at position i+1, for i from 0 to k-2. I then performed a reverse topological sort: repeatedly locate the node whose active successor set is empty (meaning no remaining character is constrained to follow it), prepend that character to the front of the growing passcode string, and remove it from the graph along with all references to it in other nodes' successor sets. This builds the passcode from right to left. If at any iteration no such node exists, a cycle is present, which the problem guarantees cannot happen for valid input.
+     </p>
+     <p>
+      In Python I used a <code>dict[str, set[str]]</code> for the successor graph. Deduplication of login attempts was free via a <code>set</code> applied to the split lines. The for-else construct in the sort loop lets me cleanly raise a <code>ValueError</code> if no tail node is found. In C I represented the same structure with a fixed-size bitmask array ( <code>unsigned int successor[MAX_DIGITS]</code>) alongside a parallel <code>active[]</code> flag array. When testing whether a node's successor set is empty, I mask out bits corresponding to inactive nodes before comparing against zero. The C version avoids heap allocation for the graph entirely and handles file I/O with manual path construction relative to the executable directory. Both versions produce the answer 73162890.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that partial character-ordering observations from login attempts map directly onto directed graph edges, and that reconstructing the full passcode is simply a topological sort problem. Once I framed it that way, the implementation was immediate. I also noted that removing nodes from the tail (no successors) and prepending them builds the result in reverse - this is a valid alternative direction to the more commonly taught Kahn's algorithm, which removes nodes from the head (no predecessors) and appends.
+     </p>
+     <p>
+      The C solution runs in effectively zero measured time (0.0000 s) while the Python solution takes about 0.2 ms - overwhelmingly interpreter and import overhead rather than any algorithmic cost given the tiny input size. The bitmask representation of successor sets in C is a compact and elegant way to handle small fixed-size node sets without any heap allocation. For larger graphs, an adjacency list or bitset library would be more appropriate, but here a plain <code>unsigned int</code> field per node is entirely sufficient.
+     </p>
+     <ul>
+      <li>
+       Partial ordering constraints from sequential observations map directly to directed graph edges - recognising this framing immediately unlocks the solution.
+      </li>
+      <li>
+       Topological sort with leaf removal from the tail (no successors) builds the result in reverse and is an equally correct alternative to Kahn's predecessor-based algorithm.
+      </li>
+      <li>
+       Deduplicating input with a set before building the constraint graph avoids redundant edges and keeps the structure minimal.
+      </li>
+      <li>
+       A bitmask representation of successor sets in C is compact and requires no heap allocation when the number of nodes is small and statically bounded.
+      </li>
+      <li>
+       The problem's guarantee of a unique shortest passcode implies the induced DAG has a unique topological ordering - verifying this property before implementation confirms a single definitive answer will always be produced.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

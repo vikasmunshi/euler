@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 36: Double-base Palindromes [Level 0]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../5/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=36" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/3/6/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../7/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 36: Double-base Palindromes [Level 0]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The decimal number, $585 = 1001001001_2$ (binary), is palindromic in both bases.
+     </p>
+     <p>
+      Find the sum of all numbers, less than one million, which are palindromic in base $10$ and base $2$.
+     </p>
+     <p class="smaller">
+      (Please note that the palindromic number, in either base, may not include leading zeros.)
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_digits=1) → 25</code></li>
+     <li><code>dev: solve(max_digits=2) → 157</code></li>
+     <li><code>dev: solve(max_digits=3) → 1772</code></li>
+     <li><code>dev: solve(max_digits=4) → 18228</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_digits=6) → 872187</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(max_digits=9) → 2609044274</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 13 Nov 2019, 10:27
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0_c" rel="noopener noreferrer" target="_blank" title="p0036_s0_c">
+         p0036_s0_c
+        </a>
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        0.000000149s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0.py" rel="noopener noreferrer" target="_blank" title="p0036_s0.py">
+         p0036_s0.py
+        </a>
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        0.000006813s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0_c" rel="noopener noreferrer" target="_blank" title="p0036_s0_c">
+         p0036_s0_c
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        157
+       </td>
+       <td>
+        0.000004046s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0.py" rel="noopener noreferrer" target="_blank" title="p0036_s0.py">
+         p0036_s0.py
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        157
+       </td>
+       <td>
+        0.000012438s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0_c" rel="noopener noreferrer" target="_blank" title="p0036_s0_c">
+         p0036_s0_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1772
+       </td>
+       <td>
+        0.000014022s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0.py" rel="noopener noreferrer" target="_blank" title="p0036_s0.py">
+         p0036_s0.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1772
+       </td>
+       <td>
+        0.000061466s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0_c" rel="noopener noreferrer" target="_blank" title="p0036_s0_c">
+         p0036_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        18228
+       </td>
+       <td>
+        0.000030743s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0036_s0.py" rel="noopener noreferrer" target="_blank" title="p0036_s0.py">
+         p0036_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        18228
+       </td>
+       <td>
+        0.000115124s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0036_s0_c" rel="noopener noreferrer" target="_blank" title="p0036_s0_c">
+         p0036_s0_c
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        872187
+       </td>
+       <td>
+        0.000249006s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0036_s0.py" rel="noopener noreferrer" target="_blank" title="p0036_s0.py">
+         p0036_s0.py
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        872187
+       </td>
+       <td>
+        0.001090693s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0036_s0_c" rel="noopener noreferrer" target="_blank" title="p0036_s0_c">
+         p0036_s0_c
+        </a>
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2609044274
+       </td>
+       <td>
+        0.013020530s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0036_s0.py" rel="noopener noreferrer" target="_blank" title="p0036_s0.py">
+         p0036_s0.py
+        </a>
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2609044274
+       </td>
+       <td>
+        0.061440642s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      A double-base palindrome must read identically forwards and backwards in both base 10 and base 2. The key structural
+observation is that decimal palindromes are entirely determined by their left half: a d-digit decimal palindrome
+is parameterised by a ceil(d/2)-digit integer. This means there are only O(10^(d/2)) decimal palindromes below
+10^d - a square-root reduction compared to the full range. Generating palindromes directly from their left half
+is therefore far more efficient than scanning every integer and testing each one for decimal palindromicity.
+The binary palindrome check requires O(log N) work proportional to the bit-length of N. The overall asymptotic
+complexity is O(d * 10^(d/2)) where d is the maximum number of decimal digits, compared to O(N log N) for a
+naive scan over all integers.
+     </p>
+     <p>
+      The no-leading-zeros constraint mentioned in the problem is automatically satisfied in both bases. Any positive
+decimal palindrome constructed from a non-zero left half trivially begins with a non-zero digit. Any positive
+integer's binary representation never begins with a zero by definition, so no special handling is required for
+the binary side.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Palindrome Generation with Binary Verification (s0 - Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python and C. Rather than iterating over every integer up to the limit
+and testing for decimal palindromicity, I wrote a generator in Python and an equivalent loop in C that constructs
+every decimal palindrome directly from its left half. The construction proceeds in two stages:
+     </p>
+     <ul>
+      <li>
+       Single-digit numbers 1 through 9 are handled directly, since they are trivially palindromic in base 10.
+      </li>
+      <li>
+       For each integer <code>digits</code> from 1 up to <code>10^(max_digits/2)</code>, I form the reversed
+string <code>digits_rev</code> and build two families: the even-length palindrome <code>digits_str + digits_rev</code>, and - when <code>2 * num_digits &lt; max_digits</code> - ten
+odd-length palindromes <code>digits_str + mid + digits_rev</code> for each middle digit 0-9.
+      </li>
+     </ul>
+     <p>
+      Each candidate is then tested for binary palindromicity. In Python I use <code>bin(number)[2:][::-1]</code> to
+reverse the bit string and parse it back as a base-2 integer, comparing against the original. In C I extract
+bits LSB-first into a char array and compare the array forwards and backwards directly - this avoids any string
+allocation for the binary check and works purely with bit-shifted integers. The guard condition <code>2 * num_digits &lt; max_digits</code> prevents generating odd-length palindromes whose total length would
+exceed the allowed digit count; without it, when <code>max_digits</code> is even and the left half is already at
+maximum length, inserting a middle digit would produce a palindrome one digit too long. The Python and C versions
+are algorithmically identical - the C version replaces the generator pattern with a flat loop using <code>snprintf</code> for string construction and <code>atoll</code> for parsing.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was recognising that generating palindromes from their left half is far cleaner than testing
+every candidate number. Given the string <code>"123"</code>, the even palindrome is <code>"123321"</code> and
+the odd palindromes are <code>"1230321"</code> through <code>"1239321"</code>. This construction completely
+eliminates the O(N) scan. The technique of constructing structured objects directly rather than filtering a raw
+range - palindromes here, primes via sieve elsewhere - is worth carrying forward whenever the objects of interest
+have a square-root-sized parameterisation.
+     </p>
+     <p>
+      Since I only implemented one algorithm for this problem, there is no comparison of distinct approaches. I did
+write it in both Python and C, and the benchmark results show a consistent speedup of roughly 5x from the C
+version: the main case (6 digits) runs in 0.0002 s in C versus 0.0011 s in Python, and the extended 9-digit
+case takes 0.0130 s in C versus 0.0614 s in Python. Both are extremely fast in absolute terms, so the Python
+solution is entirely practical at this problem size. The C speedup comes mainly from avoiding Python object
+allocation per iteration and from the direct bit-manipulation binary palindrome check, which avoids any string
+handling entirely.
+     </p>
+     <p>
+      One subtle point I had to get right was the guard on odd-length palindrome generation. When <code>max_digits</code> is even, the left half can have exactly <code>max_digits/2</code> digits, and inserting
+a middle character would produce a palindrome of <code>max_digits + 1</code> digits - one too many. The check <code>2 * num_digits &lt; max_digits</code> catches exactly this case. It is also worth noting that the <code>max_digits</code> parameterisation makes the solution easily testable at smaller scales, which is how the
+dev test cases from 1 through 4 digits were useful for verifying correctness before running the main 6-digit
+case.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

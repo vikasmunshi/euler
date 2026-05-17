@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 52: Permuted Multiples [Level 0]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../1/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=52" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/5/2/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../3/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 52: Permuted Multiples [Level 0]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      It can be seen that the number, $125874$, and its double, $251748$, contain exactly the same digits, but in a different order.
+     </p>
+     <p>
+      Find the smallest positive integer, $x$, such that $2x$, $3x$, $4x$, $5x$, and $6x$, contain the same digits.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(multiples=2) → 125874</code></li>
+     <li><code>dev: solve(multiples=3) → 142857</code></li>
+     <li><code>dev: solve(multiples=4) → 142857</code></li>
+     <li><code>dev: solve(multiples=5) → 142857</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(multiples=6) → 142857</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 6 Dec 2019, 11:24
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0_c" rel="noopener noreferrer" target="_blank" title="p0052_s0_c">
+         p0052_s0_c
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        125874
+       </td>
+       <td>
+        0.026491936s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0.py" rel="noopener noreferrer" target="_blank" title="p0052_s0.py">
+         p0052_s0.py
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        125874
+       </td>
+       <td>
+        0.129027509s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0_c" rel="noopener noreferrer" target="_blank" title="p0052_s0_c">
+         p0052_s0_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.029261546s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0.py" rel="noopener noreferrer" target="_blank" title="p0052_s0.py">
+         p0052_s0.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.205892776s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0_c" rel="noopener noreferrer" target="_blank" title="p0052_s0_c">
+         p0052_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.028497967s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0.py" rel="noopener noreferrer" target="_blank" title="p0052_s0.py">
+         p0052_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.270398430s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0_c" rel="noopener noreferrer" target="_blank" title="p0052_s0_c">
+         p0052_s0_c
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.028809622s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0052_s0.py" rel="noopener noreferrer" target="_blank" title="p0052_s0.py">
+         p0052_s0.py
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.356479055s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0052_s0_c" rel="noopener noreferrer" target="_blank" title="p0052_s0_c">
+         p0052_s0_c
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.028467980s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0052_s0.py" rel="noopener noreferrer" target="_blank" title="p0052_s0.py">
+         p0052_s0.py
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        142857
+       </td>
+       <td>
+        0.422406492s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core concept is digit-multiset equivalence: two integers are permutations of each other's digits if and only
+if sorting their decimal digit sequences produces identical strings. The problem asks for the smallest positive
+integer <code>x</code> such that all six values <code>x, 2x, 3x, 4x, 5x, 6x</code> belong to the same
+digit-permutation equivalence class. No closed-form characterisation of such numbers is known, so the solution
+reduces to a linear exhaustive scan. Checking a single candidate costs <code>O(m * d log d)</code> where <code>m</code> is the number of multiples and <code>d</code> is the digit count (the sort dominates), giving
+overall complexity <code>O(N * m * d log d)</code> with <code>N = 142857</code> for the six-multiple case.
+     </p>
+     <p>
+      The answer 142857 is the cyclic number arising from the decimal expansion of 1/7. Multiplying it by any integer
+from 1 to 6 cyclically permutes its digits, a consequence of 7 being a full-reptend prime. I did not need that
+number-theoretic fact to find the answer - the brute-force search discovers it naturally - but it explains why
+the answer is what it is, and why multiples 3 through 6 all share the same answer while the two-multiple case
+already terminates much earlier at 125874.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Linear Scan with Sorted-Digit Fingerprinting (s0 - Python and C)
+     </h4>
+     <p>
+      Both the Python and C implementations share the same algorithm. I iterate over every positive integer starting
+from 1 and, for each candidate, compute a canonical fingerprint - the sorted decimal digit string - for each
+required multiple. If every fingerprint is identical, the candidate is the answer and the loop terminates.
+     </p>
+     <p>
+      In Python I build a set comprehension over all fingerprints and check <code>len(...) == 1</code>. This is a
+clean one-liner that scales naturally with the number of multiples without any pairwise comparison loop. I
+parameterised the number of multiples so I could verify intermediate results: passing <code>multiples=2</code> reproduces the 125874 example from the problem statement, and higher values all converge to 142857. The upper
+bound on the loop is <code>sys.maxsize // multiples</code> to guard against integer overflow on any platform,
+though the loop terminates far sooner in practice.
+     </p>
+     <p>
+      In C I use a helper function <code>sorted_digits</code> that extracts digits into a temporary buffer, sorts them
+with <code>qsort</code>, and null-terminates the result. I then compare each multiple's fingerprint against the
+fingerprint of <code>i</code> itself using <code>strcmp</code>, breaking early on the first mismatch. One
+language-specific difference is that the multiples parameter is read from <code>argv</code> rather than a
+keyword argument, and the guard is a simple range check with a <code>fprintf</code> error message. The early
+break on mismatch is a minor optimisation not present in the Python set comprehension, though it matters little
+given how quickly matching candidates are found.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that sorted digit strings are a cheap, perfect fingerprint for digit-permutation
+equivalence. Collecting all fingerprints into a set and checking its length is more elegant than any pairwise
+comparison loop and generalises immediately to any number of objects being compared. Parameterising the number of
+multiples was also valuable: it let me confirm the two-multiple example before running the full six-multiple
+search, and revealed the interesting structure that multiples 3 through 6 all share the same answer while 2 alone
+terminates earlier.
+     </p>
+     <p>
+      The benchmark results confirm that a single algorithm is sufficient here. The Python solution solves the main
+case in about 0.42 s and the C translation solves it in about 0.029 s - roughly a 15x speedup - which is the
+expected payoff of eliminating interpreter overhead for a tight inner loop with many short string operations. For
+a problem at this difficulty level the Python solution is perfectly adequate, but the C version demonstrates the
+consistent gain from removing that overhead when digit-string comparisons dominate the runtime.
+     </p>
+     <ul>
+      <li>
+       Sorted digit strings as a digit-multiset fingerprint are broadly reusable across digit-manipulation problems.
+      </li>
+      <li>
+       Using <code>len(set_of_fingerprints) == 1</code> is cleaner than explicit pairwise equality checks and generalises to any number of values being compared.
+      </li>
+      <li>
+       Parameterising the search and verifying against known partial results is a reliable way to build confidence before committing to the full run.
+      </li>
+      <li>
+       The cyclic number 142857 - arising from the decimal expansion of 1/7 - surfaces in several digit-permutation contexts and is the canonical example of a full-reptend prime generating a cyclic number; worth keeping in mind for future problems.
+      </li>
+      <li>
+       Early termination on the first fingerprint mismatch is a worthwhile micro-optimisation in the C version, though the problem is easy enough that it does not change the order of magnitude of the runtime.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

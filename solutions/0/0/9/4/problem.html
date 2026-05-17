@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 94: Almost Equilateral Triangles [Level 12]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../3/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=94" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/9/4/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../5/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 94: Almost Equilateral Triangles [Level 12]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      It is easily proved that no equilateral triangle exists with integral length sides and integral area. However, the
+      <dfn>
+       almost equilateral triangle
+      </dfn>
+      $5$-$5$-$6$ has an area of $12$ square units.
+     </p>
+     <p>
+      We shall define an
+      <dfn>
+       almost equilateral triangle
+      </dfn>
+      to be a triangle for which two sides are equal and the third differs by no more than one unit.
+     </p>
+     <p>
+      Find the sum of the perimeters of all
+      <dfn>
+       almost equilateral triangles
+      </dfn>
+      with integral side lengths and area and whose perimeters do not exceed one billion ($1\,000\,000\,000$).
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(max_perimeter=1000000000) → 518408346</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Sat, 19 Jul 2025, 01:10
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0094_s0_c" rel="noopener noreferrer" target="_blank" title="p0094_s0_c">
+         p0094_s0_c
+        </a>
+       </td>
+       <td>
+        1000000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        518408346
+       </td>
+       <td>
+        0.000000077s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0094_s0.py" rel="noopener noreferrer" target="_blank" title="p0094_s0.py">
+         p0094_s0.py
+        </a>
+       </td>
+       <td>
+        1000000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        518408346
+       </td>
+       <td>
+        0.000003889s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      An almost equilateral triangle is isosceles with equal sides of length <code>a</code> and a base of either <code>a+1</code> or <code>a-1</code>. Applying Heron's formula to the <code>(a, a, a+1)</code> family shows that
+the area squared equals <code>(3a+1)(a+1)^2(a-1)/16</code>, so integral area requires <code>(3a+1)(a-1)</code> to be a perfect square. For the <code>(a, a, a-1)</code> family the analogous condition is that <code>(3a-1)(a+1)</code> must be a perfect square. Both conditions are instances of generalized Pell equations,
+whose solutions always form a sequence where each term is a fixed integer linear combination of the two
+preceding terms. Because consecutive valid values of <code>a</code> grow by a factor close to <code>2 + sqrt(3)</code>, the number of qualifying triangles up to a perimeter bound N is O(log N), and the
+entire search reduces to a handful of recurrence steps rather than any kind of scan.
+     </p>
+     <p>
+      For a perimeter bound of one billion, fewer than 30 loop iterations are needed, making the algorithm
+essentially instantaneous. A naive search would require checking on the order of 10
+      <sup>
+       8
+      </sup>
+      candidate
+side lengths, so recognising the Pell structure is the critical step that converts an impractical brute force
+into a trivially fast recurrence.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Linear recurrence derived from the Pell equation (Python and C)
+     </h4>
+     <p>
+      I derived the recurrence directly from the Pell-equation structure and unified both triangle families under a
+single loop. Three state values are maintained: <code>s1</code> (the previous equal side), <code>s2</code> (the current equal side), and <code>m</code>, a sign variable that alternates between <code>+1</code> and <code>-1</code> to distinguish the two families. The perimeter of the triangle associated with the current
+state is <code>p = 3*s2 - m</code>: when <code>m = 1</code> the odd side is <code>a-1</code> giving perimeter <code>3a-1</code>, and when <code>m = -1</code> the odd side is <code>a+1</code> giving perimeter <code>3a+1</code>. The next equal side advances via <code>s2_new = 4*s2 - s1 + 2*m</code>, after which <code>m</code> flips sign. The seed values <code>s1 = 1, s2 = 1, m = 1, p = 0</code> cause the first
+non-trivial triangle encountered to be the well-known 5-5-6 case with perimeter 16. Each qualifying
+perimeter is accumulated into a running sum until <code>p</code> exceeds the bound.
+     </p>
+     <p>
+      The Python and C implementations are identical in logic. The C version uses <code>long long</code> arithmetic
+throughout, while Python handles the values natively with arbitrary-precision integers. In practice the
+quantities never approach 64-bit overflow for this bound, so there is no numerical difference between the
+two. Both report elapsed times that round to zero, consistent with fewer than 30 loop iterations for the
+given bound.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that both integral-area conditions collapse into Pell equations, whose
+solutions are always generated by a fast linear recurrence. Once that structure is identified, the further
+step of merging the two families into one alternating loop - using the sign variable <code>m</code> to carry
+both the family label and the correction term <code>2*m</code> in the recurrence - eliminates the need for
+two separate loops or two separate equation solvers. The single alternating sign is a clean pattern worth
+remembering wherever two parallel Pell-like sequences can be interleaved.
+     </p>
+     <p>
+      The broader technique to carry forward is that integer-area constraints on parameterised families of
+triangles frequently reduce to Pell equations. Spotting that structure early converts what initially looks
+like an O(sqrt(N)) or worse brute-force search into an O(log N) closed-form iteration. The habit of
+applying Heron's formula symbolically, then factoring the resulting expression to identify a perfect-square
+condition, is a reliable first step whenever a problem mixes integer side lengths with integer areas.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

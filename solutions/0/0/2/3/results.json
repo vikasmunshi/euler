@@ -1,0 +1,38 @@
+[
+  {
+    "category": "main",
+    "solution": "p0023_s0_c",
+    "args": "",
+    "answer": 4179871,
+    "verdict": "correct",
+    "average": 0.009052446193548386,
+    "number_runs": 31
+  },
+  {
+    "category": "main",
+    "solution": "p0023_s1_c",
+    "args": "",
+    "answer": 4179871,
+    "verdict": "correct",
+    "average": 0.015165375903225808,
+    "number_runs": 31
+  },
+  {
+    "category": "main",
+    "solution": "p0023_s0.py",
+    "args": "",
+    "answer": 4179871,
+    "verdict": "correct",
+    "average": 0.08073435900000585,
+    "number_runs": 31
+  },
+  {
+    "category": "main",
+    "solution": "p0023_s1.py",
+    "args": "",
+    "answer": 4179871,
+    "verdict": "correct",
+    "average": 0.8181542956774666,
+    "number_runs": 31
+  }
+]

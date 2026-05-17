@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 99: Largest Exponential [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../8/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=99" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/9/9/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../../../1/0/0/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 99: Largest Exponential [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Comparing two numbers written in index form like $2^{11}$ and $3^7$ is not difficult, as any calculator would confirm that $2^{11} = 2048 \lt 3^7 = 2187$.
+     </p>
+     <p>
+      However, confirming that $632382^{518061} \gt 519432^{525806}$ would be much more difficult, as both numbers contain over three million digits.
+     </p>
+     <p>
+      Using
+      <a href="resources/0099_base_exp.txt">
+       base_exp.txt
+      </a>
+      (right click and 'Save Link/Target As...'), a 22K text file containing one thousand lines with a base/exponent pair on each line, determine which line number has the greatest numerical value.
+     </p>
+     <p class="smaller">
+      NOTE: The first two lines in the file represent the numbers in the example given above.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(file_url='0099_base_exp.txt') → 709</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Sat, 19 Jul 2025, 14:42
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0099_s0_c" rel="noopener noreferrer" target="_blank" title="p0099_s0_c">
+         p0099_s0_c
+        </a>
+       </td>
+       <td>
+        0099_base_exp.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        709
+       </td>
+       <td>
+        0.000156360s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0099_s0.py" rel="noopener noreferrer" target="_blank" title="p0099_s0.py">
+         p0099_s0.py
+        </a>
+       </td>
+       <td>
+        0099_base_exp.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        709
+       </td>
+       <td>
+        0.000591612s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core challenge is comparing numbers of the form a^b where direct evaluation is impossible - the winning number
+contains over three million digits. The key insight is that the natural logarithm is strictly monotonically
+increasing over the positive reals, so a^b &gt; c^d if and only if b*ln(a) &gt; d*ln(c). This follows immediately
+from the identity log(a^b) = b*log(a). Applying this transformation converts an otherwise intractable comparison of
+astronomically large integers into a trivial comparison of ordinary floating-point numbers, each requiring exactly
+one logarithm evaluation and one multiplication.
+     </p>
+     <p>
+      The asymptotic complexity is O(n) in the number of base/exponent pairs. Each pair requires a constant amount of
+work - one logarithm call, one multiplication, and one comparison against a running maximum. There is no sorting,
+no recursion, and no combinatorial structure to exploit. A single linear scan over the 1000 lines is both necessary
+and sufficient.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Logarithmic Linear Scan (s0 - Python and C)
+     </h4>
+     <p>
+      Both implementations follow identical logic: parse the comma-separated file into (base, exponent) integer pairs,
+then perform a single pass maintaining a running maximum of <code>exponent * log(base)</code>. Whichever line
+produces the largest value of this product is returned as the 1-based line index matching the problem convention.
+Both versions guard against non-positive values to avoid domain errors in the logarithm, and both handle malformed
+lines by printing a warning and continuing rather than aborting.
+     </p>
+     <p>
+      The Python version uses <code>math.log</code> inside a straightforward <code>enumerate</code> loop. Under the <code>--show</code> flag it also surfaces a human-readable summary including the approximate digit count of the
+winning number, computed as <code>floor(max_val / log(10)) + 1</code>. The C version uses <code>strtok_r</code> for line tokenisation and <code>atoll</code> for integer parsing, applying <code>log</code> from <code>math.h</code>. The file-loading helper in C resolves the resource path relative to the executable using <code>readlink("/proc/self/exe")</code>, mirroring the Python convention of looking in a sibling <code>resources/</code> directory.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key unlock was recognising that comparing large exponentials is equivalent to comparing their logarithms. Once I
+applied log(a^b) = b*log(a), the problem collapsed from an impossible direct computation into a trivial
+floating-point scan. This trick appears frequently in Project Euler whenever numbers are too large to evaluate
+directly but their relative ordering is all that is required - I should reach for it immediately whenever large
+exponentials appear.
+     </p>
+     <p>
+      The benchmark confirms that both implementations are effectively instantaneous in practice. The C version completes
+in roughly 0.0002 s versus 0.0006 s for Python - about three times faster here. Both perform identical O(n) work,
+so the difference is driven entirely by interpreter overhead rather than any algorithmic distinction. The Python
+version is marginally more expressive, particularly with the <code>--show</code> digit-count summary, while the C
+version demonstrates how little overhead the algorithm itself carries when stripped of the runtime.
+     </p>
+     <ul>
+      <li>
+       Strictly monotone transformations preserve ordering - applying ln to both sides of an inequality is always valid
+for positive reals, and this should be the first instinct whenever exponentials are too large to evaluate directly.
+      </li>
+      <li>
+       The approximate base-10 digit count of a^b is <code>floor(b * log10(a)) + 1</code>, a useful sanity check worth
+surfacing in verbose output.
+      </li>
+      <li>
+       Robust file parsing - skipping malformed lines with a warning rather than aborting - costs almost nothing and
+makes solutions far more resilient to unexpected input variations.
+      </li>
+      <li>
+       For future problems involving comparisons or orderings of very large exponentials, products, or ratios, taking
+logarithms immediately rather than attempting direct computation is almost always the correct first move.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,61 @@
+You are the author of the solution files below, writing personal technical notes for your own Project Euler solution
+archive. Write in the first person ("I chose…", "My approach…", "I decided to…").
+
+## Problem
+Number : $number
+Title  : $title
+Level  : $difficulty
+Solved : $solved_date
+
+## Problem statement (HTML)
+$problem_content
+
+## Existing Solution Notes (HTML)
+This section contains previously generated notes for this problem. It may be empty if notes are being
+generated for the first time. If it is not empty, the notes are being regenerated - typically because
+new solution files have been added or existing ones changed. Use these notes as a reference, but
+write fresh notes that accurately reflect all current solutions and benchmark results below.
+
+$solution_notes
+
+## Solution files
+Solutions may be written in Python or C. Each filename encodes the problem number and solution
+index (e.g. p0001_s0.py, p0001_s0.c). Python and C files with the same index implement the same
+algorithm in different languages; files with different indices use different algorithms.
+
+$solutions
+
+## Test cases
+$test_cases
+
+## Benchmark results
+In the results table, the solution name convention is:
+- Python solutions: `p000N_sM.py` (e.g. `p0001_s0.py`)
+- C solutions: `p000N_sM_c` (e.g. `p0001_s0_c`) — note the `_c` suffix and no file extension
+
+$results
+
+---
+
+Write an `<article>` element in plain HTML (no markdown, no code fences) that contains:
+
+1. **Mathematical complexity** — One or two paragraphs in which you describe the mathematical ideas you needed to
+   understand to solve the problem (number theory, combinatorics, dynamic programming, etc.) and the asymptotic
+   complexity class of the problem.
+
+2. **Solution approach** — A short section (use `<h4>` headings) for *each distinct algorithm* (i.e. each solution
+   index). If both a Python and a C file exist for the same index, cover them in one combined section and note any
+   language-specific differences. Name the algorithmic approach from the code, not the filename.
+
+3. **Learnings** — A concluding section covering: the key insights that unlocked the solution;
+   if more than one solution file exists, a comparison of approaches using the benchmark results (average times),
+   noting which is fastest or most elegant and why;
+   if only one solution file exists, omit any comparison note and do not mention the absence of other solutions
+   (no phrases like "since there is only one algorithm" or "with only one approach available");
+   and any concepts or techniques worth remembering for future problems.
+
+Use only semantic HTML5 elements: `<article>`, `<h3>`, `<h4>`, `<p>`, `<ul>/<li>`, `<table>`, `<code>`.
+Do not include `<html>`, `<head>`, or `<body>` tags.
+Do not repeat the problem statement verbatim. Output the HTML only — no preamble.
+Do not include the problem title as a heading.
+Use a hyphen-minus (-) instead of an em dash (—) throughout.

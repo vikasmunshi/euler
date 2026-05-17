@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0070_s0.py",
+    "args": "10000000",
+    "answer": 8319823,
+    "verdict": "correct",
+    "average": 0.14142669232434055,
+    "number_runs": 111
+  },
+  {
+    "category": "main",
+    "solution": "p0070_s0_c",
+    "args": "10000000",
+    "answer": 8319823,
+    "verdict": "correct",
+    "average": 0.04495418866071428,
+    "number_runs": 56
+  }
+]

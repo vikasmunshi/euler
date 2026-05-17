@@ -1,0 +1,1 @@
+119:Digit Power Sum:7

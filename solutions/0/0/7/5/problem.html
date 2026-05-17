@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 75: Singular Integer Right Triangles [Level 4]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../4/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=75" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/7/5/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../6/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 75: Singular Integer Right Triangles [Level 4]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      It turns out that $\pu{12 cm}$ is the smallest length of wire that can be bent to form an integer sided right angle triangle in exactly one way, but there are many more examples.
+     </p>
+     <ul style="list-style-type:none;">
+      <li>
+       $\pu{\mathbf{12} \mathbf{cm}}$: $(3,4,5)$
+      </li>
+      <li>
+       $\pu{\mathbf{24} \mathbf{cm}}$: $(6,8,10)$
+      </li>
+      <li>
+       $\pu{\mathbf{30} \mathbf{cm}}$: $(5,12,13)$
+      </li>
+      <li>
+       $\pu{\mathbf{36} \mathbf{cm}}$: $(9,12,15)$
+      </li>
+      <li>
+       $\pu{\mathbf{40} \mathbf{cm}}$: $(8,15,17)$
+      </li>
+      <li>
+       $\pu{\mathbf{48} \mathbf{cm}}$: $(12,16,20)$
+      </li>
+     </ul>
+     <p>
+      In contrast, some lengths of wire, like $\pu{20 cm}$, cannot be bent to form an integer sided right angle triangle, and other lengths allow more than one solution to be found; for example, using $\pu{120 cm}$ it is possible to form exactly three different integer sided right angle triangles.
+     </p>
+     <ul style="list-style-type:none;">
+      <li>
+       $\pu{\mathbf{120} \mathbf{cm}}$: $(30,40,50)$, $(20,48,52)$, $(24,45,51)$
+      </li>
+     </ul>
+     <p>
+      Given that $L$ is the length of the wire, for how many values of $L \le 1\,500\,000$ can exactly one integer sided right angle triangle be formed?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_perimeter=50) → 6</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_perimeter=1500000) → 161667</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(max_perimeter=10000000) → 1067080</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 17 Jul 2025, 01:13
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0075_s0_c" rel="noopener noreferrer" target="_blank" title="p0075_s0_c">
+         p0075_s0_c
+        </a>
+       </td>
+       <td>
+        50
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000000204s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0075_s0.py" rel="noopener noreferrer" target="_blank" title="p0075_s0.py">
+         p0075_s0.py
+        </a>
+       </td>
+       <td>
+        50
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000007391s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0075_s0_c" rel="noopener noreferrer" target="_blank" title="p0075_s0_c">
+         p0075_s0_c
+        </a>
+       </td>
+       <td>
+        1500000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        161667
+       </td>
+       <td>
+        0.010217114s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0075_s0.py" rel="noopener noreferrer" target="_blank" title="p0075_s0.py">
+         p0075_s0.py
+        </a>
+       </td>
+       <td>
+        1500000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        161667
+       </td>
+       <td>
+        0.434860387s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0075_s0_c" rel="noopener noreferrer" target="_blank" title="p0075_s0_c">
+         p0075_s0_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1067080
+       </td>
+       <td>
+        0.152792162s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0075_s0.py" rel="noopener noreferrer" target="_blank" title="p0075_s0.py">
+         p0075_s0.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1067080
+       </td>
+       <td>
+        4.366680860s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      Every primitive Pythagorean triple can be generated exactly once using Euclid's parametric formula: for coprime integers m &gt; n &gt; 0 with m - n odd, the three sides are m² - n², 2mn, and m² + n². The perimeter of such a primitive triple is the sum of those three terms, which simplifies neatly to 2m(m + n) - no need to compute the individual sides at all. Every non-primitive triple is an integer multiple k of a primitive one, so its perimeter is k · 2m(m + n). The problem therefore reduces to populating a frequency table over perimeter values and counting how many entries equal exactly one.
+     </p>
+     <p>
+      The outer loop over m runs up to roughly sqrt(L / 2), because the smallest perimeter achievable for a given m occurs at n = 1, giving 2m(m + 1). For each m the inner loop over valid n is O(m), and the total number of coprime pairs (m, n) satisfying the parity constraint is O(L log L) in aggregate - the same asymptotic order as a Sieve of Eratosthenes. Space is O(L) for the perimeter frequency array. Overall complexity is therefore O(L log L) time and O(L) space.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Euclid Parametric Enumeration with Multiplicity Counting (Python and C)
+     </h4>
+     <p>
+      Both implementations follow an identical algorithm. I iterate m from 2 up to floor(sqrt(max_perimeter / 2)). For each m, I start n at m % 2 + 1 so that m - n is guaranteed odd from the outset, then step n by 2 to maintain that parity automatically. Any pair where gcd(m, n) != 1 is skipped. The primitive perimeter p = 2 * m * (m + n) is then extended by integer multiples k = 1, 2, 3, ... in a while-loop for as long as k * p stays within the limit. Every generated perimeter increments the corresponding counter. After the full enumeration I count how many perimeter values have a counter of exactly one.
+     </p>
+     <p>
+      In Python I wrapped the generation logic in a <code>gen_pythagorean_triangle_perimeters</code> generator that yields each perimeter (primitive and scaled). Counts accumulate in a plain dictionary using <code>math.gcd</code> for the coprimality filter. In C I use a heap-allocated <code>int</code> array indexed directly by perimeter value, which avoids all hash-table overhead and gives contiguous, cache-friendly memory access. Neither version ever computes the actual side lengths - only the perimeter is needed at any point.
+     </p>
+     <table>
+      <tr>
+       <th>
+        solution
+       </th>
+       <th>
+        category
+       </th>
+       <th>
+        answer
+       </th>
+       <th>
+        elapsed (s)
+       </th>
+      </tr>
+      <tr>
+       <td>
+        p0075_s0.py
+       </td>
+       <td>
+        dev (50)
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.0000
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0075_s0.py
+       </td>
+       <td>
+        main (1,500,000)
+       </td>
+       <td>
+        161,667
+       </td>
+       <td>
+        0.4349
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0075_s0.py
+       </td>
+       <td>
+        extra (10,000,000)
+       </td>
+       <td>
+        1,067,080
+       </td>
+       <td>
+        4.3667
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0075_s0_c
+       </td>
+       <td>
+        dev (50)
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.0000
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0075_s0_c
+       </td>
+       <td>
+        main (1,500,000)
+       </td>
+       <td>
+        161,667
+       </td>
+       <td>
+        0.0102
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0075_s0_c
+       </td>
+       <td>
+        extra (10,000,000)
+       </td>
+       <td>
+        1,067,080
+       </td>
+       <td>
+        0.1528
+       </td>
+      </tr>
+     </table>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The first key insight was recognising that the perimeter of any Pythagorean triple generated by Euclid's formula collapses to the elegant form 2m(m + n), making the individual sides completely irrelevant. The second insight was that every non-primitive triple is a scaled copy of a primitive one, so I could extend each primitive perimeter with a compact inner while-loop over k rather than needing a separate enumeration pass. Together these two observations make the core loop extremely tight and easy to reason about.
+     </p>
+     <p>
+      A subtle but important detail is the correct upper bound for m. The minimum perimeter for a given m occurs at n = 1, giving 2m(m + 1). Setting this expression less than or equal to max_perimeter and solving gives m &lt;= sqrt(max_perimeter / 2), so I use <code>int((max_perimeter / 2) ** 0.5)</code> as the exclusive ceiling. A slightly wrong bound here would silently miss primitive triples near the limit and produce a wrong answer with no obvious error signal.
+     </p>
+     <p>
+      The C version runs roughly 43x faster than Python on the main case (0.0102 s versus 0.4349 s) and about 29x faster on the large extra case. The speedup comes from three sources: replacing a hash-map dictionary with a flat integer array, eliminating Python interpreter overhead on the tight inner loops, and the better cache behaviour of contiguous memory. The O(L log L) scaling is visible in both languages - going from 1.5 M to 10 M (a 6.67x increase in L) yields roughly a 10x increase in Python runtime and about 15x in C, both consistent with the expected logarithmic factor on top of linear growth.
+     </p>
+     <p>
+      For future problems involving primitive pair enumeration or lattice-point counting, the combination of a parity step (n += 2) and a gcd filter is a reusable pattern that is far cheaper than full factorisation while still guaranteeing exact coverage of all primitive triples. And when the key space is dense and bounded, replacing a dictionary with a plain integer array is a reliable way to approach C-level memory efficiency even before leaving Python.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

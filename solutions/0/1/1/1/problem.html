@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 111: Primes with Runs [Level 13]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../0/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=111" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/1/1/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../2/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 111: Primes with Runs [Level 13]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Considering $4$-digit primes containing repeated digits it is clear that they cannot all be the same: $1111$ is divisible by $11$, $2222$ is divisible by $22$, and so on. But there are nine $4$-digit primes containing three ones:
+$$1117, 1151, 1171, 1181, 1511, 1811, 2111, 4111, 8111.$$
+     </p>
+     <p>
+      We shall say that $M(n, d)$ represents the maximum number of repeated digits for an $n$-digit prime where $d$ is the repeated digit, $N(n, d)$ represents the number of such primes, and $S(n, d)$ represents the sum of these primes.
+     </p>
+     <p>
+      So $M(4, 1) = 3$ is the maximum number of repeated digits for a $4$-digit prime where one is the repeated digit, there are $N(4, 1) = 9$ such primes, and the sum of these primes is $S(4, 1) = 22275$. It turns out that for $d = 0$, it is only possible to have $M(4, 0) = 2$ repeated digits, but there are $N(4, 0) = 13$ such cases.
+     </p>
+     <p>
+      In the same way we obtain the following results for $4$-digit primes.
+     </p>
+     <div class="center">
+      <table align="center" border="1" cellpadding="5" cellspacing="0">
+       <tr>
+        <td>
+         <b>
+          Digit,
+          <i>
+           d
+          </i>
+         </b>
+        </td>
+        <td>
+         <b>
+          M(4,
+          <i>
+           d
+          </i>
+          )
+         </b>
+        </td>
+        <td>
+         <b>
+          N(4,
+          <i>
+           d
+          </i>
+          )
+         </b>
+        </td>
+        <td>
+         <b>
+          S(4,
+          <i>
+           d
+          </i>
+          )
+         </b>
+        </td>
+       </tr>
+       <tr>
+        <td>
+         0
+        </td>
+        <td>
+         2
+        </td>
+        <td>
+         13
+        </td>
+        <td>
+         67061
+        </td>
+       </tr>
+       <tr>
+        <td>
+         1
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         9
+        </td>
+        <td>
+         22275
+        </td>
+       </tr>
+       <tr>
+        <td>
+         2
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         1
+        </td>
+        <td>
+         2221
+        </td>
+       </tr>
+       <tr>
+        <td>
+         3
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         12
+        </td>
+        <td>
+         46214
+        </td>
+       </tr>
+       <tr>
+        <td>
+         4
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         2
+        </td>
+        <td>
+         8888
+        </td>
+       </tr>
+       <tr>
+        <td>
+         5
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         1
+        </td>
+        <td>
+         5557
+        </td>
+       </tr>
+       <tr>
+        <td>
+         6
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         1
+        </td>
+        <td>
+         6661
+        </td>
+       </tr>
+       <tr>
+        <td>
+         7
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         9
+        </td>
+        <td>
+         57863
+        </td>
+       </tr>
+       <tr>
+        <td>
+         8
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         1
+        </td>
+        <td>
+         8887
+        </td>
+       </tr>
+       <tr>
+        <td>
+         9
+        </td>
+        <td>
+         3
+        </td>
+        <td>
+         7
+        </td>
+        <td>
+         48073
+        </td>
+       </tr>
+      </table>
+     </div>
+     <p>
+      For $d = 0$ to $9$, the sum of all $S(4, d)$ is $273700$.
+     </p>
+     <p>
+      Find the sum of all $S(10, d)$.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(n=4) → 273700</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(n=10) → █</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(n=11) → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 3 Sep 2025, 13:01
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0111_s0_c" rel="noopener noreferrer" target="_blank" title="p0111_s0_c">
+         p0111_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        273700
+       </td>
+       <td>
+        0.000087321s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0111_s0.py" rel="noopener noreferrer" target="_blank" title="p0111_s0.py">
+         p0111_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        273700
+       </td>
+       <td>
+        0.001309537s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0111_s0_c" rel="noopener noreferrer" target="_blank" title="p0111_s0_c">
+         p0111_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000705984s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0111_s0.py" rel="noopener noreferrer" target="_blank" title="p0111_s0.py">
+         p0111_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.023117446s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The problem asks me to find, for each digit d from 0 to 9, the maximum number of times d can appear in a 10-digit prime, then sum all primes achieving that maximum across all digits. The combinatorial structure is straightforward: for a run of length k in an n-digit number, I need to choose which n-k positions hold some digit other than d, giving C(n, n-k) position choices, and each free position can take any of 9 digits (0-9 except d). A subtle constraint is that d=0 cannot fill the leading position, so its effective maximum run length is n-1 rather than n. The total candidate count across all run lengths and digits is bounded by sum over k of C(n, n-k) * 9^(n-k), but in practice I stop at the first run length that produces at least one prime, and for n=10 nearly every digit achieves a run of length n-1, so the actual candidate count is tiny.
+     </p>
+     <p>
+      Primality testing is the central computational challenge. A 10-digit number can reach nearly 10^10, making trial division or a sieve completely impractical. I used a deterministic Miller-Rabin test with the 12 fixed witnesses {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37}, which is proven correct for all integers below 3.3 * 10^24, comfortably covering any 10- or 11-digit candidate. Each primality test costs O(w * log n) modular multiplications where w=12 is the number of witnesses. Overall the algorithm's cost is dominated by the number of candidates generated times this per-test cost, which remains very small for n=10.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Greedy Combinatorial Search with Miller-Rabin (s0 - Python and C)
+     </h4>
+     <p>
+      Both the Python and C implementations share the same algorithm. For each digit d from 0 to 9, I start from the maximum possible run length (n for d != 0, n-1 for d=0) and count downward. At each run length I generate all candidate n-digit numbers having exactly that many copies of d in arbitrary positions, test each for primality, and stop at the first run length that yields any primes. The sum of those primes is accumulated into the total.
+     </p>
+     <p>
+      Candidate generation works by iterating over all C(n, num_other) choices of positions for the non-repeated digits using combinations, then trying all 9 eligible digits in each free slot recursively. A leading-zero guard skips any configuration where the first digit would be zero. Because two different position-assignment sequences can produce the same integer (for example when multiple free positions happen to hold the same value), deduplication is required. The Python version collects candidates into a <code>set</code>, which handles this automatically. The C version collects all found primes into a global array, then sorts and deduplicates with an explicit pass before summing - this requires an O(m^2) bubble-style sort in the worst case, though m is always small in practice. The Python version uses <code>itertools.combinations</code> and a recursive <code>fill</code> generator closure; the C version uses an equivalent recursive structure with global arrays for position lists and digit workspaces.
+     </p>
+     <p>
+      A language-specific difference is how intermediate products in modular exponentiation are handled. Python's arbitrary-precision integers deal with squaring 64-bit values transparently. The C version uses <code>__int128</code> for the modular multiplication steps inside Miller-Rabin to avoid overflow when squaring values close to 10^10.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that made this tractable is that I do not need to enumerate all n-digit primes. By fixing the repeated digit d and the run length, I can generate only the small set of candidates with that exact structure and stop as soon as any prime is found for that (d, run-length) pair. For n=10, nearly every digit achieves a run of length 9 or 10, so the candidate count at the first level tried is at most C(10,1)*9 = 90 numbers per digit, and the total work is negligible. This greedy-from-maximum strategy turns what could be an enormous search into a highly focused one.
+     </p>
+     <p>
+      The duplicate-candidate issue is easy to overlook but important for correctness. When there are two or more free positions, the same integer can be generated by different combinations of digit assignments (for instance, two free positions both assigned the same digit d' yield the same number regardless of which position received it first in the recursion). The Python set handles this silently; the C implementation requires an explicit sort-and-deduplicate step.
+     </p>
+     <p>
+      The deterministic Miller-Rabin test with a fixed witness set is a technique worth keeping on hand for any problem involving primality of individual large numbers where sieving is impractical. The benchmark shows the Python solution finishes n=10 in about 23 ms and the C version in about 0.7 ms - a roughly 33x speedup from the C port. For a problem at this difficulty level the Python speed is already well within reason, but the C port is useful for running the extra n=11 case quickly and serves as a clean reference for the same algorithm in a lower-level language.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

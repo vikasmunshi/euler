@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0059_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0059_cipher.txt 9 eEaAnNtT",
+    "answer": 129448,
+    "verdict": "correct",
+    "average": 0.00038031670000000003,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0059_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0059_cipher.txt 9 eEaAnNtT",
+    "answer": 129448,
+    "verdict": "correct",
+    "average": 0.0030974584999057695,
+    "number_runs": 10
+  }
+]

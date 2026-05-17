@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 113: Non-bouncy Numbers [Level 7]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=113" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/1/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 113: Non-bouncy Numbers [Level 7]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Working from left-to-right if no digit is exceeded by the digit to its left it is called an increasing number; for example, $134468$.
+     </p>
+     <p>
+      Similarly if no digit is exceeded by the digit to its right it is called a decreasing number; for example, $66420$.
+     </p>
+     <p>
+      We shall call a positive integer that is neither increasing nor decreasing a "bouncy" number; for example, $155349$.
+     </p>
+     <p>
+      As $n$ increases, the proportion of bouncy numbers below $n$ increases such that there are only $12951$ numbers below one-million that are not bouncy and only $277032$ non-bouncy numbers below $10^{10}$.
+     </p>
+     <p>
+      How many numbers below a googol ($10^{100}$) are not bouncy?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(num_max_digits=6) → 12951</code></li>
+     <li><code>dev: solve(num_max_digits=10) → 277032</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(num_max_digits=100) → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Sat, 6 Sep 2025, 19:50
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0113_s0_c" rel="noopener noreferrer" target="_blank" title="p0113_s0_c">
+         p0113_s0_c
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12951
+       </td>
+       <td>
+        0.000000109s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0113_s0.py" rel="noopener noreferrer" target="_blank" title="p0113_s0.py">
+         p0113_s0.py
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12951
+       </td>
+       <td>
+        0.000002322s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0113_s0_c" rel="noopener noreferrer" target="_blank" title="p0113_s0_c">
+         p0113_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        277032
+       </td>
+       <td>
+        0.000000099s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0113_s0.py" rel="noopener noreferrer" target="_blank" title="p0113_s0.py">
+         p0113_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        277032
+       </td>
+       <td>
+        0.000003104s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0113_s0_c" rel="noopener noreferrer" target="_blank" title="p0113_s0_c">
+         p0113_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000000116s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0113_s0.py" rel="noopener noreferrer" target="_blank" title="p0113_s0.py">
+         p0113_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000002698s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core insight is that counting monotone digit sequences maps directly onto combinatorial
+  multiset selection via stars-and-bars. An increasing number of exactly <code>k</code> digits is a
+  non-decreasing sequence chosen from <code>{1, ..., 9}</code> with repetition, which gives <code>C(k+8, 8)</code> choices. A decreasing number of exactly <code>k</code> digits is a
+  non-increasing sequence from <code>{0, ..., 9}</code> with a nonzero leading digit; the full
+  multiset count over ten digits is <code>C(k+9, 9)</code>, minus 1 to exclude the all-zeros
+  non-number, giving <code>C(k+9, 9) - 1</code>. Numbers satisfying both conditions simultaneously
+  are repdigits - constant sequences - of which there are exactly 9 for any digit length, so the
+  per-length non-bouncy count is <code>C(k+8, 8) + C(k+9, 9) - 10</code>.
+     </p>
+     <p>
+      Summing that expression from <code>k = 1</code> to <code>d</code> and applying the hockey-stick
+  identity ( <code>sum_{k=1}^{d} C(k+r, r) = C(d+r+1, r+1) - 1</code>) to each term collapses the
+  entire loop into a two-term closed form: <code>C(d+9, 9) + C(d+10, 10) - 10d - 2</code>. For the
+  googol case <code>d = 100</code> the largest intermediate value is <code>C(110, 10)</code>, which
+  fits comfortably in a 64-bit integer. The algorithm is effectively O(1) - it requires only two
+  iterative binomial coefficient evaluations each taking at most 10 multiplication steps, regardless
+  of how large <code>d</code> is.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Closed-form combinatorial formula (Python and C, s0)
+     </h4>
+     <p>
+      I implemented the same algorithm in both <code>p0113_s0.py</code> and <code>p0113_s0.c</code>.
+  The derivation proceeds in three steps, which I preserved as detailed comments in the Python
+  source:
+     </p>
+     <ul>
+      <li>
+       Increasing numbers of exactly <code>k</code> digits: <code>C(k+8, 8)</code>, counting
+    non-decreasing selections with repetition from <code>{1, ..., 9}</code>.
+      </li>
+      <li>
+       Decreasing numbers of exactly <code>k</code> digits: <code>C(k+9, 9) - 1</code>, subtracting
+    the invalid all-zeros sequence from the multiset count over <code>{0, ..., 9}</code>.
+      </li>
+      <li>
+       Subtract the 9 repdigits per digit length that satisfy both criteria simultaneously, giving
+    the inclusion-exclusion correction of <code>-10</code> per digit length (the <code>-1</code> from the decreasing formula and the <code>-9</code> repdigit overlap combine to <code>-10</code>).
+      </li>
+     </ul>
+     <p>
+      Applying the hockey-stick identity to <code>sum C(k+8, 8)</code> and <code>sum C(k+9, 9)</code> separately produces the closed form <code>C(d+9, 9) + C(d+10, 10) - 10d - 2</code>, which I
+  evaluate in a single expression.
+     </p>
+     <p>
+      In Python I used <code>math.comb</code>, which handles arbitrarily large integers natively. In C
+  I wrote a small iterative <code>comb</code> function that divides after each multiplication step
+  to prevent intermediate overflow - since <code>k</code> never exceeds 10 in these calls, integer
+  divisibility is guaranteed at each step and the results stay well within <code>long long</code> range.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was recognising that a monotone digit sequence of length <code>k</code> is
+  exactly a multiset selection from a bounded alphabet - once that mapping clicked, stars-and-bars
+  turned a seemingly complex digit-counting problem into a one-line formula. The hockey-stick
+  identity then eliminated even the need for a loop over digit lengths, collapsing the whole
+  summation to two binomial coefficients.
+     </p>
+     <p>
+      The inclusion-exclusion step for repdigits is a small but important detail: numbers that are both
+  increasing and decreasing form the overlap between the two sets, and subtracting them once per
+  digit length is necessary to avoid double-counting. Forgetting this step would overcount by <code>9d</code>.
+     </p>
+     <p>
+      Techniques worth remembering from this problem: stars-and-bars for non-decreasing digit sequences;
+  the hockey-stick identity for collapsing sums of consecutive binomial coefficients into a single
+  term; and the pattern of applying inclusion-exclusion when two monotonicity criteria share a common
+  subset. The general structure - counting sequences with a monotonicity property over a bounded
+  alphabet - appears frequently in combinatorics, and reducing it to a closed form via these
+  identities is far more elegant than a digit dynamic programming approach, which would require
+  maintaining state over all digit lengths up to 100.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

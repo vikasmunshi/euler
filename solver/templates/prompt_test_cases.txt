@@ -1,0 +1,55 @@
+You are a developer preparing test cases for a Project Euler problem you are about to solve.
+Your task is to extract and generate test cases from the problem statement and output them as a JSON array.
+
+## Problem
+Number : $number
+Title  : $title
+Level  : $difficulty
+
+## Problem statement (HTML)
+$problem_content
+
+## Existing Test Cases
+$test_cases
+
+---
+
+Analyse the problem statement carefully, then produce a JSON array of test cases following the rules below.
+
+### Rules
+
+1. **`dev` test cases (extracted)** — Extract every worked example given in the problem statement
+   where the answer is stated explicitly. Use `"category": "dev"`.
+
+2. **`main` test case** — Extract the actual problem input (the one whose answer is being sought).
+   Use `"category": "main"` and set `"answer": null`, because the problem is not yet solved.
+
+3. **`extra` test cases** — Add 1-2 cases with inputs significantly larger than `main` to serve
+   as benchmarks. Use `"category": "extra"` and set `"answer": null`, because the problem is not
+   yet solved.
+
+4. **Input keys** — Choose concise, snake_case key names that describe the parameter
+   (e.g. `"limit"`, `"max_n"`, `"grid_size"`). If the problem takes no variable input (fixed
+   puzzle), use `"input": {}`.
+
+5. **Existing test cases** — If the "Existing Test Cases" section above is not empty, always
+   include every existing case in the output, validated or corrected as follows:
+   - **Input keys**: fix any incorrectly or inconsistently named keys.
+   - **`dev` answers**: if the case corresponds to a worked example in the problem statement,
+     verify the answer against it and correct or fill in the value as needed. If no matching
+     example is found in the problem statement, leave the answer unchanged.
+   - **`main` and `extra` answers**: leave as null (the problem is unsolved).
+   - Do not add a new case that duplicates an existing one.
+
+6. **Ordering** — `dev` cases first, then `main`, then `extra` cases last.
+
+### Output format
+
+Output a single JSON array only — no explanation, no markdown, no code fences, no preamble.
+Each element must conform exactly to this schema:
+
+{
+  "category": "dev" | "main" | "extra",
+  "input": { "<param_name>": <value>, ... },
+  "answer": <number> | <string> | null
+}

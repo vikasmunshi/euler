@@ -1,75 +1,69 @@
 [build-system]
-requires = ["poetry-core>=2.2"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
-name = "euler-solver"
-version = "0.2.1"
-description = "A Python package for solving and managing Project Euler mathematical and computational problems."
-authors = ["Vikas Munshi <vikas.munshi@gmail.com>"]
-license = "MIT"
-readme = "README.md"
-packages = [{ include = "euler_solver" }]
+[project]
+name = "solver"
+version = "0.1.0"
+description = "Interactive shell for solving and managing Project Euler problems"
+authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
+license = { text = "MIT" }
+requires-python = ">=3.14"
+dependencies = [
+    "beautifulsoup4",
+    "cryptography",
+    "jsonschema",
+    "requests",
+]
 
-[tool.poetry.dependencies]
-beautifulsoup4 = "^4.14"
-matplotlib = "^3.10"
-numpy = "^2.3"
-pandas = "^2.3"
-pycryptodome = "^3.23"
-pyprimesieve = "^0.1"
-python = "^3.12"
-requests = "^2.32"
+[project.optional-dependencies]
+ai = [
+    "anthropic"
+]
+dev = [
+    "autoflake",
+    "autopep8",
+    "black",
+    "flake8",
+    "isort",
+    "mypy",
+    "types-requests",
+]
+show = [
+    "matplotlib",
+    "PyQt5",
+]
+solutions = [
+    "numpy",
+    "pyprimesieve",
+]
 
-[tool.system-dependencies]
-debian = [
-    "python3-tk",
-    "g++",
+
+# System-level dependencies (apt) required before `pip install`.
+# Install with: ./scripts/setup_dev_env.sh install python primesieve c
+#
+#   python      — Python 3.14 runtime + venv (via ppa:deadsnakes/ppa)
+#   primesieve  — primesieve, libprimesieve-dev (required to build pyprimesieve)
+#   c           — gcc, build-essential, etc. (required to compile C extensions)
+[tool.setup.system-dependencies]
+script = "./scripts/setup/dev_env.sh"
+targets = ["python", "primesieve", "c"]
+apt = [
+    "python3.14",
+    "python3.14-dev",
+    "python3.14-venv",
     "primesieve",
     "libprimesieve-dev",
-    "python3.12-dev"
-]
-fedora = [
-    "python3-tkinter",
-    "gcc-c++",
-    "primesieve",
-    "primesieve-devel",
-    "python3.12-devel"
-]
-arch = [
-    "tk",
+    "build-essential",
     "gcc",
-    "primesieve",
-    "python"
-]
-macos = [
-    "python-tk",
-    "primesieve"
-]
-descriptions = [
-    "python3-tk: Required for matplotlib TkAgg backend visualization",
-    "primesieve and dev packages: Required for primesieve Python bindings"
-]
-notes = [
-    "tkinter comes bundled with Python on Windows"
 ]
 
-[tool.poetry.group.dev.dependencies]
-cython = "^3.1"
-flake8 = "^7.3"
-mypy = "^1.17"
-openai-agents = "^0.2"
-pandas-stubs = "^2.3"
-poetry = "^2.1"
-pre-commit = "^4.3"
-types-requests = "^2.32"
+[project.scripts]
+solver = "solver.__main__:main"
 
-[tool.poetry.urls]
-Homepage = "https://github.com/vikasmunshi/euler"
-Repository = "https://github.com/vikasmunshi/euler.git"
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["solver*"]
 
-[tool.poetry.scripts]
-solver = "euler_solver.cli:main"
-
-[tool.flake8]
-max-line-length = 120
+[tool.setuptools.package-data]
+solver = ["*.html"]

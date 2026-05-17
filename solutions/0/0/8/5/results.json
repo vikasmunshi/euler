@@ -1,0 +1,74 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0085_s0.py",
+    "args": "0 10 18",
+    "answer": 6,
+    "verdict": "correct",
+    "average": 1.2490495671702567e-05,
+    "number_runs": 101
+  },
+  {
+    "category": "main",
+    "solution": "p0085_s0.py",
+    "args": "2 100 2000000",
+    "answer": 2772,
+    "verdict": "correct",
+    "average": 0.22692942705943098,
+    "number_runs": 100
+  },
+  {
+    "category": "dev",
+    "solution": "p0085_s1.py",
+    "args": "0 10 18",
+    "answer": 6,
+    "verdict": "correct",
+    "average": 2.900461373824913e-05,
+    "number_runs": 101
+  },
+  {
+    "category": "main",
+    "solution": "p0085_s1.py",
+    "args": "2 100 2000000",
+    "answer": 2772,
+    "verdict": "correct",
+    "average": 0.0003567128897020666,
+    "number_runs": 100
+  },
+  {
+    "category": "dev",
+    "solution": "p0085_s0_c",
+    "args": "0 10 18",
+    "answer": 6,
+    "verdict": "correct",
+    "average": 1.3510909090909093e-07,
+    "number_runs": 55
+  },
+  {
+    "category": "main",
+    "solution": "p0085_s0_c",
+    "args": "2 100 2000000",
+    "answer": 2772,
+    "verdict": "correct",
+    "average": 0.0013897293272727275,
+    "number_runs": 55
+  },
+  {
+    "category": "dev",
+    "solution": "p0085_s1_c",
+    "args": "0 10 18",
+    "answer": 6,
+    "verdict": "correct",
+    "average": 2.1758181818181816e-07,
+    "number_runs": 55
+  },
+  {
+    "category": "main",
+    "solution": "p0085_s1_c",
+    "args": "2 100 2000000",
+    "answer": 2772,
+    "verdict": "correct",
+    "average": 8.214000000000001e-07,
+    "number_runs": 55
+  }
+]

@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": [
+    "version",
+    "keys",
+    "users"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "users": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "public_key",
+          "master_key"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "public_key": {
+            "type": "string"
+          },
+          "master_key": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "keys": {
+      "type": "object",
+      "minProperties": 32,
+      "propertyNames": {
+        "pattern": "^[0-9a-fA-F]{32}$"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "value",
+          "status"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "hex-encoded encrypted 256-bit AES encryption key"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "reserved",
+              "retired"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

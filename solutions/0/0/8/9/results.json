@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0089_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0089_roman.txt",
+    "answer": 743,
+    "verdict": "correct",
+    "average": 0.00011673690000000001,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0089_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0089_roman.txt",
+    "answer": 743,
+    "verdict": "correct",
+    "average": 0.014830803199765796,
+    "number_runs": 10
+  }
+]

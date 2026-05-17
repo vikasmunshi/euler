@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 80: Square Root Digital Expansion [Level 3]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../../7/9/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=80" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/8/0/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../1/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 80: Square Root Digital Expansion [Level 3]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      It is well known that if the square root of a natural number is not an integer, then it is irrational. The decimal expansion of such square roots is infinite without any repeating pattern at all.
+     </p>
+     <p>
+      The square root of two is $1.41421356237309504880\cdots$, and the digital sum of the first one hundred decimal digits is $475$.
+     </p>
+     <p>
+      For the first one hundred natural numbers, find the total of the digital sums of the first one hundred decimal digits for all the irrational square roots.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(digits=100, max_num=2) → 475</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(digits=100, max_num=99) → 40886</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(digits=100, max_num=999) → 434576</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 18 Jul 2025, 13:02
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0080_s0_c" rel="noopener noreferrer" target="_blank" title="p0080_s0_c">
+         p0080_s0_c
+        </a>
+       </td>
+       <td>
+        100 2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        475
+       </td>
+       <td>
+        0.000008658s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0080_s1_c" rel="noopener noreferrer" target="_blank" title="p0080_s1_c">
+         p0080_s1_c
+        </a>
+       </td>
+       <td>
+        100 2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        475
+       </td>
+       <td>
+        0.000419994s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0080_s0.py" rel="noopener noreferrer" target="_blank" title="p0080_s0.py">
+         p0080_s0.py
+        </a>
+       </td>
+       <td>
+        100 2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        475
+       </td>
+       <td>
+        0.000192822s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0080_s1.py" rel="noopener noreferrer" target="_blank" title="p0080_s1.py">
+         p0080_s1.py
+        </a>
+       </td>
+       <td>
+        100 2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        475
+       </td>
+       <td>
+        0.000344043s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0080_s0_c" rel="noopener noreferrer" target="_blank" title="p0080_s0_c">
+         p0080_s0_c
+        </a>
+       </td>
+       <td>
+        100 99
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        40886
+       </td>
+       <td>
+        0.000842060s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0080_s1_c" rel="noopener noreferrer" target="_blank" title="p0080_s1_c">
+         p0080_s1_c
+        </a>
+       </td>
+       <td>
+        100 99
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        40886
+       </td>
+       <td>
+        0.038424412s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0080_s0.py" rel="noopener noreferrer" target="_blank" title="p0080_s0.py">
+         p0080_s0.py
+        </a>
+       </td>
+       <td>
+        100 99
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        40886
+       </td>
+       <td>
+        0.015517215s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0080_s1.py" rel="noopener noreferrer" target="_blank" title="p0080_s1.py">
+         p0080_s1.py
+        </a>
+       </td>
+       <td>
+        100 99
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        40886
+       </td>
+       <td>
+        0.024451804s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0080_s0_c" rel="noopener noreferrer" target="_blank" title="p0080_s0_c">
+         p0080_s0_c
+        </a>
+       </td>
+       <td>
+        100 999
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        434576
+       </td>
+       <td>
+        0.008109935s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0080_s1_c" rel="noopener noreferrer" target="_blank" title="p0080_s1_c">
+         p0080_s1_c
+        </a>
+       </td>
+       <td>
+        100 999
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        434576
+       </td>
+       <td>
+        0.362178738s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0080_s0.py" rel="noopener noreferrer" target="_blank" title="p0080_s0.py">
+         p0080_s0.py
+        </a>
+       </td>
+       <td>
+        100 999
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        434576
+       </td>
+       <td>
+        0.169867338s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0080_s1.py" rel="noopener noreferrer" target="_blank" title="p0080_s1.py">
+         p0080_s1.py
+        </a>
+       </td>
+       <td>
+        100 999
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        434576
+       </td>
+       <td>
+        0.289430372s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core challenge is arbitrary-precision arithmetic. Standard floating-point types offer only 15-17 significant decimal
+digits, so extracting 100 decimal digits of an irrational square root requires a different strategy. The key insight is
+that <code>floor(sqrt(n * 10^(2*d)))</code> gives exactly the first <code>d</code> decimal digits of <code>sqrt(n)</code>: multiplying under the radical by <code>10^(2*d)</code> is equivalent to multiplying the result
+by <code>10^d</code>, shifting the decimal point <code>d</code> places to the right. This converts a floating-point
+precision problem into a straightforward exact integer computation.
+     </p>
+     <p>
+      For each of the 91 irrational square roots below 100 we compute an integer square root of a number with roughly
+200 decimal digits. The asymptotic cost per root depends heavily on the algorithm. Newton-Raphson (Heron's method)
+converges in <code>O(log d)</code> iterations due to quadratic convergence, each requiring one big-integer division on
+an <code>O(d)</code> -digit number, giving roughly <code>O(d^2 log d)</code> total work per root with schoolbook
+arithmetic. Binary search requires <code>O(d)</code> iterations (the search space has <code>O(d)</code> bits), each
+involving a big-integer multiply, giving <code>O(d^3)</code> or worse - a much heavier cost that dominates at scale.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Heron's Method / Newton-Raphson Integer Square Root (s0)
+     </h4>
+     <p>
+      Both <code>p0080_s0.py</code> and <code>p0080_s0.c</code> implement the classic Heron iteration for integer square
+roots. In Python I scale <code>n</code> by <code>10^(2*digits)</code>, then iterate <code>x = (x + scaled // x) // 2</code> until two consecutive iterates agree - that is, until the iterate stops
+decreasing. Because Newton-Raphson converges quadratically, doubling the number of correct digits per step, it reaches
+the correct 100-digit result in roughly <code>log2(200)</code> ~ 8 steps. The Python version uses the scaled number
+itself as a safe initial overestimate, which is harmless because the first few iterations rapidly collapse it to the
+right neighbourhood. The final result string is truncated to <code>digits</code> characters and its digits summed.
+     </p>
+     <p>
+      The C version implements the same algorithm but requires a full arbitrary-precision library written from scratch using
+base- <code>10^9</code> limbs, including addition, subtraction, multiplication, Knuth Algorithm D division, and base
+conversion. A key difference from the Python version is the initial guess: rather than starting from the scaled number
+(which would be enormous in C and waste the first iteration), I seed the iteration using a <code>double</code> approximation scaled to about 15 significant digits, then multiply up by <code>10^(digits-15)</code> to produce a
+tight starting estimate. This means the C Heron loop typically needs only 2-3 iterations rather than starting cold.
+     </p>
+     <h4>
+      Binary Search Integer Square Root (s1)
+     </h4>
+     <p>
+      Both <code>p0080_s1.py</code> and <code>p0080_s1.c</code> replace Newton-Raphson with a binary search over the
+interval <code>[0, scaled_number]</code>. The invariant is that <code>low^2 &lt;= scaled_number &lt; high^2</code>;
+each step computes <code>mid = (low + high) // 2</code>, squares it, compares with the scaled number, and narrows the
+bracket. When <code>high - low == 1</code>, <code>low</code> is the floor square root. This is conceptually simpler
+than Newton-Raphson - there are no convergence subtleties and no need to detect a fixed point - but it requires
+roughly <code>d * log2(10)</code> ~ 660 iterations for <code>d = 100</code>, each involving a big-integer multiply.
+     </p>
+     <p>
+      The C binary search reuses the same BigInt library as the Heron solution. I added a dedicated <code>bi_diff_is_one</code> helper that checks whether <code>high - low == 1</code> without allocating a full BigInt
+result, avoiding unnecessary overhead in the tight loop. Even so, the hundreds of schoolbook multiplications per root
+add up significantly.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key realisation was that the entire problem reduces to integer arithmetic. The scale-and-floor trick - <code>isqrt(n * 10^(2*d))</code> gives the first <code>d</code> digits of <code>sqrt(n)</code> exactly - is a
+reusable pattern for any problem requiring high-precision irrational values. Once that transformation is in place, both
+algorithms are straightforward to formulate; the challenge shifts to implementation details of big-integer arithmetic
+in C.
+     </p>
+     <p>
+      The benchmark results tell a very clear story:
+     </p>
+     <table>
+      <tr>
+       <th>
+        Solution
+       </th>
+       <th>
+        dev (s)
+       </th>
+       <th>
+        main (s)
+       </th>
+       <th>
+        extra (s)
+       </th>
+      </tr>
+      <tr>
+       <td>
+        p0080_s0.py (Heron, Python)
+       </td>
+       <td>
+        0.0002
+       </td>
+       <td>
+        0.0155
+       </td>
+       <td>
+        0.1699
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0080_s1.py (Binary search, Python)
+       </td>
+       <td>
+        0.0003
+       </td>
+       <td>
+        0.0245
+       </td>
+       <td>
+        0.2894
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0080_s0_c (Heron, C)
+       </td>
+       <td>
+        0.0000
+       </td>
+       <td>
+        0.0008
+       </td>
+       <td>
+        0.0081
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0080_s1_c (Binary search, C)
+       </td>
+       <td>
+        0.0004
+       </td>
+       <td>
+        0.0384
+       </td>
+       <td>
+        0.3622
+       </td>
+      </tr>
+     </table>
+     <p>
+      The C Heron implementation is by far the fastest - about 21x faster than its Python equivalent on the extra case and
+over 44x faster than the C binary search. The most striking result is that the C binary search is actually slower than
+the Python binary search on the main and extra cases. The explanation is that Python's arbitrary-precision integers are
+highly optimised internally (using Karatsuba multiplication and other techniques), while my handwritten C BigInt uses
+schoolbook multiplication. For Heron's method this difference is irrelevant because so few iterations are needed, but
+for binary search the hundreds of schoolbook multiplications per root accumulate painfully. This vividly demonstrates
+that algorithmic complexity dominates language choice when the iteration counts differ by two orders of magnitude.
+     </p>
+     <ul>
+      <li>
+       Scale-and-floor trick: <code>isqrt(n * 10^(2*d))</code> gives the first <code>d</code> digits of <code>sqrt(n)</code> exactly - a reusable pattern for any problem requiring high-precision irrational roots.
+      </li>
+      <li>
+       Newton-Raphson integer square root converges in <code>O(log d)</code> iterations versus <code>O(d)</code> for binary search; this gap dominates all other performance factors including language choice.
+      </li>
+      <li>
+       When implementing Heron's method in C without native big integers, seeding with a double-precision approximation scaled to ~15 digits saves the majority of iterations compared to starting from the raw scaled number.
+      </li>
+      <li>
+       Writing a minimal big-integer library for a fixed precision target is feasible and educational, but schoolbook multiplication becomes a bottleneck under heavy iteration counts; Karatsuba or higher-order algorithms would be needed to compete with Python's built-in integers on the binary search variant.
+      </li>
+      <li>
+       Checking for perfect squares via <code>i**0.5 % 1 == 0</code> is reliable for small integers, but for larger inputs an exact check using <code>math.isqrt</code> followed by squaring and verification is safer.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 8: Largest Product in a Series [Level 0]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../7/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=8" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/0/8/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../9/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 8: Largest Product in a Series [Level 0]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The four adjacent digits in the $1000$-digit number that have the greatest product are $9 \times 9 \times 8 \times 9 = 5832$.
+     </p>
+     <p class="monospace center">
+      73167176531330624919225119674426574742355349194934
+      <br/>
+      96983520312774506326239578318016984801869478851843
+      <br/>
+      85861560789112949495459501737958331952853208805511
+      <br/>
+      12540698747158523863050715693290963295227443043557
+      <br/>
+      66896648950445244523161731856403098711121722383113
+      <br/>
+      62229893423380308135336276614282806444486645238749
+      <br/>
+      30358907296290491560440772390713810515859307960866
+      <br/>
+      70172427121883998797908792274921901699720888093776
+      <br/>
+      65727333001053367881220235421809751254540594752243
+      <br/>
+      52584907711670556013604839586446706324415722155397
+      <br/>
+      53697817977846174064955149290862569321978468622482
+      <br/>
+      83972241375657056057490261407972968652414535100474
+      <br/>
+      82166370484403199890008895243450658541227588666881
+      <br/>
+      16427171479924442928230863465674813919123162824586
+      <br/>
+      17866458359124566529476545682848912883142607690042
+      <br/>
+      24219022671055626321111109370544217506941658960408
+      <br/>
+      07198403850962455444362981230987879927244284909188
+      <br/>
+      84580156166097919133875499200524063689912560717606
+      <br/>
+      05886116467109405077541002256983155200055935729725
+      <br/>
+      71636269561882670428252483600823257530420752963450
+      <br/>
+     </p>
+     <p>
+      Find the thirteen adjacent digits in the $1000$-digit number that have the greatest product. What is the value of this product?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(length=4) → 5832</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(length=13) → 23514624000</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 8 Oct 2019, 12:23
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0008_s0_c" rel="noopener noreferrer" target="_blank" title="p0008_s0_c">
+         p0008_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5832
+       </td>
+       <td>
+        0.000009048s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0008_s0.py" rel="noopener noreferrer" target="_blank" title="p0008_s0.py">
+         p0008_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5832
+       </td>
+       <td>
+        0.000485124s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0008_s0_c" rel="noopener noreferrer" target="_blank" title="p0008_s0_c">
+         p0008_s0_c
+        </a>
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        23514624000
+       </td>
+       <td>
+        0.000010473s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0008_s0.py" rel="noopener noreferrer" target="_blank" title="p0008_s0.py">
+         p0008_s0.py
+        </a>
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        23514624000
+       </td>
+       <td>
+        0.000436969s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The problem reduces to a sliding-window maximum over a finite digit sequence. With a string of length N = 1000 and a
+window of size k = 13, there are at most N - k + 1 = 988 candidate windows. Evaluating each window naively requires
+O(k) multiplications, giving an overall complexity of O(N * k), which for any fixed k is just O(N). No number theory
+is required - this is entirely a combinatorial scan over a known, bounded sequence, and the answer is guaranteed to
+fit in a 64-bit integer since the maximum possible product is 9^13, which is well within range.
+     </p>
+     <p>
+      The structurally important observation is that any window containing a zero digit has a product of zero and can never
+be the maximum, as long as at least one zero-free window exists (which it does for this input). Filtering those windows
+out before doing any multiplication is the key mathematical insight. Because N and k are both small, even a fully
+naive O(N * k) pass completes in microseconds, but recognising zero digits as hard product-reset boundaries is the
+conceptual move that matters regardless of scale.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Sliding Window with Zero-Skip (Python and C, index 0)
+     </h4>
+     <p>
+      I embedded the 1000-digit number as a string literal directly in both source files rather than reading from an
+external file, keeping each solution self-contained and avoiding I/O overhead during benchmarking. Both versions
+accept the window <code>length</code> as a runtime parameter, which lets me verify the dev test case (length 4,
+expected 5832) before running the real case (length 13).
+     </p>
+     <p>
+      The algorithm is identical in both languages: iterate over every consecutive substring of the specified length,
+skip any window that contains a zero digit, and for surviving windows compute the product of individual digits,
+tracking the running maximum. In Python I expressed this as a list comprehension with an <code>if "0" not in sequence</code> guard, converting each surviving character to an integer and passing the
+resulting generator to <code>math.prod</code>. I chose <code>math.prod</code> (available since Python 3.8) over a
+manual <code>functools.reduce</code> loop because it is concise and internally optimised. In C I used a two-pass
+inner loop: a short-circuit scan that sets a flag on the first zero encountered, followed by the multiplication
+loop only if no zero was detected. The logic is functionally identical; the C version simply avoids Python object
+allocation and interpreter dispatch entirely, which is why the benchmark shows it completing in effectively zero
+measurable time compared to the Python version's already fast sub-millisecond results.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was treating zero digits as hard reset boundaries. Any window touching a zero is automatically
+disqualified, which immediately eliminates a large fraction of the search space without any arithmetic. For this
+input and window size the observation is almost trivially obvious, but the same pattern scales: for much larger N
+or k, partitioning the string around zeros first and only evaluating windows within each zero-free segment is the
+natural path toward a truly linear-time solution with minimal constant factors.
+     </p>
+     <p>
+      Since there is only one algorithmic approach (index 0) expressed in two languages, the benchmark comparison is
+simply a language overhead comparison. The Python solution completes in roughly 0.0004-0.0005 seconds and the C
+solution in effectively 0.0000 seconds. The difference is entirely interpreter startup, import costs, and object
+allocation overhead rather than anything intrinsic to the algorithm, since the actual computation is trivial in
+both cases. There was no compelling reason to pursue a more elaborate strategy such as maintaining a running
+product with lazy division or a log-sum transformation, given that even the slower Python version is comfortably
+fast.
+     </p>
+     <p>
+      Concepts worth remembering from this problem:
+     </p>
+     <ul>
+      <li>
+       Zero digits in a product series act as hard reset boundaries - filter or partition around them before computing anything.
+      </li>
+      <li><code>math.prod</code> is a clean, readable way to compute the product of an iterable in modern Python (3.8+).
+      </li>
+      <li>
+       Parameterising the window length and providing a smaller dev test case is a useful sanity-check pattern when the full input is difficult to inspect by hand.
+      </li>
+      <li>
+       Embedding fixed input data as a string literal rather than reading from a file keeps solutions self-contained and avoids I/O overhead in benchmarks.
+      </li>
+      <li>
+       For sliding-window maximum-product problems at scale, a log-sum approach (converting products to sums of logarithms) or a deque-based running product with divide-and-conquer updates can reduce per-window cost from O(k) to O(1) amortised.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

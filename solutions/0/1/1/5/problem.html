@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 115: Counting Block Combinations II [Level 9]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../4/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=115" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/1/5/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../6/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 115: Counting Block Combinations II [Level 9]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p class="note">
+      NOTE: This is a more difficult version of
+      <a href="problem=114">
+       Problem 114
+      </a>
+      .
+     </p>
+     <p>
+      A row measuring $n$ units in length has red blocks with a minimum length of $m$ units placed on it, such that any two red blocks (which are allowed to be different lengths) are separated by at least one black square.
+     </p>
+     <p>
+      Let the fill-count function, $F(m, n)$, represent the number of ways that a row can be filled.
+     </p>
+     <p>
+      For example, $F(3, 29) = 673135$ and $F(3, 30) = 1089155$.
+     </p>
+     <p>
+      That is, for $m = 3$, it can be seen that $n = 30$ is the smallest value for which the fill-count function first exceeds one million.
+     </p>
+     <p>
+      In the same way, for $m = 10$, it can be verified that $F(10, 56) = 880711$ and $F(10, 57) = 1148904$, so $n = 57$ is the least value for which the fill-count function first exceeds one million.
+     </p>
+     <p>
+      For $m = 50$, find the least value of $n$ for which the fill-count function first exceeds one million.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(m=3, limit=1000000) → 30</code></li>
+     <li><code>dev: solve(m=10, limit=1000000) → 57</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(m=50, limit=1000000) → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Mon, 8 Sep 2025, 13:56
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0115_s0_c" rel="noopener noreferrer" target="_blank" title="p0115_s0_c">
+         p0115_s0_c
+        </a>
+       </td>
+       <td>
+        3 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30
+       </td>
+       <td>
+        0.000002851s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0115_s0.py" rel="noopener noreferrer" target="_blank" title="p0115_s0.py">
+         p0115_s0.py
+        </a>
+       </td>
+       <td>
+        3 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30
+       </td>
+       <td>
+        0.000045105s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0115_s0_c" rel="noopener noreferrer" target="_blank" title="p0115_s0_c">
+         p0115_s0_c
+        </a>
+       </td>
+       <td>
+        10 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        57
+       </td>
+       <td>
+        0.000003784s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0115_s0.py" rel="noopener noreferrer" target="_blank" title="p0115_s0.py">
+         p0115_s0.py
+        </a>
+       </td>
+       <td>
+        10 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        57
+       </td>
+       <td>
+        0.000129449s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0115_s0_c" rel="noopener noreferrer" target="_blank" title="p0115_s0_c">
+         p0115_s0_c
+        </a>
+       </td>
+       <td>
+        50 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000018466s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0115_s0.py" rel="noopener noreferrer" target="_blank" title="p0115_s0.py">
+         p0115_s0.py
+        </a>
+       </td>
+       <td>
+        50 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000669118s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem is a direct extension of Problem 114. The fill-count function F(m, n) counts the number of ways
+    to tile a row of length n using red blocks of minimum length m, with at least one black square separating
+    any two red blocks. The counting naturally decomposes by examining the rightmost position: either it is
+    black (reducing to F(n-1)), or it is the right end of a red block of length k where m ≤ k &lt; n
+    (requiring a mandatory black separator to the left, reducing to F(n-k-1)), or the entire row is one red
+    block of length n (contributing exactly 1). This recurrence is clean enough to evaluate with memoization,
+    and each F(n) depends on O(n) previously computed values, giving an overall time complexity of O(n^2) to
+    compute all values up to the answer. In practice, for m=50 the answer is n=168, so the table is tiny and
+    runs in well under a millisecond.
+     </p>
+     <p>
+      The problem is really asking for the smallest n such that F(m, n) exceeds a threshold - a simple linear
+    search on n starting from m, with each step requiring an O(n) recurrence evaluation. The dominant
+    computational concern is avoiding redundant recomputation of subproblems, which both my Python and C
+    solutions handle through memoization or a cache array respectively.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Memoized Recurrence (Python and C, index 0)
+     </h4>
+     <p>
+      Both my Python and C solutions implement the same algorithm: a top-down memoized recursion for F(n)
+    combined with a linear search for the smallest n exceeding the given limit. The recurrence I use is:
+     </p>
+     <ul>
+      <li>
+       If n &lt; 0, return 0 (base case for the separator offset going negative).
+      </li>
+      <li>
+       If n &lt; m, return 1 (only the all-black arrangement fits; no red block of length m can be placed).
+      </li>
+      <li>
+       Otherwise: F(n) = F(n-1) + sum over k from m to n-1 of F(n-k-1) + 1.
+      </li>
+     </ul>
+     <p>
+      The final <code>+1</code> accounts for the single arrangement where a red block covers the entire row.
+    In Python I used <code>functools.lru_cache</code> for zero-boilerplate memoization. In C I maintained
+    a flat array <code>cache[]</code> and a parallel boolean array <code>cache_valid[]</code> to replicate
+    the same top-down approach. The C version takes m and the limit as command-line arguments (as integers),
+    mirroring the Python keyword arguments <code>m</code> and <code>limit</code>. Both versions are
+    functionally identical in logic.
+     </p>
+     <p>
+      I only implemented one algorithmic approach (index 0) in both languages. An equivalent bottom-up iterative
+    DP would also work and would avoid any recursion overhead, but given how small n ends up being (168 for
+    m=50), the top-down approach is perfectly sufficient.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that the recurrence from Problem 114 generalises directly by treating m as
+    a parameter rather than a hardcoded constant. Once I saw that F(m, n) decomposes cleanly by the character
+    of the last occupied position, the recurrence wrote itself. The "aha moment" was confirming that the
+    boundary case n &lt; m correctly collapses to 1 (just the all-black row), which anchors the recursion.
+     </p>
+     <p>
+      Because I only tried one algorithmic approach, there is no meaningful comparison between solution indices.
+    The Python solution runs in about 0.7 ms for the main case (m=50, limit=1000000), which is already fast
+    enough that porting to C brings no practical benefit here - I included the C version primarily for
+    consistency with the rest of my archive. The technique of parametrising a tiling recurrence by a minimum
+    block length is worth remembering: it comes up repeatedly in combinatorial tiling problems and the
+    top-down memoized form is easy to adapt quickly.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

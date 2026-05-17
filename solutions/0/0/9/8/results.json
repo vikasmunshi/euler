@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0098_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0098_words.txt",
+    "answer": 18769,
+    "verdict": "correct",
+    "average": 0.06109745139999999,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0098_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0098_words.txt",
+    "answer": 18769,
+    "verdict": "correct",
+    "average": 0.3591036501999042,
+    "number_runs": 10
+  }
+]

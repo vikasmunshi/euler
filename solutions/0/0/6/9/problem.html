@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 69: Totient Maximum [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../8/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=69" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/6/9/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../../7/0/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 69: Totient Maximum [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Euler's totient function, $\phi(n)$ [sometimes called the phi function], is defined as the number of positive integers not exceeding $n$ which are relatively prime to $n$. For example, as $1$, $2$, $4$, $5$, $7$, and $8$, are all less than or equal to nine and relatively prime to nine, $\phi(9)=6$.
+     </p>
+     <div class="center">
+      <table class="grid center">
+       <tr>
+        <td>
+         <b>
+          $n$
+         </b>
+        </td>
+        <td>
+         <b>
+          Relatively Prime
+         </b>
+        </td>
+        <td>
+         <b>
+          $\phi(n)$
+         </b>
+        </td>
+        <td>
+         <b>
+          $n/\phi(n)$
+         </b>
+        </td>
+       </tr>
+       <tr>
+        <td>
+         2
+        </td>
+        <td>
+         1
+        </td>
+        <td>
+         1
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         3
+        </td>
+        <td>
+         1,2
+        </td>
+        <td>
+         2
+        </td>
+        <td>
+         1.5
+        </td>
+       </tr>
+       <tr>
+        <td>
+         4
+        </td>
+        <td>
+         1,3
+        </td>
+        <td>
+         2
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         5
+        </td>
+        <td>
+         1,2,3,4
+        </td>
+        <td>
+         4
+        </td>
+        <td>
+         1.25
+        </td>
+       </tr>
+       <tr>
+        <td>
+         6
+        </td>
+        <td>
+         1,5
+        </td>
+        <td>
+         2
+        </td>
+        <td>
+         3
+        </td>
+       </tr>
+       <tr>
+        <td>
+         7
+        </td>
+        <td>
+         1,2,3,4,5,6
+        </td>
+        <td>
+         6
+        </td>
+        <td>
+         1.1666...
+        </td>
+       </tr>
+       <tr>
+        <td>
+         8
+        </td>
+        <td>
+         1,3,5,7
+        </td>
+        <td>
+         4
+        </td>
+        <td>
+         2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         9
+        </td>
+        <td>
+         1,2,4,5,7,8
+        </td>
+        <td>
+         6
+        </td>
+        <td>
+         1.5
+        </td>
+       </tr>
+       <tr>
+        <td>
+         10
+        </td>
+        <td>
+         1,3,7,9
+        </td>
+        <td>
+         4
+        </td>
+        <td>
+         2.5
+        </td>
+       </tr>
+      </table>
+     </div>
+     <p>
+      It can be seen that $n = 6$ produces a maximum $n/\phi(n)$ for $n\leq 10$.
+     </p>
+     <p>
+      Find the value of $n\leq 1\,000\,000$ for which $n/\phi(n)$ is a maximum.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(limit=10) → 6</code></li>
+     <li><code>dev: solve(limit=100) → 30</code></li>
+     <li><code>dev: solve(limit=1000) → 210</code></li>
+     <li><code>dev: solve(limit=10000) → 2310</code></li>
+     <li><code>dev: solve(limit=100000) → 30030</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(limit=1000000) → 510510</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 16 Jul 2025, 10:03
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0_c" rel="noopener noreferrer" target="_blank" title="p0069_s0_c">
+         p0069_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000000073s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0.py" rel="noopener noreferrer" target="_blank" title="p0069_s0.py">
+         p0069_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        0.000001789s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0_c" rel="noopener noreferrer" target="_blank" title="p0069_s0_c">
+         p0069_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30
+       </td>
+       <td>
+        0.000000072s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0.py" rel="noopener noreferrer" target="_blank" title="p0069_s0.py">
+         p0069_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30
+       </td>
+       <td>
+        0.000002333s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0_c" rel="noopener noreferrer" target="_blank" title="p0069_s0_c">
+         p0069_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        210
+       </td>
+       <td>
+        0.000000090s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0.py" rel="noopener noreferrer" target="_blank" title="p0069_s0.py">
+         p0069_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        210
+       </td>
+       <td>
+        0.000002242s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0_c" rel="noopener noreferrer" target="_blank" title="p0069_s0_c">
+         p0069_s0_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2310
+       </td>
+       <td>
+        0.000000102s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0.py" rel="noopener noreferrer" target="_blank" title="p0069_s0.py">
+         p0069_s0.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2310
+       </td>
+       <td>
+        0.000002309s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0_c" rel="noopener noreferrer" target="_blank" title="p0069_s0_c">
+         p0069_s0_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30030
+       </td>
+       <td>
+        0.000000102s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0069_s0.py" rel="noopener noreferrer" target="_blank" title="p0069_s0.py">
+         p0069_s0.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        30030
+       </td>
+       <td>
+        0.000003136s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0069_s0_c" rel="noopener noreferrer" target="_blank" title="p0069_s0_c">
+         p0069_s0_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        510510
+       </td>
+       <td>
+        0.000000123s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0069_s0.py" rel="noopener noreferrer" target="_blank" title="p0069_s0.py">
+         p0069_s0.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        510510
+       </td>
+       <td>
+        0.000003319s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The central identity is the multiplicative formula for Euler's totient: for any positive integer n with distinct prime factors p
+      <sub>
+       1
+      </sub>
+      , p
+      <sub>
+       2
+      </sub>
+      , ..., p
+      <sub>
+       k
+      </sub>
+      , we have φ(n) = n × ∏(1 - 1/p
+      <sub>
+       i
+      </sub>
+      ), so the ratio we want to maximise becomes n/φ(n) = ∏ p
+      <sub>
+       i
+      </sub>
+      /(p
+      <sub>
+       i
+      </sub>
+      - 1), a product taken only over the distinct prime factors of n. Because each factor p/(p-1) is strictly greater than 1, and smaller primes yield larger factors (2/1 &gt; 3/2 &gt; 5/4 &gt; ...), the problem reduces to a greedy selection: include as many small distinct primes as possible without exceeding the limit. Crucially, repeated prime factors do not help - multiplying n by an already-present prime p scales both n and φ(n) by the same factor p, leaving the ratio unchanged. The optimal n is therefore always squarefree and is in fact a primorial: the product of the first k primes for some k.
+     </p>
+     <p>
+      The algorithmic complexity is effectively O(log(limit)) in the number of primes consumed, because primorials grow super-exponentially and only a handful of primes are needed before the product exceeds any fixed limit. For the main case of limit = 1,000,000, only seven primes are needed since 2 × 3 × 5 × 7 × 11 × 13 × 17 = 510510. The work done is entirely negligible regardless of implementation language, which is why every benchmark entry reports 0.0000 s.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Greedy Primorial Accumulation (Python and C)
+     </h4>
+     <p>
+      Both the Python and C solutions implement the same greedy primorial strategy and I cover them together here. I start with a running product of 1 and multiply in successive primes in ascending order, stopping the moment the next multiplication would push the product past the limit. The last accepted product is the answer.
+     </p>
+     <p>
+      In the Python version I use an incremental dictionary-based sieve of Eratosthenes as an infinite prime generator. The generator tracks the smallest prime factor for composite numbers as they are encountered, stepping through odd candidates and maintaining a composites map from next composite to the prime that generated it. In practice this generator never yields more than about seven values before the accumulated primorial exceeds 1,000,000, so the sieve machinery is barely exercised. Inside <code>solve</code> I use a walrus-operator assignment in the loop condition to update <code>result</code> in place and detect when it has exceeded the limit, then undo the last multiplication with an integer division.
+     </p>
+     <p>
+      In the C version I use simple trial division to test primality of each candidate integer. I step through odd candidates starting from 3 (checking 2 first), and for each prime I compute the next product before committing it, breaking out of the loop if it would exceed the limit. Since so few primes are consumed before the product exceeds the limit, the inner divisor loop in the trial division never reaches a candidate large enough for it to do meaningful work. The two versions are structurally identical in their overall logic; the only language-specific difference is how primes are produced - a lazy generator in Python versus inline trial division in C.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was writing out the ratio n/φ(n) explicitly using the product formula over distinct primes. Once I saw it as ∏ p/(p-1), it was immediately clear that the ratio depends only on which primes appear in n, not on how many times they appear. That single observation collapses the entire search space: no exhaustive sieve of totient values is needed, and the answer must be a primorial. Problems involving φ(n) almost always become tractable once this factored form is in view.
+     </p>
+     <p>
+      Since I only implemented one algorithmic approach across both languages, there is no meaningful timing comparison to draw - every test case in both languages reports elapsed times that round to zero. For a problem at this level of trivial computational cost, elegance of expression matters more than raw speed. The Python version is slightly more elegant because the generator abstracts prime production cleanly, while the C version is more explicit but equally readable.
+     </p>
+     <ul>
+      <li>
+       The identity n/φ(n) = ∏ p/(p-1) over distinct prime factors turns a potential sieve problem into a trivially greedy one.
+      </li>
+      <li>
+       Squarefreeness of the optimal answer follows directly from the ratio formula - repeated prime factors contribute nothing to the product and therefore cannot improve the ratio.
+      </li>
+      <li>
+       Primorials are the natural maximisers for any multiplicative objective that rewards distinct small prime factors; this pattern recurs in several number theory problems.
+      </li>
+      <li>
+       A dictionary-based incremental sieve is a convenient reusable generator for lazy prime production in Python, though for problems consuming only a handful of primes any simple primality test is equally suitable.
+      </li>
+      <li>
+       When a formula involves a product over distinct prime factors, it is worth immediately asking whether repeated prime factors change the value - if they do not, the search space collapses to squarefree numbers.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 105: Special Subset Sums [Level 11]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../4/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=105" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/0/5/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../6/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 105: Special Subset Sums [Level 11]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Let $S(A)$ represent the sum of elements in set $A$ of size $n$. We shall call it a special sum set if for any two non-empty disjoint subsets, $B$ and $C$, the following properties are true:
+     </p>
+     <ol>
+      <li>
+       $S(B) \ne S(C)$; that is, sums of subsets cannot be equal.
+      </li>
+      <li>
+       If $B$ contains more elements than $C$ then $S(B) \gt S(C)$.
+      </li>
+     </ol>
+     <p>
+      For example, $\{81, 88, 75, 42, 87, 84, 86, 65\}$ is not a special sum set because $65 + 87 + 88 = 75 + 81 + 84$, whereas $\{157, 150, 164, 119, 79, 159, 161, 139, 158\}$ satisfies both rules for all possible subset pair combinations and $S(A) = 1286$.
+     </p>
+     <p>
+      Using
+      <a href="resources/0105_sets.txt">
+       sets.txt
+      </a>
+      (right click and "Save Link/Target As..."), a 4K text file with one-hundred sets containing seven to twelve elements (the two examples given above are the first two sets in the file), identify all the special sum sets, $A_1, A_2, \dots, A_k$, and find the value of $S(A_1) + S(A_2) + \cdots + S(A_k)$.
+     </p>
+     <p class="smaller">
+      NOTE: This problem is related to
+      <a href="problem=103">
+       Problem 103
+      </a>
+      and
+      <a href="problem=106">
+       Problem 106
+      </a>
+      .
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(file_url='0105_sets.txt') → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 7 Aug 2025, 23:07
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0105_s0_c" rel="noopener noreferrer" target="_blank" title="p0105_s0_c">
+         p0105_s0_c
+        </a>
+       </td>
+       <td>
+        0105_sets.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.004486193s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0105_s0.py" rel="noopener noreferrer" target="_blank" title="p0105_s0.py">
+         p0105_s0.py
+        </a>
+       </td>
+       <td>
+        0105_sets.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.295037777s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem sits at the intersection of combinatorics and set theory. Given a set of <code>n</code> elements,
+    I need to verify two properties over all pairs of non-empty disjoint subsets: no two such subsets may share the
+    same sum (rule 1), and if one subset is strictly larger than another, its sum must also be strictly larger (rule 2).
+    The number of non-empty subsets of an <code>n</code> -element set is <code>2^n - 1</code>, so the number of
+    ordered disjoint pairs is bounded by roughly <code>3^n</code> (since each element can belong to subset B, subset C,
+    or neither). For the sizes in the input file (7 to 12 elements), <code>3^12 = 531441</code>, which is entirely
+    tractable.
+     </p>
+     <p>
+      The key algorithmic idea is to precompute all subset sums using a bitmask dynamic-programming recurrence:
+    for a mask with lowest set bit <code>lsb</code>, the sum is <code>subset_sum[mask ^ lsb] + elements[i]</code>.
+    This gives all <code>2^n</code> subset sums in O(2^n) time and space. Checking disjoint pairs is then a matter
+    of iterating over all masks <code>b_mask</code> and, for each, iterating over all submasks of its bitwise complement
+    using the standard submask enumeration trick. The overall check is O(3^n) per set.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Bitmask Subset Enumeration (Algorithm 0 - Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python ( <code>p0105_s0.py</code>) and C ( <code>p0105_s0.c</code>).
+    The approach is identical in both:
+     </p>
+     <ul>
+      <li>
+       Read the input file line by line, parsing each comma-separated line into a list of integers.
+      </li>
+      <li>
+       Precompute <code>subset_sum[mask]</code> for every non-empty bitmask using the LSB recurrence.
+      </li>
+      <li>
+       Precompute <code>subset_size[mask]</code> (popcount) for every mask.
+      </li>
+      <li>
+       For each candidate subset B (every non-empty mask <code>b_mask</code>), compute its complement and enumerate
+        all non-empty submasks C of that complement using the trick <code>c_mask = (c_mask - 1) &amp; complement</code>.
+      </li>
+      <li>
+       For each disjoint pair (B, C), check rule 1 (sums differ) and rule 2 (if |B| &gt; |C| then S(B) &gt; S(C)).
+        If either rule fails, the set is not special.
+      </li>
+      <li>
+       Sum the elements of every set that passes both checks.
+      </li>
+     </ul>
+     <p>
+      In the C version I used <code>__builtin_ctz</code> to find the index of the lowest set bit, which is slightly
+    faster than the Python equivalent of <code>lsb.bit_length() - 1</code>. The C version also dynamically allocates
+    the subset sum and size arrays per set and frees them afterwards. Both versions short-circuit as soon as a
+    violation is found, avoiding unnecessary work on non-special sets.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that the submask enumeration idiom - iterating over all subsets of a given mask
+    using <code>c_mask = (c_mask - 1) &amp; complement</code> - directly gives me exactly the disjoint pairs I need.
+    By fixing B and iterating over all submasks of the complement of B, I naturally cover every pair of non-empty
+    disjoint subsets exactly once per ordered direction, which is sufficient because the two rules are both
+    directional or symmetric enough to catch all violations.
+     </p>
+     <p>
+      The benchmark results highlight the expected language gap: the C solution runs in about 0.0045 s versus 0.295 s
+    for Python - roughly a 65x speedup - even though both implement the same algorithm. For a problem of this size
+    Python is perfectly adequate, but the C translation is a useful exercise. The precomputed subset-sum table is
+    the most important optimisation; recomputing sums on the fly inside nested loops would be several times slower.
+    The submask enumeration trick and the DP recurrence for subset sums are both techniques worth remembering for
+    any future problem that requires reasoning over all subsets or pairs of disjoint subsets.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

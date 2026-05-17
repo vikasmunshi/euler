@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 17: Number Letter Counts [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../6/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=17" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/1/7/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../8/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 17: Number Letter Counts [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      If the numbers $1$ to $5$ are written out in words: one, two, three, four, five, then there are $3 + 3 + 5 + 4 + 4 = 19$ letters used in total.
+     </p>
+     <p>
+      If all the numbers from $1$ to $1000$ (one thousand) inclusive were written out in words, how many letters would be used?
+     </p>
+     <br/>
+     <p class="note">
+      <b>
+       NOTE:
+      </b>
+      Do not count spaces or hyphens. For example, $342$ (three hundred and forty-two) contains $23$ letters and $115$ (one hundred and fifteen) contains $20$ letters. The use of "and" when writing out numbers is in compliance with British usage.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_number=5) → 19</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_number=1000) → 21124</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 9 Oct 2019, 15:43
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0017_s0_c" rel="noopener noreferrer" target="_blank" title="p0017_s0_c">
+         p0017_s0_c
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        19
+       </td>
+       <td>
+        0.000004368s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0017_s0.py" rel="noopener noreferrer" target="_blank" title="p0017_s0.py">
+         p0017_s0.py
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        19
+       </td>
+       <td>
+        0.000014425s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0017_s0_c" rel="noopener noreferrer" target="_blank" title="p0017_s0_c">
+         p0017_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        21124
+       </td>
+       <td>
+        0.000170381s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0017_s0.py" rel="noopener noreferrer" target="_blank" title="p0017_s0.py">
+         p0017_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        21124
+       </td>
+       <td>
+        0.002427010s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem is primarily a structured string-generation exercise rather than a number-theory puzzle. English number words decompose hierarchically: any positive integer splits into groups of three digits (triplets), each triplet splits into a hundreds part and a sub-100 remainder, and the sub-100 range splits further into a tens word and a units word. Because the word form of a triplet value depends only on that value and not on its position in the full number, there are at most 1000 distinct sub-problems (triplet values 0-999), regardless of the upper bound.
+     </p>
+     <p>
+      The asymptotic complexity is O(n) in the upper bound n: each integer from 1 to n is visited exactly once, and the per-integer work is O(1) once the triplet cache is warm. For n=1000 the cache is fully populated after a single pass, so virtually every call beyond the first occurrence of a triplet value is a cache hit. The constant factor is tiny because the lookup tables cover all irregular forms and the recursive decomposition has depth at most two (hundreds then sub-100).
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Recursive Triplet Decomposition with Memoization (Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python and C, so I cover them together here. Both solutions share the same structural design: a lookup table handles every irregular or base-case word (the integers 0-19 and each multiple of ten up to 90), a cached triplet converter handles values 0-999 by recursion, and an outer function assembles full numbers from their triplets with appropriate scale words.
+     </p>
+     <p>
+      In the triplet converter, numbers whose word form is in the lookup table are returned immediately. Numbers between 20 and 99 that are not multiples of ten are formed by joining the tens word and units word with a hyphen, for example "twenty-one". Numbers from 100 to 999 prepend the hundreds word, and when a non-zero remainder exists, "and" is inserted before the recursive result for that remainder - this follows British English usage as required. The outer converter splits the integer into triplets (using Python's <code>f"{n:,}"</code> format string, or integer arithmetic in C), pairs each triplet with a scale suffix, and joins the pieces. A special case inserts "and" when a large number ends in a sub-100 tail.
+     </p>
+     <p>
+      In Python I used <code>@functools.lru_cache</code> on <code>number_triplet_in_words</code> to memoize results automatically. I also over-engineered the scale suffixes list to support numbers up to centillions, which costs nothing in correctness and makes the converter reusable. Letter counting is done by calling <code>str.translate</code> with a pre-built deletion table that strips spaces and hyphens. In C I pre-allocated a fixed array of 1000 character buffers ( <code>triplet_cache[1000][64]</code>) alongside a boolean flag array ( <code>triplet_cached[1000]</code>) to replicate the same caching pattern without dynamic allocation. Letter counting in C is a simple character walk that skips spaces and hyphens, avoiding any regex overhead.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <ul>
+      <li>
+       The key insight was recognising the purely hierarchical, recursive structure of English number words. Once I had a correct sub-100 builder and a hundreds layer on top of it, any arbitrarily large number follows automatically by splitting into triplets and appending scale words.
+      </li>
+      <li>
+       British English mandates "and" between the hundreds part and any non-zero remainder below 100 - for example "three hundred and forty-two". This rule also applies across the thousands boundary when the tail of the number is below 100 - for example "one thousand and five". Encoding this explicitly was essential to get the correct answer.
+      </li>
+      <li>
+       Using <code>@lru_cache</code> in Python and a manually managed buffer array in C are both clean ways to ensure each triplet value is converted at most once. For n=1000 the speedup over a naive approach is modest, but the pattern scales well to much larger ranges.
+      </li>
+      <li>
+       Stripping non-letter characters with <code>str.translate</code> and a pre-built deletion table is faster and cleaner than a character loop or a regex in Python, and is worth keeping in mind for any letter-counting task.
+      </li>
+      <li>
+       Since I only implemented one algorithm (triplet decomposition, in two languages), there is no algorithmic comparison to make. The benchmark results confirm the expected language gap: the C solution runs in roughly 0.0002 s versus 0.0024 s for Python - approximately a 12x speedup - driven almost entirely by avoiding interpreter overhead in the inner loop rather than any algorithmic difference. Both are effectively instantaneous at this scale.
+      </li>
+      <li>
+       The Python version's use of generator expressions and decorator-based caching made it the more enjoyable implementation to write, even though the C version is the faster one. For a problem this small, any correct structured approach would be fast enough.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

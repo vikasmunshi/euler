@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 21: Amicable Numbers [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../0/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=21" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/2/1/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../2/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 21: Amicable Numbers [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Let $d(n)$ be defined as the sum of proper divisors of $n$ (numbers less than $n$ which divide evenly into $n$).
+      <br/>
+      If $d(a) = b$ and $d(b) = a$, where $a \ne b$, then $a$ and $b$ are an amicable pair and each of $a$ and $b$ are called amicable numbers.
+     </p>
+     <p>
+      For example, the proper divisors of $220$ are $1, 2, 4, 5, 10, 11, 20, 22, 44, 55$ and $110$; therefore $d(220) = 284$. The proper divisors of $284$ are $1, 2, 4, 71$ and $142$; so $d(284) = 220$.
+     </p>
+     <p>
+      Evaluate the sum of all the amicable numbers under $10000$.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(max_num=10000) → 31626</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 10 Oct 2019, 10:23
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0021_s0_c" rel="noopener noreferrer" target="_blank" title="p0021_s0_c">
+         p0021_s0_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        31626
+       </td>
+       <td>
+        0.002511565s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0021_s0.py" rel="noopener noreferrer" target="_blank" title="p0021_s0.py">
+         p0021_s0.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        31626
+       </td>
+       <td>
+        0.043832450s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core number theory here is the sum-of-proper-divisors function d(n). The key efficiency insight is that
+  divisors come in pairs: if i divides n then n/i also divides n, so I can collect both in a single loop up to
+  the square root of n. This reduces computing d(n) from O(n) naive trial division down to O(sqrt(n)). One
+  subtle correction is needed for perfect squares: the integer square root would otherwise be counted twice as
+  both i and n/i, so I subtract it once in that case. Checking all candidates below a limit L therefore costs
+  O(L * sqrt(L)), which for L = 10000 is trivially fast.
+     </p>
+     <p>
+      Identifying amicable pairs requires two evaluations of d per candidate: compute b = d(a), then verify d(b) == a
+  with the constraint a != b to exclude perfect numbers. Many values of b coincide with values of a already
+  computed, so memoising the function converts repeated lookups into O(1) cache hits and keeps total work close
+  to O(L * sqrt(L)) unique evaluations rather than up to 2 * L separate computations. An alternative worth
+  knowing for much larger limits is a sieve-style accumulation: for each divisor d from 1 to L, add d to every
+  multiple of d up to L. That runs in O(L log L) and would be preferable if L grew into the millions.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Memoised Square-Root Trial Division (s0 - Python and C)
+     </h4>
+     <p>
+      Both the Python and C solutions implement the same core algorithm. I wrote a helper <code>sum_factors(n)</code> that initialises a running total to 1 (the trivial divisor 1 is always proper), then iterates i from 2 up to
+  floor(sqrt(n)). Whenever i divides n evenly, both i and n/i are added to the total. After the loop, if n is a
+  perfect square the integer square root is subtracted once to correct the double-counting. The main loop
+  iterates x from 2 to max_num, computes y = sum_factors(x), skips the case y == x (which would be a perfect
+  number rather than an amicable pair), and checks the reciprocal condition sum_factors(y) == x. Any x satisfying
+  both conditions is accumulated into the result.
+     </p>
+     <p>
+      In the Python version I decorated <code>sum_factors</code> with <code>@functools.lru_cache()</code> so repeated
+  calls with the same argument are free. I also used the walrus operator <code>:=</code> inside a generator
+  expression to assign <code>y = sum_factors(x)</code> and immediately test both conditions in one compact
+  expression passed to <code>sum()</code>. The C version follows the identical logic with a plain local variable
+  inside the for loop, since C has no equivalent syntactic shorthand. The C version has no memoisation and
+  recomputes <code>sum_factors</code> for each y from scratch, but the problem is small enough that this makes no
+  measurable difference in correctness or practical runtime at this scale.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was recognising that divisor pairs let me compute d(n) in O(sqrt(n)) rather than O(n), and
+  that the <code>lru_cache</code> in the Python version converts what would otherwise be up to 2 * L evaluations
+  into at most L unique evaluations plus L cache hits. Getting the perfect-square guard right - <code>- (n_sqrt if n_sqrt ** 2 == n else 0)</code> - is a subtle but important correctness point; omitting it
+  silently inflates every perfect-square divisor sum and produces wrong answers without any obvious error signal.
+     </p>
+     <p>
+      There is only one algorithmic approach here (index s0), implemented in both Python and C. The benchmarks show
+  the Python solution runs in about 44 ms and the C solution in about 2.5 ms, a roughly 17x speedup, which is
+  typical for this class of tight numerical loop. Neither memoisation in Python nor its absence in C matters
+  practically at L = 10000. For future problems involving divisor sums at much larger scales I should reach for
+  the sieve-style approach: iterate each candidate divisor d and add it to all its multiples, accumulating sums
+  in an array in O(L log L) time, which is asymptotically superior to the per-number sqrt loop used here.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

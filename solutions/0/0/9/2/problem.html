@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 92: Square Digit Chains [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../1/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=92" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/9/2/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../3/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 92: Square Digit Chains [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      A number chain is created by continuously adding the square of the digits in a number to form a new number until it has been seen before.
+     </p>
+     <p>
+      For example,
+$$\begin{align}
+&amp;44 \to 32 \to 13 \to 10 \to \mathbf 1 \to \mathbf 1\\
+&amp;85 \to \mathbf{89} \to 145 \to 42 \to 20 \to 4 \to 16 \to 37 \to 58 \to \mathbf{89}
+\end{align}$$
+     </p>
+     <p>
+      Therefore any chain that arrives at $1$ or $89$ will become stuck in an endless loop. What is most amazing is that EVERY starting number will eventually arrive at $1$ or $89$.
+     </p>
+     <p>
+      How many starting numbers below ten million will arrive at $89$?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(power_of_10=2) → 80</code></li>
+     <li><code>dev: solve(power_of_10=3) → 857</code></li>
+     <li><code>dev: solve(power_of_10=4) → 8558</code></li>
+     <li><code>dev: solve(power_of_10=5) → 85623</code></li>
+     <li><code>dev: solve(power_of_10=6) → 856929</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(power_of_10=7) → 8581146</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(power_of_10=8) → 85744333</code></li>
+     <li><code>extra: solve(power_of_10=9) → 854325192</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 18 Jul 2025, 21:55
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        80
+       </td>
+       <td>
+        0.000007161s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        80
+       </td>
+       <td>
+        0.000220248s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        857
+       </td>
+       <td>
+        0.000016530s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        857
+       </td>
+       <td>
+        0.000394450s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8558
+       </td>
+       <td>
+        0.000019025s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8558
+       </td>
+       <td>
+        0.000604730s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        85623
+       </td>
+       <td>
+        0.000029174s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        85623
+       </td>
+       <td>
+        0.000776020s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        856929
+       </td>
+       <td>
+        0.000027011s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        6
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        856929
+       </td>
+       <td>
+        0.001070363s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8581146
+       </td>
+       <td>
+        0.000033144s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        7
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        8581146
+       </td>
+       <td>
+        0.001517434s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        85744333
+       </td>
+       <td>
+        0.000053205s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        85744333
+       </td>
+       <td>
+        0.002109297s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0092_s0_c" rel="noopener noreferrer" target="_blank" title="p0092_s0_c">
+         p0092_s0_c
+        </a>
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        854325192
+       </td>
+       <td>
+        0.000049496s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0092_s0.py" rel="noopener noreferrer" target="_blank" title="p0092_s0.py">
+         p0092_s0.py
+        </a>
+       </td>
+       <td>
+        9
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        854325192
+       </td>
+       <td>
+        0.002249386s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core observation is that every positive integer eventually converges to either 1 or 89 under repeated
+application of the "sum of squares of digits" function. The crucial insight enabling an efficient solution
+is that this function maps any n-digit number to a value at most n * 81, since each digit contributes at
+most 9^2 = 81. For numbers below 10^7, the maximum digit-square-sum is 7 * 81 = 567, which is tiny
+compared to the 10 million numbers in the problem. This compresses the problem into two tractable
+sub-problems: (1) determine which values in [1, 567] eventually reach 89 under the chain rule, and
+(2) count how many numbers in [1, 10^n] map to each such value.
+     </p>
+     <p>
+      The counting step is handled with a generating-function argument. Each digit d contributes d^2 to the
+digit-square-sum, so the contribution of a single digit position is represented by the polynomial
+1 + x + x^4 + x^9 + x^16 + x^25 + x^36 + x^49 + x^64 + x^81, where the constant term accounts for
+digit 0. The coefficient of x^s in the n-th power of this polynomial gives exactly the count of
+n-digit sequences (with leading zeros permitted) whose digit-square-sum equals s. Multiplying this
+polynomial n times and accumulating into an array is equivalent to dynamic programming over the
+digit-square-sum value. The state space has size O(n * 81), so the total work is O(n^2 * 81^2),
+which is effectively constant for the problem sizes involved.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Generating-function convolution (s0 - Python and C)
+     </h4>
+     <p>
+      I maintain an array <code>a</code> where <code>a[i]</code> counts how many digit sequences considered
+so far produce a digit-square-sum of <code>i</code>, and a boolean array <code>is89</code> that records
+whether index <code>i</code> eventually reaches 89. A helper function <code>terminates_in_89</code> performs direct simulation for any individual value.
+     </p>
+     <p>
+      The iteration proceeds one digit position at a time. On each step I copy the current array into <code>b</code>, extend <code>a</code> by 81 zeroed slots, populate <code>is89</code> for the new
+indices, and then for every index <code>i</code> with count <code>v = b[i]</code>, I add <code>v</code> to <code>a[i + s]</code> for each of the nine non-zero digit squares s in {1, 4, 9, 16, 25, 36, 49,
+64, 81}. The existing values <code>a[0..prev_len-1]</code> are left in place from the copy, which
+implicitly handles digit 0 (whose square is 0 and leaves the sum unchanged). This correctly implements
+multiplication by the per-digit polynomial factor. After n iterations, the answer is the sum of <code>a[i]</code> over all <code>i</code> with <code>is89[i]</code> true.
+     </p>
+     <p>
+      The Python version uses list slicing, <code>enumerate</code>, and <code>map</code> for conciseness,
+and supports a <code>--show</code> flag to print intermediate results for all powers of 10. The C
+version replicates the same logic using <code>malloc</code>, <code>memcpy</code>, and <code>memset</code>, allocating the full eventual maximum array size up front and freeing the
+temporary <code>b</code> buffer after each step. The C version computes all test cases in time
+that rounds to zero microseconds, while the Python version stays under 2.2 ms even for n = 9.
+Both are correct across all test cases.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising that I did not need to iterate over every number from 1 to 10^7 at
+all. Instead of asking "does number n reach 89?", I reframed it as "how many n-digit numbers have
+digit-square-sum s?" and answered that with a polynomial convolution running in well under 2 ms even
+in Python. The bound n * 81 is tight enough that the reachable state space is tiny no matter how
+large n grows, making the approach scale to n = 9 (answer around 854 million) with essentially no
+additional cost.
+     </p>
+     <p>
+      A subtlety I had to be careful about was the treatment of digit 0. Because 0^2 = 0, including digit
+0 means the polynomial factor has a constant term of 1, and the coefficient array must not be zeroed
+before each distribution step - the old values must survive to represent the "add a zero digit"
+contribution. Implementing this by preserving existing array entries rather than re-zeroing them is
+a clean and correct way to express multiplication by the constant term.
+     </p>
+     <p>
+      Since only a single algorithm (s0) is implemented here, there is no algorithmic comparison to make.
+The benchmark does confirm, however, that the C translation offers a roughly three-orders-of-magnitude
+speedup over the Python version for larger inputs, consistent with the overhead difference between
+interpreted and compiled loops. For future problems involving large input sets that map into a small
+bounded state space, this generating-function counting trick - iterate over the small state space
+rather than over the large input set, and use a polynomial or DP to count paths - is well worth
+keeping in mind.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

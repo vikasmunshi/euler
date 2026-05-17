@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 39: Integer Right Triangles [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../8/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=39" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/3/9/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../../4/0/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 39: Integer Right Triangles [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      If $p$ is the perimeter of a right angle triangle with integral length sides, $\{a, b, c\}$, there are exactly three solutions for $p = 120$.
+     </p>
+     <p>
+      $\{20,48,52\}$, $\{24,45,51\}$, $\{30,40,50\}$
+     </p>
+     <p>
+      For which value of $p \le 1000$, is the number of solutions maximised?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_perimeter=100) → 60</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_perimeter=1000) → 840</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(max_perimeter=10000) → 5040</code></li>
+     <li><code>extra: solve(max_perimeter=100000) → 55440</code></li>
+     <li><code>extra: solve(max_perimeter=1000000) → 720720</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 26 Nov 2019, 10:48
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0039_s0_c" rel="noopener noreferrer" target="_blank" title="p0039_s0_c">
+         p0039_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        60
+       </td>
+       <td>
+        0.000000351s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0039_s0.py" rel="noopener noreferrer" target="_blank" title="p0039_s0.py">
+         p0039_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        60
+       </td>
+       <td>
+        0.000031062s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0039_s0_c" rel="noopener noreferrer" target="_blank" title="p0039_s0_c">
+         p0039_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        840
+       </td>
+       <td>
+        0.000002389s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0039_s0.py" rel="noopener noreferrer" target="_blank" title="p0039_s0.py">
+         p0039_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        840
+       </td>
+       <td>
+        0.000095352s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0039_s0_c" rel="noopener noreferrer" target="_blank" title="p0039_s0_c">
+         p0039_s0_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5040
+       </td>
+       <td>
+        0.000021187s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0039_s0.py" rel="noopener noreferrer" target="_blank" title="p0039_s0.py">
+         p0039_s0.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5040
+       </td>
+       <td>
+        0.000917079s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0039_s0_c" rel="noopener noreferrer" target="_blank" title="p0039_s0_c">
+         p0039_s0_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55440
+       </td>
+       <td>
+        0.000341983s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0039_s0.py" rel="noopener noreferrer" target="_blank" title="p0039_s0.py">
+         p0039_s0.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55440
+       </td>
+       <td>
+        0.015099559s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0039_s0_c" rel="noopener noreferrer" target="_blank" title="p0039_s0_c">
+         p0039_s0_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        720720
+       </td>
+       <td>
+        0.005530390s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0039_s0.py" rel="noopener noreferrer" target="_blank" title="p0039_s0.py">
+         p0039_s0.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        720720
+       </td>
+       <td>
+        0.296713026s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The problem reduces to counting integer right triangles for each perimeter value up to a bound. The key mathematical tool is Euclid's parametrisation: every primitive Pythagorean triple - one where gcd(a, b, c) = 1 - can be written as a = m² - n², b = 2mn, c = m² + n² for integers m &gt; n &gt; 0 with gcd(m, n) = 1 and m, n of opposite parity. The perimeter of such a primitive triple simplifies neatly to 2m(m + n). Every non-primitive triple is a positive integer multiple k of some primitive triple, so its perimeter is k · 2m(m + n). Enumerating all qualifying (m, n) pairs and then scaling by k = 2, 3, ... covers the complete set of integer right triangles without repetition or omission.
+     </p>
+     <p>
+      The number of primitive Pythagorean triples with perimeter at most P grows as O(P), so including all multiples the total work is O(P log P) - analogous to a harmonic sieve. The loop bounds on m and n are derived analytically by setting the minimum primitive perimeter for a given parameter value equal to the maximum perimeter and solving, giving tight upper limits of roughly O(sqrt(P)) for n and a corresponding bound for m. For P = 10⁶ the algorithm completes in well under a second in C and in about 0.3 seconds in Python.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Euclid Parametrisation with Harmonic Scaling (Python and C)
+     </h4>
+     <p>
+      I implement the same algorithm in both Python and C. I iterate n from 1 up to a bound derived as <code>(int(8 * sqrt(max_perimeter)) - 6) // 8</code>, and for each n I iterate m starting at n + 1 in steps of 2. The step of 2 automatically enforces the opposite-parity requirement - because n and n + 1 always differ in parity, incrementing by 2 keeps m and n on opposite parities without any explicit branch. I then check <code>gcd(m, n) == 1</code> to ensure primitivity, compute the primitive perimeter <code>p0 = 2 * m * (m + n)</code>, and record p0 together with every multiple <code>k * p0</code> for k = 2, 3, ... up to <code>max_perimeter</code>. The m bound is also derived analytically as <code>(int(sqrt(4 + 8 * max_perimeter)) - 2 * n) // 4</code>, giving tight termination without wasted iterations.
+     </p>
+     <p>
+      In Python I collect all perimeter values into a list and use <code>collections.Counter.most_common()[0][0]</code> to find the most frequent one. In C I allocate a fixed-size integer array <code>counts</code> of length <code>max_perimeter + 1</code>, increment <code>counts[p]</code> for each perimeter value, and scan the array for the maximum. The C version avoids dynamic list growth and hash-map overhead, which accounts for its large speed advantage. The loop bounds are identical in both languages - I translated the Python integer floor expressions directly into C integer arithmetic, keeping the two implementations as faithful mirrors of each other.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was recognising that I did not need to search (a, b) pairs directly over a grid of side lengths. Reformulating in Euclid's (m, n) parameters collapses a two-dimensional search over sides into a compact two-dimensional search whose inner check is just a single gcd call and whose bounds are derived analytically. The second insight was that every integer right triangle is a scaled primitive triple, so a short inner scaling loop replaces a much larger redundant outer search - making the algorithm feel like a sieve rather than brute-force enumeration.
+     </p>
+     <p>
+      Since only one algorithm is implemented, there is no algorithmic comparison to make. The Python and C versions are faithful translations of each other. The benchmark results confirm the expected language overhead gap:
+     </p>
+     <table>
+      <tr>
+       <th>
+        Solution
+       </th>
+       <th>
+        P = 10000
+       </th>
+       <th>
+        P = 100000
+       </th>
+       <th>
+        P = 1000000
+       </th>
+      </tr>
+      <tr>
+       <td>
+        p0039_s0.py
+       </td>
+       <td>
+        0.0009 s
+       </td>
+       <td>
+        0.0151 s
+       </td>
+       <td>
+        0.2967 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0039_s0_c
+       </td>
+       <td>
+        0.0000 s
+       </td>
+       <td>
+        0.0003 s
+       </td>
+       <td>
+        0.0055 s
+       </td>
+      </tr>
+     </table>
+     <p>
+      The C version is roughly 50 times faster at P = 10⁶, purely due to language overhead - the algorithm and loop bounds are identical. The C version uses a plain integer array rather than a hash map, which removes allocation and hashing cost and benefits from cache-friendly sequential access during the final scan.
+     </p>
+     <ul>
+      <li>
+       Euclid's parametrisation is the right starting point for any problem involving Pythagorean triples.
+      </li>
+      <li>
+       Primitive-triple enumeration plus harmonic scaling is the Pythagorean analogue of a prime sieve - enumerate the primitives, then sieve their multiples.
+      </li>
+      <li>
+       Deriving tight analytical loop bounds avoids wasted iterations and makes the intent explicit in code.
+      </li>
+      <li>
+       The step-of-2 trick silently enforces the opposite-parity constraint without an extra branch, and is worth reusing any time Euclid's formula appears in a future problem.
+      </li>
+      <li><code>Counter.most_common()</code> is clean and idiomatic for frequency-maximisation problems in Python; a plain count array serves the same role more efficiently in C.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

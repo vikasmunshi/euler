@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 74: Digit Factorial Chains [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../3/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=74" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/7/4/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../5/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 74: Digit Factorial Chains [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The number $145$ is well known for the property that the sum of the factorial of its digits is equal to $145$:
+$$1! + 4! + 5! = 1 + 24 + 120 = 145.$$
+     </p>
+     <p>
+      Perhaps less well known is $169$, in that it produces the longest chain of numbers that link back to $169$; it turns out that there are only three such loops that exist:
+     </p>
+     $$\begin{align}
+&amp;169 \to 363601 \to 1454 \to 169\\
+&amp;871 \to 45361 \to 871\\
+&amp;872 \to 45362 \to 872
+\end{align}$$
+     <p>
+      It is not difficult to prove that EVERY starting number will eventually get stuck in a loop. For example,
+     </p>
+     $$\begin{align}
+&amp;69 \to 363600 \to 1454 \to 169 \to 363601 (\to 1454)\\
+&amp;78 \to 45360 \to 871 \to 45361 (\to 871)\\
+&amp;540 \to 145 (\to 145)
+\end{align}$$
+     <p>
+      Starting with $69$ produces a chain of five non-repeating terms, but the longest non-repeating chain with a starting number below one million is sixty terms.
+     </p>
+     <p>
+      How many chains, with a starting number below one million, contain exactly sixty non-repeating terms?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_num=10) → 1</code></li>
+     <li><code>dev: solve(max_num=100) → 2</code></li>
+     <li><code>dev: solve(max_num=1000) → 12</code></li>
+     <li><code>dev: solve(max_num=10000) → 42</code></li>
+     <li><code>dev: solve(max_num=100000) → 42</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_num=1000000) → 402</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(max_num=5000000) → 3240</code></li>
+     <li><code>extra: solve(max_num=10000000) → 4680</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 16 Jul 2025, 23:31
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.000311539s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.002388884s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.002473824s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.000051214s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.000053307s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        0.000055418s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.000461009s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.002470742s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.002482207s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.000202776s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.000320498s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        0.000369664s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.000598043s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.002720511s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.003064174s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.001180691s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.002563721s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        12
+       </td>
+       <td>
+        0.002900479s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.000998953s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.002837488s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.003072112s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.009934283s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.028258713s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.028070762s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.003202116s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.004712374s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.005802799s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.119113396s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.348592795s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        42
+       </td>
+       <td>
+        0.363276548s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        0.022084171s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        0.024235462s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        0.028058015s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        1.269493408s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        3.632242579s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        402
+       </td>
+       <td>
+        3.656943442s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        0.087062273s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        0.107653400s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        0.111075740s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        6.755566274s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        28.841838861s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        5000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3240
+       </td>
+       <td>
+        21.314619160s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s0_c" rel="noopener noreferrer" target="_blank" title="p0074_s0_c">
+         p0074_s0_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        0.138669666s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s1_c" rel="noopener noreferrer" target="_blank" title="p0074_s1_c">
+         p0074_s1_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        0.217524442s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s2_c" rel="noopener noreferrer" target="_blank" title="p0074_s2_c">
+         p0074_s2_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        0.212714867s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s0.py" rel="noopener noreferrer" target="_blank" title="p0074_s0.py">
+         p0074_s0.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        13.582229588s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s1.py" rel="noopener noreferrer" target="_blank" title="p0074_s1.py">
+         p0074_s1.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        55.584455485s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0074_s2.py" rel="noopener noreferrer" target="_blank" title="p0074_s2.py">
+         p0074_s2.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4680
+       </td>
+       <td>
+        46.482563254s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      Every positive integer has exactly one successor under the digit-factorial map: replace the number with the sum of the factorials of its digits. This defines a functional graph - a directed graph where every node has out-degree exactly one. Because any number with at most seven digits maps to a value no larger than 7 * 9! = 2,540,160, the reachable state space is finite and bounded regardless of the starting point, which guarantees that every walk eventually enters a cycle. The problem states there are exactly three such cycle attractors, seeded by 169, 871, and 872. The question reduces to counting how many starting numbers below one million produce a non-repeating chain of exactly sixty terms before revisiting a value.
+     </p>
+     <p>
+      The key structural insight is that memoization on this bounded functional graph converts a naive O(max_num * chain_length) traversal into an amortized O(max_num) algorithm: once a node's chain length is computed and cached, any subsequent walk that reaches it terminates immediately. The main correctness subtlety is distinguishing two different termination events during a forward walk - hitting a previously cached node (where the remaining length is read directly from cache) versus revisiting a node encountered in the current walk (a cycle event, where the length is inferred from the walk prefix alone). Conflating these two cases produces off-by-one errors in every cycle member's length.
+     </p>
+     <h3>
+      Solution Approaches
+     </h3>
+     <h4>
+      s0 - Integer cache with graph dict
+     </h4>
+     <p>
+      I chose to store only a scalar chain length per number in a cache dictionary, together with a separate graph mapping each number to its precomputed successor. For each starting number I walk forward, collecting visited nodes in a <code>seen</code> list, until I either find the current node already in the length cache or detect a cycle by finding it in <code>seen</code>. In the cache-hit case the total length is <code>len(seen) + cached_length</code>; in the cycle case it is <code>len(seen)</code>, since the entire cycle is contained within the current walk. I then back-propagate through <code>seen</code>, assigning each node the correct length as <code>total - i</code>. I also track the running maximum inline to avoid a second pass. The C translation allocates flat arrays of size 3,000,000 to cover all reachable values, and uses a short linear scan over <code>seen</code> for cycle detection - acceptable because chains are short (at most around 60 elements). Cycle detection with a linear scan over a tiny array is faster in practice than maintaining a hash set for such small walks.
+     </p>
+     <h4>
+      s1 - Full chain memoization with list splicing
+     </h4>
+     <p>
+      My second approach stores for every number the full suffix chain starting at that number as a Python list. The <code>add_chains</code> function builds a <code>current_chain</code> list and a <code>visited</code> set as it walks forward. It stops either when a cached number is reached (appending that number's stored list via <code>extend</code>) or when a cycle is detected. Each prefix position in the walk is then assigned a slice of <code>current_chain</code> as its cached value. The final count is obtained by computing all stored list lengths and calling <code>list.count</code> on the maximum. The C translation reproduces the same logic with dynamic arrays and a boolean visited-flag array, freeing the per-walk visited list after each iteration. Storing full chain lists rather than scalars increases both memory allocation work and garbage-collection pressure, which is directly visible in the benchmarks.
+     </p>
+     <h4>
+      s2 - List memoization with optional visualization
+     </h4>
+     <p>
+      This variant shares the identical chain-building logic from s1. I added it primarily for interactive exploration: the Python <code>print_chains</code> function renders the chain graph using ANSI colour codes, highlighting cycle entry points in blue and starting numbers in green, and reports aggregate statistics such as the ratio of total chain entries to unique numbers. A <code>--show</code> flag and a guard restricting full rendering to <code>max_num &lt;= 1000</code> keep it usable at small scales without polluting benchmark runs. The C translation omits the visual output but is otherwise identical to s1_c. The benchmarks confirm that the visualization infrastructure adds no measurable overhead when the flag is absent.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <h4>
+      Key insights
+     </h4>
+     <ul>
+      <li>
+       Precomputing the ten digit factorials (0! through 9!) into a tuple and extracting digits with modulo and integer division is substantially faster than calling <code>math.factorial</code> inside the hot loop.
+      </li>
+      <li>
+       Cycle detection and cache lookup are two distinct termination conditions requiring different length formulas. A cache hit gives <code>len(seen) + cached_length</code>; a revisit gives <code>len(seen)</code>. Mixing them up corrupts the chain lengths of every cycle member.
+      </li>
+      <li>
+       Because the digit-factorial map is strongly contractive for large numbers (any number above roughly 2.2 million maps to a smaller value), the effective graph explored is much smaller than max_num, which is why memoization pays off so heavily even in Python.
+      </li>
+      <li>
+       On a functional graph (out-degree 1 everywhere), iterative memoization with a seen list and a scalar cache is the standard O(n) pattern. Recursive DFS should be avoided to prevent stack overflows on chains longer than Python's default recursion limit.
+      </li>
+     </ul>
+     <h4>
+      Approach comparison
+     </h4>
+     <table>
+      <tr>
+       <th>
+        Solution
+       </th>
+       <th>
+        1 M Python (s)
+       </th>
+       <th>
+        10 M Python (s)
+       </th>
+       <th>
+        1 M C (s)
+       </th>
+       <th>
+        10 M C (s)
+       </th>
+       <th>
+        Core data structure
+       </th>
+      </tr>
+      <tr>
+       <td>
+        s0
+       </td>
+       <td>
+        1.27
+       </td>
+       <td>
+        13.58
+       </td>
+       <td>
+        0.022
+       </td>
+       <td>
+        0.139
+       </td>
+       <td>
+        integer cache + graph dict
+       </td>
+      </tr>
+      <tr>
+       <td>
+        s1
+       </td>
+       <td>
+        3.63
+       </td>
+       <td>
+        55.58
+       </td>
+       <td>
+        0.024
+       </td>
+       <td>
+        0.218
+       </td>
+       <td>
+        list cache (full chains)
+       </td>
+      </tr>
+      <tr>
+       <td>
+        s2
+       </td>
+       <td>
+        3.66
+       </td>
+       <td>
+        46.48
+       </td>
+       <td>
+        0.028
+       </td>
+       <td>
+        0.213
+       </td>
+       <td>
+        list cache + visualization
+       </td>
+      </tr>
+     </table>
+     <p>
+      s0 is the clear winner in every benchmark category. In Python the performance gap grows from roughly 2.9x at one million to about 4x at ten million, because list allocation and slicing scale poorly compared with simple integer assignment. In C the gap is smaller in absolute terms but still visible - s0_c is about 1.6x faster than s1_c and s2_c at ten million. The lesson is that when only aggregate statistics (counts, maximums) are needed rather than the full path structure, storing derived scalars rather than raw sequences is almost always the right trade-off: it reduces both memory usage and garbage-collection pressure. s1 and s2 are essentially equivalent in speed at scale, confirming that the visualization code in s2 adds no overhead when the flag is absent. The C implementations deliver roughly a 60x to 100x speedup over their Python counterparts, reaching the ten-million case in under 150 ms for s0_c.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,70 @@
+You are a skilled Python programmer writing Python solutions to Project Euler problems.
+
+## Problem
+Number : $number
+Title  : $title
+Level  : $difficulty
+Solved : $solved_date
+
+## Problem statement (HTML)
+$problem_content
+
+## Solution Notes (HTML)
+$solution_notes
+
+## Existing Solution files
+Solutions may be written in Python or C. Each filename encodes the problem number and solution
+index (e.g. p0001_s0.py, p0001_s0.c): files with the same index implement the same algorithm in
+different languages; files with different indices use different algorithms.
+If no solutions exist, write the first one. If solutions exist, implement a different algorithm.
+
+$solutions
+
+## Test cases
+$test_cases
+
+## Current benchmark results
+In the results table, the solution name convention is:
+- Python solutions: `p000N_sM.py` (e.g. `p0001_s0.py`)
+- C solutions: `p000N_sM_c` (e.g. `p0001_s0_c`) — note the `_c` suffix and no file extension
+
+$results
+
+## Solution Template
+Use the following Python template as the structural basis for the generated file:
+
+$solution_template
+
+---
+
+Generate only the file listed below, using the existing solutions above only for context.
+
+File to generate: $file_to_generate
+
+Requirements:
+
+1. The first line must be exactly: `#!/usr/bin/env python3.14`
+
+2. Follow the template structure faithfully:
+   - Shebang, `# -*- coding: utf-8 -*-`, module docstring (as in the template)
+   - `from __future__ import annotations`
+   - `solve(*, ...) -> <return_type>` with keyword-only typed parameters and a return type annotation
+   - `main(**kwargs: Any) -> int` that parses `--runs=N` from argv, times `solve()`, and prints output
+   - `if __name__ == "__main__": raise SystemExit(main(<kwarg>=<type>(argv[N]), ...))`
+
+3. If existing solutions are present, implement a different algorithm. Do not replicate any
+   existing approach.
+
+4. Include `get_text_file` only when the solution must read a data file from the `resources`
+   directory. Omit it otherwise.
+
+5. The output line must be exactly: `print(f'{runs} {average} {result}')`
+
+6. Use only the Python standard library. The only permitted third-party packages are `numpy`
+   for numerical computation and `primesieve` if sieve-based prime generation is needed.
+
+7. Output the Python file wrapped in delimiter lines, no other text:
+
+// BEGIN <filename>
+[py source]
+// END <filename>

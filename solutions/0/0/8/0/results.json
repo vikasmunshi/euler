@@ -1,0 +1,110 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0080_s0.py",
+    "args": "100 2",
+    "answer": 475,
+    "verdict": "correct",
+    "average": 0.00019282207718928336,
+    "number_runs": 52
+  },
+  {
+    "category": "main",
+    "solution": "p0080_s0.py",
+    "args": "100 99",
+    "answer": 40886,
+    "verdict": "correct",
+    "average": 0.015517215096469254,
+    "number_runs": 52
+  },
+  {
+    "category": "extra",
+    "solution": "p0080_s0.py",
+    "args": "100 999",
+    "answer": 434576,
+    "verdict": "correct",
+    "average": 0.16986733801877563,
+    "number_runs": 52
+  },
+  {
+    "category": "dev",
+    "solution": "p0080_s1.py",
+    "args": "100 2",
+    "answer": 475,
+    "verdict": "correct",
+    "average": 0.0003440432308077736,
+    "number_runs": 52
+  },
+  {
+    "category": "main",
+    "solution": "p0080_s1.py",
+    "args": "100 99",
+    "answer": 40886,
+    "verdict": "correct",
+    "average": 0.0244518038651292,
+    "number_runs": 52
+  },
+  {
+    "category": "extra",
+    "solution": "p0080_s1.py",
+    "args": "100 999",
+    "answer": 434576,
+    "verdict": "correct",
+    "average": 0.2894303723458926,
+    "number_runs": 52
+  },
+  {
+    "category": "dev",
+    "solution": "p0080_s0_c",
+    "args": "100 2",
+    "answer": 475,
+    "verdict": "correct",
+    "average": 8.658451612903225e-06,
+    "number_runs": 31
+  },
+  {
+    "category": "main",
+    "solution": "p0080_s0_c",
+    "args": "100 99",
+    "answer": 40886,
+    "verdict": "correct",
+    "average": 0.0008420598387096773,
+    "number_runs": 31
+  },
+  {
+    "category": "extra",
+    "solution": "p0080_s0_c",
+    "args": "100 999",
+    "answer": 434576,
+    "verdict": "correct",
+    "average": 0.008109934838709676,
+    "number_runs": 31
+  },
+  {
+    "category": "dev",
+    "solution": "p0080_s1_c",
+    "args": "100 2",
+    "answer": 475,
+    "verdict": "correct",
+    "average": 0.0004199942903225806,
+    "number_runs": 31
+  },
+  {
+    "category": "main",
+    "solution": "p0080_s1_c",
+    "args": "100 99",
+    "answer": 40886,
+    "verdict": "correct",
+    "average": 0.03842441212903226,
+    "number_runs": 31
+  },
+  {
+    "category": "extra",
+    "solution": "p0080_s1_c",
+    "args": "100 999",
+    "answer": 434576,
+    "verdict": "correct",
+    "average": 0.362178738,
+    "number_runs": 31
+  }
+]

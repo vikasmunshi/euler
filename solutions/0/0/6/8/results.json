@@ -1,0 +1,128 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0068_s0_c",
+    "args": "9 3",
+    "answer": 432621513,
+    "verdict": "correct",
+    "average": 1.3737500000000002e-05,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0068_s0.py",
+    "args": "9 3",
+    "answer": 432621513,
+    "verdict": "correct",
+    "average": 0.0002724608002608875,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0068_s0_c",
+    "args": "12 4",
+    "answer": 462723831516,
+    "verdict": "correct",
+    "average": 7.95887e-05,
+    "number_runs": 10
+  },
+  {
+    "category": "dev",
+    "solution": "p0068_s0.py",
+    "args": "12 4",
+    "answer": 462723831516,
+    "verdict": "correct",
+    "average": 0.0034446777000994187,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0068_s0_c",
+    "args": "16 5",
+    "answer": 6531031914842725,
+    "verdict": "correct",
+    "average": 0.0008823015000000002,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0068_s0.py",
+    "args": "16 5",
+    "answer": 6531031914842725,
+    "verdict": "correct",
+    "average": 0.03122895559972676,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0_c",
+    "args": "21 6",
+    "answer": 692122310348451151719,
+    "verdict": "correct",
+    "average": 0.0039671791999999996,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0.py",
+    "args": "21 6",
+    "answer": 692122310348451151719,
+    "verdict": "correct",
+    "average": 0.09871465759988496,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0_c",
+    "args": "26 7",
+    "answer": 87494612611315115314321027,
+    "verdict": "correct",
+    "average": 0.0081993582,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0.py",
+    "args": "26 7",
+    "answer": 87494612611315115314321027,
+    "verdict": "correct",
+    "average": 0.26008252350038674,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0_c",
+    "args": "31 8",
+    "answer": 5981381151614621624114712731039,
+    "verdict": "correct",
+    "average": 0.015413495700000002,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0.py",
+    "args": "31 8",
+    "answer": 5981381151614621624114712731039,
+    "verdict": "correct",
+    "average": 0.4959795232000033,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0_c",
+    "args": "36 9",
+    "answer": 109518511716166215271473133812841149,
+    "verdict": "correct",
+    "average": 0.019563282300000002,
+    "number_runs": 10
+  },
+  {
+    "category": "extra",
+    "solution": "p0068_s0.py",
+    "args": "36 9",
+    "answer": 109518511716166215271473133812841149,
+    "verdict": "correct",
+    "average": 0.49117612169993663,
+    "number_runs": 10
+  }
+]

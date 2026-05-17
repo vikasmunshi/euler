@@ -1,0 +1,38 @@
+[
+  {
+    "category": "dev",
+    "solution": "p0007_s0.py",
+    "args": "6",
+    "answer": 13,
+    "verdict": "correct",
+    "average": 1.3526756456633485e-05,
+    "number_runs": 123
+  },
+  {
+    "category": "main",
+    "solution": "p0007_s0.py",
+    "args": "10001",
+    "answer": 104743,
+    "verdict": "correct",
+    "average": 0.05871400310760893,
+    "number_runs": 122
+  },
+  {
+    "category": "dev",
+    "solution": "p0007_s0_c",
+    "args": "6",
+    "answer": 13,
+    "verdict": "correct",
+    "average": 3.558303571428572e-06,
+    "number_runs": 56
+  },
+  {
+    "category": "main",
+    "solution": "p0007_s0_c",
+    "args": "10001",
+    "answer": 104743,
+    "verdict": "correct",
+    "average": 0.000518788982142857,
+    "number_runs": 56
+  }
+]

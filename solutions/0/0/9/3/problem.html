@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 93: Arithmetic Expressions [Level 9]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=93" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/9/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 93: Arithmetic Expressions [Level 9]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      By using each of the digits from the set, $\{1, 2, 3, 4\}$, exactly once, and making use of the four arithmetic operations ($+, -, \times, /$) and brackets/parentheses, it is possible to form different positive integer targets.
+     </p>
+     <p>
+      For example,
+     </p>
+     $$\begin{align}
+8 &amp;= (4 \times (1 + 3)) / 2\\
+14 &amp;= 4 \times (3 + 1 / 2)\\
+19 &amp;= 4 \times (2 + 3) - 1\\
+36 &amp;= 3 \times 4 \times (2 + 1)
+\end{align}$$
+     <p>
+      Note that concatenations of the digits, like $12 + 34$, are not allowed.
+     </p>
+     <p>
+      Using the set, $\{1, 2, 3, 4\}$, it is possible to obtain thirty-one different target numbers of which $36$ is the maximum, and each of the numbers $1$ to $28$ can be obtained before encountering the first non-expressible number.
+     </p>
+     <p>
+      Find the set of four distinct digits, $a \lt b \lt c \lt d$, for which the longest set of consecutive positive integers, $1$ to $n$, can be obtained, giving your answer as a string:
+      <i>
+       abcd
+      </i>
+      .
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve() → '1258'</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Sat, 19 Jul 2025, 00:37
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0093_s0_c" rel="noopener noreferrer" target="_blank" title="p0093_s0_c">
+         p0093_s0_c
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1258
+       </td>
+       <td>
+        0.023790230s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0093_s0.py" rel="noopener noreferrer" target="_blank" title="p0093_s0.py">
+         p0093_s0.py
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1258
+       </td>
+       <td>
+        0.018351918s ⚡
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core challenge is enumerating every value producible from four operands combined with three binary operators
+(+, -, x, /) under all possible parenthesizations and operand orderings. For n operands the number of distinct
+binary expression tree shapes is the (n-1)th Catalan number C(n-1), which for n=4 gives 5 tree shapes.
+Combined with 4! = 24 operand orderings and 4^3 = 64 operator assignments, the naive upper bound is
+5 x 24 x 64 = 7,680 expressions per digit set. The outer loop over all four-element subsets of {1,...,9}
+adds C(9,4) = 126, keeping the total search entirely tractable. Consecutive-run scoring then requires only
+a linear scan per subset, so the overall work is dominated by expression enumeration.
+     </p>
+     <p>
+      Rather than enumerating expression trees explicitly by shape, I recognized that every binary expression tree
+over a multiset of values can be described recursively as: pick any two values currently in the pool, combine
+them with one operation to produce a single new value, and recurse on the reduced pool. This set-reduction
+framing covers every parenthesization and operand ordering simultaneously, because every distinct tree topology
+corresponds to some sequence of such pair-picks. When the pool is represented as a sorted tuple, equivalent
+intermediate states reached by different pair-pick paths collapse to the same cache key, enabling effective
+memoization.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Recursive Pair-Reduction with Memoization (Python and C)
+     </h4>
+     <p>
+      Both solutions share the same algorithmic idea: a recursive function accepts the current pool of values and
+returns the set of all reachable scalar results. The base case returns the single remaining value. In the
+recursive case I iterate over every unordered pair (i, j) from the pool, apply up to five operations, and
+recurse on the reduced pool with the newly combined value appended.
+     </p>
+     <p>
+      The five operations are: addition (a+b), absolute difference (|a-b|), multiplication (a*b), and both
+division orders (a/b if b is nonzero, b/a if a is nonzero). Using an unordered pair avoids duplicating
+commutative results for addition and multiplication, while computing both division orders and the absolute
+difference covers the non-commutative cases. Throughout, values are stored as floating-point numbers and
+integrality is tested at the very end - with <code>x.is_integer()</code> in Python and an epsilon comparison
+against <code>floor(v + 0.5)</code> in C - which cleanly handles rational intermediates arising from
+chained divisions without requiring exact rational arithmetic.
+     </p>
+     <p>
+      The Python version represents the pool as a sorted tuple so that <code>lru_cache</code> identifies equivalent
+intermediate states regardless of how they were reached. For example, the pool {3.0, 5.0} reached via two
+different initial pair-picks maps to the same cache key <code>(3.0, 5.0)</code>, collapsing redundant
+sub-computations. The C version omits memoization entirely - the problem is small enough (126 subsets, each
+with a bounded recursion depth of 3) that the raw recursion still completes quickly. The C version uses a
+small dynamic <code>DoubleSet</code> struct with exact-equality deduplication, which is sound here because
+all intermediate values arise from the same finite sequence of arithmetic on integer starting points. Both
+solutions scan the produced result set for the longest unbroken consecutive integer run starting at 1 and
+track the best digit combination found across all 126 subsets.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was reframing expression-tree enumeration as repeated operand-pair reduction. Once I recognized
+that "pick any two values, combine them, recurse on the reduced pool" is equivalent to evaluating every
+possible parenthesization and operand ordering, the recursive structure became obvious and the memoization
+fell out naturally. Representing the pool as a sorted tuple is the essential trick that makes caching
+effective - without sorting, permutations of the same multiset of intermediate values would appear as
+distinct cache keys, negating most of the memoization benefit.
+     </p>
+     <p>
+      A subtlety worth remembering: using |a-b| as the single subtraction result merges both signed differences
+into one non-negative value. This is sufficient for this problem because no negative intermediate is required
+to reach an otherwise-unreachable positive integer target, but in a more general setting both a-b and b-a
+would need to be tracked separately.
+     </p>
+     <p>
+      The benchmark results reveal an interesting reversal of the usual performance pattern:
+     </p>
+     <table>
+      <tr>
+       <th>
+        Solution
+       </th>
+       <th>
+        Average time (s)
+       </th>
+      </tr>
+      <tr>
+       <td>
+        p0093_s0.py
+       </td>
+       <td>
+        0.0184
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0093_s0_c
+       </td>
+       <td>
+        0.0238
+       </td>
+      </tr>
+     </table>
+     <p>
+      The Python version is actually faster than the C version. I attribute this to the <code>lru_cache</code> memoization in the Python implementation eliminating enough redundant recursive work to more than compensate
+for interpreter overhead, while the C version performs the full recursion without any caching. This is a
+useful reminder that memoization can dominate raw execution speed even for problems that appear small enough
+to brute-force, and that a cached interpreted solution can outperform an uncached compiled one.
+     </p>
+     <p>
+      Two broadly reusable techniques emerged from this problem: the sorted-tuple memoization over multisets of
+intermediate values for any combine-and-reduce combinatorial search, and the pattern of accumulating
+floating-point intermediates throughout a computation and deferring integrality checks to the very end to
+handle chains of division without symbolic fractions.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0067_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0067_triangle.txt",
+    "answer": 7273,
+    "verdict": "correct",
+    "average": 0.00010427340000000002,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0067_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0067_triangle.txt",
+    "answer": 7273,
+    "verdict": "correct",
+    "average": 0.0014889302005030914,
+    "number_runs": 10
+  }
+]

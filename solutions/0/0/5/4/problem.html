@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 54: Poker Hands [Level 3]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../3/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=54" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/5/4/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../5/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 54: Poker Hands [Level 3]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
+     </p>
+     <ul>
+      <li>
+       <b>
+        High Card
+       </b>
+       : Highest value card.
+      </li>
+      <li>
+       <b>
+        One Pair
+       </b>
+       : Two cards of the same value.
+      </li>
+      <li>
+       <b>
+        Two Pairs
+       </b>
+       : Two different pairs.
+      </li>
+      <li>
+       <b>
+        Three of a Kind
+       </b>
+       : Three cards of the same value.
+      </li>
+      <li>
+       <b>
+        Straight
+       </b>
+       : All cards are consecutive values.
+      </li>
+      <li>
+       <b>
+        Flush
+       </b>
+       : All cards of the same suit.
+      </li>
+      <li>
+       <b>
+        Full House
+       </b>
+       : Three of a kind and a pair.
+      </li>
+      <li>
+       <b>
+        Four of a Kind
+       </b>
+       : Four cards of the same value.
+      </li>
+      <li>
+       <b>
+        Straight Flush
+       </b>
+       : All cards are consecutive values of same suit.
+      </li>
+      <li>
+       <b>
+        Royal Flush
+       </b>
+       : Ten, Jack, Queen, King, Ace, in same suit.
+      </li>
+     </ul>
+     <p>
+      The cards are valued in the order:
+      <br/>
+      2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King, Ace.
+     </p>
+     <p>
+      If two players have the same ranked hands then the rank made up of the highest value wins; for example, a pair of eights beats a pair of fives (see example 1 below). But if two ranks tie, for example, both players have a pair of queens, then highest cards in each hand are compared (see example 4 below); if the highest cards tie then the next highest cards are compared, and so on.
+     </p>
+     <p>
+      Consider the following five hands dealt to two players:
+     </p>
+     <div class="center">
+      <table>
+       <tr>
+        <td>
+         <b>
+          Hand
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         <b>
+          Player 1
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         <b>
+          Player 2
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         <b>
+          Winner
+         </b>
+        </td>
+       </tr>
+       <tr>
+        <td>
+         <b>
+          1
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         5H 5C 6S 7S KD
+         <br/>
+         <div class="smaller">
+          Pair of Fives
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         2C 3S 8S 8D TD
+         <br/>
+         <div class="smaller">
+          Pair of Eights
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         Player 2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         <b>
+          2
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         5D 8C 9S JS AC
+         <br/>
+         <div class="smaller">
+          Highest card Ace
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         2C 5C 7D 8S QH
+         <br/>
+         <div class="smaller">
+          Highest card Queen
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         Player 1
+        </td>
+       </tr>
+       <tr>
+        <td>
+         <b>
+          3
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         2D 9C AS AH AC
+         <br/>
+         <div class="smaller">
+          Three Aces
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         3D 6D 7D TD QD
+         <br/>
+         <div class="smaller">
+          Flush  with Diamonds
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         Player 2
+        </td>
+       </tr>
+       <tr>
+        <td>
+         <b>
+          4
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         4D 6S 9H QH QC
+         <br/>
+         <div class="smaller">
+          Pair of Queens
+          <br/>
+          Highest card Nine
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         3D 6D 7H QD QS
+         <br/>
+         <div class="smaller">
+          Pair of Queens
+          <br/>
+          Highest card Seven
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         Player 1
+        </td>
+       </tr>
+       <tr>
+        <td>
+         <b>
+          5
+         </b>
+        </td>
+        <td>
+        </td>
+        <td>
+         2H 2D 4C 4D 4S
+         <br/>
+         <div class="smaller">
+          Full House
+          <br/>
+          With Three Fours
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         3C 3D 3S 9S 9D
+         <br/>
+         <div class="smaller">
+          Full House
+          <br/>
+          with Three Threes
+         </div>
+        </td>
+        <td>
+        </td>
+        <td>
+         Player 1
+        </td>
+       </tr>
+      </table>
+     </div>
+     <p>
+      The file,
+      <a href="resources/0054_poker.txt">
+       poker.txt
+      </a>
+      , contains one-thousand random hands dealt to two players. Each line of the file contains ten cards (separated by a single space): the first five are Player 1's cards and the last five are Player 2's cards. You can assume that all hands are valid (no invalid characters or repeated cards), each player's hand is in no specific order, and in each hand there is a clear winner.
+     </p>
+     <p>
+      How many hands does Player 1 win?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(file_url='0054_poker.txt') → 376</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 12 Dec 2019, 08:35
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0054_s0_c" rel="noopener noreferrer" target="_blank" title="p0054_s0_c">
+         p0054_s0_c
+        </a>
+       </td>
+       <td>
+        0054_poker.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        376
+       </td>
+       <td>
+        0.000725454s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0054_s0.py" rel="noopener noreferrer" target="_blank" title="p0054_s0.py">
+         p0054_s0.py
+        </a>
+       </td>
+       <td>
+        0054_poker.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        376
+       </td>
+       <td>
+        0.012873220s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem is an exercise in discrete classification and total ordering rather than number theory or combinatorics in the traditional sense. The core challenge is defining a strict total order over poker hands, which requires understanding a hierarchy of ten ranked categories and, within each category, a lexicographic tie-breaking rule that resolves any draw completely. Each hand must be mapped to a comparable representation that encodes both its category rank and an ordered sequence of card values sufficient to break any tie. The problem guarantees a clear winner on every line, so only strict greater-than comparison is needed.
+     </p>
+     <p>
+      Processing the input involves evaluating each of the 1,000 lines exactly once. Classifying a single five-card hand takes O(1) time since the hand size is fixed at five cards - all loops over the hand are bounded by a constant. The overall solution therefore runs in O(N) time where N is the number of lines, making the asymptotic complexity trivial. All the interesting work lies in getting the constant-factor logic correct: mapping face characters to numeric values, counting duplicates, and assembling tie-breaker sequences that respect the full hand ranking rules.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Sorted Count-Pair Classification with a Category Integer and Tie-Breaker Sequence (Python and C)
+     </h4>
+     <p>
+      Both the Python and C solutions implement the same algorithm. I modelled each hand by extracting two parallel sequences - numeric card values mapped via the string <code>VALUES = "23456789TJQKA"</code> so that index position directly encodes rank, and suit characters. Classification first computes two boolean flags, <code>is_flush</code> and <code>is_straight</code>, to handle the top-tier hands. For the straight check I required both that all five values are distinct and that the span is exactly four; both conditions together are necessary and sufficient for a standard straight. For the remaining hand types I built a list of <code>(count, value)</code> pairs sorted descending by count then value, so quads sort before trips before pairs and the highest-count group's value surfaces automatically. Each evaluated hand is returned as a primary category integer paired with a tie-breaker sequence of up to five integers. Comparison first checks the category, then falls through to a lexicographic comparison of the tie-breaker sequence.
+     </p>
+     <p>
+      In the Python solution I used a <code>PokerRank</code><code>
+       IntEnum
+      </code>
+      so that category comparison reduces to plain integer comparison, a <code>HandRank</code> dataclass with a custom <code>__gt__</code> method, and a <code>cached_property</code> on <code>PokerHand</code> to avoid recomputing the rank if accessed more than once. The final answer is a <code>sum</code> over a generator expression that pairs each line's two hands and applies the comparison. In the C solution I implemented the same logic procedurally: <code>evaluate_hand</code> returns a <code>HandRank</code> struct containing a fixed-size <code>tie_breakers</code> array and a count field, and <code>hand_rank_gt</code> performs the two-level comparison by iterating over the tie-breaker array element by element. The C version avoids all dynamic allocation during classification, keeping every working array on the stack.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that made this problem tractable was realising I could encode the entire comparison problem into exactly two values - a category integer and a tie-breaker sequence - and then let the language's built-in ordering or a simple loop handle the rest. Once I had that framing, the classification code became a straightforward chain of if-elif tests with no backtracking. The <code>(count, value)</code> sorted-pair trick is particularly clean: sorting descending by count automatically groups quads before trips before pairs, and the secondary sort by value ensures the highest-count group's value appears first, which is precisely what tie-breaking needs without any additional logic.
+     </p>
+     <p>
+      A subtlety I handled carefully was two-pair tie-breaking: after identifying both pair values I explicitly sort them to guarantee the higher pair is always in position zero, rather than relying on the order they happened to appear in the count-pair list. Another subtle point was the Royal Flush case - I stored the suit order as the tie-breaker for completeness even though the problem guarantees no draws, because leaving it undefined would be a silent correctness hole.
+     </p>
+     <p>
+      Since there is only one algorithm index here, the Python and C files are directly comparable implementations of the same approach. The C solution runs in approximately 0.0007 s versus 0.0129 s for Python - a roughly 18x speedup - but both are fast enough that the choice has no practical consequence for this input size. The Python version is considerably more readable thanks to <code>IntEnum</code>, dataclasses, and tuple unpacking. For future problems involving structured multi-attribute comparison I will remember the pattern of separating a primary integer rank from a secondary sequence tie-breaker, combined with an <code>IntEnum</code> for the category in Python. This pattern keeps comparison logic clean, extends naturally to deeper tie-breaking chains without custom recursion, and translates directly into a plain struct in C with minimal adaptation.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

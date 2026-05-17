@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 3: Largest Prime Factor [Level 0]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=3" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/0/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 3: Largest Prime Factor [Level 0]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The prime factors of $13195$ are $5, 7, 13$ and $29$.
+     </p>
+     <p>
+      What is the largest prime factor of the number $600851475143$?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(number=13195) → 29</code></li>
+     <li><code>dev: solve(number=10) → 5</code></li>
+     <li><code>dev: solve(number=20) → 5</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(number=600851475143) → 6857</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(number=79376318561249) → 9999991</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 3 Jul 2015, 14:27
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0003_s0_c" rel="noopener noreferrer" target="_blank" title="p0003_s0_c">
+         p0003_s0_c
+        </a>
+       </td>
+       <td>
+        13195
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        29
+       </td>
+       <td>
+        0.000000108s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0003_s0.py" rel="noopener noreferrer" target="_blank" title="p0003_s0.py">
+         p0003_s0.py
+        </a>
+       </td>
+       <td>
+        13195
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        29
+       </td>
+       <td>
+        0.000012733s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0003_s0_c" rel="noopener noreferrer" target="_blank" title="p0003_s0_c">
+         p0003_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        0.000000087s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0003_s0.py" rel="noopener noreferrer" target="_blank" title="p0003_s0.py">
+         p0003_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        0.000010087s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0003_s0_c" rel="noopener noreferrer" target="_blank" title="p0003_s0_c">
+         p0003_s0_c
+        </a>
+       </td>
+       <td>
+        20
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        0.000000082s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0003_s0.py" rel="noopener noreferrer" target="_blank" title="p0003_s0.py">
+         p0003_s0.py
+        </a>
+       </td>
+       <td>
+        20
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        5
+       </td>
+       <td>
+        0.000008579s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0003_s0_c" rel="noopener noreferrer" target="_blank" title="p0003_s0_c">
+         p0003_s0_c
+        </a>
+       </td>
+       <td>
+        600851475143
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6857
+       </td>
+       <td>
+        0.000001656s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0003_s0.py" rel="noopener noreferrer" target="_blank" title="p0003_s0.py">
+         p0003_s0.py
+        </a>
+       </td>
+       <td>
+        600851475143
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        6857
+       </td>
+       <td>
+        0.000061533s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0003_s0_c" rel="noopener noreferrer" target="_blank" title="p0003_s0_c">
+         p0003_s0_c
+        </a>
+       </td>
+       <td>
+        79376318561249
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        9999991
+       </td>
+       <td>
+        0.008429163s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0003_s0.py" rel="noopener noreferrer" target="_blank" title="p0003_s0.py">
+         p0003_s0.py
+        </a>
+       </td>
+       <td>
+        79376318561249
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        9999991
+       </td>
+       <td>
+        0.251233833s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The fundamental theorem of arithmetic guarantees that every integer greater than 1 has a unique prime factorization,
+so the problem reduces to identifying the largest prime in that factorization. The classical approach is trial
+division: test candidate divisors from 2 up to the square root of the number. The square root boundary is the key
+insight - if a composite number <code>n</code> has a factor larger than its square root, the paired cofactor must
+be smaller than the square root and would have been found first. In the worst case, when <code>n</code> is itself
+prime, this requires O(sqrt(n)) iterations, which for <code>n = 600851475143</code> is roughly 775,000 steps and
+for the extra test case <code>79376318561249</code> is around 8.9 million steps.
+     </p>
+     <p>
+      A critical practical refinement is to fully divide out each confirmed factor before advancing the candidate pointer,
+and then recompute the search ceiling as the integer square root of the reduced remainder. Because small primes are
+peeled off first, the remaining number collapses quickly and the search limit shrinks far below its initial value,
+making the algorithm considerably faster in practice than the O(sqrt(n)) bound implies.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Trial Division with Dynamic Search-Limit Reduction (s0 - Python and C)
+     </h4>
+     <p>
+      I chose a straightforward trial division strategy with two focused optimizations. First, I handle the factor 2
+separately at the start, then step through only odd candidates (3, 5, 7, ...), which immediately halves the
+number of divisions tested. Second - and more impactful - every time a factor is confirmed I call <code>reduce()</code>, which fully divides that factor out of the remaining number before the loop advances. After
+each such reduction I recompute <code>search_limit</code> as the integer square root of the now-smaller remainder.
+This causes the upper bound to collapse aggressively as factors are peeled off, so the algorithm self-accelerates
+through the factorization. When the loop exits, if <code>remaining_number</code> is still greater than 1 it must
+itself be prime and is returned as the answer; otherwise the last confirmed factor is returned.
+     </p>
+     <p>
+      The Python and C implementations use identical logic. The Python version computes the square root with <code>int(remaining_number ** 0.5)</code>, while the C version uses <code>(long long)sqrt((double)remaining_number)</code>. Both behave correctly for all inputs tested. The C version
+is noticeably faster in absolute terms: on the extra test case ( <code>79376318561249</code>, largest factor <code>9999991</code>) the C solution completes in about 0.0084 seconds while the Python solution takes about
+0.25 seconds - roughly a 30x speedup - consistent with the overhead of the Python interpreter on a tight
+arithmetic loop. For the main problem input both are essentially instantaneous at well under a millisecond.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight for me was that fully dividing out each confirmed factor before advancing the candidate pointer
+implicitly guarantees that only prime factors are ever confirmed. By the time the loop reaches a composite
+candidate such as 9, all factors of 3 have already been stripped from the remaining number, so 9 will never
+divide it evenly. This means stepping through odd integers yields exactly the same result as stepping through an
+explicit list of primes, with no sieve or prime-generation overhead at all.
+     </p>
+     <p>
+      The second important realization was the dynamic search-limit update. Without it the loop would continue testing
+candidates up to sqrt(600851475143) even after the remaining number had already collapsed to a small cofactor.
+Recomputing the limit after each reduction keeps the bound tight and is a cheap operation that pays for itself
+immediately on any input with small prime factors.
+     </p>
+     <p>
+      Since I only wrote one algorithm for this problem there is no alternative approach to compare, just Python and C
+ports of the same logic. The roughly 30x speed difference on the extra test case is a useful data point: for
+tight trial-division loops where the iteration count runs into the millions, moving to C is a straightforward
+win. I decided that skipping only even numbers was preferable to wheel factorization (which would also skip
+multiples of 3, eliminating another third of candidates) because the current approach is already fast enough for
+all test cases and the code stays easy to read.
+     </p>
+     <ul>
+      <li>
+       Fully dividing out each factor before advancing the candidate implicitly restricts confirmed factors to primes - no explicit primality test is needed.
+      </li>
+      <li>
+       Recomputing <code>search_limit</code> as <code>isqrt(remaining_number)</code> after each reduction is cheap but highly effective at shrinking the loop bound.
+      </li>
+      <li>
+       When the loop exits with <code>remaining_number &gt; 1</code>, that remainder is always prime and always the largest factor - no additional check is required.
+      </li>
+      <li>
+       Wheel factorization beyond skipping evens (for example also skipping multiples of 3) is worth considering for inputs in the range of 10^15 and above where the raw loop count becomes large enough to matter.
+      </li>
+      <li>
+       For tight arithmetic loops the Python-to-C speedup is consistently around 30x, which matches the benchmark results here and serves as a useful rule of thumb for future problems.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 53: Combinatoric Selections [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=53" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/5/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 53: Combinatoric Selections [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      There are exactly ten ways of selecting three from five, 12345:
+     </p>
+     <p class="center">
+      123, 124, 125, 134, 135, 145, 234, 235, 245, and 345
+     </p>
+     <p>
+      In combinatorics, we use the notation, $\displaystyle \binom 5 3 = 10$.
+     </p>
+     <p>
+      In general, $\displaystyle \binom n r = \dfrac{n!}{r!(n-r)!}$, where $r \le n$, $n! = n \times (n-1) \times ... \times 3 \times 2 \times 1$, and $0! = 1$.
+     </p>
+     <p>
+      It is not until $n = 23$, that a value exceeds one-million: $\displaystyle \binom {23} {10} = 1144066$.
+     </p>
+     <p>
+      How many, not necessarily distinct, values of $\displaystyle \binom n r$ for $1 \le n \le 100$, are greater than one-million?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_n=100, threshold=100) → 4724</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_n=100, threshold=1000000) → 4075</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 11 Dec 2019, 09:20
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0053_s0_c" rel="noopener noreferrer" target="_blank" title="p0053_s0_c">
+         p0053_s0_c
+        </a>
+       </td>
+       <td>
+        100 100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4724
+       </td>
+       <td>
+        0.000000625s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0053_s0.py" rel="noopener noreferrer" target="_blank" title="p0053_s0.py">
+         p0053_s0.py
+        </a>
+       </td>
+       <td>
+        100 100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4724
+       </td>
+       <td>
+        0.000028789s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0053_s0_c" rel="noopener noreferrer" target="_blank" title="p0053_s0_c">
+         p0053_s0_c
+        </a>
+       </td>
+       <td>
+        100 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4075
+       </td>
+       <td>
+        0.000001660s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0053_s0.py" rel="noopener noreferrer" target="_blank" title="p0053_s0.py">
+         p0053_s0.py
+        </a>
+       </td>
+       <td>
+        100 1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4075
+       </td>
+       <td>
+        0.000046534s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The problem rests on three properties of binomial coefficients that, taken together, make a brute-force factorial approach entirely unnecessary. First, the multiplicative row recurrence <code>C(n, r+1) = C(n, r) * (n - r) / (r + 1)</code> lets me walk along any row of Pascal's triangle using only integer arithmetic, since the division always comes out exact. Second, the symmetry property <code>C(n, r) = C(n, n-r)</code> means each row is a palindrome, so I only need to inspect values up to <code>r = n // 2</code>. Third, the unimodal property means values in each row rise monotonically from <code>r = 0</code> to the central peak and then fall again. Combining all three, the moment I find the first <code>r</code> in the ascending half where <code>C(n, r)</code> exceeds the threshold, I know every remaining value in that row also exceeds it, and I can count the entire remaining block in O(1) using the formula <code>n - 2*r + 1</code>, which accounts for both the unvisited ascending positions and their symmetric partners simultaneously.
+     </p>
+     <p>
+      The brute-force upper bound is O(n^2) pairs for <code>1 &lt;= n &lt;= 100</code>, giving at most 5050 evaluations. Because of the early-exit strategy the inner loop terminates as soon as the threshold is crossed, so in practice far fewer evaluations occur - particularly for large <code>n</code> and a high threshold where the crossing point is reached very early in the row. Worst-case complexity remains O(n^2), but the average-case behaviour is substantially sub-quadratic.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Row-wise Incremental Traversal with Symmetry Early Exit (Python and C)
+     </h4>
+     <p>
+      I implemented the same algorithm in both Python ( <code>p0053_s0.py</code>) and C ( <code>p0053_s0_c</code>). For each <code>n</code> from 1 to <code>max_n</code>, I initialise <code>c = 1</code> (representing <code>C(n, 0)</code>) and walk <code>r</code> from 0 up to <code>n // 2</code>, updating via <code>c = c * (n - r) // (r + 1)</code> at each step. While <code>c &lt;= threshold</code> I continue walking. The moment <code>c</code> exceeds the threshold, I add <code>n - 2*r + 1</code> to the running count and break immediately to the next row, avoiding any evaluation of the remaining large central values. This approach requires no factorial storage and no floating-point arithmetic.
+     </p>
+     <p>
+      The Python version uses keyword arguments ( <code>max_n</code>, <code>threshold</code>) and Python's arbitrarily large integers, which means overflow is never a concern. The C version reads positional command-line arguments using <code>atoi</code> and <code>atoll</code>, and uses <code>long long</code> throughout. For this problem size the intermediate values of <code>c</code> stay well within <code>long long</code> range before the early exit fires, so no special overflow handling is needed. Both versions pass both test cases, returning 4724 for the dev case (threshold 100) and 4075 for the main case (threshold 1 000 000).
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was that I did not need factorials at all. The multiplicative recurrence walks any row of Pascal's triangle using only small integer operations, and the combination of unimodality and symmetry transforms what could be a full inner-loop count into a single arithmetic expression the moment the threshold is crossed. The formula <code>n - 2*r + 1</code> was the satisfying "aha" step: it simultaneously accounts for all unvisited positions in the ascending half and their mirrored counterparts in the descending half.
+     </p>
+     <p>
+      Only one algorithmic approach exists here, so there is no meaningful performance comparison to make. Both the Python and C versions complete in effectively zero measurable time for this problem size, which reflects how little work the early-exit strategy actually does in practice. The dev test case with threshold 100 is a genuinely useful complement to the main case: because the threshold is much lower, the crossing point is reached later in each row, forcing the counting formula to fire across a wider range of <code>r</code> values and exercising more of the logic.
+     </p>
+     <ul>
+      <li>
+       The recurrence <code>C(n, r+1) = C(n, r) * (n - r) / (r + 1)</code> always divides exactly and is far cheaper than computing or storing factorials.
+      </li>
+      <li>
+       Combining the unimodal and symmetry properties of Pascal's triangle turns a linear inner loop into an O(1) bulk count the moment a threshold is crossed - a pattern worth keeping as a mental template for any similar threshold-on-rows problem.
+      </li>
+      <li>
+       Walking a row of Pascal's triangle incrementally via the multiplicative recurrence is a general primitive that reappears in many combinatorics problems; it is worth internalising.
+      </li>
+      <li>
+       Pairing a high-threshold main test case with a low-threshold dev case is a good testing discipline: the low threshold forces later exits and exercises more of the counting code path, while the high threshold checks that the early-exit optimisation fires correctly under realistic conditions.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

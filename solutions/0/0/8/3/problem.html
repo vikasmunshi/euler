@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 83: Path Sum: Four Ways [Level 4]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=83" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/8/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 83: Path Sum: Four Ways [Level 4]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p class="small_notice">
+      NOTE: This problem is a significantly more challenging version of
+      <a href="problem=81">
+       Problem 81
+      </a>
+      .
+     </p>
+     <p>
+      In the $5$ by $5$ matrix below, the minimal path sum from the top left to the bottom right, by moving left, right, up, and down, is indicated in bold red and is equal to $2297$.
+     </p>
+     <div class="center">
+      $$
+\begin{pmatrix}
+\color{red}{131} &amp; 673 &amp; \color{red}{234} &amp; \color{red}{103} &amp; \color{red}{18}\\
+\color{red}{201} &amp; \color{red}{96} &amp; \color{red}{342} &amp; 965 &amp; \color{red}{150}\\
+630 &amp; 803 &amp; 746 &amp; \color{red}{422} &amp; \color{red}{111}\\
+537 &amp; 699 &amp; 497 &amp; \color{red}{121} &amp; 956\\
+805 &amp; 732 &amp; 524 &amp; \color{red}{37} &amp; \color{red}{331}
+\end{pmatrix}
+$$
+     </div>
+     <p>
+      Find the minimal path sum from the top left to the bottom right by moving left, right, up, and down in
+      <a href="resources/0083_matrix.txt">
+       matrix.txt
+      </a>
+      (right click and "Save Link/Target As..."), a 31K text file containing an $80$ by $80$ matrix.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(file_url='') → 2297</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(file_url='0083_matrix.txt') → 425185</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 18 Jul 2025, 15:10
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0083_s0_c" rel="noopener noreferrer" target="_blank" title="p0083_s0_c">
+         p0083_s0_c
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2297
+       </td>
+       <td>
+        0.000005803s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0083_s0.py" rel="noopener noreferrer" target="_blank" title="p0083_s0.py">
+         p0083_s0.py
+        </a>
+       </td>
+       <td>
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        2297
+       </td>
+       <td>
+        0.000088325s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0083_s0_c" rel="noopener noreferrer" target="_blank" title="p0083_s0_c">
+         p0083_s0_c
+        </a>
+       </td>
+       <td>
+        0083_matrix.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        425185
+       </td>
+       <td>
+        0.039331623s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0083_s0.py" rel="noopener noreferrer" target="_blank" title="p0083_s0.py">
+         p0083_s0.py
+        </a>
+       </td>
+       <td>
+        0083_matrix.txt
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        425185
+       </td>
+       <td>
+        2.631411159s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      Allowing movement in all four cardinal directions - up, down, left, and right - turns the grid into a general
+undirected graph rather than a directed acyclic graph. Problems 81 and 82 restricted movement to subsets that
+preserved a topological order, making dynamic programming with a fixed sweep direction correct. Here, any
+fixed processing order can fail: a later update to one cell may need to propagate backwards through cells
+already processed, so DP is no longer valid. The problem reduces to single-source shortest paths on a
+node-weighted graph with V = N squared nodes and at most 4N squared edges. Dijkstra's algorithm with a
+binary-heap priority queue solves this in O((V + E) log V), which is O(N squared log N) for a grid. My
+implementation uses a linear scan to find the minimum-distance unvisited node at each step, which costs O(V)
+per iteration and raises the overall complexity to O(V squared) = O(N to the fourth). For the 80-by-80
+matrix (V = 6400) this is still tractable, completing in about 39 milliseconds in C and 2.6 seconds in Python.
+     </p>
+     <p>
+      Because all cell values are positive integers, all edge weights in the equivalent graph are positive, which
+satisfies the key precondition for Dijkstra's algorithm. The cost of moving into a cell equals that cell's
+value, making this a node-weighted rather than edge-weighted graph. That distinction matters for
+initialisation: the start cell's own value must be included in the initial distance, and neighbour relaxation
+adds the neighbour's cell weight rather than a fixed edge cost.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Dijkstra's Algorithm with Linear Minimum Search (Python and C)
+     </h4>
+     <p>
+      I modelled the grid as a mapping from coordinates to cell weights and ran Dijkstra's algorithm starting from
+the top-left corner (0, 0). The initial distance for the start node is set to its own cell value. All other
+distances are initialised to a sentinel equal to one more than the total sum of all cell weights - a
+data-driven substitute for infinity that is guaranteed to exceed any real reachable distance. At each
+iteration I select the unvisited node with the smallest tentative distance. Both implementations perform this
+as an O(V) linear scan: the Python version uses <code>min(unvisited, key=lambda node: distances[node])</code> over a set of coordinate tuples, and the C version scans the flat distance array directly. For the selected
+node I relax its four in-bounds unvisited neighbours by adding each neighbour's cell weight to the current
+node's distance. The loop terminates as soon as the target node (size-1, size-1) is selected, exploiting
+Dijkstra's early-exit property: the first time a node is popped its tentative distance is already final.
+     </p>
+     <p>
+      The Python and C implementations follow exactly the same algorithm. The C version represents the grid as a
+flat integer array indexed by <code>row * size + col</code> and uses two <code>malloc</code> 'd arrays for
+distances and visited flags. The Python version uses a dictionary keyed by tuples for distances and a set for
+the unvisited collection. Both produce 2297 for the 5-by-5 example and 425185 for the 80-by-80 file. The
+benchmark shows a roughly 67-fold speedup from Python (2.63 s) to C (0.039 s) with no algorithmic difference
+at all - pure language overhead.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was recognising that unrestricted four-directional movement breaks the DAG property that
+made earlier problems amenable to simple DP sweeps. As soon as left and up moves are allowed, any fixed
+propagation order can miss updates that flow backwards, so correctness requires a proper shortest-path
+algorithm. Dijkstra's algorithm resolves this immediately because its correctness depends only on non-negative
+edge weights, which is satisfied since all cell values are positive integers.
+     </p>
+     <p>
+      A secondary insight concerns node-weighted versus edge-weighted graphs. Here the cost of a move is the weight
+of the destination cell. The start cell's own value must therefore appear in the initial distance, and every
+neighbour relaxation adds the neighbour's cell value rather than a fixed edge cost. Getting this wrong would
+undercount the total path cost by exactly the start cell's weight.
+     </p>
+     <p>
+      The benchmark makes the Python-to-C speedup concrete without any algorithmic change. Replacing the O(V)
+linear scan with a <code>heapq</code> -based priority queue in Python would lower the complexity to
+O(N squared log N) and could bring the Python runtime well under a second, which would be worth doing if
+performance mattered. Key techniques worth remembering for future grid shortest-path problems:
+     </p>
+     <ul>
+      <li>
+       When movement in all directions is allowed, use Dijkstra or BFS (for uniform weights) rather than adapting DP.
+      </li>
+      <li>
+       A priority queue gives O(log V) extraction instead of O(V) linear scans and should be preferred for larger grids.
+      </li>
+      <li>
+       Early termination once the target node is popped is valid in Dijkstra because the first pop gives the final distance.
+      </li>
+      <li>
+       A sentinel equal to the sum of all weights plus one is a clean, data-driven substitute for infinity in grid problems.
+      </li>
+      <li>
+       In node-weighted graphs the start node's value belongs in the initial distance, and neighbour relaxation adds the neighbour's weight, not an edge cost.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

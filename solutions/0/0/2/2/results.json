@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0022_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0022_names.txt",
+    "answer": 871198282,
+    "verdict": "correct",
+    "average": 0.00114766,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0022_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0022_names.txt",
+    "answer": 871198282,
+    "verdict": "correct",
+    "average": 0.0028760712997609517,
+    "number_runs": 10
+  }
+]

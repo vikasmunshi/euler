@@ -1,0 +1,1 @@
+160:Factorial Trailing Digits:31

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 56: Powerful Digit Sum [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../5/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=56" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/5/6/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../7/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 56: Powerful Digit Sum [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      A googol ($10^{100}$) is a massive number: one followed by one-hundred zeros; $100^{100}$ is almost unimaginably large: one followed by two-hundred zeros. Despite their size, the sum of the digits in each number is only $1$.
+     </p>
+     <p>
+      Considering natural numbers of the form, $a^b$, where $a, b \lt 100$, what is the maximum digital sum?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(num_digits=1) → 45</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(num_digits=2) → 972</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(num_digits=3) → 13888</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 12 Dec 2019, 11:59
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0056_s0_c" rel="noopener noreferrer" target="_blank" title="p0056_s0_c">
+         p0056_s0_c
+        </a>
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        45
+       </td>
+       <td>
+        0.000001667s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0056_s0.py" rel="noopener noreferrer" target="_blank" title="p0056_s0.py">
+         p0056_s0.py
+        </a>
+       </td>
+       <td>
+        1
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        45
+       </td>
+       <td>
+        0.000042130s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0056_s0_c" rel="noopener noreferrer" target="_blank" title="p0056_s0_c">
+         p0056_s0_c
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        972
+       </td>
+       <td>
+        0.001852895s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0056_s0.py" rel="noopener noreferrer" target="_blank" title="p0056_s0.py">
+         p0056_s0.py
+        </a>
+       </td>
+       <td>
+        2
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        972
+       </td>
+       <td>
+        0.009067391s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0056_s0_c" rel="noopener noreferrer" target="_blank" title="p0056_s0_c">
+         p0056_s0_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13888
+       </td>
+       <td>
+        0.332517487s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0056_s0.py" rel="noopener noreferrer" target="_blank" title="p0056_s0.py">
+         p0056_s0.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13888
+       </td>
+       <td>
+        0.275750503s ⚡
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core mathematical requirement is computing <code>a^b</code> for bases and exponents up to 99, which produces numbers with roughly 200 digits - far beyond any native fixed-width integer type. The digit-sum function itself is O(d) where d is the number of digits, and d grows as O(b * log(a)). Iterating over all pairs in a range of size N gives an overall complexity of O(N^2 * b * log(a)). For the standard problem (N = 99) this is entirely manageable even without pruning, but the pruning heuristic I apply reduces the constant factor considerably.
+     </p>
+     <p>
+      The key observation that makes pruning viable is that digit sums are maximised when both the base and exponent are large. A large exponent produces a number with many digits, and a base close to (but not equal to) a power of ten keeps those digits spread across the full 0-9 range rather than collapsing to a single leading digit followed by zeros. This means the global maximum reliably lives in the upper-right corner of the (base, exponent) grid, so restricting the search to a narrow top-end window is justified empirically and confirmed by the optional heatmap visualisation I built.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Brute-Force Enumeration with Top-Window Pruning (Python and C)
+     </h4>
+     <p>
+      Both the Python and C implementations share the same algorithm, parameterised by <code>num_digits</code> so that <code>stop_at = 10^num_digits</code> is the exclusive upper bound on both base and exponent. Rather than iterating over the full N x N grid, I restrict bases to the top 100 values below <code>stop_at</code> and exponents to the top 10 values below <code>stop_at</code>. For the standard problem ( <code>num_digits=2</code>) this covers bases 1-99 and exponents 90-99, which is a substantial reduction from the full 99x99 grid while still capturing the region where the maximum digit sum lives.
+     </p>
+     <p>
+      In Python, big-integer exponentiation is handled natively, so the core loop computes <code>base**exp</code>, converts the result to a string, and sums the digit characters via <code>sum(int(d) for d in str(n))</code>. When invoked with <code>--show</code>, the Python solver switches to a full matrix computation over the top-100-by-100 window and produces three side-by-side Matplotlib heatmaps: one for the raw digit sum, one for the number of digits in the result, and one for the average digit value per cell. I built this primarily to confirm that the pruning window genuinely contains the global maximum and to develop intuition about where large digit sums cluster in the (base, exponent) plane.
+     </p>
+     <p>
+      The C implementation builds its own little-endian base-10 big-integer library with a <code>bigint_mul_int</code> function that multiplies in place. Rather than recomputing <code>base^exp_start</code> from scratch for each exponent, I accumulate the value incrementally by multiplying by the base once per exponent step, which avoids redundant work across the inner loop. Capacity is pre-allocated using a conservative upper bound of <code>max_exp * (num_digits + 1) + 100</code> digits to avoid frequent reallocation. The C implementation ignores the <code>--show</code> flag and always runs the fast path.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was realising that exhaustive enumeration over 99x99 = 9801 pairs - even without pruning - is trivially fast once you accept that Python handles big-integer arithmetic natively and that the digit-sum calculation is the only non-trivial per-pair cost. The pruning heuristic (top-100 bases, top-10 exponents) reduces the work further and is empirically justified by the heatmap: the maximum always appears in the upper-right corner of the grid. Building the visualisation first, before committing to a pruning strategy, turned a guess into a verified claim.
+     </p>
+     <p>
+      Looking at the benchmark results, the Python and C solutions behave in an interesting and instructive way. For the main case ( <code>num_digits=2</code>), C is faster at 0.0019 s versus 0.0091 s for Python. However, for the extra case ( <code>num_digits=3</code>), they are nearly identical at 0.2758 s (Python) versus 0.3325 s (C), with C actually being marginally slower on the larger input. This reflects the overhead of my hand-rolled big-integer multiply operating digit-by-digit in base 10, compared to Python's highly optimised arbitrary-precision integer library which uses a much larger internal word size and faster multiplication algorithms. It is a good reminder that reimplementing big-integer arithmetic from scratch in C does not automatically beat a mature language runtime's built-in implementation, especially for numbers in the few-hundred-digit range.
+     </p>
+     <ul>
+      <li>
+       Python's arbitrary-precision integers remove the main algorithmic hurdle for problems involving large exponentials, and can be competitive with hand-rolled C for moderate number sizes.
+      </li>
+      <li>
+       The digit-sum idiom <code>sum(int(d) for d in str(n))</code> is concise, correct for arbitrarily large n, and fast enough for numbers in the few-hundred-digit range.
+      </li>
+      <li>
+       Parameterising the problem generically via <code>num_digits</code> and validating against multiple test cases gives confidence that a pruning heuristic is not accidentally correct only for the primary case.
+      </li>
+      <li>
+       Interactive heatmap visualisation is a cheap and effective tool for building intuition about where extrema live in a 2-D search space before committing to a pruning strategy.
+      </li>
+      <li>
+       For big-integer work in C, the performance advantage over Python is not guaranteed - Python's runtime uses sophisticated algorithms internally that are hard to beat with a naive base-10 digit array.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

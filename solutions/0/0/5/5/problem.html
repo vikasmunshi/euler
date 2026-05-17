@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 55: Lychrel Numbers [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../4/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=55" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/5/5/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../6/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 55: Lychrel Numbers [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      If we take $47$, reverse and add, $47 + 74 = 121$, which is palindromic.
+     </p>
+     <p>
+      Not all numbers produce palindromes so quickly. For example,
+     </p>
+     $$\begin{align}
+349 + 943 &amp;= 1292\\
+1292 + 2921 &amp;= 4213\\
+4213 + 3124 &amp;= 7337
+\end{align}$$
+     <p>
+      That is, $349$ took three iterations to arrive at a palindrome.
+     </p>
+     <p>
+      Although no one has proved it yet, it is thought that some numbers, like $196$, never produce a palindrome. A number that never forms a palindrome through the reverse and add process is called a Lychrel number. Due to the theoretical nature of these numbers, and for the purpose of this problem, we shall assume that a number is Lychrel until proven otherwise. In addition you are given that for every number below ten-thousand, it will either (i) become a palindrome in less than fifty iterations, or, (ii) no one, with all the computing power that exists, has managed so far to map it to a palindrome. In fact, $10677$ is the first number to be shown to require over fifty iterations before producing a palindrome: $4668731596684224866951378664$ ($53$ iterations, $28$-digits).
+     </p>
+     <p>
+      Surprisingly, there are palindromic numbers that are themselves Lychrel numbers; the first example is $4994$.
+     </p>
+     <p>
+      How many Lychrel numbers are there below ten-thousand?
+     </p>
+     <p class="smaller">
+      NOTE: Wording was modified slightly on 24 April 2007 to emphasise the theoretical nature of Lychrel numbers.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>main: solve(max_iterations=50, max_limit=10000) → 249</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Thu, 12 Dec 2019, 11:29
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0055_s0_c" rel="noopener noreferrer" target="_blank" title="p0055_s0_c">
+         p0055_s0_c
+        </a>
+       </td>
+       <td>
+        50 10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        249
+       </td>
+       <td>
+        0.001658377s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0055_s0.py" rel="noopener noreferrer" target="_blank" title="p0055_s0.py">
+         p0055_s0.py
+        </a>
+       </td>
+       <td>
+        50 10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        249
+       </td>
+       <td>
+        0.018292075s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The reverse-and-add process is elementary to describe: repeatedly take a number, add it to its own digit-reversal,
+and check whether the result is a palindrome. The subtlety is that intermediate sums can grow well beyond 64-bit
+range - the problem notes that 10677 requires 53 iterations and produces a 28-digit result - so any implementation
+relying on fixed-width machine integers will silently produce wrong answers for the harder cases. The palindrome
+check itself is just a symmetry test on the digit sequence. A number is classified as Lychrel empirically: if no
+palindrome appears within the iteration budget (50 steps here), we treat it as Lychrel by assumption rather than
+by proof.
+     </p>
+     <p>
+      The overall complexity is O(N * I * D), where N is the upper limit (10,000), I is the iteration cap (50), and D
+is the number of digits in the largest intermediate value. D grows at most logarithmically with each addition, so
+it stays well below 128 digits for all inputs below 10,000 within 50 steps. Because N and I are both small fixed
+constants for this problem, the whole computation is effectively linear in N and finishes in well under a second.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Iterative Reverse-and-Add with Early Exit (Python and C)
+     </h4>
+     <p>
+      I implemented the same core algorithm in both Python and C. The predicate <code>is_lychrel</code> loops up to <code>max_iterations</code> times. On each iteration it forms the sum of the current value and its digit-reversal,
+then immediately tests whether the result is a palindrome. If a palindrome is found the function returns false and
+exits early. If the loop exhausts all iterations without finding one, the number is classified as Lychrel. The
+outer <code>solve</code> function counts how many integers from 1 to <code>max_limit</code> satisfy this predicate.
+     </p>
+     <p>
+      In Python, arbitrary-precision integers are built into the language, so I used string slicing with <code>[::-1]</code> for both digit reversal and the palindrome check. The palindrome test becomes <code>str(number) == str(number)[::-1]</code> and the reverse-and-add step is <code>number += int(str(number)[::-1])</code>. A generator expression inside <code>sum</code> avoids building
+an intermediate list. The code is very compact as a result.
+     </p>
+     <p>
+      The C solution required me to implement a small big-integer library, since intermediate sums can exceed 64-bit
+range. I represented numbers as little-endian base-10 digit arrays of up to 128 digits stored in a fixed-size <code>BigNum</code> struct on the stack. The function <code>bignum_add_reverse</code> adds the digit array to
+its own mirror in a single pass with carry propagation. The function <code>bignum_is_palindrome</code> checks
+symmetry by comparing digits from both ends toward the center. Advancing state between iterations is just a
+struct copy <code>a = result</code>. No dynamic memory allocation is needed anywhere in the hot path.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that took a moment to appreciate is that palindromic numbers are not automatically non-Lychrel.
+The problem explicitly calls out 4994 as a palindromic Lychrel number. This means I must not short-circuit by
+testing whether the starting value is already a palindrome - the first reverse-and-add step must always be applied
+before any palindrome check. My loop structure handles this correctly because the palindrome test appears after
+the addition inside the loop body, so the original value is never tested directly.
+     </p>
+     <p>
+      Comparing the two implementations: the C version runs at roughly 0.0017 s versus 0.0183 s for Python - about an
+11x speedup. The Python solution is already fast enough that it is imperceptible at this scale, but the C version
+demonstrates how a fixed-size stack-allocated big-integer representation avoids both dynamic allocation overhead
+and Python interpreter overhead. The trade-off is that I had to write the add-and-reverse routine manually in C,
+whereas Python handled arbitrary precision transparently.
+     </p>
+     <p>
+      Two implementation details from the C big-integer representation are worth remembering for future problems. First,
+little-endian digit storage (index 0 holds the least significant digit) makes carry propagation natural because
+it flows from low index to high index. Second, the palindrome check and the reverse-add both index from opposite
+ends of the same array, so the little-endian layout requires no index adjustment - they are symmetric about the
+center regardless of endianness. For any future problem involving digit-based iteration with an empirical
+termination criterion, the pattern of a bounded loop with early exit on success and a fall-through default return
+is clean and directly reusable.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

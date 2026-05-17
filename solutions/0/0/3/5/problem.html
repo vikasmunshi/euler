@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 35: Circular Primes [Level 1]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../4/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=35" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/3/5/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../6/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 35: Circular Primes [Level 1]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The number, $197$, is called a circular prime because all rotations of the digits: $197$, $971$, and $719$, are themselves prime.
+     </p>
+     <p>
+      There are thirteen such primes below $100$: $2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79$, and $97$.
+     </p>
+     <p>
+      How many circular primes are there below one million?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_limit=10) → 4</code></li>
+     <li><code>dev: solve(max_limit=100) → 13</code></li>
+     <li><code>dev: solve(max_limit=1000) → 25</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_limit=1000000) → 55</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(max_limit=10000000) → 55</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Tue, 12 Nov 2019, 21:40
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s0_c" rel="noopener noreferrer" target="_blank" title="p0035_s0_c">
+         p0035_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000000261s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s1_c" rel="noopener noreferrer" target="_blank" title="p0035_s1_c">
+         p0035_s1_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.002286971s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s0.py" rel="noopener noreferrer" target="_blank" title="p0035_s0.py">
+         p0035_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000005167s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s1.py" rel="noopener noreferrer" target="_blank" title="p0035_s1.py">
+         p0035_s1.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.004091055s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s0_c" rel="noopener noreferrer" target="_blank" title="p0035_s0_c">
+         p0035_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        0.000005810s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s1_c" rel="noopener noreferrer" target="_blank" title="p0035_s1_c">
+         p0035_s1_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        0.002361494s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s0.py" rel="noopener noreferrer" target="_blank" title="p0035_s0.py">
+         p0035_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        0.000050115s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s1.py" rel="noopener noreferrer" target="_blank" title="p0035_s1.py">
+         p0035_s1.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        13
+       </td>
+       <td>
+        0.003975798s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s0_c" rel="noopener noreferrer" target="_blank" title="p0035_s0_c">
+         p0035_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        0.000018736s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s1_c" rel="noopener noreferrer" target="_blank" title="p0035_s1_c">
+         p0035_s1_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        0.002352695s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s0.py" rel="noopener noreferrer" target="_blank" title="p0035_s0.py">
+         p0035_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        0.000324978s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0035_s1.py" rel="noopener noreferrer" target="_blank" title="p0035_s1.py">
+         p0035_s1.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        25
+       </td>
+       <td>
+        0.004236893s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0035_s0_c" rel="noopener noreferrer" target="_blank" title="p0035_s0_c">
+         p0035_s0_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        0.006789661s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0035_s1_c" rel="noopener noreferrer" target="_blank" title="p0035_s1_c">
+         p0035_s1_c
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        0.007790085s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0035_s0.py" rel="noopener noreferrer" target="_blank" title="p0035_s0.py">
+         p0035_s0.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        0.294587944s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0035_s1.py" rel="noopener noreferrer" target="_blank" title="p0035_s1.py">
+         p0035_s1.py
+        </a>
+       </td>
+       <td>
+        1000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        0.045637447s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0035_s0_c" rel="noopener noreferrer" target="_blank" title="p0035_s0_c">
+         p0035_s0_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        0.069966313s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0035_s1_c" rel="noopener noreferrer" target="_blank" title="p0035_s1_c">
+         p0035_s1_c
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        0.075346172s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0035_s0.py" rel="noopener noreferrer" target="_blank" title="p0035_s0.py">
+         p0035_s0.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        3.392738877s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0035_s1.py" rel="noopener noreferrer" target="_blank" title="p0035_s1.py">
+         p0035_s1.py
+        </a>
+       </td>
+       <td>
+        10000000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55
+       </td>
+       <td>
+        0.480336176s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The core idea combines prime generation with a structural property of digit rotations. A circular prime requires every cyclic permutation of its decimal digit string to be prime. The key number-theoretic observation is that any multi-digit circular prime can only contain the digits 1, 3, 7, and 9. If any digit from {0, 2, 4, 5, 6, 8} appears anywhere in the number, then some rotation will place that digit in the units position, making the rotated value divisible by 2 or 5 and therefore composite. This prunes the candidate set dramatically - instead of checking every prime below the limit, I only need to examine those built entirely from {1, 3, 7, 9}, treating the single-digit primes 2, 3, 5, 7 as special cases that bypass the filter.
+     </p>
+     <p>
+      Prime generation via a sieve costs O(n log log n) time and O(n) space. After the sieve is built I store all primes in a set for O(1) membership queries. The rotation check per surviving candidate is O(d) where d = O(log n) is the digit count. Because the digit filter prunes the candidate pool heavily, the work beyond sieve construction is modest in practice. The answer stabilises at 55 above one million - there are no additional circular primes in the range 1,000,001 to 10,000,000 - which is consistent with the digit-composition constraint becoming increasingly restrictive as numbers grow larger.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Sundaram Sieve with Digit Pruning (s0)
+     </h4>
+     <p>
+      My first solution implements the Sundaram sieve from scratch in Python to generate all primes up to the limit, immediately stores them in a <code>set</code> for O(1) membership tests, then iterates over every prime as a candidate. For multi-digit candidates I first apply the digit-filter shortcut: if any character from <code>"024568"</code> appears in the decimal representation I skip the number entirely. Only after passing that filter do I call <code>get_rotated_numbers</code>, which builds all cyclic rotations as a set comprehension, and verify that every element is present in the prime set. Single-digit primes below 10 bypass both filters since 2 and 5 are legitimately circular.
+     </p>
+     <p>
+      The companion C file replaces the Sundaram sieve with a standard sieve of Eratosthenes - the more conventional and cache-friendly approach in C - but uses exactly the same digit-filter and rotation logic. One notable difference in the C sieve convention is that <code>sieve[i] = 1</code> means composite, so the primality check is a zero-test rather than a one-test, the reverse of the Python convention where set membership indicates primality. The C version allocates exactly as much sieve memory as needed for the requested limit.
+     </p>
+     <h4>
+      pyprimesieve with Minimum-1M Sieve (s1)
+     </h4>
+     <p>
+      My second Python solution keeps the identical filtering and rotation-checking logic but replaces the hand-rolled sieve with <code>pyprimesieve</code>, a thin Python wrapper around Kim Walisch's highly optimised C++ primesieve library. Because <code>pyprimesieve.primes</code> always generates at least up to 10
+      <sup>
+       6
+      </sup>
+      in my implementation, I use <code>bisect_right</code> to slice the result down to the requested limit, ensuring the candidate loop only considers primes within bounds. This introduces a fixed baseline overhead at small limits, which is visible in the dev benchmarks where s1.py costs around 4 ms even for tiny inputs.
+     </p>
+     <p>
+      The C counterpart mirrors this minimum-generation guarantee by computing <code>gen_limit = max(max_limit, 1000000)</code> before running its own Eratosthenes sieve, then only iterates candidates up to <code>max_limit</code>. This means s1_c always allocates at least a one-million-entry sieve regardless of the actual limit, faithfully matching the Python variant's behaviour. The digit-filter and rotation code is otherwise identical to s0_c. The practical effect is that s1_c shows roughly 2-3 ms of fixed overhead on dev-scale inputs compared to the near-zero times of s0_c.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight that unlocked a clean solution was the digit-parity argument: because every digit of a circular prime must be capable of appearing as the final digit of some rotation, and a prime greater than 5 cannot end in 0, 2, 4, 5, 6, or 8, the entire multi-digit candidate set collapses to numbers built exclusively from {1, 3, 7, 9}. Applying this cheap character scan before constructing any rotations avoids the bulk of the rotation work. A secondary observation is that <code>get_rotated_numbers</code> naturally includes the original number itself among its outputs - rotating by the full string length wraps back to the start - so the set comprehension gives a self-check for free without a special case.
+     </p>
+     <p>
+      Benchmark comparison across all four implementations:
+     </p>
+     <table>
+      <tr>
+       <th>
+        Solution
+       </th>
+       <th>
+        main (1 000 000)
+       </th>
+       <th>
+        extra (10 000 000)
+       </th>
+      </tr>
+      <tr>
+       <td>
+        p0035_s0.py (Sundaram, Python)
+       </td>
+       <td>
+        0.295 s
+       </td>
+       <td>
+        3.393 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0035_s1.py (pyprimesieve, Python)
+       </td>
+       <td>
+        0.046 s
+       </td>
+       <td>
+        0.480 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0035_s0_c (Eratosthenes, C)
+       </td>
+       <td>
+        0.007 s
+       </td>
+       <td>
+        0.070 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        p0035_s1_c (Eratosthenes min-1M, C)
+       </td>
+       <td>
+        0.008 s
+       </td>
+       <td>
+        0.075 s
+       </td>
+      </tr>
+     </table>
+     <p>
+      The pyprimesieve Python variant is roughly 6x faster than my pure-Python Sundaram sieve at one million and about 7x faster at ten million. The gap widens with scale because sieve construction dominates at larger limits and the C++ backend is far more cache-friendly than my Python loop. The two C implementations are essentially tied: s0_c is marginally faster at both limits because it allocates only as much sieve as needed, whereas s1_c always allocates at least a million entries regardless of the requested limit. The difference is small enough to sit near measurement noise but is consistent across runs. For small dev inputs, s1_c and s1.py show a fixed baseline overhead of around 2-4 ms from the minimum sieve allocation, whereas s0_c and s0.py scale down cleanly to near-zero.
+     </p>
+     <ul>
+      <li>
+       Store sieve output in a Python <code>set</code> immediately - O(1) membership tests pay off whenever repeated prime-membership queries are needed across a large collection of candidates.
+      </li>
+      <li>
+       Apply cheap structural filters (digit composition, parity) before expensive combinatorial checks (rotation generation); the order of guards matters for performance.
+      </li>
+      <li>
+       The Sundaram sieve is an interesting theoretical alternative to Eratosthenes but offers no practical speed advantage in pure Python; a standard sieve or an external C library is preferable for large limits.
+      </li>
+      <li>
+       When comparing a Python sieve against a C extension library, the speedup scales with the limit because sieve construction is the dominant cost term - the Python-level application logic costs roughly the same in both cases.
+      </li>
+      <li>
+       Mirroring a minimum generation guarantee between Python and C ports is a useful correctness discipline, even if it occasionally allocates slightly more than strictly necessary.
+      </li>
+      <li>
+       The answer stabilising at 55 above one million is a good sanity check: it confirms the digit-composition constraint leaves no new circular primes in the entire 1M-10M range.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

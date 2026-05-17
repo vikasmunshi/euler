@@ -1,0 +1,20 @@
+[
+  {
+    "category": "main",
+    "solution": "p0099_s0_c",
+    "args": "https://projecteuler.net/resources/documents/0099_base_exp.txt",
+    "answer": 709,
+    "verdict": "correct",
+    "average": 0.00015635950000000002,
+    "number_runs": 10
+  },
+  {
+    "category": "main",
+    "solution": "p0099_s0.py",
+    "args": "https://projecteuler.net/resources/documents/0099_base_exp.txt",
+    "answer": 709,
+    "verdict": "correct",
+    "average": 0.0005916122001508484,
+    "number_runs": 10
+  }
+]

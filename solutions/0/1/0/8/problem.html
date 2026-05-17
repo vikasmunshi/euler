@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 108: Diophantine Reciprocals I [Level 6]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../7/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=108" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/1/0/8/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../9/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 108: Diophantine Reciprocals I [Level 6]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      In the following equation $x$, $y$, and $n$ are positive integers.
+     </p>
+     $$\dfrac{1}{x} + \dfrac{1}{y} = \dfrac{1}{n}$$
+     <p>
+      For $n = 4$ there are exactly three distinct solutions:
+     </p>
+     $$\begin{align}
+\dfrac{1}{5} + \dfrac{1}{20} &amp;= \dfrac{1}{4}\\
+\dfrac{1}{6} + \dfrac{1}{12} &amp;= \dfrac{1}{4}\\
+\dfrac{1}{8} + \dfrac{1}{8} &amp;= \dfrac{1}{4}
+\end{align}
+$$
+     <p>
+      What is the least value of $n$ for which the number of distinct solutions exceeds one-thousand?
+     </p>
+     <p class="note">
+      NOTE: This problem is an easier version of
+      <a href="problem=110">
+       Problem 110
+      </a>
+      ; it is strongly advised that you solve this one first.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(min_solutions=3) → 4</code></li>
+     <li><code>dev: solve(min_solutions=10) → 24</code></li>
+     <li><code>dev: solve(min_solutions=100) → 1260</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(min_solutions=1000) → █</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Fri, 29 Aug 2025, 14:25
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s0_c" rel="noopener noreferrer" target="_blank" title="p0108_s0_c">
+         p0108_s0_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000000065s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s1_c" rel="noopener noreferrer" target="_blank" title="p0108_s1_c">
+         p0108_s1_c
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000000454s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s0.py" rel="noopener noreferrer" target="_blank" title="p0108_s0.py">
+         p0108_s0.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000027587s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s1.py" rel="noopener noreferrer" target="_blank" title="p0108_s1.py">
+         p0108_s1.py
+        </a>
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4
+       </td>
+       <td>
+        0.000019635s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s0_c" rel="noopener noreferrer" target="_blank" title="p0108_s0_c">
+         p0108_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        24
+       </td>
+       <td>
+        0.000000342s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s1_c" rel="noopener noreferrer" target="_blank" title="p0108_s1_c">
+         p0108_s1_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        24
+       </td>
+       <td>
+        0.000000630s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s0.py" rel="noopener noreferrer" target="_blank" title="p0108_s0.py">
+         p0108_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        24
+       </td>
+       <td>
+        0.000022134s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s1.py" rel="noopener noreferrer" target="_blank" title="p0108_s1.py">
+         p0108_s1.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        24
+       </td>
+       <td>
+        0.000030277s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s0_c" rel="noopener noreferrer" target="_blank" title="p0108_s0_c">
+         p0108_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1260
+       </td>
+       <td>
+        0.000051167s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s1_c" rel="noopener noreferrer" target="_blank" title="p0108_s1_c">
+         p0108_s1_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1260
+       </td>
+       <td>
+        0.000002965s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s0.py" rel="noopener noreferrer" target="_blank" title="p0108_s0.py">
+         p0108_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1260
+       </td>
+       <td>
+        0.001316862s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0108_s1.py" rel="noopener noreferrer" target="_blank" title="p0108_s1.py">
+         p0108_s1.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        1260
+       </td>
+       <td>
+        0.000229805s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0108_s0_c" rel="noopener noreferrer" target="_blank" title="p0108_s0_c">
+         p0108_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.045253053s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0108_s1_c" rel="noopener noreferrer" target="_blank" title="p0108_s1_c">
+         p0108_s1_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000014107s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0108_s0.py" rel="noopener noreferrer" target="_blank" title="p0108_s0.py">
+         p0108_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.822212249s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0108_s1.py" rel="noopener noreferrer" target="_blank" title="p0108_s1.py">
+         p0108_s1.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        █
+       </td>
+       <td>
+        0.000530207s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The key algebraic step is to rewrite <code>1/x + 1/y = 1/n</code> by multiplying through and rearranging to obtain <code>(x - n)(y - n) = n²</code>. Every positive integer solution then corresponds to a way of writing <code>n²</code> as a product of two positive factors <code>a * b</code> with <code>a &lt;= b</code>, by setting <code>x = n + a</code> and <code>y = n + b</code>. The number of such unordered factor pairs is exactly <code>(tau(n²) + 1) / 2</code>, where <code>tau</code> is the divisor-count function. The problem therefore reduces to finding the smallest <code>n</code> for which this expression is at least 1000, which is equivalent to requiring <code>tau(n²) &gt;= 1999</code>.
+     </p>
+     <p>
+      Because <code>tau</code> is multiplicative, if <code>n = prod(p_i ^ a_i)</code> then <code>tau(n²) = prod(2*a_i + 1)</code>. This product is maximised for a given magnitude of <code>n</code> by choosing <code>n</code> to be a product of small primes with decreasing exponents - the class of highly composite numbers. A
+brute linear scan costs roughly <code>O(n_answer * sqrt(n_answer))</code> in total; the DFS approach over smooth-number
+candidates is far faster and visits only a tiny fraction of all integers.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Linear Scan with Trial Division (s0)
+     </h4>
+     <p>
+      I implemented this as a straightforward loop over all <code>n</code> starting from 1. For each candidate I trial-divide
+by all integers up to <code>sqrt(n)</code> to extract the prime factorisation, accumulate <code>tau(n²) = prod(2*exp + 1)</code>, and check whether <code>(tau(n²) + 1) / 2 &gt;= min_solutions</code>. Any
+factor remaining after trial division must be a prime with exponent 1, contributing a multiplicative factor of <code>3</code>. The loop stops as soon as the threshold is crossed. I wrote both a Python and a C version with
+structurally identical logic. The C build is about 18x faster on the main case (0.045 s vs 0.822 s), which is the
+typical interpreter-overhead gap for tight arithmetic inner loops.
+     </p>
+     <h4>
+      DFS over Smooth-Number Candidates (s1)
+     </h4>
+     <p>
+      I noticed that the answer must be a product of small primes with non-increasing exponents, because any prime factor
+larger than necessary only inflates <code>n</code> without helping <code>tau(n²)</code>. I therefore fixed a list of
+the first 15 primes and ran a depth-first search over assignments of exponents to those primes, always enforcing that
+exponents are non-increasing (to avoid counting permutations of the same factorisation as different candidates). At each
+node I maintain the running product <code>n</code> and the running product <code>tau</code>. I prune a branch
+immediately if even assigning the current exponent to every remaining prime slot cannot reach the target tau, and also
+prune if <code>n</code> already exceeds the current best. Whenever <code>tau &gt;= target</code> I update the best
+answer. This collapses an enormous search space: the DFS visits only a handful of candidates compared to the 180180
+iterations of the linear scan. The Python version solves the main case in 0.0005 s and the C version in essentially
+zero measurable time.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The central insight was the substitution <code>(x - n)(y - n) = n²</code>, which converts what looks like a
+Diophantine reciprocal problem into a straightforward divisor-counting problem. Once I had that, the formula <code>tau(n²) = prod(2*a_i + 1)</code> followed directly from the multiplicativity of <code>tau</code>. These two
+steps together reduce the problem to a purely arithmetic search.
+     </p>
+     <p>
+      The benchmark comparison between s0 and s1 is striking. The linear scan (s0) in C takes 0.045 s; the DFS (s1) in
+Python takes 0.0005 s - nearly 100x faster despite being interpreted, because it visits only smooth-number candidates.
+The s1 C build is so fast it does not register. This makes clear that algorithmic improvements dwarf language-level
+optimisations when the search space can be dramatically reduced. The linear scan is adequate for a threshold of 1000
+but would be hopeless for Problem 110 (threshold of one million), whereas the DFS generalises immediately.
+     </p>
+     <ul>
+      <li>
+       The substitution <code>(x - n)(y - n) = n²</code> is the universal first step for Diophantine reciprocal problems.
+      </li>
+      <li>
+       The identity <code>tau(n²) = prod(2*a_i + 1)</code> is worth memorising; it reappears directly in Problem 110.
+      </li>
+      <li>
+       When maximising a multiplicative function over integers below a bound, the optimum is always a smooth number with
+non-increasing prime exponents. Restricting search to this family with a DFS and pruning is orders of magnitude faster
+than a linear scan.
+      </li>
+      <li>
+       The non-increasing exponent constraint (so that <code>p_1^{a_1} &lt;= p_1^{a_2}</code>... wait, non-increasing
+exponents assigned to increasing primes) eliminates redundant orderings and keeps the DFS tree small.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

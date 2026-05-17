@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 65: Convergents of $e$ [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../4/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=65" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/6/5/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../6/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 65: Convergents of $e$ [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      The square root of $2$ can be written as an infinite continued fraction.
+     </p>
+     <p>
+      $$\sqrt{2} = 1 + \dfrac{1}{2 + \dfrac{1}{2 + \dfrac{1}{2 + \dfrac{1}{2 + ...}}}}$$
+     </p>
+     <p>
+      The infinite continued fraction can be written, $\sqrt{2} = [1; (2)]$, $(2)$ indicates that $2$ repeats
+      <i>
+       ad infinitum
+      </i>
+      . In a similar way, $\sqrt{23} = [4; (1, 3, 1, 8)]$.
+     </p>
+     <p>
+      It turns out that the sequence of partial values of continued fractions for square roots provide the best rational approximations. Let us consider the convergents for $\sqrt{2}$.
+     </p>
+     <p>
+      $$\begin{align}
+&amp;1 + \dfrac{1}{2} &amp;= \dfrac{3}{2} \\
+&amp;1 + \dfrac{1}{2 + \dfrac{1}{2}} &amp;= \dfrac{7}{5}\\
+&amp;1 + \dfrac{1}{2 + \dfrac{1}{2 + \dfrac{1}{2}}} &amp;= \dfrac{17}{12}\\
+&amp;1 + \dfrac{1}{2 + \dfrac{1}{2 + \dfrac{1}{2 + \dfrac{1}{2}}}} &amp;= \dfrac{41}{29}
+\end{align}$$
+     </p>
+     <p>
+      Hence the sequence of the first ten convergents for $\sqrt{2}$ are:
+     </p>
+     <p>
+      $$1, \dfrac{3}{2}, \dfrac{7}{5}, \dfrac{17}{12}, \dfrac{41}{29}, \dfrac{99}{70}, \dfrac{239}{169}, \dfrac{577}{408}, \dfrac{1393}{985}, \dfrac{3363}{2378}, ...$$
+     </p>
+     <p>
+      What is most surprising is that the important mathematical constant,
+     </p>
+     <p>
+      $$e = [2; 1, 2, 1, 1, 4, 1, 1, 6, 1, ... , 1, 2k, 1, ...]$$
+     </p>
+     <p>
+      The first ten terms in the sequence of convergents for $e$ are:
+     </p>
+     <p>
+      $$2, 3, \dfrac{8}{3}, \dfrac{11}{4}, \dfrac{19}{7}, \dfrac{87}{32}, \dfrac{106}{39}, \dfrac{193}{71}, \dfrac{1264}{465}, \dfrac{1457}{536}, ...$$
+     </p>
+     <p>
+      The sum of digits in the numerator of the $10$
+      <sup>
+       th
+      </sup>
+      convergent is $1 + 4 + 5 + 7 = 17$.
+     </p>
+     <p>
+      Find the sum of digits in the numerator of the $100$
+      <sup>
+       th
+      </sup>
+      convergent of the continued fraction for $e$.
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(convergent_num=10) → 17</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(convergent_num=100) → 272</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(convergent_num=1000) → 4034</code></li>
+     <li><code>extra: solve(convergent_num=10000) → 55322</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 11 Mar 2020, 15:10
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0065_s0_c" rel="noopener noreferrer" target="_blank" title="p0065_s0_c">
+         p0065_s0_c
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        17
+       </td>
+       <td>
+        0.000008295s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0065_s0.py" rel="noopener noreferrer" target="_blank" title="p0065_s0.py">
+         p0065_s0.py
+        </a>
+       </td>
+       <td>
+        10
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        17
+       </td>
+       <td>
+        0.000037454s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0065_s0_c" rel="noopener noreferrer" target="_blank" title="p0065_s0_c">
+         p0065_s0_c
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        272
+       </td>
+       <td>
+        0.000008860s ⚡
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0065_s0.py" rel="noopener noreferrer" target="_blank" title="p0065_s0.py">
+         p0065_s0.py
+        </a>
+       </td>
+       <td>
+        100
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        272
+       </td>
+       <td>
+        0.000312739s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0065_s0_c" rel="noopener noreferrer" target="_blank" title="p0065_s0_c">
+         p0065_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4034
+       </td>
+       <td>
+        0.000145555s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0065_s0.py" rel="noopener noreferrer" target="_blank" title="p0065_s0.py">
+         p0065_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        4034
+       </td>
+       <td>
+        0.013943169s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0065_s0_c" rel="noopener noreferrer" target="_blank" title="p0065_s0_c">
+         p0065_s0_c
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55322
+       </td>
+       <td>
+        0.019471367s ⚡
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0065_s0.py" rel="noopener noreferrer" target="_blank" title="p0065_s0.py">
+         p0065_s0.py
+        </a>
+       </td>
+       <td>
+        10000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        55322
+       </td>
+       <td>
+        9.926062198s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      The continued fraction expansion of <code>e</code> follows the pattern [2; 1, 2, 1, 1, 4, 1, 1, 6, 1, ..., 1, 2k, 1, ...],
+where every third coefficient at 1-indexed positions 3, 6, 9, ... equals <code>2k</code> for k = 1, 2, 3, ...,
+and all other coefficients equal 1 (except the leading 2 at position 1). The n-th convergent numerator satisfies
+the forward recurrence <code>h_k = a_k * h_{k-1} + h_{k-2}</code>, and these numerators grow roughly exponentially
+with n - the 10000th convergent numerator has tens of thousands of decimal digits. Because each multiplication
+step involves a big integer of O(n) digits and there are O(n) steps, the overall work is O(n^2) in digit operations.
+     </p>
+     <p>
+      The benchmark results confirm this quadratic scaling. Going from n = 1000 to n = 10000 is a 10x increase in
+input. The Python solution goes from about 0.014 s to about 9.9 s - roughly a 710x slowdown, worse than pure
+quadratic, because Python's <code>Fraction</code> class also pays a GCD cost at every step. The C solution scales
+far more gracefully, finishing n = 10000 in about 0.020 s, because it implements the recurrence directly over
+base-10^9 limb arrays with no GCD overhead.
+     </p>
+     <h3>
+      Solution Approach
+     </h3>
+     <h4>
+      Top-Down Recursive Evaluation with Python Fraction and Forward Recurrence in C (s0)
+     </h4>
+     <p>
+      Both files share the same coefficient rule encoded in <code>e_denominator(n)</code>: return 2 when n == 1,
+return <code>2 * (n // 3)</code> when <code>n % 3 == 0</code>, and return 1 otherwise. This compresses the
+infinite irregular-looking sequence into a three-line function with no lookup table.
+     </p>
+     <p>
+      The Python solution computes the convergent top-down via <code>nth_convergent_of_e(n, _n=1)</code>, which
+recurses to depth n (the innermost coefficient) and on the way back up builds <code>a_k + 1/remainder</code> using Python's built-in <code>Fraction</code> class for exact rational arithmetic. I chose top-down recursion
+because it maps directly onto the mathematical definition of a nested fraction and produces correct numerators
+trivially. I set <code>sys.setrecursionlimit(10**6)</code> to prevent stack overflow for large n. The main
+cost is that <code>Fraction</code> reduces to lowest terms at every return via a GCD computation, which adds
+significant overhead when numerators have thousands of digits.
+     </p>
+     <p>
+      The C solution takes the opposite approach: it uses the forward recurrence <code>h_k = a_k * h_{k-1} + h_{k-2}</code> iteratively, tracking only the numerator since the problem asks only for its digit sum. I represented big
+integers as arrays of base-10^9 limbs in a <code>BigInt</code> struct with a fixed maximum of 2000 limbs.
+The combined operation <code>bigint_mul_add(dst, a, scalar, b)</code> computes <code>a * scalar + b</code> in one pass with a carry loop, which is cache-friendly and avoids any GCD step entirely. Three <code>BigInt</code> pointers are rotated at each step to avoid copying. The digit sum is extracted by
+walking each limb's decimal digits. This approach is purely iterative and eliminates all fraction overhead.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight was recognising the index pattern for the coefficients of <code>e</code> 's continued fraction.
+Once I expressed it as "return <code>2*(n//3)</code> when <code>n % 3 == 0</code>, else 1 (with 2 at position 1)",
+the rule fit in a three-line function with no precomputed table needed. After that, both the recursive and
+iterative approaches fell out naturally.
+     </p>
+     <p>
+      The second insight was that for a numerator-only recurrence there is no need to track the denominator or
+perform any GCD reduction. The forward recurrence keeps everything as pure integer addition and multiplication,
+which is exactly what the C implementation exploits. Comparing the two approaches using the benchmark results
+makes this concrete:
+     </p>
+     <table>
+      <tr>
+       <th>
+        n
+       </th>
+       <th>
+        Python (s)
+       </th>
+       <th>
+        C (s)
+       </th>
+       <th>
+        Speedup
+       </th>
+      </tr>
+      <tr>
+       <td>
+        100
+       </td>
+       <td>
+        0.0003
+       </td>
+       <td>
+        ~0.000
+       </td>
+       <td>
+        -
+       </td>
+      </tr>
+      <tr>
+       <td>
+        1000
+       </td>
+       <td>
+        0.0139
+       </td>
+       <td>
+        0.0001
+       </td>
+       <td>
+        ~139x
+       </td>
+      </tr>
+      <tr>
+       <td>
+        10000
+       </td>
+       <td>
+        9.9261
+       </td>
+       <td>
+        0.0195
+       </td>
+       <td>
+        ~509x
+       </td>
+      </tr>
+     </table>
+     <p>
+      The widening gap at larger n reflects both interpreter overhead and the hidden GCD cost inside <code>Fraction</code>. The C solution avoids both by working directly with integer limbs and never
+reducing fractions. For quick prototyping or small n, Python's <code>Fraction</code> is perfectly fine and
+produces correct results with minimal code. For performance-critical paths involving large big-integer
+arithmetic, maintaining numerator and denominator as raw integers and using the forward recurrence is
+strongly preferable.
+     </p>
+     <ul>
+      <li>
+       The continued fraction coefficients of <code>e</code> obey a clean arithmetic rule that eliminates any need for a precomputed table.
+      </li>
+      <li>
+       The forward recurrence <code>h_k = a_k * h_{k-1} + h_{k-2}</code> is both simpler and faster than top-down recursive evaluation with a rational type, because it avoids GCD computation entirely.
+      </li>
+      <li>
+       Python's <code>Fraction</code> class carries hidden GCD overhead at every arithmetic step; for large-n big-integer paths, raw integer recurrence is strongly preferable.
+      </li>
+      <li>
+       Setting <code>sys.setrecursionlimit</code> explicitly is necessary whenever recursion depth is proportional to a problem parameter that can exceed Python's default limit of 1000.
+      </li>
+      <li>
+       A base-10^9 limb representation in C keeps the number of limbs small and makes decimal digit-sum extraction straightforward, since each limb contributes at most 9 decimal digits.
+      </li>
+     </ul>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>

@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+ <head>
+  <meta charset="utf-8"/>
+  <title>
+   Problem 73: Counting Fractions in a Range [Level 2]
+  </title>
+  <style>
+   /* ── Reset & base ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+            font-size: 15px;
+            line-height: 1.65;
+            color: #1e2030;
+            background: #f4f6fb;
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 28px 24px 64px;
+        }
+
+        /* ── Typography ── */
+        h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e2030;
+            margin: 0 0 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #4a90d9;
+        }
+
+        h3 {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: #7a82a0;
+            margin: 20px 0 6px;
+        }
+
+        h4 {
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: #3a7a50;
+            margin: 14px 0 4px;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        var {
+            font-style: italic;
+        }
+
+        sup {
+            vertical-align: super;
+            font-size: smaller;
+        }
+
+        sub {
+            vertical-align: sub;
+            font-size: smaller;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        code {
+            background: #eef1f8;
+            color: #2a3a6e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+            font-size: 0.87em;
+        }
+
+        a {
+            color: #4a80c8;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #dde1ed;
+            margin: 28px 0;
+        }
+
+        /* ── General tables (e.g. in solution notes) ── */
+        table {
+            border-collapse: collapse;
+            margin: 14px 0;
+        }
+
+        th {
+            background: #f0f2f8;
+            color: #3a4060;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 7px 14px;
+            border: 1px solid #d0d5e8;
+        }
+
+        td {
+            padding: 7px 14px;
+            border: 1px solid #dde1ed;
+        }
+
+        tr:nth-child(even) td {
+            background: #f8f9fd;
+        }
+
+        /* ── Page header ── */
+        #page-header {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 6px 10px;
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+        }
+
+        #page-header a {
+            font-size: 1rem;
+            color: #5a7ab8;
+            width: 32px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        #page-header a:hover {
+            background: #eef3fb;
+            color: #2a509a;
+            text-decoration: none;
+        }
+
+        /* ── Section cards ── */
+        section {
+            background: #ffffff;
+            border: 1px solid #dde1ed;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+
+        /* ── Problem statement ── */
+        #problem-statement-content {
+            padding: 20px 24px;
+            border-left: 4px solid #4a90d9;
+        }
+
+        #problem-statement-content h2 {
+            margin-top: 0;
+        }
+
+        #problem-statement-content h3:first-of-type {
+            margin-top: 16px;
+        }
+
+        /* ── Test cases ── */
+        #test-cases-content {
+            padding: 14px 20px;
+            background: #f5f9ff;
+            border-left: 4px solid #7ab3e8;
+        }
+
+        #test-cases-content h3 {
+            margin-top: 0;
+        }
+
+        #test-cases-content ul {
+            margin: 6px 0 0;
+            padding-left: 20px;
+        }
+
+        #test-cases-content li + li {
+            margin-top: 4px;
+        }
+
+        /* long answers (e.g. big integers) must be allowed to break */
+        #test-cases-content code {
+            white-space: normal;
+            overflow-wrap: break-word;
+        }
+
+        /* ── Results ── */
+        #results-content {
+            padding: 14px 20px;
+            border-left: 4px solid #3faa72;
+        }
+
+        #results-content h3 {
+            margin-top: 0;
+        }
+
+        #results-content table {
+            border-collapse: collapse;
+            margin: 6px 0 0;
+            width: auto;
+        }
+
+        #results-content td {
+            border: none;
+            padding: 6px 6px 6px 6px;
+            vertical-align: middle;
+            white-space: nowrap;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: transparent;
+        }
+
+        /* answer column – long numbers must be allowed to wrap */
+        #results-content td:nth-child(5) {
+            white-space: normal;
+            overflow-wrap: break-word;
+            max-width: 500px;
+        }
+
+        #results-content tr.result-dev td {
+            color: #1d5c3a;
+        }
+
+        #results-content tr.result-main td {
+            color: #14402a;
+        }
+
+        #results-content tr.result-extra td {
+            color: #0a2e1c;
+        }
+
+        /* label badge – first column */
+        #results-content td:first-child {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-right: 4px;
+            vertical-align: middle;
+            width: 50px;
+        }
+
+        #results-content tr.result-dev td:first-child {
+            background: #d4f0e2;
+        }
+
+        #results-content tr.result-main td:first-child {
+            background: #b0e2c8;
+        }
+
+        #results-content tr.result-extra td:first-child {
+            background: #8dd4b0;
+        }
+
+        #results-content tr + tr:not(.result-spacer) td {
+            border-top: 1px solid #d8eed8;
+            padding-top: 5px;
+        }
+
+        #results-content tr.result-spacer td {
+            padding: 4px 0;
+            border: none;
+            background: transparent;
+        }
+
+        /* ── Solution notes ── */
+        #solution-notes-content {
+            padding: 20px 24px;
+            border-left: 4px solid #c8a020;
+            background: #fffef8;
+        }
+
+        #solution-notes-content h3:first-child {
+            margin-top: 0;
+        }
+
+        #solution-notes-content table {
+            width: 100%;
+        }
+  </style>
+  <script>
+   MathJax = {tex: {inlineMath: [["$", "$"]], displayMath: [["$$", "$$"]]}};
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+  </script>
+  <script async="" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+ </head>
+ <body>
+  <div id="page-header">
+   <a href="../2/problem.html" title="Previous problem">
+    «
+   </a>
+   <a href="https://projecteuler.net/problem=73" rel="noopener noreferrer" target="_blank" title="View on Project Euler">
+    ⌂
+   </a>
+   <a href="../../../../index.html" title="Summary">
+    ☰
+   </a>
+   <a href="https://github.com/vikasmunshi/euler/blob/master/solutions/0/0/7/3/" rel="noopener noreferrer" target="_blank" title="View on GitHub">
+    ⊙
+   </a>
+   <a href="../4/problem.html" title="Next problem">
+    »
+   </a>
+  </div>
+  <section id="problem-statement">
+   <div id="problem-statement-content">
+    <h2>
+     Problem 73: Counting Fractions in a Range [Level 2]
+    </h2>
+    <h3>
+     Problem Statement
+    </h3>
+    <div class="problem_content" role="problem">
+     <p>
+      Consider the fraction, $\dfrac n d$, where $n$ and $d$ are positive integers. If $n \lt d$ and $\operatorname{HCF}(n, d)=1$, it is called a reduced proper fraction.
+     </p>
+     <p>
+      If we list the set of reduced proper fractions for $d \le 8$ in ascending order of size, we get:
+$$\frac 1 8, \frac 1 7, \frac 1 6, \frac 1 5, \frac 1 4, \frac 2 7, \frac 1 3, \mathbf{\frac 3 8, \frac 2 5, \frac 3 7}, \frac 1 2, \frac 4 7, \frac 3 5, \frac 5 8, \frac 2 3, \frac 5 7, \frac 3 4, \frac 4 5, \frac 5 6, \frac 6 7, \frac 7 8$$
+     </p>
+     <p>
+      It can be seen that there are $3$ fractions between $\dfrac 1 3$ and $\dfrac 1 2$.
+     </p>
+     <p>
+      How many fractions lie between $\dfrac 1 3$ and $\dfrac 1 2$ in the sorted set of reduced proper fractions for $d \le 12\,000$?
+     </p>
+    </div>
+   </div>
+  </section>
+  <section id="test-cases">
+   <div id="test-cases-content">
+    <h3>
+     Test Cases
+    </h3>
+    <ul>
+     <li><code>dev: solve(max_d=8) → 3</code></li>
+     <li><code>dev: solve(max_d=1000) → 50695</code></li>
+    </ul>
+    <ul>
+     <li><code>main: solve(max_d=12000) → 7295372</code></li>
+    </ul>
+    <ul>
+     <li><code>extra: solve(max_d=100000) → 506608484</code></li>
+    </ul>
+   </div>
+  </section>
+  <section id="results">
+   <div id="results-content">
+    <h3>
+     Results
+    </h3>
+    <h4>
+     First Solved: Wed, 16 Jul 2025, 21:47
+    </h4>
+    <table>
+     <tbody>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s0_c" rel="noopener noreferrer" target="_blank" title="p0073_s0_c">
+         p0073_s0_c
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        0.000000072s ⚡
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s1_c" rel="noopener noreferrer" target="_blank" title="p0073_s1_c">
+         p0073_s1_c
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        0.000000126s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s2_c" rel="noopener noreferrer" target="_blank" title="p0073_s2_c">
+         p0073_s2_c
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        0.000000271s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s0.py" rel="noopener noreferrer" target="_blank" title="p0073_s0.py">
+         p0073_s0.py
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        0.000001488s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s1.py" rel="noopener noreferrer" target="_blank" title="p0073_s1.py">
+         p0073_s1.py
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        0.000002820s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s2.py" rel="noopener noreferrer" target="_blank" title="p0073_s2.py">
+         p0073_s2.py
+        </a>
+       </td>
+       <td>
+        8
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        3
+       </td>
+       <td>
+        0.000006396s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s0_c" rel="noopener noreferrer" target="_blank" title="p0073_s0_c">
+         p0073_s0_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        50695
+       </td>
+       <td>
+        0.000173034s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s1_c" rel="noopener noreferrer" target="_blank" title="p0073_s1_c">
+         p0073_s1_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        50695
+       </td>
+       <td>
+        0.000124594s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s2_c" rel="noopener noreferrer" target="_blank" title="p0073_s2_c">
+         p0073_s2_c
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        50695
+       </td>
+       <td>
+        0.000018453s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s0.py" rel="noopener noreferrer" target="_blank" title="p0073_s0.py">
+         p0073_s0.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        50695
+       </td>
+       <td>
+        0.003598766s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s1.py" rel="noopener noreferrer" target="_blank" title="p0073_s1.py">
+         p0073_s1.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        50695
+       </td>
+       <td>
+        0.006620868s
+       </td>
+      </tr>
+      <tr class="result-dev">
+       <td>
+        dev
+       </td>
+       <td>
+        <a href="p0073_s2.py" rel="noopener noreferrer" target="_blank" title="p0073_s2.py">
+         p0073_s2.py
+        </a>
+       </td>
+       <td>
+        1000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        50695
+       </td>
+       <td>
+        0.000784978s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0073_s0_c" rel="noopener noreferrer" target="_blank" title="p0073_s0_c">
+         p0073_s0_c
+        </a>
+       </td>
+       <td>
+        12000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7295372
+       </td>
+       <td>
+        0.024747515s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0073_s1_c" rel="noopener noreferrer" target="_blank" title="p0073_s1_c">
+         p0073_s1_c
+        </a>
+       </td>
+       <td>
+        12000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7295372
+       </td>
+       <td>
+        0.016544328s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0073_s2_c" rel="noopener noreferrer" target="_blank" title="p0073_s2_c">
+         p0073_s2_c
+        </a>
+       </td>
+       <td>
+        12000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7295372
+       </td>
+       <td>
+        0.000255022s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0073_s0.py" rel="noopener noreferrer" target="_blank" title="p0073_s0.py">
+         p0073_s0.py
+        </a>
+       </td>
+       <td>
+        12000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7295372
+       </td>
+       <td>
+        0.526345536s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0073_s1.py" rel="noopener noreferrer" target="_blank" title="p0073_s1.py">
+         p0073_s1.py
+        </a>
+       </td>
+       <td>
+        12000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7295372
+       </td>
+       <td>
+        0.911921123s
+       </td>
+      </tr>
+      <tr class="result-main">
+       <td>
+        main
+       </td>
+       <td>
+        <a href="p0073_s2.py" rel="noopener noreferrer" target="_blank" title="p0073_s2.py">
+         p0073_s2.py
+        </a>
+       </td>
+       <td>
+        12000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        7295372
+       </td>
+       <td>
+        0.013436043s
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0073_s0_c" rel="noopener noreferrer" target="_blank" title="p0073_s0_c">
+         p0073_s0_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        506608484
+       </td>
+       <td>
+        1.720053396s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0073_s1_c" rel="noopener noreferrer" target="_blank" title="p0073_s1_c">
+         p0073_s1_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        506608484
+       </td>
+       <td>
+        1.007056940s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0073_s2_c" rel="noopener noreferrer" target="_blank" title="p0073_s2_c">
+         p0073_s2_c
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        506608484
+       </td>
+       <td>
+        0.003181201s ⚡
+       </td>
+      </tr>
+      <tr class="result-spacer">
+       <td colspan="6">
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0073_s0.py" rel="noopener noreferrer" target="_blank" title="p0073_s0.py">
+         p0073_s0.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        506608484
+       </td>
+       <td>
+        34.313079920s
+       </td>
+      </tr>
+      <tr class="result-extra">
+       <td>
+        extra
+       </td>
+       <td>
+        <a href="p0073_s2.py" rel="noopener noreferrer" target="_blank" title="p0073_s2.py">
+         p0073_s2.py
+        </a>
+       </td>
+       <td>
+        100000
+       </td>
+       <td>
+        →
+       </td>
+       <td>
+        506608484
+       </td>
+       <td>
+        0.175325536s
+       </td>
+      </tr>
+     </tbody>
+    </table>
+   </div>
+  </section>
+  <section id="solution-notes">
+   <div id="solution-notes-content">
+    <article>
+     <h3>
+      Mathematical Complexity
+     </h3>
+     <p>
+      This problem lives at the intersection of two classical number-theoretic structures: the Farey sequence and the Stern-Brocot tree.
+The Farey sequence F
+      <sub>
+       n
+      </sub>
+      is the sorted enumeration of all reduced proper fractions with denominator at most n, and consecutive terms a/b and c/d satisfy the determinant property |bc - ad| = 1.
+The Stern-Brocot tree organises the same fractions as a binary search tree where every node is the mediant (a+c)/(b+d) of its two nearest ancestors, making it natural for recursive interval-splitting between 1/3 and 1/2.
+Both structures support traversal algorithms that visit only the target fractions, but their cost is proportional to the answer itself, which grows as O(max_d
+      <sup>
+       2
+      </sup>
+      ) - around 500 million steps for max_d = 100 000.
+     </p>
+     <p>
+      A fundamentally faster approach replaces traversal with a rank function that counts how many reduced fractions lie at or below a given value.
+This uses Mobius-style inclusion-exclusion - the same sieve underlying Euler's totient function - and runs in O(max_d log max_d) time.
+The answer then becomes rank(1/2) - rank(1/3) - 1, turning the problem from a quadratic traversal into two near-linear sieve passes.
+     </p>
+     <h3>
+      Solution Approaches
+     </h3>
+     <h4>
+      Iterative Farey Neighbour Traversal (s0)
+     </h4>
+     <p>
+      I start from the denominator of the fraction just to the left of 1/2 in F
+      <sub>
+       max_d
+      </sub>
+      and walk leftward using the Farey recurrence <code>new_d = max_d - (max_d + prev_d) % d</code>, incrementing a counter at each step until I return to the denominator 2, which signals arrival back at 1/2.
+The crucial observation is that fractions in this interval are uniquely determined by their denominator alone - numerators are implicit - so I only need to track two consecutive denominators at any time.
+The starting denominator is computed as <code>d = 2 + 3 * ((max_d - 2) // 3)</code>, which aligns to the largest valid denominator adjacent to 1/3 in the Farey sense.
+The Python and C implementations are structurally identical; the C version runs roughly 70x faster on the extra test case (1.72 s vs 34.31 s), but both scale as O(answer) = O(max_d
+      <sup>
+       2
+      </sup>
+      ) and are unsuitable for very large inputs.
+     </p>
+     <h4>
+      Recursive Stern-Brocot Mediant Search (s1)
+     </h4>
+     <p>
+      I exploit the Stern-Brocot property that every fraction strictly between a/b and c/d is reachable as the mediant (a+c)/(b+d).
+My recursive function takes a lower and upper denominator, computes their sum as the mediant denominator, and if the sum does not exceed max_d it counts that fraction and recurses into both sub-intervals.
+Seeding the search with <code>recursion(3, 2)</code> correctly covers the open interval (1/3, 1/2).
+This is a clean DFS over the relevant Stern-Brocot subtree, but it still visits every fraction in the answer set, so complexity remains O(answer).
+In Python it is slower than the Farey approach (0.91 s vs 0.53 s for max_d = 12 000) due to call-stack overhead; I also set <code>sys.setrecursionlimit(10**6)</code> to avoid hitting the default limit.
+The C version avoids stack depth concerns and is noticeably faster than s0_c at the same scale (1.01 s vs 1.72 s for max_d = 100 000), likely because the balanced divide-and-conquer structure fits CPU cache access patterns slightly better than purely sequential traversal.
+The Python s1 benchmark was not run for the extra test case, presumably due to recursion depth concerns.
+     </p>
+     <h4>
+      Rank Function with Mobius Sieve (s2)
+     </h4>
+     <p>
+      I define a <code>rank(n, d)</code> function that counts all reduced fractions a/b with b &lt;= max_d and a/b &lt;= n/d, then return <code>rank(1, 2) - rank(1, 3) - 1</code>.
+Inside <code>rank</code>, I initialise an array <code>data[i] = floor(i * n / d)</code>, which counts all fractions (reduced or not) with denominator i that are at most n/d.
+I then apply a Mobius-style sieve: for each i from 1 upward, I subtract <code>data[i]</code> from every later multiple <code>data[j]</code> where j = 2i, 3i, and so on.
+After this pass, <code>data[i]</code> holds exactly the count of reduced fractions with denominator i at most n/d by Mobius inversion, and summing the whole array gives the rank.
+The sieve runs in O(max_d log max_d) time due to the harmonic series, and the constant factor is tiny because it is pure integer arithmetic on a flat array.
+The Python version handles the extra case in 0.175 s, roughly 196x faster than s0.py at 34.31 s.
+The C version is even more striking: 0.0003 s for the main case and 0.0032 s for the extra case - making it the clear winner by a wide margin.
+     </p>
+     <h3>
+      Learnings
+     </h3>
+     <p>
+      The key insight for the traversal approaches was that fractions in the Stern-Brocot tree between 1/3 and 1/2 are uniquely identified by their denominator alone - carrying numerators is unnecessary.
+This made both s0 and s1 surprisingly compact, but it did not change their fundamental O(answer) complexity.
+     </p>
+     <p>
+      The deeper insight for s2 was reframing counting as a rank computation.
+Once I recognised "count reduced fractions below a threshold" as a standard Mobius inversion - the same structure underlying the Euler totient sieve - the rest followed mechanically: initialise with floor values, sieve out multiples, sum.
+Two rank evaluations and a subtraction replace the entire traversal.
+     </p>
+     <p>
+      The benchmark results make the performance differences concrete:
+     </p>
+     <table>
+      <tr>
+       <th>
+        Solution
+       </th>
+       <th>
+        main (12 000)
+       </th>
+       <th>
+        extra (100 000)
+       </th>
+      </tr>
+      <tr>
+       <td>
+        s0.py - Farey iterative
+       </td>
+       <td>
+        0.526 s
+       </td>
+       <td>
+        34.31 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        s1.py - Stern-Brocot recursive
+       </td>
+       <td>
+        0.912 s
+       </td>
+       <td>
+        (not run)
+       </td>
+      </tr>
+      <tr>
+       <td>
+        s2.py - Mobius sieve rank
+       </td>
+       <td>
+        0.013 s
+       </td>
+       <td>
+        0.175 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        s0_c - Farey iterative
+       </td>
+       <td>
+        0.025 s
+       </td>
+       <td>
+        1.720 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        s1_c - Stern-Brocot recursive
+       </td>
+       <td>
+        0.017 s
+       </td>
+       <td>
+        1.007 s
+       </td>
+      </tr>
+      <tr>
+       <td>
+        s2_c - Mobius sieve rank
+       </td>
+       <td>
+        0.0003 s
+       </td>
+       <td>
+        0.0032 s
+       </td>
+      </tr>
+     </table>
+     <p>
+      The Mobius sieve in C is roughly 540x faster than the iterative C traversal on the extra case, confirming that algorithmic complexity dominates language choice by a large margin.
+For future problems involving counts of coprime pairs or reduced fractions, I will remember the pattern of initialising <code>data[i] = floor(i * bound)</code> and sieving out multiples - it is a versatile rank oracle that converts what appears to be a difficult counting problem into a near-trivial subtraction.
+     </p>
+    </article>
+   </div>
+  </section>
+ </body>
+</html>
