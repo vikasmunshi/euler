@@ -16,13 +16,14 @@ from anthropic.types import MessageParam
 
 from solver.ai.facts import Facts, format_solutions_markdown, gather_facts
 from solver.ai.models import Model, consumed_tokens, get_api_key
-from solver.core.config import Config
+from solver.core.config import config
+from solver.core.lock import check_workspace_lock
 from solver.core.problems import Problem
 from solver.core.stack import read_stack_file
 from solver.core.templates import Templates, filled_template, get_template
 from solver.core.workspace import stack_the_workspace
+from solver.core.console import console
 from solver.utils.path_utils import canonical_path, iterdir_recursive, write_file
-from solver.utils.workspace import check_workspace_lock
 
 max_retries: int = 5
 
@@ -112,23 +113,27 @@ def generate_code(
     client = Anthropic(api_key=get_api_key())
     messages: list[MessageParam] = [MessageParam(role='user', content=prompt)]
     for attempt in range(1, max_retries + 1):
-        print(f'Generating solutions for problem {problem.number} (attempt {attempt}/{max_retries})...')
+        console.print(f'[primary]Generating solutions for problem [accent]{problem.number}[/accent] '
+                      f'(attempt {attempt}/{max_retries})...[/primary]')
         response = client.messages.create(model=model, max_tokens=16384, messages=messages)
         consumed_tokens[model]['input'] += response.usage.input_tokens
         consumed_tokens[model]['output'] += response.usage.output_tokens
-        print(f'Tokens used for problem {problem.number}: '
-              f'input {response.usage.input_tokens}, output {response.usage.output_tokens}, '
-              f'stop_reason {response.stop_reason!r}')
+        console.print(f'[muted]Tokens used for problem [accent]{problem.number}[/accent]: '
+                      f'input {response.usage.input_tokens}, output {response.usage.output_tokens}, '
+                      f'stop_reason {response.stop_reason!r}[/muted]')
         truncated: bool = response.stop_reason == 'max_tokens'
         if truncated:
-            print(f'Warning: max_tokens reached for problem {problem.number}; response may be truncated')
+            console.print(f'[warning]Warning: max_tokens reached for problem {problem.number}; '
+                          f'response may be truncated[/warning]')
         text: str | None = next((b.text for b in response.content if b.type == 'text'), None)
         if text is None:
-            print(f'Error: no text block in response for problem {problem.number}')
+            console.print(f'[error]error:[/error] no text block in response for problem '
+                          f'[accent]{problem.number}[/accent]')
             return False
         solutions = Solution.from_msg(text)
         if not solutions:
-            print(f'Error: could not parse any solutions from response for problem {problem.number}')
+            console.print(f'[error]error:[/error] could not parse any solutions from response for problem '
+                          f'[accent]{problem.number}[/accent]')
             if attempt < max_retries:
                 retry_msg = retry_missing(truncated)
                 messages.append(MessageParam(role='assistant', content=text))
@@ -147,7 +152,9 @@ def generate_code(
                          f'and return them in the same // BEGIN / // END format.\n\n'
                          f'{result.as_msg()}'),
             ))
-    print(f'Failed to generate valid solutions for problem {problem.number} after {max_retries} attempts')
+    console.print(f'[error]error:[/error] failed to generate valid solutions for problem '
+                  f'[accent]{problem.number}[/accent] '
+                  f'after {max_retries} attempts')
     return False
 
 
@@ -169,27 +176,24 @@ def check_solution_against_test_cases(*,
                 cmdline,
                 capture_output=True,
                 text=True,
-                cwd=Config.root_dir,
-                timeout=Config.timeout_single,
+                cwd=config.root_dir,
+                timeout=config.timeout_single,
             )
         except TimeoutExpired as e:
-            print(f'cmdline: {' '.join(cmdline)}\n'
-                  f'rc: -1\n'
-                  f'stdout:\n\n'
-                  f'stderr:\n{e}\n')
+            console.print(f'cmdline: {" ".join(cmdline)}\nrc: -1\nstdout:\n\nstderr:\n{e}\n',
+                          markup=False, highlight=False)
             errors[name] = (f'#### cmdline:\n\n{' '.join(cmdline)}\n\n'
                             f'#### error:\n\ncmd did not complete within timeout of '
-                            f'{Config.timeout_single} seconds\n\n'
+                            f'{config.timeout_single} seconds\n\n'
                             f'#### stdout:\n\n{(e.stdout or b'').decode()}\n\n'
                             f'#### stderr:\n\n{(e.stderr or b'').decode()}\n\n')
             if test_case['category'] in ('dev', 'main'):
                 failed.add(name)
             continue
         else:
-            print(f'cmdline: {' '.join(cmdline)}\n'
-                  f'rc: {process.returncode}\n'
-                  f'stdout:\n{process.stdout}\n'
-                  f'stderr:\n{process.stderr}\n')
+            console.print(f'cmdline: {" ".join(cmdline)}\nrc: {process.returncode}\n'
+                          f'stdout:\n{process.stdout}\nstderr:\n{process.stderr}\n',
+                          markup=False, highlight=False)
         if process.returncode != 0:
             failed.add(name)
             errors[name] = (f'#### cmdline:\n\n{' '.join(cmdline)}\n\n'
@@ -251,18 +255,17 @@ def check_generated_c_code(*,
     for solution in solutions:
         name: str = solution.name
         code: bytes = solution.code.encode()
-        source_file: Path = Config.workspace_dir / name
+        source_file: Path = config.workspace_dir / name
         if source_file.suffix != '.c':
             failed.add(name)
             errors[name] = f'{name} is not a valid C source filename, should end with .c'
             continue
         write_file(source_file, code, f'trying solution {name}...')
-        cmdline: list[str] = [Config.ScriptPaths.BUILD_C, canonical_path(source_file)]
-        process = run(cmdline, capture_output=True, text=True, cwd=Config.root_dir)
-        print(f'cmdline: {' '.join(cmdline)}\n'
-              f'rc: {process.returncode}\n'
-              f'stdout:\n{process.stdout}\n'
-              f'stderr:\n{process.stderr}\n')
+        cmdline: list[str] = [config.ScriptPaths.BUILD_C, canonical_path(source_file)]
+        process = run(cmdline, capture_output=True, text=True, cwd=config.root_dir)
+        console.print(f'cmdline: {" ".join(cmdline)}\nrc: {process.returncode}\n'
+                      f'stdout:\n{process.stdout}\nstderr:\n{process.stderr}\n',
+                      markup=False, highlight=False)
         if process.returncode != 0:
             failed.add(name)
             errors[name] = (f'#### cmdline:\n\n{' '.join(cmdline)}\n\n'
@@ -270,7 +273,7 @@ def check_generated_c_code(*,
                             f'#### stdout:\n\n{process.stdout}\n\n'
                             f'#### stderr:\n\n{process.stderr}\n\n')
             continue
-        executable_file: Path = Config.workspace_dir / f'{source_file.stem}_c'
+        executable_file: Path = config.workspace_dir / f'{source_file.stem}_c'
         check_solution_against_test_cases(
             executable_file=executable_file,
             test_cases=test_cases,
@@ -301,7 +304,7 @@ def check_generated_py_code(*,
     for solution in solutions:
         name: str = solution.name
         code: bytes = solution.code.encode()
-        source_file: Path = Config.workspace_dir / name
+        source_file: Path = config.workspace_dir / name
         if source_file.suffix != '.py':
             failed.add(name)
             errors[name] = f'{name} is not a valid PY source filename, should end with .py'
@@ -354,18 +357,18 @@ def generate_c_code(model: Model, force: bool = False) -> bool | None:
                      Returns None if there are no files to generate.
     """
     if (problem := Problem.from_workspace()) is None:
-        print('No workspace initialized. Use init to initialize the workspace')
+        console.print('[muted]No workspace initialized. Use [accent]init[/accent] to initialize the workspace[/muted]')
         return None
-    py_solutions: set[str] = {f.stem for f in iterdir_recursive(Config.workspace_dir, rt='path') if f.suffix == '.py'}
-    c_solutions: set[str] = {f.stem for f in iterdir_recursive(Config.workspace_dir, rt='path') if f.suffix == '.c'}
+    py_solutions: set[str] = {f.stem for f in iterdir_recursive(config.workspace_dir, rt='path') if f.suffix == '.py'}
+    c_solutions: set[str] = {f.stem for f in iterdir_recursive(config.workspace_dir, rt='path') if f.suffix == '.c'}
     files_to_generate: str = ' '.join(f'{f}.c' for f in py_solutions if f not in c_solutions)
     if not (force or files_to_generate):
-        print(f'No C solutions to generate for problem {problem.number}')
+        console.print(f'[muted]No C solutions to generate for problem [accent]{problem.number}[/accent][/muted]')
         return None
     try:
         facts: Facts = gather_facts(problem.number, strict=True)
     except ValueError as e:
-        print(f'Error: could not generate c for problem {problem.number}: {e}')
+        console.print(f'[error]error:[/error] could not generate C for problem [accent]{problem.number}[/accent]: {e}')
         return False
     solution_template: str = get_template(Templates.NEW_C).substitute(problem=problem.as_title())
     try:
@@ -376,16 +379,19 @@ def generate_c_code(model: Model, force: bool = False) -> bool | None:
             solution_template=format_solutions_markdown({'template.c': solution_template}),
         )
     except (KeyError, ValueError) as e:
-        print(f'Error: Template parsing error while generating notes for problem {problem.number}: {e}')
+        console.print(f'[error]error:[/error] template parsing error for problem '
+                      f'[accent]{problem.number}[/accent]: {e}')
         return False
-    test_cases: list[dict[str, Any]] = loads(read_stack_file(problem.number, Config.test_cases_filename)[0])
+    test_cases: list[dict[str, Any]] = loads(read_stack_file(problem.number, config.test_cases_filename)[0])
     test_cases = [tc for tc in test_cases if tc['answer'] is not None]
     if not test_cases:
-        print(f'No test cases with answer found for problem {problem.number}')
+        console.print(f'[error]error:[/error] no test cases with answer found for problem '
+                      f'[accent]{problem.number}[/accent]')
         return False
     expected_types: set[type] = {type(tc['answer']) for tc in test_cases}
     if len(expected_types) != 1:
-        print(f'Multiple types of answers found in test cases for problem {problem.number}: {expected_types}')
+        console.print(f'[error]error:[/error] multiple answer types in test cases for problem '
+                      f'[accent]{problem.number}[/accent]: {expected_types}')
         return False
     expected_type: type = expected_types.pop()
 
@@ -425,16 +431,18 @@ def generate_py_code(model: Model, force: bool = False) -> bool | None:
         the workspace is uninitialized.
     """
     if (problem := Problem.from_workspace()) is None:
-        print('No workspace initialized. Use init to initialize the workspace')
+        console.print('[muted]No workspace initialized. Use [accent]init[/accent] to initialize the workspace[/muted]')
         return None
-    num_existing: int = sum(1 for s in Config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.py')
+    num_existing: int = sum(1 for s in config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.py')
     if not force and num_existing > 0:
-        print(f'Found {num_existing} existing solution files for problem {problem.number}.')
+        console.print(f'[muted]Found {num_existing} existing solution files for problem '
+                      f'[accent]{problem.number}[/accent][/muted]')
         return None
     file_to_generate: str = f'p{problem.number:04d}_s{num_existing}.py'
     facts: Facts = gather_facts(problem.number, strict=False)
     if not facts.problem_content:
-        print(f'No problem content found for problem {problem.number}')
+        console.print(f'[error]error:[/error] no problem content found for problem '
+                      f'[accent]{problem.number}[/accent]')
         return False
     solution_template: str = get_template(Templates.NEW_PY).substitute(problem=problem.as_title())
     try:
@@ -445,11 +453,13 @@ def generate_py_code(model: Model, force: bool = False) -> bool | None:
             solution_template=format_solutions_markdown({'template.py': solution_template}),
         )
     except (KeyError, ValueError) as e:
-        print(f'Error: Template parsing error while generating notes for problem {problem.number}: {e}')
+        console.print(f'[error]error:[/error] template parsing error for problem '
+                      f'[accent]{problem.number}[/accent]: {e}')
         return False
-    test_cases: list[dict[str, Any]] = loads(read_stack_file(problem.number, Config.test_cases_filename)[0])
+    test_cases: list[dict[str, Any]] = loads(read_stack_file(problem.number, config.test_cases_filename)[0])
     if not [tc for tc in test_cases if tc['answer'] is not None]:
-        print(f'No test cases with answer found for problem {problem.number}')
+        console.print(f'[error]error:[/error] no test cases with answer found for problem '
+                      f'[accent]{problem.number}[/accent]')
         return False
     expected_type: type = next(type(tc['answer']) for tc in test_cases if tc['answer'] is not None)
 

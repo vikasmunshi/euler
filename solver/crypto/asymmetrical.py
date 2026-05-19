@@ -13,7 +13,8 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, PublicFormat
 
-from solver.core.config import Config
+from solver.core.config import config
+from solver.core.console import console
 from solver.utils.gh import get_gh_user_email
 
 
@@ -83,14 +84,14 @@ class UserKeyPair(NamedTuple):
         Raises:
             FileNotFoundError: If the private key file does not exist.
         """
-        if not Config.private_key_file.exists():
-            raise FileNotFoundError(f'Private key file {Config.private_key_file} not found')
-        with Config.private_key_file.open('r') as f:
+        if not config.private_key_file.exists():
+            raise FileNotFoundError(f'Private key file {config.private_key_file} not found')
+        with config.private_key_file.open('r') as f:
             user_email, private_hex = f.read().strip().split(maxsplit=1)
         private_key: X25519PrivateKey = x25519.X25519PrivateKey.from_private_bytes(bytes.fromhex(private_hex))
         return cls(user_email=user_email, private_key=private_key, public_key=private_key.public_key())
 
-    def to_file(self, key_file: Path = Config.private_key_file) -> None:
+    def to_file(self, key_file: Path = config.private_key_file) -> None:
         """
         Write the private key to key_file, rotating up to five existing backups.
 
@@ -108,7 +109,8 @@ class UserKeyPair(NamedTuple):
                 new_backup = key_file.with_suffix(f'.{i + 1}')
                 if old_backup.exists():
                     old_backup.rename(new_backup)
-                    print(f'Backed up existing private key file {key_file} to {old_backup}')
+                    console.print(f'[muted]Backed up private key [accent]{key_file}[/accent] → [accent]'
+                                  f'{old_backup}[/accent][/muted]')
             backup_file = key_file.with_suffix('.1')
             key_file.rename(backup_file)
         key_file.parent.mkdir(parents=True, exist_ok=True)
@@ -118,7 +120,7 @@ class UserKeyPair(NamedTuple):
                                                               format=PrivateFormat.Raw,
                                                               encryption_algorithm=NoEncryption()).hex()
             f.write(f'{self.user_email} {private_hex}\n')
-            print(f'Private key file {key_file} initialized')
+            console.print(f'[success]Private key file [accent]{key_file}[/accent] initialized[/success]')
 
     @classmethod
     def from_public_dict(cls, email: str, data: dict[str, str]) -> UserKeyPair:

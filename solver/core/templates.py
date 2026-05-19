@@ -7,7 +7,7 @@ from functools import lru_cache
 from string import Template
 from typing import NamedTuple
 
-from solver.core.config import Config
+from solver.core.config import config
 
 
 class Templates(StrEnum):
@@ -29,7 +29,7 @@ def filled_template(filename: Templates, /, *, facts: NamedTuple, **kwargs: str)
 @lru_cache(maxsize=None)
 def get_template(filename: Templates) -> Template:
     """Retrieve a template by filename from the 'templates' directory."""
-    return Template(Config.templates_dir.joinpath(filename).read_text())
+    return Template(config.templates_dir.joinpath(filename).read_text())
 
 
 __all__ = ('Templates', 'filled_template', 'get_template')

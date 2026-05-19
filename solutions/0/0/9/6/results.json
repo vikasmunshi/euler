@@ -5,8 +5,8 @@
     "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
     "answer": 24702,
     "verdict": "correct",
-    "average": 0.0086304234,
-    "number_runs": 10
+    "average": 0.009117022712328766,
+    "number_runs": 73
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
     "answer": 24702,
     "verdict": "correct",
-    "average": 0.06127810460020555,
-    "number_runs": 10
+    "average": 0.0586321190001458,
+    "number_runs": 31
   }
 ]

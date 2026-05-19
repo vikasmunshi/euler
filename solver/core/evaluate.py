@@ -10,9 +10,31 @@ from subprocess import TimeoutExpired, run
 from time import perf_counter
 from typing import Any, Literal
 
-from solver.core.config import Config
+from solver.core.config import config
+from solver.core.lock import check_workspace_lock
 from solver.core.results import results_collector
-from solver.utils.scripts import build_c
+from solver.core.console import console, register
+from solver.utils.path_utils import canonical_path
+
+
+@register(name='build',
+          help='Build all C source files in the workspace directory.',
+          usage='build', )
+@check_workspace_lock
+def build_c() -> None:
+    """Build all C source files in the workspace directory."""
+    source_files: list[Path] = sorted(s for s in config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.c')
+    for source_file in source_files:
+        cmdline: str = f'{config.ScriptPaths.BUILD_C} {canonical_path(source_file)}'
+        process = run(cmdline, capture_output=True, cwd=config.root_dir, shell=True, text=True)
+        if process.returncode != 0:
+            console.print(f'[error]error:[/error] building [accent]{source_file.name}[/accent]')
+            output = process.stdout + ('\n' if process.stdout and process.stderr else '') + process.stderr
+            if output.strip():
+                console.print(output.strip(), markup=False, highlight=False)
+        else:
+            console.print(f'[success]built[/success] [accent]{source_file.name}[/accent] '
+                          f'[muted]({process.stdout.strip()})[/muted]')
 
 
 def eval_solution[T](filename: str, *,
@@ -45,7 +67,7 @@ def eval_solution[T](filename: str, *,
         The answer is None on timeout or non-zero exit; error_message is empty on success.
     """
     expected_type: type = type(expected) if expected is not None else int
-    timeout: float = Config.timeout_single if runs == 1 else Config.timeout_multiple * runs
+    timeout: float = config.timeout_single if runs == 1 else config.timeout_multiple * runs
     t_start: float = perf_counter()
     try:
         result = run([f'./{filename}', *input_args, f'--runs={runs}', '--show' if show else ''],
@@ -58,7 +80,7 @@ def eval_solution[T](filename: str, *,
         assert result.returncode == 0, f'Non-zero exit code: {result.returncode}'
         output_lines: list[str] = result.stdout.splitlines()
         if len(output_lines) > 1:
-            print('\n'.join(output_lines[:-1]))
+            console.print('\n'.join(output_lines[:-1]), markup=False)
         _runs, _average, _answer = output_lines[-1].split(' ', maxsplit=2)
         assert runs == int(_runs), f'Expected {runs} runs, got {_runs}'
         average = float(_average)  # <= replace elapsed in eval_solution with _average reported by the called script
@@ -69,6 +91,11 @@ def eval_solution[T](filename: str, *,
     return answer, average, ''
 
 
+@register(name='evaluate',
+          help='Evaluate solutions against test cases.',
+          usage='evaluate [all|dev|main|extra ...] '
+                '[disable_timeout=false] [lang=*|py|c] [record=false] [runs=1] [show=false] [solution=]',
+          aliases=('eval', 'test'))
 def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
              disable_timeout: bool = False,
              lang: Literal['*', 'py', 'c'] = '*',
@@ -110,33 +137,33 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     if show:
         record = False
         runs = 1
-    test_cases_path: Path = Config.workspace_dir / Config.test_cases_filename
+    test_cases_path: Path = config.workspace_dir / config.test_cases_filename
     try:
         test_cases: list[dict[str, Any]] = loads(test_cases_path.read_text())
         assert test_cases and isinstance(test_cases, list), 'empty or invalid test cases file'
         filtered: list[dict[str, Any]] = [tc for tc in test_cases if tc['category'] in categories]
         assert filtered
     except FileNotFoundError:
-        print('Error: no test cases found, skipping evaluation')
+        console.print('[error]error:[/error] no test cases found, skipping evaluation')
         return False
     except AssertionError:
-        print(f'Error: no test cases for categories: {categories}, skipping evaluation')
+        console.print(f'[error]error:[/error] no test cases for categories: {categories}, skipping evaluation')
         return False
     except JSONDecodeError as err:
-        print(f'Error: invalid test cases file, skipping evaluation {err=}')
+        console.print(f'[error]error:[/error] invalid test cases file, skipping evaluation {err=}')
         return False
     if lang in ('*', 'c'):
         build_c()
     if solution is not None:
         solutions: list[str] = [solution]
     else:
-        solutions = sorted((f'{s.name}' for s in Config.workspace_dir.iterdir()
+        solutions = sorted((f'{s.name}' for s in config.workspace_dir.iterdir()
                             if s.is_file() and bool(s.stat().st_mode & 0o100)),
                            key=lambda name: (name.rsplit('.', 1)[-1] if '.' in name else '', name))
     if lang != '*':
         solutions = [s for s in solutions if s.endswith(lang)]
     if not solutions:
-        print('Error: no solutions found, skipping evaluation')
+        console.print('[error]error:[/error] no solutions found, skipping evaluation')
         return False
     len_input_args_str: int = 0
     for test_case in filtered:
@@ -161,7 +188,7 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
                 input_args=input_args,
                 runs=runs,
                 show=show,
-                work_dir=Config.workspace_dir,
+                work_dir=config.workspace_dir,
             )
             match (answer, expected, error):
                 case (None, _, error_msg) if 'OverflowError:' in error_msg:

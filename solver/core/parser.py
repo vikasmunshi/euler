@@ -13,13 +13,14 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
-from solver.core.config import Config
+from solver.core.config import config
 from solver.core.problems import Problem, problems
 from solver.core.problems import solutions_history
 from solver.core.results import FormattedResult, Result, read_results
-from solver.core.solution_notes import get_solution_notes_html
+from solver.core.notes import get_solution_notes_html
 from solver.core.stack import read_stack_file, stack_base_dir
 from solver.core.templates import Templates, get_template
+from solver.core.console import console
 from solver.utils.download import download_file
 from solver.utils.path_utils import canonical_path
 
@@ -106,10 +107,10 @@ def extract_resources(problem_content: BeautifulSoup, *, force_refresh: bool) ->
         if src is None:
             continue
         if isinstance(src, str) and (src.startswith('resources/') or src.startswith('project/images/')):
-            url: str = urljoin(Config.projecteuler_url, src)
-            local_filename: str = Config.resource_dirname + '/' + src.split('/')[-1].split('?')[0]
+            url: str = urljoin(config.projecteuler_url, src)
+            local_filename: str = config.resource_dirname + '/' + src.split('/')[-1].split('?')[0]
             if (content := download_file(url, refresh=force_refresh)) is None:
-                print(f'Error: Failed to download {local_filename} from {url}')
+                console.print(f'[error]error:[/error] failed to download [accent]{local_filename}[/accent] from {url}')
                 continue
             solved_results[local_filename] = content
             element[attr] = local_filename
@@ -126,7 +127,7 @@ def get_results_html(problem: Problem, test_cases: list[dict[str, Any]]) -> str:
     solved_date: str | None = solutions_history.get(problem.number)
     solved_results: list[Result] = read_results(problem.number)
     if not solved_date:
-        return f'<p><em>{Config.default_results}</em></p>'
+        return f'<p><em>{config.default_results}</em></p>'
     header: str = f'<h4>First Solved: {solved_date}</h4>'
     if not solved_results:
         return header + '\n<p><em>Solution vanished into the void. Send search party.</em></p>'
@@ -166,7 +167,7 @@ def get_results_html(problem: Problem, test_cases: list[dict[str, Any]]) -> str:
 def get_test_cases_html(problem_number: int, test_cases: list[dict[str, Any]]) -> str:
     """ Render test cases as HTML sections grouped by category. """
     if not test_cases:
-        return f'<p><em>{Config.default_test_cases}</em></p>'
+        return f'<p><em>{config.default_test_cases}</em></p>'
     sections: dict[str, list[str]] = {}
     for tc in test_cases:
         category: str = tc['category']
@@ -178,7 +179,7 @@ def get_test_cases_html(problem_number: int, test_cases: list[dict[str, Any]]) -
         sections.setdefault(category, []).append(f'<li><code>{category}: solve({args}) → {answer}</code></li>')
     parts: list[str] = [f'<ul>\n{'\n'.join(items)}\n</ul>' for category, items in sections.items()]
     if not parts:
-        return f'<p><em>{Config.default_test_cases}</em></p>'
+        return f'<p><em>{config.default_test_cases}</em></p>'
     return '\n'.join(parts)
 
 
@@ -231,8 +232,8 @@ def problem_statement(problem_number: int, /, *, force_refresh: bool = False, ) 
     if (problem := Problem.from_number(problem_number)) is None:
         raise ValueError(f'Problem {problem_number}: Invalid problem number')
     this_url, next_url, previous_url = problem_nav_urls(problem_number)
-    euler_url: str = urljoin(Config.projecteuler_url, f'problem={problem.number}')
-    github_url: str = f'{Config.project_git_url}/blob/master/{this_url}'
+    euler_url: str = urljoin(config.projecteuler_url, f'problem={problem.number}')
+    github_url: str = f'{config.project_git_url}/blob/master/{this_url}'
     if (problem_html := download_file(euler_url, refresh=force_refresh)) is None:
         raise ValueError(f'Problem {problem.number}: Failed to download HTML from {euler_url}')
     problem_soup: BeautifulSoup = BeautifulSoup(problem_html, 'html.parser')
@@ -241,7 +242,7 @@ def problem_statement(problem_number: int, /, *, force_refresh: bool = False, ) 
         raise ValueError(f'Problem {problem.number}: Could not find problem_content div in HTML')
     files: dict[str, bytes] = extract_resources(content, force_refresh=force_refresh)
     try:
-        test_cases: list[dict[str, Any]] = loads(read_stack_file(problem_number, Config.test_cases_filename)[0])
+        test_cases: list[dict[str, Any]] = loads(read_stack_file(problem_number, config.test_cases_filename)[0])
     except (FileNotFoundError, JSONDecodeError):
         test_cases = []
     solved_results: str = get_results_html(problem, test_cases)
@@ -256,7 +257,7 @@ def problem_statement(problem_number: int, /, *, force_refresh: bool = False, ) 
                                        solved_results=solved_results,
                                        solution_notes=solution_notes,
                                        test_cases=test_cases_html, )
-    files[Config.statement_filename] = html
+    files[config.statement_filename] = html
     return problem, files
 
 

@@ -9,14 +9,14 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from solver.core.config import Config
+from solver.core.config import config
 from solver.core.problems import Problem
+from solver.core.problems import solutions_history
 from solver.core.results import Result, read_results
-from solver.core.solution_notes import get_solution_notes_html
+from solver.core.notes import get_solution_notes_html
 from solver.core.stack import read_stack_file, stack_base_dir
 from solver.utils.download import download_file
 from solver.utils.path_utils import iterdir_recursive
-from solver.core.problems import solutions_history
 
 
 class Facts(NamedTuple):
@@ -97,7 +97,7 @@ def gather_facts(problem_number: int, strict: bool = False) -> Facts:
         raise ValueError('No solved solutions found')
     test_cases: list[dict[str, Any]]
     try:
-        test_cases = loads(read_stack_file(problem.number, Config.test_cases_filename)[0])
+        test_cases = loads(read_stack_file(problem.number, config.test_cases_filename)[0])
     except (FileNotFoundError, JSONDecodeError):
         if strict:
             raise ValueError('No test cases found')
@@ -105,7 +105,7 @@ def gather_facts(problem_number: int, strict: bool = False) -> Facts:
     if strict:
         if not [tc for tc in test_cases if tc['answer'] is not None]:
             raise ValueError('No test cases with answers found')
-    euler_url: str = urljoin(Config.projecteuler_url, f'problem={problem.number}')
+    euler_url: str = urljoin(config.projecteuler_url, f'problem={problem.number}')
     problem_content: str = ''
     if problem_html := download_file(euler_url, refresh=False):
         problem_soup: BeautifulSoup = BeautifulSoup(problem_html, 'html.parser')
@@ -114,7 +114,7 @@ def gather_facts(problem_number: int, strict: bool = False) -> Facts:
             if strict:
                 raise ValueError('No problem content found')
     solution_notes: str = get_solution_notes_html(problem.number)
-    if Config.default_solution_notes in solution_notes:
+    if config.default_solution_notes in solution_notes:
         solution_notes = ''
     solved_date: str = solutions_history.get(problem.number, 'unknown')
     return Facts(

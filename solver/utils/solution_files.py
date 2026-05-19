@@ -12,13 +12,14 @@ import autoflake
 import black
 import isort
 
-from solver.core.config import Config
+from solver.core.config import config
+from solver.core.console import console, register
+from solver.core.lock import check_workspace_lock
 from solver.core.problems import Problem
 from solver.core.stack import read_stack_file, stack_base_dir, write_stack_file
 from solver.core.templates import Templates, get_template
 from solver.utils.path_utils import write_file
 from solver.utils.shell_utils import run_command
-from solver.utils.workspace import check_workspace_lock
 
 
 @functools.lru_cache(maxsize=None)
@@ -99,6 +100,9 @@ def migrate_content(content: bytes) -> bytes:
     return modified_code.encode()
 
 
+@register(name='migrate',
+          help='Migrate Python solutions in the current workspace to the current template.',
+          usage='migrate', )
 @check_workspace_lock
 def migrate_py_to_template() -> None:
     """ Migrate Python solutions in the current workspace to the new solution template structure. """
@@ -111,9 +115,12 @@ def migrate_py_to_template() -> None:
             content, is_executable, m_time = read_stack_file(problem.number, filename)
             content = migrate_content(content)
             write_stack_file(problem.number, filename, content, is_executable, m_time)
-            write_file(Config.workspace_dir / filename, content, 'migrated solution file to template')
+            write_file(config.workspace_dir / filename, content, 'migrated solution file to template')
 
 
+@register(name='new',
+          help='Generate a new solution file for the problem in the current workspace.',
+          usage='new [py_only=true]', )
 @check_workspace_lock
 def new_solution_files(py_only: bool = True) -> None:
     """Generate a new solution file for the problem in the given workspace.
@@ -126,34 +133,42 @@ def new_solution_files(py_only: bool = True) -> None:
     """
     if (problem := Problem.from_workspace()) is None:
         raise ValueError('Workspace is empty / invalid, use solver init <problem number> to initialize')
-    num_existing: int = sum(1 for s in Config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.py')
+    num_existing: int = sum(1 for s in config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.py')
     names: list[str] = [f'p{problem.number:04d}_s{num_existing}.py']
     templates: list[Templates] = [Templates.NEW_PY]
     if not py_only:
         names.append(f'p{problem.number:04d}_s{num_existing}.c')
         templates.append(Templates.NEW_C)
     for name, template in zip(names, templates):
-        file: Path = Config.workspace_dir / name
+        file: Path = config.workspace_dir / name
         code: str = get_template(template).substitute(problem=problem.as_title())
         write_file(file, code.encode(), 'created solution file from template')
         if template == Templates.NEW_PY:
             os.chmod(file, 0o755)
-    if not (test_cases_file := Config.workspace_dir / Config.test_cases_filename).exists():
+    if not (test_cases_file := config.workspace_dir / config.test_cases_filename).exists():
         write_file(test_cases_file, b'[]', 'created empty test case file')
 
 
+@register(name='recover',
+          help='Recover test cases for the problem currently in the workspace.',
+          usage='recover', )
 @check_workspace_lock
 def recover_test_cases() -> bool | None:
     """Recover test cases for the problem currently in the workspace."""
     from_revision: str = '09f3cb3de177fe19ee5262946254ddc02e0059a6'
     if (problem := Problem.from_workspace()) is None:
-        print('No workspace initialized. Use init to initialize the workspace')
+        console.print('[muted]No workspace initialized. Use [accent]init[/accent] to initialize the workspace[/muted]')
         return None
-    test_cases_file = Config.workspace_dir / Config.test_cases_filename
+    test_cases_file = config.workspace_dir / config.test_cases_filename
     if test_cases_file.exists():
-        print(f'Test cases for problem {problem.number} already exist in the workspace')
+        console.print(f'[muted]'
+                      f'Test cases for problem [accent]{problem.number}[/accent] already exist in the workspace'
+                      f'[/muted]')
         return None
-    print(f'Restoring test cases for problem {problem.number} from git revision {from_revision}...')
+    console.print(f'[primary]'
+                  f'Restoring test cases for problem [accent]{problem.number}[/accent] from git revision '
+                  f'[muted]{from_revision}[/muted]...'
+                  f'[/primary]')
     file_name: str = f'p{problem.number:04d}.py'
     # Check if file exists in the revision
     file_path = run_command(f'git ls-tree -r --name-only {from_revision} | grep -F {file_name}')
@@ -187,7 +202,7 @@ def recover_test_cases() -> bool | None:
                     except (ValueError, SyntaxError):
                         return False
     # Write the test cases to the workspace
-    write_file(Config.workspace_dir / Config.test_cases_filename,
+    write_file(config.workspace_dir / config.test_cases_filename,
                json.dumps(test_cases, indent=2).encode(),
                f'Restored test cases from git revision {from_revision}')
     return True

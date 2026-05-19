@@ -8,18 +8,21 @@ from json import JSONDecodeError, dumps, loads
 from time import time
 from typing import Any, Generator, NamedTuple, Protocol
 
-from solver.core.config import Config
-from solver.core.stack import read_stack_file, write_stack_file
-from solver.utils.path_utils import canonical_path
-from solver.utils.workspace import check_workspace_lock
+from rich.markup import escape
 
-color_map: dict[str, Config.ColorCodes] = {
-    'correct': Config.ColorCodes.GREEN,
-    'incorrect': Config.ColorCodes.RED,
-    'unknown': Config.ColorCodes.BLUE,
-    'error': Config.ColorCodes.RED,
-    'overflow': Config.ColorCodes.YELLOW,
-    'timeout': Config.ColorCodes.YELLOW,
+from solver.core.config import config
+from solver.core.lock import check_workspace_lock
+from solver.core.stack import read_stack_file, write_stack_file
+from solver.core.console import console
+from solver.utils.path_utils import canonical_path
+
+color_map: dict[str, str] = {
+    'correct': 'success',
+    'incorrect': 'error',
+    'unknown': 'primary',
+    'error': 'error',
+    'overflow': 'warning',
+    'timeout': 'warning',
 }
 
 
@@ -53,10 +56,14 @@ class Result(NamedTuple):
     number_runs: int
 
     def __str__(self) -> str:
-        return (f'{color_map.get(self.verdict, Config.ColorCodes.RED)} '
-                f'{self.category:<6} {f"({self.verdict})":<11} '
-                f'[{self.average:<3.9f}s {self.number_runs}] '
-                f'{self.solution} {self.args} -> {self.answer or ""}{Config.ColorCodes.RESET}')
+        style = color_map.get(self.verdict, 'error')
+        args: str = self.args
+        if 'https' in self.args:
+            args = ' '.join([arg.split('/')[-1] if arg.startswith('https') else arg for arg in self.args.split()])
+        return (f'[muted]{self.category:<6} {f"({self.verdict})":<11}'
+                f' \\[{self.average:<3.9f}s {self.number_runs}] {self.solution} {args}[/muted]'
+                f'[accent] → [/accent]'
+                f'[{style}]{str(self.answer or "")}[/{style}]')
 
     def formatted(self) -> FormattedResult:
         sol = (f'<a href="{self.solution}" target="_blank" rel="noopener noreferrer" title="{self.solution}">'
@@ -74,9 +81,9 @@ def read_results(problem_number: int = 0) -> list[Result]:
     """Read problem results from a JSON file."""
     try:
         if problem_number == 0:
-            raw = loads((Config.workspace_dir / Config.results_filename).read_bytes())
+            raw = loads((config.workspace_dir / config.results_filename).read_bytes())
         else:
-            raw = loads(read_stack_file(problem_number, Config.results_filename)[0])
+            raw = loads(read_stack_file(problem_number, config.results_filename)[0])
     except (FileNotFoundError, JSONDecodeError):
         raw = []
     return [Result(**r) for r in raw]
@@ -92,13 +99,15 @@ def results_collector(record: bool) -> Generator[Recorder, None, None]:
         result = Result(category=category, solution=solution, args=args.strip(), answer=answer,
                         verdict=verdict, average=elapsed, number_runs=runs)
         results.append(result)
-        print(str(result))
+        console.print(str(result))
 
     yield recorder
 
     if record:
         write_results(results, problem_number=0)
-        print(f'Results written to {canonical_path(Config.workspace_dir / Config.results_filename)}')
+        console.print(f'[muted]Results written to '
+                      f'[accent]{escape(str(canonical_path(config.workspace_dir / config.results_filename)))}[/accent]'
+                      f'[/muted]')
     return None
 
 
@@ -112,9 +121,9 @@ def write_results(results: list[Result], problem_number: int = 0) -> None:
     """
     try:
         if problem_number == 0:
-            existing_raw = loads((Config.workspace_dir / Config.results_filename).read_bytes())
+            existing_raw = loads((config.workspace_dir / config.results_filename).read_bytes())
         else:
-            existing_raw = loads(read_stack_file(problem_number, Config.results_filename)[0])
+            existing_raw = loads(read_stack_file(problem_number, config.results_filename)[0])
     except (FileNotFoundError, JSONDecodeError):
         existing_raw = []
 
@@ -140,11 +149,11 @@ def write_results(results: list[Result], problem_number: int = 0) -> None:
 
     results_str = dumps(updated, indent=2)
     if problem_number == 0:
-        (Config.workspace_dir / Config.results_filename).write_text(results_str)
+        (config.workspace_dir / config.results_filename).write_text(results_str)
     else:
         write_stack_file(
             problem_number,
-            Config.results_filename,
+            config.results_filename,
             results_str.encode(),
             is_executable=False,
             m_time=time()

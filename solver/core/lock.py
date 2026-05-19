@@ -3,18 +3,18 @@
 """ Utilities for workspace locking using file-based locks."""
 from __future__ import annotations
 
-from contextlib import contextmanager
-from fcntl import LOCK_EX, LOCK_NB, LOCK_UN, flock
-from functools import wraps
-from os import getpid
+import contextlib
+import fcntl
+import functools
+import os
 from typing import Callable, Generator
 
-from solver.core.config import Config
+from solver.core.config import config
 
 workspace_lock_acquired: bool = False
 
 
-@contextmanager
+@contextlib.contextmanager
 def acquire_workspace_lock() -> Generator[bool, None, None]:
     """
     Acquire an exclusive lock on the workspace directory for the duration of the context.
@@ -27,15 +27,15 @@ def acquire_workspace_lock() -> Generator[bool, None, None]:
         False if the workspace is already locked by another process.
     """
     global workspace_lock_acquired
-    Config.workspace_dir.mkdir(parents=True, exist_ok=True)
-    if Config.workspace_dir.name.startswith('.'):
-        lock_file = Config.workspace_dir.with_suffix('.lock')
+    config.workspace_dir.mkdir(parents=True, exist_ok=True)
+    if config.workspace_dir.name.startswith('.'):
+        lock_file = config.workspace_dir.with_suffix('.lock')
     else:
-        lock_file = Config.workspace_dir.parent / f'.{Config.workspace_dir.name}.lock'
+        lock_file = config.workspace_dir.parent / f'.{config.workspace_dir.name}.lock'
     fd = lock_file.open('w')
     try:
-        flock(fd.fileno(), LOCK_EX | LOCK_NB)
-        fd.write(str(getpid()))
+        fcntl.flock(fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fd.write(str(os.getpid()))
         fd.flush()
         workspace_lock_acquired = True
     except OSError:
@@ -44,7 +44,7 @@ def acquire_workspace_lock() -> Generator[bool, None, None]:
         yield workspace_lock_acquired
     finally:
         if workspace_lock_acquired:
-            flock(fd.fileno(), LOCK_UN)
+            fcntl.flock(fd.fileno(), fcntl.LOCK_UN)
             workspace_lock_acquired = False
         fd.close()
 
@@ -60,7 +60,7 @@ def check_workspace_lock[**P, T](func: Callable[P, T]) -> Callable[P, T]:
         RuntimeError: If the calling process has not entered "acquire_workspace_lock".
     """
 
-    @wraps(func)
+    @functools.wraps(func)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if not workspace_lock_acquired:
             raise RuntimeError('Workspace is not locked or locked by another process')
@@ -69,18 +69,4 @@ def check_workspace_lock[**P, T](func: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
-def move_to_bin(*filename: str) -> None:
-    """
-    Move one or more files specified by their names to the bin directory defined in the configuration.
-
-    Arguments:
-        filename (str): One or more names of the files to be moved.
-    """
-    for fn in filename:
-        try:
-            Config.workspace_dir.joinpath(fn).move(Config.bin_dir / fn)
-        except FileNotFoundError:
-            pass
-
-
-__all__ = ('acquire_workspace_lock', 'check_workspace_lock', 'move_to_bin')
+__all__ = ('acquire_workspace_lock', 'check_workspace_lock',)

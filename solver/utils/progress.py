@@ -8,9 +8,13 @@ from collections import defaultdict
 from datetime import datetime
 from json import dumps
 
-from solver.core.config import Config
+from solver.core.config import config
+from solver.core.lock import check_workspace_lock
 from solver.core.problems import parse_progress_html
 from solver.core.templates import Templates, get_template
+from solver.core.console import register
+from solver.utils.browser import show_in_browser
+from solver.utils.path_utils import write_file
 
 
 # ---------------------------------------------------------------------------
@@ -185,17 +189,21 @@ def _levels_grid_html(problems: dict[int, dict]) -> str:
 # ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
-
+@register(
+    name='summary',
+    help='Generate a summary of the problems solved so far.',
+    usage='summary',
+    aliases=('sum', 'stats'),
+)
+@check_workspace_lock
 def solutions_summary() -> None:
     problems = parse_progress_html()
     if not problems:
-        raise ValueError(f'No problems found — is {Config.solutions_progress_file} present?')
-
+        raise ValueError(f'No problems found — is {config.solutions_progress_file} present?')
     history = {str(num): info['date'] for num, info in problems.items() if info.get('date')}
     solved_count = sum(1 for info in problems.values() if info.get('solved'))
     total_count = len(problems)
     generated_at = datetime.now().strftime('%a, %d %b %Y, %H:%M')
-
     summary: str = get_template(Templates.INDEX).substitute(
         history=dumps(history, indent=2, sort_keys=True),
         color_vars=_color_vars_css(40),
@@ -205,7 +213,8 @@ def solutions_summary() -> None:
         solved_count=str(solved_count),
         total_count=str(total_count),
     )
-    Config.solutions_summary_file.write_text(summary)
+    write_file(config.solutions_summary_file, summary.encode(), msg='solutions summary', )
+    show_in_browser(0)
 
 
 __all__ = ('solutions_summary',)

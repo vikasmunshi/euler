@@ -7,7 +7,7 @@ from enum import StrEnum
 from functools import lru_cache
 from typing import Literal, NamedTuple
 
-from solver.core.config import Config
+from solver.core.config import config
 
 
 class Model(StrEnum):  # Available models (as of May 2026)
@@ -69,7 +69,7 @@ def costs(usd_to_eur: float = 0.92) -> str:  # Conversion rate as of May 2026
 @lru_cache(maxsize=None)
 def get_api_key() -> str:
     """Read ANTHROPIC_API_KEY from the project .env file."""
-    env_file = Config.root_dir / '.env'
+    env_file = config.root_dir / '.env'
     for line in env_file.read_text().splitlines():
         if line.startswith('ANTHROPIC_API_KEY='):
             return line.split('=', 1)[1].strip()

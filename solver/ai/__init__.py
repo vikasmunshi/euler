@@ -8,9 +8,13 @@ from typing import Literal
 from solver.ai.code import generate_c_code, generate_py_code
 from solver.ai.docs import generate_notes, generate_test_cases
 from solver.ai.models import Model
+from solver.core.console import register
 
 
-def make(target: Literal['c', 'py', 'notes', 'test_cases'], model: Model | None = None, force: bool = False) -> None:
+@register(name='make',
+          help='Generate AI-based content for the specified target.',
+          usage='make [target=c|py|notes|test-cases] [model=...] [force=false]', )
+def make(target: Literal['c', 'py', 'notes', 'test-cases'], model: Model | None = None, force: bool = False) -> None:
     """Generate AI-based content for the specified target.
 
     Args:
@@ -23,7 +27,7 @@ def make(target: Literal['c', 'py', 'notes', 'test_cases'], model: Model | None 
         'c': Model.CLAUDE_OPUS_4_6,
         'py': Model.CLAUDE_OPUS_4_6,
         'notes': Model.CLAUDE_SONNET_4_6,
-        'test_cases': Model.CLAUDE_HAIKU_4_5,
+        'test-cases': Model.CLAUDE_HAIKU_4_5,
     }
 
     # Generator functions for each target
@@ -31,7 +35,7 @@ def make(target: Literal['c', 'py', 'notes', 'test_cases'], model: Model | None 
         'c': generate_c_code,
         'py': generate_py_code,
         'notes': generate_notes,
-        'test_cases': generate_test_cases,
+        'test-cases': generate_test_cases,
     }
 
     # Call the appropriate generator with the model (or default)

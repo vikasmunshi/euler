@@ -8,7 +8,7 @@ from typing import NamedTuple
 
 from bs4 import BeautifulSoup
 
-from solver.core.config import Config
+from solver.core.config import config
 
 
 class Problem(NamedTuple):
@@ -28,7 +28,7 @@ class Problem(NamedTuple):
     def from_workspace(cls) -> Problem | None:
         """ Read the current workspace's problem number file and return the matching Problem. """
         try:
-            problem_text = (Config.workspace_dir / Config.number_filename).read_text()
+            problem_text = (config.workspace_dir / config.number_filename).read_text()
             number, title, difficulty = problem_text.split(':', maxsplit=2)
             return Problem(int(number), title, difficulty or '')
         except (FileNotFoundError, ValueError):
@@ -44,7 +44,7 @@ class Problem(NamedTuple):
 
     def to_workspace(self) -> None:
         """Write the problem number to the workspace's problem number file."""
-        (Config.workspace_dir / Config.number_filename).write_text(f'{self.number}:'
+        (config.workspace_dir / config.number_filename).write_text(f'{self.number}:'
                                                                    f'{self.title}:'
                                                                    f'{self.difficulty or ""}')
 
@@ -60,7 +60,7 @@ def parse_progress_html() -> dict[int, dict[str, str | int | bool]]:
     Returns dict mapping problem_number -> {title, level, pct, solved, date}.
     level and pct are ints or '' when unknown; date is '' for unsolved problems.
     """
-    progress_file = Config.solutions_progress_file
+    progress_file = config.solutions_progress_file
     if not progress_file.exists():
         return {}
     soup = BeautifulSoup(progress_file.read_text(encoding='utf-8', errors='replace'), 'html.parser')
@@ -111,6 +111,4 @@ problems: list[Problem] = sorted(problems_dict.values(), key=lambda p: p.number)
 solutions_history: dict[int, str] = {num: str(info['date'])
                                      for num, info in parse_progress_html().items() if info.get('date')}
 
-__all__ = ('Problem', 'parse_progress_html', 'problems', 'solutions_history',)
-if __name__ == '__main__':
-    print(problems)
+__all__ = ('Problem', 'parse_progress_html', 'problems', 'problems_dict', 'solutions_history',)

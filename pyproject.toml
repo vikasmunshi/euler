@@ -13,7 +13,9 @@ dependencies = [
     "beautifulsoup4",
     "cryptography",
     "jsonschema",
+    "prompt-toolkit",
     "requests",
+    "rich",
 ]
 
 [project.optional-dependencies]

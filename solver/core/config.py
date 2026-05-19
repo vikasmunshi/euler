@@ -19,7 +19,10 @@ def _root_dir() -> Path:
     raise ValueError('Failed to get git root')
 
 
-class Config:
+class config:
+    def __init__(self) -> None:
+        raise TypeError('Config is a singleton class')
+
     class ColorCodes(StrEnum):
         GREEN = '\033[92m'
         YELLOW = '\033[93m'
@@ -79,11 +82,18 @@ class Config:
     templates_dir: Path = root_dir / 'solver/templates'
     workspace_dir: Path = root_dir / 'workspace'
 
-    def __init__(self) -> None:
-        raise TypeError('Config is a singleton class')
+    modules_with_commands: list[str] = [
+        'solver.ai',
+        'solver.core.evaluate',
+        'solver.core.stack',
+        'solver.core.workspace',
+        'solver.crypto.keys',
+        'solver.utils.browser',
+        'solver.utils.progress',
+        'solver.utils.scripts',
+        'solver.utils.solution_files',
+        'solver.utils.validation',
+    ]
 
 
-__all__ = ('Config',)
-
-if __name__ == '__main__':
-    print(Config.root_dir)
+__all__ = ('config',)

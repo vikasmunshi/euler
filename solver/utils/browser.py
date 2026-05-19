@@ -7,8 +7,9 @@ from functools import lru_cache
 from pathlib import Path
 from subprocess import CalledProcessError, run
 
-from solver.core.config import Config
+from solver.core.config import config
 from solver.core.stack import stack_path
+from solver.core.console import console, register
 from solver.utils.path_utils import canonical_path
 
 
@@ -25,6 +26,10 @@ def browser_is_available() -> bool:
         return False
 
 
+@register(name='browser',
+          help='Open the problem page in a browser; number=0 opens the summary.',
+          usage='browser [problem_number]',
+          aliases=('open', 'show', 'view'))
 def show_in_browser(problem_number: int = 0) -> None:
     """Open a problem's "problem.html" in the system browser.
 
@@ -38,17 +43,19 @@ def show_in_browser(problem_number: int = 0) -> None:
         problem_number: Problem to open; "0" means the current workspace.
     """
     if not browser_is_available():
-        print('Error: "browser" command not available; use "solver sys-install chrome" to install Chrome')
+        console.print('[error]error:[/error] [muted]"browser" command not available; '
+                      'use [accent]solver sys-install chrome[/accent] to install Chrome[/muted]')
         return
     if problem_number == 0:
-        filepath: Path = Config.solutions_summary_file
+        filepath: Path = config.solutions_summary_file
     else:
         filepath = stack_path(problem_number, 'problem.html')[1]
     if not filepath.exists():
         if problem_number == 0:
-            print('Error: workspace is empty; use init <problem_number> to initialize it')
+            console.print('[error]error:[/error] [muted]workspace is empty; '
+                          'use [accent]init <problem_number>[/accent] to initialize it[/muted]')
             return
-        print(f'Error: {canonical_path(filepath)} does not exist')
+        console.print(f'[error]error:[/error] [muted]{canonical_path(filepath)} does not exist[/muted]')
         return
     run(f'browser open {filepath.as_posix()!r}', shell=True)
 

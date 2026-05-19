@@ -10,12 +10,12 @@ from typing import Any
 
 from jsonschema import validate
 
-from solver.core.config import Config
+from solver.core.config import config
 from solver.crypto.asymmetrical import UserKeyPair
 from solver.crypto.symmetrical import EncKey
+from solver.core.console import console, register
 from solver.utils.gh import get_gh_user_email, get_repo_owner_email
 from solver.utils.path_utils import write_file
-from solver.utils.scripts import git_publish
 from solver.utils.shell_utils import confirm
 
 
@@ -25,14 +25,14 @@ from solver.utils.shell_utils import confirm
 
 def _validate_schema(data: dict[str, Any]) -> None:
     """Validate data against the JSON schema, raising ValidationError on failure."""
-    schema: dict[str, Any] = loads(Config.schema_file.read_text())
+    schema: dict[str, Any] = loads(config.schema_file.read_text())
     validate(instance=data, schema=schema)
 
 
 @lru_cache(maxsize=None)
 def read_keys_file() -> dict[str, Any]:
     """Read, schema-validate, and cache the keys-file, returning its parsed contents."""
-    data: dict[str, Any] = loads(Config.keys_file.read_text())
+    data: dict[str, Any] = loads(config.keys_file.read_text())
     _validate_schema(data)
     return data
 
@@ -47,11 +47,11 @@ def write_keys_file(data: dict[str, Any]) -> None:
         data: The full keys file contents to validate and persist.
     """
     _validate_schema(data)
-    Config.keys_file.write_text(dumps(data, indent=2))
-    print(f'Keys file {Config.keys_file} updated; num users: {len(data["users"])}, num keys: {len(data["keys"])}')
+    config.keys_file.write_text(dumps(data, indent=2))
+    console.print(f'[success]Keys file [accent]{config.keys_file}[/accent] updated; '
+                  f'num users: {len(data["users"])}, num keys: {len(data["keys"])}[/success]')
     get_key.cache_clear()
     read_keys_file.cache_clear()
-    git_publish('keys')
 
 
 # ==================================================================================================================== #
@@ -118,7 +118,6 @@ def get_enc_key(key_id: bytes | None = None) -> EncKey:
 # ==================================================================================================================== #
 #                                               rekey keys file
 # ==================================================================================================================== #
-
 def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = True) -> None:
     """
     Reinitialize keys.json with additional new encryption keys.
@@ -133,11 +132,11 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
                                Defaults to True.
     """
     if get_gh_user_email() != get_repo_owner_email():
-        print('only admin user should initialize keys file')
+        console.print('[error]error:[/error] only the admin user may initialize the keys file')
         return
     user_key: UserKeyPair = get_user_key()
     new_master_key: bytes = token_bytes(32)
-    if Config.keys_file.exists():
+    if config.keys_file.exists():
         data: dict[str, Any] = read_keys_file()
         user_data = data['users'][user_key.user_email]
         master_key: bytes = user_key.unlock(user_data['master_key'])
@@ -149,8 +148,8 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
                 raw_key['value'] = enc_key.as_dict(master_key=new_master_key)['value']
     else:
         data = {
-            '$schema': Config.schema_file.name,
-            'version': Config.keys_version,
+            '$schema': config.schema_file.name,
+            'version': config.keys_version,
             'users': {user_key.user_email: user_key.to_public_dict(new_master_key)},
             'keys': {}
         }
@@ -165,6 +164,9 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
     write_keys_file(data)
 
 
+@register(name='rekey',
+          help='Reinitialize keys.json with additional new encryption keys.',
+          usage='rekey [num_total_active_keys=32] [preserve_master=true] [backup=false]', )
 def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, backup: bool = False) -> None:
     """
     Reinitialize keys.json with additional new encryption keys.
@@ -179,19 +181,22 @@ def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, b
         backup:                If True, print the backup keys for offline vault. Defaults to False.
     """
     if not confirm('Are you sure you want to rekey?'):
-        print("Rekeying cancelled.")
+        console.print('[muted]Rekeying cancelled.[/muted]')
         return
     rekey_keys_file(num_total_active_keys, preserve_master=preserve_master)
     if backup:
-        lines: dict[str, str] = {'private_key': Config.private_key_file.read_text().strip(),
+        lines: dict[str, str] = {'private_key': config.private_key_file.read_text().strip(),
                                  **read_keys_file()['users'][get_user_key().user_email]}
-        write_file(Config.keys_backup_file, dumps(lines, indent=4).encode(), msg='keys backup')
+        write_file(config.keys_backup_file, dumps(lines, indent=4).encode(), msg='keys backup')
 
 
 # ==================================================================================================================== #
 #                                               user
 # ==================================================================================================================== #
-def user(regen: bool = False) -> str:
+@register(name='user',
+          help='Return the current user\'s identity alongside their master key access.',
+          usage='user [regen=false]')
+def user(regen: bool = False) -> None:
     """
     Return the current user's identity alongside their master key access.
 
@@ -233,9 +238,9 @@ def user(regen: bool = False) -> str:
         data['users'][new_user_key.user_email] = new_user_key.to_public_dict(master_key)
         write_keys_file(data)
         user_key = new_user_key
-    return (f'{user_key!s} '
-            f'{(Config.ColorCodes.RED + "(✗ cannot") if master_key is None else (Config.ColorCodes.GREEN + "(✓ can")} '
-            f'encrypt/decrypt){Config.ColorCodes.RESET}')
+    access_style = 'error' if master_key is None else 'success'
+    access_mark = '✗ cannot' if master_key is None else '✓ can'
+    console.print(f'[primary]{user_key!s}[/primary] [{access_style}]\n{access_mark} encrypt/decrypt[/{access_style}]')
 
 
 __all__ = (

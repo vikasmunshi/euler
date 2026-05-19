@@ -9,18 +9,19 @@ from os import X_OK, access, utime
 from pathlib import Path
 from typing import Any
 
-from solver.core.config import Config
+from solver.core.config import config
+from solver.core.lock import check_workspace_lock
 from solver.core.problems import problems
 from solver.crypto.keys import get_enc_key
+from solver.core.console import console, register
 from solver.utils.path_utils import canonical_path, iterdir_recursive, write_file
 from solver.utils.shell_utils import confirm, run_command
-from solver.utils.workspace import check_workspace_lock
 
 
 @lru_cache(maxsize=None)
 def stack_base_dir(problem_number: int) -> Path:
     """Return the stack directory for a problem, rooted one digit-level deep per digit of its zero-padded number."""
-    return Config.solutions_dir.joinpath(*f'{problem_number:04d}')
+    return config.solutions_dir.joinpath(*f'{problem_number:04d}')
 
 
 @lru_cache(maxsize=None)
@@ -41,10 +42,10 @@ def stack_path(problem_number: int, filename: str) -> tuple[bool, Path]:
     """
     encryption_required: bool = not (
             problem_number <= 100
-            or filename == Config.number_filename
-            or filename == Config.statement_filename
-            or filename == Config.statement_filename
-            or filename.startswith(Config.resource_dirname)
+            or filename == config.number_filename
+            or filename == config.statement_filename
+            or filename == config.statement_filename
+            or filename.startswith(config.resource_dirname)
     )
     stack_file_path: Path = stack_base_dir(problem_number) / (filename + '.enc' if encryption_required else filename)
     return encryption_required, stack_file_path
@@ -119,10 +120,10 @@ def stack(problem_number: int) -> None:
     Args:
         problem_number: The Project Euler problem number.
     """
-    for workspace_file_path in iterdir_recursive(Config.workspace_dir):
-        filename: str = workspace_file_path.relative_to(Config.workspace_dir).as_posix()
+    for workspace_file_path in iterdir_recursive(config.workspace_dir):
+        filename: str = workspace_file_path.relative_to(config.workspace_dir).as_posix()
         content: bytes = workspace_file_path.read_bytes()
-        if not filename.startswith(Config.resource_dirname):
+        if not filename.startswith(config.resource_dirname):
             try:
                 content.decode()
             except UnicodeDecodeError:
@@ -150,7 +151,7 @@ def unstack(problem_number: int) -> None:
     for filename in iterdir_recursive(problem_stack_dir, rt='str'):
         filename = filename.removesuffix('.enc')
         content, is_executable, m_time = read_stack_file(problem_number, filename)
-        workspace_file_path: Path = Config.workspace_dir.joinpath(filename)
+        workspace_file_path: Path = config.workspace_dir.joinpath(filename)
         write_file(workspace_file_path, content)
         if is_executable:
             workspace_file_path.chmod(0o755)
@@ -160,7 +161,9 @@ def unstack(problem_number: int) -> None:
 # ==================================================================================================================== #
 #                                               backup / restore
 # ==================================================================================================================== #
-
+@register(name='backup',
+          help='Back up problem files from the stack to the "backup" folder (unencrypted).',
+          usage='backup')
 def backup_the_stack() -> None:
     """
     Back up problem files from the stack to the 'backup' folder (unencrypted).
@@ -168,34 +171,39 @@ def backup_the_stack() -> None:
     Then iterates over all problems, decrypting and copying their stack files into
     backup/<one digit-level per digit of zero-padded problem number>/.
     """
-    if run_command(f'git check-ignore -q {Config.backup_dir.name}', silent=True) is None:
-        raise RuntimeError(f'Backup directory {Config.backup_dir.name} is not ignored by git')
-    orig_workspace_dir = Config.backup_dir
+    if run_command(f'git check-ignore -q {config.backup_dir.name}', silent=True) is None:
+        raise RuntimeError(f'Backup directory {config.backup_dir.name} is not ignored by git')
+    orig_workspace_dir = config.backup_dir
     try:
         for problem_number in range(1, problems[-1].number + 1):
-            Config.workspace_dir = Config.backup_dir / stack_base_dir(problem_number).relative_to(Config.solutions_dir)
+            config.workspace_dir = config.backup_dir / stack_base_dir(problem_number).relative_to(config.solutions_dir)
             unstack(problem_number)
-            print(f'Stack backup for problem {problem_number} -> {canonical_path(Config.workspace_dir)}')
+            console.print(f'[muted]Stack backup for problem [accent]{problem_number}[/accent] → '
+                          f'{canonical_path(config.workspace_dir)}[/muted]')
     finally:
-        Config.workspace_dir = orig_workspace_dir
+        config.workspace_dir = orig_workspace_dir
 
 
+@register(name='restore',
+          help='Restore problem files from the "backup" folder to the stack (encrypted).',
+          usage='restore')
 def restore_the_stack() -> None:
     """
     Restore problem files from the 'backup' folder (unencrypted) to the stack (encrypted).
     Inverse of 'backup_the_stack'.
     """
     if not confirm('Are you sure, you want to restore the stack?'):
-        print('Stack restoration cancelled.')
+        console.print('[muted]Stack restoration cancelled.[/muted]')
         return
-    orig_workspace_dir = Config.backup_dir
+    orig_workspace_dir = config.backup_dir
     try:
         for problem_number in range(1, problems[-1].number + 1):
-            Config.workspace_dir = Config.backup_dir / stack_base_dir(problem_number).relative_to(Config.solutions_dir)
+            config.workspace_dir = config.backup_dir / stack_base_dir(problem_number).relative_to(config.solutions_dir)
             stack(problem_number)
-            print(f'Stack restored for problem {problem_number} <- {canonical_path(Config.workspace_dir)}')
+            console.print(f'[muted]Stack restored for problem [accent]{problem_number}[/accent] ← '
+                          f'{canonical_path(config.workspace_dir)}[/muted]')
     finally:
-        Config.workspace_dir = orig_workspace_dir
+        config.workspace_dir = orig_workspace_dir
 
 
 # ==================================================================================================================== #
@@ -217,7 +225,7 @@ def has_new_solutions(problem_number: int) -> bool:
         bool: True if any solution file is newer than the statement file, otherwise False.
     """
     problem_stack_dir: Path = stack_base_dir(problem_number)
-    statement_file_m_time: float = (problem_stack_dir / Config.statement_filename).stat().st_mtime
+    statement_file_m_time: float = (problem_stack_dir / config.statement_filename).stat().st_mtime
     new_solutions: list[Path] = []
     for solution_file in (f for f in problem_stack_dir.iterdir() if f.is_file()):
         file_name: str = solution_file.name.removesuffix('.enc')
@@ -225,20 +233,23 @@ def has_new_solutions(problem_number: int) -> bool:
             if solution_file.stat().st_mtime > statement_file_m_time:
                 new_solutions.append(solution_file)
     if new_solutions:
-        print(f'{len(new_solutions)} new solutions found for problem {problem_number}: '
-              f'{", ".join(f.name for f in new_solutions)}')
+        console.print(f'[success]{len(new_solutions)} new solutions found for problem '
+                      f'[accent]{problem_number}[/accent]: '
+                      f'{", ".join(f.name for f in new_solutions)}[/success]')
         return True
-    test_cases_file: Path = stack_path(problem_number, Config.test_cases_filename)[1]
-    results_file: Path = stack_path(problem_number, Config.results_filename)[1]
+    test_cases_file: Path = stack_path(problem_number, config.test_cases_filename)[1]
+    results_file: Path = stack_path(problem_number, config.results_filename)[1]
     if (
             test_cases_file.exists() and
             test_cases_file.stat().st_mtime > statement_file_m_time and
             results_file.exists() and
             results_file.stat().st_mtime > statement_file_m_time
     ):
-        print(f'Updated test cases and results found for problem {problem_number}')
+        console.print(f'[success]Updated test cases and results found for problem '
+                      f'[accent]{problem_number}[/accent][/success]')
         return True
-    print(f'No new solutions or test-cases and results for problem {problem_number}')
+    console.print(f'[muted]No new solutions or test cases and results for problem '
+                  f'[accent]{problem_number}[/accent][/muted]')
     return False
 
 
