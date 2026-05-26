@@ -1,5 +1,8 @@
-You are the author of the solution files below, writing personal technical notes for your own Project Euler solution
-archive. Write in the first person ("I chose…", "My approach…", "I decided to…").
+You are a master programmer and educator writing worked-solution notes for a "Programming Techniques" course.
+Your audience is students who are learning to write efficient, well-reasoned programs.
+Write with clarity, precision, and authority - in the first person ("I chose...", "My approach...", "I decided to...").
+Explain not only *what* you did but *why* - every algorithmic and implementation decision should be justified
+so that a student reading these notes can learn to reason the same way.
 
 ## Problem
 Number : $number
@@ -19,9 +22,7 @@ write fresh notes that accurately reflect all current solutions and benchmark re
 $solution_notes
 
 ## Solution files
-Solutions may be written in Python or C. Each filename encodes the problem number and solution
-index (e.g. p0001_s0.py, p0001_s0.c). Python and C files with the same index implement the same
-algorithm in different languages; files with different indices use different algorithms.
+$file_naming
 
 $solutions
 
@@ -29,33 +30,42 @@ $solutions
 $test_cases
 
 ## Benchmark results
-In the results table, the solution name convention is:
-- Python solutions: `p000N_sM.py` (e.g. `p0001_s0.py`)
-- C solutions: `p000N_sM_c` (e.g. `p0001_s0_c`) — note the `_c` suffix and no file extension
-
 $results
 
 ---
 
-Write an `<article>` element in plain HTML (no markdown, no code fences) that contains:
+Write an `<article>` element in plain HTML (no markdown, no code fences) that contains four sections:
 
-1. **Mathematical complexity** — One or two paragraphs in which you describe the mathematical ideas you needed to
-   understand to solve the problem (number theory, combinatorics, dynamic programming, etc.) and the asymptotic
-   complexity class of the problem.
+1. **Problem Analysis** - One or two paragraphs describing the mathematical ideas needed to solve
+   the problem (number theory, combinatorics, dynamic programming, etc.), the key observations that
+   make the problem tractable, and the asymptotic complexity class of the solution.
+   Write for a student who may be encountering these ideas for the first time: define any technical
+   terms you use, and explain why each observation matters.
 
-2. **Solution approach** — A short section (use `<h4>` headings) for *each distinct algorithm* (i.e. each solution
-   index). If both a Python and a C file exist for the same index, cover them in one combined section and note any
-   language-specific differences. Name the algorithmic approach from the code, not the filename.
+2. **Solution Approach** - A short section (use `<h4>` headings) for *each distinct algorithm*
+   (i.e. each solution index). If both a Python and a C file exist for the same index, cover them
+   in one combined section and note any language-specific differences. Name the algorithmic
+   approach from the code, not the filename.
+   For each approach, explain the algorithm step by step, justify every significant design choice,
+   and describe how the code maps to the algorithm.
 
-3. **Learnings** — A concluding section covering: the key insights that unlocked the solution;
-   if more than one solution file exists, a comparison of approaches using the benchmark results (average times),
-   noting which is fastest or most elegant and why;
-   if only one solution file exists, omit any comparison note and do not mention the absence of other solutions
-   (no phrases like "since there is only one algorithm" or "with only one approach available");
-   and any concepts or techniques worth remembering for future problems.
+3. **Programming Techniques** - A dedicated section that identifies and explains the specific
+   programming patterns, language idioms, and implementation techniques used across the solutions.
+   Examples include: generator functions, tuple/parallel assignment, state-variable patterns,
+   loop unrolling, use of the standard library, memory layout choices in C, etc.
+   For each technique, explain what it is, why it was used here, and when a student might reach
+   for it in future problems. Use `<h4>` headings for each distinct technique.
+
+4. **Key Takeaways** - A concluding section covering: the core insights that unlock the solution;
+   if more than one solution file exists, a comparison of approaches using the benchmark results
+   (average times), noting which is fastest or most elegant and why;
+   if only one solution file exists, omit any comparison note and do not mention the absence of
+   other solutions;
+   a bullet list (`<ul>/<li>`) of concise, student-facing points worth remembering for future
+   problems - phrase each point as a reusable principle, not a fact specific to this problem.
 
 Use only semantic HTML5 elements: `<article>`, `<h3>`, `<h4>`, `<p>`, `<ul>/<li>`, `<table>`, `<code>`.
 Do not include `<html>`, `<head>`, or `<body>` tags.
-Do not repeat the problem statement verbatim. Output the HTML only — no preamble.
+Do not repeat the problem statement verbatim. Output the HTML only - no preamble.
 Do not include the problem title as a heading.
-Use a hyphen-minus (-) instead of an em dash (—) throughout.
+$house_style

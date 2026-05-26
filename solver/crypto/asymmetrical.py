@@ -13,7 +13,8 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat, PublicFormat
 
-from solver.core.config import Config
+from solver.config import config
+from solver.shell import console
 from solver.utils.gh import get_gh_user_email
 
 
@@ -33,7 +34,7 @@ class UserKeyPair(NamedTuple):
     def __str__(self) -> str:
         """Return a human-readable summary showing the email, public key hex, and private key availability."""
         return (f'{self.__class__.__name__}(email={self.user_email}, '
-                f'public_key={self.public_key.public_bytes(Encoding.Raw, PublicFormat.Raw).hex()} '
+                f'public_key={self.public_key.public_bytes(Encoding.Raw, PublicFormat.Raw).hex()}, '
                 f'private_key={self.private_key is not None})')
 
     @classmethod
@@ -81,16 +82,16 @@ class UserKeyPair(NamedTuple):
             A UserKeyPair with both public and private keys populated.
 
         Raises:
-            FileNotFoundError: If the private key file does not exist.
+            ValueError: If the private key file does not exist.
         """
-        if not Config.private_key_file.exists():
-            raise FileNotFoundError(f'Private key file {Config.private_key_file} not found')
-        with Config.private_key_file.open('r') as f:
+        if not config.private_key_file.exists():
+            raise ValueError(f'Private key file {config.private_key_file} not found; use `solver user` to create one.')
+        with config.private_key_file.open('r') as f:
             user_email, private_hex = f.read().strip().split(maxsplit=1)
         private_key: X25519PrivateKey = x25519.X25519PrivateKey.from_private_bytes(bytes.fromhex(private_hex))
         return cls(user_email=user_email, private_key=private_key, public_key=private_key.public_key())
 
-    def to_file(self, key_file: Path = Config.private_key_file) -> None:
+    def to_file(self, key_file: Path = config.private_key_file) -> None:
         """
         Write the private key to key_file, rotating up to five existing backups.
 
@@ -103,12 +104,18 @@ class UserKeyPair(NamedTuple):
         if self.private_key is None:
             return
         if key_file.exists():
-            for i in range(5, 0, -1):
+            # Keep up to five rolling backups: .1 (newest) through .5 (oldest).
+            # The oldest is discarded so the rotation never grows beyond five files.
+            oldest = key_file.with_suffix('.5')
+            if oldest.exists():
+                oldest.unlink()
+            for i in range(4, 0, -1):
                 old_backup = key_file.with_suffix(f'.{i}')
                 new_backup = key_file.with_suffix(f'.{i + 1}')
                 if old_backup.exists():
                     old_backup.rename(new_backup)
-                    print(f'Backed up existing private key file {key_file} to {old_backup}')
+                    console.print(f'[muted]Backed up private key [accent]{old_backup}[/accent] → [accent]'
+                                  f'{new_backup}[/accent][/muted]')
             backup_file = key_file.with_suffix('.1')
             key_file.rename(backup_file)
         key_file.parent.mkdir(parents=True, exist_ok=True)
@@ -118,7 +125,7 @@ class UserKeyPair(NamedTuple):
                                                               format=PrivateFormat.Raw,
                                                               encryption_algorithm=NoEncryption()).hex()
             f.write(f'{self.user_email} {private_hex}\n')
-            print(f'Private key file {key_file} initialized')
+            console.print(f'[success]Private key file [accent]{key_file}[/accent] initialized[/success]')
 
     @classmethod
     def from_public_dict(cls, email: str, data: dict[str, str]) -> UserKeyPair:
@@ -144,7 +151,7 @@ class UserKeyPair(NamedTuple):
         Returns:
             Hex string of (32-byte ephemeral public key | ChaCha20-Poly1305 ciphertext).
         """
-        ephemeral: UserKeyPair = self.__class__.new_ephemeral()
+        ephemeral: UserKeyPair = self.__class__.new_ephemeral(self.user_email)
         assert ephemeral.private_key is not None, 'Ephemeral private key should be available'
         shared_secret: bytes = ephemeral.private_key.exchange(self.public_key)
         derived: bytes = HKDF(algorithm=SHA256(), length=32, salt=None, info=b'key-encryption').derive(shared_secret)

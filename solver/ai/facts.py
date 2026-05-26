@@ -3,24 +3,40 @@
 """ Utility function for gathering problem inputs for AI """
 from __future__ import annotations
 
+from base64 import b64encode
 from json import JSONDecodeError, loads
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, cast
 from urllib.parse import urljoin
 
+from anthropic import Anthropic
+from anthropic.types import (Base64ImageSourceParam, CacheControlEphemeralParam, ContentBlockParam,
+                             ImageBlockParam, MessageParam, TextBlockParam)
 from bs4 import BeautifulSoup
+from bs4.element import Tag
 
-from solver.core.config import Config
-from solver.core.problems import Problem
+from solver.ai.models import get_api_key
+from solver.config import config
+from solver.core.parser import extract_resources
+from solver.core.problems import Problem, problems
 from solver.core.results import Result, read_results
-from solver.core.solution_notes import get_solution_notes_html
-from solver.core.stack import read_stack_file, stack_base_dir
+from solver.shell import console
 from solver.utils.download import download_file
 from solver.utils.path_utils import iterdir_recursive
-from solver.core.problems import solutions_history
+
+#: Map of file extension (lowercased, no leading dot) to the Anthropic image media type.
+#: Only extensions in this map are forwarded as image content blocks to the model.
+_IMAGE_MEDIA_TYPES: dict[str, str] = {
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'gif': 'image/gif',
+    'webp': 'image/webp',
+}
 
 
 class Facts(NamedTuple):
     difficulty: str
+    images: dict[str, bytes]
     number: int
     problem_content: str
     results: str
@@ -59,7 +75,7 @@ def format_test_cases_markdown(test_cases: list[dict[str, Any]]) -> str:
     return '\n'.join(rows)
 
 
-def gather_facts(problem_number: int, strict: bool = False) -> Facts:
+def gather_facts(strict: bool = False) -> Facts:
     """
     Gathers and processes facts from the 'stack' about a specific problem, including solutions,
     results, test cases, and problem content. This function is used to assemble
@@ -67,8 +83,7 @@ def gather_facts(problem_number: int, strict: bool = False) -> Facts:
     about the problem for further use.
 
     Arguments:
-        problem_number (int): The number of the problem to gather facts about.
-        strict (bool): If set to True, enforces strict validation of gathered data
+        strict: If True, enforces strict validation of gathered data
             (e.g., ensures solutions, results, and problem content exist).
 
     Returns:
@@ -80,24 +95,24 @@ def gather_facts(problem_number: int, strict: bool = False) -> Facts:
         ValueError: If `strict` is True and any of the required data, such as
         solutions, results, or test cases, is missing or invalid.
     """
-    if (problem := Problem.from_number(problem_number)) is None:
-        raise ValueError('Invalid problem number')
+    if (problem := Problem.from_workspace()) is None:
+        console.print('[muted]Use [accent]init[/accent] to initialize the workspace first.[/muted]')
+        raise ValueError('Invalid workspace')
     solutions: dict[str, str] = {}
-    for solution in iterdir_recursive(stack_base_dir(problem.number), rt='str'):
-        solution = solution.removesuffix('.enc')
-        if not (solution.endswith('.py') or solution.endswith('.c')):
+    for solution in iterdir_recursive(config.workspace_dir, rt='path'):
+        if not (solution.suffix in ('.py', '.c')):
             continue
-        solutions[solution] = read_stack_file(problem.number, solution)[0].decode()
+        solutions[solution.name] = solution.read_text()
     if strict and not solutions:
         raise ValueError('No solutions found')
-    solved_results: list[Result] = read_results(problem.number)
+    solved_results: list[Result] = read_results()  # read results from workspace
     if strict and not solved_results:
         raise ValueError('No results found')
     if strict and not [r for r in solved_results if r.verdict == 'correct' and r.category == 'main']:
         raise ValueError('No solved solutions found')
     test_cases: list[dict[str, Any]]
     try:
-        test_cases = loads(read_stack_file(problem.number, Config.test_cases_filename)[0])
+        test_cases = loads((config.workspace_dir / config.test_cases_filename).read_text())
     except (FileNotFoundError, JSONDecodeError):
         if strict:
             raise ValueError('No test cases found')
@@ -105,20 +120,32 @@ def gather_facts(problem_number: int, strict: bool = False) -> Facts:
     if strict:
         if not [tc for tc in test_cases if tc['answer'] is not None]:
             raise ValueError('No test cases with answers found')
-    euler_url: str = urljoin(Config.projecteuler_url, f'problem={problem.number}')
+    euler_url: str = urljoin(config.projecteuler_url, f'problem={problem.number}')
     problem_content: str = ''
+    images: dict[str, bytes] = {}
     if problem_html := download_file(euler_url, refresh=False):
         problem_soup: BeautifulSoup = BeautifulSoup(problem_html, 'html.parser')
-        problem_content = str(problem_soup.find('div', {'class': 'problem_content'}) or '')
-        if not problem_content:
-            if strict:
-                raise ValueError('No problem content found')
-    solution_notes: str = get_solution_notes_html(problem.number)
-    if Config.default_solution_notes in solution_notes:
+        content_div = problem_soup.find('div', {'class': 'problem_content'})
+        if isinstance(content_div, Tag):
+            # Mutate in-place first so the stringified content carries the rewritten
+            # local resource paths; then keep only image bytes for use as API image blocks.
+            files: dict[str, bytes] = extract_resources(content_div, force_refresh=False)
+            problem_content = str(content_div)
+            images = {
+                filename: data
+                for filename, data in files.items()
+                if filename.rsplit('.', 1)[-1].lower() in _IMAGE_MEDIA_TYPES
+            }
+    if not problem_content and strict:
+        raise ValueError('No problem content found')
+    try:
+        solution_notes: str = (config.workspace_dir / config.notes_filename).read_text()
+    except FileNotFoundError:
         solution_notes = ''
-    solved_date: str = solutions_history.get(problem.number, 'unknown')
+    solved_date: str = problems.solutions_history.get(problem.number, 'unknown')
     return Facts(
         difficulty=problem.difficulty,
+        images=images,
         number=problem.number,
         problem_content=problem_content,
         results=format_results_markdown(solved_results),
@@ -130,4 +157,75 @@ def gather_facts(problem_number: int, strict: bool = False) -> Facts:
     )
 
 
-__all__ = ('Facts', 'gather_facts', 'format_solutions_markdown')
+def user_message_content(user_prompt: str, images: dict[str, bytes], *,
+                         cache: bool = False) -> list[ContentBlockParam]:
+    """Build a user-message content list of one text block followed by an image block per image.
+
+    Images with unsupported extensions are skipped silently; the model still gets the text and any
+    inlined references in "problem_content" point to local resource filenames the AI cannot
+    fetch - including the bytes here is what actually lets the model see the image.
+
+    When 'cache' is True, an ephemeral cache_control marker is attached to the final block so
+    the API caches everything in this message (and prior system/turns) up to that point. For
+    multi-turn retries, only the first user message should set 'cache=True'.
+    """
+    text_block: TextBlockParam = {'type': 'text', 'text': user_prompt}
+    blocks: list[ContentBlockParam] = [text_block]
+    for filename, data in images.items():
+        media_type = _IMAGE_MEDIA_TYPES.get(filename.rsplit('.', 1)[-1].lower())
+        if media_type is None:
+            continue
+        source: Base64ImageSourceParam = {
+            'type': 'base64',
+            'media_type': cast(Any, media_type),
+            'data': b64encode(data).decode(),
+        }
+        block: ImageBlockParam = {'type': 'image', 'source': source}
+        blocks.append(block)
+    if cache and blocks:
+        cache_marker: CacheControlEphemeralParam = {'type': 'ephemeral'}
+        # TypedDicts permit assigning optional keys; this is the documented placement for
+        # attaching cache breakpoints to the trailing content block of a message.
+        cast(dict[str, Any], cast(object, blocks[-1]))['cache_control'] = cache_marker
+    return blocks
+
+
+def prepare_anthropic_request(prompt: str, images: dict[str, bytes] | None = None,
+                              ) -> tuple[Anthropic, list[TextBlockParam], list[MessageParam]]:
+    """Build the standard Anthropic client + cached system/user blocks from a combined prompt.
+
+    The prompt is split at the first markdown heading ('## '): everything above it is the
+    system instructions (typically a one-paragraph persona description), everything from the
+    heading onward is the user message. This is robust against blank lines inside the system
+    block - which the old 'split('\\n\\n')' heuristic silently mishandled - and matches the
+    structure every template already uses.
+
+    Both halves carry an ephemeral cache_control breakpoint (system block trailing block;
+    final user-content block). Returns '(client, system_blocks, messages)' ready to pass to
+    'client.messages.create' or 'client.messages.stream'.
+
+    Raises:
+        ValueError: If the prompt has no '## ' heading marking the user portion.
+    """
+    system_prompt, user_prompt = _split_prompt(prompt)
+    client = Anthropic(api_key=get_api_key())
+    system_blocks: list[TextBlockParam] = [
+        {'type': 'text', 'text': system_prompt, 'cache_control': {'type': 'ephemeral'}},
+    ]
+    messages: list[MessageParam] = [
+        MessageParam(role='user', content=user_message_content(user_prompt, images or {}, cache=True)),
+    ]
+    return client, system_blocks, messages
+
+
+def _split_prompt(prompt: str) -> tuple[str, str]:
+    """Split a combined prompt into '(system, user)' at the first '## ' heading."""
+    marker = '\n## '
+    idx = prompt.find(marker)
+    if idx == -1:
+        raise ValueError('prompt template has no "## " heading; cannot split into system/user')
+    return prompt[:idx].rstrip(), prompt[idx + 1:]
+
+
+__all__ = ('Facts', 'format_solutions_markdown', 'gather_facts',
+           'prepare_anthropic_request', 'user_message_content')

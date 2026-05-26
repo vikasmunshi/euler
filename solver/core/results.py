@@ -5,21 +5,20 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from json import JSONDecodeError, dumps, loads
-from time import time
 from typing import Any, Generator, NamedTuple, Protocol
 
-from solver.core.config import Config
-from solver.core.stack import read_stack_file, write_stack_file
-from solver.utils.path_utils import canonical_path
-from solver.utils.workspace import check_workspace_lock
+from solver.config import config
+from solver.core.lock import check_workspace_lock
+from solver.shell import console
+from solver.utils.path_utils import write_file
 
-color_map: dict[str, Config.ColorCodes] = {
-    'correct': Config.ColorCodes.GREEN,
-    'incorrect': Config.ColorCodes.RED,
-    'unknown': Config.ColorCodes.BLUE,
-    'error': Config.ColorCodes.RED,
-    'overflow': Config.ColorCodes.YELLOW,
-    'timeout': Config.ColorCodes.YELLOW,
+color_map: dict[str, str] = {
+    'correct': 'success',
+    'incorrect': 'error',
+    'unknown': 'primary',
+    'error': 'error',
+    'overflow': 'warning',
+    'timeout': 'warning',
 }
 
 
@@ -53,10 +52,14 @@ class Result(NamedTuple):
     number_runs: int
 
     def __str__(self) -> str:
-        return (f'{color_map.get(self.verdict, Config.ColorCodes.RED)} '
-                f'{self.category:<6} {f"({self.verdict})":<11} '
-                f'[{self.average:<3.9f}s {self.number_runs}] '
-                f'{self.solution} {self.args} -> {self.answer or ""}{Config.ColorCodes.RESET}')
+        style = color_map.get(self.verdict, 'error')
+        args: str = self.args
+        if 'https' in self.args:
+            args = ' '.join([arg.split('/')[-1] if arg.startswith('https') else arg for arg in self.args.split()])
+        return (f'[muted]{self.category:<6} {f"({self.verdict})":<11}'
+                f' \\[{self.average:<3.9f}s {self.number_runs}] {self.solution} {args}[/muted]'
+                f'[accent] → [/accent]'
+                f'[{style}]{str(self.answer or "")}[/{style}]')
 
     def formatted(self) -> FormattedResult:
         sol = (f'<a href="{self.solution}" target="_blank" rel="noopener noreferrer" title="{self.solution}">'
@@ -70,21 +73,31 @@ class Result(NamedTuple):
         return FormattedResult(**self._asdict(), solution_href=sol, args_short=args, filename=filename, lang=lang)
 
 
-def read_results(problem_number: int = 0) -> list[Result]:
+def read_results() -> list[Result]:
     """Read problem results from a JSON file."""
     try:
-        if problem_number == 0:
-            raw = loads((Config.workspace_dir / Config.results_filename).read_bytes())
-        else:
-            raw = loads(read_stack_file(problem_number, Config.results_filename)[0])
+        raw = loads((config.workspace_dir / config.results_filename).read_bytes())
     except (FileNotFoundError, JSONDecodeError):
         raw = []
     return [Result(**r) for r in raw]
 
 
 @contextmanager
-def results_collector(record: bool) -> Generator[Recorder, None, None]:
-    """Context manager that collects run results and optionally persists them on a clean exit from the with block."""
+def results_collector(record: bool, reset: bool = False) -> Generator[Recorder, None, None]:
+    """Context manager that collects run results and persists them on exit.
+
+    Persistence is controlled by "record" and "reset":
+
+    * record=False                       — never write; results are discarded on exit.
+    * record=True,  reset=False, clean   — merge new results into the existing file.
+    * record=True,  reset=False, abort   — merge partial results into the existing file
+                                           (interrupted runs still contribute what they
+                                           managed to collect).
+    * record=True,  reset=True,  clean   — replace the existing file with the new run.
+    * record=True,  reset=True,  abort   — skip writing entirely, leaving the existing
+                                           file untouched (a partial reset would be a
+                                           silent destructive overwrite).
+    """
     results: list[Result] = []
 
     def recorder(*, category: str, solution: str, args: str, answer: Any | None, verdict: str,
@@ -92,63 +105,72 @@ def results_collector(record: bool) -> Generator[Recorder, None, None]:
         result = Result(category=category, solution=solution, args=args.strip(), answer=answer,
                         verdict=verdict, average=elapsed, number_runs=runs)
         results.append(result)
-        print(str(result))
+        console.print(str(result))
 
-    yield recorder
-
-    if record:
-        write_results(results, problem_number=0)
-        print(f'Results written to {canonical_path(Config.workspace_dir / Config.results_filename)}')
-    return None
+    clean_exit: bool = False
+    try:
+        yield recorder
+        clean_exit = True
+    finally:
+        if record and (clean_exit or not reset):
+            write_results(results, reset=reset and clean_exit)
 
 
 @check_workspace_lock
-def write_results(results: list[Result], problem_number: int = 0) -> None:
-    """Write problem results to a JSON file, updating running averages.
+def write_results(results: list[Result], reset: bool = False) -> None:
+    """Write problem results to a JSON file.
 
-    Reads existing records first and uses them to maintain a cumulative average
-    and run count per (category, solution, args, verdict) key.
-    Persists average and number_runs in place of the raw elapsed time.
+    By default (reset=False) existing records are read first and merged with the
+    incoming results: matching (category, solution, args, verdict) keys have their
+    average and run count rolled into a running average, and non-matching existing
+    entries are preserved.
+
+    When reset=True the existing file is ignored and the persisted file is replaced
+    by the incoming results only. The caller is expected to gate this on a clean
+    completion of the evaluation (see "results_collector") so a partial run cannot
+    silently overwrite previously good data.
+
+    By design, only verdicts in ('correct', 'timeout') are persisted — both for
+    incoming results and when filtering existing records on a non-reset rewrite.
+    Transient verdicts ('incorrect', 'error', 'unknown', 'overflow') are
+    intentionally discarded so the persisted file represents the stable benchmark
+    surface.
+
+    Args:
+        results:        Results collected during the run.
+        reset:          If True, ignore existing records and replace the file with
+                        "results" only. Defaults to False.
     """
-    try:
-        if problem_number == 0:
-            existing_raw = loads((Config.workspace_dir / Config.results_filename).read_bytes())
-        else:
-            existing_raw = loads(read_stack_file(problem_number, Config.results_filename)[0])
-    except (FileNotFoundError, JSONDecodeError):
-        existing_raw = []
+    if reset:
+        existing_raw: list[dict[str, Any]] = []
+    else:
+        try:
+            existing_raw = loads((config.workspace_dir / config.results_filename).read_bytes())
+        except (FileNotFoundError, JSONDecodeError):
+            existing_raw = []
 
     incoming: dict[tuple[str, str, str, str], Result] = {(r.category, r.solution, r.args, r.verdict): r
                                                          for r in results if r.verdict in ('correct', 'timeout')}
     updated: list[dict] = []
-    for r in existing_raw:
-        if r['verdict'] not in ('correct', 'timeout'):
+    for existing in existing_raw:
+        if existing['verdict'] not in ('correct', 'timeout'):
             continue
-        key = (r['category'], r['solution'], r['args'], r['verdict'])
+        key = (existing['category'], existing['solution'], existing['args'], existing['verdict'])
         if key in incoming:
             nr = incoming.pop(key)
-            old_avg, old_n = r['average'], r['number_runs']
+            old_avg, old_n = existing['average'], existing['number_runs']
             new_avg = (old_avg * old_n + nr.average * nr.number_runs) / (old_n + nr.number_runs)
             d = nr._asdict()
             d['average'] = new_avg
             d['number_runs'] = old_n + nr.number_runs
             updated.append(d)
         else:
-            updated.append(r)
-    for r in incoming.values():
-        updated.append(r._asdict())
+            updated.append(existing)
+    for incoming_result in incoming.values():
+        updated.append(incoming_result._asdict())
 
-    results_str = dumps(updated, indent=2)
-    if problem_number == 0:
-        (Config.workspace_dir / Config.results_filename).write_text(results_str)
-    else:
-        write_stack_file(
-            problem_number,
-            Config.results_filename,
-            results_str.encode(),
-            is_executable=False,
-            m_time=time()
-        )
+    write_file(config.workspace_dir / config.results_filename, dumps(updated, indent=2).encode(),
+               'Updated results')
 
 
 __all__ = (

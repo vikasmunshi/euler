@@ -9,7 +9,8 @@ from uuid import NAMESPACE_URL, uuid5
 
 from requests import get
 
-from solver.core.config import Config
+from solver.config import config
+from solver.shell import console
 from solver.utils.path_utils import write_file
 
 
@@ -36,17 +37,18 @@ def download_file(url: str, *,
     Returns:
         The file contents as bytes, or None if the download or cache read fails.
     """
-    cache_path = Config.cache_dir / uuid5(NAMESPACE_URL, url).hex
+    cache_path = config.cache_dir / uuid5(NAMESPACE_URL, url).hex
     if not cache_path.exists():
         if verbose:
-            print(f'Info: {cache_path.name} not found for {url}, refreshing...')
+            console.print(f'[muted]{cache_path.name} not cached for [accent]{url}[/accent], refreshing...[/muted]')
         refresh = True
     elif check_last_modified and (modified := get(url, stream=True).headers.get('Last-Modified')):
         modified_dt = parsedate_to_datetime(modified)
         cached_dt = datetime.fromtimestamp(cache_path.stat().st_mtime, tz=timezone.utc)
         if modified_dt > cached_dt:
             if verbose:
-                print(f'Info: {cache_path.name} is out of date for {url}, refreshing...')
+                console.print(f'[muted]{cache_path.name} is out of date for [accent]{url}[/accent], '
+                              f'refreshing...[/muted]')
             refresh = True
     if refresh:
         try:
@@ -54,18 +56,21 @@ def download_file(url: str, *,
             response.raise_for_status()
             content: bytes = b''.join(chunk for chunk in response.iter_content(chunk_size=8192))
         except Exception as e:
-            print(f'Error: failed to download {cache_path.name} from {url}: {e}')
+            console.print(f'[error]error:[/error] failed to download [accent]{cache_path.name}[/accent] '
+                          f'from {url}: {e}')
             return None
         else:
             write_file(cache_path, content, msg=f'Downloaded from {url}' if verbose else None)
     try:
         return cache_path.read_bytes()
     except Exception as e:
-        print(f'Error: failed to read cache file {cache_path.name} for {url}: {e}')
+        console.print(f'[error]error:[/error] failed to read cache file [accent]{cache_path.name}[/accent] '
+                      f'for {url}: {e}')
         return None
     finally:
         if verbose:
-            print(f'Read {len(cache_path.read_bytes())} bytes for {url} from cache {cache_path.name}')
+            console.print(f'[muted]read {len(cache_path.read_bytes())} bytes for [accent]{url}[/accent] '
+                          f'from cache {cache_path.name}[/muted]')
 
 
 __all__ = ('download_file',)

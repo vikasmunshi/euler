@@ -12,28 +12,32 @@ requires-python = ">=3.14"
 dependencies = [
     "beautifulsoup4",
     "cryptography",
+    "flake8",
     "jsonschema",
+    "mypy",
+    "prompt-toolkit",
     "requests",
+    "rich",
+    "types-requests",
 ]
 
 [project.optional-dependencies]
 ai = [
-    "anthropic"
+    "anthropic",
+    "python-dotenv",
 ]
 dev = [
     "autoflake",
     "autopep8",
     "black",
-    "flake8",
     "isort",
-    "mypy",
-    "types-requests",
 ]
 show = [
     "matplotlib",
     "PyQt5",
 ]
 solutions = [
+    "mpmath",
     "numpy",
     "pyprimesieve",
 ]
@@ -59,7 +63,7 @@ apt = [
 ]
 
 [project.scripts]
-solver = "solver.__main__:main"
+solver = "solver.main:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

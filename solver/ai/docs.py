@@ -5,153 +5,163 @@ from __future__ import annotations
 
 from json import JSONDecodeError, dumps, loads
 
-from anthropic import Anthropic
-from anthropic.types import MessageParam, TextBlock, ThinkingConfigEnabledParam
-from bs4 import BeautifulSoup
+from anthropic import APIError
+from anthropic.types import MessageParam, TextBlock
 
-from solver.ai.facts import Facts, gather_facts
-from solver.ai.models import Model, consumed_tokens, get_api_key
-from solver.core.config import Config
-from solver.core.problems import Problem
-from solver.core.stack import has_new_solutions
-from solver.core.templates import Templates, filled_template
-from solver.core.workspace import reinit_the_workspace, stack_the_workspace
+from solver.ai.facts import Facts, gather_facts, prepare_anthropic_request
+from solver.ai.models import Model, record_usage
+from solver.config import config
+from solver.core.lock import check_workspace
+from solver.templates.engine import Templates, filled_template
+from solver.core.workspace import has_new_solutions
+from solver.shell import console
 from solver.utils.path_utils import write_file
-from solver.utils.workspace import check_workspace_lock
+
+max_output_tokens: int = 32_000
+api_timeout: float = 600.0  # seconds
+test_cases_retries: int = 2
 
 
-@check_workspace_lock
-def _generate_doc(problem_number: int, prompt: str, model: Model) -> str | None:
+@check_workspace
+def _generate_doc(prompt: str, model: Model, images: dict[str, bytes] | None = None,
+                  follow_up: str | None = None) -> str | None:
     """
-    Generate documentation based on the specified problem prompt using the Anthropic client and a specified
-    AI model. This function manages API interactions, token consumption, and handles potential errors during
-    the note generation process.
+    Generate documentation by streaming from the Anthropic API.
+
+    The leading line of 'prompt' (up to the first blank line) is sent as the system block with an
+    ephemeral cache_control marker; the remainder is sent as the user message with the cache marker
+    on its trailing content block. When 'follow_up' is provided it is appended as a second user
+    turn after a placeholder assistant turn, so the initial system+user prefix is still cached.
 
     Args:
-        problem_number (int): The numeric identifier of the problem being processed.
-        prompt (str): The prompt content provided to generate the notes.
-        model (Model): The AI model used for generating the notes.
+        prompt:    Combined "<system>\\n\\n<user>" template content.
+        model:     The AI model used for generating content.
+        images:    Optional map of resource filename to image bytes referenced in the prompt.
+        follow_up: Optional follow-up user turn (used for one-shot retries that piggyback on cache).
 
     Returns:
-        str | None: The textual notes generated for the problem, or None if the generation fails.
-
-    Raises:
-        Exception: Captures and logs any error occurring during the process and returns None.
+        The generated text block, or 'None' on API or response errors.
     """
-    api_key: str = get_api_key()
     try:
-        client = Anthropic(api_key=api_key)
+        client, system_blocks, messages = prepare_anthropic_request(prompt, images)
+        if follow_up is not None:
+            messages.append(MessageParam(role='assistant', content='(previous attempt produced unparseable output)'))
+            messages.append(MessageParam(role='user', content=follow_up))
         with client.messages.stream(
                 model=model,
-                max_tokens=16_000,
-                thinking=ThinkingConfigEnabledParam(type='enabled', budget_tokens=10_000),
-                messages=[MessageParam(role='user', content=prompt)],
+                max_tokens=max_output_tokens,
+                system=system_blocks,
+                messages=messages,
+                timeout=api_timeout,
         ) as stream:
             response = stream.get_final_message()
-        print(f'Tokens used for problem {problem_number}: '
-              f'input {response.usage.input_tokens}, output {response.usage.output_tokens}, '
-              f'stop_reason {response.stop_reason!r}')
-        consumed_tokens[model]['input'] += response.usage.input_tokens
-        consumed_tokens[model]['output'] += response.usage.output_tokens
+        usage = response.usage
+        console.print(f'[muted]Tokens used: '
+                      f'input {usage.input_tokens}, output {usage.output_tokens}, '
+                      f'cache_write {getattr(usage, "cache_creation_input_tokens", 0) or 0}, '
+                      f'cache_read {getattr(usage, "cache_read_input_tokens", 0) or 0}, '
+                      f'stop_reason {response.stop_reason!r}[/muted]')
+        record_usage(model, usage)
         if response.stop_reason == 'max_tokens':
-            print(f'Warning: max_tokens reached for problem {problem_number}; response may be truncated')
+            console.print('[warning]Warning: max_tokens reached; response may be truncated[/warning]')
         text_block: TextBlock | None = next(
             (block for block in response.content if block.type == 'text'), None)
         if text_block is None:
             block_types = [block.type for block in response.content]
-            print(f'Error: no text block in response for problem {problem_number} '
-                  f'(stop_reason={response.stop_reason!r}, block types={block_types})')
+            console.print(f'[error]error:[/error] no text block in response '
+                          f'(stop_reason={response.stop_reason!r}, block types={block_types})')
             return None
         return text_block.text
-    except Exception as e:
-        print(f'Error: {type(e).__name__} generating notes for problem {problem_number}: {e}')
+    except APIError as e:
+        console.print(f'[error]error:[/error] Anthropic API error: {e}')
+        return None
+    except (ValueError, OSError) as e:
+        console.print(f'[error]error:[/error] {type(e).__name__} generating notes: {e}')
         return None
 
 
-def generate_notes(model: Model, force: bool = False) -> None:
+@check_workspace
+def generate_notes(model: Model, *, force: bool, major: bool) -> bool | None:
     """
-    Generates and updates notes for a specific problem in the workspace.
+    Generate and update HTML notes for the current workspace's problem.
 
-    This function processes facts about a problem using a pre-defined template
-    and a machine learning model to generate solution notes. It updates an HTML
-    file within the workspace, appending new content to a specified div element.
-    The function performs checks to ensure the workspace is initialized, and only
-    proceeds when new solutions are available or when the 'force' parameter is set
-    to True. If no relevant div is found in the HTML, the function will warn the
-    user and not apply the changes.
-
-    Parameters:
-        model (Model):          The machine learning model used to generate notes.
-        force (bool, optional): Whether to force note generation even if no new solutions
-                                are available (default is False).
-
+    Args:
+        model: The AI model used to generate notes.
+        force: Force note generation even if no new solutions are available.
+        major: Withhold any prior notes from the prompt (use after a template/prompt change).
     """
-    if (problem := Problem.from_workspace()) is None:
-        print('No workspace initialized. Use init to initialize the workspace')
-        return
-    if not (force or has_new_solutions(problem.number)):
-        print(f'Problem {problem.number} has no new solutions')
-        return
-    facts: Facts = gather_facts(problem.number, strict=True)
+    if not (force or has_new_solutions()):
+        console.print('[muted]no new solutions[/muted]')
+        return None
+    facts: Facts = gather_facts(strict=True)
+    if major:
+        console.print('[muted]Existing notes withheld.[/muted]')
+        facts = Facts(**{k: v for k, v in facts._asdict().items() if k != 'solution_notes'},
+                      solution_notes='')
     prompt = filled_template(Templates.PROMPT_NOTES, facts=facts)
-    print(f'Generating notes for problem {problem.number}...')
-    notes: str | None = _generate_doc(problem_number=problem.number, prompt=prompt, model=model)
+    console.print('[primary]Generating notes...[/primary]')
+    notes: str | None = _generate_doc(prompt=prompt, model=model, images=facts.images)
     if notes is None:
-        print(f'Error: failed to generate notes for problem {problem.number}')
-        return
-    current_html: str = (Config.workspace_dir / Config.statement_filename).read_text()
-    soup: BeautifulSoup = BeautifulSoup(current_html, 'html.parser')
-    if div := soup.find('div', id='solution-notes-content'):
-        div.clear()
-        div.append(BeautifulSoup(notes, 'html.parser'))
-    else:
-        print(f'Warning: <div id="solution-notes-content"> not found in problem.html '
-              f'for problem {problem.number}; notes not written to file')
-        return
-    write_file(Config.workspace_dir / Config.statement_filename, str(soup).encode(),
-               f'Updated {Config.statement_filename} with generated notes.')
-    stack_the_workspace()
-    reinit_the_workspace()
+        console.print('[error]error:[/error] failed to generate notes')
+        return False
+    write_file(config.workspace_dir / config.notes_filename, notes.encode(),
+               f'Updated {config.notes_filename}')
+    return True
 
 
-def generate_test_cases(model: Model, force: bool = False) -> None:
-    """
-    Generates test cases for a given problem in the workspace. If the workspace is not
-    initialized or test cases already exist for the problem, appropriate messages will
-    be printed. This function uses a model to generate test cases based on the facts
-    collected for the problem.
-
-    Parameters:
-        model (Model):  The model to be used for generating the notes. Defaults to Model.CLAUDE_SONNET_4_6.
-        force (bool):   If True, overwrite existing test cases. Defaults to False.
-
-    """
-    if (problem := Problem.from_workspace()) is None:
-        print('No workspace initialized. Use init to initialize the workspace')
-        return
-    if not (force or not (Config.workspace_dir / Config.test_cases_filename).exists()):
-        print(f'Problem {problem.number} has existing test cases')
-        return
-    facts: Facts = gather_facts(problem.number, strict=False)
-    prompt = filled_template(Templates.PROMPT_TEST_CASES, facts=facts)
-    print(f'Generating test cases for problem {problem.number}...')
-    test_cases: str | None = _generate_doc(problem_number=problem.number, prompt=prompt, model=model)
-    if test_cases is None:
-        print(f'Error: failed to generate test cases for problem {problem.number}')
-        return
+def _parse_test_cases_json(raw: str) -> str | None:
+    """Strip optional markdown code fences and return a re-formatted JSON string, or None on failure."""
+    stripped = raw.strip()
+    if stripped.startswith('```'):
+        stripped = stripped.split('\n', 1)[1].rsplit('```', 1)[0]
     try:
-        # Strip Markdown code fences if present (e.g. ```json ... ```)
-        stripped = test_cases.strip()
-        if stripped.startswith('```'):
-            stripped = stripped.split('\n', 1)[1].rsplit('```', 1)[0]
-        test_cases_str: str = dumps(loads(stripped), indent=2)
+        return dumps(loads(stripped), indent=2)
     except JSONDecodeError:
-        print(f'Error: failed to parse generated test cases JSON for problem {problem.number}')
-        print(f'Generated test cases: {test_cases}')
-        return
-    write_file(Config.workspace_dir / Config.test_cases_filename, test_cases_str.encode(),
-               f'Updated {Config.test_cases_filename} with generated test cases.')
-    stack_the_workspace()
+        return None
+
+
+@check_workspace
+def generate_test_cases(model: Model, *, force: bool, major: bool) -> bool | None:
+    """
+    Generate a test_cases.json file for the current workspace's problem.
+
+    Retries once with a "JSON only, no prose" reminder if the first response cannot be parsed.
+
+    Args:
+        model: The AI model used to generate test cases.
+        force: Overwrite an existing test_cases.json.
+        major: No-op for test cases; preserved for the common make() signature.
+    """
+    if major:
+        console.print('[muted]Use structural transformation for migration after a major change.[/muted]')
+        return None
+    if not (force or not (config.workspace_dir / config.test_cases_filename).exists()):
+        console.print('[muted]Test cases exist.[/muted]')
+        return None
+    facts: Facts = gather_facts(strict=False)
+    prompt = filled_template(Templates.PROMPT_TEST_CASES, facts=facts)
+    console.print('[primary]Generating test cases...[/primary]')
+    raw: str | None = _generate_doc(prompt=prompt, model=model, images=facts.images)
+    parsed: str | None = _parse_test_cases_json(raw) if raw is not None else None
+    if parsed is None:
+        for attempt in range(1, test_cases_retries + 1):
+            console.print(f'[muted]Retrying test-case generation (attempt {attempt}/{test_cases_retries})'
+                          f' with strict JSON reminder...[/muted]')
+            follow_up = ('Your previous response could not be parsed as JSON. '
+                         'Re-emit the entire JSON array only - no markdown, no code fences, no prose, '
+                         'no leading or trailing text. The output must start with `[` and end with `]`.')
+            raw = _generate_doc(prompt=prompt, model=model, images=facts.images, follow_up=follow_up)
+            parsed = _parse_test_cases_json(raw) if raw is not None else None
+            if parsed is not None:
+                break
+    if parsed is None:
+        console.print('[error]error:[/error] failed to parse generated test cases JSON')
+        if raw is not None:
+            console.print(f'Generated test cases: {raw}', markup=False, highlight=False)
+        return False
+    write_file(config.workspace_dir / config.test_cases_filename, parsed.encode(),
+               f'Updated {config.test_cases_filename}')
+    return True
 
 
 __all__ = ('generate_notes', 'generate_test_cases')

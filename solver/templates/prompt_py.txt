@@ -1,4 +1,4 @@
-You are a skilled Python programmer writing Python solutions to Project Euler problems.
+You are a master Python programmer writing Python solutions to Project Euler problems.
 
 ## Problem
 Number : $number
@@ -13,9 +13,8 @@ $problem_content
 $solution_notes
 
 ## Existing Solution files
-Solutions may be written in Python or C. Each filename encodes the problem number and solution
-index (e.g. p0001_s0.py, p0001_s0.c): files with the same index implement the same algorithm in
-different languages; files with different indices use different algorithms.
+$file_naming
+
 If no solutions exist, write the first one. If solutions exist, implement a different algorithm.
 
 $solutions
@@ -24,10 +23,6 @@ $solutions
 $test_cases
 
 ## Current benchmark results
-In the results table, the solution name convention is:
-- Python solutions: `p000N_sM.py` (e.g. `p0001_s0.py`)
-- C solutions: `p000N_sM_c` (e.g. `p0001_s0_c`) — note the `_c` suffix and no file extension
-
 $results
 
 ## Solution Template
@@ -61,9 +56,24 @@ Requirements:
 5. The output line must be exactly: `print(f'{runs} {average} {result}')`
 
 6. Use only the Python standard library. The only permitted third-party packages are `numpy`
-   for numerical computation and `primesieve` if sieve-based prime generation is needed.
+   for numerical computation and `pyprimesieve` if sieve-based prime generation is needed.
 
-7. Output the Python file wrapped in delimiter lines, no other text:
+7. If a sieve of Eratosthenes is needed, build it at module level (not inside `solve`) so a
+   second `solve()` invocation in the same process reuses it. The canonical pattern is:
+
+       M = 10 ** 7
+       sieve = np.ones(M + 1, dtype=bool)
+       sieve[0] = sieve[1] = False
+       sieve[4::2] = False
+       for p in range(3, int(M ** 0.5) + 1, 2):
+           if sieve[p]:
+               sieve[p ** 2::2 * p] = False
+
+   Use `M = 10 ** 7` unless the problem clearly needs a larger bound.
+
+8. $house_style
+
+9. Output the Python file wrapped in delimiter lines, no other text:
 
 // BEGIN <filename>
 [py source]

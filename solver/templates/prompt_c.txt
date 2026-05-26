@@ -1,4 +1,4 @@
-You are a skilled C programmer translating Python Project Euler solutions to C.
+You are a master C programmer translating Python Project Euler solutions to C.
 
 ## Problem
 Number : $number
@@ -13,9 +13,7 @@ $problem_content
 $solution_notes
 
 ## Existing Solution files
-Solutions may be written in Python or C. Each filename encodes the problem number and solution
-index (e.g. p0001_s0.py, p0001_s0.c). Python and C files with the same index implement the same
-algorithm in different languages; files with different indices use different algorithms.
+$file_naming
 
 $solutions
 
@@ -23,10 +21,6 @@ $solutions
 $test_cases
 
 ## Current benchmark results
-In the results table, the solution name convention is:
-- Python solutions: `p000N_sM.py` (e.g. `p0001_s0.py`)
-- C solutions: `p000N_sM_c` (e.g. `p0001_s0_c`) — note the `_c` suffix and no file extension
-
 $results
 
 ## Solution Template
@@ -46,10 +40,10 @@ Requirements:
 1. Each C file must implement a `solve` function and a `main` block following the template.
    The `solve` signature and `main` block must be adapted to match the Python return type:
 
-   - `int` or `bool` → `long long solve(int argc, char *argv[])`, print result with `%lld`.
-   - `str`           → `char *solve(int argc, char *argv[])`, print result with `%s`;
+   - `int` or `bool` -> `long long solve(int argc, char *argv[])`, print result with `%lld`.
+   - `str`           -> `char *solve(int argc, char *argv[])`, print result with `%s`;
                         free the returned pointer in `main()` if heap-allocated.
-   - `list` / other  → encode the result as a JSON string (e.g. `[1, 2, 3]`),
+   - `list` / other  -> encode the result as a JSON string (e.g. `[1, 2, 3]`),
                         return `char *`, print with `%s`; free if heap-allocated.
 
    In all cases `main()` passes only the problem input arguments to `solve()`: argv[0] is the
@@ -72,13 +66,20 @@ Requirements:
 5. If a Python solution contains a `get_text_file` function, include and use the
     `char *get_text_file` function from the template. Otherwise, remove this function.
 
-6. Translate each algorithm faithfully -- do not change the approach.
+6. Translate each algorithm faithfully - do not change the approach.
 
 7. Include only the headers you actually use and remove any unused headers from the template.
 
 8. Begin each file with a comment: /* Solution to Euler Problem $number: $title. */
 
-9. Output each C file wrapped in delimiter lines, one after another, no other text:
+9. If a Python solution depends on libraries with no reasonable C equivalent
+   (e.g. `sympy`, `networkx`, anything beyond `numpy` / `pyprimesieve`),
+   do not fabricate a port. Emit a one-line file containing only
+   `// SKIP: <one-sentence reason>` and move on to the next file.
+
+10. $house_style
+
+11. Output each C file wrapped in delimiter lines, one after another, no other text:
 
 // BEGIN <filename>
 [c source]

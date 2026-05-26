@@ -1,95 +1,66 @@
-# Byte-compiled and cached Python files
-*.py[cod]
-*.py.class
-__pycache__/
-.mypy_cache/
-
-# C extensions
-*.so
-
-# Development artifacts
 *.cover
+*.egg-info/
 *.log
 *.manifest
-*.pot
 *.mo
+*.pot
+*.py.class
+*.py[cod]
+*.sage.py
+*.so
 *.spec
-
-# Test and coverage
+.Python
+.cache
 .coverage
 .coverage.*
-.pytest_cache/
-htmlcov/
-
-# Notebooks
-.ipynb_checkpoints
-
-# Static and compiled files
-*.sage.py
-.cache
 .dmypy.json
-
-# Environment and virtualenvs
-.Python
 .env
 .env.bak/
-.venv/
-venv/
-ENV/
 .env/
-
-# Distribution/build directories
-dist/
-eggs/
-develop-eggs/
-downloads/
-sdist/
-wheels/
-
-# Installer logs
-pip-delete-this-directory.txt
-pip-log.txt
-
-# Package metadata
-*.egg-info/
-.installed.cfg
-.python-version
-pip-wheel-metadata/
-
-# IDE and editor files
-.idea/
 .euleriws/
+.idea/
+.installed.cfg
+.ipynb_checkpoints
 .ipython_config.py
+.mypy_cache/
+.pytest_cache/
+.python-version
 .ropeproject
 .scrapy/
 .spyderproject/
 .tox/
+.venv/
 .webassets-cache/
+/*/.*
+/.*
+!.gitignore
+/CLAUDE.md
+ENV/
+__pycache__/
+celerybeat-schedule
+coverage.xml
+db.sqlite3
+db.sqlite3-journal
+develop-eggs/
+dist/
+docs/_build/
+downloads/
+eggs/
 euler.iml
 euler.ipr
 euler.iws
-
-# Specific files to ignore, with exceptions
-profile_default/
-celerybeat-schedule
-docs/_build/
-local_settings.py
-
-# Project data
-db.sqlite3
-db.sqlite3-journal
-coverage.xml
-nosetests.xml
-
-# Libraries
+htmlcov/
 lib/
 lib64/
-
-# Temporary system data
+local_settings.py
+nosetests.xml
+pip-delete-this-directory.txt
+pip-log.txt
+pip-wheel-metadata/
+profile_default/
+sdist/
 site/
 target/
 var/
-
-# solver specific files and folders to exclude
-/.*
-!.gitignore
+venv/
+wheels/

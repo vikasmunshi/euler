@@ -3,52 +3,51 @@
 """ A set of utilities to manage Git repository workflows. """
 from __future__ import annotations
 
-from pathlib import Path
+from datetime import datetime
 from subprocess import CalledProcessError, run
 from tomllib import load
 from typing import Literal
 
-from solver.core.config import Config
-from solver.utils.path_utils import canonical_path
+from solver.config import config
+from solver.shell import console, register
 from solver.utils.shell_utils import confirm
 
 
-def run_cmdline(cmdline: str) -> None:
+def run_cmdline(cmdline: str) -> int:
     """Run a shell command in the repository root and print its exit code.
 
     Args:
         cmdline: The shell command string to execute.
     """
     try:
-        process = run(cmdline, shell=True, check=True, cwd=Config.root_dir)
+        process = run(cmdline, shell=True, check=True, cwd=config.root_dir)
     except CalledProcessError as e:
         result: int = e.returncode
     else:
         result = process.returncode
-    print(f'{Config.ColorCodes.GREEN if result == 0 else Config.ColorCodes.RED}'
-          f'> {cmdline} -> {result}'
-          f'{Config.ColorCodes.RESET}')
+    style = 'success' if result == 0 else 'error'
+    console.print(f'[{style}]>[/{style}] [muted]{cmdline}[/muted] [{style}]→ {result}[/{style}]')
+    return result
 
 
-def build_c() -> None:
-    """Build all C source files in the workspace directory."""
-    source_files: list[Path] = sorted(s for s in Config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.c')
-    for source_file in source_files:
-        cmdline: str = f'{Config.ScriptPaths.BUILD_C} {canonical_path(source_file)}'
-        process = run(cmdline, capture_output=True, cwd=Config.root_dir, shell=True, text=True)
-        if process.returncode != 0:
-            print(f'{Config.ColorCodes.RED}Error building {source_file.name}{Config.ColorCodes.RESET}\n'
-                  f'{process.stdout}{'\n' if process.stdout and process.stderr else ''} {process.stderr}')
-
-
-def commit() -> None:
+@register(name='commit',
+          help='Commit solutions and workspace.',
+          usage='commit [reset=false] [verify=true]', )
+def commit(reset: bool = False, verify: bool = True) -> Literal['ok', 'nok']:
     """ Commit all changes in the local repository. """
-    cmdline = 'git reset --soft origin/master && git commit -a -m "auto-commit"'
-    run_cmdline(cmdline)
+    cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
+    cmdline += ['git', 'add', '-A', 'solutions', 'workspace', '&&']
+    cmdline += ['git', 'commit', '-a'] if verify else ['git', 'commit', '-a', '--no-verify']
+    cmdline += ['--message', f'"checkpoint {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}"']
+    result = run_cmdline(' '.join(cmdline))
+    return 'nok' if result else 'ok'
 
 
+@register(name='publish',
+          help='Publish changed files for named targets to the remote repository.',
+          usage='publish [keys|scripts|solutions|solver=solutions] [dry-run=false]', )
 def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
-                dry_run: bool = False) -> None:
+                dry_run: bool = False) -> Literal['ok', 'nok']:
     """Publish changed files for named targets to the remote repository.
 
     Args:
@@ -64,12 +63,16 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
     if not all(target in ['keys', 'scripts', 'solutions', 'solver'] for target in targets):
         raise ValueError(f'Invalid targets: {", ".join(targets)}')
     if dry_run:
-        run_cmdline(f'{Config.ScriptPaths.PUBLISH} --dry-run {" ".join(targets)}')
+        result = run_cmdline(f'{config.scripts.publish} --dry-run {" ".join(targets)}')
     else:
-        run_cmdline(f'{Config.ScriptPaths.PUBLISH} {" ".join(targets)}')
+        result = run_cmdline(f'{config.scripts.publish} {" ".join(targets)}')
+    return 'nok' if result else 'ok'
 
 
-def git_status(details: bool = False) -> None:
+@register(name='status',
+          help='Display the sync state between the local branch and origin/master.',
+          usage='status [details=false]', )
+def git_status(details: bool = False) -> Literal['ok', 'nok']:
     """Display the sync state between the local branch and origin/master.
 
     Args:
@@ -77,24 +80,32 @@ def git_status(details: bool = False) -> None:
                     When False (default), shows file counts only.
     """
     if details:
-        run_cmdline(Config.ScriptPaths.STATUS)
+        result = run_cmdline(config.scripts.status)
     else:
-        run_cmdline(f'{Config.ScriptPaths.STATUS} --summary')
+        result = run_cmdline(f'{config.scripts.status} --summary')
+    return 'nok' if result else 'ok'
 
 
-def git_sync(dry_run: bool = False) -> None:
+@register(name='sync',
+          help='Bring the local repository in sync with origin/master.',
+          usage='sync [dry-run=false]', )
+def git_sync(dry_run: bool = False) -> Literal['ok', 'nok']:
     """Bring the local repository in sync with origin/master.
 
     Args:
         dry_run: Print the sync commands instead of running them. Defaults to False.
     """
     if dry_run:
-        run_cmdline(f'{Config.ScriptPaths.SYNC} --dry-run')
+        result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
-        run_cmdline(Config.ScriptPaths.SYNC)
+        result = run_cmdline(config.scripts.sync)
+    return 'nok' if result else 'ok'
 
 
-def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show']) -> None:
+@register(name='upgrade',
+          help='Upgrade packages in the current venv for the given dependency groups.',
+          usage='upgrade [all|ai|core|dev|solutions|show=all]', )
+def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show']) -> Literal['ok', 'nok']:
     """Upgrade packages in the current venv for the given dependency groups.
 
     Groups are defined in pyproject.toml:   'core' for project.dependencies,
@@ -107,7 +118,7 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
     """
     if not groups:
         groups = ('all',)
-    with open(Config.root_dir / 'pyproject.toml', 'rb') as f:
+    with open(config.root_dir / 'pyproject.toml', 'rb') as f:
         data = load(f)
     available: dict[str, list[str]] = {'core': data['project']['dependencies']}
     available.update(data['project'].get('optional-dependencies', {}))
@@ -116,24 +127,35 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
     else:
         packages = [p for name in groups for p in available[name]]
     if confirm(f'Upgrade {len(packages)} package(s): {" ".join(packages)}'):
-        run_cmdline(f'{Config.ScriptPaths.UPGRADE} {" ".join(packages)}')
+        result = run_cmdline(f'{config.scripts.upgrade} {" ".join(packages)}')
+        return 'nok' if result else 'ok'
     else:
-        print('Package upgrade cancelled.')
+        console.print('[muted]Package upgrade cancelled.[/muted]')
+        return 'nok'
 
 
-def pre_commit() -> None:
+@register(name='git-hooks',
+          help='Run pre-commit hook and simulated pre-push hook.',
+          usage='git-hooks',
+          aliases=('hooks',), )
+def pre_commit() -> Literal['ok', 'nok']:
     """Run pre-commit hooks."""
-    print('Running pre-commit hooks...')
-    run_cmdline(Config.root_dir.joinpath('.git/hooks/pre-commit').as_posix())
-    print('Running simulated pre-push hooks...')
+    console.print('[primary]Running pre-commit hooks...[/primary]')
+    run_cmdline(config.root_dir.joinpath('.git/hooks/pre-commit').as_posix())
+    console.print('[primary]Running simulated pre-push hooks...[/primary]')
     cmd_line = ('echo "refs/heads/master $(git rev-parse HEAD) refs/heads/master $(git rev-parse origin/master)" | '
-                f'{Config.root_dir.joinpath(".git/hooks/pre-push").as_posix()}')
-    run_cmdline(cmd_line)
+                f'{config.root_dir.joinpath(".git/hooks/pre-push").as_posix()}')
+    result = run_cmdline(cmd_line)
+    return 'nok' if result else 'ok'
 
 
+@register(name='install',
+          help='Installs or uninstalls system resources.',
+          usage='install <target> [uninstall=False] [show_help=False]',
+          aliases=('setup',), )
 def sys_install(target: Literal['chrome', 'dev-env', 'upgrade-service'],
                 uninstall: bool = False,
-                show_help: bool = False) -> None:
+                show_help: bool = False) -> Literal['ok', 'nok']:
     """ Installs or uninstalls the system resource specified as the target.
 
     Parameters:
@@ -144,14 +166,14 @@ def sys_install(target: Literal['chrome', 'dev-env', 'upgrade-service'],
         show_help:  Displays help information for the specified target.
     """
     script: str = {
-        'chrome': Config.ScriptPaths.INSTALL_CHROME,
-        'dev-env': Config.ScriptPaths.INSTALL_DEV_ENV,
-        'upgrade-service': Config.ScriptPaths.INSTALL_UPGRADE_SERVICE,
+        'chrome': config.scripts.install_chrome,
+        'dev-env': config.scripts.install_dev_env,
+        'upgrade-service': config.scripts.install_upgrade_service,
     }[target]
     arg: str = '--help' if show_help else 'uninstall' if uninstall else 'install'
     if show_help:
-        run_cmdline(f'{script} {arg}')
-        return
+        result = run_cmdline(f'{script} {arg}')
+        return 'nok' if result else 'ok'
     name: str = {
         'chrome': 'Chrome browser',
         'dev-env': 'development environment',
@@ -163,11 +185,14 @@ def sys_install(target: Literal['chrome', 'dev-env', 'upgrade-service'],
         'upgrade-service': '',
     }[target]
     if confirm(f'{arg.capitalize()} {name}{extra_arg} (requires sudo)?'):
-        run_cmdline(f'{script} {arg}{extra_arg}')
+        result = run_cmdline(f'{script} {arg}{extra_arg}')
+        return 'nok' if result else 'ok'
+    else:
+        console.print('[muted]Installation cancelled.[/muted]')
+        return 'nok'
 
 
 __all__ = (
-    'build_c',
     'commit',
     'git_publish',
     'git_status',

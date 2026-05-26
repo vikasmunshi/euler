@@ -3,24 +3,26 @@
 """Stack directory management: file read/write, transparent encryption, and path resolution."""
 from __future__ import annotations
 
+from base64 import b64decode, b64encode
 from functools import lru_cache
 from json import JSONDecodeError, dumps, loads
 from os import X_OK, access, utime
 from pathlib import Path
 from typing import Any
 
-from solver.core.config import Config
+from solver.config import config
+from solver.core.lock import check_workspace_lock
 from solver.core.problems import problems
 from solver.crypto.keys import get_enc_key
+from solver.shell import console
 from solver.utils.path_utils import canonical_path, iterdir_recursive, write_file
 from solver.utils.shell_utils import confirm, run_command
-from solver.utils.workspace import check_workspace_lock
 
 
 @lru_cache(maxsize=None)
 def stack_base_dir(problem_number: int) -> Path:
     """Return the stack directory for a problem, rooted one digit-level deep per digit of its zero-padded number."""
-    return Config.solutions_dir.joinpath(*f'{problem_number:04d}')
+    return config.solutions_dir.joinpath(*f'{problem_number:04d}')
 
 
 @lru_cache(maxsize=None)
@@ -41,10 +43,9 @@ def stack_path(problem_number: int, filename: str) -> tuple[bool, Path]:
     """
     encryption_required: bool = not (
             problem_number <= 100
-            or filename == Config.number_filename
-            or filename == Config.statement_filename
-            or filename == Config.statement_filename
-            or filename.startswith(Config.resource_dirname)
+            or filename == config.number_filename
+            or filename == config.statement_filename
+            or filename.startswith(config.resource_dirname)
     )
     stack_file_path: Path = stack_base_dir(problem_number) / (filename + '.enc' if encryption_required else filename)
     return encryption_required, stack_file_path
@@ -64,12 +65,15 @@ def read_stack_file(problem_number: int, filename: str) -> tuple[bytes, bool, fl
 
     Raises:
         FileNotFoundError: If the stack file does not exist.
+        KeyError:          If the stack file is encrypted but the corresponding key is not found.
+        ValueError:        If the stack file is encrypted but cannot be decrypted for any reason.
     """
     encryption_required, stack_file_path = stack_path(problem_number, filename)
     content: bytes = stack_file_path.read_bytes()
     is_executable: bool = access(stack_file_path, X_OK)
     m_time: float = stack_file_path.stat().st_mtime
     if encryption_required:
+        content = b64decode(content, validate=True)
         key_id, enc_content = content[:16], content[16:]  # first 16 bytes are key id
         key = get_enc_key(key_id)
         content = key.decrypt(enc_content, aad=filename.encode())
@@ -101,6 +105,7 @@ def write_stack_file(problem_number: int, filename: str, content: bytes, is_exec
     if encryption_required:
         key = get_enc_key()
         content = bytes.fromhex(key.id) + key.encrypt(content, aad=filename.encode())  # first 16 bytes are key id
+        content = b64encode(content)
     write_file(stack_file_path, content)
     if is_executable:
         stack_file_path.chmod(0o755)
@@ -110,7 +115,7 @@ def write_stack_file(problem_number: int, filename: str, content: bytes, is_exec
 # ==================================================================================================================== #
 #                                               stack / unstack
 # ==================================================================================================================== #
-
+@check_workspace_lock
 def stack(problem_number: int) -> None:
     """
     Read all files from the workspace directory and write them into the stack, encrypting as required.
@@ -119,25 +124,27 @@ def stack(problem_number: int) -> None:
     Args:
         problem_number: The Project Euler problem number.
     """
-    for workspace_file_path in iterdir_recursive(Config.workspace_dir):
-        filename: str = workspace_file_path.relative_to(Config.workspace_dir).as_posix()
+    for workspace_file_path in iterdir_recursive(config.workspace_dir):
+        filename: str = workspace_file_path.relative_to(config.workspace_dir).as_posix()
         content: bytes = workspace_file_path.read_bytes()
-        if not filename.startswith(Config.resource_dirname):
+        if not filename.startswith(config.resource_dirname):
             try:
                 content.decode()
             except UnicodeDecodeError:
-                continue
+                continue  # exclude not text files, except in the resources directory
         if filename.endswith('.json'):
             try:
                 obj: Any = loads(content)
                 content = dumps(obj, indent=2).encode()
             except JSONDecodeError:
-                continue
+                console.print(f'[error]Failed to parse JSON file {canonical_path(workspace_file_path)}!', style='bold')
+                continue  # exclude invalid json files
         is_executable: bool = access(workspace_file_path, X_OK)
         m_time: float = workspace_file_path.stat().st_mtime
         write_stack_file(problem_number, filename, content, is_executable, m_time)
 
 
+@check_workspace_lock
 def unstack(problem_number: int) -> None:
     """
     Read all files from the stack and write them into the workspace, decrypting as required.
@@ -150,7 +157,7 @@ def unstack(problem_number: int) -> None:
     for filename in iterdir_recursive(problem_stack_dir, rt='str'):
         filename = filename.removesuffix('.enc')
         content, is_executable, m_time = read_stack_file(problem_number, filename)
-        workspace_file_path: Path = Config.workspace_dir.joinpath(filename)
+        workspace_file_path: Path = config.workspace_dir.joinpath(filename)
         write_file(workspace_file_path, content)
         if is_executable:
             workspace_file_path.chmod(0o755)
@@ -160,7 +167,6 @@ def unstack(problem_number: int) -> None:
 # ==================================================================================================================== #
 #                                               backup / restore
 # ==================================================================================================================== #
-
 def backup_the_stack() -> None:
     """
     Back up problem files from the stack to the 'backup' folder (unencrypted).
@@ -168,16 +174,17 @@ def backup_the_stack() -> None:
     Then iterates over all problems, decrypting and copying their stack files into
     backup/<one digit-level per digit of zero-padded problem number>/.
     """
-    if run_command(f'git check-ignore -q {Config.backup_dir.name}', silent=True) is None:
-        raise RuntimeError(f'Backup directory {Config.backup_dir.name} is not ignored by git')
-    orig_workspace_dir = Config.backup_dir
+    if run_command(f'git check-ignore -q {config.backup_dir.name}', silent=True) is None:
+        raise RuntimeError(f'Backup directory {config.backup_dir.name} is not ignored by git')
+    orig_workspace_dir = config.backup_dir
     try:
-        for problem_number in range(1, problems[-1].number + 1):
-            Config.workspace_dir = Config.backup_dir / stack_base_dir(problem_number).relative_to(Config.solutions_dir)
+        for problem_number in range(1, problems.problems_list[-1].number + 1):
+            config.workspace_dir = config.backup_dir / stack_base_dir(problem_number).relative_to(config.solutions_dir)
             unstack(problem_number)
-            print(f'Stack backup for problem {problem_number} -> {canonical_path(Config.workspace_dir)}')
+            console.print(f'[muted]Stack backup for problem [accent]{problem_number}[/accent] → '
+                          f'{canonical_path(config.workspace_dir)}[/muted]')
     finally:
-        Config.workspace_dir = orig_workspace_dir
+        config.workspace_dir = orig_workspace_dir
 
 
 def restore_the_stack() -> None:
@@ -186,65 +193,21 @@ def restore_the_stack() -> None:
     Inverse of 'backup_the_stack'.
     """
     if not confirm('Are you sure, you want to restore the stack?'):
-        print('Stack restoration cancelled.')
+        console.print('[muted]Stack restoration cancelled.[/muted]')
         return
-    orig_workspace_dir = Config.backup_dir
+    orig_workspace_dir = config.backup_dir
     try:
-        for problem_number in range(1, problems[-1].number + 1):
-            Config.workspace_dir = Config.backup_dir / stack_base_dir(problem_number).relative_to(Config.solutions_dir)
+        for problem_number in range(1, problems.problems_list[-1].number + 1):
+            config.workspace_dir = config.backup_dir / stack_base_dir(problem_number).relative_to(config.solutions_dir)
             stack(problem_number)
-            print(f'Stack restored for problem {problem_number} <- {canonical_path(Config.workspace_dir)}')
+            console.print(f'[muted]Stack restored for problem [accent]{problem_number}[/accent] ← '
+                          f'{canonical_path(config.workspace_dir)}[/muted]')
     finally:
-        Config.workspace_dir = orig_workspace_dir
-
-
-# ==================================================================================================================== #
-#                                               misc
-# ==================================================================================================================== #
-def has_new_solutions(problem_number: int) -> bool:
-    """
-    Determines if there are new solutions for a given problem based on file modification
-    times.
-
-    This function checks if any solution files in the specified problem's directory
-    have a modification time later than the modification time of the problem's
-    statement file. If such a file exists, the function returns True.
-
-    Parameters:
-        problem_number (int): The identifier for the problem to check for new solutions.
-
-    Returns:
-        bool: True if any solution file is newer than the statement file, otherwise False.
-    """
-    problem_stack_dir: Path = stack_base_dir(problem_number)
-    statement_file_m_time: float = (problem_stack_dir / Config.statement_filename).stat().st_mtime
-    new_solutions: list[Path] = []
-    for solution_file in (f for f in problem_stack_dir.iterdir() if f.is_file()):
-        file_name: str = solution_file.name.removesuffix('.enc')
-        if file_name.split('.')[-1] in ('py', 'c'):
-            if solution_file.stat().st_mtime > statement_file_m_time:
-                new_solutions.append(solution_file)
-    if new_solutions:
-        print(f'{len(new_solutions)} new solutions found for problem {problem_number}: '
-              f'{", ".join(f.name for f in new_solutions)}')
-        return True
-    test_cases_file: Path = stack_path(problem_number, Config.test_cases_filename)[1]
-    results_file: Path = stack_path(problem_number, Config.results_filename)[1]
-    if (
-            test_cases_file.exists() and
-            test_cases_file.stat().st_mtime > statement_file_m_time and
-            results_file.exists() and
-            results_file.stat().st_mtime > statement_file_m_time
-    ):
-        print(f'Updated test cases and results found for problem {problem_number}')
-        return True
-    print(f'No new solutions or test-cases and results for problem {problem_number}')
-    return False
+        config.workspace_dir = orig_workspace_dir
 
 
 __all__ = (
     'backup_the_stack',
-    'has_new_solutions',
     'read_stack_file',
     'restore_the_stack',
     'stack',

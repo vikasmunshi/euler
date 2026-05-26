@@ -96,7 +96,7 @@ class EncKey(NamedTuple):
             The decrypted plaintext bytes.
 
         Raises:
-            ValueError: If cypher_text is not in the expected wire format.
+            ValueError: If decryption fails for any reason
         """
         try:
             nonce: bytes = cypher_text[16:28]

@@ -6,16 +6,17 @@ from __future__ import annotations
 from functools import lru_cache
 from json import dumps, loads
 from secrets import choice, token_bytes
-from typing import Any
+from typing import Any, Literal
 
 from jsonschema import validate
 
-from solver.core.config import Config
+from solver.config import config
 from solver.crypto.asymmetrical import UserKeyPair
+from solver.crypto.share import reconstruct, split
 from solver.crypto.symmetrical import EncKey
-from solver.utils.gh import get_gh_user_email, get_repo_owner_email
+from solver.shell import console, register
+from solver.utils.gh import get_gh_user_email
 from solver.utils.path_utils import write_file
-from solver.utils.scripts import git_publish
 from solver.utils.shell_utils import confirm
 
 
@@ -25,14 +26,14 @@ from solver.utils.shell_utils import confirm
 
 def _validate_schema(data: dict[str, Any]) -> None:
     """Validate data against the JSON schema, raising ValidationError on failure."""
-    schema: dict[str, Any] = loads(Config.schema_file.read_text())
+    schema: dict[str, Any] = loads(config.schema_file.read_text())
     validate(instance=data, schema=schema)
 
 
 @lru_cache(maxsize=None)
 def read_keys_file() -> dict[str, Any]:
     """Read, schema-validate, and cache the keys-file, returning its parsed contents."""
-    data: dict[str, Any] = loads(Config.keys_file.read_text())
+    data: dict[str, Any] = loads(config.keys_file.read_text())
     _validate_schema(data)
     return data
 
@@ -41,17 +42,20 @@ def write_keys_file(data: dict[str, Any]) -> None:
     """
     Validate and write data to the keys-file, then sync it with the remote origin.
 
-    Clears the read and get_key caches after writing.
+    Clears all key-related caches (keys file, master key, enc keys) after writing so that
+    subsequent reads pick up the new content even after a master-key rotation.
 
     Args:
         data: The full keys file contents to validate and persist.
     """
     _validate_schema(data)
-    Config.keys_file.write_text(dumps(data, indent=2))
-    print(f'Keys file {Config.keys_file} updated; num users: {len(data["users"])}, num keys: {len(data["keys"])}')
-    get_key.cache_clear()
+    config.keys_file.write_text(dumps(data, indent=2))
+    console.print(f'[success]Keys file [accent]{config.keys_file}[/accent] updated; '
+                  f'num users: {len(data["users"])}, num keys: {len(data["keys"])}[/success]')
     read_keys_file.cache_clear()
-    git_publish('keys')
+    get_master_key.cache_clear()
+    _get_key_by_id.cache_clear()
+    console.print('[muted]To sync with the remote origin, run [accent]`solver publish keys`[/accent][/muted]')
 
 
 # ==================================================================================================================== #
@@ -59,23 +63,28 @@ def write_keys_file(data: dict[str, Any]) -> None:
 # ==================================================================================================================== #
 
 @lru_cache(maxsize=None)
+def _get_key_by_id(key_id: str) -> EncKey:
+    """Return a decrypted EncKey for an explicit key id; cached per process."""
+    master_key: bytes = get_master_key()
+    data: dict[str, Any] = read_keys_file()
+    return EncKey.from_dict(key_id, data['keys'][key_id], master_key=master_key)
+
+
 def get_key(key_id: str | None = None) -> EncKey:
     """
-    Return a decrypted EncKey, selecting a random active key when no ID is given.
+    Return a decrypted EncKey, selecting a fresh random active key when no ID is given.
 
     Args:
-        key_id: Hex UUID7 of the specific key to load. If None, a random active key is chosen.
+        key_id: Hex UUID7 of the specific key to load. If None, a random active key is chosen
+                on every call so encryption operations spread across the active key pool.
 
     Returns:
         The decrypted EncKey for the given or selected key ID.
     """
-    master_key: bytes = get_master_key()
-    data: dict[str, Any] = read_keys_file()
     if key_id is None:
-        selected_id, selected = choice([(k, v) for k, v in data['keys'].items() if v['status'] == 'active'])
-    else:
-        selected_id, selected = key_id, data['keys'][key_id]
-    return EncKey.from_dict(selected_id, selected, master_key=master_key)
+        data: dict[str, Any] = read_keys_file()
+        key_id, _ = choice([(k, v) for k, v in data['keys'].items() if v['status'] == 'active'])
+    return _get_key_by_id(key_id)
 
 
 @lru_cache(maxsize=None)
@@ -87,11 +96,12 @@ def get_master_key() -> bytes:
         The 32-byte master key, decrypted using the user's private key.
 
     Raises:
-        AssertionError: If the master key entry for this user is absent from keys.json.
+        ValueError: If the master key entry for this user is absent from keys.json.
     """
     user_key: UserKeyPair = get_user_key()
     enc_master_key: str | None = read_keys_file()['users'][user_key.user_email]['master_key']
-    assert enc_master_key is not None, f"Master key not found for user with email '{user_key.user_email}'"
+    if enc_master_key is None:
+        raise ValueError(f'Master key not found for user with email {user_key.user_email}')
     return user_key.unlock(enc_master_key)
 
 
@@ -101,16 +111,15 @@ def get_user_key() -> UserKeyPair:
     return UserKeyPair.from_file()
 
 
-@lru_cache(maxsize=None)
 def get_enc_key(key_id: bytes | None = None) -> EncKey:
     """
-    Look up an encryption key, returning the active key when no ID is given.
+    Look up an encryption key, returning a fresh active key when no ID is given.
 
     Args:
-        key_id: Raw 16-byte key identifier. If None, the current active key is returned.
+        key_id: Raw 16-byte key identifier. If None, a random active key is chosen per call.
 
     Returns:
-        The EncKey matching the given ID, or the active key if key_id is None.
+        The EncKey matching the given ID, or a freshly chosen active key if key_id is None.
     """
     return get_key(None if key_id is None else key_id.hex())
 
@@ -118,8 +127,7 @@ def get_enc_key(key_id: bytes | None = None) -> EncKey:
 # ==================================================================================================================== #
 #                                               rekey keys file
 # ==================================================================================================================== #
-
-def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = True) -> None:
+def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = True) -> Literal['ok', 'nok']:
     """
     Reinitialize keys.json with additional new encryption keys.
 
@@ -132,12 +140,12 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
         preserve_master:       If True, retain the existing master key; if False, generate a new one.
                                Defaults to True.
     """
-    if get_gh_user_email() != get_repo_owner_email():
-        print('only admin user should initialize keys file')
-        return
+    if get_gh_user_email() != config.author_email:
+        console.print('[error]error:[/error] only the admin user may initialize the keys file')
+        return 'nok'
     user_key: UserKeyPair = get_user_key()
     new_master_key: bytes = token_bytes(32)
-    if Config.keys_file.exists():
+    if config.keys_file.exists():
         data: dict[str, Any] = read_keys_file()
         user_data = data['users'][user_key.user_email]
         master_key: bytes = user_key.unlock(user_data['master_key'])
@@ -149,8 +157,8 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
                 raw_key['value'] = enc_key.as_dict(master_key=new_master_key)['value']
     else:
         data = {
-            '$schema': Config.schema_file.name,
-            'version': Config.keys_version,
+            '$schema': config.schema_file.name,
+            'version': config.keys_version,
             'users': {user_key.user_email: user_key.to_public_dict(new_master_key)},
             'keys': {}
         }
@@ -163,9 +171,14 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
         if preserve_master is False or raw_user['master_key'] is None:
             raw_user['master_key'] = UserKeyPair.from_public_dict(email, raw_user).lock(new_master_key)
     write_keys_file(data)
+    return 'ok'
 
 
-def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, backup: bool = False) -> None:
+@register(name='rekey',
+          help='Reinitialize keys.json with additional new encryption keys.',
+          usage='rekey [num_total_active_keys=32] [preserve_master=true] [backup=false]', )
+def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True,
+          backup: bool = False) -> Literal['ok', 'nok']:
     """
     Reinitialize keys.json with additional new encryption keys.
 
@@ -179,19 +192,23 @@ def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True, b
         backup:                If True, print the backup keys for offline vault. Defaults to False.
     """
     if not confirm('Are you sure you want to rekey?'):
-        print("Rekeying cancelled.")
-        return
-    rekey_keys_file(num_total_active_keys, preserve_master=preserve_master)
+        console.print('[muted]Rekeying cancelled.[/muted]')
+        return 'nok'
+    result = rekey_keys_file(num_total_active_keys, preserve_master=preserve_master)
     if backup:
-        lines: dict[str, str] = {'private_key': Config.private_key_file.read_text().strip(),
+        lines: dict[str, str] = {'private_key': config.private_key_file.read_text().strip(),
                                  **read_keys_file()['users'][get_user_key().user_email]}
-        write_file(Config.keys_backup_file, dumps(lines, indent=4).encode(), msg='keys backup')
+        write_file(config.keys_backup_file, dumps(lines, indent=4).encode(), msg='keys backup')
+    return result
 
 
 # ==================================================================================================================== #
 #                                               user
 # ==================================================================================================================== #
-def user(regen: bool = False) -> str:
+@register(name='user',
+          help='Return the current user\'s identity alongside their master key access.',
+          usage='user [regen=false]')
+def user(regen: bool = False) -> Literal['ok', 'nok']:
     """
     Return the current user's identity alongside their master key access.
 
@@ -220,11 +237,11 @@ def user(regen: bool = False) -> str:
     """
     try:
         user_key: UserKeyPair | None = get_user_key()
-    except (AssertionError, FileNotFoundError):
+    except (AssertionError, FileNotFoundError, ValueError):
         user_key = None
     try:
         master_key: bytes | None = get_master_key()
-    except (AssertionError, FileNotFoundError):
+    except (AssertionError, FileNotFoundError, ValueError):
         master_key = None
     if regen or user_key is None:
         new_user_key: UserKeyPair = UserKeyPair.new_persistent()
@@ -233,9 +250,65 @@ def user(regen: bool = False) -> str:
         data['users'][new_user_key.user_email] = new_user_key.to_public_dict(master_key)
         write_keys_file(data)
         user_key = new_user_key
-    return (f'{user_key!s} '
-            f'{(Config.ColorCodes.RED + "(✗ cannot") if master_key is None else (Config.ColorCodes.GREEN + "(✓ can")} '
-            f'encrypt/decrypt){Config.ColorCodes.RESET}')
+    access_style = 'error' if master_key is None else 'success'
+    access_mark = '✗ cannot' if master_key is None else '✓ can'
+    console.print(f'[primary]{user_key!s}[/primary] [{access_style}]\n{access_mark} encrypt/decrypt[/{access_style}]')
+    try:
+        if user_key and master_key is None:
+            register(name='reconstruct',
+                     help='Recover the master key from a list of shares.',
+                     usage='reconstruct [threshold=2]')(reconstruct_master_key)
+        if user_key and user_key.user_email == config.author_email:
+            register(name='split',
+                     help='Split the current master key into shares.',
+                     usage='split [num_shares=3] [threshold=2]')(split_master_key)
+            register(name='reconstruct',
+                     help='Recover the master key from a list of shares.',
+                     usage='reconstruct [threshold=2]')(reconstruct_master_key)
+    except ValueError:
+        pass
+    return 'ok' if user_key is not None else 'nok'
+
+
+# ==================================================================================================================== #
+#                                       n of m secret sharing for the master key
+# ==================================================================================================================== #
+def split_master_key(num_shares: int = 3, threshold: int = 2) -> Literal['ok', 'nok']:
+    try:
+        master_key: bytes = get_master_key()
+    except (AssertionError, FileNotFoundError, ValueError):
+        console.print('[error]error:[/error] master key not found')
+        return 'nok'
+    for i, share in enumerate(split(master_key, num_shares=num_shares, threshold=threshold), start=1):
+        console.print(f'[accent]Master key share {i} of {num_shares}:[/accent]\n[muted]{share}[/muted]\n\n')
+    return 'ok'
+
+
+def reconstruct_master_key(threshold: int = 2) -> Literal['ok', 'nok']:
+    """Recover the master key from a list of shares."""
+    try:
+        user_key: UserKeyPair = get_user_key()
+    except (AssertionError, FileNotFoundError, ValueError):
+        console.print('[error]error:[/error] user key not found, use `solver user` to generate one')
+        return 'nok'
+    shares: list[str] = []
+    for i in range(1, threshold + 1):
+        share: str = console.input(f'[accent]Enter master key share {i} of {threshold}:[/accent] ').strip()
+        shares.append(share)
+        console.print(f'[primary]Share {i}/{threshold} recieved.[/primary]')
+    try:
+        master_key: bytes = reconstruct(shares)
+    except ValueError:
+        console.print('[error]error:[/error] invalid shares')
+        return 'nok'
+    console.print(f'[primary]Master key reconstructed from {threshold} shares:[/primary]')
+    data: dict[str, Any] = read_keys_file()
+    console.print('[muted]Updating keys.json with new master key...')
+    data['users'][user_key.user_email] = user_key.to_public_dict(master_key)
+    write_keys_file(data)
+    get_master_key.cache_clear()
+    console.print(f'[success]Master key successfully persisted from {threshold} shares.[/success]')
+    return 'ok'
 
 
 __all__ = (

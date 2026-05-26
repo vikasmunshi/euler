@@ -18,7 +18,7 @@ def get_gh_user_email() -> str:
     if not username:
         raise ValueError('Error: could not get GitHub authenticated username')
     user_email: str | None = run_command('gh api user --jq .email')
-    if not user_email:
+    if not user_email or user_email == 'null':
         raise ValueError("Error: could not get GitHub authenticated user's email")
     return user_email
 
@@ -35,7 +35,4 @@ def get_repo_owner_email() -> str:
     return owner_email
 
 
-__all__ = (
-    'get_gh_user_email',
-    'get_repo_owner_email',
-)
+__all__ = ('get_gh_user_email', 'get_repo_owner_email',)

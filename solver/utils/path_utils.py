@@ -6,13 +6,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Generator, Literal, overload
 
-from solver.core.config import Config
-from solver.utils.workspace import check_workspace_lock
+from solver.config import config
+from solver.core.lock import check_workspace_lock
+from solver.shell import console
 
 
 def canonical_path(path: Path) -> str:
     """Return a POSIX path string relative to root_dir."""
-    return path.relative_to(Config.root_dir).as_posix()
+    return path.relative_to(config.root_dir).as_posix()
 
 
 @overload
@@ -54,7 +55,7 @@ def write_file(path: Path, content: bytes, msg: str | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(content)
     if msg is not None:
-        print(f'{msg}, wrote {len(content)} bytes to {canonical_path(path)}')
+        console.print(f'[muted]{msg}, wrote {len(content)} bytes to [accent]{canonical_path(path)}[/accent][/muted]')
 
 
 __all__ = (

@@ -37,7 +37,7 @@ uninstall-completions:
 ## Install git hooks into .git/hooks/ and reset hooksPath to default
 install-hooks:
 	git config --unset core.hooksPath || true
-	./scripts/setup/githooks.sh install
+	./scripts/setup/githooks.sh install --force
 
 ## Remove git hooks from .git/hooks/
 uninstall-hooks:
