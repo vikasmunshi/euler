@@ -3,12 +3,18 @@
 """ Solution to Euler Problem 53: Combinatoric Selections [Level 1]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def solve(*, max_n: int, threshold: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Count C(n, r) above the threshold by walking each Pascal row with the recurrence
+    C(n, r+1) = C(n, r) * (n - r) / (r + 1). Rows are unimodal and symmetric, so the first r that
+    exceeds the threshold makes entries r..n-r qualify; add n - 2*r + 1 and stop. O(max_n^2) worst
+    case, far less with the early exit."""
+    max_n = runner.parse_int(args[0])
+    threshold = runner.parse_int(args[1])
+
     count = 0
     for n in range(1, max_n + 1):
         c = 1
@@ -18,39 +24,8 @@ def solve(*, max_n: int, threshold: int) -> int:
                 break
             else:
                 c = c * (n - r) // (r + 1)
-    return count
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(count)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_n=int(argv[1]), threshold=int(argv[2])))
+    raise SystemExit(solve())

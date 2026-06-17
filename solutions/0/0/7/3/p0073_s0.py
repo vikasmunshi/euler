@@ -3,53 +3,28 @@
 """ Solution to Euler Problem 73: Counting Fractions in a Range [Level 3]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def solve(*, max_d: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Iterative Farey neighbour traversal of (1/3, 1/2): the neighbour identity bc - ad = 1 gives
+    the next denominator as max_d - ((max_d + prev_d) % d). Only denominators are tracked since the
+    boundaries fix every numerator. O(answer)."""
+    max_d = runner.parse_int(args[0])
+
     lower_denominator: int = 3
     upper_denominator: int = 2
+    # Largest denominator of the form 2 + 3k not exceeding max_d: the fraction just above 1/3.
     d = upper_denominator + lower_denominator * ((max_d - upper_denominator) // lower_denominator)
     prev_d = lower_denominator
     count = 0
+    # Walk upward, counting one fraction per step; stop at denominator 2 (the upper bound 1/2).
     while d != upper_denominator:
         count += 1
         prev_d, d = (d, max_d - (max_d + prev_d) % d)
-    return count
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(count)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_d=int(argv[1])))
+    raise SystemExit(solve())

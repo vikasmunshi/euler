@@ -1,39 +1,21 @@
 [
   {
     "category": "main",
-    "solution": "p0013_s0.py",
+    "solution": "p0013_s0_c",
     "args": "10",
     "answer": "5537376230",
     "verdict": "correct",
-    "average": 2.6046205386935115e-05,
-    "number_runs": 122
-  },
-  {
-    "category": "extra",
-    "solution": "p0013_s0.py",
-    "args": "20",
-    "answer": "55373762303908766372",
-    "verdict": "correct",
-    "average": 2.61190009814527e-05,
-    "number_runs": 75
-  },
-  {
-    "category": "extra",
-    "solution": "p0013_s0.py",
-    "args": "100",
-    "answer": "5537376230390876637302048746832985971773659831892672",
-    "verdict": "correct",
-    "average": 2.8001664959447224e-05,
-    "number_runs": 75
+    "average": 6.622698412698413e-07,
+    "number_runs": 63
   },
   {
     "category": "main",
-    "solution": "p0013_s0_c",
+    "solution": "p0013_s0.py",
     "args": "10",
     "answer": "5537376230",
     "verdict": "correct",
-    "average": 1.1848035714285716e-06,
-    "number_runs": 56
+    "average": 1.653160258669347e-05,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -41,8 +23,17 @@
     "args": "20",
     "answer": "55373762303908766372",
     "verdict": "correct",
-    "average": 1.5942941176470591e-06,
-    "number_runs": 51
+    "average": 1.1727301587301586e-06,
+    "number_runs": 63
+  },
+  {
+    "category": "extra",
+    "solution": "p0013_s0.py",
+    "args": "20",
+    "answer": "55373762303908766372",
+    "verdict": "correct",
+    "average": 1.920285747416081e-05,
+    "number_runs": 63
   },
   {
     "category": "extra",
@@ -50,7 +41,16 @@
     "args": "100",
     "answer": "5537376230390876637302048746832985971773659831892672",
     "verdict": "correct",
-    "average": 4.381823529411765e-06,
-    "number_runs": 51
+    "average": 3.6566031746031744e-06,
+    "number_runs": 63
+  },
+  {
+    "category": "extra",
+    "solution": "p0013_s0.py",
+    "args": "100",
+    "answer": "5537376230390876637302048746832985971773659831892672",
+    "verdict": "correct",
+    "average": 2.5151222611644437e-05,
+    "number_runs": 63
   }
 ]

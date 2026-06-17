@@ -36,44 +36,28 @@ Generate only the file listed below, using the existing solutions above only for
 
 File to generate: $file_to_generate
 
-Requirements:
+Follow the Python solution conventions below in full:
 
-1. The first line must be exactly: `#!/usr/bin/env python3.14`
+$python_solution_conventions
 
-2. Follow the template structure faithfully:
-   - Shebang, `# -*- coding: utf-8 -*-`, module docstring (as in the template)
-   - `from __future__ import annotations`
-   - `solve(*, ...) -> <return_type>` with keyword-only typed parameters and a return type annotation
-   - `main(**kwargs: Any) -> int` that parses `--runs=N` from argv, times `solve()`, and prints output
-   - `if __name__ == "__main__": raise SystemExit(main(<kwarg>=<type>(argv[N]), ...))`
+Apply these source documentation conventions to the in-source docstrings and comments:
 
-3. If existing solutions are present, implement a different algorithm. Do not replicate any
-   existing approach.
+$source_documentation_conventions
 
-4. Include `get_text_file` only when the solution must read a data file from the `resources`
-   directory. Omit it otherwise.
+Generation-task requirements (in addition to the conventions above):
 
-5. The output line must be exactly: `print(f'{runs} {average} {result}')`
+1. The first line must be exactly: `#!/usr/bin/env python3.14`. Keep the template's harness
+   scaffolding - the shebang, `# -*- coding: utf-8 -*-`, `from __future__ import annotations`, the
+   `from solver.runners import runner` import, the `@runner.main` decorator, and the
+   `if __name__ == "__main__": raise SystemExit(solve())` block - byte-for-byte; implement only
+   `solve()` and the module-level helpers above it.
 
-6. Use only the Python standard library. The only permitted third-party packages are `numpy`
-   for numerical computation and `pyprimesieve` if sieve-based prime generation is needed.
+2. If existing solutions are present, implement a genuinely different algorithm - do not replicate
+   any existing approach.
 
-7. If a sieve of Eratosthenes is needed, build it at module level (not inside `solve`) so a
-   second `solve()` invocation in the same process reuses it. The canonical pattern is:
+3. $house_style
 
-       M = 10 ** 7
-       sieve = np.ones(M + 1, dtype=bool)
-       sieve[0] = sieve[1] = False
-       sieve[4::2] = False
-       for p in range(3, int(M ** 0.5) + 1, 2):
-           if sieve[p]:
-               sieve[p ** 2::2 * p] = False
-
-   Use `M = 10 ** 7` unless the problem clearly needs a larger bound.
-
-8. $house_style
-
-9. Output the Python file wrapped in delimiter lines, no other text:
+4. Output the Python file wrapped in delimiter lines, no other text:
 
 // BEGIN <filename>
 [py source]

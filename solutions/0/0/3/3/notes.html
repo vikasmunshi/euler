@@ -1,0 +1,72 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+The puzzle asks for two-digit fractions <code>n/d</code> below one in value where a naive "cancellation" of a digit shared between numerator and denominator happens, by coincidence, to give the correct reduced fraction. The canonical example is <code>49/98 = 4/8</code>: cancel the shared <code>9</code> and the equation still holds. To pin this down algebraically, I write the numerator with digits <code>a</code> and <code>x</code> (value <code>10a + x</code>) and the denominator with digits <code>x</code> and <code>b</code> (value <code>10x + b</code>), so the shared digit <code>x</code> sits at the end of the numerator and the start of the denominator. Cancelling <code>x</code> leaves <code>a/b</code>, and I want exactly those triples where <code>(10a + x) / (10x + b) = a / b</code>. The problem excludes "trivial" cases such as <code>30/50 = 3/5</code>, where <code>x = 0</code> merely strips a factor of ten from both numbers; I enforce this by requiring <code>x</code> to be a genuine nonzero digit distinct from both <code>a</code> and <code>b</code>.
+</p>
+<p>
+The decisive observation is that I must never test this equality in floating point. Comparing two fractions <code>p/q = r/s</code> is equivalent to comparing the integers <code>p*s</code> and <code>r*q</code> - a technique called <a href="https://en.wikipedia.org/wiki/Cross-multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">cross-multiplication</a>. Applied here it yields the exact integer test <code>(10a + x) * b = (10x + b) * a</code>, which sidesteps rounding error entirely. The search space is tiny: <code>a</code> from 1 to 9, <code>b</code> strictly greater than <code>a</code> (so the fraction stays below one), and the shared digit <code>x</code> from 1 to 9 distinct from both. That is at most a few hundred triples, so a <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a> finishes instantly. Once the four qualifying fractions are found I multiply them and reduce the product to lowest terms; the answer is the resulting denominator. The whole computation is <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(1)</a> - a bounded, constant-size enumeration.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Algebraic Digit Enumeration (Python and C)</h4>
+<p>
+Both files implement one algorithm. I iterate the single-digit denominator from 2 to 9, the single-digit numerator from 1 up to (but not including) the denominator - which guarantees the fraction is less than one - and the shared digit <code>x</code> from 1 to 9. I skip any <code>x</code> equal to the numerator or denominator, because those would either be the trivial cancellation or a degenerate match. For the surviving triples I apply the <a href="https://en.wikipedia.org/wiki/Cross-multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">cross-multiplied</a> test <code>(10 * numerator + x) * denominator == (10 * x + denominator) * numerator</code>. Each match contributes one fraction to a running product.
+</p>
+<p>
+The Python version expresses the whole search as a single generator expression feeding <a href="https://docs.python.org/3/library/functools.html#functools.reduce" class="reference-source" target="_blank" rel="noopener noreferrer">functools.reduce</a>. Each matching triple is materialised as a <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">fractions.Fraction</a>, and the fold multiplies them together starting from the identity <code>Fraction(1, 1)</code>. Because <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">Fraction</a> keeps every intermediate result in lowest terms automatically, the final answer is simply the <code>.denominator</code> attribute of the product. I chose this representation because it removes any chance of an arithmetic bug in the reduction step - the standard library does the work.
+</p>
+<p>
+The C version has no rational type, so I instead accumulate the product of all matching numerators in one variable and the product of all matching denominators in another, then reduce the pair at the end. The reduction uses <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's algorithm</a> to compute the <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a> of the two products, and the answer is <code>den_product / gcd</code>. The two implementations are mathematically identical; the C version just makes the accumulation and reduction explicit rather than hiding them behind a library type.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Cross-multiplication to avoid floating point</h4>
+<p>
+Rather than evaluate <code>(10*n + x) / (10*x + d) == n / d</code> as floating-point division, I rearrange it into an all-integer equality. This is the single most important technique in the solution: <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a> comparison of equality is unreliable because of rounding, whereas integer comparison is exact. Reach for <a href="https://en.wikipedia.org/wiki/Cross-multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">cross-multiplication</a> whenever you need to compare or order fractions - it works in any language and needs no special types.
+</p>
+
+<h4>Generator expression as a lazy search pipeline</h4>
+<p>
+The Python search is a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>: it yields qualifying fractions one at a time on demand instead of building a list. The filtering guards sit inline next to the values they constrain, which keeps the intent readable. For tiny inputs the memory saving is irrelevant, but the habit matters: whenever you generate values and immediately consume them (folding, summing, taking the first), a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> is the natural choice.
+</p>
+
+<h4>Chained comparison and ordered guards</h4>
+<p>
+The guard <code>denominator != x != numerator</code> uses Python's <a href="https://docs.python.org/3/reference/expressions.html#comparisons" class="reference-source" target="_blank" rel="noopener noreferrer">chained comparison</a>, which reads as <code>denominator != x and x != numerator</code>. Placing this cheap exclusion before the expensive <a href="https://en.wikipedia.org/wiki/Cross-multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">cross-multiplication</a> test means the multiplication is skipped on rejected triples. Ordering guard clauses from cheapest to most expensive is a simple, transferable micro-optimisation.
+</p>
+
+<h4>Folding with functools.reduce and an identity element</h4>
+<p>
+<a href="https://docs.python.org/3/library/functools.html#functools.reduce" class="reference-source" target="_blank" rel="noopener noreferrer">functools.reduce</a> collapses a sequence into one value by applying a binary operator cumulatively. Here it multiplies all matching fractions, with <code>Fraction(1, 1)</code> as the multiplicative <a href="https://en.wikipedia.org/wiki/Identity_element" class="reference-source" target="_blank" rel="noopener noreferrer">identity element</a> so the result is well-defined even for an empty sequence. Use a <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a> with an explicit identity whenever you combine a sequence with an associative operator - products, sums, GCDs, logical ANDs.
+</p>
+
+<h4>fractions.Fraction for exact rational arithmetic</h4>
+<p>
+Python's <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">fractions.Fraction</a> stores a ratio of integers in fully reduced form and re-normalises on every operation. It removes the need to track numerator and denominator by hand or to write a reduction step. This is the right tool any time a problem demands exact <a href="https://en.wikipedia.org/wiki/Rational_number" class="reference-source" target="_blank" rel="noopener noreferrer">rational</a> results - <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating point</a> would introduce errors that could silently corrupt the answer.
+</p>
+
+<h4>Iterative Euclidean GCD in C</h4>
+<p>
+The C reduction implements <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's algorithm</a> iteratively: repeatedly replace <code>(a, b)</code> with <code>(b, a % b)</code> until <code>b</code> is zero, leaving the <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">GCD</a> in <code>a</code>. This runs in <code>O(log(min(a, b)))</code> time. I prefer the iterative form to avoid call overhead, though at this scale it is immaterial. When no rational library exists, this two-product-and-reduce pattern is the standard substitute for a fraction type.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The insight that unlocks this problem is translating the "naively cancelled fraction equals the true fraction" condition into a single <a href="https://en.wikipedia.org/wiki/Cross-multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">cross-multiplied</a> integer equation, then enumerating the handful of digit combinations that satisfy it. The domain is so small that no number theory is required - a direct scan over a few hundred triples is both faster to write and easier to verify than any clever alternative.
+</p>
+<p>
+Both solutions are correct and run in unmeasurably small time (each reported as 0.0000 s), so performance does not distinguish them. The Python version is the more elegant: <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">fractions.Fraction</a> and the generator-plus-<a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a> pattern make it self-documenting and free of manual reduction logic. The C version is instructive as a template for environments without a rational type, since it shows the accumulation and <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean reduction</a> explicitly.
+</p>
+<ul>
+  <li>When comparing fractions for equality or order, <a href="https://en.wikipedia.org/wiki/Cross-multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">cross-multiply</a> into integers - never trust floating-point equality.</li>
+  <li>For problems with tiny, well-bounded domains, prefer a direct <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force</a> enumeration; clarity and correctness outweigh cleverness when the search space is constant-size.</li>
+  <li>Use a rational type (such as <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">fractions.Fraction</a>) whenever exact fractional arithmetic is needed; it handles reduction automatically and eliminates a whole class of bugs.</li>
+  <li>Express multi-variable searches as <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expressions</a> with inline guards, ordering cheap exclusion tests before expensive ones to short-circuit work.</li>
+  <li>Know <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's GCD</a> by heart - it underpins fraction reduction, modular inverses, and many other number-theoretic primitives.</li>
+  <li>Collapse a filtered sequence with a <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a> and an explicit <a href="https://en.wikipedia.org/wiki/Identity_element" class="reference-source" target="_blank" rel="noopener noreferrer">identity element</a> when combining values under an associative operator.</li>
+</ul>
+
+</article>

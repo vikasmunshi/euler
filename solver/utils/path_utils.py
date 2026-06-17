@@ -3,11 +3,13 @@
 """ Utility functions for file and directory operations. """
 from __future__ import annotations
 
+__all__ = ['canonical_path', 'iterdir_recursive', 'write_file']
+
 from pathlib import Path
 from typing import Generator, Literal, overload
 
 from solver.config import config
-from solver.core.lock import check_workspace_lock
+from solver.core.lock import check_workspace_lock_generic
 from solver.shell import console
 
 
@@ -49,17 +51,10 @@ def iterdir_recursive(directory: Path, *,
                 yield item
 
 
-@check_workspace_lock
+@check_workspace_lock_generic
 def write_file(path: Path, content: bytes, msg: str | None = None) -> None:
     """Write bytes to the path, creating parent directories as needed, and optionally print a status message."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(content)
     if msg is not None:
         console.print(f'[muted]{msg}, wrote {len(content)} bytes to [accent]{canonical_path(path)}[/accent][/muted]')
-
-
-__all__ = (
-    'canonical_path',
-    'iterdir_recursive',
-    'write_file',
-)

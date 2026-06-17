@@ -3,12 +3,11 @@
 """ Solution to Euler Problem 12: Highly Divisible Triangular Number [Level 0]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def prime_factorization(n: int) -> tuple[tuple[int, int], ...]:
+    """Factor n by trial division to sqrt(n); return (prime, exponent) pairs."""
     if n <= 1:
         return ()
     factors = []
@@ -27,6 +26,7 @@ def prime_factorization(n: int) -> tuple[tuple[int, int], ...]:
 
 
 def num_factors(n: int) -> int:
+    """Count divisors of n as the product of (exponent + 1) over its prime factors."""
     if n == 0:
         return 0
     result = 1
@@ -35,44 +35,18 @@ def num_factors(n: int) -> int:
     return result
 
 
-def solve(*, num_divisors: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Direct search: factor each whole triangular number T(i)=i(i+1)/2 by trial division
+    and count its divisors until the count exceeds the target. O(sqrt(T(i))) per step."""
+    num_divisors = runner.parse_int(args[0])
+
     i, triangle_number = (1, 1)
     while num_factors(triangle_number) < num_divisors:
         i += 1
         triangle_number = i * (i + 1) // 2
-    return triangle_number
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(triangle_number)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(num_divisors=int(argv[1])))
+    raise SystemExit(solve())

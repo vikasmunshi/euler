@@ -1,0 +1,201 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    The task is to count the number of ways to write 100 as a sum of at least two positive
+    integers where the order of the terms is irrelevant. This is exactly the
+    <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">integer partition</a>
+    function <code>p(n)</code>, which counts the number of ways to write <code>n</code> as an
+    unordered sum of positive integers. The phrase "at least two" is the only twist: by convention
+    <code>p(n)</code> includes the single-term partition <code>n = n</code>, so the answer I want
+    is <code>p(n) - 1</code>. For <code>n = 5</code> we have <code>p(5) = 7</code>, and subtracting
+    the trivial partition <code>[5]</code> leaves the six sums shown in the problem. Recognizing
+    the problem as <code>p(n) - 1</code> is the unlocking insight: it turns an open-ended counting
+    question into one with well-studied recurrences.
+  </p>
+  <p>
+    Naive enumeration of partitions is exponential, but the structure is full of overlapping
+    subproblems, which is the hallmark situation for
+    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+    (solving each distinct subproblem once and reusing the result). One natural formulation counts
+    partitions of <code>n</code> using parts no larger than a bound, giving O(n^2) states with O(n)
+    work each, hence O(n^3) overall. A far better route uses
+    <a href="https://en.wikipedia.org/wiki/Pentagonal_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">Euler's pentagonal number theorem</a>,
+    which expresses <code>p(n)</code> as an alternating sum of only about O(sqrt(n)) earlier
+    partition values. Because the
+    <a href="https://en.wikipedia.org/wiki/Pentagonal_number" class="reference-source" target="_blank" rel="noopener noreferrer">generalized pentagonal numbers</a>
+    <code>g(k) = k(3k-1)/2</code> grow quadratically in <code>k</code>, the recurrence touches only
+    roughly <code>sqrt(2n/3)</code> previous terms, yielding an O(n*sqrt(n)) algorithm. One more
+    practical concern: for <code>n = 1000</code> the answer has 32 decimal digits, well beyond a
+    64-bit integer, so any C solution must carry
+    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>.
+  </p>
+
+  <h3>Solution Approach</h3>
+
+  <h4>s0 - Euler's Pentagonal Number Theorem</h4>
+  <p>
+    I chose the pentagonal recurrence as my primary algorithm because it is asymptotically the best
+    of the three. The
+    <a href="https://en.wikipedia.org/wiki/Pentagonal_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">pentagonal number theorem</a>
+    states <code>p(0) = 1</code> and, for <code>n &gt;= 1</code>,
+    <code>p(n) = sum over k = 1, 2, 3, ... of (-1)^(k+1) * (p(n - g(k)) + p(n - g(-k)))</code>,
+    where <code>g(k) = k(3k-1)/2</code> is the k-th
+    <a href="https://en.wikipedia.org/wiki/Pentagonal_number" class="reference-source" target="_blank" rel="noopener noreferrer">generalized pentagonal number</a>
+    and any term with a negative argument is treated as zero. The alternating sign
+    <code>(-1)^(k+1)</code> adds for <code>k = 1, 3, 5, ...</code> and subtracts for
+    <code>k = 2, 4, 6, ...</code>, which I encode with <code>k % 2</code>.
+  </p>
+  <p>
+    The Python version (<code>p0076_s0.py</code>) writes the identity directly as a recursion
+    guarded by
+    <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer">functools.lru_cache</a>,
+    so each <code>p(i)</code> is evaluated once. The inner loop uses
+    <code>itertools.count(1)</code> and breaks the instant both <code>p(n - g(k))</code> and
+    <code>p(n - g(-k))</code> evaluate to zero, which happens once both pentagonal offsets exceed
+    <code>n</code>. The C version (<code>p0076_s0.c</code>) fills a flat array
+    <code>p[0..n]</code> bottom-up; because the recurrence only ever reads backward, no explicit
+    cache is needed - the natural left-to-right fill guarantees every dependency is already
+    computed. Python handles large integers natively, whereas the C code carries a base-10^9
+    multi-limb big-integer type. This is the only approach where partition values are
+    <em>subtracted</em>, so the C big integer here implements both <code>bigint_add</code> and
+    <code>bigint_sub</code>. The payoff is dramatic: at <code>n = 1000</code> the C solution runs
+    in 0.0007 s and the Python solution in 0.0008 s.
+  </p>
+
+  <h4>s1 - Memoized 2D Partition Recursion (number, slots)</h4>
+  <p>
+    This approach defines <code>count(number, slots)</code> as the number of partitions of
+    <code>number</code> whose largest part is at most <code>slots</code>. The recurrence sums over
+    each possible largest part <code>n</code> in <code>1..slots</code>:
+    <code>count(number - n, min(number - n, n))</code>, plus <code>1</code> when
+    <code>number &lt;= slots</code> to count the whole-number partition <code>[number]</code>. The
+    second argument <code>min(number - n, n)</code> enforces a non-increasing order - the next part
+    may not exceed the current part <code>n</code>, nor the remaining sum - and that constraint is
+    precisely what prevents counting reorderings of the same partition. The base case is
+    <code>number &lt;= 1</code> returning <code>number</code> itself.
+  </p>
+  <p>
+    The Python version (<code>p0076_s1.py</code>) memoizes the core with
+    <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer">functools.lru_cache</a>.
+    The C version (<code>p0076_s1.c</code>) translates the same recursion into a bottom-up flat 2D
+    table indexed by <code>nb*(num+1)+sl</code>, filling <code>nb</code> from 2 upward so every
+    <code>count(nb-n, ...)</code> it reads (which always has a smaller first argument) is already
+    written. With O(n^2) states and O(n) work each, this is O(n^3)
+    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>,
+    which is why at <code>n = 1000</code> the C build takes 2.5217 s and the Python build 0.8583 s -
+    three to four orders of magnitude slower than s0.
+  </p>
+
+  <h4>s2 - Explicit Partition Enumeration</h4>
+  <p>
+    The Python s2 (<code>p0076_s2.py</code>) materializes the actual partitions as lists of lists
+    and returns their count. It carries a <code>safe_limit = 50</code> guard that raises
+    <code>OverflowError</code> for larger inputs, which is why the benchmark reports overflow at
+    <code>n = 100</code> and <code>n = 1000</code>. It also embeds
+    <code>assert sum(partition) == number</code> checks that serve as executable documentation of
+    the invariant. The C version (<code>p0076_s2.c</code>) keeps the same recursion structure but
+    abandons list construction (which would be memory-prohibitive at this scale); instead it
+    increments a big-integer counter when <code>n == nb</code> (the leaf partition <code>[n]</code>)
+    and otherwise accumulates the table value <code>dp[nb-n][min(nb-n, n)]</code>. The result
+    matches s1 exactly and runs in the same O(n^3) class - 2.4439 s at <code>n = 1000</code> -
+    needing only an add-in-place, an increment, and a decrement on the big-integer type.
+  </p>
+
+  <h3>Programming Techniques</h3>
+
+  <h4>Memoization with functools.lru_cache</h4>
+  <p>
+    All three Python solutions decorate their recursive core with
+    <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer">functools.lru_cache</a>.
+    The partition recursion tree has exponentially many nodes but only polynomially many distinct
+    argument tuples, so
+    <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a>
+    collapses the tree into a directed acyclic graph and turns exponential work into polynomial. I
+    use <code>maxsize=None</code> (unbounded) because evicting entries mid-computation would discard
+    results still needed by later calls. Whenever you spot overlapping subproblems, reach for
+    <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a>
+    before rewriting into an explicit table.
+  </p>
+
+  <h4>Bottom-Up Table Filling in C</h4>
+  <p>
+    C has no decorator-based
+    <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a>,
+    so I translate the recursions into bottom-up array fills. I lay the 2D table out as a single
+    contiguous block indexed by <code>nb*(num+1)+sl</code> rather than an array of pointers, which
+    improves
+    <a href="https://en.wikipedia.org/wiki/Locality_of_reference" class="reference-source" target="_blank" rel="noopener noreferrer">cache locality</a>
+    and needs only one <code>calloc</code> / <code>free</code>. Filling in dependency order
+    (increasing <code>nb</code>) means every cell read has already been written, and it sidesteps
+    the deep recursion that would otherwise risk a stack overflow in C. This forward-fill idiom is
+    the standard way to port a memoized Python recursion to C.
+  </p>
+
+  <h4>Base-10^9 Multi-Limb Big Integers</h4>
+  <p>
+    Because <code>p(1000)</code> has 32 decimal digits, far beyond a 64-bit integer, every C
+    solution implements a small
+    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>
+    type: an array of <code>long long</code> limbs in base 10^9, little-endian, plus a count of
+    significant limbs. Base 10^9 is chosen so the sum of two limbs stays below 2^63 (no overflow
+    during carry propagation) and so decimal output is trivial - print the top limb normally and the
+    lower limbs zero-padded with <code>%09lld</code>. I implemented only the operations each
+    algorithm needs: s0 needs add and subtract; s1 and s2 need add-in-place plus increment and
+    decrement. Implementing only what you need keeps the code short and auditable.
+  </p>
+
+  <h4>Loop Termination Driven by Mathematics</h4>
+  <p>
+    The s0 loop over <code>k</code> has no fixed iteration bound; it stops the moment both
+    <a href="https://en.wikipedia.org/wiki/Pentagonal_number" class="reference-source" target="_blank" rel="noopener noreferrer">generalized pentagonal</a>
+    offsets exceed <code>n</code> (detected in Python as both recursive calls returning zero, in C
+    by comparing <code>g(k)</code> and <code>g(-k)</code> against <code>n</code>). Because
+    <code>g(k)</code> grows like <code>3k^2/2</code>, the loop runs only about
+    <code>sqrt(2n/3)</code> times. Letting the mathematical structure dictate when to stop is
+    cleaner and more efficient than guessing a conservative fixed limit.
+  </p>
+
+  <h4>Keyword-Only Arguments</h4>
+  <p>
+    Several of the Python functions declare their parameters after a bare <code>*</code>, making
+    them
+    <a href="https://docs.python.org/3/glossary.html#term-parameter" class="reference-source" target="_blank" rel="noopener noreferrer">keyword-only</a>
+    (for example <code>count(*, number, slots)</code>). This forces call sites to name each
+    argument, preventing silent positional mix-ups when a function takes several distinct integer
+    quantities such as <code>number</code> and <code>slots</code>. It also interacts cleanly with
+    <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer">functools.lru_cache</a>,
+    which keys on the supplied arguments. Use this whenever parameters represent named quantities
+    rather than an ordered sequence.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The unlocking insight is recognizing that "sums of at least two positive integers" is just the
+    <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">integer partition</a>
+    function <code>p(n) - 1</code>. Once reframed, the choice of algorithm dominates performance.
+    The benchmark makes the gap stark: at <code>n = 1000</code> the
+    <a href="https://en.wikipedia.org/wiki/Pentagonal_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">pentagonal</a>
+    C solution finishes in 0.0007 s, while the O(n^3) table-based C solutions take 2.5217 s and
+    2.4439 s. Even more striking, the pentagonal Python solution (0.0008 s at <code>n = 1000</code>)
+    beats both C O(n^3) solutions by three to four orders of magnitude - a vivid demonstration that
+    algorithmic complexity matters more than raw language speed. The s0 pentagonal approach is
+    therefore both the fastest and the most elegant; the s1 and s2 table methods remain valuable as
+    straightforward, easy-to-verify baselines.
+  </p>
+  <ul>
+    <li>Reframe the problem in known terms first: spotting the
+        <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">integer partition</a>
+        function turns an open-ended counting task into a solved one with established recurrences.</li>
+    <li>Prefer an identity-based recurrence over a brute-force table when one exists; Euler's
+        O(n*sqrt(n)) recurrence dwarfs the O(n^3) slot DP.</li>
+    <li>A better algorithm in a high-level language routinely beats a worse algorithm in C - make
+        complexity your first optimization target.</li>
+    <li>Memoized top-down recursion and bottom-up tables are interchangeable for correctness;
+        choose top-down for clarity and bottom-up in C to control memory layout and avoid deep
+        stacks.</li>
+    <li>Implement only the big-integer operations a given algorithm needs, and pick a base-10^k
+        representation to make decimal output and carry handling trivial.</li>
+    <li>Let mathematics dictate loop termination - stop when the structure says the contributions
+        vanish, rather than hard-coding a conservative bound.</li>
+  </ul>
+</article>

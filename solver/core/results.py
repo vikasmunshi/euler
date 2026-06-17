@@ -3,12 +3,14 @@
 """ Results: save and retrieve problem results."""
 from __future__ import annotations
 
+__all__ = ['FormattedResult', 'Result', 'read_results', 'results_collector', 'write_results']
+
 from contextlib import contextmanager
 from json import JSONDecodeError, dumps, loads
 from typing import Any, Generator, NamedTuple, Protocol
 
 from solver.config import config
-from solver.core.lock import check_workspace_lock
+from solver.core.lock import check_workspace_lock_generic
 from solver.shell import console
 from solver.utils.path_utils import write_file
 
@@ -56,7 +58,7 @@ class Result(NamedTuple):
         args: str = self.args
         if 'https' in self.args:
             args = ' '.join([arg.split('/')[-1] if arg.startswith('https') else arg for arg in self.args.split()])
-        return (f'[muted]{self.category:<6} {f"({self.verdict})":<11}'
+        return (f'[muted]{self.category:<6} [{style}]{f"({self.verdict})":<13}[/{style}]'
                 f' \\[{self.average:<3.9f}s {self.number_runs}] {self.solution} {args}[/muted]'
                 f'[accent] → [/accent]'
                 f'[{style}]{str(self.answer or "")}[/{style}]')
@@ -116,7 +118,7 @@ def results_collector(record: bool, reset: bool = False) -> Generator[Recorder, 
             write_results(results, reset=reset and clean_exit)
 
 
-@check_workspace_lock
+@check_workspace_lock_generic
 def write_results(results: list[Result], reset: bool = False) -> None:
     """Write problem results to a JSON file.
 
@@ -150,7 +152,8 @@ def write_results(results: list[Result], reset: bool = False) -> None:
             existing_raw = []
 
     incoming: dict[tuple[str, str, str, str], Result] = {(r.category, r.solution, r.args, r.verdict): r
-                                                         for r in results if r.verdict in ('correct', 'timeout')}
+                                                         for r in results
+                                                         if r.verdict in ('correct', 'timeout', 'overflow')}
     updated: list[dict] = []
     for existing in existing_raw:
         if existing['verdict'] not in ('correct', 'timeout'):
@@ -171,12 +174,3 @@ def write_results(results: list[Result], reset: bool = False) -> None:
 
     write_file(config.workspace_dir / config.results_filename, dumps(updated, indent=2).encode(),
                'Updated results')
-
-
-__all__ = (
-    'FormattedResult',
-    'Result',
-    'read_results',
-    'results_collector',
-    'write_results',
-)

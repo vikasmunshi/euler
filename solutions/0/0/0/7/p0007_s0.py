@@ -4,14 +4,19 @@
 from __future__ import annotations
 
 import math
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
-def solve(*, n: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Sieve of Sundaram over [1, n·ln n] (the prime-number-theorem bound on the n-th prime):
+    each surviving index k denotes the odd prime 2k+1, so the (n-2)-th survivor (after the
+    special-cased prime 2) is the n-th prime. O(M log M) marking for M = n·ln n."""
+    n = runner.parse_int(args[0])
+
     if n == 1:
-        return 2
+        return str(2)
     max_expected_value = int(n * math.log(n))
     numbers = list(range(0, max_expected_value + 1))
     for i in numbers[1:]:
@@ -20,39 +25,8 @@ def solve(*, n: int) -> int:
                 numbers[i + j + 2 * i * j] = 0
             except IndexError:
                 break
-    return 2 * [i for i in numbers if i != 0][n - 2] + 1
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(2 * [i for i in numbers if i != 0][n - 2] + 1)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(n=int(argv[1])))
+    raise SystemExit(solve())

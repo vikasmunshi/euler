@@ -1,0 +1,93 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The task is to find the smallest <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime number</a> that belongs to an "eight-prime family." A family is built by taking a number, choosing one digit <em>value</em> that appears in it, and replacing every occurrence of that value simultaneously with each of the digits 0 through 9. This yields up to ten candidate numbers; if eight of them are prime, the family qualifies. The crucial modelling insight is that I replace a digit <em>value</em> (for example, all the asterisk-marked 1s in <code>56**3</code>), not an arbitrary subset of positions. That distinction collapses what could otherwise be a search over all subsets of digit positions - exponential in the number of digits - into a tiny linear scan: for each prime I need only try a handful of digit values to replace.
+</p>
+
+<p>
+A second observation prunes the search further. If a digit value <code>d</code> is the one being replaced, then the largest family that can start with <code>d</code> as its smallest member contains <code>10 - d</code> numbers - I can replace <code>d</code> with <code>d, d+1, ..., 9</code>. To reach a run of <code>prime_run</code> primes I therefore need <code>10 - d >= prime_run</code>, that is <code>d <= 10 - prime_run</code>. For an eight-prime family the replaced digit can only be 0, 1, or 2. I iterate primes in ascending order, so the first match is automatically the smallest, and for each prime I try only the permitted low replacement digits. The overall complexity is roughly O(P * D) where P is the count of primes below <code>10^num_digits</code> and D is the digit length - completely tractable for six-digit numbers.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Sieve Generation Plus Digit-Replacement Enumeration (Python and C)</h4>
+
+<p>
+Both files implement the same three-phase algorithm and differ only in language idioms.
+</p>
+
+<p>
+<strong>Phase 1 - prime generation via the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>.</strong> I produce every prime up to <code>10^num_digits</code>. The Sundaram sieve marks composite odd numbers: an odd value <code>2k+1</code> is composite exactly when <code>k = i + j + 2ij</code> for integers <code>1 &lt;= i &lt;= j</code>. Every unmarked index <code>i</code> then yields the prime <code>2i+1</code>, and I prepend <code>2</code> manually. I chose Sundaram as a compact alternative to the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>; either gives a sorted prime list, which is all I need to scan in order.
+</p>
+
+<p>
+<strong>Phase 2 - candidate enumeration.</strong> For each prime I convert it to its decimal digit string. I loop over each permitted replaced digit (characters <code>'0'</code> through <code>'0' + (10 - prime_run)</code>, exclusive). If the digit does not appear in the string I skip it - no replacement is possible. Otherwise I substitute every digit from the replaced value up to <code>'9'</code> into all occurrences, building a new number string. I discard any result with a leading zero (which would be a shorter number and not a valid same-length family member), and I count only results that are both prime and <code>&gt;= prime</code>. Counting only forward - members at or above the current prime - ensures families are never double-counted: any smaller member would have triggered the match earlier in the ascending scan.
+</p>
+
+<p>
+<strong>Phase 3 - primality check.</strong> Each candidate is tested with simple <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> up to its square root. Because I test only individual candidates - not a second full sieve - and the numbers are at most six digits, this is more than fast enough. When the forward count equals <code>prime_run</code>, I return the current prime immediately.
+</p>
+
+<p>
+<strong>Language-specific differences.</strong> The Python version expresses the replacement family as a generator inside a tuple comprehension and uses <code>str(prime).replace(...)</code> for substitution - concise and idiomatic. The C version uses <code>snprintf</code> to stringify, builds the replaced string with a manual character loop, and uses <code>atoi</code> to convert back. C stores sieve primes in a heap-allocated array (via <code>calloc</code>/<code>malloc</code>) and frees them after use. The algorithm and pruning are identical; only the mechanics differ.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Byte-Array Sieve</h4>
+<p>
+Both solutions mark composites in a flat array of bytes - Python's <code>bytearray</code> and C's <code>unsigned char *</code> from <code>calloc</code>. A byte-per-element layout needs no bit masking, so the inner marking loop stays simple. The cost is 8x more memory than a bit array, which is irrelevant for limits in the low millions. Reach for a byte sieve when clarity matters and memory is not the constraint.
+</p>
+
+<h4>Digit-as-Character Manipulation</h4>
+<p>
+The replacement step treats numbers as strings of digit characters rather than as arithmetic values. "Replace all occurrences of digit <code>d</code>" becomes a direct string substitution rather than repeated modulo/division to extract digits and reconstruct the number. In Python this is one call to <code>str.replace</code>; in C it is a short character-copy loop. I convert back to an integer only when I need to test primality. Whenever an operation is naturally about digit symbols, model the number as text first.
+</p>
+
+<h4>Constraint-Bounded Loop Ranges</h4>
+<p>
+Rather than trying all ten replaced digits and filtering, I bake the bound <code>d &lt;= 10 - prime_run</code> directly into the loop limit (<code>"0123456789"[:10 - prime_run]</code> in Python, <code>rd &lt; 10 - prime_run</code> in C). Encoding a mathematical constraint as the loop range, rather than as an early-exit branch inside the body, keeps the inner loop tight and eliminates impossible iterations before they start.
+</p>
+
+<h4>Scan-and-Stop on Sorted Input</h4>
+<p>
+Because primes are produced in ascending order and I want the smallest qualifying one, I return on the first match. There is no need to collect candidates and minimise afterward. This "find the first element of an ordered sequence satisfying a predicate" pattern is optimal in output cost whenever the search order already matches the desired result order.
+</p>
+
+<h4>Forward-Only Counting to Avoid Duplicates</h4>
+<p>
+When sizing a family, I count only members <code>&gt;=</code> the current prime. Smaller members belong to the same family but would have been discovered - and the search stopped - at an earlier prime. Counting forward only is what guarantees the algorithm returns the smallest family member, not a later one.
+</p>
+
+<h4>Generator Expression Inside a Comprehension (Python)</h4>
+<p>
+The Python solution builds the qualifying family as a tuple from a generator with two <code>if</code> filters and a <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> (<code>:=</code>) to bind <code>new_prime</code> once and reuse it in both the comparison and the result. This keeps the construction declarative and avoids a separate temporary variable. Use the walrus when you need a value computed in a filter to also appear in the produced item.
+</p>
+
+<h4>Parameterised Solver</h4>
+<p>
+Both versions accept <code>num_digits</code> and <code>prime_run</code> as inputs (positional arguments in both languages), so the same code runs the 6-prime and 7-prime warm-up cases as well as the 8-prime main case. Parameterising the search turns the smaller known-answer cases into a built-in regression suite rather than hard-coding constants.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is that replacing a digit <em>value</em> is far more constrained than replacing arbitrary positions: the family is determined entirely by which value you swap, turning an exponential subset search into a trivial linear one. Combined with the bound that an eight-prime family can only start by replacing a 0, 1, or 2, the search runs in milliseconds.
+</p>
+
+<p>
+Both files implement the identical algorithm, so the benchmark gap is purely a language effect. On the main case (6 8) the C build runs in 0.0100 s versus 0.7614 s for Python - roughly 75x faster - and the same ratio holds on the dev cases (for example 0.0021 s versus 0.1498 s on 6 6). The C version wins on raw speed thanks to compiled native code and direct memory access; the Python version wins on brevity and readability, and at well under a second it is perfectly adequate for a one-off puzzle. Choose Python for fast development when the limit is small, and reach for C when you need to push the search space much higher.
+</p>
+
+<ul>
+  <li>When a problem involves replacing "a digit," model the number as a digit string first - substitution is cleaner than arithmetic extraction.</li>
+  <li>Translate mathematical constraints into loop bounds rather than in-loop branches, so impossible cases never execute.</li>
+  <li>If the answer is the minimum of a set, iterate candidates in ascending order and return on the first hit - no collection or post-sort needed.</li>
+  <li>A byte-per-element sieve is simpler than a bit sieve and fast enough for limits in the millions; prefer it unless memory is scarce.</li>
+  <li>When counting members of a group while scanning in order, count only forward to avoid rediscovering the same group from a later starting point.</li>
+  <li>Parameterise solvers over their key inputs and validate on smaller known-answer cases before running the full problem.</li>
+</ul>
+
+</article>

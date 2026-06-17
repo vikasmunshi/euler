@@ -18,6 +18,8 @@ is 'x, y = s[:131], s[131:]'.
 """
 from __future__ import annotations
 
+__all__ = ['split_secret', 'reconstruct_secret']
+
 from secrets import randbelow
 
 #: 13th Mersenne prime; comfortably larger than a 256-bit secret.
@@ -51,7 +53,7 @@ def _interpolate_at_zero(points: list[tuple[int, int]]) -> int:
     return result
 
 
-def split(secret: bytes, num_shares: int, threshold: int) -> list[str]:
+def split_secret(secret: bytes, num_shares: int, threshold: int) -> list[str]:
     """
     Split a 32-byte AES-256 key into 'num_shares' shares; any 'threshold' of them reconstruct it.
 
@@ -80,7 +82,7 @@ def split(secret: bytes, num_shares: int, threshold: int) -> list[str]:
     return [f'{x:0{_HEX_WIDTH}x}{_eval_poly(poly, x):0{_HEX_WIDTH}x}' for x in xs]
 
 
-def reconstruct(shares: list[str]) -> bytes:
+def reconstruct_secret(shares: list[str]) -> bytes:
     """
     Reconstruct the 32-byte AES-256 key from a list of shares.
 
@@ -113,6 +115,3 @@ def reconstruct(shares: list[str]) -> bytes:
     if secret_int.bit_length() > _SECRET_BYTES * 8:
         raise ValueError('reconstructed value out of range; wrong threshold or corrupted shares')
     return secret_int.to_bytes(_SECRET_BYTES, 'big')
-
-
-__all__ = ('split', 'reconstruct')

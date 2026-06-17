@@ -1,0 +1,59 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p><a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" class="reference-source" target="_blank" rel="noopener noreferrer">Euler's totient function</a> phi(n) counts the positive integers up to n that are <a href="https://en.wikipedia.org/wiki/Coprime_integers" class="reference-source" target="_blank" rel="noopener noreferrer">relatively prime</a> to n - sharing no common factor with n other than 1. The function is <a href="https://en.wikipedia.org/wiki/Multiplicative_function" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative</a>, and for any <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime</a> p we have phi(p) = p - 1 because every smaller number is coprime to a prime. When n is the product of two distinct primes p and q (a <a href="https://en.wikipedia.org/wiki/Semiprime" class="reference-source" target="_blank" rel="noopener noreferrer">semiprime</a>), the <a href="https://en.wikipedia.org/wiki/Multiplicative_function" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative</a> property gives the exact closed form phi(p*q) = (p-1)*(q-1). This formula is the linchpin of an efficient solution: it lets me compute the totient with no factorisation work at all.</p>
+
+<p>The task is to minimise the ratio n/phi(n) subject to phi(n) being a digit-<a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutation</a> of n. Minimising n/phi(n) means making phi(n) as close as possible to n. The general formula phi(n) = n * prod (1 - 1/p) over the distinct prime factors p of n means the ratio n/phi(n) equals the product of p/(p-1) over those same primes. Each distinct prime factor pushes the ratio above 1, and small primes push hardest: 2/1 = 2, 3/2 = 1.5, 5/4 = 1.25, and so on. To keep the ratio near 1 I want as few distinct prime factors as possible, and those factors should be large. A prime n would give the smallest possible ratio, but phi(prime) = prime - 1 can never be a <a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutation</a> of the prime (subtracting 1 changes the digit sum by 1, which breaks the divisibility-by-9 alignment that any digit rearrangement must preserve). The next best structure is a <a href="https://en.wikipedia.org/wiki/Semiprime" class="reference-source" target="_blank" rel="noopener noreferrer">semiprime</a> n = p*q with both p and q large, ideally near sqrt(10^7). This insight collapses the search space: instead of testing all 10^7 candidates, I only test products of two primes drawn from a narrow band around the square root of the limit. The dominant cost is then sieving the primes once, an O(N log log N) operation, followed by a comparatively tiny pair search.</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Semiprime Prime-Pair Search (Python and C, index 0)</h4>
+
+<p>Both implementations share one algorithm: enumerate pairs of distinct primes (p1, p2) with p1 in the band [sqrt(limit)/2, sqrt(limit)], form n = p1*p2 and phi(n) = (p1-1)*(p2-1), test the <a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutation</a> condition, and track the pair giving the minimum ratio.</p>
+
+<p>The band for p1 is derived algebraically. Because I require p2 &gt; p1 to avoid double-counting and keep both primes distinct, and because p1*p2 must stay below the limit, p1 cannot exceed sqrt(limit) - otherwise p2 &gt; p1 forces n above the limit. The lower bound sqrt(limit)/2 reflects that if p1 drops much below the square root, the matching p2 needed to reach a near-square product climbs out of range, and the band would otherwise contain only pairs whose ratio is provably worse than what I have already found near the square root. Inside the loop I set the upper bound for p2 to limit/p1 so that n stays under the limit, and I require p2 &gt; p1 + 2 so the two primes are genuinely distinct (and not twins, which give a slightly worse ratio and rarely pass the permutation test).</p>
+
+<p>The Python version drives the outer loop with a generator expression that filters a lazy prime stream, breaking once p1 exceeds the upper bound. The permutation test sorts the digit strings of n and phi(n) and compares them - concise and readable. The <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> binds <code>number</code> and <code>totient</code> inline so each is computed once and reused for the ratio comparison.</p>
+
+<p>The C version pre-computes all primes up to the limit with a classical <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> into a flat array, then walks index ranges. It first locates the starting index for p1 (the first prime above min_prime_1) and, for each p1, the starting index for p2, so both inner and outer loops are simple array scans with an early <code>break</code> whenever a bound is exceeded. The permutation test uses a 10-element digit-frequency array: it increments counts while consuming the digits of n and decrements while consuming the digits of phi(n); if all ten counts are zero, the two numbers are permutations. This is allocation-free and avoids string handling entirely.</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Incremental Generator-Based Sieve (Python)</h4>
+
+<p>The Python solution yields primes one at a time using a dictionary that maps each future composite to the prime that generates it - the "postponed composites" form of the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>. It needs no upfront upper bound and uses memory proportional only to the primes seen so far. Reach for this when you want primes lazily, or when the bound is not known at the moment you start consuming them.</p>
+
+<h4>Pre-Computed Flat Sieve Array (C)</h4>
+
+<p>The C solution runs one <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> pass into a contiguous integer array and indexes into it during the search. This trades a single O(N log log N) preprocessing step for O(1) access with excellent cache locality. I estimate the array capacity from the <a href="https://en.wikipedia.org/wiki/Prime-counting_function" class="reference-source" target="_blank" rel="noopener noreferrer">prime-counting function</a> approximation limit/(ln(limit) - 1.1) and <code>realloc</code> defensively if the estimate is exceeded. When the upper bound is known at call time, a pre-built array almost always beats lazy generation.</p>
+
+<h4>Frequency-Array Permutation Check (C)</h4>
+
+<p>Instead of sorting digit strings, I count each digit 0-9 in one number and subtract the counts for the other; an all-zero result means they are rearrangements. This runs in time linear in the digit count, needs no heap allocation, and beats sorting whenever the alphabet (here, ten digits) is small. It generalises to any "are these two sequences anagrams?" test.</p>
+
+<h4>Walrus Operator and Parallel Assignment (Python)</h4>
+
+<p>The <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> (<code>:=</code>) computes <code>number</code> and <code>totient</code> exactly once inside the condition and reuses them in the body, removing redundant work and keeping the logic compact. The update <code>min_ratio, min_n = (ratio, number)</code> uses tuple assignment: Python fully evaluates the right-hand side before binding either name, so the two tracking variables always change together as a unit, which makes the state update read as a single atomic step.</p>
+
+<h4>Algebraically Bounded Loops</h4>
+
+<p>Both versions derive their loop bounds from inequalities - p1 in [sqrt(N)/2, sqrt(N)], p2 in (p1+2, N/p1] - rather than scanning all candidates and filtering. Pushing the constraint into the loop limits, and breaking as soon as a sorted prime stream exceeds a bound, is consistently faster than testing-then-discarding.</p>
+
+<h3>Key Takeaways</h3>
+
+<p>The unlocking insight is structural: n/phi(n) equals the product of p/(p-1) over the distinct prime factors of n, so the ratio is minimised by having as few, and as large, prime factors as possible. <a href="https://en.wikipedia.org/wiki/Semiprime" class="reference-source" target="_blank" rel="noopener noreferrer">Semiprimes</a> with both factors near sqrt(limit) are the sweet spot, and their totient comes from the exact formula (p-1)*(q-1) with no factorisation needed. This reduces a 10^7-element scan to a small search over prime pairs in a narrow band.</p>
+
+<p>Both solutions produce the correct answer 8319823. The C implementation runs in about 0.030 s versus 0.102 s for Python - roughly 3.4x faster - driven by the pre-computed array sieve, O(1) indexed prime access, and the allocation-free digit-frequency permutation check, compared with Python's dictionary-backed lazy sieve and string sorting. The Python version remains the more readable expression of the same idea, and at one-tenth of a second it is more than fast enough.</p>
+
+<ul>
+  <li>To minimise n/phi(n), prefer numbers with few large prime factors; the ratio is the product of p/(p-1) over distinct primes, and small primes hurt most.</li>
+  <li>When n is a product of two distinct primes, use phi(p*q) = (p-1)*(q-1) directly and skip factorisation entirely.</li>
+  <li>Derive loop bounds from algebraic constraints before writing code; tighter analytic bounds mean fewer iterations and a smaller search space.</li>
+  <li>For anagram or digit-permutation tests over a small alphabet, a frequency-count array beats sorting and avoids allocation.</li>
+  <li>Pre-build a sieve when the upper bound is known; use a lazy incremental sieve when it is not.</li>
+  <li>Use tuple assignment to update related state variables together so the change reads as a single atomic step.</li>
+  <li>Compute a value once with an inline assignment when you need it both in a condition and in the body.</li>
+</ul>
+
+</article>

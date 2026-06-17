@@ -3,6 +3,8 @@
 """AES-based symmetric encryption and decryption with key derivation."""
 from __future__ import annotations
 
+__all__ = ['EncKey']
+
 from secrets import token_bytes
 from typing import Literal, NamedTuple, cast
 from uuid import UUID, uuid7
@@ -121,6 +123,3 @@ class EncKey(NamedTuple):
         nonce: bytes = token_bytes(12)
         ciphertext: bytes = AESGCM(self.value).encrypt(nonce, plain_text, self.__aad(aad))
         return bytes.fromhex(self.id) + nonce + ciphertext  # 16 bytes key id + 12 bytes nonce + ciphertext
-
-
-__all__ = ('EncKey',)

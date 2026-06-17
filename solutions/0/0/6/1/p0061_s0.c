@@ -1,9 +1,6 @@
 /* Solution to Euler Problem 61: Cyclical Figurate Numbers. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "runner.h"
 #include <math.h>
-#include <time.h>
 
 #define MAX_NUMS 600
 #define MAX_LENGTH 8
@@ -18,6 +15,7 @@ static int nth_octagonal(int n)  { return n * (3 * n - 2); }
 
 typedef int (*gen_func)(int);
 
+/* Function-pointer table: one closed-form generator per polygon type, indexed 0..5. */
 static gen_func generators[6] = {
     nth_triangle, nth_square, nth_pentagonal,
     nth_hexagonal, nth_heptagonal, nth_octagonal
@@ -41,6 +39,9 @@ static int path_idx[MAX_LENGTH];
 static int visited[MAX_NUMS];
 static int target_length;
 
+/* True if the cycle has exactly one member per polygon type, accounting for numbers that belong to
+   several families: a multi-type number cannot simultaneously be the sole representative of every
+   one of its types, or some type would be left unfilled. */
 static int verify_polygon_types(int *cycle, int len, int ntypes) {
     int type_member_count[6];
     memset(type_member_count, 0, sizeof(type_member_count));
@@ -94,6 +95,7 @@ static int verify_polygon_types(int *cycle, int len, int ntypes) {
     return 1;
 }
 
+/* True if the sorted form of this cycle already appears in results (canonical-form dedup). */
 static int already_found(int *cycle, int len) {
     int sorted[MAX_LENGTH];
     memcpy(sorted, cycle, len * sizeof(int));
@@ -117,6 +119,7 @@ static int already_found(int *cycle, int len) {
     return 0;
 }
 
+/* Append the cycle in canonical (sorted) form plus its member sum to the results table. */
 static void store_result(int *cycle, int len) {
     if (result_count >= MAX_RESULTS) return;
     int sorted[MAX_LENGTH];
@@ -137,6 +140,9 @@ static void store_result(int *cycle, int len) {
     result_count++;
 }
 
+/* Backtracking DFS extending the path one successor at a time; on reaching target_length it
+   records the cycle when it closes back to the start (last two digits == start's first two) and
+   passes the type-coverage check. visited enforces distinct members. */
 static void dfs(int start_idx, int current_idx, int depth) {
     if (depth == target_length) {
         int cur_num   = all_nums[current_idx];
@@ -166,9 +172,12 @@ static void dfs(int start_idx, int current_idx, int depth) {
     }
 }
 
-char *solve(int argc, char *argv[]) {
+/* Model the digit-linking rule (last two digits of A == first two of B) as a directed sparse graph
+   over 4-digit figurate numbers, then DFS for length-`length` cycles covering all polygon types.
+   O(V^length) worst case, but short successor lists make it near-instant in practice. */
+const char *solve(int argc, char *argv[]) {
     int length = 6;
-    if (argc > 1) length = atoi(argv[1]);
+    if (argc > 1) length = parse_int(argv[1]);
 
     int min_val = 1000;
     int max_val = 9999;
@@ -209,7 +218,7 @@ char *solve(int argc, char *argv[]) {
     memset(succ_counts, 0, sizeof(succ_counts));
     for (int i = 0; i < all_count; i++) {
         int prev_last2 = all_nums[i] % 100;
-        /* Only consider valid 2-digit prefixes (>=10) */
+        /* Only consider valid 2-digit prefixes (>=10): a prefix below 10 cannot start a 4-digit number */
         for (int j = 0; j < all_count; j++) {
             if (i == j) continue;
             int next_first2 = all_nums[j] / 100;
@@ -266,55 +275,4 @@ char *solve(int argc, char *argv[]) {
     }
 
     return buf;
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (result != NULL) {
-            if (strcmp(cur, result) != 0) {
-                fprintf(stderr, "Expected consistent result, got %s previous result=%s\n",
-                        cur, result);
-                rc = 1;
-            }
-            free(cur);
-        } else {
-            result = cur;
-        }
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "null");
-    free(result);
-    return rc;
 }

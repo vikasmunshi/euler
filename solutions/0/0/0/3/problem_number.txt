@@ -1,1 +1,0 @@
-3:Largest Prime Factor:0

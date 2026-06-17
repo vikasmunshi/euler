@@ -3,6 +3,8 @@
 """ Module to generate notes for solver solutions, leveraging AI. """
 from __future__ import annotations
 
+__all__ = ['generate_notes', 'generate_test_cases']
+
 from json import JSONDecodeError, dumps, loads
 
 from anthropic import APIError
@@ -11,10 +13,9 @@ from anthropic.types import MessageParam, TextBlock
 from solver.ai.facts import Facts, gather_facts, prepare_anthropic_request
 from solver.ai.models import Model, record_usage
 from solver.config import config
-from solver.core.lock import check_workspace
-from solver.templates.engine import Templates, filled_template
-from solver.core.workspace import has_new_solutions
+from solver.core.problems import Problem, problems
 from solver.shell import console
+from solver.templates.engine import Templates, filled_template
 from solver.utils.path_utils import write_file
 
 max_output_tokens: int = 32_000
@@ -22,7 +23,6 @@ api_timeout: float = 600.0  # seconds
 test_cases_retries: int = 2
 
 
-@check_workspace
 def _generate_doc(prompt: str, model: Model, images: dict[str, bytes] | None = None,
                   follow_up: str | None = None) -> str | None:
     """
@@ -80,20 +80,24 @@ def _generate_doc(prompt: str, model: Model, images: dict[str, bytes] | None = N
         return None
 
 
-@check_workspace
-def generate_notes(model: Model, *, force: bool, major: bool) -> bool | None:
+def generate_notes(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """
     Generate and update HTML notes for the current workspace's problem.
 
     Args:
-        model: The AI model used to generate notes.
-        force: Force note generation even if no new solutions are available.
-        major: Withhold any prior notes from the prompt (use after a template/prompt change).
+        model (Model)     : The AI model used to generate notes.
+        problem (Problem) : The problem currently in the workspace.
+        force (bool)      : Force note generation even if no new solutions are available.
+        major (bool)      : Withhold any prior notes from the prompt (use after a template/prompt change).
     """
-    if not (force or has_new_solutions()):
-        console.print('[muted]no new solutions[/muted]')
+    if not (force or problem.number in set(p.number for p in problems.stale_problems)):
+        console.print('[muted]Use [accent]--force[/accent] to re-document solutions.[/muted]')
         return None
-    facts: Facts = gather_facts(strict=True)
+    try:
+        facts: Facts = gather_facts(strict=True)
+    except ValueError as e:
+        console.print(f'[error]error:[/error] could not document solutions: {e}')
+        return False
     if major:
         console.print('[muted]Existing notes withheld.[/muted]')
         facts = Facts(**{k: v for k, v in facts._asdict().items() if k != 'solution_notes'},
@@ -120,17 +124,17 @@ def _parse_test_cases_json(raw: str) -> str | None:
         return None
 
 
-@check_workspace
-def generate_test_cases(model: Model, *, force: bool, major: bool) -> bool | None:
+def generate_test_cases(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """
     Generate a test_cases.json file for the current workspace's problem.
 
     Retries once with a "JSON only, no prose" reminder if the first response cannot be parsed.
 
     Args:
-        model: The AI model used to generate test cases.
-        force: Overwrite an existing test_cases.json.
-        major: No-op for test cases; preserved for the common make() signature.
+        model (Model)     : The AI model used to generate test cases.
+        problem (Problem) : The problem currently in the workspace.
+        force (bool)      : Overwrite an existing test_cases.json.
+        major (bool)      : No-op for test cases; preserved for the common make() signature.
     """
     if major:
         console.print('[muted]Use structural transformation for migration after a major change.[/muted]')
@@ -162,6 +166,3 @@ def generate_test_cases(model: Model, *, force: bool, major: bool) -> bool | Non
     write_file(config.workspace_dir / config.test_cases_filename, parsed.encode(),
                f'Updated {config.test_cases_filename}')
     return True
-
-
-__all__ = ('generate_notes', 'generate_test_cases')

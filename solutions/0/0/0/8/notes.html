@@ -1,0 +1,65 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>This problem asks for the maximum product of any run of <code>length</code> consecutive digits inside a fixed 1000-digit number. The structure is a classic <a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" class="reference-source" target="_blank" rel="noopener noreferrer">sliding window</a> problem: I slide a window of fixed width across the sequence, compute a quantity — here the product of the digits — for each position, and track the best value seen. There is no number theory or combinatorics hidden here; the difficulty is purely about doing the obvious thing correctly while watching for two pitfalls: integer overflow and the presence of zero digits.</p>
+
+<p>The search space is tiny. For a string of length N and a window of width L there are exactly <code>N - L + 1</code> window positions, and each costs up to L multiplications, giving O(N · L) complexity — the product of input size and window width. With N = 1000 and L = 13 that is under 13,000 operations, effectively instantaneous, so a plain <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a> over every window is entirely sufficient. The one structural fact worth exploiting is that any window containing the digit <code>'0'</code> has a product of zero, which can never beat a window of non-zero digits. The other thing I must reason about up front is the magnitude of the answer: thirteen nines multiply to 9^13 = 2,541,865,828,329, which exceeds the range of a 32-bit integer, so the accumulator must be at least 64 bits wide.</p>
+
+<h3>Solution Approach</h3>
+
+<h4><a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" class="reference-source" target="_blank" rel="noopener noreferrer">Sliding-Window</a> Scan (Python and C)</h4>
+
+<p>Both the Python and C solutions implement the same <a href="https://en.wikipedia.org/wiki/Sliding_window_protocol" class="reference-source" target="_blank" rel="noopener noreferrer">sliding window</a> scan: visit every window position, compute its product, and keep the maximum. The two versions differ only idiomatically.</p>
+
+<p>I store the 1000-digit number as a compile-time string constant in both languages — a Python <code>str</code> literal and a C <code>static const char *</code>. In C, adjacent string literals are concatenated by the compiler at no runtime cost, so I can break the number across many lines for readability while still producing one contiguous string. There is no I/O, no parsing, and no allocation for the data itself.</p>
+
+<p>For each starting index <code>i</code> from 0 to <code>N - length</code> inclusive, the algorithm does two things. First it checks whether the window contains a <code>'0'</code>, skipping it if so. Second, for surviving windows it multiplies the <code>length</code> digits together and updates the running best. In C I extract each digit with the idiom <code>number[j] - '0'</code>, which converts an <a href="https://en.wikipedia.org/wiki/ASCII" class="reference-source" target="_blank" rel="noopener noreferrer">ASCII</a> character to its numeric value because the C standard guarantees the digits <code>'0'</code> through <code>'9'</code> have consecutive codes. The product accumulator and the return type are both <a href="https://en.wikipedia.org/wiki/C_data_types#Main_types" class="reference-source" target="_blank" rel="noopener noreferrer">long long</a> to hold the worst-case 9^13 safely.</p>
+
+<p>The Python version expresses the same logic in a single <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>: each window substring <code>number[i:i+length]</code> is produced lazily, a guard clause <code>if "0" not in sequence</code> filters out zero-containing windows, <a href="https://docs.python.org/3/library/math.html#math.prod" class="reference-source" target="_blank" rel="noopener noreferrer">math.prod</a> over <code>(int(d) for d in sequence)</code> computes each product, and the outer <code>max(...)</code> selects the largest. Python's <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a> integers mean overflow is never a concern, so no type reasoning is needed.</p>
+
+<p>In both solutions the window length is a parameter rather than a hard-coded constant — read from <code>argv</code> in C and passed as a positional argument in Python. This lets the development case (<code>length = 4</code>, expected 5832) and the main case (<code>length = 13</code>, expected 23514624000) run against the same untouched source.</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>The Zero <a href="https://en.wikipedia.org/wiki/Absorbing_element" class="reference-source" target="_blank" rel="noopener noreferrer">Annihilator</a> Guard</h4>
+
+<p>Before computing any product, both solutions test whether the window contains a zero. Zero is a multiplicative <a href="https://en.wikipedia.org/wiki/Absorbing_element" class="reference-source" target="_blank" rel="noopener noreferrer">annihilator</a> — an absorbing element — so any product including it collapses to zero, which cannot be the maximum whenever a non-zero window exists. Testing this cheap disqualifying condition before the expensive inner work is a general optimization pattern: when about to perform a costly computation, ask first whether a quick check can rule the candidate out. Here the multiplication is trivially cheap, but the habit pays off where the inner work is genuinely expensive.</p>
+
+<h4><a href="https://en.wikipedia.org/wiki/ASCII" class="reference-source" target="_blank" rel="noopener noreferrer">ASCII</a> Digit Arithmetic in C</h4>
+
+<p>The expression <code>number[j] - '0'</code> turns a digit character into its integer value with one subtraction. This works because the C standard mandates that the <a href="https://en.wikipedia.org/wiki/ASCII" class="reference-source" target="_blank" rel="noopener noreferrer">ASCII</a> codes for <code>'0'</code> to <code>'9'</code> are contiguous and increasing. I prefer it over a lookup table or a library call because it involves no branching and no memory indirection. Reach for this idiom whenever numeric data is held as <a href="https://en.wikipedia.org/wiki/ASCII" class="reference-source" target="_blank" rel="noopener noreferrer">ASCII</a> text in C.</p>
+
+<h4>Overflow-Aware Type Selection in C</h4>
+
+<p>I computed the worst-case product (9^13 ≈ 2.5 × 10^12) before choosing a type and selected <a href="https://en.wikipedia.org/wiki/C_data_types#Main_types" class="reference-source" target="_blank" rel="noopener noreferrer">long long</a>, which is guaranteed to be at least 64 bits wide. Silent integer overflow in C produces wrong answers that are hard to diagnose, so whenever the upper bound of a computation is calculable, do the calculation and pick the smallest type that safely holds it. Python is exempt because its integers grow arbitrarily large.</p>
+
+<h4>Compile-Time String Constants</h4>
+
+<p>Both solutions embed the fixed input directly in the source as a string constant. In C the compiler joins adjacent string literals automatically, so the line breaks I use for readability cost nothing at runtime. When data is fixed and known ahead of time, embedding it as a literal avoids file I/O, parsing, and allocation — it is both simpler and faster than reading it at runtime.</p>
+
+<h4><a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">Generator Expressions</a> with <a href="https://docs.python.org/3/library/math.html#math.prod" class="reference-source" target="_blank" rel="noopener noreferrer">math.prod</a></h4>
+
+<p>The Python solution composes a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> with <a href="https://docs.python.org/3/library/math.html#math.prod" class="reference-source" target="_blank" rel="noopener noreferrer">math.prod</a> to express "map each character to a digit, then multiply them all" in one line. The generator <code>(int(d) for d in sequence)</code> yields digit values lazily, so no intermediate list is built. I chose <a href="https://docs.python.org/3/library/math.html#math.prod" class="reference-source" target="_blank" rel="noopener noreferrer">math.prod</a> over <code>functools.reduce(operator.mul, ...)</code> because it reads more clearly. This compose-a-generator-into-a-reduction pattern is idiomatic Python for any map-then-fold operation.</p>
+
+<h4>Parameterising the Window Length</h4>
+
+<p>Rather than hard-coding 13, both solutions accept the window width as a runtime parameter. This turns the development test (length 4) and the main test (length 13) into two invocations of the same untouched code. Whenever a problem has a natural scale parameter — a window size, a threshold, an iteration count — make it a variable from the outset rather than a magic number buried in a loop.</p>
+
+<h3>Key Takeaways</h3>
+
+<p>The core insight is that estimating the search space first tells you a <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a> is sufficient: under 13,000 operations is nothing, so there is no need for a cleverer scheme such as maintaining a running product by dividing out the departing digit. That division trick is not only unnecessary here but fragile — it breaks exactly when a zero enters the window, the case requiring the most care. The simple scan-and-skip approach is correct, obvious, and trivially fast.</p>
+
+<p>The recorded benchmarks bear out how light this problem is. Averaged over 21 runs, the C solution comes in at roughly 0.0000037 s on the development case and 0.0000051 s on the main case, while the Python solution takes about 0.00032 s and 0.00028 s respectively — all effectively instantaneous. The gap reflects C's lack of interpreter overhead, but at this size the distinction is academic; the Python version, expressing the whole algorithm in one <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>, is arguably the more elegant.</p>
+
+<ul>
+  <li>Estimate the size of the search space before choosing an algorithm; if a <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a> fits the time budget, prefer it for its simplicity and verifiability.</li>
+  <li>Identify multiplicative <a href="https://en.wikipedia.org/wiki/Absorbing_element" class="reference-source" target="_blank" rel="noopener noreferrer">annihilators</a> such as zero early and skip candidates containing them; it is a cheap guard that also clarifies intent.</li>
+  <li>In C, compute the worst-case value of any product or sum and choose the smallest numeric type — here <a href="https://en.wikipedia.org/wiki/C_data_types#Main_types" class="reference-source" target="_blank" rel="noopener noreferrer">long long</a> — that holds it safely to avoid silent overflow.</li>
+  <li>Embed fixed, compile-time data as string or array constants rather than reading it at runtime; it is faster and removes a parsing step.</li>
+  <li>Use adjacent string-literal concatenation in C to break long embedded data across lines at no runtime cost.</li>
+  <li>In Python, compose a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> with reductions like <a href="https://docs.python.org/3/library/math.html#math.prod" class="reference-source" target="_blank" rel="noopener noreferrer">math.prod</a> and <code>max</code> to express map-then-fold logic in one clear line.</li>
+  <li>Parameterise any number that defines the problem's scale so different test cases run against the same untouched source.</li>
+</ul>
+
+</article>

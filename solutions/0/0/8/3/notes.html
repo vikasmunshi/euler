@@ -1,0 +1,94 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+This problem asks for the minimum-cost path from the top-left to the bottom-right of an N-by-N grid, where movement is permitted in all four directions - up, down, left, and right. The cost of a path is the sum of the values of the cells it visits, including the starting cell. The crucial observation is that allowing all four directions turns this into a genuine <a href="https://en.wikipedia.org/wiki/Shortest_path_problem" class="reference-source" target="_blank" rel="noopener noreferrer">shortest-path problem</a> on a weighted graph, rather than a grid-restricted DP variant. I model each cell as a node and place a directed edge from every cell to each of its four neighbours, with the edge weight equal to the value of the destination cell. The goal is then the cheapest route from node (0,0) to node (N-1, N-1).
+</p>
+
+<p>
+Why does this distinction matter? In the right- and down-only variants (Problems 81 and 82), the grid forms a <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" class="reference-source" target="_blank" rel="noopener noreferrer">directed acyclic graph (DAG)</a> - it has no cycles, so I can solve it with <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> in a single fixed-order pass. The moment upward and leftward moves are allowed, cycles become possible and there is no longer a valid evaluation order for a one-pass DP. I need a general shortest-path algorithm. Because every cell value is positive - so every edge weight is non-negative - <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Dijkstra's algorithm</a> applies and yields an exact answer. Dijkstra maintains a tentative shortest distance to each node, repeatedly finalises the closest unfinalised node, and "relaxes" (improves) the distances of its neighbours. With V = N^2 nodes and a linear scan to find the next node to finalise, the cost is O(V^2) = O(N^4). For N = 80 that is about 40 million comparisons - comfortably fast.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Dijkstra's Algorithm with Linear Minimum Scan (C and Python)</h4>
+
+<p>
+Both files implement the same algorithm - <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Dijkstra's algorithm</a> with a linear scan to choose the next node to finalise - so I describe them together and flag language differences as they arise.
+</p>
+
+<p>
+<strong>Step 1 - Parse the matrix.</strong> In Python I build a list of lists with a comprehension, splitting each non-empty line on commas: <code>[[int(n) for n in line.split(",")] for line in content.splitlines() if line]</code>. In C I scan the raw buffer character by character, using <code>atoi</code> to read each integer and advancing a pointer past spaces, commas, and line breaks. The C parser is more verbose but avoids any intermediate allocation, writing directly into a fixed <code>int matrix[80][80]</code>.
+</p>
+
+<p>
+<strong>Step 2 - Initialise distances.</strong> Every node's tentative distance starts at a sentinel I call "infinity", computed as the sum of all cell values plus one. This is guaranteed to exceed any real path cost, because no minimal path visits any cell more than once, so the cost cannot exceed the sum of all cells. The start node (0,0) is initialised to its own cell value, since the starting cell's weight is part of the total.
+</p>
+
+<p>
+<strong>Step 3 - The main loop.</strong> While the target has not been finalised, I scan all unvisited nodes for the one with the smallest tentative distance, mark it visited, and relax its four neighbours: if <code>dist[current] + value(neighbor)</code> improves the neighbour's recorded distance, I update it. Crucially, I stop the instant the target is finalised. <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Dijkstra's algorithm</a> finalises nodes in non-decreasing distance order, so once the target is extracted its distance is provably optimal and no further work is needed.
+</p>
+
+<p>
+<strong>Why a linear scan rather than a priority queue?</strong> With V = 6400 nodes, the O(V^2) scan is about 40 million operations - fast enough that the constant-factor and code-complexity cost of a <a href="https://en.wikipedia.org/wiki/Binary_heap" class="reference-source" target="_blank" rel="noopener noreferrer">binary heap</a> is not justified. A heap would give O((V+E) log V), worthwhile for much larger or sparser graphs, but here simplicity wins.
+</p>
+
+<p>
+<strong>Language-specific differences.</strong> The Python solution keys its <code>distances</code> dictionary and <code>unvisited</code> set on <code>(row, col)</code> tuples and finds the minimum with <code>min(unvisited, key=lambda node: distances[node])</code>. The C solution flattens each node to a single integer index <code>i = row * size + col</code> and stores <code>dist[]</code> and <code>visited[]</code> as contiguous one-dimensional arrays. This flat layout is far more cache-friendly and avoids hash-table overhead, which is the chief reason C runs in 0.0228 s on the full matrix while Python takes 1.5129 s. Both produce the correct answer of 425185.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Computed Sentinel Instead of INT_MAX or float('inf')</h4>
+<p>
+Rather than relying on <code>INT_MAX</code> or <code>float('inf')</code>, I compute a concrete upper bound - the sum of all cell values plus one. In C this matters: writing <code>INT_MAX + cell_value</code> during relaxation would risk <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">integer overflow</a> and wrap to a negative number, silently corrupting the comparison. A real, finite bound keeps every arithmetic operation well-defined. In Python it also avoids mixing integers with floating-point infinity. This pattern - derive a provable bound from the problem's data - is a robust habit whenever you need a "larger than anything possible" value.
+</p>
+
+<h4>Row-Major Flattening of a 2D Grid in C</h4>
+<p>
+The C solution maps each cell to a single index with <code>i = row * size + col</code>, recovering coordinates with <code>row = i / size</code> and <code>col = i % size</code>. This <a href="https://en.wikipedia.org/wiki/Row-_and_column-major_order" class="reference-source" target="_blank" rel="noopener noreferrer">row-major</a> layout lets per-node arrays be plain contiguous blocks rather than arrays of pointers, eliminating an indirection and improving locality during the inner scan. Reach for this whenever you need per-node bookkeeping over a grid in a low-level language and want predictable, cache-friendly memory access.
+</p>
+
+<h4>Direction Vectors for Neighbour Enumeration</h4>
+<p>
+Both solutions enumerate neighbours using displacement arrays - <code>drow = {-1, 1, 0, 0}</code> and <code>dcol = {0, 0, -1, 1}</code> in C, and explicit tuples in Python. Looping over these vectors replaces four near-identical branches with one, and bounds-checking happens once inside the loop. The same pattern extends trivially to diagonal (8-directional) connectivity by enlarging the displacement arrays. This is a standard, readable idiom for any grid-traversal code.
+</p>
+
+<h4>Early Termination on Target Finalisation</h4>
+<p>
+Because <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Dijkstra's algorithm</a> finalises nodes in order of increasing distance, the search can stop the moment the target node is finalised. For a corner-to-corner query this avoids exploring large regions of the grid that lie beyond the optimal path. Both solutions check this (<code>while target in unvisited</code> in Python, <code>while (!visited[target])</code> in C, plus an inner <code>break</code> in C when the popped node is the target). Use this optimisation whenever you need a single shortest path rather than distances to all nodes.
+</p>
+
+<h4>Dictionaries and Sets for Sparse Bookkeeping in Python</h4>
+<p>
+The Python solution uses a <a href="https://docs.python.org/3/tutorial/datastructures.html#dictionaries" class="reference-source" target="_blank" rel="noopener noreferrer">dict</a> for distances and a <a href="https://docs.python.org/3/tutorial/datastructures.html#sets" class="reference-source" target="_blank" rel="noopener noreferrer">set</a> for the unvisited frontier. Membership tests (<code>neighbor in unvisited</code>) and removals (<code>unvisited.remove(current)</code>) are O(1) on average, and <code>min(unvisited, key=...)</code> performs the linear scan idiomatically. This is clear and expressive, at the cost of tuple-hashing overhead that makes it materially slower than the flat C arrays.
+</p>
+
+<h4>Runtime Heap Allocation in C</h4>
+<p>
+The C code allocates <code>dist</code> and <code>visited</code> with <a href="https://en.cppreference.com/w/c/memory/malloc" class="reference-source" target="_blank" rel="noopener noreferrer">malloc</a> and frees them at the end of <code>path_sum_four_ways</code>. Although 6400 elements would fit on the stack, allocating runtime-sized buffers on the heap is good discipline and matters when the function is invoked repeatedly in a benchmark loop - the matching <code>free</code> calls prevent leaks across runs.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is recognising that four-directional movement destroys the acyclic structure that made Problems 81 and 82 solvable by simple <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>. Once cycles exist, you reach for a general <a href="https://en.wikipedia.org/wiki/Shortest_path_problem" class="reference-source" target="_blank" rel="noopener noreferrer">shortest-path</a> algorithm, and since all weights are positive, <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Dijkstra's algorithm</a> is both correct and efficient. Even its naive O(V^2) linear-scan form handles a 6400-node grid comfortably.
+</p>
+
+<p>
+Both solutions implement the identical algorithm, so the benchmark gap is purely a language-and-data-structure effect. On the full 80-by-80 matrix the C solution runs in 0.0228 s while the Python solution takes 1.5129 s - roughly 66 times faster. The difference comes from C's flat contiguous arrays versus Python's tuple-keyed hashing, compiled arithmetic versus interpreted bytecode, and the absence of per-object overhead. For N = 80 the Python version is perfectly usable; as the O(N^4) work scales into larger N, the C version's memory layout becomes decisive.
+</p>
+
+<ul>
+  <li>When grid movement allows cycles, abandon single-pass DP and use a general shortest-path algorithm.</li>
+  <li>Dijkstra's algorithm is exact and efficient precisely when all edge weights are non-negative.</li>
+  <li>A naive O(V^2) Dijkstra with a linear minimum scan is often good enough for graphs up to tens of thousands of nodes.</li>
+  <li>For single-target queries, stop as soon as the target is finalised to avoid unnecessary exploration.</li>
+  <li>Derive a concrete "infinity" from the data rather than using INT_MAX, to sidestep overflow and mixed-type arithmetic.</li>
+  <li>Flatten 2D grids to row-major 1D indices in low-level code for better cache behaviour and simpler memory management.</li>
+  <li>Encode neighbour offsets as direction vectors to keep traversal code compact and easy to extend.</li>
+  <li>High-level dictionaries and sets are ergonomic, but inner-loop-heavy algorithms pay a large constant-factor penalty for their convenience.</li>
+</ul>
+
+</article>

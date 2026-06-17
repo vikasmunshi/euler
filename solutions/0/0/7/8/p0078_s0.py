@@ -5,17 +5,22 @@ from __future__ import annotations
 
 import functools
 import itertools
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 @functools.lru_cache(maxsize=None)
 def pentagonal(x: int) -> int:
+    """Return the generalized pentagonal number g(x) = x(3x-1)/2."""
     return x * (3 * x - 1) // 2
 
 
 def least_number_with_partitions_divisible_by(divisor: int) -> int:
+    """Bottom-up DP for p(n) via Euler's pentagonal recurrence, reduced mod divisor; O(N*sqrt(N)).
+
+    Each n sums (-1)^(k-1) p(n - g(k)) over the (k, -k) pentagonal pairs, stopping once g(k) > n
+    (only O(sqrt(n)) terms contribute). The first n with p(n) == 0 (mod divisor) is returned.
+    """
     partitions = [1]
     for n in itertools.count(1):
         partition_value = 0
@@ -36,40 +41,13 @@ def least_number_with_partitions_divisible_by(divisor: int) -> int:
     return -1
 
 
-def solve(*, divisor: int) -> int:
-    return least_number_with_partitions_divisible_by(divisor=divisor)
+@runner.main
+def solve(*args: str) -> str:
+    """Parse the divisor and return the least n with p(n) divisible by it."""
+    divisor = runner.parse_int(args[0])
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(least_number_with_partitions_divisible_by(divisor=divisor))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(divisor=int(argv[1])))
+    raise SystemExit(solve())

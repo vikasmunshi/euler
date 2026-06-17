@@ -1,54 +1,39 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-""" Solution to Euler $problem. """
+"""Solution to Euler $problem.
+
+A thin solution template: the runner framework (`solver.runners.runner`) supplies everything
+but `solve()`. The `@runner.main` decorator benchmarks `solve()`, checks the result is
+consistent across `--runs=N`, and prints the `<runs> <avg_seconds> <result>` line the harness
+reads. The `runner` module also provides the argument helpers — `runner.parse_int` (ints, power
+notation, '_' separators), `runner.parse_list` ('[1,2,3]' literals), `runner.get_text_file`
+(a statement-linked file, served from the cached resources/ copy) — and the `runner.show` flag
+(set by `--show`).
+
+Typical workflow:
+    1. Implement solve(): parse each positional arg with the runner helper it needs, then
+       return the answer as a string.
+    2. Run with: ./file.py <arg>... [--runs=N] [--show]
+"""
 from __future__ import annotations
 
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = 'resources/' + src.split('/')[-1].split('?')[0]
-    return (Path(__file__).parent / local_filename).read_text()
-
-
-def solve(*, kwarg: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Name the approach and its asymptotic complexity here — e.g.
+    "Inclusion-exclusion on the closed-form arithmetic-series sum; O(1)." — then
+    replace this placeholder with the real approach.
+    """
+    # Each line is an independent example — use whichever helper the problem needs.
+    # arg1: int = runner.parse_int(args[0])  # parse an integer (power notation, '_' separators)
+    # arg2: list = runner.parse_list(args[0])  # parse a list literal: '[1,2,3]' -> [1, 2, 3]
+    # arg3: str = runner.get_text_file(args[0])  # read a file from resources/
+    # if runner.show:  # gate intermediate output behind --show
+    #     print(f'arg1={arg1}, arg2={arg2}, arg3={arg3}')
     raise NotImplementedError('implement solve() first')
 
 
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next(arg for arg in argv[1:] if arg.startswith('--runs='))
-        runs: int = int(runs_arg.split('=', 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = perf_counter(), solve(**kwargs), perf_counter()  # <= timed call
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print('\n'.join(errors), file=stderr)
-        rc = 1
-    print(f'{runs} {average} {result}')
-    return rc
-
-
 if __name__ == "__main__":
-    raise SystemExit(main(kwarg=int(argv[1])))
+    raise SystemExit(solve())

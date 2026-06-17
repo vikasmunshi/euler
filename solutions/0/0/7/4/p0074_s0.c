@@ -1,11 +1,9 @@
 /* Solution to Euler Problem 74: Digit Factorial Chains. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 static const int digit_factorials[10] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
 
+/* Successor under the digit-factorial map: sum of factorials of n's decimal digits. */
 static int sum_of_digit_factorials(int n) {
     int result = 0;
     while (n > 0) {
@@ -15,8 +13,14 @@ static int sum_of_digit_factorials(int n) {
     return result;
 }
 
-long long solve(int argc, char *argv[]) {
-    int max_num = atoi(argv[1]);
+/* Walk-and-cache memoization over the digit-factorial functional graph: from each start, walk
+ * forward until hitting a node with a known chain length or closing a cycle, then back-propagate
+ * the length to every node on the walk (seen[i] gets total - i). A flat array of 3,000,000 slots
+ * caches chain lengths and successors, since every reachable value stays below 7*9! = 2540160.
+ * Amortised O(1) per start, so O(max_num) overall. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int max_num = parse_int(argv[1]);
 
     /* We need a cache for chain lengths and graph (next number).
      * Numbers reachable from [1..max_num] are at most 6*9! = 2177280 for 7-digit numbers.
@@ -29,7 +33,7 @@ long long solve(int argc, char *argv[]) {
     int *graph = calloc((size_t)cache_size, sizeof(int));
     if (!chain_length_cache || !graph) {
         fprintf(stderr, "Out of memory\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
     /* 0 means not cached */
 
@@ -38,7 +42,7 @@ long long solve(int argc, char *argv[]) {
     int *seen = malloc((size_t)seen_capacity * sizeof(int));
     if (!seen) {
         fprintf(stderr, "Out of memory\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     int max_chain_length = 0;
@@ -49,8 +53,8 @@ long long solve(int argc, char *argv[]) {
         int current = start;
 
         /* Walk forward until we hit a cached node or revisit a node in this walk.
-         * We need to detect cycles in the current walk using a small lookup.
-         * Since chain lengths are bounded (~60), a linear scan is fine. */
+         * Cycle detection uses a linear scan of seen; chain lengths are bounded near 60,
+         * so this constant-bounded scan beats the overhead of a hash set. */
         while (1) {
             /* Check if current is in seen (cycle detection) */
             int in_seen = 0;
@@ -71,7 +75,7 @@ long long solve(int argc, char *argv[]) {
                 seen = realloc(seen, (size_t)seen_capacity * sizeof(int));
                 if (!seen) {
                     fprintf(stderr, "Out of memory\n");
-                    return -1;
+                    { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
                 }
             }
             seen[seen_len++] = current;
@@ -87,7 +91,7 @@ long long solve(int argc, char *argv[]) {
             }
         }
 
-        /* Determine length */
+        /* Chain length: walk length plus the cached tail, or just the walk if we closed a cycle. */
         int length;
         if (current < cache_size && chain_length_cache[current] != 0) {
             length = seen_len + chain_length_cache[current];
@@ -96,7 +100,7 @@ long long solve(int argc, char *argv[]) {
             length = seen_len;
         }
 
-        /* Back-propagate */
+        /* Back-propagate: seen[i] is i steps along the same chain, so its length is total - i. */
         for (int i = 0; i < seen_len; i++) {
             int num = seen[i];
             if (num < cache_size) {
@@ -122,55 +126,5 @@ long long solve(int argc, char *argv[]) {
     free(graph);
     free(seen);
 
-    return (long long)max_chain_length_count;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)max_chain_length_count)); return _answer; }
 }

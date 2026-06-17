@@ -1,8 +1,5 @@
 /* Solution to Euler Problem 55: Lychrel Numbers. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 /* Big number represented as array of digits (base 10), little-endian */
 #define MAX_DIGITS 128
@@ -12,6 +9,7 @@ typedef struct {
     int len;
 } BigNum;
 
+/* Load a non-negative long long into a little-endian base-10 BigNum. */
 static void bignum_from_ll(BigNum *b, long long n) {
     b->len = 0;
     if (n == 0) {
@@ -25,8 +23,8 @@ static void bignum_from_ll(BigNum *b, long long n) {
     }
 }
 
+/* result = a + reverse(a); little-endian index i is big-endian index n-1-i, so no reversed copy is built. */
 static void bignum_add_reverse(BigNum *result, const BigNum *a) {
-    /* result = a + reverse(a) */
     int carry = 0;
     int n = a->len;
     result->len = n;
@@ -40,6 +38,7 @@ static void bignum_add_reverse(BigNum *result, const BigNum *a) {
     }
 }
 
+/* Return 1 if the decimal digits read the same in both directions. */
 static int bignum_is_palindrome(const BigNum *b) {
     int n = b->len;
     for (int i = 0; i < n / 2; i++) {
@@ -49,6 +48,7 @@ static int bignum_is_palindrome(const BigNum *b) {
     return 1;
 }
 
+/* True if number yields no palindrome within max_iterations reverse-and-add steps (test the result, not seed). */
 static int is_lychrel(long long number, int max_iterations) {
     BigNum a, result;
     bignum_from_ll(&a, number);
@@ -62,64 +62,16 @@ static int is_lychrel(long long number, int max_iterations) {
     return 1;
 }
 
-long long solve(int argc, char *argv[]) {
-    int max_iterations = atoi(argv[1]);
-    int max_limit = atoi(argv[2]);
+/* Count Lychrel numbers up to max_limit via bounded big-integer reverse-and-add; O(max_limit * max_iterations). */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int max_iterations = parse_int(argv[1]);
+    int max_limit = parse_int(argv[2]);
 
     long long count = 0;
     for (int i = 1; i <= max_limit; i++) {
         if (is_lychrel((long long)i, max_iterations))
             count++;
     }
-    return count;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(count)); return _answer; }
 }

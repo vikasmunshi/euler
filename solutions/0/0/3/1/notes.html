@@ -1,0 +1,147 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+This is a coin-change counting problem, a concrete instance of the broader
+<a href="https://en.wikipedia.org/wiki/Partition_(number_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">integer partition</a>
+family: in how many distinct ways can a target amount be written as a sum of values drawn from a
+fixed set of denominations? The decisive subtlety is that <em>order does not matter</em>. Spending
+a 50p coin and then a 20p coin is the same combination as spending the 20p first and the 50p
+second. We count unordered multisets of coins, not ordered sequences. Formally, we want the number
+of non-negative integer solutions to <code>a1*c1 + a2*c2 + ... + ak*ck = T</code>, where each
+<code>ci</code> is a denomination and each <code>ai</code> is how many of that coin we use.
+</p>
+<p>
+The clean way to count these is
+<a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+(DP) - a technique that builds the answer to a large problem from the cached answers to overlapping
+smaller subproblems, so each subproblem is solved only once. This particular variant is the
+<a href="https://en.wikipedia.org/wiki/Knapsack_problem#Unbounded_knapsack_problem" class="reference-source" target="_blank" rel="noopener noreferrer">unbounded knapsack</a>
+pattern, "unbounded" because every coin may be reused without limit. I define <code>dp[i]</code> as
+the number of ways to form amount <code>i</code> using the coins considered so far, with the base
+case <code>dp[0] = 1</code> - there is exactly one way to make zero, namely by taking no coins.
+The complexity is O(N * T) time and O(T) space, where N is the number of denominations and T is the
+target. The single most important observation - the one that makes the count correct - is the loop
+order: coins in the outer loop, amounts in the inner loop, which guarantees we count combinations
+rather than permutations.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Bottom-up Unbounded Knapsack DP</h4>
+<p>
+Both the Python and C files implement the identical algorithm. I allocate a 1D array
+<code>dp</code> (called <code>result</code> in Python) of length <code>target_amount + 1</code>,
+fill it with zeros, and set <code>dp[0] = 1</code>. I then loop over each coin denomination. For
+each coin I sweep the amount index <code>i</code> upward from <code>coin</code> to
+<code>target_amount</code>, applying the recurrence <code>dp[i] += dp[i - coin]</code>. After every
+coin has been processed, <code>dp[target_amount]</code> holds the answer.
+</p>
+<p>
+The recurrence reads as: "the number of ways to make amount <code>i</code> that use at least one of
+the current coin equals the number of ways to make <code>i - coin</code>, to which we then add one
+more of this coin." Because the inner loop runs <em>upward</em>, by the time I reach index
+<code>i</code> the cell <code>dp[i - coin]</code> has already absorbed multiple uses of the current
+coin within this same pass - this is precisely what makes the coin unbounded.
+</p>
+<p>
+The reason the outer/inner ordering matters is a correctness issue, not a performance one. By
+fixing a coin in the outer loop, I ensure that every count accumulated in <code>dp[i]</code> was
+built using only the coins processed so far, in a fixed order. That enforces the invariant that I
+never count two different orderings of the same multiset. Were I to swap the loops - amounts
+outer, coins inner - I would instead count ordered sequences (permutations), a different and far
+larger number.
+</p>
+<p>
+The two language versions diverge only in arithmetic. For <code>target_amount = 100000</code> the
+answer is <code>10056050940818192726001</code>, a 23-digit number near 10^22, which overflows a
+64-bit integer (whose maximum is about 1.8 x 10^19). In Python this is a non-issue: its integers
+are arbitrary precision and grow automatically. In C I use the GCC built-in <code>__int128</code>
+for each <code>dp</code> cell, since 128 bits comfortably holds a 23-digit value. Because
+<code>printf</code> has no format specifier for <code>__int128</code>, I wrote a small
+<code>int128_to_str</code> helper that extracts decimal digits by repeated division by ten.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>1D DP Array with In-place Update</h4>
+<p>
+Rather than building a 2D table indexed by both coin and amount, I keep a single 1D array and
+update it in place. This is valid because the recurrence only reads a smaller index
+(<code>i - coin</code>) within the same pass. The upward inner loop means that by the time I write
+<code>dp[i]</code>, the value at <code>dp[i - coin]</code> already includes the current coin's
+contributions - exactly the behaviour the unbounded case requires. This drops memory from O(N*T) to
+O(T). Reach for this whenever a
+<a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+recurrence looks backward only and you can order the sweep so the dependencies are already updated.
+</p>
+
+<h4>Loop Order as a Correctness Invariant</h4>
+<p>
+The most important lesson here is that loop order can encode an algorithmic constraint, not merely
+a traversal pattern. Putting coins outside and amounts inside enforces "combinations, not
+permutations." Internalise this: in
+<a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>,
+the order in which you iterate your dimensions determines which subproblems are "in scope" at each
+step. Getting it wrong yields output that looks plausible but counts the wrong thing entirely.
+</p>
+
+<h4>Wide Fixed-width Arithmetic with __int128</h4>
+<p>
+When a C result is known to exceed 64 bits but stays under 128 bits, GCC's <code>__int128</code> is
+the lightest correct tool - it gives 128-bit integer arithmetic as a compiler built-in with no
+external library. I chose it over a
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">big-integer</a>
+library because the need here is modest and a full bignum library would be heavy machinery. The
+trade-off is portability: <code>__int128</code> is a GCC/Clang extension, not standard C, and it has
+no <code>printf</code> support - hence the manual digit-extraction helper.
+</p>
+
+<h4>Python Arbitrary-precision Integers</h4>
+<p>
+Python's built-in <code>int</code> is
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary precision</a>
+and grows as needed without any code change, so the same Python solver that handles target 200 also
+handles the 23-digit result for target 100000. The cost is speed: heap-allocated bignum arithmetic
+is slower than fixed-width math. This is a good prototyping pattern - prove correctness in Python
+first, then port to C with <code>__int128</code> when you need throughput.
+</p>
+
+<h4>Generic Solver with Flexible Argument Parsing</h4>
+<p>
+Both solutions are written as general coin-change counters rather than hardcoding the UK
+denominations. Python parses the coin list with its runner's <code>parse_list</code> helper; the C
+side walks each argument character by character, skipping brackets and commas and reading integers
+with <code>strtol</code>. Writing parameterised solvers pays off immediately when the test suite
+varies the input - here targets of 0, 200, 1000, and 100000 all flow through the same code, and the
+target-of-zero case naturally yields the correct answer 1.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The insight that unlocks this problem is recognising it as an
+<a href="https://en.wikipedia.org/wiki/Knapsack_problem#Unbounded_knapsack_problem" class="reference-source" target="_blank" rel="noopener noreferrer">unbounded knapsack</a>
+count and choosing the "coins outer, amounts inner" loop order to count unordered combinations
+correctly. Once that is understood, the algorithm is just a few lines.
+</p>
+<p>
+Both implementations share one algorithm, so the comparison is purely about language overhead. On
+the original target of 200 both finish in well under a millisecond, so performance is irrelevant
+there. The difference appears only at scale: for target 100000 the C version runs in about 0.0008 s
+versus the Python version's 0.0345 s - roughly 40x faster - driven entirely by fixed-width
+<code>__int128</code> arithmetic versus Python's
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+integers. The C solution is the right pick when scaling the target; the Python solution is the more
+elegant and immediately correct prototype.
+</p>
+<ul>
+  <li>To count unordered combinations with repetition, use a 1D DP array updated coin-by-coin in the outer loop - the unbounded knapsack pattern.</li>
+  <li>Loop order in DP is a correctness decision: swapping inner and outer loops can change what you count from combinations to permutations.</li>
+  <li>An in-place 1D table cuts space from O(N*T) to O(T) whenever the recurrence reads only smaller indices in the same pass.</li>
+  <li>Estimate the magnitude of your answer before coding in a fixed-width language - a quick check prevents silent overflow.</li>
+  <li>When a C result needs more than 64 but fewer than 128 bits, <code>__int128</code> is the lightest correct tool, at the cost of portability and manual printing.</li>
+  <li>Python's arbitrary-precision integers let you prove correctness first and worry about speed later.</li>
+  <li>Write parameterised solvers instead of hardcoding inputs - it makes multi-case testing trivial and surfaces edge cases like a target of zero.</li>
+</ul>
+
+</article>

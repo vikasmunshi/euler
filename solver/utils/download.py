@@ -3,6 +3,8 @@
 """ Utility for downloading and caching files via HTTP. """
 from __future__ import annotations
 
+__all__ = ['download_file']
+
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from uuid import NAMESPACE_URL, uuid5
@@ -71,6 +73,3 @@ def download_file(url: str, *,
         if verbose:
             console.print(f'[muted]read {len(cache_path.read_bytes())} bytes for [accent]{url}[/accent] '
                           f'from cache {cache_path.name}[/muted]')
-
-
-__all__ = ('download_file',)

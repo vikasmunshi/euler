@@ -1,1 +1,0 @@
-42:Coded Triangle Numbers:0

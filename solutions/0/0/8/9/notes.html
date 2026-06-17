@@ -1,0 +1,160 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The task is fundamentally a transcoding exercise: each input line is a valid but possibly wasteful
+<a href="https://en.wikipedia.org/wiki/Roman_numerals" class="reference-source" target="_blank" rel="noopener noreferrer">Roman numeral</a>,
+and I need to total how many characters I would save by rewriting every one of them in its shortest
+legal form. The crucial observation is that the rules of Roman notation define a unique
+<em>canonical form</em> for every positive integer in the range the file covers. A canonical form is
+simply the single "best" representation chosen by a fixed set of rules - here, the shortest valid
+numeral. Because that form is unique, I never have to weigh competing representations: I convert each
+numeral to a plain integer (a neutral, unambiguous intermediate) and re-encode that integer
+minimally. The difference in lengths is the saving for that line.
+</p>
+
+<p>
+The re-encoding step is a
+<a href="https://en.wikipedia.org/wiki/Greedy_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">greedy algorithm</a>:
+at each step I consume the largest "denomination" that still fits the remaining value, where the
+denominations are the seven base symbols (I, V, X, L, C, D, M) plus the six subtractive pairs (IV,
+IX, XL, XC, CD, CM). Greedy is provably optimal here for the same reason it is optimal for making
+change with this particular denomination set - no combination of smaller pieces can express a value
+in fewer characters than taking the largest fitting piece first. Both the parse and the encode run
+in O(L) time per numeral, where L is the numeral's length (bounded by a small constant), so the whole
+program is O(N) in the number of lines - a thousand here, processed essentially instantly.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Greedy Parse-then-Encode (Python and C)</h4>
+
+<p>
+Both files implement the same two-phase algorithm; I describe it once and note the language
+differences afterward.
+</p>
+
+<p>
+<strong>Phase 1 - parse to integer.</strong> I scan the numeral from right to left, holding the
+value of the previously seen (rightmost) symbol in a variable <code>last</code>. For each symbol I
+look up its value <code>n</code>: if <code>last &gt; n</code> the symbol is the smaller half of a
+subtractive pair (the I in IX), so I subtract it; otherwise I add it. Reading right-to-left makes
+this work with no look-ahead, because the larger neighbour of any subtractive pair is always already
+in <code>last</code> by the time I reach the smaller symbol. The Python version iterates over
+<code>reversed(numeral)</code> and indexes a <code>dict</code>; the C version uses a backward
+<code>for</code> loop and a <code>switch</code> in <code>char_value</code>, which the compiler turns
+into a fast jump table.
+</p>
+
+<p>
+<strong>Phase 2 - encode minimally.</strong> I keep a table of (value, string) denominations ordered
+from largest to smallest, including all six subtractive pairs. In a loop, while the remaining number
+is positive, I pick the largest denomination that fits, subtract its value, and record its
+contribution. Because the table includes the subtractive pairs, the
+<a href="https://en.wikipedia.org/wiki/Greedy_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">greedy</a>
+choice always yields the canonical minimal form. The Python encoder finds the fitting denomination
+with <code>max((value, numeral) for ... if value &lt;= number)</code> and builds the string by
+appending to a list. The C encoder linearly scans descending parallel arrays
+(<code>numeral_values[]</code> / <code>numeral_strings[]</code>), breaking on the first fit, and
+accumulates only the <em>length</em> rather than the string, since the problem asks only for character
+counts.
+</p>
+
+<p>
+<strong>Measuring savings.</strong> For each line I add <code>len(original) - len(minimal)</code> to
+a running total. Lines that are already minimal contribute zero. The Python solution reads the file
+with <code>splitlines</code>; the C solution reads the whole file into one buffer and walks it with
+pointer arithmetic, skipping <code>\r</code> and <code>\n</code> between lines.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Right-to-left scan with a running maximum</h4>
+<p>
+The parser carries a single integer of context (<code>last</code>) forward through the loop instead
+of using two pointers or look-ahead. This state-variable pattern - keep just enough context to
+interpret the current element - is broadly useful whenever an element's meaning depends on a
+neighbour. Scanning in the direction where the deciding neighbour is seen first (here, right-to-left)
+removes special cases entirely.
+</p>
+
+<h4>Table-driven greedy encoding</h4>
+<p>
+Rather than coding the Roman rules with nested conditionals, I put all domain knowledge in a sorted
+table and write a generic "while remaining &gt; 0, take the largest fitting entry" loop. Separating
+data from logic makes the code easy to audit (I can read the table directly), immune to off-by-one
+errors in the subtractive cases, and trivial to adapt if the rules change. Reach for this pattern
+whenever a problem reduces to a finite, orderable set of moves.
+</p>
+
+<h4>Parallel arrays in C</h4>
+<p>
+The C table uses two same-length arrays indexed together rather than an array of structs. For a
+small, read-only table whose two fields are always accessed in tandem, this
+<a href="https://en.wikipedia.org/wiki/AoS_and_SoA" class="reference-source" target="_blank" rel="noopener noreferrer">struct-of-arrays</a>
+layout is equally cache-friendly and simpler to initialise from static literals. It is mostly a
+readability choice here, but the same layout can be a genuine performance win when you iterate over
+one field at a time.
+</p>
+
+<h4>Computing only the needed quantity</h4>
+<p>
+The C encoder accumulates only the minimal numeral's length, never building the string, because the
+answer needs only counts. Skipping the allocation and copy avoids work that would be immediately
+discarded. "Compute the minimum information needed to answer the question" is a standard discipline
+that matters most in inner loops. Python builds the string for clarity, which is free at this scale.
+</p>
+
+<h4>Single-allocation file reading in C</h4>
+<p>
+The C helper reads the whole file into one null-terminated buffer and then processes it with
+pointers. This eliminates per-line allocations and repeated system calls and is the idiomatic
+baseline for small-to-medium files.
+</p>
+
+<h4>Generator expression inside max() in Python</h4>
+<p>
+<code>max((value, numeral) for value, numeral in numerals.items() if value &lt;= number)</code>
+filters and reduces in one
+<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
+with no intermediate list. Python compares tuples lexicographically, so maximising
+<code>(value, numeral)</code> maximises by value first - exactly what I want. This filter-then-reduce
+idiom appears whenever you need the best item from a filtered collection.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is to route through a neutral intermediate form: convert each numeral to an
+integer, then re-encode minimally. This sidesteps the messy alternative of trying to spot and rewrite
+non-minimal patterns in place. The integer is unambiguous, and the
+<a href="https://en.wikipedia.org/wiki/Greedy_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">greedy</a>
+table-driven encoder always produces the unique shortest numeral, so correctness comes almost for
+free.
+</p>
+
+<p>
+Both implementations are correct and produce 743. The C version runs in about 0.0001 s versus the
+Python version's 0.0086 s - roughly 80x faster, thanks to single-allocation I/O, a
+<code>switch</code>-based lookup, and computing only lengths. At a thousand lines, though, both
+finish effectively instantly; the C version is interesting more as a demonstration of tight I/O and
+avoided work than as a practical necessity.
+</p>
+
+<ul>
+<li>When normalising or canonicalising a representation, convert to a neutral intermediate form and
+re-encode, rather than patching the original in place.</li>
+<li>Greedy is optimal when the locally largest choice can never block a better global outcome -
+denomination-style problems are the classic example.</li>
+<li>Encode domain rules in a sorted lookup table and write a generic consume-the-largest loop to keep
+logic simple and data easy to verify.</li>
+<li>Scanning in the direction that reveals the deciding neighbour first removes the need for
+look-ahead and special cases.</li>
+<li>In C, read whole small files into one buffer and process with pointer arithmetic to avoid
+per-line allocation overhead.</li>
+<li>Compute only the derived quantity you actually need; do not build full values that will be
+discarded.</li>
+</ul>
+
+</article>

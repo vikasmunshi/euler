@@ -1,0 +1,50 @@
+html, body {
+    margin: 0;
+    height: 100%;
+    background: #1e1e1e;
+}
+#terminal {
+    position: absolute;
+    inset: 0;
+    /* A little more room on the right so the scrollbar/last column
+       isn't flush to the window edge. */
+    padding: 6px 14px 6px 8px;
+    box-sizing: border-box;
+}
+/* Reserve a gutter for the scrollbar so it never overlaps the shell's
+   rendered box border. The FitAddon subtracts .xterm's padding-right
+   when sizing the grid, so the rightmost column ends before the gutter
+   — this works even with overlay scrollbars (measured width 0), which
+   is the case where the bar otherwise draws over the last column. */
+.xterm {
+    padding-right: 12px;
+}
+/* Thin, dark scrollbar (Firefox + WebKit) sitting in that gutter. */
+.xterm-viewport {
+    scrollbar-width: thin;
+    scrollbar-color: #44475a transparent;
+}
+.xterm-viewport::-webkit-scrollbar {
+    width: 8px;
+}
+.xterm-viewport::-webkit-scrollbar-track {
+    background: transparent;
+}
+.xterm-viewport::-webkit-scrollbar-thumb {
+    background: #44475a;
+    border-radius: 4px;
+}
+#status {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    font: 12px/1.4 monospace;
+    color: #888;
+    background: rgba(30, 30, 30, 0.8);
+    padding: 2px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+#status.error { color: #e06c75; }
+#status.open { color: #98c379; }

@@ -5,12 +5,12 @@ from __future__ import annotations
 
 import fractions
 import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 def e_denominator(n: int) -> int:
+    """Return the n-th partial quotient of e: 2 at n==1, 2*(n/3) when 3 | n, else 1."""
     if n == 1:
         return 2
     elif n % 3 == 0:
@@ -20,12 +20,14 @@ def e_denominator(n: int) -> int:
 
 
 def nth_convergent_of_e(n: int, *, _n: int = 1) -> fractions.Fraction | int:
+    """Evaluate the n-th convergent exactly by recursing to depth n and unwinding a + 1/rest."""
     if n == _n:
         return e_denominator(_n)
     return e_denominator(_n) + fractions.Fraction(1, nth_convergent_of_e(n, _n=_n + 1))
 
 
 def sum_digits(n: int) -> int:
+    """Sum the decimal digits of n via repeated mod-10 division."""
     total: int = 0
     while n:
         total += n % 10
@@ -33,41 +35,15 @@ def sum_digits(n: int) -> int:
     return total
 
 
-def solve(*, convergent_num: int) -> int:
-    return sum_digits(nth_convergent_of_e(convergent_num).numerator)
+@runner.main
+def solve(*args: str) -> str:
+    """Build the n-th convergent of e with exact Fraction arithmetic, then sum its numerator's
+    digits; recursion depth and rational sizes both grow with n, so cost is ~O(n^2) digit-ops."""
+    convergent_num = runner.parse_int(args[0])
+    sys.setrecursionlimit(10 ** 6)
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sum_digits(nth_convergent_of_e(convergent_num).numerator))
 
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(10**6)
-    raise SystemExit(main(convergent_num=int(argv[1])))
+    raise SystemExit(solve())

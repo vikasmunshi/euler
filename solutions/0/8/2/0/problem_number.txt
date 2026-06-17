@@ -1,1 +1,0 @@
-820:$N$<sup>th</sup> Digit of Reciprocals:2

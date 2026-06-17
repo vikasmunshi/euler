@@ -34,12 +34,22 @@ dev = [
 ]
 show = [
     "matplotlib",
+    "pychrome",
     "PyQt5",
 ]
+web = [
+    "aiohttp",
+]
 solutions = [
+    # NOTE: `pip install primesieve` builds only the base extension; its optional
+    # `primesieve.numpy` extension must be built from source against NumPy 2.x via
+    # ./scripts/setup/primesieve_numpy_extension.sh (see [tool.setup.primesieve-numpy]).
+    # cython / numpy / setuptools below are the build deps that script relies on.
+    "cython",
     "mpmath",
     "numpy",
-    "pyprimesieve",
+    "primesieve",
+    "setuptools",
 ]
 
 
@@ -47,7 +57,7 @@ solutions = [
 # Install with: ./scripts/setup_dev_env.sh install python primesieve c
 #
 #   python      — Python 3.14 runtime + venv (via ppa:deadsnakes/ppa)
-#   primesieve  — primesieve, libprimesieve-dev (required to build pyprimesieve)
+#   primesieve  — primesieve, libprimesieve-dev (required to build primesieve)
 #   c           — gcc, build-essential, etc. (required to compile C extensions)
 [tool.setup.system-dependencies]
 script = "./scripts/setup/dev_env.sh"
@@ -62,8 +72,17 @@ apt = [
     "gcc",
 ]
 
+# Post-install build of the optional `primesieve.numpy` extension.
+# The PyPI sdist ships a NumPy-1.x-era pre-generated C++ that won't compile under
+# NumPy 2.x, so the extension is re-Cythonized and installed from source.
+# Run with: ./scripts/setup/primesieve_numpy_extension.sh install
+[tool.setup.primesieve-numpy]
+script = "./scripts/setup/primesieve_numpy_extension.sh"
+actions = ["install", "check", "uninstall"]
+
 [project.scripts]
 solver = "solver.main:main"
+solver-web = "solver.web.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

@@ -1,0 +1,87 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+This problem asks for the minimum-cost path through a square grid, starting at the top-left cell and ending at the bottom-right, where the only legal moves are one step right or one step down. The structural observation that makes this tractable is that the movement restriction sharply limits how a path can arrive at any cell: a cell at position (r, c) can only be reached from the cell directly above it, (r-1, c), or the one directly to its left, (r, c-1). Consequently, the cheapest route through (r, c) depends only on the cheapest routes to its two neighbours plus its own value. This property - that the best solution to the whole problem can be assembled from the best solutions to smaller, overlapping sub-problems - is called <a href="https://en.wikipedia.org/wiki/Optimal_substructure" class="reference-source" target="_blank" rel="noopener noreferrer">optimal substructure</a>, and it is the hallmark of a problem amenable to <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> (DP), a technique that solves a problem by caching and reusing answers to sub-problems instead of re-deriving them.
+</p>
+
+<p>
+A brute-force enumeration of every right/down path is hopeless: the number of monotone paths across an N x N grid grows like a central <a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a>, which is exponential in N. <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">Dynamic programming</a> collapses this entirely. Let <code>cost[r][c]</code> be the minimum cost to travel from (r, c) to the bottom-right corner. Then <code>cost[r][c] = matrix[r][c] + min(cost[r+1][c], cost[r][c+1])</code>, with the bottom-right corner as the base case - it has no successors, so its cost is just its own value. Each of the N x N cells is computed once with constant work, so the algorithm runs in O(N^2) time and, by overwriting the matrix in place, O(1) extra space. For the 80 x 80 grid that is only 6400 cells - trivially fast. It also helps to see the grid as a <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" class="reference-source" target="_blank" rel="noopener noreferrer">directed acyclic graph</a> (DAG), where each cell is a node and each legal move is a directed edge; shortest-path DP on a DAG is always linear in nodes plus edges.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Diagonal Backward-Fill (Python and C)</h4>
+
+<p>
+Both the Python and C solutions implement the same algorithm, which I call "diagonal backward-fill". Rather than allocating a separate DP table, I overwrite each cell of the matrix with the minimum cost to reach the bottom-right corner from that cell. I process cells in reverse, walking from the bottom-right corner toward the top-left in <a href="https://en.wikipedia.org/wiki/Diagonal" class="reference-source" target="_blank" rel="noopener noreferrer">anti-diagonal</a> bands. An anti-diagonal is the set of cells where (r + c) is constant; all such cells are the same number of steps from the corner, so they are mutually independent and can be visited in any order within a band.
+</p>
+
+<p>
+The traversal order is dictated by the recurrence. When I compute <code>cost[r][c]</code>, I need its right neighbour (r, c+1) and its lower neighbour (r+1, c) to already hold their final values. Both of those lie on an anti-diagonal closer to the bottom-right corner, so visiting diagonals in reverse guarantees the dependency is satisfied. This is precisely a <a href="https://en.wikipedia.org/wiki/Topological_sorting" class="reference-source" target="_blank" rel="noopener noreferrer">topological sort</a> of the cell-dependency <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" class="reference-source" target="_blank" rel="noopener noreferrer">DAG</a>, but it exploits the regular grid layout so no explicit graph is ever built. I chose this reverse-diagonal sweep specifically because it lets me reuse the input matrix as the DP table: every cell is read and finalised before any cell that depends on it is overwritten.
+</p>
+
+<p>
+For each cell I collect whichever of the two successor neighbours exist (the bottom-right corner has neither, the last row has only a right neighbour, the last column only a lower one), add the smaller of them to the cell's own value, and write the result back. When the walk finishes, <code>matrix[0][0]</code> holds the answer. In Python the traversal order is produced by the <a href="https://wiki.python.org/moin/Generators" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> <code>move_diagonally</code>, which yields one (row, col) pair at a time; the C version pre-computes the identical sequence into two parallel arrays <code>rows</code> and <code>cols</code> via <code>move_diagonally_all</code>, then iterates over them. The logic is identical - the difference is Python's lazy <a href="https://wiki.python.org/moin/Generators" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> versus C's eager arrays. The neighbour bookkeeping differs only slightly: Python builds a small list and uses <code>min(neighbors, default=0)</code> to handle the empty case, while C tracks a running minimum initialised to -1 as a sentinel meaning "no neighbour yet".
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Generator Functions for Sequence Abstraction</h4>
+
+<p>
+The Python <code>move_diagonally</code> function is a <a href="https://wiki.python.org/moin/Generators" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a>: it uses <code>yield</code> to emit (row, col) pairs one at a time instead of returning a full list. This cleanly separates "what order do I visit cells" from "what do I do at each cell", letting each be read and tested in isolation. It also avoids allocating an O(N^2) list of coordinates. I reach for a <a href="https://wiki.python.org/moin/Generators" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> whenever I want to iterate a complex or large sequence lazily while keeping the iteration logic readable and reusable.
+</p>
+
+<h4>In-Place DP Table Reuse</h4>
+
+<p>
+Both solutions reuse the input matrix as the <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">DP</a> table rather than allocating a second array. This halves memory and removes an initialisation pass. It is safe here precisely because the reverse-diagonal order guarantees every cell's original value is read, and the neighbours it consults are already finalised, before that cell is overwritten. This pattern applies whenever the update formula only reads cells that have already reached their final value in the current pass - always verify that invariant before mutating in place.
+</p>
+
+<h4>Sentinel Values for "No Value Yet"</h4>
+
+<p>
+The C code uses <code>min_neighbor = -1</code> as a <a href="https://en.wikipedia.org/wiki/Sentinel_value" class="reference-source" target="_blank" rel="noopener noreferrer">sentinel value</a> meaning "no valid neighbour seen". Since all grid values are non-negative, -1 can never be a legitimate cost, so the check <code>min_neighbor >= 0</code> cleanly distinguishes the corner base case from a real minimum. Python achieves the same effect more declaratively with <code>min(neighbors, default=0)</code>, supplying a default for an empty iterable. <a href="https://en.wikipedia.org/wiki/Sentinel_value" class="reference-source" target="_blank" rel="noopener noreferrer">Sentinel values</a> are a lightweight way to encode "absent" without an extra boolean flag, but they demand a value outside the legal data range to remain unambiguous.
+</p>
+
+<h4>Walrus Operator for Inline Assignment</h4>
+
+<p>
+The Python solution writes <code>move_diagonally((size := len(matrix)))</code>, using the <a href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> to compute and name <code>size</code> in a single expression so it can be reused in the loop body without a separate statement. It is most valuable inside comprehensions or call arguments, where introducing a standalone assignment would force restructuring.
+</p>
+
+<h4>Static Fixed-Size Arrays in C</h4>
+
+<p>
+The C solution declares <code>matrix</code> as a file-scope <code>static</code> array sized to the known maximum (80 x 80). For a problem with a small, fixed upper bound this avoids dynamic allocation, makes bounds visible at compile time, and removes allocation-failure handling for the main data structure. The traversal index arrays, whose exact size is known only at runtime, are allocated with <a href="https://en.cppreference.com/w/c/memory/malloc" class="reference-source" target="_blank" rel="noopener noreferrer">malloc</a> and freed promptly. Choosing static storage for bounded inputs and dynamic storage only where genuinely needed is a sound default in C.
+</p>
+
+<h4>Tokenising CSV with strtok</h4>
+
+<p>
+The C parser splits each line on commas with <a href="https://en.cppreference.com/w/c/string/byte/strtok" class="reference-source" target="_blank" rel="noopener noreferrer">strtok</a> and converts tokens with <a href="https://en.cppreference.com/w/c/string/byte/atoi" class="reference-source" target="_blank" rel="noopener noreferrer">atoi</a>, skipping leading spaces and carriage returns. Note that <a href="https://en.cppreference.com/w/c/string/byte/strtok" class="reference-source" target="_blank" rel="noopener noreferrer">strtok</a> mutates its input buffer and keeps internal state, so the code first copies each line into a local buffer rather than tokenising the shared file contents. Be mindful of these side effects in concurrent code or whenever the original string must survive.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is that restricting movement to right and down collapses an apparently exponential path search into a linear-time <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> sweep: every cell has at most two successors, which yields a clean recurrence and a natural evaluation order. Once that <a href="https://en.wikipedia.org/wiki/Optimal_substructure" class="reference-source" target="_blank" rel="noopener noreferrer">optimal substructure</a> is recognised, the implementation is almost mechanical.
+</p>
+
+<p>
+Both solutions implement the same algorithm, so the benchmark gap reflects language rather than algorithmic differences. On the 80 x 80 main input the C build runs in about 0.0002 s and the Python version in about 0.0019 s - roughly a 10x difference typical of compiled versus interpreted code. On the small dev grid both register 0.0000 s. At this scale both are effectively instantaneous, which confirms that algorithm choice dominates language choice here; the C version's edge would only matter for far larger grids or many repeated runs.
+</p>
+
+<ul>
+  <li>When movement on a grid is restricted to a fixed set of directions, look for a DP recurrence - the limited set of predecessors is exactly what makes DP applicable.</li>
+  <li>Process cells in reverse topological order (here, reverse anti-diagonals) so you can update in place without a separate output array.</li>
+  <li>In-place table reuse halves memory and skips initialisation; confirm the traversal always reads finalised neighbours before mutating.</li>
+  <li>Generator functions encapsulate a complex traversal order, keeping "what order" independent of "what action".</li>
+  <li>Use a sentinel outside the legal data range (or a default value) to represent "absent" without an extra flag.</li>
+  <li>For inputs with a known small bound, prefer static fixed-size arrays in C; reserve dynamic allocation for sizes known only at runtime.</li>
+  <li>Treat a regular grid as a DAG: cells are nodes, legal moves are edges, and shortest-path DP on a DAG is O(V + E).</li>
+</ul>
+
+</article>

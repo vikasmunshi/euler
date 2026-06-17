@@ -1,0 +1,6 @@
+{
+  "server_port": 8080,
+  "timeout_multiple": 30.0,
+  "timeout_single": 90.0,
+  "usd_to_eur": 0.92
+}

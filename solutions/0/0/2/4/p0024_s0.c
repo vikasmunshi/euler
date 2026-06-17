@@ -1,9 +1,7 @@
 /* Solution to Euler Problem 24: Lexicographic Permutations. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
+/* n! for small n; long long comfortably holds 9! = 362880. */
 static long long factorial(int n) {
     long long result = 1;
     for (int i = 2; i <= n; i++) {
@@ -48,63 +46,10 @@ static char *recursive_solution(const char *digits, long long permutation_number
     return result;
 }
 
-char *solve(int argc, char *argv[]) {
+/* Recursive unranking via the factorial number system, same algorithm as the
+   Python sibling: divmod the 0-based rank by (len-1)! to pick each digit; O(n^2). */
+const char *solve(int argc, char *argv[]) {
     const char *digits = argv[1];
-    long long permutation_number = atoll(argv[2]);
+    long long permutation_number = parse_int(argv[2]);
     return recursive_solution(digits, permutation_number);
-}
-
-/* Usage: ./file <digits> <permutation_number> [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result) {
-            if (strcmp(cur, result) != 0) {
-                fprintf(stderr, "Expected consistent result, got %s previous result=%s\n",
-                        cur, result);
-                rc = 1;
-            }
-            free(cur);
-        } else {
-            result = cur;
-            has_result = 1;
-        }
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "");
-    free(result);
-    return rc;
 }

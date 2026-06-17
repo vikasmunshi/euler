@@ -1,9 +1,12 @@
 /* Solution to Euler Problem 66: Diophantine Equation. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "runner.h"
 #include <math.h>
-#include <time.h>
+
+/*
+ * Pell's equation x^2 - D*y^2 = 1: the fundamental solution is found among the
+ * continued-fraction convergents of sqrt(D), with the period parity selecting
+ * the convergent index. O(D * sqrt(D)) big-integer operations for D up to max_d.
+ */
 
 /* Big integer: array of digits in base 10^9, little-endian */
 #define BASE 1000000000ULL
@@ -14,11 +17,13 @@ typedef struct {
     int len;
 } BigInt;
 
+/* Set a BigInt to zero (length 1, single zero limb). */
 static void bi_zero(BigInt *a) {
     memset(a->d, 0, sizeof(a->d));
     a->len = 1;
 }
 
+/* Initialise a BigInt from a 64-bit value, spilling into a second limb if needed. */
 static void bi_set(BigInt *a, unsigned long long v) {
     bi_zero(a);
     a->d[0] = v % BASE;
@@ -30,11 +35,13 @@ static void bi_set(BigInt *a, unsigned long long v) {
     }
 }
 
+/* Copy b into a, limbs and length. */
 static void bi_copy(BigInt *a, const BigInt *b) {
     memcpy(a->d, b->d, (size_t)b->len * sizeof(unsigned long long));
     a->len = b->len;
 }
 
+/* Compare two BigInts, returning -1, 0, or 1. */
 static int bi_cmp(const BigInt *a, const BigInt *b) {
     if (a->len != b->len) return a->len < b->len ? -1 : 1;
     for (int i = a->len - 1; i >= 0; i--) {
@@ -43,6 +50,7 @@ static int bi_cmp(const BigInt *a, const BigInt *b) {
     return 0;
 }
 
+/* Schoolbook addition result = a + b with carry propagation in base 10^9. */
 static void bi_add(BigInt *result, const BigInt *a, const BigInt *b) {
     int maxlen = a->len > b->len ? a->len : b->len;
     unsigned long long carry = 0;
@@ -58,6 +66,7 @@ static void bi_add(BigInt *result, const BigInt *a, const BigInt *b) {
     while (result->len > 1 && result->d[result->len-1] == 0) result->len--;
 }
 
+/* Multiply a BigInt by a small scalar; the 128-bit product avoids limb overflow. */
 static void bi_mul_small(BigInt *result, const BigInt *a, unsigned long long small) {
     if (small == 0) { bi_zero(result); return; }
     unsigned long long carry = 0;
@@ -72,6 +81,7 @@ static void bi_mul_small(BigInt *result, const BigInt *a, unsigned long long sma
     while (result->len > 1 && result->d[result->len-1] == 0) result->len--;
 }
 
+/* Generate one full period of the continued fraction of sqrt(D); stops at term 2*a0. */
 static void compute_cf(int d, int *cf, int *cf_len) {
     int a0 = (int)floor(sqrt((double)d));
     cf[0] = a0;
@@ -85,6 +95,7 @@ static void compute_cf(int d, int *cf, int *cf_len) {
     }
 }
 
+/* Evaluate the n-th convergent backward (innermost term first), cycling the periodic part. */
 static void compute_nth_convergent(int *cf, int cf_len, int n, BigInt *num_out, BigInt *den_out) {
     int period_length = cf_len - 1;
 
@@ -112,6 +123,7 @@ static void compute_nth_convergent(int *cf, int cf_len, int n, BigInt *num_out, 
     }
 }
 
+/* Fundamental x for D: convergent index 2*L-3 if period L is even, else L-2 (perfect squares give 1). */
 static void find_fundamental_x(int d, BigInt *best_x) {
     double sq = sqrt((double)d);
     if (sq == floor(sq)) {
@@ -134,8 +146,13 @@ static void find_fundamental_x(int d, BigInt *best_x) {
     compute_nth_convergent(cf, cf_len, n, best_x, &den);
 }
 
-long long solve(int argc, char *argv[]) {
-    int max_d = atoi(argv[1]);
+/*
+ * Scan non-square D in [2, max_d], take the fundamental Pell x from continued-fraction
+ * convergents of sqrt(D), and report the D maximising x. O(max_d * sqrt(max_d)) big-int ops.
+ */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int max_d = parse_int(argv[1]);
 
     int best_d = -1;
     BigInt best_x;
@@ -154,55 +171,5 @@ long long solve(int argc, char *argv[]) {
         }
     }
 
-    return (long long)best_d;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)best_d)); return _answer; }
 }

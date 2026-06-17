@@ -1,0 +1,152 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+The task is to compute 2 raised to the 1000th power and sum the decimal digits of the result. The
+mathematical content is modest, but the implementation challenge is real: 2^1000 has roughly
+<code>ceil(1000 * log10(2)) = 302</code> decimal digits. That figure comes from the observation that
+the number of base-10 digits of a positive integer <em>n</em> is <code>floor(log10(n)) + 1</code>,
+and <code>log10(2^1000) = 1000 * log10(2)</code>. A 302-digit number dwarfs the capacity of any
+native integer type in C, where even a 64-bit <code>unsigned long long</code> tops out near 19 decimal
+digits. We therefore need
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>
+- the ability to represent and manipulate integers whose size is bounded only by available memory.
+</p>
+<p>
+The key observation that makes the problem tractable is that we only ever need the <em>decimal</em>
+representation of the result, never its binary form. If we maintain the number as an array of base-10
+digits throughout the computation, then extracting the digit sum at the end is a trivial linear pass.
+The natural algorithm is repeated multiplication: start at 1 and multiply by the base <em>power</em>
+times. Each multiplication is a
+<a href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">schoolbook (long) multiplication</a>
+that walks across all current digits once, propagating a carry. With <em>P</em> multiplications over a
+result of up to <em>D</em> digits (and <code>D ~ 0.301 * P</code>), the total cost is O(P * D) = O(P^2).
+For P = 1000 that is about 300,000 digit operations - instantaneous on modern hardware.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Algorithm 0 - Repeated decimal multiplication (C and Python)</h4>
+<p>
+Both files implement the same logical algorithm - compute <code>base^power</code> as an
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integer</a>,
+then sum its decimal digits - and differ only in how they realize that big integer.
+</p>
+<p>
+<strong>Python version.</strong> Python integers carry
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>
+built into the language, so I delegate the entire big-number problem to the runtime with the single
+expression <code>base**power</code>. That one operator produces the full 302-digit value. I then convert
+it to a string with <code>str(...)</code>, iterate over each character, convert each digit back to an
+integer with <code>int(i)</code>, and feed the stream into <code>sum(...)</code>. The whole solve body is
+one line: <code>sum((int(i) for i in str(base**power)))</code>. This is correct, idiomatic, and concise;
+the cost is that I cede control of the internal representation to the interpreter, which here is
+entirely acceptable.
+</p>
+<p>
+<strong>C version.</strong> C has no native
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>,
+so I built one by hand as an array of <code>unsigned char</code>, each element holding a single decimal
+digit (0-9), with the least-significant digit at index 0 - a
+<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+layout. The steps:
+</p>
+<ul>
+  <li><strong>Allocate.</strong> I compute an upper bound on the digit count as
+      <code>(int)(power * 0.30103 + 10) + 10</code>, where 0.30103 approximates <code>log10(2)</code>,
+      and call <code>calloc</code> to obtain a zero-initialized array. The size formula and the safety
+      margin guarantee no reallocation is ever needed.</li>
+  <li><strong>Initialize.</strong> I set <code>digits[0] = 1</code> and <code>len = 1</code>, representing
+      the value 1.</li>
+  <li><strong>Multiply.</strong> I loop <code>power</code> times, each iteration a
+      <a href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">schoolbook (long) multiplication</a>
+      by the base: I walk positions <code>j = 0..len-1</code>, computing
+      <code>val = digits[j] * base + carry</code>, storing <code>val % 10</code> back, and carrying
+      <code>val / 10</code> forward. After the digits are exhausted, any remaining carry is appended as
+      new high-order digits via <code>digits[len++] = carry % 10</code> until the carry is consumed.</li>
+  <li><strong>Sum.</strong> A final linear pass accumulates all digits into a <code>long long</code>.</li>
+</ul>
+<p>
+The crucial design decision is the
+<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+digit order. Because carry propagates from the least-significant position upward - the same direction as
+the loop - the array grows naturally at its high end with a simple append. A big-endian layout would
+force either backward iteration or a final reversal, adding complexity for no benefit.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Generator expressions for digit extraction (Python)</h4>
+<p>
+The expression <code>(int(i) for i in str(base**power))</code> is a
+<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>:
+a lazy iterator that yields one converted digit at a time rather than materializing a list. Since
+<code>sum()</code> consumes values incrementally, the peak memory is one accumulator plus a single
+character, not a 302-element list. The saving is negligible at this scale, but the idiom is worth
+internalizing: whenever you would write <code>sum([f(x) for x in seq])</code> - a
+<a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions" class="reference-source" target="_blank" rel="noopener noreferrer">list comprehension</a>
+inside an aggregator - drop the brackets to get the
+<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
+<code>sum(f(x) for x in seq)</code> and avoid the intermediate allocation.
+</p>
+
+<h4>Little-endian digit arrays in C</h4>
+<p>
+Storing the least-significant digit at index 0 -
+<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+order - aligns the array's growth direction with the natural flow of carry propagation in addition and
+multiplication. Extending the number is then a single write, <code>digits[len++] = ...</code>. This is the
+standard layout in competitive programming and in big-integer libraries, precisely because it keeps the
+inner loop branch-free and the extension cheap.
+</p>
+
+<h4>Static pre-allocation from an analytical bound</h4>
+<p>
+Instead of growing the buffer with <code>realloc</code>, I derive an upper bound on the output size
+before the loop using <code>power * log10(base)</code> (with <code>log10(2) ~ 0.30103</code> hard-coded)
+plus a small margin, then allocate once with <code>calloc</code>. The zero-initialization conveniently
+sets every unused digit to 0. Reach for this pattern whenever the output size has a closed-form bound -
+common in number-theory problems where digit counts obey logarithmic laws - because it eliminates
+reallocation overhead and keeps the hot loop tight.
+</p>
+
+<h4>Separating solve logic from the timing harness</h4>
+<p>
+Both files isolate the pure computation in a <code>solve</code> function, keeping argument parsing,
+repeated-run timing, and the result-consistency check in the runner harness. A side-effect-free
+computation that takes its inputs as parameters is easy to read in isolation, easy to benchmark by
+calling it repeatedly, and easy to test. This is a habit worth carrying into every project.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is to choose a representation that matches what the problem ultimately asks.
+Since the answer is a digit sum, working in base 10 throughout makes the final step a trivial O(D)
+pass and sidesteps any base conversion. Pick the data layout to serve the output requirement, not just
+the intermediate arithmetic.
+</p>
+<p>
+The benchmark results expose a surprising performance inversion. On the main case (2^1000) both
+solutions are effectively instantaneous - the C run measured 0.000282 s and Python 0.0000165 s. But on
+the hardest case (2^10000), the C solution takes about 0.0273 s while Python finishes in roughly
+0.000236 s - more than a hundredfold faster. The reason is algorithmic, not linguistic: my hand-rolled C
+uses the naive O(P^2)
+<a href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">schoolbook multiplication</a>,
+whereas CPython's
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+runtime switches to sub-quadratic
+<a href="https://en.wikipedia.org/wiki/Karatsuba_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Karatsuba multiplication</a>
+for large operands, all implemented in optimized C. For this problem the Python solution is both more
+elegant and, at scale, faster - a vivid reminder that a superior algorithm in a "slow" language can
+beat a naive one in a "fast" language.
+</p>
+<ul>
+  <li>When native integer types overflow, pick a representation aligned with the final question - if you need digit sums, work directly in base 10.</li>
+  <li>Use <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a> digit arrays for manual big integers: carry propagation and array growth both flow in the same, simple direction.</li>
+  <li>Pre-allocate from an analytical upper bound when one exists; it removes reallocation overhead and simplifies the inner loop.</li>
+  <li>Prefer a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> over a <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions" class="reference-source" target="_blank" rel="noopener noreferrer">list comprehension</a> when an aggregator like <code>sum()</code> consumes the values immediately.</li>
+  <li>Always weigh the algorithmic complexity of a library call, not just language overhead - a well-chosen library can outpace hand-written naive code.</li>
+  <li>Keep pure computation free of I/O and separate from timing and parsing scaffolding to ease reading, testing, and benchmarking.</li>
+</ul>
+
+</article>

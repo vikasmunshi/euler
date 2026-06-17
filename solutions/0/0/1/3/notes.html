@@ -1,0 +1,198 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The task is to compute the exact sum of one hundred 50-digit integers and report its leading ten
+digits. The mathematical difficulty is purely one of magnitude: a 50-digit number is far beyond
+the range of a 64-bit integer, which tops out around 18 to 19 decimal digits (the maximum unsigned
+64-bit value is roughly 1.8 x 10^19). Any attempt at naive machine arithmetic would overflow
+silently and produce garbage. The solution therefore requires
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>,
+which means working with numbers whose digit count is bounded only by available memory, not by a
+fixed machine word size.
+</p>
+
+<p>
+The key observation that keeps this cheap is about how addition propagates information. In base 10
+addition, a <a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+only ever moves from a less-significant digit toward a more-significant one - never the reverse.
+This means the high-order digits of the result depend only on the high-order digits of the inputs
+plus whatever <a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+bubbles up from below. Summing 100 numbers can generate a
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+of at most about <code>log10(100) = 2</code> extra digit positions into the leading region. So if I
+only need the first 10 digits, I do not have to carry all 50 digits to full precision: keeping a
+small number of guard digits beyond the ten I want is enough to capture every
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+that could influence the answer. The asymptotic complexity is O(N x D), where N = 100 is the count
+of numbers and D is the number of digits processed per number. For this fixed input that is
+effectively constant work, and both implementations run in indistinguishable-from-zero time.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Algorithm 0 - Prefix Truncation with Big-Integer or Manual Digit Addition</h4>
+
+<p>
+Both the Python and C solutions share one strategy: rather than summing the full 50-digit numbers
+and slicing the prefix off the end, they truncate each operand to its first <code>digits + 1</code>
+characters before summing. That single extra digit is the guard digit - it absorbs any
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+that would otherwise have crept up from the discarded lower positions. The result is then trimmed to
+the requested number of leading digits.
+</p>
+
+<p>
+The Python version leans entirely on the language's native
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a>.
+Each line of the multiline data string is sliced with <code>i[: digits + 1]</code>, converted with
+<code>int()</code>, and fed into <code>sum()</code>:
+<code>str(sum([int(i[: digits + 1]) for i in numbers.splitlines() if i != ""]))[:digits]</code>.
+Because Python's <code>int</code> grows to whatever size it needs, the addition is exact and there
+is no overflow to reason about. The <code>splitlines()</code> call separates the embedded data into
+individual number strings and the <code>if i != ""</code> guard discards the empty trailing line.
+For the larger test cases (20 and 100 digits) the same code path works without modification - when
+<code>digits + 1</code> exceeds 50 the slice simply returns the whole number.
+</p>
+
+<p>
+The C version has no built-in big integer, so it makes the digit mechanics explicit. I maintain an
+accumulator array <code>acc[]</code> of length <code>use_digits + 4</code>, where
+<code>use_digits = min(digits + 1, 50)</code>. The four extra cells give headroom for the
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carries</a>
+produced by summing 100 numbers. The algorithm proceeds in two passes. First, an accumulation pass
+adds each input digit (converted from ASCII with <code>numbers[n][d] - '0'</code>) into its
+column of the accumulator, right-aligned. Each accumulator cell can therefore reach at most
+<code>9 x 100 = 900</code>, comfortably within the range of an <code>int</code>, so I need not
+normalize after every addition. Second, a pass that propagates the
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carries</a>
+sweeps right to left, pushing <code>acc[i] / 10</code> into the cell to the left and leaving
+<code>acc[i] % 10</code> behind. Finally I skip leading zeros, copy the first <code>digits</code>
+significant digits into a freshly <code>malloc</code>'d buffer, and return it to the caller, which
+is responsible for freeing it.
+</p>
+
+<p>
+The two implementations are algorithmically identical; the only difference is who manages the
+big-integer representation. Python delegates it to the runtime; C does it by hand with a digit
+array. Both pass all three test cases with identical answers.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Prefix Truncation as an Accuracy Guard</h4>
+
+<p>
+Instead of computing the full sum and then taking a prefix, I truncate each operand to a few more
+digits than I need. This is a deliberate precision trade: the guard digit captures the worst-case
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+from the dropped lower digits. The technique generalizes to any leading-digits-of-a-large-sum
+problem: compute how far a
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+could propagate - <code>ceil(log10(count))</code> extra positions for a sum of <code>count</code>
+terms - and keep that many guard digits. When the requested digit count meets or exceeds the
+operand width, the truncation degenerates to "use everything", which is why the same code handles
+both the 10-digit and 100-digit cases.
+</p>
+
+<h4>Native Arbitrary-Precision Integers in Python</h4>
+
+<p>
+Python's <code>int</code> has no fixed width and expands automatically, so
+<code>int("9194221336...")</code> just works on a 50-digit string. I exploit this by converting
+truncated strings directly to integers and letting <code>sum()</code> reduce them. Whenever a
+problem involves values that exceed 64 bits, the first question to ask is whether the language
+already provides exact
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a>
+- in Python it does, which often turns an overflow-handling problem into a one-liner.
+</p>
+
+<h4>List Comprehension Feeding a Reduction</h4>
+
+<p>
+The Python solution uses the transform-filter-reduce pattern in a single expression:
+<code>sum([int(i[: digits + 1]) for i in numbers.splitlines() if i != ""])</code>. The comprehension
+transforms each line into an integer, the <code>if</code> clause filters out the empty line, and
+<code>sum()</code> performs the reduction. This idiom keeps the core logic compact and readable.
+For only 100 elements, the choice between a list and a generator inside <code>sum()</code> is
+immaterial - I would prefer a generator for large or streaming inputs to avoid building the
+intermediate list.
+</p>
+
+<h4>Two-Pass Accumulate-Then-Carry Digit Addition in C</h4>
+
+<p>
+Rather than normalizing after every digit add, the C code accumulates all contributions into the
+array first and resolves the
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carries</a>
+in a single later pass. This is correct precisely because each column receives a bounded total (at
+most 900) that cannot overflow an <code>int</code>, so the intermediate "unnormalized"
+representation is safe. Separating accumulation from normalization is a standard big-integer
+technique that simplifies the inner loop and avoids interleaving the
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+logic with the addition logic - useful any time you add many numbers at once instead of pairwise.
+</p>
+
+<h4>Caller-Owned Dynamic Output Buffer in C</h4>
+
+<p>
+The C <code>solve</code> function allocates exactly <code>out_len + 1</code> bytes with
+<code>malloc</code> and returns the pointer, leaving the caller to <code>free</code> it. This
+avoids guessing a fixed buffer size at compile time and keeps the function usable for any requested
+digit count. Returning ownership of a heap buffer is a common C convention; the discipline to
+document and honor "caller frees" is what keeps it from leaking.
+</p>
+
+<h4>Embedding Fixed Data as Literals</h4>
+
+<p>
+Both solutions embed the hundred numbers directly in source - Python as one multiline string, C as
+a static array of <code>const char *</code>. For a small, immutable dataset this eliminates file
+I/O, makes the program self-contained, and keeps the data auditable in place. The trade-off (a
+larger source file) is well worth it when the data never changes; for large or variable datasets I
+would read from a file instead.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is that the leading digits of a large sum do not require computing the whole
+sum exactly. Because the
+<a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carries</a>
+only flow upward, a handful of guard digits beyond what you need suffices to pin down the answer.
+Both solutions are effectively instantaneous, but the recorded averages do separate them: on the
+main 10-digit case the C version runs in about 0.6 microseconds against roughly 15 microseconds for
+Python - some 25x faster - because it operates directly on machine ints and raw bytes while Python
+pays interpreter and big-integer object overhead on every line. The gap holds across the larger
+cases (about 2.8 microseconds versus 21 microseconds at 100 digits). Still, at microsecond scale the
+difference is academic. The Python version is the more elegant of the two, reducing the entire
+problem to a single expression by leaning on native
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a>,
+while the C version is the more instructive because it exposes the digit-level mechanics that Python
+hides. I would reach for the Python solution in practice and keep the C one as a teaching reference.
+</p>
+
+<ul>
+  <li>To find the leading digits of a large sum, truncate each operand to a few guard digits beyond
+  what you need - the
+  <a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carry</a>
+  from discarded digits spans at most <code>ceil(log10(count))</code> positions.</li>
+  <li>Check whether your language provides exact
+  <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a>
+  before hand-rolling big-number arithmetic; it can collapse an overflow problem into a one-liner.</li>
+  <li>When summing many numbers at once, accumulate first and normalize the
+  <a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carries</a>
+  in a separate pass - it is simpler and safe as long as column totals stay within the integer
+  range.</li>
+  <li>Return heap-allocated, exactly-sized buffers from C functions and document the ownership
+  contract instead of relying on fixed-size buffers chosen at compile time.</li>
+  <li>Embedding small fixed datasets as literals trades a larger source file for a self-contained,
+  I/O-free program - a good deal when the data is constant.</li>
+  <li>Always reason about how information propagates (here, the
+  <a href="https://en.wikipedia.org/wiki/Carry_(arithmetic)" class="reference-source" target="_blank" rel="noopener noreferrer">carries</a>
+  move only one direction); that structural insight is often what lets you avoid full-precision
+  computation.</li>
+</ul>
+
+</article>

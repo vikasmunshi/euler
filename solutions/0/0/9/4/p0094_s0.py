@@ -3,49 +3,26 @@
 """ Solution to Euler Problem 94: Almost Equilateral Triangles [Level 14]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def solve(*, max_perimeter: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Generate valid perimeters via the Pell recurrence x^2 - 3 y^2 = 1; O(log N).
+
+    The integral-area condition reduces to a Pell-type equation whose solutions follow a
+    linear recurrence; both triangle families (third side a+1 and a-1) are interleaved
+    into one increasing sequence using the sign alternator m, so terms grow ~4x per step.
+    """
+    max_perimeter = runner.parse_int(args[0])
+
     s, s1, s2, m, p = (0, 1, 1, 1, 0)
     while p <= max_perimeter:
+        # Parallel assignment evaluates all old values first: new s2 uses old s1/s2, new m flips.
         s, s1, s2, m = (s + p, s2, 4 * s2 - s1 + 2 * m, -m)
         p = 3 * s2 - m
-    return s
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(s)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_perimeter=int(argv[1])))
+    raise SystemExit(solve())

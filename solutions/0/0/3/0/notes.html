@@ -1,0 +1,179 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+I want every integer with more than one digit that equals the sum of the fifth powers of its own
+digits. Numbers with this self-referential property are called
+<a href="https://en.wikipedia.org/wiki/Narcissistic_number" class="reference-source" target="_blank" rel="noopener noreferrer">narcissistic numbers</a>
+(also "Armstrong numbers") for the chosen exponent. The single-digit case is excluded because
+<code>1 = 1^5</code> is a value, not a sum. At first glance the search looks unbounded - there are
+infinitely many integers - so the first and most important job is to derive a finite ceiling beyond
+which no solution can exist.
+</p>
+<p>
+The bound comes from a counting argument. For exponent <em>n</em>, the largest digit-power sum a
+<em>k</em>-digit number can produce is <code>k * 9^n</code> (every digit a 9). But the smallest
+<em>k</em>-digit number is <code>10^(k-1)</code>. Once <code>k * 9^n</code> has fewer digits than
+<em>k</em> itself, no <em>k</em>-digit number can equal its own digit-power sum, and the search must
+terminate. Taking the
+<a href="https://en.wikipedia.org/wiki/Common_logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">base-10 logarithm</a>
+of <code>n * 9^n</code> and rounding up gives the maximum number of digits any candidate can have;
+for <em>n = 5</em> this works out to 6 digits. The second key observation is that the digit-power
+sum depends only on the <em>multiset</em> of digits, not their order, because addition is
+commutative. So rather than scanning up to a million integers, I enumerate only sorted digit
+combinations using
+<a href="https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition" class="reference-source" target="_blank" rel="noopener noreferrer">combinations with replacement</a>.
+The number of such multisets of length <em>k</em> from 10 digits is <code>C(10+k-1, k)</code> - a
+few thousand for <em>k = 6</em> rather than a million. The complexity is therefore
+<code>O(C(10+k-1, k) * k)</code>, which is trivially small.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Combinations-with-replacement enumeration (Python and C)</h4>
+<p>
+Both files implement the same algorithm, so I describe it once and note language differences at the
+end.
+</p>
+<p>
+<strong>Step 1 - compute the search width.</strong> I evaluate
+<code>k = ceil(log10(n * 9^n))</code> to fix the number of digits I will enumerate. I use exactly
+this length and no fewer because any narcissistic number with fewer digits is still discovered: its
+missing leading positions simply appear in the multiset as zeros, and <code>0^n = 0</code>
+contributes nothing to the sum. Enumerating a single fixed length keeps the loop structure clean - I
+do not need a separate pass per digit count.
+</p>
+<p>
+<strong>Step 2 - enumerate multisets.</strong> I walk over every non-decreasing sequence of length
+<em>k</em> drawn from <code>{0, ..., 9}</code>. In Python this is handed to me directly by
+<a href="https://docs.python.org/3/library/itertools.html#itertools.combinations_with_replacement" class="reference-source" target="_blank" rel="noopener noreferrer"><code>itertools.combinations_with_replacement</code></a>(<code>range(10), k</code>).
+In C, lacking such an iterator, I keep an integer array <code>indices[0..k-1]</code> and advance it
+lexicographically: find the rightmost position that is not yet 9, increment it, and flood-fill every
+position to its right with that same value. The flood-fill preserves the non-decreasing invariant
+and keeps each multiset in exactly one canonical form, so no
+<a href="https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition" class="reference-source" target="_blank" rel="noopener noreferrer">combination with replacement</a>
+is visited twice.
+</p>
+<p>
+<strong>Step 3 - candidate sum and verification.</strong> For each multiset I sum the <em>n</em>-th
+powers of its elements to get a candidate <code>num</code>. A multiset's sum is only a genuine
+<a href="https://en.wikipedia.org/wiki/Narcissistic_number" class="reference-source" target="_blank" rel="noopener noreferrer">narcissistic number</a>
+if the digits of <code>num</code> itself reproduce that sum. So I verify <code>num &gt; 9</code> (to
+drop the trivial single-digit cases) and that the digit-power sum of <code>num</code> equals
+<code>num</code>. In Python I re-expand via <code>str(num)</code> and sum the powers of each
+character; in C the helper <code>digit_power_sum</code> peels digits off with repeated
+<code>% 10</code> and <code>/ 10</code>.
+</p>
+<p>
+<strong>Language differences.</strong> The Python <code>solve</code> is a single
+<code>sum(...)</code> over a generator expression, using the
+<a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a>
+to bind <code>num</code> inline. The C version uses explicit loops, a manually advanced combination
+array, and an integer power helper instead of <code>pow()</code> in the hot path. The algorithm is
+identical; the C build is roughly 50x faster on the main case purely because of compiled native code
+versus interpreter overhead.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Combinations with replacement to eliminate redundant work</h4>
+<p>
+Rather than looping over a dense integer range, I loop over unordered multisets of digits. Because
+the digit-power sum is symmetric in its inputs, many distinct integers map to the same sum;
+enumerating only the canonical sorted form computes each sum once. I reach for
+<a href="https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition" class="reference-source" target="_blank" rel="noopener noreferrer">combinations with replacement</a>
+any time the quantity I am computing is invariant under permutation of its inputs - the savings are
+combinatorial.
+</p>
+
+<h4>Analytic upper bound before any loop</h4>
+<p>
+The closed-form ceiling <code>ceil(log10(n * 9^n))</code> converts a seemingly unbounded search into
+a finite one. The
+<a href="https://en.wikipedia.org/wiki/Common_logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">base-10 logarithm</a>
+counts the number of digits of a value, so comparing it against <em>k</em> directly answers "can a
+<em>k</em>-digit number still reach its own digit-power sum?". Whenever a problem looks infinite, I
+ask what the maximum possible value of the tracked quantity is; the answer often gives a tight,
+provable bound for free.
+</p>
+
+<h4>Walrus operator for inline binding (Python)</h4>
+<p>
+<code>num := sum(x**n for x in digits)</code> computes the candidate and binds it in one step inside
+the generator's filter, so the sum is not computed twice. I use the
+<a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a>
+whenever a value must be both tested and reused without breaking out of an expression.
+</p>
+
+<h4>Short-circuit ordering in conjunctions</h4>
+<p>
+The filter <code>num &gt; 9 and num == sum(...)</code> places the cheap comparison first.
+<a href="https://en.wikipedia.org/wiki/Short-circuit_evaluation" class="reference-source" target="_blank" rel="noopener noreferrer">Short-circuit evaluation</a>
+in Python (and C) stops at the first false term, so the expensive re-expansion only runs when the
+cheap guard passes. I always put the cheapest, most-discriminating test first in an <code>and</code>
+chain.
+</p>
+
+<h4>Manual lexicographic iterator in C</h4>
+<p>
+C has no combinations iterator, so I encode the current multiset in a fixed-length array and define a
+"find the rightmost non-maximal slot, increment, flood-fill right" advance rule, looping until it
+cannot advance. This produces every multiset in
+<a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic order</a>
+exactly once. This state-array-plus-next-state pattern is the standard way to enumerate any
+combinatorial structure in a language without a rich standard library.
+</p>
+
+<h4>Integer power helper instead of floating-point pow (C)</h4>
+<p>
+<code>ipow</code> multiplies in a loop using <code>long long</code>, avoiding the
+<a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a>
+rounding risk of <code>math.h</code>'s <code>pow()</code> on integer arguments. For exact integer
+<a href="https://en.wikipedia.org/wiki/Exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">exponentiation</a>
+with small fixed exponents, an integer loop is both faster and correct. I do still use
+<code>pow</code>/<code>log10</code> once for the bound, where a tiny rounding margin is harmless.
+</p>
+
+<h4>Argument-driven parameterisation</h4>
+<p>
+Both solutions take the exponent <em>n</em> as an argument rather than hard-coding 5, which is why
+the benchmark can exercise both <em>n = 4</em> and <em>n = 5</em>. Parameterising costs nothing and
+makes the code reusable across the whole family of
+<a href="https://en.wikipedia.org/wiki/Narcissistic_number" class="reference-source" target="_blank" rel="noopener noreferrer">narcissistic-number</a>
+problems while keeping automated testing simple.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlock is recognising that a digit-power sum ignores digit order, which collapses a loop over a
+million integers into a loop over a few thousand multisets, plus the analytic bound that tells us
+where to stop. The verification step then ensures only genuine
+<a href="https://en.wikipedia.org/wiki/Narcissistic_number" class="reference-source" target="_blank" rel="noopener noreferrer">narcissistic numbers</a>
+are counted.
+</p>
+<p>
+Both files run the same algorithm. On the main case (<em>n = 5</em>) the C build averages about
+0.0001 s versus 0.0056 s for Python - roughly 50x faster - while the dev case is too fast to measure
+meaningfully (0.0000 s for C, 0.0018 s for Python). The difference is entirely compilation versus
+interpretation; the algorithm itself is so cheap that either language finishes in well under 10 ms.
+I find the Python version the more elegant expression of the idea, and the C version the better
+demonstration of how to build a combinatorial iterator by hand.
+</p>
+<ul>
+  <li>When a function of its inputs is order-independent, enumerate multisets (combinations with
+      replacement) rather than ordered tuples or whole integer ranges.</li>
+  <li>Derive a finite upper bound analytically before writing a loop; an "unbounded" search often
+      has a tight closed-form ceiling.</li>
+  <li>Prefer exact integer arithmetic over floating-point <code>pow()</code> when computing integer
+      powers in a verification path.</li>
+  <li>Place the cheapest, most-discriminating guard first in an <code>and</code> chain so
+      short-circuiting skips the expensive work.</li>
+  <li>Use the walrus operator when a value must be both tested and reused inside a single
+      expression.</li>
+  <li>In languages without a combinations iterator, encode the state in an array and define an
+      explicit "next state" rule - a pattern reusable for any combinatorial enumeration.</li>
+  <li>Parameterise constants like the exponent so one implementation serves an entire problem
+      family and is easy to test.</li>
+</ul>
+
+</article>

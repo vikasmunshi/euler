@@ -1,0 +1,77 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The <a href="https://en.wikipedia.org/wiki/Fibonacci_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Fibonacci sequence</a> is defined by the <a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a> <code>F(n) = F(n-1) + F(n-2)</code>. A fundamental fact about this sequence is that it grows exponentially: <code>F(n)</code> is asymptotically proportional to <code>phi^n</code>, where <code>phi = (1 + sqrt(5)) / 2 ≈ 1.618</code> is the <a href="https://en.wikipedia.org/wiki/Golden_ratio" class="reference-source" target="_blank" rel="noopener noreferrer">golden ratio</a>. Because the value grows exponentially, the number of decimal digits grows only linearly with the index <code>n</code> - roughly <code>n * log10(phi)</code> digits. This means reaching 1000 digits takes about <code>1000 / log10(phi) ≈ 4785</code> terms, so the loop is short. The real challenge is arithmetic precision: <a href="https://en.wikipedia.org/wiki/Fibonacci_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Fibonacci numbers</a> exceed the range of a 64-bit integer after only about the 93rd term, so to reach 1000 digits we need <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a> (<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">big integers</a>).
+</p>
+
+<p>
+The observation that makes the problem tractable is that we never need the full sequence - only the two most recent terms suffice to compute the next. So memory is constant in the number of live big integers (just two or three). Likewise, checking whether a number has reached 1000 digits does not require fully expanding it: we can compare against a power of ten, or inspect only the most significant chunk of a decimal representation. The overall complexity is <code>O(N * D)</code>, where <code>N ≈ 4782</code> is the target index and <code>D</code> is the number of digit-groups (limbs) in each number - each addition touches every limb once, and there are <code>N</code> additions.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Iterative <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">Big-Integer</a> <a href="https://en.wikipedia.org/wiki/Fibonacci_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Fibonacci</a> (Python and C, index 0)</h4>
+
+<p>
+Both solutions share the same algorithm: start from <code>F(1) = F(2) = 1</code>, repeatedly apply <code>(a, b) = (b, a + b)</code>, and stop as soon as <code>b</code> has at least <code>n</code> decimal digits. An index counter advances alongside the values, and its final value is the answer.
+</p>
+
+<p>
+In Python the algorithm is almost trivial because the language has native <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">big integers</a>. I keep two variables <code>a</code> and <code>b</code>, both initialised to 1, and an index <code>i = 2</code> pointing at <code>b</code>. The loop condition <code>b < 10 ** (n - 1)</code> exploits a clean threshold test: a number has at least <code>n</code> digits exactly when it is greater than or equal to <code>10**(n-1)</code>. Inside the loop, the <a href="https://en.wikipedia.org/wiki/Assignment_(computer_science)#Parallel_assignment" class="reference-source" target="_blank" rel="noopener noreferrer">parallel assignment</a> <code>a, b = b, a + b</code> advances both values in one step. Python grows the integers automatically, so there is no manual memory management.
+</p>
+
+<p>
+The C solution has no native <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">big integer</a>, so I hand-rolled a minimal one. I chose a <strong>base-10<sup>9</sup> limb</strong> representation: each entry of the <code>limbs</code> array holds up to 9 decimal digits packed into a 64-bit unsigned integer. I picked a decimal base rather than a binary one specifically because the problem asks about decimal digits - with decimal limbs, counting digits requires inspecting only the top limb (counting its digits by repeated division by 10) and adding <code>9 * (len - 1)</code> for the fully-packed lower limbs. This avoids a base conversion on every iteration. The base 10<sup>9</sup> is the largest power of ten that lets two limbs plus a carry fit comfortably inside a 64-bit accumulator without overflow. <code>bigint_add</code> walks both numbers from the least significant limb upward, propagating a carry exactly as in grade-school addition. I pre-allocated <code>MAX_LIMBS = 200</code> limbs (1800 digits), far beyond the requirement, so no dynamic resizing is ever needed. The two live values are <code>a</code> and <code>b</code>, with a third <code>tmp</code> holding the sum before <code>memcpy</code> shuffles the values into place.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4><a href="https://en.wikipedia.org/wiki/Assignment_(computer_science)#Parallel_assignment" class="reference-source" target="_blank" rel="noopener noreferrer">Parallel (Tuple) Assignment</a> for State Advancement</h4>
+
+<p>
+In Python, <code>a, b = b, a + b</code> updates both state variables at once. Python evaluates the entire right-hand side before binding any names, so the old value of <code>a</code> is still available when computing <code>a + b</code>. Without this <a href="https://en.wikipedia.org/wiki/Assignment_(computer_science)#Parallel_assignment" class="reference-source" target="_blank" rel="noopener noreferrer">parallel assignment</a>, a temporary variable would be needed to avoid clobbering <code>a</code> before use. Reach for this idiom whenever the next state of two variables each depends on the current state of the other - it is concise and eliminates a class of aliasing bugs.
+</p>
+
+<h4>Digit-Count via Threshold Comparison</h4>
+
+<p>
+Rather than converting a number to a string and measuring its length, the Python solution compares <code>b < 10 ** (n - 1)</code>. A number has fewer than <code>n</code> digits exactly when it is below <code>10**(n-1)</code>. This avoids repeated string allocation in the hot loop. The C code achieves the same end differently: because limbs are decimal, it counts digits in the top limb and scales by 9 for the rest. Both avoid a full decimal expansion on every iteration.
+</p>
+
+<h4>Base-10<sup>9</sup> Decimal Limb Representation</h4>
+
+<p>
+Most <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">big-integer</a> libraries use a binary base (2<sup>32</sup> or 2<sup>64</sup>) because binary maps directly onto machine arithmetic. I deliberately chose base 10<sup>9</sup> here because the question is about decimal digits. With a decimal base, the digit-count check is O(1) per iteration instead of a base conversion. The trade-off - addition is marginally less efficient than in a binary base - is irrelevant because we only ever add, never multiply or divide. Match your internal representation to the operation that dominates your work.
+</p>
+
+<h4>Fixed-Size Buffer with Pre-Allocation</h4>
+
+<p>
+The <code>BigInt</code> struct embeds a fixed array of 200 limbs directly, so the whole value lives on the stack with no heap allocation. Avoiding <code>malloc</code> inside a tight loop eliminates allocation overhead and fragmentation. The cost is a compile-time cap on magnitude, but since 1800 digits vastly exceeds the 1000-digit requirement, the bound is safe. Pre-sizing a buffer from a known upper bound is a standard technique in competitive programming and embedded systems.
+</p>
+
+<h4>Shallow Struct Copy with memcpy</h4>
+
+<p>
+Advancing the C state is conceptually <code>a = b; b = tmp</code>. Because <code>BigInt</code> is a plain value type with no pointer members, a bitwise copy via <code>memcpy</code> is correct and fast - the compiler can often lower a fixed-size copy to a few vector moves. This idiom is reliable for value-type structs; it breaks only when a struct owns heap memory, in which case a deep copy is required.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The core insight is that this problem reduces to iterating the <a href="https://en.wikipedia.org/wiki/Fibonacci_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Fibonacci</a> <a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a> with <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">big-integer</a> arithmetic until a digit-count threshold is crossed - and that threshold check is cheapest when the internal representation is already decimal. The Python solution is elegant because the language handles big integers natively, compressing the whole algorithm into a few lines. The C solution is faster (0.0006 s versus 0.0113 s on the main case) because it avoids interpreter overhead and object allocation, at the cost of a hand-written big-integer type. For a one-off answer the Python version is the obvious choice; the C version pays off only where raw speed matters.
+</p>
+
+<ul>
+  <li>When a problem counts decimal digits, consider a decimal-base internal representation - it turns an O(D) digit count into O(1).</li>
+  <li><a href="https://en.wikipedia.org/wiki/Assignment_(computer_science)#Parallel_assignment" class="reference-source" target="_blank" rel="noopener noreferrer">Parallel assignment</a> removes temporary variables when two state variables update from each other's current values.</li>
+  <li>Match your number representation to the operation that dominates: add-only workloads favour simplicity over binary efficiency.</li>
+  <li>Pre-allocating a fixed buffer from a known upper bound avoids heap allocation in tight loops whenever the bound is computable in advance.</li>
+  <li>To detect when a value first reaches <code>n</code> digits, comparing against <code>10**(n-1)</code> beats converting to a string.</li>
+  <li>Plain structs with no pointer members can be copied safely and efficiently with <code>memcpy</code>; reserve deep copies for types that own heap memory.</li>
+  <li>Prototype big-number problems in Python; port to C only when measurements show the performance is worth the extra code.</li>
+</ul>
+
+</article>

@@ -3,66 +3,35 @@
 """ Solution to Euler Problem 59: XOR Decryption [Level 1]. """
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = "resources/" + src.split("/")[-1].split("?")[0]
-    return (Path(__file__).parent / local_filename).read_text()
+@runner.main
+def solve(*args: str) -> str:
+    """Break repeating-key XOR by splitting the ciphertext into key_length interleaved single-byte
+    XOR slices and picking, per slice, the lowercase key byte whose decryption has the most common
+    letters; this collapses a 26^k search into k linear scans: O(26 * n)."""
+    file_url = args[0]
+    key_length = runner.parse_int(args[1])
+    most_common_letters = args[2]
 
-
-def solve(*, file_url: str, key_length: int, most_common_letters: str) -> int:
-    encrypted: list[int] = [int(x) for x in get_text_file(file_url).split(",")]
+    encrypted: list[int] = [int(x) for x in runner.get_text_file(file_url).split(",")]
     slices_range: tuple[int, ...] = tuple(range(key_length))
+    # Slice i holds ciphertext bytes at positions i, i+k, i+2k, ... - each a single-byte XOR cipher.
     encrypted_slices: list[list[int]] = [encrypted[i::key_length] for i in slices_range]
     key: list[int] = [0] * key_length
     score: list[int] = [0] * key_length
     decrypted: list[str] = [""] * key_length
+    # For each lowercase candidate byte, keep per slice the one maximising common-letter occurrences.
     for _key in range(97, 123):
         for i in slices_range:
             _decrypted = "".join((chr(_char ^ _key) for _char in encrypted_slices[i]))
             if (_score := sum((_decrypted.count(x) for x in most_common_letters))) > score[i]:
                 score[i], key[i], decrypted[i] = (_score, _key, _decrypted)
-    if sys.argv[-1] == "--show":
+    if runner.show:
         print("".join(("".join(chars) for chars in zip(*decrypted))))
-    return sum((ord(_char) for _decrypted in decrypted for _char in _decrypted))
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sum((ord(_char) for _decrypted in decrypted for _char in _decrypted)))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(file_url=str(argv[1]), key_length=int(argv[2]), most_common_letters=str(argv[3])))
+    raise SystemExit(solve())

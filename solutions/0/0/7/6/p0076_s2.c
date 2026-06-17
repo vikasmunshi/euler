@@ -1,8 +1,5 @@
 /* Solution to Euler Problem 76: Counting Summations. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 /*
  * Explicit partition enumeration (s2).
@@ -21,11 +18,13 @@ typedef struct {
     int n;
 } BI;
 
+/* Set a big integer to zero. */
 static void bi_zero(BI *a) {
     memset(a->limbs, 0, sizeof(a->limbs));
     a->n = 1;
 }
 
+/* a += b in place with carry propagation, clamped to NLIMBS limbs. */
 static void bi_add_inplace(BI *a, const BI *b) {
     long long carry = 0;
     int maxn = (a->n > b->n) ? a->n : b->n;
@@ -41,6 +40,7 @@ static void bi_add_inplace(BI *a, const BI *b) {
     if (a->n < maxn) a->n = maxn;
 }
 
+/* a += 1 in place, rippling the carry through full limbs. */
 static void bi_inc(BI *a) {
     for (int i = 0; i < NLIMBS; i++) {
         a->limbs[i]++;
@@ -50,6 +50,7 @@ static void bi_inc(BI *a) {
     }
 }
 
+/* a -= 1 in place, borrowing through zero limbs. */
 static void bi_dec(BI *a) {
     for (int i = 0; i < a->n; i++) {
         if (a->limbs[i] > 0) { a->limbs[i]--; break; }
@@ -66,12 +67,19 @@ static void bi_dec(BI *a) {
 static BI *g_dp = NULL;
 static int g_num = 0;
 
+/* Address of table cell dp[nb][sl] in the flat (g_num+1)-stride layout. */
 static BI *dp_get(int nb, int sl) {
     return &g_dp[nb * (g_num + 1) + sl];
 }
 
-static char *solve(int argc, char *argv[]) {
-    int num = (argc > 1) ? atoi(argv[1]) : 100;
+/*
+ * Explicit partition recurrence count(nb, sl) filled bottom-up, mirroring s2 Python but
+ * counting leaves instead of building lists: the leaf [n] increments, deeper partitions add
+ * dp[nb-n][min(nb-n, n)]. O(n^2) states with O(n) work each, hence O(n^3); answer is
+ * dp[num][num]-1 in base-10^9 big integers.
+ */
+const char *solve(int argc, char *argv[]) {
+    int num = (argc > 1) ? parse_int(argv[1]) : 100;
     g_num = num;
 
     if (num <= 0) {
@@ -121,52 +129,4 @@ static char *solve(int argc, char *argv[]) {
     free(g_dp);
     g_dp = NULL;
     return buf;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) { fprintf(stderr, "runner: out of memory\n"); return 1; }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (result) {
-            if (cur && strcmp(cur, result) != 0) {
-                fprintf(stderr, "Inconsistent results: %s vs %s\n", cur, result);
-                rc = 1;
-            }
-            free(result);
-        }
-        result = cur;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "NULL");
-    free(result);
-    return rc;
 }

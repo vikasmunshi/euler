@@ -1,0 +1,70 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+I need to count right triangles OPQ where O is the origin and P, Q are distinct lattice points - points with integer coordinates - in the square grid [0, N] x [0, N] with N = 50. A triangle has a right angle when two of its edges meet at exactly 90 degrees. The cleanest perpendicularity test is the <a href="https://en.wikipedia.org/wiki/Dot_product" class="reference-source" target="_blank" rel="noopener noreferrer">dot product</a>: two vectors are orthogonal precisely when their dot product is zero. The brute-force route enumerates every pair of points - an O(N^4) loop over the four coordinates - and checks all three vertices for a right angle. For N = 50 that is a few million pairs, tolerable but wasteful and not generalizable. A far better idea is to classify each triangle by *where* its right angle sits, which collapses the four-dimensional search into a two-dimensional sum.
+</p>
+<p>
+There are exactly three places the right angle can live: at the origin O, at P, or at Q. The right angle at O is easy: vectors OP and OQ both leave the first-quadrant origin, and two such vectors are perpendicular only when one runs along the x-axis and the other along the y-axis. Counting those axis-aligned combinations gives exactly 3*N^2 triangles. The interesting case is a right angle at a non-origin vertex, say P = (x, y). The edge OP points in direction (x, y); the perpendicular direction is (-y, x). To enumerate the lattice points Q lying on that perpendicular line through P, I reduce (-y, x) to its primitive - shortest integer - form by dividing both components by m = <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">gcd</a>(x, y). Each integer step along that primitive direction lands on a lattice point, and I just count how many such steps stay inside the grid. Computing a gcd at each of the O(N^2) grid points costs O(log N), so the whole algorithm runs in O(N^2 log N) - a dramatic improvement over O(N^4).
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Analytical Counting via Primitive Perpendicular Vectors</h4>
+<p>
+The Python and C files implement the same algorithm; the C version is a direct translation for speed. I split the total into two additive pieces.
+</p>
+<p>
+<strong>Right angle at the origin.</strong> By the axis argument above, these contribute exactly <code>3 * N^2</code> triangles. I encode this directly as <code>triangles_at_origin = 3 * coordinate_limit**2</code>. I checked this constant against the N = 2 example: it accounts for the axis-aligned right triangles among the fourteen shown.
+</p>
+<p>
+<strong>Right angle at P (and by symmetry at Q).</strong> I iterate over every candidate vertex P = (x, y) with <code>x</code> from 1 to N and <code>y</code> from 1 to N-1. Keeping <code>x, y >= 1</code> holds OP off the axes, so the perpendicular case stays genuinely distinct from the origin case. For each P, I compute <code>m = gcd(x, y)</code>. The primitive perpendicular step is <code>(-y/m, x/m)</code>. Stepping from P along that direction, Q moves by <code>y/m</code> horizontally and <code>x/m</code> vertically per step. The number of steps before leaving the grid is bounded two ways: by horizontal room, giving <code>x * m / y</code>, and by remaining vertical room, giving <code>m * (N - y) / x</code>. Both divisions are exact because m divides both x and y. I take the minimum of the two bounds - whichever boundary I hit first - and add it. Stepping in the opposite perpendicular direction mirrors this count, and the right angle can equally sit at Q rather than P; both effects are captured by the final <code>*= 2</code>.
+</p>
+<p>
+The C code stores the gcd in a local <code>int m</code> and casts to <code>long long</code> before multiplying, so <code>x * m</code> cannot overflow 32 bits if N grows. The Python code expresses the whole sum as one generator passed to <code>sum</code>, using <code>math.gcd</code> from the standard library. The only structural difference is how each language binds the gcd to a name, discussed below.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Single-Element Loop as a Let-Binding in Python</h4>
+<p>
+Inside the generator I write <code>for m in [math.gcd(x, y)]</code>. Python comprehensions do not permit assignment statements, so to compute a value once and reuse it I iterate over a one-element list. This binds <code>m</code> to the gcd exactly once per (x, y) and lets me reference it twice in the <code>min(...)</code> expression without recomputing it. Reach for this idiom whenever a sub-expression inside a comprehension is expensive or repeated; it keeps the code <a href="https://en.wikipedia.org/wiki/Don%27t_repeat_yourself" class="reference-source" target="_blank" rel="noopener noreferrer">DRY</a> without abandoning the comprehension form. Modern Python also offers the walrus operator <code>:=</code>, but the list-binding idiom reads clearly here.
+</p>
+
+<h4>Exact Integer Division Guaranteed by Factoring the GCD</h4>
+<p>
+The step counts <code>x * m // y</code> and <code>m * (N - y) // x</code> rely on integer division. Because <code>m = gcd(x, y)</code> divides both x and y, the quotients are exact - no truncation error can occur. I deliberately avoided floating-point here: a single rounding error could shift a boundary count by one and silently corrupt the total. The lesson generalizes: integer division is safe precisely when you can prove the division is exact, and factoring out the <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">gcd</a> is that proof.
+</p>
+
+<h4>Euclidean Algorithm for Primitive Lattice Directions</h4>
+<p>
+To reduce a vector to its shortest integer form I divide by the gcd, computed via the <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a>. In C I wrote the classic remainder loop by hand; in Python I used <code>math.gcd</code>. Both run in O(log min(a, b)). Whenever you need the primitive direction of an integer vector - for counting lattice points on a segment, or for <a href="https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree" class="reference-source" target="_blank" rel="noopener noreferrer">Stern-Brocot</a> reasoning - dividing by the gcd is the canonical move.
+</p>
+
+<h4>Symmetry to Halve the Work</h4>
+<p>
+The right angle can sit at P or at Q, and the perpendicular can be traversed in two opposite directions. Rather than enumerate each case separately, I count one canonical representative and multiply by 2. This is a standard combinatorial economy: when a quantity is invariant under swapping loop roles, iterate the canonical case and scale. It both speeds the code and shortens the reasoning.
+</p>
+
+<h4>Defensive Integer Width in C</h4>
+<p>
+In C the products <code>x * m</code> are cast to <code>long long</code> before division, and the running totals are <code>long long</code>. Even though the N = 50 totals fit comfortably in 32 bits, casting before the multiply prevents an intermediate <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">integer overflow</a> if the grid limit were enlarged. Promoting to a wider type at the point of multiplication - not after - is the correct habit when an intermediate product can exceed the operand width.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is to classify right triangles by where the right angle lives. Fixing that vertex determines one edge; the perpendicular direction is then forced, and the <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">gcd</a> of the edge's coordinates gives the lattice step size for enumerating valid third vertices. This converts a four-dimensional brute force into a two-dimensional sum with a closed-form count per grid point.
+</p>
+<p>
+Both solutions are correct and effectively instantaneous. On the N = 50 case the C build records 0.0000 s while the Python version records 0.0002 s; at this scale the difference is negligible, and the Python version is the more readable expression of the algorithm. For substantially larger N the C version's constant factors and integer width would make it the better choice.
+</p>
+<ul>
+  <li>When counting geometric objects defined by perpendicularity, fix one element and derive the constraint on the rest - this turns a product-space search into a linear one.</li>
+  <li>The gcd of a vector's components yields its primitive lattice direction; dividing by it gives the smallest equivalent integer vector.</li>
+  <li>Use integer division only when you can prove the quotient is exact; factoring out the gcd is exactly such a proof.</li>
+  <li>Symmetry is free performance: iterate a canonical representative and multiply when swapping roles leaves the count unchanged.</li>
+  <li>Bind expensive sub-expressions once inside Python comprehensions with the <code>for name in [expr]</code> idiom (or the walrus operator).</li>
+  <li>Validate an analytic formula against a small hand-checkable case before trusting it at scale.</li>
+</ul>
+
+</article>

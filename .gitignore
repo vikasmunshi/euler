@@ -1,3 +1,5 @@
+!.gitignore
+**/.*
 *.cover
 *.egg-info/
 *.log
@@ -31,10 +33,9 @@
 .tox/
 .venv/
 .webassets-cache/
-/*/.*
 /.*
-!.gitignore
 /CLAUDE.md
+/workspace/*_c
 ENV/
 __pycache__/
 celerybeat-schedule
@@ -64,3 +65,4 @@ target/
 var/
 venv/
 wheels/
+/tmp/

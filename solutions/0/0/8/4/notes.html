@@ -1,0 +1,80 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+At its core this is a question about a <a href="https://en.wikipedia.org/wiki/Markov_chain" class="reference-source" target="_blank" rel="noopener noreferrer">Markov chain</a>: a stochastic process whose next state depends only on the current state and a fixed set of transition probabilities, never on the full path taken to reach it. The board's 40 squares are the states, and one turn - a dice roll followed by any card or "Go To Jail" redirection - defines the transition rule. What the problem asks for is the <a href="https://en.wikipedia.org/wiki/Stationary_distribution" class="reference-source" target="_blank" rel="noopener noreferrer">stationary distribution</a>: the long-run fraction of turns that finish on each square, which an ergodic chain converges to regardless of where it started. From that distribution I need only the three squares with the highest probability, concatenated as zero-padded indices.
+</p>
+<p>
+The distribution is non-uniform because several mechanics redirect the player after the roll. G2J sends you straight to Jail; Community Chest (CC) and Chance (CH) draw cards that may move you elsewhere - Chance is the most disruptive, with 10 of its 16 cards commanding a move, several of them relative ("next railway", "next utility", "go back 3"). On top of that, rolling three consecutive doubles sends the player directly to Jail regardless of the roll. These coupled rules make the transition probabilities intricate, but they are all <em>exactly</em> computable - there is no need to approximate.
+</p>
+<p>
+The natural temptation is a <a href="https://en.wikipedia.org/wiki/Monte_Carlo_method" class="reference-source" target="_blank" rel="noopener noreferrer">Monte Carlo simulation</a>: roll a million dice and tally. The fatal flaw is that simulation is <em>non-deterministic</em> - the harness runs <code>solve()</code> several times and requires an identical result each time, but a random walk yields a slightly different modal string on every run, and with the leading squares often statistically close the ranking itself can flip. The exact approach has no such weakness: it computes the steady state directly, so the answer is reproducible to the last digit.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Exact Stationary Distribution (Python and C)</h4>
+<p>
+Both files implement the same algorithm in three stages: build the transition matrix, power-iterate it to the stationary distribution, then marginalise and rank. The board is kept as an ordered list of 40 name strings rather than bare integers, so the rules read almost as a direct transcription: identifying a CC square is a <code>"CC"</code> prefix test, and "go to next railway" is "scan clockwise to the next name starting with R". Nothing depends on magic indices.
+</p>
+
+<h4>Resolving a Landing Square into Finishing Probabilities</h4>
+<p>
+The helper <code>resolve(landing)</code> returns the probability distribution over the squares a player can <em>finish</em> on, given the roll dropped them on <code>landing</code>. A plain square maps to itself with probability 1; G2J maps wholly to Jail. A CC square splits 2/16 onto its two movement cards (Advance to GO, Go to Jail) and 14/16 staying put. A CH square splits across its ten movement cards - the absolute targets (GO, Jail, C1, E3, H2, R1), the relative "next R" (which appears twice, giving 2/16) and "next U" found by a forward scan, and "go back 3" - with 6/16 staying put. One subtlety the simulation got wrong by omission: "go back 3" from CH3 (square 36) lands on CC3, which then triggers a Community Chest draw. <code>resolve</code> handles this by recursing on the back-3 destination and folding its distribution in, so the chained card is modelled exactly.
+</p>
+
+<h4>The Augmented State and the Three-Doubles Rule</h4>
+<p>
+A chain over the 40 squares alone cannot express "three consecutive doubles", because that depends on history. The fix is to <em>augment</em> the state with the number of consecutive doubles carried into the turn (0, 1 or 2), giving 120 states indexed <code>square * 3 + doubles</code>. The transition then enumerates every ordered dice pair: a third successive double routes straight to Jail and resets the streak; otherwise the player moves, the landing square is resolved into finishing probabilities, and the streak advances (or resets on a non-double). Any move that finishes in Jail also resets the streak. This captures the rule faithfully rather than waving it away as negligible.
+</p>
+
+<h4>Power Iteration and Ranking</h4>
+<p>
+The stationary distribution is found by <a href="https://en.wikipedia.org/wiki/Power_iteration" class="reference-source" target="_blank" rel="noopener noreferrer">power iteration</a>: start from the uniform vector and repeatedly multiply by the transition matrix until the change between successive iterates falls below 1e-15. Because the chain is ergodic this converges quickly to the dominant eigenvector (eigenvalue 1). The 120-state distribution is then marginalised back to 40 per-square probabilities by summing over the doubles dimension, and the three largest are taken - with index as a deterministic tie-break - and formatted as the six-digit modal string. Both solutions reproduce the known 6-sided answer (102400) and yield 101524 for the 4-sided case.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>State Augmentation for History-Dependent Rules</h4>
+<p>
+The Markov property requires the future to depend only on the present state. When a rule depends on recent history - here, the run of consecutive doubles - the clean remedy is to fold just enough of that history into the state itself. Adding a small counter turns a non-Markovian rule into an ordinary transition over a slightly larger state space. Reach for this whenever a process "remembers" a bounded amount of its past.
+</p>
+
+<h4>Recursive Probability Resolution</h4>
+<p>
+Modelling "go back 3 -> land on CC3 -> draw a card" by having <code>resolve</code> call itself keeps the chaining exact without special-casing. The recursion terminates because the back-3 destination is never itself a back-3 trigger, so depth is bounded. Recursion is the natural tool when one event's outcome distribution is defined in terms of another's.
+</p>
+
+<h4>Power Iteration for the Dominant Eigenvector</h4>
+<p>
+<a href="https://en.wikipedia.org/wiki/Power_iteration" class="reference-source" target="_blank" rel="noopener noreferrer">Power iteration</a> finds a stochastic matrix's stationary distribution without any linear-algebra library: repeated matrix-vector products converge to the eigenvector of largest eigenvalue, which for a transition matrix is 1. A convergence threshold on the successive-iterate difference is a simple, robust stopping rule. It is the go-to technique when you need only the leading eigenvector of a large, sparse, well-behaved matrix.
+</p>
+
+<h4>String Prefix Matching for Named Squares</h4>
+<p>
+Both solutions identify square types by prefix matching - <code>startswith</code> in Python, <code>strncmp</code> in C - tied to the board's own naming scheme. The "find next R" card collapses to a single forward scan checking a one-character prefix, covering all four railways without enumerating them. Prefer symbolic, name-based matching over magic integers when the data carries meaningful names; the code then audits directly against the problem text.
+</p>
+
+<h4>Top-k Selection Without Sorting</h4>
+<p>
+The C code finds the top three squares with three linear scans over the probability array, masking each chosen square by setting its value to -1. This is O(k*N) with k=3, N=40 - effectively constant here, and simpler than a full sort. The Python side uses <code>sorted</code> with a key, O(N log N) but equally fine at this scale. For small N the simpler scan wins on clarity; asymptotic complexity matters only when N grows large.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is that a steady-state probability problem with messy but fully specified transition rules should be solved <em>exactly</em>, not simulated. The harness's cross-run consistency check makes this concrete: a Monte Carlo walk fails it outright, because near-tied squares can swap places between runs, whereas the stationary distribution is computed once and is identical every time. Augmenting the state with the consecutive-doubles count is what lets a single Markov chain absorb every rule, including the one the simulation had quietly dropped.
+</p>
+<p>
+Both implementations are correct on both test cases. The C version runs the main case in about 0.00396s versus 0.07052s for Python - roughly an 18x speedup, attributable entirely to native floating-point arithmetic over Python's interpreted object model, since the algorithm is identical. Either is comfortably fast: the work is dominated by a few hundred iterations over a 120x120 matrix, independent of any simulation count.
+</p>
+<ul>
+<li>When transition rules are fully specified, compute the exact stationary distribution rather than simulating - it is deterministic, reproducible, and here also faster.</li>
+<li>A randomised simulation cannot satisfy a cross-run consistency check; non-determinism is a correctness problem, not just a precision one.</li>
+<li>Fold a bounded slice of history (the doubles streak) into the state to make a history-dependent rule Markovian.</li>
+<li>Resolve chained effects (back-3 onto a card square) recursively so the model stays exact instead of approximate.</li>
+<li>Power iteration extracts a transition matrix's stationary distribution with nothing more than repeated matrix-vector products.</li>
+<li>Match data by its own names and prefixes rather than hardcoded indices, so the code reads as a direct transcription of the specification.</li>
+<li>For top-k over a small array, sequential masked scans are simpler than and as fast as a full sort.</li>
+</ul>
+
+</article>

@@ -1,0 +1,80 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+This problem asks me to compare one thousand numbers of the form <code>base^exponent</code> and identify which line holds the largest, where some of these numbers run to over three million digits. The naive approach - actually raising each base to its exponent and comparing the resulting integers - is hopeless: even with arbitrary-precision arithmetic, materializing a three-million-digit number takes substantial memory, and comparing two such numbers digit by digit is slow. The breakthrough is realizing that I do not need the values themselves, only their relative order. The <a href="https://en.wikipedia.org/wiki/Logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">logarithm</a> is a <a href="https://en.wikipedia.org/wiki/Monotonic_function" class="reference-source" target="_blank" rel="noopener noreferrer">strictly increasing function</a>, meaning that for any positive numbers <code>A</code> and <code>B</code>, the relation <code>A &gt; B</code> holds exactly when <code>log(A) &gt; log(B)</code>. Because the transform preserves ordering perfectly, ranking by logarithm gives the identical answer to ranking by the true values - with none of the cost.
+</p>
+
+<p>
+Pairing this with the identity <code>log(b^e) = e * log(b)</code> collapses an intractable exponentiation into a single multiplication. To rank <code>b^e</code> I only need <code>e * log(b)</code>, an ordinary floating-point number comparable in constant time. The whole algorithm is therefore a single linear scan over the N = 1000 lines, doing one <a href="https://en.wikipedia.org/wiki/Logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">logarithm</a> and one multiply per line while tracking the running maximum - an O(N) procedure with a tiny constant factor. The one thing I must verify is precision: a 64-bit <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="reference-source" target="_blank" rel="noopener noreferrer">double-precision float</a> carries roughly 15-16 significant decimal digits, far more than enough to separate 1000 distinct candidates whose log values differ well beyond rounding noise.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Logarithmic Linear Scan (Python and C)</h4>
+
+<p>
+Both <code>p0099_s0.py</code> and <code>p0099_s0.c</code> implement the same algorithm; they differ only in language mechanics. The steps are:
+</p>
+
+<ul>
+  <li><strong>Read the file:</strong> A runner helper (<code>get_text_file</code>) resolves the resource locally and loads its contents into memory. Reading the whole 22K file at once is trivial and avoids per-line I/O overhead.</li>
+  <li><strong>Parse each line:</strong> Each line splits on the comma into an integer base and an integer exponent. Blank or malformed lines are skipped with a warning rather than aborting, which keeps the code robust to trailing newlines and Windows-style line endings.</li>
+  <li><strong>Compute the ranking value:</strong> For each pair I compute <code>log_val = exponent * log(base)</code>. By the identity <code>log(b^e) = e * log(b)</code>, this is exactly the <a href="https://en.wikipedia.org/wiki/Logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">logarithm</a> of the full power - the surrogate that ranks identically to the real value.</li>
+  <li><strong>Track the argmax:</strong> Two state variables - the best value seen so far and the line that produced it - update whenever a larger value appears. This finds not merely the maximum but the line number achieving it, in a single pass.</li>
+  <li><strong>Return the 1-based line number:</strong> Since the answer is a line number, Python uses <code>enumerate(numbers, start=1)</code> and C maintains an explicit <code>line_num</code> counter.</li>
+</ul>
+
+<p>
+The differences are purely mechanical. The Python version retains the winning base and exponent so a <code>--show</code> flag can print a human-readable summary, including an estimated digit count via <code>max_val / log(10)</code>. It uses <code>splitlines</code> to normalize line endings and a <code>try/except</code> block around parsing. The C version tokenizes the buffer with <code>strtok_r</code>, manually strips a trailing <code>\r</code>, splits on the comma with <code>strchr</code>, and parses each field with <code>atoll</code>. Both convert from integers to <code>double</code> only at the moment the logarithm is taken.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Monotone Function as a Comparison Surrogate</h4>
+
+<p>
+Replacing a hard-to-compute quantity with a cheaper one that preserves order is broadly useful. Direct exponentiation here is infeasible, but the <a href="https://en.wikipedia.org/wiki/Logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">logarithm</a> is cheap and order-preserving because it is a <a href="https://en.wikipedia.org/wiki/Monotonic_function" class="reference-source" target="_blank" rel="noopener noreferrer">monotonically increasing function</a> - so it is an exact surrogate, costing me only the scale of the numbers, never correctness. Whenever only the relative order of large quantities matters, ask whether a monotone transform (logarithm, square root, reciprocal) makes the comparison tractable. The same idea lets you compare products via sums of logs, or ratios via differences of logs.
+</p>
+
+<h4>Argmax with a Running-Maximum State Pattern</h4>
+
+<p>
+Rather than building a list of all computed values and calling a max function afterward, I keep two state variables - the best value and its index - and update them in one pass. This uses O(1) extra memory regardless of input size and avoids a second allocation and traversal. The pattern is: initialize to a sentinel (zero or negative infinity here, since all log values are positive), then conditionally update inside the loop. This <a href="https://en.wikipedia.org/wiki/Arg_max" class="reference-source" target="_blank" rel="noopener noreferrer">argmax</a> idiom is the standard way to find which element achieves an extremum, not just the extremum itself.
+</p>
+
+<h4>Defensive Parsing with Graceful Degradation</h4>
+
+<p>
+Both solutions guard their parsing - <code>try/except</code> in Python, explicit checks in C - and emit warnings on bad lines instead of crashing. Real data files routinely carry trailing newlines, <a href="https://en.wikipedia.org/wiki/Newline" class="reference-source" target="_blank" rel="noopener noreferrer">CRLF line endings</a>, or blank lines. The C version strips <code>\r</code> explicitly; Python relies on <code>splitlines</code>. Degrading gracefully on imperfect input costs little code and prevents mysterious failures when reading external data you do not fully control.
+</p>
+
+<h4>Delaying Float Conversion to Preserve Precision</h4>
+
+<p>
+I parse base and exponent as integers and only cast to <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="reference-source" target="_blank" rel="noopener noreferrer">double</a> at the multiplication. Parsing directly into floats could introduce rounding before the computation even begins. Keeping exact integer representations until floats are genuinely needed is a clean discipline that avoids subtle precision bugs - convert at the last responsible moment.
+</p>
+
+<h4>C String Tokenization with strtok_r</h4>
+
+<p>
+The C version splits the file buffer into lines using <code>strtok_r</code>, the reentrant variant of <a href="https://en.cppreference.com/w/c/string/byte/strtok" class="reference-source" target="_blank" rel="noopener noreferrer">strtok</a>. I prefer the reentrant form because it stores its scanning state in an explicit <code>saveptr</code> rather than hidden static state, making the code thread-safe and free of surprising interactions if a called function also tokenizes. Tokenizing in place modifies the buffer by writing null terminators, which is efficient: no copies are made, and the comma split reuses the same technique with <code>strchr</code>.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The whole solution rests on one insight: replace the impossible comparison of giant integers with an O(1) floating-point computation per line using <code>log(b^e) = e * log(b)</code>. The benchmark confirms both implementations are dominated by file I/O rather than computation. The C solution finishes in about 0.0000 s and the Python solution in about 0.0003 s; the gap is interpreter overhead on a workload of only 1000 iterations. Neither is remotely slow - both complete in well under a millisecond - so the choice comes down to convenience, and Python's clearer parsing and optional summary make it the more readable of the two.
+</p>
+
+<ul>
+  <li>To compare large powers, take logarithms - they convert exponentiation into multiplication while preserving order.</li>
+  <li>A monotone transformation is an exact comparison surrogate: you trade scale for tractability without losing correctness.</li>
+  <li>Track both the best value and its index in one pass (the argmax pattern) instead of storing everything and searching afterward.</li>
+  <li>Parse data in its most precise natural type and convert to floating point only at the last moment.</li>
+  <li>Guard parsing of external files and warn on bad lines rather than crashing - robustness is cheap insurance.</li>
+  <li>For an O(N) scan with a tiny constant, language choice barely matters; pick the one that is clearest to write and maintain.</li>
+</ul>
+
+</article>

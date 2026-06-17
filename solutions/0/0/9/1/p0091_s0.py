@@ -4,12 +4,21 @@
 from __future__ import annotations
 
 import math
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
-def solve(*, coordinate_limit: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Classify right triangles by the location of the right angle; O(N^2 log N).
+
+    The origin contributes 3 * N^2 axis-aligned cases. For a right angle at non-origin P = (x, y),
+    the primitive perpendicular step is (-y/m, x/m) with m = gcd(x, y); the reachable lattice points
+    are bounded by horizontal room x*m/y and vertical room m*(N-y)/x, and the minimum counts them.
+    Doubling covers the right angle at Q and the opposite direction; the gcd makes both divisions exact.
+    """
+    coordinate_limit = runner.parse_int(args[0])
+
     triangles_at_p_or_q = sum(
         (
             min(x * m // y, m * (coordinate_limit - y) // x)
@@ -20,39 +29,8 @@ def solve(*, coordinate_limit: int) -> int:
     )
     triangles_at_p_or_q *= 2
     triangles_at_origin = 3 * coordinate_limit**2
-    return triangles_at_p_or_q + triangles_at_origin
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(triangles_at_p_or_q + triangles_at_origin)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(coordinate_limit=int(argv[1])))
+    raise SystemExit(solve())

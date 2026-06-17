@@ -1,71 +1,21 @@
 /* Solution to Euler Problem 9: Special Pythagorean Triplet. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-long long solve(int argc, char *argv[]) {
-    int sum_sides = atoi(argv[1]);
+const char *solve(int argc, char *argv[]) {
+    /* Bounded two-variable search: the linear constraint fixes c = S - a - b, so only
+       a (1..S/4) and b (a..S/2) are searched; return a*b*c on the first Pythagorean hit. O(S^2). */
+    static char _answer[32];
+    int sum_sides = parse_int(argv[1]);
 
     for (int a = 1; a < sum_sides / 4 + 1; a++) {
         for (int b = a; b < sum_sides / 2; b++) {
             int c = sum_sides - a - b;
             if (a * a + b * b == c * c) {
-                return (long long)a * b * c;
+                { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)a * b * c)); return _answer; }
             }
         }
     }
 
     fprintf(stderr, "No Pythagorean triplet exists with sum %d\n", sum_sides);
-    return -1;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 }

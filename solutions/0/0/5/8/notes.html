@@ -1,0 +1,93 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The spiral picture is a deliberate distraction. What actually matters is a single arithmetic observation: each time I wrap one new layer around the centre, I add exactly four corner cells - one at each corner of the larger square - and these corners lie precisely on the two diagonals. If I index layers as <code>k = 1, 2, 3, ...</code>, the side length at layer <code>k</code> is <code>2k+1</code>, an odd number, and the bottom-right corner is always the odd square <code>(2k+1)^2</code>. This is because the spiral fills clockwise to the bottom-right and the largest value on a side-<code>(2k+1)</code> spiral is <code>(2k+1)^2</code>. The remaining three corners are reached by repeatedly subtracting <code>2k</code> (the side length minus one), since each edge of the square spans exactly that many cells between consecutive corners. So the entire diagonal sequence is a closed-form function of <code>k</code> - I never need to build or store the grid.
+</p>
+
+<p>
+The real work is counting how many diagonal entries are <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime</a> and watching when the running ratio of primes to total diagonal entries first drops below 10%. I test primality with <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>: for a candidate <code>n</code>, I check divisibility by odd numbers up to <code>sqrt(n)</code>, costing <code>O(sqrt(n))</code> per test. The largest corner at the answer (side length 26241) is about <code>26241^2 ~ 6.9 * 10^8</code>, so each test does at most ~13000 divisor checks. I process roughly <code>n/2</code> layers, and a corner near layer <code>k</code> costs <code>O(k)</code> work, so the total is <code>O(n^2)</code> in the side length <code>n</code> - comfortably within a single linear pass, which is why this sits at Level 2. The bottom-right corner is an odd square (and thus never prime for <code>k >= 1</code>), so I could skip it, but testing it uniformly is harmless.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Layer-by-Layer Diagonal Scan (Python and C)</h4>
+
+<p>
+Both files implement the same algorithm; only the language idioms differ. The core loop walks layers from <code>k = 1</code> upward. For each layer I compute <code>side_length = 2k+1</code> and the step <code>side_length - 1 = 2k</code>. From the bottom-right corner <code>bottom_right = side_length^2</code> I derive the other three by successive subtraction:
+</p>
+
+<ul>
+  <li><code>bottom_left = bottom_right - step</code></li>
+  <li><code>top_left = bottom_left - step</code></li>
+  <li><code>top_right = top_left - step</code></li>
+</ul>
+
+<p>
+I keep two running accumulators: <code>num_prime_diagonals</code> (starting at 0) and <code>num_diagonal_elements</code> (starting at 1, to count the centre cell 1, which lies on both diagonals but is not prime). Each layer adds 4 to the total and adds 1 per prime corner. After updating, I check whether the ratio has dropped below the threshold and, if so, return the current side length.
+</p>
+
+<p>
+In Python I expressed layer enumeration as a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> that yields a 5-tuple <code>(side_length, bottom_right, bottom_left, top_left, top_right)</code>, and the <code>solve</code> function consumes it with a <code>for</code> loop. This separates "how to produce corners" from "when to stop". The C version is a direct port: an unbounded <code>for (int layer = 1; ; layer++)</code> with the same arithmetic. The crucial difference is type width. The corner values exceed the 32-bit signed range (~<code>2.1 * 10^9</code>) well before the answer, so the C code uses <code>long long</code> throughout the corner arithmetic to avoid silent overflow - note in particular <code>(long long)side_length * side_length</code>, which casts before multiplying so the squaring itself does not overflow. Both programs accept the threshold as a command-line argument so they can be re-run at other ratios.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Infinite Generator with Early Termination</h4>
+
+<p>
+The Python solution wraps layer production in a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> using <code>yield</code>. A <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> produces values lazily - each iteration resumes execution until the next <code>yield</code> - which is exactly what I want when the stopping point is unknown in advance. The consumer iterates and returns as soon as its condition is met, so neither side needs to know about the other's logic. Reach for a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> whenever you have an open-ended sequence and want to decouple value production from the termination test.
+</p>
+
+<h4>The Walrus Operator for Loop State</h4>
+
+<p>
+I increment and test the layer counter in one expression with <code>while layer := (layer + 1)</code>, the <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">assignment expression operator</a>. Because <code>layer</code> is always positive after the first increment, the condition is always truthy and the loop runs forever - exactly the unbounded behaviour the <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> wants. This keeps the increment and the loop condition in one place rather than scattering a separate <code>layer += 1</code> at the bottom of the body.
+</p>
+
+<h4>Deriving Values by Arithmetic Instead of Storing a Grid</h4>
+
+<p>
+Rather than allocate a 2-D spiral, I compute the four corners from a closed-form relationship to the layer index. This keeps memory use at <code>O(1)</code> no matter how many layers I scan. Whenever the elements you actually need from a structure have a formula, prefer the formula over materialising the whole structure - it saves both the memory and the time spent building data you never read.
+</p>
+
+<h4>Running Accumulators Instead of Recomputing</h4>
+
+<p>
+I carry <code>num_prime_diagonals</code> and <code>num_diagonal_elements</code> forward and update them with a constant amount of work per layer, then perform one division to test the ratio. Recomputing the totals from scratch each iteration would add a factor of <code>n</code> to the runtime. This state-variable pattern is the standard way to keep a scan linear: update aggregates incrementally rather than re-traversing.
+</p>
+
+<h4>Boolean-as-Integer Counting</h4>
+
+<p>
+The line <code>num_prime_diagonals += is_prime(corner)</code> exploits Python's coercion of <code>True</code> to 1 and <code>False</code> to 0, replacing an <code>if</code> branch with plain arithmetic. The C version does the same because <code>is_prime</code> returns an <code>int</code> of 0 or 1. This is concise and avoids a branch; reach for it any time a predicate's result feeds directly into a count.
+</p>
+
+<h4>Parameterising via Command-Line Arguments</h4>
+
+<p>
+Both solutions read the threshold from arguments (<code>float(args[0])</code> in Python, <code>atof(argv[1])</code> in C) rather than hard-coding 0.1. Parameterising the entry point makes it trivial to re-run experiments at other ratios without editing or recompiling - good hygiene for any exploratory or benchmarking tool.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is that the diagonal values are an arithmetic sequence keyed to the layer index, so a problem that looks two-dimensional collapses into a one-dimensional scan with <code>O(1)</code> bookkeeping per step (aside from the primality test). Choosing <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> was deliberate: a <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> would need a fixed upper bound, which we do not have until the answer is found, whereas <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> works candidate-by-candidate with no preallocation.
+</p>
+
+<p>
+Comparing the two implementations, the C version runs in about 0.13 s versus the Python version's 2.17 s - roughly 17 times faster. The gap comes entirely from the <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial-division</a> inner loop, a tight numeric kernel where native compiled arithmetic dominates. The algorithm and structure are identical; only the constant factor differs.
+</p>
+
+<ul>
+  <li>Look for closed-form formulas for the elements you care about in grid or spiral problems - you rarely need to store the whole structure.</li>
+  <li>Maintain running accumulators rather than recomputing aggregates each iteration; this keeps a scan linear.</li>
+  <li>Use <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> for primality when the candidate range is unknown in advance; a <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">sieve</a> needs a fixed upper bound.</li>
+  <li>Treat boolean predicates as 0/1 integers when counting occurrences - it removes a branch and reads cleanly.</li>
+  <li>Pair an infinite <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> with an early-return consumer to separate value production from stopping logic.</li>
+  <li>In C, cast to 64-bit before multiplying when intermediate values can exceed the 32-bit range, to avoid silent overflow.</li>
+  <li>Parameterise the entry point and read inputs from the command line to make exploration and benchmarking effortless.</li>
+</ul>
+
+</article>

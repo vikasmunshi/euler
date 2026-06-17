@@ -1,9 +1,7 @@
 /* Solution to Euler Problem 38: Pandigital Multiples. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
+/* True iff n uses each digit 1-9 exactly once (a 1-to-9 pandigital); O(d) via a frequency array. */
 static int is_nine_pandigital(long long n) {
     if (n < 100000000LL || n > 999999999LL)
         return 0;
@@ -20,7 +18,13 @@ static int is_nine_pandigital(long long n) {
     return sum == 9;
 }
 
-long long solve(int argc, char *argv[]) {
+/*
+ * Bounded brute force: requiring exactly 9 output digits with n > 1 caps x at 4 digits, so a static
+ * (n, max_x) table enumerates every viable case. Scanning x downward within each pair (the
+ * concatenation grows monotonically with x) makes the first pandigital hit the largest. O(X_max).
+ */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
     (void)argc; (void)argv;
 
     /* (n, max_x) pairs as in the Python solution */
@@ -33,7 +37,7 @@ long long solve(int argc, char *argv[]) {
         int n = pairs[p][0];
         int x = pairs[p][1];
         while (x > 0) {
-            /* Build concatenated number */
+            /* Build the concatenated product x*1 x*2 ... x*n in the string domain, then parse it. */
             char buf[64];
             buf[0] = '\0';
             for (int i = 1; i <= n; i++) {
@@ -43,60 +47,10 @@ long long solve(int argc, char *argv[]) {
             }
             long long number = atoll(buf);
             if (is_nine_pandigital(number)) {
-                return number;
+                { snprintf(_answer, sizeof _answer, "%lld", (long long)(number)); return _answer; }
             }
             x--;
         }
     }
-    return -1; /* No solution found */
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; } /* No solution found */
 }

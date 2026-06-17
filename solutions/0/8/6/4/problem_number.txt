@@ -1,1 +1,0 @@
-864:Square + 1 = Squarefree:31

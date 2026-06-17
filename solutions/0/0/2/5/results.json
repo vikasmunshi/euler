@@ -1,30 +1,21 @@
 [
   {
     "category": "dev",
-    "solution": "p0025_s0.py",
+    "solution": "p0025_s0_c",
     "args": "3",
     "answer": 12,
     "verdict": "correct",
-    "average": 1.5827949856169911e-06,
-    "number_runs": 112
-  },
-  {
-    "category": "main",
-    "solution": "p0025_s0.py",
-    "args": "1000",
-    "answer": 4782,
-    "verdict": "correct",
-    "average": 0.014092281604069916,
-    "number_runs": 111
+    "average": 7.440158730158729e-07,
+    "number_runs": 63
   },
   {
     "category": "dev",
-    "solution": "p0025_s0_c",
+    "solution": "p0025_s0.py",
     "args": "3",
     "answer": 12,
     "verdict": "correct",
-    "average": 8.913214285714286e-07,
-    "number_runs": 56
+    "average": 1.2722531599657877e-06,
+    "number_runs": 63
   },
   {
     "category": "main",
@@ -32,7 +23,16 @@
     "args": "1000",
     "answer": 4782,
     "verdict": "correct",
-    "average": 0.0009873726785714287,
-    "number_runs": 56
+    "average": 0.0006583571904761904,
+    "number_runs": 63
+  },
+  {
+    "category": "main",
+    "solution": "p0025_s0.py",
+    "args": "1000",
+    "answer": 4782,
+    "verdict": "correct",
+    "average": 0.012034057492172227,
+    "number_runs": 63
   }
 ]

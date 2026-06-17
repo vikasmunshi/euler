@@ -1,0 +1,153 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    A product-sum number for a set of size <code>k</code> is a natural number <code>N</code> that can be expressed
+    simultaneously as the product and the sum of a multiset of <code>k</code> natural numbers. I must find, for every
+    <code>k</code> from 2 to 12000, the smallest such <code>N</code> - its minimal product-sum number - and then sum
+    the distinct values found (the example reminds us that 8 serves several values of <code>k</code> but counts once).
+    The naive reading of the problem - search over all multisets of size <code>k</code> - is hopeless, since the count
+    of multisets grows exponentially in <code>k</code>. The whole problem turns on a single algebraic observation about
+    the behaviour of the number 1.
+  </p>
+  <p>
+    The number 1 is the multiplicative identity: multiplying by 1 leaves a product unchanged but adding 1 raises a sum
+    by 1. So given any multiset of "real" factors (each at least 2) with product <code>P</code> and sum <code>S</code>,
+    where <code>P &ge; S</code>, I can append exactly <code>P - S</code> ones. The product stays <code>P</code>, the
+    sum rises to <code>S + (P - S) = P</code>, and the two now agree. The padded set has size
+    <code>k = m + (P - S)</code>, where <code>m</code> is the number of real factors. This means I never enumerate the
+    ones at all: every <a href="https://en.wikipedia.org/wiki/Integer_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">integer factorization</a>
+    into factors &ge; 2 implicitly defines one candidate <code>(k, N)</code> pair. The search collapses from "all
+    multisets" to "all factorizations," which is dramatically smaller. A second observation bounds the search: for any
+    <code>k</code>, the set <code>{2, k, 1, 1, ..., 1}</code> (with <code>k - 2</code> ones) has product <code>2k</code>
+    and sum <code>2 + k + (k - 2) = 2k</code>, so it is always valid. Hence the minimal <code>N</code> for any
+    <code>k</code> never exceeds <code>2k</code>. That caps every value at <code>2 &middot; max_k</code>, gives the
+    answer table a safe default, and drives a
+    <a href="https://en.wikipedia.org/wiki/Branch_and_bound" class="reference-source" target="_blank" rel="noopener noreferrer">branch-and-bound</a>
+    pruning rule that keeps the work close to linear in <code>max_k</code>.
+  </p>
+
+  <h3>Solution Approach</h3>
+
+  <h4>Recursive Factorization Search</h4>
+  <p>
+    Both files implement the same algorithm, so I describe it once and note the language differences afterward. I keep
+    a table <code>min_prod[k]</code> initialised to <code>2 * max_k</code> - the universal upper bound - for every
+    <code>k</code>. The
+    <a href="https://en.wikipedia.org/wiki/Recursion_(computer_science)" class="reference-source" target="_blank" rel="noopener noreferrer">recursive</a>
+    routine <code>find_product_sum(prod, total, count, start)</code> represents the state of having chosen
+    <code>count</code> factors so far with running product <code>prod</code> and running sum <code>total</code>;
+    <code>start</code> is the smallest value the next factor may take.
+  </p>
+  <p>
+    At each call I compute <code>k = prod - total + count</code>. Here <code>prod - total</code> is the number of ones
+    needed to make the sum equal the product, and <code>count</code> is the number of factors already chosen, so
+    <code>k</code> is exactly the implied set size from the padding identity. If <code>k</code> is within range I relax
+    the table with <code>min_prod[k] = min(min_prod[k], prod)</code>. I then extend the factorization by iterating the
+    next factor <code>i</code> from <code>start</code> upward, recursing with updated product, sum, and count, and
+    passing <code>i</code> as the new <code>start</code> so factors stay non-decreasing.
+  </p>
+  <p>
+    The loop upper limit is <code>max_k // prod * 2 + 1</code>. If <code>prod * i</code> exceeded
+    <code>2 * max_k</code>, the resulting <code>N</code> would beat our bound for every <code>k</code>, so there is no
+    reason to continue. Because this limit is recomputed at each level using the current <code>prod</code>, it tightens
+    as the product grows, cutting branches more aggressively the deeper the recursion descends.
+  </p>
+  <p>
+    The initial call is <code>find_product_sum(1, 1, 1, min_k)</code>. Starting product and sum at 1 with count 1 is a
+    bookkeeping seed: when the first real factor (say 2) is chosen, the product becomes 2, the sum becomes 3, and
+    <code>count</code> becomes 2 - but the count-1 seed cancels correctly in the <code>k</code> formula so single
+    real-factor cases score properly. Setting <code>start = min_k</code> (which is 2) guarantees every chosen factor is
+    at least 2, so I explore only genuine factorizations and never spuriously include a 1 as a "real" factor.
+  </p>
+  <p>
+    After the search I sum the distinct table entries. The Python version uses the concise
+    <code>sum(set(min_prod[2:]))</code>. The C version, lacking a built-in set, allocates a <code>char</code> array of
+    size <code>2 * max_k + 1</code> indexed by value, marks each value as seen on first encounter, and accumulates only
+    unseen values - an O(N) deduplication. The C code also uses two file-scope globals, <code>g_max_k</code> and
+    <code>g_min_prod</code>, to avoid threading shared state through every recursive call, whereas Python defines the
+    helper as a nested function that closes over the enclosing variables. On the main case (<code>max_k = 12000</code>)
+    the C build runs in about 0.0011 s versus 0.0556 s for Python, roughly a 50x gap.
+  </p>
+
+  <h3>Programming Techniques</h3>
+
+  <h4>Implicit Padding with Neutral Elements</h4>
+  <p>
+    Rather than generate every multiset including its ones, I exploit that 1 is the multiplicative identity: padding a
+    factorization with <code>P - S</code> ones yields a valid set of size <code>k = m + (P - S)</code>. This replaces
+    an exponential enumeration of multisets with a much smaller enumeration of
+    <a href="https://en.wikipedia.org/wiki/Integer_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">factorizations</a>.
+    The general principle: when a combinatorial space contains a large class of degenerate or neutral elements, find a
+    formula that accounts for them implicitly instead of enumerating them.
+  </p>
+
+  <h4>Non-Decreasing Factor Ordering</h4>
+  <p>
+    Passing the chosen factor <code>i</code> as the next <code>start</code> forces every subsequent factor to be at
+    least as large as the previous one. This visits each unordered factorization exactly once - without it,
+    <code>{2, 3}</code> would appear as both (2, 3) and (3, 2). A "minimum next element" parameter threaded through the
+    <a href="https://en.wikipedia.org/wiki/Recursion_(computer_science)" class="reference-source" target="_blank" rel="noopener noreferrer">recursion</a>
+    is the canonical way to enumerate unordered combinations or multisets without duplicate work.
+  </p>
+
+  <h4>Branch-and-Bound Pruning Recomputed Per Level</h4>
+  <p>
+    The loop limit <code>max_k / prod * 2 + 1</code> is computed fresh at each recursion level. Because it derives from
+    the current running product, the bound shrinks as the product grows, so pruning is loosest near the root and
+    tightest near the leaves - exactly where the tree is widest. Recomputing a bound from partial state, rather than
+    fixing it once at the top, is a hallmark of effective
+    <a href="https://en.wikipedia.org/wiki/Branch_and_bound" class="reference-source" target="_blank" rel="noopener noreferrer">branch-and-bound</a>.
+  </p>
+
+  <h4>Direct-Address Deduplication in C</h4>
+  <p>
+    Since every minimal value lies in <code>[4, 2 &middot; max_k]</code>, the C version deduplicates with a boolean
+    array indexed by value: mark on first sighting, skip thereafter. This is
+    <a href="https://en.wikipedia.org/wiki/Direct_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">direct addressing</a>,
+    running in O(max_value) time with no sorting and no hashing. Whenever you must deduplicate bounded integers, a
+    direct-address array beats both an O(n log n) sort and the overhead of a
+    <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash set</a>.
+  </p>
+
+  <h4>Closures versus File-Scope Globals for Shared Recursive State</h4>
+  <p>
+    The recursive helper needs read/write access to the result table and the bound. Python uses a nested function that
+    forms a <a href="https://en.wikipedia.org/wiki/Closure_(computer_programming)" class="reference-source" target="_blank" rel="noopener noreferrer">closure</a>
+    over <code>min_prod</code> and <code>max_k</code>, keeping the signature clean and the state encapsulated. C has no
+    closures, so the same need is met with file-scope <code>static</code>
+    <a href="https://en.wikipedia.org/wiki/Global_variable" class="reference-source" target="_blank" rel="noopener noreferrer">globals</a>.
+    The trade-off is that the C helper is no longer reentrant or thread-safe; for a single-threaded solver that is fine,
+    but if reentrance mattered I would pass a pointer to a context struct instead.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The problem is unlocked by one algebraic identity: any
+    <a href="https://en.wikipedia.org/wiki/Integer_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">factorization</a>
+    of <code>N</code> into <code>m</code> factors with product <code>P</code> and sum <code>S</code> defines a
+    product-sum set of size <code>k = m + (P - S)</code> once padded with ones. This turns an exponential multiset
+    search into a tractable factorization search. The bound <code>N &le; 2k</code> both seeds the table and powers the
+    <a href="https://en.wikipedia.org/wiki/Branch_and_bound" class="reference-source" target="_blank" rel="noopener noreferrer">branch-and-bound</a>
+    pruning that keeps the runtime near linear in <code>max_k</code>.
+  </p>
+  <p>
+    Both implementations share the algorithm and produce identical answers. On the main case the C build runs in about
+    0.0011 s while Python takes about 0.0556 s - roughly 50x faster, the expected gap for a hot
+    <a href="https://en.wikipedia.org/wiki/Recursion_(computer_science)" class="reference-source" target="_blank" rel="noopener noreferrer">recursive</a>
+    loop where compilation eliminates interpreter overhead. The Python version is the more elegant expression of the
+    idea - its <a href="https://en.wikipedia.org/wiki/Closure_(computer_programming)" class="reference-source" target="_blank" rel="noopener noreferrer">closure</a>
+    and one-line deduplication are hard to beat for clarity - while the C version is the one to deploy when raw speed
+    matters.
+  </p>
+  <ul>
+    <li>When a search space is dominated by neutral elements, characterise them with a formula and enumerate only the
+    essential structure.</li>
+    <li>Find a natural upper bound on the answer early: it gives a safe default for tables and doubles as a pruning
+    criterion.</li>
+    <li>Enumerate unordered multisets without duplicates by passing a "minimum next element" through the recursion.</li>
+    <li>Recompute pruning bounds at each recursion level from current partial state so they tighten as you descend.</li>
+    <li>Deduplicate bounded integers with a direct-address boolean array rather than sorting or hashing.</li>
+    <li>Use closures for shared recursive state in high-level languages; in C, reach for file-scope statics or a
+    context-struct pointer.</li>
+  </ul>
+</article>

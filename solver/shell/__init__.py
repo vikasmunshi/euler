@@ -1,15 +1,22 @@
-#! /usr/bin/env python3.14
+#!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Module for the solver shell."""
+"""Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
+
+Pipeline (see `docs/syntax.md` for the authoritative language reference):
+
+    readline → lexer → parser → interpreter
+
+plus a self-contained command framework (`command`, `register`, `console`) and
+the `SolverShell` that ties it together.
+"""
 from __future__ import annotations
 
-import solver.shell.builtins  # noqa: F401
-from solver.shell.commands import register
-from solver.shell.shell import SolverShell, command, console
-
-__all__ = (
+__all__ = [
     'SolverShell',
-    'command',
     'console',
     'register',
-)
+]
+
+from solver.shell.register import register
+from solver.shell.shell import SolverShell
+from solver.shell.tty import console

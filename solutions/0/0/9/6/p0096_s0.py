@@ -4,26 +4,17 @@
 from __future__ import annotations
 
 import copy
-import sys
 import typing
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
 
-
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = "resources/" + src.split("/")[-1].split("?")[0]
-    return (Path(__file__).parent / local_filename).read_text()
-
+from solver.runners import runner
 
 Grid = list[list[int]]
 
 
 def get_grids(file_url: str) -> typing.Generator[Grid, None, None]:
+    """Yield each 9x9 puzzle from the resource file, skipping the 'Grid NN' labels."""
     grid: Grid = []
-    for line in get_text_file(file_url).splitlines(keepends=False):
+    for line in runner.get_text_file(file_url).splitlines(keepends=False):
         if line.startswith("Grid"):
             grid = []
         else:
@@ -33,6 +24,7 @@ def get_grids(file_url: str) -> typing.Generator[Grid, None, None]:
 
 
 def get_values_in_square(grid: Grid, row: int, col: int) -> typing.Generator[int, None, None]:
+    """Yield the nine values of the 3x3 box containing (row, col)."""
     row -= row % 3
     col -= col % 3
     for i in range(3):
@@ -41,6 +33,7 @@ def get_values_in_square(grid: Grid, row: int, col: int) -> typing.Generator[int
 
 
 def get_possibilities(grid: Grid, row: int, col: int) -> set[int]:
+    """Candidates for an empty cell: {1..9} minus its row, column, and box digits."""
     if grid[row][col]:
         return set()
     possible = set(range(1, 10))
@@ -54,6 +47,7 @@ def get_possibilities(grid: Grid, row: int, col: int) -> set[int]:
 
 
 def get_all_empty_cells_with_possibilities(grid: Grid) -> list[tuple[int, int, set[int]]]:
+    """Build the working set once: a (row, col, candidates) triple per empty cell."""
     empty_cells = []
     for row in range(9):
         for col in range(9):
@@ -66,6 +60,7 @@ def get_all_empty_cells_with_possibilities(grid: Grid) -> list[tuple[int, int, s
 def update_possibilities(
     empty_cells: list[tuple[int, int, set[int]]], row: int, col: int, number: int
 ) -> list[tuple[int, int, set[int]]]:
+    """Forward checking: a fresh cell list with number dropped from peers of (row, col)."""
     updated_cells = []
     for r, c, possibilities in empty_cells:
         if r == row or c == col or (r // 3 == row // 3 and c // 3 == col // 3):
@@ -77,6 +72,7 @@ def update_possibilities(
 
 
 def solve_backtracking(grid: Grid, empty_cells: list[tuple[int, int, set[int]]]) -> bool:
+    """Depth-first backtracking on the MRV cell, propagating each guess onto a fresh list."""
     if not empty_cells:
         return True
     empty_cells.sort(key=lambda c: len(c[2]))
@@ -92,6 +88,7 @@ def solve_backtracking(grid: Grid, empty_cells: list[tuple[int, int, set[int]]])
 
 
 def is_valid_sudoku_grid(grid: Grid) -> bool:
+    """Check the grid is 9 rows of 9 columns before solving."""
     if len(grid) != 9:
         return False
     for row in grid:
@@ -101,17 +98,20 @@ def is_valid_sudoku_grid(grid: Grid) -> bool:
 
 
 def solve_sudoku(grid: Grid) -> bool:
+    """Collect the empty cells and run the backtracking search on the grid in place."""
     assert is_valid_sudoku_grid(grid), f"Invalid Sudoku grid {grid}"
     empty_cells = get_all_empty_cells_with_possibilities(grid)
     return solve_backtracking(grid, empty_cells)
 
 
 def solve_one_grid(grid: Grid) -> int:
+    """Solve one puzzle in place and read off its top-left 3-digit number."""
     assert solve_sudoku(grid), "failed to solve grid"
     return int("".join(map(str, grid[0][0:3])))
 
 
 def print_grid(grid_0: Grid, grid_1: Grid) -> None:
+    """Pretty-print the unsolved and solved grids side by side (only with --show)."""
     print("     Unsolved Grid       ⟶⟶⟶      Solved Grid        ")
     print("┌───────┬───────┬───────┐   ┌───────┬───────┬───────┐")
     for rb in range(3):
@@ -136,48 +136,22 @@ def print_grid(grid_0: Grid, grid_1: Grid) -> None:
     print(" ─────────────────────────────────────────────────── ")
 
 
-def solve(*, file_url: str) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Backtracking over empty cells with MRV ordering and forward checking; sum the
+    top-left 3-digit numbers. Worst case exponential, near-linear on these puzzles."""
+    file_url = args[0]
+
     grids: tuple[Grid, ...] = tuple(get_grids(file_url=file_url))
     s: int = 0
-    if sys.argv[-1] == "--show":
+    if runner.show:
         for grid in grids:
             source_grid = copy.deepcopy(grid)
             s += solve_one_grid(grid)
             print_grid(source_grid, grid)
-        return s
-    return sum((solve_one_grid(grid) for grid in grids))
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+        return str(s)
+    return str(sum((solve_one_grid(grid) for grid in grids)))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(file_url=str(argv[1])))
+    raise SystemExit(solve())

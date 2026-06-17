@@ -3,12 +3,11 @@
 """ Solution to Euler Problem 10: Summation of Primes [Level 0]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def primes_eratosthenes_sieve_upto_max_num(max_num: int) -> tuple[int, ...]:
+    """Return every prime <= max_num via a Sieve of Eratosthenes."""
     if max_num < 2:
         return ()
     sieve = bytearray(b"\x01") * (max_num + 1)
@@ -19,40 +18,13 @@ def primes_eratosthenes_sieve_upto_max_num(max_num: int) -> tuple[int, ...]:
     return tuple((i for i in range(2, max_num + 1) if sieve[i]))
 
 
-def solve(*, max_num: int) -> int:
-    return sum(primes_eratosthenes_sieve_upto_max_num(max_num))
+@runner.main
+def solve(*args: str) -> str:
+    """Sum the primes up to max_num with a Sieve of Eratosthenes; O(n log log n) time, O(n) space."""
+    max_num = runner.parse_int(args[0])
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sum(primes_eratosthenes_sieve_upto_max_num(max_num)))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_num=int(argv[1])))
+    raise SystemExit(solve())

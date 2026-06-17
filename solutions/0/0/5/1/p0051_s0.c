@@ -1,19 +1,18 @@
 /* Solution to Euler Problem 51: Prime Digit Replacements. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-/* Sundaram sieve: returns array of primes up to max_num, sets *count */
+/* Sundaram sieve: returns array of primes up to max_num, sets *count. */
 static int *sundaram_sieve(int max_num, int *count) {
     if (max_num < 2) {
         *count = 0;
         return NULL;
     }
     long long n = ((long long)max_num - 1) / 2;
+    /* Byte-per-element marking array: simpler than a bit sieve, ample for these limits. */
     unsigned char *marked = calloc((size_t)(n + 1), 1);
     if (!marked) { *count = 0; return NULL; }
 
+    /* Odd value 2k+1 is composite exactly when k = i + j + 2ij for 1 <= i <= j. */
     for (long long i = 1; i <= n; i++) {
         long long j = i;
         while (i + j + 2LL * i * j <= n) {
@@ -31,6 +30,7 @@ static int *sundaram_sieve(int max_num, int *count) {
     int *primes = malloc((size_t)cnt * sizeof(int));
     if (!primes) { free(marked); *count = 0; return NULL; }
 
+    /* Prepend 2 manually, then each unmarked index i yields the prime 2i+1. */
     int idx = 0;
     if (max_num >= 2) primes[idx++] = 2;
     for (long long i = 1; i <= n; i++) {
@@ -42,6 +42,7 @@ static int *sundaram_sieve(int max_num, int *count) {
     return primes;
 }
 
+/* Trial division up to sqrt(num); used per candidate, not as a second sieve. */
 static int is_prime(int num) {
     if (num < 2) return 0;
     if (num == 2) return 1;
@@ -52,9 +53,14 @@ static int is_prime(int num) {
     return 1;
 }
 
-long long solve(int argc, char *argv[]) {
-    int num_digits = atoi(argv[1]);
-    int prime_run  = atoi(argv[2]);
+/* Scan primes ascending; for each, replace a single digit value (only digits 0..9-prime_run
+   can start an eight-family) with values from that digit up to 9, counting forward-only members
+   that stay prime. Return the first prime whose family reaches prime_run. O(P * D) over P primes
+   below 10^num_digits with D-digit strings. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int num_digits = parse_int(argv[1]);
+    int prime_run  = parse_int(argv[2]);
 
     /* Compute 10^num_digits */
     int limit = 1;
@@ -62,7 +68,7 @@ long long solve(int argc, char *argv[]) {
 
     int prime_count = 0;
     int *primes = sundaram_sieve(limit, &prime_count);
-    if (!primes) return -1;
+    if (!primes) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 
     long long answer = -1;
 
@@ -86,9 +92,9 @@ long long solve(int argc, char *argv[]) {
             }
             if (!found) continue;
 
-            /* For each replacement digit >= replaced digit,
-               replace all occurrences of 'replaced' with 'replacement',
-               check if result >= prime and is prime, count them */
+            /* For each replacement digit >= replaced digit, substitute all occurrences,
+               counting only same-length members that are >= prime and prime themselves;
+               forward-only counting guarantees the first match is the smallest member. */
             int seq_count = 0;
 
             for (int rep = rd; rep <= 9; rep++) {
@@ -105,7 +111,7 @@ long long solve(int argc, char *argv[]) {
                 }
                 new_str[ni] = '\0';
 
-                /* Skip leading zeros: if first char is '0', skip */
+                /* Skip leading zeros: result would be a shorter number, not a valid member. */
                 if (new_str[0] == '0') continue;
 
                 int new_val = atoi(new_str);
@@ -122,55 +128,5 @@ long long solve(int argc, char *argv[]) {
     }
 
     free(primes);
-    return answer;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(answer)); return _answer; }
 }

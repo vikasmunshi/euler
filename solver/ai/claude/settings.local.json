@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(autoflake *)",
+      "Bash(autopep8 *)",
+      "Bash(black *)",
+      "Bash(chmod +x workspace/*)",
+      "Bash(chmod -x workspace/*)",
+      "Bash(echo:*)",
+      "Bash(env)",
+      "Bash(flake8 *)",
+      "Bash(gcc *)",
+      "Bash(isort *)",
+      "Bash(ls:*)",
+      "Bash(mypy *)",
+      "Bash(pip:*)",
+      "Bash(python:*)",
+      "Bash(rm -f workspace/*)",
+      "Bash(rm -rf workspace/*)",
+      "Bash(rm workspace/*)",
+      "Bash(scripts/c/compile.sh:*)",
+      "Bash(scripts/git/status.sh:*)",
+      "Bash(scripts/linters/check.sh:*)",
+      "Bash(solver *)",
+      "Bash(stat:*)",
+      "Bash(workspace/* *)",
+      "Bash(workspace/*)",
+      "Edit(workspace/**)",
+      "Read(./**)",
+      "Read(//usr/local/bin/**)",
+      "Skill(claude-api)",
+      "Skill(claude-api:*)",
+      "Skill(update-config)",
+      "WebFetch(domain:console.anthropic.com)",
+      "Write(workspace/**)"
+    ]
+  }
+}

@@ -1,0 +1,166 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    Every starting number generates a chain: repeatedly replace the current value with the sum of the
+    squares of its decimal digits. The problem tells us (and it can be proved) that every such chain
+    eventually settles into one of exactly two terminal states - the fixed point 1, or the cycle that
+    runs through 89. The task is to count how many starting numbers below ten million land in the
+    89-cycle. A direct approach would simulate the chain for all 10^7 starting values, which is
+    feasible but wasteful, and scales badly if the bound grows.
+  </p>
+  <p>
+    The observation that unlocks an efficient solution is that the chain depends only on the
+    digit-square-sum of a number, and that sum depends only on the <em>multiset</em> of digits, not
+    their order. Both 123 and 321 have digit-square-sum 1+4+9=14, so they follow identical chains.
+    This invariance lets me reformulate the problem
+    <a href="https://en.wikipedia.org/wiki/Combinatorics" class="reference-source" target="_blank" rel="noopener noreferrer">combinatorially</a>:
+    instead of asking what chain each of 10^7 numbers follows, I ask how many numbers share each
+    possible digit-square-sum, and whether that sum reaches 89. For a d-digit number the largest
+    possible digit-square-sum is 81d (all nines), so there are at most 81d+1 distinct sums - a tiny
+    domain compared with 10^d. I count the numbers contributing to each sum with
+    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+    over digit positions, which is mathematically the
+    <a href="https://en.wikipedia.org/wiki/Convolution" class="reference-source" target="_blank" rel="noopener noreferrer">convolution</a>
+    of single-digit contribution distributions - equivalently, raising a small
+    <a href="https://en.wikipedia.org/wiki/Generating_function" class="reference-source" target="_blank" rel="noopener noreferrer">generating function</a>
+    to the d-th power. The total work is O(d^2 * 81), which for d=7 is only a few thousand operations:
+    the algorithm runs in microseconds where a brute-force scan would take seconds.
+  </p>
+
+  <h3>Solution Approach</h3>
+  <h4>Digit-Square-Sum Convolution with Incremental DP</h4>
+  <p>
+    Both <code>p0092_s0.py</code> and <code>p0092_s0.c</code> implement the same algorithm and differ
+    only in language idioms. I describe it for a general <code>power_of_10 = d</code>, which counts the
+    numbers from 0 to 10^d - 1. I allow leading zeros, so every count is taken over fixed-width
+    d-digit strings; the all-zeros string is just the number 0, which never reaches 89 and so does not
+    pollute the answer.
+  </p>
+  <p>
+    I maintain an array <code>a</code> where <code>a[s]</code> is the number of digit strings built so
+    far whose digit-square-sum equals <code>s</code>. Before any digit is placed there is exactly one
+    empty string, with sum 0, so <code>a = [1]</code>. Each iteration appends one digit position. The
+    distribution of the contribution from a single digit is fixed: digit 0 adds 0, digit 1 adds 1,
+    digit 2 adds 4, ..., digit 9 adds 81. Extending by one digit is therefore a
+    <a href="https://en.wikipedia.org/wiki/Convolution" class="reference-source" target="_blank" rel="noopener noreferrer">convolution</a>
+    of the current array with this single-digit distribution.
+  </p>
+  <p>
+    Concretely, each iteration snapshots the current array into <code>b</code>, zero-extends
+    <code>a</code> by 81 slots (the maximum a new digit can add), and then for every nonzero
+    <code>b[i]</code> and every nonzero digit-square <code>s</code> in {1,4,9,...,81} adds
+    <code>b[i]</code> into <code>a[i+s]</code>. I loop over only the nine nonzero squares. Digit 0
+    contributes 0, so its effect would be <code>a[i] += b[i]</code> at the same index - but because I
+    do not reset <code>a</code> to zero before the iteration (I only zero the new 81-slot extension),
+    the original <code>b[i]</code> values are still sitting in <code>a</code>. That correctly accounts
+    for appending a 0, folding the digit-0 case into the in-place extension.
+  </p>
+  <p>
+    To classify which sums belong to the 89-cycle I maintain a boolean array <code>is89</code>,
+    computed lazily: whenever the array grows I evaluate <code>terminates_in_89</code> for the newly
+    appeared indices only. That helper simply simulates the chain, and the values are small - after d
+    digits the maximum sum is 81d (567 for d=7) - so each simulation is short. The answer is the sum of
+    <code>a[s]</code> over all <code>s</code> with <code>is89[s]</code> true. Since
+    <code>is89[0]</code> is false, the number 0 is excluded automatically.
+  </p>
+  <p>
+    The Python version grows the array with list concatenation (<code>a + [0] * 81</code>) and extends
+    the boolean list with <code>map(terminates_in_89, range(...))</code>; it records the answer for
+    every intermediate <code>power_of_10</code> in a dictionary so it can print the full progression
+    with <code>--show</code>. The C version pre-allocates the maximum size <code>1 + d * 81</code> once
+    with <code>calloc</code>, uses <code>memcpy</code> to snapshot and <code>memset</code> to zero the
+    extension, and uses <code>long long</code> counts because the totals exceed 32 bits once d reaches
+    9. Both are structurally identical; the C version is simply more explicit about memory.
+  </p>
+
+  <h3>Programming Techniques</h3>
+  <h4>Generating-Function Convolution via Incremental Array Growth</h4>
+  <p>
+    The heart of the solution is treating an array indexed by a score (the digit-square-sum) as a
+    polynomial and convolving it with a small kernel - the single-digit
+    <a href="https://en.wikipedia.org/wiki/Generating_function" class="reference-source" target="_blank" rel="noopener noreferrer">generating function</a>
+    x^0 + x^1 + x^4 + ... + x^81 - once per digit. Growing the array one digit at a time (snapshot,
+    extend by 81, scatter-add) is exactly multiplying that polynomial in. Reach for this
+    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+    pattern whenever you must count combinations whose contributions sum to a bounded total: it
+    replaces an exponential enumeration with a polynomial-time table.
+  </p>
+  <h4>Snapshot-then-Update (Double Buffering)</h4>
+  <p>
+    Before scattering contributions into <code>a</code> I save the current state into <code>b</code>
+    and read exclusively from <code>b</code> while writing into <code>a</code>. This separation of
+    read and write buffers prevents an update from feeding back into itself within the same iteration.
+    It is the same
+    <a href="https://en.wikipedia.org/wiki/Multiple_buffering" class="reference-source" target="_blank" rel="noopener noreferrer">double buffering</a>
+    discipline used in cellular automata like
+    <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life" class="reference-source" target="_blank" rel="noopener noreferrer">Conway's Game of Life</a>:
+    whenever a "next generation" is computed from a "current generation", keep the two distinct.
+  </p>
+  <h4>Lazy, Bounded-Domain Precomputation</h4>
+  <p>
+    Rather than simulating 10^7 chains, I evaluate <code>terminates_in_89</code> only for the indices
+    that can actually arise - at most 81d distinct sums - and only when each index first appears. This
+    turns a 10^7-element simulation into at most 567 short simulations. The principle: compute derived
+    properties only for the reachable part of a domain, and compute them on demand. It is a close
+    cousin of
+    <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a>,
+    where work is deferred until it is genuinely needed.
+  </p>
+  <h4>Parallel (Tuple) Assignment in Python</h4>
+  <p>
+    The inner loop of <code>terminates_in_89</code> uses <code>n, t = (n + (t % 10) ** 2, t // 10)</code>.
+    Python evaluates the entire right-hand
+    <a href="https://docs.python.org/3/reference/expressions.html#expression-lists" class="reference-source" target="_blank" rel="noopener noreferrer">tuple</a>
+    before binding any name, so both updates use the old values without a temporary. The same idiom
+    appears as <code>b, a = (a, a + [0] * 81)</code> to snapshot and extend in one statement. Reach for
+    tuple assignment whenever two variables are updated in terms of each other's old values.
+  </p>
+  <h4>Skip-Zero Optimisation in the Scatter Loop</h4>
+  <p>
+    The C version guards the inner loop with <code>if (b[i] == 0) continue;</code>. Early in the DP
+    most slots are still zero, so skipping them avoids nine pointless additions per empty slot. This is
+    a cheap branch that pays for itself when the data is
+    <a href="https://en.wikipedia.org/wiki/Sparse_matrix" class="reference-source" target="_blank" rel="noopener noreferrer">sparse</a>
+    - a useful habit in any accumulation loop where many source entries are known to be zero.
+  </p>
+  <h4>Pre-allocation in C versus Concatenation in Python</h4>
+  <p>
+    The C code allocates the final maximum size <code>1 + d * 81</code> once with
+    <a href="https://en.cppreference.com/w/c/memory/calloc" class="reference-source" target="_blank" rel="noopener noreferrer">calloc</a>
+    and grows only a logical length counter, avoiding repeated reallocation; it uses
+    <a href="https://en.cppreference.com/w/c/string/byte/memcpy" class="reference-source" target="_blank" rel="noopener noreferrer">memcpy</a>
+    and
+    <a href="https://en.cppreference.com/w/c/string/byte/memset" class="reference-source" target="_blank" rel="noopener noreferrer">memset</a>
+    for the snapshot and zeroing. Python instead builds a fresh list each iteration with
+    <code>a + [0] * 81</code>, which is idiomatic and clear at the cost of copying. For the tiny sizes
+    here the difference is negligible, but the contrast illustrates the general trade-off: pre-allocate
+    when you know the bound and performance matters; use convenient concatenation when clarity wins.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The unlocking insight is that the chain depends only on the digit-square-sum, and that sum depends
+    only on the multiset of digits, not their order. This collapses a 10^7-number simulation into a
+    <a href="https://en.wikipedia.org/wiki/Convolution" class="reference-source" target="_blank" rel="noopener noreferrer">convolution</a>
+    over an array of size at most 81d, plus a handful of chain checks. The asymptotic cost is
+    O(d^2 * 81), effectively constant for the sizes in this problem.
+  </p>
+  <p>
+    Both solutions implement the same algorithm, so the comparison is purely about language overhead.
+    On the main case (d=7) the C solution finishes too fast to measure (0.0000 s), while the Python
+    solution takes about 0.9 ms; on the largest extra case (d=9) C remains at 0.0000 s against Python's
+    1.4 ms. The C version is fastest thanks to single pre-allocation and tight integer loops, but both
+    are orders of magnitude faster than any brute-force scan. The Python version is more compact and
+    readable, leaning on list concatenation, tuple assignment, and <code>map</code>. Since they share
+    an algorithm, the choice between them is about whether raw speed or expressiveness matters more.
+  </p>
+  <ul>
+    <li>When a property of a number depends only on its digit multiset, count multisets via convolution instead of iterating over every number.</li>
+    <li>Snapshot, extend, scatter-add is a reusable recipe for counting combinations with additive contributions to a bounded total.</li>
+    <li>Separate the expensive counting work from the cheap classification work; the classifier often has a tiny domain even when the counter scales with the input.</li>
+    <li>Precompute derived values only for the reachable indices, and do it lazily as those indices appear.</li>
+    <li>Always read from a saved copy and write to a fresh buffer when computing a next generation in place.</li>
+    <li>Tuple assignment expresses mutually dependent updates cleanly and removes the need for temporaries.</li>
+    <li>A process that funnels into a small set of fixed points lets you replace N simulations with simulations of only the distinct intermediate values.</li>
+  </ul>
+</article>

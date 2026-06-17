@@ -5,8 +5,8 @@
     "args": "https://projecteuler.net/resources/documents/0067_triangle.txt",
     "answer": 7273,
     "verdict": "correct",
-    "average": 0.00010427340000000002,
-    "number_runs": 10
+    "average": 7.139602380952382e-05,
+    "number_runs": 42
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "https://projecteuler.net/resources/documents/0067_triangle.txt",
     "answer": 7273,
     "verdict": "correct",
-    "average": 0.0014889302005030914,
-    "number_runs": 10
+    "average": 0.0011900866686898684,
+    "number_runs": 42
   }
 ]

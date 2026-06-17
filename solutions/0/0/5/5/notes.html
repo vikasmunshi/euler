@@ -1,0 +1,60 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    This problem revolves around a simple iterative transformation: take a number, reverse its decimal digits, add the two together, and check whether the result is a <a href="https://en.wikipedia.org/wiki/Palindromic_number" class="reference-source" target="_blank" rel="noopener noreferrer">palindromic number</a> - a number that reads the same forwards and backwards, like 121 or 7337. If the sum is not a palindrome, we repeat the reverse-and-add on the new value. A <a href="https://en.wikipedia.org/wiki/Lychrel_number" class="reference-source" target="_blank" rel="noopener noreferrer">Lychrel number</a> is one that, conjecturally, never reaches a palindrome by this process. The mathematical subtlety is that no number has ever been *proven* to be Lychrel; in base 10 the property is, as far as anyone knows, undecidable. What rescues the problem is the bounded budget the statement supplies: every number below ten thousand either reaches a palindrome within fifty iterations, or has resisted all computation ever attempted. That lets me redefine "Lychrel" operationally as "did not become a palindrome within 50 reverse-and-add steps," turning an open mathematical question into a finite, well-defined search.
+  </p>
+  <p>
+    The one engineering wrinkle is the magnitude of the intermediate values. Each reverse-and-add roughly doubles the value and can add a digit, so after dozens of steps the numbers overflow 64-bit integers - the statement itself cites a 28-digit result for 10677. Any correct solution therefore needs <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>. The total cost is O(N * I * D), where N = 10,000 is the search limit, I = 50 is the iteration cap, and D is the digit-count of the largest intermediate (comfortably under 30). Because D stays tiny, the computation is effectively linear in N and finishes in milliseconds.
+  </p>
+
+  <h3>Solution Approach</h3>
+  <h4>Bounded Iterative Reverse-and-Add with Big-Integer Arithmetic (Python and C)</h4>
+  <p>
+    Both solutions share one algorithm. For each candidate <code>i</code> from 1 to the limit I call <code>is_lychrel</code>, which performs up to <code>max_iterations</code> rounds of reverse-and-add. In each round I first apply the operation, then test the result for palindromicity. The ordering matters: a starting value that is itself a palindrome - 4994 is the smallest example - can still be a Lychrel number, so I must judge the *result* of the step, not the seed. If any step yields a palindrome, the number is not Lychrel and I return false; if the loop exhausts its budget, I return true.
+  </p>
+  <p>
+    In Python the code is short because integers are arbitrary-precision natively. I reverse the digits by converting to a string, reversing it with the slice <code>[::-1]</code>, and parsing back with <code>int(...)</code>. The palindrome test reuses the same idea: a number is a palindrome exactly when <code>str(number) == str(number)[::-1]</code>. The counting in <code>solve</code> is a single <code>sum</code> over a generator of boolean results.
+  </p>
+  <p>
+    In C there is no built-in big integer, so I defined a fixed-width <code>BigNum</code>: an array of decimal digits stored little-endian (least significant digit at index 0) with an explicit length. I chose base 10 rather than a larger base on purpose - the palindrome test operates on decimal digits, so storing in base 10 means I never convert between an arithmetic base and a display base. <code>bignum_add_reverse</code> computes <code>a + reverse(a)</code> in a single pass: for index <code>i</code> it adds <code>a.digits[i]</code> to <code>a.digits[n-1-i]</code> with carry, because the little-endian position <code>i</code> is exactly the big-endian position <code>n-1-i</code> of the same number. This avoids materialising a separate reversed copy. A 128-digit buffer is far more than 50 iterations starting below 10,000 will ever need. The palindrome check just compares symmetric digit pairs. Both implementations agree on the answer, 249.
+  </p>
+
+  <h3>Programming Techniques</h3>
+  <h4>String Slicing for Digit Reversal and Palindrome Testing (Python)</h4>
+  <p>
+    Python's <code>s[::-1]</code> slice reverses any sequence, including the string form of an integer. I use it both to compute the digit-reversal (<code>int(str(n)[::-1])</code>) and to test palindromicity (<code>str(n) == str(n)[::-1]</code>). This is the idiomatic Python way to manipulate digits without writing an explicit extraction loop, and it leverages the interpreter's optimised string handling. Reach for it whenever you need per-digit operations on integers in Python.
+  </p>
+  <h4>Little-Endian Decimal Digit Array (C)</h4>
+  <p>
+    The C <code>BigNum</code> stores digits least-significant-first. I chose this <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">endianness</a> because addition carries propagate from low to high significance, so the loop index matches digit significance directly and a new high-order carry is simply appended at <code>digits[len++]</code>. Choosing base 10 keeps storage aligned with the decimal palindrome test. The general principle: pick a base and endianness that match both your dominant operation (addition) and your output format (decimal).
+  </p>
+  <h4>Fused Reverse-and-Add in One Pass (C)</h4>
+  <p>
+    <code>bignum_add_reverse</code> never builds a reversed copy. Within one loop it reads digit <code>i</code> and digit <code>n-1-i</code> of the same array, summing them with carry. This is correct precisely because the reversal of a little-endian array is the same array read from the other end, and it saves an allocation and a copy in the inner loop.
+  </p>
+  <h4>Counting via a Boolean Generator (Python)</h4>
+  <p>
+    <code>sum(is_lychrel(...) for i in range(...))</code> counts true results directly, because Python's <code>bool</code> is a subclass of <code>int</code> (True is 1, False is 0). I prefer this declarative form over an explicit counter because it states the intent - "count the items satisfying this predicate" - rather than the bookkeeping.
+  </p>
+  <h4>Parameterised Entry Points</h4>
+  <p>
+    Both versions take <code>max_iterations</code> and <code>max_limit</code> as parameters instead of hardcoding 50 and 10,000. This separates the algorithm from the specific problem instance, making it trivial to test edge cases, verify the 10,677 example with a larger budget, or reuse the code elsewhere. Extracting the natural "problem size" into a parameter is a habit worth keeping.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The unlocking insight is that a theoretically undecidable property becomes a finite computation once you accept the stated iteration budget. The secondary insight is to plan for <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a> from the start, since intermediate values quickly outgrow 64-bit range. Python gives this for free; in C the cleanest design keeps numbers in base 10 little-endian so that arithmetic direction and palindrome testing share one representation with no conversions.
+  </p>
+  <p>
+    Both solutions are correct and fast. The C version runs in about 0.0011 s versus 0.0149 s for Python - roughly thirteen times faster, which reflects the cost of Python's repeated string allocation and dynamic dispatch in a tight loop. At this scale either is comfortable; the gap simply illustrates where the overhead lives.
+  </p>
+  <ul>
+    <li>When a problem is undecidable in theory but bounded in practice, identify the iteration budget explicitly - it is what makes the task computable.</li>
+    <li>Apply the transformation before testing the property when the seed itself can satisfy the condition; test the result of the operation, not the input.</li>
+    <li>In Python, <code>s[::-1]</code> on the string form of an integer is the go-to idiom for digit reversal and palindrome checks.</li>
+    <li>When rolling your own big integers in C, match base and endianness to your dominant operation and output format to eliminate conversions.</li>
+    <li>Fuse operations (reverse-and-add in one pass) to avoid temporary allocations in hot loops.</li>
+    <li><code>sum(predicate(x) for x in iterable)</code> is a concise, declarative way to count matching elements in Python.</li>
+    <li>Parameterise problem-size constants so the same code can verify worked examples and handle variations without edits.</li>
+  </ul>
+</article>

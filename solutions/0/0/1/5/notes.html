@@ -1,0 +1,189 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+The problem asks how many monotone
+<a href="https://en.wikipedia.org/wiki/Lattice_path" class="reference-source" target="_blank" rel="noopener noreferrer">lattice paths</a>
+exist from the top-left corner to the bottom-right corner of an n x n grid, where each step can
+only move right or down. The crucial observation is that the geometry of the grid is irrelevant to
+the count: any valid path consists of exactly 2n unit steps, of which n must go right and n must go
+down. A path is fully determined by the order in which we interleave these two kinds of moves.
+Counting paths therefore reduces to counting the ways to choose which n of the 2n positions in the
+move sequence are "right" moves (the remaining n are automatically "down" moves). That count is
+precisely the
+<a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a>
+C(2n, n) = (2n)! / (n! * n!), known here as the
+<a href="https://en.wikipedia.org/wiki/Central_binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">central binomial coefficient</a>.
+For n = 20 the answer is C(40, 20) = 137,846,528,820, which fits in a signed 64-bit integer; for the
+extra test case n = 200 the answer is a 120-digit number, which forces us to use
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+("big integer") arithmetic.
+</p>
+<p>
+This reframing - from "simulate or enumerate paths" to "evaluate one closed-form expression" - is
+what makes the problem trivial. There is no need for
+<a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+over the grid, no recursion, no path-counting table. The remaining concern is purely arithmetic:
+how to compute the
+<a href="https://en.wikipedia.org/wiki/Central_binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">central binomial coefficient</a>
+without producing absurdly large intermediate values. Computing (2n)! and (n!)^2 separately works
+but creates enormous factorials. A better route is the incremental product form
+C(2n, n) = product over i from 1 to n of (n + i) / i, which interleaves multiplication and division
+to keep partial values small. Either way the cost is O(n) arithmetic operations on integers whose
+size grows as O(n log n) bits, giving an overall bit-complexity of about O(n^2 log n) - entirely
+negligible for the sizes here.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Central Binomial Coefficient (Python and C)</h4>
+<p>
+Both the Python and C solutions compute the same quantity, the
+<a href="https://en.wikipedia.org/wiki/Central_binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">central binomial coefficient</a>
+C(2n, n), and differ only in how they manage
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+arithmetic.
+</p>
+<p>
+<strong>Python (p0015_s0.py):</strong> I wrote the answer in a single line,
+<code>math.factorial(2 * lattice_size) // math.factorial(lattice_size) ** 2</code>.
+Python integers are
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+by default, so there is no overflow to worry about and no custom arithmetic to implement. I used
+floor division (<code>//</code>) rather than true division (<code>/</code>) because the
+<a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a>
+is always an exact integer and I want to avoid floating-point rounding entirely.
+<code>math.factorial</code> is implemented in C inside the interpreter, so even for n = 200 this is
+effectively instantaneous. This is the simplest correct solution available in the language.
+</p>
+<p>
+<strong>C (p0015_s0.c):</strong> C has no native big integers, so I implemented a minimal
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+integer type and used the product form rather than factorials. The <code>BigInt</code> struct
+stores the number as an array of base-10^9 "limbs" in
+<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+order (index 0 holds the least significant chunk). I chose base 10^9 because a limb fits inside a
+32-bit value, yet I store each limb in a 64-bit <code>unsigned long long</code>, leaving ample
+headroom for the intermediate product <code>limb * multiplier + carry</code> in a multiply step
+- the multiplier is at most 2n = 400, far below the 64-bit overflow threshold.
+</p>
+<p>
+The <code>solve</code> function initialises the result to 1 with <code>bi_set</code>, then loops
+i from 1 to n, calling <code>bi_mul_ll(&result, n + i)</code> followed by
+<code>bi_div_ll(&result, i)</code>. The ordering is deliberate: the running value after step k
+equals C(n + k, k), which is always an integer, so each division by i is exact and never discards a
+remainder. <code>bi_mul_ll</code> propagates a carry upward through the limbs (natural for
+<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+storage), and <code>bi_div_ll</code> sweeps from the top limb downward, carrying a remainder into
+lower limbs - the standard
+<a href="https://en.wikipedia.org/wiki/Long_division" class="reference-source" target="_blank" rel="noopener noreferrer">long division</a>
+direction. Finally <code>bi_to_str</code> prints the most significant limb with no leading zeros
+and every subsequent limb as exactly nine zero-padded decimal digits, which reconstructs the full
+decimal number directly from the base-10^9 representation.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Python Built-in Arbitrary-Precision Integers</h4>
+<p>
+Python integers grow in memory as needed and have no fixed maximum, so the factorial expression
+just works for any n, returning an exact result. This eliminates an entire class of bugs - overflow
+and silent truncation - with zero extra code. Reach for Python's native
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+integers whenever correctness on large numbers matters more than raw speed; they trade a little
+performance for complete freedom from overflow reasoning.
+</p>
+
+<h4>Base-10^9 Limb Representation for Big Integers in C</h4>
+<p>
+When C needs big integers, the practical pattern is an array of limbs, each holding a chunk of the
+number in some base. I picked base 10^9 (one billion) for two reasons. First, it leaves room for
+multiplication: a limb under 10^9 times a multiplier under 400, plus a carry, stays well within 64
+bits. Second, it makes decimal output trivial - each limb maps to exactly nine decimal digits, so
+no repeated divide-by-ten loop is needed to print the number. Use a power-of-ten base when decimal
+output dominates; switch to a power-of-two base when bitwise operations or binary I/O are the main
+concern.
+</p>
+
+<h4>Little-Endian Limb Order</h4>
+<p>
+I store limbs from least significant (index 0) to most significant. This
+<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+layout matches the natural direction of carry propagation: multiplication carries flow upward
+(index 0 to higher), and division remainders flow downward (top index to lower), keeping both carry
+loops simple and free of awkward index arithmetic. It is also the convention used by
+<a href="https://en.wikipedia.org/wiki/GNU_Multiple_Precision_Arithmetic_Library" class="reference-source" target="_blank" rel="noopener noreferrer">GMP</a>,
+the de facto standard C big-integer library, so code written this way is easy to compare against a
+reference.
+</p>
+
+<h4>Interleaved Multiply-then-Divide to Control Intermediate Size</h4>
+<p>
+Instead of accumulating the full numerator and denominator and dividing once at the end, I divide
+out the known factor i immediately after multiplying by (n + i). Because each partial product is a
+genuine
+<a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a>,
+the division is always exact, so no information is lost and the intermediate values stay as small as
+the final answer rather than ballooning to factorial size. This "build a product incrementally and
+cancel known factors as you go" pattern is a staple of combinatorics code and applies any time you
+know the final result is an integer but the raw numerator and denominator would be enormous.
+</p>
+
+<h4>Minimal Self-Contained Big-Integer Module</h4>
+<p>
+Rather than linking a full library such as
+<a href="https://en.wikipedia.org/wiki/GNU_Multiple_Precision_Arithmetic_Library" class="reference-source" target="_blank" rel="noopener noreferrer">GMP</a>,
+I implemented only the three operations I actually needed: set from a 64-bit value, multiply by a
+64-bit value, and divide by a 64-bit value. This keeps the C file dependency-free and easy to audit.
+When writing competitive or embedded solutions, a purpose-built arithmetic module is often
+preferable to a heavy general-purpose dependency, provided the required operation set is small and
+well defined.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is recognising that
+<a href="https://en.wikipedia.org/wiki/Lattice_path" class="reference-source" target="_blank" rel="noopener noreferrer">lattice path</a>
+counting is a thin disguise over a
+<a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a>:
+every path is one arrangement of n right moves and n down moves, so the answer is the
+<a href="https://en.wikipedia.org/wiki/Central_binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">central binomial coefficient</a>
+C(2n, n). Once you see this, all simulation and
+<a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+disappear and the problem collapses to evaluating a single formula. Both solutions handle
+arbitrarily large n correctly - Python through native big integers, C through a compact custom
+implementation.
+</p>
+<p>
+The recorded benchmark averages reveal a genuine crossover rather than a tie. On the small inputs
+C is the faster of the two - 0.48 microseconds versus 1.35 microseconds on the dev case (n = 2),
+and 0.77 microseconds versus 2.05 microseconds on the main case (n = 20) - because its work is a
+short loop with negligible allocation, whereas CPython pays fixed interpreter and object-creation
+overhead per call. On the extra case (n = 200), however, the order reverses: Python finishes in
+8.87 microseconds against C's 13.19 microseconds. Once the numbers grow to 120 digits the cost is
+dominated by the big-integer multiplications themselves, and CPython's highly optimised native
+integer routines outpace my straightforward schoolbook base-10^9 limb arithmetic. The practical
+reading is that the Python one-liner is both the simplest and the faster choice at the scale that
+actually stresses the arithmetic; the C version wins only on tiny inputs where per-call overhead,
+not arithmetic, dominates, and earns its place as a teaching example of building
+<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+arithmetic from scratch.
+</p>
+<ul>
+  <li>When a counting problem maps to a known combinatorial quantity (a
+      <a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a>,
+      a <a href="https://en.wikipedia.org/wiki/Catalan_number" class="reference-source" target="_blank" rel="noopener noreferrer">Catalan number</a>,
+      and so on), use the closed-form formula - it is faster and simpler than any simulation.</li>
+  <li>Compute binomial coefficients via the incremental product form rather than full factorials;
+      it keeps intermediate values small and makes exact integer division automatic.</li>
+  <li>Cancel known integer factors immediately after each multiplication to stop intermediate
+      values from growing far beyond the final answer.</li>
+  <li>For big integers in C, a base-10^9 limb array gives trivially simple decimal output and no
+      external dependencies - a reliable fallback when numbers outgrow 64 bits.</li>
+  <li>Reach for Python's built-in
+      <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+      integers whenever correctness on large numbers is the priority; at scale their optimised
+      native routines can even beat a hand-rolled C implementation.</li>
+</ul>
+
+</article>

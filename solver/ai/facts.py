@@ -3,6 +3,8 @@
 """ Utility function for gathering problem inputs for AI """
 from __future__ import annotations
 
+__all__ = ['Facts', 'format_solutions_markdown', 'gather_facts', 'prepare_anthropic_request', 'user_message_content']
+
 from base64 import b64encode
 from json import JSONDecodeError, loads
 from typing import Any, NamedTuple, cast
@@ -17,9 +19,10 @@ from bs4.element import Tag
 from solver.ai.models import get_api_key
 from solver.config import config
 from solver.core.parser import extract_resources
-from solver.core.problems import Problem, problems
+from solver.core.problems import problems
 from solver.core.results import Result, read_results
 from solver.shell import console
+from solver.shell.variables import variables
 from solver.utils.download import download_file
 from solver.utils.path_utils import iterdir_recursive
 
@@ -95,7 +98,7 @@ def gather_facts(strict: bool = False) -> Facts:
         ValueError: If `strict` is True and any of the required data, such as
         solutions, results, or test cases, is missing or invalid.
     """
-    if (problem := Problem.from_workspace()) is None:
+    if (problem := variables.problem) is None:
         console.print('[muted]Use [accent]init[/accent] to initialize the workspace first.[/muted]')
         raise ValueError('Invalid workspace')
     solutions: dict[str, str] = {}
@@ -225,7 +228,3 @@ def _split_prompt(prompt: str) -> tuple[str, str]:
     if idx == -1:
         raise ValueError('prompt template has no "## " heading; cannot split into system/user')
     return prompt[:idx].rstrip(), prompt[idx + 1:]
-
-
-__all__ = ('Facts', 'format_solutions_markdown', 'gather_facts',
-           'prepare_anthropic_request', 'user_message_content')

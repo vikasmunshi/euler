@@ -1,11 +1,8 @@
 /* Solution to Euler Problem 60: Prime Pair Sets. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "runner.h"
 #include <math.h>
-#include <time.h>
 
-/* Simple primality test */
+/* Trial-division primality test up to sqrt(n); O(sqrt(n)). */
 static int is_prime(long long n) {
     if (n < 2) return 0;
     if (n == 2) return 1;
@@ -16,7 +13,7 @@ static int is_prime(long long n) {
     return 1;
 }
 
-/* Number of decimal digits in n */
+/* Decimal digit count of n, used to size the concatenation shift. */
 static int num_digits(long long n) {
     if (n == 0) return 1;
     int d = 0;
@@ -24,7 +21,7 @@ static int num_digits(long long n) {
     return d;
 }
 
-/* Concatenate a and b: e.g. a=3, b=7 -> 37 */
+/* Decimal concatenation a||b (e.g. 3,7 -> 37) via shifting a by b's digit count. */
 static long long concat(long long a, long long b) {
     int db = num_digits(b);
     long long mul = 1;
@@ -32,13 +29,13 @@ static long long concat(long long a, long long b) {
     return a * mul + b;
 }
 
-/* Check if concatenating a,b in both orders gives primes */
+/* Edge predicate: both concatenations a||b and b||a are prime. */
 static int concatenate_is_prime(long long a, long long b) {
     return is_prime(concat(a, b)) && is_prime(concat(b, a));
 }
 
-/* --- Cache for pair results --- */
-/* We use a hash table to cache results of concatenate_is_prime */
+/* --- Cache for the symmetric pair predicate (lru_cache stand-in) --- */
+/* Separate-chaining hash table; keys canonicalized to (min,max) since the predicate is symmetric. */
 
 typedef struct CacheEntry {
     long long a, b;
@@ -67,12 +64,13 @@ static void cache_free(void) {
     cache_table = NULL;
 }
 
+/* Multiplicative-XOR mix of the (a,b) key folded into CACHE_SIZE buckets. */
 static unsigned int cache_hash(long long a, long long b) {
     unsigned long long h = (unsigned long long)a * 1000003ULL ^ (unsigned long long)b;
     return (unsigned int)(h ^ (h >> 20) ^ (h >> 40)) & (CACHE_SIZE - 1);
 }
 
-/* Returns -1 if not found, else 0 or 1 */
+/* Returns -1 if not found, else cached result 0 or 1. */
 static int cache_lookup(long long a, long long b) {
     unsigned int h = cache_hash(a, b);
     CacheEntry *e = cache_table[h];
@@ -83,6 +81,7 @@ static int cache_lookup(long long a, long long b) {
     return -1;
 }
 
+/* Prepend a fresh entry onto the bucket's chain. */
 static void cache_insert(long long a, long long b, int result) {
     unsigned int h = cache_hash(a, b);
     CacheEntry *e = malloc(sizeof(CacheEntry));
@@ -93,6 +92,7 @@ static void cache_insert(long long a, long long b, int result) {
     cache_table[h] = e;
 }
 
+/* Memoized concatenate_is_prime: canonical (min,max) key halves stored entries. */
 static int cached_concatenate_is_prime(long long a, long long b) {
     /* Canonicalize order for cache: use (min,max) key since concatenate_is_prime is symmetric */
     long long ka = a < b ? a : b;
@@ -104,7 +104,7 @@ static int cached_concatenate_is_prime(long long a, long long b) {
     return r;
 }
 
-/* Sieve of Sundaram */
+/* Sieve of Sundaram: returns primes up to max_num in ascending order; O(N log log N). */
 static long long *sundaram_sieve(int max_num, int *count) {
     if (max_num < 2) { *count = 0; return NULL; }
     int n = (max_num - 1) / 2;
@@ -132,8 +132,9 @@ static long long *sundaram_sieve(int max_num, int *count) {
     return primes;
 }
 
-/* DFS clique search for set_length primes */
-/* sol: current partial solution (ascending order)
+/* Depth-first clique search: extend in strictly ascending index order so the first
+   complete clique found is the minimum-sum one; verify each new edge before recursing.
+   sol: current partial solution (ascending order)
    sol_size: number of elements in sol
    target: desired clique size
    primes: sorted prime array
@@ -156,6 +157,7 @@ static void dfs(long long *sol, int sol_size, int target,
         return;
     }
     int need = target - sol_size;
+    /* Stop where fewer than `need` primes remain to fill the clique. */
     for (int i = start_idx; i <= num_primes - need; i++) {
         long long p = primes[i];
         /* Check p pairs with all existing elements */
@@ -174,9 +176,13 @@ static void dfs(long long *sol, int sol_size, int target,
     }
 }
 
-long long solve(int argc, char *argv[], int show) {
+/* Model primes as graph nodes with an edge when both concatenations are prime, then
+   find the minimum-sum clique of size set_length via cached ascending-order DFS.
+   Every answer prime is below 10^(set_length-1), bounding the sieved candidate set. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
     int set_length = 5;
-    if (argc >= 2) set_length = atoi(argv[1]);
+    if (argc >= 2) set_length = parse_int(argv[1]);
 
     /* Compute max prime: 10^(set_length-1) */
     int max_prime = 1;
@@ -218,56 +224,5 @@ long long solve(int argc, char *argv[], int show) {
     free(primes);
     cache_free();
 
-    return best_sum;
-}
-
-/* Usage: ./file <set_length> [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-    int show = 0;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) { show = 1; continue; }
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv, show);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(best_sum)); return _answer; }
 }

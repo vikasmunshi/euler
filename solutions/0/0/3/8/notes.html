@@ -1,0 +1,60 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>The task is to find the largest <a href="https://en.wikipedia.org/wiki/Pandigital_number" class="reference-source" target="_blank" rel="noopener noreferrer">1-to-9 pandigital</a> number - one that uses each of the digits 1 through 9 exactly once, and so is exactly nine digits long - that can be written as the concatenation of the products x*1, x*2, ..., x*n for some integer x and some n greater than 1. The phrase "concatenated product" is purely textual: we write out the decimal forms of the successive multiples side by side, with no arithmetic between them.</p>
+
+<p>The observation that makes this tractable is a counting argument on digit lengths. The concatenation must total exactly nine digits, no more and no fewer. If x has k digits, then x*1 already contributes at least k digits, and each further multiple contributes at least k more. Since n must be at least 2, the products by 1 and 2 alone account for roughly 2k digits, so a 5-digit x is impossible (its double is at least five digits, giving at least ten total). This caps x at four digits. Each digit-length of x then pairs with a maximum n: a 4-digit x admits only (1,2); a 3-digit x admits (1,2,3); a 2-digit x admits up to (1,2,3,4); a single-digit x admits up to (1,...,9). The whole search therefore reduces to a few thousand candidates - effectively constant work, bounded by the largest x we test (9876). This is a <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a> made fast by mathematical pruning rather than by any clever data structure, with effective complexity O(X_max).</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Bounded Descending Brute-Force Search (Python and C)</h4>
+
+<p>Both p0038_s0.py and p0038_s0.c implement the same algorithm; I describe it once and note the language differences at the end.</p>
+
+<p>I start from a static table of (n, max_x) pairs: <code>(2, 9876)</code>, <code>(3, 987)</code>, <code>(4, 98)</code>, <code>(5, 9)</code>, <code>(6, 9)</code>, <code>(7, 9)</code>, <code>(8, 9)</code>, <code>(9, 9)</code>. Each pair encodes the digit-count reasoning above: with n=2 the largest x worth trying is 9876 (a 4-digit value whose double is five digits, giving nine total); with n=3 a 3-digit x up to 987 yields 3+3+3=9 digits; and so on down to single-digit x for the larger n values. Baking the bounds into the table avoids recomputing them inside the loop and doubles as documentation of the case analysis.</p>
+
+<p>For each pair I count x downward from its maximum to 1. For each x I build the concatenated product by converting x*1, x*2, ..., x*n to strings, joining them, and parsing the result back into an integer. I then test that integer with <code>is_nine_pandigital</code>. Because a larger x produces a larger concatenation within a fixed n, the first pandigital number I find for a given pair is automatically the largest for that pair. The pairs are ordered so the most promising case (n=2, which produces the largest values) is visited first, which lets me return on the first global hit. The answer 932718654 is the concatenated product of 9327 and (1,2): 9327*1 = 9327 and 9327*2 = 18654, concatenating to 932718654.</p>
+
+<p>The validator <code>is_nine_pandigital</code> first applies a range guard, rejecting anything outside [100000000, 999999999], then walks the digits using a <a href="https://en.wikipedia.org/wiki/Frequency_(statistics)" class="reference-source" target="_blank" rel="noopener noreferrer">frequency</a> array <code>digits[10]</code>. It returns false on a zero digit or a repeat, and finally confirms that all nine non-zero slots are set exactly once.</p>
+
+<p><strong>Language-specific details.</strong> In Python I build the concatenation with the idiom <code>int("".join([str(i * x) for i in range(1, n + 1)]))</code>, leaning on the language's effortless integer/string interconversion. In C I format each product into a temporary buffer with <code>snprintf</code>, append it to a fixed-size buffer with <code>strcat</code>, then convert the whole string with <code>atoll</code> into a <code>long long</code>. The C frequency array is a stack-allocated <code>int digits[10] = {0}</code>; the Python equivalent is <code>[0] * 10</code>. The two are logically equivalent.</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Static Lookup Table for Search Bounds</h4>
+
+<p>Rather than deriving the upper bound for x dynamically, I encode the (n, max_x) pairs as a fixed tuple-of-tuples in Python and a 2D array in C. This is the precomputed-constants pattern: when you can enumerate every case analytically before writing the loop, do so. It separates the mathematical reasoning ("which cases exist") from the mechanics ("what to do per case") and keeps the hot loop free of branching. Reach for this whenever a problem's structure yields a small, fixed set of cases.</p>
+
+<h4>Digit-Frequency Array for Pandigitality Testing</h4>
+
+<p>The validator uses an array indexed by digit value as a <a href="https://en.wikipedia.org/wiki/Frequency_(statistics)" class="reference-source" target="_blank" rel="noopener noreferrer">frequency</a> count. This is the canonical O(d) way to test whether a set of digits is a permutation of a target set, where d is the digit count. It beats sorting (O(d log d)) and avoids the overhead of a hash-based set. The short-circuits on a zero digit or a repeat let me bail out as early as possible. Keep this small-integer-array-as-map idea in your toolkit for any digit-property check.</p>
+
+<h4>Descending Iteration to Find the Maximum First</h4>
+
+<p>Within each pair I iterate x from high to low. Because the concatenation grows monotonically with x for a fixed n, the first match is automatically the largest for that case - so there is no separate maximisation pass. Combined with ordering the pairs so the biggest producers come first, this lets me return immediately on the first valid result. Use descending enumeration whenever candidates can be ordered naturally and you only want the extreme one.</p>
+
+<h4>String Concatenation for Digit Joining</h4>
+
+<p>The problem defines its number by textual concatenation, not arithmetic, so I work in the string domain - join the decimal representations, then parse back to an integer only when I need its magnitude and digits. Python's <code>"".join(...)</code> with a comprehension is both idiomatic and fast for small n; C's <code>snprintf</code> plus <code>strcat</code> achieves the same. Doing this arithmetically (shifting by powers of ten) would add complexity for no benefit. Whenever a number is defined by concatenating others, prefer the string route.</p>
+
+<h4>Size-Bounded Early Rejection</h4>
+
+<p>The validator's first action is a single range comparison that rejects any value not in [100000000, 999999999], enforcing the nine-digit requirement before touching any digit. Front-loading a cheap necessary condition before expensive work is a broadly useful guard pattern.</p>
+
+<h3>Key Takeaways</h3>
+
+<p>The insight that unlocks this problem is the digit-count argument: requiring exactly nine output digits with n > 1 forces x to have at most four digits, turning an open-ended search into a handful of bounded cases. Encoding those bounds as a static table makes the code both fast and self-documenting.</p>
+
+<p>Both solutions run effectively instantly. The C version measured 0.0000 s and the Python version 0.0003 s; the gap reflects Python's per-operation overhead on integer and string handling rather than any algorithmic difference, since the two share an identical strategy. For a search this small the choice between them is a matter of taste - the C version is marginally fastest, while the Python version is the more concise to read.</p>
+
+<ul>
+  <li>Before coding a brute-force loop, ask what constrains the search space - digit-count arguments often shrink a vast space to a few cases.</li>
+  <li>Encode analytically derived bounds as static tables to separate reasoning from loop mechanics and make code self-documenting.</li>
+  <li>Use a small integer frequency array as the go-to O(d) tool for digit-permutation checks; it beats sorting and avoids hash overhead.</li>
+  <li>When a number is defined by concatenating decimal representations, work in the string domain and convert to integer only for arithmetic needs.</li>
+  <li>Enumerate candidates from largest to smallest so the first valid hit is the answer, avoiding a separate maximisation pass.</li>
+  <li>Put cheap structural guards (range and zero checks) at the top of validators to short-circuit costly work on invalid inputs.</li>
+</ul>
+
+</article>

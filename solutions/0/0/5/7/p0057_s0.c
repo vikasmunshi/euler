@@ -1,11 +1,9 @@
 /* Solution to Euler Problem 57: Square Root Convergents. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 #include <stdint.h>
 
-/* Big integer: base 10^9, little-endian limbs */
+/* Big integer: base 10^9, little-endian limbs. Base 10^9 makes the decimal
+   digit count nearly free - each non-top limb contributes exactly nine digits. */
 #define BASE 1000000000ULL
 #define MAX_LIMBS 512
 
@@ -14,6 +12,7 @@ typedef struct {
     int size;
 } BigInt;
 
+/* Initialise a BigInt from a 64-bit value, splitting it into base-10^9 limbs. */
 static void bi_set_int(BigInt *a, uint64_t val) {
     memset(a->limbs, 0, sizeof(a->limbs));
     a->size = 0;
@@ -30,7 +29,7 @@ static void bi_set_int(BigInt *a, uint64_t val) {
     a->size = i;
 }
 
-/* a = b + 2*c */
+/* a = b + 2*c (next convergent numerator), propagating carries across limbs. */
 static void bi_add_twice(BigInt *a, const BigInt *b, const BigInt *c) {
     int n = b->size > c->size ? b->size : c->size;
     uint64_t carry = 0;
@@ -47,7 +46,7 @@ static void bi_add_twice(BigInt *a, const BigInt *b, const BigInt *c) {
     while (a->size > 1 && a->limbs[a->size - 1] == 0) a->size--;
 }
 
-/* a = b + c */
+/* a = b + c (next convergent denominator), propagating carries across limbs. */
 static void bi_add(BigInt *a, const BigInt *b, const BigInt *c) {
     int n = b->size > c->size ? b->size : c->size;
     uint64_t carry = 0;
@@ -64,7 +63,7 @@ static void bi_add(BigInt *a, const BigInt *b, const BigInt *c) {
     while (a->size > 1 && a->limbs[a->size - 1] == 0) a->size--;
 }
 
-/* Count decimal digits */
+/* Count decimal digits: 9 per non-top limb, plus the digits of the top limb. */
 static int bi_decimal_digits(const BigInt *a) {
     if (a->size == 0) return 1;
     int top = a->size - 1;
@@ -81,8 +80,12 @@ static int bi_decimal_digits(const BigInt *a) {
     return d;
 }
 
-long long solve(int argc, char *argv[]) {
-    int expansions = (argc >= 2) ? atoi(argv[1]) : 1000;
+/* Iterate the sqrt(2) convergent recurrence (p, q) -> (p + 2q, p + q) with a
+   base-10^9 big integer, counting steps where the numerator has more decimal
+   digits than the denominator; O(n^2) from adding linearly growing values. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int expansions = (argc >= 2) ? parse_int(argv[1]) : 1000;
 
     BigInt num, den, new_num, new_den;
     bi_set_int(&num, 1);
@@ -91,6 +94,8 @@ long long solve(int argc, char *argv[]) {
     long long result = 0;
 
     for (int i = 0; i < expansions; i++) {
+        /* Compute both new values before overwriting either: the new numerator
+           depends on the old denominator and vice versa. */
         bi_add_twice(&new_num, &num, &den);
         bi_add(&new_den, &num, &den);
 
@@ -102,55 +107,5 @@ long long solve(int argc, char *argv[]) {
         if (dnum > dden) result++;
     }
 
-    return result;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(result)); return _answer; }
 }

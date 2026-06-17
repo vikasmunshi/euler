@@ -1,8 +1,5 @@
 /* Solution to Euler Problem 5: Smallest Multiple. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 /* Big integer as array of uint32 limbs, little-endian base 2^32 */
 #define MAX_LIMBS 64
@@ -125,65 +122,16 @@ static char *bi_to_str(const BigInt *a) {
     return s;
 }
 
-char *solve(int argc, char *argv[]) {
-    int n = atoi(argv[1]);
+/*
+ * Iterative LCM of 1..n: fold a running BigInt result with lcm(result, y) for y = 2..n,
+ * each step using lcm = result / gcd * y on a hand-rolled big integer; O(n log n).
+ */
+const char *solve(int argc, char *argv[]) {
+    int n = parse_int(argv[1]);
     BigInt result;
     bi_set_ll(&result, 1ULL);
     for (int y = 2; y <= n; y++) {
         bi_lcm_small(&result, (long long)y);
     }
     return bi_to_str(&result);
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (result) {
-            if (strcmp(cur, result) != 0) {
-                fprintf(stderr, "Expected consistent result, got %s previous result=%s\n",
-                        cur, result);
-                rc = 1;
-            }
-            free(cur);
-        } else {
-            result = cur;
-        }
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "");
-    free(result);
-    return rc;
 }

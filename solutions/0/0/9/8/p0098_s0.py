@@ -7,37 +7,34 @@ import collections
 import dataclasses
 import itertools
 import math
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
 
-
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = "resources/" + src.split("/")[-1].split("?")[0]
-    return (Path(__file__).parent / local_filename).read_text()
+from solver.runners import runner
 
 
 def str_hash(s: str) -> str:
+    """Frequency signature: per-character repeat counts sorted descending (a bijection-invariant)."""
     return "".join(map(str, sorted((s.count(c) for c in set(s)), reverse=True)))
 
 
 @dataclasses.dataclass(frozen=True, slots=True, kw_only=True, eq=True, order=True, unsafe_hash=False, repr=True)
 class Anagram:
+    """One anagram class: a canonical sorted-letter key plus the dictionary words sharing it."""
     canonical: str
     dictionary_words: set[str] = dataclasses.field(default_factory=set)
 
     @property
     def anagram_length(self) -> int:
+        """Word length if this class holds a usable pair (more than one word), else 0."""
         return len(self.canonical) if len(self.dictionary_words) > 1 else 0
 
 
 @dataclasses.dataclass(frozen=True, slots=True, kw_only=True, eq=True, order=True, unsafe_hash=False, repr=True)
 class Anagrams:
+    """Anagram classes indexed first by word length, then by canonical sorted-letter key."""
     anagrams: dict[int, dict[str, Anagram]] = dataclasses.field(default_factory=lambda: collections.defaultdict(dict))
 
     def add_word(self, word: str) -> None:
+        """Bucket a word under its length and its canonical (sorted-letter) form."""
         canonical = "".join(sorted(word))
         word_len = len(canonical)
         if canonical not in self.anagrams[word_len]:
@@ -45,6 +42,7 @@ class Anagrams:
         self.anagrams[word_len][canonical].dictionary_words.add(word)
 
     def prune(self) -> None:
+        """Drop singleton classes and now-empty length groups: they can never form a pair."""
         for word_len in self.anagrams.keys():
             for anagram in list(self.anagrams[word_len].values()):
                 if anagram.anagram_length == 0:
@@ -56,6 +54,7 @@ class Anagrams:
 
 
 def n_digit_squares(n: int) -> set[str]:
+    """All exactly-n-digit perfect squares as strings, scanning roots in [ceil(sqrt(10^(n-1))), floor(sqrt(10^n-1))]."""
     square_numbers: set[str] = set()
     min_sqrt = math.ceil(math.sqrt(10 ** (n - 1)))
     max_sqrt = math.floor(math.sqrt(10**n - 1))
@@ -64,8 +63,15 @@ def n_digit_squares(n: int) -> set[str]:
     return square_numbers
 
 
-def solve(*, file_url: str) -> int:
-    words: list[str] = get_text_file(file_url).replace('"', "").split(",")
+@runner.main
+def solve(*args: str) -> str:
+    """Group words into anagram classes, then for lengths largest-first match each word to an
+    equal-length square via the bijection implied by zipping letters to digits; a class hit at the
+    longest length is the maximum. Shape-hash prefiltering prunes incompatible (word, square) pairs;
+    cost ~ (anagram words) x (squares per length)."""
+    file_url = args[0]
+
+    words: list[str] = runner.get_text_file(file_url).replace('"', "").split(",")
     anagrams: Anagrams = Anagrams()
     for word in words:
         anagrams.add_word(word)
@@ -91,41 +97,10 @@ def solve(*, file_url: str) -> int:
                     if other_word_num in square_numbers:
                         max_square = max(max_square, int(word_num), int(other_word_num))
                 if max_square > 0:
-                    return max_square
+                    return str(max_square)
     else:
         raise ValueError("No square anagrams found")
 
 
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
-
-
 if __name__ == "__main__":
-    raise SystemExit(main(file_url=str(argv[1])))
+    raise SystemExit(solve())

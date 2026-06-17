@@ -1,0 +1,98 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+I am asked to find the <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime</a> below one million that can be written as the sum of the most <em>consecutive</em> primes. The naive reading of this problem invites an O(n^3) catastrophe: for every starting prime, try every length, and for every candidate length re-add a run of primes and test the total for primality. The two ideas that collapse this into something fast are a <a href="https://en.wikipedia.org/wiki/Prefix_sum" class="reference-source" target="_blank" rel="noopener noreferrer">prefix sum</a> array and monotonicity-based pruning. A prefix sum array <code>S</code> stores running totals, so that <code>S[k]</code> is the sum of the first <code>k</code> primes; the sum of any contiguous block from index <code>j</code> to <code>i-1</code> is then just <code>S[i] - S[j]</code>, computed in constant time. Without it, every candidate sum is a fresh O(n) scan.
+</p>
+
+<p>
+Two observations prune the search. First, because all primes are positive, the prefix sums are strictly increasing - so as I shrink <code>j</code>, the candidate sum <code>S[i] - S[j]</code> grows monotonically, and once it crosses the limit, every longer run from the same endpoint also crosses it and I can stop immediately. Second, I only care about runs <em>longer</em> than the best found so far, so I start the inner loop at <code>j = i - best_length - 1</code> and never even look at runs that cannot improve the answer. Primality of each candidate is settled in O(1) by a Boolean sieve - an array indexed by value where the entry is true exactly when that value is prime. Building the sieve costs O(n log log n); the doubly-nested loop, thanks to the two prunes, runs in near-linear time in practice. The dominant cost is therefore the sieve itself.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Prefix-Sum Sieve Search (Python and C)</h4>
+
+<p>
+Both <code>p0050_s0.py</code> and <code>p0050_s0.c</code> implement the same four-step algorithm; they differ only in idiom and arithmetic width.
+</p>
+
+<p>
+<strong>Step 1 - Generate primes.</strong> I generate all primes up to <code>max_limit</code> with the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>. Sundaram works on odd numbers only: it marks every value of the form <code>i + j + 2*i*j</code> as composite, then maps each surviving index <code>i</code> to the odd prime <code>2*i + 1</code>, prepending the prime 2. I chose it largely for variety - the more familiar <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> is in the same complexity class and would serve equally well. The output is a dense ascending array of primes.
+</p>
+
+<p>
+<strong>Step 2 - Build the prefix-sum array.</strong> I build <code>prime_sums</code> with <code>prime_sums[0] = 0</code> and <code>prime_sums[k]</code> equal to the sum of the first <code>k</code> primes. That leading zero is a sentinel: it lets a run starting at the very first prime be written as <code>prime_sums[i] - prime_sums[0]</code>, in exactly the same form as every other run, so the inner loop needs no special case.
+</p>
+
+<p>
+<strong>Step 3 - Build a fast primality lookup.</strong> In Python I make a <code>set</code> from the prime tuple, giving O(1) average membership tests. In C I <code>calloc</code> a byte array of size <code>max_limit + 1</code> and set <code>is_prime[p] = 1</code> for each prime - O(1) worst-case lookup with excellent cache behaviour.
+</p>
+
+<p>
+<strong>Step 4 - Double-loop search with pruning.</strong> The outer loop advances the right endpoint index <code>i</code>. The inner loop starts at <code>j = i - best_length - 1</code> rather than <code>i - 1</code>, so any larger <code>j</code> - which would yield a run no longer than the current best - is skipped outright. As <code>j</code> decrements, the candidate <code>prime_sums[i] - prime_sums[j]</code> grows; the moment it exceeds <code>max_limit</code> I <code>break</code>. When a candidate is prime, I record the new best length and best value. The C version additionally guards <code>j_start &lt; 0</code> with a <code>continue</code> and checks <code>possible_prime &gt;= 2</code> before indexing the sieve.
+</p>
+
+<p>
+<strong>Language differences.</strong> Python uses <a href="https://docs.python.org/3/library/itertools.html#itertools.accumulate" class="reference-source" target="_blank" rel="noopener noreferrer">itertools.accumulate</a> to build the prefix sums in one compiled call, and relies on arbitrary-precision integers so overflow is impossible. The C version builds the prefix sums in a manual loop and stores them as <code>long long</code> (64-bit), because the sum of all primes below one million is roughly 37 billion - far past the 32-bit signed limit of about 2.1 billion. That difference in arithmetic, plus Python's dynamic dispatch, explains why the C version is roughly 60 times faster on the main case (0.0026 s versus 0.1615 s).
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Prefix Sum Arrays for Range Queries</h4>
+<p>
+A <a href="https://en.wikipedia.org/wiki/Prefix_sum" class="reference-source" target="_blank" rel="noopener noreferrer">prefix sum</a> array turns "sum of elements from a to b" into a single subtraction, after one O(n) preprocessing pass. Reach for this whenever you answer many sub-range aggregate queries over a fixed sequence - sliding windows, stock-price ranges, 2-D image integrals. If you catch yourself recomputing the same partial sums, build a prefix array.
+</p>
+
+<h4>Sentinel Zero at the Array Boundary</h4>
+<p>
+Setting <code>prime_sums[0] = 0</code> means a run starting at the first element is just <code>prime_sums[i] - prime_sums[0]</code>, with no special case. Placing a neutral element at a boundary to make inner loops uniform is a general idiom - it appears in linked-list dummy heads and in the empty-prefix base case of <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> tables.
+</p>
+
+<h4>Early Termination by Monotonicity</h4>
+<p>
+Because the <a href="https://en.wikipedia.org/wiki/Prefix_sum" class="reference-source" target="_blank" rel="noopener noreferrer">prefix sum</a> array is strictly increasing, the candidate grows as <code>j</code> shrinks. Once it crosses <code>max_limit</code>, every smaller <code>j</code> also crosses it, so I <code>break</code>. Whenever you can prove that further iterations move a quantity only one way relative to a bound, stop the instant the bound is crossed.
+</p>
+
+<h4>Best-Known-Answer Pruning</h4>
+<p>
+Starting the inner loop at <code>i - best_length - 1</code> is the simplest form of <a href="https://en.wikipedia.org/wiki/Branch_and_bound" class="reference-source" target="_blank" rel="noopener noreferrer">branch and bound</a>: a "best so far" value shrinks the live search space, and any run no longer than the current best is skipped. This is what keeps a nominally quadratic loop near-linear here.
+</p>
+
+<h4>O(1) Primality Testing via Boolean Array</h4>
+<p>
+After sieving I store membership in a flat lookup - a Python <code>set</code> or a C byte array indexed by value. In C the byte array beats a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a>: guaranteed O(1) worst case and contiguous memory for good cache locality. This is the right trade-off whenever the value universe fits comfortably in memory, as one million bytes trivially does.
+</p>
+
+<h4>Using itertools.accumulate in Python</h4>
+<p>
+Python's <a href="https://docs.python.org/3/library/itertools.html#itertools.accumulate" class="reference-source" target="_blank" rel="noopener noreferrer">itertools.accumulate</a> produces running totals and is implemented in C inside the interpreter, so it is both faster and clearer than a hand-written loop. Wrapping it in <code>list()</code> materialises the result once. Prefer standard-library building blocks that name a known algorithm directly.
+</p>
+
+<h4>Fixed-Width Arithmetic and Overflow in C</h4>
+<p>
+The sum of primes below one million overflows a 32-bit integer, so <code>prime_sums</code> is <code>long long</code>, and the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sundaram</a> bound test casts to <code>long long</code> before computing <code>i + j + 2*i*j</code>. <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">Integer overflow</a> in C is silent and yields wrong answers, not crashes. The rule: when accumulating many values or multiplying quantities that could each reach the thousands, check the intermediate magnitude and upcast.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is to reframe the search around a <a href="https://en.wikipedia.org/wiki/Prefix_sum" class="reference-source" target="_blank" rel="noopener noreferrer">prefix sum</a> array so that every consecutive-prime sum is one subtraction, then prune with two monotonicity-based rules - break on limit exceeded, and skip runs that cannot beat the current best. Together these make a problem that looks O(n^2) finish in milliseconds at n = 1,000,000.
+</p>
+
+<p>
+Both solutions implement the identical algorithm. On the main case the C version (0.0026 s) is about 60 times faster than the Python version (0.1615 s), reflecting fixed-width arithmetic and a direct byte-array sieve against Python's dynamic dispatch and arbitrary-precision integers. The Python version is the more concise and readable; the C version is the right choice when raw speed matters.
+</p>
+
+<ul>
+<li>Build a prefix-sum array whenever you need many range aggregates over a fixed sequence - one O(n) pass buys O(1) queries.</li>
+<li>Add a sentinel neutral element at an array boundary to eliminate special cases in inner loops.</li>
+<li>Exploit monotonicity: if more iterations can only push a value one way past a bound, break the instant the bound is crossed.</li>
+<li>Maintain a "best so far" value and use it to shrink the live search space - the simplest branch-and-bound trick.</li>
+<li>For membership queries over a bounded universe, prefer a flat Boolean array to a hash set in C for guaranteed O(1) and cache locality.</li>
+<li>In C, use 64-bit types for any accumulation that could exceed 2^31; overflow is silent.</li>
+<li>Prefer standard-library primitives like Python's accumulate that express an algorithm directly and run in compiled code.</li>
+</ul>
+
+</article>

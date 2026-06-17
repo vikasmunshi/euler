@@ -4,9 +4,8 @@
 from __future__ import annotations
 
 import functools
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 placeholder_suffixes: tuple[str, ...] = (
     "",
@@ -68,6 +67,7 @@ hundred_suffix: str = "hundred"
 
 @functools.lru_cache()
 def number_triplet_in_words(number: int) -> str:
+    """Spell a value 0..999 in words, recursing on the hundreds remainder (British 'and')."""
     number = int(number)
     if number in number_to_word:
         return number_to_word[number]
@@ -80,6 +80,7 @@ def number_triplet_in_words(number: int) -> str:
 
 
 def convert_number_to_words(number: int) -> str:
+    """Spell an arbitrary integer by splitting it into comma-grouped triplets and tagging each scale."""
     number_triplets = f"{number:,}".split(",")
     len_number_triplets = len(number_triplets)
     number_triplet_strings = (
@@ -92,41 +93,18 @@ def convert_number_to_words(number: int) -> str:
     return " ".join(number_triplets_in_words)
 
 
-def solve(*, max_number: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Sum the letters of the English spelling of 1..max_number via triplet decomposition; O(N).
+
+    The triplet memo is reset on every call so the timed loop measures the full word-building cost.
+    """
+    max_number = runner.parse_int(args[0])
+
+    number_triplet_in_words.cache_clear()
     ignored_chars = {ord(i): None for i in (" ", "-")}
-    return sum((len(convert_number_to_words(s).translate(ignored_chars)) for s in range(1, max_number + 1)))
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sum((len(convert_number_to_words(s).translate(ignored_chars)) for s in range(1, max_number + 1))))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_number=int(argv[1])))
+    raise SystemExit(solve())

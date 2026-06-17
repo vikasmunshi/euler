@@ -1,14 +1,12 @@
 /* Solution to Euler Problem 70: Totient Permutation. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "runner.h"
 #include <math.h>
-#include <time.h>
 
-/* Simple sieve to generate primes up to max_val */
+/* Sieve of Eratosthenes returning primes up to max_val in a flat array; O(N log log N). */
 static int *sieve_primes(int max_val, int *count) {
     char *is_composite = calloc((size_t)(max_val + 1), 1);
     if (!is_composite) { *count = 0; return NULL; }
+    /* Capacity estimated from the prime-counting approximation; realloc defensively if exceeded. */
     int cap = (int)(max_val / (log((double)max_val) - 1.1)) + 1000;
     int *primes = malloc((size_t)cap * sizeof(int));
     if (!primes) { free(is_composite); *count = 0; return NULL; }
@@ -33,7 +31,7 @@ static int *sieve_primes(int max_val, int *count) {
     return primes;
 }
 
-/* Check if digits of a and b are permutations of each other */
+/* Test whether a and b are digit permutations via an allocation-free 10-bucket frequency count. */
 static int is_digit_permutation(long long a, long long b) {
     int count[10] = {0};
     while (a > 0) { count[a % 10]++; a /= 10; }
@@ -43,8 +41,12 @@ static int is_digit_permutation(long long a, long long b) {
     return 1;
 }
 
-long long solve(int argc, char *argv[]) {
-    int limit = (argc > 1) ? atoi(argv[1]) : 10000000;
+/* Search semiprimes n = p1*p2 with both primes near sqrt(limit), since n/phi(n) = prod p/(p-1)
+   is minimised by few large factors; phi(p1*p2) = (p1-1)*(p2-1) needs no factorisation. Bounding
+   p1 to [sqrt(limit)/2, sqrt(limit)] and p2 to (p1+2, limit/p1] keeps the search to a narrow band. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int limit = (argc > 1) ? parse_int(argv[1]) : 10000000;
     int sqrt_n = (int)sqrt((double)limit);
     int min_prime_1 = sqrt_n / 2;
     int max_prime_1 = sqrt_n;
@@ -52,16 +54,15 @@ long long solve(int argc, char *argv[]) {
 
     int pcount = 0;
     int *primes = sieve_primes(max_prime_2, &pcount);
-    if (!primes) return -1;
+    if (!primes) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 
     double min_ratio = 1e18;
     long long min_n = 0;
 
-    /* Find range of prime_1 indices */
+    /* Advance to the first prime greater than min_prime_1. */
     int idx1_start = 0;
     while (idx1_start < pcount && primes[idx1_start] <= min_prime_1)
         idx1_start++;
-    /* primes[idx1_start] is first prime > min_prime_1 */
 
     for (int i = idx1_start; i < pcount; i++) {
         long long p1 = primes[i];
@@ -70,16 +71,8 @@ long long solve(int argc, char *argv[]) {
         long long max_p2 = limit / p1;
         long long min_p2 = p1 + 2;
 
-        /* Find starting index for prime_2 */
+        /* Advance p2 past p1+2 so the two primes are distinct and not twins. */
         int idx2_start = i + 1;
-        while (idx2_start < pcount && primes[idx2_start] <= min_p2)
-            idx2_start++;
-        /* primes[idx2_start] is first prime > min_p2 (i.e. > p1+2, so >= p1+3,
-           but we want prime > p1+2 meaning prime_2 > prime_1+2)
-           Actually we want prime_2 > min_prime_2 = p1+2, so prime_2 >= p1+3 but prime */
-        /* Re-check: min_prime_2 = prime_1 + 2, we want p > min_prime_2 */
-        /* Reset: find first prime strictly greater than p1+2 */
-        idx2_start = i + 1;
         while (idx2_start < pcount && primes[idx2_start] <= (int)(p1 + 2))
             idx2_start++;
 
@@ -101,55 +94,5 @@ long long solve(int argc, char *argv[]) {
     }
 
     free(primes);
-    return min_n;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(min_n)); return _answer; }
 }

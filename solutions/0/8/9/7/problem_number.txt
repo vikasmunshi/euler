@@ -1,1 +1,0 @@
-897:Maximal $n$-gon in a region:16

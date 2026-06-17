@@ -3,10 +3,7 @@
 """ Solution to Euler Problem 4: Largest Palindrome Product [Level 0]. """
 from __future__ import annotations
 
-import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def is_palindromic(*, number: int) -> bool:
@@ -14,7 +11,16 @@ def is_palindromic(*, number: int) -> bool:
     return str_number == "".join(reversed(str_number))
 
 
-def solve(*, n: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Descending pruned search for the largest palindromic product of two n-digit numbers.
+
+    Every even-length palindrome is divisible by 11, so one factor must supply that 11:
+    when `a` is not a multiple of 11 the inner factor `b` steps by 11, skipping ten of
+    every eleven candidates. Iterating downward with a monotone `a*b` early exit prunes
+    the rest. O(d^2 / 11) worst case in the count d = 9*10^(n-1) of n-digit numbers."""
+    n = runner.parse_int(args[0])
+
     largest_palindrome: int = 0
     a_max: int = 0
     b_max: int = 0
@@ -29,43 +35,12 @@ def solve(*, n: int) -> int:
                 break
             if is_palindromic(number=ab):
                 a_max, b_max, largest_palindrome = (a, b, ab)
-    if sys.argv[-1] == "--show":
+    if runner.show:
         print(
             f"Largest palindrome that is a multiple of two {n}-digit numbers is {largest_palindrome} ({a_max}x{b_max})"
         )
-    return largest_palindrome
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(largest_palindrome)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(n=int(argv[1])))
+    raise SystemExit(solve())

@@ -1,20 +1,20 @@
 [
   {
     "category": "main",
-    "solution": "p0021_s0.py",
-    "args": "10000",
-    "answer": 31626,
-    "verdict": "correct",
-    "average": 0.043832450433610615,
-    "number_runs": 111
-  },
-  {
-    "category": "main",
     "solution": "p0021_s0_c",
     "args": "10000",
     "answer": 31626,
     "verdict": "correct",
-    "average": 0.0025115646607142862,
-    "number_runs": 56
+    "average": 0.0015611947142857145,
+    "number_runs": 42
+  },
+  {
+    "category": "main",
+    "solution": "p0021_s0.py",
+    "args": "10000",
+    "answer": 31626,
+    "verdict": "correct",
+    "average": 0.022455351835344032,
+    "number_runs": 42
   }
 ]

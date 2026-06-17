@@ -4,52 +4,26 @@
 from __future__ import annotations
 
 import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
-def solve(*, max_d: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Stern-Brocot recursive mediant search of (1/3, 1/2): the mediant denominator is the sum of
+    the boundary denominators; recurse into both halves while it stays within max_d. Only
+    denominators are tracked. O(answer) time, O(depth) stack."""
+    max_d = runner.parse_int(args[0])
+    sys.setrecursionlimit(10 ** 6)
 
     def recursion(lower_denominator: int, upper_denominator: int) -> int:
+        """Count fractions in (lower, upper) via their mediant; 0 once the mediant exceeds max_d."""
         if (mediant := (lower_denominator + upper_denominator)) > max_d:
             return 0
         return 1 + recursion(lower_denominator, mediant) + recursion(mediant, upper_denominator)
 
-    return recursion(lower_denominator=3, upper_denominator=2)
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(recursion(lower_denominator=3, upper_denominator=2))
 
 
 if __name__ == "__main__":
-    sys.setrecursionlimit(10**6)
-    raise SystemExit(main(max_d=int(argv[1])))
+    raise SystemExit(solve())

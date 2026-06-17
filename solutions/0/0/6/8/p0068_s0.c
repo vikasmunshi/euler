@@ -1,8 +1,13 @@
 /* Solution to Euler Problem 68: Magic 5-gon Ring. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
+
+/*
+ * Enumerate only the n inner-ring positions (permutations of values drawn from
+ * {1..min(9, 2n)}; the cap pins 10 to an outer node so n=5 yields 16 digits) and
+ * force every outer value from the line-sum constraint outer[i] = S - (inner[i] +
+ * inner[i+1]) after pinning the smallest free value at outer[0] to fix rotation.
+ * Reject duplicate inner sums early. Complexity O(P(min(9, 2n), n) * n).
+ */
 
 static int n_global;
 static int inner_choice[20];
@@ -10,13 +15,14 @@ static int outer_choice[20];
 static char max_magic_str[200];
 static int used[25];
 
-/* Compare two numeric strings: longer = larger; equal length = lexicographic */
+/* Compare two numeric strings: longer = larger; equal length = lexicographic. */
 static int cmp_magic(const char *a, const char *b) {
     size_t la = strlen(a), lb = strlen(b);
     if (la != lb) return (la > lb) ? 1 : -1;
     return strcmp(a, b);
 }
 
+/* Backtracking over inner positions; at full depth force the outer ring and score. */
 static void solve_recursive(int depth) {
     if (depth == n_global) {
         int n = n_global;
@@ -24,7 +30,7 @@ static void solve_recursive(int depth) {
         for (int i = 0; i < n; i++) {
             inner_sums[i] = inner_choice[i] + inner_choice[(i + 1) % n];
         }
-        /* Check all distinct */
+        /* Equal inner sums would force two lines onto the same outer node - reject. */
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
                 if (inner_sums[i] == inner_sums[j]) return;
@@ -40,9 +46,11 @@ static void solve_recursive(int depth) {
                 if (v < min_outer) min_outer = v;
             }
         }
+        /* Pin the smallest free value at outer[0] to canonicalise the start. */
         outer_choice[0] = min_outer;
         oc_available[min_outer] = 0;
 
+        /* Magic total S, then force each remaining outer value; abort on any miss. */
         int line_sum = min_outer + inner_sums[0];
         int valid = 1;
         for (int i = 1; i < n; i++) {
@@ -56,7 +64,7 @@ static void solve_recursive(int depth) {
         }
         if (!valid) return;
 
-        /* Build the concatenated string */
+        /* Concatenate lines (outer, inner, next inner) and keep the largest. */
         char magic_str[200];
         magic_str[0] = '\0';
         char buf[20];
@@ -74,6 +82,7 @@ static void solve_recursive(int depth) {
         return;
     }
 
+    /* Cap inner values at 9 (when applicable) so the longest digit 10 stays outside. */
     int max_inner = (9 < 2 * n_global) ? 9 : 2 * n_global;
     for (int v = 1; v <= max_inner; v++) {
         if (!used[v]) {
@@ -85,9 +94,9 @@ static void solve_recursive(int depth) {
     }
 }
 
-char *solve(int argc, char *argv[]) {
-    int result_length = atoi(argv[1]);
-    int ring_size = atoi(argv[2]);
+const char *solve(int argc, char *argv[]) {
+    int result_length = parse_int(argv[1]);
+    int ring_size = parse_int(argv[2]);
     n_global = ring_size;
 
     memset(used, 0, sizeof(used));
@@ -105,56 +114,4 @@ char *solve(int argc, char *argv[]) {
     if (!result) return NULL;
     strcpy(result, max_magic_str);
     return result;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (result != NULL) {
-            if (strcmp(cur, result) != 0) {
-                fprintf(stderr, "Expected consistent result, got %s previous result=%s\n",
-                        cur, result);
-                rc = 1;
-            }
-            free(result);
-        }
-        result = cur;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "");
-    free(result);
-    return rc;
 }

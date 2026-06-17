@@ -1,42 +1,10 @@
 /* Solution to Euler Problem 83: Path Sum: Four Ways. */
-#include <libgen.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#include "runner.h"
 
 #define MAX_SIZE 80
 #define MAX_CONTENT (1 << 20)
 
-char *get_text_file(const char *src) {
-    const char *slash = strrchr(src, '/');
-    const char *name_start = slash ? slash + 1 : src;
-    const char *q = strchr(name_start, '?');
-    size_t name_len = q ? (size_t)(q - name_start) : strlen(name_start);
 
-    char exe_path[4096];
-    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
-    if (len < 0) return NULL;
-    exe_path[len] = '\0';
-
-    char path[4096];
-    int pn = snprintf(path, sizeof(path), "%s/resources/%.*s", dirname(exe_path), (int)name_len, name_start);
-    if (pn < 0 || (size_t)pn >= sizeof(path)) return NULL;
-
-    FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
-    long sz = ftell(f);
-    if (sz < 0) { fclose(f); return NULL; }
-    rewind(f);
-    char *buf = malloc((size_t)sz + 1);
-    if (!buf) { fclose(f); return NULL; }
-    if (fread(buf, 1, (size_t)sz, f) != (size_t)sz) { free(buf); fclose(f); return NULL; }
-    buf[sz] = '\0';
-    fclose(f);
-    return buf;
-}
 
 static const char *default_content =
     "131, 673, 234, 103, 18\n"
@@ -45,6 +13,10 @@ static const char *default_content =
     "537, 699, 497, 121, 956\n"
     "805, 732, 524, 37, 331\n";
 
+/* Minimal four-directional path sum via Dijkstra with a linear minimum scan; O(V^2) = O(N^4).
+   Four-directional movement admits cycles, so single-pass DP fails; non-negative cell weights
+   make Dijkstra exact. Nodes are flattened to row-major indices for contiguous, cache-friendly
+   per-node arrays, and the search stops as soon as the bottom-right target is finalised. */
 static long long path_sum_four_ways(const char *content) {
     int matrix[MAX_SIZE][MAX_SIZE];
     int size = 0;
@@ -64,6 +36,7 @@ static long long path_sum_four_ways(const char *content) {
         if (col > 0) size++;
     }
 
+    /* Concrete sentinel that provably exceeds any path cost; avoids INT_MAX overflow on relaxation. */
     long long infinity = 1;
     for (int r = 0; r < size; r++)
         for (int c = 0; c < size; c++)
@@ -83,6 +56,7 @@ static long long path_sum_four_ways(const char *content) {
     int target = (size - 1) * size + (size - 1);
 
     while (!visited[target]) {
+        /* Linear scan for the closest unfinalised node (the priority-queue step done naively). */
         int cur = -1;
         long long cur_dist = infinity;
         for (int i = 0; i < n; i++) {
@@ -99,6 +73,7 @@ static long long path_sum_four_ways(const char *content) {
         int crow = cur / size;
         int ccol = cur % size;
 
+        /* Direction vectors enumerate up/down/left/right in one bounds-checked loop. */
         int drow[4] = {-1, 1, 0, 0};
         int dcol[4] = {0, 0, -1, 1};
         for (int d = 0; d < 4; d++) {
@@ -119,7 +94,8 @@ static long long path_sum_four_ways(const char *content) {
     return result;
 }
 
-long long solve(int argc, char *argv[]) {
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
     const char *content = NULL;
     char *allocated = NULL;
 
@@ -127,7 +103,7 @@ long long solve(int argc, char *argv[]) {
         allocated = get_text_file(argv[1]);
         if (!allocated) {
             fprintf(stderr, "Failed to load file: %s\n", argv[1]);
-            return -1;
+            { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
         }
         content = allocated;
     }
@@ -136,53 +112,5 @@ long long solve(int argc, char *argv[]) {
 
     long long result = path_sum_four_ways(content);
     free(allocated);
-    return result;
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(result)); return _answer; }
 }

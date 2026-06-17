@@ -3,49 +3,20 @@
 """ Solution to Euler Problem 1: Multiples of 3 or 5 [Level 0]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def solve(*, max_limit: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Multiples of 3 or 5 below the limit by scanning every term and testing
+    divisibility. O(limit)."""
+    max_limit: int = runner.parse_int(args[0])
     result: int = 0
     for term in range(0, max_limit):
         if term % 3 == 0 or term % 5 == 0:
             result += term
-    return result
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(result)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_limit=int(argv[1])))
+    raise SystemExit(solve())

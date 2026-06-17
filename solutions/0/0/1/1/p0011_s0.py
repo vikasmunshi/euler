@@ -4,9 +4,8 @@
 from __future__ import annotations
 
 import textwrap
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 text_grid = (
     "08 02 22 97 38 15 00 40 00 75 04 05 07 78 52 12 50 77 91 08\n"
@@ -35,49 +34,24 @@ dimension_1 = len(grid)
 dimension_2 = len(grid[0])
 
 
-def solve(*, num_adjacent: int) -> int:
-    return max((max(horizontal, vertical, diagonal_1, diagonal_2)
-                for x in range(dimension_1 - num_adjacent + 1)
-                for y in range(dimension_2 - num_adjacent + 1)
-                for horizontal, vertical, diagonal_1, diagonal_2 in ((1, 1, 1, 1),)
-                for i in range(num_adjacent)
-                for horizontal, vertical, diagonal_1, diagonal_2 in (
-                    (horizontal * grid[x][y + i],
-                     vertical * grid[x + i][y],
-                     diagonal_1 * grid[x + i][y + i],
-                     diagonal_2 * grid[x + num_adjacent - 1 - i][y + i],),)))
+@runner.main
+def solve(*args: str) -> str:
+    """Brute-force anchor scan: at each valid anchor cell, form the four directional
+    products (horizontal, vertical, both diagonals) in one pass and keep the maximum;
+    O(N^2 * k) for an N x N grid and run length k = num_adjacent."""
+    num_adjacent = runner.parse_int(args[0])
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(max((max(horizontal, vertical, diagonal_1, diagonal_2)
+                    for x in range(dimension_1 - num_adjacent + 1)
+                    for y in range(dimension_2 - num_adjacent + 1)
+                    for horizontal, vertical, diagonal_1, diagonal_2 in ((1, 1, 1, 1),)
+                    for i in range(num_adjacent)
+                    for horizontal, vertical, diagonal_1, diagonal_2 in (
+                        (horizontal * grid[x][y + i],
+                         vertical * grid[x + i][y],
+                         diagonal_1 * grid[x + i][y + i],
+                         diagonal_2 * grid[x + num_adjacent - 1 - i][y + i],),))))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(num_adjacent=int(argv[1])))
+    raise SystemExit(solve())

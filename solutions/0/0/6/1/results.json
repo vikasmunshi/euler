@@ -8,8 +8,8 @@
       8181
     ],
     "verdict": "correct",
-    "average": 0.00015383050000000002,
-    "number_runs": 10
+    "average": 4.007214285714286e-05,
+    "number_runs": 42
   },
   {
     "category": "dev",
@@ -20,8 +20,8 @@
       8181
     ],
     "verdict": "correct",
-    "average": 0.001296831900071993,
-    "number_runs": 10
+    "average": 0.0008269049971464223,
+    "number_runs": 42
   },
   {
     "category": "dev",
@@ -32,8 +32,8 @@
       19291
     ],
     "verdict": "correct",
-    "average": 0.000171855,
-    "number_runs": 10
+    "average": 7.038421428571429e-05,
+    "number_runs": 42
   },
   {
     "category": "dev",
@@ -44,8 +44,8 @@
       19291
     ],
     "verdict": "correct",
-    "average": 0.0027226118998441963,
-    "number_runs": 10
+    "average": 0.001630994806570622,
+    "number_runs": 42
   },
   {
     "category": "dev",
@@ -59,8 +59,8 @@
       ]
     ],
     "verdict": "correct",
-    "average": 0.0001682354,
-    "number_runs": 10
+    "average": 8.097319047619047e-05,
+    "number_runs": 42
   },
   {
     "category": "dev",
@@ -74,8 +74,8 @@
       ]
     ],
     "verdict": "correct",
-    "average": 0.003135353799916629,
-    "number_runs": 10
+    "average": 0.0021441041677635873,
+    "number_runs": 42
   },
   {
     "category": "dev",
@@ -92,8 +92,8 @@
       ]
     ],
     "verdict": "correct",
-    "average": 0.00039515490000000003,
-    "number_runs": 10
+    "average": 0.00024375495238095242,
+    "number_runs": 42
   },
   {
     "category": "dev",
@@ -110,8 +110,8 @@
       ]
     ],
     "verdict": "correct",
-    "average": 0.009280004900392668,
-    "number_runs": 10
+    "average": 0.007613712052781401,
+    "number_runs": 42
   },
   {
     "category": "main",
@@ -122,8 +122,8 @@
       28684
     ],
     "verdict": "correct",
-    "average": 0.0018436836000000002,
-    "number_runs": 10
+    "average": 0.0014456340714285715,
+    "number_runs": 42
   },
   {
     "category": "main",
@@ -134,7 +134,7 @@
       28684
     ],
     "verdict": "correct",
-    "average": 0.035042656100085876,
-    "number_runs": 10
+    "average": 0.02662400290414336,
+    "number_runs": 42
   }
 ]

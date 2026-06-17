@@ -3,12 +3,11 @@
 """ Solution to Euler Problem 35: Circular Primes [Level 1]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
+    """Sieve of Sundaram over odd numbers; returns all primes up to max_num."""
     if max_num < 2:
         return ()
     n = (max_num - 1) // 2
@@ -24,11 +23,17 @@ def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
 
 
 def get_rotated_numbers(*, num: int) -> set[int]:
+    """Return the set of cyclic digit rotations of num."""
     str_num: str = str(num)
     return {num} if len(str_num) == 1 else {int(str_num[i:] + str_num[:i]) for i in range(1, len(str_num) + 1)}
 
 
-def solve(*, max_limit: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Sieve primes, then keep those whose every rotation is prime; multi-digit ones use only
+    {1,3,7,9} (the digit filter prunes the rest), so set membership makes each test O(1)."""
+    max_limit = runner.parse_int(args[0])
+
     primes = set(primes_sundaram_sieve(max_limit))
     circular_primes = [
         prime
@@ -39,39 +44,8 @@ def solve(*, max_limit: int) -> int:
             and (not any((rotated_number not in primes for rotated_number in get_rotated_numbers(num=prime))))
         )
     ]
-    return len(circular_primes)
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(len(circular_primes))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_limit=int(argv[1])))
+    raise SystemExit(solve())

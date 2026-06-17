@@ -3,27 +3,27 @@
 """ Available models and their pricing, plus a utility function to calculate costs. """
 from __future__ import annotations
 
+__all__ = ['Model', 'Price', 'TokenKind', 'costs', 'get_accumulated_charges', 'get_api_key', 'record_usage']
+
 from enum import StrEnum
 from functools import lru_cache
 from typing import Any, Literal, NamedTuple
 
-from dotenv import dotenv_values
-
-from solver.config import config
-from solver.shell import register
+from solver.config import ExitCodes, config
+from solver.shell import console, register
 
 
-class Model(StrEnum):  # Available models (as of May 2026)
-    CLAUDE_OPUS_4_6 = 'claude-opus-4-6'  # most intelligent; best for hard reasoning, agents, coding
+class Model(StrEnum):  # Available models (as of 31st May 2026)
+    CLAUDE_OPUS_4_8 = 'claude-opus-4-8'  # most intelligent; best for hard reasoning, agents, coding
     CLAUDE_SONNET_4_6 = 'claude-sonnet-4-6'  # best speed/intelligence balance; good for structured generation
     CLAUDE_HAIKU_4_5 = 'claude-haiku-4-5'  # fastest and cheapest; simple/high-volume tasks only
 
     @property
     def price(self) -> Price:  # Cost in USD per million tokens, as of May 2026
         return {
-            Model.CLAUDE_OPUS_4_6: Price(input=15.00, output=75.00),
+            Model.CLAUDE_OPUS_4_8: Price(input=5.00, output=25.00),
             Model.CLAUDE_SONNET_4_6: Price(input=3.00, output=15.00),
-            Model.CLAUDE_HAIKU_4_5: Price(input=0.80, output=4.00),
+            Model.CLAUDE_HAIKU_4_5: Price(input=1.00, output=5.00),
         }[self]
 
 
@@ -82,10 +82,8 @@ def get_accumulated_charges() -> float:
                for model in consumed_tokens)
 
 
-@register(name='costs',
-          help='Calculate and display the total cost of AI tokens consumed in the session.',
-          usage='costs [usd_to_eur=<config.usd_to_eur>]', )
-def costs(usd_to_eur: float | None = None) -> str:
+@register(help_text='Display total cost of AI tokens consumed in session.')
+def costs(usd_to_eur: float = config.usd_to_eur) -> int:
     """
     Return a formatted cost string for all AI tokens consumed in the session so far, or "nil"
     if nothing has been consumed.
@@ -97,17 +95,21 @@ def costs(usd_to_eur: float | None = None) -> str:
     Args:
         usd_to_eur: USD-to-EUR conversion rate (euros per dollar). Defaults to 'config.usd_to_eur'.
     """
-    rate: float = config.usd_to_eur if usd_to_eur is None else usd_to_eur
     charges_usd: float = get_accumulated_charges()
     if charges_usd == 0.0:
-        return 'nil'
-    charges_eur: float = charges_usd * rate
+        console.print('[muted]No charges so far.[/muted]')
+        return ExitCodes.EXIT_OK
+    charges_eur: float = charges_usd * usd_to_eur
     parts: list[str] = []
     for model, b in consumed_tokens.items():
         if any(b.values()):
             parts.append(f'{model}: input {b["input"]}, output {b["output"]}, '
                          f'cache_write {b["cache_creation"]}, cache_read {b["cache_read"]}')
-    return f'${charges_usd:.4f} (€{charges_eur:.4f} at {rate:.2f} $/€) [{"; ".join(parts)}]'
+    console.print(f'[muted]Charges so far: '
+                  f'${charges_usd:.4f} (€{charges_eur:.4f} at {usd_to_eur:.2f} $/€)'
+                  f'({'; '.join(parts)})'
+                  '[/muted]')
+    return ExitCodes.EXIT_OK
 
 
 @lru_cache(maxsize=None)
@@ -116,14 +118,14 @@ def get_api_key() -> str:
 
     Delegates to 'python-dotenv' ('ai' extra), which handles the full dotenv grammar:
     'export' prefix, single/double-quoted values, inline '#' comments, escape sequences,
-    multi-line quoted values, and variable interpolation.
+    multi-line quoted values, and variable interpolation. Imported on demand so this module
+    (and the `costs` command it registers) loads without the 'ai' group installed.
     """
+    from dotenv import dotenv_values
+
     name = 'ANTHROPIC_API_KEY'
     env_file = config.root_dir / '.env'
     value = dotenv_values(env_file).get(name)
     if not value:
         raise ValueError(f'{name} not found in .env file, please set it to your Anthropic API key')
     return value
-
-
-__all__ = ('Model', 'Price', 'TokenKind', 'costs', 'get_accumulated_charges', 'get_api_key', 'record_usage')

@@ -1,8 +1,5 @@
 /* Solution to Euler Problem 76: Counting Summations. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 /* Big integer using base 10^9 limbs, little-endian */
 #define BASE 1000000000LL
@@ -13,6 +10,7 @@ typedef struct {
     int n;
 } BigInt;
 
+/* Set a big integer to a small non-negative value. */
 static void bigint_set(BigInt *a, long long val) {
     memset(a->limbs, 0, sizeof(a->limbs));
     a->n = 1;
@@ -25,6 +23,7 @@ static void bigint_set(BigInt *a, long long val) {
     }
 }
 
+/* a += b in place with carry propagation. */
 static void bigint_add_inplace(BigInt *a, const BigInt *b) {
     long long carry = 0;
     int maxn = (a->n > b->n) ? a->n : b->n;
@@ -40,6 +39,7 @@ static void bigint_add_inplace(BigInt *a, const BigInt *b) {
     if (a->n < maxn) a->n = maxn;
 }
 
+/* Print a big integer into buf: top limb plain, lower limbs zero-padded to 9 digits. */
 static void bigint_print_to_buf(const BigInt *a, char *buf) {
     int pos = 0;
     pos += sprintf(buf + pos, "%lld", a->limbs[a->n - 1]);
@@ -48,8 +48,14 @@ static void bigint_print_to_buf(const BigInt *a, char *buf) {
     }
 }
 
-static char *solve(int argc, char *argv[]) {
-    int num = (argc > 1) ? atoi(argv[1]) : 100;
+/*
+ * Memoized 2D partition recurrence count(number, slots) translated to a bottom-up table:
+ * count(nb, sl) = sum_{n=1..min(sl,nb)} count(nb-n, min(nb-n, n)) + (1 if nb<=sl), with
+ * min(nb-n, n) enforcing non-increasing parts. O(n^2) states each costing O(n) work, hence
+ * O(n^3); the answer is dp[num][num]-1, accumulated with base-10^9 big integers.
+ */
+const char *solve(int argc, char *argv[]) {
+    int num = (argc > 1) ? parse_int(argv[1]) : 100;
 
     if (num <= 0) {
         char *buf = malloc(4);
@@ -204,52 +210,4 @@ static char *solve(int argc, char *argv[]) {
 #undef BI_ONE
 #undef NLIMBS
     return buf;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) { fprintf(stderr, "runner: out of memory\n"); return 1; }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (result) {
-            if (cur && strcmp(cur, result) != 0) {
-                fprintf(stderr, "Inconsistent results: %s vs %s\n", cur, result);
-                rc = 1;
-            }
-            free(result);
-        }
-        result = cur;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "NULL");
-    free(result);
-    return rc;
 }

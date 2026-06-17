@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/problem.css">
+    <!-- problem.js sets window.MathJax before the deferred MathJax loader runs; both are
+         deferred so they execute in document order (problem.js first, then MathJax). -->
+    <script defer src="/problem.js"></script>
+    <script id="MathJax-script" defer src="/vendor/mathjax/tex-mml-chtml.js"></script>
+</head>
+<body>
+<div id="page">
+    <div id="page-header"></div>
+    <section id="problem-statement">
+        <div id="problem-statement-content"></div>
+    </section>
+    <section id="test-cases">
+        <div id="test-cases-content">
+            <h3><a href="test_cases.json">Test Cases</a></h3>
+            <div id="test-cases-body"></div>
+        </div>
+    </section>
+    <section id="solutions">
+        <div id="solutions-content">
+            <h3>Solutions</h3>
+            <div id="solutions-body"></div>
+        </div>
+    </section>
+    <section id="solution-notes">
+        <div id="solution-notes-content"></div>
+    </section>
+</div>
+</body>
+</html>

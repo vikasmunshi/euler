@@ -3,22 +3,14 @@
 """ Solution to Euler Problem 89: Roman Numerals [Level 4]. """
 from __future__ import annotations
 
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
-
-
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = "resources/" + src.split("/")[-1].split("?")[0]
-    return (Path(__file__).parent / local_filename).read_text()
-
+from solver.runners import runner
 
 values: dict[str, int] = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000}
 
 
 def roman_to_number(numeral: str) -> int:
+    """Parse a numeral to an integer by scanning right-to-left, subtracting any symbol smaller
+    than the one to its right (the subtractive pairs); O(len)."""
     value, last = (0, 0)
     for r in reversed(numeral):
         n = values[r]
@@ -63,6 +55,8 @@ numerals: dict[int, str] = {
 
 
 def number_as_roman_numeral(number: int) -> str:
+    """Encode an integer minimally by greedily taking the largest fitting denomination (including
+    subtractive pairs), which yields the unique shortest numeral; O(len)."""
     bits = []
     while number:
         next_value, next_numeral = max(((value, numeral) for value, numeral in numerals.items() if value <= number))
@@ -71,44 +65,18 @@ def number_as_roman_numeral(number: int) -> str:
     return "".join(bits)
 
 
-def solve(*, file_url: str) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Convert each numeral to an integer and re-encode it minimally, summing the characters saved;
+    O(N) over the N input lines, each numeral of bounded length."""
+    file_url = args[0]
+
     characters_saved: int = 0
-    for numeral in get_text_file(file_url).splitlines(keepends=False):
+    for numeral in runner.get_text_file(file_url).splitlines(keepends=False):
         minimal_form = number_as_roman_numeral(roman_to_number(numeral))
         characters_saved += len(numeral) - len(minimal_form)
-    return characters_saved
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(characters_saved)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(file_url=str(argv[1])))
+    raise SystemExit(solve())

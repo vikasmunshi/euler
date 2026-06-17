@@ -38,9 +38,9 @@
 # Package Array Definitions
 # ============================================================================
 # Base packages (git, build-essential, software-properties-common) - never removed
-declare -a base_packages=("git" "gh" "build-essential" "software-properties-common")
+declare -a base_packages=("git" "gh" "build-essential" "openssl" "software-properties-common")
 # shellcheck disable=SC2034 # used dynamically
-declare -a base_commands=("git" "gh" "make")
+declare -a base_commands=("git" "gh" "make" "openssl")
 
 # PPAs (deadsnakes/ppa for Python) - never removed
 # PPAs (deadsnakes/ppa for Python) - never removed
@@ -59,7 +59,8 @@ all_targets+=(c)
 # shellcheck disable=SC2034 # used dynamically
 declare -a c_packages=(
     "autoconf" "automake" "clang" "clang-format" "clang-tidy" "cmake" "gdb"
-    "libc++-dev" "libc++abi-dev" "libtool" "lldb" "pkg-config" "valgrind"
+    "libc++-dev" "libc++abi-dev" "libgmp-dev" "libmpfr-dev" "libssl-dev"
+    "libtool" "lldb" "pkg-config" "valgrind"
 )
 # shellcheck disable=SC2034 # used dynamically
 declare -a c_commands=(

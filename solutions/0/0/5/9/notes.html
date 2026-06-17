@@ -1,0 +1,100 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The cipher here is a <a href="https://en.wikipedia.org/wiki/Stream_cipher" class="reference-source" target="_blank" rel="noopener noreferrer">repeating-key XOR cipher</a> - a byte-level form of the <a href="https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher" class="reference-source" target="_blank" rel="noopener noreferrer">Vigenere cipher</a>. Every plaintext byte is combined with one byte of a short, cyclically repeating key using the bitwise <a href="https://en.wikipedia.org/wiki/Exclusive_or" class="reference-source" target="_blank" rel="noopener noreferrer">XOR</a> operation. XOR has a property that makes the scheme both convenient and breakable: it is its own inverse. Because <code>(p ^ k) ^ k == p</code>, decryption is the very same operation as encryption - you reapply the key. That is exactly why <code>65 XOR 42 = 107</code> and <code>107 XOR 42 = 65</code>.
+</p>
+
+<p>
+The observation that makes the key recoverable without knowing it is the periodicity of a repeating key. With a key of length <code>k</code>, the byte at position <code>j</code> is always encrypted with key byte <code>j mod k</code>. So key position 0 only ever touches ciphertext bytes 0, k, 2k, ...; key position 1 touches 1, k+1, 2k+1, ...; and so on. If I partition the ciphertext into <code>k</code> interleaved sub-sequences (one per key position), each sub-sequence was encrypted with a single constant byte - that is, each is a one-byte XOR cipher. I can break each independently. Because the problem tells me the key is three lowercase letters, every position has only 26 candidate values. Instead of searching the combinatorial space of <code>26^k</code> full keys, I solve <code>k</code> separate one-dimensional problems of 26 trials each. That is the difference between exponential and linear work. To pick the right candidate per slice I use <a href="https://en.wikipedia.org/wiki/Frequency_analysis" class="reference-source" target="_blank" rel="noopener noreferrer">frequency analysis</a>: natural English is dominated by <code>e</code>, <code>t</code>, <code>a</code>, and <code>n</code>, so the candidate byte that produces the most of these is almost certainly correct. The overall complexity is <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(26 * n)</a> for <code>n</code> ciphertext bytes - negligible.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Frequency-Scoring Slice Attack (Python and C, index 0)</h4>
+
+<p>
+Both files implement the same algorithm and differ only in language idiom. It proceeds in four steps.
+</p>
+
+<p>
+<strong>Step 1 - Parse the ciphertext.</strong> The input is a comma-separated list of decimal ASCII codes. Python uses a list comprehension, <code>[int(x) for x in ...split(",")]</code>. C scans the buffer character by character, accumulating digit runs into integers and pushing them into a dynamically grown array. Both fetch the file through a shared <code>get_text_file</code> helper.
+</p>
+
+<p>
+<strong>Step 2 - Build interleaved slices.</strong> Given key length <code>k</code>, slice <code>i</code> holds ciphertext bytes at positions <code>i, i+k, i+2k, ...</code> Python expresses this directly with extended slice notation: <code>encrypted[i::key_length]</code>. C uses a two-pass approach: a first <code>j % key_length</code> pass counts each slice's size, then it allocates each slice to its exact size and a second pass routes elements in. This avoids over-allocation and per-slice reallocation.
+</p>
+
+<p>
+<strong>Step 3 - Score each candidate byte per slice.</strong> For each candidate byte from 97 (<code>'a'</code>) to 122 (<code>'z'</code>), and each slice, I XOR every element with the candidate and count how many results appear in the supplied list of common letters (<code>eEaAnNtT</code>). The highest-scoring candidate becomes that slice's key byte. I deliberately chose a plain count against a short alphabet rather than a full <a href="https://en.wikipedia.org/wiki/Chi-squared_test" class="reference-source" target="_blank" rel="noopener noreferrer">chi-squared test</a>: the ciphertext is long and the per-slice key space is tiny, so the common-letter count is more than discriminating enough, and far simpler to reason about.
+</p>
+
+<p>
+<strong>Step 4 - Compute the answer.</strong> With the per-position key known, I XOR each ciphertext byte back to plaintext and sum all ASCII values. Python caches the decrypted slice strings while scoring and reuses them; C runs a final XOR pass over each slice. The Python version also prints the recovered plaintext under <code>--show</code> - a valuable sanity check, since the bare answer 129448 gives no confidence the decryption is real English.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Interleaved Slice Extraction</h4>
+<p>
+Python's <code>encrypted[i::key_length]</code> is <a href="https://docs.python.org/3/library/functions.html#slice" class="reference-source" target="_blank" rel="noopener noreferrer">extended slice</a> syntax: start at index <code>i</code> and take every k-th element. It is a one-line, allocation-light way to extract a periodic sub-sequence, replacing a manual modular-index loop. Whenever a problem decomposes into periodic strides, this should be the first tool you reach for. In C the equivalent is a <code>j % key_length</code> dispatch - more verbose, but it exposes the same structure explicitly.
+</p>
+
+<h4>The Walrus Operator for Compute-Once Comparison</h4>
+<p>
+The expression <code>(_score := sum(...)) > score[i]</code> uses the <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">assignment expression</a> (walrus) operator. It captures the computed score in a variable while comparing it, so the sum is evaluated exactly once yet remains available to store on the next line. This is the idiomatic way to avoid recomputing a value you both test and keep.
+</p>
+
+<h4>Generator Expressions for Aggregation</h4>
+<p>
+<code>sum(_decrypted.count(x) for x in most_common_letters)</code> and <code>sum(ord(_char) for ...)</code> feed lazy <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expressions</a> straight into <code>sum</code> without building an intermediate list. This keeps memory flat and the code compact. Reach for them any time you aggregate (sum, max, any, all) over a transformed sequence.
+</p>
+
+<h4>Structure-of-Arrays State</h4>
+<p>
+Both solutions hold parallel arrays - <code>key</code>, <code>score</code>, and in Python <code>decrypted</code> - indexed by key position, rather than one array of records. This <a href="https://en.wikipedia.org/wiki/AoS_and_SoA" class="reference-source" target="_blank" rel="noopener noreferrer">structure-of-arrays</a> layout keeps the comprehensions clean in Python and avoids defining a one-off struct in C. It is the natural choice when each attribute is accessed uniformly across all positions in a tight loop.
+</p>
+
+<h4>Dynamic Array Growth by Doubling in C</h4>
+<p>
+The C parser does not know the element count in advance, so it starts at capacity 8192 and doubles via <code>realloc</code> on overflow. Doubling guarantees <a href="https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost" class="reference-source" target="_blank" rel="noopener noreferrer">amortised O(n)</a> total copying - each element is relocated only a constant number of times. Never grow by a fixed additive amount; that degrades to O(n^2).
+</p>
+
+<h4>Two-Pass Exact Allocation</h4>
+<p>
+For the slices, C counts sizes first, then allocates each slice to its exact size, then fills. This trades one extra pass for zero wasted memory and no per-slice reallocation. When the final size is cheaply computable up front, a counting pass followed by an exact allocation is cleaner than incremental growth.
+</p>
+
+<h4>Argument-Driven Parameterisation</h4>
+<p>
+Neither solution hard-codes the key length or the scoring alphabet; both take them as arguments. The same binary or script then handles any cipher file, key length, or language assumption without editing - and is trivially testable with alternative vectors. Keeping tunable values external costs nothing.
+</p>
+
+<h4>Separating I/O, Solver, and Benchmarking</h4>
+<p>
+Both files factor file reading into <code>get_text_file</code>, the algorithm into <code>solve</code>, and timing into the runner. This separation keeps each concern independently readable and testable, and it is what lets the harness run the solver repeatedly for benchmarking without the algorithm knowing anything about it.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is that a <a href="https://en.wikipedia.org/wiki/Stream_cipher" class="reference-source" target="_blank" rel="noopener noreferrer">repeating-key XOR cipher</a> is not one hard cipher but <code>k</code> easy ones, interleaved. Once you partition the ciphertext by position modulo the key length, each slice is a single-byte XOR that yields to a 26-candidate <a href="https://en.wikipedia.org/wiki/Frequency_analysis" class="reference-source" target="_blank" rel="noopener noreferrer">frequency analysis</a> scan. That structural decomposition turns a <code>26^k</code> search into <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(26 * n)</a> work.
+</p>
+
+<p>
+Both solutions reach 129448. The C build runs in about 0.0001 s and the Python script in about 0.0018 s - roughly an order of magnitude apart, consistent with interpreter overhead on tight per-byte loops. Both are effectively instant; the C version is faster, while the Python version is more concise and gains a free correctness aid through <code>--show</code>. For a problem this size the language choice is purely a matter of taste.
+</p>
+
+<ul>
+  <li>When a transformation uses a repeating key of length <code>k</code>, split the data into <code>k</code> interleaved slices and solve each independently - this collapses exponential search into linear.</li>
+  <li>XOR is its own inverse; encryption and decryption are the same operation, which both enables the attack and simplifies the code.</li>
+  <li>Frequency analysis needs only a short list of common symbols and a count, not a full statistical test, when the data is long and the per-position key space is small.</li>
+  <li>Prefer extended slice notation <code>seq[start::step]</code> for periodic sub-sequences over manual modular-index loops.</li>
+  <li>Feed generator expressions directly into <code>sum</code> or <code>max</code> to aggregate without allocating intermediates.</li>
+  <li>Capture a computed value once with the walrus operator when you both test and reuse it.</li>
+  <li>In C, double an array's capacity on overflow for amortised O(n) growth, or count-then-allocate when the final size is known cheaply.</li>
+  <li>Keep tunable parameters external as arguments, and separate I/O, algorithm, and benchmarking - the discipline pays off the moment you need to test or time the code.</li>
+</ul>
+
+</article>

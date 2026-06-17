@@ -1,39 +1,21 @@
 [
   {
     "category": "dev",
-    "solution": "p0015_s0.py",
+    "solution": "p0015_s0_c",
     "args": "2",
     "answer": 6,
     "verdict": "correct",
-    "average": 2.841536327886323e-06,
-    "number_runs": 112
-  },
-  {
-    "category": "main",
-    "solution": "p0015_s0.py",
-    "args": "20",
-    "answer": 137846528820,
-    "verdict": "correct",
-    "average": 7.334297036093402e-06,
-    "number_runs": 111
-  },
-  {
-    "category": "extra",
-    "solution": "p0015_s0.py",
-    "args": "200",
-    "answer": 102952500135414432972975880320401986757210925381077648234849059575923332372651958598336595518976492951564048597506774120,
-    "verdict": "correct",
-    "average": 1.809010844632163e-05,
-    "number_runs": 74
+    "average": 4.963095238095238e-07,
+    "number_runs": 42
   },
   {
     "category": "dev",
-    "solution": "p0015_s0_c",
+    "solution": "p0015_s0.py",
     "args": "2",
     "answer": 6,
     "verdict": "correct",
-    "average": 3.185267857142858e-06,
-    "number_runs": 56
+    "average": 1.1068089709927638e-06,
+    "number_runs": 42
   },
   {
     "category": "main",
@@ -41,8 +23,17 @@
     "args": "20",
     "answer": 137846528820,
     "verdict": "correct",
-    "average": 3.5506785714285708e-06,
-    "number_runs": 56
+    "average": 1.0140238095238096e-06,
+    "number_runs": 42
+  },
+  {
+    "category": "main",
+    "solution": "p0015_s0.py",
+    "args": "20",
+    "answer": 137846528820,
+    "verdict": "correct",
+    "average": 1.8172397089767315e-06,
+    "number_runs": 42
   },
   {
     "category": "extra",
@@ -50,7 +41,16 @@
     "args": "200",
     "answer": 102952500135414432972975880320401986757210925381077648234849059575923332372651958598336595518976492951564048597506774120,
     "verdict": "correct",
-    "average": 1.6860352941176466e-05,
-    "number_runs": 51
+    "average": 1.4636595238095237e-05,
+    "number_runs": 42
+  },
+  {
+    "category": "extra",
+    "solution": "p0015_s0.py",
+    "args": "200",
+    "answer": 102952500135414432972975880320401986757210925381077648234849059575923332372651958598336595518976492951564048597506774120,
+    "verdict": "correct",
+    "average": 9.079951615560622e-06,
+    "number_runs": 42
   }
 ]

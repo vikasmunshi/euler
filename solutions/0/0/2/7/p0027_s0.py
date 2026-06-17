@@ -3,12 +3,11 @@
 """ Solution to Euler Problem 27: Quadratic Primes [Level 1]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
+    """Return all primes <= max_num via the Sieve of Sundaram (odd-only marking)."""
     if max_num < 2:
         return ()
     n = (max_num - 1) // 2
@@ -24,6 +23,7 @@ def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
 
 
 def is_prime(num: int) -> bool:
+    """Test primality by trial division up to sqrt(num); O(sqrt(num))."""
     if num < 2:
         return False
     if num == 2:
@@ -39,14 +39,23 @@ def is_prime(num: int) -> bool:
 
 
 def prime_run(a: int, b: int) -> int:
+    """Length of the unbroken prime run of |n^2 + a*n + b| for n = 0, 1, 2, ..."""
     x = 0
     while is_prime(abs(x**2 + a * x + b)):
         x += 1
     return x
 
 
-def solve(*, max_limit: int) -> int:
-    return max(
+@runner.main
+def solve(*args: str) -> str:
+    """Brute-force scan pruned by the n=0 constraint (b must be prime) and a-parity.
+
+    Since n=0 yields b, only prime b can start a run; iterate non-negative
+    magnitudes of a and apply the four sign variants. O(P * A * R * sqrt(V_max)).
+    """
+    max_limit = runner.parse_int(args[0])
+
+    return str(max(
         [
             max(
                 (prime_run(a, b), a * b),
@@ -57,39 +66,8 @@ def solve(*, max_limit: int) -> int:
             for b in primes_sundaram_sieve(max_limit)
             for a in range(0 if b == 2 else 1, max_limit, 2)
         ]
-    )[1]
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    )[1])
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_limit=int(argv[1])))
+    raise SystemExit(solve())

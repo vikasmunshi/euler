@@ -1,0 +1,69 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+This problem concerns the <a href="https://en.wikipedia.org/wiki/Farey_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Farey sequence</a> F_N: the ascending list of all reduced proper fractions n/d with 0 &lt; n &lt; d &le; N and <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a> gcd(n, d) = 1. "Reduced" means numerator and denominator share no common factor; "proper" means the fraction lies strictly between 0 and 1. I am asked for the numerator of the fraction immediately to the left of 3/7 when N = 1,000,000.
+</p>
+<p>
+A literal reading invites an O(N) scan: for each denominator d up to N, compute the largest n/d still below 3/7 and keep the closest. But the <a href="https://en.wikipedia.org/wiki/Farey_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Farey sequence</a> has an adjacency property that makes the loop unnecessary. The gap 3/7 - n/d equals (3d - 7n)/(7d). To push n/d as close to 3/7 as possible from below, I want this gap as small as possible and positive - meaning the numerator 3d - 7n should equal the smallest positive integer, 1, while the denominator d is as large as the bound permits. This is precisely the <a href="https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree" class="reference-source" target="_blank" rel="noopener noreferrer">Stern-Brocot</a> neighbour condition |aq - bp| = 1 for two adjacent fractions a/b and p/q. Setting 3d - 7n = 1 with d = 7k forces n = 3k - 1, and the gap becomes 1/(7k), minimised by taking k as large as possible: k = floor(N / 7). The entire search collapses to a handful of arithmetic operations, giving an <strong>O(1)</strong> solution (treating the GCD reduction of two bounded integers as constant time).
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Direct Farey-neighbour formula (Python and C)</h4>
+<p>
+Both files implement the same closed-form derivation and differ only in language idiom.
+</p>
+<p>
+<strong>Step 1 - compute k.</strong> I take k = floor(N / 7) (<code>max_d // 7</code> in Python, <code>max_d / 7</code> in C, which is integer division for integral operands). This is the largest k satisfying 7k &le; N. I deliberately use a denominator that is a multiple of 7 because the target 3/7 has denominator 7, and the <a href="https://en.wikipedia.org/wiki/Farey_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Farey</a> adjacency condition 3d - 7n = 1 only yields an integer n when d is a multiple of 7.
+</p>
+<p>
+<strong>Step 2 - form the candidate.</strong> With d = 7k and n = 3k - 1, the fraction (3k - 1)/(7k) sits exactly 1/(7k) below 3/7. Because k is maximal, 1/(7k) is the smallest gap attainable, so no fraction with denominator &le; N can squeeze between it and 3/7 - this is the immediate left neighbour.
+</p>
+<p>
+<strong>Step 3 - reduce and report the numerator.</strong> The pair (3k - 1, 7k) may share a common factor, so I divide both by their GCD before reading off the numerator. In Python I express the whole derivation as <code>fractions.Fraction(3, 7) - fractions.Fraction(1, 7 * (max_d // 7))</code>; the <code>Fraction</code> constructor reduces automatically, and I simply return <code>result.numerator</code>. In C there is no built-in rational type, so I write an explicit iterative <code>gcd</code> using the <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a>, divide the numerator by it, and format the result.
+</p>
+<p>
+The language-specific difference worth noting is integer width. Python's integers are arbitrary precision, so the extra test with N = 10^12 (where 7k approaches 7 x 10^12) is handled transparently. In C I use <code>long long</code> - at least 64 bits, with a signed maximum near 9.2 x 10^18 - so that both 7k and 3k - 1 stay well within range and never overflow silently.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Using the standard library's rational type</h4>
+<p>
+The Python solution builds <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer"><code>fractions.Fraction</code></a> objects instead of juggling numerator and denominator integers by hand. A <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer"><code>Fraction</code></a> is always stored in lowest terms because the constructor performs <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">GCD</a> reduction internally. I chose this so the code reads exactly like the mathematics - subtract one fraction from another - and it eliminates an entire class of "I forgot to reduce" bugs. For exact rational arithmetic at small scale in Python, reaching for <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer"><code>fractions.Fraction</code></a> is almost always the right default.
+</p>
+
+<h4>Iterative Euclidean GCD in C</h4>
+<p>
+Without a rational type, the C code reduces (3k - 1)/(7k) with a hand-written GCD that repeatedly replaces (a, b) with (b, a mod b) until b reaches zero - the classic <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a>. I wrote the iterative form rather than recursion to avoid call-stack overhead; for two numbers the choice is mostly stylistic, but the habit scales. The general lesson: whenever you do exact rational work in a language lacking a rational type, the <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a> is the standard reduction tool.
+</p>
+
+<h4>Choosing integer width deliberately in C</h4>
+<p>
+I used <code>long long</code> throughout the C solution after estimating the largest intermediate value. For the extra test with N = 10^12, the denominator 7k reaches roughly 7 x 10^12, comfortably inside a signed 64-bit integer. The discipline is always the same: estimate your worst-case intermediate magnitude, compare it against the type's maximum, and pick the type up front. <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">Integer overflow</a> is one of the nastiest bugs precisely because the program keeps running and just produces wrong numbers.
+</p>
+
+<h4>Separating the solver from the I/O harness</h4>
+<p>
+Both files keep the pure solving logic (<code>solve</code>) distinct from the argument-parsing and benchmarking shell. The Python <code>solve</code> takes string arguments and returns a string; the C <code>solve</code> receives an <code>argv</code> with timing flags already handled by the runner. This separation makes the core logic trivially testable in isolation and keeps the timing loop uncluttered - a habit worth adopting for any code you intend to benchmark or reuse.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is the <a href="https://en.wikipedia.org/wiki/Farey_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Farey</a> adjacency formula: the fraction immediately left of p/q in F_N is (pk - 1)/(qk) where k = floor(N/q). Recognising this turns an apparent O(N) search over a million denominators into a constant-time expression.
+</p>
+<p>
+Both solutions run in unmeasurable time (0.0000 s across every benchmark category), which is exactly what O(1) arithmetic predicts; there is no meaningful performance gap to report. I find the Python version the more elegant, because <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer"><code>fractions.Fraction</code></a> lets the code mirror the maths directly, while the C version trades that elegance for explicit control over integer width and reduction.
+</p>
+<ul>
+<li>When a problem asks for the "nearest" fraction in an ordered list, suspect a <a href="https://en.wikipedia.org/wiki/Farey_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Farey-sequence</a> adjacency condition before writing any loop - the neighbour often has a closed form.</li>
+<li>Minimising the distance between fractions a/b and p/q is equivalent to minimising |aq - bp|; when that minimum is 1, you have found a <a href="https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree" class="reference-source" target="_blank" rel="noopener noreferrer">Stern-Brocot</a> neighbour.</li>
+<li>Use your language's built-in rational type for exact arithmetic - it reduces automatically and makes code self-documenting.</li>
+<li>In C, estimate the maximum magnitude of every intermediate result and confirm it fits your chosen integer type before writing the arithmetic.</li>
+<li>The <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a> is your portable GCD whenever no rational type is available.</li>
+<li>Separating the pure solver from the I/O and timing harness pays off every time you want to test, benchmark, or reuse the logic.</li>
+<li>A closed-form derivation that replaces an exhaustive search is almost always worth the up-front thought - even an O(N) to O(1) collapse reveals structure you can reuse elsewhere.</li>
+</ul>
+
+</article>

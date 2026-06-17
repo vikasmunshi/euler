@@ -1,10 +1,8 @@
 /* Solution to Euler Problem 39: Integer Right Triangles. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "runner.h"
 #include <math.h>
-#include <time.h>
 
+/* Iterative Euclidean algorithm returning gcd(a, b). */
 static int gcd(int a, int b) {
     while (b) {
         int t = b;
@@ -14,32 +12,41 @@ static int gcd(int a, int b) {
     return a;
 }
 
-long long solve(int argc, char *argv[]) {
-    int max_perimeter = atoi(argv[1]);
+/* Enumerate primitive Pythagorean triples via Euclid's formula
+ * (a = m^2 - n^2, b = 2mn, c = m^2 + n^2 with m > n > 0, gcd(m, n) = 1,
+ * opposite parity), whose primitive perimeter is p0 = 2m(m + n), then tally
+ * every multiple k*p0 <= max_perimeter in a value-indexed counting array and
+ * scan it for the perimeter with the most triples. Opposite parity is enforced
+ * structurally (m starts at n+1, steps by 2); the loop bounds invert the
+ * perimeter formula to closed form. O(P log P) over the perimeter limit P. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int max_perimeter = parse_int(argv[1]);
 
+    /* counts[p] holds the number of integer right triangles of perimeter p;
+     * calloc zero-initialises the dense value-indexed frequency table. */
     int *counts = calloc((size_t)(max_perimeter + 1), sizeof(int));
     if (!counts) {
         fprintf(stderr, "out of memory\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
-    /* Python n bound: range(1, (int(8*max_perimeter**0.5) - 6) // 8, 1)
-     * i.e. n < (int(8*sqrt(max_perimeter)) - 6) / 8
-     */
+    /* Smallest valid m for a given n is n+1; substituting into
+     * p0 = 2m(m + n) <= P and solving for n gives this closed-form bound. */
     int n_limit = ((int)(8.0 * sqrt((double)max_perimeter)) - 6) / 8;
 
     for (int n = 1; n < n_limit; n++) {
-        /* Python m bound: range(n+1, (int((4+8*max_perimeter)**0.5) - 2*n) // 4, 2)
-         * i.e. m < (int(sqrt(4+8*max_perimeter)) - 2*n) / 4
-         */
+        /* Solving 2m^2 + 2mn <= P for m via the quadratic formula gives this
+         * upper limit, so almost every iteration yields an in-range perimeter. */
         int m_limit = ((int)(sqrt(4.0 + 8.0 * (double)max_perimeter)) - 2 * n) / 4;
 
         for (int m = n + 1; m < m_limit; m += 2) {
             if (gcd(m, n) != 1) continue;
             int p0 = 2 * m * (m + n);
+            /* Guard against a slightly loose floating-point loop bound. */
             if (p0 > max_perimeter) break;
 
-            /* Python: append p0, then for k in range(2, max_perimeter // p0): append k*p0 */
+            /* Count the primitive perimeter, then every scaled multiple. */
             if (p0 <= max_perimeter) {
                 counts[p0]++;
             }
@@ -50,6 +57,7 @@ long long solve(int argc, char *argv[]) {
         }
     }
 
+    /* Linear scan for the perimeter with the maximum triangle count. */
     int best_p = 0;
     int best_count = 0;
     for (int p = 1; p <= max_perimeter; p++) {
@@ -60,55 +68,5 @@ long long solve(int argc, char *argv[]) {
     }
 
     free(counts);
-    return (long long)best_p;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)best_p)); return _answer; }
 }

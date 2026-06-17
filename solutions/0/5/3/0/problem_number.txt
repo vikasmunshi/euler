@@ -1,1 +1,0 @@
-530:GCD of Divisors:28

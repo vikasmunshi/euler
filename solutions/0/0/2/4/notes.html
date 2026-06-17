@@ -1,0 +1,57 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    We are asked to find the one-millionth arrangement of the digits 0 through 9 when all such
+    arrangements are listed in <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic order</a> - that is, dictionary order, where we compare element by element from left to right. A naive approach would generate all permutations in order and stop at the millionth, but the answer reveals a much more elegant structure. The total number of arrangements of <code>n</code> distinct symbols is <code>n!</code> (the <a href="https://en.wikipedia.org/wiki/Factorial" class="reference-source" target="_blank" rel="noopener noreferrer">factorial</a> of n). For ten digits that is 3,628,800 permutations, so generating a million of them is feasible but wasteful.
+  </p>
+  <p>
+    The key observation is the <a href="https://en.wikipedia.org/wiki/Factorial_number_system" class="reference-source" target="_blank" rel="noopener noreferrer">factorial number system</a>: among all permutations sorted in <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic order</a>, exactly <code>(n-1)!</code> of them begin with each possible leading digit. Therefore, to find the permutation at rank <code>k</code> (counting from zero), I divide <code>k</code> by <code>(n-1)!</code>. The quotient tells me the index, into the sorted list of remaining digits, of the digit to place first; the remainder is the rank of the desired permutation among those sharing that leading digit. Removing the chosen digit leaves a strictly smaller, identically structured subproblem. This technique - converting a rank into its corresponding object directly - is called <a href="https://en.wikipedia.org/wiki/Permutation#Numbering_permutations" class="reference-source" target="_blank" rel="noopener noreferrer">unranking</a>. The complexity is <code>O(n^2)</code>: we make <code>n</code> digit selections, and each selection rebuilds the shrinking digit list in linear time. For <code>n = 10</code> this is trivially fast.
+  </p>
+
+  <h3>Solution Approach</h3>
+  <h4>Factorial-Decomposition (Recursive Unranking) - Algorithm 0</h4>
+  <p>
+    Both the Python and C implementations realise the same recursive algorithm, which mirrors the mathematical structure directly: at each level of recursion one digit is fixed and the remainder of the work is an identical, smaller problem. I chose recursion precisely because the subproblem after fixing a digit is the original problem in miniature.
+  </p>
+  <p>
+    Each call receives the sorted string of available digits and a 1-based target rank. I compute <code>fact = (len - 1)!</code>, then convert the rank to 0-based and divide: <code>current = (permutation_number - 1) / fact</code> gives the index of the digit to place here, and <code>remaining = (permutation_number - 1) % fact</code> gives the sub-rank. I remove <code>digits[current]</code> from the list and recurse on the smaller list with rank <code>remaining + 1</code> (converting back to 1-based). The base case is a single remaining digit, which I return directly. The chosen digit is prepended to the result of the recursive call as the call stack unwinds.
+  </p>
+  <p>
+    In Python, removing the chosen digit is a single clean slice expression, <code>digits[:current] + digits[current + 1:]</code>, and the <a href="https://en.wikipedia.org/wiki/Factorial" class="reference-source" target="_blank" rel="noopener noreferrer">factorial</a> comes from <code>math.factorial</code>. In C, where strings are raw character buffers, I allocate a new array, copy every character except the chosen one, recurse, then build the result by writing the chosen character followed by a <code>strcpy</code> of the sub-result. The C version implements its own <code>factorial</code> loop returning <code>long long</code>, which comfortably holds <code>9! = 362880</code>, and carefully frees both the intermediate digit buffer and the sub-result at each level to avoid leaks.
+  </p>
+
+  <h3>Programming Techniques</h3>
+  <h4>Divmod for Quotient and Remainder Together</h4>
+  <p>
+    Python's built-in <code>divmod(a, b)</code> returns the quotient and remainder of integer division as a tuple in one call, which I unpack as <code>current, remaining = divmod(permutation_number - 1, math.factorial(len(digits) - 1))</code>. This is both efficient and expressive: it makes plain that the same division produces both pieces of information the algorithm needs. In C I write the two operations separately with <code>/</code> and <code>%</code>. Reach for this idiom in any number-system conversion, pagination, or rank/unrank routine where you need both results.
+  </p>
+  <h4>Recursive Decomposition of Self-Similar Problems</h4>
+  <p>
+    Both solutions are expressed as direct recursion rather than an explicit loop with an accumulator, because the problem has clean optimal substructure - fixing one digit yields a smaller instance of the same problem. The recursion depth is bounded by the input length (at most 10), so stack overflow is not a concern even in languages without tail-call optimisation. When a problem decomposes naturally into a single smaller instance of itself, recursion produces code whose shape matches the mathematics.
+  </p>
+  <h4>1-Based to 0-Based Index Conversion at the Boundary</h4>
+  <p>
+    The permutation number is given as a 1-based count. I subtract 1 immediately, perform all the division and modulo arithmetic in 0-based space, and add 1 back only when handing the sub-rank to the next recursive call. Doing the conversion at the boundary of the computation keeps the core arithmetic free of off-by-one corrections. This convert-at-the-edges discipline applies whenever human counting (starting at 1) meets array indexing or modular arithmetic (starting at 0).
+  </p>
+  <h4>Heap Allocation for Computed-Length Strings in C</h4>
+  <p>
+    Because the result is assembled character by character as recursion unwinds, its length is known only at runtime. At each level I <code>malloc</code> exactly the bytes I need - <code>len</code> for the reduced digit buffer, <code>len + 1</code> for the result including its null terminator - and <code>free</code> each buffer as soon as it is no longer referenced. Pairing every allocation with a matching free in the same logical scope makes ownership clear and prevents leaks. This is the standard pattern for C functions that must return strings of computed length.
+  </p>
+  <h4>Standard Library Over Reinvention</h4>
+  <p>
+    The Python solution uses <code>math.factorial</code> rather than a hand-written loop: it is exact for arbitrary-size integers, implemented in C, and signals intent clearly. The C standard library offers no <a href="https://en.wikipedia.org/wiki/Factorial" class="reference-source" target="_blank" rel="noopener noreferrer">factorial</a>, so there I write a trivial loop - but only because no library equivalent exists. As a general rule, prefer well-tested standard library functions for standard mathematical operations unless precision, performance, or portability gives you a concrete reason to do otherwise.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The insight that unlocks this problem is that <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic</a> rank can be decoded digit by digit using <a href="https://en.wikipedia.org/wiki/Factorial" class="reference-source" target="_blank" rel="noopener noreferrer">factorial</a> arithmetic, sidestepping enumeration entirely. Recognising that <code>(n-1)!</code> permutations begin with each leading digit turns a search into a short sequence of divisions. Both implementations finish far below human-perceptible time: on the main case (the millionth permutation of all ten digits, averaged over 21 runs) the C version takes about 0.4 microseconds and the Python version about 6.9 microseconds. The C version is thus roughly eighteen times faster in absolute terms, but the gap is immaterial - the work itself is negligible, so it is the algorithmic choice, not the language, that makes the problem trivial at this scale. The Python version is the more elegant of the two, expressing the whole algorithm in a handful of lines with slicing and <code>divmod</code>, while the C version is instructive for showing the explicit memory management the same logic requires.
+  </p>
+  <ul>
+    <li>When objects are ordered in <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic order</a>, the <a href="https://en.wikipedia.org/wiki/Factorial_number_system" class="reference-source" target="_blank" rel="noopener noreferrer">factorial number system</a> lets you <a href="https://en.wikipedia.org/wiki/Permutation#Numbering_permutations" class="reference-source" target="_blank" rel="noopener noreferrer">unrank</a> any position directly in <code>O(n)</code> selections - never enumerate permutations one at a time.</li>
+    <li>Recursion shines when a problem reduces to a single smaller instance of itself and the depth is small and bounded; the code then mirrors the mathematical definition.</li>
+    <li>Convert between 1-based and 0-based representations explicitly and at the boundaries of your computation to keep the core arithmetic clean.</li>
+    <li>Use <code>divmod</code> in Python (or paired <code>/</code> and <code>%</code> in C) whenever you need both quotient and remainder - a recurring pattern in number-system and rank/unrank problems.</li>
+    <li>In C, allocate exactly what you need and free it as early as possible, pairing every <code>malloc</code> with a <code>free</code> in the same scope to make ownership unambiguous.</li>
+    <li>Before writing brute force, ask whether the problem's ordering structure admits a direct formula; combinatorial rank and unrank problems almost always do.</li>
+  </ul>
+</article>

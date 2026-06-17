@@ -1,42 +1,10 @@
 /* Solution to Euler Problem 98: Anagramic Squares. */
-#include <libgen.h>
+#include "runner.h"
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
 
-char *get_text_file(const char *src) {
-    const char *slash = strrchr(src, '/');
-    const char *name_start = slash ? slash + 1 : src;
-    const char *q = strchr(name_start, '?');
-    size_t name_len = q ? (size_t)(q - name_start) : strlen(name_start);
 
-    char exe_path[4096];
-    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
-    if (len < 0) return NULL;
-    exe_path[len] = '\0';
 
-    char path[4096];
-    int pn = snprintf(path, sizeof(path), "%s/resources/%.*s", dirname(exe_path), (int)name_len, name_start);
-    if (pn < 0 || (size_t)pn >= sizeof(path)) return NULL;
-
-    FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
-    long sz = ftell(f);
-    if (sz < 0) { fclose(f); return NULL; }
-    rewind(f);
-    char *buf = malloc((size_t)sz + 1);
-    if (!buf) { fclose(f); return NULL; }
-    if (fread(buf, 1, (size_t)sz, f) != (size_t)sz) { free(buf); fclose(f); return NULL; }
-    buf[sz] = '\0';
-    fclose(f);
-    return buf;
-}
-
-/* ── str_hash: sorted frequency signature ── */
+/* str_hash: bijection-invariant signature - per-character repeat counts sorted descending. */
 static void str_hash(const char *s, int len, char *out) {
     int freq[256] = {0};
     for (int i = 0; i < len; i++) freq[(unsigned char)s[i]]++;
@@ -53,12 +21,13 @@ static void str_hash(const char *s, int len, char *out) {
     out[pos] = '\0';
 }
 
-/* ── string list for squares ── */
+/* Growable string list holding the candidate squares for one digit length. */
 typedef struct {
     char **data;
     int size, cap;
 } StrList;
 
+/* strlist_push: append a copy of s, doubling capacity on demand. */
 static void strlist_push(StrList *sl, const char *s) {
     if (sl->size == sl->cap) {
         sl->cap = sl->cap ? sl->cap * 2 : 16;
@@ -67,6 +36,7 @@ static void strlist_push(StrList *sl, const char *s) {
     sl->data[sl->size++] = strdup(s);
 }
 
+/* strlist_free: release all stored strings and the backing array. */
 static void strlist_free(StrList *sl) {
     for (int i = 0; i < sl->size; i++) free(sl->data[i]);
     free(sl->data);
@@ -74,12 +44,14 @@ static void strlist_free(StrList *sl) {
     sl->size = sl->cap = 0;
 }
 
+/* strlist_contains: linear-scan membership - fine for the few thousand squares per length. */
 static int strlist_contains(const StrList *sl, const char *s) {
     for (int i = 0; i < sl->size; i++)
         if (strcmp(sl->data[i], s) == 0) return 1;
     return 0;
 }
 
+/* n_digit_squares: all exactly-n-digit squares, scanning roots ceil(sqrt(10^(n-1)))..floor(sqrt(10^n-1)). */
 static StrList n_digit_squares(int n) {
     StrList sl;
     memset(&sl, 0, sizeof(sl));
@@ -93,7 +65,7 @@ static StrList n_digit_squares(int n) {
     return sl;
 }
 
-/* ── anagram buckets ── */
+/* One anagram class: canonical sorted-letter key, its member words, and their shared length. */
 #define MAX_WORDS 2200
 #define MAX_WORD_LEN 32
 #define MAX_BUCKET_WORDS 32
@@ -105,13 +77,18 @@ typedef struct {
     int word_len;
 } Bucket;
 
-long long solve(int argc, char *argv[]) {
-    if (argc < 2) { fprintf(stderr, "Usage: prog <file_url>\n"); return -1; }
+/* Group words into anagram classes, then for lengths largest-first match each word to an
+   equal-length square via the bijection implied by zipping letters to digits; a class hit at the
+   longest length is the maximum. Shape-hash prefiltering prunes incompatible (word, square) pairs;
+   cost ~ (anagram words) x (squares per length). */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    if (argc < 2) { fprintf(stderr, "Usage: prog <file_url>\n"); { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; } }
 
     char *text = get_text_file(argv[1]);
-    if (!text) { fprintf(stderr, "Cannot read file\n"); return -1; }
+    if (!text) { fprintf(stderr, "Cannot read file\n"); { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; } }
 
-    /* parse words */
+    /* parse words: skip delimiter run, then take the token up to the next quote/comma */
     static char word_store[MAX_WORDS][MAX_WORD_LEN];
     int n_words = 0;
     char *p = text;
@@ -129,7 +106,7 @@ long long solve(int argc, char *argv[]) {
     }
     free(text);
 
-    /* build buckets */
+    /* build buckets: each word's sorted-letter form is its canonical anagram key */
     static Bucket buckets[MAX_WORDS];
     int n_buckets = 0;
 
@@ -166,13 +143,13 @@ long long solve(int argc, char *argv[]) {
         }
     }
 
-    /* collect valid buckets */
+    /* collect valid buckets: a singleton class can never form a pair */
     Bucket *valid_buckets[MAX_WORDS];
     int n_valid = 0;
     for (int i = 0; i < n_buckets; i++)
         if (buckets[i].word_count > 1) valid_buckets[n_valid++] = &buckets[i];
 
-    /* unique word lengths, sorted descending */
+    /* unique word lengths, sorted descending - so the first hit is the global maximum */
     int lengths[MAX_WORD_LEN];
     int n_lengths = 0;
     for (int i = 0; i < n_valid; i++) {
@@ -204,11 +181,12 @@ long long solve(int argc, char *argv[]) {
                 for (int si = 0; si < squares.size; si++) {
                     const char *sq = squares.data[si];
 
+                    /* shape-hash prefilter: differing repeat structure rules out any bijection */
                     char sq_hash[64];
                     str_hash(sq, wl, sq_hash);
                     if (strcmp(word_hash, sq_hash) != 0) continue;
 
-                    /* build char_map */
+                    /* build char_map by zipping letters to digits, rejecting any inconsistency */
                     char char_map_key[MAX_WORD_LEN];
                     char char_map_val[MAX_WORD_LEN];
                     int map_size = 0;
@@ -230,7 +208,7 @@ long long solve(int argc, char *argv[]) {
                     }
                     if (!valid) continue;
 
-                    /* check unique char count */
+                    /* require the map to cover every distinct letter exactly once */
                     {
                         char seen[MAX_WORD_LEN];
                         int ns = 0;
@@ -244,13 +222,13 @@ long long solve(int argc, char *argv[]) {
                     }
                     if (!valid) continue;
 
-                    /* injective check */
+                    /* injective check: distinct letters must map to distinct digits */
                     for (int a2 = 0; a2 < map_size && valid; a2++)
                         for (int b2 = a2 + 1; b2 < map_size && valid; b2++)
                             if (char_map_val[a2] == char_map_val[b2]) valid = 0;
                     if (!valid) continue;
 
-                    /* apply to other words */
+                    /* apply the map to each anagram partner; a square with no leading zero is a pair */
                     for (int oi = 0; oi < bkt->word_count; oi++) {
                         if (oi == wi) continue;
                         const char *other = bkt->words[oi];
@@ -278,50 +256,5 @@ long long solve(int argc, char *argv[]) {
         strlist_free(&squares);
     }
 
-    return best;
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) { fprintf(stderr, "runner: out of memory\n"); return 1; }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(best)); return _answer; }
 }

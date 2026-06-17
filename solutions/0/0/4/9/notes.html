@@ -1,0 +1,162 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    This problem layers two independent constraints over the integers: <strong>primality</strong> and
+    <strong>digit-permutation equivalence</strong>. I am hunting for three n-digit primes that (i) form an
+    <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank" rel="noopener noreferrer">arithmetic progression</a>
+    - three values equally spaced, so the middle term minus the first equals the last minus the middle - and
+    (ii) are permutations of one another, meaning they use the exact same multiset of decimal digits. For the
+    n = 4 case the puzzle hands us one sequence (1487, 4817, 8147) and asks for the other; the generalized
+    n-digit version makes for an instructive exhaustive-search exercise.
+  </p>
+  <p>
+    Two observations make the search tractable. First, two numbers are permutations of each other if and only
+    if their sorted digits are identical. This gives a <em>canonical key</em>: I can partition the n-digit
+    primes into groups sharing a sorted-digit signature, then search each group independently, because an
+    arithmetic triple can only ever live inside one group. Each group has at most n! members, which is tiny.
+    Second, within a small set S of integers, finding every arithmetic triple does not require the naive
+    O(|S|<sup>3</sup>) scan over all triples; bucketing pairwise differences finds them in O(|S|<sup>2</sup>).
+    To enumerate primes cheaply I use a
+    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>.
+    By the
+    <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a>
+    there are on the order of 10<sup>n</sup>/n primes below 10<sup>n</sup>, so the sieve dominates the
+    asymptotic cost while the per-group permutation and bucketing work is negligible.
+  </p>
+
+  <h3>Solution Approach</h3>
+  <h4>Permutation Grouping with Difference Bucketing (Python and C, index 0)</h4>
+  <p>
+    Both files implement the same algorithm. I describe it once and call out language differences afterward.
+  </p>
+  <p>
+    <strong>Step 1 - Sieve the primes.</strong> I generate all primes below 10<sup>n</sup> with the
+    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>.
+    The sieve works only on odd candidates: it marks index k as composite when k = i + j + 2ij for some
+    i, j >= 1, and every surviving index k corresponds to the prime 2k + 1 (with 2 added separately). I then
+    keep only the n-digit primes - those strictly greater than 10<sup>n-1</sup>.
+  </p>
+  <p>
+    <strong>Step 2 - Enumerate permutation families.</strong> For each n-digit prime p, I generate every
+    permutation of its digits. For each permuted digit string I keep it only if it has no leading zero and is
+    itself a known n-digit prime, building a set of "siblings" of p. If a family has fewer than three members
+    it cannot contain a triple, so I skip it immediately - an early prune that discards most candidates.
+  </p>
+  <p>
+    <strong>Step 3 - Difference bucketing.</strong> Within each sibling family I consider every pair (a, b)
+    with a &lt; b, compute the difference d = b - a, and add both a and b into the bucket keyed by d. If a
+    bucket ends up holding exactly three distinct values {x, y, z}, those three form an arithmetic progression
+    with common difference d. The reasoning: if x &lt; y &lt; z is an
+    <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank" rel="noopener noreferrer">arithmetic progression</a>
+    then y - x = z - y = d, so both pairs (x, y) and (y, z) land in bucket d and together populate it with
+    exactly those three members. I record each triple in canonical sorted, space-joined form into a
+    deduplication set, since different starting primes in the same family discover the same triple.
+  </p>
+  <p>
+    <strong>Language differences.</strong> The Python solution leans on the standard library:
+    <a href="https://docs.python.org/3/library/itertools.html#itertools.permutations" class="reference-source" target="_blank" rel="noopener noreferrer"><code>itertools.permutations</code></a>
+    for permutation generation, a native
+    <a href="https://docs.python.org/3/library/stdtypes.html#set" class="reference-source" target="_blank" rel="noopener noreferrer"><code>set</code></a>
+    for membership and deduplication, and
+    <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict" class="reference-source" target="_blank" rel="noopener noreferrer"><code>collections.defaultdict(set)</code></a>
+    for the difference buckets. This keeps the core logic to a handful of lines. The C solution must build all
+    of this by hand: it stores the n-digit primes as a sorted array of strings queried by
+    <a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary search</a>,
+    generates permutations with
+    <a href="https://en.wikipedia.org/wiki/Heap%27s_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Heap's algorithm</a>,
+    uses parallel flat arrays for difference buckets, and does linear-scan deduplication on the small result
+    list. The benchmarks show C at 2.5 ms versus Python at 8.5 ms for n = 4, and 147 ms versus 408 ms for
+    n = 5 - roughly a 3x edge to C.
+  </p>
+
+  <h3>Programming Techniques</h3>
+  <h4>Canonical-Key Grouping</h4>
+  <p>
+    The trick that collapses the combinatorial blow-up is grouping by a canonical key - here, the multiset of
+    digits a number contains. Anything permutation-invariant (sorted digits, sorted characters, a digit
+    histogram) serves as a key that maps all members of an equivalence class to one bucket. I reach for this
+    pattern whenever a constraint reads "these items are equivalent under some transformation": compute a
+    normal form once and let equality on the normal form do the matching. Notice that in the code I do not even
+    build explicit groups - I generate each prime's permutations on demand, which is the same idea expressed
+    lazily.
+  </p>
+  <h4>Difference Bucketing for Arithmetic Triples</h4>
+  <p>
+    Instead of testing every triple in O(|S|<sup>3</sup>), I bucket each pairwise difference and look for a
+    bucket of size three. This drops the cost to O(|S|<sup>2</sup>) and generalizes: to find arithmetic
+    k-tuples, bucket pairwise differences and inspect buckets with k members that span a valid
+    <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank" rel="noopener noreferrer">progression</a>.
+    The technique trades a little extra memory (the buckets) for a cubic-to-quadratic speedup, a classic
+    time-space tradeoff.
+  </p>
+  <h4>The Sieve of Sundaram</h4>
+  <p>
+    I chose the
+    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>
+    over the more common
+    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
+    mostly for its clean fixed-formula loop and because it naturally tracks only odd numbers, halving memory.
+    The choice between the two is largely stylistic; whenever you need all primes below a fixed bound, a sieve
+    is the correct first instinct rather than trial-dividing each candidate. In the C version I widen the index
+    arithmetic to <code>long long</code> inside the loop guard so that i + j + 2ij cannot overflow <code>int</code>
+    for large bounds - a small defensive detail that matters as n grows.
+  </p>
+  <h4>Heap's Algorithm for Permutation Generation in C</h4>
+  <p>
+    C has no equivalent of
+    <a href="https://docs.python.org/3/library/itertools.html#itertools.permutations" class="reference-source" target="_blank" rel="noopener noreferrer"><code>itertools.permutations</code></a>,
+    so I generate permutations with
+    <a href="https://en.wikipedia.org/wiki/Heap%27s_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Heap's algorithm</a>,
+    which produces all n! orderings using a single swap between successive permutations. A counter array
+    <code>c[i]</code> drives the swaps (swap position 0 with i for even i, position c[i] with i for odd i),
+    emitting one permutation per swap. It is the canonical exhaustive permutation generator for low-level code.
+  </p>
+  <h4>Sorted String Array with Binary Search as a Set Substitute</h4>
+  <p>
+    Where Python uses a native hash
+    <a href="https://docs.python.org/3/library/stdtypes.html#set" class="reference-source" target="_blank" rel="noopener noreferrer"><code>set</code></a>
+    for O(1) membership, the C code stores primes as a sorted array of strings and queries them with
+    <a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary search</a>,
+    giving O(log n) lookups. Keeping the primes as strings means a permuted digit buffer can be tested directly
+    without converting to an integer. When your language lacks a hash set, a sorted array plus a single
+    <code>qsort</code> and a hand-written binary search is cache-friendly and easy to get right.
+  </p>
+  <h4>Flat Array with Stride for 2-D Data in C</h4>
+  <p>
+    The difference-to-values map in C is two parallel arrays - <code>diff_keys</code> and a flat
+    <code>diff_sets_data</code> indexed as <code>bucket * sib_count + slot</code>. Using one contiguous
+    allocation with a fixed stride instead of an array of pointers avoids per-bucket allocation overhead and
+    keeps the data in contiguous memory. This is a standard C idiom whenever a 2-D structure has a known
+    maximum width.
+  </p>
+  <h4>Early Pruning and Deduplication</h4>
+  <p>
+    Skipping families with fewer than three siblings before doing any difference work is a cheap, high-yield
+    prune; the cardinality check costs nothing and discards the overwhelming majority of groups. For
+    deduplication, Python inserts a canonical string into a
+    <a href="https://docs.python.org/3/library/stdtypes.html#set" class="reference-source" target="_blank" rel="noopener noreferrer"><code>set</code></a>;
+    C does a linear scan over the result array. Because the result counts are tiny (2 sequences at n = 4, 42 at
+    n = 5), the linear scan is negligible and the simpler code wins.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The unlocking insight is to treat the two constraints independently: sieving handles primality cheaply, and
+    sorted-digit grouping handles permutation membership cheaply, so the only remaining work - finding
+    arithmetic triples - happens inside groups small enough that even a quadratic scan is instant. Both
+    solutions implement the same algorithm; the C version is about 3x faster (2.5 ms vs 8.5 ms at n = 4,
+    147 ms vs 408 ms at n = 5), the expected gap between compiled C and interpreted Python for compute-heavy
+    search. The Python version is far more concise thanks to
+    <a href="https://docs.python.org/3/library/itertools.html#itertools.permutations" class="reference-source" target="_blank" rel="noopener noreferrer"><code>itertools</code></a>
+    and native sets, so it is the more readable choice when the speed difference does not matter.
+  </p>
+  <ul>
+    <li>When a problem has several independent constraints, apply each as a filter in sequence and prune early rather than testing all combinations at once.</li>
+    <li>Group candidates by a canonical key (sorted digits, a histogram) to restrict combinatorial searches to meaningful equivalence classes.</li>
+    <li>Difference bucketing reduces arithmetic-triple detection from cubic to quadratic and generalizes to longer progressions.</li>
+    <li>A sieve is the right first step whenever you need all primes below a fixed bound.</li>
+    <li>When your language lacks a hash set, a sorted array plus binary search gives O(log n) membership and is cache-friendly.</li>
+    <li>Keep Heap's algorithm in your toolkit for exhaustive permutation generation in low-level languages.</li>
+    <li>In C, a single flat allocation with a fixed stride is a clean, fast substitute for a 2-D array of pointers when the width is bounded.</li>
+  </ul>
+</article>

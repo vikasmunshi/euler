@@ -3,6 +3,8 @@
 """ Utility for running shell commands and capturing their output. """
 from __future__ import annotations
 
+__all__ = ['confirm', 'pause', 'run_command']
+
 from pathlib import Path
 from subprocess import run
 
@@ -33,10 +35,3 @@ def run_command(command: str, *, cwd: Path | None = None, silent: bool = False) 
         console.print(f'Out:\n{result.stdout}\nErr:\n{result.stderr}\nrc: {result.returncode}',
                       markup=False, highlight=False)
     return None
-
-
-__all__ = (
-    'confirm',
-    'pause',
-    'run_command',
-)

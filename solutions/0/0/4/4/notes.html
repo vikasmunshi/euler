@@ -1,0 +1,66 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+A <a href="https://en.wikipedia.org/wiki/Pentagonal_number" class="reference-source" target="_blank" rel="noopener noreferrer">pentagonal number</a> is defined by the closed form P(n) = n(3n-1)/2, generating the sequence 1, 5, 12, 22, 35, 51, ... for positive integers n. The problem asks me to find two pentagonal numbers whose sum and difference are both themselves pentagonal, and among all such pairs to minimise the difference D. The crux is being able to answer one question very fast: "is this integer pentagonal?" If that test is constant time, then a straightforward double loop over candidate pairs becomes practical.
+</p>
+<p>
+The test follows from inverting the defining quadratic. Setting n(3n-1)/2 = m and applying the <a href="https://en.wikipedia.org/wiki/Quadratic_formula" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic formula</a> gives n = (1 + sqrt(1 + 24m)) / 6. The integer m is pentagonal precisely when this expression is a positive whole number. That is a single <a href="https://en.wikipedia.org/wiki/Square_root" class="reference-source" target="_blank" rel="noopener noreferrer">square root</a> plus a few arithmetic operations - O(1), with no table to build or search. The second decisive observation is about search order. If I fix the larger index i and scan the smaller index j downward, the difference P(i)-P(j) grows monotonically as j shrinks, and the smallest possible difference at outer index i is P(i)-P(i-1), which itself grows with i. So the first valid pair I encounter, with i ascending and j descending, is provably the global minimum. The work is O(i_answer^2) constant-time tests, where i_answer is the outer index at which the answer surfaces - a few thousand in practice.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Ascending-Outer, Descending-Inner Pair Search with an Algebraic Membership Test</h4>
+<p>
+Both the Python (<code>p0044_s0.py</code>) and C (<code>p0044_s0.c</code>) files implement the same algorithm. The outer loop drives <code>i</code> upward from 1 with no fixed bound. For each <code>i</code> I compute <code>p_i</code> once via the closed-form helper, then run an inner loop with <code>j</code> descending from <code>i-1</code> to <code>1</code>. For each pair I form the difference <code>p_i - p_j</code> and the sum <code>p_i + p_j</code> and test both with the inverse-formula membership check. The moment both pass, I return the difference.
+</p>
+<p>
+The descending inner loop is the design choice that justifies the early return. Scanning <code>j</code> from large to small means the first valid pair found for a given <code>i</code> has the smallest difference achievable at that <code>i</code>. Combined with the ascending outer loop and the monotonicity of P(i)-P(i-1) in i, the very first valid pair found anywhere is the global minimum, so there is no reason to keep searching.
+</p>
+<p>
+The membership test differs subtly between the languages. In Python I compute <code>n = (1 + sqrt(1 + 24*m)) / 6</code> and call <code>float.is_integer()</code> on it, relying on the float landing exactly on a whole value - acceptable for these magnitudes. In C I take the defensive <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a> route: I compute the same candidate, snap it to the nearest integer with <code>round()</code>, then recompute <code>nth_pentagonal(ni)</code> in exact integer arithmetic and compare against the original <code>m</code>, additionally guarding <code>ni &gt; 0</code>. This round-then-verify pattern is immune to a value reading as 4.9999999999 instead of 5.0.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Inverting a Quadratic for O(1) Set Membership</h4>
+<p>
+Rather than maintaining a hash set or sorted list of pentagonal numbers and querying it, I invert the defining formula algebraically with the <a href="https://en.wikipedia.org/wiki/Quadratic_formula" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic formula</a>. Whenever a sequence has an easily invertible closed form, this is worth doing: it turns a membership query into one arithmetic expression with no memory allocation and no data structure that grows as the numbers do. Reach for this any time you are tempted to precompute a table that you could instead recognise by inverting a formula.
+</p>
+
+<h4>Walrus Operator for Loop-and-Increment in Python</h4>
+<p>
+The Python outer loop is written as <code>while i := (i + 1)</code>, using the <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">assignment expression</a> (the "walrus operator") from Python 3.8. It increments <code>i</code> and tests it as the loop condition in one expression; since <code>i</code> is always positive after the first increment, the condition is always truthy, giving an effectively infinite loop exited only by the <code>return</code>. It is a compact idiom for "loop forever while updating a counter", though <code>itertools.count(1)</code> would be equally idiomatic and arguably clearer.
+</p>
+
+<h4>Hoisting the Loop-Invariant Outer Term</h4>
+<p>
+Both implementations compute <code>p_i</code> once before the inner loop instead of recomputing it on every inner iteration. This is classic <a href="https://en.wikipedia.org/wiki/Loop-invariant_code_motion" class="reference-source" target="_blank" rel="noopener noreferrer">loop-invariant code motion</a>: any expression whose value does not change across iterations belongs outside the loop. <code>p_j</code> must stay inside because <code>j</code> changes, but <code>p_i</code> is constant across the inner sweep. A C compiler may hoist this automatically; the Python interpreter will not, so doing it explicitly matters most there.
+</p>
+
+<h4>Round-and-Verify for Floating-Point Integer Tests in C</h4>
+<p>
+When checking whether a <a href="https://en.wikipedia.org/wiki/Square_root" class="reference-source" target="_blank" rel="noopener noreferrer">square root</a> lands on an integer, a naive <code>floor(x) == x</code> comparison can fail to <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a> rounding error. The C solution instead uses <code>round(n)</code> to get the nearest integer candidate, recomputes the pentagonal value in exact integer arithmetic, and compares it to <code>m</code>. This eliminates both false positives and false negatives at integer boundaries. Adopt this pattern whenever a floating-point approximation must satisfy an exact integer constraint.
+</p>
+
+<h4>Early Return on a Provably Optimal First Hit</h4>
+<p>
+Because the inner loop descends and the outer loop ascends, the first pair satisfying both conditions is provably minimal. I exploit this by returning at once rather than continuing to search. Recognising when an ordered enumeration makes the first solution optimal - and stopping there - converts what looks like an exhaustive search into an early-terminating one.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is that pentagonality is testable in constant time by inverting the quadratic, removing any need to store values, and that an enumeration order in which differences grow monotonically lets me return the first valid pair as the guaranteed global minimum.
+</p>
+<p>
+Both files implement the same algorithm, so the benchmark gap is pure language overhead: the C build runs in about 0.0133 s while the Python version takes about 0.3718 s, roughly a 28x difference. That ratio is typical for tight numerical loops with no heavy data structures - per-operation interpreter overhead dominates. When such a loop is genuinely the bottleneck, a compiled rewrite is the lever to pull.
+</p>
+<ul>
+  <li>When a sequence is defined by an invertible closed-form formula, invert it to get an O(1) membership test instead of building a lookup table.</li>
+  <li>Choose your enumeration order so that the first valid result is provably optimal, then return immediately.</li>
+  <li>Hoist loop-invariant subexpressions out of inner loops, especially in interpreted languages where the runtime will not do it for you.</li>
+  <li>Convert floating-point results to integers with round-then-verify in exact arithmetic, never with floating-point equality.</li>
+  <li>For pure arithmetic hot loops, expect a large constant-factor speedup from a compiled language - reserve that effort for when the loop is the bottleneck.</li>
+</ul>
+
+</article>

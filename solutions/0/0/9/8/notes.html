@@ -1,0 +1,185 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    On the surface this looks like a number puzzle, but it is really a constrained search for a structure-preserving
+    map. We are given a word list and must find pairs of
+    <a href="https://en.wikipedia.org/wiki/Anagram" class="reference-source" target="_blank" rel="noopener noreferrer">anagrams</a>
+    - words built from exactly the same multiset of letters - for which one consistent substitution of letters by digits
+    turns both members into
+    <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect squares</a>.
+    The substitution must be a
+    <a href="https://en.wikipedia.org/wiki/Bijection" class="reference-source" target="_blank" rel="noopener noreferrer">bijection</a>
+    on the letters used: each distinct letter maps to one distinct digit, no two letters share a digit, and no number may
+    have a leading zero. Among every valid pair we want the largest square.
+  </p>
+  <p>
+    Two observations collapse this from a frightening search space into a handful of cheap checks. First, only words that
+    are <a href="https://en.wikipedia.org/wiki/Anagram" class="reference-source" target="_blank" rel="noopener noreferrer">anagrams</a>
+    of each other can ever pair, so I group words by a <em>canonical form</em> (their letters sorted alphabetically) and
+    discard any group with a single member. Second, a candidate square must not only have the same number of digits as the
+    word has letters, it must have the same <em>shape</em>: the multiset of repetition counts of its symbols. The word CARE
+    has four distinct letters each appearing once (shape "1111"), so it can only map onto a four-digit square with four
+    distinct digits. Because a
+    <a href="https://en.wikipedia.org/wiki/Bijection" class="reference-source" target="_blank" rel="noopener noreferrer">bijection</a>
+    preserves repetition structure, this shape is an
+    <a href="https://en.wikipedia.org/wiki/Invariant_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">invariant</a>
+    that any valid mapping must respect - comparing shapes rejects the overwhelming majority of (word, square) pairs before
+    any mapping is constructed. With fewer than two thousand words and at most a few thousand squares of any given length,
+    the effective work is proportional to (anagram words) x (candidate squares per length), which is tiny in practice.
+  </p>
+
+  <h3>Solution Approach</h3>
+
+  <h4>Anagram Grouping with Shape-Hash Prefiltering (Python and C)</h4>
+  <p>
+    Both files implement the same algorithm; they differ only in language idioms and data structures. I will describe the
+    shared logic and note where each language diverges.
+  </p>
+  <p>
+    <strong>Step 1 - Load and group by canonical form.</strong> The file is comma-separated and quote-wrapped, so I strip
+    quotes and split on commas. For each word I compute its <em>canonical form</em> by sorting its letters; all
+    <a href="https://en.wikipedia.org/wiki/Anagram" class="reference-source" target="_blank" rel="noopener noreferrer">anagrams</a>
+    share one canonical form and therefore one bucket. In Python the buckets live in a nested
+    <code>dict</code> keyed first by length and then by canonical form, wrapped in a frozen
+    <a href="https://docs.python.org/3/library/dataclasses.html" class="reference-source" target="_blank" rel="noopener noreferrer">dataclass</a>
+    (<code>Anagrams</code>). In C they are a static array of <code>Bucket</code> structs located by a linear scan over
+    canonical strings, with the sort done by a small insertion sort in place.
+  </p>
+  <p>
+    <strong>Step 2 - Prune singletons.</strong> A bucket holding one word can never form a pair, so I drop it before any
+    numeric work. The Python <code>prune()</code> method removes singleton classes and any now-empty length groups; the C
+    code collects buckets with <code>word_count &gt; 1</code> into a <code>valid_buckets</code> array. Pruning early keeps
+    the inner loops working only on viable candidates.
+  </p>
+  <p>
+    <strong>Step 3 - Process lengths largest first.</strong> I sort the surviving word lengths in descending order. Because
+    a longer square is numerically larger than any shorter one, the first length that yields a valid pair must contain the
+    global maximum. The Python solution returns on the first hit; the C solution guards its outer loop with
+    <code>best == 0</code> so it stops once a length produces a result. This is
+    <a href="https://en.wikipedia.org/wiki/Branch_and_bound" class="reference-source" target="_blank" rel="noopener noreferrer">early termination</a>
+    driven by the search ordering.
+  </p>
+  <p>
+    <strong>Step 4 - Generate candidate squares.</strong> For the current length <code>n</code> I enumerate every square
+    with exactly <code>n</code> digits by iterating the integer roots from <code>ceil(sqrt(10^(n-1)))</code> to
+    <code>floor(sqrt(10^n - 1))</code> and squaring each. Python stores them in a <code>set[str]</code> for O(1)
+    membership; C uses a growable <code>StrList</code> with linear-scan membership, which is fine for a few thousand
+    strings.
+  </p>
+  <p>
+    <strong>Step 5 - Shape-hash prefilter.</strong> For each word and each square I compute the shape hash - the per-symbol
+    repetition counts sorted descending and concatenated (for example "1111" or "211"). If two shape hashes differ, no
+    <a href="https://en.wikipedia.org/wiki/Bijection" class="reference-source" target="_blank" rel="noopener noreferrer">bijection</a>
+    can connect them, so I skip the pair immediately. This is the central optimization.
+  </p>
+  <p>
+    <strong>Step 6 - Build and validate the bijection.</strong> I zip the word's characters with the square's digits to
+    form a proposed map. It is valid only if it is <em>consistent</em> (a letter never maps to two different digits) and
+    <em>injective</em> (no two letters map to the same digit). Python verifies both by comparing <code>dict</code> and
+    <code>set</code> sizes against the word length; C performs explicit linear scans over its parallel
+    <code>char_map_key</code>/<code>char_map_val</code> arrays, checking coverage and collisions separately.
+  </p>
+  <p>
+    <strong>Step 7 - Apply to anagram partners.</strong> A valid map is applied to every other word in the same bucket. If
+    the resulting digit string is itself a square in the precomputed collection and has no leading zero, I have a valid
+    pair, and I record the maximum of the two square values. The first valid pair at the longest length is the answer,
+    18769.
+  </p>
+
+  <h3>Programming Techniques</h3>
+
+  <h4>Canonical Form for Equivalence Classes</h4>
+  <p>
+    Sorting a word's letters produces a unique label shared by all of its
+    <a href="https://en.wikipedia.org/wiki/Anagram" class="reference-source" target="_blank" rel="noopener noreferrer">anagrams</a>.
+    Using that label as a hash key groups every
+    <a href="https://en.wikipedia.org/wiki/Equivalence_class" class="reference-source" target="_blank" rel="noopener noreferrer">equivalence class</a>
+    in a single pass. This "sort then bucket" pattern is the standard first move whenever you must detect members of the
+    same class - anagrams, equivalent fractions, isomorphic structures - because comparing canonical forms is far cheaper
+    than pairwise comparison of every element.
+  </p>
+
+  <h4>Invariant-Based Pruning (the Shape Hash)</h4>
+  <p>
+    The shape hash captures only how many times each symbol repeats, ignoring identity. Because a
+    <a href="https://en.wikipedia.org/wiki/Bijection" class="reference-source" target="_blank" rel="noopener noreferrer">bijection</a>
+    preserves repetition structure, two objects with different shape hashes can never be matched. Computing this cheap
+    <a href="https://en.wikipedia.org/wiki/Invariant_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">invariant</a>
+    and rejecting mismatches before the expensive mapping step is what makes the search trivial. Whenever you search for a
+    structure-preserving mapping, look for an invariant the mapping must preserve and filter on it first.
+  </p>
+
+  <h4>Search Ordering with Early Termination</h4>
+  <p>
+    Both solutions order word lengths by descending magnitude and stop at the first success - a form of
+    <a href="https://en.wikipedia.org/wiki/Branch_and_bound" class="reference-source" target="_blank" rel="noopener noreferrer">branch and bound</a>.
+    When you are optimizing a single quantity and the search space can be ordered by that quantity, processing
+    largest-first and short-circuiting avoids ever examining provably inferior candidates.
+  </p>
+
+  <h4>Frozen Dataclasses with Slots (Python)</h4>
+  <p>
+    The Python model uses
+    <a href="https://docs.python.org/3/library/dataclasses.html" class="reference-source" target="_blank" rel="noopener noreferrer">dataclasses</a>
+    declared <code>frozen=True, slots=True</code>. <code>frozen=True</code> gives immutable, value-like records;
+    <code>slots=True</code> replaces the per-instance <code>__dict__</code> with a fixed layout, cutting memory and
+    speeding attribute access. Reach for frozen, slotted dataclasses when you want lightweight struct-like records in
+    Python with minimal boilerplate.
+  </p>
+
+  <h4>Itertools Product for Pair Enumeration (Python)</h4>
+  <p>
+    The Python inner loop enumerates every (word, square) pair with
+    <a href="https://docs.python.org/3/library/itertools.html#itertools.product" class="reference-source" target="_blank" rel="noopener noreferrer">itertools.product</a>,
+    which expresses the nested iteration declaratively in one expression. It reads cleanly and avoids manually nested
+    <code>for</code> statements; the C version writes those loops out explicitly.
+  </p>
+
+  <h4>Static Arrays and Parallel Arrays in C</h4>
+  <p>
+    The C solution uses statically sized arrays (<code>word_store</code>, <code>buckets</code>) sized to a conservative
+    upper bound, avoiding per-element heap allocation. The letter-to-digit map is held as two
+    <a href="https://en.wikipedia.org/wiki/Parallel_array" class="reference-source" target="_blank" rel="noopener noreferrer">parallel arrays</a>
+    with at most a handful of entries, searched linearly. For such small bounded collections a linear scan beats a hash
+    table: the constant factor is tiny and there is nothing to manage. When the maximum size is known and small, prefer
+    flat arrays over dynamically grown or hashed structures.
+  </p>
+
+  <h4>Robust File Parsing</h4>
+  <p>
+    Both versions strip surrounding quotes and split on commas. The C parser walks the buffer with a delimiter-skipping
+    loop - advancing past <code>"</code>, <code>,</code>, and whitespace before extracting each token - which tolerates
+    trailing newlines and stray whitespace without special-casing. This idiom is a reliable way to
+    <a href="https://en.wikipedia.org/wiki/Lexical_analysis" class="reference-source" target="_blank" rel="noopener noreferrer">tokenize</a>
+    messy text in C without a regex library.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The unlock is to decompose the puzzle into two independent groupings -
+    <a href="https://en.wikipedia.org/wiki/Anagram" class="reference-source" target="_blank" rel="noopener noreferrer">anagrams</a>
+    by canonical letter form, and
+    <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">squares</a>
+    by digit length - and then apply a frequency-shape
+    <a href="https://en.wikipedia.org/wiki/Invariant_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">invariant</a>
+    to prune incompatible pairs before constructing any explicit
+    <a href="https://en.wikipedia.org/wiki/Bijection" class="reference-source" target="_blank" rel="noopener noreferrer">bijection</a>.
+    What could look like millions of substitution attempts collapses into a handful of cheap checks.
+  </p>
+  <p>
+    Both implementations run the identical algorithm. The C build finishes in about 0.035 s against 0.217 s for Python -
+    roughly a 6x speedup, attributable to compiled execution and tight array access in the inner mapping and membership
+    checks. The Python version is the more concise and readable expression of the idea (sets, dicts, and
+    <a href="https://docs.python.org/3/library/itertools.html#itertools.product" class="reference-source" target="_blank" rel="noopener noreferrer">itertools.product</a>
+    do much of the work), while the C version trades verbosity for raw speed; at this scale both are effectively
+    instantaneous.
+  </p>
+  <ul>
+    <li>Group by a cheap canonical form before any pairwise comparison - sorting a word's letters is the anagram analogue of factoring a number.</li>
+    <li>When matching structure-preserving mappings, find an invariant the mapping must preserve and prune on it before building the mapping.</li>
+    <li>Order your search by the quantity you are optimizing and short-circuit on the first valid result.</li>
+    <li>Prune your working set - drop singletons and empty buckets - before entering expensive inner loops.</li>
+    <li>A bijection check has two parts: consistency (it is a function) and injectivity (no collisions) - test both explicitly.</li>
+    <li>For small, bounded collections, a flat array with linear search often beats a hash table; asymptotic wins matter only at scale.</li>
+  </ul>
+</article>

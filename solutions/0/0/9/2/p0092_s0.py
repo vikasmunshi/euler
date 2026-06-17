@@ -3,13 +3,11 @@
 """ Solution to Euler Problem 92: Square Digit Chains [Level 1]. """
 from __future__ import annotations
 
-import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def terminates_in_89(n: int) -> bool:
+    """Return True if the square-digit-sum chain from n reaches the 89-cycle rather than 1."""
     while n != 1 and n != 89:
         n, t = (0, n)
         while t:
@@ -17,7 +15,15 @@ def terminates_in_89(n: int) -> bool:
     return n == 89
 
 
-def solve(*, power_of_10: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Count d-digit values reaching 89 by convolving the per-digit square distribution; O(d^2 * 81).
+
+    The chain depends only on the digit-square-sum, so a[s] counts strings with sum s, grown one
+    digit at a time, and only the <= 81*d distinct sums need classifying via terminates_in_89.
+    """
+    power_of_10 = runner.parse_int(args[0])
+
     a, sq, is89 = ([1], [x**2 for x in range(1, 10)], [False])
     results: dict[int, int] = {}
     for n in range(1, power_of_10 + 1):
@@ -27,41 +33,10 @@ def solve(*, power_of_10: int) -> int:
             for s in sq:
                 a[i + s] += v
         results[n] = sum((a[i] for i in range(len(a)) if is89[i]))
-    if sys.argv[-1] == "--show":
+    if runner.show:
         print(f"Results for power_of_10={power_of_10}: {results}")
-    return results[power_of_10]
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(results[power_of_10])
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(power_of_10=int(argv[1])))
+    raise SystemExit(solve())

@@ -1,0 +1,483 @@
+/* ── Reset & base ── */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #1e2030;
+    background: #f4f6fb;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+}
+
+/* Inner wrapper holding the header + content. Carries the top padding (moved
+   off the body) so the sticky header keeps its breathing room initially yet
+   sticks flush to the viewport top — with no content peeking above it. */
+#page {
+    padding-top: 28px;
+}
+
+/* ── Typography ── */
+h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e2030;
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #4a90d9;
+}
+
+h3 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #7a82a0;
+    margin: 20px 0 6px;
+}
+
+h4 {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #3a7a50;
+    margin: 14px 0 4px;
+}
+
+p {
+    margin: 0 0 10px;
+}
+
+var {
+    font-style: italic;
+}
+
+sup {
+    vertical-align: super;
+    font-size: smaller;
+}
+
+sub {
+    vertical-align: sub;
+    font-size: smaller;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+code {
+    background: #eef1f8;
+    color: #2a3a6e;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.87em;
+}
+
+a {
+    color: #4a80c8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ── Reference / external-source links ── */
+a.reference-source {
+    color: #8a4ad0;
+    text-decoration: none;
+    border-bottom: 1px solid #b07ae0;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+a.reference-source::after {
+    content: '\2197';   /* ↗ north-east arrow: opens in a new tab */
+    font-size: 0.7em;
+    vertical-align: super;
+    margin-left: 1px;
+}
+
+a.reference-source:hover,
+a.reference-source:focus {
+    background: #f1e9fb;
+    border-bottom-color: #8a4ad0;
+    text-decoration: none;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #dde1ed;
+    margin: 28px 0;
+}
+
+/* ── Inline tooltips ── */
+.tooltip {
+    position: relative;
+    border-bottom: 1px dotted #7a82a0;
+    cursor: help;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    z-index: 200;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: 280px;
+    padding: 6px 10px;
+    background: #1e2030;
+    color: #fff;
+    font-size: 0.82rem;
+    font-weight: 400;
+    line-height: 1.45;
+    text-align: center;
+    border-radius: 6px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    white-space: normal;
+    transition: opacity 0.15s ease;
+}
+
+.tooltip:hover .tooltiptext,
+.tooltip:focus-within .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* ── General tables (e.g. in solution notes) ── */
+table {
+    border-collapse: collapse;
+    margin: 14px 0;
+}
+
+th {
+    background: #f0f2f8;
+    color: #3a4060;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-align: left;
+    padding: 7px 14px;
+    border: 1px solid #d0d5e8;
+}
+
+td {
+    padding: 7px 14px;
+    border: 1px solid #dde1ed;
+}
+
+tr:nth-child(even) td {
+    background: #f8f9fd;
+}
+
+/* ── Page header ── */
+#page-header {
+    position: sticky;
+    /* Pin the header 28px down (matching #page's top padding) so it stays
+       exactly where it starts — it never travels up to the viewport edge. */
+    top: 28px;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 20px;
+    padding: 6px 10px;
+    background: linear-gradient(180deg, #f5f8fd 0%, #e9eff8 100%);
+    border: 1px solid #d6deec;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30, 32, 48, 0.08);
+}
+
+/* Opaque band filling the strip above the pinned header (page background),
+   so content scrolling underneath can't peek through that gap. */
+#page-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 40px;
+    background: #f4f6fb;
+}
+
+#page-header a {
+    font-size: 1rem;
+    color: #5a7ab8;
+    width: 32px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+#page-header a:hover {
+    background: #eef3fb;
+    color: #2a509a;
+    text-decoration: none;
+}
+
+/* ── Section cards ── */
+section {
+    background: #ffffff;
+    border: 1px solid #dde1ed;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+/* ── Problem statement ── */
+#problem-statement-content {
+    padding: 20px 24px;
+    border-left: 4px solid #4a90d9;
+    overflow-wrap: break-word;
+}
+
+/* Wide equations (inline or display): scroll horizontally instead of
+   overflowing the card. Inline math is a single unbreakable inline-block,
+   so a long one would otherwise push the whole section wide. */
+mjx-container.MathJax {
+    max-width: 90%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+#problem-statement-content h2 {
+    margin-top: 0;
+}
+
+#problem-statement-content h3:first-of-type {
+    margin-top: 16px;
+}
+
+/* ── Test cases ── */
+#test-cases-content {
+    padding: 14px 20px;
+    background: #f5f9ff;
+    border-left: 4px solid #7ab3e8;
+}
+
+#test-cases-content h3 {
+    margin-top: 0;
+}
+
+/* ── Test cases table ── */
+#test-cases-table {
+    border-collapse: collapse;
+    margin: 6px 0 0;
+    width: auto;
+}
+
+#test-cases-table td {
+    border: 1px solid #c8d8ec;
+    padding: 5px 10px;
+    vertical-align: middle;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: transparent;
+}
+
+/* Category badge */
+#test-cases-table td:nth-child(1) {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: left;
+    border-radius: 4px;
+    min-width: 48px;
+}
+
+/* Answer column – allow wrapping for long numbers */
+#test-cases-table td:nth-child(3) {
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 400px;
+}
+
+/* Row text colours by category */
+#test-cases-table tr.result-dev td {
+    color: #1d3a5c;
+}
+
+#test-cases-table tr.result-main td {
+    color: #14284a;
+}
+
+#test-cases-table tr.result-extra td {
+    color: #0a1c38;
+}
+
+/* Category badge backgrounds */
+#test-cases-table tr.result-dev td:nth-child(1) {
+    background: #d4e8f8;
+}
+
+#test-cases-table tr.result-main td:nth-child(1) {
+    background: #b0cef0;
+}
+
+#test-cases-table tr.result-extra td:nth-child(1) {
+    background: #8db8e8;
+}
+
+/* Spacer rows */
+#test-cases-table tr.result-spacer td {
+    padding: 3px 0;
+    border: none;
+    background: transparent;
+}
+
+/* ── Solutions ── */
+#solutions-content {
+    padding: 14px 20px;
+    border-left: 4px solid #3faa72;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+#solutions-content h3 {
+    margin-top: 0;
+}
+
+#solutions-content h4 {
+    margin-top: 0;
+}
+
+/* ── Solutions table ── */
+#solutions-table {
+    border-collapse: collapse;
+    margin: 6px 0 0;
+    width: auto;
+}
+
+#solutions-table th {
+    background: #e6f0ea;
+    color: #2a5040;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px 10px;
+    border: 1px solid #c0d8c8;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+/* Per-category tint on the test-case column headers */
+#solutions-table thead th.result-dev {
+    background: #d4f0e2;
+}
+
+#solutions-table thead th.result-main {
+    background: #b0e2c8;
+}
+
+#solutions-table thead th.result-extra {
+    background: #8dd4b0;
+}
+
+/* Solution-name row headers (first column of each body row): C in a stronger
+   shade, Python in a lighter tint. */
+#solutions-table tbody th.solution-name {
+    text-align: left;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.75rem;
+    background: #eef3fb;
+}
+
+#solutions-table tbody th.solution-name.lang-c {
+    background: #d4e2f5;
+}
+
+#solutions-table tbody th.solution-name.lang-py {
+    background: #eef6fc;
+}
+
+#solutions-table tbody th.solution-name a {
+    color: #2a509a;
+}
+
+#solutions-table td {
+    border: 1px solid #d8eed8;
+    padding: 5px 10px;
+    vertical-align: middle;
+    white-space: nowrap;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    background: transparent;
+}
+
+/* Each test case spans two sub-columns: verdict | timing. Aligning each role
+   consistently keeps the values lined up vertically; the internal divider is
+   dropped so a group reads as one bordered block. */
+#solutions-table td.verdict {
+    text-align: center;
+    border-right: none;
+}
+
+#solutions-table td.timing {
+    text-align: right;
+    color: #2a4a38;
+    border-left: none;
+}
+
+/* Highlight the fastest correct solution for a test case (both its cells):
+   C in the stronger colour, Python in a lighter tint. */
+#solutions-table td.fastest-c {
+    background: #fcf2c0;
+    color: #6a5300;
+}
+
+#solutions-table td.fastest-py {
+    background: #fdf8df;
+    color: #8a7330;
+}
+
+/* Heavier divider where each test-case group of two columns begins */
+#solutions-table .group-start {
+    border-left: 2px solid #c0d8c8;
+}
+
+/* Correct result cells */
+#solutions-table td.result-correct {
+    color: #2a4a38;
+}
+
+/* Incorrect / errored result cells */
+#solutions-table td.result-incorrect {
+    color: #c0392b;
+    font-weight: 700;
+}
+
+/* Missing (no result) cells */
+#solutions-table td.result-missing {
+    color: #b0b8b4;
+    font-weight: 400;
+}
+
+/* ── Solution notes ── */
+#solution-notes-content {
+    padding: 20px 24px;
+    border-left: 4px solid #c8a020;
+    background: #fffef8;
+}
+
+#solution-notes-content h3:first-child {
+    margin-top: 0;
+}
+
+#solution-notes-content table {
+    width: 100%;
+}

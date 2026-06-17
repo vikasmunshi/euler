@@ -4,52 +4,26 @@
 from __future__ import annotations
 
 import typing
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
-def solve(*, max_limit: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Sum the even Fibonacci numbers below max_limit using the closed recurrence
+    E(k+1) = 4*E(k) + E(k-1) on even terms only (every third Fibonacci term is
+    even); O(log max_limit) time, O(1) space."""
+    max_limit = runner.parse_int(args[0])
 
     def _even_fibonacci_numbers() -> typing.Generator[int, None, None]:
+        """Yield successive even Fibonacci numbers below max_limit."""
         even_fib_a, even_fib_b = (2, 8)
         while even_fib_a < max_limit:
             yield even_fib_a
             even_fib_a, even_fib_b = (even_fib_b, 4 * even_fib_b + even_fib_a)
 
-    return sum(_even_fibonacci_numbers())
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sum(_even_fibonacci_numbers()))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_limit=int(argv[1])))
+    raise SystemExit(solve())

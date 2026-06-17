@@ -3,6 +3,8 @@
 """ Utility to retrieve authenticated GitHub user's email and repository owner's email. """
 from __future__ import annotations
 
+__all__ = ['get_gh_user_email', 'get_repo_owner_email']
+
 from functools import lru_cache
 
 from solver.utils.shell_utils import run_command
@@ -33,6 +35,3 @@ def get_repo_owner_email() -> str:
     if not owner_email:
         raise ValueError('Error: could not get owner email')
     return owner_email
-
-
-__all__ = ('get_gh_user_email', 'get_repo_owner_email',)

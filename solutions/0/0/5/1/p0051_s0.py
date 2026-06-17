@@ -3,12 +3,11 @@
 """ Solution to Euler Problem 51: Prime Digit Replacements [Level 2]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
+    """Primes up to max_num via the Sundaram sieve; index i is composite iff i = a + b + 2ab."""
     if max_num < 2:
         return ()
     n = (max_num - 1) // 2
@@ -24,6 +23,7 @@ def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
 
 
 def is_prime(num: int) -> bool:
+    """Trial division up to sqrt(num), tested per candidate rather than via a second sieve."""
     if num < 2:
         return False
     if num == 2:
@@ -38,7 +38,14 @@ def is_prime(num: int) -> bool:
     return True
 
 
-def solve(*, num_digits: int, prime_run: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Scan primes ascending; replace one digit value (only 0..9-prime_run can start the family)
+    with values from it up to 9, counting forward-only prime members of equal length. Return the
+    first prime whose family size reaches prime_run; O(P * D) over P primes below 10^num_digits."""
+    num_digits = runner.parse_int(args[0])
+    prime_run = runner.parse_int(args[1])
+
     for prime in primes_sundaram_sieve(10**num_digits):
         for replaced in "0123456789"[: 10 - prime_run]:
             sequence = tuple(
@@ -50,41 +57,10 @@ def solve(*, num_digits: int, prime_run: int) -> int:
                 )
             )
             if len(sequence) == prime_run:
-                return prime
+                return str(prime)
     else:
         raise ValueError("No solution found")
 
 
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
-
-
 if __name__ == "__main__":
-    raise SystemExit(main(num_digits=int(argv[1]), prime_run=int(argv[2])))
+    raise SystemExit(solve())

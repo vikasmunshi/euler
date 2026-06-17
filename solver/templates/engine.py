@@ -1,6 +1,9 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
+"""Template rendering: the Templates enum and string.Template engine with shared prompt/solution vars."""
 from __future__ import annotations
+
+__all__ = ['Templates', 'filled_template', 'get_template']
 
 from enum import StrEnum
 from functools import lru_cache
@@ -13,8 +16,8 @@ from solver.config import config
 class Templates(StrEnum):
     NEW_C = 'new.c'
     NEW_PY = 'new.py'
-    PROBLEM = 'problem.html'
     PROMPT_C = 'prompt_c.txt'
+    PROMPT_DOC = 'prompt_doc.txt'
     PROMPT_PY = 'prompt_py.txt'
     PROMPT_NOTES = 'prompt_notes.txt'
     PROMPT_TEST_CASES = 'prompt_test_cases.txt'
@@ -39,16 +42,37 @@ _COMMON_VARS: dict[str, str] = {
     ),
 }
 
+#: Convention docs that are the single source of truth for each topic. Each markdown file lives
+#: under `docs/` (the `convention_*.md` guides) and is injected here, as a $<var> substitution,
+#: into whichever prompts are relevant — so the prose lives in exactly one place. Keys must not
+#: collide with _COMMON_VARS keys or Facts fields.
+_CONVENTION_DOC_FILES: dict[str, str] = {
+    'python_solution_conventions': 'convention_python_solution.md',
+    'c_translation_conventions': 'convention_c_translation.md',
+    'source_documentation_conventions': 'convention_source_documentation.md',
+    'documentation_conventions': 'convention_documentation.md',
+    'test_case_conventions': 'convention_test_cases.md',
+}
+
+
+@lru_cache(maxsize=None)
+def _convention_docs() -> dict[str, str]:
+    """Read the shared convention-doc markdown files, keyed by their template variable name."""
+    return {var: config.docs_dir.joinpath(name).read_text().strip()
+            for var, name in _CONVENTION_DOC_FILES.items()}
+
 
 def filled_template(filename: Templates, /, *, facts: NamedTuple, **kwargs: str) -> str:
-    """Return a template filled with the given keyword arguments and shared boilerplate vars."""
-    return get_template(filename).substitute(**_COMMON_VARS, **facts._asdict(), **kwargs)
+    """Return a template filled with the given keyword arguments and shared boilerplate vars.
+
+    The shared convention docs (injected as $<var>) and `_COMMON_VARS` are made available to every
+    template; `str.Template.substitute` simply ignores the ones a given template does not reference.
+    """
+    return get_template(filename).substitute(
+        **_COMMON_VARS, **_convention_docs(), **facts._asdict(), **kwargs)
 
 
 @lru_cache(maxsize=None)
 def get_template(filename: Templates) -> Template:
     """Retrieve a template by filename from the 'templates' directory."""
     return Template(config.templates_dir.joinpath(filename).read_text())
-
-
-__all__ = ('Templates', 'filled_template', 'get_template')

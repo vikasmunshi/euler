@@ -1,0 +1,89 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+I am asked to find the perimeter <code>p &le; 1000</code> shared by the largest number of distinct integer-sided right triangles. A right triangle with integer sides <code>{a, b, c}</code> obeying <code>a&sup2; + b&sup2; = c&sup2;</code> is called a <a href="https://en.wikipedia.org/wiki/Pythagorean_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean triple</a>. The naive method - for every candidate perimeter, loop over all side pairs <code>(a, b)</code>, set <code>c = p - a - b</code>, and test the squared relation - costs O(p&sup2;) per perimeter and O(P&sup2;) across all perimeters up to a limit <code>P</code>. That is fine at <code>P = 1000</code> but becomes hopeless at <code>P = 1,000,000</code>, which the test suite exercises.
+</p>
+
+<p>
+The efficient route rests on <a href="https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's formula</a>. A <em>primitive</em> <a href="https://en.wikipedia.org/wiki/Pythagorean_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean triple</a> - one whose sides share no common factor, i.e. <code>gcd(a, b, c) = 1</code> - is generated uniquely by <code>a = m&sup2; - n&sup2;</code>, <code>b = 2mn</code>, <code>c = m&sup2; + n&sup2;</code> with <code>m &gt; n &gt; 0</code>, <code>gcd(m, n) = 1</code>, and <code>m, n</code> of opposite parity (exactly one even). Here the <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a> being 1 is precisely what makes the triple irreducible. The primitive perimeter simplifies beautifully: <code>p0 = a + b + c = (m&sup2; - n&sup2;) + 2mn + (m&sup2; + n&sup2;) = 2m&sup2; + 2mn = 2m(m + n)</code>. Every non-primitive triple is an integer scaling <code>k</code> of a primitive one, so its perimeter is <code>k &middot; p0</code>. This collapses the problem to enumerating primitive <code>(m, n)</code> pairs and tallying <code>p0</code> together with all its multiples in a frequency table. Because <code>p0 &asymp; 2m&sup2;</code>, the constraint <code>p0 &le; P</code> forces <code>m &lesssim; &radic;(P/2)</code>, so the number of primitive pairs is O(P); distributing each pair's multiples adds a <a href="https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">harmonic</a> factor, yielding roughly O(P log P) overall - far below the quadratic baseline.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Euclid parametrisation with multiple distribution (Python and C)</h4>
+
+<p>
+Both <code>p0039_s0.py</code> and <code>p0039_s0.c</code> implement the identical algorithm, so I describe them together and flag the language-specific points as I go.
+</p>
+
+<p>
+<strong>Step 1 - tight analytic loop bounds.</strong> Rather than iterate <code>m</code> and <code>n</code> over a generous range and test the perimeter inside the loop, I invert the perimeter formula algebraically into closed-form limits. For the outer loop, the smallest valid <code>m</code> at a given <code>n</code> is <code>m = n + 1</code>; substituting into <code>p0 = 2m(m + n) &le; P</code> and solving for <code>n</code> gives the bound <code>n &lt; (int(8&radic;P) - 6) / 8</code>. For the inner loop I fix <code>n</code> and solve the quadratic <code>2m&sup2; + 2mn &le; P</code> for <code>m</code> via the <a href="https://en.wikipedia.org/wiki/Quadratic_formula" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic formula</a>, giving <code>m &lt; (int(&radic;(4 + 8P)) - 2n) / 4</code>. With these bounds almost every iteration produces an in-range perimeter, so the loop body does real work instead of failing a range test.
+</p>
+
+<p>
+<strong>Step 2 - parity and coprimality filter.</strong> Euclid's formula demands opposite parity and coprimality. I enforce opposite parity structurally: the inner loop starts at <code>m = n + 1</code> and steps by 2, so <code>m</code> and <code>n</code> always differ in parity. I then keep only pairs with <code>gcd(m, n) == 1</code>, discarding non-primitive generators. The C version uses an iterative inline <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a>; the Python version calls <code>math.gcd</code>, which is itself implemented in C.
+</p>
+
+<p>
+<strong>Step 3 - multiple distribution.</strong> For each surviving pair I compute <code>p0 = 2m(m + n)</code>, count it once, then count every multiple <code>k &middot; p0</code> for <code>k = 2, 3, ...</code> up to <code>P</code>. In C I increment a value-indexed array <code>counts[k * p0]</code>; in Python I append each perimeter to a list. The C version also keeps a defensive <code>if (p0 &gt; max_perimeter) break;</code> in case the floating-point bound drifts slightly loose.
+</p>
+
+<p>
+<strong>Step 4 - find the winner.</strong> C performs a single linear scan over <code>counts[]</code>, tracking the running maximum and its index. Python feeds the perimeter list to a <a href="https://docs.python.org/3/library/collections.html#collections.Counter" class="reference-source" target="_blank" rel="noopener noreferrer">collections.Counter</a> and reads <code>most_common()[0][0]</code>. Both steps are O(P) and negligible beside the enumeration.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Tight analytic loop bounds to eliminate runtime checks</h4>
+
+<p>
+Instead of guarding the hot loop with a perimeter range test on every iteration, I precompute the boundary in closed form by inverting the perimeter formula - the inner case needs the <a href="https://en.wikipedia.org/wiki/Quadratic_formula" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic formula</a>. This converts millions of branch evaluations into a one-time arithmetic computation per loop level. Reach for this whenever the feasible parameter region is a small fraction of the naive range and its boundary can be expressed analytically - the algebra pays for itself many times over.
+</p>
+
+<h4>Counting array indexed by value (C)</h4>
+
+<p>
+The C solution allocates <code>counts</code> of size <code>max_perimeter + 1</code> with <code>calloc</code>, so <code>counts[p]</code> directly holds the tally for perimeter <code>p</code>. This is the classic <a href="https://en.wikipedia.org/wiki/Counting_sort" class="reference-source" target="_blank" rel="noopener noreferrer">counting-sort</a> frequency-table pattern: when keys are dense non-negative integers with a known upper bound, a flat array beats any <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> on both speed and memory, and it is cache-friendly. I use <code>calloc</code> rather than <code>malloc</code> plus <code>memset</code> because it zero-initialises in one call and self-documents the intent.
+</p>
+
+<h4>Filtered generator expression for the inner loop (Python)</h4>
+
+<p>
+The Python inner loop reads <code>for m in (m for m in range(...) if math.gcd(m, n) == 1)</code>. This fuses iteration and filtering into a single lazy <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> with no intermediate list. It keeps the coprimality condition right beside the iteration rather than buried behind a <code>continue</code>. Use this whenever a filtered sequence is consumed exactly once.
+</p>
+
+<h4>Walrus operator for inline assignment (Python)</h4>
+
+<p>
+The line <code>triangle_perimeters.append((perimeter := (2 * m * (m + n))))</code> uses the <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">assignment expression</a> (<code>:=</code>) to compute <code>p0</code>, bind it to <code>perimeter</code> for reuse in the multiples loop, and pass it to <code>append</code> in one expression. Reach for the walrus operator when a value is both produced inside an expression and needed again nearby - but only when it clarifies the data flow rather than obscuring it.
+</p>
+
+<h4>collections.Counter for frequency analysis (Python)</h4>
+
+<p>
+<a href="https://docs.python.org/3/library/collections.html#collections.Counter" class="reference-source" target="_blank" rel="noopener noreferrer">collections.Counter</a> consumes any iterable and builds a frequency dictionary, and its <code>most_common()</code> method returns entries sorted by count. This replaces a manual dict plus a final scan with one self-documenting call. Reach for <a href="https://docs.python.org/3/library/collections.html#collections.Counter" class="reference-source" target="_blank" rel="noopener noreferrer">Counter</a> whenever you need to tally occurrences and then query the most-frequent elements.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is <a href="https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's formula</a>: it replaces an exhaustive O(P&sup2;) scan over side pairs with a compact O(P log P) enumeration of <code>(m, n)</code> generators, each yielding one primitive <a href="https://en.wikipedia.org/wiki/Pythagorean_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean triple</a> whose multiples cover every scaled triple. This is the standard move for any Pythagorean-triple problem.
+</p>
+
+<p>
+Both implementations share this algorithm, so the benchmark gap reflects language overhead, not algorithmic difference. At <code>max_perimeter = 1,000,000</code> the C version runs in 0.0032 s against 0.1321 s for Python - roughly a 41x speedup. C wins because it increments a contiguous integer array indexed by value instead of building a Python list and a hash-based <a href="https://docs.python.org/3/library/collections.html#collections.Counter" class="reference-source" target="_blank" rel="noopener noreferrer">Counter</a>, and because it avoids interpreter overhead in the tight enumeration loop. For the contest-relevant case <code>p &le; 1000</code> both finish below the timer's resolution (0.0000 s), so the Python version is perfectly elegant and sufficient there.
+</p>
+
+<ul>
+  <li>For any problem about Pythagorean triples, reach for Euclid's parametrisation first - it turns a quadratic search into a near-linear enumeration of primitives plus their multiples.</li>
+  <li>The "enumerate primitives, distribute multiples" pattern recurs across number theory (sieves, divisor counting); recognising it saves you from re-deriving it.</li>
+  <li>Invert your loop-constraint formula algebraically to get tight closed-form bounds, replacing per-iteration range checks with one-time arithmetic.</li>
+  <li>When keys are dense small non-negative integers, a flat array beats a hash map for counting - faster, simpler, and cache-friendly.</li>
+  <li>Enforce structural constraints (like opposite parity) through loop start and step values rather than runtime tests where possible.</li>
+  <li>Prefer <code>calloc</code> over <code>malloc + memset</code> for zero-initialised arrays in C: one call, clearer intent.</li>
+  <li>When two languages share one algorithm, expect the performance gap to track interpreter overhead and data-structure choice, not algorithmic merit.</li>
+</ul>
+
+</article>

@@ -1,0 +1,63 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>This problem asks for the maximum-sum path from the apex of a triangle of integers down to its base, where at each step I may step only to one of the two numbers directly below. With 100 rows there are 2<sup>99</sup> distinct top-to-bottom paths, so trying every route - brute force - is hopeless. The problem statement makes the point explicitly: even at a trillion paths per second, exhaustive search would take longer than the age of the universe. The exercise is really about recognising that a far smarter method exists.</p>
+
+<p>The crucial observation is that the problem has <a href="https://en.wikipedia.org/wiki/Optimal_substructure" class="reference-source" target="_blank" rel="noopener noreferrer">optimal substructure</a>: the best path passing through any given cell equals that cell's value plus the better of the two best paths through its two children below. Because the answer for the whole is built from optimal answers to smaller, overlapping sub-problems, this is exactly the setting where <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> (DP) applies - solving each sub-problem once, storing its result, and reusing it instead of recomputing. The triangle can also be viewed as a <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" class="reference-source" target="_blank" rel="noopener noreferrer">directed acyclic graph</a> - a network of nodes connected by one-way edges that never loop back - and finding a maximum-weight path through such a graph is a textbook <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> problem. Since each of the roughly n(n+1)/2 cells is visited exactly once, the algorithm runs in <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank" rel="noopener noreferrer">O(n<sup>2</sup>)</a> time - about 5,000 operations for n = 100, which is effectively instantaneous.</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Bottom-Up Triangle Fold (Python and C)</h4>
+
+<p>The Python and C solutions implement one and the same algorithm; they differ only in syntax and in how they manage memory. I chose a <em>bottom-up</em> formulation - starting from the base cases (the last row) and working upward to the answer - rather than recursing from the top down. This sidesteps recursion overhead and removes any need for an explicit cache, because the base cases are simply the cells themselves and the merged values accumulate naturally as I climb.</p>
+
+<p><strong>Step 1 - Parse the input.</strong> The triangle is a text file, one row per line, with space-separated integers; row <code>i</code> holds <code>i+1</code> numbers. I read the file and split it into a list of lists of integers (Python's <code>text2triangle</code>) or a heap-allocated array of arrays (C's <code>text2triangle</code>), indexed as <code>triangle[row][col]</code>. The C parser walks the buffer twice in spirit - first counting rows, then allocating each row to its exact length and filling it with <code>atoi</code>.</p>
+
+<p><strong>Step 2 - Deep copy.</strong> The fold mutates the triangle, so I copy it first to leave the parsed data intact and keep <code>max_path_sum_triangle</code> free of side effects on its input. Python uses <code>copy.deepcopy</code>; C allocates fresh rows and copies them with <code>memcpy</code>.</p>
+
+<p><strong>Step 3 - Fold from the bottom.</strong> While more than one row remains, I update the second-to-last row by adding to each entry the larger of its two children in the last row, then discard the last row. In Python this is a single expressive line:<br>
+<code>triangle[-2] = [v + max(triangle[-1][i], triangle[-1][i + 1]) for i, v in enumerate(triangle[-2])]</code><br>
+followed by <code>del triangle[-1]</code>. In C I write the explicit loop, choose the larger child with a ternary expression (<code>left &gt; right ? left : right</code>), and <code>free</code> the discarded row immediately after it is merged.</p>
+
+<p><strong>Step 4 - Read off the answer.</strong> When the loop ends, exactly one cell remains: <code>triangle[0][0]</code> holds the maximum path sum, 7273.</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>In-Place Bottom-Up Fold</h4>
+
+<p>Rather than allocating a separate DP table, I overwrite the triangle from the bottom up, merging each row into its parent. The recurrence "combine two children into a parent" is naturally a <em>fold</em>: I reduce the structure one row at a time until a single value remains. This keeps memory use minimal and lets the answer fall out at the apex. Whenever a <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> recurrence has this "merge children upward" shape, folding in place is a clean and compact option worth reaching for.</p>
+
+<h4>List Comprehension with Atomic Reassignment (Python)</h4>
+
+<p>The row-update step builds an entirely new list and assigns it back to <code>triangle[-2]</code> in one statement. Because every read of <code>triangle[-1]</code> happens before the assignment completes, there is no danger of reading half-updated data - a subtle hazard of element-by-element in-place mutation. <a href="https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions" class="reference-source" target="_blank" rel="noopener noreferrer">List comprehensions</a> are idiomatic and typically faster than the equivalent explicit loop, so I prefer them whenever transforming one sequence into another.</p>
+
+<h4>Negative Indexing for Readability (Python)</h4>
+
+<p><code>triangle[-1]</code> and <code>triangle[-2]</code> name the last and second-to-last rows directly, with no index variable to track and decrement. This makes the intent - "always operate on the two trailing rows" - immediately obvious and eliminates a whole class of off-by-one errors. In C I express the same idea with <code>cur_rows - 1</code> and <code>cur_rows - 2</code>, decrementing <code>cur_rows</code> each iteration.</p>
+
+<h4>Explicit Memory Management in C</h4>
+
+<p>Each triangle row in the C version is its own <code>malloc</code>-allocated block. The moment a row is merged upward I call <code>free</code> on it, rather than deferring all cleanup to the end. Even though the data here is tiny, freeing memory as soon as it becomes unreachable keeps resource lifetimes explicit and prevents leaks accumulating in longer-running programs. I also wrap the allocate-compute-free cycle inside <code>max_path_sum_triangle</code> and handle allocation failure defensively - if any row's <code>malloc</code> fails mid-copy, I free the rows already taken before returning - so the ownership contract stays local and auditable.</p>
+
+<h4>Separation of I/O, Parsing, and Algorithm</h4>
+
+<p>Both solutions split into a file reader (<code>get_text_file</code>), a parser (<code>text2triangle</code>), and the core algorithm (<code>max_path_sum_triangle</code>). This lets me test the algorithm on any triangle without touching I/O, swap the data source freely, and benchmark only the work that matters. Single-purpose functions are easier to reason about, reuse, and verify.</p>
+
+<h3>Key Takeaways</h3>
+
+<p>The unlocking insight is recognising <a href="https://en.wikipedia.org/wiki/Optimal_substructure" class="reference-source" target="_blank" rel="noopener noreferrer">optimal substructure</a>: when the best whole-problem solution is composed of best sub-problem solutions, an exponential search space collapses to a polynomial <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> computation. The instant a problem reads "at each step choose one of two children and maximise the total", DP should be the first idea you reach for.</p>
+
+<p>Both implementations run the identical <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank" rel="noopener noreferrer">O(n<sup>2</sup>)</a> algorithm. On the benchmark the C version (<code>p0067_s0_c</code>) completed in 0.0001 s and the Python version (<code>p0067_s0.py</code>) in 0.0010 s - roughly a tenfold difference attributable to interpreter overhead and managed versus manual memory. For a problem this small both are instantaneous and the Python version is perfectly adequate; the C version simply shows the same idea expressed at the systems level with explicit allocation.</p>
+
+<ul>
+  <li>When an optimal value is sought over an exponential search space, look for optimal substructure - if it exists, dynamic programming makes the problem polynomial.</li>
+  <li>Bottom-up DP avoids recursion and cache-lookup overhead and is often simpler to implement than top-down memoisation.</li>
+  <li>Folding a recurrence in place, overwriting the input as you reduce it, saves both memory and code when intermediate states need not be preserved.</li>
+  <li>Build new sequences with list comprehensions and assign them atomically to avoid read-during-mutation bugs.</li>
+  <li>Use negative or end-relative indexing to refer to the tail of a sequence; it reads clearly and removes off-by-one mistakes.</li>
+  <li>In C, free heap memory as soon as it is no longer needed, and free partial allocations on the error path so failures never leak.</li>
+  <li>Decompose programs into small, single-purpose functions so parsing, I/O, and the core algorithm can be tested and benchmarked independently.</li>
+</ul>
+
+</article>

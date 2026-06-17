@@ -4,14 +4,13 @@
 from __future__ import annotations
 
 import functools
-import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 @functools.lru_cache(maxsize=None)
 def eval_all_operations(vals: tuple[int | float, ...]) -> set[int | float]:
+    """All values reachable from a value pool by repeated pairwise combination; memoised on the pool."""
     if (len_v := len(vals)) == 1:
         return {vals[0]}
     s = set()
@@ -29,7 +28,10 @@ def eval_all_operations(vals: tuple[int | float, ...]) -> set[int | float]:
     return s
 
 
-def solve() -> str:
+@runner.main
+def solve(*args: str) -> str:
+    """Recursive pool reduction enumerates every parenthesisation/operator choice; pick the digit set
+    a<b<c<d with the longest consecutive run 1..n; O(1) over the fixed 126 digit sets."""
     max_digits: str = ""
     max_length: int = 0
     max_results: set[int] = set()
@@ -43,41 +45,10 @@ def solve() -> str:
                         length += 1
                     if length > max_length:
                         max_length, max_digits, max_results = (length, f"{a}{b}{c}{d}", results)
-    if sys.argv[-1] == "--show":
+    if runner.show:
         print(f"max_digits={max_digits!r} max_length={max_length!r} max_results={max_results!r}")
-    return max_digits
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(max_digits)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(solve())

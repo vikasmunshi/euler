@@ -1,0 +1,85 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The mathematical core of this problem is the notion of a <em>digit multiset</em>: two integers are <a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutations</a> of one another exactly when they contain the same decimal digits with the same multiplicities, irrespective of order. The challenge is to test this relation cheaply. My tool is a <em>canonical form</em> - a single, unique representative chosen for each class of digit-permutations. The obvious choice is the string of the number's decimal digits <a href="https://en.wikipedia.org/wiki/Sorting_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">sorted</a> into ascending order. I call this a <em>fingerprint</em>. Two numbers are digit-permutations of each other if and only if their fingerprints are identical, so the awkward question "do these share the same digits?" collapses into a plain string equality test.
+</p>
+
+<p>
+The second observation bounds the search and proves that <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute force</a> is safe. If <code>x</code> has <code>d</code> decimal digits, any permutation of <code>x</code> must also have exactly <code>d</code> digits. Therefore <code>x</code>, <code>2x</code>, ..., <code>6x</code> must all have the same digit count. Since <code>6x</code> is the largest, this forces <code>x</code> into the lower sixth of its digit-length band (roughly <code>x &lt; 10^d / 6</code>); otherwise <code>6x</code> would carry into the next band and gain a digit. Consequently the answer is never far from the start of any band, and a simple upward linear scan finds 142857 after about 140,000 iterations. The total work is <code>O(N * M * D)</code> where <code>N</code> is the answer, <code>M</code> the number of multiples (at most 6), and <code>D</code> the digit count (at most 7) - trivially small.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Linear Scan with Sorted-Digit Fingerprinting (Python and C)</h4>
+
+<p>
+Both files implement the same algorithm. I iterate over candidates <code>x = 1, 2, 3, ...</code>. For each <code>x</code> I compute the fingerprint of every required multiple and check whether they all agree with the fingerprint of <code>x</code> itself. The first <code>x</code> for which they all coincide is the answer.
+</p>
+
+<p>
+In Python I express the test with a set comprehension: <code>{"".join(sorted(str(i * multiple))) for multiple in multiples_range}</code>. Building a <a href="https://docs.python.org/3/tutorial/datastructures.html#sets" class="reference-source" target="_blank" rel="noopener noreferrer">set</a> collapses duplicate fingerprints, so if every multiple shares the same digits the set has exactly one element. The condition <code>len(...) == 1</code> therefore reads as "all fingerprints are equal." I bound the loop at <code>sys.maxsize // multiples</code> as a conceptual overflow guard, though Python integers are unbounded in practice.
+</p>
+
+<p>
+In C I implement fingerprinting by hand. The <code>sorted_digits</code> function extracts digits by repeatedly taking <code>n % 10</code> and dividing by 10, writing them into a buffer, then calls <a href="https://en.cppreference.com/w/c/algorithm/qsort" class="reference-source" target="_blank" rel="noopener noreferrer">qsort</a> to sort that buffer and null-terminates it. I compare fingerprints with <a href="https://en.cppreference.com/w/c/string/byte/strcmp" class="reference-source" target="_blank" rel="noopener noreferrer">strcmp</a>. Crucially I use an <em>early exit</em>: in the inner loop over multiples 2..M, the moment a multiple fails to match I set <code>all_match = 0</code> and <code>break</code>. Because the vast majority of candidates fail at the very first multiple (<code>m = 2</code>), most iterations do only a single comparison.
+</p>
+
+<p>
+Both versions take the number of multiples as a parameter (a command-line argument in C, a positional argument in Python), so the same code verifies the simpler 2-multiple case (answer 125874, given in the statement) as well as the full 6-multiple case.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Canonical Fingerprinting via Sorted Digits</h4>
+
+<p>
+A fingerprint maps an object to a compact canonical form that is identical for every member of its equivalence class. Here, <a href="https://en.wikipedia.org/wiki/Sorting_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">sorting</a> the decimal digits yields a string that uniquely identifies the digit-multiset, so "are these <a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutations</a>?" becomes "are these fingerprints equal?". This pattern recurs constantly: whenever you must group items by an equivalence relation, compute a cheap canonical representative and compare those instead of doing expensive pairwise checks. In Python it is the one-liner <code>"".join(sorted(str(n)))</code>; in C it is a digit-extraction loop plus <a href="https://en.cppreference.com/w/c/algorithm/qsort" class="reference-source" target="_blank" rel="noopener noreferrer">qsort</a>.
+</p>
+
+<h4>Set-Cardinality Test for Universal Equality (Python)</h4>
+
+<p>
+Rather than store a reference fingerprint and compare each subsequent one against it, I build a <a href="https://docs.python.org/3/tutorial/datastructures.html#sets" class="reference-source" target="_blank" rel="noopener noreferrer">set</a> of all fingerprints and test <code>len(set) == 1</code>. A set keeps only distinct elements, so a cardinality of one means they were all equal. This removes bookkeeping and is highly readable. The tradeoff is that it always evaluates all elements (no short-circuit) and pays a small hashing cost, but for a collection of at most six items that is negligible. Reach for it whenever you need to assert that all elements of a small iterable coincide.
+</p>
+
+<h4>Short-Circuit Early Exit in the Inner Loop (C)</h4>
+
+<p>
+The C inner loop breaks the instant a multiple's fingerprint mismatches. Because most candidates fail immediately at <code>m = 2</code>, this turns the typical iteration into a single comparison rather than five. This is the standard optimisation for linear scans guarded by a conjunction of conditions: order the checks so the most-likely-to-fail one runs first, and bail out as soon as it fails. The Python set comprehension deliberately forgoes this for readability, which is acceptable when the per-item check is cheap.
+</p>
+
+<h4>Digit Extraction by Division and Modulo (C)</h4>
+
+<p>
+Instead of formatting numbers into strings with <code>sprintf</code>, the C code extracts digits arithmetically with repeated <code>% 10</code> and <code>/= 10</code>. This avoids string-formatting overhead and a separate parsing pass. The digits emerge least-significant first, but that is irrelevant here because they are immediately sorted. Use this technique whenever you need to process digits individually and either the order does not matter or it will be corrected downstream.
+</p>
+
+<h4>Parameterising the Problem Shape</h4>
+
+<p>
+Both solutions take the number of multiples as an argument rather than hard-coding 6. This separates the algorithm from the specific instance: it lets the test suite verify correctness on the known 2-multiple case, supports benchmarking across difficulty levels, and even reveals structure (the answer stabilises at 142857 once three or more multiples are required). Making the instance a parameter is a good habit for any algorithm you expect to test or reuse.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is the fingerprint: reducing each number to its sorted-digit string turns a complex "same digits?" relation into a uniform string comparison. The <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force</a> scan is justified by the digit-length constraint, which confines the answer to a small range within each band.
+</p>
+
+<p>
+Both files implement the identical algorithm, so the benchmark differences are purely language overhead. On the main 6-multiple case the C solution runs in about 0.0211 s versus 0.3361 s for Python - roughly 16x faster. The gap comes from Python allocating many small string and set objects on each of about 140,000 iterations, plus interpreted dispatch. The C version is the fastest; the Python version is the more elegant and readable. For a one-off answer either is more than fast enough.
+</p>
+
+<ul>
+  <li>When testing equivalence among several values, compute a canonical fingerprint for each and compare those instead of doing pairwise comparisons.</li>
+  <li>Sorting the characters or digits of a value is the standard fingerprint for "same multiset" problems.</li>
+  <li><code>len(set(values)) == 1</code> is a clean Python idiom for "all elements are equal."</li>
+  <li>Put the likeliest-to-fail check first and short-circuit out of inner loops; most candidates fail early.</li>
+  <li>Extract digits arithmetically with <code>% 10</code> and <code>/ 10</code> when string formatting is unnecessary overhead.</li>
+  <li>Parameterise the shape of a problem rather than hard-coding constants - it aids testing and reveals structure.</li>
+  <li>Digit-count constraints often implicitly bound a search space; spotting them early confirms that brute force is safe.</li>
+</ul>
+
+</article>

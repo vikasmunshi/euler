@@ -1,0 +1,67 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+A <a href="https://en.wikipedia.org/wiki/Pythagorean_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean triple</a> is a set of three positive integers a &lt; b &lt; c satisfying a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup>. Finding such integers is a <a href="https://en.wikipedia.org/wiki/Diophantine_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Diophantine equation</a> - an equation for which we admit only integer solutions. Here I add a second constraint, the linear equation a + b + c = S, and must find the unique <a href="https://en.wikipedia.org/wiki/Pythagorean_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean triple</a> satisfying both, then report the product abc.
+</p>
+<p>
+The crucial observation is that the linear constraint lets me eliminate one variable. Once a and b are chosen, c is completely determined: c = S - a - b. This collapses what would naively be a three-dimensional search into a two-dimensional one. Two further observations bound the loops tightly. First, because a &lt; b &lt; c are all positive and sum to S, the smallest value a cannot exceed roughly S/4 - if a were any larger we could not fit two strictly greater values b and c that still sum to S. Second, b is bounded above by S/2 to keep c positive. Each candidate (a, b) pair is checked in constant time, so the overall complexity is <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(S<sup>2</sup>)</a>. For S = 1000 that is on the order of 10<sup>5</sup> iterations - trivially fast in any language.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Bounded two-variable search (index 0, Python and C)</h4>
+<p>
+Both the Python and C solutions implement the same algorithm. The outer loop iterates a from 1 up to S/4 inclusive - the tightest upper bound derivable from the ordering a &lt; b &lt; c. The inner loop iterates b from a (which enforces a &le; b) up to S/2 (which keeps c positive). For each pair, c is computed directly as S - a - b rather than searched for. This is the variable-elimination step that removes an entire loop level. I then test whether a<sup>2</sup> + b<sup>2</sup> == c<sup>2</sup> and, because the problem guarantees exactly one solution, return a*b*c immediately on the first match. The two nested loops give the <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(S<sup>2</sup>)</a> bound established above.
+</p>
+<p>
+I deliberately compute c as an integer expression rather than taking a floating-point square root of a<sup>2</sup> + b<sup>2</sup>. Integer arithmetic is exact, so the equality check is reliable; a floating-point approach would demand a tolerance comparison and risk rounding errors. The closed-form c = S - a - b sidesteps all of that.
+</p>
+<p>
+The Python version wraps the nested loops in a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> and calls <code>next()</code> to retrieve the first result, converting the resulting <code>StopIteration</code> into a descriptive <code>ValueError</code> when no triple exists. The C version uses plain nested <code>for</code> loops with an early <code>return</code>, writing a diagnostic to <code>stderr</code> and returning -1 on failure. In C I cast to <code>long long</code> before the multiplication: although the answer 31875000 fits comfortably in a 32-bit <code>int</code>, the product of three loop variables could overflow for larger inputs, and promoting first is a cheap, defensive habit. Both versions handle the dev case (S = 12, the classic 3-4-5 triple, product 60) and the main case correctly.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Variable elimination via a linear constraint</h4>
+<p>
+When two or more unknowns are tied together by a linear relation, you can always solve for one of them and substitute. Writing c = S - a - b turns a three-variable search into a two-variable one for free. This is the first transformation to look for whenever a linear equation connects your variables: it removes a loop level outright and shrinks the search space dramatically.
+</p>
+
+<h4>Tight loop bounds from ordering constraints</h4>
+<p>
+The constraints a &lt; b &lt; c with a + b + c = S imply 3a &lt; S, and the ordering tightens this to a &le; S/4. Choosing the smallest provable upper bound for each loop variable directly controls the iteration count. Whenever you write a loop, ask whether a mathematical argument lets you start later or stop earlier - each tighter bound multiplicatively reduces work and, here, keeps the <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(S<sup>2</sup>)</a> constant small.
+</p>
+
+<h4>Generator expression with next() for first-match search</h4>
+<p>
+A Python <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> is lazy: it yields values on demand rather than building a full list. Wrapping the nested loops in a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> and calling <code>next()</code> stops the iteration the instant the first match is found, with no wasted computation. Catching <code>StopIteration</code> and re-raising it as a domain-meaningful <code>ValueError</code> turns a low-level iteration signal into a clear error. This is the idiomatic Python pattern for "find the first element satisfying a predicate," preferable to a manual flag or a <code>break</code>.
+</p>
+
+<h4>Single-element tuple as an inline binding</h4>
+<p>
+Inside the generator I write <code>for c in (sum_sides - a - b,)</code>. Iterating over a one-element tuple is a lightweight way to give a derived value a name without an extra statement or function. The name c can then be reused in the <code>if</code> clause and the result expression without recomputing it. Reach for this idiom whenever you want a let-binding inside a comprehension.
+</p>
+
+<h4>Defensive integer promotion in C</h4>
+<p>
+In C, arithmetic on <code>int</code> operands yields an <code>int</code>, so a product can silently overflow past INT_MAX. Writing <code>(long long)a * b * c</code> promotes the whole computation to 64-bit arithmetic before any overflow can occur, because the cast on the first operand propagates through the chain. Apply this routinely to products of loop variables, not only when you have already proven overflow will happen.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is that a linear sum constraint is a gift: it eliminates one variable at no cost, reducing a three-variable search to a two-variable one with easily computed bounds. Combined with the ordering constraint a &lt; b &lt; c, which caps a at S/4, the search space stays tiny enough that a direct nested loop is essentially instantaneous.
+</p>
+<p>
+The benchmarks bear this out. On the main input (S = 1000) the C solution completes in about 0.00004 s, while the equivalent Python solution takes about 0.006 s. Both are effectively instant; the roughly 150x gap is the usual interpreter overhead, and for a problem this small either choice is perfectly acceptable. The C version is the faster, the Python version the more concise.
+</p>
+<ul>
+  <li>When variables are linked by a linear constraint, substitute to eliminate one before writing any loop - it is always free and always shrinks the search.</li>
+  <li>Derive the tightest possible bound for every loop variable from ordering and positivity constraints; each tighter bound multiplies into fewer iterations.</li>
+  <li>Prefer exact integer arithmetic over floating-point whenever you need an equality check - compute c = S - a - b rather than a square root.</li>
+  <li>In Python, a generator expression with <code>next()</code> is the idiomatic, lazy way to find the first element satisfying a condition.</li>
+  <li>In C, cast to a wider integer type before multiplying values whose product might overflow, as a default habit rather than an afterthought.</li>
+  <li>Estimate the iteration count before coding: O(S<sup>2</sup>) at S = 1000 is about 10<sup>5</sup> steps, well within reach of brute force.</li>
+</ul>
+
+</article>

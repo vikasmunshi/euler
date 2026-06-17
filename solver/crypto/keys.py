@@ -3,16 +3,28 @@
 """Encrypted key file read/write and per-user key retrieval."""
 from __future__ import annotations
 
+__all__ = [
+    'get_enc_key',
+    'get_key',
+    'get_master_key',
+    'get_user_key',
+    'read_keys_file',
+    'rekey',
+    'rekey_keys_file',
+    'user',
+    'write_keys_file',
+]
+
 from functools import lru_cache
 from json import dumps, loads
 from secrets import choice, token_bytes
-from typing import Any, Literal
+from typing import Any
 
 from jsonschema import validate
 
-from solver.config import config
+from solver.config import ExitCodes, config
 from solver.crypto.asymmetrical import UserKeyPair
-from solver.crypto.share import reconstruct, split
+from solver.crypto.share import reconstruct_secret, split_secret
 from solver.crypto.symmetrical import EncKey
 from solver.shell import console, register
 from solver.utils.gh import get_gh_user_email
@@ -127,7 +139,7 @@ def get_enc_key(key_id: bytes | None = None) -> EncKey:
 # ==================================================================================================================== #
 #                                               rekey keys file
 # ==================================================================================================================== #
-def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = True) -> Literal['ok', 'nok']:
+def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = True) -> int:
     """
     Reinitialize keys.json with additional new encryption keys.
 
@@ -142,7 +154,7 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
     """
     if get_gh_user_email() != config.author_email:
         console.print('[error]error:[/error] only the admin user may initialize the keys file')
-        return 'nok'
+        return ExitCodes.EXIT_ERROR
     user_key: UserKeyPair = get_user_key()
     new_master_key: bytes = token_bytes(32)
     if config.keys_file.exists():
@@ -171,14 +183,12 @@ def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = 
         if preserve_master is False or raw_user['master_key'] is None:
             raw_user['master_key'] = UserKeyPair.from_public_dict(email, raw_user).lock(new_master_key)
     write_keys_file(data)
-    return 'ok'
+    return ExitCodes.EXIT_OK
 
 
-@register(name='rekey',
-          help='Reinitialize keys.json with additional new encryption keys.',
-          usage='rekey [num_total_active_keys=32] [preserve_master=true] [backup=false]', )
+@register(help_text='Reinitialize keys.json with additional new encryption keys.')
 def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True,
-          backup: bool = False) -> Literal['ok', 'nok']:
+          backup: bool = False) -> int:
     """
     Reinitialize keys.json with additional new encryption keys.
 
@@ -193,7 +203,7 @@ def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True,
     """
     if not confirm('Are you sure you want to rekey?'):
         console.print('[muted]Rekeying cancelled.[/muted]')
-        return 'nok'
+        return ExitCodes.EXIT_ERROR
     result = rekey_keys_file(num_total_active_keys, preserve_master=preserve_master)
     if backup:
         lines: dict[str, str] = {'private_key': config.private_key_file.read_text().strip(),
@@ -205,10 +215,8 @@ def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True,
 # ==================================================================================================================== #
 #                                               user
 # ==================================================================================================================== #
-@register(name='user',
-          help='Return the current user\'s identity alongside their master key access.',
-          usage='user [regen=false]')
-def user(regen: bool = False) -> Literal['ok', 'nok']:
+@register(help_text='Show the current user\'s identity and master key access.')
+def user(regen: bool = False) -> int:
     """
     Return the current user's identity alongside their master key access.
 
@@ -255,52 +263,46 @@ def user(regen: bool = False) -> Literal['ok', 'nok']:
     console.print(f'[primary]{user_key!s}[/primary] [{access_style}]\n{access_mark} encrypt/decrypt[/{access_style}]')
     try:
         if user_key and master_key is None:
-            register(name='reconstruct',
-                     help='Recover the master key from a list of shares.',
-                     usage='reconstruct [threshold=2]')(reconstruct_master_key)
+            register(help_text='Recover the master key from a list of shares.')(reconstruct)
         if user_key and user_key.user_email == config.author_email:
-            register(name='split',
-                     help='Split the current master key into shares.',
-                     usage='split [num_shares=3] [threshold=2]')(split_master_key)
-            register(name='reconstruct',
-                     help='Recover the master key from a list of shares.',
-                     usage='reconstruct [threshold=2]')(reconstruct_master_key)
+            register(help_text='Split the current master key into shares.')(split)
+            register(help_text='Recover the master key from a list of shares.')(reconstruct)
     except ValueError:
         pass
-    return 'ok' if user_key is not None else 'nok'
+    return ExitCodes.EXIT_OK if user_key is not None else ExitCodes.EXIT_ERROR
 
 
 # ==================================================================================================================== #
 #                                       n of m secret sharing for the master key
 # ==================================================================================================================== #
-def split_master_key(num_shares: int = 3, threshold: int = 2) -> Literal['ok', 'nok']:
+def split(num_shares: int, threshold: int) -> int:
     try:
         master_key: bytes = get_master_key()
     except (AssertionError, FileNotFoundError, ValueError):
         console.print('[error]error:[/error] master key not found')
-        return 'nok'
-    for i, share in enumerate(split(master_key, num_shares=num_shares, threshold=threshold), start=1):
+        return ExitCodes.EXIT_ERROR
+    for i, share in enumerate(split_secret(master_key, num_shares=num_shares, threshold=threshold), start=1):
         console.print(f'[accent]Master key share {i} of {num_shares}:[/accent]\n[muted]{share}[/muted]\n\n')
-    return 'ok'
+    return ExitCodes.EXIT_OK
 
 
-def reconstruct_master_key(threshold: int = 2) -> Literal['ok', 'nok']:
+def reconstruct(threshold: int) -> int:
     """Recover the master key from a list of shares."""
     try:
         user_key: UserKeyPair = get_user_key()
     except (AssertionError, FileNotFoundError, ValueError):
         console.print('[error]error:[/error] user key not found, use `solver user` to generate one')
-        return 'nok'
+        return ExitCodes.EXIT_ERROR
     shares: list[str] = []
     for i in range(1, threshold + 1):
         share: str = console.input(f'[accent]Enter master key share {i} of {threshold}:[/accent] ').strip()
         shares.append(share)
         console.print(f'[primary]Share {i}/{threshold} recieved.[/primary]')
     try:
-        master_key: bytes = reconstruct(shares)
+        master_key: bytes = reconstruct_secret(shares)
     except ValueError:
         console.print('[error]error:[/error] invalid shares')
-        return 'nok'
+        return ExitCodes.EXIT_ERROR
     console.print(f'[primary]Master key reconstructed from {threshold} shares:[/primary]')
     data: dict[str, Any] = read_keys_file()
     console.print('[muted]Updating keys.json with new master key...')
@@ -308,17 +310,4 @@ def reconstruct_master_key(threshold: int = 2) -> Literal['ok', 'nok']:
     write_keys_file(data)
     get_master_key.cache_clear()
     console.print(f'[success]Master key successfully persisted from {threshold} shares.[/success]')
-    return 'ok'
-
-
-__all__ = (
-    'get_enc_key',
-    'get_key',
-    'get_master_key',
-    'get_user_key',
-    'read_keys_file',
-    'rekey',
-    'rekey_keys_file',
-    'user',
-    'write_keys_file',
-)
+    return ExitCodes.EXIT_OK

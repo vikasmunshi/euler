@@ -1,0 +1,170 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+This problem contains no number theory, recursion, or combinatorics. It is a pure data-processing
+exercise: the answer is a weighted sum where the weight of each name is its rank after sorting.
+The "alphabetical value" of a name is the sum of the 1-based positions of its letters in the
+alphabet (A=1, B=2, ..., Z=26), and the "name score" multiplies that value by the name's 1-based
+position in the sorted list. The final answer sums every name's score. The single insight that
+makes the problem tractable is recognising its shape: it is a classic
+<a href="https://en.wikipedia.org/wiki/MapReduce" class="reference-source" target="_blank" rel="noopener noreferrer">map-reduce</a>
+pipeline - parse the input, sort it, map each element to a score, and reduce the scores to a sum.
+</p>
+
+<p>
+The complexity is dominated by the
+<a href="https://en.wikipedia.org/wiki/Sorting_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">sort</a>,
+which runs in O(n log n) time for n names (here n is roughly 5,000). The scoring pass is O(n * L)
+where L is the average name length, which is small and constant in practice. With n this small the
+entire computation finishes in well under a millisecond in C and a few milliseconds in Python, so
+no clever optimisation is warranted - the goal is simply a clean, correct implementation.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Algorithm 0 - Parse, Sort, Score, Sum (Python and C)</h4>
+
+<p>
+Both solutions implement the same four-step pipeline and differ only in language mechanics.
+</p>
+
+<p>
+<strong>Step 1 - Parse.</strong> The file is a single line of comma-separated, double-quoted
+tokens such as <code>"AARON","ABBEY",...</code>. In Python I read the whole file and call
+<code>.split(",")</code> to obtain a list of raw tokens (quotes still attached). In C I read the
+file into one buffer and use <code>strtok</code> with <code>","</code> as the delimiter to split
+in place. Before tokenising in C, I make a single linear pass counting commas so I can allocate the
+<code>char **names</code> pointer array exactly once - one cheap scan avoids any dynamic regrowth.
+</p>
+
+<p>
+<strong>Step 2 - Sort.</strong> Python's <code>sorted()</code> uses
+<a href="https://en.wikipedia.org/wiki/Timsort" class="reference-source" target="_blank" rel="noopener noreferrer">Timsort</a>,
+a stable O(n log n) sort. In C I call
+<a href="https://en.wikipedia.org/wiki/Qsort" class="reference-source" target="_blank" rel="noopener noreferrer">qsort</a>
+with a comparator that dereferences the <code>char **</code> arguments and calls
+<a href="https://en.wikipedia.org/wiki/C_string_handling#strcmp" class="reference-source" target="_blank" rel="noopener noreferrer">strcmp</a>.
+A subtle but important point: every token still carries its surrounding double-quotes at this
+stage. Because all tokens begin with the same quote character, the quotes contribute equally to
+every comparison and cancel out - the sort order is identical to sorting the bare names, so no
+preprocessing is required before the sort.
+</p>
+
+<p>
+<strong>Step 3 - Score.</strong> I iterate over the sorted list with a 1-based index. The helper
+<code>word_to_num</code> sums each letter's alphabet position using <code>ord(c) - 64</code>
+(Python) or <code>*c - 64</code> (C), skipping the quote and space characters. Since ASCII 'A' is
+65, subtracting 64 maps 'A' to 1 directly - no lookup table needed.
+</p>
+
+<p>
+<strong>Step 4 - Sum.</strong> Each name's value is multiplied by its rank and accumulated. The C
+version uses a <code>long long</code> accumulator: the total is around 8.7 x 10^8, which fits in a
+32-bit signed integer, but I use 64-bit to remove any doubt about overflow. Python integers are
+arbitrary precision, so the concern does not arise.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Generator expressions for a memory-light map-reduce (Python)</h4>
+
+<p>
+The Python <code>solve</code> expresses the whole scoring pass as a single <code>sum(...)</code> over a
+<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>.
+A
+<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
+looks like a list comprehension but yields values one at a time without building an intermediate
+list, so memory stays proportional to the current item rather than the whole dataset. Wrapping it in
+<code>sum()</code> consumes each score immediately and discards it. Reach for this pattern whenever
+a computation is a simple
+<a href="https://en.wikipedia.org/wiki/MapReduce" class="reference-source" target="_blank" rel="noopener noreferrer">map-reduce</a>
+and you do not need to retain the intermediate sequence.
+</p>
+
+<h4>enumerate with start=1 for 1-based ranks (Python)</h4>
+
+<p>
+<code>enumerate(iterable, start=1)</code> yields <code>(index, value)</code> pairs beginning at 1.
+This removes a manual <code>i + 1</code> offset and documents the intent - "rank by 1-based
+position" - directly. Preferring <code>enumerate</code> over a separate counter variable reduces
+off-by-one risk and keeps index and value provably in sync.
+</p>
+
+<h4>Keeping the helper cache-free for honest benchmarks (Python)</h4>
+
+<p>
+<code>word_to_num</code> is a deliberately plain function with no
+<a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoisation</a>.
+A module-level cache would be tempting, but the names in this input are distinct, so a cache buys
+nothing within a run - and worse, a persistent cache would survive across the harness's repeated
+timed runs, so every run after the first would find its work already done and report a misleadingly
+low time. Recomputing each value keeps the benchmark honest and matches the C sibling, which simply
+recomputes. The lesson generalises:
+<a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoisation</a>
+pays off only on structured search spaces with overlapping subproblems, and any state cached
+outside the function being timed distorts the measurement.
+</p>
+
+<h4>In-place tokenisation with strtok (C)</h4>
+
+<p>
+<code>strtok</code> overwrites each delimiter in the buffer with a null byte and returns a pointer
+to the start of the current token. Because it mutates the original allocation, no string data is
+copied - every entry of <code>names[]</code> points directly into the single buffer returned by
+<code>get_text_file</code>. The trade-off is the destruction of the original buffer, which is
+acceptable here since I own it and do not need the original content afterwards. This is the
+standard idiom for parsing delimited text in C when the input need not be preserved.
+</p>
+
+<h4>Sorting an array of pointers rather than strings (C)</h4>
+
+<p>
+I sort <code>char *names[]</code>, an array of pointers, instead of moving string bytes. Each swap
+moves a single pointer-sized word (8 bytes on a 64-bit system) rather than copying a whole
+variable-length string. The comparator receives <code>const void *</code> arguments, which I cast
+to <code>const char **</code> and dereference before passing to <code>strcmp</code>. This level of
+indirection is the correct pattern whenever the sorted objects are large or of variable length.
+</p>
+
+<h4>Pre-counting to allocate exactly once (C)</h4>
+
+<p>
+Before tokenising I scan the buffer once to count commas, giving an exact upper bound on the number
+of names. I then allocate the pointer array in a single <code>malloc</code>. One extra linear pass
+is far cheaper than repeated reallocation-and-copy as a dynamic array grows, and it keeps the
+memory layout simple and contiguous.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The core insight is recognising that this is a data-processing pipeline, not a mathematical puzzle.
+Once you name the shape - parse, sort, map, reduce - the implementation is mechanical. The two
+solutions confirm there is little to optimise: the C version runs in about 0.64 ms and the Python
+version in about 3.4 ms, a roughly 5x gap. The C edge comes entirely from constant factors -
+pointer-array sorting and in-place tokenisation - rather than any algorithmic difference; both are
+O(n log n). The Python solution is more elegant, expressing the whole pipeline as one
+<code>sum()</code> over a
+<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>,
+and is already fast enough that the difference is irrelevant in practice.
+</p>
+
+<ul>
+  <li>Identify the shape of a problem first; "parse, sort, map, reduce" is a recurring pattern that makes the implementation follow directly.</li>
+  <li>Sort arrays of pointers, not arrays of large objects, so each swap moves a pointer instead of copying bytes.</li>
+  <li>Use a
+  <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
+  with <code>sum()</code> for
+  <a href="https://en.wikipedia.org/wiki/MapReduce" class="reference-source" target="_blank" rel="noopener noreferrer">map-reduce</a>
+  pipelines - clean one-liners with O(1) working memory beyond the accumulator.</li>
+  <li>Pre-count delimiters to allocate once rather than growing a dynamic array; one extra linear scan beats repeated reallocation.</li>
+  <li>Use <code>enumerate(iterable, start=1)</code> for 1-based ranks to eliminate off-by-one errors and document intent.</li>
+  <li>For consecutive-ASCII mappings (A=65, ..., Z=90), the offset <code>ord(c) - 64</code> is all you need - no lookup table.</li>
+  <li>Watch for redundant transformations: if a constant prefix (like surrounding quotes) is shared by all elements, it cancels in a comparison and can be left alone.</li>
+  <li>Keep the function under benchmark free of state that outlives a single call: a cache that survives between timed runs reports work as free that is not.</li>
+  <li>Prefer a 64-bit accumulator in C whenever a sum could plausibly approach the 32-bit limit; the cost is nil and it removes a whole class of bugs.</li>
+</ul>
+
+</article>

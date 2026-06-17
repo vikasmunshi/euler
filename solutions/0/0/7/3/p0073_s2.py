@@ -3,14 +3,19 @@
 """ Solution to Euler Problem 73: Counting Fractions in a Range [Level 3]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def solve(*, max_d: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Count fractions in (1/3, 1/2) as a Farey rank difference: rank(1/2) - rank(1/3) - 1 (the -1
+    drops 1/2 itself), each rank computed by an O(max_d log max_d) additive Mobius sieve."""
+    max_d = runner.parse_int(args[0])
 
     def rank(n: int, d: int) -> int:
+        """Reduced fractions with denominator <= max_d that are <= n/d, via an additive Mobius
+        sieve: data[i] = floor(i*n/d) counts all such fractions, then subtracting each data[i]
+        from its multiples leaves the exact coprime count per denominator; their sum is the rank."""
         len_data: int = max_d + 1
         data: list[int] = [i * n // d for i in range(len_data)]
         for i in range(1, len_data):
@@ -18,39 +23,8 @@ def solve(*, max_d: int) -> int:
                 data[j] -= data[i]
         return sum(data)
 
-    return rank(n=1, d=2) - rank(n=1, d=3) - 1
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(rank(n=1, d=2) - rank(n=1, d=3) - 1)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_d=int(argv[1])))
+    raise SystemExit(solve())

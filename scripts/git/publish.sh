@@ -3,9 +3,8 @@ set -e  # Exit on error
 
 declare gh_user_email gh_user_name repo_owner_email repo_owner_name
 init_gh_git_identity() {
-    # init_gh_git_identity — Populate GitHub/repo identity globals, sync local git
-    #                        config identity, and configure gh as the local git
-    #                        credential helper.
+    # init_gh_git_identity — Populate GitHub/repo identity globals and sync the
+    #                        local git config identity to the authenticated user.
     #
     # Globals set (module-level, declared externally):
     #   gh_user_name      Login of the authenticated GitHub user
@@ -16,7 +15,6 @@ init_gh_git_identity() {
     # Side effects (all local to the current git repo):
     #   git config user.name       — set to match the authenticated GitHub user
     #   git config user.email      — set to match the authenticated GitHub user
-    #   git config credential.helper — set to '!gh auth git-credential'
     #
     # Returns:
     #   0  All phases completed successfully
@@ -27,7 +25,11 @@ init_gh_git_identity() {
     #   1. Fetch gh_user_name, gh_user_email, repo_owner_name, repo_owner_email
     #      via the GitHub API
     #   2. Sync local git identity (user.name, user.email) to the authenticated user
-    #   3. Ensure credential.helper is set to delegate auth to gh CLI
+    #
+    # Credential helper note:
+    #   git auth is delegated to the gh CLI via a global, per-host credential
+    #   helper configured once by `gh auth setup-git` (install-credentials
+    #   Makefile target) — not by this function.
     #
     # Notes:
     #   - Requires `gh` CLI authenticated via `gh auth login`
@@ -78,18 +80,10 @@ init_gh_git_identity() {
         fi
     fi
 
-    [[ ${rc} == 0 ]] || return ${rc} # no point in continuing to git auth setup
-
-    local credential_helper
-    local desired="!gh auth git-credential"
-    credential_helper=$(git config --local --get credential.helper 2>/dev/null || echo "")
-    if [[ "${credential_helper}" != "${desired}" ]]; then
-        git config --local --unset-all credential.helper 2>/dev/null || true # ok to fail, if nothing is set
-        if ! git config --local --add credential.helper "${desired}"; then
-            echo "Error: could not set gh as git auth helper"
-            rc=1
-        fi
-    fi
+    # The git credential helper is configured globally via `gh auth setup-git`
+    # (see the install-credentials Makefile target). Do not write a local
+    # credential.helper here — it duplicates the global, per-host setup and
+    # risks local/global drift.
 
     return ${rc}
 }

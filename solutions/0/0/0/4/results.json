@@ -1,48 +1,21 @@
 [
   {
     "category": "dev",
-    "solution": "p0004_s0.py",
+    "solution": "p0004_s0_c",
     "args": "2",
     "answer": 9009,
     "verdict": "correct",
-    "average": 2.8146195443407966e-05,
-    "number_runs": 123
-  },
-  {
-    "category": "main",
-    "solution": "p0004_s0.py",
-    "args": "3",
-    "answer": 906609,
-    "verdict": "correct",
-    "average": 0.00037202734433012516,
-    "number_runs": 122
-  },
-  {
-    "category": "extra",
-    "solution": "p0004_s0.py",
-    "args": "4",
-    "answer": 99000099,
-    "verdict": "correct",
-    "average": 0.0017727506544072942,
-    "number_runs": 75
-  },
-  {
-    "category": "extra",
-    "solution": "p0004_s0.py",
-    "args": "5",
-    "answer": 9966006699,
-    "verdict": "correct",
-    "average": 0.018847579292961807,
-    "number_runs": 75
+    "average": 9.21559523809524e-07,
+    "number_runs": 84
   },
   {
     "category": "dev",
-    "solution": "p0004_s0_c",
+    "solution": "p0004_s0.py",
     "args": "2",
     "answer": 9009,
     "verdict": "correct",
-    "average": 4.300964285714286e-06,
-    "number_runs": 56
+    "average": 1.2252855369643795e-05,
+    "number_runs": 84
   },
   {
     "category": "main",
@@ -50,8 +23,17 @@
     "args": "3",
     "answer": 906609,
     "verdict": "correct",
-    "average": 3.746635714285715e-05,
-    "number_runs": 56
+    "average": 2.014894047619048e-05,
+    "number_runs": 84
+  },
+  {
+    "category": "main",
+    "solution": "p0004_s0.py",
+    "args": "3",
+    "answer": 906609,
+    "verdict": "correct",
+    "average": 0.00032492925051233863,
+    "number_runs": 84
   },
   {
     "category": "extra",
@@ -59,8 +41,17 @@
     "args": "4",
     "answer": 99000099,
     "verdict": "correct",
-    "average": 9.278319607843139e-05,
-    "number_runs": 51
+    "average": 5.02927380952381e-05,
+    "number_runs": 84
+  },
+  {
+    "category": "extra",
+    "solution": "p0004_s0.py",
+    "args": "4",
+    "answer": 99000099,
+    "verdict": "correct",
+    "average": 0.0013823467504283013,
+    "number_runs": 84
   },
   {
     "category": "extra",
@@ -68,7 +59,16 @@
     "args": "5",
     "answer": 9966006699,
     "verdict": "correct",
-    "average": 0.0007184470000000001,
-    "number_runs": 51
+    "average": 0.0005401163214285715,
+    "number_runs": 84
+  },
+  {
+    "category": "extra",
+    "solution": "p0004_s0.py",
+    "args": "5",
+    "answer": 9966006699,
+    "verdict": "correct",
+    "average": 0.015761060322152583,
+    "number_runs": 84
   }
 ]

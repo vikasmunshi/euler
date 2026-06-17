@@ -1,55 +1,32 @@
 /* Solution to Euler Problem 79: Passcode Derivation. */
-#include <libgen.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#include "runner.h"
 
-char *get_text_file(const char *src) {
-    const char *slash = strrchr(src, '/');
-    const char *name_start = slash ? slash + 1 : src;
-    const char *q = strchr(name_start, '?');
-    size_t name_len = q ? (size_t)(q - name_start) : strlen(name_start);
 
-    char exe_path[4096];
-    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
-    if (len < 0) return NULL;
-    exe_path[len] = '\0';
-
-    char path[4096];
-    int pn = snprintf(path, sizeof(path), "%s/resources/%.*s", dirname(exe_path), (int)name_len, name_start);
-    if (pn < 0 || (size_t)pn >= sizeof(path)) return NULL;
-
-    FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
-    long sz = ftell(f);
-    if (sz < 0) { fclose(f); return NULL; }
-    rewind(f);
-    char *buf = malloc((size_t)sz + 1);
-    if (!buf) { fclose(f); return NULL; }
-    if (fread(buf, 1, (size_t)sz, f) != (size_t)sz) { free(buf); fclose(f); return NULL; }
-    buf[sz] = '\0';
-    fclose(f);
-    return buf;
-}
 
 #define MAX_DIGITS 10
 #define MAX_LINES  200
 
-long long solve(int argc, char *argv[]) {
-    if (argc < 3) return -1;
-    int asked_characters = atoi(argv[1]);
+/*
+ * Topological sort by repeated sink removal (Kahn's algorithm, sink-first).
+ * Each login "abc" yields ordering constraints a<b and b<c; the deduplicated
+ * constraints form a DAG over the distinct digits, stored as a per-node
+ * bitmask of successors. Repeatedly removing a node with no active successor
+ * and prepending it builds the shortest passcode left-to-right.
+ * O(D^2) in the number of distinct digits D (at most 10), effectively constant.
+ */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    if (argc < 3) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
+    int asked_characters = parse_int(argv[1]);
     const char *file_url = argv[2];
 
     char *content = get_text_file(file_url);
     if (!content) {
         fprintf(stderr, "Could not open file\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
-    /* Parse and deduplicate lines */
+    /* Parse and deduplicate lines; repeated logins add no ordering information */
     char lines[MAX_LINES][16];
     int line_count = 0;
 
@@ -76,7 +53,7 @@ long long solve(int argc, char *argv[]) {
     }
     free(content);
 
-    /* Collect distinct characters */
+    /* Collect distinct characters; their indices become the DAG node ids */
     char chars[MAX_DIGITS];
     int num_chars = 0;
     for (int i = 0; i < line_count; i++) {
@@ -90,9 +67,9 @@ long long solve(int argc, char *argv[]) {
         }
     }
 
-    /* Build successor graph using bitmasks */
+    /* Build successor graph: bit j of successor[i] set means digit i precedes digit j */
     unsigned int successor[MAX_DIGITS] = {0};
-    int num_pairs = asked_characters - 1;
+    int num_pairs = asked_characters - 1; /* consecutive pairs per login; generalises beyond 3 */
 
     for (int i = 0; i < line_count; i++) {
         for (int j = 0; j < num_pairs; j++) {
@@ -110,7 +87,7 @@ long long solve(int argc, char *argv[]) {
         }
     }
 
-    /* Reverse topological sort: repeatedly find node with no active successors */
+    /* Reverse topological sort: a sink (no active successor) belongs furthest right */
     int active[MAX_DIGITS];
     for (int i = 0; i < num_chars; i++) active[i] = 1;
 
@@ -120,7 +97,7 @@ long long solve(int argc, char *argv[]) {
 
     int remaining = num_chars;
     while (remaining > 0) {
-        /* Build active mask */
+        /* Active mask lets the sink test reduce to one bitwise AND per node */
         unsigned int active_mask = 0;
         for (int i = 0; i < num_chars; i++) {
             if (active[i]) active_mask |= (1u << i);
@@ -136,10 +113,10 @@ long long solve(int argc, char *argv[]) {
         }
         if (found < 0) {
             fprintf(stderr, "Cycle detected in constraints\n");
-            return -1;
+            { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
         }
 
-        /* Prepend chars[found] to passcode */
+        /* Prepend chars[found]: removing sinks yields rightmost elements first */
         for (int i = passcode_len; i >= 0; i--) {
             passcode[i + 1] = passcode[i];
         }
@@ -150,53 +127,5 @@ long long solve(int argc, char *argv[]) {
         remaining--;
     }
 
-    return (long long)atoll(passcode);
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)atoll(passcode))); return _answer; }
 }

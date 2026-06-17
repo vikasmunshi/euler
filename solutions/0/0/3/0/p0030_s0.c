@@ -1,18 +1,15 @@
 /* Solution to Euler Problem 30: Digit Fifth Powers. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "runner.h"
 #include <math.h>
-#include <time.h>
 
-/* Compute integer power */
+/* Integer power base^exp via repeated multiplication (no floating-point rounding risk). */
 static long long ipow(long long base, int exp) {
     long long result = 1;
     for (int i = 0; i < exp; i++) result *= base;
     return result;
 }
 
-/* Sum of nth powers of digits of num */
+/* Sum of the nth powers of the decimal digits of num. */
 static long long digit_power_sum(long long num, int n) {
     long long s = 0;
     while (num > 0) {
@@ -23,8 +20,12 @@ static long long digit_power_sum(long long num, int n) {
     return s;
 }
 
-long long solve(int argc, char *argv[]) {
-    int n = atoi(argv[1]);
+/* Enumerate sorted digit multisets (the digit-power sum is order-independent), capped at
+ * ceil(log10(n*9^n)) digits since no longer number can reach its own digit-power sum, and keep
+ * those whose sum reproduces itself; O(C(10+k-1, k) * k) for k digits. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int n = parse_int(argv[1]);
 
     /* upper_bound_num_digits = ceil(log(n * 9^n, 10)) */
     double max_sum = (double)n * pow(9.0, (double)n);
@@ -32,10 +33,10 @@ long long solve(int argc, char *argv[]) {
 
     int k = upper_bound_num_digits;
 
-    /* Enumerate combinations_with_replacement(range(10), k)
-     * using indices[0..k-1] each in [0..9], non-decreasing */
+    /* State array encoding the current multiset: indices[0..k-1] each in [0..9], non-decreasing,
+     * standing in for combinations_with_replacement(range(10), k) */
     int *indices = calloc((size_t)k, sizeof(int));
-    if (!indices) return -1;
+    if (!indices) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 
     long long total = 0;
 
@@ -47,12 +48,15 @@ long long solve(int argc, char *argv[]) {
             num += ipow(indices[i], n);
         }
 
-        /* Check: num > 9 and digit_power_sum(num) == num */
+        /* Keep num only if it is a genuine narcissistic number: > 9 and equal
+         * to the digit-power sum of its own digits */
         if (num > 9 && digit_power_sum(num, n) == num) {
             total += num;
         }
 
-        /* Advance to next combination with replacement */
+        /* Advance the multiset lexicographically: find the rightmost slot not
+         * yet 9, increment it, and flood-fill positions to its right with that
+         * value to keep the non-decreasing canonical form (each multiset once) */
         int pos = k - 1;
         while (pos >= 0 && indices[pos] == 9) {
             pos--;
@@ -65,55 +69,5 @@ long long solve(int argc, char *argv[]) {
     }
 
     free(indices);
-    return total;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(total)); return _answer; }
 }

@@ -5,12 +5,12 @@ from __future__ import annotations
 
 import collections
 import itertools
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
+    """Return all primes below max_num via Sundaram's sieve (marks k = i + j + 2ij, prime = 2k+1)."""
     if max_num < 2:
         return ()
     n = (max_num - 1) // 2
@@ -25,7 +25,13 @@ def primes_sundaram_sieve(max_num: int) -> tuple[int, ...]:
     return tuple(primes)
 
 
-def solve(*, n: int) -> list:
+@runner.main
+def solve(*args: str) -> str:
+    """Group n-digit primes by permutation siblings, then bucket pairwise differences to find
+    arithmetic triples; O(P * n!) permutation work plus O(|family|^2) per family. A bucket holding
+    exactly three values is an arithmetic progression with that common difference."""
+    n = runner.parse_int(args[0])
+
     sequences: set[str] = set()
     min_n_digit_hum = 10 ** (n - 1)
     n_digit_primes: set[str] = {str(p) for p in primes_sundaram_sieve(10**n) if p > min_n_digit_hum}
@@ -40,39 +46,8 @@ def solve(*, n: int) -> list:
             for difference, primes in differences.items():
                 if len(primes) == 3:
                     sequences.add(" ".join(sorted(primes)))
-    return sorted(sequences)
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sorted(sequences))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(n=int(argv[1])))
+    raise SystemExit(solve())

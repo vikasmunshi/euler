@@ -1,0 +1,99 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The structure hiding beneath this problem is a <a href="https://en.wikipedia.org/wiki/Clique_(graph_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">clique</a> in an undirected <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">graph</a>. I treat each prime as a node and draw an edge between two primes p and q exactly when both concatenations - pq and qp - are themselves prime. With that model, "find five primes such that any two concatenate to a prime" becomes "find a <a href="https://en.wikipedia.org/wiki/Clique_(graph_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">clique</a> of size five," and "lowest sum" becomes "the clique whose node sum is minimal." This reframing matters because clique search comes with well-understood pruning strategies, and naming the structure tells me at once how to organise the search.
+</p>
+
+<p>
+Two number-theoretic facts make the search tractable. First, I need fast <a href="https://en.wikipedia.org/wiki/Primality_test" class="reference-source" target="_blank" rel="noopener noreferrer">primality testing</a>: concatenating a k-digit and an m-digit prime yields a (k+m)-digit candidate, so for a set of five the candidates stay small enough that <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> up to the square root is plenty fast - that test is O(sqrt(n)) per call. Second, I bound the candidate set: every prime in the answer for a set of length L turns out to be below 10^(L-1), so I generate that prime list once with a <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a> (roughly 10,000 primes for L=5). The dominant cost is the pairwise primality predicate, which I <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoize</a> so each pair is tested at most once. <a href="https://en.wikipedia.org/wiki/Clique_problem" class="reference-source" target="_blank" rel="noopener noreferrer">Clique search</a> is NP-hard in general, so the worst case is exponential, but aggressive pruning over a small prime set keeps the real running time well under a tenth of a second.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Cached Depth-First Clique Search (Python and C)</h4>
+
+<p>
+Both files implement the same algorithm. I describe it once and note language differences at the end.
+</p>
+
+<p>
+<strong>Step 1 - Build the prime set.</strong> I sieve all primes up to 10^(set_length-1) with the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>. Sundaram marks an odd number 2i+1 as composite whenever its index can be written as i + j + 2ij; the unmarked indices map back to the odd primes, and I prepend 2. I picked Sundaram for variety - it is O(N log log N) like the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>, and either would serve. The output is returned sorted ascending, which is essential for the canonical search below.
+</p>
+
+<p>
+<strong>Step 2 - Memoized pair predicate.</strong> <code>concatenate_is_prime(a, b)</code> tests that both concatenations are prime. This predicate is expensive relative to the recursion overhead and the same pair is queried across many partial cliques, so I cache it. In Python that is a single <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer"><code>functools.lru_cache</code></a> decoration. In C I hand-build a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> with <a href="https://en.wikipedia.org/wiki/Hash_table#Separate_chaining" class="reference-source" target="_blank" rel="noopener noreferrer">separate chaining</a>, canonicalising each key as <code>(min(a,b), max(a,b))</code> to halve the entries (the predicate is symmetric), folding a multiplicative-XOR mix into 2^20 buckets.
+</p>
+
+<p>
+<strong>Step 3 - Depth-first extension in ascending order.</strong> I begin with each prime as the first clique element, then recursively extend: a candidate may join only if it is strictly greater than the current last element and pairs correctly with every element already chosen. I check the pairing predicate <em>before</em> recursing, so branches that cannot grow into a valid clique are never explored. Requiring strictly increasing values means each unordered set is visited exactly once in sorted form, which both removes duplicate orderings and guarantees the first complete clique found has the minimum sum.
+</p>
+
+<p>
+<strong>Python specifics.</strong> The Python version expresses the nested <a href="https://en.wikipedia.org/wiki/Depth-first_search" class="reference-source" target="_blank" rel="noopener noreferrer">depth-first search</a> as a chain of <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expressions</a> - <code>solution_pairs</code> feeds <code>extend_solution</code>, which feeds another <code>extend_solution</code> - one nesting level per clique element beyond the first pair. A single <a href="https://docs.python.org/3/library/functions.html#next" class="reference-source" target="_blank" rel="noopener noreferrer"><code>next()</code></a> on the outermost generator pulls only the first complete solution and lazily short-circuits the entire chain.
+</p>
+
+<p>
+<strong>C specifics.</strong> The C version uses a recursive <code>dfs</code> with a global <code>found</code> flag; once set, every active frame returns immediately. It keeps the partial clique in a fixed stack array <code>sol[10]</code> and passes the current depth and the next start index explicitly. The loop bound <code>i &lt;= num_primes - need</code> (where <code>need = target - sol_size</code>) prunes the tail when fewer primes remain than slots left to fill.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Memoization with lru_cache</h4>
+<p>
+<a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer"><code>functools.lru_cache(maxsize=None)</code></a> wraps a pure function so the first call with a given argument tuple computes and stores the result, and later calls return it instantly. I used an unbounded cache because evicting entries would re-trigger expensive primality scans. This is my first reach whenever a <a href="https://en.wikipedia.org/wiki/Deterministic_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">deterministic</a> function is called repeatedly with the same inputs inside a combinatorial search.
+</p>
+
+<h4>Generator expressions for lazy, early-terminating search</h4>
+<p>
+<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">Generator expressions</a> yield values one at a time instead of building the full list. By nesting them and calling <a href="https://docs.python.org/3/library/functions.html#next" class="reference-source" target="_blank" rel="noopener noreferrer"><code>next()</code></a> exactly once, the search stops at the first complete clique without ever constructing the rest of the candidate space. This is idiomatic Python whenever you need only the first match from a large implicit search space.
+</p>
+
+<h4>Ascending-order enumeration to canonicalise sets</h4>
+<p>
+Requiring each new element to exceed the previous one visits every k-element <a href="https://en.wikipedia.org/wiki/Combination" class="reference-source" target="_blank" rel="noopener noreferrer">combination</a> once, in its unique sorted form, removing the k! redundant orderings. The same trick - always extend in strictly increasing value or index order - applies to any search over unordered combinations and, as a bonus here, makes the first hit the minimum-sum hit.
+</p>
+
+<h4>Custom hash table with canonical keys in C</h4>
+<p>
+C has no built-in associative map, so I wrote a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> with <a href="https://en.wikipedia.org/wiki/Hash_table#Separate_chaining" class="reference-source" target="_blank" rel="noopener noreferrer">separate chaining</a> (each bucket is a linked list), which handles collisions without open-addressing's resize logic. Canonicalising the key as <code>(min, max)</code> exploits the predicate's symmetry to halve storage. Canonical key plus hash table is the standard replacement for <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer"><code>lru_cache</code></a> when porting a search to C.
+</p>
+
+<h4>Early-exit DFS with a global flag</h4>
+<p>
+Instead of threading a sentinel return value up every frame, the C code sets a global <code>found</code> flag checked at the top of <code>dfs</code>; once set, all frames unwind immediately. This is a simple, readable early-termination idiom for single-solution recursive search. The cost is a non-reentrant function, acceptable in this single-threaded context.
+</p>
+
+<h4>Remaining-slots pruning guard</h4>
+<p>
+The loop bound <code>i &lt;= num_primes - need</code> skips positions from which not enough primes remain to complete the clique. One comparison per iteration buys the ability to cut many doomed iterations near the end of the prime list - a cheap, general <a href="https://en.wikipedia.org/wiki/Depth-first_search" class="reference-source" target="_blank" rel="noopener noreferrer">DFS</a> prune.
+</p>
+
+<h4>Sieving once against a known bound</h4>
+<p>
+Because every answer prime is below 10^(set_length-1), I know the candidate range up front and produce the whole prime list with one <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a> pass rather than testing candidates individually. Bulk sieving is amortised cheaply across thousands of primes and beats repeated <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> over the same range. Reach for a sieve whenever you need many primes within a known bound.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is to model a "pairwise property over a set" problem as a <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">graph</a> and search for a <a href="https://en.wikipedia.org/wiki/Clique_(graph_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">clique</a>: once "compatible pair" is an edge, the standard pruning falls out naturally. The second insight is that enumerating in ascending order both eliminates duplicate orderings and makes the first solution the minimum-sum one, so no sorting or post-processing is needed.
+</p>
+
+<p>
+The two solutions implement the identical algorithm, so the benchmark gap is pure runtime overhead. On the main case (set_length 5) the C solution runs in about 0.0346 s versus 0.1052 s for Python - roughly a 3x advantage, driven by raw integer arithmetic and the custom cache avoiding interpreter and big-integer overhead. On the trivial dev cases (set_length 3 and 4) Python is actually the faster pair (0.0000 s and 0.0001 s against C's 0.0012 s and 0.0013 s), because its startup and tiny-workload path beats C's sieve and hash-table allocation; the C advantage only appears once the search does real work. Either is fast enough at this scale, but C is the choice if the search is pushed to set_length 6 or beyond.
+</p>
+
+<ul>
+  <li>When a problem asks for a set with a pairwise property, model it as a graph and look for a clique; the standard pruning strategies apply at once.</li>
+  <li>Enumerate combinations in sorted order during clique search - it removes permutation duplicates for free and makes the first solution found the minimal one.</li>
+  <li>Cache any expensive deterministic predicate evaluated repeatedly on the same inputs; one decorator or hash table can cut runtime substantially.</li>
+  <li>Prefer generator expressions plus a single <code>next()</code> when you need only the first result from a large search space.</li>
+  <li>A global "found" flag is a pragmatic way to short-circuit deep recursion once a solution exists, avoiding sentinel propagation.</li>
+  <li>A remaining-slots lower-bound check inside a DFS loop is a cheap, broadly applicable prune.</li>
+  <li>Sieve primes upfront when the upper bound is known; per-candidate trial division wastes time re-testing numbers the sieve handles in bulk.</li>
+  <li>Compiled-language wins only materialise once the workload dwarfs startup and allocation costs - measure before assuming C beats Python on small inputs.</li>
+</ul>
+
+</article>

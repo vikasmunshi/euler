@@ -1,8 +1,5 @@
 /* Solution to Euler Problem 18: Maximum Path Sum I. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 static const char *TRIANGLE_A =
     "3\n"
@@ -94,6 +91,7 @@ static int text2triangle(const char *text, int ***triangle_out, int **row_sizes_
     return rows;
 }
 
+/* Collapse the triangle bottom-up, folding each row's larger child upward; return the apex sum; O(N^2). */
 static long long max_path_sum_triangle(int **triangle, int *row_sizes, int rows) {
     /* Bottom-up DP: collapse last row into second-to-last */
     int current_rows = rows;
@@ -111,8 +109,10 @@ static long long max_path_sum_triangle(int **triangle, int *row_sizes, int rows)
     return (long long)triangle[0][0];
 }
 
-long long solve(int argc, char *argv[]) {
-    if (argc < 2) return -1;
+/* Bottom-up dynamic programming over the triangle's optimal substructure; O(N^2) in the rows. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    if (argc < 2) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 
     const char *triangle_str_key = argv[1];
     const char *text;
@@ -121,13 +121,13 @@ long long solve(int argc, char *argv[]) {
     } else if (strcmp(triangle_str_key, "TRIANGLE_B") == 0) {
         text = TRIANGLE_B;
     } else {
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     int **triangle = NULL;
     int *row_sizes = NULL;
     int rows = text2triangle(text, &triangle, &row_sizes);
-    if (rows < 0) return -1;
+    if (rows < 0) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 
     long long result = max_path_sum_triangle(triangle, row_sizes, rows);
 
@@ -135,55 +135,5 @@ long long solve(int argc, char *argv[]) {
     free(triangle);
     free(row_sizes);
 
-    return result;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(result)); return _answer; }
 }

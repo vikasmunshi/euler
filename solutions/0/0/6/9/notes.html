@@ -1,0 +1,75 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The engine of this problem is <a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" class="reference-source" target="_blank" rel="noopener noreferrer">Euler's totient function</a>, written phi(n), which counts the positive integers up to n that are <a href="https://en.wikipedia.org/wiki/Coprime_integers" class="reference-source" target="_blank" rel="noopener noreferrer">coprime</a> to n - that is, share no common divisor with n greater than 1. The function has a clean closed form built from n's distinct prime factors. If n's distinct primes are p1, p2, ..., pk (their exponents do not matter here), then phi(n) = n * (1 - 1/p1) * (1 - 1/p2) * ... * (1 - 1/pk). The exponents drop out of the product of fractions entirely - only the *set* of distinct primes dividing n appears.
+</p>
+
+<p>
+We want to maximise the ratio n/phi(n). Dividing the formula above through by phi gives n/phi(n) = product over distinct primes p dividing n of p/(p-1). This factorisation is the whole game. Every factor p/(p-1) is strictly greater than 1, so adding any new distinct prime strictly *increases* the ratio. Repeating a prime adds nothing to the ratio (only distinct primes count) while still inflating n, so we never raise a prime above the first power. And the factor p/(p-1) is largest for the smallest primes - 2/1 = 2, then 3/2 = 1.5, then 5/4 = 1.25 - shrinking towards 1 as p grows. To extract the most ratio per unit of n, we therefore multiply together consecutive primes starting at 2. The maximiser is always a <a href="https://en.wikipedia.org/wiki/Primorial" class="reference-source" target="_blank" rel="noopener noreferrer">primorial</a>: the product of the first k primes, for the largest k whose product fits under the bound. This collapses an apparent million-element search into roughly seven multiplications, since 2*3*5*7*11*13*17*19*23 already exceeds a billion. The work is effectively O(1) in the bound.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Greedy Primorial Accumulation</h4>
+
+<p>
+Both the C and Python files implement the same idea: keep a running product, start it at 1, and multiply in successive primes for as long as the product stays within the limit. The moment the next prime would push us over, we stop, and the last in-bounds product is the answer. Given the analysis above, this greedy march is provably optimal - because the smallest primes give the biggest factors and each distinct prime helps, the dense-as-possible primorial under the bound is the unique maximiser.
+</p>
+
+<p>
+The two versions differ only in how they source primes and how they handle the boundary. The C solution uses <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>: for each candidate it tests divisibility by odd numbers up to its square root. Because we need fewer than ten primes, this inner loop is trivially cheap and needs no array allocation. Crucially, the C code follows a *validate-then-commit* discipline. It computes the tentative product in a local <code>next = result * candidate</code> and only writes it back into <code>result</code> when <code>next</code> is confirmed to be at or below the limit. If it overshoots, we break immediately with <code>result</code> untouched. There is no rollback to get wrong.
+</p>
+
+<p>
+The Python solution sources its primes from <code>primes_generator</code>, a lazy infinite <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> built around an incremental <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>. Instead of a fixed boolean array, it keeps a dictionary <code>composites</code> mapping each "next composite to be struck" back to the prime that strikes it. When a candidate odd <code>n</code> is absent from the dictionary it is prime, so we yield it and record <code>n*n</code> as its first future composite; when <code>n</code> is present it is composite, so we advance that prime's marker by <code>2*p</code> to the next unoccupied slot. The accumulation loop then multiplies primes into <code>result</code> and, unlike the C version, *commits then checks*: it multiplies first, detects an overshoot, and divides the last prime back out before breaking. Both styles reach the answer in a handful of iterations.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Lazy Infinite Generator with a Dictionary Sieve</h4>
+<p>
+A Python <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> function produces an unbounded sequence on demand without ever materialising it. Pairing it with a dictionary-based <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> means memory grows only with the number of primes seen, not with the range scanned - the dictionary holds one pending composite per prime. I reach for this pattern when I need a stream of primes but have no known or practical upper bound to size a flat sieve array.
+</p>
+
+<h4>Walrus Operator for Combined Assign-and-Test</h4>
+<p>
+The Python loop writes <code>if (result := (result * prime_num)) &gt; limit</code>, which both assigns the new product and branches on it in one expression. This <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">assignment expression</a> - the walrus operator - is exactly the right tool when you want to advance a state variable and immediately test its updated value without a separate line.
+</p>
+
+<h4>Trial Division for a Small, Known Prime Count</h4>
+<p>
+When only a few primes are needed, <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> - testing each candidate against odd divisors up to its square root - is simpler than a sieve and allocates nothing. The C solution leans on this: with fewer than ten primes required, the cost is negligible. I prefer trial division over a sieve whenever the count of primes I need is small and known in advance.
+</p>
+
+<h4>Validate-Then-Commit in Greedy Loops</h4>
+<p>
+Both solutions advance a product greedily up to a constraint boundary, but they handle the edge differently. The C version computes the candidate product in a separate variable and only writes it back when it passes the test - so there is never a value to undo. The Python version multiplies first, then divides the last prime out on overshoot. The C style is generally cleaner because it eliminates the off-by-one undo logic entirely. This "tentatively step, check, commit or abandon" shape recurs throughout greedy and search algorithms.
+</p>
+
+<h4>Separation of Solver from Benchmark Runner</h4>
+<p>
+In both languages the algorithm lives in a pure <code>solve</code> function while a wrapper handles repeated runs, timing, and result-consistency checks. Keeping the logic isolated makes it testable on its own and lets the timing harness be reused unchanged across problems. The C runner parses its own flags out of <code>argv</code> before handing the remaining arguments to <code>solve</code>, cleanly separating infrastructure from the core function.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The decisive move here is mathematical, not algorithmic. Because n/phi(n) factors into independent contributions p/(p-1) from each distinct prime, and because smaller primes contribute the larger factors, the maximiser is always a <a href="https://en.wikipedia.org/wiki/Primorial" class="reference-source" target="_blank" rel="noopener noreferrer">primorial</a>. Seeing this turns a search over a million integers into about seven multiplications.
+</p>
+
+<p>
+Both solutions are correct and effectively instantaneous - every benchmark row records 0.0000 seconds, including the one-million case - so neither has a measurable speed advantage. The C version is marginally more elegant in sidestepping the rollback by validating before it commits, while the Python version showcases the lazy dictionary sieve, which would earn its keep if the problem demanded a much larger or open-ended stream of primes.
+</p>
+
+<ul>
+<li>When a score decomposes into a product of independent factors, ask which choice maximises each factor and whether a greedy ordering is globally optimal.</li>
+<li>Recognise primorials - products of consecutive primes from 2 - as the natural extremal family for totient-ratio problems.</li>
+<li>Use a lazy generator with a dictionary sieve when you need primes but have no known or practical upper bound.</li>
+<li>Do not over-engineer primality testing: if only a few primes are needed, trial division is the simplest correct choice.</li>
+<li>Prefer "validate then commit" over "commit then undo" in greedy loops - it avoids off-by-one rollback bugs.</li>
+<li>Always hunt for a structural reduction - monotonicity, decomposability - that collapses a large search before reaching for brute force.</li>
+</ul>
+
+</article>

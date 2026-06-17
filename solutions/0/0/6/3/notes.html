@@ -1,0 +1,76 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+I want to count every positive integer x that has exactly n digits and is simultaneously the n-th power of some integer base b. The first thing to pin down precisely is what "exactly n digits" means: an integer x has n digits when it lies in the half-open interval from 10^(n-1) up to 10^n - 1. So the entire problem reduces to counting the pairs (b, n) for which b^n falls inside that interval. The unlocking observation is that the base b is mathematically forced to be a single digit, that is, 1 through 9. The reasoning is short and decisive: if b is 10 or larger then b^n is at least 10^n, which already has n+1 digits, so it can never be an n-digit number. This single fact collapses the base axis of the search from infinite to exactly nine candidates per value of n.
+</p>
+
+<p>
+The second observation bounds the exponent n. The number of decimal digits of a positive integer x is floor(<a href="https://en.wikipedia.org/wiki/Common_logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">log10</a>(x)) + 1. Applied to b^n this gives floor(n * log10(b)) + 1 digits. For every base b below 10 we have log10(b) < 1, so the digit count grows strictly more slowly than n itself - it is sublinear in n. That means for each fixed base there is a largest n beyond which b^n has fewer than n digits and can never qualify again. The last base to drop out is b = 9, which stops producing n-digit n-th powers near n = 21. Because the whole search is bounded by roughly 9 * 21 candidate pairs - a fixed constant independent of any input - the algorithm runs in <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(1)</a> time. All the intellectual work is in establishing the bounds; once they are in hand, the implementation is almost mechanical, and the answer is 49.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Upward range scan with digit-count verification (Python and C)</h4>
+
+<p>
+Both of my solutions share the same skeleton. An outer loop walks n upward starting from 1, and for each n it counts how many single-digit bases produce an n-digit n-th power. The loop stops the instant a value of n yields zero qualifying bases, because the sublinear digit-growth argument guarantees that no larger n can ever succeed again. The two implementations differ only in how each candidate is tested, which is dictated by the arithmetic each language offers.
+</p>
+
+<p>
+The Python version narrows the bases analytically instead of testing all nine blindly. I invert the digit formula to get a lower bound, <code>start_range = ceil((10^(n-1))^(1/n))</code>, and an upper bound, <code>stop_range = ceil((10^n - 1)^(1/n)) + 1</code>. For each integer base in that interval I compute <code>i**n</code> exactly using Python's <a href="https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a>, then confirm the digit count with <code>len(str(r)) == n</code>. The crucial discipline here is that the floating-point bounds are used only to shrink the candidate set, never to make the final ruling. Because Python integers never overflow, the exact string-length check is always reliable even when floating-point inversion is slightly off at the edges.
+</p>
+
+<p>
+The C version cannot lean on unbounded integers, so I built a two-stage filter. First a cheap primary screen via log10: I compute <code>floor(n * log10(b)) + 1</code> and check whether it equals n, treating b = 1 specially since 1^n always has exactly one digit. If the screen passes, I confirm with exact integer arithmetic through <code>ipow</code>, which returns -1 if the product would overflow a <code>long long</code>. When the exact value is available, <code>ll_digit_count</code> verifies the digit total; when overflow is signalled, I trust the log10 estimate. That fallback is safe here because an overflowing power of a single-digit base would have far more than 21 digits and could never match a plausible n. Both routes converge on the same correct count of 49.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Generator expression with the walrus operator</h4>
+
+<p>
+My Python function <code>n_digit_nth_powers</code> uses <code>(r := (i**n))</code> inside a generator comprehension. The <a href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> (<code>:=</code>) is an assignment expression: it binds a value to a name while also evaluating to that value. Here it lets the comprehension compute <code>i**n</code> exactly once, bind it to <code>r</code>, test <code>len(str(r)) == n</code> in the filter, and yield <code>r</code> - all without recomputing the power. I reach for this idiom whenever a comprehension needs both to test and to emit the same computed value, since it eliminates the redundant second computation that the classic two-pass form would force.
+</p>
+
+<h4>While-with-walrus termination</h4>
+
+<p>
+The main loop is written as <code>while solutions := n_digit_nth_powers(n):</code>. The <a href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> again merges three steps - call the function, assign its result, and test the result's truthiness - into a single line. An empty tuple is falsy, so the loop exits cleanly the moment no base qualifies, without a separate break statement or sentinel variable. This is a tidy replacement for the familiar "loop forever, compute, break if empty" pattern.
+</p>
+
+<h4>Overflow-safe integer power in C</h4>
+
+<p>
+<code>ipow</code> multiplies repeatedly but guards each step with <code>result > (long long)9e18 / base</code> before multiplying, returning -1 as a sentinel if the next product would exceed the representable range. Because signed integer overflow is <a href="https://en.wikipedia.org/wiki/Undefined_behavior" class="reference-source" target="_blank" rel="noopener noreferrer">undefined behavior</a> in C, I must detect it before it happens rather than inspecting a wrapped result afterward - by the time the value wraps, the program is already in undefined territory. This pre-multiplication guard is the standard defensive technique for any product or power whose magnitude is not statically bounded.
+</p>
+
+<h4>Log10 as a fast primary filter</h4>
+
+<p>
+Rather than computing a full power just to count digits, the C code uses the identity that a positive integer x has floor(<a href="https://en.wikipedia.org/wiki/Common_logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">log10</a>(x)) + 1 digits. For b^n that is one floating-point multiply and a floor - far cheaper than multiprecision arithmetic. I keep the expensive exact integer check only as a secondary confirmation. This layering of a cheap approximation ahead of an exact confirmation is a broadly reusable performance pattern whenever the filtering criterion can be evaluated analytically.
+</p>
+
+<h4>Harness and solve separation</h4>
+
+<p>
+Both solutions isolate the algorithm in a <code>solve</code> function and keep timing, run-count parsing, and output formatting in the surrounding harness. This separation keeps the algorithm independently testable and makes multi-run benchmarking and consistency checks easy to bolt on without touching the core logic. It is a small structural discipline that pays off every time I want to measure or reuse the algorithm in isolation.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The insight that unlocks this problem is that the base is mathematically forced to a single digit: any base of 10 or more produces b^n >= 10^n, which has too many digits, so only b in 1..9 can ever work. Combined with the sublinear growth of the digit count of b^n for b < 10, the entire search collapses to under 200 candidate pairs and the problem becomes constant time. Both solutions run in effectively zero time in the benchmark - 0.0000 s for the C build and 0.0000 s for Python - so neither is meaningfully faster; the difference is one of style. Python's arbitrary-precision integers make the exact digit check effortless and the walrus-based code compact, while C demonstrates disciplined overflow handling and the log10 fast filter as a teaching exercise. For a problem this small, I find the Python version the more elegant expression of the idea.
+</p>
+
+<ul>
+<li>Before writing any loop, ask what mathematically constrains the search space - a tight bound can turn an unbounded search into a handful of cases.</li>
+<li>The digit count of a positive integer is floor(log10(x)) + 1, a constant-time formula that avoids string conversion in performance-sensitive code.</li>
+<li>In Python, the walrus operator merges compute, assign, and test into one expression, eliminating redundant work in comprehensions and loop conditions.</li>
+<li>In C, always guard integer powers and products with a pre-multiplication overflow check; never rely on detecting overflow after it has occurred.</li>
+<li>Layer a cheap analytical filter ahead of an exact verification to reject most candidates before paying for expensive computation.</li>
+<li>Keep the algorithm in a pure solve function and the timing and argument parsing in the harness, so the logic stays testable and benchmarkable.</li>
+</ul>
+
+</article>

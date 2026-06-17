@@ -1,10 +1,8 @@
 /* Solution to Euler Problem 85: Counting Rectangles. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-/* Triangular number: sum of (length - k + 1) for k in 1..length = length*(length+1)/2 */
+/* Triangular number T(length) = length*(length+1)/2: the count of rectangles along one axis,
+ * since choosing 2 of length+1 grid lines gives C(length+1, 2). */
 static int triangular(int length) {
     return length * (length + 1) / 2;
 }
@@ -21,16 +19,20 @@ static int bisect_left(int *numbers, int len, int x) {
     return lo;
 }
 
-long long solve(int argc, char *argv[]) {
-    int max_error = atoi(argv[1]);
-    int max_side  = atoi(argv[2]);
-    int target    = atoi(argv[3]);
+/* Triangular-number binary search: rectangle count factors as T(H)*T(W), so for each width W
+ * binary-search the sorted triangular numbers for the height whose product is nearest target,
+ * inspecting the two neighbours of the insertion point; O(max_side * log max_side). */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int max_error = parse_int(argv[1]);
+    int max_side  = parse_int(argv[2]);
+    int target    = parse_int(argv[3]);
 
     int len_numbers = max_side - 1;  /* lengths 1 .. max_side-1 */
     int *numbers = malloc((size_t)len_numbers * sizeof(int));
     if (!numbers) {
         fprintf(stderr, "out of memory\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
     for (int i = 0; i < len_numbers; i++) {
         numbers[i] = triangular(i + 1);  /* numbers[i] = T(i+1) */
@@ -44,7 +46,8 @@ long long solve(int argc, char *argv[]) {
         int num_width = numbers[width - 1];
         if (num_width == 0) continue;
 
-        /* find insertion point for target / num_width */
+        /* find insertion point for target / num_width (integer division is fine:
+         * the two bracketing neighbours still contain the true closest value) */
         int q = target / num_width;
         int j = bisect_left(numbers, len_numbers, q);
 
@@ -69,55 +72,5 @@ long long solve(int argc, char *argv[]) {
 
     (void)last_num;
     free(numbers);
-    return (long long)best_area;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)best_area)); return _answer; }
 }

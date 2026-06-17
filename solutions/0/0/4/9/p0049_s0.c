@@ -1,9 +1,7 @@
 /* Solution to Euler Problem 49: Prime Permutations. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
+/* Return all primes below max_num via Sundaram's sieve (marks k = i + j + 2ij, prime = 2k+1). */
 static int *primes_sundaram_sieve(int max_num, int *out_count) {
     *out_count = 0;
     if (max_num < 2) return NULL;
@@ -11,6 +9,7 @@ static int *primes_sundaram_sieve(int max_num, int *out_count) {
     unsigned char *marked = calloc((size_t)(n + 1), 1);
     if (!marked) return NULL;
     for (int i = 1; i <= n; i++) {
+        /* widen to long long so i + j + 2ij cannot overflow int for large bounds */
         for (int j = i; (long long)i + j + 2LL * i * j <= n; j++) {
             marked[i + j + 2 * i * j] = 1;
         }
@@ -32,10 +31,12 @@ static int *primes_sundaram_sieve(int max_num, int *out_count) {
     return primes;
 }
 
+/* Integer comparator for qsort over the sibling values. */
 static int cmp_int(const void *a, const void *b) {
     return (*(int*)a) - (*(int*)b);
 }
 
+/* String comparator for qsort over the prime strings (enables binary search). */
 static int cmp_str(const void *a, const void *b) {
     return strcmp(*(const char**)a, *(const char**)b);
 }
@@ -73,6 +74,7 @@ static int permute(char *s, int len, char *results, int stride, int max_results)
     return count;
 }
 
+/* Binary search a sorted string array for an exact match; substitute for a hash-set membership test. */
 static int in_sorted_str_array(char **arr, int size, const char *key) {
     int lo = 0, hi = size - 1;
     while (lo <= hi) {
@@ -85,14 +87,18 @@ static int in_sorted_str_array(char **arr, int size, const char *key) {
     return 0;
 }
 
+/* Linear-scan deduplication of the small result list (sequence counts are tiny). */
 static int seq_in_results(char **results, int count, const char *s) {
     for (int i = 0; i < count; i++)
         if (strcmp(results[i], s) == 0) return 1;
     return 0;
 }
 
-char *solve(int argc, char *argv[]) {
-    int n = (argc > 1) ? atoi(argv[1]) : 4;
+/* Group n-digit primes by permutation siblings, then bucket pairwise differences to find
+   arithmetic triples; O(P * n!) permutation work plus O(|family|^2) per family. A bucket holding
+   exactly three values is an arithmetic progression with that common difference. */
+const char *solve(int argc, char *argv[]) {
+    int n = (argc > 1) ? parse_int(argv[1]) : 4;
 
     int min_n_digit = 1;
     for (int i = 0; i < n - 1; i++) min_n_digit *= 10;
@@ -141,7 +147,7 @@ char *solve(int argc, char *argv[]) {
 
         int np = permute(work, plen, perm_buf, stride, max_perms);
 
-        /* Collect unique prime siblings */
+        /* Collect unique prime siblings (drop leading zeros and non-primes) */
         int sib_cap = max_perms + 4;
         int sib_count = 0;
         int *sibs = malloc((size_t)sib_cap * sizeof(int));
@@ -160,6 +166,7 @@ char *solve(int argc, char *argv[]) {
             }
         }
 
+        /* Early prune: a family with fewer than three primes cannot contain a triple */
         if (sib_count < 3) { free(sibs); continue; }
 
         qsort(sibs, (size_t)sib_count, sizeof(int), cmp_int);
@@ -170,7 +177,7 @@ char *solve(int argc, char *argv[]) {
         int *diff_keys = malloc((size_t)max_diffs * sizeof(int));
         /* Each diff bucket: store up to sib_count values */
         int *diff_set_counts = calloc((size_t)max_diffs, sizeof(int));
-        /* Flat storage: diff_sets_data[bucket_idx][value_idx] */
+        /* Flat storage with fixed stride sib_count avoids per-bucket allocation: data[bucket][slot] */
         int *diff_sets_data = malloc((size_t)(max_diffs * sib_count) * sizeof(int));
         int diff_count = 0;
 
@@ -206,6 +213,7 @@ char *solve(int argc, char *argv[]) {
             }
         }
 
+        /* A bucket with exactly three distinct values is the arithmetic triple for that difference */
         for (int k = 0; k < diff_count; k++) {
             if (diff_set_counts[k] == 3) {
                 int *trio = diff_sets_data + k * sib_count;
@@ -260,55 +268,4 @@ char *solve(int argc, char *argv[]) {
     free(sequences);
 
     return result;
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (result) {
-            if (strcmp(cur, result) != 0) {
-                fprintf(stderr, "Expected consistent result, got %s previous result=%s\n",
-                        cur, result);
-                rc = 1;
-            }
-            free(cur);
-        } else {
-            result = cur;
-        }
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "[]");
-    free(result);
-    return rc;
 }

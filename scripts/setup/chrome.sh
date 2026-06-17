@@ -62,7 +62,6 @@ install_chrome() {
 
     if chrome_is_installed; then
         echo "Google Chrome is already installed"
-        install_browser_script
         return 0
     fi
 
@@ -73,7 +72,7 @@ install_chrome() {
     rm -f google-chrome-stable_current_amd64.deb
     echo "Google Chrome installation completed"
     install_browser_script
-    install_browser_completion
+    browser start
 }
 
 install_browser_script() {
@@ -92,6 +91,7 @@ install_browser_script() {
 # - Checks if Chrome is currently running
 # - Starts Chrome in background (nohup)
 # - Opens URLs in new tabs in existing or new Chrome instances
+# - Refreshes and focuses the existing tab when the URL is already open
 # - Supports private browsing (incognito), reusing existing incognito windows
 #
 # Usage:
@@ -137,7 +137,17 @@ get_browser_binary() {
 }
 
 check_running() {
-  # Use -f so it matches anywhere in the command line
+  # "Running" means *our* managed instance (the one launched with the remote
+  # debugging port and the dedicated user-data-dir) is up and reachable, not
+  # just any chrome process. This is what lets us open tabs into it reliably;
+  # a plain pgrep would also match the user's normal-profile Chrome, against
+  # which our --user-data-dir launch would spawn a separate window.
+  if command -v curl >/dev/null 2>&1; then
+    curl -sf --max-time 1 "http://localhost:${BROWSER_DEBUG_PORT}/json/version" \
+      >/dev/null 2>&1 && return 0
+    return 1
+  fi
+  # No curl: fall back to a best-effort process match.
   pgrep -f "${BROWSER_PGREP_PATTERN}" >/dev/null 2>&1
 }
 
@@ -184,27 +194,160 @@ kill_browser() {
   fi
 }
 
-url_is_already_open() {
-  local url="$1"
-  # Normalise local paths to file:// URLs so they match what Chrome stores
-  if [[ "${url}" != *://* ]]; then
-    url="file://$(realpath "${url}" 2>/dev/null || echo "${url}")"
+# Canonicalise a URL/path for comparison so that the value we were asked to
+# open lines up with what Chrome actually stores. Chrome appends a trailing
+# slash to bare origins (https://example.com -> https://example.com/) and keeps
+# #fragments, which is exactly why a naive substring match kept missing and
+# re-opening duplicate tabs.
+normalize_url() {
+  local u="$1"
+  # Local paths -> file:// URLs
+  if [[ "${u}" != *://* ]]; then
+    u="file://$(realpath "${u}" 2>/dev/null || printf '%s' "${u}")"
   fi
+  u="${u%%#*}"   # drop any #fragment
+  u="${u%/}"     # drop a single trailing slash
+  printf '%s' "${u}"
+}
+
+# Emit one currently-open tab URL per line via the DevTools JSON endpoint.
+# Matching on the exact "url": key avoids the faviconUrl / devtoolsFrontendUrl
+# / webSocketDebuggerUrl fields (whose key has an uppercase "Url").
+list_open_tab_urls() {
   command -v curl >/dev/null 2>&1 || return 1
-  curl -sf --max-time 1 "http://localhost:${BROWSER_DEBUG_PORT}/json" 2>/dev/null | grep -qF "${url}"
+  curl -sf --max-time 1 "http://localhost:${BROWSER_DEBUG_PORT}/json" 2>/dev/null \
+    | grep -oE '"url":[[:space:]]*"[^"]*"' \
+    | sed -E 's/^"url":[[:space:]]*"(.*)"$/\1/'
+}
+
+url_is_already_open() {
+  local want u
+  want="$(normalize_url "$1")"
+  while IFS= read -r u; do
+    [ -n "${u}" ] || continue
+    if [ "$(normalize_url "${u}")" = "${want}" ]; then
+      return 0
+    fi
+  done < <(list_open_tab_urls)
+  return 1
+}
+
+# Print the DevTools target id of the first open tab whose URL matches $1 (after
+# normalisation), or nothing. Chrome's /json output is pretty-printed one field
+# per line, and within each target object the "id" field precedes "url", so we
+# remember the most recent id and emit it as soon as a matching url turns up.
+# Only the lowercase "url" key matches (faviconUrl/webSocketDebuggerUrl/etc. all
+# capitalise the U), which is the same trick list_open_tab_urls relies on.
+find_open_tab_id() {
+  command -v curl >/dev/null 2>&1 || return 1
+  local want line id="" url
+  want="$(normalize_url "$1")"
+  while IFS= read -r line; do
+    case "${line}" in
+      *'"id":'*)
+        id="$(printf '%s' "${line}" | sed -E 's/.*"id":[[:space:]]*"([^"]*)".*/\1/')"
+        ;;
+      *'"url":'*)
+        url="$(printf '%s' "${line}" | sed -E 's/.*"url":[[:space:]]*"([^"]*)".*/\1/')"
+        if [ "$(normalize_url "${url}")" = "${want}" ]; then
+          printf '%s' "${id}"
+          return 0
+        fi
+        ;;
+    esac
+  done < <(curl -sf --max-time 1 "http://localhost:${BROWSER_DEBUG_PORT}/json" 2>/dev/null)
+  return 1
+}
+
+# Send a Page.reload command to a tab over the DevTools WebSocket. Chrome only
+# exposes reload through the protocol (the /json HTTP endpoints can create,
+# activate and close tabs but never refresh one), so we speak just enough of the
+# WebSocket wire format by hand: an HTTP/1.1 Upgrade handshake over a raw TCP
+# connection, followed by a single masked text frame carrying the JSON command.
+# The mask is all-zero, which RFC 6455 permits and which lets us write the
+# payload bytes unchanged. Returns non-zero if the socket or handshake fails.
+ws_reload() {
+  local id="$1"
+  local host="localhost"
+  local key payload len line
+  exec 3<>"/dev/tcp/${host}/${BROWSER_DEBUG_PORT}" 2>/dev/null || return 1
+  key="$(head -c 16 /dev/urandom | base64)"
+  printf 'GET /devtools/page/%s HTTP/1.1\r\nHost: %s:%s\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n' \
+    "${id}" "${host}" "${BROWSER_DEBUG_PORT}" "${key}" >&3
+  # Drain the handshake response up to its blank line; bail on EOF/timeout so we
+  # never hang on a connection that did not upgrade.
+  while IFS= read -r -t 2 line <&3; do
+    line="${line%$'\r'}"
+    [ -z "${line}" ] && break
+  done
+  payload='{"id":1,"method":"Page.reload"}'
+  len=${#payload}
+  # FIN + text opcode (0x81); MASK bit set alongside the 7-bit length (our
+  # payloads are always well under 126 bytes); a zero mask key; the payload.
+  printf '\x81' >&3
+  printf "\\x$(printf '%02x' $((0x80 | len)))" >&3
+  printf '\x00\x00\x00\x00' >&3
+  printf '%s' "${payload}" >&3
+  exec 3>&-
+  return 0
+}
+
+# Bring an already-open tab to the foreground (best effort, via the HTTP
+# activate endpoint) and refresh it over the WebSocket. Returns ws_reload's
+# status so the caller can fall back to a plain "already open" message.
+reload_open_tab() {
+  local id="$1"
+  local no_refresh="$2"
+  if command -v curl >/dev/null 2>&1; then
+    curl -sf --max-time 2 "http://localhost:${BROWSER_DEBUG_PORT}/json/activate/${id}" >/dev/null 2>&1 || true
+  fi
+  [[ -z "${no_refresh}" ]] && ws_reload "${id}"
+}
+
+# Open a URL as a new *tab* in the running managed instance. Going through the
+# DevTools /json/new endpoint always creates a tab inside the existing browser
+# (never a separate window), which is the behaviour the binary's non-existent
+# --new-tab switch only pretended to provide. Newer Chrome requires PUT; we try
+# PUT, then GET (older builds), then fall back to handing the URL to the binary.
+open_url_in_new_tab() {
+  local url="$1"
+  if command -v curl >/dev/null 2>&1; then
+    if curl -sf --max-time 2 -X PUT \
+         "http://localhost:${BROWSER_DEBUG_PORT}/json/new?${url}" >/dev/null 2>&1; then
+      return 0
+    fi
+    if curl -sf --max-time 2 \
+         "http://localhost:${BROWSER_DEBUG_PORT}/json/new?${url}" >/dev/null 2>&1; then
+      return 0
+    fi
+  fi
+  # Fallback: a bare URL handed to the running instance opens in a new tab of
+  # the most recently focused window.
+  "${BROWSER_BIN}" "--user-data-dir=${BROWSER_DEBUG_DIR}" "${url}" >/dev/null 2>&1 &
 }
 
 open_url() {
   local url="$1"
+  local no_refresh="$2"
   if ! check_running; then
     echo "${BROWSER_NAME} not running; starting with URL..."
     nohup "${BROWSER_BIN}" "--remote-debugging-port=${BROWSER_DEBUG_PORT}" "--user-data-dir=${BROWSER_DEBUG_DIR}" "${url}" >/dev/null 2>&1 &
     sleep 1
   elif url_is_already_open "${url}"; then
-    echo "URL ${url} is already open in ${BROWSER_NAME}."
+    local tab_id
+    tab_id="$(find_open_tab_id "${url}")"
+    if [ -n "${tab_id}" ] && reload_open_tab "${tab_id}" "${no_refresh}"; then
+      [[ -z "${no_refresh}" ]] && {
+        echo "URL ${url} already open in ${BROWSER_NAME}; focused the existing tab and refreshed."
+      } || {
+        echo "URL ${url} already open in ${BROWSER_NAME}; focused the existing tab."
+      }
+    else
+      echo "URL ${url} is already open in ${BROWSER_NAME}; not opening a duplicate."
+    fi
   else
-    echo "Opening URL in existing ${BROWSER_NAME} window..."
-    "${BROWSER_BIN}" --new-tab "${url}" >/dev/null 2>&1 &
+    echo "Opening URL in a new tab in the existing ${BROWSER_NAME} window..."
+    open_url_in_new_tab "${url}"
   fi
 }
 
@@ -226,12 +369,13 @@ show_browser_usage() {
   local script_name
   script_name="$(basename "${BASH_SOURCE[0]}")"
   echo "Usage:"
-  echo "  ${script_name}                     → Print Chrome status"
-  echo "  ${script_name} start               → Start Chrome (nohup)"
-  echo "  ${script_name} open <URL>          → Open URL in new tab/window"
-  echo "  ${script_name} private <URL>       → Open URL in incognito tab/window"
-  echo "  ${script_name} kill                → Kill all Chrome instances"
-  echo "  ${script_name} help | -h           → Show this help"
+  echo "  ${script_name}                          → Print Chrome status"
+  echo "  ${script_name} start                    → Start Chrome (nohup)"
+  echo "  ${script_name} open <URL>               → Open URL in new tab/refresh existing tab with url open"
+  echo "  ${script_name} open <URL> --no-refresh  → Open URL in new tab/activate existing tab with url open"
+  echo "  ${script_name} private <URL>            → Open URL in incognito tab/window"
+  echo "  ${script_name} kill                     → Kill all Chrome instances"
+  echo "  ${script_name} help | -h                → Show this help"
 }
 
 ### MAIN LOGIC ###
@@ -264,10 +408,14 @@ browser_main() {
           ;;
       esac
       ;;
-    2)  # Two arguments: open URL | private URL
+    2 | 3)  # Two or three arguments: open URL [--no-refresh] | private URL
       case $1 in
         "open")   # Open URL in normal Chrome session
-          open_url "$2"
+          local no_refresh=""
+          if [ "${3:-}" = "--no-refresh" ]; then
+            no_refresh="--no-refresh"
+          fi
+          open_url "$2" "${no_refresh}"
           return 0
           ;;
         "private") # Open URL in incognito, reusing existing incognito window if any
@@ -295,7 +443,13 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
   export -f print_status
   export -f start_browser
   export -f kill_browser
+  export -f normalize_url
+  export -f list_open_tab_urls
   export -f url_is_already_open
+  export -f find_open_tab_id
+  export -f ws_reload
+  export -f reload_open_tab
+  export -f open_url_in_new_tab
   export -f open_url
   export -f open_private_url
   export -f show_browser_usage
@@ -331,6 +485,13 @@ _browser_completions() {
       case "${prev}" in
         open|private)
           COMPREPLY=($(compgen -f -- "${cur}"))
+          ;;
+      esac
+      ;;
+    3)
+      case "${COMP_WORDS[1]}" in
+        open)
+          COMPREPLY=($(compgen -W "--no-refresh" -- "${cur}"))
           ;;
       esac
       ;;

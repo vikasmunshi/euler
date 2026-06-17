@@ -1,0 +1,71 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    This problem asks me to solve <a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell's equation</a>, x² - Dy² = 1, for every non-square integer D up to 1000, and to report the D whose minimal (fundamental) solution has the largest x. The phrase "minimal solution in x" means the smallest positive-integer pair (x, y) satisfying the equation; every other solution is generated from it. The naive idea - iterate over candidate values of x or y and test - is hopeless, because the fundamental solution can be astronomically large. For D = 661 the value of x exceeds 10^17, so any search bounded by the magnitude of the answer would never terminate. The problem only becomes tractable through a classical theorem of number theory: the fundamental solution of Pell's equation always appears among the <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> convergents of sqrt(D).
+  </p>
+  <p>
+    A <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> expresses a number as a0 + 1/(a1 + 1/(a2 + ...)), and a convergent is the rational p/q obtained by truncating that expansion at a chosen depth. For a quadratic irrational such as sqrt(D), the expansion is eventually periodic - the integer terms repeat in a fixed-length cycle - which is exactly what lets me compute the whole thing in finite time. The crucial refinement is that one specific convergent yields the fundamental solution, and which one depends on the parity of the period length L. If L is odd, the solution sits at convergent index L - 1; if L is even, at index 2L - 1. The period length is O(sqrt(D)), and the numerators of the convergents grow exponentially with the index, so the digits of x grow as O(sqrt(D)) too - which forces me to use <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>. The overall cost is O(D * sqrt(D)) big-integer operations, fast enough to finish in milliseconds for D up to 1000.
+  </p>
+
+  <h3>Solution Approach</h3>
+  <h4>Continued-Fraction Convergents for Pell's Equation (Python and C)</h4>
+  <p>
+    Both files implement the same algorithm; Python defers big-integer arithmetic to its runtime, while C carries its own big-integer type. I chose this method because it is correct by theorem and runs in time proportional to the period length rather than the magnitude of the answer.
+  </p>
+  <p>
+    <strong>Step 1 - Generate the continued fraction.</strong> Starting from a0 = floor(sqrt(D)), I produce each subsequent term with the standard recurrence over three state variables m, n, a: <code>m = n*a - m</code>, <code>n = (D - m*m)/n</code>, <code>a = floor((sqrt(D) + m)/n)</code>. These three integers fully encode the "reduced" form of the quadratic surd at each step. I stop when a term equals 2*a0, which is the classical signal that one full period of the <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> has been emitted. In C this lives in <code>compute_cf</code>; in Python it is the <code>while</code> loop inside <code>find_fundamental_solution_to_pell_equation</code>.
+  </p>
+  <p>
+    <strong>Step 2 - Pick the right convergent index.</strong> With the stored array length including a0, the period length is <code>cf_len - 1</code>. If that length is even I evaluate the convergent at index <code>2*cf_len - 3</code>; if odd, at index <code>cf_len - 2</code>. This parity rule comes directly from <a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell theory</a> and means I never have to generate or test more than the one convergent that matters.
+  </p>
+  <p>
+    <strong>Step 3 - Evaluate the convergent backward.</strong> I evaluate the n-th convergent from the innermost term outward, repeatedly applying <code>term + 1/running_value</code>. To reach indices beyond a single period I wrap the term index with <code>(i - 1) % period_length + 1</code>, holding a0 fixed at position 0 and cycling through the periodic part. The backward evaluation keeps only two big integers (numerator and denominator) alive at any moment, which matters because the convergent index can be large.
+  </p>
+  <p>
+    <strong>Language-specific differences.</strong> In Python I use <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">fractions.Fraction</a>, which carries an exact <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a> numerator and denominator and reduces to lowest terms automatically. In C, where there is no native big integer, I implement a <code>BigInt</code> struct holding up to 512 limbs in base 10^9, little-endian. The only operations I need are addition (<code>bi_add</code>) and multiplication by a small scalar (<code>bi_mul_small</code>); both are simple schoolbook loops. I chose base 10^9 because a limb fits comfortably in a 64-bit word and the product of two limbs fits in 128 bits, which I obtain through GCC's <code>unsigned __int128</code> extension.
+  </p>
+
+  <h3>Programming Techniques</h3>
+  <h4>State-Variable Recurrence for the Continued Fraction</h4>
+  <p>
+    The <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> expansion is driven by just three integers (m, n, a) that fully encode the current state of the surd. This is the classic <a href="https://en.wikipedia.org/wiki/Finite-state_machine" class="reference-source" target="_blank" rel="noopener noreferrer">state-machine</a> pattern: compact state, an algebraic transition rule, and a known stopping invariant (<code>a == 2*a0</code>). It runs in O(period) time with O(1) extra state. Reach for state variables whenever a sequence is defined by a recurrence over a small fixed state - it avoids storing history and keeps the loop trivially efficient.
+  </p>
+  <h4>Backward (Horner-Style) Evaluation</h4>
+  <p>
+    Evaluating the convergent from the innermost term outward means I never need to maintain the full table of intermediate convergents. The forward three-term recurrence (h_n = a_n*h_{n-1} + h_{n-2}) would also work but requires tracking two prior numerators and two prior denominators. The backward, <a href="https://en.wikipedia.org/wiki/Horner%27s_method" class="reference-source" target="_blank" rel="noopener noreferrer">Horner-style</a> approach keeps memory constant - only two values alive - which is preferable when the truncation depth can be large.
+  </p>
+  <h4>Exact Rational Arithmetic with fractions.Fraction</h4>
+  <p>
+    In Python I represent each partial convergent as a <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">fractions.Fraction</a>, which keeps an exact arbitrary-precision numerator and denominator and auto-reduces at every step. This is the right tool when a computation is inherently rational and correctness outweighs raw speed; the <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">GCD</a> overhead of reduction is small compared to the clarity it buys. Use it whenever you need exact rationals and the magnitudes are not astronomically large.
+  </p>
+  <h4>Custom Big Integers via Limb Arrays in C</h4>
+  <p>
+    The C <code>BigInt</code> stores digits as 64-bit limbs in base 10^9, least-significant first. I chose this base because a limb fits in a 64-bit word, the product of two limbs fits in 128 bits, and decimal output (if ever needed) is nearly free. Only addition and small-scalar multiplication are implemented, each an O(len) loop. This is the simplest self-contained <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a> design when porting an algorithm to C without pulling in a full library like <a href="https://gmplib.org/" class="reference-source" target="_blank" rel="noopener noreferrer">GMP</a>.
+  </p>
+  <h4>(value, payload) Tuples Fed to max with itemgetter</h4>
+  <p>
+    The Python <code>solve</code> builds a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> of <code>(x, d)</code> tuples and passes it to <a href="https://docs.python.org/3/library/functions.html#max" class="reference-source" target="_blank" rel="noopener noreferrer">max</a> with <a href="https://docs.python.org/3/library/operator.html#operator.itemgetter" class="reference-source" target="_blank" rel="noopener noreferrer">operator.itemgetter</a>(0) as the key, then takes the last element of the winner. Because tuple comparison is lexicographic, the value to maximise comes first and the payload (the answer D) rides along. This one-pass, no-materialisation idiom is broadly reusable whenever you want the argument that achieves an extreme value.
+  </p>
+  <h4>Float sqrt with is_integer for Perfect-Square Detection</h4>
+  <p>
+    I skip perfect squares with <code>math.sqrt(d).is_integer()</code>. For D up to 10000 every <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a> has an exactly representable double-precision square root, so the test is reliable here. Be aware that for very large D this can fail due to rounding; the robust fallback is <code>math.isqrt(d)**2 == d</code>, which uses integer arithmetic only.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The core insight is that an apparently unbounded <a href="https://en.wikipedia.org/wiki/Diophantine_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Diophantine</a> search collapses to a finite algebraic computation once you know that <a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell</a> solutions live among the <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> convergents of sqrt(D), with the period parity selecting the right convergent. This reduces the work per D to O(sqrt(D)) big-integer operations.
+  </p>
+  <p>
+    Both files implement the identical algorithm. The C version is dramatically faster: on the main case (D up to 1000) it runs in 0.0004 s versus 0.0201 s for Python - roughly 50x - and on the extra case (D up to 10000) it takes 0.0106 s versus 0.6788 s, about 64x. The gap is entirely big-integer overhead: Python's <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer">Fraction</a> objects allocate and reduce on every step, while the C limb arrays operate on raw words. The Python version is the more elegant to read, while the C version is the one to choose when speed matters.
+  </p>
+  <ul>
+    <li>When a search space is unbounded, look for a theorem that maps the answer onto a finite, computable structure - here, continued-fraction convergents.</li>
+    <li>Memorise that Pell's equation x² - Dy² = 1 is solved by convergents of sqrt(D), with the period-parity rule choosing the convergent index.</li>
+    <li>Continued fractions of quadratic surds are periodic; the "term equals 2*a0" criterion is a cheap, exact way to detect the end of one period.</li>
+    <li>Use a small set of state variables for any sequence defined by a recurrence - it gives O(1) space and avoids storing history.</li>
+    <li>Backward (innermost-first) evaluation of nested expressions keeps memory constant when only the final value is needed.</li>
+    <li>Reach for exact rational types (Python's Fraction) when correctness matters and magnitudes are moderate; implement a base-10^9 limb array in C when you need big integers without a library.</li>
+    <li>The (value, payload) tuple passed to max/min with itemgetter is a clean one-pass idiom for recovering the argument that achieves an extreme.</li>
+    <li>Prefer integer perfect-square tests (isqrt(d)**2 == d) over floating-point sqrt for large inputs, even when the float test happens to suffice for small ranges.</li>
+  </ul>
+</article>

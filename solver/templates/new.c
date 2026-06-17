@@ -1,92 +1,49 @@
-/** Solution to Euler $problem. */
-#include <libgen.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+/** Solution to Euler $problem.
+ *
+ * A thin solution template: `#include "runner.h"` supplies everything but `solve()`. Its
+ * `main()` parses `--runs=N` / `--show`, benchmarks `solve()`, checks the result is consistent
+ * across runs, and prints the `<runs> <avg_seconds> <result>` line the harness reads. The header
+ * also provides the argument helpers — `parse_int` (ints, power notation, '_' separators),
+ * `parse_list` ("[1,2,3]" literals), `get_text_file` (a statement-linked file, served from the
+ * cached resources/ copy) — and the `show` flag (set by `--show`).
+ *
+ * Typical workflow:
+ *     1. Implement solve(): parse each argv[i] with the runner helper it needs, then return
+ *        the answer as a NUL-terminated string.
+ *     2. Compile (solver compile), then run: ./file <arg>... [--runs=N] [--show]
+ */
+#include "runner.h"
 
-char *get_text_file(const char *src) {
-    /* Return the contents of a file from the 'resources' directory. */
-    const char *slash = strrchr(src, '/');
-    const char *name_start = slash ? slash + 1 : src;
-    const char *q = strchr(name_start, '?');
-    size_t name_len = q ? (size_t)(q - name_start) : strlen(name_start);
-
-    char exe_path[4096];
-    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
-    if (len < 0) return NULL;
-    exe_path[len] = '\0';
-
-    char path[4096];
-    int pn = snprintf(path, sizeof(path), "%s/resources/%.*s", dirname(exe_path), (int)name_len, name_start);
-    if (pn < 0 || (size_t)pn >= sizeof(path)) return NULL;
-
-    FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
-    long sz = ftell(f);
-    if (sz < 0) { fclose(f); return NULL; }
-    rewind(f);
-    char *buf = malloc((size_t)sz + 1);
-    if (!buf) { fclose(f); return NULL; }
-    if (fread(buf, 1, (size_t)sz, f) != (size_t)sz) { free(buf); fclose(f); return NULL; }
-    buf[sz] = '\0';
-    fclose(f);
-    return buf;
-}
-
-long long solve(int argc, char *argv[]) {
-    /* int kwarg = atoi(argv[1]); */
-    return -1;  /* TODO: implement solve() */
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
+/** Solve the Project Euler problem with the given parameters.
+ *
+ * Name the approach and its complexity here — e.g. "Inclusion-exclusion on the
+ * closed-form arithmetic-series sum; O(1)." — then replace this placeholder with the
+ * real approach. argv[0] is the program name; positional arguments follow (flags are
+ * stripped by the runner).
+ *
+ * @param argc Number of forwarded arguments.
+ * @param argv Forwarded positional arguments.
+ * @return The computed answer as a NUL-terminated string (see runner.h), or NULL.
+ */
+const char *solve(int argc, char *argv[]) {
+    /* Each line is an independent example — use whichever helper the problem needs. */
+    long long arg1 = parse_int(argv[1]);               /* parse an integer (power notation, '_' separators) */
+    int arg2_len;
+    long long *arg2 = parse_list(argv[1], &arg2_len);  /* parse a list literal: "[1,2,3]" -> {1,2,3} */
+    char *arg3 = get_text_file(argv[1]);               /* read a file from resources/ */
+    if (show) {                                        /* gate intermediate output behind --show */
+        printf("arg1=%lld, arg2=[", arg1);
+        for (int i = 0; i < arg2_len; i++) printf("%s%lld", i ? "," : "", arg2[i]);
+        printf("], arg3=%s\n", arg3 ? arg3 : "(null)");
     }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    free(arg2);
+    free(arg3);
+    /* Return the answer as a string. For a numeric result, format into a static
+     * buffer that outlives this call, e.g.:
+     *     static char answer[32];
+     *     snprintf(answer, sizeof answer, "%lld", result);
+     *     return answer;
+     */
+    fprintf(stderr, "implement solve() first\n");
+    return NULL;  /* TODO: implement solve() */
 }

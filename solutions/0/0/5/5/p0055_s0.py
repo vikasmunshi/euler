@@ -3,12 +3,11 @@
 """ Solution to Euler Problem 55: Lychrel Numbers [Level 2]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def is_lychrel(*, number: int, max_iterations: int) -> bool:
+    """True if no palindrome appears within max_iterations reverse-and-add steps; tests the result, not the seed."""
     for _ in range(max_iterations):
         number += int(str(number)[::-1])
         if str(number) == str(number)[::-1]:
@@ -17,40 +16,14 @@ def is_lychrel(*, number: int, max_iterations: int) -> bool:
         return True
 
 
-def solve(*, max_iterations: int, max_limit: int) -> int:
-    return sum((is_lychrel(number=i, max_iterations=max_iterations) for i in range(1, max_limit + 1)))
+@runner.main
+def solve(*args: str) -> str:
+    """Count Lychrel numbers up to max_limit via bounded big-integer reverse-and-add; O(max_limit * max_iterations)."""
+    max_iterations = runner.parse_int(args[0])
+    max_limit = runner.parse_int(args[1])
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sum((is_lychrel(number=i, max_iterations=max_iterations) for i in range(1, max_limit + 1))))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_iterations=int(argv[1]), max_limit=int(argv[2])))
+    raise SystemExit(solve())

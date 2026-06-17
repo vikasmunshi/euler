@@ -1,220 +1,120 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Experimental interactive shell built on prompt-toolkit and rich.
+"""Interactive shell for v2: readline → lexer → parser → interpreter.
 
-Replaced the earlier 'Cmd' based framework.
-Functionally equivalent, but with a more modern and flexible look and feel.
-
-Design goals
-------------
-* Look and feel inspired by the Junie UI: a soft, modern terminal aesthetic
-  with rounded panels, subtle colours, a left-side accent bar, and a compact
-  status footer.
-* Strict separation between the *framework* (this file) and *commands*
-  (to be added in sibling modules).
-* Async-friendly prompt loop powered by 'prompt_toolkit.PromptSession' with
-  history, auto-suggest, completion, and key bindings.
-* Rich-rendered output via a shared: class:`rich.console.Console`.
+`SolverShell` reads command blocks (prompt-toolkit when interactive, plain
+`input()` otherwise), lexes and parses them, and runs them through the v2
+interpreter. Commands are dispatched through the shell's own registry (populated
+by importing the command modules); the shell is the interpreter's command runner.
 """
 from __future__ import annotations
 
-import os
-import shlex
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Callable, Iterable, TextIO
+__all__ = ['SolverShell']
 
-from prompt_toolkit import PromptSession
-from prompt_toolkit.application import get_app
-from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+import os
+import re
+import shlex
+import sys
+from contextlib import contextmanager
+from pathlib import Path
+from typing import Any, Iterable, Iterator
+
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
-from prompt_toolkit.filters import Condition
 from prompt_toolkit.formatted_text import FormattedText
-from prompt_toolkit.history import FileHistory
-from prompt_toolkit.key_binding import KeyBindings, KeyPressEvent
-from rich.console import Console
+from prompt_toolkit.shortcuts import clear_title, set_title
 from rich.panel import Panel
 from rich.text import Text
 
-from solver.config import config
+from solver.config import ExitCodes, config
+from solver.shell.command import Context, registry
+from solver.shell.interpreter import execute
+from solver.shell.lexer import LexError, lex
+from solver.shell.parser import ParserError, parse, set_commands
+from solver.shell.session import SessionLog
+from solver.shell.tty import console, make_session, read_blocks, trim_history
+from solver.shell.variables import variables
 
-#: Shared console instance; used by the shell and importable by command modules.
-console: Console = Console(theme=config.theme, highlight=False)
+#: A variable reference being typed at the cursor: `{` then an optional partial
+#: name. Used to switch completion from command names to variable names.
+_REF_PREFIX_RE = re.compile(r'\{([a-z][a-z0-9_]*)?$')
 
 
-# ---------------------------------------------------------------------------
-# Command framework
-# ---------------------------------------------------------------------------
+def _var_meta(name: str) -> str:
+    """A short right-hand hint for a variable completion (its value, or 'computed').
 
-@dataclass
-class Context:
-    """Runtime context passed to every command invocation.
-
-    Commands receive this as their first argument.  It exposes the shared
-    :class:`rich.console.Console` together with the owning shell so commands
-    can introspect or mutate shell state (e.g. exit, reload, register new
-    commands at runtime).
+    Callable specials (the dynamic ones — `next`, `random`, …) are *not* invoked;
+    their hint is just 'computed'. Other values are shown via a truncated `repr`.
     """
-    shell: 'SolverShell'
-    console: Console
-    raw_line: str = ''
-    argv: list[str] = field(default_factory=list)
+    try:
+        value = variables[name]
+    except KeyError:
+        return ''
+    if callable(value):
+        return 'computed'
+    text = repr(value)
+    return text if len(text) <= 40 else f'{text[:37]}...'
 
 
-#: Signature of a command callable.  Extra positional / keyword arguments are
-#: parsed from the user's input line via :func:`shlex.split`.
-CommandFn = Callable[..., bool | None]
+def _current_fragment(text: str) -> str:
+    """Return the command being typed after the last unquoted statement separator."""
+    quote: str | None = None
+    start = i = 0
+    n = len(text)
+    while i < n:
+        c = text[i]
+        if quote is not None:
+            if c == quote:
+                quote = None
+        elif c in ('"', "'"):
+            quote = c
+        elif c in (';', '{', '}', '\n'):
+            start = i + 1
+        elif c in ('&', '|') and i + 1 < n and text[i + 1] == c:
+            start = i + 2
+            i += 2
+            continue
+        i += 1
+    return text[start:]
 
 
-@dataclass
-class Command:
-    """A registered shell command.
-
-    Attributes
-    ----------
-    name:
-        Primary command name (the first whitespace-separated token on the
-        input line).
-    func:
-        Callable invoked with a :class:`Context` followed by parsed argv
-        tokens.  May return 'True' to request that the shell exit.
-    help:
-        Short one-line help string, shown in the 'help' listing.
-    usage:
-        Optional usage signature, shown by 'help <cmd>'.
-    aliases:
-        Alternative names that resolve to this command.
-    completer:
-        Optional callable '(ctx, text) -> list[str]' producing argument
-        completions for the command.
-    """
-    name: str
-    func: CommandFn
-    help: str = ''
-    usage: str = ''
-    aliases: tuple[str, ...] = ()
-    completer: Callable[[Context, str], Iterable[str | Completion]] | None = None
-
-    def invoke(self, ctx: Context) -> bool | None:
-        return self.func(ctx, *ctx.argv)
-
-
-class CommandRegistry:
-    """Registry of :class:`Command` instances, keyed by name and alias.
-
-    A module-level :data:`registry` is provided for convenience; you may also
-    instantiate private registries for embedded shells.
-    """
-
-    def __init__(self) -> None:
-        self._commands: dict[str, Command] = {}
-        self._by_alias: dict[str, str] = {}
-
-    def register(self, cmd: Command) -> Command:
-        """Register *cmd*; raises :class:`ValueError` on name/alias conflict."""
-        if cmd.name in self._commands or cmd.name in self._by_alias:
-            raise ValueError(f'command {cmd.name!r} is already registered')
-        self._commands[cmd.name] = cmd
-        for alias in cmd.aliases:
-            if alias in self._commands or alias in self._by_alias:
-                raise ValueError(f'alias {alias!r} conflicts with existing command')
-            self._by_alias[alias] = cmd.name
-        return cmd
-
-    def unregister(self, name: str) -> None:
-        cmd = self._commands.pop(name, None)
-        if cmd is None:
-            return
-        for alias in cmd.aliases:
-            self._by_alias.pop(alias, None)
-
-    def resolve(self, token: str) -> Command | None:
-        if token in self._commands:
-            return self._commands[token]
-        target = self._by_alias.get(token)
-        return self._commands.get(target) if target else None
-
-    def names(self, include_aliases: bool = True) -> list[str]:
-        out = list(self._commands)
-        if include_aliases:
-            out.extend(self._by_alias)
-        return sorted(out)
-
-    def all(self) -> list[Command]:
-        return sorted(self._commands.values(), key=lambda c: c.name)
-
-
-#: Default, module-level registry used by the :func:`command` decorator.
-registry = CommandRegistry()
-
-
-def command(
-        name: str | None = None,
-        *,
-        help: str = '',
-        usage: str = '',
-        aliases: tuple[str, ...] = (),
-        completer: Callable[[Context, str], Iterable[str | Completion]] | None = None,
-) -> Callable[[CommandFn], CommandFn]:
-    """Decorator that registers *func* as a shell command.
-
-    Example
-    -------
-    >>> @command(name='echo', help='Echo arguments.', aliases=('e',))
-    ... def _echo(ctx: Context, *args: str) -> None:
-    ...     ctx.console.print(' '.join(args))
-    """
-
-    def _decorate(func: CommandFn) -> CommandFn:
-        cmd_name = name or func.__name__.lstrip('_').replace('_', '-')
-        cmd_help = help
-        if not cmd_help and func.__doc__:
-            cmd_help = func.__doc__.strip().splitlines()[0]
-        registry.register(Command(
-            name=cmd_name,
-            func=func,
-            help=cmd_help,
-            usage=usage,
-            aliases=tuple(aliases),
-            completer=completer,
-        ))
-        return func
-
-    return _decorate
-
-
-# ---------------------------------------------------------------------------
-# prompt-toolkit glue
-# ---------------------------------------------------------------------------
-
-class _ShellCompleter(Completer):
-    """Completer that delegates to per-command completers after the first token."""
+class _CommandCompleter(Completer):
+    """Complete command names on the first token; delegate to per-command completers."""
 
     def __init__(self, shell: 'SolverShell') -> None:
         self._shell = shell
 
     def get_completions(self, document: Document, complete_event: Any) -> Iterable[Completion]:
-        text_before = document.text_before_cursor
+        before = document.text_before_cursor
+        # Variable reference: a `{partial` at the cursor completes to `{name}`.
+        ref = _REF_PREFIX_RE.search(before)
+        if ref is not None and not before[:ref.start()].endswith('{'):  # not an escaped `{{`
+            partial = ref.group(1) or ''
+            for name in sorted(variables.vars()):
+                if name.startswith(partial):
+                    yield Completion(f'{{{name}}}', start_position=-(len(partial) + 1),
+                                     display=f'{{{name}}}', display_meta=_var_meta(name))
+            return
+        text = _current_fragment(before)
+        # Mirror the parser's sigil split ('!ls' -> '! ls', '?ec' -> '? ec') so a
+        # sigil abutting its argument delegates to the right command's completer.
+        if text[:1] in ('!', '?') and text[1:2] not in ('', ' '):
+            text = f'{text[0]} {text[1:]}'
         try:
-            tokens = shlex.split(text_before, posix=True)
+            tokens = shlex.split(text, posix=True)
         except ValueError:
-            tokens = text_before.split()
-        # First word: complete command names.
-        if not tokens or (text_before and not text_before.endswith(' ') and len(tokens) == 1):
+            tokens = text.split()
+        if not tokens or (text and not text.endswith(' ') and len(tokens) == 1):
             prefix = tokens[0] if tokens else ''
             for name in self._shell.registry.names():
                 if name.startswith(prefix):
                     yield Completion(name, start_position=-len(prefix))
             return
-        # Subsequent words: delegate to command completer if available.
-        head = tokens[0]
-        cmd = self._shell.registry.resolve(head)
+        cmd = self._shell.registry.resolve(tokens[0])
         if cmd is None or cmd.completer is None:
             return
-        partial = '' if text_before.endswith(' ') else tokens[-1]
-        ctx = Context(shell=self._shell, console=self._shell.console,
-                      raw_line=text_before, argv=tokens[1:])
+        partial = '' if text.endswith(' ') else tokens[-1]
+        ctx = Context(shell=self._shell, console=self._shell.console, raw_line=text, argv=tokens[1:])
         for candidate in cmd.completer(ctx, partial):
             if isinstance(candidate, Completion):
                 yield candidate
@@ -222,262 +122,202 @@ class _ShellCompleter(Completer):
                 yield Completion(candidate, start_position=-len(partial))
 
 
-# ---------------------------------------------------------------------------
-# Multi-line block detection
-# ---------------------------------------------------------------------------
-
-@Condition
-def _block_is_open() -> bool:
-    """True while the current buffer contains more '{' than '}'.
-
-    Used as the *multiline* condition for :class:`PromptSession`: when this
-    returns True, Enter inserts a newline instead of submitting the input,
-    allowing brace-delimited blocks (e.g. 'for' loops) to span lines.
-    """
-    try:
-        text = get_app().current_buffer.text
-        return text.count('{') > text.count('}')
-    except Exception:
-        return False
-
-
-# ---------------------------------------------------------------------------
-# Shell
-# ---------------------------------------------------------------------------
-
-@dataclass
 class SolverShell:
-    """Interactive shell built on prompt-toolkit + rich.
+    """Interactive shell built on prompt-toolkit + rich, running the v2 pipeline."""
 
-    Parameters
-    ----------
-    registry:
-        Command registry to use.  Defaults to the module-level
-        :data:`registry`, so commands declared with :func:`command` are
-        picked up automatically.
-    history_file:
-        Path to a persistent history file (created on first use).
-    workspace:
-        Free-form label shown in the prompt; typically the current
-        workspace path.
-    """
+    def __init__(self, *, save: bool = False) -> None:
+        self.console = console
+        self.registry = registry
+        self.workspace: Path = config.workspace_dir
+        self.save = save
+        self._session_log: SessionLog | None = None
+        set_commands(self.registry.names())
 
-    registry: CommandRegistry = field(default_factory=lambda: registry)
-    history_file: Path = field(default_factory=lambda: config.history_file)
-    workspace: Path = field(default_factory=lambda: config.workspace_dir)
-    console: Console = field(default_factory=lambda: console)
-    save: bool = False
+    # -- command-host surface (consumed by commands via ctx.shell) ----------
 
-    _running: bool = field(default=False, init=False, repr=False)
-    _session: PromptSession = field(default=None, init=False, repr=False)  # type: ignore [arg-type]
-    _save_file: TextIO | None = field(default=None, init=False, repr=False)
+    @property
+    def rc(self) -> int:
+        """The standing exit code (the most recent evaluation's status)."""
+        return int(variables['rcode'])
 
-    # -- save / tee helpers ------------------------------------------------
+    @property
+    def is_logging(self) -> bool:
+        """True while a session log is open and command output is being tee'd.
 
-    def _flush_save(self) -> None:
-        """Drain the console's record buffer into the save file."""
-        if self._save_file is None:
-            return
-        text = self.console.export_text(clear=True, styles=False)
-        if text:
-            self._save_file.write(text)
-            self._save_file.flush()
-
-    def _record_input(self, line: str) -> None:
-        """Append the user's typed prompt line directly to the save file.
-
-        prompt-toolkit draws the prompt outside Rich's recording stream, so
-        the typed input would otherwise be missing from the saved log.
+        Lets commands that spawn subprocesses decide whether to route output
+        through `sys.stdout` (so it reaches the log) or let the child inherit the
+        terminal directly (preserving its TTY colours when not logging).
         """
-        if self._save_file is None:
-            return
-        self._save_file.write(f'▎ {self.workspace.name} ❯ {line}\n')
-        self._save_file.flush()
+        return self._session_log is not None
 
-    # -- history maintenance -----------------------------------------------
+    @contextmanager
+    def _capture(self) -> Iterator[None]:
+        """Tee command output into the session log, if one is active."""
+        if self._session_log is None:
+            yield
+        else:
+            with self._session_log.capture():
+                yield
 
-    def _trim_history(self, max_entries: int = 5000) -> None:
-        """Deduplicate the FileHistory file and cap it at *max_entries* entries.
+    @contextmanager
+    def pause_logging(self) -> Iterator[None]:
+        """Suspend session-log capture for the duration (terminal output continues).
 
-        Keeps the most recent occurrence of each unique command and at most
-        the newest *max_entries* unique entries.  Safe to call when the file
-        is missing or unreadable.
+        Keeps a high-frequency live region's redraws out of the transcript while
+        still showing them live; a no-op when no log is active.
         """
-        path = self.history_file
-        if not path.exists():
-            return
-        try:
-            raw = path.read_text(encoding='utf-8')
-        except OSError:
-            return
-        entries: list[tuple[str, str]] = []
-        current_ts: str | None = None
-        current_lines: list[str] = []
-        for line in raw.splitlines():
-            if line.startswith('# '):
-                if current_ts is not None and current_lines:
-                    entries.append((current_ts, '\n'.join(current_lines)))
-                current_ts = line
-                current_lines = []
-            elif line.startswith('+'):
-                current_lines.append(line[1:])
-        if current_ts is not None and current_lines:
-            entries.append((current_ts, '\n'.join(current_lines)))
-        seen: set[str] = set()
-        kept: list[tuple[str, str]] = []
-        for ts, text in reversed(entries):
-            if text in seen:
-                continue
-            seen.add(text)
-            kept.append((ts, text))
-            if len(kept) >= max_entries:
-                break
-        kept.reverse()
-        tmp = path.with_suffix(path.suffix + '.tmp')
-        try:
-            with tmp.open('w', encoding='utf-8') as f:
-                for ts, text in kept:
-                    f.write(f'\n{ts}\n')
-                    for line in text.split('\n'):
-                        f.write(f'+{line}\n')
-            os.replace(tmp, path)
-        except OSError:
-            try:
-                tmp.unlink()
-            except OSError:
-                pass
+        if self._session_log is None:
+            yield
+        else:
+            with self._session_log.pause():
+                yield
 
-    # -- lifecycle ----------------------------------------------------------
+    def _record_command(self, block: str) -> None:
+        """Record an entered block in the session log, if active."""
+        if self._session_log is not None and block.strip():
+            self._session_log.record_command(self.workspace.name, block)
 
-    def run(self, intro: bool = True, commands: list[str] | None = None) -> int:
-        """Run the prompt loop until the user exits.  Returns a process exit code.
-
-        Parameters
-        ----------
-        intro:
-            If True, print the welcome banner before entering the loop.
-        commands:
-            Optional list of commands to execute at startup (e.g. from the
-            CLI).  Each entry is dispatched as if typed at the prompt; if any
-            command requests exit (e.g. 'exit'), the loop terminates before
-            entering interactive mode.
-        """
+    @contextmanager
+    def _runtime(self) -> Iterator[None]:
+        """Per-run setup/teardown: enter the workspace and, when `save` is set,
+        open the session log for the duration, closing it on exit."""
         os.chdir(self.workspace)
-        self._trim_history()
         if self.save:
-            self.console.record = True
-            self._save_file = open(config.session_file, 'w', encoding='utf-8')
-        self._session: PromptSession = PromptSession(
-            history=FileHistory(str(self.history_file)),
-            auto_suggest=AutoSuggestFromHistory(),
-            completer=_ShellCompleter(self),
-            complete_while_typing=True,
-            key_bindings=self._build_keybindings(),
-            style=config.style,
-            bottom_toolbar=self._bottom_toolbar,
-            multiline=_block_is_open,
-            prompt_continuation=FormattedText([('class:prompt.bar', '▎'), ('class:prompt.symbol', ' · '), ]),
-        )
+            self._session_log = SessionLog(config.session_file)
         try:
-            if intro:
-                self._print_banner()
-            self._running = True
-            # Replay any startup commands first; abort the interactive loop if one exits.
-            for line in commands or []:
-                if not line.strip():
-                    continue
-                try:
-                    self.console.print(
-                        f'[accent]▎[/accent] [primary]{self.workspace.name}[/primary] '
-                        f'[accent]❯[/accent] {line}')
-                    try:
-                        if self.dispatch(line):
-                            self._running = False
-                            break
-                    except KeyboardInterrupt:
-                        self.console.print('[muted]^C[/muted]')
-                        continue
-                    except SystemExit:
-                        raise
-                    except EOFError:
-                        break
-                    except Exception as exc:  # noqa: BLE001
-                        self.console.print(f'[error]error:[/error] {exc}')
-                finally:
-                    self._flush_save()
-            while self._running:
-                try:
-                    try:
-                        line = self._session.prompt(self._build_prompt())
-                    except KeyboardInterrupt:
-                        self.console.print('[muted]^C[/muted]')
-                        continue
-                    except EOFError:
-                        break
-                    if not line.strip():
-                        continue
-                    self._record_input(line)
-                    try:
-                        if self.dispatch(line):
-                            break
-                    except KeyboardInterrupt:
-                        self.console.print('[muted]^C[/muted]')
-                        continue
-                    except SystemExit:
-                        raise
-                    except Exception as exc:  # noqa: BLE001 — top-level UX boundary
-                        self.console.print(f'[error]error:[/error] {exc}')
-                finally:
-                    self._flush_save()
-            self._print_farewell()
+            yield
         finally:
-            if self._save_file is not None:
-                self._flush_save()
-                self._save_file.close()
-                self._save_file = None
-            self._trim_history()
-        return 0
+            if self._session_log is not None:
+                self._session_log.close()
+                self._session_log = None
+
+    # -- command runner (the interpreter's dispatch hook) -------------------
+
+    def _run_command(self, name: str, args: list[str]) -> int:
+        cmd = self.registry.resolve(name)
+        if cmd is None:
+            self.console.print(f'[error]unknown command:[/error] {name}')
+            return ExitCodes.EXIT_NOTFOUND
+        raw = ' '.join([name, *(shlex.quote(a) for a in args)])
+        ctx = Context(shell=self, console=self.console, variables=variables, raw_line=raw, argv=list(args))
+        return cmd.invoke(ctx)
 
     # -- dispatch -----------------------------------------------------------
 
-    def dispatch(self, line: str) -> bool:
-        """Parse *line* and dispatch to a registered command.
+    def dispatch(self, block: str) -> int:
+        """Lex, parse, and interpret one command block; return its exit code."""
+        self._record_command(block)
+        with self._capture():
+            try:
+                canonical = lex(block)
+            except LexError as exc:
+                self._show_syntax_error(exc, canonical=None)
+                return ExitCodes.EXIT_USAGE
+            try:
+                loop, statements = parse(canonical)
+            except ParserError as exc:
+                self._show_syntax_error(exc, canonical=canonical)
+                return ExitCodes.EXIT_USAGE
+            return execute(loop, statements, command=self._run_command)
 
-        Returns 'True' if the shell should exit.
-        Lines beginning with a sigil ('!', '?') are rewritten so the
-        sigil itself becomes the command name (with the remainder as its
-        argument), e.g. '!ls' -> '! ls'.
+    def _show_syntax_error(self, exc: LexError | ParserError, canonical: str | None) -> None:
+        """Report a lex/parse failure as a clean, positioned message.
+
+        A `LexError`'s text is already `message`, then the offending line and a
+        `^` caret with `(line, col)`; that first line becomes the headline and
+        the rest is shown verbatim (the caret aligns under the printed line). A
+        `ParserError` carries no caret, so the lexer's **canonical** form (the
+        text being parsed) is shown as context instead.
         """
-        stripped = line.lstrip()
-        if stripped and stripped[0] in ('!', '?') and (len(stripped) == 1 or stripped[1] != ' '):
-            line = f'{stripped[0]} {stripped[1:]}'
-        try:
-            tokens = shlex.split(line, posix=True)
-        except ValueError as exc:
-            self.console.print(f'[error]parse error:[/error] {exc}')
-            return False
-        if not tokens:
-            return False
-        head, *argv = tokens
-        cmd = self.registry.resolve(head)
-        if cmd is None:
-            self.console.print(f'[error]unknown command:[/error] {head}  '
-                               f'[muted](try [accent]help[/accent])[/muted]')
-            return False
-        ctx = Context(shell=self, console=self.console, raw_line=line, argv=argv)
-        try:
-            return bool(cmd.invoke(ctx))
-        finally:
-            self._flush_save()
+        head, _, located = str(exc).partition('\n')
+        out = Text()
+        out.append('syntax error: ', style='error')
+        out.append(head, style='error')
+        if located:
+            out.append('\n')
+            out.append(located, style='warning')
+        elif canonical is not None:
+            out.append('\n\n')
+            out.append('while parsing:\n', style='muted')
+            out.append('\n'.join(f'  {line}' for line in canonical.splitlines()), style='muted')
+        self.console.print(out)
 
-    def stop(self) -> None:
-        """Request the prompt loop to exit after the current iteration."""
-        self._running = False
+    # -- lifecycle ----------------------------------------------------------
 
-    # -- UI helpers ---------------------------------------------------------
+    def run_command(self, blocks: list[str]) -> int:
+        """Execute *blocks* non-interactively; return the last exit status."""
+        with self._runtime():
+            variables.refresh_workspace_vars()
+            rc = 0
+            for block in blocks:
+                print(block)
+                if not block.strip():
+                    continue
+                try:
+                    rc = self.dispatch(block)
+                except SystemExit as exit_signal:
+                    return int(exit_signal.code) if isinstance(exit_signal.code, int) else 0
+                except KeyboardInterrupt:
+                    self.console.print('[muted]^C[/muted]')
+                    break
+            return rc
 
-    def _build_prompt(self) -> FormattedText:
-        # a vertical accent bar, the workspace path, then a chevron.
+    def run_interactive(self, intro: bool = True, intro_message: str = '') -> int:
+        """Run the interactive prompt loop until `exit` / EOF; return the status."""
+        with self._runtime():
+            variables.refresh_workspace_vars()
+            # Piped/redirected stdin: read blocks without the interactive chrome
+            # (no banner, no history, no prompt) so scripted output stays clean.
+            if not sys.stdin.isatty():
+                return self._run_piped()
+            if intro:
+                self.console.clear()
+                self._print_banner()
+            if intro_message:
+                self.console.print(intro_message)
+            trim_history(config.history_file)
+            session = make_session(
+                history_file=config.history_file,
+                completer=_CommandCompleter(self),
+                style=config.style,
+                bottom_toolbar=self._bottom_toolbar,
+            )
+            try:
+                while True:
+                    try:
+                        set_title(f'solver · {self.workspace.name}')
+                        block = session.prompt(self._prompt())
+                    except KeyboardInterrupt:
+                        self.console.print('[muted]^C[/muted]')
+                        continue
+                    except EOFError:
+                        break
+                    if not block.strip():
+                        continue
+                    try:
+                        self.dispatch(block)
+                    except SystemExit:
+                        break
+                    except KeyboardInterrupt:
+                        self.console.print('[muted]^C[/muted]')
+            finally:
+                clear_title()
+                trim_history(config.history_file)
+            if intro:
+                self.console.print('[muted]session ended.[/muted]')
+            return self.rc
+
+    def _run_piped(self) -> int:
+        for block in read_blocks(prompt='', continuation=''):
+            try:
+                self.dispatch(block)
+            except SystemExit:
+                break
+        return self.rc
+
+    # -- UI -----------------------------------------------------------------
+
+    def _prompt(self) -> FormattedText:
         return FormattedText([
             ('class:prompt.bar', '▎'),
             ('class:prompt.path', f' {self.workspace.name} '),
@@ -487,78 +327,28 @@ class SolverShell:
     def _bottom_toolbar(self) -> FormattedText:
         n = len(self.registry.all())
         return FormattedText([
-            ('class:bottom-toolbar', f' solver · {n} commands · Ctrl-D to exit '),
+            ('class:bottom-toolbar', f' solver v2 · {n} commands · Ctrl-D to exit '),
         ])
 
-    def _build_keybindings(self) -> KeyBindings:
-        kb = KeyBindings()
-
-        @kb.add('c-l')
-        def _(event: KeyPressEvent) -> None:
-            event.app.renderer.clear()
-
-        return kb
-
-    _LOGO: str = (
-        'SOLVER\n'
-    )
-
     def _print_banner(self) -> None:
-        # a big accent-colored wordmark, a soft tagline,
-        # and a compact "tips" footer — all wrapped in a rounded panel with
-        # a left-side accent bar in the title.
-        logo = Text(self._LOGO, style='accent', no_wrap=True)
-        tagline = Text.from_markup(
-            '[primary]  Your Euler problem solving companion in the terminal[/primary]'
-            '\n'
-            '[muted]  Powered by [/muted]'
-            '[accent.dim]claude.ai[/accent.dim]'
-            '[muted] · [/muted]'
-            '[accent.dim]prompt-toolkit[/accent.dim]'
-            '[muted] · [/muted]'
-            '[accent.dim]rich[/accent.dim]'
-            '\n\n'
-            '[muted]  start with [/muted]'
-            '[accent.dim]init <number|next|random>[/accent.dim]'
-            '[muted] to initialize the workspace with problem files[/muted]'
-            '\n'
-            '[accent.dim]  show[/accent.dim]'
-            '[muted] to read the problem documentation[/muted]'
-            '\n'
-            '[accent.dim]  eval[/accent.dim]'
-            '[muted] and [/muted]'
-            '[accent.dim]benchmark[/accent.dim]'
-            '[muted] to check your solutions[/muted]'
-            '\n'
-            '[accent.dim]  stack[/accent.dim]'
-            '[muted]/[/muted]'
-            '[accent.dim]reset[/accent.dim]'
-            '[muted] to save/discard[/muted]'
-            '\n\n'
-            '[accent]  ?[/accent]'
-            '[muted] help   [/muted]'
-            '[accent]![/accent]'
-            '[muted] bash[/muted]'
+        body = Text.from_markup(
+            '[accent]SOLVER[/accent]  [muted]v2[/muted]\n'
+            '[primary]  Your Euler problem solving companion in the terminal[/primary]\n'
+            '[muted]  Powered by [/muted][accent.dim]claude.ai[/accent.dim]'
+            '[muted] · [/muted][accent.dim]prompt-toolkit[/accent.dim]'
+            '[muted] · [/muted][accent.dim]rich[/accent.dim]\n\n'
+            '[muted]  start with [/muted][accent.dim]init <number|next|random>[/accent.dim]'
+            '[muted], then [/muted][accent.dim]eval[/accent.dim][muted] / [/muted]'
+            '[accent.dim]stack[/accent.dim][muted] / [/muted][accent.dim]reset[/accent.dim]\n'
+            '[accent]  ?[/accent][muted] help[/muted]'
         )
-        body = Text('\n').join([logo, tagline])
         self.console.print(Panel(
             body,
             border_style='panel.border',
             title='[accent]▎[/accent] [primary]solver[/primary]',
-            subtitle='[muted]type [/muted][accent]exit[/accent][muted] '
-                     'or press [/muted][accent]Ctrl-D[/accent][muted] to quit[/muted]',
+            subtitle='[muted]type [/muted][accent]exit[/accent][muted] or [/muted]'
+                     '[accent]Ctrl-D[/accent][muted] to quit[/muted]',
             title_align='left',
             subtitle_align='right',
             padding=(1, 2),
         ))
-
-    def _print_farewell(self) -> None:
-        self.console.print('[muted]session ended.[/muted]')
-
-
-__all__ = (
-    'Context',
-    'SolverShell',
-    'command',
-    'console',
-)

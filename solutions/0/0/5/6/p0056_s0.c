@@ -1,16 +1,15 @@
 /* Solution to Euler Problem 56: Powerful Digit Sum. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-/* Big integer represented as array of digits (base 10), little-endian */
+/* Big integer as a little-endian array of single base-10 digits (index 0 = units place),
+ * chosen so the digit sum is a trivial loop with no extraction. */
 typedef struct {
     int *digits;
     int len;
     int cap;
 } BigInt;
 
+/* Allocate a zeroed BigInt with the given digit capacity. */
 static BigInt *bigint_new(int cap) {
     BigInt *b = malloc(sizeof(BigInt));
     b->cap = cap;
@@ -20,6 +19,7 @@ static BigInt *bigint_new(int cap) {
     return b;
 }
 
+/* Release the digit buffer and the struct. */
 static void bigint_free(BigInt *b) {
     free(b->digits);
     free(b);
@@ -39,16 +39,18 @@ static void bigint_set(BigInt *b, int val) {
     }
 }
 
-/* Multiply big integer by a small integer, result stored in b */
+/* Multiply big integer by a small integer in place via left-to-right carry propagation. */
 static void bigint_mul_int(BigInt *b, int m) {
     long long carry = 0;
     for (int i = 0; i < b->len; i++) {
+        /* widen to long long before multiplying to avoid overflow in digit*m + carry */
         long long prod = (long long)b->digits[i] * m + carry;
         b->digits[i] = (int)(prod % 10);
         carry = prod / 10;
     }
     while (carry > 0) {
         if (b->len >= b->cap) {
+            /* doubling-realloc fallback in case the pre-allocated bound was underestimated */
             b->cap *= 2;
             b->digits = realloc(b->digits, (size_t)b->cap * sizeof(int));
         }
@@ -57,7 +59,7 @@ static void bigint_mul_int(BigInt *b, int m) {
     }
 }
 
-/* Compute digit sum of big integer */
+/* Sum the digits directly, exploiting the base-10 representation. */
 static long long bigint_digit_sum(BigInt *b) {
     long long s = 0;
     for (int i = 0; i < b->len; i++) {
@@ -66,8 +68,12 @@ static long long bigint_digit_sum(BigInt *b) {
     return s;
 }
 
-long long solve(int argc, char *argv[]) {
-    int num_digits = atoi(argv[1]);
+/* Brute-force the top 100 bases and top 10 exponents below 10^num_digits, maximizing the digit
+ * sum of base^exp; powers are built incrementally (base^exp_start once, then one scalar multiply
+ * per subsequent exponent). O(N^2) pairs each costing O(N log N) bignum digit work. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int num_digits = parse_int(argv[1]);
 
     /* stop_at = 10^num_digits */
     int stop_at = 1;
@@ -109,55 +115,5 @@ long long solve(int argc, char *argv[]) {
     }
 
     bigint_free(b);
-    return best;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(best)); return _answer; }
 }

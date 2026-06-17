@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{FILENAME}}</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/code.css">
+    <!-- CodeJar's default look: highlight.js's stock default theme supplies the token colours. -->
+    <link rel="stylesheet" href="/vendor/highlight.css">
+</head>
+<body data-language="{{LANGUAGE}}">
+<div id="code-header">
+    <a href="./" title="Back to problem">&laquo;</a>
+    <a id="nav-euler" target="_blank" rel="noopener noreferrer" title="View on Project Euler">&#8962;</a>
+    <a href="/summary" title="Summary">&#9776;</a>
+    <a id="nav-github" target="_blank" rel="noopener noreferrer" title="View on GitHub">&#8857;</a>
+    <span class="nav-dummy" title="Next problem">&raquo;</span>
+    <span class="lang-badge" id="lang-badge" title="{{LANGUAGE}}"></span>
+    <span class="filename">{{FILENAME}}</span>
+    <span class="header-spacer"></span>
+    <button id="eval-btn" type="button" hidden disabled>Eval</button>
+    <button id="save-btn" type="button" hidden disabled>Save</button>
+    <button id="del-btn" type="button" hidden disabled>Del</button>
+</div>
+<pre id="save-output" hidden></pre>
+<main id="code-view">
+    <div id="editor"></div>
+</main>
+<!-- The HTML-escaped source; a textarea decodes the entities back to plain text. -->
+<label for="source"></label><textarea id="source" hidden>{{CODE}}</textarea>
+<!-- highlight.js (UMD common bundle) exposes window.hljs for the module below. -->
+<script src="/vendor/highlight.min.js"></script>
+<script type="module" src="/code.js"></script>
+</body>
+</html>

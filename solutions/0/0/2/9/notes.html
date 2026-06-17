@@ -1,0 +1,86 @@
+<article>
+
+<h3>Problem Analysis</h3>
+<p>
+The task is to count how many <em>distinct</em> values appear in the set of powers a<sup>b</sup> as a and b each range over an interval. If every pair (a, b) produced a different number, the answer would just be the count of pairs. It does not, because different bases and exponents can coincide - the canonical small example is 2<sup>4</sup> = 4<sup>2</sup> = 16. To get the right count I must detect and discard these collisions.
+</p>
+<p>
+The reason collisions occur, and the key to characterising them cheaply, is the <a href="https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">fundamental theorem of arithmetic</a>: every integer above one has a unique factorisation into primes. If a base a factors as p<sub>1</sub><sup>e<sub>1</sub></sup> &middot; p<sub>2</sub><sup>e<sub>2</sub></sup> &middot; ..., then a<sup>b</sup> = p<sub>1</sub><sup>e<sub>1</sub>b</sup> &middot; p<sub>2</sub><sup>e<sub>2</sub>b</sup> &middot; ... Two powers are equal precisely when these prime-exponent maps match. That gives me a canonical <em>signature</em> - the tuple of (prime, scaled-exponent) pairs - that encodes equality of two potentially enormous numbers using only small integers. The point matters because 100<sup>100</sup> already has roughly 200 decimal digits and 1000<sup>1000</sup> about 3000, so direct comparison demands either arbitrary-precision arithmetic or a compact encoding.
+</p>
+<p>
+In either representation, the algorithm is the same: generate every power, reduce it to a hashable key (the raw big-integer value or its prime signature), insert each key into a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash set</a>, and report the set's size. There are roughly (a<sub>max</sub> - a<sub>min</sub> + 1) &times; (b<sub>max</sub> - b<sub>min</sub> + 1) insertions, each expected O(1), plus a factorisation cost per base. Factoring a single base by <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> is O(&radic;a). So overall I expect O(a<sub>max</sub> &middot; b<sub>max</sub>) for the insertions plus O(a<sub>max</sub> &middot; &radic;a<sub>max</sub>) for factoring - and at these sizes the insertion term dominates.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Algorithm 0 - Direct big-integer set, with prime-signature fallback (hand-rolled factoriser)</h4>
+<p>
+Both <code>p0029_s0.py</code> and <code>p0029_s0.c</code> branch on <code>min(a_max, b_max)</code> against a threshold of 100. The idea is to use the simplest correct method for small bounds and the memory-efficient method for large ones.
+</p>
+<p>
+<strong>Small-range path.</strong> In Python this is a one-liner: <code>len({a**b for a in range(...) for b in range(...)})</code>. Python integers are arbitrary-precision, so there is no overflow, and the built-in <code>set</code> handles hashing and equality of the big values. In C there is no native big integer, so I built one: numbers live in arrays of 32-bit limbs in base 10<sup>9</sup>, least significant limb first. For each base a I compute a<sup>b_min</sup> by repeated multiplication, then obtain each successive power by a single multiply by a. Each value is serialised to a decimal string and inserted into a custom string-keyed hash set; the final element count is the answer.
+</p>
+<p>
+<strong>Large-range path.</strong> Here I factorise each base a by <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> (the inner loop tries divisors d while d &middot; d &le; n), producing (prime, exponent) pairs. For each exponent b I scale every exponent by b to form the signature of a<sup>b</sup>. In Python the signature is a tuple of <code>(prime, power * b)</code> pairs added to a <code>set</code>; in C it is encoded as a comma-separated string like <code>"2:6,5:3"</code> and inserted into the same hash table. This path never builds a large number - it works entirely with small integers - which is why it scales gracefully to a = b = 1000.
+</p>
+
+<h4>Algorithm 1 - Same dual-path strategy with a sieve-backed factoriser</h4>
+<p>
+<code>p0029_s1.py</code> and <code>p0029_s1.c</code> are algorithmically identical to Algorithm 0. The only difference is the factorisation step: instead of trial-dividing against every integer, they first generate all primes up to &radic;a<sub>max</sub> using the <a href="https://github.com/kimwalisch/primesieve" class="reference-source" target="_blank" rel="noopener noreferrer">primesieve</a> library (the <code>primes</code> function in Python, <code>primesieve_generate_primes</code> in C) and trial-divide only against that prime list. This is asymptotically the same as <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> against all integers but avoids wasted attempts on composite divisors. The reason for keeping both variants is to let the benchmark answer whether factorisation is the bottleneck - and as the timings show, it is not, because hash-set insertion dominates.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Canonical signatures instead of raw values</h4>
+<p>
+Rather than comparing two huge numbers, I reduce each a<sup>b</sup> to its prime-factorisation signature and compare those. This is an instance of a general principle: when you must test equality of composed mathematical objects (powers, polynomials, factored forms), find a <em>canonical form</em> - a representation that is equal exactly when the objects are equal - and work with that. It is frequently both simpler and faster than evaluating the objects, and here it lets me avoid 3000-digit integers entirely while relying on the <a href="https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">fundamental theorem of arithmetic</a> to guarantee correctness.
+</p>
+
+<h4>Set comprehension for deduplication</h4>
+<p>
+The small-range Python path uses <code>len({a**b for ...})</code>. A <a href="https://docs.python.org/3/tutorial/datastructures.html#sets" class="reference-source" target="_blank" rel="noopener noreferrer">set comprehension</a> is the most direct expression of "collect all values, drop duplicates, count what remains". Python's <a href="https://docs.python.org/3/library/stdtypes.html#set" class="reference-source" target="_blank" rel="noopener noreferrer">set</a> is a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> with expected O(1) insertion and lookup, and arbitrary-precision integers hash and compare effectively in constant time at these sizes. Reach for this idiom whenever the objects have natural equality and the collection fits in memory.
+</p>
+
+<h4>Incremental big-integer exponentiation</h4>
+<p>
+In the C small-range path I compute a<sup>b_min</sup> once, then obtain a<sup>b_min+1</sup> by a single multiply by a, and so on across the inner loop. This turns what would be O(b_max) independent re-exponentiations (each itself O(b_max) multiplies) into a single chain of O(b_max) multiplies per base. The pattern - initialise once, then apply a cheap update per step - is "incremental" or "online" computation, and it pays off whenever successive outputs are related by a small, cheap update.
+</p>
+
+<h4>Base-10<sup>9</sup> big-integer representation in C</h4>
+<p>
+Large integers are stored as arrays of <code>int</code> in base 10<sup>9</sup>, least significant limb first - a hand-rolled form of <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>. Base 10<sup>9</sup> is chosen so each limb fits in a 32-bit int, the product of two limbs plus a carry fits in a 64-bit <code>long long</code> (avoiding overflow during multiplication), and serialisation to decimal is trivial: print the top limb unpadded, then each remaining limb zero-padded to exactly nine digits. This is a standard, portable way to do big-integer arithmetic without 128-bit types or external libraries.
+</p>
+
+<h4>String-keyed chained hash table in C</h4>
+<p>
+Because C has no built-in hash set, I built one as an array of linked-list buckets - a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> with <a href="https://en.wikipedia.org/wiki/Hash_table#Separate_chaining" class="reference-source" target="_blank" rel="noopener noreferrer">separate chaining</a>. I use the <a href="http://www.cse.yorku.ca/~oz/hash.html" class="reference-source" target="_blank" rel="noopener noreferrer">djb2 hash</a> (<code>h = h*33 + c</code>) for good distribution on short strings, and 2<sup>22</sup> buckets so the bucket index is a single bitwise AND with <code>HASH_MASK</code> rather than a modulo. Keys are duplicated with <code>strdup</code> and released in <code>hash_clear</code>, so repeated benchmark runs leak no memory. Choosing power-of-two table sizes for cheap masking is a recurring trick in performance-sensitive hashing.
+</p>
+
+<h4>Runtime algorithm selection by input size</h4>
+<p>
+Both solutions branch on a size threshold (<code>min(a_max, b_max) &gt; 100</code>). The direct method is simplest and fast for small bounds; the signature method is necessary and memory-frugal for large bounds. Guarding a fast special case with a threshold and falling back to a general method is a pragmatic, readable form of adaptive algorithm selection - it keeps the common case clean without sacrificing correctness or scalability on the hard case.
+</p>
+
+<h4>Library-backed prime generation versus hand-rolled trial division</h4>
+<p>
+Algorithm 1 swaps the inline divisor loop for a precomputed prime list from <a href="https://github.com/kimwalisch/primesieve" class="reference-source" target="_blank" rel="noopener noreferrer">primesieve</a>. <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">Trial-dividing</a> only against primes up to &radic;n is asymptotically the same but avoids work on composite divisors, and using a vetted library removes a class of off-by-one bugs. The lesson is to measure before assuming the library buys you anything - here the gain is within measurement noise because factoring is not the bottleneck.
+</p>
+
+<h3>Key Takeaways</h3>
+<p>
+The unlocking insight is that equality of powers is equality of prime-factorisation signatures, which sidesteps thousand-digit numbers altogether. For the canonical bounds (a, b &le; 100) the numbers are small enough that a direct set of arbitrary-precision integers is trivially correct, which is why this is a Level 1 problem; the signature trick is what makes the extra case (a = b = 1000) tractable in memory.
+</p>
+<p>
+The benchmarks tell a clear two-regime story. On the dev and main cases the Python solutions (about 2.3 ms on main) beat the C solutions (about 11 ms) by roughly 5x, because the C code spends its time on big-integer serialisation and hash-table bookkeeping while Python delegates both to highly optimised built-in types. On the extra case (a = b = 1000), where the signature path runs and the per-operation count dominates, the situation reverses: the C solutions (about 0.36-0.37 s) are roughly 4x faster than Python (about 1.6 s), the crossover where C's lower per-operation cost outweighs interpreter overhead. Between Algorithm 0 and Algorithm 1 there is no meaningful difference in either language (within measurement noise), confirming that hash-set insertion, not factorisation, is the dominant cost.
+</p>
+<ul>
+<li>When testing equality of composed mathematical objects, compare a canonical form rather than the evaluated value - it is often both simpler and faster.</li>
+<li>Incremental computation, updating a running value one step at a time, can remove a factor equal to the inner-loop length from the total work.</li>
+<li>Python's built-in <code>set</code> with arbitrary-precision integer keys can beat a hand-rolled C hash table for small-to-medium inputs; measure before assuming C wins.</li>
+<li>For big integers in C without library support, base-10<sup>9</sup> limbs in a 64-bit accumulator are portable, overflow-safe, and easy to serialise.</li>
+<li>Guard a fast special case behind a size threshold and fall back to a general algorithm to stay both readable and scalable across the input range.</li>
+<li>Choose power-of-two hash-table sizes so the bucket index is a cheap bitwise AND rather than a modulo.</li>
+<li>Profile before optimising a subroutine: the obvious candidate (factorisation) was not the bottleneck here.</li>
+</ul>
+
+</article>

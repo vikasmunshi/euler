@@ -1,40 +1,12 @@
 /* Solution to Euler Problem 96: Su Doku. */
-#include <libgen.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#include "runner.h"
 
-char *get_text_file(const char *src) {
-    const char *slash = strrchr(src, '/');
-    const char *name_start = slash ? slash + 1 : src;
-    const char *q = strchr(name_start, '?');
-    size_t name_len = q ? (size_t)(q - name_start) : strlen(name_start);
 
-    char exe_path[4096];
-    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
-    if (len < 0) return NULL;
-    exe_path[len] = '\0';
 
-    char path[4096];
-    int pn = snprintf(path, sizeof(path), "%s/resources/%.*s", dirname(exe_path), (int)name_len, name_start);
-    if (pn < 0 || (size_t)pn >= sizeof(path)) return NULL;
-
-    FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
-    long sz = ftell(f);
-    if (sz < 0) { fclose(f); return NULL; }
-    rewind(f);
-    char *buf = malloc((size_t)sz + 1);
-    if (!buf) { fclose(f); return NULL; }
-    if (fread(buf, 1, (size_t)sz, f) != (size_t)sz) { free(buf); fclose(f); return NULL; }
-    buf[sz] = '\0';
-    fclose(f);
-    return buf;
-}
-
+/* Backtracking search over empty cells with MRV ordering and forward checking.
+   Each empty cell carries its candidate digits; the search branches on the cell
+   with fewest candidates and copies the working set so undo is free.
+   Worst case exponential in empty-cell count, but near-linear on these puzzles. */
 typedef struct {
     int row;
     int col;
@@ -42,6 +14,7 @@ typedef struct {
     int num_possibilities;
 } Cell;
 
+/* Candidates for one empty cell: {1..9} minus the digits seen in its row, column, and box. */
 static void get_possibilities(int g[9][9], int row, int col, int *poss, int *num_poss) {
     int possible[10] = {0,1,1,1,1,1,1,1,1,1};
 
@@ -66,6 +39,7 @@ static void get_possibilities(int g[9][9], int row, int col, int *poss, int *num
     }
 }
 
+/* Build the working set once: a (row, col, candidates) triple for every empty cell. */
 static int get_all_empty_cells(int g[9][9], Cell *cells) {
     int count = 0;
     for (int row = 0; row < 9; row++) {
@@ -83,6 +57,7 @@ static int get_all_empty_cells(int g[9][9], Cell *cells) {
     return count;
 }
 
+/* Forward checking: drop the placed digit from every cell sharing its row, column, or box. */
 static void update_possibilities(Cell *cells, int num_cells, int row, int col, int number) {
     for (int i = 0; i < num_cells; i++) {
         int r = cells[i].row;
@@ -106,12 +81,14 @@ static void update_possibilities(Cell *cells, int num_cells, int row, int col, i
     }
 }
 
+/* Order cells by candidate count, ascending, so qsort surfaces the MRV cell first. */
 static int cell_cmp(const void *a, const void *b) {
     const Cell *ca = (const Cell *)a;
     const Cell *cb = (const Cell *)b;
     return ca->num_possibilities - cb->num_possibilities;
 }
 
+/* Depth-first backtracking: pick the MRV cell, try each candidate, propagate on a copy. */
 static int solve_backtracking(int g[9][9], Cell *cells, int num_cells) {
     if (num_cells == 0) return 1;
 
@@ -128,12 +105,14 @@ static int solve_backtracking(int g[9][9], Cell *cells, int num_cells) {
         int number = chosen.possibilities[pi];
         g[chosen.row][chosen.col] = number;
 
+        /* Copy-before-mutate: editing the copy leaves the caller's set intact for backtracking. */
         Cell *updated = malloc((size_t)remaining_count * sizeof(Cell));
         if (!updated && remaining_count > 0) return 0;
         if (remaining_count > 0)
             memcpy(updated, remaining, (size_t)remaining_count * sizeof(Cell));
         update_possibilities(updated, remaining_count, chosen.row, chosen.col, number);
 
+        /* Fail-fast: a cell drained of candidates means this branch is already doomed. */
         int feasible = 1;
         for (int i = 0; i < remaining_count; i++) {
             if (updated[i].num_possibilities == 0) {
@@ -154,22 +133,25 @@ static int solve_backtracking(int g[9][9], Cell *cells, int num_cells) {
     return 0;
 }
 
+/* Collect the empty cells and run the backtracking search on the grid in place. */
 static int solve_sudoku(int g[9][9]) {
     Cell cells[81];
     int num_cells = get_all_empty_cells(g, cells);
     return solve_backtracking(g, cells, num_cells);
 }
 
-long long solve(int argc, char *argv[]) {
+const char *solve(int argc, char *argv[]) {
+    /* Sum each solved grid's top-left 3-digit number across all fifty puzzles. */
+    static char _answer[32];
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <file_url>\n", argv[0]);
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     char *text = get_text_file(argv[1]);
     if (!text) {
         fprintf(stderr, "Cannot read file: %s\n", argv[1]);
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     long long total = 0;
@@ -208,53 +190,5 @@ long long solve(int argc, char *argv[]) {
     }
 
     free(text);
-    return total;
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(total)); return _answer; }
 }

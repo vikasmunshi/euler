@@ -1,9 +1,7 @@
 /* Solution to Euler Problem 47: Distinct Primes Factors. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
+/* Count distinct prime factors of n by trial division with in-place reduction; O(sqrt(n)). */
 static int prime_factor_count(int n) {
     if (n <= 1) return 0;
     int count = 0;
@@ -11,18 +9,24 @@ static int prime_factor_count(int n) {
     while (d * d <= n) {
         if (n % d == 0) {
             count++;
+            /* Strip every copy of d so later composite d cannot divide; each divisor found is prime. */
             while (n % d == 0) {
                 n /= d;
             }
         }
         d++;
     }
+    /* Any remainder above 1 is a prime factor exceeding the square root of the original n. */
     if (n > 1) count++;
     return count;
 }
 
-long long solve(int argc, char *argv[]) {
-    int n = atoi(argv[1]);
+/* Linear scan for the first run of n consecutive integers each with n distinct prime factors.
+   Each count is O(sqrt(k)) trial division; the window test short-circuits on the first failure,
+   giving roughly O(answer * sqrt(answer)) overall. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int n = parse_int(argv[1]);
     int number = 2;
     while (1) {
         int all_match = 1;
@@ -32,57 +36,7 @@ long long solve(int argc, char *argv[]) {
                 break;
             }
         }
-        if (all_match) return (long long)number;
+        if (all_match) { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)number)); return _answer; }
         number++;
     }
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
 }

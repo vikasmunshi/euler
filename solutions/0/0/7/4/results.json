@@ -1,75 +1,39 @@
 [
   {
     "category": "dev",
+    "solution": "p0074_s0_c",
+    "args": "10",
+    "answer": 1,
+    "verdict": "correct",
+    "average": 9.183395454545455e-05,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s1_c",
+    "args": "10",
+    "answer": 1,
+    "verdict": "correct",
+    "average": 0.0005302553181818183,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2_c",
+    "args": "10",
+    "answer": 1,
+    "verdict": "correct",
+    "average": 0.0005225630454545433,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
     "solution": "p0074_s0.py",
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "average": 5.1213731843169026e-05,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0.py",
-    "args": "100",
-    "answer": 2,
-    "verdict": "correct",
-    "average": 0.00020277633590768968,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0.py",
-    "args": "1000",
-    "answer": 12,
-    "verdict": "correct",
-    "average": 0.0011806909209270196,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0.py",
-    "args": "10000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.009934283416991057,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0.py",
-    "args": "100000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.11911339610758723,
-    "number_runs": 101
-  },
-  {
-    "category": "main",
-    "solution": "p0074_s0.py",
-    "args": "1000000",
-    "answer": 402,
-    "verdict": "correct",
-    "average": 1.2694934078700044,
-    "number_runs": 100
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s0.py",
-    "args": "5000000",
-    "answer": 3240,
-    "verdict": "correct",
-    "average": 6.755566274339799,
-    "number_runs": 3
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s0.py",
-    "args": "10000000",
-    "answer": 4680,
-    "verdict": "correct",
-    "average": 13.582229588336,
-    "number_runs": 3
+    "average": 2.481050879313526e-05,
+    "number_runs": 22
   },
   {
     "category": "dev",
@@ -77,8 +41,53 @@
     "args": "10",
     "answer": 1,
     "verdict": "correct",
-    "average": 5.33069507339563e-05,
-    "number_runs": 101
+    "average": 3.079472596503117e-05,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2.py",
+    "args": "10",
+    "answer": 1,
+    "verdict": "correct",
+    "average": 2.9187371679158375e-05,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0_c",
+    "args": "100",
+    "answer": 2,
+    "verdict": "correct",
+    "average": 0.00014765986363636364,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s1_c",
+    "args": "100",
+    "answer": 2,
+    "verdict": "correct",
+    "average": 0.0005269913636363637,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2_c",
+    "args": "100",
+    "answer": 2,
+    "verdict": "correct",
+    "average": 0.0005080077727272728,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0.py",
+    "args": "100",
+    "answer": 2,
+    "verdict": "correct",
+    "average": 0.00011559513487472114,
+    "number_runs": 22
   },
   {
     "category": "dev",
@@ -86,8 +95,53 @@
     "args": "100",
     "answer": 2,
     "verdict": "correct",
-    "average": 0.0003204984057712935,
-    "number_runs": 101
+    "average": 0.00020311267739585176,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2.py",
+    "args": "100",
+    "answer": 2,
+    "verdict": "correct",
+    "average": 0.00019725928326476026,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0_c",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "correct",
+    "average": 0.00019161595454545457,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s1_c",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "correct",
+    "average": 0.0005546037272727272,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2_c",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "correct",
+    "average": 0.0005336036818181819,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0.py",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "correct",
+    "average": 0.0007803894047604197,
+    "number_runs": 22
   },
   {
     "category": "dev",
@@ -95,8 +149,53 @@
     "args": "1000",
     "answer": 12,
     "verdict": "correct",
-    "average": 0.002563721316166698,
-    "number_runs": 101
+    "average": 0.0017300426750973036,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2.py",
+    "args": "1000",
+    "answer": 12,
+    "verdict": "correct",
+    "average": 0.0017756727743703364,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0_c",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.0003790574090909091,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s1_c",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.0006818748181818183,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2_c",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.0006418643636363636,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0.py",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.007293346135570159,
+    "number_runs": 22
   },
   {
     "category": "dev",
@@ -104,8 +203,53 @@
     "args": "10000",
     "answer": 42,
     "verdict": "correct",
-    "average": 0.028258713079115087,
-    "number_runs": 101
+    "average": 0.019625636729126036,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2.py",
+    "args": "10000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.021081511362519286,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0_c",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.0016914586363636368,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s1_c",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.0017402616818181817,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2_c",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.001953237181818182,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s0.py",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.08309075923303184,
+    "number_runs": 22
   },
   {
     "category": "dev",
@@ -113,8 +257,53 @@
     "args": "100000",
     "answer": 42,
     "verdict": "correct",
-    "average": 0.3485927954259138,
-    "number_runs": 101
+    "average": 0.22924502386409917,
+    "number_runs": 22
+  },
+  {
+    "category": "dev",
+    "solution": "p0074_s2.py",
+    "args": "100000",
+    "answer": 42,
+    "verdict": "correct",
+    "average": 0.2349141596403735,
+    "number_runs": 22
+  },
+  {
+    "category": "main",
+    "solution": "p0074_s0_c",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "correct",
+    "average": 0.01524500188888889,
+    "number_runs": 9
+  },
+  {
+    "category": "main",
+    "solution": "p0074_s1_c",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "correct",
+    "average": 0.015368519666666667,
+    "number_runs": 9
+  },
+  {
+    "category": "main",
+    "solution": "p0074_s2_c",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "correct",
+    "average": 0.01858303066666667,
+    "number_runs": 9
+  },
+  {
+    "category": "main",
+    "solution": "p0074_s0.py",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "correct",
+    "average": 0.9193886390098164,
+    "number_runs": 9
   },
   {
     "category": "main",
@@ -122,296 +311,35 @@
     "args": "1000000",
     "answer": 402,
     "verdict": "correct",
-    "average": 3.6322425787299926,
-    "number_runs": 100
+    "average": 2.510818943652945,
+    "number_runs": 9
+  },
+  {
+    "category": "main",
+    "solution": "p0074_s2.py",
+    "args": "1000000",
+    "answer": 402,
+    "verdict": "correct",
+    "average": 2.5970687274400714,
+    "number_runs": 9
   },
   {
     "category": "extra",
-    "solution": "p0074_s1.py",
+    "solution": "p0074_s0_c",
     "args": "5000000",
     "answer": 3240,
     "verdict": "correct",
-    "average": 28.84183886066118,
-    "number_runs": 3
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s1.py",
-    "args": "10000000",
-    "answer": 4680,
-    "verdict": "correct",
-    "average": 55.58445548499731,
+    "average": 0.06998564600000001,
     "number_runs": 2
   },
   {
-    "category": "dev",
-    "solution": "p0074_s2.py",
-    "args": "10",
-    "answer": 1,
-    "verdict": "correct",
-    "average": 5.5418039428422174e-05,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2.py",
-    "args": "100",
-    "answer": 2,
-    "verdict": "correct",
-    "average": 0.00036966390954679953,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2.py",
-    "args": "1000",
-    "answer": 12,
-    "verdict": "correct",
-    "average": 0.002900478930598075,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2.py",
-    "args": "10000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.028070761791657715,
-    "number_runs": 101
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2.py",
-    "args": "100000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.36327654779103735,
-    "number_runs": 101
-  },
-  {
-    "category": "main",
-    "solution": "p0074_s2.py",
-    "args": "1000000",
-    "answer": 402,
-    "verdict": "correct",
-    "average": 3.6569434416104216,
-    "number_runs": 100
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s2.py",
-    "args": "5000000",
-    "answer": 3240,
-    "verdict": "correct",
-    "average": 21.314619159995345,
-    "number_runs": 3
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s2.py",
-    "args": "10000000",
-    "answer": 4680,
-    "verdict": "correct",
-    "average": 46.48256325366674,
-    "number_runs": 3
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0_c",
-    "args": "10",
-    "answer": 1,
-    "verdict": "correct",
-    "average": 0.0003115392363636363,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0_c",
-    "args": "100",
-    "answer": 2,
-    "verdict": "correct",
-    "average": 0.00046100921818181817,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0_c",
-    "args": "1000",
-    "answer": 12,
-    "verdict": "correct",
-    "average": 0.0005980427818181819,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0_c",
-    "args": "10000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.000998952509090909,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s0_c",
-    "args": "100000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.0032021157454545437,
-    "number_runs": 55
-  },
-  {
-    "category": "main",
-    "solution": "p0074_s0_c",
-    "args": "1000000",
-    "answer": 402,
-    "verdict": "correct",
-    "average": 0.02208417061818182,
-    "number_runs": 55
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s0_c",
-    "args": "5000000",
-    "answer": 3240,
-    "verdict": "correct",
-    "average": 0.08706227284000001,
-    "number_runs": 50
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s0_c",
-    "args": "10000000",
-    "answer": 4680,
-    "verdict": "correct",
-    "average": 0.13866966594000002,
-    "number_runs": 50
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s1_c",
-    "args": "10",
-    "answer": 1,
-    "verdict": "correct",
-    "average": 0.002388883854545455,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s1_c",
-    "args": "100",
-    "answer": 2,
-    "verdict": "correct",
-    "average": 0.0024707420545454547,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s1_c",
-    "args": "1000",
-    "answer": 12,
-    "verdict": "correct",
-    "average": 0.002720510527272728,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s1_c",
-    "args": "10000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.0028374880363636374,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s1_c",
-    "args": "100000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.00471237358181818,
-    "number_runs": 55
-  },
-  {
-    "category": "main",
-    "solution": "p0074_s1_c",
-    "args": "1000000",
-    "answer": 402,
-    "verdict": "correct",
-    "average": 0.024235462000000006,
-    "number_runs": 55
-  },
-  {
     "category": "extra",
     "solution": "p0074_s1_c",
     "args": "5000000",
     "answer": 3240,
     "verdict": "correct",
-    "average": 0.10765339992000002,
-    "number_runs": 50
-  },
-  {
-    "category": "extra",
-    "solution": "p0074_s1_c",
-    "args": "10000000",
-    "answer": 4680,
-    "verdict": "correct",
-    "average": 0.21752444152000003,
-    "number_runs": 50
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2_c",
-    "args": "10",
-    "answer": 1,
-    "verdict": "correct",
-    "average": 0.0024738239454545454,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2_c",
-    "args": "100",
-    "answer": 2,
-    "verdict": "correct",
-    "average": 0.002482207363636364,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2_c",
-    "args": "1000",
-    "answer": 12,
-    "verdict": "correct",
-    "average": 0.0030641739272727277,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2_c",
-    "args": "10000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.003072112018181818,
-    "number_runs": 55
-  },
-  {
-    "category": "dev",
-    "solution": "p0074_s2_c",
-    "args": "100000",
-    "answer": 42,
-    "verdict": "correct",
-    "average": 0.005802799199999999,
-    "number_runs": 55
-  },
-  {
-    "category": "main",
-    "solution": "p0074_s2_c",
-    "args": "1000000",
-    "answer": 402,
-    "verdict": "correct",
-    "average": 0.028058014581818187,
-    "number_runs": 55
+    "average": 0.07888781450000001,
+    "number_runs": 2
   },
   {
     "category": "extra",
@@ -419,8 +347,53 @@
     "args": "5000000",
     "answer": 3240,
     "verdict": "correct",
-    "average": 0.11107574006,
-    "number_runs": 50
+    "average": 0.07732010950000001,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s0.py",
+    "args": "5000000",
+    "answer": 3240,
+    "verdict": "correct",
+    "average": 4.971595795999747,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s1.py",
+    "args": "5000000",
+    "answer": 3240,
+    "verdict": "correct",
+    "average": 14.532148260987015,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s2.py",
+    "args": "5000000",
+    "answer": 3240,
+    "verdict": "correct",
+    "average": 14.528927378501976,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s0_c",
+    "args": "10000000",
+    "answer": 4680,
+    "verdict": "correct",
+    "average": 0.1095802985,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s1_c",
+    "args": "10000000",
+    "answer": 4680,
+    "verdict": "correct",
+    "average": 0.1321422645,
+    "number_runs": 2
   },
   {
     "category": "extra",
@@ -428,7 +401,34 @@
     "args": "10000000",
     "answer": 4680,
     "verdict": "correct",
-    "average": 0.21271486699999997,
-    "number_runs": 50
+    "average": 0.1537645385,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s0.py",
+    "args": "10000000",
+    "answer": 4680,
+    "verdict": "correct",
+    "average": 10.023970327994903,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s1.py",
+    "args": "10000000",
+    "answer": 4680,
+    "verdict": "correct",
+    "average": 30.773360998005955,
+    "number_runs": 2
+  },
+  {
+    "category": "extra",
+    "solution": "p0074_s2.py",
+    "args": "10000000",
+    "answer": 4680,
+    "verdict": "correct",
+    "average": 30.171382945991354,
+    "number_runs": 2
   }
 ]

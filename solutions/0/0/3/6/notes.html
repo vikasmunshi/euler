@@ -1,0 +1,87 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+I am asked to sum every positive integer below one million that is a <a href="https://en.wikipedia.org/wiki/Palindromic_number" class="reference-source" target="_blank" rel="noopener noreferrer">palindrome</a> in base 10 and simultaneously a <a href="https://en.wikipedia.org/wiki/Palindromic_number" class="reference-source" target="_blank" rel="noopener noreferrer">palindrome</a> in base 2. A palindrome is a finite sequence of symbols that reads the same forwards and backwards; here the symbols are the decimal digits in one case and the binary bits in the other. The "no leading zeros" rule means the most-significant symbol must be nonzero in each base. For base 2 this is automatic: the highest bit of any positive integer is, by definition, a 1. For base 10 I simply have to avoid placing a zero in the leading position when I construct candidates.
+</p>
+
+<p>
+The naive method - iterate over all N integers below the limit and test each in both bases - runs in O(N) and wastes effort, because decimal palindromes are extremely sparse among the integers. The observation that makes the problem tractable is that a decimal palindrome is completely determined by its <em>left half</em>. A k-digit prefix mirrored onto itself yields exactly one even-length palindrome of 2k digits, and inserting any of ten interior digits yields ten odd-length palindromes of 2k+1 digits. The number of distinct halves is on the order of the square root of N, so this <a href="https://en.wikipedia.org/wiki/Generate_and_test" class="reference-source" target="_blank" rel="noopener noreferrer">generate-and-test</a> strategy reduces the candidate count from O(N) to O(sqrt(N)). Each candidate is then checked for binary palindromicity in O(log N) time by inspecting its bits, so the overall cost is O(sqrt(N) log N) - which is why even the 9-digit case finishes in a fraction of a second.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Decimal Palindrome Generation with a Binary Filter (s0 - Python and C)</h4>
+
+<p>
+Both files implement the same algorithm; I describe it once and note the language differences afterward.
+</p>
+
+<p>
+<strong>Step 1 - single-digit seeds.</strong> The digits 1 through 9 are palindromes in every base by definition, so I emit each one (subject to the binary test). I handle them separately because the mirroring construction below would turn the half "1" into the two-digit string "11" - it can never reproduce the single-digit numbers themselves.
+</p>
+
+<p>
+<strong>Step 2 - enumerate halves and mirror.</strong> The half loop runs over integers from 1 up to <code>10^(max_digits // 2) - 1</code>. For each value I take its decimal string, reverse it, and concatenate the two to form an even-length palindrome. This construction is exact and exhaustive: every even-length decimal palindrome with no leading zero is produced exactly once, since the half itself begins with a nonzero digit.
+</p>
+
+<p>
+<strong>Step 3 - odd-length palindromes.</strong> When inserting a middle digit still fits the budget - guarded by <code>2 * num_digits &lt; max_digits</code> - I loop over middle digits 0 through 9 and form <code>half + mid + reverse(half)</code>. A middle digit of 0 is legal here because it is an interior symbol, not the leading one.
+</p>
+
+<p>
+<strong>Step 4 - binary palindrome test.</strong> Each candidate is tested for binary palindromicity. In Python this is the one-liner <code>number == int(bin(number)[2:][::-1], 2)</code>: strip the <code>0b</code> prefix, reverse the bit string, parse it back, and compare. In C I extract bits one at a time into a small <code>char</code> array (least-significant bit first) and check <code>bits[i] == bits[len-1-i]</code>. A nice consequence falls out of the bit structure: an even number has its lowest bit 0, but a binary palindrome must have its highest bit 1, so even numbers can never pass - the test discards them implicitly at no extra cost.
+</p>
+
+<p>
+<strong>Language differences.</strong> The Python version isolates generation in a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator function</a> that <code>yield</code>s candidates lazily, with the filter applied in a generator expression inside <code>sum()</code>. The C version performs the same steps inline, building strings with <code>snprintf</code> and converting with <code>atoll</code>, and uses a small <code>int_pow10</code> helper for the loop bound. Both produce identical answers across every test case.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Constructing Candidates Instead of Filtering</h4>
+<p>
+The central technique is to generate only objects that already satisfy one property - decimal palindromicity - and test the second property, rather than scanning all integers and testing both. Whenever one of two required conditions has a compact generative description, as "mirror a half" does here, I prefer generation over filtering. This single decision turns an O(N) scan into an O(sqrt(N)) <a href="https://en.wikipedia.org/wiki/Generate_and_test" class="reference-source" target="_blank" rel="noopener noreferrer">generate-and-test</a> enumeration, and the idea generalises to any sparse-structure search.
+</p>
+
+<h4>Generator Functions for Lazy Enumeration</h4>
+<p>
+In Python, a function containing <code>yield</code> returns an iterator that produces values on demand without materialising them all in memory. I used <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator function</a> <code>generate_decimal_palindromes</code> to separate the generation logic from the filtering predicate cleanly, keeping memory use constant no matter how many candidates the generator could emit. I reach for this pattern whenever the candidate sequence is large or the generation logic is non-trivial enough to deserve its own named function.
+</p>
+
+<h4>String Reversal as a Palindrome Test</h4>
+<p>
+Comparing a string to its reverse is the simplest correct palindrome test: <code>s == s[::-1]</code> in Python, or an index-mirroring loop in C. This avoids the error-prone arithmetic of masks and shifts. In C I chose to extract bits into a small byte array rather than build a full text string - it is more cache-friendly and needs only one pass over the bits. The lesson is to keep the readable string approach by default and switch to bit manipulation only when profiling demands it.
+</p>
+
+<h4>Integer Arithmetic for Bounds</h4>
+<p>
+The half-loop upper bound is computed as <code>10^(max_digits // 2)</code> using integer division, which truncates toward zero and so handles both even and odd <code>max_digits</code> correctly. Using integer exponentiation and integer division rather than a floating-point square root eliminates the rounding ambiguity that could cause off-by-one boundary errors. In C this is the <code>int_pow10</code> helper; in Python it is the native <code>**</code> operator on integers.
+</p>
+
+<h4>Parameterising the Limit</h4>
+<p>
+Although the problem fixes the bound at one million, I parameterised both solutions by <code>max_digits</code> read from the command line. This let me verify correctness incrementally on the 1- through 4-digit cases before trusting the 6-digit answer, and it scaled directly to the 9-digit extra case with no code change. Separating the algorithm from its input size is a habit that pays off in testability and reuse.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The insight that unlocks this problem is that decimal palindromes have a compact generative structure: a palindrome of 2k or 2k+1 digits is fully determined by a k-digit prefix. Enumerating prefixes turns a half-million-integer scan into a few thousand constructions, and the binary palindrome check is then a cheap O(log N) post-filter on a small set.
+</p>
+
+<p>
+Both implementations agree on every answer. The C solution is consistently faster - on the main 6-digit case it records 0.0001 s against the Python 0.0008 s, and on the 9-digit case 0.0084 s against 0.0455 s, roughly a 5x edge throughout. That gap is purely the absence of interpreter overhead on the tight inner loop, since the algorithm is identical. For a problem this size both are effectively instantaneous, so I regard the Python version as the more elegant and readable choice and keep the C version for when raw throughput genuinely matters.
+</p>
+
+<ul>
+  <li>When two conditions must both hold, generate candidates from the one with a compact structural description and use the other as a filter - never the reverse.</li>
+  <li>Mirroring a left half is the canonical way to enumerate palindromes and cuts the search space from O(N) to O(sqrt(N)).</li>
+  <li>String reversal is the clearest palindrome test; switch to bit manipulation only when profiling shows it is the bottleneck.</li>
+  <li>Use generator functions to decouple candidate production from filtering and keep memory use constant.</li>
+  <li>Compute bounds and indices with integer arithmetic to avoid floating-point rounding and off-by-one errors.</li>
+  <li>Parameterise problem size from the start so you can validate on small inputs before committing to the full case.</li>
+</ul>
+
+</article>

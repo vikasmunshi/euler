@@ -1,12 +1,7 @@
 /* Solution to Euler Problem 29: Distinct Powers. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-/* Prime factorization: returns array of (prime, exponent) pairs.
-   factors is filled with alternating prime, exponent values.
-   Returns number of distinct prime factors. */
+/* Trial-division factorization into (prime, exponent) pairs; O(sqrt(n)). */
 static int prime_factorization(int n, int *primes, int *exponents) {
     int count = 0;
     int d = 2;
@@ -31,8 +26,9 @@ static int prime_factorization(int n, int *primes, int *exponents) {
     return count;
 }
 
-/* Simple hash set for tuples of (prime, scaled_exponent) pairs.
-   We encode each signature as a string key for hashing. */
+/* Chained string-keyed hash set: each signature (or big-integer decimal)
+   is encoded as a string key and deduplicated here. Power-of-two bucket
+   count makes the index a bitwise AND rather than a modulo. */
 
 #define HASH_SIZE (1 << 22)  /* 4M buckets */
 #define HASH_MASK (HASH_SIZE - 1)
@@ -45,6 +41,7 @@ typedef struct HashNode {
 static HashNode *hash_table[HASH_SIZE];
 static int hash_count = 0;
 
+/* Free every bucket chain and reset the element count. */
 static void hash_clear(void) {
     for (int i = 0; i < HASH_SIZE; i++) {
         HashNode *node = hash_table[i];
@@ -59,6 +56,7 @@ static void hash_clear(void) {
     hash_count = 0;
 }
 
+/* djb2 string hash, masked to the bucket range. */
 static unsigned int hash_str(const char *s) {
     unsigned int h = 5381;
     while (*s) {
@@ -68,7 +66,7 @@ static unsigned int hash_str(const char *s) {
     return h & HASH_MASK;
 }
 
-/* Returns 1 if inserted (new), 0 if already existed */
+/* Insert key if absent; returns 1 if newly inserted, 0 if already present. */
 static int hash_insert(const char *key) {
     unsigned int h = hash_str(key);
     HashNode *node = hash_table[h];
@@ -84,12 +82,13 @@ static int hash_insert(const char *key) {
     return 1;
 }
 
-/* Big integer power for small ranges: a^b stored as string via repeated multiplication.
-   For the main/dev case (a<=100, b<=100), we use a big-integer approach.
-   Max value: 100^100 has about 200 decimal digits. */
+/* Big integer in base 10^9, little-endian, used on the small-range path so
+   a^b can be represented exactly (100^100 has about 200 decimal digits). */
 
 #define BIGNUM_DIGITS 220
 
+/* Multiply the big number in place by a small factor; the per-limb product
+   plus carry is accumulated in a 64-bit value to avoid 32-bit overflow. */
 static void bignum_mul(int *digits, int *ndigits, int factor) {
     long long carry = 0;
     for (int i = 0; i < *ndigits; i++) {
@@ -103,7 +102,8 @@ static void bignum_mul(int *digits, int *ndigits, int factor) {
     }
 }
 
-/* Convert big number to string key */
+/* Serialise the big number to a decimal string key: top limb unpadded,
+   each remaining limb zero-padded to nine digits. */
 static void bignum_to_str(int *digits, int ndigits, char *buf) {
     int pos = 0;
     pos += sprintf(buf + pos, "%d", digits[ndigits - 1]);
@@ -113,11 +113,17 @@ static void bignum_to_str(int *digits, int ndigits, char *buf) {
     buf[pos] = '\0';
 }
 
-long long solve(int argc, char *argv[]) {
-    int a_min = atoi(argv[1]);
-    int a_max = atoi(argv[2]);
-    int b_min = atoi(argv[3]);
-    int b_max = atoi(argv[4]);
+/* Count distinct values of a^b over the given ranges by deduplicating keys in
+   a hash set; O(a_max * b_max) insertions dominate. Small bounds key on the
+   exact big-integer decimal; large bounds key on the prime-factorization
+   signature (prime, exponent*b), equal exactly when the powers are equal, so
+   thousand-digit numbers are never built. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int a_min = parse_int(argv[1]);
+    int a_max = parse_int(argv[2]);
+    int b_min = parse_int(argv[3]);
+    int b_max = parse_int(argv[4]);
 
     memset(hash_table, 0, sizeof(hash_table));
     hash_count = 0;
@@ -141,7 +147,7 @@ long long solve(int argc, char *argv[]) {
             bignum_to_str(digits, ndigits, buf);
             hash_insert(buf);
 
-            /* For each subsequent b, multiply by a */
+            /* For each subsequent b, multiply by a (incremental exponentiation) */
             for (int b = b_min + 1; b <= b_max; b++) {
                 bignum_mul(digits, &ndigits, a);
                 bignum_to_str(digits, ndigits, buf);
@@ -170,55 +176,5 @@ long long solve(int argc, char *argv[]) {
 
     long long result = hash_count;
     hash_clear();
-    return result;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(result)); return _answer; }
 }

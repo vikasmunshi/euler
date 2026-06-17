@@ -1,10 +1,13 @@
 /* Solution to Euler Problem 54: Poker Hands. */
-#include <libgen.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
+#include "runner.h"
+
+/*
+ * Approach: reduce each hand to a (rank, tie-breaker) comparison key, then count Player 1 wins by
+ * a single lexicographic comparison per line. A frequency table over card values (sorted by count
+ * descending, then value descending) classifies every category; two boolean flags (flush, straight)
+ * settle the remaining ones. Per hand is O(1) since a hand is always five cards, so O(N) overall
+ * for N lines.
+ */
 
 static const char *VALUES = "23456789TJQKA";
 
@@ -21,18 +24,21 @@ typedef enum {
     ROYAL_FLUSH     = 9
 } PokerRank;
 
+/* A hand's comparison key: its category plus tie-breakers ordered most-significant first. */
 typedef struct {
     PokerRank rank;
     int tie_breakers[5];
     int tb_count;
 } HandRank;
 
+/* Map a card's value character to its 0..12 rank via its position in VALUES. */
 static int card_value(char c) {
     const char *p = strchr(VALUES, c);
     if (!p) return -1;
     return (int)(p - VALUES);
 }
 
+/* Map a suit character to a stable 0..3 order (used only to break royal-flush ties). */
 static int suit_order(char s) {
     switch (s) {
         case 'C': return 0;
@@ -43,10 +49,12 @@ static int suit_order(char s) {
     }
 }
 
+/* qsort comparator sorting ints into descending order. */
 static int cmp_desc(const void *a, const void *b) {
     return *(const int *)b - *(const int *)a;
 }
 
+/* Classify five cards into a HandRank, building tie-breakers in priority order. */
 static HandRank evaluate_hand(char cards[5][3]) {
     int values[5];
     char suits[5];
@@ -77,6 +85,7 @@ static HandRank evaluate_hand(char cards[5][3]) {
     for (int i = 1; i < 5; i++)
         if (sorted_vals[i] != sorted_vals[i - 1]) distinct++;
 
+    /* Five distinct values spanning a range of exactly 4 are consecutive (a straight). */
     int is_straight = (distinct == 5) && (sorted_vals[4] - sorted_vals[0] == 4);
 
     if (is_straight && is_flush) {
@@ -110,7 +119,7 @@ static HandRank evaluate_hand(char cards[5][3]) {
         }
     }
 
-    /* Sort by count desc, then value desc */
+    /* Sort by count desc, then value desc, so the dominant group lands in ucounts[0]/uvals[0]. */
     for (int i = 0; i < ucount; i++) {
         for (int j = i + 1; j < ucount; j++) {
             int swap = 0;
@@ -217,6 +226,7 @@ static HandRank evaluate_hand(char cards[5][3]) {
     return hr;
 }
 
+/* Lexicographic comparison of two keys: rank first, then tie-breakers; returns 1 if hr1 wins. */
 static int hand_rank_gt(HandRank *hr1, HandRank *hr2) {
     if (hr1->rank != hr2->rank)
         return hr1->rank > hr2->rank;
@@ -228,42 +238,17 @@ static int hand_rank_gt(HandRank *hr1, HandRank *hr2) {
     return 0;
 }
 
-char *get_text_file(const char *src) {
-    const char *slash = strrchr(src, '/');
-    const char *name_start = slash ? slash + 1 : src;
-    const char *q = strchr(name_start, '?');
-    size_t name_len = q ? (size_t)(q - name_start) : strlen(name_start);
 
-    char exe_path[4096];
-    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
-    if (len < 0) return NULL;
-    exe_path[len] = '\0';
 
-    char path[4096];
-    int pn = snprintf(path, sizeof(path), "%s/resources/%.*s", dirname(exe_path), (int)name_len, name_start);
-    if (pn < 0 || (size_t)pn >= sizeof(path)) return NULL;
-
-    FILE *f = fopen(path, "rb");
-    if (!f) return NULL;
-    if (fseek(f, 0, SEEK_END) != 0) { fclose(f); return NULL; }
-    long sz = ftell(f);
-    if (sz < 0) { fclose(f); return NULL; }
-    rewind(f);
-    char *buf = malloc((size_t)sz + 1);
-    if (!buf) { fclose(f); return NULL; }
-    if (fread(buf, 1, (size_t)sz, f) != (size_t)sz) { free(buf); fclose(f); return NULL; }
-    buf[sz] = '\0';
-    fclose(f);
-    return buf;
-}
-
-long long solve(int argc, char *argv[]) {
+/* Evaluate both hands per line and tally Player 1 wins; O(N) over the N lines of the file. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
     const char *file_url = (argc > 1) ? argv[1] : "";
 
     char *content = get_text_file(file_url);
     if (!content) {
         fprintf(stderr, "Could not open poker file\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     long long p1_wins = 0;
@@ -293,6 +278,7 @@ long long solve(int argc, char *argv[]) {
 
         if (n < 10) { line = strtok_r(NULL, "\n", &saveptr); continue; }
 
+        /* First five tokens are Player 1's cards, last five Player 2's. */
         char p1cards[5][3], p2cards[5][3];
         for (int i = 0; i < 5; i++) {
             strncpy(p1cards[i], tokens[i], 2); p1cards[i][2] = '\0';
@@ -308,53 +294,5 @@ long long solve(int argc, char *argv[]) {
     }
 
     free(content);
-    return p1_wins;
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(p1_wins)); return _answer; }
 }

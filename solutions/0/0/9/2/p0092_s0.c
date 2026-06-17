@@ -1,9 +1,7 @@
 /* Solution to Euler Problem 92: Square Digit Chains. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
+/* Return 1 if the square-digit-sum chain from n reaches the 89-cycle rather than 1. */
 static int terminates_in_89(int n) {
     while (n != 1 && n != 89) {
         int next = 0;
@@ -17,8 +15,12 @@ static int terminates_in_89(int n) {
     return n == 89;
 }
 
-long long solve(int argc, char *argv[]) {
-    int power_of_10 = atoi(argv[1]);
+/* Count d-digit values reaching 89 by convolving the per-digit square distribution; O(d^2 * 81).
+   The chain depends only on the digit-square-sum, so a[s] counts strings with sum s, grown one
+   digit at a time, and only the <= 81*d distinct sums need classifying via terminates_in_89. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int power_of_10 = parse_int(argv[1]);
 
     /* sq = squares of digits 1..9 */
     int sq[9] = {1, 4, 9, 16, 25, 36, 49, 64, 81};
@@ -26,12 +28,13 @@ long long solve(int argc, char *argv[]) {
     /* Maximum size of a after power_of_10 iterations: 1 + power_of_10 * 81 */
     int max_size = 1 + power_of_10 * 81;
 
+    /* long long counts since they exceed 32 bits once power_of_10 reaches 9. */
     long long *a = calloc((size_t)max_size, sizeof(long long));
     int *is89 = calloc((size_t)max_size, sizeof(int));
     if (!a || !is89) {
         fprintf(stderr, "out of memory\n");
         free(a); free(is89);
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     /* Initialize: a = [1], is89 = [0] (index 0: terminates_in_89(0) is false) */
@@ -51,7 +54,7 @@ long long solve(int argc, char *argv[]) {
         if (!b) {
             fprintf(stderr, "out of memory\n");
             free(a); free(is89);
-            return -1;
+            { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
         }
         memcpy(b, a, (size_t)prev_len * sizeof(long long));
 
@@ -87,55 +90,5 @@ long long solve(int argc, char *argv[]) {
 
     free(a);
     free(is89);
-    return result;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(result)); return _answer; }
 }

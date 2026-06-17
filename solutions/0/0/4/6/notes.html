@@ -1,0 +1,67 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    Christian Goldbach's "other" conjecture asserts that every odd <a href="https://en.wikipedia.org/wiki/Composite_number" class="reference-source" target="_blank" rel="noopener noreferrer">composite number</a> can be written as the sum of a <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime</a> and twice a perfect square, that is n = p + 2k<sup>2</sup> for some prime p and integer k >= 1. A composite number is one with divisors other than 1 and itself - in other words, not prime. The conjecture is false, and my task is to find the smallest counterexample: the first odd composite for which no such decomposition exists.
+  </p>
+  <p>
+    The natural way to disprove a universal statement is to hunt for a counterexample by enumeration. I walk the integers upward, classify each as prime or composite, and for every odd composite I test exhaustively whether some valid (p, k) pair exists. Two observations keep the cost low. First, I only ever examine odd composites - even numbers and primes are skipped at once. Second, for a fixed candidate n, rather than iterating over all possible squares I iterate over the primes p below n and ask whether (n - p) / 2 is a <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a> - a constant-time test using a square root. Each candidate therefore costs O(pi(n)) work, where pi(n) counts the primes below n. By the <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a>, pi(n) is about n / ln n, so the entire search up to the answer N = 5777 runs in roughly O(N<sup>2</sup> / ln N) time - trivially fast at this scale.
+  </p>
+
+  <h3>Solution Approach</h3>
+  <h4>Approach 0 - Enumerate and Test the Conjecture (Python and C)</h4>
+  <p>
+    Both files implement the same overall algorithm: iterate over integers from 2 upward, decide primality, accumulate the primes found so far, and for each odd composite test the conjecture by searching the known primes for a decomposition. The only real difference is how primality is decided.
+  </p>
+  <p>
+    The Python solution uses an <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Incremental_sieve" class="reference-source" target="_blank" rel="noopener noreferrer">incremental sieve of Eratosthenes</a>. A dictionary <code>known_composites</code> maps each future composite number to the list of primes that will reach it. When the current number is absent from the dictionary, no recorded prime factor reaches it, so it must be prime: I add it to the <code>primes</code> set and register its square as the first composite it generates. When the current number is present, it is composite; I advance each of its prime factors p forward to the next multiple <code>p + current_number</code>, then delete the consumed entry. For odd composites I run the conjecture check before advancing the sieve.
+  </p>
+  <p>
+    The conjecture check is the heart of the algorithm. For an odd composite n, the code asks <code>any((((current_number - p) / 2) ** 0.5 % 1 == 0 for p in primes if current_number > p != 2))</code>. For each prime p strictly below n (excluding 2, since n - 2 would be odd and not divisible by 2), it computes (n - p) / 2 and tests whether its square root is integral by checking that the fractional part is zero. If no prime yields a perfect square, the candidate is returned as the answer.
+  </p>
+  <p>
+    The C solution decides primality by <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> against the primes found so far, dividing only by primes up to the square root of the candidate. This is correct because any composite must have a prime factor no larger than its square root. The primes live in a dynamic array that doubles in capacity when full. For odd composites the inner loop mirrors the Python check, but in pure integer arithmetic: it computes <code>half = (current - p) / 2</code>, takes <code>root = (int)sqrt((double)half)</code>, and confirms <code>root * root == half</code>. This integer confirmation is robust against floating-point rounding, although both are exact at this scale.
+  </p>
+
+  <h3>Programming Techniques</h3>
+  <h4>Incremental (Lazy) Sieve of Eratosthenes</h4>
+  <p>
+    A classic <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">sieve of Eratosthenes</a> pre-allocates a boolean array up to a fixed upper bound. The <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Incremental_sieve" class="reference-source" target="_blank" rel="noopener noreferrer">incremental variant</a> builds the sieve on demand, keyed on the next composite each prime will hit, and advances markers as numbers are consumed. It needs no upper bound in advance and uses O(pi(N)) memory rather than O(N) - one entry per discovered prime. I reach for it when I need an unbounded prime stream or do not know the search limit ahead of time, which is exactly the situation here: I cannot know where the first counterexample lives until I find it.
+  </p>
+  <h4>Dictionary setdefault for Grouping</h4>
+  <p>
+    <code>known_composites.setdefault(key, []).append(value)</code> appends to a list stored under a dictionary key, creating the list if the key is absent. This avoids an explicit membership check and is the idiomatic Python way to accumulate grouped values. <a href="https://docs.python.org/3/library/collections.html#collections.defaultdict" class="reference-source" target="_blank" rel="noopener noreferrer">collections.defaultdict</a> serves the same role when the default factory is fixed.
+  </p>
+  <h4>Short-Circuit Search with any() over a Generator</h4>
+  <p>
+    The Python check wraps a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> in <code>any()</code>. The built-in stops iterating the moment it finds a truthy element, so it returns immediately upon finding a valid decomposition without building an intermediate list. This is the cleanest way to express an early-exit linear search in Python - I prefer it over a manual loop with <code>break</code> when the body is a single boolean test.
+  </p>
+  <h4>Perfect-Square Detection via Integer Square Root</h4>
+  <p>
+    The C solution detects perfect squares with one floating-point sqrt followed by an integer multiply-and-compare: <code>root = (int)sqrt((double)half); root * root == half</code>. This is O(1) and immune to floating-point rounding because the final verification is exact integer arithmetic. I prefer this idiom over looping candidate roots or trusting the floating-point result alone.
+  </p>
+  <h4>Dynamic Array with Doubling Capacity in C</h4>
+  <p>
+    The C code starts with a 1024-element buffer and doubles it via <code>realloc</code> when full. Doubling gives amortised O(1) insertion - the same growth strategy behind C++ <code>std::vector</code>. A sensible initial capacity avoids early reallocations, and geometric growth keeps the total number of reallocations logarithmic in the final size.
+  </p>
+  <h4>Trial Division Against Known Primes Only</h4>
+  <p>
+    Instead of dividing by every integer up to the square root, the C solution divides only by previously discovered primes, breaking out once a prime exceeds the square root. Since every composite has a prime factor no larger than its square root, this is correct and reduces the number of divisions by the factor by which primes thin out relative to integers.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The unlocking insight is to reframe "verify a conjecture" as "search for a counterexample." I enumerate candidates in order and, for each odd composite, test the condition cheaply by iterating over the primes below it and checking a single perfect-square condition per prime. The first candidate that fails every test is the answer, 5777.
+  </p>
+  <p>
+    Both solutions implement identical logic and produce 5777. The C version benchmarks at about 0.2 ms against roughly 14.3 ms for Python - around a 70x speedup. The gap is pure language and runtime overhead, not algorithmic: the tight inner loops over integers and primes are exactly where C's lack of per-operation overhead shines. The Python incremental sieve is the more elegant expression of primality, while the C trial-division version trades that elegance for raw speed. At this scale either is instantaneous, so clarity wins; for a far larger search the C approach would be the obvious choice.
+  </p>
+  <ul>
+    <li>To disprove a universal claim, enumerate candidates and search for the first counterexample - it is usually simpler than a constructive proof.</li>
+    <li>Maintain a running list of primes and use trial division against only those primes up to the square root for both correct and efficient primality testing.</li>
+    <li>Use <code>any(generator)</code> for early-exit searches in Python to stay concise and avoid building intermediate lists.</li>
+    <li>Detect perfect squares with an integer square root followed by a multiply-and-compare, never by trusting floating-point exactness alone.</li>
+    <li>Prefer an incremental sieve when you need an unbounded prime stream or do not know the upper limit in advance.</li>
+    <li>Grow dynamic arrays by doubling for amortised O(1) insertion - the standard pattern for growable buffers in C.</li>
+    <li>When the search space is small, optimise for readability and correctness first; reach for a low-level language only when the constant factor genuinely matters.</li>
+  </ul>
+</article>

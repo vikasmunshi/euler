@@ -1,0 +1,128 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    This problem contrasts two quantities computed over the first n natural numbers: the
+    <em>square of the sum</em>, written as (1 + 2 + ... + n)<sup>2</sup>, and the
+    <em>sum of the squares</em>, written as 1<sup>2</sup> + 2<sup>2</sup> + ... + n<sup>2</sup>.
+    The naive approach iterates over all n numbers, accumulating both totals, which costs O(n)
+    time - the running time grows linearly with n. The key insight is that both of these
+    quantities are <em>polynomial functions of n</em> with classical closed-form expressions, so
+    we can compute the answer in a fixed number of arithmetic operations regardless of the size of
+    n. This is described as
+    <a href="https://en.wikipedia.org/wiki/Time_complexity#Constant_time" class="reference-source" target="_blank" rel="noopener noreferrer">constant time</a>,
+    or O(1) complexity.
+  </p>
+  <p>
+    The sum of the first n natural numbers is the n-th
+    <a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank" rel="noopener noreferrer">triangular number</a>,
+    given by S(n) = n(n+1)/2. Squaring this yields the square of the sum. The sum of the squares
+    has its own identity, the
+    <a href="https://en.wikipedia.org/wiki/Square_pyramidal_number" class="reference-source" target="_blank" rel="noopener noreferrer">square pyramidal number</a>
+    formula, SS(n) = n(n+1)(2n+1)/6. Both identities can be proved by
+    <a href="https://en.wikipedia.org/wiki/Mathematical_induction" class="reference-source" target="_blank" rel="noopener noreferrer">mathematical induction</a>
+    or by telescoping differences. The answer we want is simply S(n)<sup>2</sup> - SS(n). Because
+    each formula involves only a handful of multiplications and one division, the entire
+    computation is independent of n: it takes the same time for n = 100 as for n = 10<sup>9</sup>.
+    Recognising that a loop is really computing a polynomial in disguise is the central skill this
+    problem teaches.
+  </p>
+
+  <h3>Solution Approach</h3>
+  <h4>Closed-Form Arithmetic (Python and C)</h4>
+  <p>
+    The Python file <code>p0006_s0.py</code> and the C file <code>p0006_s0.c</code> implement the
+    same algorithm, differing only in syntax and integer types. The logic is three steps:
+  </p>
+  <p>
+    First, I compute the sum of the first n natural numbers with <code>n*(n+1)/2</code> and square
+    it to obtain the square of the sum. Second, I compute the sum of the squares directly with
+    <code>(2*n+1)*(n+1)*n/6</code>. Third, I subtract the second from the first and return the
+    result. In Python this collapses into a single expression:
+    <code>(n * (n + 1) // 2) ** 2 - (2 * n + 1) * (n + 1) * n // 6</code>. In C I broke the same
+    arithmetic into named intermediate variables (<code>sum</code>, <code>square_of_sum</code>,
+    <code>sum_of_squares</code>) purely for readability.
+  </p>
+  <p>
+    I deliberately wrote the sum-of-squares term as <code>(2*n+1)*(n+1)*n/6</code> with the
+    multiplications happening before the division. This matters because the division by 6 must be
+    <em>exact</em> in integer arithmetic. Among the three factors n, n+1, and 2n+1, one of the two
+    consecutive integers n and n+1 is always even (so the product is divisible by 2), and exactly
+    one of n, n+1, 2n+1 is always divisible by 3. Together these guarantee divisibility by 6, so
+    the integer division never loses a remainder and I never need floating-point arithmetic - which
+    would risk rounding error.
+  </p>
+  <p>
+    The one genuine language-specific concern is overflow. In C, ordinary <code>int</code>
+    arithmetic silently wraps around when intermediate values exceed the 32-bit range. I declared
+    n and all intermediate values as <code>long long</code> (a 64-bit signed type) so the products
+    never overflow for any realistic input. Python integers have arbitrary precision built in, so
+    no such precaution is required - the interpreter grows the integer transparently. Python's
+    <code>//</code> floor-division operator plays the same role as C's integer division here, since
+    I have already proven the division is exact.
+  </p>
+
+  <h3>Programming Techniques</h3>
+  <h4>Closed-Form Formula Substitution</h4>
+  <p>
+    Rather than summing in a loop, I replaced the iteration with a mathematical identity. This is
+    one of the most valuable habits in algorithmic work: whenever a loop accumulates a quantity
+    whose dependence on the index follows a polynomial pattern, a closed-form expression almost
+    always exists and can be derived by the method of differences or induction. Reach for this
+    whenever you see sums of powers of integers, geometric series, or other regularly structured
+    sequences - it collapses O(n) work into O(1).
+  </p>
+  <h4>Ordering Arithmetic to Guarantee Exact Integer Division</h4>
+  <p>
+    When implementing a formula like <code>n*(n+1)*(2n+1)/6</code> in integer arithmetic, the order
+    of operations is not cosmetic. I multiply all factors first and divide last, relying on the
+    number-theoretic guarantee that the product is divisible by 6. Proving divisibility before
+    dividing is the disciplined alternative to reaching for floating point: it keeps the result
+    exact and avoids the subtle rounding bugs that floating-point division introduces. Apply this
+    pattern whenever a combinatorial or number-theoretic formula contains a division.
+  </p>
+  <h4>Defensive Integer Typing in C</h4>
+  <p>
+    In C I used <code>long long</code> throughout the solve function rather than <code>int</code>.
+    For n = 100 the square of the sum is only about 25 million, comfortably inside 32-bit range,
+    but using the wider type from the start costs nothing and protects the code if it is later
+    reused with much larger n. The general principle: assess the largest intermediate value your
+    computation can produce - not just the final result - and choose an integer type whose range
+    comfortably exceeds it.
+  </p>
+  <h4>Separating Solve Logic from the I/O Harness</h4>
+  <p>
+    Both solutions isolate the core computation in a pure <code>solve</code> function and surround
+    it with a thin harness that parses arguments, runs the solve repeatedly, times each run, and
+    checks that repeated runs agree. This separation makes the algorithm trivial to test in
+    isolation and lets the benchmarking loop call <code>solve</code> many times without re-parsing
+    input. Keeping side-effecting I/O at the edges and pure computation at the core is a pattern
+    worth applying to every non-trivial program.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The core insight is that both target quantities are polynomials in n with well-known closed
+    forms, so the problem that looks like it needs a loop actually needs only arithmetic. Both
+    solutions complete in well under a microsecond on both the dev and main inputs, which is exactly
+    what we expect from an O(1) computation: there is nothing for n to scale. The recorded averages
+    confirm this and show the C version is marginally faster - about 0.37 microseconds on both
+    inputs, against roughly 0.56 microseconds (dev) and 0.64 microseconds (main) for Python. The gap
+    reflects interpreter overhead rather than algorithmic difference: the C version is also more
+    explicit about its integer widths, while the Python version is more concise thanks to
+    arbitrary-precision integers and a single-expression body.
+  </p>
+  <ul>
+    <li>Before writing a loop to sum a regularly structured sequence, ask whether a closed-form
+        formula exists - it usually does, and it is always faster.</li>
+    <li>Memorise the foundational identities S(n) = n(n+1)/2 and SS(n) = n(n+1)(2n+1)/6; they
+        recur constantly in combinatorics and algorithm analysis.</li>
+    <li>When dividing in integer arithmetic, prove the division is exact before relying on it -
+        order your multiplications so the divisibility is guaranteed.</li>
+    <li>In statically typed languages, choose integer types to fit the largest intermediate value,
+        not merely the final answer.</li>
+    <li>Keep pure computation separate from I/O and timing so the core logic stays easy to test,
+        benchmark, and reuse.</li>
+    <li>An O(1) solution is the ideal endpoint - when a problem has mathematical structure, invest
+        in finding the formula rather than settling for a fast-enough loop.</li>
+  </ul>
+</article>

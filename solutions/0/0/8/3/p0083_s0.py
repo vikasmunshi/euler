@@ -1,19 +1,9 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-""" Solution to Euler Problem 83: Path Sum [Level 4]. """
+""" Solution to Euler Problem 83: Path Sum: Four Ways [Level 4]. """
 from __future__ import annotations
 
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
-
-
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = "resources/" + src.split("/")[-1].split("?")[0]
-    return (Path(__file__).parent / local_filename).read_text()
-
+from solver.runners import runner
 
 default: str = (
     "131, 673, 234, 103, 18\n"
@@ -25,6 +15,12 @@ default: str = (
 
 
 def path_sum_four_ways(content: str) -> int:
+    """Minimal four-directional path sum via Dijkstra with a linear minimum scan; O(V^2) = O(N^4).
+
+    Four-directional movement creates cycles, ruling out single-pass DP; non-negative cell weights
+    make Dijkstra exact. Edge weight is the destination cell's value, and the scan stops once the
+    bottom-right target is finalised. Distances/unvisited are keyed on (row, col) tuples.
+    """
     matrix: list[list[int]] = [[int(n) for n in line.split(",")] for line in content.splitlines(keepends=False) if line]
     size = len(matrix)
     node_weights = {(row, col): matrix[row][col] for row in range(size) for col in range(size)}
@@ -50,41 +46,14 @@ def path_sum_four_ways(content: str) -> int:
     return distances[target]
 
 
-def solve(*, file_url: str) -> int:
-    content: str = get_text_file(file_url) if file_url else default
-    return path_sum_four_ways(content)
+@runner.main
+def solve(*args: str) -> str:
+    """Load the matrix (file URL or built-in 5x5 default) and return the minimal path sum."""
+    file_url = args[0]
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    content: str = runner.get_text_file(file_url) if file_url else default
+    return str(path_sum_four_ways(content))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(file_url=str(argv[1])))
+    raise SystemExit(solve())

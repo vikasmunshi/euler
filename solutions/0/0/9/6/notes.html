@@ -1,0 +1,130 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    Sudoku is a textbook <a href="https://en.wikipedia.org/wiki/Constraint_satisfaction_problem" class="reference-source" target="_blank" rel="noopener noreferrer">constraint-satisfaction problem</a> (a CSP - a set of variables, each drawn from a domain of allowed values, subject to constraints that forbid certain combinations). Here the 81 cells of the 9x9 grid are the variables, the digits 1-9 are the domain, and the constraints say that each digit appears exactly once in every row, column, and 3x3 box. Some cells are pre-assigned (the clues); the task is to fill the rest without violating any constraint. There is no arithmetic shortcut - the entire problem is structural, and progress comes only from systematically eliminating illegal assignments.
+  </p>
+  <p>
+    The single observation that makes every approach below work is that constraints <em>propagate</em>: the instant you fix a digit in a cell, every other empty cell sharing its row, column, or box loses that digit as a candidate. This shrinks the search space dramatically. In the general case, deciding Sudoku on an <em>n</em>x<em>n</em> board is <a href="https://en.wikipedia.org/wiki/NP-completeness" class="reference-source" target="_blank" rel="noopener noreferrer">NP-complete</a>, so no polynomial-time algorithm is known and the worst case is exponential in the number of empty cells. What makes these fifty puzzles tractable is that each has a unique solution reachable by aggressive pruning, so the effective branching factor stays close to one. I solved the problem three different ways: direct <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> with candidate propagation, a reduction to <a href="https://en.wikipedia.org/wiki/Exact_cover" class="reference-source" target="_blank" rel="noopener noreferrer">exact cover</a> solved by <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a>, and <a href="https://en.wikipedia.org/wiki/Constraint_propagation" class="reference-source" target="_blank" rel="noopener noreferrer">constraint propagation</a> driven to a fixpoint before guessing. All three are <a href="https://en.wikipedia.org/wiki/Depth-first_search" class="reference-source" target="_blank" rel="noopener noreferrer">depth-first searches</a> over partial assignments; they differ in how they represent the constraints, how much they deduce before branching, and how cheaply they undo a tentative choice.
+  </p>
+
+  <h3>Solution Approach</h3>
+
+  <h4>Backtracking with MRV and Forward Checking (Python and C, index 0)</h4>
+  <p>
+    The first solution attacks the grid directly with <a href="https://en.wikipedia.org/wiki/Depth-first_search" class="reference-source" target="_blank" rel="noopener noreferrer">depth-first</a> <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a>, in five stages.
+  </p>
+  <p>
+    <strong>Stage 1 - Candidates for one cell.</strong> For an empty cell <code>(row, col)</code> I start with {1..9} and discard every digit already present in its row, column, and 3x3 box. The box origin is found by snapping the coordinate down to the nearest multiple of three: <code>box_row = row - row % 3</code>. Python uses a real <code>set</code> with <code>discard</code>; C uses a length-10 boolean array <code>possible[]</code> indexed by digit, then collapses the marked entries into a compact array. Both compute the same set, but the C version avoids hashing entirely.
+  </p>
+  <p>
+    <strong>Stage 2 - Build the working set once.</strong> I scan all 81 cells and, for each empty one, store a <code>(row, col, candidates)</code> triple. Doing this once per puzzle means the recursion never has to rescan the raw grid to recompute candidates.
+  </p>
+  <p>
+    <strong>Stage 3 - MRV selection.</strong> Before each recursive step I sort the empty-cell list by candidate-set size, ascending, and take the first element. This is the <a href="https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Variable_and_value_ordering" class="reference-source" target="_blank" rel="noopener noreferrer">minimum remaining values</a> (MRV) heuristic - always branching on the most constrained cell does the heavy lifting. A cell with zero candidates is an immediate dead end (prune now); a cell with one candidate is a forced move (no branching at all). This keeps the search tree narrow.
+  </p>
+  <p>
+    <strong>Stage 4 - Propagate on assignment.</strong> When I tentatively place digit <code>d</code>, I remove it from the candidate sets of every remaining cell in the same row, column, or box. This is the <a href="https://en.wikipedia.org/wiki/Look-ahead_(backtracking)" class="reference-source" target="_blank" rel="noopener noreferrer">forward checking</a> step. Crucially I produce a <em>new</em> candidate list rather than mutating the old one: Python's <code>update_possibilities</code> returns a fresh list of tuples, and C copies the remaining cells with <code>memcpy</code> before editing the copy. That makes undoing a choice on <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> free - I simply drop the modified copy.
+  </p>
+  <p>
+    <strong>Stage 5 - Recurse and backtrack.</strong> An empty working set means the grid is full - success. Otherwise I try each candidate of the chosen cell, writing it into the grid in place. If recursion succeeds the answer bubbles up; if a candidate leads nowhere I reset <code>grid[row][col] = 0</code> and try the next. The C version adds one optimisation: after propagation it scans the copied cells and skips the recursive call entirely if any cell has dropped to zero candidates - a fail-fast check that saves a function call on doomed branches. Python relies on the same condition being detected one level deeper.
+  </p>
+
+  <h4>Exact Cover via Algorithm X and Dancing Links (Python and C, index 1)</h4>
+  <p>
+    The second solution reformulates the puzzle as an <a href="https://en.wikipedia.org/wiki/Exact_cover" class="reference-source" target="_blank" rel="noopener noreferrer">exact cover</a> problem and solves it with <a href="https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X" class="reference-source" target="_blank" rel="noopener noreferrer">Algorithm X</a>. An <a href="https://en.wikipedia.org/wiki/Exact_cover" class="reference-source" target="_blank" rel="noopener noreferrer">exact cover</a> takes a 0/1 matrix and asks for a subset of its rows that, summed, place exactly one 1 in every column. I encode Sudoku into that shape: each <em>column</em> is one of 324 constraints (81 "cell <code>(r,c)</code> is filled", 81 "row <code>r</code> contains digit <code>d</code>", 81 "column <code>c</code> contains digit <code>d</code>", 81 "box <code>b</code> contains digit <code>d</code>"), and each matrix <em>row</em> is a single placement of a digit in a cell, marking the exactly four constraints it discharges. A clue emits only the one row matching its given digit; an empty cell emits all nine. A solved grid is then precisely a choice of 81 rows covering all 324 columns once each.
+  </p>
+  <p>
+    <a href="https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X" class="reference-source" target="_blank" rel="noopener noreferrer">Algorithm X</a> is the obvious recursion on this matrix: pick an uncovered column, try each row that covers it, recurse, undo on failure. Its efficiency comes entirely from how the matrix is stored. <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a> (Knuth's technique, abbreviated DLX) stores every 1 as a node threaded into two <a href="https://en.wikipedia.org/wiki/Doubly_linked_list" class="reference-source" target="_blank" rel="noopener noreferrer">circular doubly-linked lists</a> - one along its row, one down its column - with a header node per column tracking how many 1s remain. The defining trick is that unlinking a node <code>x</code> with <code>x.left.right = x.right; x.right.left = x.left</code> leaves <code>x</code>'s own pointers untouched, so the very same node can later splice itself back in with <code>x.left.right = x; x.right.left = x</code>. "Covering" a column unlinks it and every row touching it; "uncovering" reverses it exactly - the structure dances its rows in and out of existence as the search descends and backtracks, with no allocation and no copying.
+  </p>
+  <p>
+    I keep the node mesh in seven parallel integer arrays (<code>left</code>, <code>right</code>, <code>up</code>, <code>down</code>, <code>column</code>, <code>size</code>, <code>row_id</code>) indexed by node id - identical in Python and C, which makes the port line-for-line faithful. The recursion always covers the column with the smallest <code>size</code> (Knuth's S heuristic), the DLX analogue of <a href="https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Variable_and_value_ordering" class="reference-source" target="_blank" rel="noopener noreferrer">minimum remaining values</a>: branching on the most constrained obligation minimises fan-out. When the header ring is empty every constraint is met; I then decode each chosen row's <code>row_id</code> back into its <code>(row, col, digit)</code> and write the digits into the grid.
+  </p>
+
+  <h4>Constraint Propagation to a Fixpoint (Python and C, index 2)</h4>
+  <p>
+    The third solution, following <a href="https://norvig.com/sudoku.html" class="reference-source" target="_blank" rel="noopener noreferrer">Peter Norvig's well-known essay</a>, deduces as much as possible before ever guessing. Each cell holds a set of candidate digits, and the solver maintains its invariant by propagating two logical rules to a <a href="https://en.wikipedia.org/wiki/Constraint_propagation" class="reference-source" target="_blank" rel="noopener noreferrer">constraint-propagation</a> fixpoint - a state where no further deduction is possible.
+  </p>
+  <p>
+    <strong>The two propagation rules.</strong> Everything is expressed through one primitive, <code>eliminate(cell, digit)</code>, which removes a digit from a cell's candidate set and enforces two consequences. (1) <em>Naked single</em>: if the removal leaves the cell with exactly one candidate, that value is forced, so I eliminate it from all 20 of the cell's peers (the cells sharing its row, column, or box). (2) <em>Hidden single</em>: if, within any unit the cell belongs to, the just-removed digit now has only one cell where it can legally go, I place it there. Both consequences call back into <code>eliminate</code> (via <code>assign</code>, which fixes a cell by eliminating all its <em>other</em> candidates), so a single removal can cascade across the whole grid until the fixpoint is reached. A cell emptied of all candidates, or a unit with nowhere for a digit, signals a contradiction and the propagation fails.
+  </p>
+  <p>
+    <strong>Search only when stuck.</strong> Seeding the grid is just <code>assign</code>-ing each clue, which triggers the cascade; for the easier puzzles this alone solves the grid with no guessing. When propagation stalls with cells still ambiguous, I pick the unsolved cell with the fewest candidates (the same <a href="https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Variable_and_value_ordering" class="reference-source" target="_blank" rel="noopener noreferrer">minimum remaining values</a> idea) and try each candidate on a fresh copy of the state, recursing. Because every guess is immediately propagated to a new fixpoint, contradictions surface almost at once and the tree stays shallow.
+  </p>
+  <p>
+    Like the exact-cover solver, I represent each candidate set as a 9-bit integer mask, so "remove a digit" is one bit-clear, "is this digit still possible" is one bit-test, and "how many candidates remain" is a population count. Python and C share the same bit layout and the same mutually-recursive <code>assign</code>/<code>eliminate</code> pair; the only structural difference is that C copies an 81-int array on each guess where Python slices a list.
+  </p>
+  <p>
+    All three solutions parse the puzzle file the same way: Python expresses parsing as a <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> over the file lines, while C uses <code>strtok_r</code> to split the in-memory buffer on newlines and accumulates rows until it has nine. Each then reads the three-digit top-left number off every solution and sums across all fifty.
+  </p>
+
+  <h3>Programming Techniques</h3>
+
+  <h4>Dancing Links: undo by leaving pointers in place</h4>
+  <p>
+    The defining trick of <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a> is that an element removed from a <a href="https://en.wikipedia.org/wiki/Doubly_linked_list" class="reference-source" target="_blank" rel="noopener noreferrer">doubly-linked list</a> still remembers its old neighbours, so re-insertion is a constant-time splice with no saved state. This turns backtracking - normally a matter of logging and replaying edits - into a pure structural operation: cover on the way down, uncover (in reverse order) on the way up. Reach for it whenever a search repeatedly removes and restores the same elements; it is the canonical way to make a recursive exact-cover or constraint search allocation-free.
+  </p>
+
+  <h4>Parallel arrays for a pointer structure (Python and C)</h4>
+  <p>
+    Rather than a node object with pointer fields, I store the <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a> mesh as seven integer arrays indexed by a node id, so a "pointer" is just an array index. This keeps the data contiguous and cache-friendly, sidesteps per-node allocation, and - because Python and C express it identically - makes the translation between languages mechanical. A struct-of-arrays layout is the natural choice when a graph or linked structure has a fixed, known node count.
+  </p>
+
+  <h4>Modelling by reduction to a known problem</h4>
+  <p>
+    Index 1 solves Sudoku by <em>not</em> writing a Sudoku-specific search at all: it reduces the puzzle to <a href="https://en.wikipedia.org/wiki/Exact_cover" class="reference-source" target="_blank" rel="noopener noreferrer">exact cover</a> and hands it to a generic <a href="https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X" class="reference-source" target="_blank" rel="noopener noreferrer">Algorithm X</a> solver. Recognising that a bespoke problem is an instance of a well-studied one lets you inherit a fast, correct algorithm and confine all the problem knowledge to the encoding. When you can map your constraints onto exact cover, SAT, or matching, the reduction is often clearer and faster than a hand-rolled search.
+  </p>
+
+  <h4>Bitmask sets and population counts (index 2)</h4>
+  <p>
+    The propagation solver stores each cell's candidate digits as a 9-bit integer rather than a hash set or boolean array. Membership is a bit-test (<code>mask &amp; (1 &lt;&lt; (d-1))</code>), removal is a bit-clear, the lone surviving digit of a singleton is read with a count-trailing-zeros intrinsic (<code>__builtin_ctz</code> in C, <code>int.bit_length</code> in Python), and the candidate count is a single population-count (<code>__builtin_popcount</code> / <code>int.bit_count</code>). Encoding a set drawn from a small fixed universe as the bits of an integer turns set algebra into single-cycle hardware operations and makes the per-cell state a single machine word.
+  </p>
+
+  <h4>Propagate to a fixpoint before branching (index 2)</h4>
+  <p>
+    The defining move of the Norvig approach is to exhaust cheap deductions before paying for a guess: <code>eliminate</code> recurses until no rule fires, and only then does <a href="https://en.wikipedia.org/wiki/Constraint_propagation" class="reference-source" target="_blank" rel="noopener noreferrer">constraint propagation</a> hand off to search. Reaching a fixpoint of forced consequences after every assignment shrinks the branching dramatically - often to nothing. Whenever a problem has cheap, complete deduction rules, run them to saturation between branches rather than interleaving weak checks into the search.
+  </p>
+
+  <h4>Copy-before-mutate for free backtracking (index 0)</h4>
+  <p>
+    The first solution creates a fresh candidate list before each recursive descent instead of mutating in place and reversing the edit on the way back. Once the recursive call returns, the modified copy is discarded and the caller's original state is intact - undo costs nothing. Python does this with a list comprehension; C does it with <code>malloc</code> + <code>memcpy</code> and a matching <code>free</code> on every exit path. The pattern trades a small allocation per node for much simpler <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> logic, and is worth it whenever the per-node state is small and bounded (here, at most 81 entries). It is the conceptual opposite of the <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a> approach, which makes undo free by mutating in place but never losing the information needed to reverse it.
+  </p>
+
+  <h4>MRV via sort-and-pop instead of a priority queue (index 0)</h4>
+  <p>
+    Rather than maintaining a heap, the first solution re-sorts the (bounded) cell list before each step and takes the front element to realise <a href="https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Variable_and_value_ordering" class="reference-source" target="_blank" rel="noopener noreferrer">minimum remaining values</a>. For at most 81 elements, an O(81 log 81) sort is effectively constant, and a full re-sort is far easier to reason about than incremental heap updates whose keys change as constraints propagate. When the working set is small and its keys mutate frequently, a full re-sort is often the pragmatic, correct choice.
+  </p>
+
+  <h4>Boolean lookup array vs hash set (C, index 0)</h4>
+  <p>
+    Where Python uses a hash-based <code>set</code>, C marks candidate digits in a fixed <code>int possible[10]</code> indexed directly by the digit value. Direct array indexing eliminates hashing overhead and is extremely cache-friendly. For small, dense, integer-keyed domains, an indexed flag array almost always beats a general hash set.
+  </p>
+
+  <h4>Reentrant tokenising with strtok_r (C)</h4>
+  <p>
+    The parser splits the file buffer on newlines using <code>strtok_r</code>, the reentrant variant of <code>strtok</code>, which operates in place by inserting null terminators and keeps its position in an explicit <code>saveptr</code>. This avoids extra string allocation and the hidden-global-state pitfalls of plain <code>strtok</code>. Prefer the reentrant form even in single-threaded code - explicit state is always safer.
+  </p>
+
+  <h4>Generator-based parsing (Python)</h4>
+  <p>
+    <code>get_grids</code> is a <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a>: it accumulates rows in a local list and <code>yield</code>s a complete grid as soon as nine rows are collected. The consumer processes one grid at a time, so peak memory stays proportional to a single puzzle rather than the whole file. Reach for <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source" target="_blank" rel="noopener noreferrer">generators</a> whenever production and consumption can be interleaved - it decouples parsing from computation and scales to arbitrarily large inputs.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The core insight, shared by all three solutions, is that the right pruning turns an apparently exhaustive search into a near-deterministic walk. The <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> solution achieves it with <a href="https://en.wikipedia.org/wiki/Constraint_satisfaction_problem#Variable_and_value_ordering" class="reference-source" target="_blank" rel="noopener noreferrer">minimum remaining values</a> plus <a href="https://en.wikipedia.org/wiki/Look-ahead_(backtracking)" class="reference-source" target="_blank" rel="noopener noreferrer">forward checking</a>; the <a href="https://en.wikipedia.org/wiki/Exact_cover" class="reference-source" target="_blank" rel="noopener noreferrer">exact cover</a> solution achieves the identical effect by always covering the smallest column, paying nothing to undo thanks to <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a>; and the <a href="https://en.wikipedia.org/wiki/Constraint_propagation" class="reference-source" target="_blank" rel="noopener noreferrer">constraint-propagation</a> solution pushes the deductions themselves as far as they go before guessing at all. Three very different representations, the same underlying idea: deduce or branch on the most constrained choice, and make backtracking cheap.
+  </p>
+  <p>
+    The six recorded averages are revealing. In C the <a href="https://en.wikipedia.org/wiki/Constraint_propagation" class="reference-source" target="_blank" rel="noopener noreferrer">constraint-propagation</a> solver is fastest at <strong>0.0011 s</strong>, ahead of <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a> at <strong>0.0017 s</strong> and well ahead of plain <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> at <strong>0.0061 s</strong> - propagation does so much logical work per assignment that most of the fifty puzzles fall without a single guess, and bitmask operations make each deduction nearly free. In Python the ranking shuffles and tightens: plain <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> is quickest at <strong>0.0428 s</strong>, the <a href="https://en.wikipedia.org/wiki/Constraint_propagation" class="reference-source" target="_blank" rel="noopener noreferrer">constraint-propagation</a> solver follows at <strong>0.0460 s</strong>, and <a href="https://en.wikipedia.org/wiki/Dancing_Links" class="reference-source" target="_blank" rel="noopener noreferrer">Dancing Links</a> trails at <strong>0.0495 s</strong>. The tight inner loops that a C compiler turns into a handful of machine instructions become, in the interpreter, thousands of slow attribute and index operations - so the cleverer, lower-level algorithms (the pointer dance, the bit twiddling) lose their edge, and the algorithm with the least per-step overhead wins. The lesson is sharp: the fastest algorithm depends on the machine that runs it, and an elegant low-level method can win decisively in C yet fall behind in an interpreter.
+  </p>
+  <ul>
+    <li>Model puzzles as constraint-satisfaction problems, or reduce them to a known one like exact cover: identify variables, domains, and constraints before writing any search code.</li>
+    <li>Branch on the most constrained choice - minimum remaining values, or the smallest exact-cover column - to convert exponential search into near-linear work on well-constrained instances.</li>
+    <li>Exhaust cheap, complete deduction rules to a fixpoint between branches; on well-constrained instances, propagation alone often finishes the job.</li>
+    <li>Make backtracking cheap, either by copying small bounded state or, as in Dancing Links, by removing elements in a way that remembers how to restore them.</li>
+    <li>Reducing a bespoke problem to a well-studied one lets you inherit a fast, correct, generic algorithm and isolate all problem knowledge in the encoding.</li>
+    <li>Encode a set drawn from a small fixed universe as the bits of an integer: membership, removal, and counting become single hardware instructions.</li>
+    <li>Store a fixed-size linked structure as parallel arrays indexed by id: cache-friendly, allocation-free, and trivially portable between languages.</li>
+    <li>Generators decouple parsing from processing and keep memory proportional to a single record rather than the whole input.</li>
+    <li>The fastest algorithm is platform-dependent: pointer-chasing and bit-twiddling structures shine in C but can lose to simpler code in an interpreter - always measure on the target runtime.</li>
+  </ul>
+</article>

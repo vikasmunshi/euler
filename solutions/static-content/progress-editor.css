@@ -1,0 +1,92 @@
+:root {
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    font-family: ui-monospace, monospace;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Single toolbar row (nav markup shared with summary.html), restyled flat and dark —
+   the summary's light floating card would clash here. Nav icons sit on the left, the
+   title next to them, and Save / status are pushed to the right by .toolbar-spacer. */
+#page-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: #252526;
+    border-bottom: 1px solid #333;
+}
+
+#page-header a,
+#page-header .nav-dummy {
+    font-size: 1rem;
+    width: 32px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: #888;
+    text-decoration: none;
+}
+
+#page-header a:hover {
+    background: #333;
+    color: #d4d4d4;
+}
+
+#page-header .nav-dummy {
+    color: #555;
+    cursor: default;
+}
+
+#page-header h1 {
+    font-size: 1rem;
+    margin: 0 0 0 8px;
+    font-weight: 600;
+}
+
+.toolbar-spacer {
+    flex: 1;
+}
+
+button {
+    font: inherit;
+    padding: 0.3rem 1rem;
+    cursor: pointer;
+    background: #0e639c;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+}
+
+button:hover {
+    background: #1177bb;
+}
+
+#status {
+    font-size: 0.85rem;
+    color: #888;
+}
+
+textarea {
+    flex: 1;
+    width: 100%;
+    box-sizing: border-box;
+    resize: none;
+    border: none;
+    outline: none;
+    padding: 1rem;
+    font: inherit;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    white-space: pre;
+    overflow: auto;
+}

@@ -1,16 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-""" Solution to Euler Problem 54: Poker Hands [Level 3]. """
+""" Solution to Euler Problem 54: Poker Hands [Level 54]. """
 from __future__ import annotations
 
 import dataclasses
 import enum
 import functools
 import typing
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 VALUES = "23456789TJQKA"
 
@@ -30,10 +28,13 @@ class PokerRank(enum.IntEnum):
 
 @dataclasses.dataclass
 class HandRank:
+    """A hand's comparison key: its category plus tie-breakers ordered most-significant first."""
+
     rank: PokerRank
     tie_breakers: int | tuple[int, ...]
 
     def __gt__(self, other: typing.Any) -> bool:
+        """Compare rank first, then break ties by lexicographic comparison of tie_breakers."""
         if not isinstance(other, HandRank):
             return NotImplemented
         if self.rank != other.rank:
@@ -52,20 +53,23 @@ SUIT_ORDER: dict[str, int] = {"C": 0, "D": 1, "H": 2, "S": 3}
 
 @dataclasses.dataclass
 class PokerHand:
+    """Five validated cards, with values and suits decoded into numeric/character tuples."""
+
     cards: tuple[str, str, str, str, str]
-    values: tuple[int, int, int, int, int] = dataclasses.field(init=False, default=None)
-    suits: tuple[str, str, str, str, str] = dataclasses.field(init=False, default=None)
+    values: tuple[int, int, int, int, int] = dataclasses.field(init=False, default=None)  # type: ignore[assignment]
+    suits: tuple[str, str, str, str, str] = dataclasses.field(init=False, default=None)  # type: ignore[assignment]
 
     def __post_init__(self) -> None:
+        """Validate the five cards and decode each into its value rank and suit character."""
         if not isinstance(self.cards, (list, tuple)) or len(self.cards) != 5:
             raise ValueError("Cards must be a list or tuple of exactly 5 cards")
         for card in self.cards:
             if any((not isinstance(card, str), len(card) != 2, card[0] not in VALUES, card[1] not in SUITS)):
                 raise ValueError(f"Invalid card: {card}")
         if isinstance(self.cards, list):
-            self.cards = typing.cast(tuple[str, str, str, str, str], tuple(self.cards))
+            self.cards = typing.cast(tuple[str, str, str, str, str], tuple(self.cards))  # type: ignore[unreachable]
         if self.values is None:
-            self.values = (
+            self.values = (  # type: ignore[unreachable]
                 VALUES.index(self.cards[0][0]),
                 VALUES.index(self.cards[1][0]),
                 VALUES.index(self.cards[2][0]),
@@ -73,10 +77,15 @@ class PokerHand:
                 VALUES.index(self.cards[4][0]),
             )
         if self.suits is None:
-            self.suits = (self.cards[0][1], self.cards[1][1], self.cards[2][1], self.cards[3][1], self.cards[4][1])
+            self.suits = (self.cards[0][1],  # type: ignore[unreachable]
+                          self.cards[1][1],
+                          self.cards[2][1],
+                          self.cards[3][1],
+                          self.cards[4][1])
 
     @functools.cached_property
     def hand_rank(self) -> HandRank:
+        """Classify into a HandRank via a count-sorted value table and flush/straight flags; O(1)."""
         values, suits = (self.values, self.suits)
         is_straight = len(set(values)) == 5 and max(values) - min(values) == 4
         is_flush = len(set(suits)) == 1
@@ -84,6 +93,7 @@ class PokerHand:
             if min(values) == 8:
                 return HandRank(PokerRank.ROYAL_FLUSH, SUIT_ORDER[suits[0]])
             return HandRank(PokerRank.STRAIGHT_FLUSH, max(values))
+        # Sort (count, value) pairs descending so the dominant group is value_counts[0].
         value_counts = tuple(sorted([(self.values.count(v), v) for v in set(self.values)], reverse=True))
         if value_counts[0][0] == 4:
             return HandRank(PokerRank.FOUR_OF_A_KIND, (value_counts[0][1], value_counts[1][1]))
@@ -111,54 +121,21 @@ class PokerHand:
         return HandRank(PokerRank.HIGH_CARD, tuple(sorted(values, reverse=True)))
 
 
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = "resources/" + src.split("/")[-1].split("?")[0]
-    return (Path(__file__).parent / local_filename).read_text()
+@runner.main
+def solve(*args: str) -> str:
+    """Reduce each hand to a comparison key and tally Player 1 wins by comparing keys; O(N) lines."""
+    file_url = args[0]
 
-
-def solve(*, file_url: str) -> int:
     plays = (
         (
             PokerHand(typing.cast(tuple[str, str, str, str, str], tuple(cards[:5]))),
             PokerHand(typing.cast(tuple[str, str, str, str, str], tuple(cards[5:]))),
         )
-        for line in get_text_file(file_url).splitlines()
+        for line in runner.get_text_file(file_url).splitlines()
         if (cards := line.split())
     )
-    return sum((player_1_hand.hand_rank > player_2_hand.hand_rank for player_1_hand, player_2_hand in plays))
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(sum((player_1_hand.hand_rank > player_2_hand.hand_rank for player_1_hand, player_2_hand in plays)))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(file_url=str(argv[1])))
+    raise SystemExit(solve())

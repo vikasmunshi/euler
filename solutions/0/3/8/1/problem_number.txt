@@ -1,1 +1,0 @@
-381:$(\text{prime}-k)$ Factorial:3

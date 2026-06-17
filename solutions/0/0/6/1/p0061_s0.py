@@ -6,15 +6,13 @@ from __future__ import annotations
 import enum
 import functools
 import math
-import sys
 import typing
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 def n_is_positive_integer[T](func: typing.Callable[[int], T]) -> typing.Callable[[int], T]:
-
+    """Decorator enforcing that the wrapped nth-value function receives a positive integer."""
     @functools.wraps(func)
     def wrapper(n: int) -> T:
         if isinstance(n, int) and n > 0:
@@ -27,11 +25,13 @@ def n_is_positive_integer[T](func: typing.Callable[[int], T]) -> typing.Callable
 
 @n_is_positive_integer
 def nth_hexagonal_number(n: int) -> int:
+    """Return the nth hexagonal number P(6,n) = n(2n-1)."""
     return n * (2 * n - 1)
 
 
 @n_is_positive_integer
 def closest_hexagonal_number(n: int) -> tuple[float, int, int]:
+    """Return the inverted index for value n and the hexagonal numbers either side of it."""
     return (
         (i := ((1 + math.sqrt(1 + 8 * n)) / 4)),
         nth_hexagonal_number(math.floor(i)),
@@ -64,11 +64,13 @@ class FigurateNumber(enum.Enum):
 
 @n_is_positive_integer
 def nth_triangle_number(n: int) -> int:
+    """Return the nth triangle number P(3,n) = n(n+1)/2."""
     return n * (n + 1) // 2
 
 
 @n_is_positive_integer
 def closest_triangle_number(n: int) -> tuple[float, int, int]:
+    """Return the inverted index for value n and the triangle numbers either side of it."""
     return (
         (i := ((-1 + math.sqrt(1 + 8 * n)) / 2)),
         nth_triangle_number(math.floor(i)),
@@ -78,11 +80,13 @@ def closest_triangle_number(n: int) -> tuple[float, int, int]:
 
 @n_is_positive_integer
 def nth_pentagonal_number(n: int) -> int:
+    """Return the nth pentagonal number P(5,n) = n(3n-1)/2."""
     return n * (3 * n - 1) // 2
 
 
 @n_is_positive_integer
 def closest_pentagonal_number(n: int) -> tuple[float, int, int]:
+    """Return the inverted index for value n and the pentagonal numbers either side of it."""
     return (
         (i := ((1 + math.sqrt(1 + 24 * n)) / 6)),
         nth_pentagonal_number(math.floor(i)),
@@ -92,21 +96,25 @@ def closest_pentagonal_number(n: int) -> tuple[float, int, int]:
 
 @n_is_positive_integer
 def nth_square_number(n: int) -> int:
-    return n**2
+    """Return the nth square number P(4,n) = n^2."""
+    return n ** 2
 
 
 @n_is_positive_integer
 def closest_square_number(n: int) -> tuple[float, int, int]:
+    """Return the inverted index for value n and the square numbers either side of it."""
     return ((i := math.sqrt(n)), nth_square_number(math.floor(i)), nth_square_number(math.ceil(i)))
 
 
 @n_is_positive_integer
 def nth_octagonal_number(n: int) -> int:
+    """Return the nth octagonal number P(8,n) = n(3n-2)."""
     return n * (3 * n - 2)
 
 
 @n_is_positive_integer
 def closest_octagonal_number(n: int) -> tuple[float, int, int]:
+    """Return the inverted index for value n and the octagonal numbers either side of it."""
     return (
         (i := ((2 + math.sqrt(4 + 12 * n)) / 6)),
         nth_octagonal_number(math.floor(i)),
@@ -116,11 +124,13 @@ def closest_octagonal_number(n: int) -> tuple[float, int, int]:
 
 @n_is_positive_integer
 def nth_heptagonal_number(n: int) -> int:
+    """Return the nth heptagonal number P(7,n) = n(5n-3)/2."""
     return n * (5 * n - 3) // 2
 
 
 @n_is_positive_integer
 def closest_heptagonal_number(n: int) -> tuple[float, int, int]:
+    """Return the inverted index for value n and the heptagonal numbers either side of it."""
     return (
         (i := ((3 + math.sqrt(9 + 40 * n)) / 10)),
         nth_heptagonal_number(math.floor(i)),
@@ -146,7 +156,8 @@ p_funcs: dict[FigurateNumber, typing.Callable[[int], int]] = {
 }
 
 
-def p_gen(p_num: FigurateNumber, min_value: int = 0, max_value: int = 2**32) -> typing.Generator[int, None, None]:
+def p_gen(p_num: FigurateNumber, min_value: int = 0, max_value: int = 2 ** 32) -> typing.Generator[int, None, None]:
+    """Yield the figurate numbers of one type within [min_value, max_value], seeded via the inverse."""
     p_func: typing.Callable[[int], int] = p_funcs[p_num]
     c_func: typing.Callable[[int], tuple[float, int, int]] = c_funcs[p_num]
     start_num: int = math.floor(c_func(min_value)[0])
@@ -157,13 +168,14 @@ def p_gen(p_num: FigurateNumber, min_value: int = 0, max_value: int = 2**32) -> 
 
 
 def find_cyclic_paths(
-    start: int,
-    current: int,
-    path: list[int],
-    visited: set[int],
-    number_mapping: dict[int, list[int]],
-    target_length: int,
+        start: int,
+        current: int,
+        path: list[int],
+        visited: set[int],
+        number_mapping: dict[int, list[int]],
+        target_length: int,
 ) -> list[tuple[int, ...]]:
+    """Backtracking DFS returning every length-target_length path that closes back to the start."""
     if len(path) == target_length:
         if current % 100 == start // 100:
             return [tuple(path[:])]
@@ -180,6 +192,7 @@ def find_cyclic_paths(
 
 
 def verify_polygon_types(chain: tuple[int, ...], p_numbers: dict[FigurateNumber, set[int]]) -> bool:
+    """True if the chain covers every polygon type once, handling numbers belonging to several families."""
     figurate_in_chain: dict[FigurateNumber, list[int]] = {k: [n for n in chain if n in v] for k, v in p_numbers.items()}
     if any((len(n) == 0 for n in figurate_in_chain.values())):
         return False
@@ -194,9 +207,15 @@ def verify_polygon_types(chain: tuple[int, ...], p_numbers: dict[FigurateNumber,
     return True
 
 
-def solve(*, length: int) -> list:
-    min_value: int = 10**3
-    max_value: int = 10**4 - 1
+@runner.main
+def solve(*args: str) -> str:
+    """Model the digit-linking rule as a directed sparse graph over 4-digit figurate numbers, then
+    DFS for length-cycles covering all polygon types; O(V^length) worst case, near-instant in practice
+    given the short successor lists."""
+    length = runner.parse_int(args[0])
+
+    min_value: int = 10 ** 3
+    max_value: int = 10 ** 4 - 1
     generator_funcs: dict[FigurateNumber, typing.Generator[int, None, None]] = {
         (p_num := FigurateNumber(n)): p_gen(p_num=FigurateNumber(p_num), min_value=min_value, max_value=max_value)
         for n in range(3, length + 3)
@@ -213,49 +232,18 @@ def solve(*, length: int) -> list:
         for path in find_cyclic_paths(start_num, start_num, [start_num], {start_num}, number_to_next_graph, length):
             cyclic_paths.add(tuple(sorted(path)))
     valid_cyclic_paths: list = sorted((path for path in cyclic_paths if verify_polygon_types(path, p_numbers)), key=sum)
-    if sys.argv[-1] == "--show":
+    if runner.show:
         from pprint import pprint
 
         for valid_cyclic_path in valid_cyclic_paths:
             figurates = {n: tuple((str(k) for k, v in p_numbers.items() if n in v)) for n in valid_cyclic_path}
             print(f"length={length!r} {figurates}")
             pprint(figurates)
-    return [
+    return str([
         (len_paths := len(valid_cyclic_paths)),
         sum(valid_cyclic_paths[0]) if len_paths == 1 else [sum(path) for path in valid_cyclic_paths],
-    ]
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    ])
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(length=int(argv[1])))
+    raise SystemExit(solve())

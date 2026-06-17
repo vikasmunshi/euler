@@ -3,12 +3,8 @@
 """ Solution to Euler Problem 56: Powerful Digit Sum [Level 1]. """
 from __future__ import annotations
 
-import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
-
 import numpy as np
+from solver.runners import runner
 
 
 def visualize(
@@ -20,6 +16,7 @@ def visualize(
     stop_at: int,
     start_at: int,
 ) -> None:
+    """Render heatmaps of digit sum, digit length, and average digit value across the (base, exp) grid."""
     import matplotlib.pyplot as plt
     import matplotlib.ticker
 
@@ -89,16 +86,22 @@ def visualize(
     plt.show()
 
 
-def solve(*, num_digits: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Brute-force the top 100 bases and top 10 exponents below 10^num_digits, maximizing the digit
+    sum of base**exp via Python's arbitrary-precision int; O(N^2) pairs each costing O(N log N)
+    bignum digit work."""
+    num_digits = runner.parse_int(args[0])
+
     stop_at: int = 10**num_digits
-    if sys.argv[-1] != "--show":
-        return max(
+    if not runner.show:
+        return str(max(
             [
                 sum([int(d) for d in str(base**exp)])
                 for base in range(max(1, stop_at - 100), stop_at)
                 for exp in range(max(1, stop_at - 10), stop_at)
             ]
-        )
+        ))
     else:
         data_matrix: np.ndarray[tuple[int, int], np.dtype[np.uint64]]
         start_at: int = max(1, stop_at - 100)
@@ -126,39 +129,8 @@ def solve(*, num_digits: int) -> int:
             stop_at=stop_at,
             start_at=start_at,
         )
-        return int(data_matrix.max())
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+        return str(int(data_matrix.max()))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(num_digits=int(argv[1])))
+    raise SystemExit(solve())

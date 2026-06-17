@@ -1,17 +1,26 @@
 /* Solution to Euler Problem 95: Amicable Chains. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-long long solve(int argc, char *argv[]) {
-    int max_num = atoi(argv[1]);
+/*
+ * Two-phase functional-graph cycle search; O(N log N).
+ *
+ * Phase 1: an additive sieve fills divisor_sum[n] with the sum of n's proper
+ *   divisors in O(N log N) by pushing each divisor i onto all its multiples.
+ * Phase 2: treat n -> divisor_sum[n] as a functional graph and walk each
+ *   unclassified node once. A functional graph decomposes into tails leading
+ *   into cycles, so tracking the current path lets us detect the closing cycle
+ *   (including mid-path cycles) and record the longest one. The smallest member
+ *   of that longest cycle is the answer. Each node is touched O(1) times overall.
+ */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int max_num = parse_int(argv[1]);
 
-    /* Build divisor sum array using additive sieve */
+    /* Phase 1: additive sieve - accumulate each divisor i into its multiples. */
     int *divisor_sum = (int *)calloc((size_t)(max_num + 1), sizeof(int));
     if (!divisor_sum) {
         fprintf(stderr, "Out of memory\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     for (int i = 1; i <= max_num / 2; i++) {
@@ -20,91 +29,92 @@ long long solve(int argc, char *argv[]) {
         }
     }
 
-    /* seen array: 0 = not seen, positive = chain length */
+    /* Permanent classification: 0 = unvisited, positive = cycle length, -1 = tail. */
     int *seen = (int *)calloc((size_t)(max_num + 1), sizeof(int));
     if (!seen) {
         fprintf(stderr, "Out of memory\n");
         free(divisor_sum);
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
-    /* in_path array: stores position+1 of node in current path (0 = not in path) */
+    /* Transient per-walk state: 1-indexed position in current path (0 = absent),
+     * so revisiting a node recovers its cycle-start index in O(1). */
     int *in_path = (int *)calloc((size_t)(max_num + 1), sizeof(int));
     if (!in_path) {
         fprintf(stderr, "Out of memory\n");
         free(divisor_sum);
         free(seen);
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
-    /* path buffer */
+    /* Ordered record of the nodes visited in the current walk. */
     int *path = (int *)malloc((size_t)(max_num + 1) * sizeof(int));
     if (!path) {
         fprintf(stderr, "Out of memory\n");
         free(divisor_sum);
         free(seen);
         free(in_path);
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     int smallest_member = 0;
     int longest_length = 0;
 
+    /* Phase 2: classify every node by walking its chain at most once. */
     for (int i = 1; i <= max_num; i++) {
         if (seen[i]) continue;
 
-        /* Walk the chain from i */
+        /* Walk the chain from i, recording each node and its path position. */
         int path_len = 0;
         path[path_len++] = i;
         in_path[i] = path_len; /* position 1-indexed */
 
         int c = divisor_sum[i];
 
+        /* Stop on leaving range, re-entering this walk, or hitting prior work. */
         while (c >= 1 && c <= max_num && !in_path[c] && !seen[c]) {
             path[path_len++] = c;
             in_path[c] = path_len;
             c = divisor_sum[c];
         }
 
-        /* Check if we closed a cycle back to i */
+        /* Cycle closes back to the start: the whole path is one amicable chain. */
         if (c == i) {
-            /* The entire path is one amicable chain */
             int len_ch = path_len;
             if (len_ch > longest_length) {
                 longest_length = len_ch;
                 smallest_member = i;
             }
-            /* Mark all nodes as seen */
             for (int k = 0; k < path_len; k++) {
                 seen[path[k]] = len_ch;
             }
         } else if (c >= 1 && c <= max_num && in_path[c]) {
-            /* c is in the current path but not equal to i:
-             * the cycle starts at position in_path[c]-1 in the path array */
+            /* Mid-path cycle: it begins at the recorded position of c; nodes
+             * before that are tail, nodes from there on form the cycle. */
             int cycle_start_pos = in_path[c] - 1; /* 0-indexed */
             int cycle_len = path_len - cycle_start_pos;
 
             if (cycle_len > longest_length) {
                 longest_length = cycle_len;
-                /* smallest member is the minimum in the cycle */
+                /* Smallest member is the minimum over the cycle's nodes. */
                 int min_val = path[cycle_start_pos];
                 for (int k = cycle_start_pos + 1; k < path_len; k++) {
                     if (path[k] < min_val) min_val = path[k];
                 }
                 smallest_member = min_val;
             }
-            /* Mark all nodes as seen */
+            /* Tail nodes get -1; cycle nodes get the cycle length. */
             for (int k = 0; k < path_len; k++) {
                 seen[path[k]] = (k >= cycle_start_pos) ? cycle_len : -1;
             }
         } else {
-            /* No cycle found; mark all as seen with length -1 (tail only) */
+            /* Walk ran off the range or into prior work with no cycle: all tail. */
             for (int k = 0; k < path_len; k++) {
                 seen[path[k]] = -1;
             }
         }
 
-        /* Clear in_path for all nodes in current path */
+        /* Targeted cleanup: reset in_path only for the nodes we touched. */
         for (int k = 0; k < path_len; k++) {
             in_path[path[k]] = 0;
         }
@@ -115,55 +125,5 @@ long long solve(int argc, char *argv[]) {
     free(in_path);
     free(path);
 
-    return (long long)smallest_member;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)smallest_member)); return _answer; }
 }

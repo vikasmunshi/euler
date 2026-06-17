@@ -2,16 +2,14 @@
   {
     "category": "dev",
     "input": {
-      "dice_size": 6,
-      "simulations": 1000000
+      "dice_size": 6
     },
     "answer": "102400"
   },
   {
     "category": "main",
     "input": {
-      "dice_size": 4,
-      "simulations": 1000000
+      "dice_size": 4
     },
     "answer": "101524"
   }

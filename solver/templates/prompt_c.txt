@@ -35,51 +35,30 @@ Use the existing solution files above for context; do not regenerate files that 
 
 Files to generate: $files_to_generate
 
-Requirements:
+Follow the C translation conventions below in full:
 
-1. Each C file must implement a `solve` function and a `main` block following the template.
-   The `solve` signature and `main` block must be adapted to match the Python return type:
+$c_translation_conventions
 
-   - `int` or `bool` -> `long long solve(int argc, char *argv[])`, print result with `%lld`.
-   - `str`           -> `char *solve(int argc, char *argv[])`, print result with `%s`;
-                        free the returned pointer in `main()` if heap-allocated.
-   - `list` / other  -> encode the result as a JSON string (e.g. `[1, 2, 3]`),
-                        return `char *`, print with `%s`; free if heap-allocated.
+Apply these source documentation conventions to the in-source comments:
 
-   In all cases `main()` passes only the problem input arguments to `solve()`: argv[0] is the
-   program name, argv[1] is the first input, argv[2] the second, etc.
-   The output line must always follow the format: `"<runs> <avg_seconds> <result>"`.
+$source_documentation_conventions
 
-2. Parse arguments with atoi(argv[N]) for int, atoll(argv[N]) for long long,
-   atof(argv[N]) for double.
+Generation-task requirements (in addition to the conventions above):
+
+1. Each file to generate corresponds to the Python solution with the same index; use the existing
+   solution files above for context and do not regenerate files that already exist.
+
+2. Begin each file with the comment: /* Solution to Euler Problem $number: $title. */
 
 3. Skip matplotlib and any graphical visualization code entirely.
 
-4. If a Python solution uses primesieve, use the C primesieve library:
-     #include <primesieve.h>     (link with -lprimesieve)
-   Key functions:
-     - primesieve_nth_prime(n, start)            -- n-th prime >= start (1-indexed from start)
-     - primesieve_count_primes(start, stop)      -- count primes in [start, stop]
-     - primesieve_generate_primes(start, stop, &size, INT_PRIMES)
-                                                 -- malloc'd array; free with primesieve_free()
+4. If a Python solution depends on libraries with no reasonable C equivalent (anything beyond
+   numpy / primesieve / GMP / MPFR / OpenSSL BIGNUM, e.g. sympy or networkx), do not fabricate a
+   port: emit a one-line file containing only `// SKIP: <one-sentence reason>` and move to the next.
 
-5. If a Python solution contains a `get_text_file` function, include and use the
-    `char *get_text_file` function from the template. Otherwise, remove this function.
+5. $house_style
 
-6. Translate each algorithm faithfully - do not change the approach.
-
-7. Include only the headers you actually use and remove any unused headers from the template.
-
-8. Begin each file with a comment: /* Solution to Euler Problem $number: $title. */
-
-9. If a Python solution depends on libraries with no reasonable C equivalent
-   (e.g. `sympy`, `networkx`, anything beyond `numpy` / `pyprimesieve`),
-   do not fabricate a port. Emit a one-line file containing only
-   `// SKIP: <one-sentence reason>` and move on to the next file.
-
-10. $house_style
-
-11. Output each C file wrapped in delimiter lines, one after another, no other text:
+6. Output each C file wrapped in delimiter lines, one after another, no other text:
 
 // BEGIN <filename>
 [c source]

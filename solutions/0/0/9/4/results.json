@@ -5,8 +5,8 @@
     "args": "1000000000",
     "answer": 518408346,
     "verdict": "correct",
-    "average": 7.7e-08,
-    "number_runs": 10
+    "average": 4.596904761904762e-07,
+    "number_runs": 42
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "1000000000",
     "answer": 518408346,
     "verdict": "correct",
-    "average": 3.8892001612111924e-06,
-    "number_runs": 10
+    "average": 1.8494340890486325e-06,
+    "number_runs": 42
   }
 ]

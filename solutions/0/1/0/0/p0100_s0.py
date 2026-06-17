@@ -3,51 +3,28 @@
 """ Solution to Euler Problem 100: Arranged Probability [Level 6]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
-def solve(*, total_discs: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Solve the Pell equation x^2 - 2*y^2 = -1 by iterating its linear recurrence; O(log total).
+
+    The condition P(BB) = 1/2 rearranges to (2n-1)^2 - 2*(2b-1)^2 = -1, a Pell equation in
+    x = 2n-1, y = 2b-1. From the fundamental solution (1, 1) each next solution follows by
+    (x, y) -> (3x + 4y, 2x + 3y); x and y stay odd so n and b recover exactly, and solutions
+    grow geometrically, so only ~40 steps reach 10^12.
+    """
+    total_discs = runner.parse_int(args[0])
+
     x, y = (1, 1)
     while True:
         x, y = (3 * x + 4 * y, 2 * x + 3 * y)
         n = (x + 1) // 2
         b = (y + 1) // 2
         if n >= total_discs:
-            return b
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+            return str(b)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(total_discs=int(argv[1])))
+    raise SystemExit(solve())

@@ -1,11 +1,9 @@
 /* Solution to Euler Problem 74: Digit Factorial Chains. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 static const int digit_factorials[10] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880};
 
+/* Successor under the digit-factorial map: sum of factorials of n's decimal digits. */
 static int sum_of_digit_factorials(int n) {
     int result = 0;
     while (n > 0) {
@@ -15,12 +13,15 @@ static int sum_of_digit_factorials(int n) {
     return result;
 }
 
-/* We store for each number the chain length only (derived from the list-length approach).
- * This faithfully mirrors s1's logic: build a current_chain list, extend with cached chain,
- * detect cycles, then assign each position its chain length. */
+/* Walk-and-cache memoization mirroring the Python s1 add_chains: build current_chain by walking
+ * the functional graph until a cached node (whose cached length is appended) or a cycle is found,
+ * then assign every position its chain length. Cycle membership is tested with a boolean
+ * visited_flag array cleared after each walk via visited_list. Only lengths are stored (the
+ * full chain list of s1 is unnecessary for the answer). Amortised O(1) per start, O(max_num) total. */
 
-long long solve(int argc, char *argv[]) {
-    int max_num = atoi(argv[1]);
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int max_num = parse_int(argv[1]);
 
     /* Max cache size: any number up to 10M maps to at most 7*362880=2540160 */
     int cache_size = 3000000;
@@ -29,19 +30,18 @@ long long solve(int argc, char *argv[]) {
     int *chain_length = calloc((size_t)cache_size, sizeof(int));
     if (!chain_length) {
         fprintf(stderr, "Out of memory\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     /* current_chain: dynamically sized array */
     int chain_cap = 256;
     int *current_chain = malloc((size_t)chain_cap * sizeof(int));
-    /* visited set for cycle detection: use a small boolean array indexed by position in chain */
-    /* We'll use a hash set for visited since values can be large */
-    /* Actually values stay < cache_size, so use a boolean array */
+    /* visited set for cycle detection: a boolean array indexed by value, since every
+     * reachable value stays below cache_size, giving O(1) membership tests */
     char *visited_flag = calloc((size_t)cache_size, sizeof(char));
     if (!current_chain || !visited_flag) {
         fprintf(stderr, "Out of memory\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     int max_chain_length = 0;
@@ -72,7 +72,7 @@ long long solve(int argc, char *argv[]) {
         int *visited_list = malloc((size_t)visited_list_cap * sizeof(int));
         if (!visited_list) {
             fprintf(stderr, "Out of memory\n");
-            return -1;
+            { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
         }
 
         int num = number;
@@ -104,7 +104,7 @@ long long solve(int argc, char *argv[]) {
                 current_chain = realloc(current_chain, (size_t)chain_cap * sizeof(int));
                 if (!current_chain) {
                     fprintf(stderr, "Out of memory\n");
-                    return -1;
+                    { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
                 }
             }
             current_chain[chain_len++] = num;
@@ -117,7 +117,7 @@ long long solve(int argc, char *argv[]) {
                     visited_list = realloc(visited_list, (size_t)visited_list_cap * sizeof(int));
                     if (!visited_list) {
                         fprintf(stderr, "Out of memory\n");
-                        return -1;
+                        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
                     }
                 }
                 visited_list[visited_len++] = num;
@@ -170,7 +170,7 @@ long long solve(int argc, char *argv[]) {
             total_length = chain_len;
         }
 
-        /* Assign chain lengths back */
+        /* Assign chain lengths back: position i sits i steps along the chain. */
         for (int i = 0; i < chain_len; i++) {
             int val = current_chain[i];
             if (val < cache_size && chain_length[val] == 0) {
@@ -192,55 +192,5 @@ long long solve(int argc, char *argv[]) {
     free(current_chain);
     free(visited_flag);
 
-    return (long long)max_chain_length_count;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)((long long)max_chain_length_count)); return _answer; }
 }

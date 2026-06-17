@@ -1,10 +1,7 @@
 /* Solution to Euler Problem 77: Prime Summations. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-/* Sieve of Sundaram: return primes up to max_num */
+/* Sieve of Sundaram: return primes up to max_num, writing the count via *count. */
 static int *sundaram_sieve(int max_num, int *count) {
     *count = 0;
     if (max_num < 2) return NULL;
@@ -41,6 +38,7 @@ typedef struct {
     int        cap;
 } PartList;
 
+/* Return an empty PartList. */
 static PartList make_part_list(void) {
     PartList pl;
     pl.items = NULL;
@@ -49,6 +47,7 @@ static PartList make_part_list(void) {
     return pl;
 }
 
+/* Free every partition array and the items buffer, then reset the list. */
 static void part_list_free(PartList *pl) {
     for (int i = 0; i < pl->count; i++) {
         free(pl->items[i].parts);
@@ -59,7 +58,7 @@ static void part_list_free(PartList *pl) {
     pl->cap   = 0;
 }
 
-/* Memo for partition enumeration: keyed by (number, slots) */
+/* Memo for partition enumeration: keyed by (number, slots), value is the owned PartList. */
 #define ENUM_MEMO_SIZE (1 << 14)  /* 16384 buckets */
 
 typedef struct EnumMemoEntry {
@@ -72,6 +71,7 @@ typedef struct EnumMemoEntry {
 static EnumMemoEntry enum_memo[ENUM_MEMO_SIZE];
 static int enum_memo_initialized = 0;
 
+/* Free all owned PartLists and mark every bucket empty before first use. */
 static void enum_memo_init(void) {
     for (int i = 0; i < ENUM_MEMO_SIZE; i++) {
         if (enum_memo[i].valid) {
@@ -84,6 +84,7 @@ static void enum_memo_init(void) {
     enum_memo_initialized = 1;
 }
 
+/* Mix the two integer keys into a bucket index; power-of-two size lets % reduce to & . */
 static unsigned int enum_hash(int number, int slots) {
     unsigned int h = (unsigned int)(number * 1000003 + slots);
     h ^= h >> 16;
@@ -92,6 +93,7 @@ static unsigned int enum_hash(int number, int slots) {
     return h & (ENUM_MEMO_SIZE - 1);
 }
 
+/* Return a pointer to the cached PartList for (number, slots), or NULL if absent. */
 static PartList *enum_memo_get(int number, int slots) {
     unsigned int idx = enum_hash(number, slots);
     for (int probe = 0; probe < ENUM_MEMO_SIZE; probe++) {
@@ -103,6 +105,7 @@ static PartList *enum_memo_get(int number, int slots) {
     return NULL;
 }
 
+/* Store pl for (number, slots), taking ownership of its arrays and freeing any prior entry. */
 static void enum_memo_set(int number, int slots, PartList *pl) {
     unsigned int idx = enum_hash(number, slots);
     for (int probe = 0; probe < ENUM_MEMO_SIZE; probe++) {
@@ -125,7 +128,9 @@ static void enum_memo_set(int number, int slots, PartList *pl) {
 /* safe_limit: beyond this the partition count explodes; set large enough for all test cases */
 static int g_safe_limit = 50;
 
-/* Returns NULL on overflow (number > safe_limit), or pointer to owned PartList in memo */
+/* Build every prime partition of number with parts <= slots, prepending each chosen prime p
+ * to the sub-partitions of the remainder; p is also the next ceiling, forcing non-increasing
+ * parts. Returns NULL on overflow (number > safe_limit), else an owned PartList in the memo. */
 static PartList *get_prime_partitions(int number, int slots) {
     if (number > g_safe_limit) return NULL;  /* overflow guard */
 
@@ -178,6 +183,7 @@ static PartList *get_prime_partitions(int number, int slots) {
                     new_parts[0] = p;
                     memcpy(new_parts + 1, sub->items[j].parts,
                            (size_t)sub->items[j].len * sizeof(int));
+                    /* Grow by doubling for amortised O(1) append. */
                     if (result.count == result.cap) {
                         int new_cap = result.cap == 0 ? 8 : result.cap * 2;
                         result.items = realloc(result.items, (size_t)new_cap * sizeof(Partition));
@@ -196,9 +202,13 @@ static PartList *get_prime_partitions(int number, int slots) {
     return enum_memo_get(number, slots);
 }
 
-long long solve(int argc, char *argv[]) {
-    if (argc < 2) return -1;
-    int threshold = atoi(argv[1]);
+/* Enumeration-based memoised recursion: build all prime partitions and take the length of the
+ * first n whose list reaches the threshold. Far slower than the count-only sibling because it
+ * allocates and copies O(count) int arrays per subproblem; g_safe_limit bounds the search. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    if (argc < 2) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
+    int threshold = parse_int(argv[1]);
 
     if (!enum_memo_initialized) enum_memo_init();
 
@@ -211,62 +221,11 @@ long long solve(int argc, char *argv[]) {
         PartList *pl = get_prime_partitions(n, n);
         if (!pl) {
             fprintf(stderr, "OverflowError: number exceeds safe_limit=%d\n", g_safe_limit);
-            return -1;
+            { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
         }
-        if (pl->count >= threshold) return n;
+        if (pl->count >= threshold) { snprintf(_answer, sizeof _answer, "%lld", (long long)(n)); return _answer; }
     }
 
     fprintf(stderr, "OverflowError: answer exceeds safe_limit=%d\n", g_safe_limit);
-    return -1;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        enum_memo_init();
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 }

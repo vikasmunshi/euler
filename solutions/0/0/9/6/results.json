@@ -5,8 +5,26 @@
     "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
     "answer": 24702,
     "verdict": "correct",
-    "average": 0.0086304234,
-    "number_runs": 10
+    "average": 0.006307513738095236,
+    "number_runs": 42
+  },
+  {
+    "category": "main",
+    "solution": "p0096_s1_c",
+    "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
+    "answer": 24702,
+    "verdict": "correct",
+    "average": 0.0016521434285714277,
+    "number_runs": 42
+  },
+  {
+    "category": "main",
+    "solution": "p0096_s2_c",
+    "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
+    "answer": 24702,
+    "verdict": "correct",
+    "average": 0.001037590380952381,
+    "number_runs": 42
   },
   {
     "category": "main",
@@ -14,7 +32,25 @@
     "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
     "answer": 24702,
     "verdict": "correct",
-    "average": 0.06127810460020555,
-    "number_runs": 10
+    "average": 0.044539835710782516,
+    "number_runs": 42
+  },
+  {
+    "category": "main",
+    "solution": "p0096_s1.py",
+    "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
+    "answer": 24702,
+    "verdict": "correct",
+    "average": 0.05275099932900741,
+    "number_runs": 42
+  },
+  {
+    "category": "main",
+    "solution": "p0096_s2.py",
+    "args": "https://projecteuler.net/resources/documents/0096_sudoku.txt",
+    "answer": 24702,
+    "verdict": "correct",
+    "average": 0.05010123295332527,
+    "number_runs": 42
   }
 ]

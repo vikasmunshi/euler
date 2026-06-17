@@ -1,8 +1,5 @@
 /* Solution to Euler Problem 37: Truncatable Primes. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 /* Incremental sieve using a hash map (open addressing) */
 
@@ -16,6 +13,7 @@ typedef struct {
 
 static HashEntry htable[HASH_SIZE];
 
+/* Insert key->val into the composites map (linear probing). */
 static void hash_insert(int key, int val) {
     unsigned int h = (unsigned int)key & HASH_MASK;
     while (htable[h].key != 0 && htable[h].key != key)
@@ -24,6 +22,7 @@ static void hash_insert(int key, int val) {
     htable[h].val = val;
 }
 
+/* Return the stored value for key, or 0 if absent. */
 static int hash_get(int key) {
     /* returns 0 if not found */
     unsigned int h = (unsigned int)key & HASH_MASK;
@@ -34,6 +33,7 @@ static int hash_get(int key) {
     return 0;
 }
 
+/* Test whether key is present in the composites map. */
 static int hash_contains(int key) {
     unsigned int h = (unsigned int)key & HASH_MASK;
     while (htable[h].key != 0) {
@@ -43,6 +43,7 @@ static int hash_contains(int key) {
     return 0;
 }
 
+/* Delete key, then re-insert the contiguous probe chain so no lookup is broken. */
 static void hash_remove(int key) {
     /* Robin Hood removal: mark slot and re-insert chain */
     unsigned int h = (unsigned int)key & HASH_MASK;
@@ -70,12 +71,14 @@ static void hash_remove(int key) {
 static char str_keys[STR_HASH_SIZE][12];  /* up to 11-digit numbers */
 static int  str_used[STR_HASH_SIZE];
 
+/* djb2 hash of a NUL-terminated prime string. */
 static unsigned int str_hash(const char *s) {
     unsigned int h = 5381;
     while (*s) h = ((h << 5) + h) ^ (unsigned char)*s++;
     return h;
 }
 
+/* Insert a prime string into the seen-set (linear probing). */
 static void str_set_insert(const char *s) {
     unsigned int h = str_hash(s) & STR_HASH_MASK;
     while (str_used[h] && strcmp(str_keys[h], s) != 0)
@@ -85,6 +88,7 @@ static void str_set_insert(const char *s) {
     str_keys[h][11] = '\0';
 }
 
+/* Test whether a prime string is in the seen-set. */
 static int str_set_contains(const char *s) {
     unsigned int h = str_hash(s) & STR_HASH_MASK;
     while (str_used[h]) {
@@ -94,7 +98,12 @@ static int str_set_contains(const char *s) {
     return 0;
 }
 
-long long solve(int argc, char *argv[]) {
+/* Stream primes as strings via an incremental sieve; a prime is truncatable iff every prefix and
+   suffix already lies in the seen-set, so each test is O(digits) set lookups. Sorted generation
+   guarantees those smaller primes are present; stop after the eleven known truncatable primes.
+   Overall O(n log log n) over the range scanned. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
     (void)argc; (void)argv;
 
     /* incremental sieve state */
@@ -123,7 +132,7 @@ long long solve(int argc, char *argv[]) {
 
             /* insert n*n into composites */
             int nn = n * n;
-            /* only if it fits (n < ~46340 for int) */
+            /* only if it fits (n < ~46340 for int); cast to long long guards the overflow check */
             if ((long long)n * n < (long long)(1 << 30)) {
                 /* check n*n not already in map */
                 if (!hash_contains(nn))
@@ -167,59 +176,5 @@ long long solve(int argc, char *argv[]) {
         n += 2;
     }
 
-    return total;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        /* reset global state for each run */
-        memset(htable, 0, sizeof(htable));
-        memset(str_used, 0, sizeof(str_used));
-
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(total)); return _answer; }
 }

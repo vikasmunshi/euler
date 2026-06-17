@@ -4,16 +4,15 @@
 from __future__ import annotations
 
 import enum
-import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 Chains = dict[int, list[int]]
 digit_factorials: tuple[int, ...] = (1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880)
 
 
 def sum_of_digit_factorials(n: int) -> int:
+    """Successor under the digit-factorial map: sum of factorials of n's decimal digits."""
     result = 0
     while n > 0:
         result += digit_factorials[n % 10]
@@ -22,6 +21,7 @@ def sum_of_digit_factorials(n: int) -> int:
 
 
 def add_chains(chains: Chains, number: int) -> bool:
+    """Walk from number caching the full tail list for each new node; return False if already cached."""
     if number in chains:
         return False
     num: int = number
@@ -42,6 +42,7 @@ def add_chains(chains: Chains, number: int) -> bool:
 
 
 def get_chain(max_num: int) -> Chains:
+    """Build the full chain cache for all starts in [2, max_num] (used by the --show display)."""
     chains: Chains = {}
     for num in range(2, max_num + 1):
         add_chains(chains, num)
@@ -49,6 +50,7 @@ def get_chain(max_num: int) -> Chains:
 
 
 def count_chains_with_max_length_digit_factorial(max_num: int) -> tuple[int, int]:
+    """Cache every chain, then report the maximum chain length and how many chains attain it."""
     chains: Chains = {}
     for num in range(2, max_num + 1):
         add_chains(chains, num)
@@ -59,6 +61,7 @@ def count_chains_with_max_length_digit_factorial(max_num: int) -> tuple[int, int
 
 
 class ColorCodes(enum.StrEnum):
+    """ANSI escape sequences for coloured terminal output; StrEnum members drop into f-strings."""
     GREEN = "\x1b[92m"
     YELLOW = "\x1b[93m"
     RED = "\x1b[91m"
@@ -75,6 +78,7 @@ class ColorCodes(enum.StrEnum):
 
 
 def print_chains(chains: Chains) -> None:
+    """Render each chain with its cycle entry highlighted, plus aggregate statistics."""
     for start, chain in sorted(chains.items()):
         cycle: int = sum_of_digit_factorials(chain[-1])
         print(
@@ -98,48 +102,23 @@ def print_chains(chains: Chains) -> None:
           f"max_chain_length={max_chain_length!r}")
 
 
-def solve(*, max_num: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Same algorithm as s1 (memoize full tail lists over the digit-factorial functional graph,
+    counting maximal-length chains), with optional coloured --show visualisation. Amortised O(1)
+    per start, O(max_num) total."""
+    max_num = runner.parse_int(args[0])
+
     max_chain_length, max_chain_length_count = count_chains_with_max_length_digit_factorial(max_num=max_num)
-    if sys.argv[-1] == "--show":
+    if runner.show:
         if max_num <= 1000:
             chains: Chains = get_chain(max_num)
             print_chains(chains)
         print(f"max_num={max_num!r} "
               f"max_chain_length={max_chain_length!r} "
               f"max_chain_length_count={max_chain_length_count!r}")
-    return max_chain_length_count
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(max_chain_length_count)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_num=int(argv[1])))
+    raise SystemExit(solve())

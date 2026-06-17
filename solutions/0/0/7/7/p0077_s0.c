@@ -1,10 +1,7 @@
 /* Solution to Euler Problem 77: Prime Summations. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-/* Sieve of Sundaram: return primes up to max_num */
+/* Sieve of Sundaram: return primes up to max_num, writing the count via *count. */
 static int *sundaram_sieve(int max_num, int *count) {
     *count = 0;
     if (max_num < 2) return NULL;
@@ -29,8 +26,8 @@ static int *sundaram_sieve(int max_num, int *count) {
     return primes;
 }
 
-/* Memoisation: key is (number, slots), value is count */
-/* Use a hash map with open addressing */
+/* Memoisation: key is (number, slots), value is the partition count.
+ * Flat open-addressing hash table with linear probing for cache locality. */
 
 #define MEMO_SIZE (1 << 18)  /* 262144 buckets */
 #define MEMO_EMPTY (-1)
@@ -44,6 +41,7 @@ typedef struct {
 static MemoEntry memo_table[MEMO_SIZE];
 static int memo_initialized = 0;
 
+/* Mark every bucket empty before first use. */
 static void memo_init(void) {
     for (int i = 0; i < MEMO_SIZE; i++) {
         memo_table[i].number = MEMO_EMPTY;
@@ -53,6 +51,7 @@ static void memo_init(void) {
     memo_initialized = 1;
 }
 
+/* Mix the two integer keys into a bucket index; power-of-two size lets % reduce to & . */
 static unsigned int memo_hash(int number, int slots) {
     unsigned int h = (unsigned int)(number * 1000003 + slots);
     h ^= h >> 16;
@@ -61,6 +60,7 @@ static unsigned int memo_hash(int number, int slots) {
     return h & (MEMO_SIZE - 1);
 }
 
+/* Return the cached count for (number, slots), or -1 if absent. */
 static long long memo_get(int number, int slots) {
     unsigned int idx = memo_hash(number, slots);
     for (int probe = 0; probe < MEMO_SIZE; probe++) {
@@ -72,6 +72,7 @@ static long long memo_get(int number, int slots) {
     return -1;
 }
 
+/* Store the count for (number, slots), overwriting any existing entry for that key. */
 static void memo_set(int number, int slots, long long value) {
     unsigned int idx = memo_hash(number, slots);
     for (int probe = 0; probe < MEMO_SIZE; probe++) {
@@ -86,6 +87,9 @@ static void memo_set(int number, int slots, long long value) {
     }
 }
 
+/* Count prime partitions of number using parts each at most slots; memoised recursion.
+ * Passing the chosen prime p (not slots) as the next ceiling enforces non-increasing
+ * parts, so each multiset is counted exactly once. */
 static long long num_prime_partitions(int number, int slots) {
     if (number == 0) return 1;
     if (slots < 2)   return 0;
@@ -110,67 +114,18 @@ static long long num_prime_partitions(int number, int slots) {
     return result;
 }
 
-long long solve(int argc, char *argv[]) {
-    if (argc < 2) return -1;
-    int threshold = atoi(argv[1]);
+/* Count-only memoised recursion over (remaining sum, max allowed part); first n whose
+ * prime-partition count reaches the threshold. O(N * pi(N)) subproblems, O(pi(N)) each. */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    if (argc < 2) { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
+    int threshold = parse_int(argv[1]);
 
     if (!memo_initialized) memo_init();
 
     for (int n = 1; ; n++) {
         long long count = num_prime_partitions(n, n);
-        if (count >= threshold) return n;
+        if (count >= threshold) { snprintf(_answer, sizeof _answer, "%lld", (long long)(n)); return _answer; }
     }
-    return -1;
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        /* Reset memo for each run */
-        memo_init();
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
 }

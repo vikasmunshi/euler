@@ -1,0 +1,184 @@
+<article>
+  <h3>Problem Analysis</h3>
+  <p>
+    I need to extract the first one hundred decimal digits of the square root of every
+    non-perfect-square integer in a range, sum those digits, and total the sums. The mathematical
+    foundation is that the square root of a natural number is either an integer or an
+    <a href="https://en.wikipedia.org/wiki/Irrational_number" class="reference-source" target="_blank" rel="noopener noreferrer">irrational number</a>:
+    a quantity that cannot be written as a ratio of two integers and whose decimal expansion neither
+    terminates nor settles into a repeating cycle. So for every number that is not a
+    <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a>,
+    I have an unending string of digits and must read off a fixed prefix from it without rounding
+    error contaminating my answer.
+  </p>
+  <p>
+    The observation that makes this tractable is a scaling trick. If x = sqrt(n), then
+    x * 10^d = sqrt(n * 10^(2d)). The integer part of sqrt(n * 10^(2d)) is therefore exactly the
+    first d significant digits of sqrt(n) written without a decimal point. This converts a problem
+    about real-number precision into a pure <a href="https://en.wikipedia.org/wiki/Integer_square_root" class="reference-source" target="_blank" rel="noopener noreferrer">integer square root</a>
+    problem: compute floor(sqrt(n * 10^(2d))). For n up to 999 and d = 100, the scaled value has
+    roughly 206 decimal digits - far beyond the 64-bit range - so I need
+    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>
+    (big integers). The cost of each big-integer multiply or divide grows with the digit count d, so
+    the overall complexity is roughly O(N * d^2), where N is the count of irrational roots: the d^2
+    comes from schoolbook multiplication of two d-digit numbers, and the choice of root-finding
+    algorithm controls how many such operations I perform per number.
+  </p>
+
+  <h3>Solution Approach</h3>
+
+  <h4>Heron's (Newton's) Method for Integer Square Root</h4>
+  <p>
+    Both <code>p0080_s0.py</code> and <code>p0080_s0_c</code> compute the integer square root using
+    <a href="https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method" class="reference-source" target="_blank" rel="noopener noreferrer">Heron's method</a>,
+    which is <a href="https://en.wikipedia.org/wiki/Newton%27s_method" class="reference-source" target="_blank" rel="noopener noreferrer">Newton's method</a>
+    applied to the equation x^2 - S = 0. The iteration is x_new = (x + S / x) / 2. Each step roughly
+    doubles the number of correct digits, so the method converges
+    <a href="https://en.wikipedia.org/wiki/Rate_of_convergence" class="reference-source" target="_blank" rel="noopener noreferrer">quadratically</a>:
+    about seven iterations suffice to reach 100 digits.
+  </p>
+  <ul>
+    <li>Scale the input to S = n * 10^(2d) using big integers.</li>
+    <li>Pick a starting guess at or above the true root, so the sequence decreases monotonically
+        toward floor(sqrt(S)). In Python I seed with x = S itself, which is always a valid
+        overestimate for S >= 1; the quadratic convergence quickly absorbs the loose start. In C I
+        bootstrap with a double-precision estimate <code>sqrt(n) * 1e15</code> (accurate to about 15
+        digits), add a margin of 100, then scale up by 10^(d-15) to land within a few iterations of
+        the answer.</li>
+    <li>Iterate until x_new is no longer strictly less than x; that fixed point is floor(sqrt(S)).</li>
+    <li>Stringify the result, take the first d characters, and sum their digits.</li>
+  </ul>
+  <p>
+    The Python version is almost a direct transcription of the math, using the
+    <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a>
+    to assign the next iterate and compare it to the previous value in one expression. The C version
+    is far larger because <a href="https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method" class="reference-source" target="_blank" rel="noopener noreferrer">Heron's method</a>
+    requires big-integer <em>division</em>, which I implemented with
+    <a href="https://en.wikipedia.org/wiki/Division_algorithm#Integer_division_(unsigned)_with_remainder" class="reference-source" target="_blank" rel="noopener noreferrer">Knuth's Algorithm D</a>
+    (long division on limb arrays, with divisor normalization and a two-step quotient-digit
+    correction). This is the most intricate routine in the file and the reason the C solution earns
+    its speed.
+  </p>
+
+  <h4>Binary Search for Integer Square Root</h4>
+  <p>
+    Both <code>p0080_s1.py</code> and <code>p0080_s1_c</code> find floor(sqrt(S)) by
+    <a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary search</a>.
+    The invariant is low^2 <= S < high^2. Each step computes mid = (low + high) / 2, squares it, and
+    moves low or high according to whether mid^2 <= S. When high - low == 1, low is the answer.
+  </p>
+  <p>
+    <a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Binary search</a>
+    is conceptually simpler than <a href="https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method" class="reference-source" target="_blank" rel="noopener noreferrer">Heron's method</a>
+    - it needs only multiplication, never division - but it converges only
+    <a href="https://en.wikipedia.org/wiki/Rate_of_convergence" class="reference-source" target="_blank" rel="noopener noreferrer">linearly</a>:
+    it takes about log2(sqrt(S)) iterations, roughly 166 squarings of a 100-digit number for d = 100.
+    That is fine in Python but markedly slower in C. The C version adds a helper
+    <code>bi_diff_is_one</code> that tests the termination condition high - low == 1 directly,
+    avoiding a full subtraction allocation each iteration. Both versions start with low = 0 and
+    high = S, a maximally loose but always-correct bracket.
+  </p>
+
+  <h3>Programming Techniques</h3>
+
+  <h4>Scaling to Convert Decimal Digits to Integer Arithmetic</h4>
+  <p>
+    The central pattern in every solution is replacing "first d digits of sqrt(n)" with
+    "floor(sqrt(n * 10^(2d)))". This turns a question about real-number precision into a pure
+    <a href="https://en.wikipedia.org/wiki/Integer_square_root" class="reference-source" target="_blank" rel="noopener noreferrer">integer square root</a>
+    computation, eliminating floating-point rounding error entirely. Reach for this trick whenever a
+    problem demands a fixed number of digits of an
+    <a href="https://en.wikipedia.org/wiki/Irrational_number" class="reference-source" target="_blank" rel="noopener noreferrer">irrational</a>
+    quantity: multiply by the appropriate power of ten, do exact integer work, then read the digits
+    off the result.
+  </p>
+
+  <h4>Python Arbitrary-Precision Integers and the Walrus Operator</h4>
+  <p>
+    Python integers are
+    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>
+    by default, so the Heron and binary-search loops read exactly like their mathematical
+    definitions with no limb management. The Heron loop also uses the
+    <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a>
+    (<code>:=</code>) inside the <code>while</code> condition to assign the next iterate and compare
+    it to the previous value in a single expression - a compact idiom for "iterate until a fixed
+    point is reached".
+  </p>
+
+  <h4>Custom Big-Integer Library in C with Limb Representation</h4>
+  <p>
+    The C solutions implement big integers as base-10^9 limbs stored least-significant-first. Base
+    10^9 is deliberate: it fits in a 64-bit word with carry room, two limbs multiplied together fit
+    in GCC's
+    <a href="https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html" class="reference-source" target="_blank" rel="noopener noreferrer">__uint128_t</a>,
+    and it maps cleanly to decimal output via <code>%09llu</code>. With <code>MAXLIMBS = 64</code> I
+    get 576 decimal digits of headroom, comfortably more than needed. Choosing a base that is a power
+    of ten makes decimal I/O trivial at a small cost in space efficiency - a good trade whenever the
+    primary output is itself decimal digits.
+  </p>
+
+  <h4>Knuth Algorithm D for Big-Integer Division</h4>
+  <p>
+    <a href="https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method" class="reference-source" target="_blank" rel="noopener noreferrer">Heron's method</a>
+    requires dividing one big integer by another, so the C Heron file implements
+    <a href="https://en.wikipedia.org/wiki/Long_division" class="reference-source" target="_blank" rel="noopener noreferrer">long division</a>
+    limb by limb via
+    <a href="https://en.wikipedia.org/wiki/Division_algorithm#Integer_division_(unsigned)_with_remainder" class="reference-source" target="_blank" rel="noopener noreferrer">Knuth's Algorithm D</a>.
+    It normalizes the divisor so its top limb is at least BASE/2 (which tightens the estimate of each
+    quotient digit), estimates each quotient digit from the top two dividend limbs, refines that
+    estimate with at most two corrections, subtracts the partial product, and adds the divisor back
+    if it overshot. This is the standard industrial-strength division routine and the correct
+    starting point any time you need division in a hand-rolled big-integer library.
+  </p>
+
+  <h4>Double-Precision Bootstrap for the Initial Guess</h4>
+  <p>
+    The C Heron solution seeds its iterate from <code>sqrt((double)n) * 1e15</code>, capturing about
+    15 correct digits cheaply, then scales it up to full precision. This is the general pattern of
+    "use a fast imprecise method to get close, then let the quadratically convergent method finish".
+    The only requirement is that the guess sit at or above the true root so the monotone-decreasing
+    convergence holds; the <code>+ 100.0</code> margin guarantees that.
+  </p>
+
+  <h4>Cheap Perfect-Square Detection</h4>
+  <p>
+    Before any expensive root computation, each solution skips
+    <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect squares</a>.
+    C uses <code>is_perfect_square</code>, rounding <code>sqrt((double)n)</code> and checking the
+    nearby integers exactly; Python uses the equally cheap test <code>i**0.5 % 1 == 0</code>.
+    Excluding degenerate cases with an O(1) filter before invoking heavy machinery is a habit worth
+    keeping.
+  </p>
+
+  <h3>Key Takeaways</h3>
+  <p>
+    The unlocking insight is to treat "decimal digits of an irrational square root" as "integer
+    square root of a scaled number", which removes floating point from the picture entirely. Given
+    that, the choice of root-finding algorithm dominates performance.
+    <a href="https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method" class="reference-source" target="_blank" rel="noopener noreferrer">Heron's</a>
+    <a href="https://en.wikipedia.org/wiki/Rate_of_convergence" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic convergence</a>
+    crushes <a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary search</a>'s
+    linear convergence at high precision, and the gap widens with problem size. On the extra
+    benchmark (digits 100, up to 999), the C Heron solution ran in 0.0052 s versus 0.2730 s for C
+    binary search - about 52x faster - because Heron performs roughly seven iterations where binary
+    search performs over a hundred and sixty. In Python the gap is smaller (0.1466 s vs 0.2170 s)
+    since CPython's bignum operations are uniformly well-optimized in C, but Heron still wins. The C
+    Heron solution is the fastest overall; the Python Heron solution is the most readable and is
+    plenty fast for this problem size.
+  </p>
+  <ul>
+    <li>To extract d decimal digits of an irrational root, compute the integer square root of the
+        value scaled by 10^(2d) - turning analysis into exact integer arithmetic.</li>
+    <li>Prefer quadratically convergent methods (Newton/Heron) over linear ones (binary search)
+        whenever precision is high and each operation is expensive.</li>
+    <li>Bootstrap an iterative numerical method with the best cheap approximation available, then let
+        the fast-converging method finish the remaining precision.</li>
+    <li>When iterating toward a fixed point, ensure the starting guess lies on the side that gives
+        monotone convergence; a guaranteed overestimate or underestimate makes termination simple.</li>
+    <li>Lean on arbitrary-precision integers when prototyping; only drop to a hand-rolled limb
+        library in C when the language's native bignum is the bottleneck.</li>
+    <li>For custom big integers, a power-of-ten base with 128-bit intermediate products gives clean
+        decimal I/O and safe carries; Knuth's Algorithm D is the reference division routine.</li>
+    <li>Filter out degenerate inputs with an O(1) check before invoking expensive routines.</li>
+  </ul>
+</article>

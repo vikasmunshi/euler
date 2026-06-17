@@ -5,8 +5,8 @@
     "args": "https://projecteuler.net/resources/documents/0042_words.txt",
     "answer": 162,
     "verdict": "correct",
-    "average": 9.909430000000002e-05,
-    "number_runs": 10
+    "average": 6.366607142857143e-05,
+    "number_runs": 42
   },
   {
     "category": "main",
@@ -14,7 +14,7 @@
     "args": "https://projecteuler.net/resources/documents/0042_words.txt",
     "answer": 162,
     "verdict": "correct",
-    "average": 0.0006932408001375734,
-    "number_runs": 10
+    "average": 0.00046697652405349626,
+    "number_runs": 42
   }
 ]

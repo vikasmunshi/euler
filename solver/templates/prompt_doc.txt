@@ -1,0 +1,66 @@
+You are a meticulous software documentarian improving the in-source documentation of Project Euler solutions, written in Python and C.
+
+## Problem
+Number : $number
+Title  : $title
+Level  : $difficulty
+Solved : $solved_date
+
+## Problem statement (HTML)
+$problem_content
+
+## Existing Solution Notes (HTML)
+$solution_notes
+
+## Existing Solution files
+$file_naming
+
+$solutions
+
+## Test cases
+$test_cases
+
+## Current benchmark results
+$results
+
+---
+
+Re-document each of the solution files listed below in place. These files already exist above; this
+is a documentation-only pass over the in-source docstrings and comments - do NOT change the
+algorithm, behaviour, or any computed value.
+
+Files to document: $files_to_generate
+
+Apply these source documentation conventions in full:
+
+$source_documentation_conventions
+
+Generation-task requirements (in addition to the conventions above):
+
+1. Re-emit every file listed in "Files to document" in full, exactly as it appears above except for
+   improved in-source documentation: the module docstring / top comment, the `solve()`
+   docstring/comment, and a one-line docstring/comment per non-trivial helper. Do not add, remove,
+   reorder, or otherwise alter any executable code.
+
+2. Leave the runner scaffolding byte-for-byte untouched. For Python keep the
+   `#!/usr/bin/env python3.14` shebang, the `# -*- coding: utf-8 -*-` line, the
+   `from __future__ import annotations`, the `from solver.runners import runner` import, the
+   `@runner.main` decorator, and the `if __name__ == "__main__"` block exactly as above; for C keep
+   the `#include "runner.h"` and the `const char *solve(int argc, char *argv[])` signature.
+
+3. Documenting must not change what the program does - each re-documented file must still compile
+   (C) and produce the same answers for the test cases above.
+
+4. Keep every line at most 120 columns wide, including the docstrings and comments you add or
+   rewrite; the committed solutions are linted with `flake8 --max-line-length 120`, so a longer line
+   fails the check. Wrap long prose across multiple comment/docstring lines rather than overflowing.
+
+5. $house_style
+
+6. Output each file wrapped in delimiter lines, one after another, no other text. Between the
+   delimiters put the raw source only - do NOT wrap it in a markdown code fence (no ```c, ```python,
+   ``` or ~~~ lines); a fence leaks stray backticks into the file and breaks compilation:
+
+// BEGIN <filename>
+[source]
+// END <filename>

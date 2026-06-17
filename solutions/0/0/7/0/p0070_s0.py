@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import typing
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 def primes_generator() -> typing.Generator[int, None, None]:
+    """Lazily yield primes via the postponed-composites incremental sieve; no upfront bound needed."""
     yield 2
     composites: dict[int, int] = {}
     n = 3
@@ -26,7 +26,13 @@ def primes_generator() -> typing.Generator[int, None, None]:
         n += 2
 
 
-def solve(*, limit: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Search semiprimes n = p1*p2 with both primes near sqrt(limit), since n/phi(n) = prod p/(p-1)
+    is minimised by few large factors; phi(p1*p2) = (p1-1)*(p2-1) needs no factorisation. Bounding
+    p1 to [sqrt(limit)/2, sqrt(limit)] and p2 to (p1+2, limit/p1] keeps the search to a narrow band."""
+    limit = runner.parse_int(args[0])
+
     min_ratio: float = float("inf")
     min_n: int = 0
     sqrt_n = int(limit**0.5)
@@ -43,39 +49,8 @@ def solve(*, limit: int) -> int:
             ):
                 if (ratio := (number / totient)) < min_ratio:
                     min_ratio, min_n = (ratio, number)
-    return min_n
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(min_n)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(limit=int(argv[1])))
+    raise SystemExit(solve())

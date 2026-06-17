@@ -1,0 +1,87 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+The structure that makes this problem tractable is the arithmetic of <a href="https://en.wikipedia.org/wiki/Pythagorean_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean triples</a> - integer triples (a, b, c) with a^2 + b^2 = c^2, which describe the side lengths of right-angled triangles. A triple is <em>primitive</em> when gcd(a, b, c) = 1, meaning the sides share no common factor; every other triple is an integer multiple of a primitive one. <a href="https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's formula</a> states that every primitive triple is generated uniquely by a pair (m, n) with m &gt; n &gt; 0, gcd(m, n) = 1, and m, n of opposite parity (one odd, one even), via a = m^2 - n^2, b = 2mn, c = m^2 + n^2. This is the key that converts a hopeless two-dimensional search over (a, b, c) - which would be O(L^2) - into a one-dimensional enumeration over generator pairs.
+</p>
+
+<p>
+What I actually care about is the perimeter L = a + b + c. For a primitive triple this collapses beautifully: L = (m^2 - n^2) + 2mn + (m^2 + n^2) = 2m^2 + 2mn = 2m(m + n). The k-th multiple of that primitive triple has perimeter exactly k * 2m(m + n). Because the smallest perimeter for a fixed m occurs at n = 1, giving 2m(m + 1) &gt; 2m^2, the generator m is bounded by sqrt(L / 2) - a tight, analytically derived limit. The algorithm is then a <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">sieve</a>: for each primitive perimeter p, mark every multiple k * p &lt;= L, counting how many triples land on each perimeter, then tally the perimeters hit exactly once. Summing L/p over all primitive perimeters follows the <a href="https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">harmonic series</a>, placing the total work at roughly O(L log L) - the same class as a prime sieve.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Sieve over primitive perimeters (C and Python)</h4>
+
+<p>
+Both files implement the same algorithm; they differ only in language and the data structure used to accumulate counts. I enumerate generator pairs (m, n) with m &gt; n, gcd(m, n) = 1, and opposite parity. For each valid pair I compute the primitive perimeter p = 2 * m * (m + n), then walk k = 1, 2, 3, ... incrementing a counter for k * p as long as it stays within the limit. After enumeration I count how many perimeter values were hit exactly once - that is the answer.
+</p>
+
+<p>
+The outer loop runs m from 2 up to sqrt(max_perimeter / 2). The inner loop over n begins at <code>m % 2 + 1</code> and steps by 2: this guarantees m - n is odd, so m and n always have opposite parity, with no per-iteration parity test. The <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">gcd</a> check then removes the remaining non-primitive generators. Together these two conditions ensure each primitive triple is generated exactly once, so no perimeter is ever double-counted by accident.
+</p>
+
+<p>
+The languages diverge only in storage. In C I allocate a flat <code>int</code> array of size max_perimeter + 1 with <code>calloc</code>, indexing directly by perimeter value - O(1) writes and a cache-friendly final linear scan. I guard the multiple loop against overflow by widening <code>k * p</code> to <code>long long</code> before comparing. In Python I use a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator function</a> that yields perimeters one at a time and a <a href="https://docs.python.org/3/library/stdtypes.html#dict" class="reference-source" target="_blank" rel="noopener noreferrer">dictionary</a> to accumulate counts. The benchmark shows the consequence of these language choices: on the main case (L = 1,500,000) C runs in 0.0083 s against Python's 0.3477 s, roughly a 40x gap typical of tight integer loops.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Parity enforced by loop start and stride</h4>
+
+<p>
+<a href="https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's formula</a> requires m and n to differ in parity. Rather than branch inside the hot inner loop, I encode the constraint into the loop itself: <code>n_start = m % 2 + 1</code> selects the correct parity (odd if m is even, even if m is odd), and stepping by 2 preserves it. This removes a branch from the busiest part of the code and halves the iteration count. Reach for this whenever a modular condition can be baked into a loop's start and stride instead of being tested every pass.
+</p>
+
+<h4>Generator functions for lazy enumeration</h4>
+
+<p>
+The Python <code>gen_pythagorean_triangle_perimeters</code> uses <code>yield</code> to emit one perimeter at a time, cleanly separating "how perimeters are produced" from "what is done with them" - the consuming loop simply counts. It also avoids materialising a large intermediate list in memory. <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">Generator functions</a> are the right tool whenever you produce a long, single-pass sequence whose full materialisation would be wasteful.
+</p>
+
+<h4>Sieve-style multiple marking</h4>
+
+<p>
+The inner <code>while k * p &lt;= limit</code> loop is the classic <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">sieve</a> pattern: for each generator, touch all its multiples. Recognising that a counting problem has this "for each base, mark all multiples" shape is what unlocks the O(L log L) complexity via the <a href="https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">harmonic series</a>. The same skeleton recurs in prime sieves, divisor-counting problems, and many number-theoretic enumerations.
+</p>
+
+<h4>Flat array versus hash map for accumulation</h4>
+
+<p>
+In C I index a <code>calloc</code>-allocated array by perimeter; in Python I use a <a href="https://docs.python.org/3/library/stdtypes.html#dict" class="reference-source" target="_blank" rel="noopener noreferrer">dictionary</a>. The array wins on a dense domain - here a large fraction of perimeters below L are hit - because direct indexing has no hashing cost and the final scan is cache-friendly. A hash map is preferable on a sparse domain where you want to avoid reserving slots for values that never appear. Choosing between them is a deliberate space-versus-speed decision driven by domain density.
+</p>
+
+<h4>calloc over malloc plus memset</h4>
+
+<p>
+The count array must start at zero, so I use <a href="https://en.cppreference.com/w/c/memory/calloc" class="reference-source" target="_blank" rel="noopener noreferrer">calloc</a>, which zero-initialises in a single call and can hand back pre-zeroed memory pages from the OS for free. Whenever the desired initial value is zero, <code>calloc</code> is both more idiomatic and potentially faster than <code>malloc</code> followed by <code>memset</code>.
+</p>
+
+<h4>Overflow-safe comparison via widening cast</h4>
+
+<p>
+In C, <code>k * p</code> can overflow a 32-bit <code>int</code> at large limits, so I widen it to <code>long long</code> before comparing against max_perimeter. Casting one operand of an arithmetic expression to a wider type before a comparison is a cheap, standard guard against silent <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">integer overflow</a> in loop conditions.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is that every <a href="https://en.wikipedia.org/wiki/Pythagorean_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean triple</a> descends from a unique primitive ancestor described by <a href="https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple" class="reference-source" target="_blank" rel="noopener noreferrer">Euclid's formula</a>, and that its perimeter collapses to the clean form 2m(m + n). This turns an intractable two-dimensional triple search into a one-dimensional enumeration of generators with a known bound on m, followed by a <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">sieve</a> over multiples - dropping complexity from O(L^2) to O(L log L).
+</p>
+
+<p>
+Both files run the identical algorithm, so the comparison is purely about language. On the main case C completes in 0.0083 s versus Python's 0.3477 s; on the extra case (L = 10,000,000) the gap widens to 0.1297 s against 4.4539 s. C is the clear choice when the limit is pushed, while the Python version stays compact and readable. The algorithm, not the language, is what makes either fast enough.
+</p>
+
+<ul>
+  <li>Learn parametric formulas like Euclid's: they turn multi-dimensional searches into one-dimensional enumerations with analytic bounds.</li>
+  <li>When a problem says "all multiples up to a limit", reach for a sieve - enumerate generators, mark multiples, and expect O(N log N) work.</li>
+  <li>Enforce modular constraints through loop start and stride rather than in-loop conditionals; it removes branches and halves iterations for free.</li>
+  <li>Derive loop bounds analytically before writing code - a tight bound documents intent and prevents wasted work.</li>
+  <li>Pick flat arrays for dense integer domains and hash maps for sparse ones; the choice is a conscious space-speed trade-off.</li>
+  <li>Use generator functions to separate production from consumption and keep memory flat over long single-pass sequences.</li>
+  <li>Guard integer arithmetic in loop conditions with a widening cast whenever values can grow large.</li>
+</ul>
+
+</article>

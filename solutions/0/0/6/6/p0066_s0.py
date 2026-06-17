@@ -6,12 +6,12 @@ from __future__ import annotations
 import fractions
 import math
 import operator
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 def compute_nth_convergent(continued_fraction: tuple[int, ...], n: int) -> fractions.Fraction:
+    """Evaluate the n-th convergent backward (innermost term first), cycling the periodic part."""
     period_length: int = len(continued_fraction) - 1
     convergent: fractions.Fraction = fractions.Fraction(continued_fraction[(n - 1) % period_length + 1], 1)
     for i in range(n - 1, 0, -1):
@@ -23,6 +23,7 @@ def compute_nth_convergent(continued_fraction: tuple[int, ...], n: int) -> fract
 
 
 def find_fundamental_solution_to_pell_equation(d: int) -> tuple[int, int]:
+    """Fundamental (x, y) via convergents of sqrt(d): index 2*L-3 if period L is even, else L-2."""
     if (sqrt_d := math.sqrt(d)).is_integer():
         return (1, 0)
     continued_fraction: tuple[int, ...] = (math.floor(sqrt_d),)
@@ -38,47 +39,21 @@ def find_fundamental_solution_to_pell_equation(d: int) -> tuple[int, int]:
         return compute_nth_convergent(continued_fraction, len_continued_fraction - 2).as_integer_ratio()
 
 
-def solve(*, max_d: int) -> int:
-    return max(
+@runner.main
+def solve(*args: str) -> str:
+    """Maximise the fundamental Pell x over non-square D <= max_d using continued-fraction
+    convergents of sqrt(D); O(max_d * sqrt(max_d)) big-integer operations."""
+    max_d = runner.parse_int(args[0])
+
+    return str(max(
         (
             (find_fundamental_solution_to_pell_equation(d)[0], d)
             for d in range(2, max_d + 1)
             if math.sqrt(d).is_integer() is False
         ),
         key=operator.itemgetter(0),
-    )[-1]
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    )[-1])
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(max_d=int(argv[1])))
+    raise SystemExit(solve())

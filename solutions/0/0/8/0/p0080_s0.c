@@ -1,9 +1,6 @@
 /* Solution to Euler Problem 80: Square Root Digital Expansion. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include "runner.h"
 #include <math.h>
-#include <time.h>
 
 /*
  * Arbitrary-precision integer arithmetic.
@@ -18,25 +15,30 @@ typedef __uint128_t u128;
 
 typedef struct { ull limbs[MAXLIMBS]; int size; } BigInt;
 
+/* Set a to zero (canonical one-limb form). */
 static void bi_zero(BigInt *a) {
     memset(a->limbs, 0, sizeof(a->limbs));
     a->size = 1;
 }
 
+/* Initialize a from a 64-bit value, splitting into at most two base-10^9 limbs. */
 static void bi_from_ull(BigInt *a, ull v) {
     bi_zero(a);
     a->limbs[0] = v % BASE;
     if (v >= BASE) { a->limbs[1] = v / BASE; a->size = 2; }
 }
 
+/* Copy src into dst. */
 static void bi_copy(BigInt *dst, const BigInt *src) {
     memcpy(dst, src, sizeof(BigInt));
 }
 
+/* Drop leading zero limbs, keeping at least one. */
 static void bi_trim(BigInt *a) {
     while (a->size > 1 && a->limbs[a->size-1] == 0) a->size--;
 }
 
+/* Compare magnitudes: returns -1, 0, or 1 for a < b, a == b, a > b. */
 static int bi_cmp(const BigInt *a, const BigInt *b) {
     if (a->size != b->size) return a->size > b->size ? 1 : -1;
     for (int i = a->size-1; i >= 0; i--) {
@@ -46,6 +48,7 @@ static int bi_cmp(const BigInt *a, const BigInt *b) {
     return 0;
 }
 
+/* dst = a + b with carry propagation across limbs. */
 static void bi_add(BigInt *dst, const BigInt *a, const BigInt *b) {
     int n = a->size > b->size ? a->size : b->size;
     ull carry = 0;
@@ -60,6 +63,7 @@ static void bi_add(BigInt *dst, const BigInt *a, const BigInt *b) {
     bi_trim(dst);
 }
 
+/* dst = a - b assuming a >= b, with borrow propagation. */
 static void bi_sub(BigInt *dst, const BigInt *a, const BigInt *b) {
     long long borrow = 0;
     int n = a->size;
@@ -73,6 +77,7 @@ static void bi_sub(BigInt *dst, const BigInt *a, const BigInt *b) {
     bi_trim(dst);
 }
 
+/* dst = a / 2, propagating the odd-limb remainder downward as carry. */
 static void bi_div2(BigInt *dst, const BigInt *a) {
     bi_copy(dst, a);
     ull carry = 0;
@@ -84,6 +89,7 @@ static void bi_div2(BigInt *dst, const BigInt *a) {
     bi_trim(dst);
 }
 
+/* dst = a * b via schoolbook O(size_a * size_b); products fit in u128 per limb pair. */
 static void bi_mul(BigInt *dst, const BigInt *a, const BigInt *b) {
     BigInt t;
     memset(&t, 0, sizeof(t));
@@ -101,6 +107,7 @@ static void bi_mul(BigInt *dst, const BigInt *a, const BigInt *b) {
     bi_copy(dst, &t);
 }
 
+/* dst = a * v for a single-limb multiplier v. */
 static void bi_mul_limb(BigInt *dst, const BigInt *a, ull v) {
     ull carry = 0;
     int n = a->size;
@@ -114,6 +121,7 @@ static void bi_mul_limb(BigInt *dst, const BigInt *a, ull v) {
     bi_trim(dst);
 }
 
+/* a = 10^exp, built by repeated single-limb multiplies (chunks of 9 plus remainder). */
 static void bi_pow10(BigInt *a, int exp) {
     bi_from_ull(a, 1);
     BigInt t;
@@ -125,7 +133,7 @@ static void bi_pow10(BigInt *a, int exp) {
     if (baserem > 1) { bi_mul_limb(&t, a, baserem); bi_copy(a, &t); }
 }
 
-/* q = floor(a / b), Knuth Algorithm D */
+/* q = floor(a / b) by Knuth Algorithm D: normalize, estimate each quotient digit, correct. */
 static void bi_div(BigInt *q, const BigInt *a, const BigInt *b) {
     if (bi_cmp(a, b) < 0) { bi_from_ull(q, 0); return; }
 
@@ -147,6 +155,7 @@ static void bi_div(BigInt *q, const BigInt *a, const BigInt *b) {
     int n = b->size;
     int m = a->size - n;
 
+    /* Normalize so the top divisor limb is >= BASE/2, tightening the q_hat estimate. */
     ull d = BASE / (b->limbs[n-1] + 1);
 
     BigInt u, v;
@@ -167,6 +176,7 @@ static void bi_div(BigInt *q, const BigInt *a, const BigInt *b) {
         ull vn1 = v.limbs[n-1];
         ull vn2 = (n >= 2) ? v.limbs[n-2] : 0;
 
+        /* Estimate quotient digit from the top two dividend limbs; u128 avoids overflow. */
         u128 top2 = (u128)uj_n * BASE + uj_n1;
         ull q_hat = (ull)(top2 / vn1);
         if (q_hat >= BASE) q_hat = BASE - 1;
@@ -195,7 +205,7 @@ static void bi_div(BigInt *q, const BigInt *a, const BigInt *b) {
         }
 
         if (borrow) {
-            /* add back */
+            /* q_hat overshot by one: decrement and add v back into u[j..j+n]. */
             q_hat--;
             ull carry2 = 0;
             for (int i = 0; i <= n; i++) {
@@ -214,7 +224,7 @@ static void bi_div(BigInt *q, const BigInt *a, const BigInt *b) {
     bi_copy(q, &qq);
 }
 
-/* Convert to decimal string; caller frees */
+/* Convert to decimal string; caller frees. Top limb plain, rest zero-padded to 9 digits. */
 static char *bi_to_str(const BigInt *a) {
     char *buf = malloc((size_t)(a->size * 9 + 4));
     if (!buf) return NULL;
@@ -224,6 +234,7 @@ static char *bi_to_str(const BigInt *a) {
     return buf;
 }
 
+/* O(1) test: round sqrt(n) to a double and check the nearby integers exactly. */
 static int is_perfect_square(int n) {
     int s = (int)(sqrt((double)n) + 0.5);
     for (int k = s-1; k <= s+1; k++)
@@ -231,6 +242,10 @@ static int is_perfect_square(int n) {
     return 0;
 }
 
+/*
+ * Sum the first `digits` decimal digits of sqrt(n) via floor(sqrt(n * 10^(2*digits)))
+ * computed by Heron's (Newton's) method. Quadratic convergence: ~7 iterations for 100 digits.
+ */
 static int sqrt_digit_sum_heron(int n, int digits) {
     BigInt scale;
     bi_pow10(&scale, 2 * digits);
@@ -242,6 +257,7 @@ static int sqrt_digit_sum_heron(int n, int digits) {
     /*
      * Initial guess: slightly above sqrt(n)*10^digits.
      * Use double to get ~15 significant digits, add margin, then scale by 10^(digits-15).
+     * Seeding above the true root keeps the iterates monotone-decreasing to the floor.
      */
     BigInt x;
     {
@@ -274,57 +290,18 @@ static int sqrt_digit_sum_heron(int n, int digits) {
     return sum;
 }
 
-long long solve(int argc, char *argv[]) {
-    int digits  = atoi(argv[1]);
-    int max_num = atoi(argv[2]);
+/*
+ * Sum digit sums of the first `digits` decimals of every irrational sqrt(n) for n in [2, max_num].
+ * Each root uses Heron integer sqrt of the 10^(2*digits)-scaled value; O(N * d^2) overall.
+ */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
+    int digits  = parse_int(argv[1]);
+    int max_num = parse_int(argv[2]);
     long long result = 0;
     for (int i = 2; i <= max_num; i++) {
         if (is_perfect_square(i)) continue;
         result += sqrt_digit_sum_heron(i, digits);
     }
-    return result;
-}
-
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) { fprintf(stderr, "runner: out of memory\n"); return 1; }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0, has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
+    { snprintf(_answer, sizeof _answer, "%lld", (long long)(result)); return _answer; }
 }

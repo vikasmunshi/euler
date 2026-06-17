@@ -5,12 +5,12 @@ from __future__ import annotations
 
 import itertools
 import typing
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+
+from solver.runners import runner
 
 
 def is_prime(num: int) -> bool:
+    """Trial division up to sqrt(num); fast enough as candidates stay below 8 million."""
     if num < 2:
         return False
     if num == 2:
@@ -26,6 +26,7 @@ def is_prime(num: int) -> bool:
 
 
 def fast_is_prime(num: int) -> bool:
+    """Alias for is_prime, kept for naming parity with other solutions."""
     return is_prime(num)
 
 
@@ -33,6 +34,7 @@ nine_digits: tuple[str, ...] = ("1", "2", "3", "4", "5", "6", "7", "8", "9")
 
 
 def gen_n_digit_pandigital_numbers(n: int, descending: bool = False) -> typing.Generator[int, None, None]:
+    """Yield every 1..n pandigital number; reversing the digit tuple gives descending order."""
     assert 1 <= n <= 9, "n must be between 1 and 9"
     n_digits: tuple[str, ...] = nine_digits[:n]
     if descending:
@@ -40,46 +42,18 @@ def gen_n_digit_pandigital_numbers(n: int, descending: bool = False) -> typing.G
     yield from (int("".join(digits)) for digits in itertools.permutations(n_digits, n))
 
 
-def solve() -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Digit-sum-mod-3 pruning leaves only lengths 7 and 4; scan them in descending order and
+    take the first prime via a lazy generator, so that first hit is the maximum. O(k! * sqrt(N))."""
     pandigital_primes = (
         number
         for length in (7, 4)
         for number in gen_n_digit_pandigital_numbers(length, descending=True)
         if fast_is_prime(number)
     )
-    return next(pandigital_primes)
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(next(pandigital_primes))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(solve())

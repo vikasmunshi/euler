@@ -1,8 +1,5 @@
 /* Solution to Euler Problem 15: Lattice Paths. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 /* Big integer arithmetic using base-10^9 limbs (little-endian) */
 #define BASE 1000000000ULL
@@ -61,9 +58,11 @@ static char *bi_to_str(const BigInt *a) {
     return buf;
 }
 
-char *solve(int argc, char *argv[]) {
-    int n = atoi(argv[1]);
-    /* C(2n, n) = product_{i=1}^{n} (n + i) / i */
+const char *solve(int argc, char *argv[]) {
+    int n = parse_int(argv[1]);
+    /* Closed-form central binomial coefficient: paths through an n×n grid = C(2n, n);
+       O(n) big-int mul/div via the multiplicative formula product_{i=1}^{n} (n + i) / i,
+       which keeps the running value bounded (the full (2n)! would not fit). */
     BigInt result;
     bi_set(&result, 1ULL);
     for (int i = 1; i <= n; i++) {
@@ -71,57 +70,4 @@ char *solve(int argc, char *argv[]) {
         bi_div_ll(&result, (unsigned long long)i);
     }
     return bi_to_str(&result);
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (result) {
-            if (strcmp(cur, result) != 0) {
-                fprintf(stderr, "Expected consistent result, got %s previous result=%s\n",
-                        cur, result);
-                rc = 1;
-            }
-            free(cur);
-        } else {
-            result = cur;
-        }
-    }
-
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "");
-    free(result);
-    free(solve_argv);
-    return rc;
 }

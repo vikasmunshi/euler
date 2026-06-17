@@ -18,20 +18,23 @@ if [[ -n "$fix_files" ]]; then
 fi
 
 # trailing-whitespace: check remaining changes (exclude encrypted files)
+echo "checking trailing-whitespace ${dir_to_check} ..."
 git diff --check --no-color -- "${dir_to_check}" ':!*.enc'
 ws_rc=$?
 echo "trailing-whitespace ${dir_to_check} -> ${ws_rc}"
 
 # Check if there are Python files
 if ! find "${dir_to_check}" -type f -name "*.py" | grep -q .; then
-    echo "No Python files found in ${dir_to_check}"
+    echo "No Python files found in ${dir_to_check}, skipping mypy"
     mypy_rc=0
 else
+    echo "checking mypy ${dir_to_check} ..."
     mypy "${dir_to_check}"
     mypy_rc=$?
     echo "mypy ${dir_to_check} -> ${mypy_rc}"
 fi
 
+echo "checking flake8 ${dir_to_check} ..."
 flake8 "${dir_to_check}"
 flake8_rc=$?
 echo "flake8 ${dir_to_check} -> ${flake8_rc}"

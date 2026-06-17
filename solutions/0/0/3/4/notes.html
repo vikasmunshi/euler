@@ -1,0 +1,93 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+I am asked to find every number that equals the sum of the <a href="https://en.wikipedia.org/wiki/Factorial" class="reference-source" target="_blank" rel="noopener noreferrer">factorials</a> of its own decimal digits, the canonical example being 145 = 1! + 4! + 5!. Any search problem of this shape begins with the same question: what bounds the search space? Without an upper limit the candidate set is infinite, so I need an analytic argument to make it finite. The argument is a counting one. The largest digit factorial is 9! = 362880, so a d-digit number can produce a digit factorial sum of at most d * 362880. For d = 8 that ceiling is 2,903,040 - a number with only seven digits. An eight-digit number can therefore never equal its own digit factorial sum, because the sum is too small to reach eight digits. This proves that I only need to examine numbers with at most seven digits, capping the brute-force search at roughly ten million candidates.
+</p>
+
+<p>
+The second and more powerful observation is one of symmetry: the digit factorial sum depends only on the <a href="https://en.wikipedia.org/wiki/Multiset" class="reference-source" target="_blank" rel="noopener noreferrer">multiset</a> of digits - the collection of digit values with their multiplicities but without regard to order - not on the sequence in which they appear. The numbers 145, 514, and 451 all share the identical digit factorial sum. So rather than scanning all ten million ordered numbers I only need to enumerate distinct digit multisets. Enumerating multisets is precisely the operation called <a href="https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition" class="reference-source" target="_blank" rel="noopener noreferrer">combinations with replacement</a>: choosing k digits from {0,...,9} where repetition is allowed but order is ignored. For length k there are C(k + 9, k) such multisets; summed over k = 2 through 7 the total is under 20000 candidates - roughly 500x fewer than the naive scan. The complexity is therefore O(sum over k of C(k+9, k)) candidate evaluations, each costing O(k) work to compute and verify - polynomial in the digit count and trivially fast in practice.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Combinations-with-Replacement Filter (Python and C)</h4>
+
+<p>
+Both files implement the same algorithm: generate each digit multiset once, compute its factorial sum, then verify whether that sum is itself a number whose digits reproduce the multiset.
+</p>
+
+<p>
+<strong>Step 1 - precompute the factorials.</strong> The ten digit factorials 0! through 9! are stored in a lookup table: a dictionary keyed by character in Python, a plain <code>int[10]</code> indexed by digit value in C. Both give O(1) factorial access and avoid recomputing factorials inside the inner loop.
+</p>
+
+<p>
+<strong>Step 2 - enumerate multisets.</strong> For each length k from 2 to 7, I generate every non-decreasing sequence of length k over {0,...,9}. A non-decreasing sequence is the canonical representative of a multiset, so each multiset is visited exactly once with no deduplication pass needed. Python calls <code>itertools.combinations_with_replacement</code> directly. The C code drives the enumeration by hand: it starts with all positions at 0, then to advance it finds the rightmost position that is not yet 9, increments it, and sets every later position to that same value. This walks through all non-decreasing sequences in order.
+</p>
+
+<p>
+<strong>Step 3 - compute the factorial sum</strong> of the digits in the combination.
+</p>
+
+<p>
+<strong>Step 4 - apply three guards, cheapest first.</strong> Guard A: the factorial sum must have exactly k digits, otherwise it cannot be a k-digit candidate. Guard B: every digit in the combination must appear in the decimal representation of the factorial sum - a necessary (though not by itself sufficient) condition for the two digit multisets to coincide. Guard C: the definitive test - recompute the digit factorial sum of the sum itself and confirm it equals the sum. Guard C is what actually proves the curiosity property; the earlier guards exist only to discard the overwhelming majority of candidates cheaply before reaching it.
+</p>
+
+<p>
+The differences are purely in representation. Python converts the sum to a string and tests digit membership with the <code>in</code> operator. C uses <code>snprintf</code> to render the sum, then counts digit frequencies in two <code>int[10]</code> arrays (<code>need</code> from the combination, <code>have</code> from the string) and verifies <code>need[d] &lt;= have[d]</code> for every digit - a stricter multiplicity check than Python's plain membership test, though both reach the same answer because guard C is exact regardless. C's definitive recomputation in <code>digit_factorial_sum</code> uses arithmetic (modulo 10, divide by 10) rather than string conversion.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Precomputed Lookup Tables</h4>
+
+<p>
+Both solutions store the ten digit factorials once before searching. Recomputing a factorial by repeated multiplication inside the inner loop would waste cycles on a value that has only ten possible inputs. A direct array or dictionary lookup is O(1) with a single memory access. Whenever a function has a small, fixed domain and is called many times, precomputing it into a table is the first micro-optimisation I reach for.
+</p>
+
+<h4>Multiset Enumeration via Non-Decreasing Sequences</h4>
+
+<p>
+Generating non-decreasing sequences is the standard way to visit each multiset exactly once without a hash set or a separate deduplication pass. Python's <a href="https://docs.python.org/3/library/itertools.html#itertools.combinations_with_replacement" class="reference-source" target="_blank" rel="noopener noreferrer">combinations with replacement</a> packages this into one readable call. The C version implements the "advance the rightmost non-maximal position" rule by hand. Understanding this rule frees me from depending on a library: it generates <a href="https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition" class="reference-source" target="_blank" rel="noopener noreferrer">combinations with replacement</a> in any language and lets me interleave generation with early termination.
+</p>
+
+<h4>Generator Expressions and Expression-Level Binding (Python)</h4>
+
+<p>
+The Python <code>solve</code> is a single <code>sum()</code> wrapping a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> with nested <code>for</code> clauses and filter conditions. A <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> yields candidates one at a time without materialising a full list in memory. To bind the intermediate string of the factorial sum without a separate assignment statement, the code uses the idiom <code>for num in (str(...),)</code> - iterating over a one-element tuple. This is a clean way to introduce a named intermediate inside a comprehension where assignment is not otherwise permitted.
+</p>
+
+<h4>Progressive Filtering (Guard Chains)</h4>
+
+<p>
+The three guards are ordered from cheapest-and-coarsest to most-expensive-and-exact: a single integer comparison (digit count), a linear scan over at most ten digits (subset check), then a full digit decomposition (definitive recomputation). Because each guard is only reached when all earlier ones pass, the total cost is dominated by applying the cheapest guard to every candidate. Ordering tests by the ratio of cost to discriminating power is a principle that recurs everywhere from search loops to database query planning.
+</p>
+
+<h4>Choosing String vs Arithmetic Digit Extraction</h4>
+
+<p>
+The Python solution converts numbers to strings to test digit membership; C uses <code>snprintf</code> for the subset check but plain modulo/divide arithmetic for the final recomputation. The right representation depends on the downstream operation: membership and frequency tests favour strings or counting arrays, while accumulating a sum favours arithmetic. Picking the representation that makes the next operation natural avoids needless conversions.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The insight that unlocks this problem is recognising that a digit factorial sum is order-independent, which turns a sequential scan of around ten million numbers into an enumeration of under 20000 <a href="https://en.wikipedia.org/wiki/Multiset" class="reference-source" target="_blank" rel="noopener noreferrer">multisets</a> - a combinatorial saving from a single observation about symmetry. Pairing that with an analytically derived upper bound (no candidate exceeds seven digits) keeps the search both finite and tiny.
+</p>
+
+<p>
+Both solutions implement the identical algorithm and are extremely fast. The C version runs in about 0.0003 s and the Python version in about 0.0098 s - roughly 30x faster - reflecting the overhead of Python's dynamic dispatch and object allocation even in a compact implementation. The Python version is the more elegant to read thanks to <a href="https://docs.python.org/3/library/itertools.html#itertools.combinations_with_replacement" class="reference-source" target="_blank" rel="noopener noreferrer">combinations with replacement</a> and the single <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> form; the C version is the faster to run.
+</p>
+
+<ul>
+  <li>When a property depends only on a multiset of values and not their order, enumerate multisets instead of sequences - the saving is combinatorial.</li>
+  <li>Derive an upper bound on the search space analytically before writing any search code; it often shrinks the problem dramatically.</li>
+  <li>Precompute any function over a small fixed domain into a lookup table and never recompute it inside a loop.</li>
+  <li>Order filter conditions from cheapest-and-coarsest to most-expensive-and-exact, so each layer is only reached by candidates that survived the cheaper ones.</li>
+  <li>Generate combinations-with-replacement by walking non-decreasing sequences; the manual "advance rightmost non-maximal position" rule works in any language.</li>
+  <li>In Python, iterating a one-element tuple (<code>for x in (expr,)</code>) cleanly binds an intermediate result inside a comprehension.</li>
+  <li>Choose string or arithmetic digit handling based on the next operation: membership and counting favour strings, accumulation favours arithmetic.</li>
+</ul>
+
+</article>

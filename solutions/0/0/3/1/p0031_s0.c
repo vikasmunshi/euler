@@ -1,10 +1,7 @@
 /* Solution to Euler Problem 31: Coin Sums. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
-/* Print a __int128 value to a buffer, return pointer to buffer */
+/* Render a __int128 as a decimal string into buf via repeated division by 10. */
 static char *int128_to_str(__int128 val, char *buf, int bufsize) {
     if (val == 0) {
         buf[0] = '0';
@@ -29,15 +26,21 @@ static char *int128_to_str(__int128 val, char *buf, int bufsize) {
 }
 
 /*
+ * Unbounded-knapsack coin-change count, mirroring the Python sibling; O(num_coins * target_amount)
+ * time and O(target_amount) space. dp[i] is the number of unordered ways to make amount i with the
+ * coins processed so far; iterating coins in the outer loop and amounts inner counts combinations,
+ * not permutations. dp cells are __int128 because the target=100000 answer (23 digits) overflows
+ * 64 bits.
+ *
  * argv[1..n-1] = coins as space-separated tokens from "[1, 2, 5, 10, 20, 50, 100, 200]"
  * argv[n]      = target_amount (last argument)
  */
 static char result_str[128];
 
-char *solve(int argc, char *argv[]) {
+const char *solve(int argc, char *argv[]) {
     if (argc < 3) { strcpy(result_str, "-1"); return result_str; }
 
-    int target_amount = atoi(argv[argc - 1]);
+    int target_amount = parse_int(argv[argc - 1]);
 
     /* Parse all coins from argv[1] .. argv[argc-2] */
     int coins[64];
@@ -62,11 +65,12 @@ char *solve(int argc, char *argv[]) {
     /* Allocate DP table using __int128 */
     __int128 *dp = (__int128 *)calloc((size_t)(target_amount + 1), sizeof(__int128));
     if (!dp) { strcpy(result_str, "-1"); return result_str; }
-    dp[0] = 1;
+    dp[0] = 1;  /* one way to make zero: take no coins */
 
-    /* Bottom-up coin-change DP: coin outer, amount inner */
+    /* Bottom-up coin-change DP: coin outer, amount inner (counts combinations). */
     for (int ci = 0; ci < num_coins; ci++) {
         int coin = coins[ci];
+        /* Upward sweep reuses dp[i - coin] within this pass, making the coin unbounded. */
         for (int i = coin; i <= target_amount; i++) {
             dp[i] += dp[i - coin];
         }
@@ -77,47 +81,4 @@ char *solve(int argc, char *argv[]) {
 
     int128_to_str(ans, result_str, (int)sizeof(result_str));
     return result_str;
-}
-
-/* Usage: ./file <coins_list> <target_amount> [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    char *result = NULL;
-    double total = 0.0;
-    int rc = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        char *cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        result = cur;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %s\n", runs, total / (double)runs, result ? result : "-1");
-    return rc;
 }

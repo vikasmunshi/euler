@@ -1,20 +1,11 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-""" Solution to Euler Problem 81: Path Sum [Level 2]. """
+""" Solution to Euler Problem 81: Path Sum: Two Ways [Level 2]. """
 from __future__ import annotations
 
 import typing
-from pathlib import Path
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
 
-
-def get_text_file(src: str) -> str:
-    """Return the contents of a file from the 'resources' directory."""
-    local_filename: str = "resources/" + src.split("/")[-1].split("?")[0]
-    return (Path(__file__).parent / local_filename).read_text()
-
+from solver.runners import runner
 
 default: str = (
     "131, 673, 234, 103, 18\n"
@@ -26,6 +17,7 @@ default: str = (
 
 
 def move_diagonally(size: int) -> typing.Generator[tuple[int, int], None, None]:
+    """Yield cell coordinates in reverse anti-diagonal order so each cell precedes its predecessors."""
     row, col = (size - 1, size - 1)
     while row >= 0:
         yield (row, col)
@@ -37,6 +29,7 @@ def move_diagonally(size: int) -> typing.Generator[tuple[int, int], None, None]:
 
 
 def path_sum_two_ways(content: str) -> int:
+    """Accumulate the minimal cost to the bottom-right into each cell in topological order."""
     matrix: list[list[int]] = [[int(n) for n in line.split(",")] for line in content.splitlines(keepends=False) if line]
     for row, col in move_diagonally((size := len(matrix))):
         neighbors = []
@@ -48,41 +41,15 @@ def path_sum_two_ways(content: str) -> int:
     return matrix[0][0]
 
 
-def solve(*, file_url: str) -> int:
-    content: str = get_text_file(file_url) if file_url else default
-    return path_sum_two_ways(content)
+@runner.main
+def solve(*args: str) -> str:
+    """Minimum right/down path sum via in-place DP: each cell takes the smaller of its right and
+    lower neighbour's finalised cost, swept over reverse anti-diagonals; O(N^2)."""
+    file_url = args[0]
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    content: str = runner.get_text_file(file_url) if file_url else default
+    return str(path_sum_two_ways(content))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(file_url=str(argv[1])))
+    raise SystemExit(solve())

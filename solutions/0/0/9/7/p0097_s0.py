@@ -3,12 +3,12 @@
 """ Solution to Euler Problem 97: Large Non-Mersenne Prime [Level 1]. """
 from __future__ import annotations
 
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def large_non_mersenne_prime(*, num_digits: int, prime: str) -> int:
+    """Evaluate (coeff * 2^exp + 1) mod 10^num_digits to get the last num_digits
+    digits; the loop here doubles modulo divisor exp times, so it is O(exp)."""
     divisor: int = 10**num_digits
     prime_parts: list[str] = prime.split()
     number: int
@@ -22,40 +22,15 @@ def large_non_mersenne_prime(*, num_digits: int, prime: str) -> int:
     return number
 
 
-def solve(*, num_digits: int, prime: str) -> int:
-    return large_non_mersenne_prime(num_digits=num_digits, prime=prime)
+@runner.main
+def solve(*args: str) -> str:
+    """Parse the digit count and prime expression, then return the last
+    num_digits digits via modular reduction; O(exp) from the doubling loop."""
+    num_digits = runner.parse_int(args[0])
+    prime = args[1]
 
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    return str(large_non_mersenne_prime(num_digits=num_digits, prime=prime))
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(num_digits=int(argv[1]), prime=str(argv[2])))
+    raise SystemExit(solve())

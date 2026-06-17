@@ -3,15 +3,14 @@
 """ Solution to Euler Problem 28: Number Spiral Diagonals [Level 0]. """
 from __future__ import annotations
 
-import sys
-from sys import argv, stderr
-from time import perf_counter
-from typing import Any
+from solver.runners import runner
 
 
 def number_spiral_with_diagonal_sum(size: int) -> int:
+    """Build the spiral by stepping to the nearest free neighbour and sum its diagonals;
+    O(size^2) reference check for the closed form."""
     x, y, coordinate_map = (0, 0, {(0, 0): 1})
-    for number in range(2, size**2 + 1):
+    for number in range(2, size ** 2 + 1):
         free_adjacent_coords = (c for c in ((x + 1, y), (x, y - 1), (x - 1, y), (x, y + 1)) if c not in coordinate_map)
         x, y = min(((c[0] ** 2 + c[1] ** 2, c) for c in free_adjacent_coords), key=lambda c: c[0])[1]
         coordinate_map[x, y] = number
@@ -34,44 +33,18 @@ def number_spiral_with_diagonal_sum(size: int) -> int:
     return diagonal_sum
 
 
-def solve(*, size: int) -> int:
+@runner.main
+def solve(*args: str) -> str:
+    """Each ring's four diagonal corners form an arithmetic pattern that sums in closed form to (N*(N*(4N+3)+8)-9)/6;
+    O(1). The O(size^2) spiral simulation runs only under --show for small grids as a cross-check."""
+    size = runner.parse_int(args[0])
+
     if not isinstance(size, int) or size <= 0 or size % 2 == 0:
         raise ValueError("Size must be a positive odd integer")
-    if sys.argv[-1] == "--show" and size <= 10:
-        return number_spiral_with_diagonal_sum(size)
-    return (size * (size * (4 * size + 3) + 8) - 9) // 6
-
-
-def main(**kwargs: Any) -> int:
-    """
-    Usage: ./file.py <kwarg>... [--runs=1] [--show]
-    Output: "<runs> <avg_seconds> <result>"
-    """
-    try:
-        runs_arg: str = next((arg for arg in argv[1:] if arg.startswith("--runs=")))
-        runs: int = int(runs_arg.split("=", 1)[1])
-        assert runs > 0
-    except (AssertionError, StopIteration, ValueError):
-        runs = 1
-    elapsed: list[float] = []
-    result: int | None = None
-    rc: int = 0
-    errors: list[str] = []
-    for _ in range(runs):
-        _start, _result, _stop = (perf_counter(), solve(**kwargs), perf_counter())
-        elapsed.append(_stop - _start)
-        if result is not None and _result != result:
-            errors.append(f"Expected consistent result, got {_result} previous result={result}")
-        result = _result
-    if result is None:
-        errors.append("Expected a result, got None")
-    average: float = sum(elapsed) / len(elapsed)
-    if errors:
-        print("\n".join(errors), file=stderr)
-        rc = 1
-    print(f"{runs} {average} {result}")
-    return rc
+    if runner.show and size <= 10:
+        return str(number_spiral_with_diagonal_sum(size))
+    return str((size * (size * (4 * size + 3) + 8) - 9) // 6)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(size=int(argv[1])))
+    raise SystemExit(solve())

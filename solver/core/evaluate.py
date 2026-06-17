@@ -3,51 +3,67 @@
 """Solution evaluation: runs standalone scripts against test cases and reports results."""
 from __future__ import annotations
 
+__all__ = ['evaluate']
+
+import re
 from ast import literal_eval
-from json import JSONDecodeError, loads
 from pathlib import Path
 from subprocess import TimeoutExpired, run
 from time import perf_counter
-from typing import Any, Literal
+from typing import Literal, cast
 
-from solver.config import config
-from solver.core.lock import check_workspace_lock
+from solver.config import ExitCodes, config
+from solver.core.lock import check_workspace_lock_command
+from solver.core.problems import problems
 from solver.core.results import results_collector
+from solver.core.test_cases import TestCase, load_test_cases
 from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
 
+# group 1: problem number, group 2: solution index, group 3: file type
+_solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
 
-@register(name='build',
-          help='Build all C source files in the workspace directory.',
-          usage='build', )
-@check_workspace_lock
-def build_c() -> Literal['ok', 'nok']:
-    """Build all C source files in the workspace directory."""
+
+@register(help_text='Build all C source files in the workspace directory.', quietable=True)
+@check_workspace_lock_command
+def compile_c(clean: bool = False) -> int:
+    """Compile every C solution in the workspace into a runnable binary.
+
+    Builds each `.c` file in `workspace/` (linking the runner harness) so it can
+    be evaluated and benchmarked; reports per-file success or the compiler
+    error. `eval --clean` and `benchmark` invoke this for you, so you rarely
+    call it directly.
+
+    Args:
+        clean:  When True, force a full rebuild instead of reusing up-to-date
+                build output. Defaults to False.
+    """
     source_files: list[Path] = sorted(s for s in config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.c')
-    result: Literal['ok', 'nok'] = 'ok'
+    result: int = ExitCodes.EXIT_OK
     for source_file in source_files:
-        cmdline: str = f'{config.scripts.build_c} {canonical_path(source_file)}'
+        cmdline: str = f'{config.scripts.compile_c} {canonical_path(source_file)} {'--clean' if clean else ''}'
         process = run(cmdline, capture_output=True, cwd=config.root_dir, shell=True, text=True)
         if process.returncode != 0:
-            console.print(f'[error]error:[/error] building [accent]{source_file.name}[/accent]')
+            console.print(f'[error]error:[/error] compiling [accent]{source_file.name}[/accent]')
             output = process.stdout + ('\n' if process.stdout and process.stderr else '') + process.stderr
             if output.strip():
                 console.print(output.strip(), markup=False, highlight=False)
-            result = 'nok'
+            result = ExitCodes.EXIT_ERROR
         else:
-            console.print(f'[success]built[/success] [accent]{source_file.name}[/accent] '
-                          f'[muted]({process.stdout.strip()})[/muted]')
+            console.print(f'[accent]{source_file.name}[/accent] '
+                          f'[muted]{process.stdout.strip()}[/muted]')
     return result
 
 
-def eval_solution[T](filename: str, *,
-                     disable_timeout: bool,
-                     expected: T,
-                     input_args: list[str],
-                     runs: int,
-                     show: bool,
-                     work_dir: Path,
-                     ) -> tuple[T | None, float, str]:
+def _eval_solution[T](filename: str, *,
+                      timeout: float | None = None,
+                      disable_timeout: bool,
+                      expected: T,
+                      input_args: list[str],
+                      runs: int,
+                      show: bool,
+                      work_dir: Path,
+                      ) -> tuple[T | None, float, str]:
     """
     Run a solution script against a single set of input arguments and capture its result.
 
@@ -57,6 +73,7 @@ def eval_solution[T](filename: str, *,
 
     Args:
         filename:           Name of the executable to run (relative to work_dir).
+        timeout:            Timeout in seconds for script execution. If None, uses default.
         disable_timeout:    If True, disables timeouts for script execution.
         expected:           The expected answer; its type determines how stdout is parsed.
                             Pass None to indicate an unknown answer (int parsing is assumed).
@@ -70,11 +87,14 @@ def eval_solution[T](filename: str, *,
         The answer is None on timeout or non-zero exit; error_message is empty on success.
     """
     expected_type: type = type(expected) if expected is not None else int
-    timeout: float = config.timeout_single if runs == 1 else (config.timeout_multiple * runs)
+    if disable_timeout:
+        timeout = None
+    else:
+        timeout = timeout or (config.timeout_single if runs == 1 else (config.timeout_multiple * runs))
     t_start: float = perf_counter()
     try:
         result = run([f'./{filename}', *input_args, f'--runs={runs}', *(['--show'] if show else [])],
-                     cwd=work_dir, capture_output=True, text=True, timeout=None if disable_timeout else timeout)
+                     cwd=work_dir, capture_output=True, text=True, timeout=timeout)
     except TimeoutExpired:
         return None, (perf_counter() - t_start) / runs, f'TimeoutExpired: {timeout}s'
     else:
@@ -94,21 +114,18 @@ def eval_solution[T](filename: str, *,
     return answer, average, ''
 
 
-@register(name='evaluate',
-          help='Evaluate solutions against test cases.',
-          usage='evaluate [all|dev|main|extra ...=dev main] '
-                '[disable_timeout=false] [lang=*|py|c] [record=false] [reset=false] '
-                '[runs=1] [show=false] [solution=*]',
-          aliases=('eval', 'test'))
-def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
-             disable_timeout: bool = False,
-             lang: Literal['*', 'py', 'c'] = '*',
-             record: bool = False,
-             reset: bool = False,
-             runs: int = 1,
-             show: bool = False,
-             solution: str = '*',
-             ) -> bool:
+def _evaluate(*categories: Literal['dev', 'main', 'extra'],
+              clean: bool = False,
+              timeout: float | None = None,
+              disable_timeout: bool = False,
+              lang: Literal['*', 'py', 'c'] = '*',
+              record: bool = False,
+              reset: bool = False,
+              runs: int | None = None,
+              show: bool = False,
+              solution_index: int | None = None,
+              verbose: bool = False,
+              ) -> int:
     """
     Run all solutions in workspace_dir against the filtered test cases and report results.
 
@@ -119,6 +136,8 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     Args:
         *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                             (which expands to all three). Defaults to ('dev', 'main') if omitted.
+        clean:              If True, force compiles C solutions. Defaults to False.
+        timeout:            Timeout in seconds for solution execution. If None, uses default.
         disable_timeout:    If True, disables timeout for solution execution. Defaults to False.
         lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
         record:             If True, persists the evaluation results via the result recorder.
@@ -131,9 +150,10 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
                             Defaults to 1.
         show:               If True, appends '--show' to the arguments passed to each solution;
                             forces 'record' to False and 'runs' to 1. Defaults to False.
-        solution:           Specific solution to evaluate.
-                            If provided, only this solution will be evaluated.
+        solution_index:     Specific solution index to evaluate.
+                            If provided, only this solution index will be evaluated.
                             If None, all solutions will be evaluated. Defaults to None.
+        verbose:            If True, prints error information during evaluation. Defaults to False.
 
     Returns:
                         True if evaluation is completed without errors
@@ -141,81 +161,200 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     """
     if not categories:
         categories = ('dev', 'main')
-    if 'all' in categories:
-        categories = ('dev', 'main', 'extra')
     if show:
         record = False
         runs = 1
-    test_cases_path: Path = config.workspace_dir / config.test_cases_filename
-    try:
-        test_cases: list[dict[str, Any]] = loads(test_cases_path.read_text())
-        assert test_cases and isinstance(test_cases, list), 'empty or invalid test cases file'
-        filtered: list[dict[str, Any]] = [tc for tc in test_cases if tc['category'] in categories]
-        assert filtered
-    except FileNotFoundError:
-        console.print('[error]error:[/error] no test cases found, skipping evaluation')
-        return False
-    except AssertionError:
-        console.print(f'[error]error:[/error] no test cases for categories: {categories}, skipping evaluation')
-        return False
-    except JSONDecodeError as err:
-        console.print(f'[error]error:[/error] invalid test cases file, skipping evaluation {err=}')
-        return False
-    if lang in ('*', 'c') and (solution == '*' or solution.endswith('_c')):
-        build_c()
-    if solution == '*':
-        solutions: list[str] = sorted((f'{s.name}' for s in config.workspace_dir.iterdir()
-                                       if s.is_file() and bool(s.stat().st_mode & 0o100)),
-                                      key=lambda name: (name.rsplit('.', 1)[-1] if '.' in name else '', name))
-    else:
-        solutions = [solution]
-    if lang != '*':
-        solutions = [s for s in solutions if s.endswith(lang)]
+    if disable_timeout:
+        runs = 1
+    if lang in ('*', 'c'):
+        compile_c(clean=clean)
+    solutions: list[str] = sorted(
+        (
+            f'{s.name}' for s in config.workspace_dir.iterdir()
+            if s.is_file()  # is a file
+            if bool(s.stat().st_mode & 0o100)  # is executable
+            if (match := _solution_file_prefix.match(s.name))  # matches pN_sK[.py|_c]
+            if solution_index is None or match.group(2) == str(solution_index)  # matches solution_index
+            if lang == '*' or s.name.endswith(lang)  # matches lang
+        ),
+        key=lambda name: (name.rsplit('.', 1)[-1] if '.' in name else '', name))
     if not solutions:
         console.print('[error]error:[/error] no solutions found, skipping evaluation')
-        return False
-    len_input_args_str: int = 0
-    for test_case in filtered:
-        input_args: list[str] = [str(v) for v in test_case['input'].values()]
-        test_case['input_args'] = input_args
-        input_args_str: str = ' '.join(input_args)
-        test_case['input_args_str'] = input_args_str
-        len_input_args_str = max(len_input_args_str, len(input_args_str))
-    for test_case in filtered:
-        test_case['input_args_str'] = f'{test_case["input_args_str"]:<{len_input_args_str}}'
-    no_errors: bool = True
+        return ExitCodes.EXIT_ERROR
+    test_cases: list[TestCase] = load_test_cases(*categories, solutions=solutions, runs=runs)
+    if not test_cases:
+        return ExitCodes.EXIT_ERROR
+    rc: int = ExitCodes.EXIT_OK
     with results_collector(record=record, reset=reset) as recorder:
-        for test_case, solution in ((tc, s) for tc in filtered for s in solutions):
-            expected: Any = test_case.get('answer')
-            input_args = test_case['input_args']
-            input_args_str = test_case['input_args_str']
-            category: str = test_case['category']
-            answer, elapsed, error = eval_solution(
-                solution,
-                disable_timeout=disable_timeout,
-                expected=expected,
-                input_args=input_args,
-                runs=runs,
-                show=show,
-                work_dir=config.workspace_dir,
-            )
-            match (answer, expected, error):
+        for test_case, solution in ((tc, s) for tc in test_cases for s in solutions):
+            answer, elapsed, error = _eval_solution(solution,
+                                                    timeout=timeout,
+                                                    disable_timeout=disable_timeout,
+                                                    expected=test_case.answer,
+                                                    input_args=test_case.input_args,
+                                                    runs=test_case.runs,
+                                                    show=show,
+                                                    work_dir=config.workspace_dir, )
+            match (answer, test_case.answer, error):
+                case (None, _, error_msg) if 'ModuleNotFoundError:' in error_msg:
+                    verdict = 'missing dep'
                 case (None, _, error_msg) if 'OverflowError:' in error_msg:
                     verdict = 'overflow'
                 case (None, _, error_msg) if 'TimeoutExpired:' in error_msg:
                     verdict = 'timeout'
+                case (None, _, error_msg) if 'implement solve() first' in error_msg:
+                    verdict = 'no solve'
                 case (None, _, _):
                     verdict = 'error'
-                    no_errors = False
+                    rc = ExitCodes.EXIT_ERROR
                 case (_, None, _):
                     verdict = 'unknown'
                 case (ans, exp, _) if ans == exp:
                     verdict = 'correct'
                 case _:
                     verdict = 'incorrect'
-            recorder(category=category, solution=solution, args=input_args_str, answer=answer, verdict=verdict,
-                     elapsed=elapsed, runs=runs)
-    return no_errors
+                    rc = ExitCodes.EXIT_ERROR
+            if verbose and verdict not in ('correct', 'incorrect', 'unknown'):
+                console.print(f'[error]error:[/error] {verdict} for {solution} on {test_case.category}\n'
+                              f'[error]{error}[/error]')
+            recorder(category=test_case.category,
+                     solution=solution,
+                     args=test_case.input_args_str,
+                     answer=answer,
+                     verdict=verdict,
+                     elapsed=elapsed,
+                     runs=test_case.runs, )
+    return rc
 
 
-__all__ = ('evaluate',)
+@register(help_text='Evaluate solutions against test cases.', aliases=('eval',), quietable=True)
+@check_workspace_lock_command
+def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
+             clean: bool = False,
+             timeout: float | None = None,
+             disable_timeout: bool = False,
+             lang: Literal['*', 'py', 'c'] = '*',
+             runs: int = 1,
+             show: bool = False,
+             solution_index: int | None = None,
+             verbose: bool = False,
+             ) -> int:
+    """
+    Evaluate solutions against test cases.
+
+    Args:
+    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
+                        (which expands to all three). Defaults to 'dev', 'main' if omitted.
+    clean:              If True, force compiles C solutions. Defaults to False.
+    timeout:            Timeout in seconds for solution execution. If None, uses default timeout.
+                        Defaults to None.
+    disable_timeout:    If True, disables timeout for solution execution. Defaults to False.
+                        If True, only one run will be performed for each solution.
+    lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
+    runs:               Number of times to run each solution per test case (useful for timing).
+                        Defaults to 1.
+    show:               If True, appends '--show' to the arguments passed to each solution;
+                        defaults to False.
+    solution_index:     Specific solution index to evaluate.
+                        If provided, only this solution index will be evaluated.
+                        If None, all solutions will be evaluated. Defaults to None.
+    verbose:            If True, prints error information during evaluation. Defaults to False.
+    """
+    if not categories:
+        eval_categories: list[Literal['dev', 'main', 'extra']] = ['dev', 'main']
+    elif 'all' in categories:
+        eval_categories = ['dev', 'main', 'extra']
+    else:
+        eval_categories = cast(list[Literal['dev', 'main', 'extra']], list(categories))
+    try:
+        rc: int = _evaluate(*eval_categories,
+                            clean=clean,
+                            timeout=timeout,
+                            disable_timeout=disable_timeout,
+                            lang=lang,
+                            runs=runs,
+                            show=show,
+                            solution_index=solution_index,
+                            verbose=verbose, )
+    except KeyboardInterrupt:
+        console.print('[muted]Evaluate interrupted by user.[/muted]')
+        return ExitCodes.EXIT_ERROR
+    return rc
+
+
+@register(help_text='Benchmark the problem currently in the workspace.', quietable=True)
+@check_workspace_lock_command
+def benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
+              clean: bool = False,
+              timeout: float | None = None,
+              disable_timeout: bool = False,
+              lang: Literal['*', 'py', 'c'] = '*',
+              solution_index: int | None = None,
+              reset: bool = False,
+              verbose: bool = False,
+              ) -> int:
+    """Measure and record the execution time of the workspace solutions.
+
+    Like `eval`, runs every solution against the chosen test-case categories, but
+    always **records** the timings to `results.json` and repeats each case an
+    adaptive number of times (see "Repeats") instead of running once. Run `eval`
+    first to confirm correctness, then `benchmark` to measure; categories default
+    to all three ('dev', 'main', 'extra').
+
+    Repeats:
+        `benchmark` does not take a `runs` argument — it passes `runs=None` to the
+        evaluator, which makes `load_test_cases` (`core/test_cases.py`) choose the
+        repeat count **per test-case category** from the previously recorded
+        timings::
+
+            runs = clamp(round(21 / slowest_prior_average), 1, 21)
+
+        where `slowest_prior_average` is the largest recorded average (seconds per
+        run) among prior *correct* results for that category and the solutions
+        being benchmarked. So each case is repeated ~21 times when it runs in well
+        under a second and scales down toward a single run as it gets slower —
+        keeping the per-category wall time bounded at roughly 21s — clamped to the
+        1..21 range. With no prior correct result recorded for a category the
+        count is 1: the first benchmark establishes a one-run baseline, and later
+        benchmarks use it to repeat the fast cases and average out noise. Passing
+        `disable_timeout` overrides this and forces a single run.
+
+    Args:
+        *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
+                            (which expands to all three). Defaults to all three if omitted.
+        clean:              If True, force compiles C solutions. Defaults to False.
+        timeout:            Per-run timeout in seconds for solution execution. If None, uses the
+                            default timeout. Defaults to None.
+        disable_timeout:    If True, disables the timeout for solution execution and forces a single
+                            run (bypassing the adaptive repeat count above). Defaults to False.
+        lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
+        solution_index:     Specific solution index to evaluate.
+                            If provided, only this solution index will be evaluated.
+                            If None, all solutions will be evaluated. Defaults to None.
+        reset:              If True, replace any existing persisted results with this run on a
+                            clean completion. If the benchmark is interrupted, existing results
+                            are preserved untouched. Defaults to False (results are merged with
+                            existing records as a running average).
+        verbose:            If True, prints error information during evaluation. Defaults to False.
+    """
+    if not categories or 'all' in categories:
+        eval_categories: list[Literal['dev', 'main', 'extra']] = ['dev', 'main', 'extra']
+    else:
+        eval_categories = cast(list[Literal['dev', 'main', 'extra']], list(categories))
+    try:
+        rc: int = _evaluate(*eval_categories,
+                            clean=clean,
+                            timeout=timeout,
+                            disable_timeout=disable_timeout,
+                            lang=lang,
+                            record=True,
+                            reset=reset,
+                            runs=None,
+                            show=False,
+                            solution_index=solution_index,
+                            verbose=verbose, )
+    except KeyboardInterrupt:
+        console.print('[muted]Benchmark interrupted by user.[/muted]')
+        return ExitCodes.EXIT_ERROR
+    problems.clear_cache()
+    return rc

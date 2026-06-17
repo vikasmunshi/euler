@@ -1,15 +1,12 @@
 /* Solution to Euler Problem 52: Permuted Multiples. */
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <time.h>
+#include "runner.h"
 
 static int cmp_char(const void *a, const void *b) {
     return (*(const char *)a) - (*(const char *)b);
 }
 
+/* Build the sorted-digit fingerprint of n: identical for any digit-permutation of n. */
 static void sorted_digits(long long n, char *buf) {
-    /* Write sorted decimal digits of n into buf (null-terminated). */
     char tmp[32];
     int len = 0;
     if (n == 0) {
@@ -17,6 +14,7 @@ static void sorted_digits(long long n, char *buf) {
         buf[1] = '\0';
         return;
     }
+    /* Extract digits arithmetically (least-significant first); order is irrelevant before sorting. */
     while (n > 0) {
         tmp[len++] = (char)('0' + (n % 10));
         n /= 10;
@@ -26,23 +24,27 @@ static void sorted_digits(long long n, char *buf) {
     buf[len] = '\0';
 }
 
-long long solve(int argc, char *argv[]) {
+/* Linear scan from x=1: x is the answer when 2x..Mx all share x's sorted-digit fingerprint.
+   The digit-count constraint confines x to the low sixth of each band, so the scan is short.
+   O(N * M * D): N the answer, M multiples (<=6), D digits (<=7). */
+const char *solve(int argc, char *argv[]) {
+    static char _answer[32];
     int multiples = 6;
     if (argc >= 2) {
-        multiples = atoi(argv[1]);
+        multiples = parse_int(argv[1]);
     }
     if (multiples < 2 || multiples > 6) {
         fprintf(stderr, "multiples must be between 2 and 6 inclusive.\n");
-        return -1;
+        { snprintf(_answer, sizeof _answer, "%lld", (long long)(-1)); return _answer; }
     }
 
     char fingerprint[32];
     char candidate[32];
 
     for (long long i = 1; ; i++) {
-        /* Compute sorted-digit fingerprint of i */
         sorted_digits(i, fingerprint);
 
+        /* Early exit: most candidates mismatch at m=2, so the inner loop usually does one compare. */
         int all_match = 1;
         for (int m = 2; m <= multiples; m++) {
             sorted_digits(i * (long long)m, candidate);
@@ -53,57 +55,7 @@ long long solve(int argc, char *argv[]) {
         }
 
         if (all_match) {
-            return i;
+            { snprintf(_answer, sizeof _answer, "%lld", (long long)(i)); return _answer; }
         }
     }
-}
-
-/* Usage: ./file <kwarg>... [--runs=1] [--show]
- * Output: "<runs> <avg_seconds> <result>" */
-int main(int argc, char *argv[]) {
-    int runs = 1;
-
-    char **solve_argv = malloc((size_t)argc * sizeof(char *));
-    if (!solve_argv) {
-        fprintf(stderr, "runner: out of memory\n");
-        return 1;
-    }
-    int solve_argc = 0;
-    solve_argv[solve_argc++] = argv[0];
-
-    for (int i = 1; i < argc; i++) {
-        if (argv[i][0] == '\0') continue;
-        if (strncmp(argv[i], "--runs=", 7) == 0) {
-            int r = atoi(argv[i] + 7);
-            if (r >= 1) runs = r;
-            continue;
-        }
-        if (strcmp(argv[i], "--show") == 0) continue;
-        solve_argv[solve_argc++] = argv[i];
-    }
-
-    long long result = 0;
-    double total = 0.0;
-    int rc = 0;
-    int has_result = 0;
-
-    for (int r = 0; r < runs; r++) {
-        struct timespec t0, t1;
-        clock_gettime(CLOCK_MONOTONIC, &t0);
-        long long cur = solve(solve_argc, solve_argv);
-        clock_gettime(CLOCK_MONOTONIC, &t1);
-        total += (double)(t1.tv_sec - t0.tv_sec)
-               + (double)(t1.tv_nsec - t0.tv_nsec) * 1e-9;
-        if (has_result && cur != result) {
-            fprintf(stderr, "Expected consistent result, got %lld previous result=%lld\n",
-                    cur, result);
-            rc = 1;
-        }
-        result = cur;
-        has_result = 1;
-    }
-
-    free(solve_argv);
-    printf("%d %.17g %lld\n", runs, total / (double)runs, result);
-    return rc;
 }

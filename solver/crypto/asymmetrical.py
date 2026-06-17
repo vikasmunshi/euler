@@ -3,6 +3,8 @@
 """X25519 ECDH key pair generation, master key wrapping, and user identity management."""
 from __future__ import annotations
 
+__all__ = ['UserKeyPair']
+
 from pathlib import Path
 from typing import NamedTuple
 
@@ -185,6 +187,3 @@ class UserKeyPair(NamedTuple):
         cipher: ChaCha20Poly1305 = ChaCha20Poly1305(derived)
         nonce: bytes = b'\x00' * 12
         return cipher.decrypt(nonce, ciphertext, None)
-
-
-__all__ = ('UserKeyPair',)

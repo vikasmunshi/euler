@@ -1,0 +1,88 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+When you carry out long division to express the unit fraction 1/d as a decimal, the digits after the point either terminate or eventually fall into a repeating loop. The fraction terminates exactly when d's only prime factors are 2 and 5 - the prime factors of our base, 10. For every other d, the expansion settles into a purely repeating cycle, and the length of that cycle is a well-studied number-theoretic quantity called the <a href="https://en.wikipedia.org/wiki/Multiplicative_order" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative order</a> of 10 modulo d. The <a href="https://en.wikipedia.org/wiki/Multiplicative_order" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative order</a> of a base a modulo n is the smallest positive integer k such that a^k is congruent to 1 modulo n - written a^k = 1 (mod n). It exists if and only if a and n are <a href="https://en.wikipedia.org/wiki/Coprime_integers" class="reference-source" target="_blank" rel="noopener noreferrer">coprime</a> (their <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a> is 1). The reason this maps onto our problem is that the remainders produced during long division of 1/d are precisely the sequence 10^k mod d, and the cycle closes the first time that remainder returns to its starting value of 1.
+</p>
+
+<p>
+The observation that makes the search efficient is a bound on how long a cycle can be. The remainders in the long-division process are all in the range 1 to d-1, so the cycle length can be at most d-1. When d is prime, <a href="https://en.wikipedia.org/wiki/Fermat%27s_little_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">Fermat's little theorem</a> tells us the order divides d-1, and the maximum achievable is exactly d-1. This means the longest cycle below a limit L must come from a large d near L, because a small d simply cannot produce a long enough cycle. I exploit this by scanning the top of the range downward rather than testing every d from 2 upward. Computing the order by direct simulation costs O(d) per candidate, and restricting the scan to the top tenth of the range makes the whole search O(L/10 * L) - trivially fast for L = 1000.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Multiplicative-Order Search by Simulation (Python and C)</h4>
+
+<p>
+Both files implement the same algorithm in two languages. The heart of it is <code>multiplicative_order(a, modulus)</code>: I start with a remainder <code>r = 1</code> and repeatedly apply <code>r = r * a % modulus</code>, counting each step until <code>r</code> returns to 1. The step count at that moment is the cycle length. I cap the loop at <code>modulus - 1</code> iterations because, by Fermat's argument above, the order can never exceed that - and if the loop finishes without returning to 1, no order exists and I return <code>None</code> (or <code>-1</code> in C).
+</p>
+
+<p>
+Before invoking the order computation I filter with a <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a> check: if <code>gcd(d, 10) != 1</code>, then d shares a factor of 2 or 5 with the base, the order does not exist, and the simulation loop would never terminate by finding <code>r == 1</code>. Skipping these candidates is both a correctness guard and a small performance win. The Python version uses <code>math.gcd</code>; the C version implements the <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a> by hand in a tight <code>while</code> loop.
+</p>
+
+<p>
+The search window covers the top 10% of the range (with a floor of 10 iterations so tiny limits like the dev case of 10 still examine enough candidates). I justify this restriction with the cycle-length bound: a d below L/10 can produce a cycle no longer than L/10, which will always be beaten by a large d near L carrying a near-maximal cycle. The Python solution feeds a generator of <code>(cycle_length, d)</code> tuples into <code>max()</code>, relying on lexicographic tuple comparison to maximise length first and break ties toward the larger d. The C solution tracks <code>best_len</code> and <code>best_d</code> explicitly, encoding the identical tie-break in a conditional. Both take the limit as a runtime argument so the same binary handles the dev and main cases without recompilation.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Walrus Operator for Inline Assignment in Comprehensions</h4>
+
+<p>
+The Python solution uses the <a href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> (<code>:=</code>) to bind <code>d := (limit - i)</code> inside the generator's filter clause, then reuse that name in both the filter test and the projected tuple. This avoids recomputing <code>limit - i</code> and keeps the comprehension self-contained. Reach for it whenever a subexpression is needed in more than one place within the same comprehension or condition.
+</p>
+
+<h4>Tuple Comparison for Multi-Key Maximisation</h4>
+
+<p>
+Rather than juggling two running-best variables, the Python code builds <code>(cycle_length, d)</code> tuples and calls <code>max()</code>. Python compares tuples lexicographically, so this maximises cycle length first and breaks ties by the larger d automatically - the tie-break rule is encoded in the data layout instead of in branching logic. This is the cleanest idiom whenever you need a maximum by a primary key with a secondary tie-breaker.
+</p>
+
+<h4>Cheap Pre-filter Before Expensive Work</h4>
+
+<p>
+Both solutions run an O(log d) <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a> test to gate the O(d) order simulation. The principle - guard an expensive computation with a fast necessary condition - is broadly reusable: if a hard computation has a quick prerequisite, check the prerequisite first and skip the work when it fails.
+</p>
+
+<h4>Bounded Iterative Order Computation</h4>
+
+<p>
+I deliberately chose the simplest correct method for the order: repeated multiplication modulo d, bounded by d-1 iterations. A more elaborate approach would factor d-1 and test only its divisors, but for d below 1000 the naive loop runs in microseconds, so the extra machinery would only add bugs and obscure intent. Optimise only when profiling exposes a genuine bottleneck.
+</p>
+
+<h4>Wide Accumulator to Avoid Overflow in C</h4>
+
+<p>
+The C version declares the running remainder <code>r</code> as <code>long long</code>. Before each modulo reduction, the product <code>r * 10</code> can reach roughly 10 * (d-1), which is safely within <code>int</code> range for d < 1000 - but using a wider type makes the code robust if the limit is raised, with no measurable cost. Choosing a multiplication accumulator wide enough to hold the intermediate product is a standard defensive habit in C modular arithmetic.
+</p>
+
+<h4>Command-Line Parameterisation for Testability</h4>
+
+<p>
+Both programs read the limit from <code>argv</code> rather than hard-coding it. The same executable validates against the dev case (limit 10, answer 7) and the main case (limit 1000, answer 983) without edits or recompilation. Parameterising inputs through the command line is a small habit that pays off whenever you need to test multiple cases or profile across input sizes.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is recognising that the decimal cycle length of 1/d is exactly the <a href="https://en.wikipedia.org/wiki/Multiplicative_order" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative order</a> of 10 modulo d. Once that mapping is clear, the algorithm writes itself: filter to <a href="https://en.wikipedia.org/wiki/Coprime_integers" class="reference-source" target="_blank" rel="noopener noreferrer">coprime</a> d, simulate the order, take the maximum. The second insight - that the cycle length is bounded by d-1 - lets me prune the search to large d near the limit, turning an exhaustive scan into a quick top-down sweep.
+</p>
+
+<p>
+Both implementations are correct and effectively instantaneous. On the main case the C build runs in about 0.00006 s versus roughly 0.0004 s for Python - the C version is around seven times faster as expected from native compilation, but at this scale the difference is irrelevant. The Python solution is the more elegant of the two: its tuple-based <code>max()</code> expresses the entire search and tie-break in a single readable line.
+</p>
+
+<ul>
+  <li>Recurring decimal cycles are an instance of <a href="https://en.wikipedia.org/wiki/Multiplicative_order" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative order</a> in modular arithmetic - learn to recognise this mapping.</li>
+  <li>The <a href="https://en.wikipedia.org/wiki/Multiplicative_order" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative order</a> of a modulo n exists only when gcd(a, n) = 1; check that precondition before iterating.</li>
+  <li>When a quantity is bounded above by a function of the candidate (here, cycle length less than d), exploit the bound to prune the search space.</li>
+  <li>Encode multi-key maximisation with lexicographic tuple comparison instead of manual tie-breaking branches.</li>
+  <li>Place a fast necessary-condition filter before any expensive computation to avoid wasted work.</li>
+  <li>In C, widen the accumulator for modular multiplication to avoid silent overflow on larger inputs.</li>
+  <li>Parameterise inputs through the command line so one program validates against many test cases.</li>
+  <li>Prefer the simplest correct algorithm when the input size guarantees fast execution; optimise only when profiling demands it.</li>
+</ul>
+
+</article>

@@ -1,0 +1,95 @@
+<article>
+
+<h3>Problem Analysis</h3>
+
+<p>
+<a href="https://en.wikipedia.org/wiki/Champernowne_constant" class="reference-source" target="_blank" rel="noopener noreferrer">Champernowne's constant</a> is formed by concatenating the positive integers into an endless decimal string. The naive way to find the millionth digit - actually building that string - is wasteful: it would require gigabytes of memory and linear time in the position. The decisive observation is that the string is not random at all; it is a stack of regular <em>bands</em>, where each band collects all the integers with the same number of digits. The 1-digit numbers (1 through 9) contribute 9 * 1 = 9 characters; the 2-digit numbers (10 through 99) contribute 90 * 2 = 180 characters; and in general the band of d-digit numbers holds 9 * 10^(d-1) integers, each contributing d characters, for a band length of d * 9 * 10^(d-1) characters.
+</p>
+
+<p>
+Because each band's length has a closed-form formula, I can locate any digit by accumulating band lengths - a running <a href="https://en.wikipedia.org/wiki/Prefix_sum" class="reference-source" target="_blank" rel="noopener noreferrer">prefix sum</a> - until the total first reaches or exceeds the target position. That tells me which band the position falls in; two integer operations (<a href="https://en.wikipedia.org/wiki/Division_(mathematics)#Of_integers" class="reference-source" target="_blank" rel="noopener noreferrer">floor division</a> and <a href="https://en.wikipedia.org/wiki/Modulo" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a>) then pinpoint the exact integer and the exact digit within it. The number of bands to examine is bounded by the number of digits in the target position, so each lookup costs <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(log n)</a> integer operations. Since the problem asks for only a handful of digits (positions 10^0 through 10^6), the total work is a few dozen integer operations and the runtime is effectively immeasurable.
+</p>
+
+<h3>Solution Approach</h3>
+
+<h4>Arithmetic band-walk (Python and C)</h4>
+
+<p>
+The Python file <code>p0040_s0.py</code> and the C file <code>p0040_s0.c</code> implement the same algorithm. The core lookup is <code>get_nth_digit_champernowne_s_constant</code> in Python and <code>get_nth_digit_champernowne</code> in C.
+</p>
+
+<p>
+<strong>Step 1 - find the band.</strong> I keep two running totals: <code>length_till_num_digits</code>, the number of characters contributed by all bands strictly before the current one, and <code>length_with_num_digits</code>, the same total after including the current band. On each iteration I increment <code>num_digits</code>, copy the old running total into <code>length_till_num_digits</code>, then add the band length <code>num_digits * 9 * 10^(num_digits-1)</code>. I stop as soon as <code>length_with_num_digits</code> reaches or exceeds <code>n</code>. At that point <code>num_digits</code> is the digit-length of the numbers in the band containing position <code>n</code>, and the two totals bracket that band's start and end. This is the <a href="https://en.wikipedia.org/wiki/Prefix_sum" class="reference-source" target="_blank" rel="noopener noreferrer">prefix sum</a> comparison made concrete.
+</p>
+
+<p>
+<strong>Step 2 - find the offset within the band.</strong> I compute <code>offset_of_number = n - length_till_num_digits - 1</code>. Subtracting <code>length_till_num_digits</code> measures how far into the band we are; the extra <code>-1</code> converts the problem's 1-based digit numbering into a 0-based index. Then <a href="https://en.wikipedia.org/wiki/Division_(mathematics)#Of_integers" class="reference-source" target="_blank" rel="noopener noreferrer">floor division</a> by <code>num_digits</code> gives the index of the number within the band, and the <a href="https://en.wikipedia.org/wiki/Modulo" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a> gives the index of the digit within that number.
+</p>
+
+<p>
+<strong>Step 3 - recover the digit.</strong> The first number in the d-digit band is 10^(d-1), so the target number is <code>10^(num_digits-1) + offset_of_number // num_digits</code>. In Python I render the number with <code>str</code> and index the requested character, converting back to <code>int</code>. In C I format the number into a small stack buffer with <code>snprintf</code> and subtract <code>'0'</code> from the indexed character.
+</p>
+
+<p>
+The driver loops over k from 0 to i inclusive, querying position 10^k each time and accumulating the product. Python expresses this declaratively with <a href="https://docs.python.org/3/library/functools.html#functools.reduce" class="reference-source" target="_blank" rel="noopener noreferrer"><code>functools.reduce</code></a> folding a multiplication over a generator. C uses a plain loop, multiplying the running <code>pos</code> by 10 on each iteration to avoid recomputing the power. Both compute 10^(num_digits-1) and the band length with short explicit multiplication loops in C, which sidesteps the floating-point inaccuracy that <a href="https://en.wikipedia.org/wiki/C_mathematical_functions" class="reference-source" target="_blank" rel="noopener noreferrer"><code>pow</code></a> would introduce.
+</p>
+
+<h3>Programming Techniques</h3>
+
+<h4>Band-boundary arithmetic instead of string materialisation</h4>
+
+<p>
+The central technique is recognising the hierarchical structure of the sequence and navigating it arithmetically rather than building it. Each band is fully described by two numbers - its start position and its length - both derivable from a formula. This is the general pattern for positional lookup in a structured sequence: when a sequence is a concatenation of groups whose sizes follow a known formula, find the n-th element in <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(depth)</a> time using <a href="https://en.wikipedia.org/wiki/Prefix_sum" class="reference-source" target="_blank" rel="noopener noreferrer">prefix-sum</a> comparisons and integer division. Reach for this whenever a problem asks for the n-th element of an enumerated or concatenated sequence that would be wasteful to build in full.
+</p>
+
+<h4>Index decomposition with floor division and modulo</h4>
+
+<p>
+Inside the correct band I use the classic decomposition: <a href="https://en.wikipedia.org/wiki/Division_(mathematics)#Of_integers" class="reference-source" target="_blank" rel="noopener noreferrer">floor division</a> (<code>offset // width</code>) yields the item index and <a href="https://en.wikipedia.org/wiki/Modulo" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a> (<code>offset % width</code>) yields the position within the item. This is precisely the arithmetic that converts a flat array index into row and column coordinates of a 2-D grid. I apply the <code>-1</code> conversion from 1-based to 0-based indexing once, at the single point where I compute the offset - keeping this conversion explicit and localised is the simplest defence against off-by-one errors.
+</p>
+
+<h4>functools.reduce for product accumulation (Python)</h4>
+
+<p>
+The Python solution folds a product over a generator using <a href="https://docs.python.org/3/library/functools.html#functools.reduce" class="reference-source" target="_blank" rel="noopener noreferrer"><code>functools.reduce</code></a> with a lambda and an explicit initial value of 1. This declarative style removes the need for a mutable accumulator and states the intent plainly - collapse a sequence with an associative binary operation. The explicit initial value also makes the fold well-defined for an empty sequence. Reach for <code>reduce</code> whenever you need products, GCDs, or other folds that the standard library does not provide a dedicated function for.
+</p>
+
+<h4>snprintf for digit extraction (C)</h4>
+
+<p>
+In C the safest way to extract the k-th decimal digit of a large integer is to format it into a stack buffer with <a href="https://en.cppreference.com/w/c/io/fprintf" class="reference-source" target="_blank" rel="noopener noreferrer"><code>snprintf</code></a> and index the character directly. The alternative - peeling digits with repeated division and modulo - requires reversing the order and tracking lengths, which is more error-prone. Because the function runs only a few times, the formatting cost is irrelevant and clarity wins. I sized the buffer at 32 bytes, comfortably above the roughly 20 characters a 64-bit integer can require.
+</p>
+
+<h4>Integer power by short multiplication loop (C)</h4>
+
+<p>
+Rather than calling <a href="https://en.wikipedia.org/wiki/C_mathematical_functions" class="reference-source" target="_blank" rel="noopener noreferrer"><code>pow</code></a> from <code>math.h</code> - which operates in <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating point</a> and can return values like 999.9999 that truncate incorrectly - the C code computes 10^(num_digits-1) and the band length with small explicit multiplication loops over <code>long long</code>. This guarantees exact integer arithmetic. Whenever you need an integer power for indexing or sizing, prefer exact integer multiplication over a floating-point power function.
+</p>
+
+<h4>Harness separated from algorithm (C)</h4>
+
+<p>
+The C <code>solve</code> entry point receives a clean <code>argc</code>/<code>argv</code> pair from the runner, which strips framework flags before calling it. This keeps the algorithmic core readable in isolation and lets the Python and C solutions share an identical command-line interface, which simplifies automated testing.
+</p>
+
+<h3>Key Takeaways</h3>
+
+<p>
+The unlocking insight is that an infinite, irregular-looking string is actually a stack of regular bands whose lengths follow a closed-form formula. Recognising that structure turns a hopeless string search into a few integer operations per query, giving an <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(log n)</a> lookup with a tiny constant. Both solutions are correct across all test cases, including i = 11, where one queried digit is 0 and the product collapses to 0 - a satisfying edge case the arithmetic handles without any special treatment.
+</p>
+
+<p>
+On the benchmark both implementations report 0.0000 s for every input, which is expected: the total work is at most a few dozen integer operations regardless of the query size. With the timings indistinguishable, the choice between them is one of context rather than speed - the Python version is the more concise and expressive thanks to <a href="https://docs.python.org/3/library/functools.html#functools.reduce" class="reference-source" target="_blank" rel="noopener noreferrer"><code>functools.reduce</code></a> and big-integer literals, while the C version demonstrates the explicit integer-arithmetic discipline needed to avoid floating-point pitfalls in a lower-level language.
+</p>
+
+<ul>
+  <li>When a sequence is a concatenation of groups with a predictable size formula, locate any position with prefix-sum comparisons and integer division instead of building the sequence.</li>
+  <li>The pair <code>offset // width</code> (item index) and <code>offset % width</code> (position within item) recurs everywhere you flatten a structured sequence into a linear index - internalise it.</li>
+  <li>Convert between 1-based and 0-based indexing at a single, clearly named point to stop off-by-one errors from spreading.</li>
+  <li>Prefer <code>functools.reduce</code> with an explicit initial value over a mutable accumulator when folding a sequence to one value.</li>
+  <li>In C, compute integer powers with explicit multiplication rather than the floating-point <code>pow</code> to keep results exact for indexing and sizing.</li>
+  <li>Formatting a number into a stack buffer and indexing it is often cleaner than manual digit peeling, especially for code called infrequently.</li>
+  <li>Separating the benchmarking and argument harness from the algorithmic core keeps both easier to read, test, and port across languages.</li>
+</ul>
+
+</article>
