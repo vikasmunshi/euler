@@ -1,0 +1,44 @@
+/* ── Dark theme for the terminal page ──
+   Only colour variables live here; solver.css holds the layout and reads these,
+   and solver.js reads the --term-* / --ansi-* values to build the xterm theme.
+   Switch themes by repointing the solver-theme.css symlink at this or the light
+   variant. These values reproduce xterm.js's built-in dark palette so the dark
+   look is unchanged from when the colours were hard-coded. */
+
+:root {
+    /* Page chrome (background, scrollbar, status indicator). */
+    --page-bg: #282c34;
+    --scrollbar-thumb: #4b5263;
+    --status-color: #888;
+    --status-bg: rgba(40, 44, 52, 0.8);
+    --status-error: #e06c75;
+    --status-open: #98c379;
+
+    /* xterm core colours. A slate grey (One Dark) rather than near-black, so the
+       ANSI palette stands out against it. */
+    --term-bg: #282c34;
+    --term-fg: #ffffff;
+    --term-cursor: #ffffff;
+    --term-cursor-accent: #000000;
+    --term-selection: rgba(255, 255, 255, 0.3);
+
+    /* xterm 16-colour ANSI palette — a vibrant One Dark set that pops against the
+       slate-grey background. --ansi-black is lifted well off --term-bg so it stays
+       visible, and the bright variants are a clear notch lighter than the normals. */
+    --ansi-black: #3f4451;
+    --ansi-red: #e06c75;
+    --ansi-green: #98c379;
+    --ansi-yellow: #e5c07b;
+    --ansi-blue: #61afef;
+    --ansi-magenta: #c678dd;
+    --ansi-cyan: #56b6c2;
+    --ansi-white: #abb2bf;
+    --ansi-bright-black: #5c6370;
+    --ansi-bright-red: #ff7b86;
+    --ansi-bright-green: #b5e890;
+    --ansi-bright-yellow: #ffd596;
+    --ansi-bright-blue: #7cc4ff;
+    --ansi-bright-magenta: #d99aed;
+    --ansi-bright-cyan: #6fd7e3;
+    --ansi-bright-white: #ffffff;
+}

@@ -1,0 +1,115 @@
+/* ── Code editor: a CodeJar editing surface for .py / .c / .json files.
+   Shares the look & feel of the problem & summary pages (problem.css / summary.css):
+   the #f4f6fb page, the rounded gradient header card, and white rounded card
+   surfaces. The editor differs only in filling the viewport height so its surface
+   scrolls internally rather than the page. ── */
+
+/* Reset, typography, colours, and the 860px content width live in common.css;
+   here the page is a full-height column whose editor surface scrolls internally. */
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    padding: 24px 24px;            /* 24px top: shared breathing room above the header */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;              /* the editor scrolls, not the page */
+}
+
+/* Shared monospace stack for code-bearing surfaces. (The header's filename is
+   styled in header.css.) */
+#editor,
+#gutter,
+#save-output {
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+}
+
+/* Header card: its look AND position come from header.css; here it only needs to
+   be a non-shrinking flex item in the column layout (the editor below it takes the
+   remaining height). */
+#page-header {
+    flex: 0 0 auto;
+}
+
+/* ── Command output card (save result / eval results / diagnostics). A white
+   card with a left accent stripe — success / error tint the stripe. ── */
+#save-output {
+    flex: 0 0 auto;
+    max-height: 30vh;
+    overflow: auto;
+    margin: 0 0 16px;              /* gap to the editor below (matches the header's gap) */
+    padding: 12px 16px;
+    background: #ffffff;
+    color: #3a4060;
+    border: 1px solid #dde1ed;
+    border-left: 4px solid #c4ccdc;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30, 32, 48, 0.08);
+    white-space: pre;              /* preserve table alignment; scroll instead of wrap */
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+#save-output.output-ok {
+    border-left-color: #3faa72;
+}
+
+#save-output.output-error {
+    border-left-color: #d98a80;
+}
+
+/* ── Editor surface: a white card filling the remaining height; CodeJar scrolls
+   inside it. ── */
+#code-view {
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #dde1ed;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30, 32, 48, 0.08);
+}
+
+/* CodeJar editing surface — minimal default styling; CodeJar edits a real
+   contenteditable element, so selection / delete / replace are native.
+   The left padding leaves room for the #gutter overlaid on the same card. */
+#editor {
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+    margin: 0;
+    padding: 14px 16px 14px calc(3.5em + 12px);
+    white-space: pre;            /* long lines scroll, never wrap */
+    tab-size: 4;
+    -moz-tab-size: 4;
+    outline: none;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+/* Line-number gutter: a non-editable overlay pinned to the card's left edge.
+   Its scroll is driven from the editor (code.js) so the numbers track the
+   text; metrics (font, size, line-height, top padding) must match #editor so
+   each number lines up with its row. */
+#gutter {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1;
+    width: 3.5em;
+    margin: 0;
+    padding: 14px 8px 14px 0;
+    overflow: hidden;            /* scrolled programmatically, in sync with #editor */
+    text-align: right;
+    white-space: pre;
+    color: #b8c0d4;
+    background: #fafbfe;
+    border-right: 1px solid #eef0f6;
+    font-size: 13px;
+    line-height: 1.55;
+    user-select: none;
+    pointer-events: none;        /* clicks fall through to the editor */
+}

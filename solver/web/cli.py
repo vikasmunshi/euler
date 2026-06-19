@@ -3,8 +3,13 @@
 """`solver-web`: lifecycle for the PTY-backed SolverShell web front end.
 
 The server runs as a detached child process so it keeps serving after the shell
-that launched it exits; a PID file is the cross-process source of truth, so any
-later shell (or a plain `solver-web stop`) can query or stop it.
+that launched it exits. The detached child holds an exclusive `fcntl.flock` on a
+dedicated lock file for its whole lifetime (see :func:`hold_instance_lock`); that
+flock is the cross-process source of truth for "is a server running", so any later
+shell (or a plain `solver-web stop`) can probe or stop it. Because the OS drops
+the lock when the process exits or crashes, there is never stale state to clean up
+and a recycled PID can never produce a false positive. The PID is recorded as the
+lock file's content purely so `stop`/`status` can report and signal it.
 
 The detached child wraps its entire runtime in a single `acquire_workspace_lock()`
 context (see :mod:`solver.core.lock`). That covers every launch case with the
@@ -19,7 +24,6 @@ from __future__ import annotations
 __all__ = ['main', 'running_pid', 'ensure_running']
 
 import argparse
-import atexit
 import os
 import signal
 import sys
@@ -30,40 +34,34 @@ from typing import Literal
 from aiohttp import web
 
 from solver.config import ExitCodes, config
-from solver.core.lock import acquire_workspace_lock
+from solver.core.lock import acquire_workspace_lock, hold_instance_lock, probe_instance_lock
 from solver.shell import console
 from solver.web.app import build_app
 
 
-def running_pid(pid: int | None = None) -> int | None:
+def running_pid() -> int | None:
     """Return the PID of the running web server, or None if it is not running.
 
-    The PID file survives shell exit, so any shell can query or stop a server
-    started by another. A stale file (PID no longer alive) is treated
-    as "not running".
+    Probes the server's instance flock (held by the detached child for its whole
+    lifetime), so any shell can query or stop a server started by another. The OS
+    releases the flock on exit or crash, so a stale lock file is never mistaken
+    for a live server.
     """
-    try:
-        pid = pid or int(config.server_pid_file.read_text().strip())
-    except (FileNotFoundError, ValueError):
-        return None
-    try:
-        os.kill(pid, 0)  # signal 0: liveness probe, does not actually signal
-    except OSError:
-        return None
-    return pid
+    return probe_instance_lock(config.server_lock_file)
 
 
 def _serve_forever(save: bool) -> None:  # pragma: no cover — runs in the detached child process
     """Hold the workspace lock and serve until terminated; the detached child entry point.
 
-    The PID file is written only after the lock context is entered (so the env var
-    is set for PTY children) and removed on exit. `web.run_app` installs its own
-    SIGTERM/SIGINT handling and returns on signal, unwinding the lock cleanly.
+    The instance flock is taken only after the workspace lock context is entered (so the env var
+    is set for PTY children); if it cannot be taken another server already owns it and we bail.
+    `web.run_app` installs its own SIGTERM/SIGINT handling and returns on signal, unwinding the
+    lock cleanly; the OS drops the instance flock as the process exits.
     """
     console.width = config.screen_width  # stable width for captured command output (no tty here)
     with acquire_workspace_lock():
-        config.server_pid_file.write_text(str(os.getpid()))
-        atexit.register(config.server_pid_file.unlink, missing_ok=True)
+        if not hold_instance_lock(config.server_lock_file):
+            return  # lost the race: another server is already running
         web.run_app(build_app(save=save), host='127.0.0.1', port=config.server_port, print=None)
 
 
@@ -101,7 +99,7 @@ def _stop() -> int:
     except OSError as exc:
         console.print(f'[error]error:[/error] [muted]cannot stop web server: {exc}[/muted]')
         return ExitCodes.EXIT_ERROR
-    while running_pid(pid=pid) is not None:
+    while running_pid() is not None:
         time.sleep(0.1)
     console.print(f'[muted]web server stopped (pid {pid})[/muted]')
     return ExitCodes.EXIT_OK

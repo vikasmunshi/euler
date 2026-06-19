@@ -188,73 +188,73 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 <summary>architecture &amp; package layout</summary>
 
 <!-- GEN:package-layout -->
-
 ```
 solver/
-  __main__.py         - Module entry point.
-  config.py           - Singleton Config: all paths, constants, command modules, and managed settings.
-  main.py             - Entry point for the "solver shell" CLI.
+  __main__.py         — Module entry point.
+  config.py           — Singleton Config: all paths, constants, command modules, and managed settings.
+  main.py             — Entry point for the "solver shell" CLI.
   ai/
-    api.py            - The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
-    code.py           - Generate and re-document Project Euler solutions (Python and C) via the Claude API.
-    docs.py           - Module to generate notes for solver solutions, leveraging AI.
-    facts.py          - Utility function for gathering problem inputs for AI
-    models.py         - Available models and their pricing, plus a utility function to calculate costs.
-    skill.py          - The `claude-skill` command: run Claude Code in-shell against the locked workspace.
+    api.py            — The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
+    code.py           — Generate and re-document Project Euler solutions (Python and C) via the Claude API.
+    docs.py           — Module to generate notes for solver solutions, leveraging AI.
+    facts.py          — Utility function for gathering problem inputs for AI
+    models.py         — Available models and their pricing, plus a utility function to calculate costs.
+    skill.py          — The `claude-skill` command: run Claude Code in-shell against the locked workspace.
+    update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   core/
-    evaluate.py       - Solution evaluation: runs standalone scripts against test cases and reports results.
-    lock.py           - Utilities for workspace locking using file-based locks.
-    parser.py         - HTML problem-statement parser: assemble a standalone statement page from a scraped Project Euler page.
-    problems.py       - The Problem model plus the projecteuler.net problem scraper and on-disk cache.
-    results.py        - Results: save and retrieve problem results.
-    stack.py          - Stack directory management: file read/write, transparent encryption, and path resolution.
-    test_cases.py     - Load test cases for evaluation
-    workspace.py      - Workspace management: initialise, stack, list, and clear problem workspaces.
+    checkout.py       — Workspace checkout marker: a presence-based guard that blocks `reset`.
+    evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
+    lock.py           — Utilities for workspace locking using file-based locks.
+    parser.py         — HTML problem-statement parser: assemble a standalone statement page from a scraped Project Euler page.
+    problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
+    results.py        — Results: save and retrieve problem results.
+    stack.py          — Stack directory management: file read/write, transparent encryption, and path resolution.
+    test_cases.py     — Load test cases for evaluation
+    workspace.py      — Workspace management: initialise, stack, list, and clear problem workspaces.
   crypto/
-    asymmetrical.py   - X25519 ECDH key pair generation, master key wrapping, and user identity management.
-    keys.py           - Encrypted key file read/write and per-user key retrieval.
-    share.py          - n of m secret sharing for fixed-size AES-256 keys.
-    symmetrical.py    - AES-based symmetric encryption and decryption with key derivation.
+    asymmetrical.py   — X25519 ECDH key pair generation, master key wrapping, and user identity management.
+    keys.py           — Encrypted key file read/write and per-user key retrieval.
+    share.py          — n of m secret sharing for fixed-size AES-256 keys.
+    symmetrical.py    — AES-based symmetric encryption and decryption with key derivation.
   runners/
-    migrate.py        - Migrate legacy solutions to the new runner framework.
-    runner.h          - Runner framework for Project Euler solutions with benchmarking and validation.
-    runner.py         - Runner framework for Project Euler solutions with benchmarking and validation.
-  shell/              - Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
-    bash.py           - The `!` (`sh` / `bash`) built-in command: run a bash command in the workspace.
-    builtins.py       - Built-in framework commands for shell v2: echo, clear, help.
-    command.py        - Command framework for shell v2: Context, Command, registry, and decorator.
-    interpreter.py    - Interpreter for shell v2: execute the parser's statements.
-    lexer.py          - Lexer for shell v2: syntax-check a command block and normalise it.
-    parser.py         - Parser for shell v2: canonical form (the lexer's output) → typed statements.
-    register.py       - The `@register` decorator: register a function as a shell command with type-safe coercion and completion.
-    session.py        - Session capture: tee shell output and typed input to a plain-text log file.
-    shell.py          - Interactive shell for v2: readline → lexer → parser → interpreter.
-    tty.py            - Terminal I/O: the shared rich console, the prompt-toolkit session, and the command-block reader.
-    variables.py      - Variable store for shell v2.
+    migrate.py        — Migrate legacy solutions to the new runner framework.
+    runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
+    runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
+  shell/              — Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
+    bash.py           — The `!` (`sh` / `bash`) built-in command: run a bash command in the workspace.
+    builtins.py       — Built-in framework commands for shell v2: echo, clear, help.
+    command.py        — Command framework for shell v2: Context, Command, registry, and decorator.
+    interpreter.py    — Interpreter for shell v2: execute the parser's statements.
+    lexer.py          — Lexer for shell v2: syntax-check a command block and normalise it.
+    parser.py         — Parser for shell v2: canonical form (the lexer's output) → typed statements.
+    register.py       — The `@register` decorator: register a function as a shell command with type-safe coercion and completion.
+    session.py        — Session capture: tee shell output and typed input to a plain-text log file.
+    shell.py          — Interactive shell for v2: readline → lexer → parser → interpreter.
+    tty.py            — Terminal I/O: the shared rich console, the prompt-toolkit session, and the command-block reader.
+    variables.py      — Variable store for shell v2.
   templates/
-    engine.py         - Template rendering: the Templates enum and string.Template engine with shared prompt/solution vars.
-    new.c             - Solution to Euler $problem.
-    new.py            - Solution to Euler $problem.
+    engine.py         — Template rendering: the Templates enum and string.Template engine with shared prompt/solution vars.
+    new.c             — Solution to Euler $problem.
+    new.py            — Solution to Euler $problem.
   utils/
-    download.py       - Utility for downloading and caching files via HTTP.
-    gh.py             - Utility to retrieve authenticated GitHub user's email and repository owner's email.
-    linter.py         - Utilities for linting code.
-    loader.py         - Utility for loading modules.
-    misc.py           - The `problems`, `manage-config`, and `lock-status` commands.
-    path_utils.py     - Utility functions for file and directory operations.
-    scripts.py        - A set of utilities to manage Git repository workflows.
-    search.py         - 'find' command: grep the solution stack for a regular expression.
-    shell_utils.py    - Utility for running shell commands and capturing their output.
-    show.py           - Browser utilities for visualizing solutions.
-    solution_files.py - The `new` command and solution-file formatting (black / isort / autoflake).
-    summary.py        - Progress: parse .progress.html into problems.json and refresh in-memory state.
-    update_doc.py     - Regenerate the machine-maintained sections of the guides under `docs/`.
+    download.py       — Utility for downloading and caching files via HTTP.
+    gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
+    linter.py         — Utilities for linting code.
+    loader.py         — Utility for loading modules.
+    misc.py           — The `problems`, `manage-config`, and `lock-status` commands.
+    path_utils.py     — Utility functions for file and directory operations.
+    scripts.py        — A set of utilities to manage Git repository workflows.
+    search.py         — 'find' command: grep the solution stack for a regular expression.
+    shell_utils.py    — Utility for running shell commands and capturing their output.
+    show.py           — Browser utilities for visualizing solutions.
+    solution_files.py — The `new` command and solution-file formatting (black / isort / autoflake).
+    summary.py        — Progress: parse .progress.html into problems.json and refresh in-memory state.
+    update_doc.py     — Regenerate the machine-maintained sections of the guides under `docs/`.
   web/
-    app.py            - aiohttp application: the SolverShell terminal, its PTY WebSocket, and the viewer.
-    cli.py            - `solver-web`: lifecycle for the PTY-backed SolverShell web front end.
-    pty_bridge.py     - PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
+    app.py            — aiohttp application: the SolverShell terminal, its PTY WebSocket, and the viewer.
+    cli.py            — `solver-web`: lifecycle for the PTY-backed SolverShell web front end.
+    pty_bridge.py     — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
 ```
-
 <!-- /GEN:package-layout -->
 
 Every shell command is a plain Python function decorated with `@register(...)`

@@ -90,8 +90,8 @@ solver-web start --save # also tee the shell's console output to the session log
 ```
 
 The server runs **detached**, so it keeps serving after the shell that launched
-it exits; a PID file makes any later `solver-web` invocation able to query or
-stop it. Browsing to `/` gives an `xterm.js` terminal running one interactive
+it exits; an `flock` it holds for its lifetime makes any later `solver-web`
+invocation able to query or stop it (and is released automatically if it crashes). Browsing to `/` gives an `xterm.js` terminal running one interactive
 `solver` shell — only one terminal session is allowed at a time, because every
 session drives the same shared `workspace/`. `/summary` and `/<n>/` are the
 read-only viewer pages; `show N` (below) auto-starts this server.
@@ -205,14 +205,16 @@ command name below links to its full entry — usage and description — in the
 <!-- GEN:command-table -->
 | Command | Aliases | Description |
 |---------|---------|-------------|
-| [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | Run a bash command in the workspace. ↻ |
+| [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | Run a bash command in the workspace. ↻ ⚑ |
 | [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
 | [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark the problem currently in the workspace. § » |
-| [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. § |
-| [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. § ↻ |
+| [`checkin`](commands-index.md#command-checkin) | — | Check in the workspace, re-allowing `init` and `reset`. § » |
+| [`checkout`](commands-index.md#command-checkout) | — | Check out the workspace, blocking `init` and `reset` until checkin. § » |
+| [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. § ⚑ |
+| [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. § ⚑ |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](commands-index.md#command-compile-c) | — | Build all C source files in the workspace directory. § » |
-| [`costs`](commands-index.md#command-costs) | — | Display total cost of AI tokens consumed in session. |
+| [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. § » |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
@@ -220,9 +222,9 @@ command name below links to its full entry — usage and description — in the
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`init`](commands-index.md#command-init) | — | Initialize the workspace for the given problem number. § ↻ » |
+| [`init`](commands-index.md#command-init) | — | Initialize the workspace for the given problem number. § ↻ ⊘ » |
 | [`lint`](commands-index.md#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. § » |
-| [`lock-status`](commands-index.md#command-lock-status) | — | Check and report the workspace lock status. |
+| [`lock-status`](commands-index.md#command-lock-status) | — | Check and report the workspace checkout and lock status. |
 | [`ls`](commands-index.md#command-ls-list) | `list` | List current workspace, indicating changes against stack. |
 | [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. § » |
@@ -231,16 +233,17 @@ command name below links to its full entry — usage and description — in the
 | [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
 | [`rekey`](commands-index.md#command-rekey) | — | Reinitialize keys.json with additional new encryption keys. |
-| [`reset`](commands-index.md#command-reset) | — | Clear the workspace, and, if required, stack first. § ↻ » |
+| [`reset`](commands-index.md#command-reset) | — | Clear the workspace, and, if required, stack first. § ↻ ⊘ » |
 | [`search`](commands-index.md#command-search-find) | `find` | Find content in the stack. |
 | [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
 | [`stack`](commands-index.md#command-stack-save) | `save` | Propagate stackable workspace changes to the stack. § » |
 | [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. § » |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
+| [`update-models`](commands-index.md#command-update-models) | — | Refresh Model enum, pricing, and USD→EUR rate from live API and docs. » |
 | [`user`](commands-index.md#command-user) | — | Show the current user's identity and master key access. |
 
-*Legend: § requires the workspace lock · ↻ may refresh workspace state · » supports `--silent`.*
+*Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*
 <!-- /GEN:command-table -->
 
 > The table above is generated from the live command registry by the
@@ -254,46 +257,53 @@ command name below links to its full entry — usage and description — in the
 **Solve a problem** (see the [Solver Guide](solver-guide.md) for the full loop):
 
 ```bash
-init 42 && new && show          # set up, scaffold, read the statement
-# implement solve() ...
-eval && benchmark && mark       # check, time, mark solved
-stack && reset                  # save and clear
-```
-
-**Browse without decrypting to disk** — `show N` opens any problem's statement,
-notes, and results in Chrome, decrypting in memory. It auto-starts the
-`solver-web` server if it is not already running:
-
-```bash
-show 503                 # auto-starts the web server, opens problem 503
-solver-web status        # check / manage the server from a normal shell
+init 42     # initialize the workspace for problem 42
+checkout    # optionally, check out the workspace to prevent accidental reset
+show        # open the problem page in a browser to read and understand the problem
+            # create scripts (non-executable files) in the workspace directory to derive/confirm mathematical insights
+new --tc    # create an empty test-case file in the workspace directory
+new --py    # create a template Python solution file in the workspace directory (p0042_s0.py)
+            # implement solve() in the solution template
+evaluate    # evaluate the solution against the test cases
+            # record the answers in the test-case file
+benchmark   # time the solution, the first time it is run 1 time
+mark        # mark the problem as solved
+new --c     # create a template C solution file in the workspace directory (p0042_s0.c)
+            # translate the solution to C,
+benchmark   # time the solution, (it is run between 1 to 21 times based on earlier times)
+            # document your learnings in notes.html
+stack       # save the workspace to the stack
+checkin     # check in the workspace,
+reset       # clear the workspace (reset before checkin is blocked by checkout)
 ```
 
 **Sweep a range of unsolved problems:**
 
 ```bash
-loop {unsolved}[0:5]: { init {loop.number} && claude-skill solve && stack && reset }
+loop {unsolved}[0:5]: { init {loop.number} && checkout && claude-skill solve && stack && checkin && reset }
 ```
 
 ---
 
 ## 5. AI assistance
 
-Two complementary AI paths are wired into the shell (both need the `ai`
-dependency group and an `ANTHROPIC_API_KEY`):
+Two complementary AI paths are wired into the shell (both require the `ai`
+dependency group;
+API requires `ANTHROPIC_API_KEY` in `.env`;
+Claude Code requires authentication in the CLI `claude /login`):
 
-- **`claude-api <target>`** — a single, templated Claude API call that writes one
+- **`claude-api <target>`** — a single templated Claude API call that writes one
   artifact: `py` / `c` (a solution), `notes` (the write-up), or `test-cases`. It
-  is fast and cheap, with token cost tracked by `costs`, but it does not run or
-  verify its output — checking it is on you.
-- **`claude-skill <action>`** — full Claude Code working the *locked* workspace:
-  it runs `solver` commands, edits files, evaluates, benchmarks, and iterates.
-  Actions are `review`, `solve`, `translate`, `document`, `summarise`. Heavier
-  and slower, for the harder job. `! claude <prompt>` drops into an interactive
-  Claude Code session against the same workspace.
+  is fast and cheap, and `costs` tracks its token spend, but the AI neither runs
+  nor verifies its output — that happens afterwards in the script.
+- **`claude-skill <action>`** — full Claude Code working against the *locked*
+  workspace: it runs `solver` commands, edits files, evaluates, benchmarks, and
+  iterates. The actions are `review` and `solve`. Heavier and slower, it is meant
+  for the harder job. `! claude <prompt>` drops into an interactive Claude Code
+  session against the same workspace.
 
-The goal is to deepen understanding, not skip it — generate alternatives *after*
-you have solved a problem, or translate your Python to C for a comparison.
+The goal is to deepen understanding, not skip it: generate alternatives *after*
+you have solved a problem, or translate your Python into C for comparison.
 
 ---
 

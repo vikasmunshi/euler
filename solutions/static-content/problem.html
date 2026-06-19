@@ -4,15 +4,21 @@
     <meta charset="UTF-8">
     <title></title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/common.css">
+    <link rel="stylesheet" href="/header.css">
     <link rel="stylesheet" href="/problem.css">
-    <!-- problem.js sets window.MathJax before the deferred MathJax loader runs; both are
-         deferred so they execute in document order (problem.js first, then MathJax). -->
+    <!-- header.js draws the shared nav bar into #page-header. problem.js sets window.MathJax
+         before the deferred MathJax loader runs; all are deferred so they execute in document
+         order (header.js, problem.js, then MathJax). -->
+    <script defer src="/header.js"></script>
     <script defer src="/problem.js"></script>
     <script id="MathJax-script" defer src="/vendor/mathjax/tex-mml-chtml.js"></script>
 </head>
 <body>
 <div id="page">
     <div id="page-header"></div>
+    <!-- Output of the header's init / reset / eval buttons (problem.js); hidden until used. -->
+    <pre id="cmd-output" hidden></pre>
     <section id="problem-statement">
         <div id="problem-statement-content"></div>
     </section>

@@ -5,7 +5,9 @@ solver.ai.docs,,
 solver.ai.facts,,
 solver.ai.models,True,True
 solver.ai.skill,True,True
+solver.ai.update_models,True,True
 solver.config,,
+solver.core.checkout,True,True
 solver.core.evaluate,True,True
 solver.core.lock,,
 solver.core.parser,,

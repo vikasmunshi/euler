@@ -69,7 +69,8 @@ def _help(ctx: Context, *args: str) -> int:
 
     With no argument, prints a table of all registered commands with their
     aliases and one-line descriptions, plus the legend (§ requires the workspace
-    lock, ↻ may refresh workspace state, » supports --silent).
+    lock, ↻ may refresh workspace state, ⊘ refuses while checked out, ⚑ checks
+    out while it runs, » supports --silent).
 
     With a command name or alias, prints a panel for just that command: its
     description (with the legend glyphs expanded to full sentences), its aliases,
@@ -89,6 +90,10 @@ def _help(ctx: Context, *args: str) -> int:
             ' [warning]§[/warning]', '\n[warning]§[/warning] requires workspace to be locked.')
         help_text = help_text.replace(
             ' [warning]↻[/warning]', '\n[warning]↻[/warning] (may) refresh the workspace.')
+        help_text = help_text.replace(
+            ' [warning]⊘[/warning]', '\n[warning]⊘[/warning] refuses while the workspace is checked out.')
+        help_text = help_text.replace(
+            ' [warning]⚑[/warning]', '\n[warning]⚑[/warning] checks the workspace out while it runs.')
         help_text = help_text.replace(
             ' [warning]»[/warning]', '\n[warning]»[/warning] supports --silent to suppress output.')
         body.append_text(Text.from_markup(help_text, style='accent.dim'))
@@ -112,8 +117,9 @@ def _help(ctx: Context, *args: str) -> int:
         table.add_row(names, cmd.help or '')
     ctx.console.print(Panel(table, border_style='panel.border',
                             title='[accent]▎[/accent] [primary]commands[/primary]',
-                            subtitle='[warning]§ requires workspace lock.   '
-                                     '↻ refreshes workspace.   » supports --silent.[/warning]',
+                            subtitle='[warning]§ requires lock.  ↻ refreshes vars.  '
+                                     '⊘ blocked by checkout.  ⚑ auto-checkout.  '
+                                     '» supports --silent.[/warning]',
                             subtitle_align='right',
                             title_align='left', padding=(1, 2)))
     return ExitCodes.EXIT_OK

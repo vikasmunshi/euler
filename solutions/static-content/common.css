@@ -1,0 +1,21 @@
+/* ── Common base shared by every content page (problem, summary, code, progress) ──
+   The box-sizing reset and the page's typography, colours, and content width all
+   live here so the pages agree on a single column width (problem.css's 860px) and
+   look. Each page's own stylesheet keeps only its layout specifics (padding,
+   full-height flex for the editors, sticky header positioning, …). Linked before
+   the per-page stylesheet so those specifics layer on top. The terminal page
+   (solver.html) is full-screen and does not use this. */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    color: #1e2030;
+    background: #f4f6fb;
+    max-width: 980px;
+    margin: 0 auto;
+}

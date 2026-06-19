@@ -16,19 +16,19 @@ from rich.panel import Panel
 from rich.text import Text
 
 from solver.config import ExitCodes, config
+from solver.core.checkout import auto_checkout
 from solver.core.lock import check_workspace_lock_command
 from solver.shell import console, register
 from solver.shell.command import Context
-from solver.shell.variables import refresh_workspace_vars, variables
+from solver.shell.variables import variables
 
 
 @register(help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
-@refresh_workspace_vars
 @check_workspace_lock_command
+@auto_checkout
 def claude_skill(
         ctx: Context,
         action: Literal['solve', 'review'],
-        problem_number: int | None = None,
         additional_prompt: str = '',
 ) -> int:
     """Run Claude Code over the locked workspace via the claude-euler-solver skill.
@@ -45,17 +45,13 @@ def claude_skill(
                             solution, translate it to C, then document and
                             summarise), or 'review' (audit an existing solution
                             for C↔Python parity, in-source docs, and notes.html).
-        problem_number:     Problem to act on; defaults to the one currently in
-                            the workspace (fails if none and none given).
         additional_prompt:  Extra free-text instructions appended to the skill
                             invocation. Defaults to empty.
     """
-    if problem_number is None:
-        if (problem := variables.problem) is None:
-            console.print('[error]No problem in the workspace[/error] — pass a [accent]problem_number[/accent] '
-                          'or run [accent]init <n>[/accent] first.')
-            return ExitCodes.EXIT_ERROR
-        problem_number = problem.number
+    if (problem := variables.problem) is None:
+        console.print('[error]No problem in the workspace[/error] — run [accent]init <n>[/accent] first.')
+        return ExitCodes.EXIT_ERROR
+    problem_number = problem.number
     cmdline = ('claude -p --output-format stream-json --verbose '
                '--include-partial-messages '
                f'{shlex.quote(f'/claude-euler-solver {problem_number} {action} {additional_prompt}')}'.strip())

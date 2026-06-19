@@ -83,7 +83,9 @@ solver/
     facts.py          — Utility function for gathering problem inputs for AI
     models.py         — Available models and their pricing, plus a utility function to calculate costs.
     skill.py          — The `claude-skill` command: run Claude Code in-shell against the locked workspace.
+    update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   core/
+    checkout.py       — Workspace checkout marker: a presence-based guard that blocks `reset`.
     evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
     lock.py           — Utilities for workspace locking using file-based locks.
     parser.py         — HTML problem-statement parser: assemble a standalone statement page from a scraped Project Euler page.
@@ -201,7 +203,7 @@ Two AI entry points, both calling the Claude API. Install the optional deps with
 
 ### Web front end (`solver-web`)
 
-`solver-web` (`solver/web/cli.py`, console script + `python -m solver.web.cli`) runs a single localhost aiohttp server (default port `config.server_port` = 8080) as a **detached** child process, so it keeps serving after the launching shell exits. A PID file (`.server.pid`) is the cross-process source of truth — any later `solver-web {status,stop,restart}` queries or stops it. Actions: `start`, `stop`, `status` (default), `restart`; `--save` tees the shell's console output to the session log.
+`solver-web` (`solver/web/cli.py`, console script + `python -m solver.web.cli`) runs a single localhost aiohttp server (default port `config.server_port` = 8080) as a **detached** child process, so it keeps serving after the launching shell exits. The detached child holds an exclusive `fcntl.flock` on a lock file (`.server.lock`) for its whole lifetime; that flock is the cross-process source of truth — any later `solver-web {status,stop,restart}` probes it (and reads the PID recorded in the file to signal it). The OS drops the lock on exit or crash, so there is no stale state and a recycled PID can never look "running". Actions: `start`, `stop`, `status` (default), `restart`; `--save` tees the shell's console output to the session log.
 
 `build_app` (`solver/web/app.py`) wires three concerns into one server:
 - **Terminal** — `GET /` serves an xterm.js page and `GET /ws` streams one interactive `solver` shell over a PTY (`solver/web/pty_bridge.py`). Only one PTY session is allowed at a time, since every session drives the shared `workspace/`.

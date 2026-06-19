@@ -9,7 +9,8 @@ from functools import lru_cache
 from typing import Literal, Protocol
 
 from solver.ai.models import Model, get_accumulated_charges
-from solver.config import config, ExitCodes
+from solver.config import ExitCodes, config
+from solver.core.checkout import auto_checkout
 from solver.core.lock import check_workspace_lock_command
 from solver.core.problems import Problem
 from solver.shell import console, register
@@ -45,6 +46,7 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
 
 @register(help_text='Generate specified target using Claude API.')
 @check_workspace_lock_command
+@auto_checkout
 def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
                force: bool = False,
                major: bool = False,
@@ -79,5 +81,5 @@ def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
     result = generators[target](model=model or default_models[target], problem=problem, force=force, major=major)
     charges_post: float = get_accumulated_charges()
     charges_usd: float = charges_post - charges_pre
-    console.print(f'${charges_usd:.4f} (€{charges_usd * config.usd_to_eur:.4f} at {config.usd_to_eur:.2f} $/€)')
+    console.print(f'${charges_usd:.4f} (€{charges_usd / config.ecb_usd_rate:.4f} at {config.ecb_usd_rate:.2f} €/$)')
     return ExitCodes.EXIT_ERROR if result is False else ExitCodes.EXIT_OK

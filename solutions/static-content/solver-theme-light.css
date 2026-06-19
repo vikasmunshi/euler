@@ -1,0 +1,40 @@
+/* ── Light theme for the terminal page ──
+   Companion to solver-theme-dark.css: same variable contract, light values.
+   The ANSI palette is darkened/desaturated so coloured shell output stays legible
+   on a near-white background, and --ansi-bright-white is deliberately dark (shells
+   use it for emphasis text, which must not vanish against the light background). */
+
+:root {
+    /* Page chrome (background, scrollbar, status indicator). */
+    --page-bg: #fbfbfb;
+    --scrollbar-thumb: #c0c4cc;
+    --status-color: #888;
+    --status-bg: rgba(255, 255, 255, 0.85);
+    --status-error: #c0392b;
+    --status-open: #2e7d32;
+
+    /* xterm core colours. */
+    --term-bg: #fbfbfb;
+    --term-fg: #1e2030;
+    --term-cursor: #1e2030;
+    --term-cursor-accent: #fbfbfb;
+    --term-selection: rgba(36, 86, 179, 0.22);
+
+    /* xterm 16-colour ANSI palette tuned for a light background. */
+    --ansi-black: #1e2030;
+    --ansi-red: #c0392b;
+    --ansi-green: #2e7d32;
+    --ansi-yellow: #9a7d0a;
+    --ansi-blue: #2456b3;
+    --ansi-magenta: #8e44ad;
+    --ansi-cyan: #0e7c86;
+    --ansi-white: #5c6370;
+    --ansi-bright-black: #5c6370;
+    --ansi-bright-red: #e74c3c;
+    --ansi-bright-green: #27ae60;
+    --ansi-bright-yellow: #b7950b;
+    --ansi-bright-blue: #2980b9;
+    --ansi-bright-magenta: #9b59b6;
+    --ansi-bright-cyan: #17a2b8;
+    --ansi-bright-white: #2b2b2b;
+}

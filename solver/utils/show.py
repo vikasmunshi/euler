@@ -35,11 +35,7 @@ def browser_is_available() -> bool:
         return False
 
 
-@register(
-    help_text='Open problem documentation in a browser.',
-    aliases=('open', 'view'),
-    quietable=True,
-)
+@register(help_text='Open problem documentation in a browser.', aliases=('open', 'view'), quietable=True)
 def show(problem_number: int = 0, check_for_errors: bool = False) -> int:
     """Open a problem's "problem.html" in the system browser.
 

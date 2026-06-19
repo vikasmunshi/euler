@@ -8,11 +8,41 @@ function setStatus(symbol, title, cls) {
     statusEl.className = cls || '';
 }
 
+// Build the xterm theme from the CSS variables the active solver-theme.css
+// defines, so swapping the theme symlink re-themes the terminal grid too.
+function cssTheme() {
+    const css = getComputedStyle(document.documentElement);
+    const v = (name) => css.getPropertyValue(name).trim();
+    return {
+        background: v('--term-bg'),
+        foreground: v('--term-fg'),
+        cursor: v('--term-cursor'),
+        cursorAccent: v('--term-cursor-accent'),
+        selectionBackground: v('--term-selection'),
+        black: v('--ansi-black'),
+        red: v('--ansi-red'),
+        green: v('--ansi-green'),
+        yellow: v('--ansi-yellow'),
+        blue: v('--ansi-blue'),
+        magenta: v('--ansi-magenta'),
+        cyan: v('--ansi-cyan'),
+        white: v('--ansi-white'),
+        brightBlack: v('--ansi-bright-black'),
+        brightRed: v('--ansi-bright-red'),
+        brightGreen: v('--ansi-bright-green'),
+        brightYellow: v('--ansi-bright-yellow'),
+        brightBlue: v('--ansi-bright-blue'),
+        brightMagenta: v('--ansi-bright-magenta'),
+        brightCyan: v('--ansi-bright-cyan'),
+        brightWhite: v('--ansi-bright-white'),
+    };
+}
+
 const term = new Terminal({
     cursorBlink: true,
     fontFamily: 'monospace',
     fontSize: 14,
-    theme: {background: '#1e1e1e'},
+    theme: cssTheme(),
     scrollback: 5000,
 });
 const fitAddon = new FitAddon.FitAddon();
@@ -32,9 +62,15 @@ function sendResize() {
     ws.send(JSON.stringify({resize: [term.cols, term.rows]}));
 }
 
+function guardUnload(e) {
+    e.preventDefault();
+    e.returnValue = '';   // required for Chrome to show the prompt
+}
+
 ws.onopen = () => {
     setStatus('●', 'connected', 'open');   // ● filled circle
     sendResize();          // prompt-toolkit/rich need the real geometry up front
+    window.addEventListener('beforeunload', guardUnload);   // warn before any reload/navigation
 };
 
 // Binary frames are raw terminal bytes; write them straight to xterm.
@@ -48,6 +84,7 @@ ws.onmessage = (ev) => {
 
 ws.onclose = () => {
     setStatus('○', 'connection closed', 'error');   // ○ hollow circle
+    window.removeEventListener('beforeunload', guardUnload);   // closed → nothing left to protect
     term.write('\r\n\x1b[2m[connection closed]\x1b[0m\r\n');
 };
 
@@ -59,6 +96,16 @@ term.onData((data) => {
         ws.send(encoder.encode(data));
     }
 });
+
+// Swallow the F5 reload shortcut while connected, before the browser acts on
+// it. Ctrl+R / ⌘-R are left alone so they reach the terminal (reverse-search).
+// Does not cover the reload button — beforeunload does.
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'F5' && ws.readyState === WebSocket.OPEN) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}, true);
 
 window.addEventListener('resize', () => {
     fitAddon.fit();

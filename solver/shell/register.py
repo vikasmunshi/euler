@@ -238,6 +238,10 @@ def _build_command_spec(
         help_text += ' [warning]§[/warning]'
     if getattr(func, '__refresh_workspace_vars__', False):
         help_text += ' [warning]↻[/warning]'
+    if getattr(func, '__requires_checkin__', False):
+        help_text += ' [warning]⊘[/warning]'
+    if getattr(func, '__auto_checkout__', False):
+        help_text += ' [warning]⚑[/warning]'
     if quietable:
         help_text += ' [warning]»[/warning]'
     cmd_name: str = name or func.__name__.lstrip('_').replace('_', '-')

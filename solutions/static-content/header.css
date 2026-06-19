@@ -1,0 +1,178 @@
+/* ── Shared site header ──
+   The single source of truth for the navigation bar — both its *look* and its
+   *position* — used by the problem, summary, code, and progress-editor pages.
+   The bar sits flush to the top of the content area (24px of breathing room above
+   it, which every page provides as its top padding) and stays pinned there as the
+   page scrolls. Each page keeps only the layout specifics that the bar can't know
+   about (e.g. being a non-shrinking flex item inside the full-height editor
+   columns); the bar's place on the page is fixed here. */
+
+#page-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 10px;
+    background: linear-gradient(180deg, #f5f8fd 0%, #e9eff8 100%);
+    border: 1px solid #d6deec;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30, 32, 48, 0.08);
+
+    /* Pinned flush to the top of the scroll area, with a fixed gap below it. */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    margin-bottom: 16px;
+}
+
+/* Opaque band filling the 24px strip above the pinned bar (the page's top
+   padding), so content scrolling underneath can't peek through that gap. */
+#page-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 24px;
+    background: #f4f6fb;
+}
+
+/* Glyph nav buttons (every nav item is an <a>; an inert one carries .nav-dummy). */
+#page-header a {
+    font-size: 1rem;
+    color: #5a7ab8;
+    width: 32px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+#page-header a:hover:not(.nav-dummy) {
+    background: #eef3fb;
+    color: #2a509a;
+    text-decoration: none;
+}
+
+/* Inert placeholder (no navigation target here, e.g. prev/next on the summary). */
+#page-header a.nav-dummy {
+    color: #b8c0d4;
+    cursor: default;
+}
+
+/* Thin divider between the three nav groups (prev–next | euler/github | summary/progress). */
+#page-header .nav-sep {
+    flex: 0 0 auto;
+    width: 1px;
+    height: 18px;
+    margin: 0 4px;
+    background: #d6deec;
+}
+
+/* Flexible gap that pushes the code-page cluster (badge, filename, buttons) to the right. */
+#page-header .header-spacer {
+    flex: 1 1 auto;
+}
+
+/* ── Code-page extras (hidden on other pages) ── */
+#page-header .lang-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    margin-left: 6px;
+}
+
+#page-header .lang-badge img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#page-header .filename {
+    margin-left: 4px;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+    font-weight: 600;
+    color: #1e2030;
+    letter-spacing: 0.01em;
+}
+
+/* ── Action buttons (Eval, Save, Del) ── */
+#page-header button {
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 6px;
+    height: 30px;
+    padding: 0 12px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+#page-header button:disabled {
+    color: #aeb6c6;
+    background: #eef0f6;
+    border-color: #dde1ed;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+#page-header #init-btn {
+    color: #1f6f6a;
+    background: #d2ecea;
+    border: 1px solid #8ecfc9;
+}
+
+#page-header #init-btn:hover:not(:disabled) {
+    background: #c2e5e2;
+    color: #134845;
+}
+
+#page-header #reset-btn {
+    color: #8a5a16;
+    background: #f6e8cf;
+    border: 1px solid #e0c48a;
+}
+
+#page-header #reset-btn:hover:not(:disabled) {
+    background: #f0ddb8;
+    color: #6a440f;
+}
+
+#page-header #save-btn {
+    color: #2a6f4f;
+    background: #d4ecdd;
+    border: 1px solid #8ecfa6;
+}
+
+#page-header #save-btn:hover:not(:disabled) {
+    background: #c2e5cf;
+    color: #1d4030;
+}
+
+#page-header #eval-btn {
+    color: #2a509a;
+    background: #d7e6f8;
+    border: 1px solid #9fc0ea;
+}
+
+#page-header #eval-btn:hover:not(:disabled) {
+    background: #c6dcf4;
+    color: #1a3a78;
+}
+
+#page-header #del-btn {
+    color: #a03228;
+    background: #f6dcd9;
+    border: 1px solid #e0a8a0;
+}
+
+#page-header #del-btn:hover:not(:disabled) {
+    background: #f0c8c2;
+    color: #7d2017;
+}

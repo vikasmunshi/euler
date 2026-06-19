@@ -16,11 +16,13 @@ or usage.
 A command's *flags* line lists the behaviours marked by these glyphs (the same
 ones shown after a command's help by `?`):
 
-| glyph | meaning                                                          |
-|-------|------------------------------------------------------------------|
-| `§`   | requires the workspace lock (`init` must have run in this shell) |
-| `↻`   | may refresh workspace state (re-reads which problem is loaded)   |
-| `»`   | supports `--silent` to suppress its incidental output            |
+| glyph | meaning                                                         |
+|-------|-----------------------------------------------------------------|
+| `§`   | requires the workspace lock to be acquired or inherited         |
+| `↻`   | the variable `problem` is read from the workspace on completion |
+| `⊘`   | refuses while the workspace is checked out                      |
+| `⚑ `  | checkout on start, checkin on completion                        |
+| `»`   | supports `--silent` to suppress its incidental output           |
 
 In a usage string: `<required>`, `[optional]`, `a|b|c` is a choice, `key=value`
 sets a named parameter, `--flag` / `--no-flag` toggle a boolean, and `...` marks
@@ -36,14 +38,16 @@ a parameter that accepts repetition.
 <!-- GEN:command-summary -->
 | Command | Aliases | Description |
 |---------|---------|-------------|
-| [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command in the workspace. ↻ |
+| [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command in the workspace. ↻ ⚑ |
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
 | [`benchmark`](#command-benchmark) | — | Benchmark the problem currently in the workspace. § » |
-| [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. § |
-| [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. § ↻ |
+| [`checkin`](#command-checkin) | — | Check in the workspace, re-allowing `init` and `reset`. § » |
+| [`checkout`](#command-checkout) | — | Check out the workspace, blocking `init` and `reset` until checkin. § » |
+| [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. § ⚑ |
+| [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. § ⚑ |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](#command-compile-c) | — | Build all C source files in the workspace directory. § » |
-| [`costs`](#command-costs) | — | Display total cost of AI tokens consumed in session. |
+| [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. § » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
@@ -51,9 +55,9 @@ a parameter that accepts repetition.
 | [`git-publish`](#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`init`](#command-init) | — | Initialize the workspace for the given problem number. § ↻ » |
+| [`init`](#command-init) | — | Initialize the workspace for the given problem number. § ↻ ⊘ » |
 | [`lint`](#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. § » |
-| [`lock-status`](#command-lock-status) | — | Check and report the workspace lock status. |
+| [`lock-status`](#command-lock-status) | — | Check and report the workspace checkout and lock status. |
 | [`ls`](#command-ls-list) | `list` | List current workspace, indicating changes against stack. |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. § » |
@@ -62,16 +66,17 @@ a parameter that accepts repetition.
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
 | [`rekey`](#command-rekey) | — | Reinitialize keys.json with additional new encryption keys. |
-| [`reset`](#command-reset) | — | Clear the workspace, and, if required, stack first. § ↻ » |
+| [`reset`](#command-reset) | — | Clear the workspace, and, if required, stack first. § ↻ ⊘ » |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
 | [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
 | [`stack`](#command-stack-save) | `save` | Propagate stackable workspace changes to the stack. § » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. § » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
+| [`update-models`](#command-update-models) | — | Refresh Model enum, pricing, and USD→EUR rate from live API and docs. » |
 | [`user`](#command-user) | — | Show the current user's identity and master key access. |
 
-*Legend: § requires the workspace lock · ↻ may refresh workspace state · » supports `--silent`.*
+*Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*
 <!-- /GEN:command-summary -->
 
 </details>
@@ -82,8 +87,8 @@ a parameter that accepts repetition.
 #### Command: `!` (`sh`, `bash`)
 
 Run a bash command in the workspace.
-
-**Flags:** ↻ (may refresh workspace state)
+* ↻ may refresh workspace state
+* ⚑ checks the workspace out while it runs
 
 ```
 ! <command> [args]...
@@ -127,7 +132,8 @@ List every command, or show detailed help for one command.
 
 With no argument, prints a table of all registered commands with their
 aliases and one-line descriptions, plus the legend (§ requires the workspace
-lock, ↻ may refresh workspace state, » supports --silent).
+lock, ↻ may refresh workspace state, ⊘ refuses while checked out, ⚑ checks
+out while it runs, » supports --silent).
 
 With a command name or alias, prints a panel for just that command: its
 description (with the legend glyphs expanded to full sentences), its aliases,
@@ -141,8 +147,8 @@ Aliased as `help`.
 #### Command: `benchmark`
 
 Benchmark the problem currently in the workspace.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 benchmark
@@ -205,17 +211,60 @@ Args:
 
 ---
 
+#### Command: `checkin`
+
+Check in the workspace, re-allowing `init` and `reset`.
+* § requires the workspace lock
+* » supports `--silent`
+
+```
+checkin
+[silent=true|--silent]
+```
+
+```text
+Clear the checkout marker left by `checkout`, re-allowing `init` and `reset`.
+```
+
+---
+
+#### Command: `checkout`
+
+Check out the workspace, blocking `init` and `reset` until checkin.
+* § requires the workspace lock
+* » supports `--silent`
+
+```
+checkout
+[reason=<str>] (default '')
+[silent=true|--silent]
+```
+
+```text
+Mark the workspace checked out so `init`/`reset` refuses until a `checkin`.
+
+Protects an in-progress workspace from an accidental `reset` — including the reset button on the
+web viewer and a sibling shell — by leaving a presence marker that any process can see. `claude-api`
+and `claude-skill` check out automatically while they run; this is the manual equivalent. The marker
+persists until `checkin` (there is no force-reset), so it also survives a crash until cleared.
+
+Args:
+    reason: Free-text note recorded in the marker and echoed when a reset is refused.
+```
+
+---
+
 #### Command: `claude-api`
 
 Generate specified target using Claude API.
-
-**Flags:** § (requires the workspace lock)
+* § requires the workspace lock
+* ⚑ checks the workspace out while it runs
 
 ```
 claude-api <c|py|doc|notes|test-cases>
 [force=true|--force]
 [major=true|--major]
-[model=claude-opus-4-8|claude-sonnet-4-6|claude-haiku-4-5|none] (default None)
+[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-haiku-4-5|none] (default None)
 ```
 
 ```text
@@ -234,12 +283,11 @@ Args:
 #### Command: `claude-skill`
 
 Launch the Claude Euler Solver skill.
-
-**Flags:** § (requires the workspace lock), ↻ (may refresh workspace state)
+* § requires the workspace lock
+* ⚑ checks the workspace out while it runs
 
 ```
 claude-skill <solve|review>
-[problem_number=<int>|none] (default None)
 [additional_prompt=<str>] (default '')
 ```
 
@@ -258,8 +306,6 @@ Args:
                         solution, translate it to C, then document and
                         summarise), or 'review' (audit an existing solution
                         for C↔Python parity, in-source docs, and notes.html).
-    problem_number:     Problem to act on; defaults to the one currently in
-                        the workspace (fails if none and none given).
     additional_prompt:  Extra free-text instructions appended to the skill
                         invocation. Defaults to empty.
 ```
@@ -286,8 +332,8 @@ A convenience wrapper over the console's clear; equivalent to the shell
 #### Command: `compile-c`
 
 Build all C source files in the workspace directory.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 compile-c
@@ -312,11 +358,11 @@ Args:
 
 #### Command: `costs`
 
-Display total cost of AI tokens consumed in session.
+Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[usd_to_eur=<float>] (default 0.92)
+[ecb_usd_rate=<float>] (default 1.1461)
 ```
 
 ```text
@@ -328,7 +374,7 @@ price per million tokens (with cache writes at 1.25x and cache reads at 0.10x th
 then converts to EUR using "usd_to_eur".
 
 Args:
-    usd_to_eur: USD-to-EUR conversion rate (euros per dollar). Defaults to 'config.usd_to_eur'.
+    ecb_usd_rate: conversion rate (1 € = N $). Defaults to 'config.ecb_usd_rate'.
 ```
 
 ---
@@ -355,8 +401,8 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 #### Command: `evaluate` (`eval`)
 
 Evaluate solutions against test cases.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 evaluate
@@ -399,8 +445,7 @@ verbose:            If True, prints error information during evaluation. Default
 #### Command: `git-commit` (`commit`)
 
 Commit everything, optionally resetting to origin/master.
-
-**Flags:** » (supports `--silent`)
+* » supports `--silent`
 
 ```
 git-commit
@@ -430,8 +475,7 @@ Aliased as `commit`.
 #### Command: `git-hooks` (`hooks`)
 
 Run pre-commit hook and simulated pre-push hook.
-
-**Flags:** » (supports `--silent`)
+* » supports `--silent`
 
 ```
 git-hooks
@@ -454,8 +498,7 @@ Aliased as `hooks`.
 #### Command: `git-publish` (`publish`)
 
 Publish named targets (keys|scripts|solutions|solver) to remote.
-
-**Flags:** » (supports `--silent`)
+* » supports `--silent`
 
 ```
 git-publish
@@ -518,8 +561,10 @@ Args:
 #### Command: `init`
 
 Initialize the workspace for the given problem number.
-
-**Flags:** § (requires the workspace lock), ↻ (may refresh workspace state), » (supports `--silent`)
+* § requires the workspace lock
+* ↻ may refresh workspace state
+* ⊘ refuses while the workspace is checked out
+* » supports `--silent`
 
 ```
 init <problem_number>
@@ -544,8 +589,8 @@ Args:
 #### Command: `lint`
 
 Lint the workspace, fix with autoflake + autopep8 + isort.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 lint
@@ -571,7 +616,7 @@ Args:
 
 #### Command: `lock-status`
 
-Check and report the workspace lock status.
+Check and report the workspace checkout and lock status.
 
 ```
 lock-status
@@ -641,8 +686,8 @@ Args:
 #### Command: `mark` (`mark-solved`)
 
 Mark the workspace problem as solved, after checking.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 mark
@@ -670,8 +715,8 @@ Aliased as `mark-solved`.
 #### Command: `new`
 
 Generate new solution/test-case file in the workspace.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 new
@@ -786,8 +831,10 @@ Args:
 #### Command: `reset`
 
 Clear the workspace, and, if required, stack first.
-
-**Flags:** § (requires the workspace lock), ↻ (may refresh workspace state), » (supports `--silent`)
+* § requires the workspace lock
+* ↻ may refresh workspace state
+* ⊘ refuses while the workspace is checked out
+* » supports `--silent`
 
 ```
 reset
@@ -842,8 +889,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open problem documentation in a browser.
-
-**Flags:** » (supports `--silent`)
+* » supports `--silent`
 
 ```
 show
@@ -871,8 +917,8 @@ Arguments:
 #### Command: `stack` (`save`)
 
 Propagate stackable workspace changes to the stack.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 stack
@@ -892,8 +938,8 @@ Args:
 #### Command: `summary`
 
 Parse .progress.html into problems.json.
-
-**Flags:** § (requires the workspace lock), » (supports `--silent`)
+* § requires the workspace lock
+* » supports `--silent`
 
 ```
 summary
@@ -941,8 +987,7 @@ Parameters:
 #### Command: `update-docs`
 
 Regenerate the generated sections of the docs/ guides.
-
-**Flags:** » (supports `--silent`)
+* » supports `--silent`
 
 ```
 update-docs
@@ -964,6 +1009,35 @@ Args:
     check:  When True, write nothing and fail (non-zero) if any doc is out
             of date, listing the stale files. When False (default), rewrite
             the docs in place and report which were updated.
+```
+
+---
+
+#### Command: `update-models`
+
+Refresh Model enum, pricing, and USD→EUR rate from live API and docs.
+* » supports `--silent`
+
+```
+update-models
+[check=true|--check]
+[silent=true|--silent]
+```
+
+```text
+Refresh the `Model` class in `models.py` and the `usd_to_eur` rate in `config.json`.
+
+Lists the available Claude models from the Anthropic Models API, scrapes each model's base
+input/output price (per million tokens) from the public pricing page, and rewrites the
+`# GEN:models` block in `models.py` — the enum members, their inline comments, and the
+`price` map. Curated per-model comments are kept; a newly discovered model is commented with
+its display name. Separately, fetches the USD→EUR rate from the ECB daily reference feed and
+writes it to `config.json` (the rate is used only by `costs`). Nothing else is touched.
+
+Args:
+    check:  When True, write nothing and fail (non-zero) if either the model block or the
+            FX rate is out of date. When False (default), rewrite both in place. The FX rate
+            drifts daily, so `--check` will usually report it as stale.
 ```
 
 ---

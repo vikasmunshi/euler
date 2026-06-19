@@ -27,6 +27,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from solver.config import ExitCodes, config
+from solver.core.lock import lock_state
 from solver.shell.command import Context, registry
 from solver.shell.interpreter import execute
 from solver.shell.lexer import LexError, lex
@@ -131,6 +132,8 @@ class SolverShell:
         self.workspace: Path = config.workspace_dir
         self.save = save
         self._session_log: SessionLog | None = None
+        _lock_state = lock_state()
+        self.workspace_is_locked: bool = _lock_state.acquired or _lock_state.inherited
         set_commands(self.registry.names())
 
     # -- command-host surface (consumed by commands via ctx.shell) ----------
@@ -318,9 +321,13 @@ class SolverShell:
     # -- UI -----------------------------------------------------------------
 
     def _prompt(self) -> FormattedText:
+        # Dim the workspace name when the lock is neither acquired nor inherited.
+        # Read the live module attribute (it is rebound as the lock is taken/released).
+        path_class = 'class:prompt.path' if self.workspace_is_locked else 'class:prompt.path.unlocked'
+        path_text = f' {self.workspace.name} ' if self.workspace_is_locked else f'(read-only) {self.workspace.name} '
         return FormattedText([
             ('class:prompt.bar', '▎'),
-            ('class:prompt.path', f' {self.workspace.name} '),
+            (path_class, path_text,),
             ('class:prompt.symbol', '❯ '),
         ])
 

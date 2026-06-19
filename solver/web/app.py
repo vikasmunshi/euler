@@ -4,8 +4,8 @@
 
 `build_app` wires one localhost server with three concerns:
 
-- **Terminal** — `GET /` serves the xterm.js page (the default landing page;
-  `/solver` redirects to it) and `GET /ws` streams a
+- **Terminal** — `GET /` serves the xterm.js page (the default landing page) and
+  `GET /ws` streams a
   single interactive `solver` shell on a pseudo-terminal (see
   :class:`solver.web.pty_bridge.PtySession`). Binary WS frames are raw terminal
   bytes both ways; a `{"resize": [cols, rows]}` text frame propagates geometry.
@@ -14,14 +14,17 @@
 
 - **Read-only viewer** — the static summary/problem pages plus the problem files
   served through :func:`solver.core.stack.read_stack_file` (decrypting as needed,
-  preferring the live workspace copy when a problem is active). Ported from the
-  retired `solver.utils.server`; the old JSON control API (`/controls` +
-  `flags`) is gone — the terminal does that work now.
+  preferring the live workspace copy when a problem is active). The browser learns
+  the workspace state from `GET /flags?problem_number=N` (authoritative? active?
+  the neighbouring problem numbers), which drives the shared header's navigation
+  and its init/reset/eval/save/del action buttons.
 
-- **Edits** — `POST /<n>/<file>` validates and saves an edited workspace file;
-  `DELETE /<n>/<file>` removes a solution. Both require the server to be
-  authoritative over the workspace (lock acquired or inherited; see
-  :func:`solver.core.lock.acquire_workspace_lock`).
+- **Workspace control & edits** — all guarded by the workspace lock, returning
+  HTTP 403 when the server is not authoritative over it (lock acquired or
+  inherited; see :func:`solver.core.lock.acquire_workspace_lock`):
+  `POST /<n>/cmd` runs a workspace command (`init`, `reset`, or `eval`);
+  `POST /<n>/<file>` validates and saves an edited workspace file;
+  `DELETE /<n>/<file>` removes a solution; `POST /progress` saves the progress file.
 """
 from __future__ import annotations
 
@@ -32,28 +35,49 @@ import functools
 import html
 import json
 import mimetypes
+import re
+import tempfile
+from collections.abc import Callable
 from pathlib import Path
 from subprocess import run
-from typing import Any
+from typing import Any, Literal, TypedDict
 
 from aiohttp import WSMsgType, web
 
 from solver.config import config
-from solver.core import lock
+from solver.core import workspace
 from solver.core.evaluate import evaluate
-from solver.core.problems import Problem
+from solver.core.lock import check_workspace_lock_generic, lock_state
+from solver.core.problems import Problem, problems
 from solver.core.stack import read_stack_file, stack_base_dir
 from solver.shell import console
+from solver.utils.summary import summary
 from solver.web.pty_bridge import PtySession
 
-#: Key under which the single-session flag is stored on the Application.
-_HAS_SESSION: web.AppKey[list[bool]] = web.AppKey('has_session', list)
+
+class _State(TypedDict):
+    """Mutable per-server runtime state shared across requests.
+
+    The aiohttp `Application` mapping is frozen once the server starts, so request
+    handlers cannot reassign `app[key]`; live state instead lives in this single
+    mutable value, stashed under :data:`_STATE` at setup and mutated in place.
+    """
+    #: Whether a PTY shell session is active (only one is allowed at a time).
+    has_session: bool
+    #: Last non-zero problem number queried via /flags, echoed back on the
+    #: problem-less pages (summary / progress) so the header can still navigate.
+    last_problem: int | None
+
+
+#: Key under which the shared mutable state is stored on the Application.
+_STATE: web.AppKey[_State] = web.AppKey('state', _State)
 
 #: Top-level static page assets served verbatim from `config.static_file_dir`.
 _STATIC_ASSETS: frozenset[str] = frozenset({
-    'code.css', 'code.html', 'code.js', 'favicon.svg', 'problem.css', 'problem.html', 'problem.js',
-    'problems.json', 'progress-editor.css', 'progress-editor.js', 'solver.css', 'solver.html',
-    'solver.js', 'summary.css', 'summary.html', 'summary.js',
+    'code.css', 'code.html', 'code.js', 'common.css', 'favicon.svg', 'header.css', 'header.html',
+    'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json', 'progress-editor.css',
+    'progress-editor.js', 'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
+    'summary.html', 'summary.js',
 })
 
 #: mime type of a served problem file → highlight.js language for the code viewer.
@@ -84,6 +108,49 @@ async def _serve_solver_page(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(config.static_file_dir / 'solver.html')
 
 
+async def _serve_flags(request: web.Request) -> web.StreamResponse:
+    """Serve the JSON workspace flags for `GET /flags?problem_number=N`.
+
+    The front end (shared header, problem and code pages) uses these to decide what
+    to enable. Fields:
+
+    - `authoritative` — this server holds (or inherited) the workspace lock, so it
+      may mutate / evaluate the workspace.
+    - `active` — *problem_number* is the problem currently in the workspace.
+    - `workspace_problem` — the problem currently in the workspace (or null).
+    - `problem_number` — the problem in context: the queried problem, or the last
+      one queried this session when 0 / absent (e.g. on the summary and progress
+      pages), so the header keeps a problem to navigate from. Null only until the
+      first problem is viewed.
+    - `previous_problem` / `next_problem` — neighbours for the nav arrows
+      (wrapping at the ends), or null when no problem is in context.
+    """
+    problem_number: int = int(request.query.get('problem_number', 0))
+    state = request.app[_STATE]
+    if problem_number != 0:
+        state['last_problem'] = problem_number  # remember the last real one
+    effective: int | None = problem_number or state['last_problem']
+    _lock_state = lock_state()
+    authoritative = _lock_state.acquired or _lock_state.inherited
+    workspace_problem: int | None = problem.number if (problem := Problem.from_workspace()) is not None else None
+    active: bool = problem_number != 0 and workspace_problem is not None and workspace_problem == problem_number
+    if effective is None:
+        previous_problem: int | None = None
+        next_problem: int | None = None
+    else:
+        previous_problem = effective - 1 if effective > 1 else problems.last_problem.number
+        next_problem = effective + 1 if effective < problems.last_problem.number else 1
+    return _render_json(request,
+                        'flags',
+                        json.dumps({'authoritative': authoritative,
+                                    'active': active,
+                                    'workspace_problem': workspace_problem,
+                                    'problem_number': effective,
+                                    'previous_problem': previous_problem,
+                                    'next_problem': next_problem,
+                                    }).encode('utf-8'))
+
+
 async def _serve_summary_page(request: web.Request) -> web.StreamResponse:
     """Serve the solutions summary page (`/summary`)."""
     return web.FileResponse(config.static_file_dir / 'summary.html')
@@ -101,7 +168,7 @@ async def _serve_progress_page(request: web.Request) -> web.StreamResponse:
     return _bytes_response(page.encode('utf-8'), 'text/html')
 
 
-@lock.check_workspace_lock_generic
+@check_workspace_lock_generic
 def _save_progress(content: bytes) -> tuple[int, str]:
     """Write edited content to the progress file; return (status, message) or None (→ 403).
 
@@ -109,6 +176,7 @@ def _save_progress(content: bytes) -> tuple[int, str]:
     outside the workspace, so no per-problem checks apply — the bytes are written verbatim.
     """
     config.static_file_progress.write_bytes(content)
+    summary()
     return 200, f'saved {config.static_file_progress.name}'
 
 
@@ -116,15 +184,10 @@ async def _save_progress_page(request: web.Request) -> web.StreamResponse:
     """Save the edited progress file (`POST /progress`)."""
     body = await request.read()
     loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(None, functools.partial(_save_progress, body))
+    result = await loop.run_in_executor(None, _save_progress, body)
     if result is None:  # check_workspace_lock_generic refused: not authoritative here
         return _text(403, _READ_ONLY)
     return _text(*result)
-
-
-async def _redirect_to_root(request: web.Request) -> web.StreamResponse:
-    """Redirect the old `/solver` URL to the new default `/`."""
-    raise web.HTTPMovedPermanently('/')
 
 
 async def _serve_vendor_asset(request: web.Request) -> web.StreamResponse:
@@ -181,12 +244,12 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    has_session = request.app[_HAS_SESSION]
-    if has_session[0]:
+    state = request.app[_STATE]
+    if state['has_session']:
         await ws.send_str('\x1b[31ma solver session is already active in another tab\x1b[0m\r\n')
         await ws.close()
         return ws
-    has_session[0] = True
+    state['has_session'] = True
 
     session = PtySession(save=save)
     pump = asyncio.create_task(_pump_pty_to_ws(session, ws))
@@ -202,7 +265,7 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
     finally:
         pump.cancel()
         session.close()
-        has_session[0] = False
+        state['has_session'] = False
     return ws
 
 
@@ -265,20 +328,6 @@ def _list_solutions(problem_number: int) -> bytes:
     return json.dumps(sorted(files), indent=2).encode('utf-8')
 
 
-def _workspace_flags(problem_number: int) -> bytes:
-    """Report whether the editor may write to *problem_number* via this server.
-
-    `authoritative` is True when the server holds the workspace lock (acquired
-    standalone or inherited from a launching shell) and can therefore mutate it;
-    `active` is True when *problem_number* is the problem currently in the
-    workspace. The code.html editor enables Save/Eval/Delete only when both hold.
-    """
-    authoritative = lock.lock_state.acquired or lock.lock_state.inherited
-    problem = Problem.from_workspace()
-    active = problem is not None and problem.number == problem_number
-    return json.dumps({'authoritative': authoritative, 'active': active}).encode('utf-8')
-
-
 def _validate_source(path: Path) -> tuple[bool, str]:
     """Validate a Python or C source file on disk; return (ok, captured diagnostics).
 
@@ -298,7 +347,7 @@ def _validate_source(path: Path) -> tuple[bool, str]:
     return False, (proc.stdout + ('\n' if proc.stdout and proc.stderr else '') + proc.stderr).strip()
 
 
-@lock.check_workspace_lock_generic
+@check_workspace_lock_generic
 def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str]:
     """Validate edited content and write it into the workspace; return (status, message).
 
@@ -331,7 +380,63 @@ def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[i
     return 200, f'saved {filename}'
 
 
-@lock.check_workspace_lock_generic
+#: flake8 line: `path:row:col: CODE message`.
+_FLAKE8_RE = re.compile(r'^.*?:(\d+):(\d+):\s+([A-Z]\d+)\s+(.*)$')
+#: gcc/clang line: `path:row[:col]: error|warning|note: message`.
+_GCC_RE = re.compile(r'^.*?:(\d+):(?:(\d+):)?\s+(error|warning|note):\s+(.*)$')
+
+
+def _parse_diagnostics(output: str, suffix: str) -> list[dict[str, Any]]:
+    """Parse flake8 / gcc text into `{line, col, severity, message}` diagnostics.
+
+    Non-matching lines (summary banners, multi-line context) are ignored. flake8
+    `F*` / `E9*` (pyflakes + syntax) map to errors, the rest to warnings; gcc maps
+    by the emitted severity word (a `note` becomes a warning).
+    """
+    diagnostics: list[dict[str, Any]] = []
+    if suffix == '.py':
+        for line in output.splitlines():
+            if (m := _FLAKE8_RE.match(line)) is None:
+                continue
+            row, col, code, message = m.groups()
+            severity = 'error' if code[0] == 'F' or code.startswith('E9') else 'warning'
+            diagnostics.append({'line': int(row), 'col': int(col),
+                                'severity': severity, 'code': code, 'message': message})
+    else:  # .c
+        for line in output.splitlines():
+            if (m := _GCC_RE.match(line)) is None:
+                continue
+            row, col, severity, message = m.groups()
+            diagnostics.append({'line': int(row), 'col': int(col or 1),
+                                'severity': 'warning' if severity == 'note' else severity,
+                                'message': message})
+    return diagnostics
+
+
+@check_workspace_lock_generic
+def _lint_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str]:
+    """Lint edited content without saving it; return (status, JSON diagnostics).
+
+    Runs the same validators as save — flake8 for Python, the runner-aware compile
+    for C — against a throwaway temp copy, so the workspace file is never touched
+    and a syntactically broken buffer is still diagnosable. Guarded by the workspace
+    lock (None → HTTP 403), matching the editor's editable gating. The reply is
+    `{"diagnostics": [{line, col, severity, message, code?}, ...]}` (empty when clean).
+    """
+    suffix = Path(filename).suffix
+    if Path(filename).name != filename or suffix not in ('.py', '.c'):
+        return 400, json.dumps({'diagnostics': []})
+    if (problem := Problem.from_workspace()) is None or problem.number != problem_number:
+        return 400, json.dumps({'diagnostics': []})
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_file = Path(tmp) / f'lint{suffix}'  # compile.sh finds runner.h via an absolute -I
+        tmp_file.write_bytes(content)
+        ok, message = _validate_source(tmp_file)
+    diagnostics = [] if ok else _parse_diagnostics(message, suffix)
+    return 200, json.dumps({'diagnostics': diagnostics})
+
+
+@check_workspace_lock_generic
 def _del_solution(problem_number: int, filename: str) -> tuple[int, str]:
     """Delete a solution from the workspace; return (status, message) or None (→ 403)."""
     if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c'):
@@ -345,17 +450,40 @@ def _del_solution(problem_number: int, filename: str) -> tuple[int, str]:
     return 200, f'deleted {filename}'
 
 
-@lock.check_workspace_lock_generic
-def _run_eval(problem_number: int, lang: str, solution_index: int) -> tuple[int, str]:
-    """Evaluate a single solution against its test cases; return (status, output) or None (→ 403).
+@check_workspace_lock_generic
+def _run_cmd(problem_number: int,
+             cmd: Literal['init', 'reset', 'eval'],
+             lang: Literal['*', 'py', 'c'] | None = None,
+             solution_index: int | None = None,
+             ) -> tuple[int, str]:
+    """Run a workspace command on *problem_number*; return (status, output) or None (→ 403).
 
-    `evaluate` reports through the shared console, captured here as plain text the
-    editor renders in its output panel.
+    Guarded by the workspace lock (None → HTTP 403 when not authoritative). Each
+    command maps onto the matching shell verb and its console output is captured as
+    plain text for the caller to display:
+
+    - `init`  — unstack the problem into the workspace, resetting a different active
+      problem first (:func:`solver.core.workspace.init`); allowed whatever is active.
+    - `reset` — stack any changes and clear the workspace; requires *problem_number*
+      to be the active workspace.
+    - `eval`  — evaluate solutions against the test cases; requires *problem_number*
+      to be active. With neither *lang* nor *solution_index* it evaluates every
+      solution (the problem page's button); the code page passes a specific
+      (lang, index) to evaluate a single solution.
+
+    Status mirrors HTTP: 200 when the command exits 0, 400 on a bad request or a
+    non-zero command exit.
     """
-    if (problem := Problem.from_workspace()) is None or problem.number != problem_number:
+    if cmd != 'init' and ((problem := Problem.from_workspace()) is None or problem.number != problem_number):
         return 400, f'problem {problem_number} is not the active workspace'
+    cmd_funcs: dict[str, Callable[[], int]] = {
+        'init': functools.partial(workspace.init, problem_number),
+        'reset': workspace.reset,
+        # No lang → evaluate every language ('*'); solution_index None → all solutions.
+        'eval': functools.partial(evaluate, lang=lang or '*', solution_index=solution_index),
+    }
     with console.capture() as capture:
-        rcode = evaluate(lang=lang, solution_index=solution_index)  # type: ignore[arg-type]
+        rcode = cmd_funcs[cmd]()
     output = capture.get().strip()
     return (200 if rcode == 0 else 400), output
 
@@ -409,14 +537,17 @@ async def _problem_file(request: web.Request) -> web.StreamResponse:
     filename = request.match_info['filename']
     if '..' in Path(filename).parts:  # filename may hold a subdir (resources/…); reject traversal
         raise web.HTTPNotFound()
+    if problem_number < 1 or problem_number > problems.last_problem.number:
+        raise web.HTTPNotFound()
     if filename == 'solutions':
         return _render_json(request, 'solutions', _list_solutions(problem_number))
-    if filename == 'flags':
-        return _render_json(request, 'flags', _workspace_flags(problem_number))
     try:
         content: bytes = _read_problem_file(problem_number, filename)
     except (FileNotFoundError, KeyError, ValueError):
-        raise web.HTTPNotFound()
+        if _wants_html_view(request):
+            content = f'Error: file {filename} not found!'.encode('utf-8')
+        else:
+            raise web.HTTPNotFound()
     mime, _ = mimetypes.guess_type(filename)
     if (language := _CODE_LANGUAGES.get(mime or '')) is not None:
         return _bytes_response(_render_code_page(filename, content, language), 'text/html')
@@ -456,52 +587,89 @@ async def _delete_problem_file(request: web.Request) -> web.StreamResponse:
     return _text(*result)
 
 
-async def _eval_solution(request: web.Request) -> web.StreamResponse:
-    """Evaluate one solution against its test cases (`POST /<n>/eval`).
+async def _run_command(request: web.Request) -> web.StreamResponse:
+    """Run a workspace command on the problem (`POST /<n>/cmd`).
 
-    Body: `{"lang": "py"|"c", "solution_index": int}`. Replies with JSON
-    `{"output": <captured text>, "rcode": <int>}`; the editor shows the output.
+    Body: `{"cmd": "init"|"reset"|"eval", "lang"?: "py"|"c", "solution_index"?: int}`
+    — *lang* / *solution_index* are only meaningful for `eval` (omit them to evaluate
+    every solution). Replies with JSON `{"output": <captured text>, "rcode": 0|1|null}`;
+    the page renders the output. 400 for a malformed body, 403 when the server is not
+    authoritative over the workspace.
     """
-    problem_number = int(request.match_info['problem_number'])
+    problem_number: int = int(request.match_info['problem_number'])
     try:
         data = await request.json()
     except (json.JSONDecodeError, UnicodeDecodeError):
-        data = {}
-    lang = data.get('lang') if isinstance(data, dict) else None
-    solution_index = data.get('solution_index') if isinstance(data, dict) else None
-    if lang not in ('py', 'c') or type(solution_index) is not int:
-        return web.json_response({'output': 'eval needs lang (py|c) and an integer solution_index',
-                                  'rcode': None}, status=400)
+        raise web.HTTPBadRequest()
+    if not isinstance(data, dict):
+        raise web.HTTPBadRequest()
+    if (cmd := data.get('cmd')) not in ('init', 'reset', 'eval'):
+        raise web.HTTPBadRequest()
+    lang: Literal['py', 'c'] | None = data.get('lang')
+    solution_index: int | None = data.get('solution_index')
     loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(None, functools.partial(_run_eval, problem_number, lang, solution_index))
+    result = await loop.run_in_executor(None, _run_cmd, problem_number, cmd, lang, solution_index)
     if result is None:
         return web.json_response({'output': _READ_ONLY, 'rcode': None}, status=403)
     code, output = result
     return web.json_response({'output': output, 'rcode': 0 if code == 200 else 1}, status=code)
 
 
+async def _lint_problem_file(request: web.Request) -> web.StreamResponse:
+    """Lint an edited (unsaved) workspace file (`POST /<n>/lint`).
+
+    Body: `{"filename": "p0007_s0.py", "content": "<source>"}`. Replies with JSON
+    `{"diagnostics": [...]}` the editor renders as inline squiggles; 403 when the
+    server is not authoritative over the workspace, 400 for a malformed body.
+    """
+    problem_number = int(request.match_info['problem_number'])
+    try:
+        data = await request.json()
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        raise web.HTTPBadRequest()
+    if not isinstance(data, dict) or not isinstance(data.get('filename'), str):
+        raise web.HTTPBadRequest()
+    content = str(data.get('content', '')).encode('utf-8')
+    loop = asyncio.get_running_loop()
+    result = await loop.run_in_executor(
+        None, functools.partial(_lint_content, problem_number, data['filename'], content))
+    if result is None:  # not authoritative: nothing to lint here
+        return web.json_response({'diagnostics': []}, status=403)
+    code, payload = result
+    return web.Response(status=code, text=payload, content_type='application/json', charset='utf-8')
+
+
 def build_app(save: bool) -> web.Application:
     """Construct the aiohttp application: terminal, WebSocket, and read-only viewer."""
     app = web.Application()
-    app[_HAS_SESSION] = [False]
+    state: _State = {'has_session': False, 'last_problem': None}
+    app[_STATE] = state
     ws_handler = functools.partial(_ws_handler, save=save)
     app.add_routes([
         # Terminal + WebSocket. The terminal is the default landing page (`/`);
         web.get('/', _serve_solver_page),
         web.get('/ws', ws_handler),
+        # Vendored assets: `/vendor/<asset>` for the JS/CSS/etc. that the editor needs.
         web.get(r'/vendor/{filename:.+}', _serve_vendor_asset),
+        # /flags?problem_number=N
+        web.get('/flags', _serve_flags),
         # Static pages: `/summary` → the solutions summary, `/<asset>` for the rest.
         web.get('/summary', _serve_summary_page),
         web.get('/progress', _serve_progress_page),
-        web.post('/progress', _save_progress_page),
         web.get('/favicon.ico', _serve_favicon),
         web.get(r'/{asset:[A-Za-z0-9_.-]+\.(?:css|js|html|json|svg)}', _serve_static),
         # Problem viewer + edits (numeric problem number).
         web.get(r'/{problem_number:\d+}', _redirect_with_slash),
         web.get(r'/{problem_number:\d+}/', _problem_page),
         web.get(r'/{problem_number:\d+}/{filename:.+}', _problem_file),
-        web.post(r'/{problem_number:\d+}/eval', _eval_solution),
+        # Post actions: a workspace command (init / reset / eval), the progress save,
+        # and an edited-file save. `/cmd` precedes the catch-all `/{filename}` so it
+        # is matched as a command rather than a file named "cmd".
+        web.post('/progress', _save_progress_page),
+        web.post(r'/{problem_number:\d+}/cmd', _run_command),
+        web.post(r'/{problem_number:\d+}/lint', _lint_problem_file),
         web.post(r'/{problem_number:\d+}/{filename}', _save_problem_file),
+        # Delete a solution file from the workspace.
         web.delete(r'/{problem_number:\d+}/{filename}', _delete_problem_file),
     ])
     return app

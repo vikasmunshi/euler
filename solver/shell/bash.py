@@ -21,6 +21,7 @@ from typing import Iterable, Protocol
 from prompt_toolkit.completion import Completion
 
 from solver.config import ExitCodes, config
+from solver.core.checkout import auto_checkout
 from solver.shell.command import Context, command
 from solver.shell.variables import refresh_workspace_vars
 
@@ -157,13 +158,14 @@ def _run_streamed(ctx: Context, cmdline: str, cwd: Path) -> int:
 
 
 @command(name='!',
-         help_text='Run a bash command in the workspace. [warning]↻[/warning]',
+         help_text='Run a bash command in the workspace. [warning]↻[/warning] [warning]⚑[/warning]',
          usage='\t! <command> [args]...\n'
                '\t! sh → escape to a bash shell.\n'
                '\t! py → escape to a python interpreter.\n',
          aliases=('sh', 'bash',),
          completer=_bash_completer)
 @refresh_workspace_vars
+@auto_checkout
 def _bash(ctx: Context, *args: str) -> int:
     """Run a shell command from the shell, returning its exit code.
 

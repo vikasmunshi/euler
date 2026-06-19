@@ -238,27 +238,6 @@ function renderSolutions(testCases, results, solutions, problemsJson) {
         '\n</tbody>\n</table>\n</div>';
 }
 
-function renderPageHeader(problemsJson) {
-    const header = document.getElementById('page-header');
-    if (!header) return;
-    const num = PROBLEM_NUMBER;
-    const maxNum = Math.max(...Object.keys(problemsJson).map(Number));
-    const eulerUrl = `https://projecteuler.net/problem=${num}`;
-    const p = String(num).padStart(4, '0');
-    const githubUrl = `https://github.com/vikasmunshi/euler/blob/master/solutions/${p[0]}/${p[1]}/${p[2]}/${p[3]}/`;
-    const summaryUrl = '/summary';
-    const nextNum = (num % maxNum) + 1;
-    const prevNum = ((num - 2 + maxNum) % maxNum) + 1;
-    const nextUrl = `/${String(nextNum).padStart(4, '0')}/`;
-    const prevUrl = `/${String(prevNum).padStart(4, '0')}/`;
-    header.innerHTML =
-        `<a href="${escapeHtml(prevUrl)}" title="Previous problem">&laquo;</a>` +
-        `<a href="${escapeHtml(eulerUrl)}" target="_blank" rel="noopener noreferrer" title="View on Project Euler">&#8962;</a>` +
-        `<a href="${escapeHtml(summaryUrl)}" title="Summary">&#9776;</a>` +
-        `<a href="${escapeHtml(githubUrl)}" target="_blank" rel="noopener noreferrer" title="View on GitHub">&#8857;</a>` +
-        `<a href="${escapeHtml(nextUrl)}" title="Next problem">&raquo;</a>`;
-}
-
 function renderProblemStatement(title, level, statementHtml) {
     if (title) document.title = `${PROBLEM_NUMBER}: ${title}`;
     const target = document.getElementById('problem-statement-content');
@@ -292,7 +271,6 @@ async function loadAll() {
     const title = problemsJson[PROBLEM_NUMBER].title;
     const level = problemsJson[PROBLEM_NUMBER].level;
     renderProblemStatement(title, level, statementHtml);
-    renderPageHeader(problemsJson);
     renderTestCases(testCases);
     renderSolutions(testCases, results, solutions, problemsJson);
     renderNotes(notesHtml);
@@ -301,3 +279,64 @@ async function loadAll() {
 }
 
 document.addEventListener('DOMContentLoaded', loadAll);
+
+// ── Workspace action buttons (init / reset / eval) ──
+// These live in the shared header (header.js) and are gated by the workspace flags:
+//   init  — enabled when authoritative and this problem is NOT already active
+//   reset — enabled when authoritative and this problem IS active
+//   eval  — enabled when authoritative and this problem IS active (evaluates all solutions)
+function showCmdOutput(text, kind) {
+    const el = document.getElementById('cmd-output');
+    if (!el) return;
+    el.textContent = text;
+    el.className = kind ? `output-${kind}` : '';
+    el.hidden = !text;
+}
+
+function applyCmdButtonState(buttons, flags) {
+    const auth = !!flags.authoritative;
+    const active = !!flags.active;
+    buttons.init.disabled = !(auth && !active);   // nothing to init once it is the active workspace
+    buttons.reset.disabled = !(auth && active);   // reset / eval need the problem in the workspace
+    buttons.eval.disabled = !(auth && active);
+    for (const b of Object.values(buttons)) b.hidden = false;
+}
+
+async function runWorkspaceCmd(buttons, body, label) {
+    showCmdOutput(`${label}…`, '');
+    for (const b of Object.values(buttons)) b.disabled = true;
+    try {
+        const r = await fetch(`/${PROBLEM_NUMBER}/cmd`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+        });
+        const res = await r.json().catch(() => ({}));
+        showCmdOutput(res.output || (r.ok ? `${label} ok` : `${label} failed`), r.ok ? 'ok' : 'error');
+    } catch {
+        showCmdOutput('network error', 'error');
+    }
+    // The workspace may have changed: refresh the gating flags and reload the page data.
+    applyCmdButtonState(buttons, await fetchJson(`/flags?problem_number=${PROBLEM_NUMBER}`, {}));
+    await loadAll();
+}
+
+function wireWorkspaceButtons(flags) {
+    const buttons = {
+        init: document.getElementById('init-btn'),
+        reset: document.getElementById('reset-btn'),
+        eval: document.getElementById('eval-btn'),
+    };
+    if (!buttons.init || !buttons.reset || !buttons.eval) return;
+    buttons.init.title = 'Initialise this problem in the workspace';
+    buttons.reset.title = 'Stack changes and clear the workspace';
+    buttons.eval.title = 'Evaluate all solutions against the test cases';
+    applyCmdButtonState(buttons, flags);
+    buttons.init.addEventListener('click', () => runWorkspaceCmd(buttons, {cmd: 'init'}, 'init'));
+    buttons.reset.addEventListener('click', () => runWorkspaceCmd(buttons, {cmd: 'reset'}, 'reset'));
+    buttons.eval.addEventListener('click', () => runWorkspaceCmd(buttons, {cmd: 'eval'}, 'eval'));
+}
+
+// The buttons live in the shared header, injected asynchronously; SolverHeader.ready
+// resolves with the same flags header.js fetched, so reuse them for the initial state.
+window.SolverHeader.ready.then(wireWorkspaceButtons);

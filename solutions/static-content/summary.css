@@ -41,81 +41,50 @@
   --t_39: #67001f;
 }
 
-table.grid td.problem_solved.t_0 { background-color: var(--t_0); }
-table.grid td.problem_solved.t_1 { background-color: var(--t_1); }
-table.grid td.problem_solved.t_2 { background-color: var(--t_2); }
-table.grid td.problem_solved.t_3 { background-color: var(--t_3); }
-table.grid td.problem_solved.t_4 { background-color: var(--t_4); }
-table.grid td.problem_solved.t_5 { background-color: var(--t_5); }
-table.grid td.problem_solved.t_6 { background-color: var(--t_6); }
-table.grid td.problem_solved.t_7 { background-color: var(--t_7); }
-table.grid td.problem_solved.t_8 { background-color: var(--t_8); }
-table.grid td.problem_solved.t_9 { background-color: var(--t_9); }
-table.grid td.problem_solved.t_10 { background-color: var(--t_10); }
-table.grid td.problem_solved.t_11 { background-color: var(--t_11); }
-table.grid td.problem_solved.t_12 { background-color: var(--t_12); }
-table.grid td.problem_solved.t_13 { background-color: var(--t_13); }
-table.grid td.problem_solved.t_14 { background-color: var(--t_14); }
-table.grid td.problem_solved.t_15 { background-color: var(--t_15); }
-table.grid td.problem_solved.t_16 { background-color: var(--t_16); }
-table.grid td.problem_solved.t_17 { background-color: var(--t_17); }
-table.grid td.problem_solved.t_18 { background-color: var(--t_18); }
-table.grid td.problem_solved.t_19 { background-color: var(--t_19); }
-table.grid td.problem_solved.t_20 { background-color: var(--t_20); }
-table.grid td.problem_solved.t_21 { background-color: var(--t_21); }
-table.grid td.problem_solved.t_22 { background-color: var(--t_22); }
-table.grid td.problem_solved.t_23 { background-color: var(--t_23); }
-table.grid td.problem_solved.t_24 { background-color: var(--t_24); }
-table.grid td.problem_solved.t_25 { background-color: var(--t_25); }
-table.grid td.problem_solved.t_26 { background-color: var(--t_26); }
-table.grid td.problem_solved.t_27 { background-color: var(--t_27); }
-table.grid td.problem_solved.t_28 { background-color: var(--t_28); }
-table.grid td.problem_solved.t_29 { background-color: var(--t_29); }
-table.grid td.problem_solved.t_30 { background-color: var(--t_30); }
-table.grid td.problem_solved.t_31 { background-color: var(--t_31); }
-table.grid td.problem_solved.t_32 { background-color: var(--t_32); }
-table.grid td.problem_solved.t_33 { background-color: var(--t_33); }
-table.grid td.problem_solved.t_34 { background-color: var(--t_34); }
-table.grid td.problem_solved.t_35 { background-color: var(--t_35); }
-table.grid td.problem_solved.t_36 { background-color: var(--t_36); }
-table.grid td.problem_solved.t_37 { background-color: var(--t_37); }
-table.grid td.problem_solved.t_38 { background-color: var(--t_38); }
-table.grid td.problem_solved.t_39 { background-color: var(--t_39); }
+table.grid td.problem_solved { background-color: var(--t_0); color: #fff; }
+table.grid td.problem_solved.t_0 { background-color: var(--t_0); color: #fff; }
+table.grid td.problem_solved.t_1 { background-color: var(--t_1); color: #fff; }
+table.grid td.problem_solved.t_2 { background-color: var(--t_2); color: #fff; }
+table.grid td.problem_solved.t_3 { background-color: var(--t_3); color: #fff; }
+table.grid td.problem_solved.t_4 { background-color: var(--t_4); color: #fff; }
+table.grid td.problem_solved.t_5 { background-color: var(--t_5); color: #fff; }
+table.grid td.problem_solved.t_6 { background-color: var(--t_6); color: #fff; }
+table.grid td.problem_solved.t_7 { background-color: var(--t_7); color: #fff; }
+table.grid td.problem_solved.t_8 { background-color: var(--t_8); color: #fff; }
+table.grid td.problem_solved.t_9 { background-color: var(--t_9); color: #1e2030; }
+table.grid td.problem_solved.t_10 { background-color: var(--t_10); color: #1e2030; }
+table.grid td.problem_solved.t_11 { background-color: var(--t_11); color: #1e2030; }
+table.grid td.problem_solved.t_12 { background-color: var(--t_12); color: #1e2030; }
+table.grid td.problem_solved.t_13 { background-color: var(--t_13); color: #1e2030; }
+table.grid td.problem_solved.t_14 { background-color: var(--t_14); color: #1e2030; }
+table.grid td.problem_solved.t_15 { background-color: var(--t_15); color: #1e2030; }
+table.grid td.problem_solved.t_16 { background-color: var(--t_16); color: #1e2030; }
+table.grid td.problem_solved.t_17 { background-color: var(--t_17); color: #1e2030; }
+table.grid td.problem_solved.t_18 { background-color: var(--t_18); color: #1e2030; }
+table.grid td.problem_solved.t_19 { background-color: var(--t_19); color: #1e2030; }
+table.grid td.problem_solved.t_20 { background-color: var(--t_20); color: #1e2030; }
+table.grid td.problem_solved.t_21 { background-color: var(--t_21); color: #1e2030; }
+table.grid td.problem_solved.t_22 { background-color: var(--t_22); color: #1e2030; }
+table.grid td.problem_solved.t_23 { background-color: var(--t_23); color: #1e2030; }
+table.grid td.problem_solved.t_24 { background-color: var(--t_24); color: #1e2030; }
+table.grid td.problem_solved.t_25 { background-color: var(--t_25); color: #1e2030; }
+table.grid td.problem_solved.t_26 { background-color: var(--t_26); color: #1e2030; }
+table.grid td.problem_solved.t_27 { background-color: var(--t_27); color: #1e2030; }
+table.grid td.problem_solved.t_28 { background-color: var(--t_28); color: #1e2030; }
+table.grid td.problem_solved.t_29 { background-color: var(--t_29); color: #1e2030; }
+table.grid td.problem_solved.t_30 { background-color: var(--t_30); color: #1e2030; }
+table.grid td.problem_solved.t_31 { background-color: var(--t_31); color: #fff; }
+table.grid td.problem_solved.t_32 { background-color: var(--t_32); color: #fff; }
+table.grid td.problem_solved.t_33 { background-color: var(--t_33); color: #fff; }
+table.grid td.problem_solved.t_34 { background-color: var(--t_34); color: #fff; }
+table.grid td.problem_solved.t_35 { background-color: var(--t_35); color: #fff; }
+table.grid td.problem_solved.t_36 { background-color: var(--t_36); color: #fff; }
+table.grid td.problem_solved.t_37 { background-color: var(--t_37); color: #fff; }
+table.grid td.problem_solved.t_38 { background-color: var(--t_38); color: #fff; }
+table.grid td.problem_solved.t_39 { background-color: var(--t_39); color: #fff; }
 
-table.grid td.problem_solved { color: #fff; }
-table.grid td.problem_solved.t_9,
-table.grid td.problem_solved.t_10,
-table.grid td.problem_solved.t_11,
-table.grid td.problem_solved.t_12,
-table.grid td.problem_solved.t_13,
-table.grid td.problem_solved.t_14,
-table.grid td.problem_solved.t_15,
-table.grid td.problem_solved.t_16,
-table.grid td.problem_solved.t_17,
-table.grid td.problem_solved.t_18,
-table.grid td.problem_solved.t_19,
-table.grid td.problem_solved.t_20,
-table.grid td.problem_solved.t_21,
-table.grid td.problem_solved.t_22,
-table.grid td.problem_solved.t_23,
-table.grid td.problem_solved.t_24,
-table.grid td.problem_solved.t_25,
-table.grid td.problem_solved.t_26,
-table.grid td.problem_solved.t_27,
-table.grid td.problem_solved.t_28,
-table.grid td.problem_solved.t_29,
-table.grid td.problem_solved.t_30 { color: #1e2030; }
-
-*, *::before, *::after { box-sizing: border-box; }
-
+/* Reset, typography, colours, and the 860px content width live in common.css. */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
-  font-size: 13px;
-  line-height: 1.65;
-  color: #1e2030;
-  background: #f4f6fb;
-  max-width: 860px;
-  margin: 0 auto;
   padding: 24px 24px 64px;
 }
 
@@ -137,60 +106,9 @@ h3 {
   margin: 20px 0 6px;
 }
 
-/* Navigation header bar, matching the problem page (problem.css #page-header).
-   Previous/next have no meaning on the summary, so they are shown for parity
-   but rendered as inert, muted placeholders. */
-#page-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-sizing: border-box;
-  margin-bottom: 16px;
-  padding: 6px 10px;
-  background: linear-gradient(180deg, #f5f8fd 0%, #e9eff8 100%);
-  border: 1px solid #d6deec;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(30, 32, 48, 0.08);
-}
-
-/* Opaque band filling the strip above the pinned header (the body padding),
-   so content scrolling underneath can't peek through that gap. */
-#page-header::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 100%;
-  height: 24px;
-  background: #f4f6fb;
-}
-
-#page-header a,
-#page-header span {
-  font-size: 1rem;
-  color: #5a7ab8;
-  width: 32px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  text-decoration: none;
-}
-
-#page-header a:hover {
-  background: #eef3fb;
-  color: #2a509a;
-  text-decoration: none;
-}
-
-#page-header .nav-dummy {
-  color: #b8c0d4;
-  cursor: default;
-}
+/* The shared nav bar's position and look both live in header.css. On the summary,
+   previous/next/this-problem have no meaning, so header.js renders them as inert,
+   muted placeholders. */
 
 /* White card surfaces matching the problem page's section cards. */
 .summary-info {
@@ -233,9 +151,9 @@ table.grid {
 }
 
 table.grid td {
-  width: 38px;
-  min-width: 38px;
-  height: 38px;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
   text-align: center;
   vertical-align: middle;
   font-size: 0.77rem;
@@ -292,10 +210,11 @@ table.grid td a {
 .tooltiptext_narrow .tt-date  { font-size: 0.78rem; opacity: 0.85; color: #aed4f8; }
 .tooltiptext_narrow .tt-name  { font-size: 0.82rem; margin-top: 3px; font-style: italic; }
 
-/* 3-column row layout for "by ID" grids */
+/* x-column row layout for "by ID" grids */
 .grids-row-layout {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 20px 24px;
 }
 

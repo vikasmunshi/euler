@@ -8,6 +8,8 @@ __all__ = ['manage_config']
 from solver.config import config, ExitCodes
 from solver.core.problems import Problem, problems as problem_set
 from solver.shell import register, console
+from solver.core.checkout import workspace_checkout_reason
+from solver.core.lock import lock_state
 
 
 @register(help_text='Show list of problems ([accent.dim]all[/accent.dim]|solved|unsolved|stale).')
@@ -39,7 +41,7 @@ def problems(which: Literal['all', 'solved', 'unsolved', 'stale'] = 'all') -> in
 
 @register(help_text='Manage configuration settings.')
 def manage_config(
-        param: Literal['all', 'server_port', 'timeout_multiple', 'timeout_single', 'usd_to_eur'] = 'all',
+        param: Literal['all', 'server_port', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate'] = 'all',
         value: float | int | None = None, /,
 ) -> int:
     """Show or update a managed configuration setting.
@@ -47,7 +49,7 @@ def manage_config(
     The managed settings persist to `solver/config.json` and override the
     defaults in `config.py`: `server_port` (the web server's port),
     `timeout_single` / `timeout_multiple` (solution timeouts in seconds for a
-    single run and for repeated runs), and `usd_to_eur` (the rate `costs` uses).
+    single run and for repeated runs), and `ecb_usd_rate` (the rate `costs` uses).
 
     Args:
         param:  Which setting to act on; 'all' (default) prints every setting.
@@ -55,7 +57,7 @@ def manage_config(
                 setting's type and saved). When omitted, the current value of
                 `param` is printed instead.
     """
-    config_params: list[str] = ['server_port', 'timeout_multiple', 'timeout_single', 'usd_to_eur']
+    config_params: list[str] = ['server_port', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate']
     if param == 'all':
         param_len: int = max(len(p) for p in config_params) + 1
         for config_param in config_params:
@@ -77,7 +79,7 @@ def manage_config(
         return ExitCodes.EXIT_USAGE
 
 
-@register(help_text='Check and report the workspace lock status.')
+@register(help_text='Check and report the workspace checkout and lock status.')
 def lock_status() -> int:
     """Report whether this shell holds the workspace lock, and who does.
 
@@ -90,12 +92,17 @@ def lock_status() -> int:
         EXIT_USAGE (2)  : this shell acquired the lock (PID shown).
         EXIT_ERROR (1)  : the workspace could not be locked.
     """
-    from solver.core.lock import lock_state
-    if lock_state.inherited:
-        console.print(f'[success]Workspace lock inherited from PID {lock_state.pid_of_holder}[/success]')
+    if (reason := workspace_checkout_reason()) is None:
+        console.print('[success]Workspace is not checked out[/success].')
+    else:
+        console.print(f'[warning]Workspace is checked out ([accent]{reason}[/accent])[/warning] — '
+                      '[muted]init and reset are blocked until [accent]checkin[/accent].[/muted]')
+    _lock_state = lock_state()
+    if _lock_state.inherited:
+        console.print(f'[success]Workspace lock inherited from PID {_lock_state.pid_of_holder}[/success]')
         return ExitCodes.EXIT_OK
-    if lock_state.acquired:
-        console.print(f'[warning]Workspace lock acquired by PID {lock_state.pid_of_holder}[/warning]')
+    if _lock_state.acquired:
+        console.print(f'[warning]Workspace lock acquired by PID {_lock_state.pid_of_holder}[/warning]')
         return ExitCodes.EXIT_USAGE
-    console.print(f'[error]Workspace is not locked!{lock_state.held_by}[/error]')
+    console.print(f'[error]Workspace is not locked!{_lock_state.held_by}[/error]')
     return ExitCodes.EXIT_ERROR

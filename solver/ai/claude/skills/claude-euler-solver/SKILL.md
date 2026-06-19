@@ -1,7 +1,7 @@
 ---
 name: claude-euler-solver
 description: Use when Claude is invoked from *inside* a running SolverShell via
-  `claude -p /claude-euler-solver <problem_number> <action> [additional_prompt]`
+  `claude -p /claude-euler-solver <action> [additional_prompt]`
   to perform an action on the already-locked `workspace/`. The parent SolverShell
   holds the workspace lock and Claude inherits it through the `solver_workspace_lock`
   environment variable, so `solver` subcommands run directly. Two actions —
@@ -19,7 +19,7 @@ A skill that runs **inside** a live `solver` shell. A SolverShell that is alread
 running — and already holds the workspace lock — launches Claude with:
 
 ```
-claude -p /claude-euler-solver <problem_number> <action> [additional_prompt]
+claude -p /claude-euler-solver <action> [additional_prompt]
 ```
 
 `<action>` is `solve` or `review`; `[additional_prompt]` is optional free-form
@@ -111,31 +111,54 @@ auto-denied in a headless run.
 solver lock-status
 ```
 
-It must return **0** (`Workspace lock inherited from PID …`). Any non-zero exit
-means we are **not** running inside a lock-holding SolverShell (`2` = this process
-acquired the lock standalone, `1` = the workspace is not locked) — **abort
-immediately**: report that this skill must be invoked as
-`claude -p /claude-euler-solver <problem_number> <action> [additional_prompt]`
-from inside a running, lock-holding SolverShell, and do nothing else.
-
-Once the lock is confirmed, **initialize and list the workspace**:
-
-```bash
-solver "init <problem_number>; ls"
+Example output:
+```text
+$ solver lock-status
+lock-status
+Workspace is checked out (claude-skill) — init and reset are blocked until checkin.
+Workspace lock inherited from PID 458944
+lock-status → 0
 ```
 
-Confirm both: (1) the problem number matches the `ls` header line, and (2)
-`statement.html` exists and holds a real statement. If either fails, **stop and
-report — do not improvise.** (See [`init`](docs/commands-index.md#command-init) /
-[`ls`](docs/commands-index.md#command-ls-list).)
+It reports the workspace check-out status as one of:
+`Workspace is not checked out.` or
+`Workspace is checked out (<reason>) — init and reset are blocked until checkin.`
+
+It reports the workspace lock status as one of:
+`Workspace lock inherited from PID <PID>`,
+`Workspace lock acquired by PID <PID>`, or
+`Workspace is not locked! (held by PID <PID>)`
+
+It must return **0** (`Workspace lock inherited from PID …`).
+Any non-zero exit means we are **not** running inside a lock-holding SolverShell
+(`2` = this process acquired the lock standalone; `1` = the workspace is not
+locked). In that case, **abort immediately**: report that this skill must be
+invoked as `claude -p /claude-euler-solver <action> [additional_prompt]` from
+inside a running, lock-holding SolverShell, and do nothing else.
+
+Once the lock is confirmed, **list the workspace** (see [`ls`](docs/commands-index.md#command-ls-list)):
+
+```bash
+solver ls
+```
+
+If the workspace is empty, check additional_prompt for a problem number (e.g. solve problem 42, 42, or problem 42).
+If one is provided, init the workspace for that problem (see [init](docs/commands-index.md#command-init)):
+```bash
+solver "checkin && init <problem_number>"
+```
+
+Confirm `statement.html` exists and read it.
+Otherwise, **abort and report that this skill must be invoked with an initialized workspace.**
 
 ---
 
 ## Phase 2 — Action
 
 Dispatch on `<action>`. If an `[additional_prompt]` was given, treat it as extra
-caller guidance (an algorithm hint, a constraint, an aspect to focus on) and factor
-it in without overriding the action's contract or the conventions.
+caller guidance — an algorithm hint, a constraint, an aspect to focus on, or an
+additional step to perform — and factor it in without overriding the action's
+contract or the conventions.
 
 > **Note:** implement any required analysis/brute-force scripts in `workspace/` as
 > **non-executable** files. The `eval` / `benchmark` harness only discovers
@@ -180,7 +203,7 @@ following the [solve workflow](docs/solver-guide.md#7-the-solve-workflow):
 ### `review`
 
 Audit an **existing** solution and bring it up to standard. **Precondition:** at
-least one solution file (`pNNNN_sK.py` or `.c`) must exist — if none does, stop and
+least one python solution file (`pNNNN_sK.py`) must exist — if none does, stop and
 report that this is a `solve` job, not a `review`. Then, in order:
 
 1. **C ↔ Python parity.** For each solution index, read the `.py` and its `.c` and
@@ -220,12 +243,15 @@ the exception: `→ 1` means *has changes* — proceed.)
    issues automatically; fix any remaining `mypy`/`flake8` errors by hand (we own
    `workspace/`) and re-run until `lint(...) → 0`. If you cannot make it pass, stop
    and report.
-3. **Stack, reset, and commit:** `solver "stack && reset && git-commit"`. Confirm
-   the canonical echoes `stack() → 0` and `git-commit() → 0`.
+3. **Stack:** `solver stack`. Confirm the canonical echo `stack() → 0`.
+   Note: the SolverShell holds the workspace *checked out* for the whole run
+   (so a stray `reset` cannot clear it mid-session); `reset` will fail without
+   a prior checkin. The shell checks the workspace back in when this skill returns,
+   leaving it populated for the user to inspect, commit, and reset.
 
 Then **summarise the session** in one or two sentences (the action, and what was
-found or done — including where persistence stopped, if it did) and end the turn,
-returning control to the SolverShell.
+found or done — including tokens consumed) and end the turn, returning control to
+the SolverShell.
 
 ---
 
@@ -237,11 +263,14 @@ returning control to the SolverShell.
   only through the `workspace/` that `init` populated.
 - In `solve`: code against the actual `test_cases.json` `input` schema; verify `dev`
   before computing `main`; build caches **inside** `solve()`; never print after the
-  harness's final line; write the computed answer into **every** `null` `answer`.
+  harness's final line; and write the computed answer into **every** `null` `answer`.
+- In `solve`: **use** `workspace/` as scratch space, creating any required analysis
+  artifacts as non-executable files.
 - In `review`: do **not** rewrite a `.c` that already matches its Python, and do
   **not** change any algorithm; keep `.c` files non-executable (only the compiled
   `_c` is `+x`). Take only the corrective steps the audit actually requires — a
-  solution already in parity, documented, and summarised is a valid "nothing to do".
+  solution that is already in parity, documented, and summarised is a valid
+  "nothing to do".
 - In [Finalize](#phase-3--finalize-always-last): the steps are **gated** — a
-  non-zero exit at lint / stack / commit, or an unfixable lint error, is a
-  stop-and-report, never a reason to push on.
+  non-zero exit at lint, or an unfixable lint error, is a stop-and-report,
+  never a reason to push on.

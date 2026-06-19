@@ -14,6 +14,7 @@ from shutil import rmtree
 from subprocess import run
 
 from solver.config import ExitCodes, config
+from solver.core.checkout import requires_checkin
 from solver.core.lock import check_workspace_lock_command
 from solver.core.parser import problem_statement
 from solver.core.problems import Problem
@@ -28,6 +29,7 @@ from solver.utils.path_utils import canonical_path, iterdir_recursive, write_fil
 @register(help_text='Initialize the workspace for the given problem number.', quietable=True)
 @refresh_workspace_vars
 @check_workspace_lock_command
+@requires_checkin
 def init(problem_number: int, /, *, refresh: bool = False) -> int:
     """
     Initialize the workspace for the specified problem number.
@@ -86,10 +88,7 @@ def init(problem_number: int, /, *, refresh: bool = False) -> int:
     return ExitCodes.EXIT_OK
 
 
-@register(
-    help_text='List current workspace, indicating changes against stack.',
-    aliases=('list',)
-)
+@register(help_text='List current workspace, indicating changes against stack.', aliases=('list',))
 def ls() -> int:
     """
     Generates a summary report of the current workspace, including information related to
@@ -166,6 +165,7 @@ def ls() -> int:
 @register(help_text='Clear the workspace, and, if required, stack first.', quietable=True)
 @refresh_workspace_vars
 @check_workspace_lock_command
+@requires_checkin
 def reset(*, discard_changes: bool = False) -> int:
     """
     Clear the workspace by deleting all files and directories.
@@ -194,11 +194,7 @@ def reset(*, discard_changes: bool = False) -> int:
     return ExitCodes.EXIT_OK
 
 
-@register(
-    help_text='Propagate stackable workspace changes to the stack.',
-    aliases=('save',),
-    quietable=True,
-)
+@register(help_text='Propagate stackable workspace changes to the stack.', aliases=('save',), quietable=True)
 @check_workspace_lock_command
 def stack(*, process_deletions: bool = True) -> int:
     """

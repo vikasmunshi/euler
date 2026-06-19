@@ -73,7 +73,7 @@ def get_problems() -> dict[int, dict[str, str | int | bool]]:
 
 @lru_cache(maxsize=None)
 def get_notes_are_stale_func() -> Callable[[int], bool]:
-    """Lazily import the notes_are_stale function."""
+    """Lazily import the notes_are_stale function. Stack already imports problems"""
     from solver.core.stack import notes_are_stale
     return notes_are_stale
 
@@ -96,6 +96,10 @@ class Problems:
         self.__solutions_history = {}
         self.__solved_problems = []
         self.__not_solved_problems = []
+
+    @property
+    def last_problem(self) -> Problem:
+        return self.problems_list[-1]
 
     @property
     def problems_list(self) -> list[Problem]:

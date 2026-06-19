@@ -48,7 +48,8 @@ import signal
 from types import FrameType
 from typing import Any, Callable, Generator, Iterable, cast
 
-from solver.config import Singleton
+from solver.config import Singleton, config
+from solver.core.lock import descendant_pids, lock_state, proc_is_solver
 from solver.core.problems import Problem, problems
 from solver.shell.tty import console
 
@@ -67,10 +68,10 @@ class Variables(metaclass=Singleton):
 
     def __init__(self) -> None:
         self.__dict__: dict[str, Any] = {
+            'config': config,
             'loop': None,
             'problem': None,
             'rcode': 0,
-            'reserved': [],
             'next': lambda: next(
                 (p for p in problems.problems_list if p not in problems.solved_problems),
                 problems.problems_list[-1]
@@ -78,10 +79,11 @@ class Variables(metaclass=Singleton):
             'random': lambda: random.choice(
                 [p for p in problems.problems_list if p not in problems.solved_problems] or problems.problems_list
             ).number,
-            'problems': problems.problems_list,
+            'problems': lambda: problems.problems_list,
             'solved': lambda: problems.solved_problems,
             'unsolved': lambda: problems.not_solved_problems,
             'stale': lambda: problems.stale_problems,
+            'reserved': [],
         }
         self.__reserved__: set[str] = set(self.__dict__.keys())
         self.__dict__['reserved'] = sorted(self.__reserved__)
@@ -172,29 +174,38 @@ class Variables(metaclass=Singleton):
     def refresh_workspace_vars(self) -> None:
         """Sync the `problem` special from the current workspace problem."""
         self.problem = Problem.from_workspace()
+        problems.clear_cache()
 
 
 # ---------------------------------------------------------------------------
 # Cross-process workspace-var refresh
 #
-# The interactive shell owns the workspace flock (lock_state.acquired) for its
-# whole session; the children it spawns (the web server, claude-skill) inherit
-# that lock (lock_state.inherited) and carry the owner's PID in lock_state. When
-# a child mutates the workspace it re-syncs its own vars, then signals the owner
-# so the otherwise-idle parent shell re-runs refresh_workspace_vars() too.
+# The lock owner (lock_state.acquired) holds the workspace flock for its whole
+# lifetime; every shell it spawns (the web server and the PTY shells it forks,
+# claude-skill) inherits that lock (lock_state.inherited) and carries the owner's
+# PID in lock_state. The owner is therefore an ancestor of every sibling shell.
+#
+# A workspace change is propagated through the owner as a hub:
+#   * the owner mutates  → it fans the nudge straight out to its descendants;
+#   * a descendant mutates → it signals the owner (the single well-known PID),
+#     whose handler re-syncs and then fans out to *all* descendants (the sender
+#     included — a redundant but idempotent re-read), so every sibling re-syncs.
+# Only the owner ever fans out (descendants merely re-sync in their handler), so
+# the relay cannot loop.
 #
 # The SIGUSR1 handler is installed once, at Variables construction (import time),
-# in every process: this replaces SIGUSR1's default "terminate" before any child
+# in every process: this replaces SIGUSR1's default "terminate" before any peer
 # can send the nudge, and avoids depending on lock state that is not yet known at
-# import. Only the lock owner is ever signalled (see _notify_parent), so a handler
-# sitting idle in a non-owner process is harmless.
+# import. A handler sitting idle in a process that is neither owner nor descendant
+# is harmless.
 # ---------------------------------------------------------------------------
 _parent_trigger_installed: bool = False
 
 
 def _on_workspace_changed(signum: int, frame: FrameType | None) -> None:
-    """SIGUSR1 handler: re-sync vars after a child changed the workspace."""
+    """SIGUSR1 handler: re-sync vars after a workspace change, then relay if we own the lock."""
     variables.refresh_workspace_vars()
+    _broadcast_to_descendants()
 
 
 def _install_parent_trigger() -> None:
@@ -209,12 +220,37 @@ def _install_parent_trigger() -> None:
     _parent_trigger_installed = True
 
 
-def _notify_parent() -> None:
-    """From a child holding an inherited lock, nudge the owner shell to re-sync its vars."""
-    from solver.core.lock import lock_state  # local import to avoid circular import
-    if lock_state.inherited and lock_state.pid_of_holder:
+def _broadcast_to_descendants() -> None:
+    """If this process owns the workspace lock, nudge every descendant shell to re-sync.
+
+    A no-op in any non-owner process (self-guarded on `lock_state.acquired`), so descendants
+    never re-fan and the relay terminates after one hop. Only `solver` shells are signalled: a
+    non-solver descendant (e.g. the `claude` child spawned by `claude-skill`, or its `sh -c`
+    wrapper) has no SIGUSR1 handler, so the nudge would terminate it (`claude exited -10`).
+    """
+    if not lock_state().acquired:
+        return
+    for pid in descendant_pids(os.getpid()):
+        if not proc_is_solver(pid):
+            continue  # not a sibling shell — no handler installed, so the nudge would kill it
         try:
-            os.kill(lock_state.pid_of_holder, signal.SIGUSR1)
+            os.kill(pid, signal.SIGUSR1)
+        except OSError:
+            pass  # that descendant has gone; nothing to refresh there
+
+
+def _notify_peers() -> None:
+    """Propagate a local workspace change to the other shells sharing the lock.
+
+    The owner fans out to its descendants directly; a descendant routes the nudge through the
+    owner, whose handler then reaches every sibling.
+    """
+    _lock_state = lock_state()
+    if _lock_state.acquired:
+        _broadcast_to_descendants()
+    elif _lock_state.inherited and _lock_state.pid_of_holder:
+        try:
+            os.kill(_lock_state.pid_of_holder, signal.SIGUSR1)
         except OSError:
             pass  # owner already gone; nothing left to refresh
 
@@ -232,7 +268,7 @@ def refresh_workspace_vars[**P, T](func: Callable[P, T]) -> Callable[P, T]:
             console.print(f'[primary]Workspace '
                           f'{'is empty' if variables.problem is None else f'has {variables.problem.as_title()}'}'
                           f'[/primary]')
-            _notify_parent()
+            _notify_peers()
 
     wrapper.__refresh_workspace_vars__ = True  # type: ignore[attr-defined]
     return wrapper

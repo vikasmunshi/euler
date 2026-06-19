@@ -70,15 +70,16 @@ class Scripts(metaclass=Singleton):
 
 
 class Config(metaclass=Singleton):
-    __slots__ = ('api_timeout', 'author_email', 'backup_dir', 'bin_dir', 'cache_dir', 'default_results',
-                 'default_solution_notes', 'default_test_cases', 'docs_dir', 'history_file', 'keys_backup_file',
-                 'keys_file', 'keys_version', 'lock_env_var', 'max_line_length', 'max_output_tokens', 'max_retries',
-                 'modules_file', 'notes_filename', 'number_filename', 'private_key_file', 'project_git_url',
-                 'projecteuler_url', 'resource_dirname', 'results_filename', 'root_dir', 'schema_file', 'screen_width',
-                 'scripts', 'server_pid_file', 'server_port', 'session_file', 'skill_dir', 'solutions_dir',
-                 'stale_notes_tolerance_s', 'statement_filename', 'static_file_dir', 'static_file_problems',
-                 'static_file_progress', 'static_file_progress_editor', 'style', 'templates_dir', 'test_cases_filename',
-                 'theme', 'timeout_multiple', 'timeout_single', 'usd_to_eur', 'workspace_dir')
+    __slots__ = ('api_timeout', 'author_email', 'backup_dir', 'bin_dir', 'cache_dir', 'checkout', 'default_results',
+                 'default_solution_notes', 'default_test_cases', 'docs_dir', 'ecb_usd_rate', 'history_file',
+                 'keys_backup_file', 'keys_file', 'keys_version', 'lock_env_var', 'max_line_length',
+                 'max_output_tokens', 'max_retries', 'modules_file', 'notes_filename', 'number_filename',
+                 'private_key_file', 'project_git_url', 'projecteuler_url', 'resource_dirname', 'results_filename',
+                 'root_dir', 'schema_file', 'screen_width', 'scripts', 'server_lock_file', 'server_port',
+                 'session_file', 'skill_dir', 'solutions_dir', 'stale_notes_tolerance_s', 'statement_filename',
+                 'static_file_dir', 'static_file_problems', 'static_file_progress', 'static_file_progress_editor',
+                 'style', 'templates_dir', 'test_cases_filename', 'theme', 'timeout_multiple', 'timeout_single',
+                 'workspace_dir')
 
     managed_config_file: ClassVar[Path] = Path(__file__).parent / 'config.json'
     version: ClassVar[str] = '0.2'
@@ -89,6 +90,7 @@ class Config(metaclass=Singleton):
                  backup_dir: str,
                  bin_dir: str,
                  cache_dir: str,
+                 checkout: str,
                  docs_dir: str,
                  history_file: str,
                  keys_backup_file: str,
@@ -96,7 +98,7 @@ class Config(metaclass=Singleton):
                  modules_file: str,
                  private_key_file: str,
                  schema_file: str,
-                 server_pid_file: str,
+                 server_lock_file: str,
                  session_file: str,
                  skill_dir: str,
                  solutions_dir: str,
@@ -135,13 +137,14 @@ class Config(metaclass=Singleton):
         self.test_cases_filename: str = 'test_cases.json'
         self.timeout_multiple: float = 30.0  # timeout in seconds per run when runs > 1
         self.timeout_single: float = 90.0  # timeout in seconds for single run
-        self.usd_to_eur: float = 0.92  # euros per US dollar, used by `costs`; updated as needed
+        self.ecb_usd_rate: float = 1.00  # euros per US dollar, used by `costs`; updated by update-models cmd
 
         root_dir: Path = _root_dir()
         self.root_dir: Path = root_dir
         self.backup_dir: Path = root_dir / backup_dir
         self.bin_dir: Path = root_dir / bin_dir
         self.cache_dir: Path = root_dir / cache_dir
+        self.checkout: Path = root_dir / checkout
         self.docs_dir: Path = root_dir / docs_dir
         self.history_file: Path = root_dir / history_file
         self.keys_backup_file: Path = root_dir / keys_backup_file
@@ -149,7 +152,7 @@ class Config(metaclass=Singleton):
         self.modules_file: Path = root_dir / modules_file
         self.private_key_file: Path = Path.home() / private_key_file
         self.schema_file: Path = root_dir / schema_file
-        self.server_pid_file: Path = root_dir / server_pid_file
+        self.server_lock_file: Path = root_dir / server_lock_file
         self.session_file: Path = root_dir / session_file
         self.skill_dir: Path = root_dir / skill_dir
         self.solutions_dir: Path = root_dir / solutions_dir
@@ -168,12 +171,20 @@ class Config(metaclass=Singleton):
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    def __repr__(self) -> str:
+        return dumps(
+            {'server_port': self.server_port,
+             'timeout_multiple': self.timeout_multiple,
+             'timeout_single': self.timeout_single,
+             'ecb_usd_rate': self.ecb_usd_rate,
+             }, indent=2)
+
     def dump_managed_config(self) -> None:
         self.managed_config_file.write_text(dumps(
             {'server_port': self.server_port,
              'timeout_multiple': self.timeout_multiple,
              'timeout_single': self.timeout_single,
-             'usd_to_eur': self.usd_to_eur,
+             'ecb_usd_rate': self.ecb_usd_rate,
              }, indent=2))
 
     def load_managed_config(self) -> None:
@@ -200,6 +211,7 @@ config: Config = Config(
     backup_dir='.backup',
     bin_dir='.bin',
     cache_dir='.cache',
+    checkout='.checkout',
     docs_dir='docs',
     history_file='.history',
     keys_backup_file='backup/keys_backup.json',
@@ -207,7 +219,7 @@ config: Config = Config(
     modules_file='solver/modules.csv',
     private_key_file='.ssh/id_solver',
     schema_file='keys/schema.json',
-    server_pid_file='.server.pid',
+    server_lock_file='.server.lock',
     session_file='.session',
     skill_dir='solver/ai/claude/skills/claude-euler-solver',
     solutions_dir='solutions',
@@ -247,6 +259,7 @@ config: Config = Config(
     style=Style.from_dict({
         'prompt.bar': '#f97316 bold',
         'prompt.path': '#60a5fa',
+        'prompt.path.unlocked': '#475569',  # dimmed: workspace lock not held
         'prompt.symbol': '#f97316 bold',
         'prompt.user': '#e5e7eb',
         '': '#60a5fa',  # typed input text

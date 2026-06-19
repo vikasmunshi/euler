@@ -42,10 +42,13 @@ DOCS_DIR: Path = config.docs_dir
 _MARKUP = re.compile(r'\[/?[\w.]+\]')
 
 #: Trailing legend glyphs the registry appends to a command's help text.
-#:   § requires the workspace lock · ↻ may refresh workspace state · » supports --silent
+#:   § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while checked out ·
+#:   ⚑ checks the workspace out while it runs · » supports --silent
 _LEGEND: dict[str, str] = {
     '§': 'requires the workspace lock',
     '↻': 'may refresh workspace state',
+    '⊘': 'refuses while the workspace is checked out',
+    '⚑': 'checks the workspace out while it runs',
     '»': 'supports `--silent`',
 }
 
@@ -135,9 +138,10 @@ def gen_command_index() -> str:
         description, glyphs = _clean_help(cmd.help)
         parts = [f'#### {_heading_text(cmd)}', '']
         if description:
-            parts += [description, '']
+            parts += [description]
         if glyphs:
-            parts += ['**Flags:** ' + ', '.join(f'{g} ({_LEGEND[g]})' for g in glyphs), '']
+            parts += ['\n'.join(f'* {g} {_LEGEND[g]}' for g in glyphs)]
+        parts += ['']
         parts.append(_usage_block(cmd))
         docstring = _docstring(cmd)
         if docstring:

@@ -5,21 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>progress editor</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="progress-editor.css">
+    <link rel="stylesheet" href="/common.css">
+    <link rel="stylesheet" href="/header.css">
+    <link rel="stylesheet" href="/progress-editor.css">
 </head>
 <body>
-<div id="page-header">
-    <span class="nav-dummy" title="Previous problem">&laquo;</span>
-    <a href="https://projecteuler.net/progress" target="_blank" rel="noopener noreferrer" title="View on Project Euler">&#8962;</a>
-    <a href="/summary" title="Summary">&#9776;</a>
-    <a href="https://github.com/vikasmunshi/euler" target="_blank" rel="noopener noreferrer" title="View on GitHub">&#8857;</a>
-    <a href="/progress" title="Progress Editor">&#9749;</a>
-    <span class="nav-dummy" title="Next problem">&raquo;</span>
-    <span class="toolbar-spacer"></span>
-    <button id="save">Save</button>
-    <span id="status"></span>
-</div>
-<label for="content"></label><textarea id="content" spellcheck="false">{{CONTENT}}</textarea>
-<script src="progress-editor.js"></script>
+<!-- header.js injects the shared nav bar; progress-editor.js reuses its Save button. -->
+<div id="page-header"></div>
+<pre id="save-output" hidden></pre>
+<textarea id="content" aria-label="progress file" spellcheck="false">{{CONTENT}}</textarea>
+<!-- header.js (classic) defines window.SolverHeader before progress-editor.js awaits it. -->
+<script src="/header.js"></script>
+<script src="/progress-editor.js"></script>
 </body>
 </html>

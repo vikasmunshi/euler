@@ -1,7 +1,14 @@
+/* ── Terminal page layout ──
+   Colours come from the active theme (solver-theme.css, a symlink to a
+   solver-theme-*.css variable file); this file holds only layout and reads the
+   --page-* / --scrollbar-* / --status-* variables. solver.js reads the matching
+   --term-* / --ansi-* variables to build the xterm theme, so repointing the
+   symlink re-themes both the page chrome and the terminal grid. */
+
 html, body {
     margin: 0;
     height: 100%;
-    background: #1e1e1e;
+    background: var(--page-bg);
 }
 #terminal {
     position: absolute;
@@ -19,10 +26,10 @@ html, body {
 .xterm {
     padding-right: 12px;
 }
-/* Thin, dark scrollbar (Firefox + WebKit) sitting in that gutter. */
+/* Thin scrollbar (Firefox + WebKit) sitting in that gutter. */
 .xterm-viewport {
     scrollbar-width: thin;
-    scrollbar-color: #44475a transparent;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 .xterm-viewport::-webkit-scrollbar {
     width: 8px;
@@ -31,7 +38,7 @@ html, body {
     background: transparent;
 }
 .xterm-viewport::-webkit-scrollbar-thumb {
-    background: #44475a;
+    background: var(--scrollbar-thumb);
     border-radius: 4px;
 }
 #status {
@@ -40,11 +47,11 @@ html, body {
     right: 8px;
     z-index: 10;
     font: 12px/1.4 monospace;
-    color: #888;
-    background: rgba(30, 30, 30, 0.8);
+    color: var(--status-color);
+    background: var(--status-bg);
     padding: 2px 8px;
     border-radius: 4px;
     pointer-events: none;
 }
-#status.error { color: #e06c75; }
-#status.open { color: #98c379; }
+#status.error { color: var(--status-error); }
+#status.open { color: var(--status-open); }
