@@ -9,7 +9,7 @@ from pathlib import Path
 from subprocess import run
 
 from solver.config import config
-from solver.shell import console
+from solver.shell import console, register
 
 
 def confirm(prompt: str) -> bool:
@@ -18,10 +18,11 @@ def confirm(prompt: str) -> bool:
     return response.lower() == 'yes'
 
 
-def pause() -> None:
+@register(help_text='Pause for user confirmation to continue.')
+def pause() -> int:
     """Pause the program execution until the user presses Enter."""
-    console.input('[muted]paused[/muted]\nPress enter to continue:')
-    return None
+    console.input('[muted]paused[/muted]\nPress enter to continue: ')
+    return 0
 
 
 def run_command(command: str, *, cwd: Path | None = None, silent: bool = False) -> str | None:

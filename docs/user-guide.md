@@ -235,6 +235,7 @@ command name below links to its full entry — usage and description — in the
 | [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. § » |
 | [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file in the workspace. § » |
+| [`pause`](commands-index.md#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
@@ -267,18 +268,18 @@ solver <<'EOF'
 init 42     # initialize the workspace for problem 42
 checkout    # optionally, check out the workspace to prevent accidental reset
 show        # open the problem page in a browser to read and understand the problem
-            # create scripts (non-executable files) in the workspace directory to derive/confirm mathematical insights
+pause       # create scripts (non-executable files) in the workspace directory to derive/confirm mathematical insights
 new --tc    # create an empty test-case file in the workspace directory
 new --py    # create a template Python solution file in the workspace directory (p0042_s0.py)
-            # implement solve() in the solution template
+pause       # implement solve() in the solution template
 eval        # evaluate the solution against the test cases
-            # record the answers in the test-case file
+pause       # record the answers in the test-case file
 benchmark   # time the solution, the first time it is run 1 time
 mark        # mark the problem as solved
 new --c     # create a template C solution file in the workspace directory (p0042_s0.c)
-            # translate the solution to C,
+pause       # translate the solution to C,
 benchmark   # time the solution, (it is run between 1 to 21 times based on earlier times)
-            # document your learnings in notes.html
+pause       # document your learnings in notes.html
 stack       # save the workspace to the stack
 checkin     # check in the workspace,
 reset       # clear the workspace (reset before checkin is blocked by checkout)

@@ -62,6 +62,7 @@ a parameter that accepts repetition.
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. § » |
 | [`new`](#command-new) | — | Generate new solution/test-case file in the workspace. § » |
+| [`pause`](#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
@@ -734,6 +735,20 @@ Python solution files in the workspace (e.g., "p0001_s0.py", "p0001_s1.py").
 
 Prompts the user for confirmation before creating the file. The file is created from
 the boilerplate template with the problem information substituted.
+```
+
+---
+
+#### Command: `pause`
+
+Pause for user confirmation to continue.
+
+```
+pause
+```
+
+```text
+Pause the program execution until the user presses Enter.
 ```
 
 ---

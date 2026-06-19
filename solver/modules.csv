@@ -44,7 +44,7 @@ solver.utils.misc,True,True
 solver.utils.path_utils,,
 solver.utils.scripts,True,True
 solver.utils.search,True,True
-solver.utils.shell_utils,,
+solver.utils.shell_utils,True,True
 solver.utils.show,True,True
 solver.utils.solution_files,True,True
 solver.utils.summary,True,True
