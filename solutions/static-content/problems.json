@@ -1354,15 +1354,15 @@
     "title": "Coloured Configurations",
     "level": 31,
     "pct": 79,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 18:18"
   },
   "195": {
     "title": "$60$-degree Triangle Inscribed Circles",
     "level": 28,
     "pct": 72,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 14:14"
   },
   "196": {
     "title": "Prime Triplets",
@@ -1382,15 +1382,15 @@
     "title": "Ambiguous Numbers",
     "level": 33,
     "pct": 85,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 14:53"
   },
   "199": {
     "title": "Iterative Circle Packing",
     "level": 26,
     "pct": 67,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 14:00"
   },
   "200": {
     "title": "Prime-proof Squbes",
@@ -1571,8 +1571,8 @@
     "title": "Tribonacci Non-divisors",
     "level": 14,
     "pct": 38,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 19:28"
   },
   "226": {
     "title": "A Scoop of Blancmange",
@@ -1613,8 +1613,8 @@
     "title": "Prime Factorisation of Binomial Coefficients",
     "level": 11,
     "pct": 30,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 19:49"
   },
   "232": {
     "title": "The Race",
@@ -1697,8 +1697,8 @@
     "title": "Resilience",
     "level": 11,
     "pct": 30,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 20:12"
   },
   "244": {
     "title": "Sliders",
@@ -2012,8 +2012,8 @@
     "title": "An Enormous Factorial",
     "level": 12,
     "pct": 32,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 20:24"
   },
   "289": {
     "title": "Eulerian Cycles",
@@ -2047,8 +2047,8 @@
     "title": "Pseudo-Fortunate Numbers",
     "level": 9,
     "pct": 25,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 19 Jun 2026, 20:33"
   },
   "294": {
     "title": "Sum of Digits - Experience #23",

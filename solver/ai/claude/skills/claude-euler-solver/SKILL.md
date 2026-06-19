@@ -194,9 +194,10 @@ following the [solve workflow](docs/solver-guide.md#7-the-solve-workflow):
    `scripts/c/compile.sh workspace/pNNNN_sK.c`, then verify with
    `solver "eval lang=c solution_index=K"` until `correct`. If a faithful C port is
    impractical, leave the template in place with a remark explaining why.
-6. **Document & summarise.** Bring the in-source docs to
-   [convention_source_documentation.md](docs/convention_source_documentation.md), run
-   `solver benchmark` to record fresh timings, then write/refresh
+6. **Document.** replace the template's placeholder module and function docstrings
+   with the real approach. Bring the in-source docs to
+   [convention_source_documentation.md](docs/convention_source_documentation.md).
+7. **Summarise.** run `solver benchmark` to record fresh timings, then write/refresh
    `workspace/notes.html` per [convention_documentation.md](docs/convention_documentation.md),
    using the recorded `results.json` values for every timing claim.
 
@@ -221,7 +222,7 @@ report that this is a `solve` job, not a `review`. Then, in order:
    [convention_source_documentation.md](docs/convention_source_documentation.md). This is
    a documentation pass only — **do not** change algorithm or behaviour. A `solve()`
    left with the template placeholder (or no docstring) is below the floor; add the
-   missing approach-and-complexity note. Do not pad past the floor.
+   missing approach-and-complexity note.
 3. **`notes.html`.** Ensure `results.json` is present and newer than every solution
    source (`solver ls` shows the mtimes); if it is missing or stale, run
    `solver benchmark` to refresh it. Then bring `workspace/notes.html` to
@@ -250,8 +251,7 @@ the exception: `→ 1` means *has changes* — proceed.)
    leaving it populated for the user to inspect, commit, and reset.
 
 Then **summarise the session** in one or two sentences (the action, and what was
-found or done — including tokens consumed) and end the turn, returning control to
-the SolverShell.
+found or done) and end the turn, returning control to the SolverShell.
 
 ---
 

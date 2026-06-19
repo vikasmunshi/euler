@@ -67,8 +67,11 @@ def claude_skill(
             bits.append(f'{turns} turns')
         if (duration := meta.get('duration_ms')) is not None:
             bits.append(f'{duration / 1000:.1f}s')
+        cost: float | None
         if (cost := meta.get('total_cost_usd')) is not None:
+            cost_eur = cost / config.ecb_usd_rate
             bits.append(f'${cost:.4f}')
+            bits.append(f'€{cost_eur:.4f}')
         return f'[muted]{" · ".join(bits)}[/muted]' if bits else None
 
     def _panel(done: bool = False) -> Panel:

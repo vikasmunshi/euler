@@ -5,11 +5,12 @@ from __future__ import annotations
 
 __all__ = ['ExitCodes', 'Singleton', 'config']
 
-from enum import IntEnum
-from json import JSONDecodeError, dumps, loads
-from os import chdir
+import enum
+import json
+import os
+import subprocess
+import sys
 from pathlib import Path
-from subprocess import run
 from typing import Any, ClassVar, cast
 
 from prompt_toolkit.styles import Style
@@ -33,12 +34,16 @@ class Singleton(type):
 
 
 def _root_dir() -> Path:
-    """Return the git repository root directory, cached after the first lookup."""
+    """Return the git repository root directory and set the os env PATH, cached after the first lookup."""
     a_package_dir = Path(__file__).parent.resolve()
-    result = run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True,
-                 cwd=a_package_dir)
+    result = subprocess.run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True,
+                            cwd=a_package_dir)
     if result.returncode == 0 and (git_root := result.stdout.strip()) != '':
-        chdir(git_root)
+        os.chdir(git_root)
+        env_path: list[str] = [Path(sys.executable).parent.as_posix()] + os.getenv('PATH', '').split(':')
+        env_path = [p for p in env_path if not p.startswith('/mnt')]
+        env_path = list(dict.fromkeys(env_path))
+        os.environ['PATH'] = ':'.join(env_path)
         return Path(git_root)
     raise ValueError('Failed to get git root')
 
@@ -172,7 +177,7 @@ class Config(metaclass=Singleton):
         return getattr(self, key)
 
     def __repr__(self) -> str:
-        return dumps(
+        return json.dumps(
             {'server_port': self.server_port,
              'timeout_multiple': self.timeout_multiple,
              'timeout_single': self.timeout_single,
@@ -180,7 +185,7 @@ class Config(metaclass=Singleton):
              }, indent=2)
 
     def dump_managed_config(self) -> None:
-        self.managed_config_file.write_text(dumps(
+        self.managed_config_file.write_text(json.dumps(
             {'server_port': self.server_port,
              'timeout_multiple': self.timeout_multiple,
              'timeout_single': self.timeout_single,
@@ -189,9 +194,9 @@ class Config(metaclass=Singleton):
 
     def load_managed_config(self) -> None:
         try:
-            for param, value in loads(self.managed_config_file.read_text()).items():
+            for param, value in json.loads(self.managed_config_file.read_text()).items():
                 setattr(self, param, type(self[param])(value))
-        except (FileNotFoundError, JSONDecodeError, ValueError):
+        except (FileNotFoundError, json.JSONDecodeError, ValueError):
             pass
 
 
@@ -269,7 +274,7 @@ config: Config = Config(
 )
 
 
-class ExitCodes(IntEnum):
+class ExitCodes(enum.IntEnum):
     #: Conventional exit codes, following common shell practice.
     EXIT_OK = 0  #: success
     EXIT_ERROR = 1  #: generic failure

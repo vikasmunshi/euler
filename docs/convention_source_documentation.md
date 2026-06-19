@@ -17,9 +17,8 @@ only the one-line module/top comment is **under-documented** — `solve()` is ne
   explain any non-obvious mathematical identity, invariant, or bound. Never restate what a line
   plainly does — descriptive names and full type hints already carry the *mechanics*; the
   docstring/comment carries the *idea* the names cannot.
-- **Replace the template's placeholder docstring** ("Name the approach and its complexity here … then
-  replace this placeholder with the real approach.") with the real approach. Do not keep it verbatim,
-  and do not delete it leaving nothing in its place.
+- **Replace the template's placeholder module and function docstrings** with the real
+  approach. Do not keep template documentation verbatim – replace it.
 - **No first person, no narrative, no hyperlinks** — those are `notes.html`'s job.
 - **Leave the runner scaffolding alone.** The benchmarking, `--runs=` / `--show` parsing, timing,
   and `"<runs> <avg_seconds> <result>"` output now live in the runner — `@runner.main` (Python)

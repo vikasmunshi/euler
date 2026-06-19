@@ -135,7 +135,7 @@ function renderTestCases(testCases) {
         }
         const args = Object.entries(inputCopy).map(([k, v]) => `${k}=${pyRepr(v)}`).join(', ');
         const ans = tc.answer;
-        const showAnswer = ans !== null && ans !== undefined && (PROBLEM_NUMBER <= 100 || category === 'dev');
+        const showAnswer = ans !== null && ans !== undefined;
         const answer = showAnswer ? pyRepr(ans) : '█';
         if (prevCategory !== null && category !== prevCategory) rows.push(spacer);
         prevCategory = category;

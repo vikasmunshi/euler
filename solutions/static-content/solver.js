@@ -42,6 +42,11 @@ const term = new Terminal({
     cursorBlink: true,
     fontFamily: 'monospace',
     fontSize: 14,
+    // The DOM renderer clips each glyph to the cell height; at the default
+    // lineHeight (1) the underscore sits on the bottom pixel row and is cut
+    // off, so a typed/echoed '_' renders as blank background. A small bump
+    // gives the descender room to show.
+    lineHeight: 1.1,
     theme: cssTheme(),
     scrollback: 5000,
 });
