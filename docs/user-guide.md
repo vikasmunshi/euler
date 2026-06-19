@@ -120,9 +120,11 @@ operators gate on it:
 - `{ … }` — group commands; groups nest.
 
 ```bash
+solver <<'EOF'
 init 42 && eval && stack            # stop at the first step that fails
 eval || echo "needs work"           # react to a failed evaluation
 { init 42; eval } && stack          # group, then save only if the group succeeded
+EOF
 ```
 
 A statement can also be a `name = expr` **assignment** or a bare **expression**.
@@ -130,8 +132,10 @@ An expression sets the exit code from its truthiness (`0` when truthy, `1` when
 falsy), so it can gate a chain.
 
 ```bash
+solver <<'EOF'
 limit = 1000                        # assign a user variable
 {problem.number} > 100 && echo "a later problem"
+EOF
 ```
 
 The command language — surface syntax, canonical form, and semantics — is
@@ -177,6 +181,7 @@ element. The list is any expression evaluating to a sequence — the built-in
 number lists (each sliceable) or a literal.
 
 ```bash
+$ solver <<'EOF'
 loop {unsolved}[0:5]: {
   init {loop.number} || break     # set up the problem; stop the loop if init fails
   claude-skill solve              # work it
@@ -184,6 +189,7 @@ loop {unsolved}[0:5]: {
 }
 
 loop [1, 2, 3]: echo {loop}       # body runs with loop = 1, then 2, then 3
+EOF
 ```
 
 There is no implicit workspace lifecycle — you spell out `init … stack && reset`
@@ -257,6 +263,7 @@ command name below links to its full entry — usage and description — in the
 **Solve a problem** (see the [Solver Guide](solver-guide.md) for the full loop):
 
 ```bash
+solver <<'EOF'
 init 42     # initialize the workspace for problem 42
 checkout    # optionally, check out the workspace to prevent accidental reset
 show        # open the problem page in a browser to read and understand the problem
@@ -264,7 +271,7 @@ show        # open the problem page in a browser to read and understand the prob
 new --tc    # create an empty test-case file in the workspace directory
 new --py    # create a template Python solution file in the workspace directory (p0042_s0.py)
             # implement solve() in the solution template
-evaluate    # evaluate the solution against the test cases
+eval        # evaluate the solution against the test cases
             # record the answers in the test-case file
 benchmark   # time the solution, the first time it is run 1 time
 mark        # mark the problem as solved
@@ -275,12 +282,15 @@ benchmark   # time the solution, (it is run between 1 to 21 times based on earli
 stack       # save the workspace to the stack
 checkin     # check in the workspace,
 reset       # clear the workspace (reset before checkin is blocked by checkout)
+EOF
 ```
 
 **Sweep a range of unsolved problems:**
 
 ```bash
+solver <<'EOF'
 loop {unsolved}[0:5]: { init {loop.number} && checkout && claude-skill solve && stack && checkin && reset }
+EOF
 ```
 
 ---
@@ -352,16 +362,20 @@ encrypted with.
 ### Gaining access (new user)
 
 ```bash
+solver <<'EOF'
 solver user         # generates ~/.ssh/id_solver and registers your public key in keys/keys.json
 solver publish keys # opens a pull request with the updated keys/keys.json
+EOF
 ```
 
 Once the repository owner merges the pull request, your `master_key` entry is
 populated, and you can pull the update to gain access:
 
 ```bash
+solver <<'EOF'
 solver sync
 solver user
+EOF
 ```
 
 If you do not yet have master-key access, `user` also registers a `reconstruct`
@@ -372,10 +386,12 @@ out-of-band shares via n-of-m secret sharing (`solver/crypto/share.py`).
 
 To decrypt all problem files to the local `backup/` folder (gitignored, never committed):
 
-```
+```bash
+solver <<'EOF'
 loop {solved}: {
-  init {loop.number} && ! cp -r workspace backup/{loop.number} && reset
+  init {loop.number} && ! cp -r * backup/{loop.number}/. && reset
 }
+EOF
 ```
 
 Or use `show N` to view any problem's statement, notes, and results directly in Chrome

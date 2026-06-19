@@ -122,8 +122,10 @@ The harness reads one line of stdout. To emit intermediate output (a chart, trac
 values) **only when asked**, gate it behind the show flag:
 
 ```python
+from solver.runners import runner
+
 if runner.show:  # Python; set by --show
-    print(f'partial sums: {sums}')
+    print(f'partial sums: ...')
 ```
 
 ```c
@@ -132,8 +134,7 @@ if (show) {                           /* C; set by --show */
 }
 ```
 
-`eval show=true` and `benchmark` pass `--show` through to the solution. Graphical
-output needs the `show` dependency group (`pip install -e ".[show]"`).
+Graphical output needs the `show` dependency group (`pip install -e ".[show]"`).
 
 ---
 
@@ -165,10 +166,12 @@ and numbered after any solutions already present (`p0042_s0.py`, `p0042_s1.py`, 
 Run `init <N>` first so the workspace knows which problem it is.
 
 ```bash
+solver <<'EOF'
 new            # the next Python solution + a matching .c sibling
 new --py       # a Python solution only
 new --c        # add a .c sibling for every .py that lacks one
 new --tc       # create a template test_cases.json (only if one is missing)
+EOF
 ```
 
 Each generated solution is the thin runner template from §1–2: it implements only
@@ -181,9 +184,11 @@ Each generated solution is the thin runner template from §1–2: it implements 
 ## 7. The solve workflow
 
 ```bash
+solver <<'EOF'
 init N             # copy problem files into workspace/
 ls                 # list the problem files
 show               # read problem statement, test_cases, result, and notes in the browser
+checkout           # optionally, check out the workspace to prevent accidental reset
 # ...read the problem statement, review the test cases...
 new --tc           # scaffold test_cases.json if needed
 new --py           # scaffold p0042_s0.py
@@ -205,18 +210,21 @@ benchmark          # benchmark all solutions and all test cases
 stack              # save changes back to the solution stack (fix any linter errors)
 # ...write up the mathematical insight in notes.html...
 stack              # save changes back to the solution stack (fix any linter errors)
+checkin            # check in the workspace,
 reset              # clear the workspace (re-stacking any changes first)
 commit             # commit the changes to the repo
+EOF
 ```
 
-Two complementary checks: **`eval`** answers *is it right*, **`benchmark`**
-answers *how fast*. Run `eval` until it passes, then `benchmark` to compare
-approaches and languages.
+Two complementary checks:
+**`eval`** answers *is it right* and *how fast*,
+**`benchmark`** persists the answers in `results.json`.
+Run `eval` until it passes, then `benchmark` to compare approaches and languages.
 
-- `eval` never records — it is the fast correctness loop.
+- `eval` is the fast correctness loop.
 - `benchmark` always records to `results.json` and repeats each case an adaptive
   number of times — up to 21 for sub-second cases, scaling down toward 1 for slow
-  ones (from prior recorded timings) — to average out noise without unbounded
+  ones (from prior recorded timings) — to average out noise without an unbounded
   runtime.
 
 See the [User Guide](user-guide.md) for the full options of each command and

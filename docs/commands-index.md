@@ -371,7 +371,7 @@ if nothing has been consumed.
 
 Totals the charges across all models in "consumed_tokens" using each model's published USD
 price per million tokens (with cache writes at 1.25x and cache reads at 0.10x the input rate),
-then converts to EUR using "usd_to_eur".
+then converts to EUR using "ecb_usd_rate".
 
 Args:
     ecb_usd_rate: conversion rate (1 € = N $). Defaults to 'config.ecb_usd_rate'.
@@ -662,7 +662,7 @@ Manage configuration settings.
 
 ```
 manage-config
-[param=all|server_port|timeout_multiple|timeout_single|usd_to_eur] (default all)
+[param=all|server_port|timeout_multiple|timeout_single|ecb_usd_rate] (default all)
 [value=<float>|none] (default None)
 ```
 
@@ -672,7 +672,7 @@ Show or update a managed configuration setting.
 The managed settings persist to `solver/config.json` and override the
 defaults in `config.py`: `server_port` (the web server's port),
 `timeout_single` / `timeout_multiple` (solution timeouts in seconds for a
-single run and for repeated runs), and `usd_to_eur` (the rate `costs` uses).
+single run and for repeated runs), and `ecb_usd_rate` (the rate `costs` uses).
 
 Args:
     param:  Which setting to act on; 'all' (default) prints every setting.
