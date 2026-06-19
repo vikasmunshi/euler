@@ -55,6 +55,42 @@ term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
+// In a browser, Ctrl-C with text selected is "copy", not "interrupt". Intercept
+// it before xterm turns it into a ^C byte: when there is a selection, copy it to
+// the clipboard and clear it; otherwise let the key through so it still sends
+// SIGINT to the shell. (Only act on keydown — keypress/keyup would double-fire.)
+term.attachCustomKeyEventHandler((e) => {
+    if (e.type === 'keydown' && e.ctrlKey && !e.altKey && !e.metaKey &&
+        (e.key === 'c' || e.key === 'C')) {
+        const sel = term.getSelection();
+        if (sel) {
+            navigator.clipboard?.writeText(sel);
+            term.clearSelection();
+            return false;   // swallow: don't send ^C to the PTY
+        }
+    }
+    // Ctrl-V → paste. We always do it ourselves via the clipboard API (below),
+    // so swallow the key here to stop xterm's own keydown→paste path.
+    if (e.type === 'keydown' && e.ctrlKey && !e.altKey && !e.metaKey &&
+        (e.key === 'v' || e.key === 'V')) {
+        navigator.clipboard?.readText().then((text) => {
+            if (text) term.paste(text);
+        });
+        return false;
+    }
+    return true;
+});
+
+// Whichever browser/xterm build, a native `paste` event may still fire on the
+// hidden textarea and trigger xterm's built-in paste. Suppress it in the capture
+// phase so our clipboard-API path above is the single source of one paste.
+if (term.textarea) {
+    term.textarea.addEventListener('paste', (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+    }, true);
+}
+
 const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
 const ws = new WebSocket(`${wsProto}//${location.host}/ws`);
 ws.binaryType = 'arraybuffer';

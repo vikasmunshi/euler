@@ -231,7 +231,7 @@ config: Config = Config(
     static_file_dir='solutions/static-content',
     static_file_problems='solutions/static-content/problems.json',
     static_file_progress='solutions/.progress.html',
-    static_file_progress_editor='solutions/static-content/progress-editor.html',
+    static_file_progress_editor='solutions/static-content/progress/progress.html',
     templates_dir='solver/templates',
     workspace_dir='workspace',
 

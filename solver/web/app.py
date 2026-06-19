@@ -75,8 +75,8 @@ _STATE: web.AppKey[_State] = web.AppKey('state', _State)
 #: Top-level static page assets served verbatim from `config.static_file_dir`.
 _STATIC_ASSETS: frozenset[str] = frozenset({
     'code.css', 'code.html', 'code.js', 'common.css', 'favicon.svg', 'header.css', 'header.html',
-    'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json', 'progress-editor.css',
-    'progress-editor.js', 'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
+    'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json', 'progress.css',
+    'progress.js', 'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
     'summary.html', 'summary.js',
 })
 
@@ -95,7 +95,11 @@ async def _serve_static(request: web.Request) -> web.StreamResponse:
     name = request.match_info.get('asset') or 'summary.html'
     if name not in _STATIC_ASSETS:
         raise web.HTTPNotFound()
-    return web.FileResponse(config.static_file_dir / name)
+    if (file := config.static_file_dir / name).exists():
+        return web.FileResponse(file)
+    if (file := config.static_file_dir / file.stem / name).exists():
+        return web.FileResponse(file)
+    raise web.HTTPNotFound()
 
 
 async def _serve_favicon(request: web.Request) -> web.StreamResponse:
@@ -105,7 +109,7 @@ async def _serve_favicon(request: web.Request) -> web.StreamResponse:
 
 async def _serve_solver_page(request: web.Request) -> web.StreamResponse:
     """Serve the xterm.js terminal page (the default landing page at `/`)."""
-    return web.FileResponse(config.static_file_dir / 'solver.html')
+    return web.FileResponse(config.static_file_dir / 'solver/solver.html')
 
 
 async def _serve_flags(request: web.Request) -> web.StreamResponse:
@@ -153,7 +157,7 @@ async def _serve_flags(request: web.Request) -> web.StreamResponse:
 
 async def _serve_summary_page(request: web.Request) -> web.StreamResponse:
     """Serve the solutions summary page (`/summary`)."""
-    return web.FileResponse(config.static_file_dir / 'summary.html')
+    return web.FileResponse(config.static_file_dir / 'summary/summary.html')
 
 
 async def _serve_progress_page(request: web.Request) -> web.StreamResponse:
@@ -291,7 +295,7 @@ def _render_code_page(filename: str, content: bytes, language: str) -> bytes:
     The source is HTML-escaped and embedded directly in the page, so the browser
     renders it like an IDE rather than downloading raw text.
     """
-    template = (config.static_file_dir / 'code.html').read_bytes()
+    template = (config.static_file_dir / 'code/code.html').read_bytes()
     page = (template.decode('utf-8')
             .replace('{{FILENAME}}', html.escape(filename))
             .replace('{{LANGUAGE}}', language)
@@ -518,7 +522,7 @@ def _render_json(request: web.Request, filename: str, content: bytes) -> web.Res
 
 async def _problem_page(request: web.Request) -> web.StreamResponse:
     """Serve the problem viewer page for `/<n>/`."""
-    return web.FileResponse(config.static_file_dir / 'problem.html')
+    return web.FileResponse(config.static_file_dir / 'problem/problem.html')
 
 
 async def _redirect_with_slash(request: web.Request) -> web.StreamResponse:

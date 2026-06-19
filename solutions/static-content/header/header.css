@@ -1,6 +1,6 @@
 /* ── Shared site header ──
    The single source of truth for the navigation bar — both its *look* and its
-   *position* — used by the problem, summary, code, and progress-editor pages.
+   *position* — used by the problem, summary, code, and progress pages.
    The bar sits flush to the top of the content area (24px of breathing room above
    it, which every page provides as its top padding) and stays pinned there as the
    page scrolls. Each page keeps only the layout specifics that the bar can't know

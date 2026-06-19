@@ -8,8 +8,8 @@
     <link rel="stylesheet" href="/common.css">
     <link rel="stylesheet" href="/header.css">
     <link rel="stylesheet" href="/code.css">
-    <!-- CodeJar's default look: highlight.js's stock default theme supplies the token colours. -->
-    <link rel="stylesheet" href="/vendor/highlight.css">
+    <!-- CodeMirror 6 ships its own gutter, syntax highlighting, bracket matching,
+         autocompletion and search; no separate highlight.js theme is needed. -->
 </head>
 <body data-language="{{LANGUAGE}}">
 <!-- header.js injects the shared nav bar and (on this code page) the filename,
@@ -17,13 +17,11 @@
 <div id="page-header"></div>
 <pre id="save-output" hidden></pre>
 <main id="code-view">
-    <div id="gutter" aria-hidden="true"></div>
+    <!-- CodeMirror mounts its EditorView (with its own gutter) inside #editor. -->
     <div id="editor"></div>
 </main>
 <!-- The HTML-escaped source; a textarea decodes the entities back to plain text. -->
 <label for="source"></label><textarea id="source" hidden>{{CODE}}</textarea>
-<!-- highlight.js (UMD common bundle) exposes window.hljs for the module below. -->
-<script src="/vendor/highlight.min.js"></script>
 <!-- header.js (classic) defines window.SolverHeader before the deferred code.js module awaits it. -->
 <script src="/header.js"></script>
 <script type="module" src="/code.js"></script>
