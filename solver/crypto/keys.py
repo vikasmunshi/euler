@@ -251,8 +251,9 @@ def user(regen: bool = False) -> int:
         master_key: bytes | None = get_master_key()
     except (AssertionError, FileNotFoundError, ValueError):
         master_key = None
+    user_email: str = get_gh_user_email() if user_key is None else user_key.user_email
     if regen or user_key is None:
-        new_user_key: UserKeyPair = UserKeyPair.new_persistent()
+        new_user_key: UserKeyPair = UserKeyPair.new_persistent(user_email)
         get_user_key.cache_clear()
         data: dict[str, Any] = read_keys_file()
         data['users'][new_user_key.user_email] = new_user_key.to_public_dict(master_key)

@@ -83,6 +83,7 @@ actions = ["install", "check", "uninstall"]
 [project.scripts]
 solver = "solver.main:main"
 solver-web = "solver.web.cli:main"
+solver-gitfilter = "solver.crypto.gitfilter:main"
 
 [tool.setuptools.packages.find]
 where = ["."]

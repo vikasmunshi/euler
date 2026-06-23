@@ -8,8 +8,10 @@
 #   2. No commit adds unencrypted solution files for problems > 100.
 #      (Encryption policy mirrors solver/core/stack.py: stack_path().)
 # Then, once per push:
-#   3. flake8 on every .py file changed by any commit in the push range.
-#   4. mypy on the solver package.
+#   3. Encryption-at-rest audit: every tracked file under SOLUTIONS_DIR/private
+#      is stored as gitfilter ciphertext (scripts/git/audit-private.sh).
+#   4. flake8 on every .py file changed by any commit in the push range.
+#   5. mypy on the solver package.
 #
 # Output contract: every check announces itself, prints its own detail on
 # failure, and the hook always ends with a single PASS/FAIL verdict that
@@ -125,7 +127,23 @@ if (( ${#FAILURES[@]} == 0 )); then
     pass "no workspace leakage or unencrypted solutions detected"
 fi
 
-# ── 3. flake8 on changed .py files ───────────────────────────────────────
+# ── 3. Encryption-at-rest audit (solutions/private) ──────────────────────
+# Reads each tracked blob under solutions/private straight from the object
+# store (no smudge filter) and checks it carries the gitfilter magic, so a
+# plaintext leak can never be pushed. PATH carries the venv so the script's
+# bare `python` (which reads config.gitfilter_magic) resolves under minimal
+# push environments too.
+section "Encryption-at-rest audit (solutions/private)"
+audit_out=$(PATH="$VENV/bin:$PATH" bash "$REPO_ROOT/scripts/git/audit-private.sh" --summary 2>&1)
+audit_rc=$?
+if (( audit_rc == 0 )); then
+    pass "${audit_out##*$'\n'}"
+else
+    note "${audit_out//$'\n'/$'\n'  }"
+    fail "tracked files under solutions/private are not all encrypted at rest"
+fi
+
+# ── 4. flake8 on changed .py files ───────────────────────────────────────
 section "flake8 (changed Python files)"
 unique_py=$(printf '%s\n' "$py_files_all" | sort -u | grep -v '^$' || true)
 if [[ -z "$unique_py" ]]; then
@@ -136,7 +154,7 @@ else
     fail "flake8 reported issues in changed Python files"
 fi
 
-# ── 4. mypy on the solver package ────────────────────────────────────────
+# ── 5. mypy on the solver package ────────────────────────────────────────
 section "mypy (solver package)"
 if "$VENV/bin/mypy" solver; then
     pass "mypy clean"

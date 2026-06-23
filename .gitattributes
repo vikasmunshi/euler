@@ -1,0 +1,2 @@
+# Transparent encryption for private solutions (solver.crypto.gitfilter).
+solutions/private/** filter=solver-crypt -text

@@ -1,6 +1,11 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """X25519 ECDH key pair generation, master key wrapping, and user identity management."""
+# Import-time contract: importing this module (and everything it transitively imports) must emit
+# nothing on stdout. solver.crypto.gitfilter imports UserKeyPair at module top and runs as a git
+# clean/smudge filter, where stdout carries the file content -- a single stray byte written at
+# import time would corrupt every encrypted/decrypted blob.
+# Verified: `python -c "import solver.crypto.asymmetrical"` emits 0 bytes on stdout.
 from __future__ import annotations
 
 __all__ = ['UserKeyPair']
@@ -17,7 +22,6 @@ from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption,
 
 from solver.config import config
 from solver.shell import console
-from solver.utils.gh import get_gh_user_email
 
 
 class UserKeyPair(NamedTuple):
@@ -40,7 +44,7 @@ class UserKeyPair(NamedTuple):
                 f'private_key={self.private_key is not None})')
 
     @classmethod
-    def new_ephemeral(cls, user_email: str | None = None) -> UserKeyPair:
+    def new_ephemeral(cls, user_email: str) -> UserKeyPair:
         """
         Generate a transient X25519 key pair not written to disk.
 
@@ -50,13 +54,12 @@ class UserKeyPair(NamedTuple):
         Returns:
             A UserKeyPair with both public and private keys populated.
         """
-        email: str = user_email or get_gh_user_email()
         private_key: X25519PrivateKey = x25519.X25519PrivateKey.generate()
         public_key: X25519PublicKey = private_key.public_key()
-        return cls(user_email=email, public_key=public_key, private_key=private_key)
+        return cls(user_email=user_email, public_key=public_key, private_key=private_key)
 
     @classmethod
-    def new_persistent(cls, user_email: str | None = None) -> UserKeyPair:
+    def new_persistent(cls, user_email: str) -> UserKeyPair:
         """
         Generate a new X25519 key pair and persist the private key to disk.
 
@@ -68,10 +71,9 @@ class UserKeyPair(NamedTuple):
         Returns:
             A UserKeyPair with both public and private keys populated.
         """
-        email: str = user_email or get_gh_user_email()
         private_key: X25519PrivateKey = x25519.X25519PrivateKey.generate()
         public_key: X25519PublicKey = private_key.public_key()
-        new: UserKeyPair = cls(user_email=email, public_key=public_key, private_key=private_key)
+        new: UserKeyPair = cls(user_email=user_email, public_key=public_key, private_key=private_key)
         new.to_file()
         return new
 
@@ -85,6 +87,7 @@ class UserKeyPair(NamedTuple):
 
         Raises:
             ValueError: If the private key file does not exist.
+        Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
         """
         if not config.private_key_file.exists():
             raise ValueError(f'Private key file {config.private_key_file} not found; use `solver user` to create one.')
@@ -158,7 +161,7 @@ class UserKeyPair(NamedTuple):
         shared_secret: bytes = ephemeral.private_key.exchange(self.public_key)
         derived: bytes = HKDF(algorithm=SHA256(), length=32, salt=None, info=b'key-encryption').derive(shared_secret)
         cipher: ChaCha20Poly1305 = ChaCha20Poly1305(derived)
-        nonce: bytes = b'\x00' * 12
+        nonce: bytes = b'\x00' * 12  # safe here because a fresh ephemeral key is generated per call
         ciphertext: bytes = cipher.encrypt(nonce, master_key, None)
         ephemeral_public: bytes = ephemeral.public_key.public_bytes(encoding=Encoding.Raw, format=PublicFormat.Raw)
         return (ephemeral_public + ciphertext).hex()
@@ -176,6 +179,7 @@ class UserKeyPair(NamedTuple):
 
         Raises:
             ValueError: If private_key is None (public key cannot decrypt).
+        Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
         """
         if self.private_key is None:
             raise ValueError('Cannot unlock using a KeyPair with null private key.')
@@ -185,5 +189,5 @@ class UserKeyPair(NamedTuple):
         shared_secret: bytes = self.private_key.exchange(ephemeral_public)
         derived: bytes = HKDF(algorithm=SHA256(), length=32, salt=None, info=b'key-encryption').derive(shared_secret)
         cipher: ChaCha20Poly1305 = ChaCha20Poly1305(derived)
-        nonce: bytes = b'\x00' * 12
+        nonce: bytes = b'\x00' * 12  # using a null nonce because a fresh ephemeral key is generated per call to lock
         return cipher.decrypt(nonce, ciphertext, None)
