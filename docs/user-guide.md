@@ -339,6 +339,10 @@ Access to those keys is controlled via a two-layer scheme. You only need this if
 you want to collaborate on — or study — the encrypted solutions; problems 1–100
 are plaintext and need no keys.
 
+> For the separate **transparent** encryption of files under `solutions/private/`
+> (a git clean/smudge filter, no `init`/`stack`/`reset`), see the
+> [Git Filter Guide](gitfilter-guide.md).
+
 ### keys/keys.json structure
 
 ```
