@@ -5,8 +5,9 @@
 # Native pre-push hook. Runs for every push.
 # Checks, per commit in the push range:
 #   1. No commit adds/modifies files under DIR_TO_CHECK.
-#   2. No commit adds unencrypted solution files for problems > 100.
-#      (Encryption policy mirrors solver/core/stack.py: stack_path().)
+#   2. No commit adds plaintext solution files outside the allowed locations
+#      (problems 1–100 under solutions/public; problems > 100 live under
+#      solutions/private and are verified by the encryption-at-rest audit, 3).
 # Then, once per push:
 #   3. Encryption-at-rest audit: every tracked file under SOLUTIONS_DIR/private
 #      is stored as gitfilter ciphertext (scripts/git/audit-private.sh).
@@ -88,28 +89,27 @@ while IFS=' ' read -r _local_ref local_sha _remote_ref remote_sha; do
             fail "commit ${commit_label} committed workspace files under '${DIR_TO_CHECK}/'"
         fi
 
-        # 2. Unencrypted solution files newly added for problems > 100.
-        # Exclusions mirror solver/core/stack.py stack_path(): files that are
-        # legitimately stored as plaintext even for problems > 100 are
-        #   - already-encrypted files            (*.enc)
-        #   - problems 1–100                      (solutions/0/0/.. and solutions/0/1/0/0/..)
-        #   - top-level page assets              (solutions/<name>.html|css|js|json)
-        #   - the title file and statement file  (title.json, statement.html)
-        #   - downloaded problem resources       (.../resources/..)
-        # --diff-filter=A: only additions. Modifications of pre-existing files
-        # (legacy state, if any) are out of scope — fix those separately.
+        # 2. Plaintext solution files added outside the allowed locations.
+        # Under the gitfilter layout (CLAUDE.md "Stack") every problem lives in
+        # exactly one place:
+        #   - problems 1–100  → solutions/public      (plaintext, allowed)
+        #   - problems > 100  → solutions/private      (ciphertext at rest;
+        #                        verified independently by the audit in check 3)
+        #   - shared page assets → solutions/static-content
+        # Anything else newly added under SOLUTIONS_DIR is a stray plaintext
+        # leak. --diff-filter=A: only additions. Modifications of pre-existing
+        # files (legacy state, if any) are out of scope — fix those separately.
         un_enc_files=$(git diff-tree --no-commit-id -r --name-only --diff-filter=A "$commit" \
             -- "$SOLUTIONS_DIR/" 2>/dev/null \
-            | grep -v -E '\.enc$' \
-            | grep -v -E '^solutions/0/0/|^solutions/0/1/0/0/' \
+            | grep -v -E '^solutions/public/' \
+            | grep -v -E '^solutions/private/' \
             | grep -v -E '^solutions/static-content/' \
-            | grep -v -E '/(statement\.html|number\.txt)$' \
-            | grep -v -E '^solutions/[0-9]/[0-9]/[0-9]/[0-9]/resources/' \
+            | grep -v -E '\.enc$' \
             || true)
         if [[ -n "$un_enc_files" ]]; then
-            note "commit ${commit_label} adds unencrypted files for a problem > 100:"
+            note "commit ${commit_label} adds plaintext solution files outside the allowed locations:"
             note "  ${un_enc_files//$'\n'/$'\n'  }"
-            fail "commit ${commit_label} added unencrypted solution files for a problem > 100"
+            fail "commit ${commit_label} added plaintext solution files outside solutions/public"
         fi
 
         # Collect .py files changed by this commit (for flake8 below).
@@ -144,8 +144,13 @@ else
 fi
 
 # ── 4. flake8 on changed .py files ───────────────────────────────────────
+# Decrypted private scratch/helper scripts (brute.py, verify.py, …) share
+# module basenames and are throwaway, so they are dropped here; the canonical
+# private solution files p<NNNN>_s<K>.py and everything else are kept.
 section "flake8 (changed Python files)"
-unique_py=$(printf '%s\n' "$py_files_all" | sort -u | grep -v '^$' || true)
+unique_py=$(printf '%s\n' "$py_files_all" | sort -u | grep -v '^$' \
+    | awk -F/ '!($1=="solutions" && $2=="private") || $NF ~ /^p[0-9][0-9][0-9][0-9]_s[0-9]+\.py$/' \
+    || true)
 if [[ -z "$unique_py" ]]; then
     note "no Python files changed in this push — skipping flake8"
 elif printf '%s\n' "$unique_py" | xargs -d '\n' "$VENV/bin/flake8"; then

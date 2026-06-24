@@ -44,33 +44,47 @@ print_verdict() {
 # ── trailing-whitespace: auto-fix staged text files, then re-stage ───────
 # Globs match the same families flagged by `git diff --check`, so the fixer's
 # scope tracks the checker's scope. Add new extensions here as the repo grows.
+# solutions/private is excluded: its staged blobs are gitfilter ciphertext
+# (solver.crypto.gitfilter), so a text whitespace pass on them is meaningless
+# and `git diff --check` would flag random ciphertext bytes as bad whitespace.
 section "trailing whitespace"
 fix_files=$(git diff --cached --name-only --diff-filter=d \
-    -- '*.py' '*.c' '*.h' '*.html' '*.json' '*.md' '*.sh' '*.txt' '*.yml' '*.yaml' '*.csv')
+    -- '*.py' '*.c' '*.h' '*.html' '*.json' '*.md' '*.sh' '*.txt' '*.yml' '*.yaml' '*.csv' \
+    ':(exclude)solutions/private')
 if [[ -n "$fix_files" ]]; then
     # Normalise CRLF→LF, then strip trailing whitespace.
     echo "$fix_files" | xargs -d '\n' sed -i 's/\r$//; s/[[:space:]]*$//'
     echo "$fix_files" | xargs -d '\n' git add
     note "auto-fixed and re-staged trailing whitespace where present"
 fi
-# Check remaining staged changes (exclude encrypted files).
-if git diff --check --cached --no-color -- ':!*.enc'; then
+# Check remaining staged changes (exclude encrypted files: legacy *.enc and the
+# gitfilter-encrypted solutions/private tree).
+if git diff --check --cached --no-color -- ':!*.enc' ':!solutions/private'; then
     pass "no trailing-whitespace / conflict markers in staged changes"
 else
     fail "staged changes contain trailing whitespace or conflict markers"
 fi
 
-# ── flake8: solutions and solver ─────────────────────────────────────────
-section "flake8 (solutions, solver)"
-if "$VENV/bin/flake8" solutions solver; then
+# ── Lint scope under the gitfilter layout ────────────────────────────────
+# solutions/public (problems 1–100) and solver are plaintext and scanned
+# wholesale, as before. Under solutions/private only the canonical solution
+# files p<NNNN>_s<K>.py are linted: the decrypted scratch/helper scripts
+# (brute.py, verify.py, …) share module basenames across problems — which
+# breaks mypy's module resolution — and are throwaway, so they are excluded.
+mapfile -t PRIVATE_SOLUTIONS < <(
+    find solutions/private -type f -name 'p[0-9][0-9][0-9][0-9]_s[0-9]*.py' 2>/dev/null | sort)
+
+# ── flake8: public solutions, private solution files, solver ─────────────
+section "flake8 (public solutions, private solution files, solver)"
+if "$VENV/bin/flake8" solutions/public solver "${PRIVATE_SOLUTIONS[@]}"; then
     pass "flake8 clean"
 else
     fail "flake8 reported issues"
 fi
 
-# ── mypy: solutions and solver ───────────────────────────────────────────
-section "mypy (solutions, solver)"
-if "$VENV/bin/mypy" solutions solver; then
+# ── mypy: public solutions, private solution files, solver ───────────────
+section "mypy (public solutions, private solution files, solver)"
+if "$VENV/bin/mypy" solutions/public solver "${PRIVATE_SOLUTIONS[@]}"; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"

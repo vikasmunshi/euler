@@ -7,6 +7,7 @@ __all__ = ['Problem', 'problems']
 
 from functools import lru_cache
 from json import loads
+from pathlib import Path
 from typing import Callable, NamedTuple
 
 from solver.config import config
@@ -42,6 +43,14 @@ class Problem(NamedTuple):
     def as_title(self) -> str:
         """Return a human-readable label in the form '<number>: <title>'."""
         return f'Problem {self.number}: {self.title} [Level {self.difficulty}]'
+
+    @property
+    def solution_dir(self) -> Path:
+        if self.number > 100:
+            start_group: int = int(self.number / 100) * 100
+            end_group: int = start_group + 99
+            return config.solutions_dir.joinpath('private', f'{start_group:04d}-{end_group:04d}', f'p{self.number:04d}')
+        return config.solutions_dir.joinpath('public', f'p{self.number:04d}')
 
     @classmethod
     def from_workspace(cls) -> Problem | None:
