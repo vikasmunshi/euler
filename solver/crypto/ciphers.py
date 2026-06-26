@@ -18,7 +18,7 @@ This is the non-interactive heart of `solver.crypto`. It owns:
   AES-256 key + a content-derived nonce (`HMAC(plaintext)`), so identical plaintext always yields
   byte-identical ciphertext (no spurious git diffs).
 
-All creation, persistence, rotation, sharing and the shell commands live in `solver.crypto.cipher_keys`
+All creation, persistence, rotation, sharing and the shell commands live in `solver.crypto.keys`
 (which is interactive and imports this module). The git filter (`solver.crypto.gitfilter`) imports
 only this module. Both of those callers run in contexts where stdout carries file content, so this
 module's hard contract is: **importing it, and everything it imports, emits nothing on stdout.** It

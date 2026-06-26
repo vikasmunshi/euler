@@ -93,7 +93,7 @@ solver/
   crypto/
     ciphers.py        — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
     gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
-    keys.py           — Cipher key management: create, persist, rotate, share and migrate the crypto key material.
+    keys.py           — Cipher key management: create, persist, rotate and share the crypto key material.
   runners/
     runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
     runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
@@ -166,7 +166,7 @@ The active workspace is `workspace/`. `init <n>` copies (unstacks) a problem's f
 
 The crypto sub-package is three modules: `ciphers.py` (non-interactive: `config_dict` with all file
 locations + git-filter wire constants — **no `solver.config` dependency** — plus load/lock/unlock and
-encrypt/decrypt helpers), `cipher_keys.py` (all interactive create/persist/rotate/share/migrate and
+encrypt/decrypt helpers), `keys.py` (all interactive create/persist/rotate/share and
 the shell commands), and `gitfilter.py` (the git clean/smudge filter, depending only on `ciphers`).
 
 - Per-user private key: `~/.solver/id` (X25519, PKCS8 PEM, password-protected). The password is read
@@ -175,7 +175,6 @@ the shell commands), and `gitfilter.py` (the git clean/smudge filter, depending 
   <master key wrapped to that key>}` plus a `verify` ciphertext for self-checking. One entry per
   authorised public key; no email is stored. Authority is proof-of-possession.
 - Decryption path: read password → unlock private key → unwrap master key → verify → decrypt files.
-- Migrate the legacy `~/.ssh/id_solver` + `keys/master_key.json` with the `migrate` command.
 
 ### Solution file naming
 

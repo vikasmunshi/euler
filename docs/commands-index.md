@@ -49,7 +49,6 @@ a parameter that accepts repetition.
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
-| [`generate-master`](#command-generate-master) | — | Create the master encryption key (once per repo); --force overwrites. |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
@@ -325,7 +324,7 @@ Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1461)
+[ecb_usd_rate=<float>] (default 1.1342)
 ```
 
 ```text
@@ -400,21 +399,6 @@ solution_index:     Specific solution index to evaluate.
                     If provided, only this solution index will be evaluated.
                     If None, all solutions will be evaluated. Defaults to None.
 verbose:            If True, prints error information during evaluation. Defaults to False.
-```
-
----
-
-#### Command: `generate-master`
-
-Create the master encryption key (once per repo); --force overwrites.
-
-```
-generate-master
-[force=true|--force]
-```
-
-```text
-Create a fresh master key wrapped to the current user's public key and write enc-key.json.
 ```
 
 ---

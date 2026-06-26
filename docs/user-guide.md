@@ -222,7 +222,6 @@ command name below links to its full entry — usage and description — in the
 | [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
-| [`generate-master`](commands-index.md#command-generate-master) | — | Create the master encryption key (once per repo); --force overwrites. |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
@@ -368,15 +367,8 @@ solver "authorize <your-public-key-hex>"   # wraps the master key to your public
 ```
 
 Commit and push `keys/enc-key.json`; pull it, and `solver "user"` will now report
-`✓ can encrypt/decrypt`. As a fallback you can `reconstruct` the master key from
-`threshold` out-of-band shares produced by `split` (n-of-m secret sharing).
-
-### Migrating from the old scheme
-
-If you still have the legacy `~/.ssh/id_solver` and `keys/master_key.json`, run
-`solver "migrate"` once: it preserves your existing identity and master key into the
-new layout (prompting for a private-key password), leaving the old files in place for
-you to remove after verifying with `user`.
+`✓ can encrypt/decrypt`. As a fallback you can `key-reconstruct` the master key from
+`threshold` out-of-band shares produced by `key-split` (n-of-m secret sharing).
 
 ### Studying the solutions
 

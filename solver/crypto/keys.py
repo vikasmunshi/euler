@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """
-Cipher key management: create, persist, rotate, share and migrate the crypto key material.
+Cipher key management: create, persist, rotate and share the crypto key material.
 
 This is the **interactive** half of `solver.crypto` -- all user interaction (password prompts, share
 entry, confirmations) lives here, and nowhere else. It owns the lifecycle of two keys:
@@ -19,12 +19,11 @@ The non-interactive primitives (load, lock/unlock, encrypt/decrypt, the config) 
 `solver.crypto.ciphers`; this module never re-implements them. The git filter
 (`solver.crypto.gitfilter`) does not import this module.
 
-Shell commands registered here: `user`, `generate-master`, `rekey`, `authorize`, `split`,
-`reconstruct`, `migrate`.
+Shell commands registered here: `user`, `rekey`, `authorize`, `key-split`, `key-reconstruct`.
 """
 from __future__ import annotations
 
-__all__ = ['authorize', 'generate_master', 'key_reconstruct', 'key_split', 'rekey', 'user']
+__all__ = ['authorize', 'key_reconstruct', 'key_split', 'rekey', 'user']
 
 from json import dumps
 from pathlib import Path
@@ -123,20 +122,20 @@ def _wrapped_for_all(master_key: bytes, public_keys: list[str]) -> dict[str, str
     return data
 
 
-@register(help_text='Create the master encryption key (once per repo); --force overwrites.')
-def generate_master(force: bool = False) -> int:
-    """Create a fresh master key wrapped to the current user's public key and write enc-key.json."""
-    enc_file: Path = config_dict['enc_key_file']
-    if enc_file.exists() and not force:
-        console.print(f'[error]error:[/error] {enc_file} already exists; pass --force to overwrite')
-        return 1
-    try:
-        private_key: X25519PrivateKey = load_private_key()
-    except (FileNotFoundError, ValueError) as exc:
-        console.print(f'[error]error:[/error] need a private key first ({exc}); run `user`')
-        return 1
-    _write_enc_key_file(_wrapped_for_all(token_bytes(32), [public_key_hex(private_key.public_key())]))
-    return 0
+# @register(help_text='Create the master encryption key (once per repo); --force overwrites.')
+# def generate_master(force: bool = False) -> int:
+#     """Create a fresh master key wrapped to the current user's public key and write enc-key.json."""
+#     enc_file: Path = config_dict['enc_key_file']
+#     if enc_file.exists() and not force:
+#         console.print(f'[error]error:[/error] {enc_file} already exists; pass --force to overwrite')
+#         return 1
+#     try:
+#         private_key: X25519PrivateKey = load_private_key()
+#     except (FileNotFoundError, ValueError) as exc:
+#         console.print(f'[error]error:[/error] need a private key first ({exc}); run `user`')
+#         return 1
+#     _write_enc_key_file(_wrapped_for_all(token_bytes(32), [public_key_hex(private_key.public_key())]))
+#     return 0
 
 
 @register(help_text='Rotate the master key, re-wrap to users, and re-encrypt private files.')
@@ -218,8 +217,8 @@ def user(regen: bool = False) -> int:
         console.print(f'[primary]public key:[/primary] {pub}\n[success]✓ can encrypt/decrypt[/success]')
     except (FileNotFoundError, KeyError, ValueError):
         console.print(f'[primary]public key:[/primary] {pub}\n[error]✗ cannot encrypt/decrypt[/error]')
-        console.print('[muted]Run `generate-master` (first user), have an existing user `authorize` this '
-                      'public key, or `reconstruct` from shares.[/muted]')
+        console.print('[muted]Have an existing user `authorize` this public key, or `key-reconstruct` '
+                      'from shares.[/muted]')
     return 0
 
 

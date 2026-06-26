@@ -8,7 +8,7 @@ ciphertext every time, or git reports spurious modifications on every `status`/`
 core that provides this (one fixed key from a master key via HKDF, a content-derived nonce
 `HMAC(plaintext)` -- the convergent-encryption trick `git-crypt` uses) lives in
 `solver.crypto.ciphers`; this module is purely the git plumbing on top of it. Multi-user access comes
-for free because the master key is wrapped per user (see `solver.crypto.cipher_keys`).
+for free because the master key is wrapped per user (see `solver.crypto.keys`).
 
 Wire format of an encrypted blob::
 
@@ -26,8 +26,8 @@ stdout when imported** -- in every filter mode stdout is the pkt-line / file-con
 single stray byte written during import would corrupt every blob. Keep that property when editing
 either module (verified: `python -c "import solver.crypto.gitfilter"` writes 0 bytes to stdout).
 
-Create the master key with `solver generate-master` (see `solver.crypto.cipher_keys`), then `install`
-to register the filter in the local git config and `.gitattributes`; `status` reports the wiring.
+The master key lives in `keys/enc-key.json` (managed by `solver.crypto.keys`); run `install` to
+register the filter in the local git config and `.gitattributes`; `status` reports the wiring.
 """
 from __future__ import annotations
 
@@ -183,8 +183,21 @@ def _filter(action: str) -> int:
 #                                               install / status
 # ==================================================================================================================== #
 def _install() -> int:
-    """Register the filter (process + clean/smudge fallback) in git config, ensure the .gitattributes
-    rule exists, then verify the master key against the stored ciphertext or fail."""
+    """Verify the master key first, then register the filter in git config and ensure the
+    .gitattributes rule exists.
+
+    The key check runs **before** anything is wired so a failed install never leaves the filter
+    registered with `required = true` -- which would abort every later git operation on the private
+    tree (checkout/status/add/commit) for a user who cannot load the key.
+    """
+    try:
+        read_master_key()
+    except _KEY_ERRORS as exc:
+        print(f'gitfilter: master key check FAILED: {exc}', file=sys.stderr)
+        print('gitfilter: run `solver user` and gain key access before installing; nothing was wired.', file=sys.stderr)
+        return 1
+    print('gitfilter: master key verified against the stored ciphertext.', file=sys.stderr)
+
     name: str = config_dict['filter_name']
     root = config_dict['root_dir']
     base: str = f'{sys.executable} -m solver.crypto.gitfilter'
@@ -208,14 +221,6 @@ def _install() -> int:
         print(f'added rule to {attrs_path}', file=sys.stderr)
     else:
         print(f'{attrs_path} already has the rule', file=sys.stderr)
-
-    try:
-        read_master_key()
-    except _KEY_ERRORS as exc:
-        print(f'gitfilter: master key check FAILED: {exc}', file=sys.stderr)
-        print('gitfilter: run `solver generate-master` before using the filter.', file=sys.stderr)
-        return 1
-    print('gitfilter: master key verified against the stored ciphertext.', file=sys.stderr)
     return 0
 
 
@@ -242,11 +247,7 @@ def _status() -> int:
 #                                               cli
 # ==================================================================================================================== #
 def main() -> int:
-    """Dispatch a CLI action: clean | smudge | process | install | status.
-
-    Master-key creation and rotation live in the shell (`generate-master`, `rekey`; see
-    solver.crypto.cipher_keys), not here.
-    """
+    """Dispatch a CLI action: clean | smudge | process | install | status. """
     argv = sys.argv
     actions = ('clean', 'smudge', 'process', 'install', 'status')
     if len(argv) < 2 or argv[1] not in actions:

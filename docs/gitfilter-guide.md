@@ -92,32 +92,33 @@ source of truth and the crypto package does not depend on `solver.config`.
 
 ## 3. Setup
 
-You need an X25519 identity first (`~/.solver/id` — run `solver user` if you have
-not already; see [User Guide §7](user-guide.md#7-key-exchange)). Then:
+You need an X25519 identity with master-key access first. Run `solver user`; if it reports
+`✗ cannot encrypt/decrypt`, have an existing user `authorize` your public key (the master key is
+created once and committed in `keys/enc-key.json`). See
+[User Guide §7](user-guide.md#7-key-exchange). Then:
 
 ```bash
-solver generate-master             # create keys/enc-key.json (once per repo)
 solver-gitfilter install           # wire git config + .gitattributes, verify the key
 ```
 
-(`generate-master`, `rekey`, `authorize`, `split`, `reconstruct` and `migrate` are
-shell commands — they prompt and print — so they live in `solver`, not in the
-output-silent `solver-gitfilter` CLI.)
+(`rekey`, `authorize`, `key-split` and `key-reconstruct` are shell commands — they prompt and
+print — so they live in `solver`, not in the output-silent `solver-gitfilter` CLI.)
 
-`install` is idempotent and:
+`install` is idempotent and, in order:
 
-1. Registers the filter in the **local** git config:
+1. Verifies the master key against `verify`, exiting non-zero and **wiring nothing** if it
+   fails — so a failed install can never leave `required = true` set with no usable key.
+2. Registers the filter in the **local** git config:
    ```
    filter.solver-crypt.process = <python> -m solver.crypto.gitfilter process
    filter.solver-crypt.clean   = <python> -m solver.crypto.gitfilter clean
    filter.solver-crypt.smudge  = <python> -m solver.crypto.gitfilter smudge
    filter.solver-crypt.required = true
    ```
-2. Ensures `.gitattributes` contains:
+3. Ensures `.gitattributes` contains:
    ```
    solutions/private/** filter=solver-crypt -text
    ```
-3. Verifies the master key against `verify`, exiting non-zero if it fails.
 
 > **`.gitattributes` must be committed.** The repo `.gitignore` ignores dotfiles,
 > so `.gitattributes` is git-ignored by default; a `!.gitattributes` negation
@@ -156,7 +157,7 @@ The filter plumbing is `solver-gitfilter <action>` (or `python -m solver.crypto.
 
 | Action | Purpose |
 | --- | --- |
-| `install` | Register the filter in git config + `.gitattributes`, then verify the master key or exit non-zero. |
+| `install` | Verify the master key (exit non-zero, wiring nothing, if it fails), then register the filter in git config + `.gitattributes`. |
 | `status` | Print the git-config wiring, `.gitattributes` state, and whether the master key is present and verified. |
 | `process` | Git's long-running filter protocol (pkt-line). Invoked by git; not run by hand. |
 | `clean` / `smudge` | Single-file encrypt / decrypt over stdin→stdout. Invoked by git as a fallback; usable manually for testing. |
@@ -165,15 +166,13 @@ The filter plumbing is `solver-gitfilter <action>` (or `python -m solver.crypto.
 (diagnostics go to stderr) — this is why `gitfilter.py` and `ciphers.py` keep their
 imports stdout-silent and redirect key-retrieval output to stderr.
 
-Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.cipher_keys`):
+Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.keys`):
 
 | Command | Purpose |
 | --- | --- |
-| `generate-master` | Create `keys/enc-key.json`: fresh master key, wrapped to you, plus the `verify` ciphertext. Pass `--force` to overwrite. |
 | `rekey` | Rotate to a new master key, re-wrap it to **every** authorised public key, and re-encrypt tracked private files (`git add --renormalize`). Requires the current key to verify first. |
 | `authorize <public-key-hex>` | Wrap the current master key to another public key (add a user). |
-| `split <n> <t>` / `reconstruct <t>` | Split the master key into `n` shares (any `t` reconstruct) / recover it from `t` shares. |
-| `migrate` | Import a legacy `~/.ssh/id_solver` + `keys/master_key.json` into the new format. |
+| `key-split <n> <t>` / `key-reconstruct <t>` | Split the master key into `n` shares (any `t` reconstruct) / recover it from `t` shares. |
 
 ---
 
@@ -229,7 +228,7 @@ any private file would be pushed in the clear.
 | Symptom | Cause / fix |
 | --- | --- |
 | `git add` hangs | A stale `process` filter or `.git/index.lock` from an interrupted run. Kill leftover `gitfilter process` procs and remove `.git/index.lock`. |
-| `master key check FAILED` on `install` | No `keys/enc-key.json` yet, no `~/.solver/id` / `keys/.user-pass`, or your public key has no entry. Run `solver user` then `solver generate-master`, or have an existing user `authorize` your public key. |
+| `master key check FAILED` on `install` | No `keys/enc-key.json` yet, no `~/.solver/id` / `keys/.user-pass`, or your public key has no entry. Run `solver user`, then have an existing user `authorize` your public key (the master key is committed in `keys/enc-key.json`). |
 | Checkout/commit of private files aborts | `required = true` and the master key is unavailable. Obtain master-key access (see §6), or you genuinely cannot read these files. |
 | Other clones see ciphertext in the working tree | `.gitattributes` was not committed, or the filter was never `install`-ed on that clone. Commit `.gitattributes`; run `solver-gitfilter install`. |
 | Spurious "modified" on `status` with no edits | Determinism broke — the master key in use differs from the one a blob was encrypted with (e.g. after a partial rekey). Reconcile the master key, then `git add --renormalize`. |

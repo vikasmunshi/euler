@@ -210,7 +210,7 @@ solver/
   crypto/
     ciphers.py        — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
     gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
-    keys.py           — Cipher key management: create, persist, rotate, share and migrate the crypto key material.
+    keys.py           — Cipher key management: create, persist, rotate and share the crypto key material.
   runners/
     runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
     runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
