@@ -221,16 +221,16 @@ command name below links to its full entry — usage and description — in the
 | [`eval-benchmark`](commands-index.md#command-eval-benchmark-benchmark) | `benchmark` | Benchmark the problem currently in the workspace. » |
 | [`eval-compile-c`](commands-index.md#command-eval-compile-c-compile) | `compile` | Build all C source files in the solutions_dir. » |
 | [`eval-evaluate`](commands-index.md#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
-| [`eval-set-problem`](commands-index.md#command-eval-set-problem-problem) | `problem` | Set the active problem |
+| [`eval-set-problem`](commands-index.md#command-eval-set-problem-problem) | `problem` | Set the active problem » |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
-| [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
+| [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | Recover master key from shares and wrap it to the current user. |
+| [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | Recover master key from shares. |
 | [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
-| [`key-split`](commands-index.md#command-key-split) | — | Split master key into shares; recovery by threshold num of shares. |
-| [`lint`](commands-index.md#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. » |
+| [`key-split`](commands-index.md#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
+| [`lint`](commands-index.md#command-lint) | — | Lint current problem, auto-fix with --auto-fix. » |
 | [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
 | [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file in the workspace. » |
@@ -244,7 +244,7 @@ command name below links to its full entry — usage and description — in the
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
-| [`user`](commands-index.md#command-user) | — | Show user public key & enc-key access; --regen makes new key-pair. |
+| [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 
 *Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*

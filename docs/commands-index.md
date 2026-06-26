@@ -48,16 +48,16 @@ a parameter that accepts repetition.
 | [`eval-benchmark`](#command-eval-benchmark-benchmark) | `benchmark` | Benchmark the problem currently in the workspace. » |
 | [`eval-compile-c`](#command-eval-compile-c-compile) | `compile` | Build all C source files in the solutions_dir. » |
 | [`eval-evaluate`](#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
-| [`eval-set-problem`](#command-eval-set-problem-problem) | `problem` | Set the active problem |
+| [`eval-set-problem`](#command-eval-set-problem-problem) | `problem` | Set the active problem » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
-| [`git-publish`](#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
+| [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares and wrap it to the current user. |
+| [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares. |
 | [`key-rekey`](#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
-| [`key-split`](#command-key-split) | — | Split master key into shares; recovery by threshold num of shares. |
-| [`lint`](#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. » |
+| [`key-split`](#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
+| [`lint`](#command-lint) | — | Lint current problem, auto-fix with --auto-fix. » |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
 | [`new`](#command-new) | — | Generate new solution/test-case file in the workspace. » |
@@ -71,7 +71,7 @@ a parameter that accepts repetition.
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
-| [`user`](#command-user) | — | Show user public key & enc-key access; --regen makes new key-pair. |
+| [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 
 *Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*
@@ -126,8 +126,8 @@ List commands or show help for a specific command.
 ```text
 List every command, or show detailed help for one command.
 
-With no argument, prints a table of all registered commands with their
-aliases and one-line descriptions, plus the legend (§ requires the workspace
+With no argument, prints a three-column table (command, aliases,
+description) of all registered commands, plus the legend (§ requires the workspace
 lock, ↻ may refresh workspace state, ⊘ refuses while checked out, ⚑ checks
 out while it runs, » supports --silent).
 
@@ -392,9 +392,12 @@ verbose:            If True, prints error information during evaluation. Default
 #### Command: `eval-set-problem` (`problem`)
 
 Set the active problem
+* » supports `--silent`
 
 ```
-eval-set-problem <problem_number>
+eval-set-problem
+[problem_number=<int>|none] (default None)
+[silent=true|--silent]
 ```
 
 ---
@@ -454,7 +457,7 @@ Aliased as `hooks`.
 
 #### Command: `git-publish` (`publish`)
 
-Publish named targets (keys|scripts|solutions|solver) to remote.
+Push targets (keys|scripts|solutions|solver) to remote.
 * » supports `--silent`
 
 ```
@@ -517,7 +520,7 @@ Args:
 
 #### Command: `key-reconstruct`
 
-Recover master key from shares and wrap it to the current user.
+Recover master key from shares.
 
 ```
 key-reconstruct
@@ -549,7 +552,7 @@ rotation re-encrypts the tracked private files via `git add --renormalize`.
 
 #### Command: `key-split`
 
-Split master key into shares; recovery by threshold num of shares.
+Split master key into shares (n-of-m secret sharing).
 
 ```
 key-split
@@ -565,7 +568,7 @@ Print `num_shares` Shamir shares of the current master key (threshold needed to 
 
 #### Command: `lint`
 
-Lint the workspace, fix with autoflake + autopep8 + isort.
+Lint current problem, auto-fix with --auto-fix.
 * » supports `--silent`
 
 ```
@@ -915,7 +918,7 @@ Args:
 
 #### Command: `user`
 
-Show user public key & enc-key access; --regen makes new key-pair.
+Show public key & enc-key access; --regen for new key-pair.
 
 ```
 user
