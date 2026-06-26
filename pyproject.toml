@@ -13,7 +13,6 @@ dependencies = [
     "beautifulsoup4",
     "cryptography",
     "flake8",
-    "jsonschema",
     "mypy",
     "prompt-toolkit",
     "requests",

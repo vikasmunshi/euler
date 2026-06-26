@@ -14,7 +14,7 @@ set -uo pipefail
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 VENV="__VENV__"
 
-cd "$REPO_ROOT"
+cd "$REPO_ROOT" || exit 1
 
 # ── Reporting helpers ────────────────────────────────────────────────────
 FAILURES=()
@@ -41,50 +41,78 @@ print_verdict() {
     return 1
 }
 
-# ── trailing-whitespace: auto-fix staged text files, then re-stage ───────
-# Globs match the same families flagged by `git diff --check`, so the fixer's
-# scope tracks the checker's scope. Add new extensions here as the repo grows.
-# solutions/private is excluded: its staged blobs are gitfilter ciphertext
-# (solver.crypto.gitfilter), so a text whitespace pass on them is meaningless
-# and `git diff --check` would flag random ciphertext bytes as bad whitespace.
+# ── trailing-whitespace / conflict markers: check only, no auto-fix ──────
+# Every staged file is checked, solutions/private included. Those blobs are
+# gitfilter ciphertext (solver.crypto.gitfilter) which contains NUL bytes, so
+# git classifies them as binary and skips the whitespace check automatically —
+# no exclude needed, and no risk of flagging random ciphertext bytes.
 section "trailing whitespace"
-fix_files=$(git diff --cached --name-only --diff-filter=d \
-    -- '*.py' '*.c' '*.h' '*.html' '*.json' '*.md' '*.sh' '*.txt' '*.yml' '*.yaml' '*.csv' \
-    ':(exclude)solutions/private')
-if [[ -n "$fix_files" ]]; then
-    # Normalise CRLF→LF, then strip trailing whitespace.
-    echo "$fix_files" | xargs -d '\n' sed -i 's/\r$//; s/[[:space:]]*$//'
-    echo "$fix_files" | xargs -d '\n' git add
-    note "auto-fixed and re-staged trailing whitespace where present"
-fi
-# Check remaining staged changes (exclude encrypted files: legacy *.enc and the
-# gitfilter-encrypted solutions/private tree).
-if git diff --check --cached --no-color -- ':!*.enc' ':!solutions/private'; then
+if git diff --check --cached --no-color; then
     pass "no trailing-whitespace / conflict markers in staged changes"
 else
     fail "staged changes contain trailing whitespace or conflict markers"
 fi
 
-# ── Lint scope under the gitfilter layout ────────────────────────────────
-# solutions/public (problems 1–100) and solver are plaintext and scanned
-# wholesale, as before. Under solutions/private only the canonical solution
-# files p<NNNN>_s<K>.py are linted: the decrypted scratch/helper scripts
-# (brute.py, verify.py, …) share module basenames across problems — which
-# breaks mypy's module resolution — and are throwaway, so they are excluded.
-mapfile -t PRIVATE_SOLUTIONS < <(
-    find solutions/private -type f -name 'p[0-9][0-9][0-9][0-9]_s[0-9]*.py' 2>/dev/null | sort)
+# ── compiled binaries: drop staged build artifacts ───────────────────────
+# The C runner compiles each solution to an executable (p<NNNN>_s<K>_c, no
+# extension); these are gitignored build artifacts regenerated on demand and
+# must never enter a commit. Inspect each staged blob (not the worktree file)
+# and unstage any that begins with the ELF magic (7f 45 4c 46).
+section "compiled binaries"
+removed_bins=()
+while IFS= read -r f; do
+    [[ -z "$f" ]] && continue
+    head_hex=$(git cat-file -p ":$f" 2>/dev/null | head -c4 | xxd -p)
+    if [[ "$head_hex" == "7f454c46" ]]; then
+        git rm --cached --quiet -- "$f"
+        removed_bins+=("$f")
+    fi
+done < <(git diff --cached --name-only --diff-filter=d)
+if (( ${#removed_bins[@]} > 0 )); then
+    note "unstaged compiled binaries (excluded from this commit):"
+    for b in "${removed_bins[@]}"; do note "  $b"; done
+    pass "compiled binaries removed from the index"
+else
+    pass "no compiled binaries staged"
+fi
 
-# ── flake8: public solutions, private solution files, solver ─────────────
-section "flake8 (public solutions, private solution files, solver)"
-if "$VENV/bin/flake8" solutions/public solver "${PRIVATE_SOLUTIONS[@]}"; then
+# ── gitignored files: block staged paths matched by .gitignore ───────────
+# `git check-ignore` reports a path as NOT ignored once it is in the index, so
+# --no-index is required to evaluate the staged set against the ignore rules
+# directly. That also drops git's "tracked files are never ignored" rule, so a
+# tracked file matching a pattern would be a false positive — but .gitignore is
+# kept correct (its `!.gitignore` / `!.gitattributes` negations follow every
+# broad dot rule, so no tracked file matches), which is why the whole staged
+# set can be checked. Compiled binaries were already dropped above; this catches
+# anything else gitignored (other build artifacts, .env, logs, …) force-added.
+section "gitignored files"
+staged=$(git diff --cached --name-only --diff-filter=d)
+ignored=""
+if [[ -n "$staged" ]]; then
+    ignored=$(printf '%s\n' "$staged" | git check-ignore --no-index --stdin 2>/dev/null || true)
+fi
+if [[ -z "$ignored" ]]; then
+    pass "no gitignored files staged"
+else
+    note "staged files are matched by .gitignore:"
+    while IFS= read -r g; do note "  $g"; done <<< "$ignored"
+    fail "gitignored files are staged — unstage them (or commit deliberately)"
+fi
+
+# ── flake8: solver + solutions ───────────────────────────────────────────
+# The whole solutions tree (public + decrypted private) is a proper package —
+# every directory carries an __init__.py — so module resolution is unambiguous
+# and the lint scope is simply `solutions solver`.
+section "flake8 (solutions, solver)"
+if "$VENV/bin/flake8" solutions solver; then
     pass "flake8 clean"
 else
     fail "flake8 reported issues"
 fi
 
-# ── mypy: public solutions, private solution files, solver ───────────────
-section "mypy (public solutions, private solution files, solver)"
-if "$VENV/bin/mypy" solutions/public solver "${PRIVATE_SOLUTIONS[@]}"; then
+# ── mypy: solver + solutions ─────────────────────────────────────────────
+section "mypy (solutions, solver)"
+if "$VENV/bin/mypy" solutions solver; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"

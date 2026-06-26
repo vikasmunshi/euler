@@ -32,8 +32,8 @@ from datetime import date
 from pathlib import Path
 
 from solver.config import ExitCodes, config
+from solver.core.download import download_file
 from solver.shell import console, register
-from solver.utils.download import download_file
 
 #: The module whose `Model` class this command maintains.
 MODELS_FILE: Path = Path(__file__).resolve().with_name('models.py')
@@ -146,8 +146,7 @@ def _fetch_ecb_usd_rate() -> float | None:
     The ECB quotes `1 EUR = N USD`
     Returns None if the feed is unreachable or carries no USD rate.
     """
-    if (raw := download_file(ECB_FX_URL, refresh=True)) is None:
-        return None
+    raw: bytes = download_file(ECB_FX_URL, refresh=True)
     if not (match := _USD_RATE_RE.search(raw.decode('utf-8'))):
         console.print(f'[error]error:[/error] no USD rate found in the ECB feed at {ECB_FX_URL}')
         return None
@@ -169,8 +168,7 @@ def _collect() -> list[tuple[str, str, float, float]] | None:
     """
     if (fetched := _fetch_models()) is None:
         return None
-    if (raw := download_file(PRICING_URL, refresh=True)) is None:
-        return None
+    raw: bytes = download_file(PRICING_URL, refresh=True)
     prices = _parse_pricing(raw.decode('utf-8'))
     models: list[tuple[str, str, float, float]] = []
     for model_id, display in fetched:

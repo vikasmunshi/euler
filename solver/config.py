@@ -84,14 +84,13 @@ class Config(metaclass=Singleton):
                  'default_solution_notes', 'default_test_cases', 'docs_dir', 'ecb_usd_rate',
                  'gitfilter_attr_line', 'gitfilter_header_len', 'gitfilter_magic', 'gitfilter_name',
                  'gitfilter_nonce_len', 'gitfilter_pkt_max', 'gitfilter_verify_text', 'history_file',
-                 'keys_backup_file', 'keys_file', 'keys_version', 'lock_env_var', 'master_key_file', 'max_line_length',
+                 'keys_backup_file', 'keys_file', 'keys_version', 'master_key_file', 'max_line_length',
                  'max_output_tokens', 'max_retries', 'modules_file', 'notes_filename', 'number_filename',
                  'private_key_file', 'project_git_url', 'projecteuler_url', 'resource_dirname', 'results_filename',
                  'root_dir', 'schema_file', 'screen_width', 'scripts', 'server_lock_file', 'server_port',
                  'session_file', 'skill_dir', 'solutions_dir', 'stale_notes_tolerance_s', 'statement_filename',
                  'static_file_dir', 'static_file_problems', 'static_file_progress', 'static_file_progress_editor',
-                 'style', 'templates_dir', 'test_cases_filename', 'theme', 'timeout_multiple', 'timeout_single',
-                 'workspace_dir')
+                 'style', 'templates_dir', 'test_cases_filename', 'theme', 'timeout_multiple', 'timeout_single',)
 
     managed_config_file: ClassVar[Path] = Path(__file__).parent / 'config.json'
     version: ClassVar[str] = '0.2'
@@ -120,7 +119,6 @@ class Config(metaclass=Singleton):
                  static_file_progress: str,
                  static_file_progress_editor: str,
                  templates_dir: str,
-                 workspace_dir: str,
 
                  theme: Theme,
                  style: Style,
@@ -133,7 +131,6 @@ class Config(metaclass=Singleton):
         self.default_solution_notes: str = 'Nothing here yet - come back when the dust has settled.'
         self.default_test_cases: str = 'No test cases yet - someone has to go first.'
         self.keys_version: str = '1.0.1'
-        self.lock_env_var: str = 'solver_workspace_lock'
         self.max_line_length: int = 120  # keep in sync with tox.ini [flake8] max-line-length
         self.max_output_tokens: int = 10_000
         self.max_retries: int = 3
@@ -191,7 +188,6 @@ class Config(metaclass=Singleton):
         self.static_file_progress: Path = root_dir / static_file_progress
         self.static_file_progress_editor: Path = root_dir / static_file_progress_editor
         self.templates_dir: Path = root_dir / templates_dir
-        self.workspace_dir: Path = root_dir / workspace_dir
 
         self.theme: Theme = theme
         self.style: Style = style
@@ -259,7 +255,6 @@ config: Config = Config(
     static_file_progress='solutions/.progress.html',
     static_file_progress_editor='solutions/static-content/progress/progress.html',
     templates_dir='solver/templates',
-    workspace_dir='workspace',
 
     theme=Theme({
         'accent': 'bold #f97316',  # warm orange accent (Junie highlight)

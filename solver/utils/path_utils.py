@@ -9,7 +9,6 @@ from pathlib import Path
 from typing import Generator, Literal, overload
 
 from solver.config import config
-from solver.core.lock import check_workspace_lock_generic
 from solver.shell import console
 
 
@@ -51,7 +50,6 @@ def iterdir_recursive(directory: Path, *,
                 yield item
 
 
-@check_workspace_lock_generic
 def write_file(path: Path, content: bytes, msg: str | None = None) -> None:
     """Write bytes to the path, creating parent directories as needed, and optionally print a status message."""
     path.parent.mkdir(parents=True, exist_ok=True)

@@ -90,7 +90,7 @@ def generate_notes(model: Model, *, problem: Problem, force: bool, major: bool) 
         force (bool)      : Force note generation even if no new solutions are available.
         major (bool)      : Withhold any prior notes from the prompt (use after a template/prompt change).
     """
-    if not (force or problem.number in set(p.number for p in problems.stale_problems)):
+    if not (force or problem.number in set(p.number for p in problems.solved_problems)):
         console.print('[muted]Use [accent]--force[/accent] to re-document solutions.[/muted]')
         return None
     try:
@@ -108,7 +108,7 @@ def generate_notes(model: Model, *, problem: Problem, force: bool, major: bool) 
     if notes is None:
         console.print('[error]error:[/error] failed to generate notes')
         return False
-    write_file(config.workspace_dir / config.notes_filename, notes.encode(),
+    write_file(problem.solution_dir / config.notes_filename, notes.encode(),
                f'Updated {config.notes_filename}')
     return True
 
@@ -139,7 +139,7 @@ def generate_test_cases(model: Model, *, problem: Problem, force: bool, major: b
     if major:
         console.print('[muted]Use structural transformation for migration after a major change.[/muted]')
         return None
-    if not (force or not (config.workspace_dir / config.test_cases_filename).exists()):
+    if not (force or not (problem.solution_dir / config.test_cases_filename).exists()):
         console.print('[muted]Test cases exist.[/muted]')
         return None
     facts: Facts = gather_facts(strict=False)
@@ -163,6 +163,6 @@ def generate_test_cases(model: Model, *, problem: Problem, force: bool, major: b
         if raw is not None:
             console.print(f'Generated test cases: {raw}', markup=False, highlight=False)
         return False
-    write_file(config.workspace_dir / config.test_cases_filename, parsed.encode(),
+    write_file(problem.solution_dir / config.test_cases_filename, parsed.encode(),
                f'Updated {config.test_cases_filename}')
     return True

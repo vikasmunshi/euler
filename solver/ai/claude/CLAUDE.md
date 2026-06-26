@@ -85,22 +85,18 @@ solver/
     skill.py          — The `claude-skill` command: run Claude Code in-shell against the locked workspace.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   core/
-    checkout.py       — Workspace checkout marker: a presence-based guard that blocks `reset`.
     evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
-    lock.py           — Utilities for workspace locking using file-based locks.
     parser.py         — HTML problem-statement parser: assemble a standalone statement page from a scraped Project Euler page.
     problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
     results.py        — Results: save and retrieve problem results.
-    stack.py          — Stack directory management: file read/write, transparent encryption, and path resolution.
     test_cases.py     — Load test cases for evaluation
-    workspace.py      — Workspace management: initialise, stack, list, and clear problem workspaces.
   crypto/
     asymmetrical.py   — X25519 ECDH key pair generation, master key wrapping, and user identity management.
+    gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
     keys.py           — Encrypted key file read/write and per-user key retrieval.
     share.py          — n of m secret sharing for fixed-size AES-256 keys.
     symmetrical.py    — AES-based symmetric encryption and decryption with key derivation.
   runners/
-    migrate.py        — Migrate legacy solutions to the new runner framework.
     runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
     runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
   shell/              — Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.

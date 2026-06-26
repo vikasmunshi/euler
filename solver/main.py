@@ -8,7 +8,6 @@ __all__ = ['main']
 import argparse
 
 from solver.config import config
-from solver.core.lock import acquire_workspace_lock
 from solver.shell import SolverShell
 from solver.utils.loader import load_commands
 
@@ -34,18 +33,11 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
 
     args = parser.parse_args()
 
-    with acquire_workspace_lock() as lock:
-        load_commands()
-        shell = SolverShell(save=args.save and not args.cmdline)
-        if args.cmdline:
-            return shell.run_command(args.cmdline)
-        if not (lock.acquired or lock.inherited):
-            intro_message: str = f'[warning]Workspace is not locked!{lock.held_by}[/warning]'
-        elif lock.inherited:
-            intro_message = f'[primary]Workspace lock inherited from PID {lock.pid_of_holder}[/primary]'
-        else:
-            intro_message = ''
-        return shell.run_interactive(intro_message=intro_message)
+    load_commands()
+    shell = SolverShell(save=args.save and not args.cmdline)
+    if args.cmdline:
+        return shell.run_command(args.cmdline)
+    return shell.run_interactive(intro_message='')
 
 
 if __name__ == '__main__':  # pragma: no cover

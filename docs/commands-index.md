@@ -40,38 +40,31 @@ a parameter that accepts repetition.
 |---------|---------|-------------|
 | [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command in the workspace. ↻ ⚑ |
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](#command-benchmark) | — | Benchmark the problem currently in the workspace. § » |
-| [`checkin`](#command-checkin) | — | Check in the workspace, re-allowing `init` and `reset`. § » |
-| [`checkout`](#command-checkout) | — | Check out the workspace, blocking `init` and `reset` until checkin. § » |
-| [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. § ⚑ |
-| [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. § ⚑ |
+| [`benchmark`](#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
+| [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. |
+| [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
-| [`compile-c`](#command-compile-c) | — | Build all C source files in the workspace directory. § » |
+| [`compile-c`](#command-compile-c) | — | Build all C source files in the solutions_dir. » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
-| [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. § » |
+| [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`init`](#command-init) | — | Initialize the workspace for the given problem number. § ↻ ⊘ » |
-| [`lint`](#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. § » |
-| [`lock-status`](#command-lock-status) | — | Check and report the workspace checkout and lock status. |
-| [`ls`](#command-ls-list) | `list` | List current workspace, indicating changes against stack. |
+| [`lint`](#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. » |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. § » |
-| [`new`](#command-new) | — | Generate new solution/test-case file in the workspace. § » |
+| [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
+| [`new`](#command-new) | — | Generate new solution/test-case file in the workspace. » |
 | [`pause`](#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
 | [`rekey`](#command-rekey) | — | Reinitialize keys.json with additional new encryption keys. |
-| [`reset`](#command-reset) | — | Clear the workspace, and, if required, stack first. § ↻ ⊘ » |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
 | [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
-| [`stack`](#command-stack-save) | `save` | Propagate stackable workspace changes to the stack. § » |
-| [`summary`](#command-summary) | — | Parse .progress.html into problems.json. § » |
+| [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](#command-update-models) | — | Refresh Model enum, pricing, and USD→EUR rate from live API and docs. » |
@@ -148,11 +141,10 @@ Aliased as `help`.
 #### Command: `benchmark`
 
 Benchmark the problem currently in the workspace.
-* § requires the workspace lock
 * » supports `--silent`
 
 ```
-benchmark
+benchmark <problem_number>
 [all|dev|main|extra ...]
 [clean=true|--clean]
 [timeout=<float>|none] (default None)
@@ -192,6 +184,7 @@ Repeats:
     `disable_timeout` overrides this and forces a single run.
 
 Args:
+    problem_number:      Problem number to benchmark.
     *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                         (which expands to all three). Defaults to all three if omitted.
     clean:              If True, force compiles C solutions. Defaults to False.
@@ -212,54 +205,9 @@ Args:
 
 ---
 
-#### Command: `checkin`
-
-Check in the workspace, re-allowing `init` and `reset`.
-* § requires the workspace lock
-* » supports `--silent`
-
-```
-checkin
-[silent=true|--silent]
-```
-
-```text
-Clear the checkout marker left by `checkout`, re-allowing `init` and `reset`.
-```
-
----
-
-#### Command: `checkout`
-
-Check out the workspace, blocking `init` and `reset` until checkin.
-* § requires the workspace lock
-* » supports `--silent`
-
-```
-checkout
-[reason=<str>] (default '')
-[silent=true|--silent]
-```
-
-```text
-Mark the workspace checked out so `init`/`reset` refuses until a `checkin`.
-
-Protects an in-progress workspace from an accidental `reset` — including the reset button on the
-web viewer and a sibling shell — by leaving a presence marker that any process can see. `claude-api`
-and `claude-skill` check out automatically while they run; this is the manual equivalent. The marker
-persists until `checkin` (there is no force-reset), so it also survives a crash until cleared.
-
-Args:
-    reason: Free-text note recorded in the marker and echoed when a reset is refused.
-```
-
----
-
 #### Command: `claude-api`
 
 Generate specified target using Claude API.
-* § requires the workspace lock
-* ⚑ checks the workspace out while it runs
 
 ```
 claude-api <c|py|doc|notes|test-cases>
@@ -284,8 +232,6 @@ Args:
 #### Command: `claude-skill`
 
 Launch the Claude Euler Solver skill.
-* § requires the workspace lock
-* ⚑ checks the workspace out while it runs
 
 ```
 claude-skill <solve|review>
@@ -332,12 +278,11 @@ A convenience wrapper over the console's clear; equivalent to the shell
 
 #### Command: `compile-c`
 
-Build all C source files in the workspace directory.
-* § requires the workspace lock
+Build all C source files in the solutions_dir.
 * » supports `--silent`
 
 ```
-compile-c
+compile-c <problem_number>
 [clean=true|--clean]
 [silent=true|--silent]
 ```
@@ -351,8 +296,9 @@ error. `eval --clean` and `benchmark` invoke this for you, so you rarely
 call it directly.
 
 Args:
-    clean:  When True, force a full rebuild instead of reusing up-to-date
-            build output. Defaults to False.
+    problem_number:     problem number to compile.
+    clean:              When True, force a full rebuild instead of reusing up-to-date
+                        build output. Defaults to False.
 ```
 
 ---
@@ -402,11 +348,10 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 #### Command: `evaluate` (`eval`)
 
 Evaluate solutions against test cases.
-* § requires the workspace lock
 * » supports `--silent`
 
 ```
-evaluate
+evaluate <problem_number>
 [all|dev|main|extra ...]
 [clean=true|--clean]
 [timeout=<float>|none] (default None)
@@ -423,6 +368,7 @@ evaluate
 Evaluate solutions against test cases.
 
 Args:
+problem_number:     Problem number to evaluate.
 *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                     (which expands to all three). Defaults to 'dev', 'main' if omitted.
 clean:              If True, force compiles C solutions. Defaults to False.
@@ -559,38 +505,9 @@ Args:
 
 ---
 
-#### Command: `init`
-
-Initialize the workspace for the given problem number.
-* § requires the workspace lock
-* ↻ may refresh workspace state
-* ⊘ refuses while the workspace is checked out
-* » supports `--silent`
-
-```
-init <problem_number>
-[refresh=true|--refresh]
-[silent=true|--silent]
-```
-
-```text
-Initialize the workspace for the specified problem number.
-
-If a workspace is already initialized for a different problem number, it will be reset
-before initializing the new problem workspace.
-
-Args:
-    problem_number: Problem number of the projecteuler problem to initialize in the workspace.
-    refresh:        Whether to force a refresh of the projecteuler files if they are already cached.
-                    Defaults to False.
-```
-
----
-
 #### Command: `lint`
 
 Lint the workspace, fix with autoflake + autopep8 + isort.
-* § requires the workspace lock
 * » supports `--silent`
 
 ```
@@ -611,48 +528,6 @@ Args:
                 (remove unused imports/variables), autopep8 (style), and
                 isort (import order), then re-check. When False (default),
                 only report. Fails if the workspace holds no problem.
-```
-
----
-
-#### Command: `lock-status`
-
-Check and report the workspace checkout and lock status.
-
-```
-lock-status
-```
-
-```text
-Report whether this shell holds the workspace lock, and who does.
-
-Only one shell may own `workspace/` at a time. Prints — and reflects in the
-exit code — one of three states (lock-requiring commands, marked §, refuse to
-run in the last one):
-
-Returns:
-    EXIT_OK (0)     : the lock was inherited from a parent process (PID shown).
-    EXIT_USAGE (2)  : this shell acquired the lock (PID shown).
-    EXIT_ERROR (1)  : the workspace could not be locked.
-```
-
----
-
-#### Command: `ls` (`list`)
-
-List current workspace, indicating changes against stack.
-
-```
-ls
-```
-
-```text
-Generates a summary report of the current workspace, including information related to
-file modifications, new files, and deleted files, comparing the current workspace
-contents with the stack for a specific problem.
-
-Returns:
-    bool: True if the workspace differs from the stack, False otherwise.
 ```
 
 ---
@@ -687,7 +562,6 @@ Args:
 #### Command: `mark` (`mark-solved`)
 
 Mark the workspace problem as solved, after checking.
-* § requires the workspace lock
 * » supports `--silent`
 
 ```
@@ -716,7 +590,6 @@ Aliased as `mark-solved`.
 #### Command: `new`
 
 Generate new solution/test-case file in the workspace.
-* § requires the workspace lock
 * » supports `--silent`
 
 ```
@@ -843,33 +716,6 @@ Args:
 
 ---
 
-#### Command: `reset`
-
-Clear the workspace, and, if required, stack first.
-* § requires the workspace lock
-* ↻ may refresh workspace state
-* ⊘ refuses while the workspace is checked out
-* » supports `--silent`
-
-```
-reset
-[discard_changes=true|--discard-changes]
-[silent=true|--silent]
-```
-
-```text
-Clear the workspace by deleting all files and directories.
-
-If the workspace has unstacked changes and discard_changes is False, the workspace will be stacked first
-if discard_changes is True, the workspace will be cleared immediately without stacking.
-
-Args:
-    discard_changes: If True, clear the workspace without stacking changes first.
-                     If False (default), stack the workspace before clearing if it differs from the stack.
-```
-
----
-
 #### Command: `search` (`find`)
 
 Find content in the stack.
@@ -929,31 +775,9 @@ Arguments:
 
 ---
 
-#### Command: `stack` (`save`)
-
-Propagate stackable workspace changes to the stack.
-* § requires the workspace lock
-* » supports `--silent`
-
-```
-stack
-[process_deletions=false|--no-process-deletions]
-[silent=true|--silent]
-```
-
-```text
-Stack the current problem in the workspace to the stack directory.
-
-Args:
-    process_deletions: Whether to process deletions during stacking, defaults to True.
-```
-
----
-
 #### Command: `summary`
 
 Parse .progress.html into problems.json.
-* § requires the workspace lock
 * » supports `--silent`
 
 ```

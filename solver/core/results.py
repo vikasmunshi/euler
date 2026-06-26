@@ -10,8 +10,7 @@ from json import JSONDecodeError, dumps, loads
 from typing import Any, Generator, NamedTuple, Protocol
 
 from solver.config import config
-from solver.core.lock import check_workspace_lock_generic
-from solver.shell import console
+from solver.shell import console, variables
 from solver.utils.path_utils import write_file
 
 color_map: dict[str, str] = {
@@ -78,7 +77,7 @@ class Result(NamedTuple):
 def read_results() -> list[Result]:
     """Read problem results from a JSON file."""
     try:
-        raw = loads((config.workspace_dir / config.results_filename).read_bytes())
+        raw = loads((variables.problem.solution_dir / config.results_filename).read_bytes())
     except (FileNotFoundError, JSONDecodeError):
         raw = []
     return [Result(**r) for r in raw]
@@ -118,7 +117,6 @@ def results_collector(record: bool, reset: bool = False) -> Generator[Recorder, 
             write_results(results, reset=reset and clean_exit)
 
 
-@check_workspace_lock_generic
 def write_results(results: list[Result], reset: bool = False) -> None:
     """Write problem results to a JSON file.
 
@@ -147,7 +145,7 @@ def write_results(results: list[Result], reset: bool = False) -> None:
         existing_raw: list[dict[str, Any]] = []
     else:
         try:
-            existing_raw = loads((config.workspace_dir / config.results_filename).read_bytes())
+            existing_raw = loads((variables.problem.solution_dir / config.results_filename).read_bytes())
         except (FileNotFoundError, JSONDecodeError):
             existing_raw = []
 
@@ -172,5 +170,5 @@ def write_results(results: list[Result], reset: bool = False) -> None:
     for incoming_result in incoming.values():
         updated.append(incoming_result._asdict())
 
-    write_file(config.workspace_dir / config.results_filename, dumps(updated, indent=2).encode(),
+    write_file(variables.problem.solution_dir / config.results_filename, dumps(updated, indent=2).encode(),
                'Updated results')

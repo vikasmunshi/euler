@@ -14,7 +14,6 @@
 # Licensed under the MIT License.
 
 set -euo pipefail
-declare DIR_TO_CHECK SOLUTIONS_DIR
 
 REPO_ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 HOOKS_DIR="${REPO_ROOT}/.git/hooks"
@@ -59,36 +58,11 @@ render_hook() {
     sed \
         -e "s|__REPO_ROOT__|${REPO_ROOT}|g" \
         -e "s|__VENV__|${VENV}|g" \
-        -e "s|__DIR_TO_CHECK__|${DIR_TO_CHECK}|g" \
-        -e "s|__SOLUTIONS_DIR__|${SOLUTIONS_DIR}|g" \
         "${template}" > "${dest}"
     chmod +x "${dest}"
 }
 
 install_hooks() {
-    DIR_TO_CHECK=$("${VENV}"/bin/python - <<'EOF'
-from solver.config import config
-from solver.utils.path_utils import canonical_path
-print(canonical_path(config.workspace_dir))
-EOF
-)
-    SOLUTIONS_DIR=$("${VENV}"/bin/python - <<'EOF'
-from solver.config import config
-from solver.utils.path_utils import canonical_path
-print(canonical_path(config.solutions_dir))
-EOF
-)
-
-    if [[ -z "${DIR_TO_CHECK}" || ! -d "${REPO_ROOT}/${DIR_TO_CHECK}" ]]; then
-        echo "ERROR: DIR_TO_CHECK is not a valid directory: '${DIR_TO_CHECK}'" >&2
-        exit 1
-    fi
-
-    if [[ -z "${SOLUTIONS_DIR}" || ! -d "${REPO_ROOT}/${SOLUTIONS_DIR}" ]]; then
-        echo "ERROR: SOLUTIONS_DIR is not a valid directory: '${SOLUTIONS_DIR}'" >&2
-        exit 1
-    fi
-
     if (( FORCE == 0 )); then
         backup_if_exists "${PRE_COMMIT}"
         backup_if_exists "${PRE_PUSH}"

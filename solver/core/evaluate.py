@@ -3,7 +3,7 @@
 """Solution evaluation: runs standalone scripts against test cases and reports results."""
 from __future__ import annotations
 
-__all__ = ['evaluate']
+__all__ = ['benchmark', 'evaluate']
 
 import re
 from ast import literal_eval
@@ -13,19 +13,16 @@ from time import perf_counter
 from typing import Literal, cast
 
 from solver.config import ExitCodes, config
-from solver.core.lock import check_workspace_lock_command
-from solver.core.problems import problems
 from solver.core.results import results_collector
 from solver.core.test_cases import TestCase, load_test_cases
-from solver.shell import console, register
+from solver.shell import console, register, variables
 from solver.utils.path_utils import canonical_path
 
 # group 1: problem number, group 2: solution index, group 3: file type
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
 
 
-@register(help_text='Build all C source files in the workspace directory.', quietable=True)
-@check_workspace_lock_command
+@register(help_text='Build all C source files in the solutions_dir.', quietable=True)
 def compile_c(clean: bool = False) -> int:
     """Compile every C solution in the workspace into a runnable binary.
 
@@ -35,10 +32,12 @@ def compile_c(clean: bool = False) -> int:
     call it directly.
 
     Args:
-        clean:  When True, force a full rebuild instead of reusing up-to-date
-                build output. Defaults to False.
+        problem_number:     problem number to compile.
+        clean:              When True, force a full rebuild instead of reusing up-to-date
+                            build output. Defaults to False.
     """
-    source_files: list[Path] = sorted(s for s in config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.c')
+    source_files: list[Path] = sorted(s for s in variables.problem.solution_dir.iterdir()
+                                      if s.is_file() and s.suffix == '.c')
     result: int = ExitCodes.EXIT_OK
     for source_file in source_files:
         cmdline: str = f'{config.scripts.compile_c} {canonical_path(source_file)} {'--clean' if clean else ''}'
@@ -127,10 +126,10 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
               verbose: bool = False,
               ) -> int:
     """
-    Run all solutions in workspace_dir against the filtered test cases and report results.
+    Run all solutions in problem.solutions_dir against the filtered test cases and report results.
 
     Test cases are read from the workspace's test cases file and filtered to the given
-    categories. Each solution (any executable file in workspace_dir) is run against every
+    categories. Each solution (any executable file in problem.solutions_dir) is run against every
     matching test case via eval_solution, and each result is passed to the result recorder.
 
     Args:
@@ -170,7 +169,7 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
         compile_c(clean=clean)
     solutions: list[str] = sorted(
         (
-            f'{s.name}' for s in config.workspace_dir.iterdir()
+            f'{s.name}' for s in variables.problem.solution_dir.iterdir()
             if s.is_file()  # is a file
             if bool(s.stat().st_mode & 0o100)  # is executable
             if (match := _solution_file_prefix.match(s.name))  # matches pN_sK[.py|_c]
@@ -194,7 +193,7 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
                                                     input_args=test_case.input_args,
                                                     runs=test_case.runs,
                                                     show=show,
-                                                    work_dir=config.workspace_dir, )
+                                                    work_dir=variables.problem.solution_dir, )
             match (answer, test_case.answer, error):
                 case (None, _, error_msg) if 'ModuleNotFoundError:' in error_msg:
                     verdict = 'missing dep'
@@ -228,7 +227,6 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
 
 
 @register(help_text='Evaluate solutions against test cases.', aliases=('eval',), quietable=True)
-@check_workspace_lock_command
 def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
              clean: bool = False,
              timeout: float | None = None,
@@ -283,7 +281,6 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
 
 
 @register(help_text='Benchmark the problem currently in the workspace.', quietable=True)
-@check_workspace_lock_command
 def benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
               clean: bool = False,
               timeout: float | None = None,
@@ -356,5 +353,4 @@ def benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
     except KeyboardInterrupt:
         console.print('[muted]Benchmark interrupted by user.[/muted]')
         return ExitCodes.EXIT_ERROR
-    problems.clear_cache()
     return rc

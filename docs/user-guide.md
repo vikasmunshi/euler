@@ -213,38 +213,31 @@ command name below links to its full entry — usage and description — in the
 |---------|---------|-------------|
 | [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | Run a bash command in the workspace. ↻ ⚑ |
 | [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark the problem currently in the workspace. § » |
-| [`checkin`](commands-index.md#command-checkin) | — | Check in the workspace, re-allowing `init` and `reset`. § » |
-| [`checkout`](commands-index.md#command-checkout) | — | Check out the workspace, blocking `init` and `reset` until checkin. § » |
-| [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. § ⚑ |
-| [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. § ⚑ |
+| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
+| [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. |
+| [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |
-| [`compile-c`](commands-index.md#command-compile-c) | — | Build all C source files in the workspace directory. § » |
+| [`compile-c`](commands-index.md#command-compile-c) | — | Build all C source files in the solutions_dir. » |
 | [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
-| [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. § » |
+| [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
-| [`init`](commands-index.md#command-init) | — | Initialize the workspace for the given problem number. § ↻ ⊘ » |
-| [`lint`](commands-index.md#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. § » |
-| [`lock-status`](commands-index.md#command-lock-status) | — | Check and report the workspace checkout and lock status. |
-| [`ls`](commands-index.md#command-ls-list) | `list` | List current workspace, indicating changes against stack. |
+| [`lint`](commands-index.md#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. » |
 | [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. § » |
-| [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file in the workspace. § » |
+| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
+| [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file in the workspace. » |
 | [`pause`](commands-index.md#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
 | [`rekey`](commands-index.md#command-rekey) | — | Reinitialize keys.json with additional new encryption keys. |
-| [`reset`](commands-index.md#command-reset) | — | Clear the workspace, and, if required, stack first. § ↻ ⊘ » |
 | [`search`](commands-index.md#command-search-find) | `find` | Find content in the stack. |
 | [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
-| [`stack`](commands-index.md#command-stack-save) | `save` | Propagate stackable workspace changes to the stack. § » |
-| [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. § » |
+| [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](commands-index.md#command-update-models) | — | Refresh Model enum, pricing, and USD→EUR rate from live API and docs. » |

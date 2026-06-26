@@ -70,18 +70,18 @@ class Solution(NamedTuple):
     executable: Path
 
     @staticmethod
-    def from_msg(msg: str) -> list[Solution]:
+    def from_msg(msg: str, problem: Problem) -> list[Solution]:
         """Parse solutions from an AI response containing // BEGIN / // END delimiters."""
         solutions: list[Solution] = []
         for m in _PATTERN.finditer(msg):
             name: str = m.group(1)
             code: str = _strip_code_fence(m.group(2))
-            file: Path = config.workspace_dir / name
+            file: Path = problem.solution_dir / name
             suffix: str = file.suffix
             if suffix in ('.c', '.py'):
                 write_file(file, code.encode(), f'generated {name}')
             if suffix == '.c':
-                executable: Path = config.workspace_dir / f'{file.stem}_c'
+                executable: Path = problem.solution_dir / f'{file.stem}_c'
             elif suffix == '.py':
                 file.chmod(0o755)
                 executable = file
@@ -210,7 +210,7 @@ def _generate_code(
             console.print(f'[error]error:[/error] no text block in response for '
                           f'[accent]problem {problem.number}[/accent]')
             return False
-        solutions: list[Solution] = Solution.from_msg(text)
+        solutions: list[Solution] = Solution.from_msg(text, problem)
         if not solutions:
             console.print(f'[error]error:[/error] could not parse any solutions from response for '
                           f'[accent]problem {problem.number}[/accent]')
@@ -468,14 +468,14 @@ def _check_generated_code(*,
     final: SolutionsCheckResults = _check_results(passed=passed, failed=failed, errors=errors)
     if final.verdict:
         # success on any attempt: drop accumulated .bak litter from earlier retries
-        for file in iterdir_recursive(config.workspace_dir, rt='path'):
+        for file in iterdir_recursive(problem.solution_dir, rt='path'):
             if file.suffix == '.bak':
                 file.unlink(missing_ok=True)
     elif attempt == config.max_retries:
         # final attempt still failing: preserve the rejected sources
         backup_dir: Path = config.backup_dir / f'p{problem.number:04d}_{int(time())}'
         backup_dir.mkdir(parents=True, exist_ok=True)
-        for file in iterdir_recursive(config.workspace_dir, rt='path'):
+        for file in iterdir_recursive(problem.solution_dir, rt='path'):
             if file.suffix == '.bak':
                 file.rename(backup_dir / file.with_suffix('').name)
         console.print(f'[accent.dim]backup of failed solutions to {canonical_path(backup_dir)}[/accent.dim]')
@@ -488,7 +488,7 @@ def _check_generated_code(*,
 
 
 def _load_test_cases(problem: Problem, filter_null_answers: bool) -> list[dict[str, Any]]:
-    test_cases: list[dict[str, Any]] = loads((config.workspace_dir / config.test_cases_filename).read_text())
+    test_cases: list[dict[str, Any]] = loads((problem.solution_dir / config.test_cases_filename).read_text())
     if not (filtered := [tc for tc in test_cases if tc['answer'] is not None]):
         style = 'error' if filter_null_answers else 'warning'
         console.print(f'[{style}]{style}:[/{style}] no test cases with answer found for '
@@ -529,8 +529,8 @@ def generate_c_code(model: Model, *, problem: Problem, force: bool, major: bool)
         return None
     if not (test_cases := _load_test_cases(problem, filter_null_answers=True)):
         return None
-    py_solutions: set[str] = {f.stem for f in iterdir_recursive(config.workspace_dir, rt='path') if f.suffix == '.py'}
-    c_solutions: set[str] = {f.stem for f in iterdir_recursive(config.workspace_dir, rt='path') if f.suffix == '.c'}
+    py_solutions: set[str] = {f.stem for f in iterdir_recursive(problem.solution_dir, rt='path') if f.suffix == '.py'}
+    c_solutions: set[str] = {f.stem for f in iterdir_recursive(problem.solution_dir, rt='path') if f.suffix == '.c'}
     files_to_generate: str = ' '.join(f'{f}.c' for f in py_solutions if f not in c_solutions)
     if not (force or files_to_generate):
         console.print('[muted]No C solutions to generate.[/muted]')
@@ -585,7 +585,7 @@ def generate_py_code(model: Model, *, problem: Problem, force: bool, major: bool
         return None
     if not (test_cases := _load_test_cases(problem, filter_null_answers=False)):
         return None
-    num_existing: int = sum(1 for s in config.workspace_dir.iterdir() if s.is_file() and s.suffix == '.py')
+    num_existing: int = sum(1 for s in problem.solution_dir.iterdir() if s.is_file() and s.suffix == '.py')
     if not force and num_existing == 0:
         console.print('[muted]No python solutions; solve the problem first[/muted]')
         return None
@@ -648,13 +648,13 @@ def document_code(model: Model, *, problem: Problem, force: bool, major: bool) -
     if major:
         console.print('[muted]Use structural code transformation for migration after major change.[/muted]')
         return None
-    if not (force or problem.number in set(p.number for p in problems.stale_problems)):
+    if not (force or problem.number in set(p.number for p in problems.solved_problems)):
         console.print('[muted]Use [accent]--force[/accent] to re-document solutions.[/muted]')
         return None
     if not (test_cases := _load_test_cases(problem, filter_null_answers=True)):
         return None
     files_to_generate: str = ' '.join(sorted(
-        f.name for f in iterdir_recursive(config.workspace_dir, rt='path') if f.suffix in ('.py', '.c')))
+        f.name for f in iterdir_recursive(problem.solution_dir, rt='path') if f.suffix in ('.py', '.c')))
     if not files_to_generate:
         console.print('[muted]No solutions to document.[/muted]')
         return None

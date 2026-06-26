@@ -87,14 +87,6 @@ def _help(ctx: Context, *args: str) -> int:
         body = Text()
         help_text = cmd.help or '(no description)'
         help_text = help_text.replace(
-            ' [warning]§[/warning]', '\n[warning]§[/warning] requires workspace to be locked.')
-        help_text = help_text.replace(
-            ' [warning]↻[/warning]', '\n[warning]↻[/warning] (may) refresh the workspace.')
-        help_text = help_text.replace(
-            ' [warning]⊘[/warning]', '\n[warning]⊘[/warning] refuses while the workspace is checked out.')
-        help_text = help_text.replace(
-            ' [warning]⚑[/warning]', '\n[warning]⚑[/warning] checks the workspace out while it runs.')
-        help_text = help_text.replace(
             ' [warning]»[/warning]', '\n[warning]»[/warning] supports --silent to suppress output.')
         body.append_text(Text.from_markup(help_text, style='accent.dim'))
         if cmd.aliases:
@@ -117,9 +109,7 @@ def _help(ctx: Context, *args: str) -> int:
         table.add_row(names, cmd.help or '')
     ctx.console.print(Panel(table, border_style='panel.border',
                             title='[accent]▎[/accent] [primary]commands[/primary]',
-                            subtitle='[warning]§ requires lock.  ↻ refreshes vars.  '
-                                     '⊘ blocked by checkout.  ⚑ auto-checkout.  '
-                                     '» supports --silent.[/warning]',
+                            subtitle='[warning]» supports --silent.[/warning]',
                             subtitle_align='right',
                             title_align='left', padding=(1, 2)))
     return ExitCodes.EXIT_OK

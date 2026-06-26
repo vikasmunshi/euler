@@ -8,12 +8,10 @@ __all__ = ['manage_config']
 from solver.config import config, ExitCodes
 from solver.core.problems import Problem, problems as problem_set
 from solver.shell import register, console
-from solver.core.checkout import workspace_checkout_reason
-from solver.core.lock import lock_state
 
 
 @register(help_text='Show list of problems ([accent.dim]all[/accent.dim]|solved|unsolved|stale).')
-def problems(which: Literal['all', 'solved', 'unsolved', 'stale'] = 'all') -> int:
+def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     """Print a list of problems and their count.
 
     Args:
@@ -21,16 +19,14 @@ def problems(which: Literal['all', 'solved', 'unsolved', 'stale'] = 'all') -> in
                 'solved' the problems with a recorded answer, 'unsolved' those
                 without, or 'stale' those whose notes are older than their
                 solution source. Mirrors the `{problems}` / `{solved}` /
-                `{unsolved}` / `{stale}` shell variables.
+                `{unsolved}` shell variables.
     """
     if which == 'all':
         collection: list[Problem] = problem_set.problems_list
     elif which == 'solved':
         collection = problem_set.solved_problems
     elif which == 'unsolved':
-        collection = problem_set.not_solved_problems
-    elif which == 'stale':
-        collection = problem_set.stale_problems
+        collection = problem_set.unsolved_problems
     else:
         raise ValueError(f'invalid problem list: {which}')
     for problem in collection:
@@ -77,32 +73,3 @@ def manage_config(
     except ValueError:
         console.print(f'[error]invalid value `{value}` for config parameter:[/error] {param}')
         return ExitCodes.EXIT_USAGE
-
-
-@register(help_text='Check and report the workspace checkout and lock status.')
-def lock_status() -> int:
-    """Report whether this shell holds the workspace lock, and who does.
-
-    Only one shell may own `workspace/` at a time. Prints — and reflects in the
-    exit code — one of three states (lock-requiring commands, marked §, refuse to
-    run in the last one):
-
-    Returns:
-        EXIT_OK (0)     : the lock was inherited from a parent process (PID shown).
-        EXIT_USAGE (2)  : this shell acquired the lock (PID shown).
-        EXIT_ERROR (1)  : the workspace could not be locked.
-    """
-    if (reason := workspace_checkout_reason()) is None:
-        console.print('[success]Workspace is not checked out[/success].')
-    else:
-        console.print(f'[warning]Workspace is checked out ([accent]{reason}[/accent])[/warning] — '
-                      '[muted]init and reset are blocked until [accent]checkin[/accent].[/muted]')
-    _lock_state = lock_state()
-    if _lock_state.inherited:
-        console.print(f'[success]Workspace lock inherited from PID {_lock_state.pid_of_holder}[/success]')
-        return ExitCodes.EXIT_OK
-    if _lock_state.acquired:
-        console.print(f'[warning]Workspace lock acquired by PID {_lock_state.pid_of_holder}[/warning]')
-        return ExitCodes.EXIT_USAGE
-    console.print(f'[error]Workspace is not locked!{_lock_state.held_by}[/error]')
-    return ExitCodes.EXIT_ERROR

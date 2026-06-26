@@ -10,8 +10,6 @@ from typing import Literal, Protocol
 
 from solver.ai.models import Model, get_accumulated_charges
 from solver.config import ExitCodes, config
-from solver.core.checkout import auto_checkout
-from solver.core.lock import check_workspace_lock_command
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.variables import variables
@@ -45,8 +43,6 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
 
 
 @register(help_text='Generate specified target using Claude API.')
-@check_workspace_lock_command
-@auto_checkout
 def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
                force: bool = False,
                major: bool = False,
@@ -61,9 +57,7 @@ def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
         force:  Whether to force generation even if the target already exists.
         model:  The AI model to use for generation; defaults to Opus for code and docs and Sonnet for test cases.
     """
-    if (problem := variables.problem) is None:
-        console.print('[muted]Use [accent]init[/accent] to initialize the workspace first.[/muted]')
-        return ExitCodes.EXIT_ERROR
+    problem = variables.problem
     if (generators := _get_generate_funcs()) is None:
         return ExitCodes.EXIT_ERROR
 

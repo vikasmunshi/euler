@@ -9,7 +9,6 @@ import os
 from pathlib import Path
 
 from solver.config import ExitCodes, config
-from solver.core.lock import check_workspace_lock_command
 from solver.shell import console, register
 from solver.shell.variables import variables
 from solver.templates.engine import Templates, get_template
@@ -42,11 +41,7 @@ new_test_case: bytes = (
 )
 
 
-@register(
-    help_text='Generate new solution/test-case file in the workspace.',
-    quietable=True,
-)
-@check_workspace_lock_command
+@register(help_text='Generate new solution/test-case file in the workspace.', quietable=True)
 def new(py: bool = False, c: bool = False, tc: bool = False) -> int:
     """Generate a new solution file for the problem in the given workspace.
 
@@ -56,11 +51,9 @@ def new(py: bool = False, c: bool = False, tc: bool = False) -> int:
     Prompts the user for confirmation before creating the file. The file is created from
     the boilerplate template with the problem information substituted.
     """
-    if (problem := variables.problem) is None:
-        console.print('[error]error:[/error] no problem in workspace')
-        return ExitCodes.EXIT_ERROR
+    problem = variables.problem
     if tc:
-        if not (test_cases_file := config.workspace_dir / config.test_cases_filename).exists():
+        if not (test_cases_file := problem.solution_dir / config.test_cases_filename).exists():
             write_file(test_cases_file, new_test_case, f'created empty {config.test_cases_filename}')
         else:
             console.print(f'[primary]{config.test_cases_filename} already exists[/primary]')
@@ -69,15 +62,15 @@ def new(py: bool = False, c: bool = False, tc: bool = False) -> int:
     prefix: str = f'p{problem.number:04d}_s'
     if new_py:
         k: int = 0
-        while (config.workspace_dir / f'{prefix}{k}.py').exists():
+        while (problem.solution_dir / f'{prefix}{k}.py').exists():
             k += 1
         prefix = f'{prefix}{k}'
-        py_file: Path = config.workspace_dir / f'{prefix}.py'
+        py_file: Path = problem.solution_dir / f'{prefix}.py'
         code: str = get_template(Templates.NEW_PY).substitute(problem=problem.as_title())
         write_file(py_file, code.encode(), 'created solution file from template')
         os.chmod(py_file, 0o755)
     if new_c:
-        for py_file in config.workspace_dir.glob(f'{prefix}*.py'):
+        for py_file in problem.solution_dir.glob(f'{prefix}*.py'):
             c_file: Path = py_file.with_suffix('.c')
             if c_file.exists():
                 continue

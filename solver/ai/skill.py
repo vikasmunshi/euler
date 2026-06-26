@@ -16,16 +16,12 @@ from rich.panel import Panel
 from rich.text import Text
 
 from solver.config import ExitCodes, config
-from solver.core.checkout import auto_checkout
-from solver.core.lock import check_workspace_lock_command
 from solver.shell import console, register
 from solver.shell.command import Context
 from solver.shell.variables import variables
 
 
 @register(help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
-@check_workspace_lock_command
-@auto_checkout
 def claude_skill(
         ctx: Context,
         action: Literal['solve', 'review'],
@@ -48,9 +44,7 @@ def claude_skill(
         additional_prompt:  Extra free-text instructions appended to the skill
                             invocation. Defaults to empty.
     """
-    if (problem := variables.problem) is None:
-        console.print('[error]No problem in the workspace[/error] — run [accent]init <n>[/accent] first.')
-        return ExitCodes.EXIT_ERROR
+    problem = variables.problem
     problem_number = problem.number
     cmdline = ('claude -p --output-format stream-json --verbose '
                '--include-partial-messages '

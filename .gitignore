@@ -1,5 +1,4 @@
-!.gitignore
-!.gitattributes
+**/*_c
 **/.*
 *.cover
 *.egg-info/
@@ -12,31 +11,8 @@
 *.sage.py
 *.so
 *.spec
-.Python
-.cache
-.coverage
-.coverage.*
-.dmypy.json
-.env
-.env.bak/
-.env/
-.euleriws/
-.idea/
-.installed.cfg
-.ipynb_checkpoints
-.ipython_config.py
-.mypy_cache/
-.pytest_cache/
-.python-version
-.ropeproject
-.scrapy/
-.spyderproject/
-.tox/
-.venv/
-.webassets-cache/
-/.*
 /CLAUDE.md
-/workspace/*_c
+/tmp/
 ENV/
 __pycache__/
 celerybeat-schedule
@@ -66,4 +42,7 @@ target/
 var/
 venv/
 wheels/
-/tmp/
+# Overrides: re-include these tracked dotfiles. The negations must come after
+# the broad **/.* rule above, since the last matching pattern wins.
+!.gitattributes
+!.gitignore

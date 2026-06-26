@@ -21,9 +21,7 @@ from typing import Iterable, Protocol
 from prompt_toolkit.completion import Completion
 
 from solver.config import ExitCodes, config
-from solver.core.checkout import auto_checkout
 from solver.shell.command import Context, command
-from solver.shell.variables import refresh_workspace_vars
 
 
 def _bash_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
@@ -98,7 +96,7 @@ def _bash_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]
         )
         proc = subprocess.run(
             ['bash', '-c', script],
-            capture_output=True, text=True, timeout=2, cwd=ctx.shell.workspace, check=False,
+            capture_output=True, text=True, timeout=2, cwd=ctx.variables.problem.solution_dir, check=False,
         )
         for line in proc.stdout.splitlines():
             line = line.strip()
@@ -109,7 +107,7 @@ def _bash_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]
         pass
     # Workspace files as a fallback / supplement.
     try:
-        for f in sorted(ctx.shell.workspace.iterdir()):
+        for f in sorted(ctx.variables.problem.solution_dir.iterdir()):
             if f.name.startswith(incomplete) and f.name not in seen:
                 seen.add(f.name)
                 results.append(f.name)
@@ -158,14 +156,12 @@ def _run_streamed(ctx: Context, cmdline: str, cwd: Path) -> int:
 
 
 @command(name='!',
-         help_text='Run a bash command in the workspace. [warning]↻[/warning] [warning]⚑[/warning]',
+         help_text='Run a bash command.',
          usage='\t! <command> [args]...\n'
                '\t! sh → escape to a bash shell.\n'
                '\t! py → escape to a python interpreter.\n',
          aliases=('sh', 'bash',),
          completer=_bash_completer)
-@refresh_workspace_vars
-@auto_checkout
 def _bash(ctx: Context, *args: str) -> int:
     """Run a shell command from the shell, returning its exit code.
 
@@ -194,7 +190,7 @@ def _bash(ctx: Context, *args: str) -> int:
     runner: Runner
     if cmdline in ('sh', 'bash'):
         cmdline = '/usr/bin/bash'
-        cwd: Path = ctx.shell.workspace
+        cwd: Path = ctx.variables.problem.solution_dir
         runner = _run_interactive
     elif cmdline in ('py', 'python'):
         cmdline = sys.executable
@@ -204,7 +200,7 @@ def _bash(ctx: Context, *args: str) -> int:
         cwd = config.root_dir
         runner = _run_interactive
     else:
-        cwd = ctx.shell.workspace
+        cwd = ctx.variables.problem.solution_dir
         runner = _run_streamed
 
     try:

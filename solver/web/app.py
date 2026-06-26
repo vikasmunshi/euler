@@ -37,7 +37,6 @@ import json
 import mimetypes
 import re
 import tempfile
-from collections.abc import Callable
 from pathlib import Path
 from subprocess import run
 from typing import Any, Literal, TypedDict
@@ -45,11 +44,8 @@ from typing import Any, Literal, TypedDict
 from aiohttp import WSMsgType, web
 
 from solver.config import config
-from solver.core import workspace
-from solver.core.evaluate import evaluate
-from solver.core.lock import check_workspace_lock_generic, lock_state
+from solver.core.evaluate import benchmark, evaluate
 from solver.core.problems import Problem, problems
-from solver.core.stack import read_stack_file, stack_base_dir
 from solver.shell import console
 from solver.utils.summary import summary
 from solver.web.pty_bridge import PtySession
@@ -112,49 +108,6 @@ async def _serve_solver_page(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(config.static_file_dir / 'solver/solver.html')
 
 
-async def _serve_flags(request: web.Request) -> web.StreamResponse:
-    """Serve the JSON workspace flags for `GET /flags?problem_number=N`.
-
-    The front end (shared header, problem and code pages) uses these to decide what
-    to enable. Fields:
-
-    - `authoritative` — this server holds (or inherited) the workspace lock, so it
-      may mutate / evaluate the workspace.
-    - `active` — *problem_number* is the problem currently in the workspace.
-    - `workspace_problem` — the problem currently in the workspace (or null).
-    - `problem_number` — the problem in context: the queried problem, or the last
-      one queried this session when 0 / absent (e.g. on the summary and progress
-      pages), so the header keeps a problem to navigate from. Null only until the
-      first problem is viewed.
-    - `previous_problem` / `next_problem` — neighbours for the nav arrows
-      (wrapping at the ends), or null when no problem is in context.
-    """
-    problem_number: int = int(request.query.get('problem_number', 0))
-    state = request.app[_STATE]
-    if problem_number != 0:
-        state['last_problem'] = problem_number  # remember the last real one
-    effective: int | None = problem_number or state['last_problem']
-    _lock_state = lock_state()
-    authoritative = _lock_state.acquired or _lock_state.inherited
-    workspace_problem: int | None = problem.number if (problem := Problem.from_workspace()) is not None else None
-    active: bool = problem_number != 0 and workspace_problem is not None and workspace_problem == problem_number
-    if effective is None:
-        previous_problem: int | None = None
-        next_problem: int | None = None
-    else:
-        previous_problem = effective - 1 if effective > 1 else problems.last_problem.number
-        next_problem = effective + 1 if effective < problems.last_problem.number else 1
-    return _render_json(request,
-                        'flags',
-                        json.dumps({'authoritative': authoritative,
-                                    'active': active,
-                                    'workspace_problem': workspace_problem,
-                                    'problem_number': effective,
-                                    'previous_problem': previous_problem,
-                                    'next_problem': next_problem,
-                                    }).encode('utf-8'))
-
-
 async def _serve_summary_page(request: web.Request) -> web.StreamResponse:
     """Serve the solutions summary page (`/summary`)."""
     return web.FileResponse(config.static_file_dir / 'summary/summary.html')
@@ -172,7 +125,6 @@ async def _serve_progress_page(request: web.Request) -> web.StreamResponse:
     return _bytes_response(page.encode('utf-8'), 'text/html')
 
 
-@check_workspace_lock_generic
 def _save_progress(content: bytes) -> tuple[int, str]:
     """Write edited content to the progress file; return (status, message) or None (→ 403).
 
@@ -189,8 +141,6 @@ async def _save_progress_page(request: web.Request) -> web.StreamResponse:
     body = await request.read()
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(None, _save_progress, body)
-    if result is None:  # check_workspace_lock_generic refused: not authoritative here
-        return _text(403, _READ_ONLY)
     return _text(*result)
 
 
@@ -303,35 +253,6 @@ def _render_code_page(filename: str, content: bytes, language: str) -> bytes:
     return page.encode('utf-8')
 
 
-def _read_problem_file(problem_number: int, filename: str) -> bytes:
-    """Read a problem file, preferring the live workspace copy when active.
-
-    While *problem_number* is the active workspace, its files are served from
-    workspace/ so the viewer reflects unsaved edits and round-trips with the
-    editor's save. Otherwise (and for any file absent from the workspace) the
-    stacked copy is read, decrypting as needed. Returns (content, mtime).
-    """
-    if ((problem := Problem.from_workspace()) is not None and problem.number == problem_number
-            and (workspace_file := config.workspace_dir / filename).is_file()):
-        return workspace_file.read_bytes()
-    content = read_stack_file(problem_number, filename)[0]
-    return content
-
-
-def _list_solutions(problem_number: int) -> bytes:
-    """Return the JSON array of a problem's solution file names (workspace or stack)."""
-    if (problem := Problem.from_workspace()) is not None and problem.number == problem_number:
-        source_dir: Path = config.workspace_dir
-    else:
-        source_dir = stack_base_dir(problem_number)
-    files: list[str] = []
-    for file in source_dir.glob(f'p{problem_number:04d}_s*.*'):
-        if file.suffix == '.enc':
-            file = file.with_suffix('')
-        files.append(f'{file.stem}_c' if file.suffix == '.c' else file.name)
-    return json.dumps(sorted(files), indent=2).encode('utf-8')
-
-
 def _validate_source(path: Path) -> tuple[bool, str]:
     """Validate a Python or C source file on disk; return (ok, captured diagnostics).
 
@@ -351,7 +272,6 @@ def _validate_source(path: Path) -> tuple[bool, str]:
     return False, (proc.stdout + ('\n' if proc.stdout and proc.stderr else '') + proc.stderr).strip()
 
 
-@check_workspace_lock_generic
 def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str]:
     """Validate edited content and write it into the workspace; return (status, message).
 
@@ -363,11 +283,11 @@ def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[i
     """
     if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c', '.json'):
         return 400, f'{filename} is not an editable workspace file'
-    if (problem := Problem.from_workspace()) is None or problem.number != problem_number:
-        return 400, f'problem {problem_number} is not the active workspace'
-    target: Path = config.workspace_dir / filename
-    if not target.is_file():
-        return 400, f'{filename} not in the workspace'
+    try:
+        problem: Problem = Problem.from_number(problem_number)
+    except ValueError:
+        return 400, f'problem {problem_number} not found'
+    target: Path = problem.solution_dir.joinpath(filename)
     if filename.endswith('.json'):
         try:
             json.loads(content)
@@ -417,7 +337,6 @@ def _parse_diagnostics(output: str, suffix: str) -> list[dict[str, Any]]:
     return diagnostics
 
 
-@check_workspace_lock_generic
 def _lint_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str]:
     """Lint edited content without saving it; return (status, JSON diagnostics).
 
@@ -430,8 +349,6 @@ def _lint_content(problem_number: int, filename: str, content: bytes) -> tuple[i
     suffix = Path(filename).suffix
     if Path(filename).name != filename or suffix not in ('.py', '.c'):
         return 400, json.dumps({'diagnostics': []})
-    if (problem := Problem.from_workspace()) is None or problem.number != problem_number:
-        return 400, json.dumps({'diagnostics': []})
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp) / f'lint{suffix}'  # compile.sh finds runner.h via an absolute -I
         tmp_file.write_bytes(content)
@@ -440,23 +357,21 @@ def _lint_content(problem_number: int, filename: str, content: bytes) -> tuple[i
     return 200, json.dumps({'diagnostics': diagnostics})
 
 
-@check_workspace_lock_generic
 def _del_solution(problem_number: int, filename: str) -> tuple[int, str]:
     """Delete a solution from the workspace; return (status, message) or None (→ 403)."""
     if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c'):
         return 400, f'{filename} is not a deletable workspace file'
-    if (problem := Problem.from_workspace()) is None or problem.number != problem_number:
-        return 400, f'problem {problem_number} is not the active workspace'
-    target: Path = config.workspace_dir / filename
-    if not target.is_file():
-        return 400, f'{filename} not in the workspace'
-    target.unlink()
+    try:
+        problem: Problem = Problem.from_number(problem_number)
+    except ValueError:
+        return 200, f'deleted {filename}'
+    target: Path = problem.solution_dir.joinpath(filename)
+    target.unlink(missing_ok=True)
     return 200, f'deleted {filename}'
 
 
-@check_workspace_lock_generic
 def _run_cmd(problem_number: int,
-             cmd: Literal['init', 'reset', 'eval'],
+             cmd: Literal['benchmark', 'eval'],
              lang: Literal['*', 'py', 'c'] | None = None,
              solution_index: int | None = None,
              ) -> tuple[int, str]:
@@ -478,16 +393,13 @@ def _run_cmd(problem_number: int,
     Status mirrors HTTP: 200 when the command exits 0, 400 on a bad request or a
     non-zero command exit.
     """
-    if cmd != 'init' and ((problem := Problem.from_workspace()) is None or problem.number != problem_number):
-        return 400, f'problem {problem_number} is not the active workspace'
-    cmd_funcs: dict[str, Callable[[], int]] = {
-        'init': functools.partial(workspace.init, problem_number),
-        'reset': workspace.reset,
-        # No lang → evaluate every language ('*'); solution_index None → all solutions.
-        'eval': functools.partial(evaluate, lang=lang or '*', solution_index=solution_index),
-    }
     with console.capture() as capture:
-        rcode = cmd_funcs[cmd]()
+        if cmd == 'benchmark':
+            rcode = benchmark(lang=lang or '*', solution_index=solution_index)
+        elif cmd == 'eval':
+            rcode = evaluate(lang=lang or '*', solution_index=solution_index)
+        else:
+            return 400, f'unknown command {cmd}'  # type: ignore[unreachable]
     output = capture.get().strip()
     return (200 if rcode == 0 else 400), output
 
@@ -543,17 +455,27 @@ async def _problem_file(request: web.Request) -> web.StreamResponse:
         raise web.HTTPNotFound()
     if problem_number < 1 or problem_number > problems.last_problem.number:
         raise web.HTTPNotFound()
-    if filename == 'solutions':
-        return _render_json(request, 'solutions', _list_solutions(problem_number))
     try:
-        content: bytes = _read_problem_file(problem_number, filename)
+        problem: Problem = Problem.from_number(problem_number)
+    except ValueError:
+        raise web.HTTPNotFound()
+    if filename == 'solutions':
+        files: list[str] = []
+        for file in problem.solution_dir.glob(f'p{problem_number:04d}_s*.*'):
+            if file.suffix == '.enc':
+                file = file.with_suffix('')
+            files.append(f'{file.stem}_c' if file.suffix == '.c' else file.name)
+        return _render_json(request, 'solutions', json.dumps(sorted(files), indent=2).encode('utf-8'))
+    try:
+        content: bytes = problem.solution_dir.joinpath(filename).read_bytes()
     except (FileNotFoundError, KeyError, ValueError):
         if _wants_html_view(request):
             content = f'Error: file {filename} not found!'.encode('utf-8')
         else:
             raise web.HTTPNotFound()
     mime, _ = mimetypes.guess_type(filename)
-    if (language := _CODE_LANGUAGES.get(mime or '')) is not None:
+    language = _CODE_LANGUAGES.get(mime or '')
+    if language is not None:
         return _bytes_response(_render_code_page(filename, content, language), 'text/html')
     if mime == 'application/json':
         return _render_json(request, filename, content)
@@ -576,8 +498,6 @@ async def _save_problem_file(request: web.Request) -> web.StreamResponse:
     body = await request.read()
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(None, functools.partial(_save_content, problem_number, filename, body))
-    if result is None:  # check_workspace_lock_generic refused: not authoritative here
-        return _text(403, _READ_ONLY)
     return _text(*result)
 
 
@@ -586,8 +506,6 @@ async def _delete_problem_file(request: web.Request) -> web.StreamResponse:
     problem_number = int(request.match_info['problem_number'])
     filename = request.match_info['filename']
     result = _del_solution(problem_number, filename)
-    if result is None:
-        return _text(403, _READ_ONLY)
     return _text(*result)
 
 
@@ -613,8 +531,6 @@ async def _run_command(request: web.Request) -> web.StreamResponse:
     solution_index: int | None = data.get('solution_index')
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(None, _run_cmd, problem_number, cmd, lang, solution_index)
-    if result is None:
-        return web.json_response({'output': _READ_ONLY, 'rcode': None}, status=403)
     code, output = result
     return web.json_response({'output': output, 'rcode': 0 if code == 200 else 1}, status=code)
 
@@ -635,10 +551,7 @@ async def _lint_problem_file(request: web.Request) -> web.StreamResponse:
         raise web.HTTPBadRequest()
     content = str(data.get('content', '')).encode('utf-8')
     loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(
-        None, functools.partial(_lint_content, problem_number, data['filename'], content))
-    if result is None:  # not authoritative: nothing to lint here
-        return web.json_response({'diagnostics': []}, status=403)
+    result = await loop.run_in_executor(None, _lint_content, problem_number, data['filename'], content)
     code, payload = result
     return web.Response(status=code, text=payload, content_type='application/json', charset='utf-8')
 
@@ -655,8 +568,6 @@ def build_app(save: bool) -> web.Application:
         web.get('/ws', ws_handler),
         # Vendored assets: `/vendor/<asset>` for the JS/CSS/etc. that the editor needs.
         web.get(r'/vendor/{filename:.+}', _serve_vendor_asset),
-        # /flags?problem_number=N
-        web.get('/flags', _serve_flags),
         # Static pages: `/summary` → the solutions summary, `/<asset>` for the rest.
         web.get('/summary', _serve_summary_page),
         web.get('/progress', _serve_progress_page),

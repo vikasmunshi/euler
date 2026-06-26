@@ -50,7 +50,7 @@ def git_commit(reset: bool = False, verify: bool = True) -> int:
     Aliased as `commit`.
     """
     cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
-    cmdline += ['git', 'add', '-A', 'solutions', 'workspace', '&&']
+    cmdline += ['git', 'add', '-A', 'solutions', 'solver', '&&']
     cmdline += ['git', 'commit', '-a'] if verify else ['git', 'commit', '-a', '--no-verify']
     cmdline += ['--message', f'"checkpoint {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}"']
     result = run_cmdline(' '.join(cmdline))

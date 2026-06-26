@@ -16,7 +16,6 @@ import re
 import shlex
 import sys
 from contextlib import contextmanager
-from pathlib import Path
 from typing import Any, Iterable, Iterator
 
 from prompt_toolkit.completion import Completer, Completion
@@ -27,7 +26,6 @@ from rich.panel import Panel
 from rich.text import Text
 
 from solver.config import ExitCodes, config
-from solver.core.lock import lock_state
 from solver.shell.command import Context, registry
 from solver.shell.interpreter import execute
 from solver.shell.lexer import LexError, lex
@@ -129,11 +127,8 @@ class SolverShell:
     def __init__(self, *, save: bool = False) -> None:
         self.console = console
         self.registry = registry
-        self.workspace: Path = config.workspace_dir
         self.save = save
         self._session_log: SessionLog | None = None
-        _lock_state = lock_state()
-        self.workspace_is_locked: bool = _lock_state.acquired or _lock_state.inherited
         set_commands(self.registry.names())
 
     # -- command-host surface (consumed by commands via ctx.shell) ----------
@@ -178,13 +173,13 @@ class SolverShell:
     def _record_command(self, block: str) -> None:
         """Record an entered block in the session log, if active."""
         if self._session_log is not None and block.strip():
-            self._session_log.record_command(self.workspace.name, block)
+            self._session_log.record_command('TBD', block)
 
     @contextmanager
     def _runtime(self) -> Iterator[None]:
         """Per-run setup/teardown: enter the workspace and, when `save` is set,
         open the session log for the duration, closing it on exit."""
-        os.chdir(self.workspace)
+        os.chdir(config.root_dir)
         if self.save:
             self._session_log = SessionLog(config.session_file)
         try:
@@ -250,7 +245,6 @@ class SolverShell:
     def run_command(self, blocks: list[str]) -> int:
         """Execute *blocks* non-interactively; return the last exit status."""
         with self._runtime():
-            variables.refresh_workspace_vars()
             rc = 0
             for block in blocks:
                 print(block)
@@ -268,7 +262,6 @@ class SolverShell:
     def run_interactive(self, intro: bool = True, intro_message: str = '') -> int:
         """Run the interactive prompt loop until `exit` / EOF; return the status."""
         with self._runtime():
-            variables.refresh_workspace_vars()
             # Piped/redirected stdin: read blocks without the interactive chrome
             # (no banner, no history, no prompt) so scripted output stays clean.
             if not sys.stdin.isatty():
@@ -288,7 +281,7 @@ class SolverShell:
             try:
                 while True:
                     try:
-                        set_title(f'solver · {self.workspace.name}')
+                        set_title(f'solver · {variables.problem}')
                         block = session.prompt(self._prompt())
                     except KeyboardInterrupt:
                         self.console.print('[muted]^C[/muted]')
@@ -323,11 +316,9 @@ class SolverShell:
     def _prompt(self) -> FormattedText:
         # Dim the workspace name when the lock is neither acquired nor inherited.
         # Read the live module attribute (it is rebound as the lock is taken/released).
-        path_class = 'class:prompt.path' if self.workspace_is_locked else 'class:prompt.path.unlocked'
-        path_text = f' {self.workspace.name} ' if self.workspace_is_locked else f'(read-only) {self.workspace.name} '
         return FormattedText([
             ('class:prompt.bar', '▎'),
-            (path_class, path_text,),
+            ('class:prompt.path', f' {variables.problem} ',),
             ('class:prompt.symbol', '❯ '),
         ])
 

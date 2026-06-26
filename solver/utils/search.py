@@ -13,14 +13,12 @@ from __future__ import annotations
 __all__ = ['search']
 
 import re
-from pathlib import Path
 from typing import Literal
 
 from rich.markup import escape
 
-from solver.config import ExitCodes, config
+from solver.config import ExitCodes
 from solver.core.problems import Problem, problems
-from solver.core.stack import read_stack_file, stack_base_dir
 from solver.shell import console, register
 from solver.utils.path_utils import iterdir_recursive
 
@@ -43,10 +41,7 @@ def _highlight(re_query: re.Pattern[str], text: str) -> str:
     return ''.join(parts)
 
 
-@register(
-    help_text='Find content in the stack.',
-    aliases=('find',),
-)
+@register(help_text='Find content in the stack.', aliases=('find',))
 def search(query: str,
            *files: Literal['*', 'py', 'c', 'html', 'json'],
            scope: Literal['problems', 'solved'] = 'solved') -> int:
@@ -80,19 +75,16 @@ def search(query: str,
     problems_in_scope: list[Problem] = problems.problems_list if scope == 'problems' else problems.solved_problems
     for problem in problems_in_scope:
         found: bool = False
-        stack_dir: Path = stack_base_dir(problem.number)
-        for filename in iterdir_recursive(stack_dir, rt='str'):
-            # Stored encrypted files carry a '.enc' suffix on disk, but read_stack_file
-            # expects the logical name; strip it before filtering and reading.
-            filename = filename.removesuffix('.enc')
-            if not any(filename.endswith(suffix) for suffix in suffixes):
+        for file in iterdir_recursive(problem.solution_dir, rt='path'):
+            if not file.is_file() or file.suffix not in suffixes:
                 continue
-            content: bytes = read_stack_file(problem.number, filename)[0]
+            content: bytes = file.read_bytes()
             for line_num, line in enumerate(content.decode('utf-8').splitlines(), start=1):
                 if re_query.search(line):
                     found = True
-                    console.print(f'[dim]{stack_dir.relative_to(config.root_dir).as_posix()}/[/dim]'
-                                  f'[accent.dim]{filename}[/accent.dim][dim]:{line_num}[/dim] '
+                    console.print(f'[dim]{problem.solution_dir.name}/[/dim]'
+                                  f'[accent.dim]{file.relative_to(problem.solution_dir).as_posix()}[/accent.dim]'
+                                  f'[dim]:{line_num}[/dim] '
                                   f'{_highlight(re_query, line.strip())}')
         if found:
             console.print()

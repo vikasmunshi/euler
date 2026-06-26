@@ -12,7 +12,6 @@ from typing import Any
 from bs4 import BeautifulSoup, Tag
 
 from solver.config import ExitCodes, config
-from solver.core.lock import check_workspace_lock_command
 from solver.core.problems import Problem, problems
 from solver.shell import console, register
 from solver.shell.variables import variables
@@ -81,11 +80,7 @@ def _update_problems_state(_problems: dict[int, dict[str, str | int | bool]]) ->
     problems.clear_cache()
 
 
-@register(
-    help_text='Parse .progress.html into problems.json.',
-    quietable=True,
-)
-@check_workspace_lock_command
+@register(help_text='Parse .progress.html into problems.json.', quietable=True)
 def summary() -> int:
     """Refresh the solved/unsolved state from your Project Euler progress page.
 
@@ -148,7 +143,6 @@ def progress() -> int:
     aliases=('mark-solved',),
     quietable=True,
 )
-@check_workspace_lock_command
 def mark() -> int:
     """Mark the workspace problem as solved — once its results confirm it.
 
@@ -164,8 +158,7 @@ def mark() -> int:
 
     Aliased as `mark-solved`.
     """
-    if (problem := variables.problem) is None:
-        return ExitCodes.EXIT_ERROR
+    problem = variables.problem
     _problems: dict[int, dict[str, str | int | bool]] = {
         int(k): v
         for k, v in loads(config.static_file_problems.read_text()).items()
@@ -174,7 +167,7 @@ def mark() -> int:
         console.print(f'[muted]Problem {problem.number} is already marked as solved.[/muted]')
         return ExitCodes.EXIT_OK
     try:
-        test_cases: list[dict[str, Any]] = loads((config.workspace_dir / config.test_cases_filename).read_text())
+        test_cases: list[dict[str, Any]] = loads((problem.solution_dir / config.test_cases_filename).read_text())
     except FileNotFoundError:
         console.print(f'[error]error:[/error] [muted]Test cases file not found for {problem}[/muted]')
         return ExitCodes.EXIT_ERROR
@@ -186,7 +179,7 @@ def mark() -> int:
         console.print(f'[error]error:[/error] [muted]{problem} is not solved.[/muted]')
         return ExitCodes.EXIT_ERROR
     try:
-        results: list[dict[str, Any]] = loads((config.workspace_dir / config.results_filename).read_text())
+        results: list[dict[str, Any]] = loads((problem.solution_dir / config.results_filename).read_text())
     except FileNotFoundError:
         console.print(f'[error]error:[/error] [muted]Results file not found for {problem}[/muted]')
         return ExitCodes.EXIT_ERROR

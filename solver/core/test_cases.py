@@ -12,7 +12,7 @@ from typing import Any, Literal
 
 from solver.config import config
 from solver.core.results import read_results
-from solver.shell import console
+from solver.shell import console, variables
 
 
 @dataclass
@@ -37,7 +37,7 @@ def load_test_cases(*categories: Literal['dev', 'main', 'extra'],
                     solutions: list[str],
                     runs: int | None,
                     ) -> list[TestCase]:
-    test_cases_path: Path = config.workspace_dir / config.test_cases_filename
+    test_cases_path: Path = variables.problem.solution_dir / config.test_cases_filename
     try:
         filtered: list[dict[str, Any]] = loads(test_cases_path.read_text())
         assert filtered and isinstance(filtered, list), 'empty or invalid test cases file'

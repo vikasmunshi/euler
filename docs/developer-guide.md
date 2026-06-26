@@ -206,28 +206,6 @@ re-derives the `problem` special from the workspace and prints a one-line status
 (`Workspace has #42 …` / `Workspace is empty`). Use it on commands that mutate
 which problem is loaded (`init`, `reset`). These are marked `↻`.
 
-### 3.8 The workspace lock decorator
-
-Independent of `@register`, commands that touch `workspace/` stack the
-`check_workspace_lock_command` decorator (from `solver.core.lock`) **beneath**
-`@register`:
-
-```python
-from solver.core.lock import check_workspace_lock_command
-
-
-@register(help_text='…', changes_workspace=True)
-@check_workspace_lock_command
-def init(problem_number: int, /, *, force_refresh: bool = False) -> int:
-    ...
-```
-
-It refuses to run (returning a failure code) unless this process holds — or
-inherited — the workspace lock, preventing two shells from corrupting the
-workspace. Such commands are marked `§` in the help legend. `check_workspace_lock_command`
-is for `-> int` commands; `check_workspace_lock_generic` is the variant for
-helper functions returning other types.
-
 ---
 
 ## 4. Completion

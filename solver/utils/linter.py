@@ -9,18 +9,13 @@ from subprocess import DEVNULL, run
 from typing import Callable
 
 from solver.config import ExitCodes, config
-from solver.core.lock import check_workspace_lock_command
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.variables import variables
-from solver.utils.path_utils import iterdir_recursive
+from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 
-@register(
-    help_text='Lint the workspace, fix with autoflake + autopep8 + isort.',
-    quietable=True,
-)
-@check_workspace_lock_command
+@register(help_text='Lint the workspace, fix with autoflake + autopep8 + isort.', quietable=True)
 def lint(auto_fix: bool = False) -> int:
     """Lint the workspace solution files, optionally auto-fixing them.
 
@@ -34,9 +29,7 @@ def lint(auto_fix: bool = False) -> int:
                     isort (import order), then re-check. When False (default),
                     only report. Fails if the workspace holds no problem.
     """
-    if (problem := variables.problem) is None:
-        console.print('[warning]error:[/warning] no problem in workspace')
-        return ExitCodes.EXIT_USAGE
+    problem = variables.problem
     console.print(f'[accent]checking[/accent] {problem}')
     if _linter_check(problem):
         return ExitCodes.EXIT_OK
@@ -52,7 +45,7 @@ def _linter_check(problem: Problem) -> bool:
     # When the shared console is quiet, send the check subprocess to /dev/null too —
     # it writes straight to the terminal (inherited fds), so console.quiet alone won't hush it.
     pipe = DEVNULL if console.quiet else None
-    linter_check = run(f'{config.scripts.linter} {config.workspace_dir.name}', shell=True,
+    linter_check = run(f'{config.scripts.linter} {canonical_path(problem.solution_dir)}', shell=True,
                        cwd=config.root_dir, stdout=pipe, stderr=pipe)
     if linter_check.returncode != 0:
         console.print(f'[error]check failed:[/error] {problem} rc={linter_check.returncode}')
@@ -89,7 +82,7 @@ def _auto_fix(problem: Problem) -> bool:
         return False
 
     py_files = [
-        f for f in iterdir_recursive(config.workspace_dir, rt='path')
+        f for f in iterdir_recursive(problem.solution_dir, rt='path')
         if f.is_file() and f.suffix == '.py'
     ]
     fixed = False

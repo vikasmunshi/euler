@@ -34,9 +34,10 @@ from typing import Any, Callable, Iterable
 from prompt_toolkit.completion import Completion
 from rich.text import Text
 
-from solver.config import ExitCodes, config
-from solver.core.problems import problems
+from solver.config import ExitCodes
+from solver.core.problems import Problem, problems
 from solver.shell.command import Context, command
+from solver.shell.variables import variables
 
 
 # ---------------------------------------------------------------------------
@@ -234,14 +235,6 @@ def _build_command_spec(
         quietable: bool,
 ) -> _CommandSpec:
     """Introspect *func* and pre-compute everything the token-driven helpers need."""
-    if getattr(func, '__check_workspace_lock__', False):
-        help_text += ' [warning]§[/warning]'
-    if getattr(func, '__refresh_workspace_vars__', False):
-        help_text += ' [warning]↻[/warning]'
-    if getattr(func, '__requires_checkin__', False):
-        help_text += ' [warning]⊘[/warning]'
-    if getattr(func, '__auto_checkout__', False):
-        help_text += ' [warning]⚑[/warning]'
     if quietable:
         help_text += ' [warning]»[/warning]'
     cmd_name: str = name or func.__name__.lstrip('_').replace('_', '-')
@@ -408,11 +401,11 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
     if '=' in incomplete and not incomplete.startswith('='):
         key, _, partial = incomplete.partition('=')
         # Special case: list executable files in the workspace dir.
-        if key == 'solution':
+        if key == 'solution' and variables.problem is not None:
             try:
                 return [
                     f'solution={f.name}'
-                    for f in sorted(config.workspace_dir.iterdir())
+                    for f in sorted(variables.problem.solution_dir.iterdir())
                     if f.is_file() and os.access(f, os.X_OK) and f.name.startswith(partial)
                 ]
             except OSError:
@@ -612,3 +605,12 @@ def register[**P](
         return func
 
     return _register
+
+
+@register(help_text='Set the active problem')
+def set_problem(problem_number: int) -> int:
+    try:
+        variables.problem = Problem.from_number(problem_number)
+    except ValueError:
+        return ExitCodes.EXIT_USAGE
+    return ExitCodes.EXIT_OK

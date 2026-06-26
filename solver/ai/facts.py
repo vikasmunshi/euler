@@ -8,22 +8,16 @@ __all__ = ['Facts', 'format_solutions_markdown', 'gather_facts', 'prepare_anthro
 from base64 import b64encode
 from json import JSONDecodeError, loads
 from typing import Any, NamedTuple, cast
-from urllib.parse import urljoin
 
 from anthropic import Anthropic
 from anthropic.types import (Base64ImageSourceParam, CacheControlEphemeralParam, ContentBlockParam,
                              ImageBlockParam, MessageParam, TextBlockParam)
-from bs4 import BeautifulSoup
-from bs4.element import Tag
 
 from solver.ai.models import get_api_key
 from solver.config import config
-from solver.core.parser import extract_resources
 from solver.core.problems import problems
 from solver.core.results import Result, read_results
-from solver.shell import console
 from solver.shell.variables import variables
-from solver.utils.download import download_file
 from solver.utils.path_utils import iterdir_recursive
 
 #: Map of file extension (lowercased, no leading dot) to the Anthropic image media type.
@@ -42,6 +36,7 @@ class Facts(NamedTuple):
     images: dict[str, bytes]
     number: int
     problem_content: str
+    problem_resources: dict[str, str]
     results: str
     solution_notes: str
     solutions: str
@@ -98,11 +93,9 @@ def gather_facts(strict: bool = False) -> Facts:
         ValueError: If `strict` is True and any of the required data, such as
         solutions, results, or test cases, is missing or invalid.
     """
-    if (problem := variables.problem) is None:
-        console.print('[muted]Use [accent]init[/accent] to initialize the workspace first.[/muted]')
-        raise ValueError('Invalid workspace')
+    problem = variables.problem
     solutions: dict[str, str] = {}
-    for solution in iterdir_recursive(config.workspace_dir, rt='path'):
+    for solution in iterdir_recursive(problem.solution_dir, rt='path'):
         if not (solution.suffix in ('.py', '.c')):
             continue
         solutions[solution.name] = solution.read_text()
@@ -115,7 +108,7 @@ def gather_facts(strict: bool = False) -> Facts:
         raise ValueError('No solved solutions found')
     test_cases: list[dict[str, Any]]
     try:
-        test_cases = loads((config.workspace_dir / config.test_cases_filename).read_text())
+        test_cases = loads((problem.solution_dir / config.test_cases_filename).read_text())
     except (FileNotFoundError, JSONDecodeError):
         if strict:
             raise ValueError('No test cases found')
@@ -123,26 +116,18 @@ def gather_facts(strict: bool = False) -> Facts:
     if strict:
         if not [tc for tc in test_cases if tc['answer'] is not None]:
             raise ValueError('No test cases with answers found')
-    euler_url: str = urljoin(config.projecteuler_url, f'problem={problem.number}')
-    problem_content: str = ''
+    problem_content: str = problem.problem_statement
     images: dict[str, bytes] = {}
-    if problem_html := download_file(euler_url, refresh=False):
-        problem_soup: BeautifulSoup = BeautifulSoup(problem_html, 'html.parser')
-        content_div = problem_soup.find('div', {'class': 'problem_content'})
-        if isinstance(content_div, Tag):
-            # Mutate in-place first so the stringified content carries the rewritten
-            # local resource paths; then keep only image bytes for use as API image blocks.
-            files: dict[str, bytes] = extract_resources(content_div, force_refresh=False)
-            problem_content = str(content_div)
-            images = {
-                filename: data
-                for filename, data in files.items()
-                if filename.rsplit('.', 1)[-1].lower() in _IMAGE_MEDIA_TYPES
-            }
+    resources: dict[str, str] = {}
+    for filename, data in problem.problem_resources.items():
+        if filename.rsplit('.', 1)[-1].lower() in _IMAGE_MEDIA_TYPES:
+            images[filename] = data
+        else:
+            resources[filename] = data.decode()
     if not problem_content and strict:
         raise ValueError('No problem content found')
     try:
-        solution_notes: str = (config.workspace_dir / config.notes_filename).read_text()
+        solution_notes: str = (problem.solution_dir / config.notes_filename).read_text()
     except FileNotFoundError:
         solution_notes = ''
     solved_date: str = problems.solutions_history.get(problem.number, 'unknown')
@@ -151,6 +136,7 @@ def gather_facts(strict: bool = False) -> Facts:
         images=images,
         number=problem.number,
         problem_content=problem_content,
+        problem_resources=resources,
         results=format_results_markdown(solved_results),
         solution_notes=solution_notes,
         solutions=format_solutions_markdown(solutions),
