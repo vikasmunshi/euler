@@ -372,5 +372,6 @@ def eval_set_problem(problem_number: int | None = None) -> int:
         variables.set_problem(problem_number or variables.problem.number, )
     except ValueError:
         return ExitCodes.EXIT_USAGE
-    console.print(f'[muted]Current problem is: [/muted][accent]{variables.problem.as_title()}[/accent]')
+    console.print(f'[muted]Current problem : [/muted][accent]{variables.problem.as_title()}[/accent]')
+    console.print(f'[muted]Solution path   : [/muted][accent]{canonical_path(variables.problem.solution_dir)}[/accent]')
     return ExitCodes.EXIT_OK
