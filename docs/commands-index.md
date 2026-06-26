@@ -38,8 +38,9 @@ a parameter that accepts repetition.
 <!-- GEN:command-summary -->
 | Command | Aliases | Description |
 |---------|---------|-------------|
-| [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command in the workspace. ↻ ⚑ |
+| [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
+| [`authorize`](#command-authorize) | — | Authorise another public key (hex) to access the master key. |
 | [`benchmark`](#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
 | [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. |
 | [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
@@ -48,11 +49,14 @@ a parameter that accepts repetition.
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
+| [`generate-master`](#command-generate-master) | — | Create the master encryption key (once per repo); --force overwrites. |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
+| [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares and wrap it to the current user. |
+| [`key-split`](#command-key-split) | — | Split master key into num_shares shares for n-of-m threshold recovery. |
 | [`lint`](#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. » |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
@@ -61,14 +65,15 @@ a parameter that accepts repetition.
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
-| [`rekey`](#command-rekey) | — | Reinitialize keys.json with additional new encryption keys. |
+| [`rekey`](#command-rekey) | — | Rotate the master key, re-wrap to users, and re-encrypt private files. |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
+| [`set-problem`](#command-set-problem) | — | Set the active problem |
 | [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](#command-update-models) | — | Refresh Model enum, pricing, and USD→EUR rate from live API and docs. » |
-| [`user`](#command-user) | — | Show the current user's identity and master key access. |
+| [`user`](#command-user) | — | Show user's public key and master-key access; --regen makes new key-pair. |
 
 *Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -80,9 +85,7 @@ a parameter that accepts repetition.
 <!-- GEN:command-index -->
 #### Command: `!` (`sh`, `bash`)
 
-Run a bash command in the workspace.
-* ↻ may refresh workspace state
-* ⚑ checks the workspace out while it runs
+Run a bash command.
 
 ```
 ! <command> [args]...
@@ -138,13 +141,27 @@ Aliased as `help`.
 
 ---
 
+#### Command: `authorize`
+
+Authorise another public key (hex) to access the master key.
+
+```
+authorize <public_key>
+```
+
+```text
+Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession).
+```
+
+---
+
 #### Command: `benchmark`
 
 Benchmark the problem currently in the workspace.
 * » supports `--silent`
 
 ```
-benchmark <problem_number>
+benchmark
 [all|dev|main|extra ...]
 [clean=true|--clean]
 [timeout=<float>|none] (default None)
@@ -184,7 +201,6 @@ Repeats:
     `disable_timeout` overrides this and forces a single run.
 
 Args:
-    problem_number:      Problem number to benchmark.
     *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                         (which expands to all three). Defaults to all three if omitted.
     clean:              If True, force compiles C solutions. Defaults to False.
@@ -282,7 +298,7 @@ Build all C source files in the solutions_dir.
 * » supports `--silent`
 
 ```
-compile-c <problem_number>
+compile-c
 [clean=true|--clean]
 [silent=true|--silent]
 ```
@@ -351,7 +367,7 @@ Evaluate solutions against test cases.
 * » supports `--silent`
 
 ```
-evaluate <problem_number>
+evaluate
 [all|dev|main|extra ...]
 [clean=true|--clean]
 [timeout=<float>|none] (default None)
@@ -368,7 +384,6 @@ evaluate <problem_number>
 Evaluate solutions against test cases.
 
 Args:
-problem_number:     Problem number to evaluate.
 *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                     (which expands to all three). Defaults to 'dev', 'main' if omitted.
 clean:              If True, force compiles C solutions. Defaults to False.
@@ -385,6 +400,21 @@ solution_index:     Specific solution index to evaluate.
                     If provided, only this solution index will be evaluated.
                     If None, all solutions will be evaluated. Defaults to None.
 verbose:            If True, prints error information during evaluation. Defaults to False.
+```
+
+---
+
+#### Command: `generate-master`
+
+Create the master encryption key (once per repo); --force overwrites.
+
+```
+generate-master
+[force=true|--force]
+```
+
+```text
+Create a fresh master key wrapped to the current user's public key and write enc-key.json.
 ```
 
 ---
@@ -501,6 +531,37 @@ Bring the local repository in sync with origin/master.
 
 Args:
     dry_run: Print the sync commands instead of running them. Defaults to False.
+```
+
+---
+
+#### Command: `key-reconstruct`
+
+Recover master key from shares and wrap it to the current user.
+
+```
+key-reconstruct
+[threshold=<int>] (default 2)
+```
+
+```text
+Prompt for `threshold` shares, reconstruct the master key, and store it wrapped to this user.
+```
+
+---
+
+#### Command: `key-split`
+
+Split master key into num_shares shares for n-of-m threshold recovery.
+
+```
+key-split
+[num_shares=<int>] (default 3)
+[threshold=<int>] (default 2)
+```
+
+```text
+Print `num_shares` Shamir shares of the current master key (threshold needed to reconstruct).
 ```
 
 ---
@@ -655,7 +716,7 @@ Show list of problems (all|solved|unsolved|stale).
 
 ```
 problems
-[which=all|solved|unsolved|stale] (default all)
+[which=all|solved|unsolved] (default all)
 ```
 
 ```text
@@ -666,7 +727,7 @@ Args:
             'solved' the problems with a recorded answer, 'unsolved' those
             without, or 'stale' those whose notes are older than their
             solution source. Mirrors the `{problems}` / `{solved}` /
-            `{unsolved}` / `{stale}` shell variables.
+            `{unsolved}` shell variables.
 ```
 
 ---
@@ -692,26 +753,17 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 
 #### Command: `rekey`
 
-Reinitialize keys.json with additional new encryption keys.
+Rotate the master key, re-wrap to users, and re-encrypt private files.
 
 ```
 rekey
-[num_total_active_keys=<int>] (default 32)
-[preserve_master=false|--no-preserve-master]
-[backup=true|--backup]
 ```
 
 ```text
-Reinitialize keys.json with additional new encryption keys.
+Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
 
-Generates enough new active keys to reach num_total_active_keys in total,
-optionally re-encrypting them under a new master key. Only accessible to admin users.
-
-Args:
-    num_total_active_keys: Target number of active keys in keys.json after rekeying. Defaults to 32.
-    preserve_master:       If True, retain the existing master key; if False, generate a new one.
-                           Defaults to True.
-    backup:                If True, print the backup keys for offline vault. Defaults to False.
+Because the git filter is deterministic, every committed blob depends on the master key, so a
+rotation re-encrypts the tracked private files via `git add --renormalize`.
 ```
 
 ---
@@ -743,6 +795,16 @@ Args:
             set 'py c html json'.
     scope:  Which problems to search: 'solved' (default) restricts to
             solved problems; 'problems' covers every known problem.
+```
+
+---
+
+#### Command: `set-problem`
+
+Set the active problem
+
+```
+set-problem <problem_number>
 ```
 
 ---
@@ -883,7 +945,7 @@ Args:
 
 #### Command: `user`
 
-Show the current user's identity and master key access.
+Show user's public key and master-key access; --regen makes new key-pair.
 
 ```
 user
@@ -891,29 +953,6 @@ user
 ```
 
 ```text
-Return the current user's identity alongside their master key access.
-
-Loads the X25519 private key from ~/.ssh/id_solver. If no private key exists there,
-or if regen is True, a new X25519 key pair is generated and the private key is persisted
-to ~/.ssh/id_solver. When a new key pair is generated, the corresponding public key entry
-is written to <repo>/keys/keys.json under the user's email:
-
-    data['users'][user_key.user_email] = {
-        "public_key": user_key.public_key.to_public_bytes().hex(),
-        "master_key": user_key.lock(master_key) or None,
-    }
-
-Run `solver upload_keys` to create a pull request with the updated keys/keys.json;
-the administrator will then add the encrypted master key for the new user.
-
-Note: generating a new key pair requires the GitHub CLI (gh) to be authenticated (gh auth login).
-
-Args:
-    regen: If True, generate and persist a new key pair regardless of whether one already
-           exists at ~/.ssh/id_solver. Defaults to False.
-
-Returns:
-    A colour-coded string identifying the user and indicating whether they have
-    access to the master key (✓ can encrypt/decrypt in green, ✗ cannot in red).
+Show the current identity and whether it can decrypt; create a key pair on first run or --regen.
 ```
 <!-- /GEN:command-index -->

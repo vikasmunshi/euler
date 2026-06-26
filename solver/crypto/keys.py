@@ -1,314 +1,338 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Encrypted key file read/write and per-user key retrieval."""
+"""
+Cipher key management: create, persist, rotate, share and migrate the crypto key material.
+
+This is the **interactive** half of `solver.crypto` -- all user interaction (password prompts, share
+entry, confirmations) lives here, and nowhere else. It owns the lifecycle of two keys:
+
+- The **asymmetric** identity: an X25519 key pair. The private key is generated here, password-
+  protected, and written to `~/.solver/id` (PKCS8 PEM, encrypted); the password is stored alongside
+  the repo in `keys/.user-pass` (a gitignored dotfile) so the non-interactive load path
+  (`solver.crypto.ciphers.load_private_key`) needs no prompt.
+- The **symmetric** master key: a single 32-byte AES key, wrapped to each authorised user's public
+  key in `keys/enc-key.json` -- a `{<public-key-hex>: <locked-master-key-hex>}` map plus a `verify`
+  ciphertext. Authority is **proof-of-possession**: anyone who can unwrap and verify the current
+  master key may rotate it, authorise another public key, or split it into shares.
+
+The non-interactive primitives (load, lock/unlock, encrypt/decrypt, the config) come from
+`solver.crypto.ciphers`; this module never re-implements them. The git filter
+(`solver.crypto.gitfilter`) does not import this module.
+
+Shell commands registered here: `user`, `generate-master`, `rekey`, `authorize`, `split`,
+`reconstruct`, `migrate`.
+"""
 from __future__ import annotations
 
-__all__ = [
-    'get_enc_key',
-    'get_key',
-    'get_master_key',
-    'get_user_key',
-    'read_keys_file',
-    'rekey',
-    'rekey_keys_file',
-    'user',
-    'write_keys_file',
-]
+__all__ = ['authorize', 'generate_master', 'key_reconstruct', 'key_split', 'rekey', 'user']
 
-from functools import lru_cache
-from json import dumps, loads
-from secrets import choice, token_bytes
-from typing import Any
+from json import dumps
+from pathlib import Path
+from secrets import randbelow, token_bytes
+from subprocess import run
 
-from jsonschema import validate
+from cryptography.hazmat.primitives.asymmetric import x25519
+from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
+from cryptography.hazmat.primitives.serialization import BestAvailableEncryption, Encoding, PrivateFormat
 
-from solver.config import ExitCodes, config
-from solver.crypto.asymmetrical import UserKeyPair
-from solver.crypto.share import reconstruct_secret, split_secret
-from solver.crypto.symmetrical import EncKey
+from solver.crypto.ciphers import (config_dict, encrypt_blob, load_private_key, lock, public_key_hex,
+                                   read_enc_key_file, read_master_key, verify_master_key)
 from solver.shell import console, register
-from solver.utils.gh import get_gh_user_email
-from solver.utils.path_utils import write_file
 from solver.utils.shell_utils import confirm
 
+#: Reserved (non-public-key) entry in enc-key.json holding the verify-by-decrypt ciphertext.
+_VERIFY: str = 'verify'
+
 
 # ==================================================================================================================== #
-#                                               keys-file read/write
+#                                       asymmetric key: create + persist
 # ==================================================================================================================== #
+def _prompt_new_password() -> bytes:
+    """Prompt (twice, hidden) for a non-empty private-key password and return it as bytes."""
+    while True:
+        first: str = console.input('[accent]Choose a password for the new private key:[/accent] ', password=True)
+        if not first:
+            console.print('[error]password must not be empty[/error]')
+            continue
+        if first != console.input('[accent]Confirm password:[/accent] ', password=True):
+            console.print('[error]passwords do not match; try again[/error]')
+            continue
+        return first.encode()
+    raise AssertionError('unreachable')
 
-def _validate_schema(data: dict[str, Any]) -> None:
-    """Validate data against the JSON schema, raising ValidationError on failure."""
-    schema: dict[str, Any] = loads(config.schema_file.read_text())
-    validate(instance=data, schema=schema)
+
+def _rotate_backups(key_file: Path) -> None:
+    """Rotate up to `private_key_backups` rolling backups of key_file (.1 newest ... .N oldest)."""
+    if not key_file.exists():
+        return
+    keep: int = config_dict['private_key_backups']
+    oldest: Path = key_file.with_suffix(f'.{keep}')
+    if oldest.exists():
+        oldest.unlink()
+    for i in range(keep - 1, 0, -1):
+        backup: Path = key_file.with_suffix(f'.{i}')
+        if backup.exists():
+            backup.rename(key_file.with_suffix(f'.{i + 1}'))
+    key_file.rename(key_file.with_suffix('.1'))
 
 
-@lru_cache(maxsize=None)
-def read_keys_file() -> dict[str, Any]:
-    """Read, schema-validate, and cache the keys-file, returning its parsed contents."""
-    data: dict[str, Any] = loads(config.keys_file.read_text())
-    _validate_schema(data)
+def _persist_private_key(private_key: X25519PrivateKey, password: bytes) -> None:
+    """Write the password-encrypted private key to disk (rotating backups) and store the password."""
+    key_file: Path = config_dict['private_key_file']
+    _rotate_backups(key_file)
+    key_file.parent.mkdir(parents=True, exist_ok=True)
+    key_file.parent.chmod(0o700)
+    key_file.write_bytes(private_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8,
+                                                   BestAvailableEncryption(password)))
+    key_file.chmod(0o600)
+    pass_file: Path = config_dict['user_pass_file']
+    pass_file.parent.mkdir(parents=True, exist_ok=True)
+    pass_file.write_bytes(password)
+    pass_file.chmod(0o600)
+    load_private_key.cache_clear()
+    read_master_key.cache_clear()
+    console.print(f'[success]Private key written to [accent]{key_file}[/accent] '
+                  f'(password in [accent]{pass_file}[/accent])[/success]')
+
+
+def _create_user_key() -> X25519PrivateKey:
+    """Generate a fresh X25519 key pair, persist it password-protected, and return the private key."""
+    private_key: X25519PrivateKey = x25519.X25519PrivateKey.generate()
+    _persist_private_key(private_key, _prompt_new_password())
+    return private_key
+
+
+# ==================================================================================================================== #
+#                                       master (symmetrical) key: persist + rotate
+# ==================================================================================================================== #
+def _write_enc_key_file(data: dict[str, str]) -> None:
+    """Serialise keys/enc-key.json and clear the cached master key so the next read picks it up."""
+    enc_file: Path = config_dict['enc_key_file']
+    enc_file.parent.mkdir(parents=True, exist_ok=True)
+    enc_file.write_text(dumps(data, indent=2))
+    read_master_key.cache_clear()
+    pubkeys: int = sum(1 for k in data if k != _VERIFY)
+    console.print(f'[success]Wrote [accent]{enc_file}[/accent] ({pubkeys} authorised public key(s))[/success]')
+
+
+def _wrapped_for_all(master_key: bytes, public_keys: list[str]) -> dict[str, str]:
+    """Build the enc-key.json body: master_key wrapped to each public key, plus the verify ciphertext."""
+    data: dict[str, str] = {pub: lock(X25519PublicKey.from_public_bytes(bytes.fromhex(pub)), master_key)
+                            for pub in public_keys}
+    data[_VERIFY] = encrypt_blob(config_dict['verify_text'], master_key).hex()
     return data
 
 
-def write_keys_file(data: dict[str, Any]) -> None:
-    """
-    Validate and write data to the keys-file, then sync it with the remote origin.
+@register(help_text='Create the master encryption key (once per repo); --force overwrites.')
+def generate_master(force: bool = False) -> int:
+    """Create a fresh master key wrapped to the current user's public key and write enc-key.json."""
+    enc_file: Path = config_dict['enc_key_file']
+    if enc_file.exists() and not force:
+        console.print(f'[error]error:[/error] {enc_file} already exists; pass --force to overwrite')
+        return 1
+    try:
+        private_key: X25519PrivateKey = load_private_key()
+    except (FileNotFoundError, ValueError) as exc:
+        console.print(f'[error]error:[/error] need a private key first ({exc}); run `user`')
+        return 1
+    _write_enc_key_file(_wrapped_for_all(token_bytes(32), [public_key_hex(private_key.public_key())]))
+    return 0
 
-    Clears all key-related caches (keys file, master key, enc keys) after writing so that
-    subsequent reads pick up the new content even after a master-key rotation.
 
-    Args:
-        data: The full keys file contents to validate and persist.
+@register(help_text='Rotate the master key, re-wrap to users, and re-encrypt private files.')
+def rekey() -> int:
+    """Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
+
+    Because the git filter is deterministic, every committed blob depends on the master key, so a
+    rotation re-encrypts the tracked private files via `git add --renormalize`.
     """
-    _validate_schema(data)
-    config.keys_file.write_text(dumps(data, indent=2))
-    console.print(f'[success]Keys file [accent]{config.keys_file}[/accent] updated; '
-                  f'num users: {len(data["users"])}, num keys: {len(data["keys"])}[/success]')
-    read_keys_file.cache_clear()
-    get_master_key.cache_clear()
-    _get_key_by_id.cache_clear()
-    console.print('[muted]To sync with the remote origin, run [accent]`solver publish keys`[/accent][/muted]')
+    try:
+        read_master_key()  # proof of authority: must currently hold and verify the master key
+    except (FileNotFoundError, KeyError, ValueError) as exc:
+        console.print(f'[error]error:[/error] refusing to rekey -- current key check failed ({exc})')
+        return 1
+    if not confirm('Rotate the master key and re-encrypt all private files?'):
+        console.print('[muted]Rekey cancelled.[/muted]')
+        return 1
+    data: dict[str, str] = read_enc_key_file()
+    new_master: bytes = token_bytes(32)
+    _write_enc_key_file(_wrapped_for_all(new_master, [k for k in data if k != _VERIFY]))
+    console.print('[muted]Re-encrypting tracked private files...[/muted]')
+    run(['git', 'add', '--renormalize', '--', 'solutions/private'], cwd=config_dict['root_dir'], check=False)
+    console.print('[success]Master key rotated; review `git status` and commit the re-encrypted blobs.[/success]')
+    return 0
+
+
+@register(help_text='Authorise another public key (hex) to access the master key.')
+def authorize(public_key: str) -> int:
+    """Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession)."""
+    try:
+        master_key: bytes = read_master_key()
+    except (FileNotFoundError, KeyError, ValueError) as exc:
+        console.print(f'[error]error:[/error] cannot access the master key ({exc})')
+        return 1
+    try:
+        pub: X25519PublicKey = X25519PublicKey.from_public_bytes(bytes.fromhex(public_key))
+    except ValueError:
+        console.print('[error]error:[/error] public_key must be 32 bytes of hex')
+        return 1
+    data: dict[str, str] = read_enc_key_file()
+    data[public_key_hex(pub)] = lock(pub, master_key)
+    _write_enc_key_file(data)
+    console.print(f'[success]Public key [accent]{public_key}[/accent] authorised.[/success]')
+    return 0
 
 
 # ==================================================================================================================== #
-#                                               get key / master key / user key
+#                                               user identity
 # ==================================================================================================================== #
-
-@lru_cache(maxsize=None)
-def _get_key_by_id(key_id: str) -> EncKey:
-    """Return a decrypted EncKey for an explicit key id; cached per process."""
-    master_key: bytes = get_master_key()
-    data: dict[str, Any] = read_keys_file()
-    return EncKey.from_dict(key_id, data['keys'][key_id], master_key=master_key)
-
-
-def get_key(key_id: str | None = None) -> EncKey:
-    """
-    Return a decrypted EncKey, selecting a fresh random active key when no ID is given.
-
-    Args:
-        key_id: Hex UUID7 of the specific key to load. If None, a random active key is chosen
-                on every call so encryption operations spread across the active key pool.
-
-    Returns:
-        The decrypted EncKey for the given or selected key ID.
-    """
-    if key_id is None:
-        data: dict[str, Any] = read_keys_file()
-        key_id, _ = choice([(k, v) for k, v in data['keys'].items() if v['status'] == 'active'])
-    return _get_key_by_id(key_id)
-
-
-@lru_cache(maxsize=None)
-def get_master_key() -> bytes:
-    """
-    Decrypt and return the master key for the current user.
-
-    Returns:
-        The 32-byte master key, decrypted using the user's private key.
-
-    Raises:
-        ValueError: If the master key entry for this user is absent from keys.json.
-    """
-    user_key: UserKeyPair = get_user_key()
-    enc_master_key: str | None = read_keys_file()['users'][user_key.user_email]['master_key']
-    if enc_master_key is None:
-        raise ValueError(f'Master key not found for user with email {user_key.user_email}')
-    return user_key.unlock(enc_master_key)
-
-
-@lru_cache(maxsize=None)
-def get_user_key() -> UserKeyPair:
-    """Load and cache the user key pair from the private key file on disk."""
-    return UserKeyPair.from_file()
-
-
-def get_enc_key(key_id: bytes | None = None) -> EncKey:
-    """
-    Look up an encryption key, returning a fresh active key when no ID is given.
-
-    Args:
-        key_id: Raw 16-byte key identifier. If None, a random active key is chosen per call.
-
-    Returns:
-        The EncKey matching the given ID, or a freshly chosen active key if key_id is None.
-    """
-    return get_key(None if key_id is None else key_id.hex())
+@register(help_text="Show user's public key and master-key access; --regen makes new key-pair.")
+def user(regen: bool = False) -> int:
+    """Show the current identity and whether it can decrypt; create a key pair on first run or --regen."""
+    try:
+        private_key: X25519PrivateKey | None = load_private_key()
+    except (FileNotFoundError, ValueError):
+        private_key = None
+    if regen and private_key is not None and not confirm('Replace the existing private key with a new one?'):
+        console.print('[muted]Keeping the existing private key.[/muted]')
+        regen = False
+    if regen or private_key is None:
+        # Carry master-key access across the rotation: capture it with the outgoing key *before*
+        # replacing it, then re-wrap it to the new key (and revoke the old entry) afterwards.
+        carry: tuple[str, bytes] | None = None
+        if private_key is not None:
+            try:
+                carry = (public_key_hex(private_key.public_key()), read_master_key())
+            except (FileNotFoundError, KeyError, ValueError):
+                carry = None
+        private_key = _create_user_key()
+        if carry is not None:
+            old_pub, master_key = carry
+            data: dict[str, str] = read_enc_key_file()
+            data.pop(old_pub, None)  # revoke the replaced key's access
+            data[public_key_hex(private_key.public_key())] = lock(private_key.public_key(), master_key)
+            _write_enc_key_file(data)
+    pub: str = public_key_hex(private_key.public_key())
+    try:
+        read_master_key()
+        console.print(f'[primary]public key:[/primary] {pub}\n[success]✓ can encrypt/decrypt[/success]')
+    except (FileNotFoundError, KeyError, ValueError):
+        console.print(f'[primary]public key:[/primary] {pub}\n[error]✗ cannot encrypt/decrypt[/error]')
+        console.print('[muted]Run `generate-master` (first user), have an existing user `authorize` this '
+                      'public key, or `reconstruct` from shares.[/muted]')
+    return 0
 
 
 # ==================================================================================================================== #
-#                                               rekey keys file
+#                                       n of m secret sharing (Shamir over GF(2**521-1))
 # ==================================================================================================================== #
-def rekey_keys_file(num_total_active_keys: int = 32, *, preserve_master: bool = True) -> int:
-    """
-    Reinitialize keys.json with additional new encryption keys.
-
-    Generates enough new active keys to reach num_total_active_keys in total, optionally
-    re-encrypting all key material under a new master key. Only accessible to admin users.
-    Creates keys.json from scratch if it does not already exist.
-
-    Args:
-        num_total_active_keys: Target number of active keys in keys.json after rekeying. Defaults to 32.
-        preserve_master:       If True, retain the existing master key; if False, generate a new one.
-                               Defaults to True.
-    """
-    if get_gh_user_email() != config.author_email:
-        console.print('[error]error:[/error] only the admin user may initialize the keys file')
-        return ExitCodes.EXIT_ERROR
-    user_key: UserKeyPair = get_user_key()
-    new_master_key: bytes = token_bytes(32)
-    if config.keys_file.exists():
-        data: dict[str, Any] = read_keys_file()
-        user_data = data['users'][user_key.user_email]
-        master_key: bytes = user_key.unlock(user_data['master_key'])
-        if preserve_master:
-            new_master_key = master_key
-        else:
-            for key_id, raw_key in data['keys'].items():
-                enc_key: EncKey = EncKey.from_dict(key_id, raw_key, master_key=master_key)
-                raw_key['value'] = enc_key.as_dict(master_key=new_master_key)['value']
-    else:
-        data = {
-            '$schema': config.schema_file.name,
-            'version': config.keys_version,
-            'users': {user_key.user_email: user_key.to_public_dict(new_master_key)},
-            'keys': {}
-        }
-        preserve_master = False
-    num_new_keys: int = num_total_active_keys - sum(1 for _, k in data['keys'].items() if k['status'] == 'active')
-    if num_new_keys > 0:
-        data['keys'].update({enc_key.id: enc_key.as_dict(master_key=new_master_key)
-                             for enc_key in (EncKey.new('active') for _ in range(num_new_keys))})
-    for email, raw_user in data['users'].items():
-        if preserve_master is False or raw_user['master_key'] is None:
-            raw_user['master_key'] = UserKeyPair.from_public_dict(email, raw_user).lock(new_master_key)
-    write_keys_file(data)
-    return ExitCodes.EXIT_OK
+#: 13th Mersenne prime; comfortably larger than a 256-bit secret.
+_PRIME: int = 2 ** 521 - 1
+#: Length of the master key in bytes, and the hex width sufficient for any value < _PRIME.
+_SECRET_BYTES: int = 32
+_HEX_WIDTH: int = 131
 
 
-@register(help_text='Reinitialize keys.json with additional new encryption keys.')
-def rekey(num_total_active_keys: int = 32, /, *, preserve_master: bool = True,
-          backup: bool = False) -> int:
-    """
-    Reinitialize keys.json with additional new encryption keys.
-
-    Generates enough new active keys to reach num_total_active_keys in total,
-    optionally re-encrypting them under a new master key. Only accessible to admin users.
-
-    Args:
-        num_total_active_keys: Target number of active keys in keys.json after rekeying. Defaults to 32.
-        preserve_master:       If True, retain the existing master key; if False, generate a new one.
-                               Defaults to True.
-        backup:                If True, print the backup keys for offline vault. Defaults to False.
-    """
-    if not confirm('Are you sure you want to rekey?'):
-        console.print('[muted]Rekeying cancelled.[/muted]')
-        return ExitCodes.EXIT_ERROR
-    result = rekey_keys_file(num_total_active_keys, preserve_master=preserve_master)
-    if backup:
-        lines: dict[str, str] = {'private_key': config.private_key_file.read_text().strip(),
-                                 **read_keys_file()['users'][get_user_key().user_email]}
-        write_file(config.keys_backup_file, dumps(lines, indent=4).encode(), msg='keys backup')
+def _eval_poly(poly: list[int], x: int) -> int:
+    """Evaluate `poly` at `x` (Horner's method) modulo `_PRIME`."""
+    result: int = 0
+    for coeff in reversed(poly):
+        result = (result * x + coeff) % _PRIME
     return result
 
 
-# ==================================================================================================================== #
-#                                               user
-# ==================================================================================================================== #
-@register(help_text='Show the current user\'s identity and master key access.')
-def user(regen: bool = False) -> int:
-    """
-    Return the current user's identity alongside their master key access.
+def _interpolate_at_zero(points: list[tuple[int, int]]) -> int:
+    """Lagrange-interpolate the polynomial value at `x = 0` from `points` modulo `_PRIME`."""
+    result: int = 0
+    for i, (xi, yi) in enumerate(points):
+        num: int = 1
+        den: int = 1
+        for j, (xj, _) in enumerate(points):
+            if i == j:
+                continue
+            num = (num * -xj) % _PRIME
+            den = (den * (xi - xj)) % _PRIME
+        result = (result + yi * num * pow(den, -1, _PRIME)) % _PRIME
+    return result
 
-    Loads the X25519 private key from ~/.ssh/id_solver. If no private key exists there,
-    or if regen is True, a new X25519 key pair is generated and the private key is persisted
-    to ~/.ssh/id_solver. When a new key pair is generated, the corresponding public key entry
-    is written to <repo>/keys/keys.json under the user's email:
 
-        data['users'][user_key.user_email] = {
-            "public_key": user_key.public_key.to_public_bytes().hex(),
-            "master_key": user_key.lock(master_key) or None,
-        }
+def _split_secret(secret: bytes, num_shares: int, threshold: int) -> list[str]:
+    """Split a 32-byte key into `num_shares` shares; any `threshold` reconstruct it. Each share is 262 hex chars."""
+    if len(secret) != _SECRET_BYTES:
+        raise ValueError(f'secret must be exactly {_SECRET_BYTES} bytes, got {len(secret)}')
+    if not 1 <= threshold <= num_shares:
+        raise ValueError('require 1 <= threshold <= num_shares')
+    poly: list[int] = [int.from_bytes(secret, 'big')] + [randbelow(_PRIME) for _ in range(threshold - 1)]
+    xs: set[int] = set()
+    while len(xs) < num_shares:
+        xs.add(randbelow(_PRIME - 1) + 1)
+    return [f'{x:0{_HEX_WIDTH}x}{_eval_poly(poly, x):0{_HEX_WIDTH}x}' for x in xs]
 
-    Run `solver upload_keys` to create a pull request with the updated keys/keys.json;
-    the administrator will then add the encrypted master key for the new user.
 
-    Note: generating a new key pair requires the GitHub CLI (gh) to be authenticated (gh auth login).
+def _reconstruct_secret(shares: list[str]) -> bytes:
+    """Reconstruct the 32-byte key from `threshold` distinct shares produced by `_split_secret`."""
+    if not shares:
+        raise ValueError('need at least one share')
+    points: list[tuple[int, int]] = []
+    seen: set[int] = set()
+    for s in shares:
+        if len(s) != 2 * _HEX_WIDTH:
+            raise ValueError(f'share must be {2 * _HEX_WIDTH} hex chars, got {len(s)}')
+        x: int = int(s[:_HEX_WIDTH], 16)
+        y: int = int(s[_HEX_WIDTH:], 16)
+        if x in seen:
+            raise ValueError(f'duplicate share index {x:x}')
+        seen.add(x)
+        points.append((x, y))
+    secret_int: int = _interpolate_at_zero(points)
+    if secret_int.bit_length() > _SECRET_BYTES * 8:
+        raise ValueError('reconstructed value out of range; wrong threshold or corrupted shares')
+    return secret_int.to_bytes(_SECRET_BYTES, 'big')
 
-    Args:
-        regen: If True, generate and persist a new key pair regardless of whether one already
-               exists at ~/.ssh/id_solver. Defaults to False.
 
-    Returns:
-        A colour-coded string identifying the user and indicating whether they have
-        access to the master key (✓ can encrypt/decrypt in green, ✗ cannot in red).
-    """
+@register(help_text='Split master key into num_shares shares for n-of-m threshold recovery.')
+def key_split(num_shares: int = 3, threshold: int = 2) -> int:
+    """Print `num_shares` Shamir shares of the current master key (threshold needed to reconstruct)."""
+    if num_shares < threshold or threshold < 2:
+        console.print('[error]error:[/error] threshold must be >= 2 and < num_shares')
+        return 1
     try:
-        user_key: UserKeyPair | None = get_user_key()
-    except (AssertionError, FileNotFoundError, ValueError):
-        user_key = None
+        master_key: bytes = read_master_key()
+    except (FileNotFoundError, KeyError, ValueError) as exc:
+        console.print(f'[error]error:[/error] cannot access the master key ({exc})')
+        return 1
     try:
-        master_key: bytes | None = get_master_key()
-    except (AssertionError, FileNotFoundError, ValueError):
-        master_key = None
-    user_email: str = get_gh_user_email() if user_key is None else user_key.user_email
-    if regen or user_key is None:
-        new_user_key: UserKeyPair = UserKeyPair.new_persistent(user_email)
-        get_user_key.cache_clear()
-        data: dict[str, Any] = read_keys_file()
-        data['users'][new_user_key.user_email] = new_user_key.to_public_dict(master_key)
-        write_keys_file(data)
-        user_key = new_user_key
-    access_style = 'error' if master_key is None else 'success'
-    access_mark = '✗ cannot' if master_key is None else '✓ can'
-    console.print(f'[primary]{user_key!s}[/primary] [{access_style}]\n{access_mark} encrypt/decrypt[/{access_style}]')
-    try:
-        if user_key and master_key is None:
-            register(help_text='Recover the master key from a list of shares.')(reconstruct)
-        if user_key and user_key.user_email == config.author_email:
-            register(help_text='Split the current master key into shares.')(split)
-            register(help_text='Recover the master key from a list of shares.')(reconstruct)
-    except ValueError:
-        pass
-    return ExitCodes.EXIT_OK if user_key is not None else ExitCodes.EXIT_ERROR
+        shares: list[str] = _split_secret(master_key, num_shares, threshold)
+    except ValueError as exc:
+        console.print(f'[error]error:[/error] {exc}')
+        return 1
+    for i, share in enumerate(shares, start=1):
+        console.print(f'[accent]Master key share {i} of {num_shares}:[/accent]\n[muted]{share}[/muted]\n')
+    return 0
 
 
-# ==================================================================================================================== #
-#                                       n of m secret sharing for the master key
-# ==================================================================================================================== #
-def split(num_shares: int, threshold: int) -> int:
+@register(help_text='Recover master key from shares and wrap it to the current user.')
+def key_reconstruct(threshold: int = 2) -> int:
+    """Prompt for `threshold` shares, reconstruct the master key, and store it wrapped to this user."""
     try:
-        master_key: bytes = get_master_key()
-    except (AssertionError, FileNotFoundError, ValueError):
-        console.print('[error]error:[/error] master key not found')
-        return ExitCodes.EXIT_ERROR
-    for i, share in enumerate(split_secret(master_key, num_shares=num_shares, threshold=threshold), start=1):
-        console.print(f'[accent]Master key share {i} of {num_shares}:[/accent]\n[muted]{share}[/muted]\n\n')
-    return ExitCodes.EXIT_OK
-
-
-def reconstruct(threshold: int) -> int:
-    """Recover the master key from a list of shares."""
-    try:
-        user_key: UserKeyPair = get_user_key()
-    except (AssertionError, FileNotFoundError, ValueError):
-        console.print('[error]error:[/error] user key not found, use `solver user` to generate one')
-        return ExitCodes.EXIT_ERROR
+        private_key: X25519PrivateKey = load_private_key()
+    except (FileNotFoundError, ValueError) as exc:
+        console.print(f'[error]error:[/error] need a private key first ({exc}); run `user`')
+        return 1
     shares: list[str] = []
     for i in range(1, threshold + 1):
-        share: str = console.input(f'[accent]Enter master key share {i} of {threshold}:[/accent] ').strip()
-        shares.append(share)
-        console.print(f'[primary]Share {i}/{threshold} recieved.[/primary]')
+        shares.append(console.input(f'[accent]Enter master key share {i} of {threshold}:[/accent] ').strip())
     try:
-        master_key: bytes = reconstruct_secret(shares)
-    except ValueError:
-        console.print('[error]error:[/error] invalid shares')
-        return ExitCodes.EXIT_ERROR
-    console.print(f'[primary]Master key reconstructed from {threshold} shares:[/primary]')
-    data: dict[str, Any] = read_keys_file()
-    console.print('[muted]Updating keys.json with new master key...')
-    data['users'][user_key.user_email] = user_key.to_public_dict(master_key)
-    write_keys_file(data)
-    get_master_key.cache_clear()
-    console.print(f'[success]Master key successfully persisted from {threshold} shares.[/success]')
-    return ExitCodes.EXIT_OK
+        master_key: bytes = _reconstruct_secret(shares)
+    except ValueError as exc:
+        console.print(f'[error]error:[/error] {exc}')
+        return 1
+    data: dict[str, str] = read_enc_key_file() if config_dict['enc_key_file'].exists() else {}
+    if _VERIFY in data and not verify_master_key(data, master_key):
+        console.print('[error]error:[/error] reconstructed key fails verification; wrong shares?')
+        return 1
+    data[public_key_hex(private_key.public_key())] = lock(private_key.public_key(), master_key)
+    data.setdefault(_VERIFY, encrypt_blob(config_dict['verify_text'], master_key).hex())
+    _write_enc_key_file(data)
+    console.print(f'[success]Master key reconstructed from {threshold} shares and stored.[/success]')
+    return 0

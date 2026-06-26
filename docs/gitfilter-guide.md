@@ -5,9 +5,9 @@ This guide covers the **transparent git encryption** for files under
 prove the files are encrypted at rest. It is implemented in
 [`solver/crypto/gitfilter.py`](../solver/crypto/gitfilter.py).
 
-If you are looking for the older pool-based scheme that encrypts problems #101+
-in place (`*.enc` files, `keys/keys.json`), see [User Guide §7](user-guide.md#7-key-exchange).
-The two are independent; this one is opt-in per file via `.gitattributes`.
+The key material it relies on (your identity and the master key) is described in
+[User Guide §7](user-guide.md#7-key-exchange). Encryption is opt-in per file via
+`.gitattributes` (only `solutions/private/`).
 
 ---
 
@@ -59,23 +59,21 @@ already-encrypted blobs, are never double-processed.
 
 ### The master key file
 
-The master key lives in its own file, `keys/master_key.json`
-(`config.master_key_file`), **separate** from `keys/keys.json`:
+The master key lives in `keys/enc-key.json`, a flat map keyed by **public key**:
 
 ```
-master_key.json
-├── users/              - one entry per authorised user
-│   └── <email>
-│       ├── public_key  - user's X25519 public key (hex)
-│       └── master_key  - the 32-byte master key wrapped for this user
+enc-key.json
+├── <public-key-hex>    - the 32-byte master key wrapped for this X25519 public key
 │                         (ephemeral X25519 ECDH → HKDF-SHA256 → ChaCha20-Poly1305)
+├── … one entry per authorised public key …
 └── verify              - MAGIC|nonce|ciphertext: the master key encrypting a fixed
                           known text (Blake's "Auguries of Innocence", opening quatrain)
 ```
 
-Multi-user access is free: the master key is wrapped per user with the same
-X25519 scheme as `keys.json` (`solver/crypto/asymmetrical.py`). To use it, the
-filter unwraps the current user's copy with the private key at `~/.ssh/id_solver`.
+No email is stored anywhere — a key is identified solely by its public-key value.
+To use the master key the filter unwraps the current user's entry with the private
+key at `~/.solver/id` (PKCS8 PEM, password-protected; the password is read from the
+gitignored `keys/.user-pass`). All of this lives in `solver/crypto/ciphers.py`.
 
 The `verify` field makes the key **self-checking**: loading the master key always
 decrypts `verify` and compares it to the known text. A wrong or corrupt key is
@@ -84,22 +82,27 @@ only wrapped keys and a ciphertext, never a plaintext key.
 
 ### Constants
 
-All wire-format and filter constants live on `config` (`config.gitfilter_magic`,
-`config.gitfilter_name`, `config.gitfilter_attr_line`, `config.gitfilter_pkt_max`,
-`config.gitfilter_verify_text`, …) so the filter and the audit script share a
-single source of truth.
+All crypto configuration — file locations **and** wire-format / filter constants —
+lives in one place, `solver.crypto.ciphers.config_dict` (`config_dict['magic']`,
+`config_dict['filter_name']`, `config_dict['attr_line']`, `config_dict['pkt_max']`,
+`config_dict['verify_text']`, …), so the filter and the audit script share a single
+source of truth and the crypto package does not depend on `solver.config`.
 
 ---
 
 ## 3. Setup
 
-You need an X25519 identity first (`~/.ssh/id_solver` — run `solver user` if you
-have not already; see [User Guide §7](user-guide.md#7-key-exchange)). Then:
+You need an X25519 identity first (`~/.solver/id` — run `solver user` if you have
+not already; see [User Guide §7](user-guide.md#7-key-exchange)). Then:
 
 ```bash
-solver-gitfilter generate-master   # create keys/master_key.json (once per repo)
+solver generate-master             # create keys/enc-key.json (once per repo)
 solver-gitfilter install           # wire git config + .gitattributes, verify the key
 ```
+
+(`generate-master`, `rekey`, `authorize`, `split`, `reconstruct` and `migrate` are
+shell commands — they prompt and print — so they live in `solver`, not in the
+output-silent `solver-gitfilter` CLI.)
 
 `install` is idempotent and:
 
@@ -149,33 +152,40 @@ fallback and for manual use.)
 
 ## 5. CLI reference
 
-Invoke as `solver-gitfilter <action>` or `python -m solver.crypto.gitfilter <action>`.
+The filter plumbing is `solver-gitfilter <action>` (or `python -m solver.crypto.gitfilter <action>`):
 
 | Action | Purpose |
 | --- | --- |
-| `generate-master` | Create `keys/master_key.json`: fresh master key, wrapped to you, plus the `verify` ciphertext. Pass `--force` to overwrite an existing file. |
 | `install` | Register the filter in git config + `.gitattributes`, then verify the master key or exit non-zero. |
 | `status` | Print the git-config wiring, `.gitattributes` state, and whether the master key is present and verified. |
-| `rekey-master` | Rotate to a new master key, re-wrap it to **every** stored user, and re-encrypt tracked private files (`git add --renormalize`). Requires the current key to verify first. |
 | `process` | Git's long-running filter protocol (pkt-line). Invoked by git; not run by hand. |
 | `clean` / `smudge` | Single-file encrypt / decrypt over stdin→stdout. Invoked by git as a fallback; usable manually for testing. |
 
 `clean`/`smudge`/`process` write **only** the transformed file content to stdout
-(diagnostics go to stderr) — this is why `gitfilter.py` keeps its imports
-stdout-silent and redirects key-retrieval output to stderr.
+(diagnostics go to stderr) — this is why `gitfilter.py` and `ciphers.py` keep their
+imports stdout-silent and redirect key-retrieval output to stderr.
+
+Master-key lifecycle is in the interactive `solver` shell (see `solver.crypto.cipher_keys`):
+
+| Command | Purpose |
+| --- | --- |
+| `generate-master` | Create `keys/enc-key.json`: fresh master key, wrapped to you, plus the `verify` ciphertext. Pass `--force` to overwrite. |
+| `rekey` | Rotate to a new master key, re-wrap it to **every** authorised public key, and re-encrypt tracked private files (`git add --renormalize`). Requires the current key to verify first. |
+| `authorize <public-key-hex>` | Wrap the current master key to another public key (add a user). |
+| `split <n> <t>` / `reconstruct <t>` | Split the master key into `n` shares (any `t` reconstruct) / recover it from `t` shares. |
+| `migrate` | Import a legacy `~/.ssh/id_solver` + `keys/master_key.json` into the new format. |
 
 ---
 
 ## 6. Multi-user and key rotation
 
-- **Add a user:** they run `solver user` to create their identity, then their
-  `master_key` entry must be added to `master_key.json` wrapped to their public
-  key (admin task — re-wrap the current master key to the new user's
-  `public_key`). Commit the updated file.
-- **Rotate the master key:** `solver-gitfilter rekey-master`. It verifies the
-  current key, generates a new one, re-wraps it to all stored users, refreshes
-  `verify`, and re-encrypts the tracked private files. Commit the new
-  `master_key.json` **and** the re-encrypted blobs together.
+- **Add a user:** they run `solver user` to create their identity and share their
+  public key; any existing key holder runs `solver "authorize <public-key-hex>"` to
+  wrap the master key to it in `enc-key.json`. Commit the updated file.
+- **Rotate the master key:** `solver rekey`. It verifies the current key, generates
+  a new one, re-wraps it to all authorised public keys, refreshes `verify`, and
+  re-encrypts the tracked private files. Commit the new `enc-key.json` **and** the
+  re-encrypted blobs together.
 
 > A rekey changes every encrypted blob (the derived keys change). Make sure all
 > private files are checked out (plaintext present) before rotating, then commit
@@ -219,7 +229,7 @@ any private file would be pushed in the clear.
 | Symptom | Cause / fix |
 | --- | --- |
 | `git add` hangs | A stale `process` filter or `.git/index.lock` from an interrupted run. Kill leftover `gitfilter process` procs and remove `.git/index.lock`. |
-| `master key check FAILED` on `install` | No `keys/master_key.json` yet, or the current user has no entry / a wrong private key. Run `generate-master`, or have an admin wrap the master key to your `public_key`. |
+| `master key check FAILED` on `install` | No `keys/enc-key.json` yet, no `~/.solver/id` / `keys/.user-pass`, or your public key has no entry. Run `solver user` then `solver generate-master`, or have an existing user `authorize` your public key. |
 | Checkout/commit of private files aborts | `required = true` and the master key is unavailable. Obtain master-key access (see §6), or you genuinely cannot read these files. |
 | Other clones see ciphertext in the working tree | `.gitattributes` was not committed, or the filter was never `install`-ed on that clone. Commit `.gitattributes`; run `solver-gitfilter install`. |
 | Spurious "modified" on `status` with no edits | Determinism broke — the master key in use differs from the one a blob was encrypted with (e.g. after a partial rekey). Reconcile the master key, then `git add --renormalize`. |

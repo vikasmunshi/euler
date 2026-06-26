@@ -202,17 +202,15 @@ solver/
     skill.py          — The `claude-skill` command: run Claude Code in-shell against the locked workspace.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   core/
+    download.py       — Utility for downloading and caching files via HTTP.
     evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
-    parser.py         — HTML problem-statement parser: assemble a standalone statement page from a scraped Project Euler page.
     problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
     results.py        — Results: save and retrieve problem results.
     test_cases.py     — Load test cases for evaluation
   crypto/
-    asymmetrical.py   — X25519 ECDH key pair generation, master key wrapping, and user identity management.
+    ciphers.py        — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
     gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
-    keys.py           — Encrypted key file read/write and per-user key retrieval.
-    share.py          — n of m secret sharing for fixed-size AES-256 keys.
-    symmetrical.py    — AES-based symmetric encryption and decryption with key derivation.
+    keys.py           — Cipher key management: create, persist, rotate, share and migrate the crypto key material.
   runners/
     runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
     runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
@@ -233,7 +231,6 @@ solver/
     new.c             — Solution to Euler $problem.
     new.py            — Solution to Euler $problem.
   utils/
-    download.py       — Utility for downloading and caching files via HTTP.
     gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
     linter.py         — Utilities for linting code.
     loader.py         — Utility for loading modules.

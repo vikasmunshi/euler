@@ -9,7 +9,7 @@ audit_private() {
     #
     # Reads each path's stored git blob directly via 'git cat-file' (the object store, so NO smudge
     # filter runs) and checks it begins with the gitfilter MAGIC header. The magic is read from
-    # config.gitfilter_magic so this stays in lockstep with solver/crypto/gitfilter.py. A blob that
+    # solver.crypto.ciphers.config_dict so this stays in lockstep with the filter. A blob that
     # does not start with the magic is plaintext — a file that slipped past the clean filter (e.g.
     # committed before .gitattributes covered it, or with the filter uninstalled).
     #
@@ -17,7 +17,7 @@ audit_private() {
     #
     # Returns 1 if any tracked private file is stored as plaintext, else 0.
     local magic_hex mlen total=0 encrypted=0 plaintext=0
-    magic_hex=$(python -c 'from solver.config import config; print(config.gitfilter_magic.hex())')
+    magic_hex=$(python -c 'from solver.crypto.ciphers import config_dict; print(config_dict["magic"].hex())')
     mlen=$(( ${#magic_hex} / 2 ))
 
     echo "Encryption-at-rest audit of tracked ${private_dir} (magic=0x${magic_hex}):"

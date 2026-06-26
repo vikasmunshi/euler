@@ -1,11 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """Singleton Config: all paths, constants, command modules, and managed settings."""
-# Import-time contract: importing this module (and everything it transitively imports) must emit
-# nothing on stdout. solver.crypto.gitfilter imports config at module top and runs as a git
-# clean/smudge filter, where stdout carries the file content -- a single stray byte written at
-# import time would corrupt every encrypted/decrypted blob.
-# Verified: `python -c "import solver.config"` emits 0 bytes on stdout.
 from __future__ import annotations
 
 __all__ = ['ExitCodes', 'Singleton', 'config']
@@ -81,13 +76,10 @@ class Scripts(metaclass=Singleton):
 
 class Config(metaclass=Singleton):
     __slots__ = ('api_timeout', 'author_email', 'backup_dir', 'bin_dir', 'cache_dir', 'checkout', 'default_results',
-                 'default_solution_notes', 'default_test_cases', 'docs_dir', 'ecb_usd_rate',
-                 'gitfilter_attr_line', 'gitfilter_header_len', 'gitfilter_magic', 'gitfilter_name',
-                 'gitfilter_nonce_len', 'gitfilter_pkt_max', 'gitfilter_verify_text', 'history_file',
-                 'keys_backup_file', 'keys_file', 'keys_version', 'master_key_file', 'max_line_length',
-                 'max_output_tokens', 'max_retries', 'modules_file', 'notes_filename', 'number_filename',
-                 'private_key_file', 'project_git_url', 'projecteuler_url', 'resource_dirname', 'results_filename',
-                 'root_dir', 'schema_file', 'screen_width', 'scripts', 'server_lock_file', 'server_port',
+                 'default_solution_notes', 'default_test_cases', 'docs_dir', 'ecb_usd_rate', 'history_file',
+                 'max_line_length', 'max_output_tokens', 'max_retries', 'modules_file', 'notes_filename',
+                 'number_filename', 'project_git_url', 'projecteuler_url', 'resource_dirname', 'results_filename',
+                 'root_dir', 'screen_width', 'scripts', 'server_lock_file', 'server_port',
                  'session_file', 'skill_dir', 'solutions_dir', 'stale_notes_tolerance_s', 'statement_filename',
                  'static_file_dir', 'static_file_problems', 'static_file_progress', 'static_file_progress_editor',
                  'style', 'templates_dir', 'test_cases_filename', 'theme', 'timeout_multiple', 'timeout_single',)
@@ -104,12 +96,7 @@ class Config(metaclass=Singleton):
                  checkout: str,
                  docs_dir: str,
                  history_file: str,
-                 keys_backup_file: str,
-                 keys_file: str,
-                 master_key_file: str,
                  modules_file: str,
-                 private_key_file: str,
-                 schema_file: str,
                  server_lock_file: str,
                  session_file: str,
                  skill_dir: str,
@@ -130,7 +117,6 @@ class Config(metaclass=Singleton):
         self.default_results: str = 'Solution pending... the mathematician is still thinking.'
         self.default_solution_notes: str = 'Nothing here yet - come back when the dust has settled.'
         self.default_test_cases: str = 'No test cases yet - someone has to go first.'
-        self.keys_version: str = '1.0.1'
         self.max_line_length: int = 120  # keep in sync with tox.ini [flake8] max-line-length
         self.max_output_tokens: int = 10_000
         self.max_retries: int = 3
@@ -149,22 +135,6 @@ class Config(metaclass=Singleton):
         self.timeout_single: float = 90.0  # timeout in seconds for single run
         self.ecb_usd_rate: float = 1.00  # euros per US dollar, used by `costs`; updated by update-models cmd
 
-        # solver.crypto.gitfilter constants (transparent git clean/smudge encryption).
-        self.gitfilter_magic: bytes = b'SLVR\x01'  # 4-byte tag + 1-byte format version
-        self.gitfilter_nonce_len: int = 12
-        self.gitfilter_header_len: int = len(self.gitfilter_magic) + self.gitfilter_nonce_len
-        self.gitfilter_name: str = 'solver-crypt'  # git filter driver name (.gitattributes / git config)
-        self.gitfilter_attr_line: str = f'{solutions_dir}/private/** filter={self.gitfilter_name} -text'
-        self.gitfilter_pkt_max: int = 65516  # max pkt-line payload (65520 - 4-byte length prefix)
-        # Fixed known plaintext for the verify-by-decrypt master-key check: the opening quatrain of
-        # "Auguries of Innocence" by William Blake.
-        self.gitfilter_verify_text: bytes = (
-            b'To see a World in a Grain of Sand\n'
-            b'And a Heaven in a Wild Flower\n'
-            b'Hold Infinity in the palm of your hand\n'
-            b'And Eternity in an hour\n'
-        )
-
         root_dir: Path = _root_dir()
         self.root_dir: Path = root_dir
         self.backup_dir: Path = root_dir / backup_dir
@@ -173,12 +143,7 @@ class Config(metaclass=Singleton):
         self.checkout: Path = root_dir / checkout
         self.docs_dir: Path = root_dir / docs_dir
         self.history_file: Path = root_dir / history_file
-        self.keys_backup_file: Path = root_dir / keys_backup_file
-        self.keys_file: Path = root_dir / keys_file
-        self.master_key_file: Path = root_dir / master_key_file
         self.modules_file: Path = root_dir / modules_file
-        self.private_key_file: Path = Path.home() / private_key_file
-        self.schema_file: Path = root_dir / schema_file
         self.server_lock_file: Path = root_dir / server_lock_file
         self.session_file: Path = root_dir / session_file
         self.skill_dir: Path = root_dir / skill_dir
@@ -240,12 +205,7 @@ config: Config = Config(
     checkout='.checkout',
     docs_dir='docs',
     history_file='.history',
-    keys_backup_file='backup/keys_backup.json',
-    keys_file='keys/keys.json',
-    master_key_file='keys/master_key.json',
     modules_file='solver/modules.csv',
-    private_key_file='.ssh/id_solver',
-    schema_file='keys/schema.json',
     server_lock_file='.server.lock',
     session_file='.session',
     skill_dir='solver/ai/claude/skills/claude-euler-solver',
