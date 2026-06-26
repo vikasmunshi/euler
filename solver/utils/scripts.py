@@ -29,11 +29,7 @@ def run_cmdline(cmdline: str) -> int:
     return result
 
 
-@register(
-    help_text='Commit everything, optionally resetting to origin/master.',
-    aliases=('commit',),
-    quietable=True,
-)
+@register(help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
 def git_commit(reset: bool = False, verify: bool = True) -> int:
     """Stage and commit the solutions and workspace as a timestamped checkpoint.
 
@@ -58,7 +54,7 @@ def git_commit(reset: bool = False, verify: bool = True) -> int:
 
 
 @register(
-    help_text='Publish named targets (keys|scripts|[accent.dim]solutions[/accent.dim]|solver) to remote.',
+    help_text='Push targets (keys|scripts|[accent]solutions[/accent]|solver) to remote.',
     aliases=('publish',),
     quietable=True,
 )
@@ -85,10 +81,7 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
     return result
 
 
-@register(
-    help_text='Display sync state between local and origin/master.',
-    aliases=('status',),
-)
+@register(help_text='Display sync state between local and origin/master.', aliases=('status',),)
 def git_status(details: bool = False) -> int:
     """Display the sync state between the local branch and origin/master.
 
@@ -103,10 +96,7 @@ def git_status(details: bool = False) -> int:
     return result
 
 
-@register(
-    help_text='Bring the local repository in sync with origin/master.',
-    aliases=('sync',),
-)
+@register(help_text='Bring the local repository in sync with origin/master.', aliases=('sync',),)
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
 

@@ -67,8 +67,8 @@ def _help_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]
 def _help(ctx: Context, *args: str) -> int:
     """List every command, or show detailed help for one command.
 
-    With no argument, prints a table of all registered commands with their
-    aliases and one-line descriptions, plus the legend (§ requires the workspace
+    With no argument, prints a three-column table (command, aliases,
+    description) of all registered commands, plus the legend (§ requires the workspace
     lock, ↻ may refresh workspace state, ⊘ refuses while checked out, ⚑ checks
     out while it runs, » supports --silent).
 
@@ -99,14 +99,12 @@ def _help(ctx: Context, *args: str) -> int:
                                 title=f'[accent]▎[/accent] [cmd.name]{cmd.name}[/cmd.name]',
                                 title_align='left', padding=(1, 2)))
         return ExitCodes.EXIT_OK
-    table = Table(show_header=False, box=None, padding=(0, 2))
-    table.add_column(style='cmd.name', no_wrap=True)
-    table.add_column(style='cmd.help')
+    table = Table(show_header=True, header_style='muted', box=None, padding=(0, 2))
+    table.add_column('command', style='cmd.name', no_wrap=True)
+    table.add_column('aliases', style='cmd.name', no_wrap=True)
+    table.add_column('description', style='cmd.help')
     for cmd in reg.all():
-        names = Text(cmd.name, style='cmd.name')
-        if cmd.aliases:
-            names.append(f' {" ".join(cmd.aliases)}', style='cmd.help')
-        table.add_row(names, cmd.help or '')
+        table.add_row(cmd.name, ' '.join(cmd.aliases), cmd.help or '')
     ctx.console.print(Panel(table, border_style='panel.border',
                             title='[accent]▎[/accent] [primary]commands[/primary]',
                             subtitle='[warning]» supports --silent.[/warning]',

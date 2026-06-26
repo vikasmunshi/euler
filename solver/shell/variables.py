@@ -144,13 +144,14 @@ class Variables(metaclass=Singleton):
         return cast(Problem, self.__dict__['problem'])
 
     @problem.setter
-    def problem(self, problem: Problem | int) -> None:
+    def problem(self, problem: Problem) -> None:
         """The current problem, exposed as `problem`."""
-        if isinstance(problem, int):
-            problem = Problem.from_number(problem)
         if not isinstance(problem, Problem):
             raise TypeError(f'problem must be a Problem, not {problem!r}')
         self.__dict__['problem'] = problem
+
+    def set_problem(self, problem_number: int) -> None:
+        self.problem = Problem.from_number(problem_number)
 
     @property
     def rcode(self) -> int:

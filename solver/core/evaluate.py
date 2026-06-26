@@ -356,10 +356,11 @@ def eval_benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
     return rc
 
 
-@register(help_text='Set the active problem', aliases=('problem',))
-def eval_set_problem(problem_number: int) -> int:
+@register(help_text='Set the active problem', aliases=('problem',), quietable=True, )
+def eval_set_problem(problem_number: int | None = None) -> int:
     try:
-        variables.problem = problem_number
+        variables.set_problem(problem_number or variables.problem.number, )
     except ValueError:
         return ExitCodes.EXIT_USAGE
+    console.print(f'[muted]Current problem is: [/muted][accent]{variables.problem.as_title()}[/accent]')
     return ExitCodes.EXIT_OK

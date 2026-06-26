@@ -15,7 +15,7 @@ from solver.shell.variables import variables
 from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 
-@register(help_text='Lint the workspace, fix with autoflake + autopep8 + isort.', quietable=True)
+@register(help_text='Lint current problem, auto-fix with --auto-fix.', quietable=True)
 def lint(auto_fix: bool = False) -> int:
     """Lint the workspace solution files, optionally auto-fixing them.
 
