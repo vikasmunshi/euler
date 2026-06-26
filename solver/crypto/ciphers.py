@@ -3,11 +3,10 @@
 """
 Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
 
-This is the non-interactive heart of `solver.crypto`. It owns:
+This is the non-interactive heart of `solver.crypto`. File locations and git-filter wire-format
+constants come from the `config` TypedDict in `solver.crypto.config` (the crypto package does **not**
+import `solver.config`). On top of that, this module owns:
 
-- `config_dict` -- the single source of truth for every crypto file location and every git-filter
-  wire-format constant. The crypto package does **not** import `solver.config`; the repo root is
-  discovered here with `git rev-parse`.
 - the asymmetric primitives -- load the password-protected X25519 private key from `~/.solver/id`
   (the password is read from `keys/.user-pass`), and `lock`/`unlock` (wrap/unwrap) a secret to an
   X25519 public key via ephemeral ECDH -> HKDF-SHA256 -> ChaCha20-Poly1305.
@@ -22,14 +21,13 @@ All creation, persistence, rotation, sharing and the shell commands live in `sol
 (which is interactive and imports this module). The git filter (`solver.crypto.gitfilter`) imports
 only this module. Both of those callers run in contexts where stdout carries file content, so this
 module's hard contract is: **importing it, and everything it imports, emits nothing on stdout.** It
-imports only the standard library and `cryptography`; keep it that way.
+imports only the standard library, `cryptography`, and `solver.crypto.config`; keep it that way.
 Verified: `python -c "import solver.crypto.ciphers"` writes 0 bytes to stdout.
 """
 from __future__ import annotations
 
 __all__ = [
     'build_cipher',
-    'config_dict',
     'decrypt_blob',
     'decrypt_blob_with',
     'encrypt_blob',
@@ -49,8 +47,7 @@ from hashlib import sha256
 from hmac import new as hmac_new
 from json import loads
 from pathlib import Path
-from subprocess import run
-from typing import Any, cast
+from typing import cast
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.asymmetric import x25519
@@ -60,47 +57,7 @@ from cryptography.hazmat.primitives.hashes import SHA256
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import (Encoding, PublicFormat, load_pem_private_key)
 
-
-# ==================================================================================================================== #
-#                                               configuration
-# ==================================================================================================================== #
-def _root_dir() -> Path:
-    """Return the git repository root (pure: captures git's output, no chdir / PATH side-effects)."""
-    result = run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True, cwd=Path(__file__).parent)
-    if result.returncode != 0 or not (root := result.stdout.strip()):
-        raise ValueError('solver.crypto: failed to locate the git repository root')
-    return Path(root)
-
-
-_ROOT: Path = _root_dir()
-_MAGIC: bytes = b'SLVR\x01'  # 4-byte tag + 1-byte format version
-_NONCE_LEN: int = 12
-_FILTER_NAME: str = 'solver-crypt'  # git filter driver name (.gitattributes / git config)
-
-#: All crypto configuration -- file locations and git-filter wire-format constants -- in one place.
-config_dict: dict[str, Any] = {
-    'root_dir': _ROOT,
-    # key material
-    'private_key_file': Path.home() / '.solver' / 'id',  # password-protected X25519 private key (PKCS8 PEM)
-    'user_pass_file': _ROOT / 'keys' / '.user-pass',     # private-key password (machine-local; gitignored dotfile)
-    'enc_key_file': _ROOT / 'keys' / 'enc-key.json',     # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
-    'private_key_backups': 5,                            # rolling backups kept of the private key file
-    # git-filter wire format
-    'magic': _MAGIC,
-    'nonce_len': _NONCE_LEN,
-    'header_len': len(_MAGIC) + _NONCE_LEN,
-    'filter_name': _FILTER_NAME,
-    'attr_line': f'solutions/private/** filter={_FILTER_NAME} -text',
-    'pkt_max': 65516,  # max pkt-line payload (65520 - 4-byte length prefix)
-    # Fixed known plaintext for the verify-by-decrypt master-key check: the opening quatrain of
-    # "Auguries of Innocence" by William Blake.
-    'verify_text': (
-        b'To see a World in a Grain of Sand\n'
-        b'And a Heaven in a Wild Flower\n'
-        b'Hold Infinity in the palm of your hand\n'
-        b'And Eternity in an hour\n'
-    ),
-}
+from solver.crypto.config import config
 
 
 # ==================================================================================================================== #
@@ -120,8 +77,8 @@ def load_private_key() -> X25519PrivateKey:
         ValueError:        If the password is wrong or the key file is malformed.
     Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
     """
-    key_file: Path = config_dict['private_key_file']
-    pass_file: Path = config_dict['user_pass_file']
+    key_file: Path = config['private_key_file']
+    pass_file: Path = config['user_pass_file']
     if not key_file.exists():
         raise FileNotFoundError(f'private key {key_file} not found; run `solver user` to create one')
     if not pass_file.exists():
@@ -169,13 +126,13 @@ def unlock(private_key: X25519PrivateKey, locked: str) -> bytes:
 # ==================================================================================================================== #
 def read_enc_key_file() -> dict[str, str]:
     """Read and parse keys/enc-key.json; raises FileNotFoundError if it has not been generated."""
-    return cast(dict[str, str], loads(config_dict['enc_key_file'].read_text()))
+    return cast(dict[str, str], loads(config['enc_key_file'].read_text()))
 
 
 def verify_master_key(data: dict[str, str], master_key: bytes) -> bool:
     """Return True if `master_key` decrypts the stored `verify` ciphertext back to the known plaintext."""
     try:
-        return decrypt_blob(bytes.fromhex(data['verify']), master_key) == bytes(config_dict['verify_text'])
+        return decrypt_blob(bytes.fromhex(data['verify']), master_key) == bytes(config['verify_text'])
     except (InvalidTag, ValueError, KeyError):
         return False
 
@@ -197,7 +154,7 @@ def read_master_key() -> bytes:
     data: dict[str, str] = read_enc_key_file()
     my_public: str = public_key_hex(private_key.public_key())
     if my_public not in data:
-        raise KeyError(f'public key {my_public} has no entry in {config_dict["enc_key_file"]}')
+        raise KeyError(f'public key {my_public} has no entry in {config["enc_key_file"]}')
     try:
         master_key: bytes = unlock(private_key, data[my_public])
     except InvalidTag as exc:
@@ -223,7 +180,7 @@ def _derive_keys(master_key: bytes) -> tuple[bytes, bytes]:
 
 def is_encrypted(blob: bytes) -> bool:
     """Return True if blob carries the filter's MAGIC header (i.e. is already ciphertext)."""
-    magic: bytes = config_dict['magic']
+    magic: bytes = config['magic']
     return blob[:len(magic)] == magic
 
 
@@ -241,8 +198,8 @@ def encrypt_blob_with(plaintext: bytes, cipher: AESGCM, mac_key: bytes) -> bytes
     """
     if is_encrypted(plaintext):
         return plaintext
-    magic: bytes = config_dict['magic']
-    nonce: bytes = hmac_new(mac_key, plaintext, sha256).digest()[:config_dict['nonce_len']]
+    magic: bytes = config['magic']
+    nonce: bytes = hmac_new(mac_key, plaintext, sha256).digest()[:config['nonce_len']]
     return magic + nonce + cipher.encrypt(nonce, plaintext, None)
 
 
@@ -250,8 +207,8 @@ def decrypt_blob_with(blob: bytes, cipher: AESGCM) -> bytes:
     """Decrypt with a prebuilt cipher; pass-through for content without MAGIC."""
     if not is_encrypted(blob):
         return blob
-    return cipher.decrypt(blob[len(config_dict['magic']):config_dict['header_len']],
-                          blob[config_dict['header_len']:], None)
+    return cipher.decrypt(blob[len(config['magic']):config['header_len']],
+                          blob[config['header_len']:], None)
 
 
 def encrypt_blob(plaintext: bytes, master_key: bytes) -> bytes:

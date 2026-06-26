@@ -9,6 +9,7 @@ from functools import lru_cache
 from itertools import chain
 from json import loads
 from pathlib import Path
+from random import choice
 from typing import NamedTuple
 from urllib.parse import urljoin
 
@@ -125,6 +126,10 @@ class Problems(metaclass=Singleton):
     @property
     def next_unsolved_problem(self) -> Problem:
         return self.unsolved_problems[0]
+
+    @property
+    def random_problem(self) -> Problem:
+        return choice(problems.unsolved_problems or problems.problems_list)
 
     @property
     def problems_list(self) -> list[Problem]:

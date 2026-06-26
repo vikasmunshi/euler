@@ -203,7 +203,7 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
     ])
 
 
-@register(help_text='Refresh Model enum, pricing, and USD→EUR rate from live API and docs.',
+@register(help_text='Update Model enum, pricing, and USD→EUR rate.',
           quietable=True)
 def update_models(check: bool = False) -> int:
     """Refresh the `Model` class in `models.py` and the `usd_to_eur` rate in `config.json`.

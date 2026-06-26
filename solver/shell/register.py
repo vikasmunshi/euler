@@ -35,7 +35,7 @@ from prompt_toolkit.completion import Completion
 from rich.text import Text
 
 from solver.config import ExitCodes
-from solver.core.problems import Problem, problems
+from solver.core.problems import problems
 from solver.shell.command import Context, command
 from solver.shell.variables import variables
 
@@ -605,12 +605,3 @@ def register[**P](
         return func
 
     return _register
-
-
-@register(help_text='Set the active problem')
-def set_problem(problem_number: int) -> int:
-    try:
-        variables.problem = Problem.from_number(problem_number)
-    except ValueError:
-        return ExitCodes.EXIT_USAGE
-    return ExitCodes.EXIT_OK

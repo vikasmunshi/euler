@@ -17,7 +17,7 @@ audit_private() {
     #
     # Returns 1 if any tracked private file is stored as plaintext, else 0.
     local magic_hex mlen total=0 encrypted=0 plaintext=0
-    magic_hex=$(python -c 'from solver.crypto.ciphers import config_dict; print(config_dict["magic"].hex())')
+    magic_hex=$(python -c 'from solver.crypto.config import config; print(config["magic"].hex())')
     mlen=$(( ${#magic_hex} / 2 ))
 
     echo "Encryption-at-rest audit of tracked ${private_dir} (magic=0x${magic_hex}):"

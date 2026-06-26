@@ -15,15 +15,15 @@ entry, confirmations) lives here, and nowhere else. It owns the lifecycle of two
   ciphertext. Authority is **proof-of-possession**: anyone who can unwrap and verify the current
   master key may rotate it, authorise another public key, or split it into shares.
 
-The non-interactive primitives (load, lock/unlock, encrypt/decrypt, the config) come from
-`solver.crypto.ciphers`; this module never re-implements them. The git filter
-(`solver.crypto.gitfilter`) does not import this module.
+The non-interactive primitives (load, lock/unlock, encrypt/decrypt) come from `solver.crypto.ciphers`
+and the configuration from `solver.crypto.config`; this module never re-implements them. The git
+filter (`solver.crypto.gitfilter`) does not import this module.
 
 Shell commands registered here: `user`, `rekey`, `authorize`, `key-split`, `key-reconstruct`.
 """
 from __future__ import annotations
 
-__all__ = ['authorize', 'key_reconstruct', 'key_split', 'rekey', 'user']
+__all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'user', 'user_authorize']
 
 from json import dumps
 from pathlib import Path
@@ -34,8 +34,9 @@ from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.serialization import BestAvailableEncryption, Encoding, PrivateFormat
 
-from solver.crypto.ciphers import (config_dict, encrypt_blob, load_private_key, lock, public_key_hex,
-                                   read_enc_key_file, read_master_key, verify_master_key)
+from solver.crypto.ciphers import (encrypt_blob, load_private_key, lock, public_key_hex, read_enc_key_file,
+                                   read_master_key, verify_master_key)
+from solver.crypto.config import config
 from solver.shell import console, register
 from solver.utils.shell_utils import confirm
 
@@ -64,7 +65,7 @@ def _rotate_backups(key_file: Path) -> None:
     """Rotate up to `private_key_backups` rolling backups of key_file (.1 newest ... .N oldest)."""
     if not key_file.exists():
         return
-    keep: int = config_dict['private_key_backups']
+    keep: int = config['private_key_backups']
     oldest: Path = key_file.with_suffix(f'.{keep}')
     if oldest.exists():
         oldest.unlink()
@@ -77,14 +78,14 @@ def _rotate_backups(key_file: Path) -> None:
 
 def _persist_private_key(private_key: X25519PrivateKey, password: bytes) -> None:
     """Write the password-encrypted private key to disk (rotating backups) and store the password."""
-    key_file: Path = config_dict['private_key_file']
+    key_file: Path = config['private_key_file']
     _rotate_backups(key_file)
     key_file.parent.mkdir(parents=True, exist_ok=True)
     key_file.parent.chmod(0o700)
     key_file.write_bytes(private_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8,
                                                    BestAvailableEncryption(password)))
     key_file.chmod(0o600)
-    pass_file: Path = config_dict['user_pass_file']
+    pass_file: Path = config['user_pass_file']
     pass_file.parent.mkdir(parents=True, exist_ok=True)
     pass_file.write_bytes(password)
     pass_file.chmod(0o600)
@@ -106,7 +107,7 @@ def _create_user_key() -> X25519PrivateKey:
 # ==================================================================================================================== #
 def _write_enc_key_file(data: dict[str, str]) -> None:
     """Serialise keys/enc-key.json and clear the cached master key so the next read picks it up."""
-    enc_file: Path = config_dict['enc_key_file']
+    enc_file: Path = config['enc_key_file']
     enc_file.parent.mkdir(parents=True, exist_ok=True)
     enc_file.write_text(dumps(data, indent=2))
     read_master_key.cache_clear()
@@ -118,7 +119,7 @@ def _wrapped_for_all(master_key: bytes, public_keys: list[str]) -> dict[str, str
     """Build the enc-key.json body: master_key wrapped to each public key, plus the verify ciphertext."""
     data: dict[str, str] = {pub: lock(X25519PublicKey.from_public_bytes(bytes.fromhex(pub)), master_key)
                             for pub in public_keys}
-    data[_VERIFY] = encrypt_blob(config_dict['verify_text'], master_key).hex()
+    data[_VERIFY] = encrypt_blob(config['verify_text'], master_key).hex()
     return data
 
 
@@ -138,8 +139,8 @@ def _wrapped_for_all(master_key: bytes, public_keys: list[str]) -> dict[str, str
 #     return 0
 
 
-@register(help_text='Rotate the master key, re-wrap to users, and re-encrypt private files.')
-def rekey() -> int:
+@register(help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
+def key_rekey() -> int:
     """Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
 
     Because the git filter is deterministic, every committed blob depends on the master key, so a
@@ -157,13 +158,13 @@ def rekey() -> int:
     new_master: bytes = token_bytes(32)
     _write_enc_key_file(_wrapped_for_all(new_master, [k for k in data if k != _VERIFY]))
     console.print('[muted]Re-encrypting tracked private files...[/muted]')
-    run(['git', 'add', '--renormalize', '--', 'solutions/private'], cwd=config_dict['root_dir'], check=False)
+    run(['git', 'add', '--renormalize', '--', 'solutions/private'], cwd=config['root_dir'], check=False)
     console.print('[success]Master key rotated; review `git status` and commit the re-encrypted blobs.[/success]')
     return 0
 
 
-@register(help_text='Authorise another public key (hex) to access the master key.')
-def authorize(public_key: str) -> int:
+@register(help_text='Authorise another public key (hex) to access the enc key.', aliases=('authorize',))
+def user_authorize(public_key: str) -> int:
     """Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession)."""
     try:
         master_key: bytes = read_master_key()
@@ -185,7 +186,7 @@ def authorize(public_key: str) -> int:
 # ==================================================================================================================== #
 #                                               user identity
 # ==================================================================================================================== #
-@register(help_text="Show user's public key and master-key access; --regen makes new key-pair.")
+@register(help_text="Show user public key & enc-key access; --regen makes new key-pair.")
 def user(regen: bool = False) -> int:
     """Show the current identity and whether it can decrypt; create a key pair on first run or --regen."""
     try:
@@ -289,7 +290,7 @@ def _reconstruct_secret(shares: list[str]) -> bytes:
     return secret_int.to_bytes(_SECRET_BYTES, 'big')
 
 
-@register(help_text='Split master key into num_shares shares for n-of-m threshold recovery.')
+@register(help_text='Split master key into shares; recovery by threshold num of shares.')
 def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     """Print `num_shares` Shamir shares of the current master key (threshold needed to reconstruct)."""
     if num_shares < threshold or threshold < 2:
@@ -326,12 +327,12 @@ def key_reconstruct(threshold: int = 2) -> int:
     except ValueError as exc:
         console.print(f'[error]error:[/error] {exc}')
         return 1
-    data: dict[str, str] = read_enc_key_file() if config_dict['enc_key_file'].exists() else {}
+    data: dict[str, str] = read_enc_key_file() if config['enc_key_file'].exists() else {}
     if _VERIFY in data and not verify_master_key(data, master_key):
         console.print('[error]error:[/error] reconstructed key fails verification; wrong shares?')
         return 1
     data[public_key_hex(private_key.public_key())] = lock(private_key.public_key(), master_key)
-    data.setdefault(_VERIFY, encrypt_blob(config_dict['verify_text'], master_key).hex())
+    data.setdefault(_VERIFY, encrypt_blob(config['verify_text'], master_key).hex())
     _write_enc_key_file(data)
     console.print(f'[success]Master key reconstructed from {threshold} shares and stored.[/success]')
     return 0

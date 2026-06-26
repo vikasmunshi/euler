@@ -3,7 +3,7 @@
 """Solution evaluation: runs standalone scripts against test cases and reports results."""
 from __future__ import annotations
 
-__all__ = ['benchmark', 'evaluate']
+__all__ = ['eval_benchmark', 'eval_compile_c', 'eval_evaluate', 'eval_set_problem']
 
 import re
 from ast import literal_eval
@@ -22,8 +22,8 @@ from solver.utils.path_utils import canonical_path
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
 
 
-@register(help_text='Build all C source files in the solutions_dir.', quietable=True)
-def compile_c(clean: bool = False) -> int:
+@register(help_text='Build all C source files in the solutions_dir.', aliases=('compile',), quietable=True)
+def eval_compile_c(clean: bool = False) -> int:
     """Compile every C solution in the workspace into a runnable binary.
 
     Builds each `.c` file in `workspace/` (linking the runner harness) so it can
@@ -166,7 +166,7 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
     if disable_timeout:
         runs = 1
     if lang in ('*', 'c'):
-        compile_c(clean=clean)
+        eval_compile_c(clean=clean)
     solutions: list[str] = sorted(
         (
             f'{s.name}' for s in variables.problem.solution_dir.iterdir()
@@ -227,16 +227,16 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
 
 
 @register(help_text='Evaluate solutions against test cases.', aliases=('eval',), quietable=True)
-def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
-             clean: bool = False,
-             timeout: float | None = None,
-             disable_timeout: bool = False,
-             lang: Literal['*', 'py', 'c'] = '*',
-             runs: int = 1,
-             show: bool = False,
-             solution_index: int | None = None,
-             verbose: bool = False,
-             ) -> int:
+def eval_evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
+                  clean: bool = False,
+                  timeout: float | None = None,
+                  disable_timeout: bool = False,
+                  lang: Literal['*', 'py', 'c'] = '*',
+                  runs: int = 1,
+                  show: bool = False,
+                  solution_index: int | None = None,
+                  verbose: bool = False,
+                  ) -> int:
     """
     Evaluate solutions against test cases.
 
@@ -280,16 +280,16 @@ def evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     return rc
 
 
-@register(help_text='Benchmark the problem currently in the workspace.', quietable=True)
-def benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
-              clean: bool = False,
-              timeout: float | None = None,
-              disable_timeout: bool = False,
-              lang: Literal['*', 'py', 'c'] = '*',
-              solution_index: int | None = None,
-              reset: bool = False,
-              verbose: bool = False,
-              ) -> int:
+@register(help_text='Benchmark the problem currently in the workspace.', aliases=('benchmark',), quietable=True)
+def eval_benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
+                   clean: bool = False,
+                   timeout: float | None = None,
+                   disable_timeout: bool = False,
+                   lang: Literal['*', 'py', 'c'] = '*',
+                   solution_index: int | None = None,
+                   reset: bool = False,
+                   verbose: bool = False,
+                   ) -> int:
     """Measure and record the execution time of the workspace solutions.
 
     Like `eval`, runs every solution against the chosen test-case categories, but
@@ -354,3 +354,12 @@ def benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
         console.print('[muted]Benchmark interrupted by user.[/muted]')
         return ExitCodes.EXIT_ERROR
     return rc
+
+
+@register(help_text='Set the active problem', aliases=('problem',))
+def eval_set_problem(problem_number: int) -> int:
+    try:
+        variables.problem = problem_number
+    except ValueError:
+        return ExitCodes.EXIT_USAGE
+    return ExitCodes.EXIT_OK

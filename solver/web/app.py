@@ -44,7 +44,7 @@ from typing import Any, Literal, TypedDict
 from aiohttp import WSMsgType, web
 
 from solver.config import config
-from solver.core.evaluate import benchmark, evaluate
+from solver.core.evaluate import eval_benchmark, eval_evaluate
 from solver.core.problems import Problem, problems
 from solver.shell import console
 from solver.utils.summary import summary
@@ -395,9 +395,9 @@ def _run_cmd(problem_number: int,
     """
     with console.capture() as capture:
         if cmd == 'benchmark':
-            rcode = benchmark(lang=lang or '*', solution_index=solution_index)
+            rcode = eval_benchmark(lang=lang or '*', solution_index=solution_index)
         elif cmd == 'eval':
-            rcode = evaluate(lang=lang or '*', solution_index=solution_index)
+            rcode = eval_evaluate(lang=lang or '*', solution_index=solution_index)
         else:
             return 400, f'unknown command {cmd}'  # type: ignore[unreachable]
     output = capture.get().strip()

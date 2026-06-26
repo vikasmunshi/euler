@@ -40,22 +40,23 @@ a parameter that accepts repetition.
 |---------|---------|-------------|
 | [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
-| [`authorize`](#command-authorize) | — | Authorise another public key (hex) to access the master key. |
-| [`benchmark`](#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
 | [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. |
 | [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
-| [`compile-c`](#command-compile-c) | — | Build all C source files in the solutions_dir. » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
-| [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
+| [`eval-benchmark`](#command-eval-benchmark-benchmark) | `benchmark` | Benchmark the problem currently in the workspace. » |
+| [`eval-compile-c`](#command-eval-compile-c-compile) | `compile` | Build all C source files in the solutions_dir. » |
+| [`eval-evaluate`](#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
+| [`eval-set-problem`](#command-eval-set-problem-problem) | `problem` | Set the active problem |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Publish named targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares and wrap it to the current user. |
-| [`key-split`](#command-key-split) | — | Split master key into num_shares shares for n-of-m threshold recovery. |
+| [`key-rekey`](#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
+| [`key-split`](#command-key-split) | — | Split master key into shares; recovery by threshold num of shares. |
 | [`lint`](#command-lint) | — | Lint the workspace, fix with autoflake + autopep8 + isort. » |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
 | [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
@@ -64,15 +65,14 @@ a parameter that accepts repetition.
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
-| [`rekey`](#command-rekey) | — | Rotate the master key, re-wrap to users, and re-encrypt private files. |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
-| [`set-problem`](#command-set-problem) | — | Set the active problem |
 | [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
-| [`update-models`](#command-update-models) | — | Refresh Model enum, pricing, and USD→EUR rate from live API and docs. » |
-| [`user`](#command-user) | — | Show user's public key and master-key access; --regen makes new key-pair. |
+| [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
+| [`user`](#command-user) | — | Show user public key & enc-key access; --regen makes new key-pair. |
+| [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 
 *Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -136,86 +136,6 @@ description (with the legend glyphs expanded to full sentences), its aliases,
 and its usage. Returns non-zero if the named command is unknown.
 
 Aliased as `help`.
-```
-
----
-
-#### Command: `authorize`
-
-Authorise another public key (hex) to access the master key.
-
-```
-authorize <public_key>
-```
-
-```text
-Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession).
-```
-
----
-
-#### Command: `benchmark`
-
-Benchmark the problem currently in the workspace.
-* » supports `--silent`
-
-```
-benchmark
-[all|dev|main|extra ...]
-[clean=true|--clean]
-[timeout=<float>|none] (default None)
-[disable_timeout=true|--disable-timeout]
-[lang=*|py|c] (default *)
-[solution_index=<int>|none] (default None)
-[reset=true|--reset]
-[verbose=true|--verbose]
-[silent=true|--silent]
-```
-
-```text
-Measure and record the execution time of the workspace solutions.
-
-Like `eval`, runs every solution against the chosen test-case categories, but
-always **records** the timings to `results.json` and repeats each case an
-adaptive number of times (see "Repeats") instead of running once. Run `eval`
-first to confirm correctness, then `benchmark` to measure; categories default
-to all three ('dev', 'main', 'extra').
-
-Repeats:
-    `benchmark` does not take a `runs` argument — it passes `runs=None` to the
-    evaluator, which makes `load_test_cases` (`core/test_cases.py`) choose the
-    repeat count **per test-case category** from the previously recorded
-    timings::
-
-        runs = clamp(round(21 / slowest_prior_average), 1, 21)
-
-    where `slowest_prior_average` is the largest recorded average (seconds per
-    run) among prior *correct* results for that category and the solutions
-    being benchmarked. So each case is repeated ~21 times when it runs in well
-    under a second and scales down toward a single run as it gets slower —
-    keeping the per-category wall time bounded at roughly 21s — clamped to the
-    1..21 range. With no prior correct result recorded for a category the
-    count is 1: the first benchmark establishes a one-run baseline, and later
-    benchmarks use it to repeat the fast cases and average out noise. Passing
-    `disable_timeout` overrides this and forces a single run.
-
-Args:
-    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
-                        (which expands to all three). Defaults to all three if omitted.
-    clean:              If True, force compiles C solutions. Defaults to False.
-    timeout:            Per-run timeout in seconds for solution execution. If None, uses the
-                        default timeout. Defaults to None.
-    disable_timeout:    If True, disables the timeout for solution execution and forces a single
-                        run (bypassing the adaptive repeat count above). Defaults to False.
-    lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
-    solution_index:     Specific solution index to evaluate.
-                        If provided, only this solution index will be evaluated.
-                        If None, all solutions will be evaluated. Defaults to None.
-    reset:              If True, replace any existing persisted results with this run on a
-                        clean completion. If the benchmark is interrupted, existing results
-                        are preserved untouched. Defaults to False (results are merged with
-                        existing records as a running average).
-    verbose:            If True, prints error information during evaluation. Defaults to False.
 ```
 
 ---
@@ -291,33 +211,6 @@ A convenience wrapper over the console's clear; equivalent to the shell
 
 ---
 
-#### Command: `compile-c`
-
-Build all C source files in the solutions_dir.
-* » supports `--silent`
-
-```
-compile-c
-[clean=true|--clean]
-[silent=true|--silent]
-```
-
-```text
-Compile every C solution in the workspace into a runnable binary.
-
-Builds each `.c` file in `workspace/` (linking the runner harness) so it can
-be evaluated and benchmarked; reports per-file success or the compiler
-error. `eval --clean` and `benchmark` invoke this for you, so you rarely
-call it directly.
-
-Args:
-    problem_number:     problem number to compile.
-    clean:              When True, force a full rebuild instead of reusing up-to-date
-                        build output. Defaults to False.
-```
-
----
-
 #### Command: `costs`
 
 Display total cost of AI API tokens consumed in session.
@@ -360,13 +253,106 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 
 ---
 
-#### Command: `evaluate` (`eval`)
+#### Command: `eval-benchmark` (`benchmark`)
+
+Benchmark the problem currently in the workspace.
+* » supports `--silent`
+
+```
+eval-benchmark
+[all|dev|main|extra ...]
+[clean=true|--clean]
+[timeout=<float>|none] (default None)
+[disable_timeout=true|--disable-timeout]
+[lang=*|py|c] (default *)
+[solution_index=<int>|none] (default None)
+[reset=true|--reset]
+[verbose=true|--verbose]
+[silent=true|--silent]
+```
+
+```text
+Measure and record the execution time of the workspace solutions.
+
+Like `eval`, runs every solution against the chosen test-case categories, but
+always **records** the timings to `results.json` and repeats each case an
+adaptive number of times (see "Repeats") instead of running once. Run `eval`
+first to confirm correctness, then `benchmark` to measure; categories default
+to all three ('dev', 'main', 'extra').
+
+Repeats:
+    `benchmark` does not take a `runs` argument — it passes `runs=None` to the
+    evaluator, which makes `load_test_cases` (`core/test_cases.py`) choose the
+    repeat count **per test-case category** from the previously recorded
+    timings::
+
+        runs = clamp(round(21 / slowest_prior_average), 1, 21)
+
+    where `slowest_prior_average` is the largest recorded average (seconds per
+    run) among prior *correct* results for that category and the solutions
+    being benchmarked. So each case is repeated ~21 times when it runs in well
+    under a second and scales down toward a single run as it gets slower —
+    keeping the per-category wall time bounded at roughly 21s — clamped to the
+    1..21 range. With no prior correct result recorded for a category the
+    count is 1: the first benchmark establishes a one-run baseline, and later
+    benchmarks use it to repeat the fast cases and average out noise. Passing
+    `disable_timeout` overrides this and forces a single run.
+
+Args:
+    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
+                        (which expands to all three). Defaults to all three if omitted.
+    clean:              If True, force compiles C solutions. Defaults to False.
+    timeout:            Per-run timeout in seconds for solution execution. If None, uses the
+                        default timeout. Defaults to None.
+    disable_timeout:    If True, disables the timeout for solution execution and forces a single
+                        run (bypassing the adaptive repeat count above). Defaults to False.
+    lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
+    solution_index:     Specific solution index to evaluate.
+                        If provided, only this solution index will be evaluated.
+                        If None, all solutions will be evaluated. Defaults to None.
+    reset:              If True, replace any existing persisted results with this run on a
+                        clean completion. If the benchmark is interrupted, existing results
+                        are preserved untouched. Defaults to False (results are merged with
+                        existing records as a running average).
+    verbose:            If True, prints error information during evaluation. Defaults to False.
+```
+
+---
+
+#### Command: `eval-compile-c` (`compile`)
+
+Build all C source files in the solutions_dir.
+* » supports `--silent`
+
+```
+eval-compile-c
+[clean=true|--clean]
+[silent=true|--silent]
+```
+
+```text
+Compile every C solution in the workspace into a runnable binary.
+
+Builds each `.c` file in `workspace/` (linking the runner harness) so it can
+be evaluated and benchmarked; reports per-file success or the compiler
+error. `eval --clean` and `benchmark` invoke this for you, so you rarely
+call it directly.
+
+Args:
+    problem_number:     problem number to compile.
+    clean:              When True, force a full rebuild instead of reusing up-to-date
+                        build output. Defaults to False.
+```
+
+---
+
+#### Command: `eval-evaluate` (`eval`)
 
 Evaluate solutions against test cases.
 * » supports `--silent`
 
 ```
-evaluate
+eval-evaluate
 [all|dev|main|extra ...]
 [clean=true|--clean]
 [timeout=<float>|none] (default None)
@@ -399,6 +385,16 @@ solution_index:     Specific solution index to evaluate.
                     If provided, only this solution index will be evaluated.
                     If None, all solutions will be evaluated. Defaults to None.
 verbose:            If True, prints error information during evaluation. Defaults to False.
+```
+
+---
+
+#### Command: `eval-set-problem` (`problem`)
+
+Set the active problem
+
+```
+eval-set-problem <problem_number>
 ```
 
 ---
@@ -534,9 +530,26 @@ Prompt for `threshold` shares, reconstruct the master key, and store it wrapped 
 
 ---
 
+#### Command: `key-rekey` (`rekey`)
+
+Rotate the enc key and re-wrap to users.
+
+```
+key-rekey
+```
+
+```text
+Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
+
+Because the git filter is deterministic, every committed blob depends on the master key, so a
+rotation re-encrypts the tracked private files via `git add --renormalize`.
+```
+
+---
+
 #### Command: `key-split`
 
-Split master key into num_shares shares for n-of-m threshold recovery.
+Split master key into shares; recovery by threshold num of shares.
 
 ```
 key-split
@@ -735,23 +748,6 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 
 ---
 
-#### Command: `rekey`
-
-Rotate the master key, re-wrap to users, and re-encrypt private files.
-
-```
-rekey
-```
-
-```text
-Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
-
-Because the git filter is deterministic, every committed blob depends on the master key, so a
-rotation re-encrypts the tracked private files via `git add --renormalize`.
-```
-
----
-
 #### Command: `search` (`find`)
 
 Find content in the stack.
@@ -779,16 +775,6 @@ Args:
             set 'py c html json'.
     scope:  Which problems to search: 'solved' (default) restricts to
             solved problems; 'problems' covers every known problem.
-```
-
----
-
-#### Command: `set-problem`
-
-Set the active problem
-
-```
-set-problem <problem_number>
 ```
 
 ---
@@ -900,7 +886,7 @@ Args:
 
 #### Command: `update-models`
 
-Refresh Model enum, pricing, and USD→EUR rate from live API and docs.
+Update Model enum, pricing, and USD→EUR rate.
 * » supports `--silent`
 
 ```
@@ -929,7 +915,7 @@ Args:
 
 #### Command: `user`
 
-Show user's public key and master-key access; --regen makes new key-pair.
+Show user public key & enc-key access; --regen makes new key-pair.
 
 ```
 user
@@ -938,5 +924,19 @@ user
 
 ```text
 Show the current identity and whether it can decrypt; create a key pair on first run or --regen.
+```
+
+---
+
+#### Command: `user-authorize` (`authorize`)
+
+Authorise another public key (hex) to access the enc key.
+
+```
+user-authorize <public_key>
+```
+
+```text
+Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession).
 ```
 <!-- /GEN:command-index -->

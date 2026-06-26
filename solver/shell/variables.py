@@ -41,7 +41,6 @@ from __future__ import annotations
 
 __all__ = ['Variables', 'variables']
 
-import random
 from typing import Any, Generator, Iterable, cast
 
 from solver.config import Singleton, config
@@ -67,7 +66,7 @@ class Variables(metaclass=Singleton):
             'problem': None,
             'rcode': 0,
             'next': lambda: problems.next_unsolved_problem.number,
-            'random': lambda: random.choice(problems.unsolved_problems or problems.problems_list).number,
+            'random': lambda: problems.random_problem.number,
             'problems': lambda: problems.problems_list,
             'solved': lambda: problems.solved_problems,
             'unsolved': lambda: problems.unsolved_problems,
@@ -145,8 +144,10 @@ class Variables(metaclass=Singleton):
         return cast(Problem, self.__dict__['problem'])
 
     @problem.setter
-    def problem(self, problem: Problem) -> None:
+    def problem(self, problem: Problem | int) -> None:
         """The current problem, exposed as `problem`."""
+        if isinstance(problem, int):
+            problem = Problem.from_number(problem)
         if not isinstance(problem, Problem):
             raise TypeError(f'problem must be a Problem, not {problem!r}')
         self.__dict__['problem'] = problem

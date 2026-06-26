@@ -63,7 +63,7 @@ cat >/dev/null
 # solver/crypto/gitfilter.py; a blob lacking it is plaintext that slipped past
 # the clean filter — block the push.
 section "Encryption-at-rest audit (solutions/private)"
-magic_hex=$("$VENV/bin/python" -c 'from solver.config import config; print(config.gitfilter_magic.hex())')
+magic_hex=$("$VENV/bin/python" -c 'from solver.crypto.config import config; print(config["magic"].hex())')
 if [[ -z "$magic_hex" ]]; then
     fail "could not read config.gitfilter_magic (is the venv intact?)"
 else

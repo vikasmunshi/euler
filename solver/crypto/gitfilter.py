@@ -21,10 +21,11 @@ filter and already-encrypted blobs are never double-processed):
   throughput path and what `install` wires up.
 - `clean` / `smudge` -- one process per file. A fallback for direct/manual use.
 
-Import-time contract: this module imports only `solver.crypto.ciphers`, which emits **nothing on
-stdout when imported** -- in every filter mode stdout is the pkt-line / file-content channel, so a
-single stray byte written during import would corrupt every blob. Keep that property when editing
-either module (verified: `python -c "import solver.crypto.gitfilter"` writes 0 bytes to stdout).
+Import-time contract: this module imports only `solver.crypto.ciphers` and `solver.crypto.config`,
+both of which emit **nothing on stdout when imported** -- in every filter mode stdout is the pkt-line
+/ file-content channel, so a single stray byte written during import would corrupt every blob. Keep
+that property when editing these modules (verified: `python -c "import solver.crypto.gitfilter"`
+writes 0 bytes to stdout).
 
 The master key lives in `keys/enc-key.json` (managed by `solver.crypto.keys`); run `install` to
 register the filter in the local git config and `.gitattributes`; `status` reports the wiring.
@@ -39,10 +40,10 @@ from typing import BinaryIO
 
 from cryptography.exceptions import InvalidTag
 
-# Top-level import is safe only because importing solver.crypto.ciphers emits nothing on stdout --
-# see the import-time contract in this module's docstring.
-from solver.crypto.ciphers import (build_cipher, config_dict, decrypt_blob, decrypt_blob_with, encrypt_blob,
-                                   encrypt_blob_with, read_master_key)
+# Top-level import is safe because importing solver.crypto.ciphers and solver.crypto.config emit nothing on stdout --
+from solver.crypto.ciphers import (build_cipher, decrypt_blob, decrypt_blob_with, encrypt_blob, encrypt_blob_with,
+                                   read_master_key)
+from solver.crypto.config import config
 
 _KEY_ERRORS = (FileNotFoundError, KeyError, ValueError, InvalidTag)
 
@@ -104,8 +105,8 @@ def _write_response(dst: BinaryIO, content: bytes) -> None:
     """Write a success response: status, then the content chunked into pkt-lines, then end markers."""
     _write_text_pkt(dst, 'status=success')
     dst.write(b'0000')  # flush after status
-    for i in range(0, len(content), config_dict['pkt_max']):
-        _write_pkt(dst, content[i:i + config_dict['pkt_max']])
+    for i in range(0, len(content), config['pkt_max']):
+        _write_pkt(dst, content[i:i + config['pkt_max']])
     dst.write(b'0000')  # flush: end of content
     dst.write(b'0000')  # flush: empty trailing status list -> overall success
     dst.flush()
@@ -198,8 +199,8 @@ def _install() -> int:
         return 1
     print('gitfilter: master key verified against the stored ciphertext.', file=sys.stderr)
 
-    name: str = config_dict['filter_name']
-    root = config_dict['root_dir']
+    name: str = config['filter_name']
+    root = config['root_dir']
     base: str = f'{sys.executable} -m solver.crypto.gitfilter'
     settings: dict[str, str] = {
         f'filter.{name}.process': f'{base} process',
@@ -212,7 +213,7 @@ def _install() -> int:
         print(f'git config {key} = {value}', file=sys.stderr)
 
     attrs_path = root / '.gitattributes'
-    attr_line: str = config_dict['attr_line']
+    attr_line: str = config['attr_line']
     existing: str = attrs_path.read_text() if attrs_path.exists() else ''
     if attr_line not in existing.splitlines():
         header = '' if existing.endswith('\n') or not existing else '\n'
@@ -226,14 +227,14 @@ def _install() -> int:
 
 def _status() -> int:
     """Print whether the filter is wired up in git config / .gitattributes and the master key is valid."""
-    name: str = config_dict['filter_name']
-    root = config_dict['root_dir']
+    name: str = config['filter_name']
+    root = config['root_dir']
     for action in ('process', 'clean', 'smudge', 'required'):
         result = run(['git', 'config', '--local', '--get', f'filter.{name}.{action}'],
                      cwd=root, capture_output=True, text=True)
         print(f'filter.{name}.{action} = {result.stdout.strip() or "(unset)"}', file=sys.stderr)
     attrs_path = root / '.gitattributes'
-    has_rule: bool = attrs_path.exists() and config_dict['attr_line'] in attrs_path.read_text().splitlines()
+    has_rule: bool = attrs_path.exists() and config['attr_line'] in attrs_path.read_text().splitlines()
     print(f'.gitattributes rule present: {has_rule}', file=sys.stderr)
     try:
         read_master_key()

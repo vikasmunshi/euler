@@ -209,6 +209,7 @@ solver/
     test_cases.py     — Load test cases for evaluation
   crypto/
     ciphers.py        — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
+    config.py         — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
     gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
     keys.py           — Cipher key management: create, persist, rotate and share the crypto key material.
   runners/
