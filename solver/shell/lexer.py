@@ -594,6 +594,7 @@ class _Parser:
         return labels.get(tok[0], repr(tok[1]))
 
     def parse(self) -> Seq:
+        """Parse the whole token stream into a `Seq`, erroring on trailing tokens."""
         seq = self._sequence()
         if self._peek()[0] != 'EOF':
             tok = self._peek()
@@ -601,6 +602,7 @@ class _Parser:
         return seq
 
     def _sequence(self) -> Seq:
+        """Parse a `;`-separated sequence of `||` expressions (empty statements collapsed)."""
         items = [self._or()]
         while self._peek()[0] == 'SEMI':
             while self._peek()[0] == 'SEMI':
@@ -611,6 +613,7 @@ class _Parser:
         return Seq(items)
 
     def _or(self) -> Or:
+        """Parse one or more `&&` expressions separated by `||`."""
         items = [self._and()]
         while self._peek()[0] == 'OR':
             self._advance()
@@ -618,6 +621,7 @@ class _Parser:
         return Or(items)
 
     def _and(self) -> And:
+        """Parse one or more primaries (statements or groups) separated by `&&`."""
         items: list[Stmt | Group] = [self._primary()]
         while self._peek()[0] == 'AND':
             self._advance()
@@ -625,6 +629,7 @@ class _Parser:
         return And(items)
 
     def _primary(self) -> Stmt | Group:
+        """Parse a single statement (CHUNK) or a `{ … }` group."""
         tok = self._peek()
         if tok[0] == 'LBRACE':
             self._advance()
@@ -644,6 +649,7 @@ class _Parser:
 # ---------------------------------------------------------------------------
 
 def _lower_seq(seq: Seq) -> list[_Canon]:
+    """Lower every `||` expression in a sequence to a flat list of canonical statements."""
     out: list[_Canon] = []
     for or_expr in seq.items:
         out += _lower(or_expr, 'True')
@@ -701,11 +707,13 @@ def _attach_on_error(result: list[_Canon], guard: str, on_error: str) -> list[_C
 
 
 def _render(loop_expr: str | None, stmts: list[_Canon]) -> str:
+    """Render the canonical guarded form (§8): a loop header and a braced body."""
     header = f'{loop_expr}:' if loop_expr else 'None:'
     return '\n'.join([header, '{', *_render_body(stmts, 1), '}'])
 
 
 def _render_body(stmts: list[_Canon], level: int) -> list[str]:
+    """Render canonical statements as indented `guard: target = eval || on_error;` lines."""
     indent = '    ' * level
     out: list[str] = []
     for stmt in stmts:

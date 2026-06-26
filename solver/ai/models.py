@@ -47,10 +47,12 @@ class Price(NamedTuple):
     #: cache reads (cache_read_input_tokens) are billed at 0.10x the input rate.
     @property
     def cache_write(self) -> float:
+        """The per-million cache-write rate (1.25x the input rate)."""
         return self.input * 1.25
 
     @property
     def cache_read(self) -> float:
+        """The per-million cache-read rate (0.10x the input rate)."""
         return self.input * 0.10
 
     def cost(self, *,
@@ -58,6 +60,7 @@ class Price(NamedTuple):
              output_tokens: int,
              cache_creation_tokens: int = 0,
              cache_read_tokens: int = 0) -> float:
+        """Return the USD cost of the given token counts at this model's rates."""
         return (self.input * input_tokens
                 + self.cache_write * cache_creation_tokens
                 + self.cache_read * cache_read_tokens
@@ -97,8 +100,8 @@ def get_accumulated_charges() -> float:
 @register(help_text='Display total cost of AI API tokens consumed in session.')
 def costs(ecb_usd_rate: float = config.ecb_usd_rate) -> int:
     """
-    Return a formatted cost string for all AI tokens consumed in the session so far, or "nil"
-    if nothing has been consumed.
+    Print the total cost of all AI tokens consumed in the session so far, broken down per model,
+    or a "No charges so far." notice if nothing has been consumed. Always returns EXIT_OK.
 
     Totals the charges across all models in "consumed_tokens" using each model's published USD
     price per million tokens (with cache writes at 1.25x and cache reads at 0.10x the input rate),

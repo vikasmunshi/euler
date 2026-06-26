@@ -63,7 +63,7 @@ a parameter that accepts repetition.
 | [`new`](#command-new) | — | Generate new solution/test-case file in the workspace. » |
 | [`pause`](#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
-| [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
+| [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
 | [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
@@ -127,13 +127,13 @@ List commands or show help for a specific command.
 List every command, or show detailed help for one command.
 
 With no argument, prints a three-column table (command, aliases,
-description) of all registered commands, plus the legend (§ requires the workspace
-lock, ↻ may refresh workspace state, ⊘ refuses while checked out, ⚑ checks
-out while it runs, » supports --silent).
+description) of all registered commands; the `»` glyph in a description marks
+a command that supports --silent, as noted in the panel subtitle.
 
 With a command name or alias, prints a panel for just that command: its
-description (with the legend glyphs expanded to full sentences), its aliases,
-and its usage. Returns non-zero if the named command is unknown.
+description (with a trailing `»` glyph expanded to a full sentence about
+--silent), its aliases, and its usage. Returns non-zero if the named command
+is unknown.
 
 Aliased as `help`.
 ```
@@ -159,7 +159,9 @@ Args:
             docs, 'notes' for documentation, 'test-cases' for test cases).
     major:  Whether this is after a major change (e.g. template or instruction change).
     force:  Whether to force generation even if the target already exists.
-    model:  The AI model to use for generation; defaults to Opus for code and docs and Sonnet for test cases.
+    model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
+
+Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
 ```
 
 ---
@@ -221,8 +223,8 @@ costs
 ```
 
 ```text
-Return a formatted cost string for all AI tokens consumed in the session so far, or "nil"
-if nothing has been consumed.
+Print the total cost of all AI tokens consumed in the session so far, broken down per model,
+or a "No charges so far." notice if nothing has been consumed. Always returns EXIT_OK.
 
 Totals the charges across all models in "consumed_tokens" using each model's published USD
 price per million tokens (with cache writes at 1.25x and cache reads at 0.10x the input rate),
@@ -339,7 +341,6 @@ error. `eval --clean` and `benchmark` invoke this for you, so you rarely
 call it directly.
 
 Args:
-    problem_number:     problem number to compile.
     clean:              When True, force a full rebuild instead of reusing up-to-date
                         build output. Defaults to False.
 ```
@@ -400,6 +401,19 @@ eval-set-problem
 [silent=true|--silent]
 ```
 
+```text
+Set the active problem for the shell session and print its title.
+
+Updates the workspace's current problem (the one `eval`, `benchmark`, `new`,
+and the AI commands act on) without touching any files. Accepts a problem
+number, or the `{next}` / `{random}` aliases the completer offers.
+
+Args:
+    problem_number:     Problem to make active. When None (default), re-selects the
+                        current problem — handy to re-print its title. Returns a usage
+                        error if the number is out of range.
+```
+
 ---
 
 #### Command: `git-commit` (`commit`)
@@ -415,9 +429,9 @@ git-commit
 ```
 
 ```text
-Stage and commit the solutions and workspace as a timestamped checkpoint.
+Stage and commit the solutions and solver package as a timestamped checkpoint.
 
-Adds everything under `solutions/` and `workspace/` and commits it with a
+Adds everything under `solutions/` and `solver/` and commits it with a
 `checkpoint <timestamp>` message — the routine "save my progress" step.
 
 Args:
@@ -662,13 +676,22 @@ new
 ```
 
 ```text
-Generate a new solution file for the problem in the given workspace.
+Generate new solution and/or test-case files for the workspace problem.
 
-The new file is named based on the problem's base filename and the number of existing
-Python solution files in the workspace (e.g., "p0001_s0.py", "p0001_s1.py").
+Solution files are named from the problem number and the next free solution
+index (e.g. "p0001_s0.py", "p0001_s1.py") and are created from the boilerplate
+template with the problem information substituted; Python files are made
+executable (mode 0o755).
 
-Prompts the user for confirmation before creating the file. The file is created from
-the boilerplate template with the problem information substituted.
+Args:
+    py: Create a Python solution file. Defaults to False.
+    c:  Create a C solution file (one per existing Python solution lacking a
+        matching ".c"). Defaults to False.
+    tc: Create an empty test-cases file instead of solution files, unless one
+        already exists. Defaults to False.
+
+With neither `py` nor `c` given (and `tc` False), both a Python and a C file
+are created.
 ```
 
 ---
@@ -712,7 +735,7 @@ Args:
 
 #### Command: `problems`
 
-Show list of problems (all|solved|unsolved|stale).
+Show list of problems (all|solved|unsolved).
 
 ```
 problems
@@ -724,9 +747,8 @@ Print a list of problems and their count.
 
 Args:
     which:  Which set to list — 'all' (default) every known problem,
-            'solved' the problems with a recorded answer, 'unsolved' those
-            without, or 'stale' those whose notes are older than their
-            solution source. Mirrors the `{problems}` / `{solved}` /
+            'solved' the problems with a recorded answer, or 'unsolved'
+            those without. Mirrors the `{problems}` / `{solved}` /
             `{unsolved}` shell variables.
 ```
 

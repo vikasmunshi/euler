@@ -42,6 +42,11 @@ def lint(auto_fix: bool = False) -> int:
 
 
 def _linter_check(problem: Problem) -> bool:
+    """Run the configured linter over *problem*'s solution dir; return True if it passes.
+
+    Reports pass/fail to the console and, when the console is quiet, suppresses the
+    subprocess's own output too.
+    """
     # When the shared console is quiet, send the check subprocess to /dev/null too —
     # it writes straight to the terminal (inherited fds), so console.quiet alone won't hush it.
     pipe = DEVNULL if console.quiet else None
@@ -55,6 +60,11 @@ def _linter_check(problem: Problem) -> bool:
 
 
 def lazy_import_fix_code() -> Callable[[str], str] | None:
+    """Return a source-fixing callable (autoflake → autopep8 → isort), or None.
+
+    The `dev`-group dependencies are imported on demand; if they are missing, an
+    install hint is printed and None is returned.
+    """
     try:
         import autoflake
         import autopep8

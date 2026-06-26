@@ -30,6 +30,7 @@ class TestCase:
 
 
 def _clamp(x: int, min_val: int, max_val: int) -> int:
+    """Clamp *x* into the inclusive range [min_val, max_val]."""
     return max(min(x, max_val), min_val)
 
 
@@ -37,6 +38,25 @@ def load_test_cases(*categories: Literal['dev', 'main', 'extra'],
                     solutions: list[str],
                     runs: int | None,
                     ) -> list[TestCase]:
+    """Load and filter the workspace problem's test cases, resolving a per-category run count.
+
+    Reads the test-cases file, keeps only cases whose category is in *categories*,
+    and assigns each surviving case a `runs` value. Prints an error and returns an
+    empty list if the file is missing, malformed, or has no case in *categories*.
+
+    Args:
+        *categories:    Categories to include ('dev', 'main', 'extra').
+        solutions:      Solution filenames being evaluated; used to scope the prior
+                        timings consulted for the adaptive run count.
+        runs:           Fixed run count for every category, or None to derive it
+                        adaptively per category from previously recorded *correct*
+                        results as `clamp(round(21 / slowest_prior_average), 1, 21)`
+                        (1 when there is no prior timing).
+
+    Returns:
+        The selected `TestCase` objects, with `input_args_str` padded to a common
+        width for aligned output.
+    """
     test_cases_path: Path = variables.problem.solution_dir / config.test_cases_filename
     try:
         filtered: list[dict[str, Any]] = loads(test_cases_path.read_text())

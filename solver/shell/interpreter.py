@@ -162,6 +162,15 @@ _FUNCTIONS: dict[str, Callable[..., Any]] = {
 
 
 def _eval_node(node: ast.AST, namespace: dict[str, Any]) -> Any:
+    """Recursively evaluate a whitelisted AST node against *namespace*.
+
+    Supports constants, names (resolved from *namespace*), boolean/unary/binary
+    operators, comparisons (including chains), list/tuple/set displays,
+    subscripts and slices, and calls to the sandboxed `_FUNCTIONS` only. Any other
+    node — or an undefined name, unsupported operator, or disallowed call — raises
+    `ValueError`, keeping the evaluator free of attribute access and arbitrary
+    callables.
+    """
     if isinstance(node, ast.Expression):
         return _eval_node(node.body, namespace)
     if isinstance(node, ast.Constant):
@@ -273,6 +282,7 @@ def _eval_expr(text: str) -> Any:
 # ---------------------------------------------------------------------------
 
 def _print_error(message: str) -> None:
+    """Print *message* to the console prefixed with a styled `error:` label."""
     text = Text('error: ', style='error')
     text.append(message)
     console.print(text)
@@ -292,6 +302,7 @@ def _print_syntax_error(exc: _ExprSyntaxError) -> None:
 
 
 def _echo_command(name: str, args: list[str], rcode: int) -> None:
+    """Echo a run command and its resulting exit code as `name args → rcode`."""
     text = Text(name if not args else f'{name} {" ".join(args)}', style='muted')
     text.append(' → ', style='accent.dim')
     text.append(str(rcode))
@@ -299,6 +310,7 @@ def _echo_command(name: str, args: list[str], rcode: int) -> None:
 
 
 def _echo_assignment(target: str, value: Any) -> None:
+    """Echo an assignment as `target = repr(value)`."""
     text = Text(target, style='muted')
     text.append(' = ', style='accent.dim')
     text.append(repr(value))
@@ -306,6 +318,7 @@ def _echo_assignment(target: str, value: Any) -> None:
 
 
 def _echo_value(var: str, value: Any) -> None:
+    """Echo a bare value expression as `var → repr(value)`."""
     text = Text(f'{var} → ', style='accent.dim')
     text.append(repr(value))
     console.print(text)
@@ -337,12 +350,25 @@ def _evaluate(node: Eval, command: CommandRunner) -> tuple[Any, int]:
 
 
 def _eval_guard(guard: Eval) -> Any:
+    """Evaluate a statement's guard expression to a truthy/falsy value.
+
+    A guard is always a `Variable` or `Literal` (the lexer guarantees this); any
+    other node is a programming error and raises `ValueError`.
+    """
     if isinstance(guard, (Variable, Literal)):
         return _eval_expr(guard.text)
     raise ValueError(f'invalid guard: {guard!r}')
 
 
 def _exec_statement(stmt: Statement, command: CommandRunner) -> None:
+    """Execute one statement: guard, evaluate, assign, then apply on-error flow.
+
+    Skips the statement (leaving `rcode` unchanged) when its guard is falsy.
+    Otherwise evaluates it, records the resulting `rcode`, assigns the value to
+    `stmt.target` (or echoes a bare value), and — on a non-zero `rcode` — raises
+    `_Continue`/`_Break` per `stmt.on_error`. Expression and runtime errors are
+    reported to the console and set `rcode` to 1; flow-control signals propagate.
+    """
     if not _eval_guard(stmt.guard):
         return
     try:
@@ -375,6 +401,7 @@ def _exec_statement(stmt: Statement, command: CommandRunner) -> None:
 
 
 def _exec_block(stmts: list[Statement], command: CommandRunner) -> None:
+    """Execute each statement in *stmts* in order."""
     for stmt in stmts:
         _exec_statement(stmt, command)
 

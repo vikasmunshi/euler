@@ -18,6 +18,14 @@ _commands_loaded = False
 
 
 def update_modules() -> bool:
+    """Regenerate `modules.csv` by scanning the package, returning True if it changed.
+
+    Each non-underscore `.py` module under the registry directory gets a row
+    recording whether it registers commands (an `@register`/`@command` decorator)
+    and whether it should load. Manual `load` edits for known modules are
+    preserved, new modules default their `load` cell to whether they register
+    commands, and rows for deleted modules are dropped.
+    """
     registers_commands_re = re.compile(r'^@(?:register|command)\(', re.MULTILINE)
 
     # Preserve any manual on/off edits: keep the existing `load` cell for known

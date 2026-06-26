@@ -42,18 +42,34 @@ class Problem(NamedTuple):
     difficulty: str
 
     def __str__(self) -> str:
-        """Return a human-readable label in the form '<number>'."""
+        """Return a compact label in the form '<number>:"<title>"'."""
         return f'{self.number}:"{self.title}"'
 
     def as_title(self) -> str:
-        """Return a human-readable label in the form '<number>: <title>'."""
+        """Return a full label of the form 'Problem <number>: <title> [Level <difficulty>]'."""
         return f'Problem {self.number}: {self.title} [Level {self.difficulty}]'
 
     @property
     def solution_dir(self) -> Path:
+        """The on-disk directory holding this problem's files (see module-level `solution_dir`)."""
         return solution_dir(self.number)
 
     def init(self, *, force_refresh: bool = False) -> None:
+        """Download the problem statement and its resources into `solution_dir`.
+
+        Fetches the projecteuler.net page for this problem, extracts the
+        `problem_content` markup, downloads every referenced resource/image,
+        rewrites the links to the local copies, and writes the statement plus an
+        empty `__init__.py` into the solution directory.
+
+        Args:
+            force_refresh:  When True, bypass the download cache and re-fetch the
+                            page and resources. Defaults to False.
+
+        Raises:
+            ValueError: if the page or any resource fails to download, or the
+                        `problem_content` div is absent.
+        """
         euler_url = urljoin(config.projecteuler_url, f'problem={self.number}')
         if (problem_html := download_file(euler_url, refresh=force_refresh)) is None:
             raise ValueError(f'Problem {self.number}: Failed to download HTML from {euler_url}')
@@ -80,10 +96,12 @@ class Problem(NamedTuple):
 
     @property
     def problem_statement(self) -> str:
+        """The saved HTML problem statement read from `solution_dir`."""
         return (self.solution_dir / config.statement_filename).read_text()
 
     @property
     def problem_resources(self) -> dict[str, bytes]:
+        """Map each downloaded resource's relative path to its bytes (empty if none)."""
         if not (resources_path := self.solution_dir / config.resource_dirname).exists():
             return {}
         return {
@@ -112,6 +130,7 @@ class Problems(metaclass=Singleton):
         self.__unsolved_problems: list[Problem] = []
 
     def clear_cache(self) -> None:
+        """Drop every memoised collection so they are rebuilt from `problems.json` on next access."""
         get_problems.cache_clear()
         self.__problems_list = []
         self.__problems_dict = {}
@@ -121,18 +140,27 @@ class Problems(metaclass=Singleton):
 
     @property
     def last_problem(self) -> Problem:
+        """The highest-numbered known problem."""
         return self.problems_list[-1]
 
     @property
     def next_unsolved_problem(self) -> Problem:
+        """The lowest-numbered problem without a recorded solution."""
         return self.unsolved_problems[0]
 
     @property
     def random_problem(self) -> Problem:
+        """A randomly chosen unsolved problem (or any problem if all are solved)."""
         return choice(problems.unsolved_problems or problems.problems_list)
 
     @property
     def problems_list(self) -> list[Problem]:
+        """All known problems, ascending by number (built lazily and cached).
+
+        On first build, any problem whose `solution_dir` is missing is `init()`-ed
+        (its statement and resources downloaded), so accessing this can have the
+        side effect of populating the stack.
+        """
         if not self.__problems_list:
             self.__problems_list = [
                 Problem(number=num, title=str(info['title']), difficulty=str(info['level']))
@@ -145,6 +173,7 @@ class Problems(metaclass=Singleton):
 
     @property
     def problems_dict(self) -> dict[int, Problem]:
+        """All known problems keyed by number (built lazily and cached)."""
         if not self.__problems_dict:
             self.__problems_dict = {
                 problem.number: problem
@@ -154,6 +183,7 @@ class Problems(metaclass=Singleton):
 
     @property
     def solutions_history(self) -> dict[int, str]:
+        """Map each solved problem's number to its recorded solve date (built lazily and cached)."""
         if not self.__solutions_history:
             self.__solutions_history = {
                 num: str(info['date'])
@@ -163,6 +193,7 @@ class Problems(metaclass=Singleton):
 
     @property
     def solved_problems(self) -> list[Problem]:
+        """Problems flagged solved with a recorded date, ascending by number (built lazily and cached)."""
         if not self.__solved_problems:
             self.__solved_problems = [
                 Problem(number=num, title=str(info['title']), difficulty=str(info['level']))
@@ -173,6 +204,7 @@ class Problems(metaclass=Singleton):
 
     @property
     def unsolved_problems(self) -> list[Problem]:
+        """Known problems not in `solved_problems`, ascending by number (built lazily and cached)."""
         if not self.__unsolved_problems:
             solved_set: set[int] = {problem.number for problem in self.solved_problems}
             self.__unsolved_problems = [

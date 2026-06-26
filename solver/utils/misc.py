@@ -10,15 +10,14 @@ from solver.core.problems import Problem, problems as problem_set
 from solver.shell import register, console
 
 
-@register(help_text='Show list of problems ([accent.dim]all[/accent.dim]|solved|unsolved|stale).')
+@register(help_text='Show list of problems ([accent.dim]all[/accent.dim]|solved|unsolved).')
 def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     """Print a list of problems and their count.
 
     Args:
         which:  Which set to list — 'all' (default) every known problem,
-                'solved' the problems with a recorded answer, 'unsolved' those
-                without, or 'stale' those whose notes are older than their
-                solution source. Mirrors the `{problems}` / `{solved}` /
+                'solved' the problems with a recorded answer, or 'unsolved'
+                those without. Mirrors the `{problems}` / `{solved}` /
                 `{unsolved}` shell variables.
     """
     if which == 'all':

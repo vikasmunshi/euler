@@ -236,7 +236,7 @@ command name below links to its full entry — usage and description — in the
 | [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file in the workspace. » |
 | [`pause`](commands-index.md#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
-| [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved|stale). |
+| [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved). |
 | [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
 | [`search`](commands-index.md#command-search-find) | `find` | Find content in the stack. |
 | [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |

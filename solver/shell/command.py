@@ -52,6 +52,7 @@ class Command:
     completer: Callable[[Context, str], Iterable[str | Completion]] | None = None
 
     def invoke(self, ctx: Context) -> int:
+        """Call the command's function with *ctx* and the parsed argv, returning its exit code."""
         return self.func(ctx, *ctx.argv)
 
 
@@ -74,6 +75,7 @@ class CommandRegistry(metaclass=Singleton):
         return cmd
 
     def unregister(self, name: str) -> None:
+        """Remove the command named *name* and its aliases; a no-op if it is absent."""
         cmd = self._commands.pop(name, None)
         if cmd is None:
             return
@@ -81,18 +83,21 @@ class CommandRegistry(metaclass=Singleton):
             self._by_alias.pop(alias, None)
 
     def resolve(self, token: str) -> Command | None:
+        """Return the command registered under *token* (a name or alias), or None."""
         if token in self._commands:
             return self._commands[token]
         target = self._by_alias.get(token)
         return self._commands.get(target) if target else None
 
     def names(self, include_aliases: bool = True) -> list[str]:
+        """Return all registered command names, sorted, optionally including aliases."""
         out = list(self._commands)
         if include_aliases:
             out.extend(self._by_alias)
         return sorted(out)
 
     def all(self) -> list[Command]:
+        """Return every registered command, sorted by name (aliases excluded)."""
         return sorted(self._commands.values(), key=lambda c: c.name)
 
 

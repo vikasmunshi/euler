@@ -22,17 +22,17 @@ separate set and assign"*):
 
 Reserved variables seeded at construction:
 
+    config   → Config          the global configuration singleton     (read-only)
     loop     → Any             current loop value (read-only; driven by
                                :meth:`loop_through_iterable`; None outside a loop)
     problem  → Problem | None  the workspace problem, as an object   (shell-settable)
     rcode    → int             exit code of the most recent evaluation (shell-settable)
     reserved → list[str]       sorted list of every reserved name     (read-only)
-    problems → list[Problem]   every known problem                    (read-only)
+    problems → list[Problem]   every known problem                    (computed)
     next     → int             number of the next unsolved problem    (computed)
     random   → int             number of a random unsolved problem    (computed)
     solved   → list[Problem]   the solved problems                    (computed)
     unsolved → list[Problem]   the unsolved problems                  (computed)
-    stale    → list[Problem]   the stale problems                     (computed)
 
 The *computed* specials are callables, invoked by the interpreter at each `{…}`
 reference, so their value reflects current progress on every use.
@@ -151,6 +151,7 @@ class Variables(metaclass=Singleton):
         self.__dict__['problem'] = problem
 
     def set_problem(self, problem_number: int) -> None:
+        """Set the active `problem` by number; raises ValueError if it is unknown."""
         self.problem = Problem.from_number(problem_number)
 
     @property

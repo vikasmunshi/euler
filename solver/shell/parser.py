@@ -165,6 +165,10 @@ def _scan_top(text: str) -> Generator[tuple[int, str], None, None]:
 
 
 def _first_top(text: str, char: str) -> int | None:
+    """Return the index of the first top-level *char* in *text*, or None.
+
+    "Top-level" means outside quotes, `{…}` references, and brackets (per `_scan_top`).
+    """
     for i, c in _scan_top(text):
         if c == char:
             return i
@@ -240,6 +244,11 @@ def classify(text: str) -> Eval:
 # ---------------------------------------------------------------------------
 
 def _split_semis(body: str) -> list[str]:
+    """Split a canonical block body into statements on top-level `;`, dropping blanks.
+
+    Each piece is stripped of a trailing `;` so a malformed statement's terminator
+    never leaks into the leaf and masks the real (e.g. unbalanced-bracket) error.
+    """
     out, start = [], 0
     for i, c in _scan_top(body):
         if c == ';':
@@ -289,6 +298,12 @@ def _split_assign(rest: str) -> tuple[str, str] | None:
 
 
 def _parse_statement(stmt: str) -> Statement:
+    """Parse one canonical statement `guard: target = eval [|| on_error]` into a `Statement`.
+
+    The evaluation may be a `{ … }` group (parsed into a `Block`) or a `target =
+    evaluation` leaf, with `_` denoting no assignment target. Raises `ParserError`
+    if the guard colon or the target assignment is missing.
+    """
     colon = _first_top(stmt, ':')
     if colon is None:
         raise ParserError(f'statement missing guard colon: {stmt!r}')
@@ -308,6 +323,7 @@ def _parse_statement(stmt: str) -> Statement:
 
 
 def _parse_body(body: str) -> list[Statement]:
+    """Parse a canonical block body into its list of `Statement` nodes."""
     return [_parse_statement(piece.strip()) for piece in _split_semis(body)]
 
 
@@ -331,6 +347,7 @@ def parse(canonical: str) -> tuple[Eval | None, list[Statement]]:
 # ---------------------------------------------------------------------------
 
 def _fmt(node: Eval) -> str:
+    """Format a single `Eval` node as a short tagged string for `dump`."""
     if isinstance(node, Variable):
         return f'var {node.text}'
     if isinstance(node, Command):
@@ -349,6 +366,7 @@ def dump(loop: Eval | None, stmts: list[Statement]) -> str:
 
 
 def _dump_stmts(stmts: list[Statement], level: int) -> list[str]:
+    """Render *stmts* as indented inspection lines, recursing into nested blocks."""
     indent = '  ' * level
     out: list[str] = []
     for s in stmts:

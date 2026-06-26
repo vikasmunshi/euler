@@ -31,9 +31,9 @@ def run_cmdline(cmdline: str) -> int:
 
 @register(help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
 def git_commit(reset: bool = False, verify: bool = True) -> int:
-    """Stage and commit the solutions and workspace as a timestamped checkpoint.
+    """Stage and commit the solutions and solver package as a timestamped checkpoint.
 
-    Adds everything under `solutions/` and `workspace/` and commits it with a
+    Adds everything under `solutions/` and `solver/` and commits it with a
     `checkpoint <timestamp>` message — the routine "save my progress" step.
 
     Args:

@@ -104,6 +104,7 @@ class SolutionsCheckResults(NamedTuple):
     errors: dict[str, str]
 
     def as_msg(self) -> str:  # TO:DO, modify if required
+        """Render the check results (verdict, message, passed/failed lists, errors) as Markdown."""
         if self.errors:
             errors_section = '## errors:\n\n'
             for filename, error in self.errors.items():
@@ -250,6 +251,15 @@ def _check_solution_against_test_cases(*,
                                        errors: dict[str, str],
                                        expected_type: type,
                                        ) -> None:
+    """Run *solution* against each test case, recording failures and errors in place.
+
+    Executes the solution once per test case, parsing its final stdout line into
+    *expected_type* and comparing it to the case's answer. A `dev`/`main` case that
+    times out, exits non-zero (other than an OverflowError), or returns the wrong
+    answer adds the solution to *failed*; the diagnostic text is collected in
+    *errors* keyed by solution name. A `main` case with no recorded answer prompts
+    the user to confirm the computed result interactively.
+    """
     timeout = config.timeout_single
     for test_case in test_cases:
         category: str = test_case['category']
@@ -310,6 +320,7 @@ def _check_results(*,
                    failed: set[str],
                    errors: dict[str, str],
                    ) -> SolutionsCheckResults:
+    """Aggregate the passed/failed sets and errors into a `SolutionsCheckResults` verdict."""
     if failed:
         verdict: bool = False
         msg: str = f'{len(failed)} solutions failed, {len(passed)} passed'
@@ -488,6 +499,11 @@ def _check_generated_code(*,
 
 
 def _load_test_cases(problem: Problem, filter_null_answers: bool) -> list[dict[str, Any]]:
+    """Load *problem*'s test cases, optionally dropping those without an answer.
+
+    Warns (or errors, when *filter_null_answers* is True) if no answered case is
+    found, and reports when the answered cases mix more than one answer type.
+    """
     test_cases: list[dict[str, Any]] = loads((problem.solution_dir / config.test_cases_filename).read_text())
     if not (filtered := [tc for tc in test_cases if tc['answer'] is not None]):
         style = 'error' if filter_null_answers else 'warning'

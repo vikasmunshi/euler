@@ -68,13 +68,13 @@ def _help(ctx: Context, *args: str) -> int:
     """List every command, or show detailed help for one command.
 
     With no argument, prints a three-column table (command, aliases,
-    description) of all registered commands, plus the legend (§ requires the workspace
-    lock, ↻ may refresh workspace state, ⊘ refuses while checked out, ⚑ checks
-    out while it runs, » supports --silent).
+    description) of all registered commands; the `»` glyph in a description marks
+    a command that supports --silent, as noted in the panel subtitle.
 
     With a command name or alias, prints a panel for just that command: its
-    description (with the legend glyphs expanded to full sentences), its aliases,
-    and its usage. Returns non-zero if the named command is unknown.
+    description (with a trailing `»` glyph expanded to a full sentence about
+    --silent), its aliases, and its usage. Returns non-zero if the named command
+    is unknown.
 
     Aliased as `help`.
     """

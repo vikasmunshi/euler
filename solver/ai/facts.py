@@ -46,6 +46,7 @@ class Facts(NamedTuple):
 
 
 def format_results_markdown(solved_results: list[Result]) -> str:
+    """Render benchmark results as a Markdown table (or a placeholder if empty)."""
     if not solved_results:
         return '(no benchmark results available)'
     rows = ['| solution | category | args | answer | verdict | elapsed (s) |',
@@ -57,6 +58,7 @@ def format_results_markdown(solved_results: list[Result]) -> str:
 
 
 def format_solutions_markdown(solutions: dict[str, str]) -> str:
+    """Render each filename→source pair as a language-tagged Markdown code block."""
     parts: list[str] = []
     for filename, source in solutions.items():
         lang = 'c' if filename.endswith('.c') else 'python'
@@ -65,6 +67,7 @@ def format_solutions_markdown(solutions: dict[str, str]) -> str:
 
 
 def format_test_cases_markdown(test_cases: list[dict[str, Any]]) -> str:
+    """Render test cases as a Markdown table (or a placeholder if empty)."""
     if not test_cases:
         return '(no test cases available)'
     rows = ['| category | input | answer |', '|---|---|---|']

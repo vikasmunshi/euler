@@ -160,9 +160,11 @@ class Config(metaclass=Singleton):
         self.load_managed_config()
 
     def __getitem__(self, key: str) -> Any:
+        """Read a config attribute by name (so `config['server_port']` works)."""
         return getattr(self, key)
 
     def __repr__(self) -> str:
+        """Return the managed settings as a pretty-printed JSON object."""
         return json.dumps(
             {'server_port': self.server_port,
              'timeout_multiple': self.timeout_multiple,
@@ -171,6 +173,7 @@ class Config(metaclass=Singleton):
              }, indent=2)
 
     def dump_managed_config(self) -> None:
+        """Persist the managed settings (port, timeouts, FX rate) to `managed_config_file`."""
         self.managed_config_file.write_text(json.dumps(
             {'server_port': self.server_port,
              'timeout_multiple': self.timeout_multiple,
@@ -179,6 +182,7 @@ class Config(metaclass=Singleton):
              }, indent=2))
 
     def load_managed_config(self) -> None:
+        """Overlay any persisted managed settings onto the defaults, ignoring a missing/invalid file."""
         try:
             for param, value in json.loads(self.managed_config_file.read_text()).items():
                 setattr(self, param, type(self[param])(value))

@@ -55,7 +55,9 @@ def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
                 docs, 'notes' for documentation, 'test-cases' for test cases).
         major:  Whether this is after a major change (e.g. template or instruction change).
         force:  Whether to force generation even if the target already exists.
-        model:  The AI model to use for generation; defaults to Opus for code and docs and Sonnet for test cases.
+        model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
+
+    Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
     """
     problem = variables.problem
     if (generators := _get_generate_funcs()) is None:

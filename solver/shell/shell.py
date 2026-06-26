@@ -84,6 +84,12 @@ class _CommandCompleter(Completer):
         self._shell = shell
 
     def get_completions(self, document: Document, complete_event: Any) -> Iterable[Completion]:
+        """Yield completions for the text before the cursor.
+
+        Completes a `{partial` variable reference to `{name}`, the first token to a
+        command name, and any later token by delegating to the resolved command's
+        own completer (mirroring the parser's `!`/`?` sigil split).
+        """
         before = document.text_before_cursor
         # Variable reference: a `{partial` at the cursor completes to `{name}`.
         ref = _REF_PREFIX_RE.search(before)
@@ -192,6 +198,11 @@ class SolverShell:
     # -- command runner (the interpreter's dispatch hook) -------------------
 
     def _run_command(self, name: str, args: list[str]) -> int:
+        """Resolve and invoke command *name* with *args*; the interpreter's dispatch hook.
+
+        Returns the command's exit code, or EXIT_NOTFOUND after reporting an
+        unknown command.
+        """
         cmd = self.registry.resolve(name)
         if cmd is None:
             self.console.print(f'[error]unknown command:[/error] {name}')
@@ -304,6 +315,7 @@ class SolverShell:
             return self.rc
 
     def _run_piped(self) -> int:
+        """Dispatch blocks read from non-interactive stdin; return the final status."""
         for block in read_blocks(prompt='', continuation=''):
             try:
                 self.dispatch(block)
@@ -314,8 +326,7 @@ class SolverShell:
     # -- UI -----------------------------------------------------------------
 
     def _prompt(self) -> FormattedText:
-        # Dim the workspace name when the lock is neither acquired nor inherited.
-        # Read the live module attribute (it is rebound as the lock is taken/released).
+        """Build the interactive prompt: a bar, the current problem, and the `❯` symbol."""
         return FormattedText([
             ('class:prompt.bar', '▎'),
             ('class:prompt.path', f' {variables.problem} ',),
@@ -323,12 +334,14 @@ class SolverShell:
         ])
 
     def _bottom_toolbar(self) -> FormattedText:
+        """Build the bottom toolbar showing the command count and exit hint."""
         n = len(self.registry.all())
         return FormattedText([
             ('class:bottom-toolbar', f' solver v2 · {n} commands · Ctrl-D to exit '),
         ])
 
     def _print_banner(self) -> None:
+        """Print the welcome banner shown when the interactive shell starts."""
         body = Text.from_markup(
             '[accent]SOLVER[/accent]  [muted]v2[/muted]\n'
             '[primary]  Your Euler problem solving companion in the terminal[/primary]\n'

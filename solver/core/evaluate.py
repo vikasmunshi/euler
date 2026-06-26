@@ -32,7 +32,6 @@ def eval_compile_c(clean: bool = False) -> int:
     call it directly.
 
     Args:
-        problem_number:     problem number to compile.
         clean:              When True, force a full rebuild instead of reusing up-to-date
                             build output. Defaults to False.
     """
@@ -358,6 +357,17 @@ def eval_benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
 
 @register(help_text='Set the active problem', aliases=('problem',), quietable=True, )
 def eval_set_problem(problem_number: int | None = None) -> int:
+    """Set the active problem for the shell session and print its title.
+
+    Updates the workspace's current problem (the one `eval`, `benchmark`, `new`,
+    and the AI commands act on) without touching any files. Accepts a problem
+    number, or the `{next}` / `{random}` aliases the completer offers.
+
+    Args:
+        problem_number:     Problem to make active. When None (default), re-selects the
+                            current problem — handy to re-print its title. Returns a usage
+                            error if the number is out of range.
+    """
     try:
         variables.set_problem(problem_number or variables.problem.number, )
     except ValueError:

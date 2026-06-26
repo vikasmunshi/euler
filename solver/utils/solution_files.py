@@ -43,13 +43,22 @@ new_test_case: bytes = (
 
 @register(help_text='Generate new solution/test-case file in the workspace.', quietable=True)
 def new(py: bool = False, c: bool = False, tc: bool = False) -> int:
-    """Generate a new solution file for the problem in the given workspace.
+    """Generate new solution and/or test-case files for the workspace problem.
 
-    The new file is named based on the problem's base filename and the number of existing
-    Python solution files in the workspace (e.g., "p0001_s0.py", "p0001_s1.py").
+    Solution files are named from the problem number and the next free solution
+    index (e.g. "p0001_s0.py", "p0001_s1.py") and are created from the boilerplate
+    template with the problem information substituted; Python files are made
+    executable (mode 0o755).
 
-    Prompts the user for confirmation before creating the file. The file is created from
-    the boilerplate template with the problem information substituted.
+    Args:
+        py: Create a Python solution file. Defaults to False.
+        c:  Create a C solution file (one per existing Python solution lacking a
+            matching ".c"). Defaults to False.
+        tc: Create an empty test-cases file instead of solution files, unless one
+            already exists. Defaults to False.
+
+    With neither `py` nor `c` given (and `tc` False), both a Python and a C file
+    are created.
     """
     problem = variables.problem
     if tc:

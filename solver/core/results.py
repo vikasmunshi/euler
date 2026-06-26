@@ -53,6 +53,10 @@ class Result(NamedTuple):
     number_runs: int
 
     def __str__(self) -> str:
+        """Render the result as a single rich-markup line, coloured by verdict.
+
+        URL arguments are abbreviated to their final path segment for brevity.
+        """
         style = color_map.get(self.verdict, 'error')
         args: str = self.args
         if 'https' in self.args:
@@ -63,6 +67,12 @@ class Result(NamedTuple):
                 f'[{style}]{str(self.answer or "")}[/{style}]')
 
     def formatted(self) -> FormattedResult:
+        """Return a `FormattedResult` enriched for HTML display.
+
+        Adds an anchor-tag link to the solution, an abbreviated args string (URLs
+        reduced to their final segment), and the solution split into its base
+        filename and language suffix.
+        """
         sol = (f'<a href="{self.solution}" target="_blank" rel="noopener noreferrer" title="{self.solution}">'
                f'{self.solution}'
                f'</a>')
@@ -130,11 +140,12 @@ def write_results(results: list[Result], reset: bool = False) -> None:
     completion of the evaluation (see "results_collector") so a partial run cannot
     silently overwrite previously good data.
 
-    By design, only verdicts in ('correct', 'timeout') are persisted — both for
-    incoming results and when filtering existing records on a non-reset rewrite.
-    Transient verdicts ('incorrect', 'error', 'unknown', 'overflow') are
-    intentionally discarded so the persisted file represents the stable benchmark
-    surface.
+    By design only stable verdicts are persisted: incoming results are kept when
+    their verdict is in ('correct', 'timeout', 'overflow'), while existing records
+    are retained (on a non-reset rewrite) only when their verdict is in
+    ('correct', 'timeout'). The remaining transient verdicts ('incorrect',
+    'error', 'unknown') are intentionally discarded so the persisted file
+    represents the stable benchmark surface.
 
     Args:
         results:        Results collected during the run.
