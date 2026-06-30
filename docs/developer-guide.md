@@ -20,7 +20,7 @@ input line, coerces each token to your parameter's annotated type, calls your
 function, and maps the outcome to a Unix exit code.
 
 ```
-user types:  init 42 --force-refresh
+user types:  eval 42 main --clean
                 │
                 ▼
   lexer → parser → interpreter        (solver/shell/*)
@@ -29,7 +29,7 @@ user types:  init 42 --force-refresh
   @register adapter                   (solver/shell/register.py)
                 │  shlex split · type coercion · flag parsing · error reporting
                 ▼
-  your function  init(problem_number: int, *, force_refresh: bool = False) -> int
+  your function  eval_evaluate(problem: Problem, *categories: str, clean: bool = False) -> int
 ```
 
 The contract is therefore: **you write an ordinary typed function that returns an
@@ -217,10 +217,19 @@ Tab-completion is derived from the signature for free:
 - `Optional[...]` offers `none`;
 - keyword parameters offer `name=` once they are not yet supplied on the line.
 
-Two parameter **names** are special-cased: `problem_number` completes to known
-problem numbers (with titles) plus `{next}`/`{random}`, and `solution` completes
-to executable files in the workspace. Reusing those names gives you that
-behaviour automatically.
+Two parameter **names** are special-cased: a `problem` parameter (annotated
+`Problem`, optionally `| None`) completes to known problem numbers (with titles)
+plus `{next}`/`{random}`, and `solution` completes to executable files in the
+workspace. Reusing those names gives you that behaviour automatically.
+
+The `problem` parameter is the **problem special** (see §3.x / the `register`
+docstring): the user gives it as a bare problem number — positionally
+(`eval 42 …`) or as `problem=42` — which the adapter coerces to a `Problem`.
+Supplying it remembers the choice as the workspace problem (`variables.problem`);
+omitting it injects the current workspace problem, so a command can declare
+`problem: Problem` and never worry about resolving it. Only a leading positional
+naming a *known* problem is consumed as `problem`, so a trailing `*categories`
+(or other positionals) are unaffected.
 
 ---
 

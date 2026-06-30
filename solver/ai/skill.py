@@ -16,14 +16,15 @@ from rich.panel import Panel
 from rich.text import Text
 
 from solver.config import ExitCodes, config
+from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.command import Context
-from solver.shell.variables import variables
 
 
 @register(help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
 def claude_skill(
         ctx: Context,
+        problem: Problem,
         action: Literal['solve', 'review'],
         additional_prompt: str = '',
 ) -> int:
@@ -37,6 +38,7 @@ def claude_skill(
     `claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
 
     Args:
+        problem:            The `problem` to work on; defaults to the current workspace problem.
         action:             What to do — 'solve' (write and verify a Python
                             solution, translate it to C, then document and
                             summarise), or 'review' (audit an existing solution
@@ -44,7 +46,6 @@ def claude_skill(
         additional_prompt:  Extra free-text instructions appended to the skill
                             invocation. Defaults to empty.
     """
-    problem = variables.problem
     problem_number = problem.number
     cmdline = ('claude -p --output-format stream-json --verbose '
                '--include-partial-messages '

@@ -9,8 +9,8 @@ import os
 from pathlib import Path
 
 from solver.config import ExitCodes, config
+from solver.core.problems import Problem
 from solver.shell import console, register
-from solver.shell.variables import variables
 from solver.templates.engine import Templates, get_template
 from solver.utils.path_utils import write_file
 
@@ -42,7 +42,7 @@ new_test_case: bytes = (
 
 
 @register(help_text='Generate new solution/test-case file in the workspace.', quietable=True)
-def new(py: bool = False, c: bool = False, tc: bool = False) -> int:
+def new(problem: Problem, py: bool = False, c: bool = False, tc: bool = False) -> int:
     """Generate new solution and/or test-case files for the workspace problem.
 
     Solution files are named from the problem number and the next free solution
@@ -51,6 +51,7 @@ def new(py: bool = False, c: bool = False, tc: bool = False) -> int:
     executable (mode 0o755).
 
     Args:
+        problem:    The `problem` to create files for; defaults to the current workspace problem.
         py: Create a Python solution file. Defaults to False.
         c:  Create a C solution file (one per existing Python solution lacking a
             matching ".c"). Defaults to False.
@@ -60,7 +61,6 @@ def new(py: bool = False, c: bool = False, tc: bool = False) -> int:
     With neither `py` nor `c` given (and `tc` False), both a Python and a C file
     are created.
     """
-    problem = variables.problem
     if tc:
         if not (test_cases_file := problem.solution_dir / config.test_cases_filename).exists():
             write_file(test_cases_file, new_test_case, f'created empty {config.test_cases_filename}')

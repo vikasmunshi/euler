@@ -552,7 +552,7 @@ def generate_c_code(model: Model, *, problem: Problem, force: bool, major: bool)
         console.print('[muted]No C solutions to generate.[/muted]')
         return None
     try:
-        facts: Facts = gather_facts(strict=True)
+        facts: Facts = gather_facts(problem, strict=True)
     except ValueError as e:
         console.print(f'[error]error:[/error] could not generate C: {e}')
         return False
@@ -607,7 +607,7 @@ def generate_py_code(model: Model, *, problem: Problem, force: bool, major: bool
         return None
     file_to_generate: str = f'p{problem.number:04d}_s{num_existing}.py'
     try:
-        facts: Facts = gather_facts(strict=not force)
+        facts: Facts = gather_facts(problem, strict=not force)
     except ValueError as e:
         console.print(f'[error]error:[/error] could not generate py: {e}')
         return False
@@ -675,7 +675,7 @@ def document_code(model: Model, *, problem: Problem, force: bool, major: bool) -
         console.print('[muted]No solutions to document.[/muted]')
         return None
     try:
-        facts: Facts = gather_facts(strict=True)
+        facts: Facts = gather_facts(problem, strict=True)
     except ValueError as e:
         console.print(f'[error]error:[/error] could not document solutions: {e}')
         return False

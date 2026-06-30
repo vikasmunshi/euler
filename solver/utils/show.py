@@ -13,8 +13,8 @@ from functools import lru_cache
 from subprocess import CalledProcessError, DEVNULL, run
 
 from solver.config import ExitCodes, config
+from solver.core.problems import Problem
 from solver.shell import console, register
-from solver.shell.variables import variables
 from solver.web.cli import ensure_running
 
 
@@ -36,28 +36,25 @@ def browser_is_available() -> bool:
 
 
 @register(help_text='Open problem documentation in a browser.', aliases=('open', 'view'), quietable=True)
-def show(problem_number: int = 0, check_for_errors: bool = False) -> int:
+def show(problem: Problem, check_for_errors: bool = False) -> int:
     """Open a problem's "problem.html" in the system browser.
 
-    When *problem_number* is "0" (default), opens the problem currently in the workspace.
+    When *problem* is omitted, opens the problem currently in the workspace.
 
     Prints an error and returns early if:
     - the "browser" command is not available, or
     - the resolved "problem.html" file does not exist.
 
     Arguments:
-        problem_number: Problem to open; "0" means the current workspace.
-        check_for_errors: Whether to check for rendering errors.
+        problem:            The `problem` to open; defaults to the current workspace problem.
+        check_for_errors:   Whether to check for rendering errors.
     """
     if not browser_is_available():
         console.print('[error]error:[/error] [muted]"browser" command not available; '
                       'use [accent]solver install chrome[/accent] to install Chrome[/muted]')
         return ExitCodes.EXIT_ERROR
     ensure_running()
-    if problem_number == 0 and (problem := variables.problem) is not None:
-        problem_number = problem.number
-    url: str = (f'http://localhost:{config.server_port}/'
-                f'{'summary' if problem_number == 0 else f'{problem_number:04d}/'}')
+    url: str = f'http://localhost:{config.server_port}/{problem.number:04d}/'
     if check_for_errors:
         return _check_for_rendering_errors(url)
     pipe = DEVNULL if console.quiet else None

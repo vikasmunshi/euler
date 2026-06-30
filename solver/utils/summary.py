@@ -14,7 +14,6 @@ from bs4 import BeautifulSoup, Tag
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem, problems
 from solver.shell import console, register
-from solver.shell.variables import variables
 from solver.utils.path_utils import canonical_path
 
 
@@ -143,7 +142,7 @@ def progress() -> int:
     aliases=('mark-solved',),
     quietable=True,
 )
-def mark() -> int:
+def mark(problem: Problem) -> int:
     """Mark the workspace problem as solved — once its results confirm it.
 
     Records the current workspace problem as solved (with today's date) in
@@ -157,8 +156,10 @@ def mark() -> int:
     marked solved is left unchanged.
 
     Aliased as `mark-solved`.
+
+    Args:
+        problem:    The `problem` to mark solved; defaults to the current workspace problem.
     """
-    problem = variables.problem
     _problems: dict[int, dict[str, str | int | bool]] = {
         int(k): v
         for k, v in loads(config.static_file_problems.read_text()).items()

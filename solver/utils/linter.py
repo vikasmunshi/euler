@@ -11,12 +11,11 @@ from typing import Callable
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem
 from solver.shell import console, register
-from solver.shell.variables import variables
 from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 
 @register(help_text='Lint current problem, auto-fix with --auto-fix.', quietable=True)
-def lint(auto_fix: bool = False) -> int:
+def lint(problem: Problem, auto_fix: bool = False) -> int:
     """Lint the workspace solution files, optionally auto-fixing them.
 
     Checks the current problem's solution files for style and quality issues
@@ -24,12 +23,12 @@ def lint(auto_fix: bool = False) -> int:
     in the exit code.
 
     Args:
+        problem:    The `problem` to lint; defaults to the current workspace problem.
         auto_fix:   When True, attempt to fix issues in place with autoflake
                     (remove unused imports/variables), autopep8 (style), and
                     isort (import order), then re-check. When False (default),
-                    only report. Fails if the workspace holds no problem.
+                    only report.
     """
-    problem = variables.problem
     console.print(f'[accent]checking[/accent] {problem}')
     if _linter_check(problem):
         return ExitCodes.EXIT_OK

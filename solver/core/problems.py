@@ -118,7 +118,7 @@ class Problem(NamedTuple):
             raise ValueError(f'Problem {problem_number} not found') from None
 
 
-class Problems():
+class Problems:
     __slots__ = ('__problems_list', '__problems_dict', '__solutions_history', '__solved_problems',
                  '__unsolved_problems',)
 

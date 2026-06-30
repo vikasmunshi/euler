@@ -15,9 +15,8 @@ from anthropic.types import (Base64ImageSourceParam, CacheControlEphemeralParam,
 
 from solver.ai.models import get_api_key
 from solver.config import config
-from solver.core.problems import problems
+from solver.core.problems import Problem, problems
 from solver.core.results import Result, read_results
-from solver.shell.variables import variables
 from solver.utils.path_utils import iterdir_recursive
 
 #: Map of file extension (lowercased, no leading dot) to the Anthropic image media type.
@@ -76,7 +75,7 @@ def format_test_cases_markdown(test_cases: list[dict[str, Any]]) -> str:
     return '\n'.join(rows)
 
 
-def gather_facts(strict: bool = False) -> Facts:
+def gather_facts(problem: Problem, strict: bool = False) -> Facts:
     """
     Gathers and processes facts from the 'stack' about a specific problem, including solutions,
     results, test cases, and problem content. This function is used to assemble
@@ -84,6 +83,7 @@ def gather_facts(strict: bool = False) -> Facts:
     about the problem for further use.
 
     Arguments:
+        problem: The problem to gather facts about.
         strict: If True, enforces strict validation of gathered data
             (e.g., ensures solutions, results, and problem content exist).
 
@@ -96,7 +96,6 @@ def gather_facts(strict: bool = False) -> Facts:
         ValueError: If `strict` is True and any of the required data, such as
         solutions, results, or test cases, is missing or invalid.
     """
-    problem = variables.problem
     solutions: dict[str, str] = {}
     for solution in iterdir_recursive(problem.solution_dir, rt='path'):
         if not (solution.suffix in ('.py', '.c')):
@@ -104,7 +103,7 @@ def gather_facts(strict: bool = False) -> Facts:
         solutions[solution.name] = solution.read_text()
     if strict and not solutions:
         raise ValueError('No solutions found')
-    solved_results: list[Result] = read_results()  # read results from workspace
+    solved_results: list[Result] = read_results(problem=problem)  # read results from workspace
     if strict and not solved_results:
         raise ValueError('No results found')
     if strict and not [r for r in solved_results if r.verdict == 'correct' and r.category == 'main']:

@@ -3,7 +3,7 @@
 """Solution evaluation: runs standalone scripts against test cases and reports results."""
 from __future__ import annotations
 
-__all__ = ['eval_benchmark', 'eval_compile_c', 'eval_evaluate', 'eval_set_problem']
+__all__ = ['benchmark', 'compile_c', 'eval_evaluate']
 
 import re
 from ast import literal_eval
@@ -13,30 +13,30 @@ from time import perf_counter
 from typing import Literal, cast
 
 from solver.config import ExitCodes, config
+from solver.core.problems import Problem
 from solver.core.results import results_collector
 from solver.core.test_cases import TestCase, load_test_cases
-from solver.shell import console, register, variables
+from solver.shell import console, register
 from solver.utils.path_utils import canonical_path
 
 # group 1: problem number, group 2: solution index, group 3: file type
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
 
 
-@register(help_text='Build all C source files in the solutions_dir.', aliases=('compile',), quietable=True)
-def eval_compile_c(clean: bool = False) -> int:
+@register(help_text='Build all C source files for the problem.', aliases=('compile',), quietable=True)
+def compile_c(problem: Problem, *, clean: bool = True) -> int:
     """Compile every C solution in the workspace into a runnable binary.
 
-    Builds each `.c` file in `workspace/` (linking the runner harness) so it can
-    be evaluated and benchmarked; reports per-file success or the compiler
-    error. `eval --clean` and `benchmark` invoke this for you, so you rarely
-    call it directly.
+    Builds each `.c` file in `problem.solution_dir/` (linking the runner harness)
+    so it can be evaluated and benchmarked; reports per-file success or the compiler
+    error. `eval` and `benchmark` invoke this for you, so you rarely call it directly.
 
     Args:
-        clean:              When True, force a full rebuild instead of reusing up-to-date
-                            build output. Defaults to False.
+        problem:            The `problem` to compile.
+        clean:              When False, reuse up-to-date build output from previous compilations.
+                            Defaults to True.
     """
-    source_files: list[Path] = sorted(s for s in variables.problem.solution_dir.iterdir()
-                                      if s.is_file() and s.suffix == '.c')
+    source_files: list[Path] = sorted(s for s in problem.solution_dir.iterdir() if s.is_file() and s.suffix == '.c')
     result: int = ExitCodes.EXIT_OK
     for source_file in source_files:
         cmdline: str = f'{config.scripts.compile_c} {canonical_path(source_file)} {'--clean' if clean else ''}'
@@ -112,7 +112,8 @@ def _eval_solution[T](filename: str, *,
     return answer, average, ''
 
 
-def _evaluate(*categories: Literal['dev', 'main', 'extra'],
+def _evaluate(problem: Problem,
+              *categories: Literal['dev', 'main', 'extra'],
               clean: bool = False,
               timeout: float | None = None,
               disable_timeout: bool = False,
@@ -132,6 +133,7 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
     matching test case via eval_solution, and each result is passed to the result recorder.
 
     Args:
+        problem:            The `problem` to evaluate.
         *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                             (which expands to all three). Defaults to ('dev', 'main') if omitted.
         clean:              If True, force compiles C solutions. Defaults to False.
@@ -165,10 +167,10 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
     if disable_timeout:
         runs = 1
     if lang in ('*', 'c'):
-        eval_compile_c(clean=clean)
+        compile_c(problem=problem, clean=clean)
     solutions: list[str] = sorted(
         (
-            f'{s.name}' for s in variables.problem.solution_dir.iterdir()
+            f'{s.name}' for s in problem.solution_dir.iterdir()
             if s.is_file()  # is a file
             if bool(s.stat().st_mode & 0o100)  # is executable
             if (match := _solution_file_prefix.match(s.name))  # matches pN_sK[.py|_c]
@@ -179,11 +181,11 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
     if not solutions:
         console.print('[error]error:[/error] no solutions found, skipping evaluation')
         return ExitCodes.EXIT_ERROR
-    test_cases: list[TestCase] = load_test_cases(*categories, solutions=solutions, runs=runs)
+    test_cases: list[TestCase] = load_test_cases(problem, *categories, solutions=solutions, runs=runs)
     if not test_cases:
         return ExitCodes.EXIT_ERROR
     rc: int = ExitCodes.EXIT_OK
-    with results_collector(record=record, reset=reset) as recorder:
+    with results_collector(problem, record=record, reset=reset) as recorder:
         for test_case, solution in ((tc, s) for tc in test_cases for s in solutions):
             answer, elapsed, error = _eval_solution(solution,
                                                     timeout=timeout,
@@ -192,7 +194,7 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
                                                     input_args=test_case.input_args,
                                                     runs=test_case.runs,
                                                     show=show,
-                                                    work_dir=variables.problem.solution_dir, )
+                                                    work_dir=problem.solution_dir, )
             match (answer, test_case.answer, error):
                 case (None, _, error_msg) if 'ModuleNotFoundError:' in error_msg:
                     verdict = 'missing dep'
@@ -226,7 +228,8 @@ def _evaluate(*categories: Literal['dev', 'main', 'extra'],
 
 
 @register(help_text='Evaluate solutions against test cases.', aliases=('eval',), quietable=True)
-def eval_evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
+def eval_evaluate(problem: Problem,
+                  *categories: Literal['all', 'dev', 'main', 'extra'],
                   clean: bool = False,
                   timeout: float | None = None,
                   disable_timeout: bool = False,
@@ -240,6 +243,7 @@ def eval_evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     Evaluate solutions against test cases.
 
     Args:
+    problem:            The `problem` to evaluate.
     *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                         (which expands to all three). Defaults to 'dev', 'main' if omitted.
     clean:              If True, force compiles C solutions. Defaults to False.
@@ -264,7 +268,8 @@ def eval_evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     else:
         eval_categories = cast(list[Literal['dev', 'main', 'extra']], list(categories))
     try:
-        rc: int = _evaluate(*eval_categories,
+        rc: int = _evaluate(problem,
+                            *eval_categories,
                             clean=clean,
                             timeout=timeout,
                             disable_timeout=disable_timeout,
@@ -279,16 +284,17 @@ def eval_evaluate(*categories: Literal['all', 'dev', 'main', 'extra'],
     return rc
 
 
-@register(help_text='Benchmark the problem currently in the workspace.', aliases=('benchmark',), quietable=True)
-def eval_benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
-                   clean: bool = False,
-                   timeout: float | None = None,
-                   disable_timeout: bool = False,
-                   lang: Literal['*', 'py', 'c'] = '*',
-                   solution_index: int | None = None,
-                   reset: bool = False,
-                   verbose: bool = False,
-                   ) -> int:
+@register(help_text='Benchmark the problem currently in the workspace.', quietable=True)
+def benchmark(problem: Problem,
+              *categories: Literal['all', 'dev', 'main', 'extra'],
+              clean: bool = False,
+              timeout: float | None = None,
+              disable_timeout: bool = False,
+              lang: Literal['*', 'py', 'c'] = '*',
+              solution_index: int | None = None,
+              reset: bool = False,
+              verbose: bool = False,
+              ) -> int:
     """Measure and record the execution time of the workspace solutions.
 
     Like `eval`, runs every solution against the chosen test-case categories, but
@@ -316,6 +322,7 @@ def eval_benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
         `disable_timeout` overrides this and forces a single run.
 
     Args:
+        problem:            The `problem` to benchmark.
         *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                             (which expands to all three). Defaults to all three if omitted.
         clean:              If True, force compiles C solutions. Defaults to False.
@@ -338,7 +345,8 @@ def eval_benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
     else:
         eval_categories = cast(list[Literal['dev', 'main', 'extra']], list(categories))
     try:
-        rc: int = _evaluate(*eval_categories,
+        rc: int = _evaluate(problem,
+                            *eval_categories,
                             clean=clean,
                             timeout=timeout,
                             disable_timeout=disable_timeout,
@@ -353,25 +361,3 @@ def eval_benchmark(*categories: Literal['all', 'dev', 'main', 'extra'],
         console.print('[muted]Benchmark interrupted by user.[/muted]')
         return ExitCodes.EXIT_ERROR
     return rc
-
-
-@register(help_text='Set the active problem', aliases=('problem',), quietable=True, )
-def eval_set_problem(problem_number: int | None = None) -> int:
-    """Set the active problem for the shell session and print its title.
-
-    Updates the workspace's current problem (the one `eval`, `benchmark`, `new`,
-    and the AI commands act on) without touching any files. Accepts a problem
-    number, or the `{next}` / `{random}` aliases the completer offers.
-
-    Args:
-        problem_number:     Problem to make active. When None (default), re-selects the
-                            current problem — handy to re-print its title. Returns a usage
-                            error if the number is out of range.
-    """
-    try:
-        variables.set_problem(problem_number or variables.problem.number, )
-    except ValueError:
-        return ExitCodes.EXIT_USAGE
-    console.print(f'[muted]Current problem : [/muted][accent]{variables.problem.as_title()}[/accent]')
-    console.print(f'[muted]Solution path   : [/muted][accent]{canonical_path(variables.problem.solution_dir)}[/accent]')
-    return ExitCodes.EXIT_OK

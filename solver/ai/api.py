@@ -12,7 +12,6 @@ from solver.ai.models import Model, get_accumulated_charges
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem
 from solver.shell import console, register
-from solver.shell.variables import variables
 
 
 class GeneratorFunc(Protocol):
@@ -43,7 +42,8 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
 
 
 @register(help_text='Generate specified target using Claude API.')
-def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
+def claude_api(problem: Problem,
+               target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
                force: bool = False,
                major: bool = False,
                model: Model | None = None,
@@ -51,6 +51,7 @@ def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
     """Generate AI-based content for the specified target.
 
     Args:
+        problem: The `problem` to generate for; defaults to the current workspace problem.
         target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
                 docs, 'notes' for documentation, 'test-cases' for test cases).
         major:  Whether this is after a major change (e.g. template or instruction change).
@@ -59,7 +60,6 @@ def claude_api(target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
 
     Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
     """
-    problem = variables.problem
     if (generators := _get_generate_funcs()) is None:
         return ExitCodes.EXIT_ERROR
 

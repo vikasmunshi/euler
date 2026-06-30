@@ -94,7 +94,7 @@ def generate_notes(model: Model, *, problem: Problem, force: bool, major: bool) 
         console.print('[muted]Use [accent]--force[/accent] to re-document solutions.[/muted]')
         return None
     try:
-        facts: Facts = gather_facts(strict=True)
+        facts: Facts = gather_facts(problem, strict=True)
     except ValueError as e:
         console.print(f'[error]error:[/error] could not document solutions: {e}')
         return False
@@ -142,7 +142,7 @@ def generate_test_cases(model: Model, *, problem: Problem, force: bool, major: b
     if not (force or not (problem.solution_dir / config.test_cases_filename).exists()):
         console.print('[muted]Test cases exist.[/muted]')
         return None
-    facts: Facts = gather_facts(strict=False)
+    facts: Facts = gather_facts(problem, strict=False)
     prompt = filled_template(Templates.PROMPT_TEST_CASES, facts=facts)
     console.print('[primary]Generating test cases...[/primary]')
     raw: str | None = _generate_doc(prompt=prompt, model=model, images=facts.images)

@@ -213,15 +213,14 @@ command name below links to its full entry — usage and description — in the
 |---------|---------|-------------|
 | [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
+| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
 | [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. |
 | [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |
+| [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | Build all C source files for the problem. » |
 | [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
-| [`eval-benchmark`](commands-index.md#command-eval-benchmark-benchmark) | `benchmark` | Benchmark the problem currently in the workspace. » |
-| [`eval-compile-c`](commands-index.md#command-eval-compile-c-compile) | `compile` | Build all C source files in the solutions_dir. » |
 | [`eval-evaluate`](commands-index.md#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
-| [`eval-set-problem`](commands-index.md#command-eval-set-problem-problem) | `problem` | Set the active problem » |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
@@ -238,10 +237,12 @@ command name below links to its full entry — usage and description — in the
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved). |
 | [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
+| [`results`](commands-index.md#command-results) | — | list the results for the problem. |
 | [`search`](commands-index.md#command-search-find) | `find` | Find content in the stack. |
 | [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
 | [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
+| [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. |
 | [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |

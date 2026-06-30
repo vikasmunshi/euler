@@ -35,7 +35,7 @@ from prompt_toolkit.completion import Completion
 from rich.text import Text
 
 from solver.config import ExitCodes
-from solver.core.problems import problems
+from solver.core.problems import Problem, problems
 from solver.shell.command import Context, command
 from solver.shell.variables import variables
 
@@ -94,11 +94,65 @@ def _coerce(value: Any, annotation: Any) -> Any:
         return _coerce(value, args[0]) if args else value
     if annotation is bool:
         return value.strip().lower() in ('1', 'true', 'yes', 'y', 'on')
+    if annotation is Problem:
+        # The `problem` special: a token is the zero-based problem number (the
+        # interpreter has already substituted `{next}`/`{random}` to a number).
+        return Problem.from_number(int(value))
     if annotation in (int, float, str):
         return annotation(value)
     if isinstance(annotation, type) and issubclass(annotation, enum.Enum):
         return annotation(value)
     return ast.literal_eval(value)
+
+
+def _is_problem_annotation(annotation: Any) -> bool:
+    """True if *annotation* is `Problem` or a union including `Problem` (e.g. `Problem | None`)."""
+    if annotation is Problem:
+        return True
+    origin = typing.get_origin(annotation)
+    if origin is typing.Union or origin is types.UnionType:
+        return any(arg is Problem for arg in typing.get_args(annotation))
+    return False
+
+
+def _coerces_to_problem(token: str) -> bool:
+    """True if *token* is a bare problem number naming a known problem."""
+    try:
+        _coerce(token, Problem)
+        return True
+    except (ValueError, SyntaxError):
+        return False
+
+
+def _is_positional_token(token: str) -> bool:
+    """True if *token* fills a positional slot (i.e. is neither a `--flag` nor a `key=value`)."""
+    if token.startswith('--') and len(token) > 2 and '=' not in token:
+        return False
+    return not ('=' in token and not token.startswith('='))
+
+
+def _problem_completions(incomplete: str, *, prefix: str = '') -> list[Completion]:
+    """Completions for the `problem` special: the `{next}`/`{random}` aliases
+    (the interpreter resolves them to a number) then every known problem number,
+    each shown with its title.
+
+    *prefix* is prepended to each completion (e.g. `'problem='` for the value side
+    of a `problem=<partial>` token); the partial matched against is *incomplete*
+    with *prefix* stripped, while the whole *incomplete* sets the replace span.
+    """
+    partial = incomplete[len(prefix):]
+    candidates: list[Completion] = []
+    for alias, display in (
+            ('{next}', 'next unsolved problem'),
+            ('{random}', 'random unsolved problem'),
+    ):
+        if alias.startswith(partial):
+            candidates.append(Completion(prefix + alias, start_position=-len(incomplete), display=display))
+    for problem in problems.problems_list:
+        number = str(problem.number)
+        if number.startswith(partial):
+            candidates.append(Completion(prefix + number, start_position=-len(incomplete), display=str(problem)))
+    return candidates
 
 
 def _usage_from_signature(cmd_name: str, params: list[inspect.Parameter], quietable: bool) -> str:
@@ -131,7 +185,11 @@ def _usage_from_signature(cmd_name: str, params: list[inspect.Parameter], quieta
     optional: list[str] = []
     for p in params:
         nm = p.name
-        if p.kind is inspect.Parameter.VAR_POSITIONAL:
+        if nm == 'problem' and _is_problem_annotation(p.annotation):
+            # The `problem` special is always optional: it falls back to the
+            # current workspace problem when omitted (see `register`).
+            optional.append('[problem=<n>] (default current)')
+        elif p.kind is inspect.Parameter.VAR_POSITIONAL:
             if typing.get_origin(p.annotation) is typing.Literal:
                 optional.append(f'[{_hint(p.annotation)} ...]')
             else:
@@ -183,6 +241,8 @@ class _CommandSpec:
     positional_params: list[inspect.Parameter]
     var_keyword_param: inspect.Parameter | None
     bool_flags: dict[str, tuple[str, bool]]
+    problem_param: inspect.Parameter | None
+    problem_positional: bool
 
 
 def _build_bool_flags(params: list[inspect.Parameter], quietable: bool) -> dict[str, tuple[str, bool]]:
@@ -249,8 +309,21 @@ def _build_command_spec(
             raise ValueError(f'{getattr(func, "__name__", "?")}: '
                              'pass_ctx=True requires a leading positional context parameter')
         params = params[1:]
+    # The `problem` special — a parameter named `problem` annotated `Problem`
+    # (optionally `| None`). The adapter resolves it from a bare problem number,
+    # remembers it as the workspace problem, and injects the current one when the
+    # user omits it; it is therefore excluded from the generic positional stream.
+    problem_param: inspect.Parameter | None = next(
+        (p for p in params if p.name == 'problem' and _is_problem_annotation(p.annotation)),
+        None,
+    )
+    problem_positional: bool = problem_param is not None and problem_param.kind in (
+        inspect.Parameter.POSITIONAL_ONLY,
+        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+    )
     positional_params: list[inspect.Parameter] = [
         p for p in params
+        if p is not problem_param
         if p.kind in (inspect.Parameter.POSITIONAL_ONLY,
                       inspect.Parameter.POSITIONAL_OR_KEYWORD,
                       inspect.Parameter.VAR_POSITIONAL)
@@ -272,6 +345,8 @@ def _build_command_spec(
         positional_params=positional_params,
         var_keyword_param=var_keyword_param,
         bool_flags=_build_bool_flags(params, quietable),
+        problem_param=problem_param,
+        problem_positional=problem_positional,
     )
 
 
@@ -394,8 +469,9 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
     * Otherwise, suggest `Literal` members for the current positional
       slot (including `VAR_POSITIONAL`), then 'name=' for every
       keyword-bindable parameter not yet supplied on the current line.
-      Special case: 'problem_number' yields rich `Completion` objects
-      with the problem title as display text.
+      Special case: the `problem` parameter yields rich `Completion`
+      objects (known problem numbers, with the title as display text,
+      plus the `{next}`/`{random}` aliases), positionally and as `problem=`.
     """
     # Value-side completion: 'key=<partial>'.
     if '=' in incomplete and not incomplete.startswith('='):
@@ -411,6 +487,9 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
             except OSError:
                 return []
         ann = _keyword_annotation(spec, key)
+        # Special case: the `problem` special completes to problem numbers.
+        if key == 'problem' and _is_problem_annotation(ann):
+            return list(_problem_completions(incomplete, prefix=f'{key}='))
         hints: list[str] = []
         origin = typing.get_origin(ann)
         if origin is typing.Union or origin is types.UnionType:
@@ -446,44 +525,32 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
             if param_name not in supplied and f'--{flag}'.startswith(incomplete)
         ]
     candidates: list[str | Completion] = []
-    # Positional hints: determine which slot we're filling.
-    pos_count = sum(
-        1 for t in ctx.argv
-        if not ('=' in t and not t.startswith('='))
-        and not (t.startswith('--') and len(t) > 2 and '=' not in t)
-    )
+    # Positional hints: which slot are we filling? Count the positional tokens
+    # already on the line (the incomplete one, if positional, is the last of them).
+    pos_tokens = [t for t in ctx.argv if _is_positional_token(t)]
     if incomplete:
-        pos_count -= 1  # incomplete token is already in ctx.argv; don't count it
+        pos_tokens = pos_tokens[:-1]
+    # The `problem` special rides the leading positional slot: completable only
+    # before any positional is given, and consumed once a leading number is.
+    problem_consumed = spec.problem_positional and bool(pos_tokens) and _coerces_to_problem(pos_tokens[0])
+    if spec.problem_positional and not pos_tokens:
+        candidates.extend(_problem_completions(incomplete))
+    if problem_consumed:
+        supplied.add('problem')  # don't also offer `problem=` once given positionally
+    slot = len(pos_tokens) - (1 if problem_consumed else 0)
     positional_params = spec.positional_params
     pos_param: inspect.Parameter | None = None
-    if pos_count < len(positional_params) and \
-            positional_params[pos_count].kind != inspect.Parameter.VAR_POSITIONAL:
-        pos_param = positional_params[pos_count]
+    if slot < len(positional_params) and \
+            positional_params[slot].kind != inspect.Parameter.VAR_POSITIONAL:
+        pos_param = positional_params[slot]
     elif positional_params and positional_params[-1].kind == inspect.Parameter.VAR_POSITIONAL:
         pos_param = positional_params[-1]
-    if pos_param is not None:
-        # Special case: 'problem_number' — emit 'next'/'random' aliases
-        # first, then each known problem number with its title as
-        # display text.
-        if pos_param.name == 'problem_number':
-            for alias, display in (
-                    ('{next}', 'next unsolved problem'),
-                    ('{random}', 'random unsolved problem'),
-            ):
-                if alias.startswith(incomplete):
-                    candidates.append(
-                        Completion(alias, start_position=-len(incomplete), display=display)
-                    )
-            for problem in problems.problems_list:
-                s = str(problem.number)
-                if s.startswith(incomplete):
-                    candidates.append(Completion(s, start_position=-len(incomplete), display=str(problem)))
-        elif typing.get_origin(pos_param.annotation) is typing.Literal:
-            candidates.extend(
-                str(v)
-                for v in typing.get_args(pos_param.annotation)
-                if str(v).startswith(incomplete)
-            )
+    if pos_param is not None and typing.get_origin(pos_param.annotation) is typing.Literal:
+        candidates.extend(
+            str(v)
+            for v in typing.get_args(pos_param.annotation)
+            if str(v).startswith(incomplete)
+        )
     # Keyword name hints.
     for p in spec.params:
         if p.kind not in (inspect.Parameter.POSITIONAL_OR_KEYWORD,
@@ -496,13 +563,51 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
     return candidates
 
 
+def _strip_positional_problem(spec: _CommandSpec, args: tuple[str, ...]) -> tuple[tuple[str, ...], Problem | None]:
+    """Consume a leading positional problem number from *args* for the `problem` special.
+
+    Only the **first** positional token is a candidate, and only when it names a known
+    problem (so `eval 42 dev` reads 42 as the problem while `eval dev` does not). The
+    consumed token is removed; an explicit `problem=…` keyword is left for `_parse_args`
+    to coerce. Returns the remaining args and the resolved `Problem` (or None).
+    """
+    if not spec.problem_positional:
+        return args, None
+    for idx, tok in enumerate(args):
+        if not _is_positional_token(tok):
+            continue
+        if _coerces_to_problem(tok):
+            return args[:idx] + args[idx + 1:], _coerce(tok, Problem)
+        return args, None  # first positional isn't a problem — leave it for the categories
+    return args, None
+
+
 def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int:
     """Parse *args*, invoke the wrapped function, and map outcomes to exit codes."""
+    problem: Problem | None = None
+    if spec.problem_param is not None:
+        args, problem = _strip_positional_problem(spec, args)
     try:
         pos_args, kw_args = _parse_args(spec, args)
     except (ValueError, SyntaxError) as exc:
         _print_arg_error(spec, ctx, args, exc)
         return ExitCodes.EXIT_USAGE
+    if spec.problem_param is not None:
+        # An explicit `problem=…` keyword (already coerced to a Problem) takes the
+        # same path; reject supplying it both ways.
+        if 'problem' in kw_args:
+            if problem is not None:
+                _print_arg_error(spec, ctx, args, ValueError("problem given twice (positional and 'problem=')"))
+                return ExitCodes.EXIT_USAGE
+            problem = kw_args.pop('problem')
+        if problem is not None:
+            variables.problem = problem  # remember the user's choice as the workspace problem
+        else:
+            problem = variables.problem  # fall back to (and so default-select) the workspace problem
+        if spec.problem_positional:
+            pos_args = [problem, *pos_args]
+        else:
+            kw_args['problem'] = problem
     # `silent` is the adapter's flag, not the function's: pop it and run the
     # body with the shared console quiet (restored before any output, so the
     # `cmd() → rc` summary and any errors still show).
@@ -563,6 +668,16 @@ def register[**P](
     :class:`Context` there and parses user tokens against the *remaining*
     parameters.  This lets a 'register()' command reach shell state (e.g.
     'ctx.shell') while keeping the decorator's argument coercion and completion.
+
+    A parameter named 'problem' annotated ':class:`Problem`' (optionally
+    ''| None'') is the **problem special**.  The user gives it as a bare problem
+    number — positionally ('eval 42 …') or as ''problem=42'' — which the adapter
+    coerces to a :class:`Problem` and completes to known problem numbers (with
+    the ''{next}''/''{random}'' aliases).  Supplying it **remembers** the choice
+    as the workspace problem ('variables.problem'); omitting it injects the
+    current workspace problem, so 'eval' alone re-runs the active problem.  Only
+    a leading positional naming a *known* problem is consumed as 'problem', so a
+    following ''*categories'' (or other positionals) are unaffected.
 
     Keyword-only parameters must be supplied as 'name=value' tokens (there is no
     positional form for them, matching Python's call semantics).

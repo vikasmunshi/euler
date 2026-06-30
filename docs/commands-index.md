@@ -40,15 +40,14 @@ a parameter that accepts repetition.
 |---------|---------|-------------|
 | [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
+| [`benchmark`](#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
 | [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. |
 | [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
+| [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for the problem. » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
-| [`eval-benchmark`](#command-eval-benchmark-benchmark) | `benchmark` | Benchmark the problem currently in the workspace. » |
-| [`eval-compile-c`](#command-eval-compile-c-compile) | `compile` | Build all C source files in the solutions_dir. » |
 | [`eval-evaluate`](#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
-| [`eval-set-problem`](#command-eval-set-problem-problem) | `problem` | Set the active problem » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
@@ -65,10 +64,12 @@ a parameter that accepts repetition.
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
+| [`results`](#command-results) | — | list the results for the problem. |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
 | [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
+| [`test-cases`](#command-test-cases) | — | list the test cases for the problem. |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
@@ -140,128 +141,14 @@ Aliased as `help`.
 
 ---
 
-#### Command: `claude-api`
-
-Generate specified target using Claude API.
-
-```
-claude-api <c|py|doc|notes|test-cases>
-[force=true|--force]
-[major=true|--major]
-[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-haiku-4-5|none] (default None)
-```
-
-```text
-Generate AI-based content for the specified target.
-
-Args:
-    target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
-            docs, 'notes' for documentation, 'test-cases' for test cases).
-    major:  Whether this is after a major change (e.g. template or instruction change).
-    force:  Whether to force generation even if the target already exists.
-    model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
-
-Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
-```
-
----
-
-#### Command: `claude-skill`
-
-Launch the Claude Euler Solver skill.
-
-```
-claude-skill <solve|review>
-[additional_prompt=<str>] (default '')
-```
-
-```text
-Run Claude Code over the locked workspace via the claude-euler-solver skill.
-
-Launches Claude Code headless against the current `workspace/` (which this
-shell holds the lock for), runs the requested action, and streams a
-live-updating Markdown summary back into the shell, ending with a footer of
-turns / duration / cost. Heavier and slower than `claude-api` — it actually
-runs `solver` commands, edits files, evaluates, and iterates. Needs the
-`claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
-
-Args:
-    action:             What to do — 'solve' (write and verify a Python
-                        solution, translate it to C, then document and
-                        summarise), or 'review' (audit an existing solution
-                        for C↔Python parity, in-source docs, and notes.html).
-    additional_prompt:  Extra free-text instructions appended to the skill
-                        invocation. Defaults to empty.
-```
-
----
-
-#### Command: `clear` (`cls`)
-
-Clear the screen.
-
-```
-clear
-```
-
-```text
-Clear the terminal screen and scrollback, then succeed.
-
-A convenience wrapper over the console's clear; equivalent to the shell
-`clear`. Takes no arguments. Aliased as `cls`.
-```
-
----
-
-#### Command: `costs`
-
-Display total cost of AI API tokens consumed in session.
-
-```
-costs
-[ecb_usd_rate=<float>] (default 1.1342)
-```
-
-```text
-Print the total cost of all AI tokens consumed in the session so far, broken down per model,
-or a "No charges so far." notice if nothing has been consumed. Always returns EXIT_OK.
-
-Totals the charges across all models in "consumed_tokens" using each model's published USD
-price per million tokens (with cache writes at 1.25x and cache reads at 0.10x the input rate),
-then converts to EUR using "ecb_usd_rate".
-
-Args:
-    ecb_usd_rate: conversion rate (1 € = N $). Defaults to 'config.ecb_usd_rate'.
-```
-
----
-
-#### Command: `echo`
-
-Print text.
-
-```
-echo <text>
-```
-
-```text
-Print the given text to the console, then succeed.
-
-The arguments are joined with single spaces and printed literally (no rich
-markup interpretation). Handy in command blocks to annotate progress or to
-surface a variable, since `{...}` references are substituted before the
-command runs — e.g. `echo solved {len(solved)} problems`.
-```
-
----
-
-#### Command: `eval-benchmark` (`benchmark`)
+#### Command: `benchmark`
 
 Benchmark the problem currently in the workspace.
 * » supports `--silent`
 
 ```
-eval-benchmark
+benchmark
+[problem=<n>] (default current)
 [all|dev|main|extra ...]
 [clean=true|--clean]
 [timeout=<float>|none] (default None)
@@ -301,6 +188,7 @@ Repeats:
     `disable_timeout` overrides this and forces a single run.
 
 Args:
+    problem:            The `problem` to benchmark.
     *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                         (which expands to all three). Defaults to all three if omitted.
     clean:              If True, force compiles C solutions. Defaults to False.
@@ -321,28 +209,148 @@ Args:
 
 ---
 
-#### Command: `eval-compile-c` (`compile`)
+#### Command: `claude-api`
 
-Build all C source files in the solutions_dir.
+Generate specified target using Claude API.
+
+```
+claude-api <c|py|doc|notes|test-cases>
+[problem=<n>] (default current)
+[force=true|--force]
+[major=true|--major]
+[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-haiku-4-5|none] (default None)
+```
+
+```text
+Generate AI-based content for the specified target.
+
+Args:
+    problem: The `problem` to generate for; defaults to the current workspace problem.
+    target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
+            docs, 'notes' for documentation, 'test-cases' for test cases).
+    major:  Whether this is after a major change (e.g. template or instruction change).
+    force:  Whether to force generation even if the target already exists.
+    model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
+
+Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
+```
+
+---
+
+#### Command: `claude-skill`
+
+Launch the Claude Euler Solver skill.
+
+```
+claude-skill <solve|review>
+[problem=<n>] (default current)
+[additional_prompt=<str>] (default '')
+```
+
+```text
+Run Claude Code over the locked workspace via the claude-euler-solver skill.
+
+Launches Claude Code headless against the current `workspace/` (which this
+shell holds the lock for), runs the requested action, and streams a
+live-updating Markdown summary back into the shell, ending with a footer of
+turns / duration / cost. Heavier and slower than `claude-api` — it actually
+runs `solver` commands, edits files, evaluates, and iterates. Needs the
+`claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
+
+Args:
+    problem:            The `problem` to work on; defaults to the current workspace problem.
+    action:             What to do — 'solve' (write and verify a Python
+                        solution, translate it to C, then document and
+                        summarise), or 'review' (audit an existing solution
+                        for C↔Python parity, in-source docs, and notes.html).
+    additional_prompt:  Extra free-text instructions appended to the skill
+                        invocation. Defaults to empty.
+```
+
+---
+
+#### Command: `clear` (`cls`)
+
+Clear the screen.
+
+```
+clear
+```
+
+```text
+Clear the terminal screen and scrollback, then succeed.
+
+A convenience wrapper over the console's clear; equivalent to the shell
+`clear`. Takes no arguments. Aliased as `cls`.
+```
+
+---
+
+#### Command: `compile-c` (`compile`)
+
+Build all C source files for the problem.
 * » supports `--silent`
 
 ```
-eval-compile-c
-[clean=true|--clean]
+compile-c
+[problem=<n>] (default current)
+[clean=false|--no-clean]
 [silent=true|--silent]
 ```
 
 ```text
 Compile every C solution in the workspace into a runnable binary.
 
-Builds each `.c` file in `workspace/` (linking the runner harness) so it can
-be evaluated and benchmarked; reports per-file success or the compiler
-error. `eval --clean` and `benchmark` invoke this for you, so you rarely
-call it directly.
+Builds each `.c` file in `problem.solution_dir/` (linking the runner harness)
+so it can be evaluated and benchmarked; reports per-file success or the compiler
+error. `eval` and `benchmark` invoke this for you, so you rarely call it directly.
 
 Args:
-    clean:              When True, force a full rebuild instead of reusing up-to-date
-                        build output. Defaults to False.
+    problem:            The `problem` to compile.
+    clean:              When False, reuse up-to-date build output from previous compilations.
+                        Defaults to True.
+```
+
+---
+
+#### Command: `costs`
+
+Display total cost of AI API tokens consumed in session.
+
+```
+costs
+[ecb_usd_rate=<float>] (default 1.1401)
+```
+
+```text
+Print the total cost of all AI tokens consumed in the session so far, broken down per model,
+or a "No charges so far." notice if nothing has been consumed. Always returns EXIT_OK.
+
+Totals the charges across all models in "consumed_tokens" using each model's published USD
+price per million tokens (with cache writes at 1.25x and cache reads at 0.10x the input rate),
+then converts to EUR using "ecb_usd_rate".
+
+Args:
+    ecb_usd_rate: conversion rate (1 € = N $). Defaults to 'config.ecb_usd_rate'.
+```
+
+---
+
+#### Command: `echo`
+
+Print text.
+
+```
+echo <text>
+```
+
+```text
+Print the given text to the console, then succeed.
+
+The arguments are joined with single spaces and printed literally (no rich
+markup interpretation). Handy in command blocks to annotate progress or to
+surface a variable, since `{...}` references are substituted before the
+command runs — e.g. `echo solved {len(solved)} problems`.
 ```
 
 ---
@@ -354,6 +362,7 @@ Evaluate solutions against test cases.
 
 ```
 eval-evaluate
+[problem=<n>] (default current)
 [all|dev|main|extra ...]
 [clean=true|--clean]
 [timeout=<float>|none] (default None)
@@ -370,6 +379,7 @@ eval-evaluate
 Evaluate solutions against test cases.
 
 Args:
+problem:            The `problem` to evaluate.
 *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                     (which expands to all three). Defaults to 'dev', 'main' if omitted.
 clean:              If True, force compiles C solutions. Defaults to False.
@@ -386,32 +396,6 @@ solution_index:     Specific solution index to evaluate.
                     If provided, only this solution index will be evaluated.
                     If None, all solutions will be evaluated. Defaults to None.
 verbose:            If True, prints error information during evaluation. Defaults to False.
-```
-
----
-
-#### Command: `eval-set-problem` (`problem`)
-
-Set the active problem
-* » supports `--silent`
-
-```
-eval-set-problem
-[problem_number=<int>|none] (default None)
-[silent=true|--silent]
-```
-
-```text
-Set the active problem for the shell session and print its title.
-
-Updates the workspace's current problem (the one `eval`, `benchmark`, `new`,
-and the AI commands act on) without touching any files. Accepts a problem
-number, or the `{next}` / `{random}` aliases the completer offers.
-
-Args:
-    problem_number:     Problem to make active. When None (default), re-selects the
-                        current problem — handy to re-print its title. Returns a usage
-                        error if the number is out of range.
 ```
 
 ---
@@ -587,6 +571,7 @@ Lint current problem, auto-fix with --auto-fix.
 
 ```
 lint
+[problem=<n>] (default current)
 [auto_fix=true|--auto-fix]
 [silent=true|--silent]
 ```
@@ -599,10 +584,11 @@ Checks the current problem's solution files for style and quality issues
 in the exit code.
 
 Args:
+    problem:    The `problem` to lint; defaults to the current workspace problem.
     auto_fix:   When True, attempt to fix issues in place with autoflake
                 (remove unused imports/variables), autopep8 (style), and
                 isort (import order), then re-check. When False (default),
-                only report. Fails if the workspace holds no problem.
+                only report.
 ```
 
 ---
@@ -641,6 +627,7 @@ Mark the workspace problem as solved, after checking.
 
 ```
 mark
+[problem=<n>] (default current)
 [silent=true|--silent]
 ```
 
@@ -658,6 +645,9 @@ case. Run `benchmark` (which records results) first; a problem already
 marked solved is left unchanged.
 
 Aliased as `mark-solved`.
+
+Args:
+    problem:    The `problem` to mark solved; defaults to the current workspace problem.
 ```
 
 ---
@@ -669,6 +659,7 @@ Generate new solution/test-case file in the workspace.
 
 ```
 new
+[problem=<n>] (default current)
 [py=true|--py]
 [c=true|--c]
 [tc=true|--tc]
@@ -684,6 +675,7 @@ template with the problem information substituted; Python files are made
 executable (mode 0o755).
 
 Args:
+    problem:    The `problem` to create files for; defaults to the current workspace problem.
     py: Create a Python solution file. Defaults to False.
     c:  Create a C solution file (one per existing Python solution lacking a
         matching ".c"). Defaults to False.
@@ -773,6 +765,29 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 
 ---
 
+#### Command: `results`
+
+list the results for the problem.
+
+```
+results
+[problem=<n>] (default current)
+[all|dev|main|extra ...]
+```
+
+```text
+List the results for a given problem.
+Args:
+    problem:            The `problem` to list `results` for. This is used to locate the `results` file.
+    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
+                        (which expands to all three). Defaults to all three if omitted.
+
+Returns:
+    int: Exit code indicating the completion status of the operation.
+```
+
+---
+
 #### Command: `search` (`find`)
 
 Find content in the stack.
@@ -811,7 +826,7 @@ Open problem documentation in a browser.
 
 ```
 show
-[problem_number=<int>] (default 0)
+[problem=<n>] (default current)
 [check_for_errors=true|--check-for-errors]
 [silent=true|--silent]
 ```
@@ -819,15 +834,15 @@ show
 ```text
 Open a problem's "problem.html" in the system browser.
 
-When *problem_number* is "0" (default), opens the problem currently in the workspace.
+When *problem* is omitted, opens the problem currently in the workspace.
 
 Prints an error and returns early if:
 - the "browser" command is not available, or
 - the resolved "problem.html" file does not exist.
 
 Arguments:
-    problem_number: Problem to open; "0" means the current workspace.
-    check_for_errors: Whether to check for rendering errors.
+    problem:            The `problem` to open; defaults to the current workspace problem.
+    check_for_errors:   Whether to check for rendering errors.
 ```
 
 ---
@@ -876,6 +891,30 @@ Parameters:
     uninstall:  Indicates whether the operation is an uninstallation.
                 Defaults to False, which performs installation.
     show_help:  Displays help information for the specified target.
+```
+
+---
+
+#### Command: `test-cases`
+
+list the test cases for the problem.
+
+```
+test-cases
+[problem=<n>] (default current)
+[all|dev|main|extra ...]
+```
+
+```text
+List the test cases for a given problem based on specified categories.
+
+Args:
+    problem:            The `problem` to list test cases for. This is used to locate the test cases file.
+    *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
+                        (which expands to all three). Defaults to all three if omitted.
+
+Returns:
+    int: Exit code indicating the completion status of the operation.
 ```
 
 ---

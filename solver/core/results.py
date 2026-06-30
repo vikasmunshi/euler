@@ -7,10 +7,11 @@ __all__ = ['FormattedResult', 'Result', 'read_results', 'results_collector', 'wr
 
 from contextlib import contextmanager
 from json import JSONDecodeError, dumps, loads
-from typing import Any, Generator, NamedTuple, Protocol
+from typing import Any, Generator, Literal, NamedTuple, Protocol, cast
 
-from solver.config import config
-from solver.shell import console, variables
+from solver.config import ExitCodes, config
+from solver.core.problems import Problem
+from solver.shell import console, register
 from solver.utils.path_utils import write_file
 
 color_map: dict[str, str] = {
@@ -84,17 +85,17 @@ class Result(NamedTuple):
         return FormattedResult(**self._asdict(), solution_href=sol, args_short=args, filename=filename, lang=lang)
 
 
-def read_results() -> list[Result]:
+def read_results(problem: Problem) -> list[Result]:
     """Read problem results from a JSON file."""
     try:
-        raw = loads((variables.problem.solution_dir / config.results_filename).read_bytes())
+        raw = loads((problem.solution_dir / config.results_filename).read_bytes())
     except (FileNotFoundError, JSONDecodeError):
         raw = []
     return [Result(**r) for r in raw]
 
 
 @contextmanager
-def results_collector(record: bool, reset: bool = False) -> Generator[Recorder, None, None]:
+def results_collector(problem: Problem, record: bool, reset: bool = False) -> Generator[Recorder, None, None]:
     """Context manager that collects run results and persists them on exit.
 
     Persistence is controlled by "record" and "reset":
@@ -124,10 +125,10 @@ def results_collector(record: bool, reset: bool = False) -> Generator[Recorder, 
         clean_exit = True
     finally:
         if record and (clean_exit or not reset):
-            write_results(results, reset=reset and clean_exit)
+            write_results(problem=problem, results=results, reset=reset and clean_exit)
 
 
-def write_results(results: list[Result], reset: bool = False) -> None:
+def write_results(problem: Problem, results: list[Result], reset: bool = False) -> None:
     """Write problem results to a JSON file.
 
     By default (reset=False) existing records are read first and merged with the
@@ -148,6 +149,7 @@ def write_results(results: list[Result], reset: bool = False) -> None:
     represents the stable benchmark surface.
 
     Args:
+        problem:        The problem under evaluation, used to locate the `results` file.
         results:        Results collected during the run.
         reset:          If True, ignore existing records and replace the file with
                         "results" only. Defaults to False.
@@ -156,7 +158,7 @@ def write_results(results: list[Result], reset: bool = False) -> None:
         existing_raw: list[dict[str, Any]] = []
     else:
         try:
-            existing_raw = loads((variables.problem.solution_dir / config.results_filename).read_bytes())
+            existing_raw = loads((problem.solution_dir / config.results_filename).read_bytes())
         except (FileNotFoundError, JSONDecodeError):
             existing_raw = []
 
@@ -181,5 +183,28 @@ def write_results(results: list[Result], reset: bool = False) -> None:
     for incoming_result in incoming.values():
         updated.append(incoming_result._asdict())
 
-    write_file(variables.problem.solution_dir / config.results_filename, dumps(updated, indent=2).encode(),
+    write_file(problem.solution_dir / config.results_filename, dumps(updated, indent=2).encode(),
                'Updated results')
+
+
+@register(help_text='list the results for the problem.')
+def results(problem: Problem, *categories: Literal['all', 'dev', 'main', 'extra']) -> int:
+    """List the results for a given problem.
+    Args:
+        problem:            The `problem` to list `results` for. This is used to locate the `results` file.
+        *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
+                            (which expands to all three). Defaults to all three if omitted.
+
+    Returns:
+        int: Exit code indicating the completion status of the operation.
+    """
+    if not categories or 'all' in categories:
+        eval_categories: list[Literal['dev', 'main', 'extra']] = ['dev', 'main', 'extra']
+    else:
+        eval_categories = cast(list[Literal['dev', 'main', 'extra']], list(categories))
+    _results = read_results(problem)
+    if not _results:
+        console.print('[error]error:[/error] no results found, skipping display')
+        return ExitCodes.EXIT_NOTFOUND
+    console.print('\n'.join(str(r) for r in _results if r.category in eval_categories))
+    return ExitCodes.EXIT_OK

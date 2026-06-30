@@ -15,10 +15,8 @@ __all__ = [
     'SolverShell',
     'console',
     'register',
-    'variables',
 ]
 
 from solver.shell.register import register
 from solver.shell.shell import SolverShell
 from solver.shell.tty import console
-from solver.shell.variables import variables
