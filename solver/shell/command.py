@@ -16,7 +16,6 @@ from typing import Any, Callable, Iterable
 from prompt_toolkit.completion import Completion
 from rich.console import Console
 
-from solver.config import Singleton
 from solver.shell.tty import console
 from solver.shell.variables import Variables, variables
 
@@ -56,7 +55,7 @@ class Command:
         return self.func(ctx, *ctx.argv)
 
 
-class CommandRegistry(metaclass=Singleton):
+class CommandRegistry():
     """Registry of :class:`Command` instances, keyed by name and alias."""
 
     def __init__(self) -> None:

@@ -16,7 +16,7 @@ from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 
-from solver.config import Singleton, config
+from solver.config import config
 from solver.core.download import download_file
 
 
@@ -118,7 +118,7 @@ class Problem(NamedTuple):
             raise ValueError(f'Problem {problem_number} not found') from None
 
 
-class Problems(metaclass=Singleton):
+class Problems():
     __slots__ = ('__problems_list', '__problems_dict', '__solutions_history', '__solved_problems',
                  '__unsolved_problems',)
 

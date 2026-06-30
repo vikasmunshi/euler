@@ -43,11 +43,11 @@ __all__ = ['Variables', 'variables']
 
 from typing import Any, Generator, Iterable, cast
 
-from solver.config import Singleton, config
+from solver.config import config
 from solver.core.problems import Problem, problems
 
 
-class Variables(metaclass=Singleton):
+class Variables():
     """The interpreter's name store (a singleton; use the `variables` instance).
 
     The instance `__dict__` *is* the backing store, so reserved names live
