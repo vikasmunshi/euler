@@ -294,8 +294,6 @@ def _build_command_spec(
         quietable: bool,
 ) -> _CommandSpec:
     """Introspect *func* and pre-compute everything the token-driven helpers need."""
-    if quietable:
-        help_text += ' [warning]»[/warning]'
     cmd_name: str = name or func.__name__.lstrip('_').replace('_', '-')
     signature: inspect.Signature = inspect.signature(func, eval_str=True)
     params = list(signature.parameters.values())
@@ -316,6 +314,10 @@ def _build_command_spec(
         (p for p in params if p.name == 'problem' and _is_problem_annotation(p.annotation)),
         None,
     )
+    if problem_param is not None:
+        help_text += ' [warning]❏[/warning]'
+    if quietable:
+        help_text += ' [warning]»[/warning]'
     problem_positional: bool = problem_param is not None and problem_param.kind in (
         inspect.Parameter.POSITIONAL_ONLY,
         inspect.Parameter.POSITIONAL_OR_KEYWORD,

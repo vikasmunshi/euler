@@ -7,7 +7,7 @@ const SEGMENTS = window.location.pathname.split('/').filter(Boolean);
 const PROBLEM_NUMBER = SEGMENTS[0];
 const FILENAME = SEGMENTS[SEGMENTS.length - 1];
 const LANGUAGE = document.body.dataset.language;
-// Only real solution files are editable; generated views (flags, solutions) are not.
+// Only real solution files are editable; the generated `solutions` view is not.
 const EDITABLE = /\.(py|c|json)$/.test(FILENAME);
 // Source files can be evaluated / deleted; derive (lang, index) from p<NNNN>_s<K>.<ext>.
 const EVAL_MATCH = FILENAME.match(/_s(\d+)\.(py|c)$/);
@@ -56,13 +56,13 @@ editorEl.addEventListener('scroll', () => {
 jar.updateCode(document.getElementById('source').value);
 renderGutter();
 
-// CodeJar makes the element editable on init; gate that on /flags like before.
-// 'plaintext-only' keeps paste/Enter from injecting markup into the source.
+// CodeJar makes the element editable on init; editable source files are switched on
+// once the header is ready. 'plaintext-only' keeps paste/Enter from injecting markup.
 function setEditable(canEdit) {
     editorEl.setAttribute('contenteditable', canEdit ? 'plaintext-only' : 'false');
 }
 
-setEditable(false);  // read-only until /flags confirms we may save
+setEditable(false);  // read-only until the header wires up editing
 
 // Clear stale command feedback as soon as the document changes.
 jar.onUpdate(() => {
@@ -71,7 +71,7 @@ jar.onUpdate(() => {
 });
 
 // ── Save / Eval / Delete: the buttons live in the shared header, so resolve them
-// once header.js has injected it, then wire their handlers and the first flag check.
+// once header.js has injected it, then wire their handlers and enable editing.
 let saveBtn, evalBtn, delBtn;
 
 // Ctrl/Cmd+S saves (CodeMirror's Mod-s keymap equivalent).
@@ -82,31 +82,23 @@ editorEl.addEventListener('keydown', e => {
     }
 });
 
-async function refreshFlags() {
+// Show and enable the Save / Eval / Delete buttons for an editable source file and
+// make the editor writable. Generated views (e.g. `solutions`) stay read-only.
+function enableEditing() {
     if (!EDITABLE) return;  // generated views stay read-only with no Save / Eval button
-    let flags = {};
-    try {
-        const r = await fetch(`/flags?problem_number=${PROBLEM_NUMBER}`, {headers: {Accept: 'application/json'}});
-        if (r.ok) flags = await r.json();
-    } catch { /* server unreachable: stay read-only */
-    }
-    // Editing / evaluating the workspace needs an authoritative server with this problem active.
-    const canSave = !!(flags.authoritative && flags.active);
     saveBtn.hidden = false;
-    saveBtn.disabled = !canSave;
-    saveBtn.title = canSave ? 'Save to workspace (Ctrl/Cmd+S)' : 'Workspace is read-only here';
-    setEditable(canSave);
+    saveBtn.disabled = false;
+    saveBtn.title = 'Save (Ctrl/Cmd+S)';
+    setEditable(true);
     if (EVALUABLE) {
         evalBtn.hidden = false;
-        evalBtn.disabled = !canSave;
-        evalBtn.title = canSave ? 'Evaluate this solution against its test cases'
-            : 'Workspace is read-only here';
+        evalBtn.disabled = false;
+        evalBtn.title = 'Evaluate this solution against its test cases';
     }
     if (DELETABLE) {
         delBtn.hidden = false;
-        delBtn.disabled = !canSave;
-        delBtn.title = canSave ? 'Delete this solution from the workspace'
-            : 'Workspace is read-only here';
+        delBtn.disabled = false;
+        delBtn.title = 'Delete this solution';
     }
 }
 
@@ -125,11 +117,11 @@ async function save() {
     } catch {
         showOutput('network error', 'error');
     } finally {
-        await refreshFlags();  // re-enable only if the workspace is still writable
+        enableEditing();  // re-enable the buttons
     }
 }
 
-// Evaluate just this solution (its language + index) via the /<n>/eval endpoint.
+// Evaluate just this solution (its language + index) via the /<n>/cmd endpoint.
 async function runEval() {
     if (evalBtn.disabled) return;
     evalBtn.disabled = true;
@@ -149,15 +141,14 @@ async function runEval() {
     } catch {
         showOutput('network error', 'error');
     } finally {
-        await refreshFlags();
+        enableEditing();
     }
 }
 
-// Delete this solution file from the workspace, then return to the problem page.
+// Delete this solution file, then return to the problem page.
 async function runDelete() {
     if (delBtn.disabled) return;
-    if (!confirm(`Delete
-    ${FILENAME} from the workspace?`)) return;
+    if (!confirm(`Delete ${FILENAME}?`)) return;
     delBtn.disabled = true;
     showOutput('deleting…', '');
     try {
@@ -173,7 +164,7 @@ async function runDelete() {
     } catch {
         showOutput('network error', 'error');
     }
-    await refreshFlags();
+    enableEditing();
 }
 
 // The header (with the buttons) is injected asynchronously; wire up once it is ready.
@@ -184,5 +175,5 @@ window.SolverHeader.ready.then(() => {
     saveBtn.addEventListener('click', save);
     evalBtn.addEventListener('click', runEval);
     delBtn.addEventListener('click', runDelete);
-    refreshFlags();
+    enableEditing();
 });

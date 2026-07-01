@@ -2,5 +2,5 @@
   "server_port": 8080,
   "timeout_multiple": 30.0,
   "timeout_single": 90.0,
-  "ecb_usd_rate": 1.1401
+  "ecb_usd_rate": 1.1394
 }

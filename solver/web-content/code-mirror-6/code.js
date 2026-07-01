@@ -9,7 +9,7 @@ const SEGMENTS = window.location.pathname.split('/').filter(Boolean);
 const PROBLEM_NUMBER = SEGMENTS[0];
 const FILENAME = SEGMENTS[SEGMENTS.length - 1];
 const LANGUAGE = document.body.dataset.language;
-// Only real solution files are editable; generated views (flags, solutions) are not.
+// Only real solution files are editable; the generated `solutions` view is not.
 const EDITABLE = /\.(py|c|json)$/.test(FILENAME);
 // Source files can be evaluated / deleted; derive (lang, index) from p<NNNN>_s<K>.<ext>.
 const EVAL_MATCH = FILENAME.match(/_s(\d+)\.(py|c)$/);
@@ -31,8 +31,8 @@ function showOutput(text, kind) {
 // CodeMirror language extension for the file's language (none for generated views).
 const LANG_EXT = {python: python(), c: cpp(), json: json()}[LANGUAGE] || [];
 
-// Read-only is toggled at runtime (once /flags confirms we may save) by reconfiguring
-// this compartment — the CodeMirror equivalent of CodeJar's contenteditable gate.
+// Editable source files start read-only and are switched on once the header is ready
+// (generated views stay read-only) by reconfiguring this compartment.
 const editable = new Compartment();
 const editExt = on => [EditorView.editable.of(on), EditorState.readOnly.of(!on)];
 
@@ -52,7 +52,7 @@ async function lintSource(v) {
             body: JSON.stringify({filename: FILENAME, content: v.state.doc.toString()}),
         });
         if (r.ok) ({diagnostics = []} = await r.json());
-    } catch { /* server unreachable / not authoritative: no diagnostics */ }
+    } catch { /* server unreachable: no diagnostics */ }
     const doc = v.state.doc;
     return diagnostics.map(d => {
         const line = doc.line(Math.min(Math.max(d.line, 1), doc.lines));
@@ -74,7 +74,7 @@ const view = new EditorView({
         indentUnit.of('    '),  // 4-space indentation (project style), not CM's 2-space default
         lintGutter(),
         linter(lintSource, {delay: 500}),
-        editable.of(editExt(false)),  // read-only until /flags confirms we may save
+        editable.of(editExt(false)),  // read-only until the header wires up editing
         // Tab indents (matching CodeJar's catchTab); Ctrl/Cmd+S saves.
         keymap.of([
             indentWithTab,
@@ -94,35 +94,27 @@ function setEditable(canEdit) {
 }
 
 // ── Save / Eval / Delete: the buttons live in the shared header, so resolve them
-// once header.js has injected it, then wire their handlers and the first flag check.
+// once header.js has injected it, then wire their handlers and enable editing.
 let saveBtn, evalBtn, delBtn;
 
-async function refreshFlags() {
+// Show and enable the Save / Eval / Delete buttons for an editable source file and
+// make the editor writable. Generated views (e.g. `solutions`) stay read-only.
+function enableEditing() {
     if (!EDITABLE) return;  // generated views stay read-only with no Save / Eval button
-    let flags = {};
-    try {
-        const r = await fetch(`/flags?problem_number=${PROBLEM_NUMBER}`, {headers: {Accept: 'application/json'}});
-        if (r.ok) flags = await r.json();
-    } catch { /* server unreachable: stay read-only */
-    }
-    // Editing / evaluating the workspace needs an authoritative server with this problem active.
-    const canSave = !!(flags.authoritative && flags.active);
     saveBtn.hidden = false;
-    saveBtn.disabled = !canSave;
-    saveBtn.title = canSave ? 'Save to workspace (Ctrl/Cmd+S)' : 'Workspace is read-only here';
-    setEditable(canSave);
-    if (canSave && LINTABLE) forceLinting(view);  // surface diagnostics without waiting for an edit
+    saveBtn.disabled = false;
+    saveBtn.title = 'Save (Ctrl/Cmd+S)';
+    setEditable(true);
+    if (LINTABLE) forceLinting(view);  // surface diagnostics without waiting for an edit
     if (EVALUABLE) {
         evalBtn.hidden = false;
-        evalBtn.disabled = !canSave;
-        evalBtn.title = canSave ? 'Evaluate this solution against its test cases'
-            : 'Workspace is read-only here';
+        evalBtn.disabled = false;
+        evalBtn.title = 'Evaluate this solution against its test cases';
     }
     if (DELETABLE) {
         delBtn.hidden = false;
-        delBtn.disabled = !canSave;
-        delBtn.title = canSave ? 'Delete this solution from the workspace'
-            : 'Workspace is read-only here';
+        delBtn.disabled = false;
+        delBtn.title = 'Delete this solution';
     }
 }
 
@@ -141,11 +133,11 @@ async function save() {
     } catch {
         showOutput('network error', 'error');
     } finally {
-        await refreshFlags();  // re-enable only if the workspace is still writable
+        enableEditing();  // re-enable the buttons
     }
 }
 
-// Evaluate just this solution (its language + index) via the /<n>/eval endpoint.
+// Evaluate just this solution (its language + index) via the /<n>/cmd endpoint.
 async function runEval() {
     if (evalBtn.disabled) return;
     evalBtn.disabled = true;
@@ -165,14 +157,14 @@ async function runEval() {
     } catch {
         showOutput('network error', 'error');
     } finally {
-        await refreshFlags();
+        enableEditing();
     }
 }
 
-// Delete this solution file from the workspace, then return to the problem page.
+// Delete this solution file, then return to the problem page.
 async function runDelete() {
     if (delBtn.disabled) return;
-    if (!confirm(`Delete ${FILENAME} from the workspace?`)) return;
+    if (!confirm(`Delete ${FILENAME}?`)) return;
     delBtn.disabled = true;
     showOutput('deleting…', '');
     try {
@@ -188,7 +180,7 @@ async function runDelete() {
     } catch {
         showOutput('network error', 'error');
     }
-    await refreshFlags();
+    enableEditing();
 }
 
 // The header (with the buttons) is injected asynchronously; wire up once it is ready.
@@ -199,5 +191,5 @@ window.SolverHeader.ready.then(() => {
     saveBtn.addEventListener('click', save);
     evalBtn.addEventListener('click', runEval);
     delBtn.addEventListener('click', runDelete);
-    refreshFlags();
+    enableEditing();
 });

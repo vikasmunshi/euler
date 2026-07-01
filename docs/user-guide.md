@@ -45,12 +45,11 @@ blocks from stdin, runs them in order, and exits with the last block's status.
 This is the natural form for scripting against a heredoc or a generated block:
 
 ```bash
-echo "init 42; eval; reset" | solver           # pipe a single block
+echo "eval 42; benchmark 42" | solver           # pipe a single block
 
 solver <<'EOF'                                  # or a heredoc of several lines
-init 42
-eval && stack
-reset
+new 42 --py
+eval 42 && benchmark 42
 EOF
 ```
 
@@ -58,13 +57,13 @@ EOF
 exits with its status (no prompt, no stdin read):
 
 ```bash
-solver "init 42; eval; reset"          # run a block, then exit with its status
-solver "init 42 && eval && stack"      # && gates each step on the previous one's success
-solver -s "init 42; benchmark"         # -s also tees console output to the session log
+solver "eval 42; benchmark 42"         # run a block, then exit with its status
+solver "eval 42 && benchmark 42"       # && gates each step on the previous one's success
+solver -s "eval 42; benchmark 42"      # -s also tees console output to the session log
 ```
 
 Because the exit status propagates, `solver "<block>"` composes inside an outer
-shell script or a `Makefile` target (`solver "init 42 && eval" && echo ok`).
+shell script or a `Makefile` target (`solver "eval 42 && benchmark 42" && echo ok`).
 
 ### Command-line arguments
 
@@ -93,18 +92,8 @@ The server runs **detached**, so it keeps serving after the shell that launched
 it exits; an `flock` it holds for its lifetime makes any later `solver-web`
 invocation able to query or stop it (and is released automatically if it crashes). Browsing to `/` gives an `xterm.js` terminal running one interactive
 `solver` shell — only one terminal session is allowed at a time, because every
-session drives the same shared `workspace/`. `/summary` and `/<n>/` are the
+session drives the same shared solution tree. `/summary` and `/<n>/` are the
 read-only viewer pages; `show N` (below) auto-starts this server.
-
-### The workspace lock
-
-Only one shell may own `workspace/` at a time. On launch the shell acquires the
-lock; a child process (e.g. `claude` launched via `!`) **inherits** it through
-the `solver_workspace_lock` environment variable. The `solver-web` server holds
-the lock the same way — acquiring it standalone or inheriting it when launched
-from a running shell, and passing it to the PTY shell and any edits it makes.
-Commands marked `§` refuse to run without the lock. `lock-status` reports who
-holds it.
 
 ---
 
@@ -121,9 +110,9 @@ operators gate on it:
 
 ```bash
 solver <<'EOF'
-init 42 && eval && stack            # stop at the first step that fails
-eval || echo "needs work"           # react to a failed evaluation
-{ init 42; eval } && stack          # group, then save only if the group succeeded
+new 42 --py && eval 42 && benchmark 42   # stop at the first step that fails
+eval 42 || echo "needs work"             # react to a failed evaluation
+{ new 42 --py; eval 42 } && benchmark 42 # group, then benchmark only if it succeeded
 EOF
 ```
 
@@ -149,7 +138,7 @@ arguments and expressions. User variables are lowercase (`limit = 1000`). The
 
 | name       | type            | meaning                                                 |
 |------------|-----------------|---------------------------------------------------------|
-| `problem`  | Problem \| None | the workspace problem as an object (`{problem.number}`) |
+| `problem`  | Problem \| None | the current problem as an object (`{problem.number}`)   |
 | `rcode`    | int             | exit code of the most recent evaluation                 |
 | `loop`     | Any             | the current `loop` element (`None` outside a loop)      |
 | `next`     | int             | number of the next unsolved problem                     |
@@ -159,7 +148,7 @@ arguments and expressions. User variables are lowercase (`limit = 1000`). The
 | `unsolved` | list[Problem]   | the unsolved problems                                   |
 | `stale`    | list[Problem]   | problems whose notes are older than their source        |
 
-`next` / `random` are bare problem **numbers** (handy as arguments: `init
+`next` / `random` are bare problem **numbers** (handy as arguments: `eval
 {next}`); `problems` / `solved` / `unsolved` / `stale` hold `Problem` objects —
 reach a field with an attribute path (`{problem.number}`, `{loop.number}`). The
 computed specials are re-evaluated on **every** reference, so `{random}` yields a
@@ -183,18 +172,15 @@ number lists (each sliceable) or a literal.
 ```bash
 $ solver <<'EOF'
 loop {unsolved}[0:5]: {
-  init {loop.number} || break     # set up the problem; stop the loop if init fails
-  claude-skill solve              # work it
-  stack && reset                  # save and clear before the next iteration
+  claude-skill {loop.number} solve || break   # work it; stop the loop on failure
 }
 
 loop [1, 2, 3]: echo {loop}       # body runs with loop = 1, then 2, then 3
 EOF
 ```
 
-There is no implicit workspace lifecycle — you spell out `init … stack && reset`
-yourself, keeping every per-iteration step explicit and gateable. `break` /
-`continue` (or trailing `… || break`) control iteration; loops do not nest.
+Each per-iteration step is explicit and gateable. `break` / `continue` (or a
+trailing `… || break`) control iteration; loops do not nest.
 
 ---
 
@@ -204,8 +190,7 @@ Type `?` in the shell for this list, or `? <cmd>` for one command's usage. Each
 command name below links to its full entry — usage and description — in the
 [Command Index](commands-index.md). The legend glyphs appear in a command's help:
 
-- `§` — requires the workspace lock.
-- `↻` — may refresh workspace state (re-reads which problem is loaded).
+- `❏` — takes an optional problem number (defaults to the current problem).
 - `»` — supports `--silent` to suppress its incidental output.
 
 <!-- GEN:command-table -->
@@ -213,14 +198,14 @@ command name below links to its full entry — usage and description — in the
 |---------|---------|-------------|
 | [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark the problem. » |
-| [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. |
-| [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
+| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
+| [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. ❏ |
+| [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |
-| [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | Build all C source files for the problem. » |
+| [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
 | [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
-| [`eval-evaluate`](commands-index.md#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. |
+| [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
@@ -229,27 +214,27 @@ command name below links to its full entry — usage and description — in the
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | Recover master key from shares. |
 | [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
 | [`key-split`](commands-index.md#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
-| [`lint`](commands-index.md#command-lint) | — | Lint current problem, auto-fix with --auto-fix. » |
-| [`ls`](commands-index.md#command-ls) | — | Benchmark the current problem. |
+| [`lint`](commands-index.md#command-lint) | — | Lint current problem, auto-fix with --auto-fix. ❏ » |
+| [`ls`](commands-index.md#command-ls) | — | List the solutions dir for given/current problem. ❏ » |
 | [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. » |
-| [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file for a problem. » |
+| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. ❏ » |
+| [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file for a problem. ❏ » |
 | [`pause`](commands-index.md#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved). |
 | [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
-| [`results`](commands-index.md#command-results) | — | list the results for the problem. |
+| [`results`](commands-index.md#command-results) | — | list the results for the problem. ❏ |
 | [`search`](commands-index.md#command-search-find) | `find` | Find content in the stack. |
-| [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
+| [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. ❏ » |
 | [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
-| [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. |
+| [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. ❏ |
 | [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 
-*Legend: » supports `--silent`.*
+*Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-table -->
 
 > The table above is generated from the live command registry by the
@@ -264,32 +249,30 @@ command name below links to its full entry — usage and description — in the
 
 ```bash
 solver <<'EOF'
-init 42     # initialize the workspace for problem 42
-checkout    # optionally, check out the workspace to prevent accidental reset
-show        # open the problem page in a browser to read and understand the problem
-pause       # create scripts (non-executable files) in the workspace directory to derive/confirm mathematical insights
-new --tc    # create an empty test-case file in the workspace directory
-new --py    # create a template Python solution file in the workspace directory (p0042_s0.py)
-pause       # implement solve() in the solution template
+show 42     # open problem 42 in a browser (and select it as the current problem)
+pause       # derive/confirm insights (scratch scripts under the solution dir), then continue
+new --tc    # create an empty test-case file for the current problem
+new --py    # create a template Python solution file (p0042_s0.py)
+pause       # implement solve() in the template, then continue
 eval        # evaluate the solution against the test cases
-pause       # record the answers in the test-case file
-benchmark   # time the solution, the first time it is run 1 time
+pause       # record the answers in the test-case file, then continue
+benchmark   # time the solution
 mark        # mark the problem as solved
-new --c     # create a template C solution file in the workspace directory (p0042_s0.c)
-pause       # translate the solution to C,
-benchmark   # time the solution, (it is run between 1 to 21 times based on earlier times)
-pause       # document your learnings in notes.html
-stack       # save the workspace to the stack
-checkin     # check in the workspace,
-reset       # clear the workspace (reset before checkin is blocked by checkout)
+new --c     # create a template C solution file (p0042_s0.c)
+pause       # translate the solution to C, then continue
+benchmark   # time the C solution too
+pause       # document your learnings in notes.html, then continue
 EOF
 ```
+
+Files are edited in place in the problem's solution directory — there is no
+separate workspace to populate or persist.
 
 **Sweep a range of unsolved problems:**
 
 ```bash
 solver <<'EOF'
-loop {unsolved}[0:5]: { init {loop.number} && checkout && claude-skill solve && stack && checkin && reset }
+loop {unsolved}[0:5]: { claude-skill {loop.number} solve }
 EOF
 ```
 
@@ -306,11 +289,11 @@ Claude Code requires authentication in the CLI `claude /login`):
   artifact: `py` / `c` (a solution), `notes` (the write-up), or `test-cases`. It
   is fast and cheap, and `costs` tracks its token spend, but the AI neither runs
   nor verifies its output — that happens afterwards in the script.
-- **`claude-skill <action>`** — full Claude Code working against the *locked*
-  workspace: it runs `solver` commands, edits files, evaluates, benchmarks, and
-  iterates. The actions are `review` and `solve`. Heavier and slower, it is meant
-  for the harder job. `! claude <prompt>` drops into an interactive Claude Code
-  session against the same workspace.
+- **`claude-skill <n> <action>`** — full Claude Code working directly on a
+  problem's solution files: it runs `solver` commands, edits files, evaluates,
+  benchmarks, and iterates. The actions are `review` and `solve` (e.g.
+  `claude-skill 42 solve`). Heavier and slower, it is meant for the harder job.
+  `! claude <prompt>` drops into an interactive Claude Code session in the repo.
 
 The goal is to deepen understanding, not skip it: generate alternatives *after*
 you have solved a problem, or translate your Python into C for comparison.
@@ -325,8 +308,8 @@ you have solved a problem, or translate your Python into C for comparison.
 - **`manage-config`** shows or sets the managed settings (`server_port`,
   timeouts, `usd_to_eur`); **`config`**-style values persist to
   `solver/config.json`.
-- **`! <cmd>`** runs a bash command in the workspace (`! sh` / `! py` drop into a
-  shell / Python interpreter); it inherits the workspace lock.
+- **`! <cmd>`** runs a bash command in the current problem's solution directory
+  (`! sh` / `! py` drop into a shell / Python interpreter).
 
 ---
 

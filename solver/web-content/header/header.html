@@ -1,12 +1,11 @@
 <!-- Shared site header partial: fetched and injected into #page-header by header.js,
-     then wired from /flags?problem_number=N. Every glyph starts as an inert .nav-dummy;
-     header.js promotes the ones with a real target to live links. The filename, language
-     badge, and Eval/Save/Del buttons stay hidden except on code pages. -->
+     which wires the nav links from the current problem number. Every glyph starts as
+     an inert .nav-dummy; header.js promotes the ones with a real target to live links.
+     The filename, language badge, and Eval/Save/Del buttons stay hidden except on code pages. -->
 <a id="nav-prev" class="nav-dummy" title="Previous problem">&laquo;</a>
-<a id="nav-problem" class="nav-dummy" title="Current problem">&#10063;</a>
+<a id="nav-problem" class="nav-dummy" title="Active problem">&#10063;</a>
 <a id="nav-next" class="nav-dummy" title="Next problem">&raquo;</a>
 <span class="nav-sep"></span>
-<a id="nav-workspace" class="nav-dummy" title="Workspace problem">&#9998;</a>
 <a id="nav-euler" class="nav-dummy" title="View on Project Euler">&#8962;</a>
 <a id="nav-github" class="nav-dummy" title="View on GitHub">&#8857;</a>
 <span class="nav-sep"></span>
@@ -16,10 +15,7 @@
 <span class="lang-badge" id="lang-badge" hidden></span>
 <span class="filename" id="filename"></span>
 <span class="header-spacer"></span>
-<button id="init-btn" type="button" hidden disabled>init</button>
-<button id="reset-btn" type="button" hidden disabled>reset</button>
 <button id="eval-btn" type="button" hidden disabled>eval</button>
 <button id="save-btn" type="button" hidden disabled>save</button>
 <button id="del-btn" type="button" hidden disabled>del</button>
-<button id="workspace-btn" type="button" hidden disabled>workspace</button>
 <span class="nav-sep"></span>

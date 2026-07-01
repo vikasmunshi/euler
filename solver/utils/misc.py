@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `problems`, `manage-config`, and `lock-status` commands."""
+"""The `problems` and `manage-config` commands."""
 from typing import Literal
 
 __all__ = ['manage_config']

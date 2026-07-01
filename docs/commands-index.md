@@ -40,14 +40,14 @@ a parameter that accepts repetition.
 |---------|---------|-------------|
 | [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](#command-benchmark) | — | Benchmark the problem. » |
-| [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. |
-| [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
+| [`benchmark`](#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
+| [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. ❏ |
+| [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
-| [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for the problem. » |
+| [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
-| [`eval-evaluate`](#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. |
+| [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
@@ -56,27 +56,27 @@ a parameter that accepts repetition.
 | [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares. |
 | [`key-rekey`](#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
 | [`key-split`](#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
-| [`lint`](#command-lint) | — | Lint current problem, auto-fix with --auto-fix. » |
-| [`ls`](#command-ls) | — | Benchmark the current problem. |
+| [`lint`](#command-lint) | — | Lint current problem, auto-fix with --auto-fix. ❏ » |
+| [`ls`](#command-ls) | — | List the solutions dir for given/current problem. ❏ » |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. » |
-| [`new`](#command-new) | — | Generate new solution/test-case file for a problem. » |
+| [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. ❏ » |
+| [`new`](#command-new) | — | Generate new solution/test-case file for a problem. ❏ » |
 | [`pause`](#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved). |
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
-| [`results`](#command-results) | — | list the results for the problem. |
+| [`results`](#command-results) | — | list the results for the problem. ❏ |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
-| [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. » |
+| [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. ❏ » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
-| [`test-cases`](#command-test-cases) | — | list the test cases for the problem. |
+| [`test-cases`](#command-test-cases) | — | list the test cases for the problem. ❏ |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 
-*Legend: » supports `--silent`.*
+*Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
 
 </details>
@@ -141,14 +141,15 @@ Aliased as `help`.
 
 #### Command: `benchmark`
 
-Benchmark the problem.
+Benchmark solutions to given/current problem.
+* ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
 benchmark
 [problem=<n>] (default current)
 [all|dev|main|extra ...]
-[clean=true|--clean]
+[clean=false|--no-clean]
 [timeout=<float>|none] (default None)
 [disable_timeout=true|--disable-timeout]
 [lang=*|py|c] (default *)
@@ -189,7 +190,8 @@ Args:
     problem:            The `problem` to benchmark.
     *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                         (which expands to all three). Defaults to all three if omitted.
-    clean:              If True, force compiles C solutions. Defaults to False.
+    clean:              When False, reuse up-to-date build output from previous compilations.
+                        Defaults to True.
     timeout:            Per-run timeout in seconds for solution execution. If None, uses the
                         default timeout. Defaults to None.
     disable_timeout:    If True, disables the timeout for solution execution and forces a single
@@ -210,13 +212,14 @@ Args:
 #### Command: `claude-api`
 
 Generate specified target using Claude API.
+* ❏ takes an optional problem number (defaults to the current problem)
 
 ```
 claude-api <c|py|doc|notes|test-cases>
 [problem=<n>] (default current)
 [force=true|--force]
 [major=true|--major]
-[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-haiku-4-5|none] (default None)
+[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5|none] (default None)
 ```
 
 ```text
@@ -238,6 +241,7 @@ Prints the USD/EUR cost of the call and returns non-zero if the generator report
 #### Command: `claude-skill`
 
 Launch the Claude Euler Solver skill.
+* ❏ takes an optional problem number (defaults to the current problem)
 
 ```
 claude-skill <solve|review>
@@ -286,7 +290,8 @@ A convenience wrapper over the console's clear; equivalent to the shell
 
 #### Command: `compile-c` (`compile`)
 
-Build all C source files for the problem.
+Build all C source files for given/current problem.
+* ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
@@ -317,7 +322,7 @@ Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1401)
+[ecb_usd_rate=<float>] (default 1.1394)
 ```
 
 ```text
@@ -353,15 +358,16 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 
 ---
 
-#### Command: `eval-evaluate` (`eval`)
+#### Command: `evaluate` (`eval`)
 
-Evaluate solutions against test cases.
+Evaluate solutions to given/current problem.
+* ❏ takes an optional problem number (defaults to the current problem)
 
 ```
-eval-evaluate
+evaluate
 [problem=<n>] (default current)
 [all|dev|main|extra ...]
-[clean=true|--clean]
+[clean=false|--no-clean]
 [timeout=<float>|none] (default None)
 [disable_timeout=true|--disable-timeout]
 [lang=*|py|c] (default *)
@@ -378,7 +384,8 @@ Args:
 problem:            The `problem` to evaluate.
 *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                     (which expands to all three). Defaults to 'dev', 'main' if omitted.
-clean:              If True, force compiles C solutions. Defaults to False.
+clean:              When False, reuse up-to-date build output from previous compilations.
+                    Defaults to True.
 timeout:            Timeout in seconds for solution execution. If None, uses default timeout.
                     Defaults to None.
 disable_timeout:    If True, disables timeout for solution execution. Defaults to False.
@@ -563,6 +570,7 @@ Print `num_shares` Shamir shares of the current master key (threshold needed to 
 #### Command: `lint`
 
 Lint current problem, auto-fix with --auto-fix.
+* ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
@@ -591,11 +599,23 @@ Args:
 
 #### Command: `ls`
 
-Benchmark the current problem.
+List the solutions dir for given/current problem.
+* ❏ takes an optional problem number (defaults to the current problem)
+* » supports `--silent`
 
 ```
 ls
 [problem=<n>] (default current)
+[silent=true|--silent]
+```
+
+```text
+This function lists all files found recursively in the solution directory of a
+given problem while displaying their canonical paths and file sizes. The files
+are shown in sorted order for easy navigation.
+
+Args:
+    problem (Problem): The problem instance containing the solution directory.
 ```
 
 ---
@@ -630,6 +650,7 @@ Args:
 #### Command: `mark` (`mark-solved`)
 
 Mark the current problem as solved, after checking.
+* ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
@@ -662,6 +683,7 @@ Args:
 #### Command: `new`
 
 Generate new solution/test-case file for a problem.
+* ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
@@ -775,6 +797,7 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 #### Command: `results`
 
 list the results for the problem.
+* ❏ takes an optional problem number (defaults to the current problem)
 
 ```
 results
@@ -829,6 +852,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open problem documentation in a browser.
+* ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
@@ -905,6 +929,7 @@ Parameters:
 #### Command: `test-cases`
 
 list the test cases for the problem.
+* ❏ takes an optional problem number (defaults to the current problem)
 
 ```
 test-cases

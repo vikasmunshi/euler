@@ -122,28 +122,6 @@
     opacity: 0.5;
 }
 
-#page-header #init-btn {
-    color: #1f6f6a;
-    background: #d2ecea;
-    border: 1px solid #8ecfc9;
-}
-
-#page-header #init-btn:hover:not(:disabled) {
-    background: #c2e5e2;
-    color: #134845;
-}
-
-#page-header #reset-btn {
-    color: #8a5a16;
-    background: #f6e8cf;
-    border: 1px solid #e0c48a;
-}
-
-#page-header #reset-btn:hover:not(:disabled) {
-    background: #f0ddb8;
-    color: #6a440f;
-}
-
 #page-header #save-btn {
     color: #2a6f4f;
     background: #d4ecdd;

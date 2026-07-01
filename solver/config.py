@@ -187,10 +187,10 @@ class Config(AttributeDict):
             'session_file': root_dir / '.session',
             'skill_dir': root_dir / 'solver/ai/claude/skills/claude-euler-solver',
             'solutions_dir': root_dir / 'solutions',
-            'static_file_dir': root_dir / 'solutions/static-content',
-            'static_file_problems': root_dir / 'solutions/static-content/problems.json',
+            'static_file_dir': root_dir / 'solver/web-content',
+            'static_file_problems': root_dir / 'solver/web-content/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
-            'static_file_progress_editor': root_dir / 'solutions/static-content/progress/progress.html',
+            'static_file_progress_editor': root_dir / 'solver/web-content/progress/progress.html',
             'templates_dir': root_dir / 'solver/templates',
 
             'theme': Theme({

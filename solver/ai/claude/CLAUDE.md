@@ -32,7 +32,7 @@ flake8 solver                     # max-line-length 120
 make run
 
 # Run shell commands non-interactively (a command block; exits with its status)
-solver "init 42; eval; reset"
+solver "eval 42; benchmark 42"
 
 # Launch the PTY-backed web front end (aiohttp); serves the terminal + viewer/editor
 solver-web start        # also: stop | status | restart  (needs the `web` group: pip install -e ".[web]")
@@ -56,7 +56,7 @@ echo "refs/heads/master $(git rev-parse HEAD) refs/heads/master $(git rev-parse 
 User- and developer-facing docs live under `docs/`:
 
 - `docs/user-guide.md` — using the shell: invocation, command blocks, variables, loops, command catalogue.
-- `docs/solver-guide.md` — solving problems: the `@runner.main` decorator, test cases, the `init → stack` workflow.
+- `docs/solver-guide.md` — solving problems: the `@runner.main` decorator, test cases, the solve workflow.
 - `docs/developer-guide.md` — extending the framework: the `@register` contract, command modules, the loader.
 - `docs/commands-index.md` — every command's aliases, flags, and exact usage.
 - `docs/syntax.md` — the authoritative command-language reference.
@@ -118,7 +118,7 @@ solver/
     gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
     linter.py         — Utilities for linting code.
     loader.py         — Utility for loading modules.
-    misc.py           — The `problems`, `manage-config`, and `lock-status` commands.
+    misc.py           — The `problems` and `manage-config` commands.
     path_utils.py     — Utility functions for file and directory operations.
     scripts.py        — A set of utilities to manage Git repository workflows.
     search.py         — 'find' command: grep the solution stack for a regular expression.
@@ -136,15 +136,14 @@ solver/
 
 ### Command registration
 
-Every shell command is a plain Python function decorated with `@register(help_text=..., aliases=..., pass_ctx=..., quietable=..., changes_workspace=...)` from `solver.shell`. The command name is derived from the function name (underscores → dashes; `usage` is synthesised from the signature). The decorator handles argument tokenisation (`shlex.split`), type coercion (Literal, bool, int, Optional, Enum), and tab-completion. Commands are collected at import time; `solver/modules.csv` (read by `shell/loader.py`) lists which modules to import on startup.
+Every shell command is a plain Python function decorated with `@register(help_text=..., aliases=..., pass_ctx=..., quietable=...)` from `solver.shell`. The command name is derived from the function name (underscores → dashes; `usage` is synthesised from the signature). The decorator handles argument tokenisation (`shlex.split`), type coercion (Literal, bool, int, Optional, Enum), and tab-completion. Commands are collected at import time; `solver/modules.csv` (read by `shell/loader.py`) lists which modules to import on startup.
 
 Functions still work as normal Python — they are not transformed, just registered. See `docs/developer-guide.md` for the full register contract.
 
 ### Command contract & blocks
 
 Every command returns an `int` Unix exit code (`0` = success, non-zero = failure); the `@register`
-adapter forwards it verbatim, and the `check_workspace_lock_command` / `check_workspace_lock_generic`
-decorators (`core/lock.py`) preserve it. Input runs through a `lexer → parser → interpreter` pipeline
+adapter forwards it verbatim. Input runs through a `lexer → parser → interpreter` pipeline
 (authoritative spec: `docs/syntax.md`): commands compose with `;` (sequential), `&&` (on
 success), `||` (on failure) and `{ … }` groups, nesting arbitrarily, with a newline as an implied `;`.
 A statement is a command, a `name = expr` assignment, or a bare expression (`rcode` 0 when truthy, 1
@@ -152,16 +151,16 @@ when falsy) — so expressions gate `&&`/`||` chains. `loop <list>: <block>` is 
 runs its `{ … }` (or inline) body once per element of a list, binding the current element to `{loop}`;
 `break`/`continue`/`exit` are flow words. The lexer normalises input to a canonical guarded form (§8 of
 docs/syntax.md). `solver <cmd>` exits with the block's status, so steps can be gated directly
-(`solver "init 42 && eval && stack"`).
+(`solver "eval 42 && benchmark 42"`).
 
 ### Stack (solutions storage)
 
-Solutions live in `solutions/<d0>/<d1>/<d2>/<d3>/` (one directory level per digit of the zero-padded four-digit problem number, e.g. problem 42 → `solutions/0/0/4/2/`).
+Solutions live under `solutions/`, one directory per problem: plaintext problems in `solutions/public/pNNNN/` (e.g. problem 42 → `solutions/public/p0042/`) and encrypted problems in `solutions/private/pXXXX_YYYY/pNNNN/`, bucketed by century (e.g. problem 101 → `solutions/private/p0100_0199/p0101/`).
 
-- Problems 1–100: all files stored in plain text.
-- Problems 101+: solution code, test cases, results, and notes are encrypted (AES-256, `.enc` suffix). `stack.py` handles transparent encrypt/decrypt via `read_stack_file` / `write_stack_file`.
+- `solutions/public/`: all files stored in plain text.
+- `solutions/private/`: solution code, test cases, results, and notes are encrypted at rest (AES-256) by a transparent git clean/smudge filter (`crypto/gitfilter.py`) — ciphertext in git, plaintext in the working tree once the master key is available.
 
-The active workspace is `workspace/`. `init <n>` copies (unstacks) a problem's files there; `stack` saves them back (encrypting problems > 100), and `reset` re-stacks any changes then clears the workspace.
+There is no separate workspace and no lock: commands operate directly on each problem's files (resolved via `problem.solution_dir`), and the git filter handles encryption on commit / decryption on checkout.
 
 ### Encryption key hierarchy
 
@@ -201,21 +200,21 @@ See `solver/templates/new.py` / `new.c` for the canonical templates.
 Two AI entry points, both calling the Claude API. Install the optional deps with `pip install -e ".[ai]"` (`anthropic` + `python-dotenv`); the key is `ANTHROPIC_API_KEY`, read from the project `.env` (`models.py:get_api_key`).
 
 - **`claude-api`** (`solver/ai/api.py`) generates solution artifacts, dispatching to per-target generators — `code.py` (Python/C), `docs.py` (notes), `facts.py` (test cases) — with prompts in `solver/templates/prompt_*.txt`. Default models: Opus for code (Python + C) and notes, Sonnet for test cases. The `costs` command (`models.py`) reports accumulated token spend.
-- **`claude-skill`** (`solver/ai/skill.py`) launches Claude Code *inside* the running shell against the locked `workspace/`, via the `claude-euler-solver` skill (`.claude/skills/claude-euler-solver/`). Its actions are `solve` and `review`. The shell holds the workspace lock and the child Claude inherits it. The skill's standards live in the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`).
+- **`claude-skill`** (`solver/ai/skill.py`) launches Claude Code headless against a problem's solution files, via the `claude-euler-solver` skill (`solver/ai/claude/skills/claude-euler-solver/`). Invoked as `claude -p /claude-euler-solver <problem_number> <action>`, running at the repo root; its actions are `solve` and `review`. The skill's standards live in the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`).
 
 ### Web front end (`solver-web`)
 
 `solver-web` (`solver/web/cli.py`, console script + `python -m solver.web.cli`) runs a single localhost aiohttp server (default port `config.server_port` = 8080) as a **detached** child process, so it keeps serving after the launching shell exits. The detached child holds an exclusive `fcntl.flock` on a lock file (`.server.lock`) for its whole lifetime; that flock is the cross-process source of truth — any later `solver-web {status,stop,restart}` probes it (and reads the PID recorded in the file to signal it). The OS drops the lock on exit or crash, so there is no stale state and a recycled PID can never look "running". Actions: `start`, `stop`, `status` (default), `restart`; `--save` tees the shell's console output to the session log.
 
 `build_app` (`solver/web/app.py`) wires three concerns into one server:
-- **Terminal** — `GET /` serves an xterm.js page and `GET /ws` streams one interactive `solver` shell over a PTY (`solver/web/pty_bridge.py`). Only one PTY session is allowed at a time, since every session drives the shared `workspace/`.
-- **Read-only viewer** — the summary/problem pages and problem files via `read_stack_file` (decrypting in memory, preferring the live workspace copy of the active problem). This replaced the retired `solver.utils.server`.
-- **Edits** — `POST/DELETE /<n>/<file>` and `POST /<n>/eval` mutate or evaluate the active workspace problem; all are guarded by `check_workspace_lock_generic` and return HTTP 403 when the server is not authoritative over the workspace.
+- **Terminal** — `GET /` serves an xterm.js page and `GET /ws` streams one interactive `solver` shell over a PTY (`solver/web/pty_bridge.py`). Only one PTY session is allowed at a time, since every session drives the shared solution tree.
+- **Read-only viewer** — the summary/problem pages and problem files, read directly from each problem's `solution_dir`.
+- **Edits** — `POST/DELETE /<n>/<file>` saves/deletes a solution file and `POST /<n>/cmd` evaluates or benchmarks the problem; the write helpers return `(status, message)` and there is no lock guard.
 
-The detached server wraps its whole runtime in one `acquire_workspace_lock()` context: standalone it *acquires* the flock, launched from a running shell it *inherits* it, and every PTY child it forks re-enters and inherits the same lock (no flock conflict). The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page; there is no separate `server` shell command any more.
+The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree. The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page; there is no separate `server` shell command any more.
 
 ## Solution Code Conventions
 
-- Do NOT read solution files for problems > 100 (they are encrypted in the repo).
-- For code structure and patterns, reference solutions in `solutions/0/0/*/` (problems 1–99).
-- Build sieves, precomputed tables, and caches (`@cache`/`@lru_cache`, memo dicts) **inside** `solve()` (or in helpers it calls fresh each call), sized to the inputs — **not** at module level with a fixed bound. With `--runs=N` the harness times the repeated `solve()` calls, so anything built once at import (or a cache kept warm between runs) is excluded from the first run and free thereafter, understating the real cost. See `solutions/0/0/0/7/p0007_s0.py` (sieve sized to `n·ln n`) and `solutions/0/0/3/5/p0035_s0.py`.
+- Solution files for problems > 100 live under `solutions/private/` — ciphertext in git, plaintext in the working tree only when the master key is available; treat them as private.
+- For code structure and patterns, reference the plaintext solutions in `solutions/public/` (e.g. `solutions/public/p000*/`).
+- Build sieves, precomputed tables, and caches (`@cache`/`@lru_cache`, memo dicts) **inside** `solve()` (or in helpers it calls fresh each call), sized to the inputs — **not** at module level with a fixed bound. With `--runs=N` the harness times the repeated `solve()` calls, so anything built once at import (or a cache kept warm between runs) is excluded from the first run and free thereafter, understating the real cost. See `solutions/public/p0007/p0007_s0.py` (sieve sized to `n·ln n`) and `solutions/public/p0035/p0035_s0.py`.

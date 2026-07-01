@@ -1,10 +1,10 @@
-// Shared site header: injected into #page-header on every page and wired from
-// /flags?problem_number=N. The problem number comes from the URL (/<n>/ or
-// /<n>/<file>); the summary and progress pages have none (number 0).
+// Shared site header: injected into #page-header on every page. The problem
+// number comes from the URL (/<n>/ or /<n>/<file>); the summary and progress
+// pages have none (number 0).
 //
 // Exposes window.SolverHeader = {ready, problemNumber, filename}, where `ready`
-// resolves (with the parsed flags) once the header DOM is injected and wired —
-// code.js awaits it before touching the Eval/Save/Del buttons it owns.
+// resolves once the header DOM is injected and wired — code.js awaits it before
+// touching the Eval/Save/Del buttons it owns.
 (function () {
     'use strict';
 
@@ -31,27 +31,17 @@
         }
     }
 
-    async function fetchFlags() {
-        try {
-            const r = await fetch(`/flags?problem_number=${PROBLEM_NUMBER}`,
-                {headers: {Accept: 'application/json'}});
-            if (r.ok) return await r.json();
-        } catch { /* server unreachable: leave everything as inert dummies */
-        }
-        return {};
-    }
-
-    // Problem links (prev / workspace / this problem / next) are dummies when the
-    // flag is null; Euler and GitHub fall back to their site roots off a problem.
-    function wireNav(flags) {
-        const num = flags.problem_number || null;
+    // Problem links (prev / this problem / next) are derived from the current
+    // problem number, and are dummies off a problem (number 0); Euler and GitHub
+    // fall back to their site roots off a problem.
+    function wireNav() {
+        const num = PROBLEM_NUMBER || null;
         const byId = id => document.getElementById(id);
         const problemUrl = n => `/${pad4(n)}/`;
 
-        setLink(byId('nav-prev'), flags.previous_problem ? problemUrl(flags.previous_problem) : null);
-        setLink(byId('nav-workspace'), flags.workspace_problem ? problemUrl(flags.workspace_problem) : null);
+        setLink(byId('nav-prev'), num && num > 1 ? problemUrl(num - 1) : null);
         setLink(byId('nav-problem'), num ? problemUrl(num) : null);
-        setLink(byId('nav-next'), flags.next_problem ? problemUrl(flags.next_problem) : null);
+        setLink(byId('nav-next'), num ? problemUrl(num + 1) : null);
 
         setLink(byId('nav-euler'),
             num ? `https://projecteuler.net/problem=${num}` : 'https://projecteuler.net/progress', true);
@@ -93,16 +83,11 @@
 
     async function init() {
         const host = document.getElementById('page-header');
-        if (!host) return {};
-        const [markup, flags] = await Promise.all([
-            fetch('/header.html').then(r => r.text()),
-            fetchFlags(),
-        ]);
-        host.innerHTML = markup;
-        wireNav(flags);
+        if (!host) return;
+        host.innerHTML = await fetch('/header.html').then(r => r.text());
+        wireNav();
         fillCodeMeta();
-        document.dispatchEvent(new CustomEvent('header:ready', {detail: {flags}}));
-        return flags;
+        document.dispatchEvent(new CustomEvent('header:ready'));
     }
 
     const domReady = document.readyState === 'loading'

@@ -11,8 +11,8 @@ force was never the right question.
 This repository is a record of that journey. Where multiple approaches were tried, all are sometimes kept:
 the naïve solution alongside the elegant one, because the contrast is the lesson.
 
-The framework around the solutions is deliberate. Problems are fetched, the workspace is managed, solutions are
-benchmarked, and solutions are encrypted – all from a single interactive/web shell. An incorporated AI agent enables
+The framework around the solutions is deliberate. Problems are fetched, solutions are scaffolded and
+benchmarked, and later problems are encrypted – all from a single interactive/web shell. An incorporated AI agent enables
 reflection and learning: explore alternatives after solving a problem, translate Python to C for a performance
 comparison, or articulate the mathematical insight in plain language.
 **The point never is to get an answer but to understand why it is the answer.**
@@ -31,7 +31,7 @@ authoritative command-language spec:
 | Guide                                      | For                     | Covers                                                                           |
 |--------------------------------------------|-------------------------|----------------------------------------------------------------------------------|
 | [User Guide](docs/user-guide.md)           | using the shell         | launching, command blocks, variables, loops, the command catalogue, key exchange |
-| [Solver Guide](docs/solver-guide.md)       | solving problems        | the `@runner.main` decorator, test cases, the `init → stack` workflow            |
+| [Solver Guide](docs/solver-guide.md)       | solving problems        | the `@runner.main` decorator, test cases, the solve workflow                     |
 | [Developer Guide](docs/developer-guide.md) | extending the framework | the `@register` contract, command modules, the module loader                     |
 | [Command Index](docs/commands-index.md)    | reference               | every command's aliases, flags, and exact usage                                  |
 | [Language reference](docs/syntax.md)       | the command language    | surface syntax, canonical form, semantics                                        |
@@ -74,7 +74,6 @@ curl -fsSL https://raw.githubusercontent.com/vikasmunshi/euler/master/install.sh
 git clone https://github.com/vikasmunshi/euler.git
 cd euler
 make --version >/dev/null || sudo apt install build-essential
-mkdir workspace
 make install-all      # system deps + venv + all groups + git hooks + completions
 source .venv/bin/activate
 solver
@@ -128,28 +127,26 @@ $ solver
 │    Your Euler problem solving companion in the terminal                                              │
 │    Powered by claude.ai · prompt-toolkit · rich                                                      │
 │                                                                                                      │
-│    start with init <number|next|random>, then eval / stack / reset                                   │
+│    start with ls [number|next|random], then eval / benchmark                                         │
 │    ? help                                                                                            │
 │                                                                                                      │
 ╰──────────────────────────────────────────────────────────────────────── type exit or Ctrl-D to quit ─╯
-▎ workspace ❯ loop {solved}: {
-▎ ·   init {loop.number} --silent || continue;
-▎ ·   benchmark --silent || break;
-▎ ·   stack --silent && reset --silent || break;
+▎ ❯ loop {solved}: {
+▎ ·   benchmark {loop.number} --silent || break;
 ▎ ·   }
 ```
 
 Launch the web-based solver shell with `solver-web` or launch the interactive terminal with `solver` (or
 `python -m solver`); Type `?` for the command list, `? <cmd>` for usage, and `exit` / Ctrl-D to quit. `solver` can also
-be driven non-interactively by passing a quoted command block (`solver "init 42; eval; reset"`), exiting with the
-block's status. The full workflow - `init`, `new`, `eval`, `benchmark`, `stack`, `reset` - is in
+be driven non-interactively by passing a quoted command block (`solver "eval 42; benchmark 42"`), exiting with the
+block's status. The full workflow - `new`, `eval`, `benchmark`, `mark` - is in
 the [User Guide](docs/user-guide.md) and [Solver Guide](docs/solver-guide.md);
 the [Command Index](docs/commands-index.md) lists every command.
 
 A note on the AI assistance: two complementary paths are wired into the shell, both
 aimed at deepening understanding rather than skipping it - the single-shot
 **`claude-api`** (generate a solution, notes, or test cases) and the agentic
-**`claude-skill`** / `! claude` (Claude Code working the locked workspace). Both need
+**`claude-skill`** / `! claude` (Claude Code working directly on a problem's solution files). Both need
 the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 [User Guide](docs/user-guide.md#5-ai-assistance) for the trade-offs.
 
@@ -165,10 +162,9 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   readable as a rendered page.
 - **Web front end** - `solver-web` runs a single localhost `aiohttp` server (port 8080) with three concerns
   in one place: a browser **terminal** (xterm.js over a PTY running a real `solver` shell), a read-only
-  **viewer** that assembles each problem's page - statement, notes, and benchmark results - on the fly,
-  decrypting encrypted problems in memory so nothing lands on disk, and an in-browser **editor** that saves,
-  evaluates, and deletes solutions in the active workspace. It runs detached (survives the launching shell)
-  and inherits the workspace lock; `solver-web start|stop|status|restart` manages it, and `show N` auto-starts
+  **viewer** that assembles each problem's page - statement, notes, and benchmark results - on the fly, and an
+  in-browser **editor** that saves, evaluates, and deletes a problem's solution files. It runs detached
+  (survives the launching shell); `solver-web start|stop|status|restart` manages it, and `show N` auto-starts
   it to open a problem (or the index) in the browser.
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
@@ -235,7 +231,7 @@ solver/
     gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
     linter.py         — Utilities for linting code.
     loader.py         — Utility for loading modules.
-    misc.py           — The `problems`, `manage-config`, and `lock-status` commands.
+    misc.py           — The `problems` and `manage-config` commands.
     path_utils.py     — Utility functions for file and directory operations.
     scripts.py        — A set of utilities to manage Git repository workflows.
     search.py         — 'find' command: grep the solution stack for a regular expression.
@@ -279,10 +275,10 @@ the optional groups summarised under [Requirements](#requirements) above (`solut
 `dev`, `web`) - install only what you need.
 
 The web front end bundles its JavaScript/CSS assets locally so it runs fully offline, with no CDN
-calls. These vendored assets live under `solutions/static-content/vendor/` - xterm.js (MIT),
+calls. These vendored assets live under `solver/web-content/vendor/` - xterm.js (MIT),
 highlight.js (BSD-3-Clause), CodeJar (MIT), MathJax (Apache-2.0), and Devicon (MIT). Each is
 redistributed under its permissive license; the full license texts and an inventory of every file
-are in the [vendor README](solutions/static-content/vendor/README.md).
+are in the [vendor README](solver/web-content/vendor/README.md).
 
 ### Authors
 

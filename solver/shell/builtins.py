@@ -86,6 +86,8 @@ def _help(ctx: Context, *args: str) -> int:
             return ExitCodes.EXIT_NOTFOUND
         body = Text()
         help_text = cmd.help or '(no description)'
+        help_text = help_text.replace(' [warning]❏[/warning]',
+                                      '\n[warning]❏[/warning] uses/sets current problem.')
         help_text = help_text.replace(' [warning]»[/warning]',
                                       '\n[warning]»[/warning] supports --silent to suppress output.')
         body.append_text(Text.from_markup(help_text, style='accent.dim'))
@@ -108,7 +110,7 @@ def _help(ctx: Context, *args: str) -> int:
     ctx.console.print(Panel(table,
                             border_style='panel.border',
                             title='[accent]▎[/accent] [primary]commands[/primary]',
-                            subtitle='[warning]» supports --silent.[/warning]',
+                            subtitle='[warning]❏ uses/sets current problem | » supports --silent[/warning]',
                             subtitle_align='right',
                             title_align='left',
                             padding=(1, 2)))

@@ -36,7 +36,7 @@ from typing import Any, Literal, TypedDict
 from aiohttp import WSMsgType, web
 
 from solver.config import config
-from solver.core.evaluate import benchmark, eval_evaluate
+from solver.core.evaluate import benchmark, evaluate
 from solver.core.problems import Problem, problems
 from solver.shell import console
 from solver.utils.summary import summary
@@ -138,7 +138,7 @@ async def _save_progress_page(request: web.Request) -> web.StreamResponse:
 
 
 async def _serve_vendor_asset(request: web.Request) -> web.StreamResponse:
-    """Serve a vendored front-end asset under `static-content/vendor/`.
+    """Serve a vendored front-end asset under `web-content/vendor/`.
 
     The filename is resolved under the vendor directory; anything that escapes it
     (`..` etc.) or is absent is rejected as 404.
@@ -386,7 +386,7 @@ def _run_cmd(problem_number: int,
         if cmd == 'benchmark':
             rcode = benchmark(problem, lang=lang or '*', solution_index=solution_index)
         elif cmd == 'eval':
-            rcode = eval_evaluate(problem, lang=lang or '*', solution_index=solution_index)
+            rcode = evaluate(problem, lang=lang or '*', solution_index=solution_index)
         else:
             return 400, f'unknown command {cmd}'  # type: ignore[unreachable]
     output = capture.get().strip()
@@ -451,8 +451,6 @@ async def _problem_file(request: web.Request) -> web.StreamResponse:
     if filename == 'solutions':
         files: list[str] = []
         for file in problem.solution_dir.glob(f'p{problem_number:04d}_s*.*'):
-            if file.suffix == '.enc':
-                file = file.with_suffix('')
             files.append(f'{file.stem}_c' if file.suffix == '.c' else file.name)
         return _render_json(request, 'solutions', json.dumps(sorted(files), indent=2).encode('utf-8'))
     try:

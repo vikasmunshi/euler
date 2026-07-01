@@ -123,22 +123,6 @@ def _wrapped_for_all(master_key: bytes, public_keys: list[str]) -> dict[str, str
     return data
 
 
-# @register(help_text='Create the master encryption key (once per repo); --force overwrites.')
-# def generate_master(force: bool = False) -> int:
-#     """Create a fresh master key wrapped to the current user's public key and write enc-key.json."""
-#     enc_file: Path = config_dict['enc_key_file']
-#     if enc_file.exists() and not force:
-#         console.print(f'[error]error:[/error] {enc_file} already exists; pass --force to overwrite')
-#         return 1
-#     try:
-#         private_key: X25519PrivateKey = load_private_key()
-#     except (FileNotFoundError, ValueError) as exc:
-#         console.print(f'[error]error:[/error] need a private key first ({exc}); run `user`')
-#         return 1
-#     _write_enc_key_file(_wrapped_for_all(token_bytes(32), [public_key_hex(private_key.public_key())]))
-#     return 0
-
-
 @register(help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
 def key_rekey() -> int:
     """Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.

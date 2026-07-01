@@ -42,8 +42,9 @@ DOCS_DIR: Path = config.docs_dir
 _MARKUP = re.compile(r'\[/?[\w.]+\]')
 
 #: Trailing legend glyphs the registry appends to a command's help text.
-#:   » supports --silent
+#:   ❏ takes an optional problem number (default current) · » supports --silent
 _LEGEND: dict[str, str] = {
+    '❏': 'takes an optional problem number (defaults to the current problem)',
     '»': 'supports `--silent`',
 }
 

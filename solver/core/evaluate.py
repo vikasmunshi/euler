@@ -3,7 +3,7 @@
 """Solution evaluation: runs standalone scripts against test cases and reports results."""
 from __future__ import annotations
 
-__all__ = ['benchmark', 'compile_c', 'eval_evaluate']
+__all__ = ['benchmark', 'compile_c', 'evaluate']
 
 import re
 from ast import literal_eval
@@ -23,7 +23,7 @@ from solver.utils.path_utils import canonical_path, iterdir_recursive
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
 
 
-@register(help_text='Build all C source files for the problem.', aliases=('compile',), quietable=True)
+@register(help_text='Build all C source files for given/current problem.', aliases=('compile',), quietable=True)
 def compile_c(problem: Problem, *, clean: bool = True) -> int:
     """Compile every C solution for the problem into a runnable binary.
 
@@ -114,7 +114,7 @@ def _eval_solution[T](filename: str, *,
 
 def _evaluate(problem: Problem,
               *categories: Literal['dev', 'main', 'extra'],
-              clean: bool = False,
+              clean: bool = True,
               timeout: float | None = None,
               disable_timeout: bool = False,
               lang: Literal['*', 'py', 'c'] = '*',
@@ -136,7 +136,8 @@ def _evaluate(problem: Problem,
         problem:            The `problem` to evaluate.
         *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                             (which expands to all three). Defaults to ('dev', 'main') if omitted.
-        clean:              If True, force compiles C solutions. Defaults to False.
+        clean:              When False, reuse up-to-date build output from previous compilations.
+                            Defaults to True.
         timeout:            Timeout in seconds for solution execution. If None, uses default.
         disable_timeout:    If True, disables timeout for solution execution. Defaults to False.
         lang:               Language to evaluate. Accepts '*', 'py' or 'c'. Defaults to '*'.
@@ -227,18 +228,18 @@ def _evaluate(problem: Problem,
     return rc
 
 
-@register(help_text='Evaluate solutions against test cases.', aliases=('eval',))
-def eval_evaluate(problem: Problem,
-                  *categories: Literal['all', 'dev', 'main', 'extra'],
-                  clean: bool = False,
-                  timeout: float | None = None,
-                  disable_timeout: bool = False,
-                  lang: Literal['*', 'py', 'c'] = '*',
-                  runs: int = 1,
-                  show: bool = False,
-                  solution_index: int | None = None,
-                  verbose: bool = False,
-                  ) -> int:
+@register(help_text='Evaluate solutions to given/current problem.', aliases=('eval',))
+def evaluate(problem: Problem,
+             *categories: Literal['all', 'dev', 'main', 'extra'],
+             clean: bool = True,
+             timeout: float | None = None,
+             disable_timeout: bool = False,
+             lang: Literal['*', 'py', 'c'] = '*',
+             runs: int = 1,
+             show: bool = False,
+             solution_index: int | None = None,
+             verbose: bool = False,
+             ) -> int:
     """
     Evaluate solutions against test cases.
 
@@ -246,7 +247,8 @@ def eval_evaluate(problem: Problem,
     problem:            The `problem` to evaluate.
     *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                         (which expands to all three). Defaults to 'dev', 'main' if omitted.
-    clean:              If True, force compiles C solutions. Defaults to False.
+    clean:              When False, reuse up-to-date build output from previous compilations.
+                        Defaults to True.
     timeout:            Timeout in seconds for solution execution. If None, uses default timeout.
                         Defaults to None.
     disable_timeout:    If True, disables timeout for solution execution. Defaults to False.
@@ -284,10 +286,10 @@ def eval_evaluate(problem: Problem,
     return rc
 
 
-@register(help_text='Benchmark the problem.', quietable=True)
+@register(help_text='Benchmark solutions to given/current problem.', quietable=True)
 def benchmark(problem: Problem,
               *categories: Literal['all', 'dev', 'main', 'extra'],
-              clean: bool = False,
+              clean: bool = True,
               timeout: float | None = None,
               disable_timeout: bool = False,
               lang: Literal['*', 'py', 'c'] = '*',
@@ -325,7 +327,8 @@ def benchmark(problem: Problem,
         problem:            The `problem` to benchmark.
         *categories:        Test case categories to include. Accepts 'dev', 'main', 'extra', or 'all'
                             (which expands to all three). Defaults to all three if omitted.
-        clean:              If True, force compiles C solutions. Defaults to False.
+        clean:              When False, reuse up-to-date build output from previous compilations.
+                            Defaults to True.
         timeout:            Per-run timeout in seconds for solution execution. If None, uses the
                             default timeout. Defaults to None.
         disable_timeout:    If True, disables the timeout for solution execution and forces a single
@@ -363,8 +366,22 @@ def benchmark(problem: Problem,
     return rc
 
 
-@register(help_text='Benchmark the current problem.')
+@register(help_text='List the solutions dir for given/current problem.', quietable=True)
 def ls(problem: Problem) -> int:
+    """This function lists all files found recursively in the solution directory of a
+    given problem while displaying their canonical paths and file sizes. The files
+    are shown in sorted order for easy navigation.
+
+    Args:
+        problem (Problem): The problem instance containing the solution directory.
+    """
+    files: list[tuple[str, int]] = []
     for file in sorted(iterdir_recursive(problem.solution_dir, rt='path')):
-        console.print(canonical_path(file), file.stat().st_size, highlight=True)
+        files.append((canonical_path(file), file.stat().st_size))
+    if not files:
+        console.print('[error]error:[/error] no files found in the solution directory')
+        return ExitCodes.EXIT_ERROR
+    max_filename_length: int = max(len(filename) for filename, _ in files)
+    for filename, size in files:
+        console.print(f'{filename:<{max_filename_length}} {size:6d} bytes', highlight=True)
     return ExitCodes.EXIT_OK

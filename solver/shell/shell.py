@@ -345,13 +345,12 @@ class SolverShell:
         body = Text.from_markup(
             '[accent]SOLVER[/accent]  [muted]v2[/muted]\n'
             '[primary]  Your Euler problem solving companion in the terminal[/primary]\n'
-            '[muted]  Powered by [/muted][accent.dim]claude.ai[/accent.dim]'
-            '[muted] · [/muted][accent.dim]prompt-toolkit[/accent.dim]'
-            '[muted] · [/muted][accent.dim]rich[/accent.dim]\n\n'
-            '[muted]  start with [/muted][accent.dim]init <number|next|random>[/accent.dim]'
-            '[muted], then [/muted][accent.dim]eval[/accent.dim][muted] / [/muted]'
-            '[accent.dim]stack[/accent.dim][muted] / [/muted][accent.dim]reset[/accent.dim]\n'
-            '[accent]  ?[/accent][muted] help[/muted]'
+            '[muted]  Powered by [accent.dim]claude.ai[/accent.dim]'
+            ' · [accent.dim]prompt-toolkit[/accent.dim]'
+            ' · [accent.dim]rich[/accent.dim]\n\n'
+            '  start with [accent.dim]ls \\[number|next|random][/accent.dim],'
+            ' then [accent.dim]eval[/accent.dim]/[accent.dim]benchmark[/accent.dim]\n'
+            '[accent]  ?[/accent] help[/muted]'
         )
         self.console.print(Panel(
             body,

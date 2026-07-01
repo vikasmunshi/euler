@@ -2,7 +2,7 @@
 
 This guide is for someone using the framework to **solve Project Euler
 problems**. It explains the solution interface — the `@runner.main` decorator and
-its C counterpart — and the round trip from `init` to `stack`.
+its C counterpart — and the workflow from scaffolding a solution to benchmarking it.
 
 If you want the shell and command reference, read the [User Guide](user-guide.md).
 If you want to add commands to the framework, read the
@@ -161,14 +161,14 @@ implicit.
 
 ## 6. The `new` command
 
-`new` scaffolds solution files in the workspace, named after the current problem
-and numbered after any solutions already present (`p0042_s0.py`, `p0042_s1.py`, …).
-Run `init <N>` first so the workspace knows which problem it is.
+`new` scaffolds solution files for a problem, named after it and numbered after
+any solutions already present (`p0042_s0.py`, `p0042_s1.py`, …). Pass the problem
+number, or let it default to the current problem (the last one a command named).
 
 ```bash
 solver <<'EOF'
-new            # the next Python solution + a matching .c sibling
-new --py       # a Python solution only
+new 42         # the next Python solution + a matching .c sibling for problem 42
+new --py       # a Python solution only (for the current problem)
 new --c        # add a .c sibling for every .py that lacks one
 new --tc       # create a template test_cases.json (only if one is missing)
 EOF
@@ -185,21 +185,18 @@ Each generated solution is the thin runner template from §1–2: it implements 
 
 ```bash
 solver <<'EOF'
-init N             # copy problem files into workspace/
-ls                 # list the problem files
-show               # read problem statement, test_cases, result, and notes in the browser
-checkout           # optionally, check out the workspace to prevent accidental reset
+show 42            # read the statement, test_cases, results, and notes in the browser
+ls                 # list the problem's files
 # ...read the problem statement, review the test cases...
 new --tc           # scaffold test_cases.json if needed
 new --py           # scaffold p0042_s0.py
 # ...implement solve() in py...
-# ...implement any required analysis/brute-force scripts in workspace/ as non-executable files...
+# ...implement any analysis/brute-force scripts in the solution dir as non-executable files...
 eval               # check correctness against dev + main test cases
 eval all           # check correctness against dev + main + extra test cases
 # check and record answers in test_cases.json
 lint               # check and fix linter errors
 benchmark          # measure timings (max 21 runs each) and record to results.json
-stack              # save changes back to the solution stack (fix any linter errors)
 mark               # mark solved (checks the problem is solved)
 new --c            # scaffold p0042_s0.c
 # ...implement solve() in c...
@@ -207,14 +204,14 @@ eval lang=c        # check correctness against dev + main test cases
 eval all lang=c    # check correctness against dev + main + extra test cases
 benchmark lang=c   # measure timings (max 21 runs each) and record to results.json
 benchmark          # benchmark all solutions and all test cases
-stack              # save changes back to the solution stack (fix any linter errors)
 # ...write up the mathematical insight in notes.html...
-stack              # save changes back to the solution stack (fix any linter errors)
-checkin            # check in the workspace,
-reset              # clear the workspace (re-stacking any changes first)
-commit             # commit the changes to the repo
+commit             # commit the changes to the repo (git-commit)
 EOF
 ```
+
+`show 42` selects problem 42 as the current problem, so the later commands act on
+it without repeating the number. Files are edited in place in the problem's
+solution directory — there is no workspace to populate, persist, or clear.
 
 Two complementary checks:
 **`eval`** answers *is it right* and *how fast*,
@@ -234,9 +231,10 @@ See the [User Guide](user-guide.md) for the full options of each command and
 
 ## 8. File layout and naming
 
-Solutions live under `solutions/<d0>/<d1>/<d2>/<d3>/`, one directory per digit of
-the zero-padded four-digit problem number (problem 42 → `solutions/0/0/4/2/`).
-Within a directory:
+Solutions live under `solutions/`, one directory per problem: plaintext problems
+in `solutions/public/pNNNN/` (problem 42 → `solutions/public/p0042/`) and encrypted
+problems in `solutions/private/pXXXX_YYYY/pNNNN/`, bucketed by century (problem 101
+→ `solutions/private/p0100_0199/p0101/`). Within a directory:
 
 | file              | contents                                                 |
 |-------------------|----------------------------------------------------------|
@@ -251,10 +249,12 @@ Within a directory:
 Multiple solutions per problem are supported — `new` numbers the next index for
 you (`p0042_s0`, `p0042_s1`, …).
 
-**Problems 1–100 are stored in plain text; 101+ are encrypted at rest** (AES-256,
-`.enc` suffix). The shell encrypts/decrypts transparently on `stack` / `init`, so
-you work with plaintext in `workspace/` either way. Do **not** read solution
-files for problems > 100 directly from the repo — they are ciphertext. For code
-structure and patterns, reference the plaintext solutions in `solutions/0/0/*/`.
+**Problems under `solutions/public/` are plain text; those under
+`solutions/private/` are encrypted at rest** (AES-256) by a transparent git
+clean/smudge filter — ciphertext in git, but plaintext in your working tree once
+you hold the master key (see the [Git Filter Guide](gitfilter-guide.md) and the
+User Guide's key-exchange section). Without the key the private files stay
+ciphertext. For code structure and patterns, reference the plaintext solutions
+under `solutions/public/`.
 
 ---

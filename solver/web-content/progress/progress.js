@@ -46,13 +46,11 @@ contentEl.addEventListener('keydown', e => {
     }
 });
 
-// The Save button lives in the shared header, injected asynchronously; saving the
-// progress file needs an authoritative server (the /progress POST is lock-guarded).
-window.SolverHeader.ready.then(flags => {
+// The Save button lives in the shared header, injected asynchronously; wire it once ready.
+window.SolverHeader.ready.then(() => {
     saveBtn = document.getElementById('save-btn');
-    const canSave = !!(flags && flags.authoritative);
     saveBtn.hidden = false;
-    saveBtn.disabled = !canSave;
-    saveBtn.title = canSave ? 'Save the progress file (Ctrl/Cmd+S)' : 'Workspace is read-only here';
+    saveBtn.disabled = false;
+    saveBtn.title = 'Save the progress file (Ctrl/Cmd+S)';
     saveBtn.addEventListener('click', save);
 });
