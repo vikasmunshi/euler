@@ -10,8 +10,8 @@ solver.config,,
 solver.core.download,,
 solver.core.evaluate,True,True
 solver.core.problems,,
-solver.core.results,True,
-solver.core.test_cases,True,
+solver.core.results,True,True
+solver.core.test_cases,True,True
 solver.crypto.ciphers,,
 solver.crypto.config,,
 solver.crypto.gitfilter,,

@@ -17,7 +17,7 @@ from solver.core.problems import Problem
 from solver.core.results import results_collector
 from solver.core.test_cases import TestCase, load_test_cases
 from solver.shell import console, register
-from solver.utils.path_utils import canonical_path
+from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 # group 1: problem number, group 2: solution index, group 3: file type
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
@@ -227,7 +227,7 @@ def _evaluate(problem: Problem,
     return rc
 
 
-@register(help_text='Evaluate solutions against test cases.', aliases=('eval',), quietable=True)
+@register(help_text='Evaluate solutions against test cases.', aliases=('eval',))
 def eval_evaluate(problem: Problem,
                   *categories: Literal['all', 'dev', 'main', 'extra'],
                   clean: bool = False,
@@ -284,7 +284,7 @@ def eval_evaluate(problem: Problem,
     return rc
 
 
-@register(help_text='Benchmark the problem currently in the workspace.', quietable=True)
+@register(help_text='Benchmark the problem.', quietable=True)
 def benchmark(problem: Problem,
               *categories: Literal['all', 'dev', 'main', 'extra'],
               clean: bool = False,
@@ -361,3 +361,10 @@ def benchmark(problem: Problem,
         console.print('[muted]Benchmark interrupted by user.[/muted]')
         return ExitCodes.EXIT_ERROR
     return rc
+
+
+@register(help_text='Benchmark the problem currently in the workspace.')
+def ls(problem: Problem) -> int:
+    for file in sorted(iterdir_recursive(problem.solution_dir, rt='path')):
+        console.print(canonical_path(file), file.stat().st_size, highlight=True)
+    return ExitCodes.EXIT_OK

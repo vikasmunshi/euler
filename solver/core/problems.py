@@ -5,12 +5,13 @@ from __future__ import annotations
 
 __all__ = ['Problem', 'problems']
 
+from datetime import datetime
 from functools import lru_cache
 from itertools import chain
 from json import loads
 from pathlib import Path
 from random import choice
-from typing import NamedTuple
+from typing import Literal, NamedTuple, TypedDict
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -30,8 +31,16 @@ def solution_dir(problem_number: int) -> Path:
     return config.solutions_dir.joinpath('public', f'p{problem_number:04d}')
 
 
+class ProblemInfoDict(TypedDict):
+    title: str
+    level: int | Literal['']
+    pct: int | Literal['']
+    solved: bool
+    date: str
+
+
 @lru_cache(maxsize=None)
-def get_problems() -> dict[int, dict[str, str | int | bool]]:
+def get_problems() -> dict[int, ProblemInfoDict]:
     """Retrieve problems from a cached problems.json."""
     return {int(k): v for k, v in loads(config.static_file_problems.read_text()).items()}
 
@@ -130,7 +139,7 @@ class Problems:
         self.__unsolved_problems: list[Problem] = []
 
     def clear_cache(self) -> None:
-        """Drop every memoised collection so they are rebuilt from `problems.json` on next access."""
+        """Drop every memoized collection so they are rebuilt from `problems.json` on next access."""
         get_problems.cache_clear()
         self.__problems_list = []
         self.__problems_dict = {}
@@ -142,6 +151,22 @@ class Problems:
     def last_problem(self) -> Problem:
         """The highest-numbered known problem."""
         return self.problems_list[-1]
+
+    @property
+    def last_solved_problem(self) -> Problem:
+        """The latest solved `problem`."""
+        result: Problem = self.problems_list[0]
+        latest_solved: datetime | None = None
+        for num, info in get_problems().items():
+            if not info['solved']:
+                continue
+            if not info['date']:
+                continue
+            solved = datetime.strptime(info['date'], "%a, %d %b %Y, %H:%M")
+            if not latest_solved or solved > latest_solved:
+                result = Problem.from_number(num)
+                latest_solved = solved
+        return result
 
     @property
     def next_unsolved_problem(self) -> Problem:
@@ -163,7 +188,7 @@ class Problems:
         """
         if not self.__problems_list:
             self.__problems_list = [
-                Problem(number=num, title=str(info['title']), difficulty=str(info['level']))
+                Problem(number=num, title=info['title'], difficulty=str(info['level']))
                 for num, info in sorted(get_problems().items(), key=lambda item: item[0])
             ]
             for problem in self.__problems_list:
@@ -196,7 +221,7 @@ class Problems:
         """Problems flagged solved with a recorded date, ascending by number (built lazily and cached)."""
         if not self.__solved_problems:
             self.__solved_problems = [
-                Problem(number=num, title=str(info['title']), difficulty=str(info['level']))
+                Problem.from_number(num)
                 for num, info in sorted(get_problems().items(), key=lambda item: item[0])
                 if info['solved'] and bool(info['date'])
             ]

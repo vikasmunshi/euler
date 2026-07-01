@@ -58,6 +58,11 @@ class Variables():
     """
 
     __slots__ = ('__dict__', '__reserved__')
+    problems: list[Problem]
+    solved: list[Problem]
+    unsolved: list[Problem]
+    next: int
+    random: int
 
     def __init__(self) -> None:
         self.__dict__: dict[str, Any] = {
@@ -140,7 +145,7 @@ class Variables():
     def problem(self) -> Problem:
         """The current problem, exposed as `problem`."""
         if self.__dict__['problem'] is None:
-            self.__dict__['problem'] = problems.next_unsolved_problem
+            self.__dict__['problem'] = problems.last_solved_problem
         return cast(Problem, self.__dict__['problem'])
 
     @problem.setter

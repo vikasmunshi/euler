@@ -86,8 +86,8 @@ def _help(ctx: Context, *args: str) -> int:
             return ExitCodes.EXIT_NOTFOUND
         body = Text()
         help_text = cmd.help or '(no description)'
-        help_text = help_text.replace(
-            ' [warning]»[/warning]', '\n[warning]»[/warning] supports --silent to suppress output.')
+        help_text = help_text.replace(' [warning]»[/warning]',
+                                      '\n[warning]»[/warning] supports --silent to suppress output.')
         body.append_text(Text.from_markup(help_text, style='accent.dim'))
         if cmd.aliases:
             body.append('\n\naliases: ', style='muted')
@@ -100,14 +100,16 @@ def _help(ctx: Context, *args: str) -> int:
                                 title_align='left', padding=(1, 2)))
         return ExitCodes.EXIT_OK
     table = Table(show_header=True, header_style='muted', box=None, padding=(0, 2))
-    table.add_column('command', style='cmd.name', no_wrap=True)
-    table.add_column('aliases', style='cmd.name', no_wrap=True)
+    table.add_column('command', style='accent.dim', no_wrap=True)
+    table.add_column('aliases', style='accent.dim', no_wrap=True)
     table.add_column('description', style='cmd.help')
     for cmd in reg.all():
         table.add_row(cmd.name, ' '.join(cmd.aliases), cmd.help or '')
-    ctx.console.print(Panel(table, border_style='panel.border',
+    ctx.console.print(Panel(table,
+                            border_style='panel.border',
                             title='[accent]▎[/accent] [primary]commands[/primary]',
                             subtitle='[warning]» supports --silent.[/warning]',
                             subtitle_align='right',
-                            title_align='left', padding=(1, 2)))
+                            title_align='left',
+                            padding=(1, 2)))
     return ExitCodes.EXIT_OK

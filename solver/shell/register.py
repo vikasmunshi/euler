@@ -24,7 +24,6 @@ __all__ = ['register']
 import ast
 import enum
 import inspect
-import os
 import types
 import typing
 from dataclasses import dataclass
@@ -476,16 +475,6 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
     # Value-side completion: 'key=<partial>'.
     if '=' in incomplete and not incomplete.startswith('='):
         key, _, partial = incomplete.partition('=')
-        # Special case: list executable files in the workspace dir.
-        if key == 'solution' and variables.problem is not None:
-            try:
-                return [
-                    f'solution={f.name}'
-                    for f in sorted(variables.problem.solution_dir.iterdir())
-                    if f.is_file() and os.access(f, os.X_OK) and f.name.startswith(partial)
-                ]
-            except OSError:
-                return []
         ann = _keyword_annotation(spec, key)
         # Special case: the `problem` special completes to problem numbers.
         if key == 'problem' and _is_problem_annotation(ann):
