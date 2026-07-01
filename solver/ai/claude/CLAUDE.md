@@ -160,7 +160,7 @@ Solutions live under `solutions/`, one directory per problem: plaintext problems
 - `solutions/public/`: all files stored in plain text.
 - `solutions/private/`: solution code, test cases, results, and notes are encrypted at rest (AES-256) by a transparent git clean/smudge filter (`crypto/gitfilter.py`) — ciphertext in git, plaintext in the working tree once the master key is available.
 
-There is no separate workspace and no lock: commands operate directly on each problem's files (resolved via `problem.solution_dir`), and the git filter handles encryption on commit / decryption on checkout.
+Commands operate directly on each problem's files (resolved via `problem.solution_dir`); the git filter handles encryption on commit / decryption on checkout.
 
 ### Encryption key hierarchy
 
@@ -209,9 +209,9 @@ Two AI entry points, both calling the Claude API. Install the optional deps with
 `build_app` (`solver/web/app.py`) wires three concerns into one server:
 - **Terminal** — `GET /` serves an xterm.js page and `GET /ws` streams one interactive `solver` shell over a PTY (`solver/web/pty_bridge.py`). Only one PTY session is allowed at a time, since every session drives the shared solution tree.
 - **Read-only viewer** — the summary/problem pages and problem files, read directly from each problem's `solution_dir`.
-- **Edits** — `POST/DELETE /<n>/<file>` saves/deletes a solution file and `POST /<n>/cmd` evaluates or benchmarks the problem; the write helpers return `(status, message)` and there is no lock guard.
+- **Edits** — `POST/DELETE /<n>/<file>` saves/deletes a solution file and `POST /<n>/cmd` evaluates or benchmarks the problem; the write helpers return `(status, message)`.
 
-The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree. The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page; there is no separate `server` shell command any more.
+The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree. The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page.
 
 ## Solution Code Conventions
 

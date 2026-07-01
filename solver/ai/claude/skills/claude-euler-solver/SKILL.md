@@ -4,7 +4,7 @@ description: Use when Claude is launched by the `claude-skill` command via
   `claude -p /claude-euler-solver <problem_number> <action> [additional_prompt]`
   to perform an action on a single Project Euler problem's solution files under
   `solutions/`. Claude runs headless at the repository root and edits the problem's
-  solution directory directly — there is no separate workspace and no lock. Two
+  solution directory directly. Two
   actions — `solve` (write and verify a Python solution, translate it to C, then
   document and summarise) and `review` (audit an existing solution for C↔Python
   algorithmic parity, in-source documentation, and `notes.html` standards). Do NOT
@@ -51,7 +51,7 @@ and [`mark`](docs/commands-index.md#command-mark-mark-solved). The solution inte
 ## Execution model
 
 The skill runs at the repository root and operates **directly** on the problem's
-solution files — there is no separate workspace and no lock to acquire or inherit.
+solution files.
 `solver` is on `PATH`; run subcommands directly and pass the problem number
 (`solver "ls 42"`, `solver "eval 42 lang=py"`, …). Every command takes an optional
 leading problem number and otherwise defaults to the last one used, so once a step
@@ -203,8 +203,8 @@ report that this is a `solve` job, not a `review`. Then, in order:
 
 ## Phase 3 — Finalize (always last)
 
-Files are edited in place in the solution directory, so there is no separate persist
-step. Just make sure the work is clean, then summarise:
+Files are edited in place in the solution directory. Make sure the work is clean,
+then summarise:
 
 1. **Lint and fix:** `solver "lint <n> --auto-fix"`. It clears the mechanical
    `flake8` issues automatically; fix any remaining `mypy`/`flake8` errors by hand

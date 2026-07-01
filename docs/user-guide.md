@@ -265,8 +265,8 @@ pause       # document your learnings in notes.html, then continue
 EOF
 ```
 
-Files are edited in place in the problem's solution directory — there is no
-separate workspace to populate or persist.
+Files are edited in place in the problem's solution directory; `commit` persists
+them.
 
 **Sweep a range of unsolved problems:**
 
@@ -318,7 +318,7 @@ you have solved a problem, or translate your Python into C for comparison.
 Solutions under `solutions/private/` are encrypted at rest (in accordance with
 [Project Euler's guidelines](https://projecteuler.net/about#publish)) by a
 **transparent git clean/smudge filter** — they are ciphertext in git but plaintext
-in your working tree, with no `init`/`stack`/`reset` step. You only need keys if you
+in your working tree. You only need keys if you
 want to collaborate on, or study, those files; `solutions/public/` is plaintext and
 needs nothing. The mechanics of the filter itself are covered in the
 [Git Filter Guide](gitfilter-guide.md); this section covers the key material.

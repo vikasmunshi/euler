@@ -16,8 +16,7 @@ The key material it relies on (your identity and the master key) is described in
 Files under `solutions/private/` are stored **encrypted in git** (in the index,
 in commits, on the remote) but appear as **plaintext in your working tree**. You
 edit and run them normally; git encrypts on the way in and decrypts on the way
-out. There is no `init`/`stack`/`reset` step and no workspace lock — you can work
-on many problems at once.
+out. You can work on many problems at once.
 
 ```
    working tree                git object store / remote

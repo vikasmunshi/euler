@@ -218,7 +218,7 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
 
 
 # ---------------------------------------------------------------------------
-# Viewer helpers (ported from the retired solver.utils.server)
+# Viewer helpers
 # ---------------------------------------------------------------------------
 def _prettify_json(content: bytes) -> bytes:
     """Re-serialise JSON with two-space indentation for the code viewer.

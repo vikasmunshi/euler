@@ -211,7 +211,7 @@ EOF
 
 `show 42` selects problem 42 as the current problem, so the later commands act on
 it without repeating the number. Files are edited in place in the problem's
-solution directory — there is no workspace to populate, persist, or clear.
+solution directory, and `commit` persists them.
 
 Two complementary checks:
 **`eval`** answers *is it right* and *how fast*,
