@@ -106,22 +106,15 @@ class Config(AttributeDict):
     # precise per-field type of each `config.<name>` read.
     scripts: Scripts
     api_timeout: float
-    author_email: str
-    default_results: str
-    default_solution_notes: str
-    default_test_cases: str
     max_line_length: int
     max_output_tokens: int
     max_retries: int
     notes_filename: str
-    number_filename: str
-    project_git_url: str
     projecteuler_url: str
     resource_dirname: str
     results_filename: str
     screen_width: int
     server_port: int
-    stale_notes_tolerance_s: float
     statement_filename: str
     test_cases_filename: str
     timeout_multiple: float
@@ -129,15 +122,12 @@ class Config(AttributeDict):
     ecb_usd_rate: float
     root_dir: Path
     backup_dir: Path
-    bin_dir: Path
     cache_dir: Path
-    checkout: Path
     docs_dir: Path
     history_file: Path
     modules_file: Path
     server_lock_file: Path
     session_file: Path
-    skill_dir: Path
     solutions_dir: Path
     static_file_dir: Path
     static_file_problems: Path
@@ -153,22 +143,15 @@ class Config(AttributeDict):
             'scripts': Scripts(),
 
             'api_timeout': 600.0,  # seconds
-            'author_email': 'vikas.munshi@gmail.com',
-            'default_results': 'Solution pending... the mathematician is still thinking.',
-            'default_solution_notes': 'Nothing here yet - come back when the dust has settled.',
-            'default_test_cases': 'No test cases yet - someone has to go first.',
             'max_line_length': 120,  # keep in sync with tox.ini [flake8] max-line-length
             'max_output_tokens': 10_000,
             'max_retries': 3,
             'notes_filename': 'notes.html',
-            'number_filename': 'number.txt',
-            'project_git_url': 'https://github.com/vikasmunshi/euler',
             'projecteuler_url': 'https://projecteuler.net',
             'resource_dirname': 'resources',
             'results_filename': 'results.json',
             'screen_width': 86,
             'server_port': 8080,
-            'stale_notes_tolerance_s': 2.0,  # Seconds a source must out-age notes.html to count notes as stale.
             'statement_filename': 'statement.html',
             'test_cases_filename': 'test_cases.json',
             'timeout_multiple': 30.0,  # timeout in seconds per run when runs > 1
@@ -177,15 +160,12 @@ class Config(AttributeDict):
 
             'root_dir': root_dir,
             'backup_dir': root_dir / '.backup',
-            'bin_dir': root_dir / '.bin',
             'cache_dir': root_dir / '.cache',
-            'checkout': root_dir / '.checkout',
             'docs_dir': root_dir / 'docs',
             'history_file': root_dir / '.history',
             'modules_file': root_dir / 'solver/modules.csv',
             'server_lock_file': root_dir / '.server.lock',
             'session_file': root_dir / '.session',
-            'skill_dir': root_dir / 'solver/ai/claude/skills/claude-euler-solver',
             'solutions_dir': root_dir / 'solutions',
             'static_file_dir': root_dir / 'solver/web-content',
             'static_file_problems': root_dir / 'solver/web-content/problems.json',
