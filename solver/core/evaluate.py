@@ -25,7 +25,7 @@ _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c
 
 @register(help_text='Build all C source files for the problem.', aliases=('compile',), quietable=True)
 def compile_c(problem: Problem, *, clean: bool = True) -> int:
-    """Compile every C solution in the workspace into a runnable binary.
+    """Compile every C solution for the problem into a runnable binary.
 
     Builds each `.c` file in `problem.solution_dir/` (linking the runner harness)
     so it can be evaluated and benchmarked; reports per-file success or the compiler
@@ -128,7 +128,7 @@ def _evaluate(problem: Problem,
     """
     Run all solutions in problem.solutions_dir against the filtered test cases and report results.
 
-    Test cases are read from the workspace's test cases file and filtered to the given
+    Test cases are read from the problem's test cases file and filtered to the given
     categories. Each solution (any executable file in problem.solutions_dir) is run against every
     matching test case via eval_solution, and each result is passed to the result recorder.
 
@@ -295,7 +295,7 @@ def benchmark(problem: Problem,
               reset: bool = False,
               verbose: bool = False,
               ) -> int:
-    """Measure and record the execution time of the workspace solutions.
+    """Measure and record the execution time of the problem's solutions.
 
     Like `eval`, runs every solution against the chosen test-case categories, but
     always **records** the timings to `results.json` and repeats each case an
@@ -363,7 +363,7 @@ def benchmark(problem: Problem,
     return rc
 
 
-@register(help_text='Benchmark the problem currently in the workspace.')
+@register(help_text='Benchmark the current problem.')
 def ls(problem: Problem) -> int:
     for file in sorted(iterdir_recursive(problem.solution_dir, rt='path')):
         console.print(canonical_path(file), file.stat().st_size, highlight=True)

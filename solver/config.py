@@ -222,7 +222,6 @@ class Config(AttributeDict):
             'style': Style.from_dict({
                 'prompt.bar': '#f97316 bold',
                 'prompt.path': '#60a5fa',
-                'prompt.path.unlocked': '#475569',  # dimmed: workspace lock not held
                 'prompt.symbol': '#f97316 bold',
                 'prompt.user': '#e5e7eb',
                 '': '#60a5fa',  # typed input text

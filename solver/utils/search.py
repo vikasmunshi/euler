@@ -3,9 +3,8 @@
 """'find' command: grep the solution stack for a regular expression.
 
 Unlike a plain filesystem grep, this walks the *logical* stack — iterating over
-problems (all, or only solved) and reading each file through
-:func:`read_stack_file`, which transparently decrypts the encrypted files of
-problems above 100.  Matches are printed as '<dir>/<file>:<line> <text>' with
+problems (all, or only solved) and reading each solution file directly from its
+solution directory.  Matches are printed as '<dir>/<file>:<line> <text>' with
 the matched substring highlighted.
 """
 from __future__ import annotations

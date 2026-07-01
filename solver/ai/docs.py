@@ -82,11 +82,11 @@ def _generate_doc(prompt: str, model: Model, images: dict[str, bytes] | None = N
 
 def generate_notes(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """
-    Generate and update HTML notes for the current workspace's problem.
+    Generate and update HTML notes for the given problem.
 
     Args:
         model (Model)     : The AI model used to generate notes.
-        problem (Problem) : The problem currently in the workspace.
+        problem (Problem) : The problem to document.
         force (bool)      : Force note generation even if no new solutions are available.
         major (bool)      : Withhold any prior notes from the prompt (use after a template/prompt change).
     """
@@ -126,13 +126,13 @@ def _parse_test_cases_json(raw: str) -> str | None:
 
 def generate_test_cases(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """
-    Generate a test_cases.json file for the current workspace's problem.
+    Generate a test_cases.json file for the given problem.
 
     Retries once with a "JSON only, no prose" reminder if the first response cannot be parsed.
 
     Args:
         model (Model)     : The AI model used to generate test cases.
-        problem (Problem) : The problem currently in the workspace.
+        problem (Problem) : The problem to generate test cases for.
         force (bool)      : Overwrite an existing test_cases.json.
         major (bool)      : No-op for test cases; preserved for the common make() signature.
     """

@@ -469,8 +469,8 @@ def _check_generated_code(*,
             errors[solution.name] = f'{solution.name} is not a valid source filename, should end with .py or .c'
         _lint_generated_code(solution=solution, failed=failed, errors=errors)
         if solution.name in failed:
-            # Preserve the rejected source as a .bak for debugging and drop it from the workspace so a
-            # final-failure leftover is never stacked; a retry re-emits and rewrites it via from_msg.
+            # Preserve the rejected source as a .bak for debugging and remove it from the solution
+            # directory so a final-failure leftover never lingers; a retry re-emits and rewrites it via from_msg.
             backup_file: Path = solution.file.with_suffix(f'.{attempt}{suffix}.bak')
             write_file(backup_file, solution.code.encode(), f'backup of failed {solution.name}')
             solution.file.unlink(missing_ok=True)
@@ -519,9 +519,9 @@ def _load_test_cases(problem: Problem, filter_null_answers: bool) -> list[dict[s
 
 def generate_c_code(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """
-    Generates C code for Python solutions in the current workspace.
+    Generates C code for the problem's Python solutions.
 
-    This function identifies Python solution files in the workspace that do not have corresponding
+    This function identifies Python solution files that do not have corresponding
     C implementation files. It generates C code for these Python solutions based on the test cases
     and problem metadata. The C solutions are created using a templated approach and validated through
     specific criteria.
@@ -531,7 +531,7 @@ def generate_c_code(model: Model, *, problem: Problem, force: bool, major: bool)
 
     Arguments:
         model (Model)     : The model instance to use for generating the C solutions.
-        problem (Problem) : The problem currently in the workspace.
+        problem (Problem) : The problem to generate C code for.
         force (bool)      : If True, forces generation even if no files are missing.
         major (bool)      : Whether this is after a major change.
 
@@ -582,19 +582,19 @@ def generate_c_code(model: Model, *, problem: Problem, force: bool, major: bool)
 def generate_py_code(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """
     Generates Python code for a specified problem using the provided model. The function creates a new file in the
-    workspace with a unique name, gathers problem-related facts, and formulates a completion prompt for generating
-    solutions. It verifies the presence of problem content and valid test cases before code generation. The function
-    also handles template parsing errors and prompts for retry messages when required.
+    problem's solution directory with a unique name, gathers problem-related facts, and formulates a completion prompt
+    for generating solutions. It verifies the presence of problem content and valid test cases before code generation.
+    The function also handles template parsing errors and prompts for retry messages when required.
 
     Parameters:
         model (Model)     : The AI model to use for generating the code.
-        problem (Problem) : The problem currently in the workspace.
+        problem (Problem) : The problem to generate Python code for.
         force (bool)      : Whether to force the code generation process.
         major (bool)      : Whether this is after a major change.
 
     Returns:
         bool | None: True if code generation is successful, False if an error or validation issue occurs, or None if
-        the workspace is uninitialized.
+        the problem has no content.
     """
     if major:
         console.print('[muted]Use structural code transformation for migration after major change.[/muted]')
@@ -640,7 +640,7 @@ def generate_py_code(model: Model, *, problem: Problem, force: bool, major: bool
 
 def document_code(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """
-    Refresh the in-source documentation of every solution in the workspace, leveraging AI.
+    Refresh the in-source documentation of every solution for the problem, leveraging AI.
 
     This is the API counterpart of the claude-euler-solver skill's `document` action: it re-emits
     each `pNNNN_sK.py` / `.c` with improved module/function docstrings and comments while leaving
@@ -651,7 +651,7 @@ def document_code(model: Model, *, problem: Problem, force: bool, major: bool) -
 
     Arguments:
         model (Model)     : The model instance to use for re-documenting the solutions.
-        problem (Problem) : The problem currently in the workspace.
+        problem (Problem) : The problem whose solutions to re-document.
         force (bool)      : Accepted for the common generator signature; documentation always runs over
                             the existing solutions.
         major (bool)      : Accepted for the common generator signature; unused here.

@@ -39,14 +39,14 @@ def browser_is_available() -> bool:
 def show(problem: Problem, check_for_errors: bool = False) -> int:
     """Open a problem's "problem.html" in the system browser.
 
-    When *problem* is omitted, opens the problem currently in the workspace.
+    When *problem* is omitted, opens the current problem.
 
     Prints an error and returns early if:
     - the "browser" command is not available, or
     - the resolved "problem.html" file does not exist.
 
     Arguments:
-        problem:            The `problem` to open; defaults to the current workspace problem.
+        problem:            The `problem` to open; defaults to the current problem.
         check_for_errors:   Whether to check for rendering errors.
     """
     if not browser_is_available():

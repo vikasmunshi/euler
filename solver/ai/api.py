@@ -51,7 +51,7 @@ def claude_api(problem: Problem,
     """Generate AI-based content for the specified target.
 
     Args:
-        problem: The `problem` to generate for; defaults to the current workspace problem.
+        problem: The `problem` to generate for; defaults to the current problem.
         target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
                 docs, 'notes' for documentation, 'test-cases' for test cases).
         major:  Whether this is after a major change (e.g. template or instruction change).

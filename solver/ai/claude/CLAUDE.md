@@ -82,7 +82,7 @@ solver/
     docs.py           — Module to generate notes for solver solutions, leveraging AI.
     facts.py          — Utility function for gathering problem inputs for AI
     models.py         — Available models and their pricing, plus a utility function to calculate costs.
-    skill.py          — The `claude-skill` command: run Claude Code in-shell against the locked workspace.
+    skill.py          — The `claude-skill` command: run Claude Code in-shell against a problem's solution files.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   core/
     download.py       — Utility for downloading and caching files via HTTP.
@@ -99,7 +99,7 @@ solver/
     runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
     runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
   shell/              — Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
-    bash.py           — The `!` (`sh` / `bash`) built-in command: run a bash command in the workspace.
+    bash.py           — The `!` (`sh` / `bash`) built-in command: run a bash command in the current
     builtins.py       — Built-in framework commands for shell v2: echo, clear, help.
     command.py        — Command framework for shell v2: Context, Command, registry, and decorator.
     interpreter.py    — Interpreter for shell v2: execute the parser's statements.

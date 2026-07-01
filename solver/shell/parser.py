@@ -32,7 +32,7 @@ from typing import Generator, Iterable
 #: to a stub set for standalone use; the shell replaces it with the live command
 #: registry's names via :func:`set_commands`.
 COMMANDS: frozenset[str] = frozenset({
-    'init', 'reinit', 'reset', 'stack', 'ls', 'eval', 'benchmark', 'lint',
+    'ls', 'eval', 'benchmark', 'lint', 'new',
     'echo', 'clear', 'help', 'find', 'loop',
 })
 

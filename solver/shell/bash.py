@@ -1,7 +1,8 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
 """
-The `!` (`sh` / `bash`) built-in command: run a bash command in the workspace.
+The `!` (`sh` / `bash`) built-in command: run a bash command in the current
+problem's solution directory.
 
 Interactive subshells (`sh`/`bash`, `py`, `claude`) take over the terminal
 directly; every other command streams its combined output through
@@ -31,7 +32,7 @@ def _bash_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]
       files found in `/bin`, `/usr/bin`, `/usr/local/bin`, `~/local/bin`,
       and `~/.local/bin` (deduplicated, first occurrence wins).
     * Subsequent tokens: try the command's own completions via
-      `bash -c "compgen ..."`; merge with workspace files.
+      `bash -c "compgen ..."`; merge with the solution directory's files.
     """
     # Count completed positional tokens already on the line.
     # When *incomplete* is non-empty it is the last entry of `ctx.argv`,
@@ -62,7 +63,7 @@ def _bash_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]
                     results.append(entry)
         results.sort()
         return results
-    # Subsequent tokens: command-specific completions + workspace files.
+    # Subsequent tokens: command-specific completions + solution-directory files.
     results = []
     seen = set()
     # Build the full bash command line so multi-level completions work, e.g.
@@ -105,7 +106,7 @@ def _bash_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]
                 results.append(line)
     except (OSError, subprocess.TimeoutExpired):
         pass
-    # Workspace files as a fallback / supplement.
+    # Solution-directory files as a fallback / supplement.
     try:
         for f in sorted(ctx.variables.problem.solution_dir.iterdir()):
             if f.name.startswith(incomplete) and f.name not in seen:
@@ -165,20 +166,17 @@ def _run_streamed(ctx: Context, cmdline: str, cwd: Path) -> int:
 def _bash(ctx: Context, *args: str) -> int:
     """Run a shell command from the shell, returning its exit code.
 
-    Any child process inherits this shell's workspace lock (via the
-    `solver_workspace_lock` environment variable), so tools launched here operate
-    on the locked workspace safely. Three forms escape into an *interactive*
-    session that takes over the terminal:
+    Three forms escape into an *interactive* session that takes over the terminal:
 
-        `! sh` / `! bash`       an interactive bash subshell, in `workspace/`
+        `! sh` / `! bash`       an interactive bash subshell, in the solution dir
         `! py` / `! python`     an interactive Python interpreter, in the repo root
         `! claude [prompt]`     Claude Code, in the repo root
 
-    Any other command (`! ls`, `! git diff`, …) runs non-interactively in
-    `workspace/` — so paths are relative to the current problem's files — with
-    its output streamed through the shell (so `solver -s` can log it). After the
-    command finishes, the workspace specials are refreshed (↻) in case it changed
-    the workspace.
+    Any other command (`! ls`, `! git diff`, …) runs non-interactively in the
+    current problem's solution directory — so paths are relative to that problem's
+    files — with its output streamed through the shell (so `solver -s` can log it).
+    After the command finishes, the problem specials are refreshed (↻) in case it
+    changed the files.
 
     Aliased as `sh` and `bash`, so `sh <command>` is shorthand for `! <command>`.
     """

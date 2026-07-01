@@ -138,19 +138,19 @@ def progress() -> int:
 
 
 @register(
-    help_text='Mark the workspace problem as solved, after checking.',
+    help_text='Mark the current problem as solved, after checking.',
     aliases=('mark-solved',),
     quietable=True,
 )
 def mark(problem: Problem) -> int:
-    """Mark the workspace problem as solved — once its results confirm it.
+    """Mark the current problem as solved — once its results confirm it.
 
-    Records the current workspace problem as solved (with today's date) in
+    Records the current problem as solved (with today's date) in
     `problems.json`, the same state `summary` maintains, so `{solved}`,
     `progress`, and `solved` reflect it without re-importing the progress page.
 
-    It only proceeds after checking the recorded results: the workspace must
-    hold a problem, its `test_cases.json` must have a `main` case with an
+    It only proceeds after checking the recorded results: there must be a
+    selected problem, its `test_cases.json` must have a `main` case with an
     answer, and `results.json` must contain a `correct` verdict for that `main`
     case. Run `benchmark` (which records results) first; a problem already
     marked solved is left unchanged.
@@ -158,7 +158,7 @@ def mark(problem: Problem) -> int:
     Aliased as `mark-solved`.
 
     Args:
-        problem:    The `problem` to mark solved; defaults to the current workspace problem.
+        problem:    The `problem` to mark solved; defaults to the current problem.
     """
     _problems: dict[int, dict[str, str | int | bool]] = {
         int(k): v

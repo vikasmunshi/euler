@@ -183,7 +183,7 @@ class SolverShell:
 
     @contextmanager
     def _runtime(self) -> Iterator[None]:
-        """Per-run setup/teardown: enter the workspace and, when `save` is set,
+        """Per-run setup/teardown: enter the repo root and, when `save` is set,
         open the session log for the duration, closing it on exit."""
         os.chdir(config.root_dir)
         if self.save:

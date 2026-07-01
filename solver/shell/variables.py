@@ -25,7 +25,7 @@ Reserved variables seeded at construction:
     config   → Config          the global configuration singleton     (read-only)
     loop     → Any             current loop value (read-only; driven by
                                :meth:`loop_through_iterable`; None outside a loop)
-    problem  → Problem | None  the workspace problem, as an object   (shell-settable)
+    problem  → Problem | None  the current problem, as an object      (shell-settable)
     rcode    → int             exit code of the most recent evaluation (shell-settable)
     reserved → list[str]       sorted list of every reserved name     (read-only)
     problems → list[Problem]   every known problem                    (computed)

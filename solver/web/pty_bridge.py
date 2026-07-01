@@ -10,9 +10,8 @@ the non-interactive piped fallback.
 
 The parent keeps the PTY master file descriptor: read it for the shell's output,
 write to it for keystrokes, ioctl it to propagate the browser terminal's size.
-The child inherits the workspace lock through the `solver_workspace_lock`
-environment variable (see `solver.core.lock`), so it operates on the locked
-workspace exactly like a terminal session started by the same holder.
+The child is a plain `solver` shell operating on the shared solution tree, exactly
+like a terminal session started at the command line.
 """
 from __future__ import annotations
 
@@ -44,8 +43,6 @@ class PtySession:
         if pid == 0:  # pragma: no cover — child process, replaced by execvp
             # A colour-capable TERM so prompt-toolkit/rich render styled output.
             os.environ['TERM'] = 'xterm-256color'
-            # The workspace lock flows in via config.lock_env_var, already set in
-            # this process's environment by the server holding/inheriting it.
             argv = [sys.executable, '-m', 'solver'] + (['--save'] if save else [])
             os.execvp(sys.executable, argv)
             os._exit(127)  # only reached if execvp fails

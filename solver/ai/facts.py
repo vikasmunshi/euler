@@ -103,7 +103,7 @@ def gather_facts(problem: Problem, strict: bool = False) -> Facts:
         solutions[solution.name] = solution.read_text()
     if strict and not solutions:
         raise ValueError('No solutions found')
-    solved_results: list[Result] = read_results(problem=problem)  # read results from workspace
+    solved_results: list[Result] = read_results(problem=problem)  # read the problem's recorded results
     if strict and not solved_results:
         raise ValueError('No results found')
     if strict and not [r for r in solved_results if r.verdict == 'correct' and r.category == 'main']:

@@ -213,14 +213,14 @@ command name below links to its full entry — usage and description — in the
 |---------|---------|-------------|
 | [`!`](commands-index.md#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
+| [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark the problem. » |
 | [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. |
 | [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | Build all C source files for the problem. » |
 | [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
-| [`eval-evaluate`](commands-index.md#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
+| [`eval-evaluate`](commands-index.md#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
@@ -230,9 +230,10 @@ command name below links to its full entry — usage and description — in the
 | [`key-rekey`](commands-index.md#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
 | [`key-split`](commands-index.md#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
 | [`lint`](commands-index.md#command-lint) | — | Lint current problem, auto-fix with --auto-fix. » |
+| [`ls`](commands-index.md#command-ls) | — | Benchmark the current problem. |
 | [`manage-config`](commands-index.md#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
-| [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file in the workspace. » |
+| [`mark`](commands-index.md#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. » |
+| [`new`](commands-index.md#command-new) | — | Generate new solution/test-case file for a problem. » |
 | [`pause`](commands-index.md#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](commands-index.md#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](commands-index.md#command-problems) | — | Show list of problems (all|solved|unsolved). |
@@ -248,7 +249,7 @@ command name below links to its full entry — usage and description — in the
 | [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 
-*Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*
+*Legend: » supports `--silent`.*
 <!-- /GEN:command-table -->
 
 > The table above is generated from the live command registry by the

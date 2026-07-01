@@ -186,7 +186,7 @@ def _usage_from_signature(cmd_name: str, params: list[inspect.Parameter], quieta
         nm = p.name
         if nm == 'problem' and _is_problem_annotation(p.annotation):
             # The `problem` special is always optional: it falls back to the
-            # current workspace problem when omitted (see `register`).
+            # current problem when omitted (see `register`).
             optional.append('[problem=<n>] (default current)')
         elif p.kind is inspect.Parameter.VAR_POSITIONAL:
             if typing.get_origin(p.annotation) is typing.Literal:
@@ -310,7 +310,7 @@ def _build_command_spec(
         params = params[1:]
     # The `problem` special — a parameter named `problem` annotated `Problem`
     # (optionally `| None`). The adapter resolves it from a bare problem number,
-    # remembers it as the workspace problem, and injects the current one when the
+    # remembers it as the current problem, and injects the current one when the
     # user omits it; it is therefore excluded from the generic positional stream.
     problem_param: inspect.Parameter | None = next(
         (p for p in params if p.name == 'problem' and _is_problem_annotation(p.annotation)),
@@ -464,7 +464,6 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
     * If *incomplete* contains '=', complete the value side using
       annotation-aware hints ('true'/'false' for `bool`,
       'none' for `Optional[...]`, literal members for `Literal[...]`).
-      Special case: 'solution=' lists executables in the workspace dir.
     * Otherwise, suggest `Literal` members for the current positional
       slot (including `VAR_POSITIONAL`), then 'name=' for every
       keyword-bindable parameter not yet supplied on the current line.
@@ -590,9 +589,9 @@ def _run_command(spec: _CommandSpec, ctx: Context, args: tuple[str, ...]) -> int
                 return ExitCodes.EXIT_USAGE
             problem = kw_args.pop('problem')
         if problem is not None:
-            variables.problem = problem  # remember the user's choice as the workspace problem
+            variables.problem = problem  # remember the user's choice as the current problem
         else:
-            problem = variables.problem  # fall back to (and so default-select) the workspace problem
+            problem = variables.problem  # fall back to (and so default-select) the current problem
         if spec.problem_positional:
             pos_args = [problem, *pos_args]
         else:
@@ -663,8 +662,8 @@ def register[**P](
     number — positionally ('eval 42 …') or as ''problem=42'' — which the adapter
     coerces to a :class:`Problem` and completes to known problem numbers (with
     the ''{next}''/''{random}'' aliases).  Supplying it **remembers** the choice
-    as the workspace problem ('variables.problem'); omitting it injects the
-    current workspace problem, so 'eval' alone re-runs the active problem.  Only
+    as the current problem ('variables.problem'); omitting it injects the
+    current problem, so 'eval' alone re-runs the active problem.  Only
     a leading positional naming a *known* problem is consumed as 'problem', so a
     following ''*categories'' (or other positionals) are unaffected.
 

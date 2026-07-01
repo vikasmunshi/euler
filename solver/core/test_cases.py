@@ -46,7 +46,7 @@ def load_test_cases(problem: Problem,
                     solutions: list[str],
                     runs: int | None,
                     ) -> list[TestCase]:
-    """Load and filter the workspace problem's test cases, resolving a per-category run count.
+    """Load and filter the problem's test cases, resolving a per-category run count.
 
     Reads the test-cases file, keeps only cases whose category is in *categories*,
     and assigns each surviving case a `runs` value. Prints an error and returns an

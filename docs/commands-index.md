@@ -40,14 +40,14 @@ a parameter that accepts repetition.
 |---------|---------|-------------|
 | [`!`](#command--sh-bash) | `sh`, `bash` | Run a bash command. |
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
-| [`benchmark`](#command-benchmark) | — | Benchmark the problem currently in the workspace. » |
+| [`benchmark`](#command-benchmark) | — | Benchmark the problem. » |
 | [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. |
 | [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for the problem. » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
-| [`eval-evaluate`](#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. » |
+| [`eval-evaluate`](#command-eval-evaluate-eval) | `eval` | Evaluate solutions against test cases. |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
@@ -57,9 +57,10 @@ a parameter that accepts repetition.
 | [`key-rekey`](#command-key-rekey-rekey) | `rekey` | Rotate the enc key and re-wrap to users. |
 | [`key-split`](#command-key-split) | — | Split master key into shares (n-of-m secret sharing). |
 | [`lint`](#command-lint) | — | Lint current problem, auto-fix with --auto-fix. » |
+| [`ls`](#command-ls) | — | Benchmark the current problem. |
 | [`manage-config`](#command-manage-config) | — | Manage configuration settings. |
-| [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the workspace problem as solved, after checking. » |
-| [`new`](#command-new) | — | Generate new solution/test-case file in the workspace. » |
+| [`mark`](#command-mark-mark-solved) | `mark-solved` | Mark the current problem as solved, after checking. » |
+| [`new`](#command-new) | — | Generate new solution/test-case file for a problem. » |
 | [`pause`](#command-pause) | — | Pause for user confirmation to continue. |
 | [`pip-upgrade`](#command-pip-upgrade-upgrade) | `upgrade` | Upgrade dependency group (all|ai|core|dev|solutions|show). |
 | [`problems`](#command-problems) | — | Show list of problems (all|solved|unsolved). |
@@ -75,7 +76,7 @@ a parameter that accepts repetition.
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 
-*Legend: § requires the workspace lock · ↻ may refresh workspace state · ⊘ refuses while the workspace is checked out · ⚑ checks the workspace out while it runs · » supports `--silent`.*
+*Legend: » supports `--silent`.*
 <!-- /GEN:command-summary -->
 
 </details>
@@ -96,20 +97,17 @@ Run a bash command.
 ```text
 Run a shell command from the shell, returning its exit code.
 
-Any child process inherits this shell's workspace lock (via the
-`solver_workspace_lock` environment variable), so tools launched here operate
-on the locked workspace safely. Three forms escape into an *interactive*
-session that takes over the terminal:
+Three forms escape into an *interactive* session that takes over the terminal:
 
-    `! sh` / `! bash`       an interactive bash subshell, in `workspace/`
+    `! sh` / `! bash`       an interactive bash subshell, in the solution dir
     `! py` / `! python`     an interactive Python interpreter, in the repo root
     `! claude [prompt]`     Claude Code, in the repo root
 
-Any other command (`! ls`, `! git diff`, …) runs non-interactively in
-`workspace/` — so paths are relative to the current problem's files — with
-its output streamed through the shell (so `solver -s` can log it). After the
-command finishes, the workspace specials are refreshed (↻) in case it changed
-the workspace.
+Any other command (`! ls`, `! git diff`, …) runs non-interactively in the
+current problem's solution directory — so paths are relative to that problem's
+files — with its output streamed through the shell (so `solver -s` can log it).
+After the command finishes, the problem specials are refreshed (↻) in case it
+changed the files.
 
 Aliased as `sh` and `bash`, so `sh <command>` is shorthand for `! <command>`.
 ```
@@ -143,7 +141,7 @@ Aliased as `help`.
 
 #### Command: `benchmark`
 
-Benchmark the problem currently in the workspace.
+Benchmark the problem.
 * » supports `--silent`
 
 ```
@@ -161,7 +159,7 @@ benchmark
 ```
 
 ```text
-Measure and record the execution time of the workspace solutions.
+Measure and record the execution time of the problem's solutions.
 
 Like `eval`, runs every solution against the chosen test-case categories, but
 always **records** the timings to `results.json` and repeats each case an
@@ -225,7 +223,7 @@ claude-api <c|py|doc|notes|test-cases>
 Generate AI-based content for the specified target.
 
 Args:
-    problem: The `problem` to generate for; defaults to the current workspace problem.
+    problem: The `problem` to generate for; defaults to the current problem.
     target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
             docs, 'notes' for documentation, 'test-cases' for test cases).
     major:  Whether this is after a major change (e.g. template or instruction change).
@@ -248,17 +246,17 @@ claude-skill <solve|review>
 ```
 
 ```text
-Run Claude Code over the locked workspace via the claude-euler-solver skill.
+Run Claude Code over a problem's solution files via the claude-euler-solver skill.
 
-Launches Claude Code headless against the current `workspace/` (which this
-shell holds the lock for), runs the requested action, and streams a
+Launches Claude Code headless against the given problem's solution directory,
+runs the requested action, and streams a
 live-updating Markdown summary back into the shell, ending with a footer of
 turns / duration / cost. Heavier and slower than `claude-api` — it actually
 runs `solver` commands, edits files, evaluates, and iterates. Needs the
 `claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
 
 Args:
-    problem:            The `problem` to work on; defaults to the current workspace problem.
+    problem:            The `problem` to work on; defaults to the current problem.
     action:             What to do — 'solve' (write and verify a Python
                         solution, translate it to C, then document and
                         summarise), or 'review' (audit an existing solution
@@ -299,7 +297,7 @@ compile-c
 ```
 
 ```text
-Compile every C solution in the workspace into a runnable binary.
+Compile every C solution for the problem into a runnable binary.
 
 Builds each `.c` file in `problem.solution_dir/` (linking the runner harness)
 so it can be evaluated and benchmarked; reports per-file success or the compiler
@@ -358,7 +356,6 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 #### Command: `eval-evaluate` (`eval`)
 
 Evaluate solutions against test cases.
-* » supports `--silent`
 
 ```
 eval-evaluate
@@ -372,7 +369,6 @@ eval-evaluate
 [show=true|--show]
 [solution_index=<int>|none] (default None)
 [verbose=true|--verbose]
-[silent=true|--silent]
 ```
 
 ```text
@@ -577,18 +573,29 @@ lint
 ```
 
 ```text
-Lint the workspace solution files, optionally auto-fixing them.
+Lint the problem's solution files, optionally auto-fixing them.
 
 Checks the current problem's solution files for style and quality issues
 (flake8, plus the configured checks). Reports any findings and reflects them
 in the exit code.
 
 Args:
-    problem:    The `problem` to lint; defaults to the current workspace problem.
+    problem:    The `problem` to lint; defaults to the current problem.
     auto_fix:   When True, attempt to fix issues in place with autoflake
                 (remove unused imports/variables), autopep8 (style), and
                 isort (import order), then re-check. When False (default),
                 only report.
+```
+
+---
+
+#### Command: `ls`
+
+Benchmark the current problem.
+
+```
+ls
+[problem=<n>] (default current)
 ```
 
 ---
@@ -622,7 +629,7 @@ Args:
 
 #### Command: `mark` (`mark-solved`)
 
-Mark the workspace problem as solved, after checking.
+Mark the current problem as solved, after checking.
 * » supports `--silent`
 
 ```
@@ -632,14 +639,14 @@ mark
 ```
 
 ```text
-Mark the workspace problem as solved — once its results confirm it.
+Mark the current problem as solved — once its results confirm it.
 
-Records the current workspace problem as solved (with today's date) in
+Records the current problem as solved (with today's date) in
 `problems.json`, the same state `summary` maintains, so `{solved}`,
 `progress`, and `solved` reflect it without re-importing the progress page.
 
-It only proceeds after checking the recorded results: the workspace must
-hold a problem, its `test_cases.json` must have a `main` case with an
+It only proceeds after checking the recorded results: there must be a
+selected problem, its `test_cases.json` must have a `main` case with an
 answer, and `results.json` must contain a `correct` verdict for that `main`
 case. Run `benchmark` (which records results) first; a problem already
 marked solved is left unchanged.
@@ -647,14 +654,14 @@ marked solved is left unchanged.
 Aliased as `mark-solved`.
 
 Args:
-    problem:    The `problem` to mark solved; defaults to the current workspace problem.
+    problem:    The `problem` to mark solved; defaults to the current problem.
 ```
 
 ---
 
 #### Command: `new`
 
-Generate new solution/test-case file in the workspace.
+Generate new solution/test-case file for a problem.
 * » supports `--silent`
 
 ```
@@ -667,7 +674,7 @@ new
 ```
 
 ```text
-Generate new solution and/or test-case files for the workspace problem.
+Generate new solution and/or test-case files for the problem.
 
 Solution files are named from the problem number and the next free solution
 index (e.g. "p0001_s0.py", "p0001_s1.py") and are created from the boilerplate
@@ -675,7 +682,7 @@ template with the problem information substituted; Python files are made
 executable (mode 0o755).
 
 Args:
-    problem:    The `problem` to create files for; defaults to the current workspace problem.
+    problem:    The `problem` to create files for; defaults to the current problem.
     py: Create a Python solution file. Defaults to False.
     c:  Create a C solution file (one per existing Python solution lacking a
         matching ".c"). Defaults to False.
@@ -834,14 +841,14 @@ show
 ```text
 Open a problem's "problem.html" in the system browser.
 
-When *problem* is omitted, opens the problem currently in the workspace.
+When *problem* is omitted, opens the current problem.
 
 Prints an error and returns early if:
 - the "browser" command is not available, or
 - the resolved "problem.html" file does not exist.
 
 Arguments:
-    problem:            The `problem` to open; defaults to the current workspace problem.
+    problem:            The `problem` to open; defaults to the current problem.
     check_for_errors:   Whether to check for rendering errors.
 ```
 

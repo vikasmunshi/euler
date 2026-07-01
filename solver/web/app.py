@@ -9,22 +9,14 @@
   single interactive `solver` shell on a pseudo-terminal (see
   :class:`solver.web.pty_bridge.PtySession`). Binary WS frames are raw terminal
   bytes both ways; a `{"resize": [cols, rows]}` text frame propagates geometry.
-  Only one PTY session is allowed at a time — every session drives the shared
-  `workspace/` and concurrent shells would race on it.
+  Only one PTY session is allowed at a time.
 
 - **Read-only viewer** — the static summary/problem pages plus the problem files
-  served through :func:`solver.core.stack.read_stack_file` (decrypting as needed,
-  preferring the live workspace copy when a problem is active). The browser learns
-  the workspace state from `GET /flags?problem_number=N` (authoritative? active?
-  the neighbouring problem numbers), which drives the shared header's navigation
-  and its init/reset/eval/save/del action buttons.
+  read directly from each problem's solution directory (`problem.solution_dir`).
 
-- **Workspace control & edits** — all guarded by the workspace lock, returning
-  HTTP 403 when the server is not authoritative over it (lock acquired or
-  inherited; see :func:`solver.core.lock.acquire_workspace_lock`):
-  `POST /<n>/cmd` runs a workspace command (`init`, `reset`, or `eval`);
-  `POST /<n>/<file>` validates and saves an edited workspace file;
-  `DELETE /<n>/<file>` removes a solution; `POST /progress` saves the progress file.
+- **Edits** — `POST /<n>/cmd` evaluates the problem's solutions; `POST /<n>/<file>`
+  validates and saves an edited solution file; `DELETE /<n>/<file>` removes a
+  solution; `POST /progress` saves the progress file.
 """
 from __future__ import annotations
 
@@ -116,8 +108,9 @@ async def _serve_summary_page(request: web.Request) -> web.StreamResponse:
 async def _serve_progress_page(request: web.Request) -> web.StreamResponse:
     """Serve the progress file in an editable textarea (`GET /progress`).
 
-    The file (`config.static_file_progress`) lives outside the workspace; its content
-    is HTML-escaped into a textarea that POSTs back to `/progress` via the Save button.
+    The file (`config.static_file_progress`) lives outside the solution tree; its
+    content is HTML-escaped into a textarea that POSTs back to `/progress` via the
+    Save button.
     """
     path = config.static_file_progress
     content = path.read_text(encoding='utf-8') if path.is_file() else ''
@@ -126,10 +119,10 @@ async def _serve_progress_page(request: web.Request) -> web.StreamResponse:
 
 
 def _save_progress(content: bytes) -> tuple[int, str]:
-    """Write edited content to the progress file; return (status, message) or None (→ 403).
+    """Write edited content to the progress file; return (status, message).
 
-    Guarded by the workspace lock (None → HTTP 403 when not authoritative). The file is
-    outside the workspace, so no per-problem checks apply — the bytes are written verbatim.
+    The file is outside the solution tree, so no per-problem checks apply — the
+    bytes are written verbatim (status mirrors HTTP: 200 saved).
     """
     config.static_file_progress.write_bytes(content)
     summary()
@@ -191,8 +184,9 @@ async def _pump_pty_to_ws(session: PtySession, ws: web.WebSocketResponse) -> Non
 async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse:
     """Bridge a browser terminal to a fresh PTY-backed `solver` shell.
 
-    Refuses a second concurrent connection (the single shared workspace must not
-    have two live shells). Binary frames are forwarded to the PTY as keystrokes;
+    Refuses a second concurrent connection (the shared solution tree must not
+    have two live shells racing on it). Binary frames are forwarded to the PTY as
+    keystrokes;
     a `resize` text frame propagates the browser geometry to the PTY.
     """
     ws = web.WebSocketResponse()
@@ -273,16 +267,15 @@ def _validate_source(path: Path) -> tuple[bool, str]:
 
 
 def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str]:
-    """Validate edited content and write it into the workspace; return (status, message).
+    """Validate edited content and write it into the solution directory; return (status, message).
 
-    Guarded by the workspace lock: returns None (→ HTTP 403) when the server is not
-    authoritative here. Otherwise status mirrors HTTP — 200 saved, 400 on a bad
-    request or failed validation. JSON is parsed, Python is flake8-linted, and C is
-    compiled before the file is accepted; on any validation failure the previous
-    content is restored so a bad edit never lands.
+    Status mirrors HTTP — 200 saved, 400 on a bad request or failed validation.
+    JSON is parsed, Python is flake8-linted, and C is compiled before the file is
+    accepted; on any validation failure the previous content is restored so a bad
+    edit never lands.
     """
     if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c', '.json'):
-        return 400, f'{filename} is not an editable workspace file'
+        return 400, f'{filename} is not an editable solution file'
     try:
         problem: Problem = Problem.from_number(problem_number)
     except ValueError:
@@ -341,9 +334,8 @@ def _lint_content(problem_number: int, filename: str, content: bytes) -> tuple[i
     """Lint edited content without saving it; return (status, JSON diagnostics).
 
     Runs the same validators as save — flake8 for Python, the runner-aware compile
-    for C — against a throwaway temp copy, so the workspace file is never touched
-    and a syntactically broken buffer is still diagnosable. Guarded by the workspace
-    lock (None → HTTP 403), matching the editor's editable gating. The reply is
+    for C — against a throwaway temp copy, so the solution file is never touched
+    and a syntactically broken buffer is still diagnosable. The reply is
     `{"diagnostics": [{line, col, severity, message, code?}, ...]}` (empty when clean).
     """
     suffix = Path(filename).suffix
@@ -358,9 +350,9 @@ def _lint_content(problem_number: int, filename: str, content: bytes) -> tuple[i
 
 
 def _del_solution(problem_number: int, filename: str) -> tuple[int, str]:
-    """Delete a solution from the workspace; return (status, message) or None (→ 403)."""
+    """Delete a solution from its solution directory; return (status, message)."""
     if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c'):
-        return 400, f'{filename} is not a deletable workspace file'
+        return 400, f'{filename} is not a deletable solution file'
     try:
         problem: Problem = Problem.from_number(problem_number)
     except ValueError:
@@ -375,20 +367,16 @@ def _run_cmd(problem_number: int,
              lang: Literal['*', 'py', 'c'] | None = None,
              solution_index: int | None = None,
              ) -> tuple[int, str]:
-    """Run a workspace command on *problem_number*; return (status, output) or None (→ 403).
+    """Run a command on *problem_number*; return (status, output).
 
-    Guarded by the workspace lock (None → HTTP 403 when not authoritative). Each
-    command maps onto the matching shell verb and its console output is captured as
-    plain text for the caller to display:
+    Each command maps onto the matching shell verb and its console output is
+    captured as plain text for the caller to display:
 
-    - `init`  — unstack the problem into the workspace, resetting a different active
-      problem first (:func:`solver.core.workspace.init`); allowed whatever is active.
-    - `reset` — stack any changes and clear the workspace; requires *problem_number*
-      to be the active workspace.
-    - `eval`  — evaluate solutions against the test cases; requires *problem_number*
-      to be active. With neither *lang* nor *solution_index* it evaluates every
-      solution (the problem page's button); the code page passes a specific
-      (lang, index) to evaluate a single solution.
+    - `eval`      — evaluate solutions against the test cases. With neither *lang*
+      nor *solution_index* it evaluates every solution (the problem page's button);
+      the code page passes a specific (lang, index) to evaluate a single solution.
+    - `benchmark` — time the problem's solutions (same *lang* / *solution_index*
+      selection as `eval`).
 
     Status mirrors HTTP: 200 when the command exits 0, 400 on a bad request or a
     non-zero command exit.
@@ -483,17 +471,13 @@ async def _problem_file(request: web.Request) -> web.StreamResponse:
     return _bytes_response(content, mime or 'application/octet-stream')
 
 
-#: Message returned (HTTP 403) when a write helper is refused for lack of the lock.
-_READ_ONLY: str = 'workspace is read-only here'
-
-
 def _text(code: int, message: str) -> web.Response:
     """A plain-text response with the given HTTP status."""
     return web.Response(status=code, text=message, content_type='text/plain', charset='utf-8')
 
 
 async def _save_problem_file(request: web.Request) -> web.StreamResponse:
-    """Save an edited workspace file (`POST /<n>/<filename>`)."""
+    """Save an edited solution file (`POST /<n>/<filename>`)."""
     problem_number = int(request.match_info['problem_number'])
     filename = request.match_info['filename']
     body = await request.read()
@@ -503,7 +487,7 @@ async def _save_problem_file(request: web.Request) -> web.StreamResponse:
 
 
 async def _delete_problem_file(request: web.Request) -> web.StreamResponse:
-    """Delete a solution from the workspace (`DELETE /<n>/<filename>`)."""
+    """Delete a solution (`DELETE /<n>/<filename>`)."""
     problem_number = int(request.match_info['problem_number'])
     filename = request.match_info['filename']
     result = _del_solution(problem_number, filename)
@@ -511,13 +495,12 @@ async def _delete_problem_file(request: web.Request) -> web.StreamResponse:
 
 
 async def _run_command(request: web.Request) -> web.StreamResponse:
-    """Run a workspace command on the problem (`POST /<n>/cmd`).
+    """Run a command on the problem (`POST /<n>/cmd`).
 
-    Body: `{"cmd": "init"|"reset"|"eval", "lang"?: "py"|"c", "solution_index"?: int}`
-    — *lang* / *solution_index* are only meaningful for `eval` (omit them to evaluate
-    every solution). Replies with JSON `{"output": <captured text>, "rcode": 0|1|null}`;
-    the page renders the output. 400 for a malformed body, 403 when the server is not
-    authoritative over the workspace.
+    Body: `{"cmd": "eval"|"benchmark", "lang"?: "py"|"c", "solution_index"?: int}`
+    — *lang* / *solution_index* select a single solution (omit them to run every
+    solution). Replies with JSON `{"output": <captured text>, "rcode": 0|1|null}`;
+    the page renders the output. 400 for a malformed body.
     """
     problem_number: int = int(request.match_info['problem_number'])
     try:
@@ -526,7 +509,7 @@ async def _run_command(request: web.Request) -> web.StreamResponse:
         raise web.HTTPBadRequest()
     if not isinstance(data, dict):
         raise web.HTTPBadRequest()
-    if (cmd := data.get('cmd')) not in ('init', 'reset', 'eval'):
+    if (cmd := data.get('cmd')) not in ('eval', 'benchmark'):
         raise web.HTTPBadRequest()
     lang: Literal['py', 'c'] | None = data.get('lang')
     solution_index: int | None = data.get('solution_index')
@@ -537,11 +520,11 @@ async def _run_command(request: web.Request) -> web.StreamResponse:
 
 
 async def _lint_problem_file(request: web.Request) -> web.StreamResponse:
-    """Lint an edited (unsaved) workspace file (`POST /<n>/lint`).
+    """Lint an edited (unsaved) solution file (`POST /<n>/lint`).
 
     Body: `{"filename": "p0007_s0.py", "content": "<source>"}`. Replies with JSON
-    `{"diagnostics": [...]}` the editor renders as inline squiggles; 403 when the
-    server is not authoritative over the workspace, 400 for a malformed body.
+    `{"diagnostics": [...]}` the editor renders as inline squiggles; 400 for a
+    malformed body.
     """
     problem_number = int(request.match_info['problem_number'])
     try:
@@ -578,14 +561,14 @@ def build_app(save: bool) -> web.Application:
         web.get(r'/{problem_number:\d+}', _redirect_with_slash),
         web.get(r'/{problem_number:\d+}/', _problem_page),
         web.get(r'/{problem_number:\d+}/{filename:.+}', _problem_file),
-        # Post actions: a workspace command (init / reset / eval), the progress save,
-        # and an edited-file save. `/cmd` precedes the catch-all `/{filename}` so it
+        # Post actions: a command (eval / benchmark), the progress save, and an
+        # edited-file save. `/cmd` precedes the catch-all `/{filename}` so it
         # is matched as a command rather than a file named "cmd".
         web.post('/progress', _save_progress_page),
         web.post(r'/{problem_number:\d+}/cmd', _run_command),
         web.post(r'/{problem_number:\d+}/lint', _lint_problem_file),
         web.post(r'/{problem_number:\d+}/{filename}', _save_problem_file),
-        # Delete a solution file from the workspace.
+        # Delete a solution file.
         web.delete(r'/{problem_number:\d+}/{filename}', _delete_problem_file),
     ])
     return app

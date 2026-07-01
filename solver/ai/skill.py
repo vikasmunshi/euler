@@ -1,6 +1,6 @@
 #! /usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `claude-skill` command: run Claude Code in-shell against the locked workspace."""
+"""The `claude-skill` command: run Claude Code in-shell against a problem's solution files."""
 from __future__ import annotations
 
 __all__ = ['claude_skill']
@@ -28,17 +28,17 @@ def claude_skill(
         action: Literal['solve', 'review'],
         additional_prompt: str = '',
 ) -> int:
-    """Run Claude Code over the locked workspace via the claude-euler-solver skill.
+    """Run Claude Code over a problem's solution files via the claude-euler-solver skill.
 
-    Launches Claude Code headless against the current `workspace/` (which this
-    shell holds the lock for), runs the requested action, and streams a
+    Launches Claude Code headless against the given problem's solution directory,
+    runs the requested action, and streams a
     live-updating Markdown summary back into the shell, ending with a footer of
     turns / duration / cost. Heavier and slower than `claude-api` — it actually
     runs `solver` commands, edits files, evaluates, and iterates. Needs the
     `claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
 
     Args:
-        problem:            The `problem` to work on; defaults to the current workspace problem.
+        problem:            The `problem` to work on; defaults to the current problem.
         action:             What to do — 'solve' (write and verify a Python
                             solution, translate it to C, then document and
                             summarise), or 'review' (audit an existing solution

@@ -16,14 +16,14 @@ from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 @register(help_text='Lint current problem, auto-fix with --auto-fix.', quietable=True)
 def lint(problem: Problem, auto_fix: bool = False) -> int:
-    """Lint the workspace solution files, optionally auto-fixing them.
+    """Lint the problem's solution files, optionally auto-fixing them.
 
     Checks the current problem's solution files for style and quality issues
     (flake8, plus the configured checks). Reports any findings and reflects them
     in the exit code.
 
     Args:
-        problem:    The `problem` to lint; defaults to the current workspace problem.
+        problem:    The `problem` to lint; defaults to the current problem.
         auto_fix:   When True, attempt to fix issues in place with autoflake
                     (remove unused imports/variables), autopep8 (style), and
                     isort (import order), then re-check. When False (default),
@@ -83,7 +83,7 @@ def lazy_import_fix_code() -> Callable[[str], str] | None:
 
 
 def _auto_fix(problem: Problem) -> bool:
-    """Auto-fix the workspace Python files with autoflake + autopep8 + isort, then re-check.
+    """Auto-fix the problem's Python files with autoflake + autopep8 + isort, then re-check.
 
     Dev-group deps, imported on demand so the shell starts without the `dev` group installed.
     """

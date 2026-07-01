@@ -11,13 +11,9 @@ the lock when the process exits or crashes, there is never stale state to clean 
 and a recycled PID can never produce a false positive. The PID is recorded as the
 lock file's content purely so `stop`/`status` can report and signal it.
 
-The detached child wraps its entire runtime in a single `acquire_workspace_lock()`
-context (see :mod:`solver.core.lock`). That covers every launch case with the
-existing semantics: standalone it *acquires* the flock; launched from a running
-shell it *inherits* it. Either way `config.lock_env_var` is set for the server's
-lifetime, so every PTY child it forks (`python -m solver`) re-enters the lock and
-**inherits** rather than fighting for it — there is never a flock conflict between
-the server and its shells.
+Every PTY child the server forks (`python -m solver`) is a plain `solver` shell
+operating on the shared solution tree; the instance flock above is the only
+cross-process lock the server holds.
 """
 from __future__ import annotations
 
@@ -134,12 +130,11 @@ def running_pid() -> int | None:
 
 
 def _serve_forever(save: bool) -> None:  # pragma: no cover — runs in the detached child process
-    """Hold the workspace lock and serve until terminated; the detached child entry point.
+    """Serve until terminated; the detached child entry point.
 
-    The instance flock is taken only after the workspace lock context is entered (so the env var
-    is set for PTY children); if it cannot be taken another server already owns it and we bail.
-    `web.run_app` installs its own SIGTERM/SIGINT handling and returns on signal, unwinding the
-    lock cleanly; the OS drops the instance flock as the process exits.
+    Takes the instance flock; if it cannot be taken another server already owns it
+    and we bail. `web.run_app` installs its own SIGTERM/SIGINT handling and returns
+    on signal; the OS drops the instance flock as the process exits.
     """
     console.width = config.screen_width  # stable width for captured command output (no tty here)
     if not hold_instance_lock(config.server_lock_file):
