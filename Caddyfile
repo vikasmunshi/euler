@@ -1,0 +1,17 @@
+# Caddy configuration for the solver-web HTTPS front end.
+#
+# Caddy terminates TLS and reverse-proxies to the aiohttp server on loopback.
+# The certificate is issued out-of-band by acme.sh (name.com DNS-01) and deployed
+# to keys/ — Caddy loads it via the `tls` directive and performs no ACME itself.
+# Cert paths are relative to Caddy's working directory (the repo root, set by
+# caddy-euler.service's WorkingDirectory) so this file is not machine-specific.
+# See docs/tls-setup.md.
+{
+	# DNS-01 needs no inbound port, so keep Caddy off :80 (no HTTP->HTTPS redirect).
+	auto_https disable_redirects
+}
+
+euler.vikasmunshi.com {
+	tls keys/.server.crt keys/.server.key
+	reverse_proxy 127.0.0.1:8080
+}
