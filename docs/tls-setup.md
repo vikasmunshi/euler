@@ -97,8 +97,8 @@ Add the name.com credentials to the project `.env` (the same file that holds
 `ANTHROPIC_API_KEY`):
 
 ```
-Namecom_Username=<name.com username>
-Namecom_Token=<name.com API token>
+NAMEDOTCOM_USERNAME=<name.com username>
+NAMEDOTCOM_TOKEN=<name.com API token>
 ```
 
 Then install the acme.sh client and issue + deploy the cert:

@@ -16,8 +16,8 @@
 #
 # name.com API credentials are read from the project .env (the same file that holds
 # ANTHROPIC_API_KEY), as:
-#     Namecom_Username=<username>
-#     Namecom_Token=<token>
+#     NAMEDOTCOM_USERNAME=<username>
+#     NAMEDOTCOM_TOKEN=<token>
 # or from the existing environment if already exported. acme.sh caches them after
 # the first issue, so renewals need no re-entry.
 #
@@ -48,7 +48,7 @@ ACME_EMAIL="${EULER_TLS_EMAIL:-vikas.munshi@gmail.com}"
 
 CERT_FILE="${PROJECT_ROOT}/keys/.server.crt"    # full chain; gitignored dotfile
 KEY_FILE="${PROJECT_ROOT}/keys/.server.key"     # private key; gitignored dotfile
-ENV_FILE="${PROJECT_ROOT}/.env"                 # name.com creds (Namecom_Username / Namecom_Token)
+ENV_FILE="${PROJECT_ROOT}/.env"                 # name.com creds (NAMEDOTCOM_USERNAME / NAMEDOTCOM_TOKEN)
 CADDYFILE="${PROJECT_ROOT}/Caddyfile"
 
 # Reload Caddy over its admin API (no sudo); on first issue Caddy may not yet be
@@ -93,13 +93,15 @@ load_namecom_creds() {
         # shellcheck disable=SC1090
         set -a; . "${ENV_FILE}"; set +a
     fi
-    if [ -z "${Namecom_Username:-}" ] || [ -z "${Namecom_Token:-}" ]; then
+    if [ -z "${NAMEDOTCOM_USERNAME:-}" ] || [ -z "${NAMEDOTCOM_TOKEN:-}" ]; then
         echo "Error: name.com credentials not found." >&2
         echo "Add them to ${ENV_FILE} (or export them):" >&2
-        echo "    Namecom_Username=<username>" >&2
-        echo "    Namecom_Token=<token>" >&2
+        echo "    NAMEDOTCOM_USERNAME=<username>" >&2
+        echo "    NAMEDOTCOM_TOKEN=<token>" >&2
         return 1
     fi
+    Namecom_Username=${NAMEDOTCOM_USERNAME}
+    Namecom_Token=${NAMEDOTCOM_TOKEN}
     export Namecom_Username Namecom_Token
 }
 
