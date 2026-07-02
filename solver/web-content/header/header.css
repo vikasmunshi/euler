@@ -76,6 +76,65 @@
     flex: 1 1 auto;
 }
 
+/* ── Account menu (user icon on the right → change password / log out) ── */
+#page-header .user-menu {
+    position: relative;
+    margin-left: 4px;
+}
+
+#page-header .user-btn {
+    width: 32px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5a7ab8;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: normal;
+}
+
+#page-header .user-btn:hover {
+    background: #eef3fb;
+    color: #2a509a;
+}
+
+#page-header .user-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 160px;
+    padding: 4px;
+    background: #ffffff;
+    border: 1px solid #d6deec;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(30, 32, 48, 0.16);
+    display: flex;
+    flex-direction: column;
+    z-index: 200;
+}
+
+/* Override the generic glyph-link sizing for the dropdown's text links. */
+#page-header .user-dropdown a {
+    width: auto;
+    height: auto;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    color: #2a3550;
+    border-radius: 6px;
+}
+
+#page-header .user-dropdown a:hover {
+    background: #eef3fb;
+    color: #1a3a78;
+}
+
 /* ── Code-page extras (hidden on other pages) ── */
 #page-header .lang-badge {
     display: flex;

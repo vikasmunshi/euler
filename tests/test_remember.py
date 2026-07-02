@@ -65,6 +65,15 @@ class RememberStoreTests(unittest.TestCase):
         self.store.revoke(cookie)
         self.assertIsNone(self.store.validate_and_rotate(cookie))
 
+    def test_revoke_all(self) -> None:
+        first = self.store.issue('a@b.com')
+        second = self.store.issue('a@b.com')
+        other = self.store.issue('other@b.com')
+        self.store.revoke_all('a@b.com')
+        self.assertIsNone(self.store.validate_and_rotate(first))
+        self.assertIsNone(self.store.validate_and_rotate(second))
+        self.assertIsNotNone(self.store.validate_and_rotate(other))   # a different user is untouched
+
     def test_file_mode_and_no_raw_validator(self) -> None:
         cookie = self.store.issue('a@b.com')
         validator = cookie.split(':', 1)[1]

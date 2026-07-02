@@ -18,6 +18,13 @@ const createButton = document.getElementById('create');
 let verifiedEmail = null;
 let verifiedOtp = null;
 
+// Prefill the email from the link in the OTP email (/register?email=…).
+const prefillEmail = new URLSearchParams(location.search).get('email');
+if (prefillEmail) {
+    emailInput.value = prefillEmail;
+    otpInput.focus();
+}
+
 document.getElementById('verify-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     errorBox.textContent = '';

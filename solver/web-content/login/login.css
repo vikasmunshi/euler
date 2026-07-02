@@ -98,3 +98,12 @@ button:disabled { opacity: 0.6; cursor: default; }
     font-size: 0.85rem;
     text-align: center;
 }
+
+.alt-link {
+    margin: 1rem 0 0;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.alt-link a { color: var(--accent); }

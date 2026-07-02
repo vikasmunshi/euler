@@ -207,3 +207,36 @@ class AuthRoutesTests(AioHTTPTestCase):
         self.assertEqual(with_new.status, 200)
         _c, with_old = await self._login(_EMAIL, _PASSWORD)
         self.assertEqual(with_old.status, 401)
+
+    async def test_whoami_returns_email(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD)
+        session = verify.cookies[policy.SESSION_COOKIE].value
+        resp = await self.client.get('/whoami', headers={'Cookie': f'{policy.SESSION_COOKIE}={session}'})
+        self.assertEqual(resp.status, 200)
+        self.assertEqual((await resp.json())['email'], _EMAIL)
+
+    async def test_whoami_requires_auth(self) -> None:
+        self.assertEqual((await self.client.get('/whoami')).status, 401)
+
+    async def test_self_service_password_change(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD, remember=True)
+        session = verify.cookies[policy.SESSION_COOKIE].value
+        remember = verify.cookies[policy.REMEMBER_COOKIE].value
+        new_password = 'a shiny new passphrase'
+        token = SrpToken.create(_EMAIL, new_password)
+        change = await self.client.post(
+            '/password/change', headers={'Cookie': f'{policy.SESSION_COOKIE}={session}'},
+            json={'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+        self.assertEqual(change.status, 200)
+        _c, with_new = await self._login(_EMAIL, new_password)
+        self.assertEqual(with_new.status, 200)                 # new password works
+        _c, with_old = await self._login(_EMAIL, _PASSWORD)
+        self.assertEqual(with_old.status, 401)                 # old password fails
+        stale = await self.client.get('/protected', headers={'Cookie': f'{policy.REMEMBER_COOKIE}={remember}'})
+        self.assertEqual(stale.status, 401)                    # remember tokens revoked on change
+
+    async def test_password_change_requires_auth(self) -> None:
+        token = SrpToken.create(_EMAIL, 'a password long enough')
+        resp = await self.client.post(
+            '/password/change', json={'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+        self.assertEqual(resp.status, 401)

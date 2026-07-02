@@ -102,22 +102,28 @@ def _set_auth_cookie(response: web.StreamResponse, name: str, value: str, max_ag
                         samesite='Strict', path='/')
 
 
-def _resolve_auth(request: web.Request) -> tuple[bool, list[tuple[str, str, int]]]:
+def current_email(request: web.Request) -> str:
+    """The signed-in user's email (stashed by auth_middleware on every gated route)."""
+    return str(request['user_email'])
+
+
+def _resolve_auth(request: web.Request) -> tuple[str | None, list[tuple[str, str, int]]]:
     """Authenticate a request, promoting a remember-me cookie to a session if needed.
 
-    Returns (authenticated, cookies_to_set). A live session needs no cookies; a
-    successful remember-me promotion returns the fresh session + rotated remember
-    cookies for the caller to apply to the response.
+    Returns (email, cookies_to_set); email is None when unauthenticated. A live session
+    needs no cookies; a successful remember-me promotion returns the fresh session +
+    rotated remember cookies for the caller to apply to the response.
     """
     sessions = request.app[SESSIONS]
-    if sessions.email_for(request.cookies.get(policy.SESSION_COOKIE)) is not None:
-        return True, []
+    email = sessions.email_for(request.cookies.get(policy.SESSION_COOKIE))
+    if email is not None:
+        return email, []
     rotated = request.app[REMEMBER].validate_and_rotate(request.cookies.get(policy.REMEMBER_COOKIE))
     if rotated is None:
-        return False, []
-    email, new_remember = rotated
-    return True, [
-        (policy.SESSION_COOKIE, sessions.create(email), sessions.ttl_seconds),
+        return None, []
+    remember_email, new_remember = rotated
+    return remember_email, [
+        (policy.SESSION_COOKIE, sessions.create(remember_email), sessions.ttl_seconds),
         (policy.REMEMBER_COOKIE, new_remember, request.app[REMEMBER].ttl_seconds),
     ]
 
@@ -255,6 +261,33 @@ async def _logout(request: web.Request) -> web.StreamResponse:
     return response
 
 
+async def _whoami(request: web.Request) -> web.StreamResponse:
+    """`GET /whoami` → `{email}` for the signed-in user (the password page needs it for SRP)."""
+    return web.json_response({'email': current_email(request)})
+
+
+async def _serve_password(request: web.Request) -> web.StreamResponse:
+    """Serve the self-service change-password page (authenticated)."""
+    return web.FileResponse(config.static_file_dir / 'password' / 'password.html')
+
+
+async def _password_change(request: web.Request) -> web.StreamResponse:
+    """`POST /password/change {salt, verifier}` → set a new SRP verifier for the signed-in user.
+
+    Authorised by the session (already logged in); the email comes from the session, not
+    the body. Revokes remember-me tokens so other devices must re-authenticate.
+    """
+    data = await _read_json(request)
+    try:
+        token = SrpToken(salt=bytes.fromhex(str(data['salt'])), verifier=int(str(data['verifier']), 16))
+    except (KeyError, ValueError):
+        raise web.HTTPBadRequest()
+    email = current_email(request)
+    request.app[USERS].register(email, token)
+    request.app[REMEMBER].revoke_all(email)
+    return web.json_response({'ok': True})
+
+
 @web.middleware
 async def auth_middleware(request: web.Request, handler: Handler) -> web.StreamResponse:
     """Gate every route but the public login surface; promote remember-me to a session."""
@@ -262,11 +295,12 @@ async def auth_middleware(request: web.Request, handler: Handler) -> web.StreamR
         raise web.HTTPTooManyRequests(text='too many requests')
     if request.path in PUBLIC_PATHS:
         return await handler(request)
-    authenticated, cookies = _resolve_auth(request)
-    if not authenticated:
+    email, cookies = _resolve_auth(request)
+    if email is None:
         if _wants_html(request):
             raise web.HTTPFound(f'/login?next={quote(request.path_qs, safe="/?=&")}')
         raise web.HTTPUnauthorized(text='authentication required')
+    request['user_email'] = email
     try:
         response = await handler(request)
     except web.HTTPException as exc:
@@ -295,5 +329,8 @@ def setup_auth(app: web.Application) -> None:
         web.get('/register', _serve_register),
         web.post('/register/verify', _register_verify),
         web.post('/register/complete', _register_complete),
+        web.get('/whoami', _whoami),
+        web.get('/password', _serve_password),
+        web.post('/password/change', _password_change),
         web.get('/logout', _logout),
     ])

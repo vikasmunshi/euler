@@ -178,6 +178,21 @@ export async function srpRegister(email, otp, password) {
     return { ok: response.ok };
 }
 
+// Change the signed-in user's password: fetch their email (for the SRP salt/verifier
+// derivation), compute a fresh verifier, and post it. The server authorises by session.
+export async function srpChangePassword(password) {
+    const who = await fetch('/whoami', { headers: { Accept: 'application/json' } });
+    if (!who.ok) return { ok: false };
+    const { email } = await who.json();
+    const { salt, verifier } = await srpMakeVerifier(email, password);
+    const response = await fetch('/password/change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ salt, verifier }),
+    });
+    return { ok: response.ok };
+}
+
 // Interop check against the reference vectors (see tests/test_srp.py).
 export async function _selfTest() {
     const email = 'user@example.com';
@@ -226,5 +241,5 @@ export async function _selfTest() {
     return pass;
 }
 
-export const SRP = { srpLogin, srpMakeVerifier, srpVerifyOtp, srpRegister, _selfTest };
+export const SRP = { srpLogin, srpMakeVerifier, srpVerifyOtp, srpRegister, srpChangePassword, _selfTest };
 if (typeof window !== 'undefined') window.SRP = SRP;

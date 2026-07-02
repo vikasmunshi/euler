@@ -124,6 +124,14 @@ class RememberStore:
             del data['tokens'][selector]
             self._save(data)
 
+    def revoke_all(self, email: str) -> None:
+        """Delete every remember token for `email` (used on password change)."""
+        data = self._load()
+        keep = {sel: entry for sel, entry in data['tokens'].items() if entry.get('email') != email}
+        if len(keep) != len(data['tokens']):
+            data['tokens'] = keep
+            self._save(data)
+
     @property
     def ttl_seconds(self) -> int:
         """The remember-me lifetime, for setting the cookie max-age."""

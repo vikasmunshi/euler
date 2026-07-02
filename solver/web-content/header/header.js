@@ -81,12 +81,33 @@
         }
     }
 
+    // The account menu (user icon → change password / log out): toggle on click,
+    // close on an outside click.
+    function wireUserMenu() {
+        const button = document.getElementById('user-btn');
+        const dropdown = document.getElementById('user-dropdown');
+        if (!button || !dropdown) return;
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const opening = dropdown.hidden;
+            dropdown.hidden = !opening;
+            button.setAttribute('aria-expanded', String(opening));
+        });
+        document.addEventListener('click', () => {
+            if (!dropdown.hidden) {
+                dropdown.hidden = true;
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
     async function init() {
         const host = document.getElementById('page-header');
         if (!host) return;
         host.innerHTML = await fetch('/header.html').then(r => r.text());
         wireNav();
         fillCodeMeta();
+        wireUserMenu();
         document.dispatchEvent(new CustomEvent('header:ready'));
     }
 
