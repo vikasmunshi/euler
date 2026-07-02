@@ -119,6 +119,12 @@
     z-index: 200;
 }
 
+/* The author `display: flex` above overrides the UA `[hidden] { display: none }`,
+   so restore hiding explicitly (higher specificity) — the menu opens only on click. */
+#page-header .user-dropdown[hidden] {
+    display: none;
+}
+
 /* Override the generic glyph-link sizing for the dropdown's text links. */
 #page-header .user-dropdown a {
     width: auto;
