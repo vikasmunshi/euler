@@ -40,6 +40,7 @@ from solver.core.evaluate import benchmark, evaluate
 from solver.core.problems import Problem, problems
 from solver.shell import console
 from solver.utils.summary import summary
+from solver.web.auth.routes import auth_middleware, setup_auth
 from solver.web.pty_bridge import PtySession
 
 
@@ -66,6 +67,7 @@ _STATIC_ASSETS: frozenset[str] = frozenset({
     'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json', 'progress.css',
     'progress.js', 'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
     'summary.html', 'summary.js',
+    'login.css', 'login.js', 'srp-client.js',
 })
 
 #: mime type of a served problem file → highlight.js language for the code viewer.
@@ -539,10 +541,16 @@ async def _lint_problem_file(request: web.Request) -> web.StreamResponse:
 
 
 def build_app(save: bool) -> web.Application:
-    """Construct the aiohttp application: terminal, WebSocket, and read-only viewer."""
-    app = web.Application()
+    """Construct the aiohttp application: terminal, WebSocket, and read-only viewer.
+
+    Every route is gated by :func:`solver.web.auth.routes.auth_middleware` except
+    the login page, its assets, and the SRP endpoints; :func:`setup_auth` wires the
+    session store and those routes onto the app.
+    """
+    app = web.Application(middlewares=[auth_middleware])
     state: _State = {'has_session': False, 'last_problem': None}
     app[_STATE] = state
+    setup_auth(app)
     ws_handler = functools.partial(_ws_handler, save=save)
     app.add_routes([
         # Terminal + WebSocket. The terminal is the default landing page (`/`);

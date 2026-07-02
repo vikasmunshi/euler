@@ -9,8 +9,10 @@ access and shares no key material with the encryption master key.
 from __future__ import annotations
 
 __all__ = ['SrpClient', 'SrpServer', 'SrpToken', 'make_srp_token', 'compute_verifier',
-           'verify_password', 'VERSION', 'UserRecord', 'UserStore', 'normalize_email']
+           'verify_password', 'decoy_token', 'VERSION', 'UserRecord', 'UserStore',
+           'normalize_email', 'SessionStore']
 
+from solver.web.auth.sessions import SessionStore
 from solver.web.auth.srp import (VERSION, SrpClient, SrpServer, SrpToken, compute_verifier,
-                                 make_srp_token, verify_password)
+                                 decoy_token, make_srp_token, verify_password)
 from solver.web.auth.users import UserRecord, UserStore, normalize_email

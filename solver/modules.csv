@@ -44,5 +44,11 @@ solver.utils.solution_files,True,True
 solver.utils.summary,True,True
 solver.utils.update_doc,True,True
 solver.web.app,,
+solver.web.auth.commands,True,True
+solver.web.auth.policy,,
+solver.web.auth.routes,,
+solver.web.auth.sessions,,
+solver.web.auth.srp,,
+solver.web.auth.users,,
 solver.web.cli,,
 solver.web.pty_bridge,,

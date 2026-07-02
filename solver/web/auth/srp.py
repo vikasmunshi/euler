@@ -43,8 +43,9 @@ byte-for-byte to interoperate.
 from __future__ import annotations
 
 __all__ = ['SrpClient', 'SrpServer', 'SrpToken', 'make_srp_token', 'compute_verifier',
-           'verify_password', 'VERSION']
+           'verify_password', 'decoy_token', 'VERSION']
 
+import hmac
 import secrets
 from hashlib import sha256
 from typing import NamedTuple
@@ -173,6 +174,20 @@ class SrpToken(NamedTuple):
 def make_srp_token(email: str, password: str, *, salt: bytes | None = None) -> str:
     """Mint and serialise an SRP token for `(email, password)` — the storage entry point."""
     return SrpToken.create(email, password, salt=salt).serialize()
+
+
+def decoy_token(email: str, secret: bytes) -> SrpToken:
+    """Return a deterministic dummy token for a nonexistent user.
+
+    Lets the challenge step answer for unknown emails with a *stable* salt and a
+    plausible verifier, so a caller cannot distinguish a real account from an
+    unknown one by watching the salt (the subsequent proof still fails for any
+    password). Derived from a per-process `secret` and the email via HMAC-SHA256,
+    so it is consistent within a run yet reveals nothing about real users.
+    """
+    salt: bytes = hmac.new(secret, b'srp-decoy-salt:' + email.encode(), sha256).digest()[:_SALT_BYTES]
+    x: int = _hash_int(hmac.new(secret, b'srp-decoy-x:' + email.encode(), sha256).digest())
+    return SrpToken(salt=salt, verifier=pow(_g, x, _N))
 
 
 class SrpClient:

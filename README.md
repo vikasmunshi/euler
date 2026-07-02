@@ -244,6 +244,13 @@ solver/
     app.py            — aiohttp application: the SolverShell terminal, its PTY WebSocket, and the viewer.
     cli.py            — `solver-web`: lifecycle for the PTY-backed SolverShell web front end.
     pty_bridge.py     — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
+    auth/             — Web authentication for solver-web.
+      commands.py     — The `users` shell command: manage web-auth accounts from the solver shell.
+      policy.py       — Auth policy constants (lifetimes, cookie names, password rules).
+      routes.py       — HTTP layer for web authentication: SRP login endpoints + the gating middleware.
+      sessions.py     — In-memory web session table.
+      srp.py          — Secure Remote Password (SRP-6a) primitives for web authentication.
+      users.py        — User store for web authentication: the SRP verifier database at ``keys/users.json``.
 ```
 <!-- /GEN:package-layout -->
 

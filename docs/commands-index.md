@@ -75,6 +75,7 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
+| [`users`](#command-users) | — | Manage web-auth users (list|add|remove|disable|enable). |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -1034,5 +1035,27 @@ user-authorize <public_key>
 
 ```text
 Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession).
+```
+
+---
+
+#### Command: `users`
+
+Manage web-auth users (list|add|remove|disable|enable).
+
+```
+users
+[action=list|add|remove|disable|enable] (default list)
+[email=<str>] (default '')
+```
+
+```text
+List or manage the web-auth accounts in `keys/users.json`.
+
+Args:
+    action:  'list' (default) shows every account; 'add' creates or resets an
+             account's password (prompts locally); 'remove' deletes one;
+             'disable' / 'enable' toggle whether the account may log in.
+    email:   The account email (required for every action except 'list').
 ```
 <!-- /GEN:command-index -->

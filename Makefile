@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-caddy uninstall-caddy install-acme uninstall-acme run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-caddy uninstall-caddy install-acme uninstall-acme test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -102,6 +102,10 @@ uninstall-acme:
 $(VENV):
 	python3.14 -m venv $(VENV)
 	@printf "✓ venv created at $(VENV)\n"
+
+## Run the unit test suite (tests/)
+test: $(VENV)
+	$(PYTHON) -m unittest discover -s tests -t .
 
 ## Run the interactive solver shell
 run: $(VENV)

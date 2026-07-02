@@ -150,5 +150,20 @@ class TokenSerializationTests(unittest.TestCase):
         self.assertNotIn(format(token.verifier, 'x'), str(token))
 
 
+class DecoyTokenTests(unittest.TestCase):
+    def test_deterministic_per_secret(self) -> None:
+        secret = b'\x01' * 32
+        self.assertEqual(srp.decoy_token('x@y.com', secret), srp.decoy_token('x@y.com', secret))
+        self.assertEqual(len(srp.decoy_token('x@y.com', secret).salt), 16)
+
+    def test_differs_by_secret_and_email(self) -> None:
+        self.assertNotEqual(srp.decoy_token('x@y.com', b'\x01' * 32), srp.decoy_token('x@y.com', b'\x02' * 32))
+        self.assertNotEqual(srp.decoy_token('a@y.com', b'\x01' * 32), srp.decoy_token('b@y.com', b'\x01' * 32))
+
+    def test_no_password_verifies_against_a_decoy(self) -> None:
+        token = srp.decoy_token('x@y.com', b'\x01' * 32)
+        self.assertFalse(srp.verify_password('x@y.com', 'anything', token))
+
+
 if __name__ == '__main__':
     unittest.main()
