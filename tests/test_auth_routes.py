@@ -11,12 +11,14 @@ from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase
 
 from solver.web.auth import policy, routes
 from solver.web.auth.otp import PendingStore
+from solver.web.auth.remember import RememberStore
 from solver.web.auth.routes import auth_middleware, setup_auth
 from solver.web.auth.srp import SrpClient, SrpToken
 from solver.web.auth.users import UserStore
@@ -32,23 +34,28 @@ class AuthRoutesTests(AioHTTPTestCase):
         store = UserStore(Path(tmp.name) / 'users.json')
         store.register(_EMAIL, SrpToken.create(_EMAIL, _PASSWORD))
         self.pending = PendingStore(Path(tmp.name) / 'pending.json')
+        self.remember = RememberStore(Path(tmp.name) / 'remember.json', b'\x00' * 32,
+                                      policy.REMEMBER_TTL_SECONDS)
         app = web.Application(middlewares=[auth_middleware])
-        setup_auth(app)
+        with patch('solver.web.auth.routes.load_or_create_secret', return_value=b'\x00' * 32):
+            setup_auth(app)                     # patched so it doesn't write keys/.session-secret
         app[routes.USERS] = store               # temp stores instead of config paths
         app[routes.PENDING_REG] = self.pending
+        app[routes.REMEMBER] = self.remember
         app.router.add_get('/protected', self._protected)
         return app
 
     async def _protected(self, request: web.Request) -> web.Response:
         return web.Response(text='secret')
 
-    async def _login(self, email: str, password: str) -> tuple[SrpClient, web.HTTPException | object]:
+    async def _login(self, email: str, password: str,
+                     remember: bool = False) -> tuple[SrpClient, web.HTTPException | object]:
         challenge = await self.client.post('/auth/challenge', json={'email': email})
         data = await challenge.json()
         client = SrpClient(email, password)
         m1 = client.process_challenge(bytes.fromhex(data['salt']), int(data['B'], 16))
-        verify = await self.client.post(
-            '/auth/verify', json={'email': email, 'A': format(client.public, 'x'), 'M1': m1.hex()})
+        verify = await self.client.post('/auth/verify', json={
+            'email': email, 'A': format(client.public, 'x'), 'M1': m1.hex(), 'remember': remember})
         return client, verify
 
     @staticmethod
@@ -147,3 +154,30 @@ class AuthRoutesTests(AioHTTPTestCase):
             'email': email, 'otp': '999999', 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
         self.assertEqual(resp.status, 401)
         self.assertFalse(self.app[routes.USERS].is_active(email))
+
+    async def test_remember_me_sets_cookie_only_when_requested(self) -> None:
+        _c, without = await self._login(_EMAIL, _PASSWORD, remember=False)
+        self.assertNotIn(policy.REMEMBER_COOKIE, without.cookies)
+        _c, with_remember = await self._login(_EMAIL, _PASSWORD, remember=True)
+        self.assertIn(policy.REMEMBER_COOKIE, with_remember.cookies)
+
+    async def test_remember_cookie_promotes_to_session(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD, remember=True)
+        remember = verify.cookies[policy.REMEMBER_COOKIE].value
+        # a request with ONLY the remember cookie (no session) is promoted...
+        prot = await self.client.get('/protected', headers={'Cookie': f'{policy.REMEMBER_COOKIE}={remember}'})
+        self.assertEqual(prot.status, 200)
+        # ...and issued a fresh session plus a rotated remember cookie
+        self.assertIn(policy.SESSION_COOKIE, prot.cookies)
+        self.assertIn(policy.REMEMBER_COOKIE, prot.cookies)
+        self.assertNotEqual(prot.cookies[policy.REMEMBER_COOKIE].value, remember)
+
+    async def test_logout_revokes_remember(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD, remember=True)
+        remember = verify.cookies[policy.REMEMBER_COOKIE].value
+        session = verify.cookies[policy.SESSION_COOKIE].value
+        await self.client.get('/logout', allow_redirects=False, headers={
+            'Cookie': f'{policy.SESSION_COOKIE}={session}; {policy.REMEMBER_COOKIE}={remember}'})
+        # the remember cookie no longer promotes after logout
+        prot = await self.client.get('/protected', headers={'Cookie': f'{policy.REMEMBER_COOKIE}={remember}'})
+        self.assertEqual(prot.status, 401)

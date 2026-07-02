@@ -125,7 +125,7 @@ function normalizeEmail(email) { return email.trim().toLowerCase(); }
 // --- public API ------------------------------------------------------------
 // Perform an SRP-6a login. Resolves { ok: true } on success (server proof
 // verified + session cookie set), { ok: false } otherwise.
-export async function srpLogin(email, password) {
+export async function srpLogin(email, password, remember = false) {
     const nemail = normalizeEmail(email);
     const challenge = await fetch('/auth/challenge', {
         method: 'POST',
@@ -140,7 +140,7 @@ export async function srpLogin(email, password) {
     const verify = await fetch('/auth/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: nemail, A: A.toString(16), M1: bytesToHex(M1) }),
+        body: JSON.stringify({ email: nemail, A: A.toString(16), M1: bytesToHex(M1), remember }),
     });
     if (!verify.ok) return { ok: false };
     const { M2: serverM2 } = await verify.json();

@@ -2,6 +2,7 @@
 **/.*
 keys/users.json
 keys/pending.json
+keys/remember.json
 *.cover
 *.egg-info/
 *.log

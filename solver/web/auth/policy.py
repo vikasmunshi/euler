@@ -8,7 +8,7 @@ Values match the confirmed decisions in docs/auth-plan.md.
 from __future__ import annotations
 
 __all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MIN_PASSWORD_LENGTH',
-           'OTP_LENGTH', 'OTP_TTL_SECONDS', 'OTP_MAX_ATTEMPTS']
+           'OTP_LENGTH', 'OTP_TTL_SECONDS', 'OTP_MAX_ATTEMPTS', 'REMEMBER_COOKIE', 'REMEMBER_TTL_SECONDS']
 
 #: Name of the short-lived session cookie set on a successful SRP login.
 SESSION_COOKIE: str = 'solver_session'
@@ -27,3 +27,8 @@ OTP_LENGTH: int = 6
 OTP_TTL_SECONDS: int = 10 * 60
 #: Wrong-OTP attempts allowed before a pending registration is locked out.
 OTP_MAX_ATTEMPTS: int = 5
+
+#: Name of the persistent "remember me" cookie (a rotating selector:validator token).
+REMEMBER_COOKIE: str = 'solver_remember'
+#: Remember-me lifetime — 30 days (refreshed on each use).
+REMEMBER_TTL_SECONDS: int = 30 * 24 * 3600

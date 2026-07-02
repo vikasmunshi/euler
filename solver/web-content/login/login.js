@@ -4,6 +4,7 @@ import { srpLogin } from '/srp-client.js';
 const form = document.getElementById('login-form');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
+const rememberInput = document.getElementById('remember');
 const submitButton = document.getElementById('submit');
 const errorBox = document.getElementById('error');
 
@@ -17,7 +18,7 @@ form.addEventListener('submit', async (event) => {
     errorBox.textContent = '';
     submitButton.disabled = true;
     try {
-        const { ok } = await srpLogin(emailInput.value, passwordInput.value);
+        const { ok } = await srpLogin(emailInput.value, passwordInput.value, rememberInput.checked);
         if (ok) {
             location.assign(safeNext());
         } else {

@@ -4,15 +4,17 @@
 
 Login is browser-side SRP-6a — the password never reaches the server:
 
-    POST /auth/challenge  {email}          -> {salt, B}
-    POST /auth/verify     {email, A, M1}   -> {M2}  (+ sets the session cookie)
-    GET  /logout                            -> clears the session
+    POST /auth/challenge  {email}                    -> {salt, B}
+    POST /auth/verify     {email, A, M1, remember?}  -> {M2}  (+ session cookie,
+                                                              + remember cookie if asked)
+    GET  /logout                                     -> clears the session + remember token
 
 :func:`auth_middleware` requires a live session for every route except the login
-page, its static assets, the two auth endpoints, and the favicon; a signed-out
+page, its static assets, the auth/register endpoints, and the favicon; a signed-out
 browser navigation is redirected to ``/login?next=…`` while a programmatic fetch
-gets 401. Unknown emails are answered with a stable decoy salt/B so the endpoints
-do not reveal which accounts exist.
+gets 401. A request with no session but a valid remember-me cookie is transparently
+promoted to a fresh session (the remember token is rotated). Unknown emails are
+answered with a stable decoy salt/B so the endpoints do not reveal which accounts exist.
 """
 from __future__ import annotations
 
@@ -29,6 +31,7 @@ from aiohttp.typedefs import Handler
 from solver.config import config
 from solver.web.auth import policy
 from solver.web.auth.otp import PendingStore
+from solver.web.auth.remember import RememberStore, load_or_create_secret
 from solver.web.auth.sessions import SessionStore
 from solver.web.auth.srp import SrpServer, SrpToken, decoy_token
 from solver.web.auth.users import UserStore, normalize_email
@@ -41,6 +44,7 @@ PENDING_REG: web.AppKey[PendingStore] = web.AppKey('auth_pending_reg', PendingSt
 PENDING: web.AppKey[dict[str, tuple[SrpServer, bool, float]]] = web.AppKey('auth_pending', dict)
 # per-process secret backing the anti-enumeration decoy tokens.
 DECOY_SECRET: web.AppKey[bytes] = web.AppKey('auth_decoy_secret', bytes)
+REMEMBER: web.AppKey[RememberStore] = web.AppKey('auth_remember', RememberStore)
 
 #: Routes reachable without a session (so a signed-out browser can log in).
 PUBLIC_PATHS: frozenset[str] = frozenset({
@@ -65,9 +69,41 @@ def _safe_next(raw: str | None) -> str:
 
 
 def is_authenticated(request: web.Request) -> bool:
-    """True if the request carries a live session cookie."""
+    """True if the request carries a live session cookie (does not consider remember-me)."""
     token = request.cookies.get(policy.SESSION_COOKIE)
     return request.app[SESSIONS].email_for(token) is not None
+
+
+def _set_auth_cookie(response: web.StreamResponse, name: str, value: str, max_age: int) -> None:
+    """Set a hardened auth cookie (Secure, HttpOnly, SameSite=Strict, site-wide)."""
+    response.set_cookie(name, value, max_age=max_age, httponly=True, secure=True,
+                        samesite='Strict', path='/')
+
+
+def _resolve_auth(request: web.Request) -> tuple[bool, list[tuple[str, str, int]]]:
+    """Authenticate a request, promoting a remember-me cookie to a session if needed.
+
+    Returns (authenticated, cookies_to_set). A live session needs no cookies; a
+    successful remember-me promotion returns the fresh session + rotated remember
+    cookies for the caller to apply to the response.
+    """
+    sessions = request.app[SESSIONS]
+    if sessions.email_for(request.cookies.get(policy.SESSION_COOKIE)) is not None:
+        return True, []
+    rotated = request.app[REMEMBER].validate_and_rotate(request.cookies.get(policy.REMEMBER_COOKIE))
+    if rotated is None:
+        return False, []
+    email, new_remember = rotated
+    return True, [
+        (policy.SESSION_COOKIE, sessions.create(email), sessions.ttl_seconds),
+        (policy.REMEMBER_COOKIE, new_remember, request.app[REMEMBER].ttl_seconds),
+    ]
+
+
+def _apply_cookies(response: web.StreamResponse, cookies: list[tuple[str, str, int]]) -> None:
+    """Apply the (name, value, max_age) cookies from a remember-me promotion."""
+    for name, value, max_age in cookies:
+        _set_auth_cookie(response, name, value, max_age)
 
 
 async def _serve_login(request: web.Request) -> web.StreamResponse:
@@ -136,10 +172,11 @@ async def _auth_verify(request: web.Request) -> web.StreamResponse:
         return _auth_failed()
 
     sessions = request.app[SESSIONS]
-    token = sessions.create(email)
     response = web.json_response({'M2': server_proof.hex()})
-    response.set_cookie(policy.SESSION_COOKIE, token, max_age=sessions.ttl_seconds,
-                        httponly=True, secure=True, samesite='Strict', path='/')
+    _set_auth_cookie(response, policy.SESSION_COOKIE, sessions.create(email), sessions.ttl_seconds)
+    if bool(data.get('remember')):
+        remember = request.app[REMEMBER]
+        _set_auth_cookie(response, policy.REMEMBER_COOKIE, remember.issue(email), remember.ttl_seconds)
     return response
 
 
@@ -187,21 +224,32 @@ async def _register_complete(request: web.Request) -> web.StreamResponse:
 
 
 async def _logout(request: web.Request) -> web.StreamResponse:
-    """Drop the current session and clear its cookie, then redirect to the login page."""
+    """Drop the session and remember token, clear both cookies, redirect to the login page."""
     request.app[SESSIONS].destroy(request.cookies.get(policy.SESSION_COOKIE))
+    request.app[REMEMBER].revoke(request.cookies.get(policy.REMEMBER_COOKIE))
     response = web.HTTPFound('/login')
     response.del_cookie(policy.SESSION_COOKIE, path='/')
+    response.del_cookie(policy.REMEMBER_COOKIE, path='/')
     return response
 
 
 @web.middleware
 async def auth_middleware(request: web.Request, handler: Handler) -> web.StreamResponse:
-    """Require a live session for every route except the public login surface."""
-    if request.path in PUBLIC_PATHS or is_authenticated(request):
+    """Gate every route but the public login surface; promote remember-me to a session."""
+    if request.path in PUBLIC_PATHS:
         return await handler(request)
-    if _wants_html(request):
-        raise web.HTTPFound(f'/login?next={quote(request.path_qs, safe="/?=&")}')
-    raise web.HTTPUnauthorized(text='authentication required')
+    authenticated, cookies = _resolve_auth(request)
+    if not authenticated:
+        if _wants_html(request):
+            raise web.HTTPFound(f'/login?next={quote(request.path_qs, safe="/?=&")}')
+        raise web.HTTPUnauthorized(text='authentication required')
+    try:
+        response = await handler(request)
+    except web.HTTPException as exc:
+        _apply_cookies(exc, cookies)   # a promoted request that redirects still gets its cookies
+        raise
+    _apply_cookies(response, cookies)
+    return response
 
 
 def setup_auth(app: web.Application) -> None:
@@ -209,6 +257,9 @@ def setup_auth(app: web.Application) -> None:
     app[SESSIONS] = SessionStore(policy.SESSION_TTL_SECONDS)
     app[USERS] = UserStore(config.users_file)
     app[PENDING_REG] = PendingStore(config.pending_file)
+    app[REMEMBER] = RememberStore(config.remember_file,
+                                  load_or_create_secret(config.session_secret_file),
+                                  policy.REMEMBER_TTL_SECONDS)
     app[PENDING] = {}
     app[DECOY_SECRET] = secrets.token_bytes(32)
     app.add_routes([

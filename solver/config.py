@@ -131,6 +131,8 @@ class Config(AttributeDict):
     solutions_dir: Path
     users_file: Path
     pending_file: Path
+    remember_file: Path
+    session_secret_file: Path
     static_file_dir: Path
     static_file_problems: Path
     static_file_progress: Path
@@ -171,6 +173,8 @@ class Config(AttributeDict):
             'solutions_dir': root_dir / 'solutions',
             'users_file': root_dir / 'keys' / 'users.json',  # web-auth SRP verifiers (separate from crypto keys)
             'pending_file': root_dir / 'keys' / 'pending.json',  # invite OTPs, shared shell<->server
+            'remember_file': root_dir / 'keys' / 'remember.json',  # persistent remember-me tokens
+            'session_secret_file': root_dir / 'keys' / '.session-secret',  # HMAC key for remember-me
             'static_file_dir': root_dir / 'solver/web-content',
             'static_file_problems': root_dir / 'solver/web-content/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
