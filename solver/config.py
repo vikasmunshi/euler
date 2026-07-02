@@ -129,6 +129,7 @@ class Config(AttributeDict):
     server_lock_file: Path
     session_file: Path
     solutions_dir: Path
+    users_file: Path
     static_file_dir: Path
     static_file_problems: Path
     static_file_progress: Path
@@ -167,6 +168,7 @@ class Config(AttributeDict):
             'server_lock_file': root_dir / '.server.lock',
             'session_file': root_dir / '.session',
             'solutions_dir': root_dir / 'solutions',
+            'users_file': root_dir / 'keys' / 'users.json',  # web-auth SRP verifiers (separate from crypto keys)
             'static_file_dir': root_dir / 'solver/web-content',
             'static_file_problems': root_dir / 'solver/web-content/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
