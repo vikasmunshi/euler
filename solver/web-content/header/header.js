@@ -15,6 +15,17 @@
 
     const pad4 = n => String(n).padStart(4, '0');
 
+    // Remember / recall the last problem viewed, so the "active problem" link still
+    // works from the summary, progress and shell pages (which carry no URL number).
+    function setCookie(name, value) {
+        document.cookie = `${name}=${value}; path=/; max-age=31536000; samesite=lax`;
+    }
+
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
+        return match ? match[1] : null;
+    }
+
     // Make an anchor a live link, or an inert .nav-dummy when there is no target.
     function setLink(el, href, external) {
         if (!el) return;
@@ -39,8 +50,13 @@
         const byId = id => document.getElementById(id);
         const problemUrl = n => `/${pad4(n)}/`;
 
+        // On a problem page, record it; elsewhere fall back to the last one viewed.
+        if (num) setCookie('last_problem', String(num));
+        const stored = getCookie('last_problem');
+        const activeNum = num || (/^\d+$/.test(stored || '') ? stored : null);
+
         setLink(byId('nav-prev'), num && num > 1 ? problemUrl(num - 1) : null);
-        setLink(byId('nav-problem'), num ? problemUrl(num) : null);
+        setLink(byId('nav-problem'), activeNum ? problemUrl(activeNum) : null);
         setLink(byId('nav-next'), num ? problemUrl(num + 1) : null);
 
         setLink(byId('nav-euler'),
@@ -51,6 +67,7 @@
 
         setLink(byId('nav-summary'), '/summary');
         setLink(byId('nav-progress'), '/progress');
+        setLink(byId('nav-shell'), '/');
     }
 
     // The filename + language badge only appear on code pages, which set
