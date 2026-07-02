@@ -133,6 +133,8 @@ solver/
     pty_bridge.py     — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
     auth/             — Web authentication for solver-web.
       commands.py     — The `users` shell command: manage web-auth accounts from the solver shell.
+      mail.py         — Send the registration OTP by email via Gmail SMTP.
+      otp.py          — One-time passwords and the shared pending-registration store.
       policy.py       — Auth policy constants (lifetimes, cookie names, password rules).
       routes.py       — HTTP layer for web authentication: SRP login endpoints + the gating middleware.
       sessions.py     — In-memory web session table.

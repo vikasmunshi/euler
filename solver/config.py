@@ -130,6 +130,7 @@ class Config(AttributeDict):
     session_file: Path
     solutions_dir: Path
     users_file: Path
+    pending_file: Path
     static_file_dir: Path
     static_file_problems: Path
     static_file_progress: Path
@@ -169,6 +170,7 @@ class Config(AttributeDict):
             'session_file': root_dir / '.session',
             'solutions_dir': root_dir / 'solutions',
             'users_file': root_dir / 'keys' / 'users.json',  # web-auth SRP verifiers (separate from crypto keys)
+            'pending_file': root_dir / 'keys' / 'pending.json',  # invite OTPs, shared shell<->server
             'static_file_dir': root_dir / 'solver/web-content',
             'static_file_problems': root_dir / 'solver/web-content/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',

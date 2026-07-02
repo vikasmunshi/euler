@@ -1053,9 +1053,10 @@ users
 List or manage the web-auth accounts in `keys/users.json`.
 
 Args:
-    action:  'list' (default) shows every account; 'add' creates or resets an
-             account's password (prompts locally); 'remove' deletes one;
-             'disable' / 'enable' toggle whether the account may log in.
+    action:  'list' (default) shows every account; 'add' invites an email
+             (disabled + emailed OTP; the user sets their own password at
+             /register); 'remove' deletes an account; 'disable' / 'enable'
+             toggle whether a registered account may log in.
     email:   The account email (required for every action except 'list').
 ```
 <!-- /GEN:command-index -->

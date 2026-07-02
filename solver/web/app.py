@@ -67,7 +67,7 @@ _STATIC_ASSETS: frozenset[str] = frozenset({
     'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json', 'progress.css',
     'progress.js', 'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
     'summary.html', 'summary.js',
-    'login.css', 'login.js', 'srp-client.js',
+    'login.css', 'login.js', 'srp-client.js', 'register.css', 'register.js',
 })
 
 #: mime type of a served problem file → highlight.js language for the code viewer.

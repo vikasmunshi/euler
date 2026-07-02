@@ -1,0 +1,18 @@
+/* register.css — additions to login.css for the two-step registration page. */
+.hidden { display: none; }
+
+.hint {
+    margin: -0.6rem 0 1rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+}
+
+.success {
+    min-height: 1.2rem;
+    margin: 0.5rem 0 0;
+    color: #22c55e;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.success a { color: var(--accent); }

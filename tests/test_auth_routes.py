@@ -16,6 +16,7 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase
 
 from solver.web.auth import policy, routes
+from solver.web.auth.otp import PendingStore
 from solver.web.auth.routes import auth_middleware, setup_auth
 from solver.web.auth.srp import SrpClient, SrpToken
 from solver.web.auth.users import UserStore
@@ -29,10 +30,12 @@ class AuthRoutesTests(AioHTTPTestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         store = UserStore(Path(tmp.name) / 'users.json')
-        store.put(_EMAIL, SrpToken.create(_EMAIL, _PASSWORD))
+        store.register(_EMAIL, SrpToken.create(_EMAIL, _PASSWORD))
+        self.pending = PendingStore(Path(tmp.name) / 'pending.json')
         app = web.Application(middlewares=[auth_middleware])
         setup_auth(app)
-        app[routes.USERS] = store               # temp store instead of config.users_file
+        app[routes.USERS] = store               # temp stores instead of config paths
+        app[routes.PENDING_REG] = self.pending
         app.router.add_get('/protected', self._protected)
         return app
 
@@ -107,3 +110,40 @@ class AuthRoutesTests(AioHTTPTestCase):
         self.app[routes.USERS].set_disabled(_EMAIL, True)
         _client, verify = await self._login(_EMAIL, _PASSWORD)
         self.assertEqual(verify.status, 401)
+
+    async def test_invited_user_cannot_login(self) -> None:
+        self.app[routes.USERS].invite('invited@nowhere.test')   # disabled, no verifier
+        _client, verify = await self._login('invited@nowhere.test', 'anything long enough')
+        self.assertEqual(verify.status, 401)
+
+    async def test_registration_flow_creates_active_user(self) -> None:
+        email, otp, password = 'newuser@nowhere.test', '135790', 'a brand new password'
+        self.app[routes.USERS].invite(email)
+        self.pending.invite(email, otp)
+
+        pre = await self.client.post('/register/verify', json={'email': email, 'otp': otp})
+        self.assertEqual(pre.status, 200)                       # OTP pre-check (non-consuming)
+
+        token = SrpToken.create(email, password)                # browser derives salt+verifier
+        complete = await self.client.post('/register/complete', json={
+            'email': email, 'otp': otp, 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+        self.assertEqual(complete.status, 200)
+        self.assertTrue(self.app[routes.USERS].is_active(email))
+
+        _client, verify = await self._login(email, password)    # can now log in
+        self.assertEqual(verify.status, 200)
+
+    async def test_register_verify_rejects_bad_otp(self) -> None:
+        self.pending.invite('newuser@nowhere.test', '135790')
+        resp = await self.client.post('/register/verify', json={'email': 'newuser@nowhere.test', 'otp': '000000'})
+        self.assertEqual(resp.status, 401)
+
+    async def test_register_complete_rejects_bad_otp(self) -> None:
+        email = 'newuser@nowhere.test'
+        self.app[routes.USERS].invite(email)
+        self.pending.invite(email, '135790')
+        token = SrpToken.create(email, 'a brand new password')
+        resp = await self.client.post('/register/complete', json={
+            'email': email, 'otp': '999999', 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+        self.assertEqual(resp.status, 401)
+        self.assertFalse(self.app[routes.USERS].is_active(email))

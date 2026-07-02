@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 """The `users` shell command: manage web-auth accounts from the solver shell.
 
-Bootstraps and administers the SRP verifier store at ``keys/users.json``. The
-``add`` action prompts for a password locally and stores only the derived
-verifier — used to create the first account before the emailed-OTP invite flow
-exists (milestone 3). SRP binds the password to the **normalised** email, so the
-browser login must use the same normalisation (trim + lower-case), which
-``solver.web.auth.users.normalize_email`` and the JS client both apply.
+Registration is invite-only. ``users add <email>`` creates a **disabled,
+password-less** account in ``keys/users.json`` and emails a one-time code; the
+user chooses their own password in the browser at ``/register`` (the server never
+sees it). If Gmail SMTP is not configured, the code is printed on the console so
+the admin can deliver it manually. The other actions manage existing accounts.
 """
 from __future__ import annotations
 
@@ -17,8 +16,8 @@ from typing import Literal
 
 from solver.config import ExitCodes, config
 from solver.shell import console, register
-from solver.web.auth import policy
-from solver.web.auth.srp import SrpToken
+from solver.web.auth import mail
+from solver.web.auth.otp import PendingStore, generate_otp
 from solver.web.auth.users import UserStore, normalize_email
 
 
@@ -27,9 +26,10 @@ def users(action: Literal['list', 'add', 'remove', 'disable', 'enable'] = 'list'
     """List or manage the web-auth accounts in `keys/users.json`.
 
     Args:
-        action:  'list' (default) shows every account; 'add' creates or resets an
-                 account's password (prompts locally); 'remove' deletes one;
-                 'disable' / 'enable' toggle whether the account may log in.
+        action:  'list' (default) shows every account; 'add' invites an email
+                 (disabled + emailed OTP; the user sets their own password at
+                 /register); 'remove' deletes an account; 'disable' / 'enable'
+                 toggle whether a registered account may log in.
         email:   The account email (required for every action except 'list').
     """
     store = UserStore(config.users_file)
@@ -42,40 +42,53 @@ def users(action: Literal['list', 'add', 'remove', 'disable', 'enable'] = 'list'
         return ExitCodes.EXIT_ERROR
 
     if action == 'add':
-        return _add_user(store, key)
+        return _invite_user(store, PendingStore(config.pending_file), key)
     if action == 'remove':
-        return _report(store.remove(key), f'removed {key}', f'no such user: {key}')
+        removed = store.remove(key)
+        PendingStore(config.pending_file).remove(key)  # also drop any pending OTP
+        return _report(removed, f'removed {key}', f'no such user: {key}')
     if action == 'disable':
         return _report(store.set_disabled(key, True), f'disabled {key}', f'no such user: {key}')
     return _report(store.set_disabled(key, False), f'enabled {key}', f'no such user: {key}')
 
 
 def _list_users(store: UserStore) -> int:
-    """Print every account with its created date and status."""
+    """Print every account with its status (invited / active / disabled) and created date."""
     records = store.records()
     if not records:
-        console.print('[muted]no web-auth users (add one with: users add <email>)[/muted]')
+        console.print('[muted]no web-auth users (invite one with: users add <email>)[/muted]')
         return ExitCodes.EXIT_OK
     width = max(len(r.email) for r in records) + 1
     for record in records:
-        status = '[error]disabled[/error]' if record.disabled else '[success]active[/success]'
+        if not record.registered:
+            status = '[warning]invited[/warning]'
+        elif record.disabled:
+            status = '[error]disabled[/error]'
+        else:
+            status = '[success]active[/success]'
         console.print(f'[accent.dim]{record.email:<{width}}[/accent.dim] {status} [muted]{record.created}[/muted]')
     return ExitCodes.EXIT_OK
 
 
-def _add_user(store: UserStore, key: str) -> int:
-    """Prompt for a password, then create or reset the account's SRP verifier."""
-    password = console.input('[accent]Choose a password:[/accent] ', password=True)
-    if len(password) < policy.MIN_PASSWORD_LENGTH:
-        console.print(f'[error]error:[/error] [muted]password must be at least '
-                      f'{policy.MIN_PASSWORD_LENGTH} characters[/muted]')
+def _invite_user(store: UserStore, pending: PendingStore, key: str) -> int:
+    """Invite `key`: create a disabled account, seed a pending OTP, and email the code."""
+    record = store.get(key)
+    if record is not None and record.registered:
+        console.print(f'[error]error:[/error] [muted]{key} is already registered '
+                      f'(disable or remove it first)[/muted]')
         return ExitCodes.EXIT_ERROR
-    if password != console.input('[accent]Confirm password:[/accent] ', password=True):
-        console.print('[error]error:[/error] [muted]passwords do not match[/muted]')
-        return ExitCodes.EXIT_ERROR
-    existed = store.get(key) is not None
-    store.put(key, SrpToken.create(key, password))
-    console.print(f'[success]{"updated" if existed else "added"} {key}[/success]')
+
+    store.invite(key)
+    otp = generate_otp()
+    pending.invite(key, otp)
+    try:
+        mail.send_otp(key, otp)
+    except Exception as exc:
+        console.print(f'[warning]could not email OTP to {key}:[/warning] [muted]{exc}[/muted]')
+        console.print(f'[muted]deliver this code to {key} manually (valid ~10 min):[/muted] [accent]{otp}[/accent]')
+        return ExitCodes.EXIT_OK
+    console.print(f'[success]invited {key}[/success] '
+                  f'[muted]— OTP emailed; they set their password at /register[/muted]')
     return ExitCodes.EXIT_OK
 
 

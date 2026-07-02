@@ -40,17 +40,28 @@ def normalize_email(email: str) -> str:
 
 
 class UserRecord(NamedTuple):
-    """One user's stored authentication material and bookkeeping."""
+    """One user's stored authentication material and bookkeeping.
+
+    An invited-but-not-yet-registered account has no salt/verifier (both None) and
+    is disabled; registration sets them and enables the account.
+    """
 
     email: str
-    salt: bytes
-    verifier: int
+    salt: bytes | None
+    verifier: int | None
     created: str
     disabled: bool
 
     @property
+    def registered(self) -> bool:
+        """True once the user has completed registration (has an SRP verifier)."""
+        return self.salt is not None and self.verifier is not None
+
+    @property
     def token(self) -> SrpToken:
-        """The SRP token (salt + verifier) used to drive a server-side handshake."""
+        """The SRP token (salt + verifier); only valid for a registered user."""
+        if self.salt is None or self.verifier is None:
+            raise ValueError(f'{self.email} has not completed registration')
         return SrpToken(salt=self.salt, verifier=self.verifier)
 
 
@@ -92,11 +103,13 @@ class UserStore:
 
     @staticmethod
     def _to_record(email: str, entry: dict[str, Any]) -> UserRecord:
-        """Build a :class:`UserRecord` from a stored JSON entry."""
+        """Build a :class:`UserRecord` from a stored JSON entry (salt/verifier optional)."""
+        salt_hex = entry.get('salt')
+        verifier_hex = entry.get('verifier')
         return UserRecord(
             email=email,
-            salt=bytes.fromhex(entry['salt']),
-            verifier=int(entry['verifier'], 16),
+            salt=bytes.fromhex(salt_hex) if salt_hex else None,
+            verifier=int(verifier_hex, 16) if verifier_hex else None,
             created=entry['created'],
             disabled=bool(entry.get('disabled', False)),
         )
@@ -109,9 +122,9 @@ class UserStore:
         return self._to_record(key, entry) if entry is not None else None
 
     def is_active(self, email: str) -> bool:
-        """Return True if the user exists and is not disabled."""
+        """Return True if the user exists, has registered, and is not disabled."""
         record = self.get(email)
-        return record is not None and not record.disabled
+        return record is not None and record.registered and not record.disabled
 
     def emails(self) -> list[str]:
         """Return all stored emails, sorted."""
@@ -123,11 +136,24 @@ class UserStore:
         return [self._to_record(email, users[email]) for email in sorted(users)]
 
     # -- mutations ----------------------------------------------------------
-    def put(self, email: str, token: SrpToken, *, created: str | None = None) -> UserRecord:
-        """Create or replace the user's verifier; returns the stored record.
+    def invite(self, email: str) -> UserRecord:
+        """Create a disabled, password-less invited account (no-op if it already exists).
 
-        A fresh account is created enabled; replacing an existing user's verifier
-        (e.g. a password change) preserves its `created` and `disabled` state.
+        Returns the record (existing or new). Registration later sets the verifier and
+        enables it; callers should refuse to re-invite an already-registered user.
+        """
+        key = normalize_email(email)
+        data = self._load()
+        if key not in data['users']:
+            data['users'][key] = {'created': datetime.now(timezone.utc).isoformat(), 'disabled': True}
+            self._save(data)
+        return self._to_record(key, data['users'][key])
+
+    def register(self, email: str, token: SrpToken) -> UserRecord:
+        """Store the user's SRP verifier and enable the account (registration complete).
+
+        Creates the account if absent, otherwise preserves its `created`; always clears
+        `disabled` so the user can log in.
         """
         key = normalize_email(email)
         data = self._load()
@@ -135,8 +161,8 @@ class UserStore:
         entry = {
             'salt': token.salt.hex(),
             'verifier': format(token.verifier, 'x'),
-            'created': created or existing.get('created') or datetime.now(timezone.utc).isoformat(),
-            'disabled': bool(existing.get('disabled', False)),
+            'created': existing.get('created') or datetime.now(timezone.utc).isoformat(),
+            'disabled': False,
         }
         data['users'][key] = entry
         self._save(data)

@@ -220,11 +220,11 @@ and management without the web flow:
 - `users list` — emails + created/disabled state (never secrets).
 - `users disable <email>` / `users enable <email>`.
 - `users remove <email>`.
-- `users add <email>` — **the** registration trigger (invite-only). Default: seed a
-  pending registration and **email the OTP**; the invited user completes it in the
-  browser, choosing their own password (admin never sees it). A local `--password`
-  mode prompts for a password in the shell and stores the verifier directly (no
-  email) — used to bootstrap the first account before SMTP is wired.
+- `users add <email>` — **the** registration trigger (invite-only): create a
+  **disabled, password-less** account, seed a pending OTP, and **email it** (falling
+  back to printing the code on the console if SMTP is unconfigured). The invited user
+  always chooses their own password in the browser — the shell never sets one and the
+  server never sees it. `remove`/`disable`/`enable`/`list` manage existing accounts.
 
 ## Security considerations
 
@@ -251,7 +251,7 @@ and management without the web flow:
    for `srp.py` incl. the JS-interop vectors.
 2. **Login (SRP) + sessions + middleware** — challenge/verify endpoints, session
    cookie, gate all routes incl. `/ws`; login page + `srp-client.js`. Bootstrap a
-   user via `users add --password` (local, no email). (Usable end-to-end: login
+   user via `users add` + the OTP flow (M3). (Usable end-to-end: login
    required, no OTP invite yet.)
 3. **Invite registration + OTP + Gmail** — `users add` (seed + send OTP), the
    `/register/verify` + `/register/complete` endpoints, `otp.py`, SMTP sender, and the
@@ -263,6 +263,7 @@ and management without the web flow:
 
 1. **Browser-side SRP-6a** — password stays in the browser; complexity enforced
    client-side; server stores only `{salt, verifier}`.
-2. **Invite-only registration** — accounts created only via `users add` (which emails
-   an OTP invite, or `--password` for local bootstrap); no open request endpoint.
+2. **Invite-only registration** — accounts created only via `users add`, which emails
+   an OTP invite; the user always sets their own password in the browser (the shell
+   never sets one). No open request endpoint.
 3. **Lifetimes** — session **12 h**, remember-me **30 d**, OTP **10 min**.

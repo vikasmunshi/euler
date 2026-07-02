@@ -1,6 +1,7 @@
 **/*_c
 **/.*
 keys/users.json
+keys/pending.json
 *.cover
 *.egg-info/
 *.log

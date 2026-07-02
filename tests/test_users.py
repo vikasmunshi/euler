@@ -27,7 +27,7 @@ class UserStoreTests(unittest.TestCase):
     def tearDown(self) -> None:
         self._tmp.cleanup()
 
-    def _token(self, email: str = 'a@b.com', pw: str = 'pw') -> srp.SrpToken:
+    def _token(self, email: str = 'a@b.com', pw: str = 'passwordpassword') -> srp.SrpToken:
         return srp.SrpToken.create(email, pw)
 
     def test_missing_file_reads_as_empty(self) -> None:
@@ -35,56 +35,72 @@ class UserStoreTests(unittest.TestCase):
         self.assertIsNone(self.store.get('nobody@x.com'))
         self.assertFalse(self.store.is_active('nobody@x.com'))
 
-    def test_put_get_roundtrip_and_active(self) -> None:
+    def test_register_roundtrip_and_active(self) -> None:
         token = self._token()
-        record = self.store.put('User@B.com', token)
-        self.assertEqual(record.email, 'user@b.com')       # normalized
-        self.assertEqual(record.token, token)
+        record = self.store.register('User@B.com', token)   # normalized on write
+        self.assertEqual(record.email, 'user@b.com')
+        self.assertTrue(record.registered)
         self.assertFalse(record.disabled)
-        fetched = self.store.get('user@b.com')
-        assert fetched is not None
-        self.assertEqual(fetched.token, token)
+        self.assertEqual(record.token, token)
         self.assertTrue(self.store.is_active('USER@b.com'))  # lookup normalizes too
 
     def test_token_drives_successful_handshake(self) -> None:
-        self.store.put('a@b.com', srp.SrpToken.create('a@b.com', 's3cret'))
+        self.store.register('a@b.com', srp.SrpToken.create('a@b.com', 's3cret-passphrase'))
         record = self.store.get('a@b.com')
         assert record is not None
-        self.assertTrue(srp.verify_password('a@b.com', 's3cret', record.token))
+        self.assertTrue(srp.verify_password('a@b.com', 's3cret-passphrase', record.token))
         self.assertFalse(srp.verify_password('a@b.com', 'wrong', record.token))
 
+    def test_invite_creates_disabled_unregistered(self) -> None:
+        record = self.store.invite('New@User.com')
+        self.assertEqual(record.email, 'new@user.com')
+        self.assertFalse(record.registered)
+        self.assertTrue(record.disabled)
+        self.assertIsNone(record.salt)
+        self.assertIsNone(record.verifier)
+        self.assertFalse(self.store.is_active('new@user.com'))  # invited != active
+        with self.assertRaises(ValueError):
+            _ = record.token                                     # no verifier yet
+
+    def test_invite_is_noop_when_present(self) -> None:
+        first = self.store.invite('a@b.com')
+        again = self.store.invite('A@B.com')
+        self.assertEqual(again.created, first.created)
+        self.store.register('a@b.com', self._token())
+        after = self.store.invite('a@b.com')                     # must not wipe a registered user
+        self.assertTrue(after.registered)
+
+    def test_register_enables_invited_and_preserves_created(self) -> None:
+        invited = self.store.invite('a@b.com')
+        registered = self.store.register('a@b.com', self._token())
+        self.assertEqual(registered.created, invited.created)
+        self.assertTrue(registered.registered)
+        self.assertFalse(registered.disabled)                    # registration enables
+        self.assertTrue(self.store.is_active('a@b.com'))
+
     def test_disable_enable_toggles_active(self) -> None:
-        self.store.put('a@b.com', self._token())
+        self.store.register('a@b.com', self._token())
         self.assertTrue(self.store.set_disabled('a@b.com', True))
         self.assertFalse(self.store.is_active('a@b.com'))
         self.assertTrue(self.store.set_disabled('a@b.com', False))
         self.assertTrue(self.store.is_active('a@b.com'))
         self.assertFalse(self.store.set_disabled('ghost@x.com', True))
 
-    def test_put_preserves_created_and_disabled_on_replace(self) -> None:
-        first = self.store.put('a@b.com', self._token())
-        self.store.set_disabled('a@b.com', True)
-        replaced = self.store.put('a@b.com', self._token(pw='new'))
-        self.assertEqual(replaced.created, first.created)
-        self.assertTrue(replaced.disabled)                 # state preserved
-        self.assertNotEqual(replaced.verifier, first.verifier)
-
     def test_remove(self) -> None:
-        self.store.put('a@b.com', self._token())
+        self.store.register('a@b.com', self._token())
         self.assertTrue(self.store.remove('A@B.com'))
         self.assertIsNone(self.store.get('a@b.com'))
         self.assertFalse(self.store.remove('a@b.com'))
 
     def test_emails_and_records_sorted(self) -> None:
         for email in ('c@x.com', 'a@x.com', 'b@x.com'):
-            self.store.put(email, self._token(email))
+            self.store.register(email, self._token(email))
         self.assertEqual(self.store.emails(), ['a@x.com', 'b@x.com', 'c@x.com'])
         self.assertEqual([r.email for r in self.store.records()], ['a@x.com', 'b@x.com', 'c@x.com'])
 
     def test_file_is_mode_0600_and_valid_json(self) -> None:
-        self.store.put('a@b.com', self._token())
-        mode = stat.S_IMODE(self.path.stat().st_mode)
-        self.assertEqual(mode, 0o600)
+        self.store.register('a@b.com', self._token())
+        self.assertEqual(stat.S_IMODE(self.path.stat().st_mode), 0o600)
         data = json.loads(self.path.read_text())
         self.assertEqual(data['version'], srp.VERSION)
         self.assertIn('a@b.com', data['users'])

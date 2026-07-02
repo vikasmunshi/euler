@@ -28,13 +28,15 @@ from aiohttp.typedefs import Handler
 
 from solver.config import config
 from solver.web.auth import policy
+from solver.web.auth.otp import PendingStore
 from solver.web.auth.sessions import SessionStore
-from solver.web.auth.srp import SrpServer, decoy_token
+from solver.web.auth.srp import SrpServer, SrpToken, decoy_token
 from solver.web.auth.users import UserStore, normalize_email
 
 #: Per-server auth state, stashed on the Application.
 SESSIONS: web.AppKey[SessionStore] = web.AppKey('auth_sessions', SessionStore)
 USERS: web.AppKey[UserStore] = web.AppKey('auth_users', UserStore)
+PENDING_REG: web.AppKey[PendingStore] = web.AppKey('auth_pending_reg', PendingStore)
 # email -> (server, is_active, expiry): the outstanding SRP challenge per email.
 PENDING: web.AppKey[dict[str, tuple[SrpServer, bool, float]]] = web.AppKey('auth_pending', dict)
 # per-process secret backing the anti-enumeration decoy tokens.
@@ -43,7 +45,9 @@ DECOY_SECRET: web.AppKey[bytes] = web.AppKey('auth_decoy_secret', bytes)
 #: Routes reachable without a session (so a signed-out browser can log in).
 PUBLIC_PATHS: frozenset[str] = frozenset({
     '/login', '/logout', '/auth/challenge', '/auth/verify',
+    '/register', '/register/verify', '/register/complete',
     '/favicon.ico', '/favicon.svg', '/login.css', '/login.js', '/srp-client.js',
+    '/register.css', '/register.js',
 })
 
 
@@ -99,8 +103,12 @@ async def _auth_challenge(request: web.Request) -> web.StreamResponse:
     _prune_pending(pending)
 
     record = request.app[USERS].get(email)
-    active = record is not None and not record.disabled
-    token = record.token if record is not None else decoy_token(email, request.app[DECOY_SECRET])
+    if record is not None and record.registered:
+        token = record.token
+        active = not record.disabled
+    else:  # unknown, or invited-but-not-registered → indistinguishable decoy
+        token = decoy_token(email, request.app[DECOY_SECRET])
+        active = False
     server = SrpServer(email, token)
     pending[email] = (server, active, time.time() + policy.CHALLENGE_TTL_SECONDS)
     return web.json_response({'salt': server.salt.hex(), 'B': format(server.public, 'x')})
@@ -140,6 +148,44 @@ def _auth_failed() -> web.Response:
     return web.json_response({'error': 'authentication failed'}, status=401)
 
 
+async def _serve_register(request: web.Request) -> web.StreamResponse:
+    """Serve the registration page (public; invited users complete signup here)."""
+    return web.FileResponse(config.static_file_dir / 'register' / 'register.html')
+
+
+async def _register_verify(request: web.Request) -> web.StreamResponse:
+    """`POST /register/verify {email, otp}` → 200 if the OTP is currently valid (a UX pre-check).
+
+    Does not consume the OTP; the authoritative check happens in `/register/complete`.
+    """
+    data = await _read_json(request)
+    email = normalize_email(str(data.get('email', '')))
+    otp = str(data.get('otp', ''))
+    if request.app[PENDING_REG].check(email, otp, consume=False):
+        return web.json_response({'ok': True})
+    return _auth_failed()
+
+
+async def _register_complete(request: web.Request) -> web.StreamResponse:
+    """`POST /register/complete {email, otp, salt, verifier}` → store the verifier + enable.
+
+    The browser has verified the OTP, taken the chosen password (checked against the
+    complexity policy client-side), and computed the SRP salt/verifier. A valid OTP is
+    the authorisation to set them; the OTP is consumed on success.
+    """
+    data = await _read_json(request)
+    email = normalize_email(str(data.get('email', '')))
+    otp = str(data.get('otp', ''))
+    try:
+        token = SrpToken(salt=bytes.fromhex(str(data['salt'])), verifier=int(str(data['verifier']), 16))
+    except (KeyError, ValueError):
+        raise web.HTTPBadRequest()
+    if not request.app[PENDING_REG].check(email, otp, consume=True):
+        return _auth_failed()
+    request.app[USERS].register(email, token)
+    return web.json_response({'ok': True})
+
+
 async def _logout(request: web.Request) -> web.StreamResponse:
     """Drop the current session and clear its cookie, then redirect to the login page."""
     request.app[SESSIONS].destroy(request.cookies.get(policy.SESSION_COOKIE))
@@ -162,11 +208,15 @@ def setup_auth(app: web.Application) -> None:
     """Initialise per-server auth state and register the auth routes."""
     app[SESSIONS] = SessionStore(policy.SESSION_TTL_SECONDS)
     app[USERS] = UserStore(config.users_file)
+    app[PENDING_REG] = PendingStore(config.pending_file)
     app[PENDING] = {}
     app[DECOY_SECRET] = secrets.token_bytes(32)
     app.add_routes([
         web.get('/login', _serve_login),
         web.post('/auth/challenge', _auth_challenge),
         web.post('/auth/verify', _auth_verify),
+        web.get('/register', _serve_register),
+        web.post('/register/verify', _register_verify),
+        web.post('/register/complete', _register_complete),
         web.get('/logout', _logout),
     ])

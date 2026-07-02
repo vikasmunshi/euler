@@ -147,6 +147,37 @@ export async function srpLogin(email, password) {
     return { ok: serverM2 === bytesToHex(M2) };   // reject a server that can't prove K
 }
 
+// Compute a fresh SRP salt + verifier for registration (v = g^x mod N).
+export async function srpMakeVerifier(email, password) {
+    const nemail = normalizeEmail(email);
+    const salt = new Uint8Array(16);
+    crypto.getRandomValues(salt);
+    const x = await deriveX(salt, nemail, password);
+    return { salt: bytesToHex(salt), verifier: modpow(g, x, N).toString(16) };
+}
+
+// Pre-check an OTP (does not consume it) — for immediate feedback on the register page.
+export async function srpVerifyOtp(email, otp) {
+    const response = await fetch('/register/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: normalizeEmail(email), otp }),
+    });
+    return { ok: response.ok };
+}
+
+// Complete registration: derive the verifier locally and submit it with the OTP.
+export async function srpRegister(email, otp, password) {
+    const nemail = normalizeEmail(email);
+    const { salt, verifier } = await srpMakeVerifier(nemail, password);
+    const response = await fetch('/register/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: nemail, otp, salt, verifier }),
+    });
+    return { ok: response.ok };
+}
+
 // Interop check against the reference vectors (see tests/test_srp.py).
 export async function _selfTest() {
     const email = 'user@example.com';
@@ -175,13 +206,25 @@ export async function _selfTest() {
         M2: '660f648df00840decddece5c403a6a80f50b801607212c109f7135a386393fb2',
         K: 'fbe681f3f72b005e752c66a5360d0965708074d1b0d602393622a0657f459e80',
     };
+    const verifierHex =
+        '412cadf21c82bd3c7659cfa6c9112ab5b25cb744b873fc6e7cb6df3088158525' +
+        'f75b42c21285d7292b74ce7a51160b57ea635cac09242afcbc428df10e80111f' +
+        'c791398d33dc630640fb2d020b16e50bb2dcb2d70c2f739a5800203e1e808eeb' +
+        '594a3ed25d4fd0e7d0445f971e9740c7dc17c6a68b3c5047df2d74ffa4ba6823' +
+        '6fee5e636ca19256b5af5d819e487750e52528efa880ec2cf46faa6730e79d1b' +
+        '9ec9dce85166a83b380887bb0590847fe61ae5a666b4da6d08dc8f2a97fd7cbc' +
+        '6c32651284adcee46e08acee4605e9e866b18af31536de4da47060fe0c2252cd' +
+        'aa67a050cf839217a5ac79655afefb407d1c5be7595528f16af072aa20f1337e';
+
     const { A, M1, K, M2 } = await computeClient(email, password, salt, B, aExp);
-    const got = { A: A.toString(16), M1: bytesToHex(M1), M2: bytesToHex(M2), K: bytesToHex(K) };
-    const pass = got.A === expect.A && got.M1 === expect.M1 && got.M2 === expect.M2 && got.K === expect.K;
-    if (!pass) console.error('SRP self-test FAILED', { got, expect });
+    const verifier = modpow(g, await deriveX(salt, email, password), N).toString(16);
+    const got = { A: A.toString(16), M1: bytesToHex(M1), M2: bytesToHex(M2), K: bytesToHex(K), verifier };
+    const pass = got.A === expect.A && got.M1 === expect.M1 && got.M2 === expect.M2 &&
+        got.K === expect.K && got.verifier === verifierHex;
+    if (!pass) console.error('SRP self-test FAILED', { got, expect: { ...expect, verifier: verifierHex } });
     else console.log('SRP self-test passed — interop with srp.py confirmed');
     return pass;
 }
 
-export const SRP = { srpLogin, _selfTest };
+export const SRP = { srpLogin, srpMakeVerifier, srpVerifyOtp, srpRegister, _selfTest };
 if (typeof window !== 'undefined') window.SRP = SRP;
