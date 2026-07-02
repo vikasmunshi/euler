@@ -182,6 +182,24 @@ class AuthRoutesTests(AioHTTPTestCase):
         prot = await self.client.get('/protected', headers={'Cookie': f'{policy.REMEMBER_COOKIE}={remember}'})
         self.assertEqual(prot.status, 401)
 
+    async def test_logout_closes_web_shells(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD)
+        session = verify.cookies[policy.SESSION_COOKIE].value
+
+        class _FakeWS:
+            def __init__(self) -> None:
+                self.closed = False
+
+            async def close(self, *, message: bytes = b'') -> None:
+                self.closed = True
+
+        fake = _FakeWS()
+        self.app[routes.WS_CONNECTIONS].setdefault(_EMAIL, set()).add(fake)  # type: ignore[arg-type]
+        await self.client.get('/logout', allow_redirects=False,
+                              headers={'Cookie': f'{policy.SESSION_COOKIE}={session}'})
+        self.assertTrue(fake.closed)                                  # the shell socket was closed
+        self.assertNotIn(_EMAIL, self.app[routes.WS_CONNECTIONS])     # and its registry entry dropped
+
     async def test_rate_limit_returns_429(self) -> None:
         for _ in range(policy.AUTH_RATE_MAX):
             ok = await self.client.post('/auth/challenge', json={'email': _EMAIL})

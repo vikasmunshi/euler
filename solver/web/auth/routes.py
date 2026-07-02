@@ -47,6 +47,8 @@ PENDING: web.AppKey[dict[str, tuple[SrpServer, bool, float]]] = web.AppKey('auth
 DECOY_SECRET: web.AppKey[bytes] = web.AppKey('auth_decoy_secret', bytes)
 REMEMBER: web.AppKey[RememberStore] = web.AppKey('auth_remember', RememberStore)
 LIMITER: web.AppKey[RateLimiter] = web.AppKey('auth_limiter', RateLimiter)
+# Open PTY WebSocket connections per signed-in email, so logout can close them.
+WS_CONNECTIONS: web.AppKey[dict[str, set[web.WebSocketResponse]]] = web.AppKey('auth_ws', dict)
 
 #: Routes reachable without a session (so a signed-out browser can log in).
 PUBLIC_PATHS: frozenset[str] = frozenset({
@@ -251,10 +253,24 @@ async def _register_complete(request: web.Request) -> web.StreamResponse:
     return web.json_response({'ok': True})
 
 
+async def _close_user_sockets(app: web.Application, email: str) -> None:
+    """Close any open PTY WebSocket connections for `email` (used on logout)."""
+    connections = app[WS_CONNECTIONS].pop(email, None)
+    for socket in list(connections or ()):
+        try:
+            await socket.close(message=b'signed out')
+        except Exception:
+            pass
+
+
 async def _logout(request: web.Request) -> web.StreamResponse:
-    """Drop the session and remember token, clear both cookies, redirect to the login page."""
-    request.app[SESSIONS].destroy(request.cookies.get(policy.SESSION_COOKIE))
+    """Drop the session/remember token, close the user's web shells, clear cookies, redirect."""
+    token = request.cookies.get(policy.SESSION_COOKIE)
+    email = request.app[SESSIONS].email_for(token)   # who is logging out (before we destroy it)
+    request.app[SESSIONS].destroy(token)
     request.app[REMEMBER].revoke(request.cookies.get(policy.REMEMBER_COOKIE))
+    if email is not None:
+        await _close_user_sockets(request.app, email)
     response = web.HTTPFound('/login')
     response.del_cookie(policy.SESSION_COOKIE, path='/')
     response.del_cookie(policy.REMEMBER_COOKIE, path='/')
@@ -324,6 +340,7 @@ def setup_auth(app: web.Application) -> None:
                                   policy.REMEMBER_TTL_SECONDS)
     app[PENDING] = {}
     app[DECOY_SECRET] = secrets.token_bytes(32)
+    app[WS_CONNECTIONS] = {}
     app[LIMITER] = RateLimiter(policy.AUTH_RATE_MAX, policy.AUTH_RATE_WINDOW_SECONDS)
     app.on_response_prepare.append(_add_security_headers)
     app.add_routes([

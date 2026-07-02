@@ -9,7 +9,7 @@
   single interactive `solver` shell on a pseudo-terminal (see
   :class:`solver.web.pty_bridge.PtySession`). Binary WS frames are raw terminal
   bytes both ways; a `{"resize": [cols, rows]}` text frame propagates geometry.
-  Only one PTY session is allowed at a time.
+  Multiple concurrent sessions are allowed; `logout` closes a user's sessions.
 
 - **Read-only viewer** — the static summary/problem pages plus the problem files
   read directly from each problem's solution directory (`problem.solution_dir`).
@@ -40,7 +40,7 @@ from solver.core.evaluate import benchmark, evaluate
 from solver.core.problems import Problem, problems
 from solver.shell import console
 from solver.utils.summary import summary
-from solver.web.auth.routes import auth_middleware, setup_auth
+from solver.web.auth.routes import WS_CONNECTIONS, auth_middleware, setup_auth
 from solver.web.pty_bridge import PtySession
 
 
@@ -51,8 +51,6 @@ class _State(TypedDict):
     handlers cannot reassign `app[key]`; live state instead lives in this single
     mutable value, stashed under :data:`_STATE` at setup and mutated in place.
     """
-    #: Whether a PTY shell session is active (only one is allowed at a time).
-    has_session: bool
     #: Last non-zero problem number queried via /flags, echoed back on the
     #: problem-less pages (summary / progress) so the header can still navigate.
     last_problem: int | None
@@ -187,20 +185,17 @@ async def _pump_pty_to_ws(session: PtySession, ws: web.WebSocketResponse) -> Non
 async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse:
     """Bridge a browser terminal to a fresh PTY-backed `solver` shell.
 
-    Refuses a second concurrent connection (the shared solution tree must not
-    have two live shells racing on it). Binary frames are forwarded to the PTY as
-    keystrokes;
-    a `resize` text frame propagates the browser geometry to the PTY.
+    Multiple concurrent sessions are allowed; each gets its own shell. The
+    connection is tracked by the signed-in user's email so `logout` can close it.
+    Binary frames are forwarded to the PTY as keystrokes; a `resize` text frame
+    propagates the browser geometry to the PTY.
     """
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    state = request.app[_STATE]
-    if state['has_session']:
-        await ws.send_str('\x1b[31ma solver session is already active in another tab\x1b[0m\r\n')
-        await ws.close()
-        return ws
-    state['has_session'] = True
+    email: str = request['user_email']   # set by auth_middleware (the /ws route is gated)
+    connections = request.app[WS_CONNECTIONS]
+    connections.setdefault(email, set()).add(ws)
 
     session = PtySession(save=save)
     pump = asyncio.create_task(_pump_pty_to_ws(session, ws))
@@ -216,7 +211,10 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
     finally:
         pump.cancel()
         session.close()
-        state['has_session'] = False
+        if (live := connections.get(email)) is not None:
+            live.discard(ws)
+            if not live:
+                connections.pop(email, None)
     return ws
 
 
@@ -549,7 +547,7 @@ def build_app(save: bool) -> web.Application:
     session store and those routes onto the app.
     """
     app = web.Application(middlewares=[auth_middleware])
-    state: _State = {'has_session': False, 'last_problem': None}
+    state: _State = {'last_problem': None}
     app[_STATE] = state
     setup_auth(app)
     ws_handler = functools.partial(_ws_handler, save=save)
