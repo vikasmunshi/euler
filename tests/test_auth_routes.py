@@ -240,3 +240,16 @@ class AuthRoutesTests(AioHTTPTestCase):
         resp = await self.client.post(
             '/password/change', json={'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
         self.assertEqual(resp.status, 401)
+
+    async def test_html_navigation_redirects_when_signed_out(self) -> None:
+        resp = await self.client.get('/protected', headers={'Accept': 'text/html'}, allow_redirects=False)
+        self.assertEqual(resp.status, 302)
+        self.assertIn('/login', resp.headers['Location'])
+
+    async def test_gated_html_page_is_no_store(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD)
+        session = verify.cookies[policy.SESSION_COOKIE].value
+        resp = await self.client.get('/protected', headers={
+            'Accept': 'text/html', 'Cookie': f'{policy.SESSION_COOKIE}={session}'})
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(resp.headers.get('Cache-Control'), 'no-store')

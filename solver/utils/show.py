@@ -54,7 +54,7 @@ def show(problem: Problem, check_for_errors: bool = False) -> int:
                       'use [accent]solver install chrome[/accent] to install Chrome[/muted]')
         return ExitCodes.EXIT_ERROR
     ensure_running()
-    url: str = f'http://localhost:{config.server_port}/{problem.number:04d}/'
+    url: str = f'{config.base_url}/{problem.number:04d}/'
     if check_for_errors:
         return _check_for_rendering_errors(url)
     pipe = DEVNULL if console.quiet else None

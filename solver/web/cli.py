@@ -145,7 +145,7 @@ def _serve_forever(save: bool) -> None:  # pragma: no cover — runs in the deta
 def _start(save: bool = False) -> int:
     """Launch the detached server child; no-op if one is already running."""
     if (pid := running_pid()) is not None:
-        console.print(f'[muted]web server already running on http://localhost:{config.server_port} (pid {pid})[/muted]')
+        console.print(f'[muted]web server already running on {config.base_url} (pid {pid})[/muted]')
         return ExitCodes.EXIT_OK
     argv = [sys.executable, '-m', 'solver.web.cli'] + (['--save'] if save else [])
     proc = Popen(argv, cwd=config.root_dir, stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL,
@@ -158,8 +158,8 @@ def _start(save: bool = False) -> int:
             return ExitCodes.EXIT_ERROR
         if (pid := running_pid()) is not None:
             console.print(f'[accent]web server started[/accent] '
-                          f'[muted]- http://localhost:{config.server_port} (pid {pid})[/muted]')
-            run(f'browser open http://localhost:{config.server_port} --no-refresh', shell=True)
+                          f'[muted]- {config.base_url} (pid {pid})[/muted]')
+            run(f'browser open {config.base_url} --no-refresh', shell=True)
             return ExitCodes.EXIT_OK
         time.sleep(0.05)
     console.print('[error]error:[/error] [muted]web server did not come up in time[/muted]')
@@ -187,7 +187,7 @@ def _status() -> int:
     if (pid := running_pid()) is None:
         console.print('[muted]web server is not running[/muted]')
     else:
-        console.print(f'[accent]running[/accent] [muted]- http://localhost:{config.server_port} (pid {pid})[/muted]')
+        console.print(f'[accent]running[/accent] [muted]- {config.base_url} (pid {pid})[/muted]')
     return ExitCodes.EXIT_OK
 
 

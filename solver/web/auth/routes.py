@@ -307,6 +307,10 @@ async def auth_middleware(request: web.Request, handler: Handler) -> web.StreamR
         _apply_cookies(exc, cookies)   # a promoted request that redirects still gets its cookies
         raise
     _apply_cookies(response, cookies)
+    if _wants_html(request):
+        # Never cache a gated page document, or the browser would serve it after logout
+        # (and via the back button) without re-hitting the now-redirecting server.
+        response.headers['Cache-Control'] = 'no-store'
     return response
 
 

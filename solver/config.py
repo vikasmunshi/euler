@@ -111,6 +111,7 @@ class Config(AttributeDict):
     max_retries: int
     notes_filename: str
     projecteuler_url: str
+    base_url: str
     resource_dirname: str
     results_filename: str
     screen_width: int
@@ -152,6 +153,7 @@ class Config(AttributeDict):
             'max_retries': 3,
             'notes_filename': 'notes.html',
             'projecteuler_url': 'https://projecteuler.net',
+            'base_url': os.environ.get('EULER_BASE_URL', 'https://euler.vikasmunshi.com'),
             'resource_dirname': 'resources',
             'results_filename': 'results.json',
             'screen_width': 86,
