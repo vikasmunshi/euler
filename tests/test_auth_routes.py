@@ -181,3 +181,29 @@ class AuthRoutesTests(AioHTTPTestCase):
         # the remember cookie no longer promotes after logout
         prot = await self.client.get('/protected', headers={'Cookie': f'{policy.REMEMBER_COOKIE}={remember}'})
         self.assertEqual(prot.status, 401)
+
+    async def test_rate_limit_returns_429(self) -> None:
+        for _ in range(policy.AUTH_RATE_MAX):
+            ok = await self.client.post('/auth/challenge', json={'email': _EMAIL})
+            self.assertEqual(ok.status, 200)
+        blocked = await self.client.post('/auth/challenge', json={'email': _EMAIL})
+        self.assertEqual(blocked.status, 429)
+
+    async def test_security_headers_present(self) -> None:
+        resp = await self.client.get('/login')
+        self.assertEqual(resp.headers.get('X-Content-Type-Options'), 'nosniff')
+        self.assertEqual(resp.headers.get('X-Frame-Options'), 'DENY')
+        self.assertEqual(resp.headers.get('Referrer-Policy'), 'no-referrer')
+
+    async def test_password_reset_overwrites_verifier(self) -> None:
+        # `users reset` seeds an OTP; the browser then re-registers with a new password.
+        self.pending.invite(_EMAIL, '246800')
+        new_password = 'a totally different passphrase'
+        token = SrpToken.create(_EMAIL, new_password)
+        complete = await self.client.post('/register/complete', json={
+            'email': _EMAIL, 'otp': '246800', 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+        self.assertEqual(complete.status, 200)
+        _c, with_new = await self._login(_EMAIL, new_password)
+        self.assertEqual(with_new.status, 200)
+        _c, with_old = await self._login(_EMAIL, _PASSWORD)
+        self.assertEqual(with_old.status, 401)

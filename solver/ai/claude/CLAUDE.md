@@ -136,6 +136,7 @@ solver/
       mail.py         — Send the registration OTP by email via Gmail SMTP.
       otp.py          — One-time passwords and the shared pending-registration store.
       policy.py       — Auth policy constants (lifetimes, cookie names, password rules).
+      ratelimit.py    — A small in-memory sliding-window rate limiter for the auth endpoints.
       remember.py     — Persistent "remember me" tokens (selector\:validator, rotated on use).
       routes.py       — HTTP layer for web authentication: SRP login endpoints + the gating middleware.
       sessions.py     — In-memory web session table.

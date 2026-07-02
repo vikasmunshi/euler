@@ -10,9 +10,11 @@ from __future__ import annotations
 
 __all__ = ['SrpClient', 'SrpServer', 'SrpToken', 'make_srp_token', 'compute_verifier',
            'verify_password', 'decoy_token', 'VERSION', 'UserRecord', 'UserStore',
-           'normalize_email', 'SessionStore', 'PendingStore', 'generate_otp', 'RememberStore']
+           'normalize_email', 'SessionStore', 'PendingStore', 'generate_otp', 'RememberStore',
+           'RateLimiter']
 
 from solver.web.auth.otp import PendingStore, generate_otp
+from solver.web.auth.ratelimit import RateLimiter
 from solver.web.auth.remember import RememberStore
 from solver.web.auth.sessions import SessionStore
 from solver.web.auth.srp import (VERSION, SrpClient, SrpServer, SrpToken, compute_verifier,

@@ -75,7 +75,7 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
-| [`users`](#command-users) | — | Manage web-auth users (list|add|remove|disable|enable). |
+| [`users`](#command-users) | — | Manage web-auth users (list|add|reset|remove|disable|enable). |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -1041,11 +1041,11 @@ Wrap the current master key to `public_key` and add it to enc-key.json (proof-of
 
 #### Command: `users`
 
-Manage web-auth users (list|add|remove|disable|enable).
+Manage web-auth users (list|add|reset|remove|disable|enable).
 
 ```
 users
-[action=list|add|remove|disable|enable] (default list)
+[action=list|add|reset|remove|disable|enable] (default list)
 [email=<str>] (default '')
 ```
 
@@ -1055,8 +1055,9 @@ List or manage the web-auth accounts in `keys/users.json`.
 Args:
     action:  'list' (default) shows every account; 'add' invites an email
              (disabled + emailed OTP; the user sets their own password at
-             /register); 'remove' deletes an account; 'disable' / 'enable'
-             toggle whether a registered account may log in.
+             /register); 'reset' emails a fresh code so a registered user can
+             choose a new password; 'remove' deletes an account; 'disable' /
+             'enable' toggle whether a registered account may log in.
     email:   The account email (required for every action except 'list').
 ```
 <!-- /GEN:command-index -->

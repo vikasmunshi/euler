@@ -31,6 +31,7 @@ from aiohttp.typedefs import Handler
 from solver.config import config
 from solver.web.auth import policy
 from solver.web.auth.otp import PendingStore
+from solver.web.auth.ratelimit import RateLimiter
 from solver.web.auth.remember import RememberStore, load_or_create_secret
 from solver.web.auth.sessions import SessionStore
 from solver.web.auth.srp import SrpServer, SrpToken, decoy_token
@@ -45,6 +46,7 @@ PENDING: web.AppKey[dict[str, tuple[SrpServer, bool, float]]] = web.AppKey('auth
 # per-process secret backing the anti-enumeration decoy tokens.
 DECOY_SECRET: web.AppKey[bytes] = web.AppKey('auth_decoy_secret', bytes)
 REMEMBER: web.AppKey[RememberStore] = web.AppKey('auth_remember', RememberStore)
+LIMITER: web.AppKey[RateLimiter] = web.AppKey('auth_limiter', RateLimiter)
 
 #: Routes reachable without a session (so a signed-out browser can log in).
 PUBLIC_PATHS: frozenset[str] = frozenset({
@@ -52,6 +54,11 @@ PUBLIC_PATHS: frozenset[str] = frozenset({
     '/register', '/register/verify', '/register/complete',
     '/favicon.ico', '/favicon.svg', '/login.css', '/login.js', '/srp-client.js',
     '/register.css', '/register.js',
+})
+
+#: Unauthenticated endpoints rate-limited per client IP (brute-force surface).
+RATE_LIMITED: frozenset[str] = frozenset({
+    '/auth/challenge', '/auth/verify', '/register/verify', '/register/complete',
 })
 
 
@@ -66,6 +73,21 @@ def _safe_next(raw: str | None) -> str:
     if not raw or not raw.startswith('/') or raw.startswith('//'):
         return '/'
     return raw
+
+
+def _client_ip(request: web.Request) -> str:
+    """Best-effort client IP: the first X-Forwarded-For hop (set by Caddy), else the peer."""
+    forwarded = request.headers.get('X-Forwarded-For')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.remote or 'unknown'
+
+
+async def _add_security_headers(request: web.Request, response: web.StreamResponse) -> None:
+    """Add conservative security headers to every response (on_response_prepare hook)."""
+    response.headers.setdefault('X-Content-Type-Options', 'nosniff')
+    response.headers.setdefault('X-Frame-Options', 'DENY')
+    response.headers.setdefault('Referrer-Policy', 'no-referrer')
 
 
 def is_authenticated(request: web.Request) -> bool:
@@ -236,6 +258,8 @@ async def _logout(request: web.Request) -> web.StreamResponse:
 @web.middleware
 async def auth_middleware(request: web.Request, handler: Handler) -> web.StreamResponse:
     """Gate every route but the public login surface; promote remember-me to a session."""
+    if request.path in RATE_LIMITED and not request.app[LIMITER].allow(_client_ip(request)):
+        raise web.HTTPTooManyRequests(text='too many requests')
     if request.path in PUBLIC_PATHS:
         return await handler(request)
     authenticated, cookies = _resolve_auth(request)
@@ -262,6 +286,8 @@ def setup_auth(app: web.Application) -> None:
                                   policy.REMEMBER_TTL_SECONDS)
     app[PENDING] = {}
     app[DECOY_SECRET] = secrets.token_bytes(32)
+    app[LIMITER] = RateLimiter(policy.AUTH_RATE_MAX, policy.AUTH_RATE_WINDOW_SECONDS)
+    app.on_response_prepare.append(_add_security_headers)
     app.add_routes([
         web.get('/login', _serve_login),
         web.post('/auth/challenge', _auth_challenge),

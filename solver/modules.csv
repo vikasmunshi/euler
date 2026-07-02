@@ -48,6 +48,7 @@ solver.web.auth.commands,True,True
 solver.web.auth.mail,,
 solver.web.auth.otp,,
 solver.web.auth.policy,,
+solver.web.auth.ratelimit,,
 solver.web.auth.remember,,
 solver.web.auth.routes,,
 solver.web.auth.sessions,,

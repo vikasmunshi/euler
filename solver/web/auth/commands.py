@@ -21,15 +21,17 @@ from solver.web.auth.otp import PendingStore, generate_otp
 from solver.web.auth.users import UserStore, normalize_email
 
 
-@register(help_text='Manage web-auth users ([accent.dim]list|add|remove|disable|enable[/accent.dim]).')
-def users(action: Literal['list', 'add', 'remove', 'disable', 'enable'] = 'list', email: str = '') -> int:
+@register(help_text='Manage web-auth users ([accent.dim]list|add|reset|remove|disable|enable[/accent.dim]).')
+def users(action: Literal['list', 'add', 'reset', 'remove', 'disable', 'enable'] = 'list',
+          email: str = '') -> int:
     """List or manage the web-auth accounts in `keys/users.json`.
 
     Args:
         action:  'list' (default) shows every account; 'add' invites an email
                  (disabled + emailed OTP; the user sets their own password at
-                 /register); 'remove' deletes an account; 'disable' / 'enable'
-                 toggle whether a registered account may log in.
+                 /register); 'reset' emails a fresh code so a registered user can
+                 choose a new password; 'remove' deletes an account; 'disable' /
+                 'enable' toggle whether a registered account may log in.
         email:   The account email (required for every action except 'list').
     """
     store = UserStore(config.users_file)
@@ -43,6 +45,8 @@ def users(action: Literal['list', 'add', 'remove', 'disable', 'enable'] = 'list'
 
     if action == 'add':
         return _invite_user(store, PendingStore(config.pending_file), key)
+    if action == 'reset':
+        return _reset_user(store, PendingStore(config.pending_file), key)
     if action == 'remove':
         removed = store.remove(key)
         PendingStore(config.pending_file).remove(key)  # also drop any pending OTP
@@ -75,20 +79,40 @@ def _invite_user(store: UserStore, pending: PendingStore, key: str) -> int:
     record = store.get(key)
     if record is not None and record.registered:
         console.print(f'[error]error:[/error] [muted]{key} is already registered '
-                      f'(disable or remove it first)[/muted]')
+                      f'(use `users reset` to send a new-password code, or remove it first)[/muted]')
         return ExitCodes.EXIT_ERROR
-
     store.invite(key)
     otp = generate_otp()
     pending.invite(key, otp)
+    return _deliver_otp(key, otp, f'[success]invited {key}[/success] '
+                        f'[muted]— OTP emailed; they set their password at /register[/muted]')
+
+
+def _reset_user(store: UserStore, pending: PendingStore, key: str) -> int:
+    """Send a fresh OTP so a registered `key` can choose a new password at /register.
+
+    The account stays enabled and keeps its current password until the user completes
+    the reset (registration overwrites the verifier), so a reset never locks anyone out.
+    """
+    record = store.get(key)
+    if record is None or not record.registered:
+        console.print(f'[error]error:[/error] [muted]{key} is not a registered user[/muted]')
+        return ExitCodes.EXIT_ERROR
+    otp = generate_otp()
+    pending.invite(key, otp)
+    return _deliver_otp(key, otp, f'[success]reset code sent to {key}[/success] '
+                        f'[muted]— they set a new password at /register[/muted]')
+
+
+def _deliver_otp(key: str, otp: str, success: str) -> int:
+    """Email the OTP to `key`; on SMTP failure print it for manual delivery. Prints `success`."""
     try:
         mail.send_otp(key, otp)
     except Exception as exc:
-        console.print(f'[warning]could not email OTP to {key}:[/warning] [muted]{exc}[/muted]')
+        console.print(f'[warning]could not email code to {key}:[/warning] [muted]{exc}[/muted]')
         console.print(f'[muted]deliver this code to {key} manually (valid ~10 min):[/muted] [accent]{otp}[/accent]')
         return ExitCodes.EXIT_OK
-    console.print(f'[success]invited {key}[/success] '
-                  f'[muted]— OTP emailed; they set their password at /register[/muted]')
+    console.print(success)
     return ExitCodes.EXIT_OK
 
 

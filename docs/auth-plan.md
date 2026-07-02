@@ -244,20 +244,20 @@ and management without the web flow:
 - **No secrets in logs**; `users.json`/`remember.json`/`.session-secret` at `0600`.
 - **Reset** — password reset reuses the OTP mechanism (later; same flow as register).
 
-## Milestones (each a reviewable PR-sized step)
+## Milestones (each a reviewable PR-sized step) — all shipped
 
-1. **Scaffold & separation** — create `solver/web/auth/`, relocate `srp.py` there,
-   add `UserStore` + `users.json` schema + config paths + `.gitignore`. Unit tests
-   for `srp.py` incl. the JS-interop vectors.
-2. **Login (SRP) + sessions + middleware** — challenge/verify endpoints, session
-   cookie, gate all routes incl. `/ws`; login page + `srp-client.js`. Bootstrap a
-   user via `users add` + the OTP flow (M3). (Usable end-to-end: login
-   required, no OTP invite yet.)
-3. **Invite registration + OTP + Gmail** — `users add` (seed + send OTP), the
-   `/register/verify` + `/register/complete` endpoints, `otp.py`, SMTP sender, and the
-   register page. `.env` SMTP creds. (No open request endpoint.)
-4. **Remember-me** — persistent token store + rotation + cookie.
-5. **Admin polish & hardening** — `users` command, rate-limiting, docs, reset (opt).
+1. ✅ **Scaffold & separation** — `solver/web/auth/`, relocated `srp.py`, `UserStore`
+   + `users.json` + config paths + `.gitignore`; `srp.py` unit tests incl. JS-interop
+   vectors.
+2. ✅ **Login (SRP) + sessions + middleware** — challenge/verify endpoints, session
+   cookie, all routes gated incl. `/ws`; login page + `srp-client.js`.
+3. ✅ **Invite registration + OTP + Gmail** — `users add` (seed + send OTP),
+   `/register/verify` + `/register/complete`, `otp.py`, SMTP sender, register page.
+4. ✅ **Remember-me** — persistent rotating token store + cookie + session promotion.
+5. ✅ **Admin polish & hardening** — `users` command (list/add/**reset**/remove/
+   disable/enable), per-IP rate-limiting on the auth endpoints (`ratelimit.py`, 429),
+   security headers (nosniff / frame-DENY / no-referrer), password reset via the OTP
+   flow. Optional future work: a CSP for the app pages, and a Caddy edge rate-limit.
 
 ## Confirmed decisions
 
