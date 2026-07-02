@@ -41,17 +41,64 @@ html, body {
     background: var(--scrollbar-thumb);
     border-radius: 4px;
 }
-#status {
+/* Account menu (top-right): the icon colour reflects the connection state, the
+   dropdown offers connect/disconnect, change password, and log out. */
+.user-menu {
     position: absolute;
     top: 8px;
     right: 8px;
     z-index: 10;
-    font: 12px/1.4 monospace;
+}
+
+.user-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
     color: var(--status-color);
     background: var(--status-bg);
-    padding: 2px 8px;
-    border-radius: 4px;
-    pointer-events: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
 }
-#status.error { color: var(--status-error); }
-#status.open { color: var(--status-open); }
+
+.user-btn.connected { color: var(--status-open); }
+.user-btn.disconnected { color: var(--status-error); }
+.user-btn:hover { border-color: var(--status-color); }
+
+.user-dropdown {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 160px;
+    padding: 4px;
+    background: var(--status-bg);
+    border: 1px solid var(--scrollbar-thumb);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+}
+
+.user-dropdown[hidden] { display: none; }
+
+.user-dropdown a,
+.user-dropdown button {
+    text-align: left;
+    padding: 8px 10px;
+    font: 13px/1.2 monospace;
+    color: var(--status-color);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.user-dropdown a:hover,
+.user-dropdown button:hover {
+    background: rgba(255, 255, 255, 0.08);
+}

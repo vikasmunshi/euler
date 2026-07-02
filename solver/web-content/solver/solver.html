@@ -12,7 +12,20 @@
     <link rel="stylesheet" href="solver.css">
 </head>
 <body>
-<div id="status" title="connecting&hellip;">&#9676;</div>
+<div id="user-menu" class="user-menu">
+    <button id="user-btn" class="user-btn" type="button" title="connecting&hellip;"
+            aria-haspopup="true" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path fill="currentColor"
+                  d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/>
+        </svg>
+    </button>
+    <div id="user-dropdown" class="user-dropdown" hidden>
+        <button id="conn-toggle" type="button">Disconnect</button>
+        <a href="/password">Change password</a>
+        <a href="/logout">Log out</a>
+    </div>
+</div>
 <div id="terminal"></div>
 
 <script src="vendor/xterm.js"></script>
