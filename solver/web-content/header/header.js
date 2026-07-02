@@ -104,6 +104,14 @@
     async function init() {
         const host = document.getElementById('page-header');
         if (!host) return;
+        // Verify we're still signed in before rendering a (possibly cached) app page —
+        // an uncached auth probe, so a signed-out user is bounced to /login even if the
+        // page document itself came from the browser cache.
+        const auth = await fetch('/whoami', { cache: 'no-store', headers: { Accept: 'application/json' } });
+        if (!auth.ok) {
+            window.location.replace('/login');
+            return;
+        }
         host.innerHTML = await fetch('/header.html').then(r => r.text());
         wireNav();
         fillCodeMeta();

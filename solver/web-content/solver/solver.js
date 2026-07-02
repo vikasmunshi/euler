@@ -91,6 +91,11 @@ if (term.textarea) {
     }, true);
 }
 
+// Bounce to the login screen if the session has ended (e.g. this page came from the
+// browser cache after logout); the /ws upgrade below would otherwise just fail.
+fetch('/whoami', { cache: 'no-store', headers: { Accept: 'application/json' } })
+    .then((r) => { if (!r.ok) window.location.replace('/login'); });
+
 const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
 const ws = new WebSocket(`${wsProto}//${location.host}/ws`);
 ws.binaryType = 'arraybuffer';
