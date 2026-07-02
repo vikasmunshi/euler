@@ -101,7 +101,9 @@ class Problem(NamedTuple):
                 element[attr] = local_filename
         files[config.statement_filename] = str(content).encode('utf-8')
         for filename, file_bytes in files.items():
-            (self.solution_dir / filename).write_bytes(file_bytes)
+            file: Path = self.solution_dir / filename
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_bytes(file_bytes)
 
     @property
     def problem_statement(self) -> str:
