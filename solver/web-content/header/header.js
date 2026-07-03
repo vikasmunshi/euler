@@ -15,15 +15,19 @@
 
     const pad4 = n => String(n).padStart(4, '0');
 
-    // Remember / recall the last problem viewed, so the "active problem" link still
-    // works from the summary, progress and shell pages (which carry no URL number).
-    function setCookie(name, value) {
-        document.cookie = `${name}=${value}; path=/; max-age=31536000; samesite=lax`;
-    }
-
-    function getCookie(name) {
-        const match = document.cookie.match(new RegExp('(?:^|; )' + name + '=([^;]*)'));
-        return match ? match[1] : null;
+    // The "active problem" — the number the signed-in user's solver shell holds
+    // in variables.problem — is where the diamond link jumps, from any page. It
+    // comes from the server (GET /active-problem), not a browser cookie or the
+    // current URL, so it always tracks the shell.
+    async function fetchActiveProblem() {
+        try {
+            const r = await fetch('/active-problem', { headers: { Accept: 'application/json' } });
+            if (!r.ok) return null;
+            const { problem } = await r.json();
+            return /^\d+$/.test(String(problem)) ? String(problem) : null;
+        } catch {
+            return null;
+        }
     }
 
     // Make an anchor a live link, or an inert .nav-dummy when there is no target.
@@ -42,21 +46,17 @@
         }
     }
 
-    // Problem links (prev / this problem / next) are derived from the current
-    // problem number, and are dummies off a problem (number 0); Euler and GitHub
-    // fall back to their site roots off a problem.
-    function wireNav() {
+    // Prev / next are derived from the current problem number, and are dummies
+    // off a problem (number 0); Euler and GitHub fall back to their site roots
+    // off a problem. The active-problem link points at the shell's
+    // variables.problem (from the server) on every page, the current one included.
+    function wireNav(activeProblem) {
         const num = PROBLEM_NUMBER || null;
         const byId = id => document.getElementById(id);
         const problemUrl = n => `/${pad4(n)}/`;
 
-        // On a problem page, record it; elsewhere fall back to the last one viewed.
-        if (num) setCookie('last_problem', String(num));
-        const stored = getCookie('last_problem');
-        const activeNum = num || (/^\d+$/.test(stored || '') ? stored : null);
-
         setLink(byId('nav-prev'), num && num > 1 ? problemUrl(num - 1) : null);
-        setLink(byId('nav-problem'), activeNum ? problemUrl(activeNum) : null);
+        setLink(byId('nav-problem'), activeProblem ? problemUrl(activeProblem) : null);
         setLink(byId('nav-next'), num ? problemUrl(num + 1) : null);
 
         setLink(byId('nav-euler'),
@@ -67,7 +67,6 @@
 
         setLink(byId('nav-summary'), '/summary');
         setLink(byId('nav-progress'), '/progress');
-        setLink(byId('nav-shell'), '/');
     }
 
     // The filename + language badge only appear on code pages, which set
@@ -130,7 +129,9 @@
             return;
         }
         host.innerHTML = await fetch('/header.html').then(r => r.text());
-        wireNav();
+        // The active-problem link always tracks the shell's variables.problem,
+        // fetched from the server, on every page (the current problem included).
+        wireNav(await fetchActiveProblem());
         fillCodeMeta();
         wireUserMenu();
         document.dispatchEvent(new CustomEvent('header:ready'));

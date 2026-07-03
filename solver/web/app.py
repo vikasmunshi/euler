@@ -14,6 +14,9 @@
 
 - **Read-only viewer** — the static summary/problem pages plus the problem files
   read directly from each problem's solution directory (`problem.solution_dir`).
+  `GET /active-problem` reports the signed-in user's active problem — the number
+  their `solver` shell holds in `variables.problem` — so the header can wire its
+  "Active problem" link on pages that carry no problem number in the URL.
 
 - **Edits** — `POST /<n>/cmd` evaluates the problem's solutions; `POST /<n>/<file>`
   validates and saves an edited solution file; `DELETE /<n>/<file>` removes a
@@ -32,7 +35,7 @@ import re
 import tempfile
 from pathlib import Path
 from subprocess import run
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal
 
 from aiohttp import WSMsgType, web
 
@@ -40,25 +43,11 @@ from solver.config import config
 from solver.core.evaluate import benchmark, evaluate
 from solver.core.problems import Problem, problems
 from solver.shell import console
+from solver.shell.variables import variables
+from solver.utils.identity import slugify
 from solver.utils.summary import summary
 from solver.web.auth.routes import USER_EMAIL, WS_CONNECTIONS, auth_middleware, setup_auth
 from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
-
-
-class _State(TypedDict):
-    """Mutable per-server runtime state shared across requests.
-
-    The aiohttp `Application` mapping is frozen once the server starts, so request
-    handlers cannot reassign `app[key]`; live state instead lives in this single
-    mutable value, stashed under :data:`_STATE` at setup and mutated in place.
-    """
-    #: Last non-zero problem number queried via /flags, echoed back on the
-    #: problem-less pages (summary / progress) so the header can still navigate.
-    last_problem: int | None
-
-
-#: Key under which the shared mutable state is stored on the Application.
-_STATE: web.AppKey[_State] = web.AppKey('state', _State)
 
 #: Top-level static page assets served verbatim from `config.static_file_dir`.
 _STATIC_ASSETS: frozenset[str] = frozenset({
@@ -105,6 +94,33 @@ async def _serve_solver_page(request: web.Request) -> web.StreamResponse:
 async def _serve_summary_page(request: web.Request) -> web.StreamResponse:
     """Serve the solutions summary page (`/summary`)."""
     return web.FileResponse(config.static_file_dir / 'summary/summary.html')
+
+
+def _active_problem(email: str) -> int:
+    """The signed-in user's active problem number — their shell's `variables.problem`.
+
+    The `solver` shell persists `variables.problem` to a per-user `last_problem`
+    file whenever it changes (see `solver.shell.shell.SolverShell` and
+    `solver.shell.variables`); this reads that file for *email*'s slug. A missing,
+    unparseable, or unknown number falls back to `variables.problem` here — which,
+    unset in the web process, yields the last solved problem, matching the shell's
+    own default.
+    """
+    path = config.state_dir / slugify(email) / config.last_problem_file.name
+    try:
+        return Problem.from_number(int(path.read_text(encoding='utf-8').strip())).number
+    except (OSError, ValueError):
+        return variables.problem.number
+
+
+async def _serve_active_problem(request: web.Request) -> web.StreamResponse:
+    """Report the signed-in user's active problem (`GET /active-problem`).
+
+    Replies `{"problem": <number>}`; the header wires its "Active problem" link
+    from it on pages that carry no problem number in the URL (summary, progress,
+    the shell), replacing the former browser cookie.
+    """
+    return web.json_response({'problem': _active_problem(request[USER_EMAIL])})
 
 
 async def _serve_progress_page(request: web.Request) -> web.StreamResponse:
@@ -531,8 +547,6 @@ def build_app(save: bool) -> web.Application:
     session store and those routes onto the app.
     """
     app = web.Application(middlewares=[auth_middleware])
-    state: _State = {'last_problem': None}
-    app[_STATE] = state
     setup_auth(app)
     setup_pty_manager(app)
     ws_handler = functools.partial(_ws_handler, save=save)
@@ -545,6 +559,7 @@ def build_app(save: bool) -> web.Application:
         # Static pages: `/summary` → the solutions summary, `/<asset>` for the rest.
         web.get('/summary', _serve_summary_page),
         web.get('/progress', _serve_progress_page),
+        web.get('/active-problem', _serve_active_problem),
         web.get('/favicon.ico', _serve_favicon),
         web.get(r'/{asset:[A-Za-z0-9_.-]+\.(?:css|js|html|json|svg)}', _serve_static),
         # Problem viewer + edits (numeric problem number).
