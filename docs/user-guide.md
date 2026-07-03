@@ -93,7 +93,9 @@ it exits; an `flock` it holds for its lifetime makes any later `solver-web`
 invocation able to query or stop it (and is released automatically if it crashes). Browsing to `/` gives an `xterm.js` terminal running one interactive
 `solver` shell — only one terminal session is allowed at a time, because every
 session drives the same shared solution tree. `/summary` and `/<n>/` are the
-read-only viewer pages; `show N` (below) auto-starts this server.
+read-only viewer pages; `show N` (below) auto-starts this server and opens the
+problem's page in a dedicated browser tab named `solver-doc`, which every later
+`show` reuses (refreshing it for the same problem, navigating it for another).
 
 ---
 
@@ -250,7 +252,7 @@ command name below links to its full entry — usage and description — in the
 
 ```bash
 solver <<'EOF'
-show 42     # open problem 42 in a browser (and select it as the current problem)
+show 42     # open problem 42 in the solver-doc browser tab (and select it as the current problem)
 pause       # derive/confirm insights (scratch scripts under the solution dir), then continue
 new --tc    # create an empty test-case file for the current problem
 new --py    # create a template Python solution file (p0042_s0.py)
@@ -360,6 +362,7 @@ Commit and push `keys/enc-key.json`; pull it, and `solver "user"` will now repor
 
 Once you have master-key access the private files are plaintext in your working tree —
 just open them. Or use `show N` to view any problem's statement, notes, and results in
-a browser via the `solver-web` server.
+the browser via the `solver-web` server; every `show` reuses one dedicated browser tab
+(`solver-doc`), so browsing through problems never piles up tabs.
 
 ---

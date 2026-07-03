@@ -92,14 +92,16 @@ install_browser_script() {
 # - Starts Chrome in background (nohup)
 # - Opens URLs in new tabs in existing or new Chrome instances
 # - Refreshes and focuses the existing tab when the URL is already open
+# - Named tabs: open-in-tab reuses (refreshes or navigates) the tab registered under a name
 # - Supports private browsing (incognito), reusing existing incognito windows
 #
 # Usage:
-#   browser                     → Print Chrome status
-#   browser start               → Start Chrome (nohup)
-#   browser open <URL>          → Open URL in new tab/window
-#   browser private <URL>       → Open URL in incognito tab/window
-#   browser kill                → Kill all Chrome instances
+#   browser                            → Print Chrome status
+#   browser start                      → Start Chrome (nohup)
+#   browser open <URL>                 → Open URL in new tab/window
+#   browser open-in-tab <NAME> <URL>   → Open URL in the named tab, reusing it if open
+#   browser private <URL>              → Open URL in incognito tab/window
+#   browser kill                       → Kill all Chrome instances
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2024. All rights reserved.
@@ -129,11 +131,13 @@ get_browser_binary() {
   BROWSER_NAME="Chrome"
   BROWSER_DEBUG_PORT=9222
   BROWSER_DEBUG_DIR="${HOME}/.config/google-chrome-browser"
+  BROWSER_NAMED_TABS="${BROWSER_DEBUG_DIR}/named-tabs"
   export BROWSER_BIN
   export BROWSER_PGREP_PATTERN
   export BROWSER_NAME
   export BROWSER_DEBUG_PORT
   export BROWSER_DEBUG_DIR
+  export BROWSER_NAMED_TABS
 }
 
 check_running() {
@@ -259,17 +263,70 @@ find_open_tab_id() {
   return 1
 }
 
-# Send a Page.reload command to a tab over the DevTools WebSocket. Chrome only
-# exposes reload through the protocol (the /json HTTP endpoints can create,
-# activate and close tabs but never refresh one), so we speak just enough of the
-# WebSocket wire format by hand: an HTTP/1.1 Upgrade handshake over a raw TCP
-# connection, followed by a single masked text frame carrying the JSON command.
-# The mask is all-zero, which RFC 6455 permits and which lets us write the
-# payload bytes unchanged. Returns non-zero if the socket or handshake fails.
-ws_reload() {
+# Print the current URL of the tab whose DevTools target id is $1, relying on
+# the same id-precedes-url line pairing as find_open_tab_id.
+get_tab_url() {
+  command -v curl >/dev/null 2>&1 || return 1
+  local want="$1" line id=""
+  while IFS= read -r line; do
+    case "${line}" in
+      *'"id":'*)
+        id="$(printf '%s' "${line}" | sed -E 's/.*"id":[[:space:]]*"([^"]*)".*/\1/')"
+        ;;
+      *'"url":'*)
+        if [ "${id}" = "${want}" ]; then
+          printf '%s' "${line}" | sed -E 's/.*"url":[[:space:]]*"([^"]*)".*/\1/'
+          return 0
+        fi
+        ;;
+    esac
+  done < <(curl -sf --max-time 1 "http://localhost:${BROWSER_DEBUG_PORT}/json" 2>/dev/null)
+  return 1
+}
+
+# True if a DevTools target with id $1 is currently open.
+tab_id_is_open() {
+  command -v curl >/dev/null 2>&1 || return 1
+  curl -sf --max-time 1 "http://localhost:${BROWSER_DEBUG_PORT}/json" 2>/dev/null \
+    | grep -qE "\"id\":[[:space:]]*\"$1\""
+}
+
+# The named-tab registry maps a caller-chosen tab name to the DevTools target
+# id it last resolved to, one "name<TAB>id" line per name. Target ids die with
+# their tab (and with the browser), so callers must validate an id with
+# tab_id_is_open before trusting it, and re-register when it has gone stale.
+get_named_tab_id() {
+  local name="$1" id
+  [ -f "${BROWSER_NAMED_TABS}" ] || return 1
+  id="$(awk -F '\t' -v n="${name}" '$1 == n { print $2; exit }' "${BROWSER_NAMED_TABS}")"
+  [ -n "${id}" ] || return 1
+  printf '%s' "${id}"
+}
+
+set_named_tab_id() {
+  local name="$1" id="$2" tmp
+  mkdir -p "$(dirname "${BROWSER_NAMED_TABS}")"
+  tmp="$(mktemp)"
+  if [ -f "${BROWSER_NAMED_TABS}" ]; then
+    awk -F '\t' -v n="${name}" '$1 != n' "${BROWSER_NAMED_TABS}" > "${tmp}"
+  fi
+  printf '%s\t%s\n' "${name}" "${id}" >> "${tmp}"
+  mv "${tmp}" "${BROWSER_NAMED_TABS}"
+}
+
+# Send a single DevTools protocol command to a tab over its WebSocket. Chrome
+# only exposes reload and navigate through the protocol (the /json HTTP
+# endpoints can create, activate and close tabs but never drive one), so we
+# speak just enough of the WebSocket wire format by hand: an HTTP/1.1 Upgrade
+# handshake over a raw TCP connection, followed by a single masked text frame
+# carrying the JSON command. The mask is all-zero, which RFC 6455 permits and
+# which lets us write the payload bytes unchanged. Returns non-zero if the
+# socket or handshake fails.
+ws_send() {
   local id="$1"
+  local payload="$2"
   local host="localhost"
-  local key payload len line
+  local key len line
   exec 3<>"/dev/tcp/${host}/${BROWSER_DEBUG_PORT}" 2>/dev/null || return 1
   key="$(head -c 16 /dev/urandom | base64)"
   printf 'GET /devtools/page/%s HTTP/1.1\r\nHost: %s:%s\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: %s\r\nSec-WebSocket-Version: 13\r\n\r\n' \
@@ -280,16 +337,39 @@ ws_reload() {
     line="${line%$'\r'}"
     [ -z "${line}" ] && break
   done
-  payload='{"id":1,"method":"Page.reload"}'
-  len=${#payload}
-  # FIN + text opcode (0x81); MASK bit set alongside the 7-bit length (our
-  # payloads are always well under 126 bytes); a zero mask key; the payload.
+  # FIN + text opcode (0x81); MASK bit set alongside the length. Payloads up to
+  # 125 bytes fit in the 7-bit length; longer ones (a navigate carrying a long
+  # URL) use the 126 marker followed by a 16-bit big-endian byte count.
+  len="$(printf '%s' "${payload}" | wc -c)"
   printf '\x81' >&3
-  printf "\\x$(printf '%02x' $((0x80 | len)))" >&3
+  if [ "${len}" -lt 126 ]; then
+    printf "\\x$(printf '%02x' $((0x80 | len)))" >&3
+  else
+    printf '\xfe' >&3
+    printf "\\x$(printf '%02x' $((len >> 8)))\\x$(printf '%02x' $((len & 0xff)))" >&3
+  fi
   printf '\x00\x00\x00\x00' >&3
   printf '%s' "${payload}" >&3
   exec 3>&-
   return 0
+}
+
+ws_reload() {
+  ws_send "$1" '{"id":1,"method":"Page.reload"}'
+}
+
+# Point an existing tab at a new URL via Page.navigate. Bare local paths become
+# file:// URLs (Page.navigate resolves nothing itself); backslashes and quotes
+# are escaped so the URL embeds safely in the JSON command.
+ws_navigate() {
+  local id="$1"
+  local url="$2"
+  if [[ "${url}" != *://* ]]; then
+    url="file://$(realpath "${url}" 2>/dev/null || printf '%s' "${url}")"
+  fi
+  url="${url//\\/\\\\}"
+  url="${url//\"/\\\"}"
+  ws_send "${id}" "{\"id\":1,\"method\":\"Page.navigate\",\"params\":{\"url\":\"${url}\"}}"
 }
 
 # Bring an already-open tab to the foreground (best effort, via the HTTP
@@ -326,6 +406,21 @@ open_url_in_new_tab() {
   "${BROWSER_BIN}" "--user-data-dir=${BROWSER_DEBUG_DIR}" "${url}" >/dev/null 2>&1 &
 }
 
+# Create a new tab for $1 via /json/new and print the new target's id (PUT for
+# newer Chrome, GET for older builds). Unlike open_url_in_new_tab there is no
+# binary fallback: callers need the id, and a launch via the binary never
+# reports one.
+new_tab_with_id() {
+  command -v curl >/dev/null 2>&1 || return 1
+  local url="$1" out id
+  out="$(curl -sf --max-time 2 -X PUT "http://localhost:${BROWSER_DEBUG_PORT}/json/new?${url}" 2>/dev/null)" \
+    || out="$(curl -sf --max-time 2 "http://localhost:${BROWSER_DEBUG_PORT}/json/new?${url}" 2>/dev/null)" \
+    || return 1
+  id="$(printf '%s' "${out}" | grep -oE '"id":[[:space:]]*"[^"]*"' | head -n 1 | sed -E 's/.*"([^"]*)".*/\1/')"
+  [ -n "${id}" ] || return 1
+  printf '%s' "${id}"
+}
+
 open_url() {
   local url="$1"
   local no_refresh="$2"
@@ -351,6 +446,47 @@ open_url() {
   fi
 }
 
+# Open a URL in the tab registered under a caller-chosen name, reusing that
+# tab whenever it is still open: same URL → focus + refresh, different URL →
+# navigate the tab in place. Otherwise (unknown name, or its tab or browser
+# has since closed) a fresh tab is created and recorded under the name.
+open_url_in_named_tab() {
+  local name="$1"
+  local url="$2"
+  local id
+  if ! check_running; then
+    echo "${BROWSER_NAME} not running; starting with URL..."
+    nohup "${BROWSER_BIN}" "--remote-debugging-port=${BROWSER_DEBUG_PORT}" "--user-data-dir=${BROWSER_DEBUG_DIR}" "${url}" >/dev/null 2>&1 &
+    sleep 1
+    # Best effort: register the tab the fresh instance opened with the URL.
+    if id="$(find_open_tab_id "${url}")" && [ -n "${id}" ]; then
+      set_named_tab_id "${name}" "${id}"
+    fi
+    return 0
+  fi
+  id="$(get_named_tab_id "${name}")" || id=""
+  if [ -n "${id}" ] && tab_id_is_open "${id}"; then
+    if [ "$(normalize_url "$(get_tab_url "${id}")")" = "$(normalize_url "${url}")" ]; then
+      echo "Tab '${name}' already shows ${url}; focused and refreshed it."
+      reload_open_tab "${id}" ""
+    else
+      echo "Reusing tab '${name}' for ${url}..."
+      if command -v curl >/dev/null 2>&1; then
+        curl -sf --max-time 2 "http://localhost:${BROWSER_DEBUG_PORT}/json/activate/${id}" >/dev/null 2>&1 || true
+      fi
+      ws_navigate "${id}" "${url}"
+    fi
+  else
+    echo "Opening URL in new tab '${name}'..."
+    if id="$(new_tab_with_id "${url}")"; then
+      set_named_tab_id "${name}" "${id}"
+    else
+      # No id to register (no curl / DevTools refused) — still open the URL.
+      open_url_in_new_tab "${url}"
+    fi
+  fi
+}
+
 open_private_url() {
   local url="$1"
   # For Chrome, using --incognito will reuse any existing incognito profile;
@@ -369,13 +505,14 @@ show_browser_usage() {
   local script_name
   script_name="$(basename "${BASH_SOURCE[0]}")"
   echo "Usage:"
-  echo "  ${script_name}                          → Print Chrome status"
-  echo "  ${script_name} start                    → Start Chrome (nohup)"
-  echo "  ${script_name} open <URL>               → Open URL in new tab/refresh existing tab with url open"
-  echo "  ${script_name} open <URL> --no-refresh  → Open URL in new tab/activate existing tab with url open"
-  echo "  ${script_name} private <URL>            → Open URL in incognito tab/window"
-  echo "  ${script_name} kill                     → Kill all Chrome instances"
-  echo "  ${script_name} help | -h                → Show this help"
+  echo "  ${script_name}                            → Print Chrome status"
+  echo "  ${script_name} start                      → Start Chrome (nohup)"
+  echo "  ${script_name} open <URL>                 → Open URL in new tab/refresh existing tab with url open"
+  echo "  ${script_name} open <URL> --no-refresh    → Open URL in new tab/activate existing tab with url open"
+  echo "  ${script_name} open-in-tab <name> <URL>   → Open URL in the named tab, reusing/navigating it if open"
+  echo "  ${script_name} private <URL>              → Open URL in incognito tab/window"
+  echo "  ${script_name} kill                       → Kill all Chrome instances"
+  echo "  ${script_name} help | -h                  → Show this help"
 }
 
 ### MAIN LOGIC ###
@@ -408,7 +545,7 @@ browser_main() {
           ;;
       esac
       ;;
-    2 | 3)  # Two or three arguments: open URL [--no-refresh] | private URL
+    2 | 3)  # Two or three arguments: open URL [--no-refresh] | open-in-tab NAME URL | private URL
       case $1 in
         "open")   # Open URL in normal Chrome session
           local no_refresh=""
@@ -416,6 +553,14 @@ browser_main() {
             no_refresh="--no-refresh"
           fi
           open_url "$2" "${no_refresh}"
+          return 0
+          ;;
+        "open-in-tab")  # Open URL in a named tab, creating or reusing it
+          if [ $# -ne 3 ]; then
+            show_browser_usage
+            return 1
+          fi
+          open_url_in_named_tab "$2" "$3"
           return 0
           ;;
         "private") # Open URL in incognito, reusing existing incognito window if any
@@ -447,10 +592,18 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
   export -f list_open_tab_urls
   export -f url_is_already_open
   export -f find_open_tab_id
+  export -f get_tab_url
+  export -f tab_id_is_open
+  export -f get_named_tab_id
+  export -f set_named_tab_id
+  export -f ws_send
   export -f ws_reload
+  export -f ws_navigate
   export -f reload_open_tab
   export -f open_url_in_new_tab
+  export -f new_tab_with_id
   export -f open_url
+  export -f open_url_in_named_tab
   export -f open_private_url
   export -f show_browser_usage
   export -f browser_main
@@ -466,10 +619,7 @@ EOF
 }
 
 install_browser_completion() {
-    if [ -f "${BROWSER_COMPLETION}" ]; then
-        echo "Browser completion is already installed"
-        return 0
-    fi
+    # Always (re)write so completion updates land alongside script updates.
     sudo tee "${BROWSER_COMPLETION}" <<'EOF' > /dev/null
 # Bash completion for the browser command
 _browser_completions() {
@@ -479,12 +629,19 @@ _browser_completions() {
 
   case "${COMP_CWORD}" in
     1)
-      COMPREPLY=($(compgen -W "start kill open private help -h" -- "${cur}"))
+      COMPREPLY=($(compgen -W "start kill open open-in-tab private help -h" -- "${cur}"))
       ;;
     2)
       case "${prev}" in
         open|private)
           COMPREPLY=($(compgen -f -- "${cur}"))
+          ;;
+        open-in-tab)
+          # Offer the already-registered tab names
+          local named_tabs="${HOME}/.config/google-chrome-browser/named-tabs"
+          if [ -f "${named_tabs}" ]; then
+            COMPREPLY=($(compgen -W "$(cut -f1 "${named_tabs}")" -- "${cur}"))
+          fi
           ;;
       esac
       ;;
@@ -492,6 +649,9 @@ _browser_completions() {
       case "${COMP_WORDS[1]}" in
         open)
           COMPREPLY=($(compgen -W "--no-refresh" -- "${cur}"))
+          ;;
+        open-in-tab)
+          COMPREPLY=($(compgen -f -- "${cur}"))
           ;;
       esac
       ;;

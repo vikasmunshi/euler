@@ -37,17 +37,24 @@ def browser_is_available() -> bool:
 
 @register(help_text='Open problem documentation in a browser.', aliases=('open', 'view'), quietable=True)
 def show(problem: Problem, check_for_errors: bool = False) -> int:
-    """Open a problem's "problem.html" in the system browser.
+    """Open a problem's documentation page in the managed Chrome browser.
 
     When *problem* is omitted, opens the current problem.
 
-    Prints an error and returns early if:
-    - the "browser" command is not available, or
-    - the resolved "problem.html" file does not exist.
+    Auto-starts the `solver-web` server and opens its page for the problem
+    (`<base_url>/NNNN/`) in the named browser tab "solver-doc" (via
+    `browser open-in-tab`). Every `show` reuses that one tab: the same
+    problem is focused and refreshed, a different problem navigates the tab
+    in place, and the tab is recreated if it has been closed.
+
+    With *check_for_errors* the page is instead loaded in a throwaway tab and
+    inspected for rendering errors (see `_check_for_rendering_errors`).
+
+    Prints an error and returns early if the "browser" command is not available.
 
     Arguments:
         problem:            The `problem` to open; defaults to the current problem.
-        check_for_errors:   Whether to check for rendering errors.
+        check_for_errors:   Whether to check for rendering errors instead of showing the page.
     """
     if not browser_is_available():
         console.print('[error]error:[/error] [muted]"browser" command not available; '
@@ -58,7 +65,7 @@ def show(problem: Problem, check_for_errors: bool = False) -> int:
     if check_for_errors:
         return _check_for_rendering_errors(url)
     pipe = DEVNULL if console.quiet else None
-    run(f'browser open {url}', shell=True, stdout=pipe, stderr=pipe)
+    run(f'browser open-in-tab solver-doc {url}', shell=True, stdout=pipe, stderr=pipe)
     return ExitCodes.EXIT_OK
 
 
