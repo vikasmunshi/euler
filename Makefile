@@ -14,8 +14,6 @@ install-all: install-system install-chrome $(VENV)
 	$(MAKE) install-completions
 	$(MAKE) install-credentials
 	$(MAKE) install-claude
-	$(MAKE) install-acme
-	$(MAKE) install-caddy
 	@printf "✓ install-all complete: full developer environment ready\n"
 
 ## Minimal install: base + solutions + show (no dev tools)
