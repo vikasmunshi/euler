@@ -5,11 +5,12 @@
 `build_app` wires one localhost server with three concerns:
 
 - **Terminal** — `GET /` serves the xterm.js page (the default landing page) and
-  `GET /ws` streams a
-  single interactive `solver` shell on a pseudo-terminal (see
-  :class:`solver.web.pty_bridge.PtySession`). Binary WS frames are raw terminal
-  bytes both ways; a `{"resize": [cols, rows]}` text frame propagates geometry.
-  Multiple concurrent sessions are allowed; `logout` closes a user's sessions.
+  `GET /ws` attaches to the signed-in user's persistent `solver` shell on a
+  pseudo-terminal (see :class:`solver.web.pty_manager.PersistentPty`). Binary WS
+  frames are raw terminal bytes both ways; a `{"resize": [cols, rows]}` text frame
+  propagates geometry. There is at most one shell per user — extra tabs attach to
+  the same shell — and it survives disconnect, ending only on `logout`, an
+  in-shell `exit`, or server stop.
 
 - **Read-only viewer** — the static summary/problem pages plus the problem files
   read directly from each problem's solution directory (`problem.solution_dir`).
@@ -41,7 +42,7 @@ from solver.core.problems import Problem, problems
 from solver.shell import console
 from solver.utils.summary import summary
 from solver.web.auth.routes import WS_CONNECTIONS, auth_middleware, setup_auth
-from solver.web.pty_bridge import PtySession
+from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
 
 
 class _State(TypedDict):
@@ -165,30 +166,14 @@ def _parse_resize(payload: str) -> tuple[int, int] | None:
     return None
 
 
-async def _pump_pty_to_ws(session: PtySession, ws: web.WebSocketResponse) -> None:
-    """Stream PTY output to the WebSocket until the shell exits or the socket closes.
-
-    `session.read` is a blocking `os.read` on the master fd, so it runs in the
-    default executor; awaiting each send in turn keeps the byte stream strictly
-    ordered. An empty read means the child shell has exited, which closes the socket.
-    """
-    loop = asyncio.get_running_loop()
-    while True:
-        data = await loop.run_in_executor(None, session.read)
-        if not data or ws.closed:
-            break
-        await ws.send_bytes(data)
-    if not ws.closed:
-        await ws.close()
-
-
 async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse:
-    """Bridge a browser terminal to a fresh PTY-backed `solver` shell.
+    """Attach a browser terminal to the signed-in user's persistent `solver` shell.
 
-    Multiple concurrent sessions are allowed; each gets its own shell. The
-    connection is tracked by the signed-in user's email so `logout` can close it.
-    Binary frames are forwarded to the PTY as keystrokes; a `resize` text frame
-    propagates the browser geometry to the PTY.
+    The shell is forked on first connect and reused thereafter (one per user);
+    the recent output buffer is replayed so a reconnecting terminal redraws its
+    prompt. The socket is tracked by email so `logout` can close it, and detached
+    on disconnect *without* killing the shell. Binary frames are forwarded to the
+    PTY as keystrokes; a `resize` text frame propagates the browser geometry.
     """
     ws = web.WebSocketResponse()
     await ws.prepare(request)
@@ -197,20 +182,19 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
     connections = request.app[WS_CONNECTIONS]
     connections.setdefault(email, set()).add(ws)
 
-    session = PtySession(save=save, user=email)
-    pump = asyncio.create_task(_pump_pty_to_ws(session, ws))
+    pty = request.app[PTY_MANAGER].get_or_create(email, save=save)
+    await pty.attach(ws)
     try:
         async for msg in ws:
             if msg.type == WSMsgType.BINARY:
-                session.write(msg.data)
+                pty.write(msg.data)
             elif msg.type == WSMsgType.TEXT:
                 if (size := _parse_resize(msg.data)) is not None:
-                    session.resize(cols=size[0], rows=size[1])
+                    pty.resize(cols=size[0], rows=size[1])
             elif msg.type == WSMsgType.ERROR:
                 break
     finally:
-        pump.cancel()
-        session.close()
+        pty.detach(ws)   # the shell keeps running; only this socket goes away
         if (live := connections.get(email)) is not None:
             live.discard(ws)
             if not live:
@@ -550,6 +534,7 @@ def build_app(save: bool) -> web.Application:
     state: _State = {'last_problem': None}
     app[_STATE] = state
     setup_auth(app)
+    setup_pty_manager(app)
     ws_handler = functools.partial(_ws_handler, save=save)
     app.add_routes([
         # Terminal + WebSocket. The terminal is the default landing page (`/`);

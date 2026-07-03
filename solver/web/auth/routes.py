@@ -36,6 +36,7 @@ from solver.web.auth.remember import RememberStore, load_or_create_secret
 from solver.web.auth.sessions import SessionStore
 from solver.web.auth.srp import SrpServer, SrpToken, decoy_token
 from solver.web.auth.users import UserStore, normalize_email
+from solver.web.pty_manager import PTY_MANAGER
 
 #: Per-server auth state, stashed on the Application.
 SESSIONS: web.AppKey[SessionStore] = web.AppKey('auth_sessions', SessionStore)
@@ -254,7 +255,9 @@ async def _register_complete(request: web.Request) -> web.StreamResponse:
 
 
 async def _close_user_sockets(app: web.Application, email: str) -> None:
-    """Close any open PTY WebSocket connections for `email` (used on logout)."""
+    """Terminate the user's persistent shell and close its WebSockets (used on logout)."""
+    if PTY_MANAGER in app:
+        await app[PTY_MANAGER].close(email)   # kill the background shell itself
     connections = app[WS_CONNECTIONS].pop(email, None)
     for socket in list(connections or ()):
         try:
