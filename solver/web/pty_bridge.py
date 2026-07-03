@@ -36,13 +36,20 @@ class PtySession:
     with a TERM that enables colour; the parent retains `pid` and the PTY master
     `fd`. The caller drives I/O — `read()`/`write()` move bytes, `resize()`
     propagates the browser terminal geometry, `close()` terminates the child.
+
+    When `user` is given, it is exported as `SOLVER_USER` in the child so the
+    forked shell resolves to that identity (see :mod:`solver.utils.identity`) —
+    the web tier has already authenticated the user via SRP and vouches for it
+    here, giving the shell that user's per-user history and last problem.
     """
 
-    def __init__(self, save: bool) -> None:
+    def __init__(self, save: bool, user: str | None = None) -> None:
         pid, fd = pty.fork()
         if pid == 0:  # pragma: no cover — child process, replaced by execvp
             # A colour-capable TERM so prompt-toolkit/rich render styled output.
             os.environ['TERM'] = 'xterm-256color'
+            if user:  # the web tier vouches for this SRP-authenticated identity
+                os.environ['SOLVER_USER'] = user
             argv = [sys.executable, '-m', 'solver'] + (['--save'] if save else [])
             os.execvp(sys.executable, argv)
             os._exit(127)  # only reached if execvp fails

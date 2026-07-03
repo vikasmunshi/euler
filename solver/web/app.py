@@ -197,7 +197,7 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
     connections = request.app[WS_CONNECTIONS]
     connections.setdefault(email, set()).add(ws)
 
-    session = PtySession(save=save)
+    session = PtySession(save=save, user=email)
     pump = asyncio.create_task(_pump_pty_to_ws(session, ws))
     try:
         async for msg in ws:
