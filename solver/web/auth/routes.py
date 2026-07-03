@@ -91,7 +91,9 @@ def _client_ip(request: web.Request) -> str:
 async def _add_security_headers(request: web.Request, response: web.StreamResponse) -> None:
     """Add conservative security headers to every response (on_response_prepare hook)."""
     response.headers.setdefault('X-Content-Type-Options', 'nosniff')
-    response.headers.setdefault('X-Frame-Options', 'DENY')
+    # SAMEORIGIN (not DENY) so the terminal page can frame its own /NNNN/ viewer
+    # panel (the web `show` command); cross-origin framing is still blocked.
+    response.headers.setdefault('X-Frame-Options', 'SAMEORIGIN')
     response.headers.setdefault('Referrer-Policy', 'no-referrer')
 
 

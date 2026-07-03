@@ -231,7 +231,7 @@ command name below links to its full entry — usage and description — in the
 | [`progress`](commands-index.md#command-progress) | — | Print progress statistics about Euler problems. |
 | [`results`](commands-index.md#command-results) | — | list the results for the problem. ❏ |
 | [`search`](commands-index.md#command-search-find) | `find` | Find content in the stack. |
-| [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. ❏ » |
+| [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open documentation in a browser or the web viewer panel. ❏ » |
 | [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. ❏ |

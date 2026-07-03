@@ -108,7 +108,7 @@ Dependencies are split into optional groups - install only what you need:
 |-------------|--------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|
 | *(base)*    | `beautifulsoup4`, `cryptography`, `flake8`, `jsonschema`, `mypy`, `prompt-toolkit`, `requests`, `rich`, `types-requests` | using the solver framework                |
 | `solutions` | `cython`, `mpmath`, `numpy`, `primesieve`, `setuptools`                                                                  | running some solutions                    |
-| `show`      | `matplotlib`, `pychrome`, `PyQt5`                                                                                        | graphical output (`--show`)               |
+| `show`      | `matplotlib`, `PyQt5`                                                                                                    | graphical output (`--show`)               |
 | `ai`        | `anthropic`, `python-dotenv`                                                                                             | only when running `claude-api`            |
 | `dev`       | `autoflake`, `autopep8`, `black`, `isort`                                                                                | `lint --auto-fix` and solution formatting |
 | `web`       | `aiohttp`                                                                                                                | for `solver-web`                          |

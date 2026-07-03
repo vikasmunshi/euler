@@ -10,13 +10,74 @@ html, body {
     height: 100%;
     background: var(--page-bg);
 }
-#terminal {
+/* The workspace fills the window and lays the viewer panel (left) beside the
+   terminal (right); the panel is display:none until `show` opens it, so the
+   terminal spans the full width on its own. */
+#workspace {
     position: absolute;
     inset: 0;
+    display: flex;
+}
+#terminal {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
     /* A little more room on the right so the scrollbar/last column
        isn't flush to the window edge. */
     padding: 6px 14px 6px 8px;
     box-sizing: border-box;
+}
+/* Split viewer panel: an in-page iframe onto /NNNN/, revealed by the web `show`
+   command via body.viewer-open. */
+.viewer {
+    display: none;
+    flex: 0 0 clamp(340px, 48%, 62%);
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
+    border-right: 1px solid var(--scrollbar-thumb);
+    background: var(--page-bg);
+}
+body.viewer-open .viewer { display: flex; }
+.viewer-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 8px 6px 12px;
+    background: var(--status-bg);
+    border-bottom: 1px solid var(--scrollbar-thumb);
+}
+.viewer-title {
+    overflow: hidden;
+    font: 12px/1.2 monospace;
+    color: var(--status-color);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.viewer-close {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    font: 16px/1 monospace;
+    color: var(--status-color);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.viewer-close:hover { border-color: var(--status-color); }
+.viewer-frame {
+    flex: 1 1 auto;
+    width: 100%;
+    border: 0;
+    background: var(--page-bg);
 }
 /* Reserve a gutter for the scrollbar so it never overlaps the shell's
    rendered box border. The FitAddon subtracts .xterm's padding-right

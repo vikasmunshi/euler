@@ -67,7 +67,7 @@ a parameter that accepts repetition.
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
 | [`results`](#command-results) | — | list the results for the problem. ❏ |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
-| [`show`](#command-show-open-view) | `open`, `view` | Open problem documentation in a browser. ❏ » |
+| [`show`](#command-show-open-view) | `open`, `view` | Open documentation in a browser or the web viewer panel. ❏ » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`test-cases`](#command-test-cases) | — | list the test cases for the problem. ❏ |
@@ -852,36 +852,39 @@ Args:
 
 #### Command: `show` (`open`, `view`)
 
-Open problem documentation in a browser.
+Open documentation in a browser or the web viewer panel.
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
 show
 [problem=<n>] (default current)
-[check_for_errors=true|--check-for-errors]
 [silent=true|--silent]
 ```
 
 ```text
-Open a problem's documentation page in the managed Chrome browser.
+Open a problem's documentation page, in a browser or the web viewer panel.
 
-When *problem* is omitted, opens the current problem.
+When *problem* is omitted, opens the current problem. The path depends on the
+shell profile:
 
-Auto-starts the `solver-web` server and opens its page for the problem
-(`<base_url>/NNNN/`) in the named browser tab "solver-doc" (via
-`browser open-in-tab`). Every `show` reuses that one tab: the same
-problem is focused and refreshed, a different problem navigates the tab
-in place, and the tab is recreated if it has been closed.
+- **terminal** — auto-starts the `solver-web` server and opens its page for the
+  problem (`<base_url>/NNNN/`) in the named browser tab "solver-doc" (via
+  `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
+  focused and refreshed, a different problem navigates the tab in place, and the
+  tab is recreated if it has been closed. Prints an error and returns early if
+  the "browser" command is not available.
 
-With *check_for_errors* the page is instead loaded in a throwaway tab and
-inspected for rendering errors (see `_check_for_rendering_errors`).
-
-Prints an error and returns early if the "browser" command is not available.
+- **web** — the shell has no local browser to drive (it runs on the server while
+  the user's browser is elsewhere), so it emits an `OSC 5379` control sequence
+  (`open;<NNNN>;<token>`) on stdout. The xterm.js page rides it over the
+  PTY → WebSocket pipe and points its in-page viewer iframe at `<origin>/NNNN/`;
+  the monotonic token lets the page ignore the sequence when the PTY replay
+  buffer re-sends it on reconnect.
 
 Arguments:
-    problem:            The `problem` to open; defaults to the current problem.
-    check_for_errors:   Whether to check for rendering errors instead of showing the page.
+    ctx:      The shell's command context (selects the profile-specific path).
+    problem:  The `problem` to open; defaults to the current problem.
 ```
 
 ---
@@ -981,6 +984,7 @@ changing any command's name, alias, help text, or signature, or a module's
 first docstring line.
 
 Args:
+    ctx:    The command context.
     check:  When True, write nothing and fail (non-zero) if any doc is out
             of date, listing the stale files. When False (default), rewrite
             the docs in place and report which were updated.

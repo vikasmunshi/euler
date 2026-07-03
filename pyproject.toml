@@ -33,7 +33,6 @@ dev = [
 ]
 show = [
     "matplotlib",
-    "pychrome",
     "PyQt5",
 ]
 web = [

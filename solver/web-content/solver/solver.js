@@ -61,6 +61,42 @@ term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
+// ── Viewer panel ──
+// The web `show` command emits `OSC 5379 ; open ; <NNNN> ; <token>` on the shell's
+// stdout; it rides the PTY → WebSocket pipe into term.write() here. We point the
+// same-origin viewer iframe at /<NNNN>/ (its request carries the session cookie)
+// and reveal the split pane. The token is a server-side millisecond clock, strictly
+// increasing per `show`; we ignore any token we've already passed, so the copy the
+// PTY replay buffer re-sends on reconnect never re-opens a panel the user closed.
+const viewerFrame = document.getElementById('viewer-frame');
+let lastShowToken = 0;
+
+function openViewer(n) {
+    viewerFrame.src = `${location.origin}/${n}/`;
+    document.body.classList.add('viewer-open');
+    fitAddon.fit();
+    sendResize();   // the terminal just got narrower — reflow the grid + tell the PTY
+}
+
+function closeViewer() {
+    document.body.classList.remove('viewer-open');
+    viewerFrame.src = 'about:blank';
+    fitAddon.fit();
+    sendResize();
+}
+
+document.getElementById('viewer-close').addEventListener('click', closeViewer);
+
+term.parser.registerOscHandler(5379, (payload) => {
+    const [action, n, token] = payload.split(';');
+    const t = Number(token) || 0;
+    if (action === 'open' && /^\d+$/.test(n || '') && t > lastShowToken) {
+        lastShowToken = t;
+        openViewer(n);
+    }
+    return true;   // handled — don't let xterm treat it as printable text
+});
+
 // In a browser, Ctrl-C with text selected is "copy", not "interrupt". Intercept
 // it before xterm turns it into a ^C byte: when there is a selection, copy it to
 // the clipboard and clear it; otherwise let the key through so it still sends

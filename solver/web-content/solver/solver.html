@@ -26,7 +26,20 @@
         <a href="/logout">Log out</a>
     </div>
 </div>
-<div id="terminal"></div>
+<div id="workspace">
+    <!-- Viewer panel (left): hidden until the web `show` command reveals it
+         (body.viewer-open). The iframe is same-origin, so its /NNNN/ request
+         carries the session cookie. The shell sits to its right. -->
+    <aside id="viewer" class="viewer" aria-label="problem viewer">
+        <div class="viewer-bar">
+            <span class="viewer-title">doc viewer</span>
+            <button id="viewer-close" class="viewer-close" type="button"
+                    title="Close viewer" aria-label="Close viewer">&times;</button>
+        </div>
+        <iframe id="viewer-frame" class="viewer-frame" title="problem viewer" src="about:blank"></iframe>
+    </aside>
+    <div id="terminal"></div>
+</div>
 
 <script src="vendor/xterm.js"></script>
 <script src="vendor/addon-fit.js"></script>

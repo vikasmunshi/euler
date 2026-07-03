@@ -16,7 +16,7 @@ import re
 import shlex
 import sys
 from contextlib import contextmanager
-from typing import Any, Iterable, Iterator
+from typing import TYPE_CHECKING, Any, Iterable, Iterator
 
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
@@ -33,6 +33,9 @@ from solver.shell.parser import ParserError, parse, set_commands
 from solver.shell.session import SessionLog
 from solver.shell.tty import console, make_session, read_blocks, trim_history
 from solver.shell.variables import variables
+
+if TYPE_CHECKING:
+    from solver.utils.loader import Profile
 
 #: A variable reference being typed at the cursor: `{` then an optional partial
 #: name. Used to switch completion from command names to variable names.
@@ -130,10 +133,11 @@ class _CommandCompleter(Completer):
 class SolverShell:
     """Interactive shell built on prompt-toolkit + rich, running the v2 pipeline."""
 
-    def __init__(self, *, save: bool = False) -> None:
+    def __init__(self, *, save: bool = False, profile: Profile = 'terminal') -> None:
         self.console = console
         self.registry = registry
         self.save = save
+        self.profile = profile
         self._session_log: SessionLog | None = None
         set_commands(self.registry.names())
 

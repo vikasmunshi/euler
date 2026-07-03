@@ -31,7 +31,7 @@ from typing import Callable
 
 from solver.config import ExitCodes, config
 from solver.shell import console, register
-from solver.shell.command import Command, registry
+from solver.shell.command import Command, Context, registry
 from solver.utils.loader import load_commands, update_modules
 
 #: The docs directory whose marked blocks we maintain.
@@ -267,8 +267,8 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
     return updated, stale
 
 
-@register(help_text='Regenerate the generated sections of the docs/ guides.', quietable=True)
-def update_docs(check: bool = False) -> int:
+@register(help_text='Regenerate the generated sections of the docs/ guides.', pass_ctx=True, quietable=True)
+def update_docs(ctx: Context, check: bool = False) -> int:
     """Rebuild the registry-generated blocks in the `docs/` guides and the README.
 
     Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
@@ -279,12 +279,14 @@ def update_docs(check: bool = False) -> int:
     first docstring line.
 
     Args:
+        ctx:    The command context.
         check:  When True, write nothing and fail (non-zero) if any doc is out
                 of date, listing the stale files. When False (default), rewrite
                 the docs in place and report which were updated.
     """
-    if update_modules():
-        load_commands()
+    profile = ctx.shell.profile
+    if update_modules(profile):
+        load_commands(profile)
         console.print('[success]modules updated[/success]')
     else:
         console.print('[muted]modules already up to date[/muted]')

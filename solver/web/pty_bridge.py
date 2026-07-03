@@ -10,8 +10,9 @@ the non-interactive piped fallback.
 
 The parent keeps the PTY master file descriptor: read it for the shell's output,
 write to it for keystrokes, ioctl it to propagate the browser terminal's size.
-The child is a plain `solver` shell operating on the shared solution tree, exactly
-like a terminal session started at the command line.
+The child is a plain `solver` shell operating on the shared solution tree, run
+with `--web` so it loads the web profile (dropping local-only commands such as
+`show`, which cannot reach the remote user's desktop browser).
 """
 from __future__ import annotations
 
@@ -50,7 +51,7 @@ class PtySession:
             os.environ['TERM'] = 'xterm-256color'
             if user:  # the web tier vouches for this SRP-authenticated identity
                 os.environ['SOLVER_USER'] = user
-            argv = [sys.executable, '-m', 'solver'] + (['--save'] if save else [])
+            argv = [sys.executable, '-m', 'solver', '--web'] + (['--save'] if save else [])
             os.execvp(sys.executable, argv)
             os._exit(127)  # only reached if execvp fails
         self.pid: int = pid

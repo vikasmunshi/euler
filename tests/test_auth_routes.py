@@ -210,7 +210,7 @@ class AuthRoutesTests(AioHTTPTestCase):
     async def test_security_headers_present(self) -> None:
         resp = await self.client.get('/login')
         self.assertEqual(resp.headers.get('X-Content-Type-Options'), 'nosniff')
-        self.assertEqual(resp.headers.get('X-Frame-Options'), 'DENY')
+        self.assertEqual(resp.headers.get('X-Frame-Options'), 'SAMEORIGIN')
         self.assertEqual(resp.headers.get('Referrer-Policy'), 'no-referrer')
 
     async def test_password_reset_overwrites_verifier(self) -> None:
