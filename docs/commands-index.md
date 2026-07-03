@@ -323,7 +323,7 @@ Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1394)
+[ecb_usd_rate=<float>] (default 1.1399)
 ```
 
 ```text

@@ -229,6 +229,7 @@ solver/
     new.py            — Solution to Euler $problem.
   utils/
     gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
+    identity.py       — Ambient user identity: who is this shell running as, for per-user state.
     linter.py         — Utilities for linting code.
     loader.py         — Utility for loading modules.
     misc.py           — The `problems` and `manage-config` commands.
@@ -244,6 +245,7 @@ solver/
     app.py            — aiohttp application: the SolverShell terminal, its PTY WebSocket, and the viewer.
     cli.py            — `solver-web`: lifecycle for the PTY-backed SolverShell web front end.
     pty_bridge.py     — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
+    pty_manager.py    — Persistent per-user PTY shells: one long-lived `solver` shell per web user.
     auth/             — Web authentication for solver-web.
       commands.py     — The `users` shell command: manage web-auth accounts from the solver shell.
       mail.py         — Send the registration OTP by email via Gmail SMTP.

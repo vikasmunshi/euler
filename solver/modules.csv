@@ -32,6 +32,7 @@ solver.shell.variables,,
 solver.templates.engine,,
 solver.templates.new,,
 solver.utils.gh,,
+solver.utils.identity,,
 solver.utils.linter,True,True
 solver.utils.loader,,
 solver.utils.misc,True,True
@@ -56,3 +57,4 @@ solver.web.auth.srp,,
 solver.web.auth.users,,
 solver.web.cli,,
 solver.web.pty_bridge,,
+solver.web.pty_manager,,

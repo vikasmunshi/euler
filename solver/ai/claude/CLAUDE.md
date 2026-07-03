@@ -116,6 +116,7 @@ solver/
     new.py            — Solution to Euler $problem.
   utils/
     gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
+    identity.py       — Ambient user identity: who is this shell running as, for per-user state.
     linter.py         — Utilities for linting code.
     loader.py         — Utility for loading modules.
     misc.py           — The `problems` and `manage-config` commands.
@@ -131,6 +132,7 @@ solver/
     app.py            — aiohttp application: the SolverShell terminal, its PTY WebSocket, and the viewer.
     cli.py            — `solver-web`: lifecycle for the PTY-backed SolverShell web front end.
     pty_bridge.py     — PTY bridge: run an interactive `solver` shell on a pseudo-terminal.
+    pty_manager.py    — Persistent per-user PTY shells: one long-lived `solver` shell per web user.
     auth/             — Web authentication for solver-web.
       commands.py     — The `users` shell command: manage web-auth accounts from the solver shell.
       mail.py         — Send the registration OTP by email via Gmail SMTP.
@@ -218,11 +220,11 @@ Two AI entry points, both calling the Claude API. Install the optional deps with
 `solver-web` (`solver/web/cli.py`, console script + `python -m solver.web.cli`) runs a single localhost aiohttp server (default port `config.server_port` = 8080) as a **detached** child process, so it keeps serving after the launching shell exits. The detached child holds an exclusive `fcntl.flock` on a lock file (`.server.lock`) for its whole lifetime; that flock is the cross-process source of truth — any later `solver-web {status,stop,restart}` probes it (and reads the PID recorded in the file to signal it). The OS drops the lock on exit or crash, so there is no stale state and a recycled PID can never look "running". Actions: `start`, `stop`, `status` (default), `restart`; `--save` tees the shell's console output to the session log.
 
 `build_app` (`solver/web/app.py`) wires three concerns into one server:
-- **Terminal** — `GET /` serves an xterm.js page and `GET /ws` streams one interactive `solver` shell over a PTY (`solver/web/pty_bridge.py`). Only one PTY session is allowed at a time, since every session drives the shared solution tree.
+- **Terminal** — `GET /` serves an xterm.js page and `GET /ws` attaches to the signed-in user's **persistent** `solver` shell over a PTY. `PtyManager` (`solver/web/pty_manager.py`) keeps at most one long-lived shell per user (forked via `pty_bridge.py` with `SOLVER_USER` set to their email): a single background drainer reads the PTY continuously into a bounded replay buffer and fans output out to every attached socket, so the shell survives disconnect and reconnecting replays recent output. Extra tabs for the same user share the one shell. It is torn down only on in-shell `exit`, logout (`_close_user_sockets` → `manager.close`), or server stop (`on_cleanup` → `close_all`).
 - **Read-only viewer** — the summary/problem pages and problem files, read directly from each problem's `solution_dir`.
 - **Edits** — `POST/DELETE /<n>/<file>` saves/deletes a solution file and `POST /<n>/cmd` evaluates or benchmarks the problem; the write helpers return `(status, message)`.
 
-The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree. The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page.
+The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree, running as the user who attached it (`SOLVER_USER`) so it reads and writes that user's per-user state — command history, session log, and last active problem under `.state/<slug>/` (the identity/slug resolved by `solver/utils/identity.py`, wired into `config`). The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page.
 
 ## Solution Code Conventions
 

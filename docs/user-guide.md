@@ -90,9 +90,13 @@ solver-web start --save # also tee the shell's console output to the session log
 
 The server runs **detached**, so it keeps serving after the shell that launched
 it exits; an `flock` it holds for its lifetime makes any later `solver-web`
-invocation able to query or stop it (and is released automatically if it crashes). Browsing to `/` gives an `xterm.js` terminal running one interactive
-`solver` shell — only one terminal session is allowed at a time, because every
-session drives the same shared solution tree. `/summary` and `/<n>/` are the
+invocation able to query or stop it (and is released automatically if it crashes). Browsing to `/` gives an `xterm.js` terminal attached to **your own persistent
+`solver` shell**: it is forked the first time you connect (as your logged-in
+identity, see §6) and **survives disconnect** — closing the tab or dropping the
+connection leaves it running, and reconnecting reattaches to it with its recent
+output replayed. There is at most one shell per user, so a second browser tab
+attaches to the *same* shell (a shared terminal). The shell is torn down only
+when you type `exit`, log out, or the server stops. `/summary` and `/<n>/` are the
 read-only viewer pages; `show N` (below) auto-starts this server and opens the
 problem's page in a dedicated browser tab named `solver-doc`, which every later
 `show` reuses (refreshing it for the same problem, navigating it for another).
@@ -305,7 +309,17 @@ you have solved a problem, or translate your Python into C for comparison.
 
 ## 6. Sessions, history, and config
 
-- **History** persists across sessions; auto-suggest offers your past lines.
+- **Per-user state.** The shell runs as a resolved *identity* and keeps that
+  user's state under `.state/<slug>/` (command history, session log, last active
+  problem). The identity is taken from the first of: the `SOLVER_USER` environment
+  variable, `SOLVER_USER` in the project `.env`, the `keys/.user-email` file, or
+  your OS login name. In the web front end it is your signed-in account — the
+  server forks the shell with `SOLVER_USER` set to your email — so each user gets
+  their own history and last problem. (This is personalisation, not an access
+  boundary: on a shared machine it is not isolation, only convenience.)
+- **History** persists across sessions, per user; auto-suggest offers your past lines.
+- **Last problem** is remembered per user: the interactive shell restores the
+  problem you last worked on when it starts, and records it as you switch.
 - **`-s` / `--save`** tees the interactive session (typed input + console output)
   to the session log.
 - **`manage-config`** shows or sets the managed settings (`server_port`,
