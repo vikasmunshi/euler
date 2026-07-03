@@ -31,7 +31,7 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {config.version}')
     parser.add_argument('-s', '--save', action='store_true', help=f'tee console output to {config.session_file.name}')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     load_commands()
     shell = SolverShell(save=args.save and not args.cmdline)
