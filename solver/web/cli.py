@@ -159,7 +159,7 @@ def _start(save: bool = False) -> int:
         if (pid := running_pid()) is not None:
             console.print(f'[accent]web server started[/accent] '
                           f'[muted]- {config.base_url} (pid {pid})[/muted]')
-            run(f'browser open {config.base_url} --no-refresh', shell=True)
+            run(f'browser open-in-tab solver-shell {config.base_url}', shell=True)
             return ExitCodes.EXIT_OK
         time.sleep(0.05)
     console.print('[error]error:[/error] [muted]web server did not come up in time[/muted]')

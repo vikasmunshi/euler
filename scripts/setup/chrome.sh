@@ -291,6 +291,37 @@ tab_id_is_open() {
     | grep -qE "\"id\":[[:space:]]*\"$1\""
 }
 
+# Wait for the DevTools endpoint to answer, polling for at most $1 (default 10)
+# seconds. A cold Chrome start needs a few seconds before /json is reachable.
+wait_for_devtools() {
+  local deadline=$(( SECONDS + ${1:-10} ))
+  while (( SECONDS < deadline )); do
+    check_running && return 0
+    sleep 0.25
+  done
+  return 1
+}
+
+# Print the target id of the only open "page" tab; fail when there are none or
+# several. ("page" targets exclude extension background pages and workers; the
+# id field precedes type in each /json object, as in find_open_tab_id.)
+sole_page_tab_id() {
+  command -v curl >/dev/null 2>&1 || return 1
+  local line id="" found="" count=0
+  while IFS= read -r line; do
+    case "${line}" in
+      *'"id":'*)
+        id="$(printf '%s' "${line}" | sed -E 's/.*"id":[[:space:]]*"([^"]*)".*/\1/')"
+        ;;
+      *'"type":'*'"page"'*)
+        found="${id}"
+        count=$((count + 1))
+        ;;
+    esac
+  done < <(curl -sf --max-time 1 "http://localhost:${BROWSER_DEBUG_PORT}/json" 2>/dev/null)
+  [ "${count}" -eq 1 ] && [ -n "${found}" ] && printf '%s' "${found}"
+}
+
 # The named-tab registry maps a caller-chosen tab name to the DevTools target
 # id it last resolved to, one "name<TAB>id" line per name. Target ids die with
 # their tab (and with the browser), so callers must validate an id with
@@ -457,10 +488,14 @@ open_url_in_named_tab() {
   if ! check_running; then
     echo "${BROWSER_NAME} not running; starting with URL..."
     nohup "${BROWSER_BIN}" "--remote-debugging-port=${BROWSER_DEBUG_PORT}" "--user-data-dir=${BROWSER_DEBUG_DIR}" "${url}" >/dev/null 2>&1 &
-    sleep 1
-    # Best effort: register the tab the fresh instance opened with the URL.
-    if id="$(find_open_tab_id "${url}")" && [ -n "${id}" ]; then
-      set_named_tab_id "${name}" "${id}"
+    # Register the tab Chrome opened for the URL: wait for DevTools to come up
+    # (a cold start needs a few seconds), then find the tab by URL — or, when
+    # the page has already redirected (e.g. to a login page), settle for the
+    # only page tab there is. Skipping this would strand the tab unregistered
+    # and make every later call open a duplicate.
+    if wait_for_devtools 15; then
+      id="$(find_open_tab_id "${url}")" || id="$(sole_page_tab_id)" || id=""
+      [ -n "${id}" ] && set_named_tab_id "${name}" "${id}"
     fi
     return 0
   fi
@@ -476,6 +511,12 @@ open_url_in_named_tab() {
       fi
       ws_navigate "${id}" "${url}"
     fi
+  elif id="$(find_open_tab_id "${url}")" && [ -n "${id}" ]; then
+    # The name is unregistered (or its tab is gone) but some tab already shows
+    # the URL — adopt it rather than opening a duplicate.
+    echo "Adopting the open ${url} tab as '${name}'; focused and refreshed it."
+    set_named_tab_id "${name}" "${id}"
+    reload_open_tab "${id}" ""
   else
     echo "Opening URL in new tab '${name}'..."
     if id="$(new_tab_with_id "${url}")"; then
@@ -594,6 +635,8 @@ if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
   export -f find_open_tab_id
   export -f get_tab_url
   export -f tab_id_is_open
+  export -f wait_for_devtools
+  export -f sole_page_tab_id
   export -f get_named_tab_id
   export -f set_named_tab_id
   export -f ws_send
