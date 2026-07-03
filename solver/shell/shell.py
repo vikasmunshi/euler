@@ -283,6 +283,7 @@ class SolverShell:
             if intro_message:
                 self.console.print(intro_message)
             trim_history(config.history_file)
+            last_problem = self._load_last_problem()
             session = make_session(
                 history_file=config.history_file,
                 completer=_CommandCompleter(self),
@@ -307,8 +308,11 @@ class SolverShell:
                         break
                     except KeyboardInterrupt:
                         self.console.print('[muted]^C[/muted]')
+                    finally:
+                        last_problem = self._persist_last_problem(last_problem)
             finally:
                 clear_title()
+                self._persist_last_problem(last_problem)
                 trim_history(config.history_file)
             if intro:
                 self.console.print('[muted]session ended.[/muted]')
@@ -322,6 +326,46 @@ class SolverShell:
             except SystemExit:
                 break
         return self.rc
+
+    # -- per-user last-problem persistence ----------------------------------
+
+    def _load_last_problem(self) -> int | None:
+        """Seed the active problem from the per-user last-problem file.
+
+        Returns the number now in effect (so the caller can suppress a redundant
+        first write), or None when there is nothing valid to restore — a missing
+        file, unparseable content, or a problem number that is no longer known.
+        """
+        try:
+            number = int(config.last_problem_file.read_text(encoding='utf-8').strip())
+        except (OSError, ValueError):
+            return None
+        try:
+            variables.set_problem(number)
+        except ValueError:
+            return None
+        return number
+
+    def _persist_last_problem(self, last: int | None) -> int | None:
+        """Write the active problem number if it changed since *last*; return what is on disk.
+
+        A best-effort atomic write (temp file + `os.replace`); any failure — or an
+        unresolvable current problem — leaves the file untouched and never disturbs
+        the shell.
+        """
+        try:
+            number = variables.problem.number
+        except Exception:  # noqa: BLE001 — persistence must never break the shell
+            return last
+        if number == last:
+            return last
+        tmp = config.last_problem_file.with_suffix('.tmp')
+        try:
+            tmp.write_text(f'{number}\n', encoding='utf-8')
+            os.replace(tmp, config.last_problem_file)
+        except OSError:
+            return last
+        return number
 
     # -- UI -----------------------------------------------------------------
 
