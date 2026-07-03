@@ -50,6 +50,8 @@ REMEMBER: web.AppKey[RememberStore] = web.AppKey('auth_remember', RememberStore)
 LIMITER: web.AppKey[RateLimiter] = web.AppKey('auth_limiter', RateLimiter)
 # Open PTY WebSocket connections per signed-in email, so logout can close them.
 WS_CONNECTIONS: web.AppKey[dict[str, set[web.WebSocketResponse]]] = web.AppKey('auth_ws', dict)
+#: Per-request key holding the authenticated user's email (set by auth_middleware on gated routes).
+USER_EMAIL: web.RequestKey[str] = web.RequestKey('user_email', str)
 
 #: Routes reachable without a session (so a signed-out browser can log in).
 PUBLIC_PATHS: frozenset[str] = frozenset({
@@ -107,7 +109,7 @@ def _set_auth_cookie(response: web.StreamResponse, name: str, value: str, max_ag
 
 def current_email(request: web.Request) -> str:
     """The signed-in user's email (stashed by auth_middleware on every gated route)."""
-    return str(request['user_email'])
+    return str(request[USER_EMAIL])
 
 
 def _resolve_auth(request: web.Request) -> tuple[str | None, list[tuple[str, str, int]]]:
@@ -277,7 +279,7 @@ async def _logout(request: web.Request) -> web.StreamResponse:
     response = web.HTTPFound('/login')
     response.del_cookie(policy.SESSION_COOKIE, path='/')
     response.del_cookie(policy.REMEMBER_COOKIE, path='/')
-    return response
+    raise response
 
 
 async def _whoami(request: web.Request) -> web.StreamResponse:
@@ -319,7 +321,7 @@ async def auth_middleware(request: web.Request, handler: Handler) -> web.StreamR
         if _wants_html(request):
             raise web.HTTPFound(f'/login?next={quote(request.path_qs, safe="/?=&")}')
         raise web.HTTPUnauthorized(text='authentication required')
-    request['user_email'] = email
+    request[USER_EMAIL] = email
     try:
         response = await handler(request)
     except web.HTTPException as exc:

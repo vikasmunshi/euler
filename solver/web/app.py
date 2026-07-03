@@ -41,7 +41,7 @@ from solver.core.evaluate import benchmark, evaluate
 from solver.core.problems import Problem, problems
 from solver.shell import console
 from solver.utils.summary import summary
-from solver.web.auth.routes import WS_CONNECTIONS, auth_middleware, setup_auth
+from solver.web.auth.routes import USER_EMAIL, WS_CONNECTIONS, auth_middleware, setup_auth
 from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
 
 
@@ -178,7 +178,7 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    email: str = request['user_email']   # set by auth_middleware (the /ws route is gated)
+    email: str = request[USER_EMAIL]   # set by auth_middleware (the /ws route is gated)
     connections = request.app[WS_CONNECTIONS]
     connections.setdefault(email, set()).add(ws)
 
