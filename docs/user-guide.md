@@ -318,8 +318,9 @@ you have solved a problem, or translate your Python into C for comparison.
   their own history and last problem. (This is personalisation, not an access
   boundary: on a shared machine it is not isolation, only convenience.)
 - **History** persists across sessions, per user; auto-suggest offers your past lines.
-- **Last problem** is remembered per user: the interactive shell restores the
-  problem you last worked on when it starts, and records it as you switch.
+- **Last problem** is remembered per user: every shell — interactive, a
+  `cmdline` block, or piped stdin — restores the problem you last worked on when
+  it starts, and records it as you switch.
 - **`-s` / `--save`** tees the interactive session (typed input + console output)
   to the session log.
 - **`manage-config`** shows or sets the managed settings (`server_port`,

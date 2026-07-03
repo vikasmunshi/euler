@@ -256,18 +256,24 @@ class SolverShell:
     def run_command(self, blocks: list[str]) -> int:
         """Execute *blocks* non-interactively; return the last exit status."""
         with self._runtime():
+            last_problem = self._load_last_problem()
             rc = 0
-            for block in blocks:
-                print(block)
-                if not block.strip():
-                    continue
-                try:
-                    rc = self.dispatch(block)
-                except SystemExit as exit_signal:
-                    return int(exit_signal.code) if isinstance(exit_signal.code, int) else 0
-                except KeyboardInterrupt:
-                    self.console.print('[muted]^C[/muted]')
-                    break
+            try:
+                for block in blocks:
+                    print(block)
+                    if not block.strip():
+                        continue
+                    try:
+                        rc = self.dispatch(block)
+                    except SystemExit as exit_signal:
+                        return int(exit_signal.code) if isinstance(exit_signal.code, int) else 0
+                    except KeyboardInterrupt:
+                        self.console.print('[muted]^C[/muted]')
+                        break
+                    finally:
+                        last_problem = self._persist_last_problem(last_problem)
+            finally:
+                self._persist_last_problem(last_problem)
             return rc
 
     def run_interactive(self, intro: bool = True, intro_message: str = '') -> int:
@@ -320,11 +326,17 @@ class SolverShell:
 
     def _run_piped(self) -> int:
         """Dispatch blocks read from non-interactive stdin; return the final status."""
-        for block in read_blocks(prompt='', continuation=''):
-            try:
-                self.dispatch(block)
-            except SystemExit:
-                break
+        last_problem = self._load_last_problem()
+        try:
+            for block in read_blocks(prompt='', continuation=''):
+                try:
+                    self.dispatch(block)
+                except SystemExit:
+                    break
+                finally:
+                    last_problem = self._persist_last_problem(last_problem)
+        finally:
+            self._persist_last_problem(last_problem)
         return self.rc
 
     # -- per-user last-problem persistence ----------------------------------
