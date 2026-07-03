@@ -82,37 +82,52 @@ In `solver/web/cli.py` (`_serve_forever`), change `host='0.0.0.0'` to
 ### 3. Install Caddy (stock)
 
 ```bash
-scripts/setup/caddy.sh install     # also: update | service | uninstall | status
+scripts/setup/caddy.sh install euler.example.com   # also: update | service | uninstall | status
 ```
 
 This installs stock Caddy from the official apt repo, **stops/disables the default
 `caddy.service`** (bound to the stock Caddyfile) so it does not clash with our
-config, and installs our **`caddy-euler.service`** unit (§6) — enabled immediately,
-and started automatically once the cert + Caddyfile are in place. No DNS plugin is
-needed — acme.sh issues the cert.
+config, **generates the `Caddyfile` (§5) for the given hostname**, and installs our
+**`caddy-euler.service`** unit (§6) — enabled immediately, and started automatically
+once the cert + Caddyfile are in place. No DNS plugin is needed — acme.sh issues the
+cert.
+
+The hostname may be passed as the `install` argument, taken from `$EULER_TLS_DOMAIN`
+(shared with acme.sh), or entered at a prompt if neither is set. The `Caddyfile` is
+gitignored (it carries the deployment hostname) and rewritten on each `install`; a
+repeated `install` with no hostname leaves an existing `Caddyfile` untouched.
 
 ### 4. Issue the certificate with acme.sh
 
-Add the name.com credentials to the project `.env` (the same file that holds
-`ANTHROPIC_API_KEY`):
+`acme.sh issue` requires the `Caddyfile` (its reload command points at it), so run
+step 3 first — otherwise it fails and tells you to install Caddy.
 
-```
-NAMEDOTCOM_USERNAME=<name.com username>
-NAMEDOTCOM_TOKEN=<name.com API token>
-```
+The DNS provider is selectable — pass it to `issue`/`renew` or set
+`$EULER_TLS_DNS_PROVIDER` (default `namecom`). Add that provider's credentials to the
+project `.env` (the same file that holds `ANTHROPIC_API_KEY`):
+
+| provider (arg) | acme.sh hook | credentials in `.env` |
+| --- | --- | --- |
+| `namecom` (default) | `dns_namecom` | `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` |
+| `cloudflare` | `dns_cf` | `CF_Token` / `CF_Account_ID` |
+| `route53` | `dns_aws` | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` |
+| `godaddy` | `dns_gd` | `GD_Key` / `GD_Secret` |
+| `digitalocean` | `dns_dgon` | `DO_API_KEY` |
+| `gandi` | `dns_gandi_livedns` | `GANDI_LIVEDNS_KEY` |
 
 Then install the acme.sh client and issue + deploy the cert:
 
 ```bash
-scripts/setup/acme.sh install     # installs acme.sh, default CA = Let's Encrypt
-scripts/setup/acme.sh issue       # DNS-01 via dns_namecom → deploy to keys/ → reload Caddy
+scripts/setup/acme.sh install            # installs acme.sh, default CA = Let's Encrypt
+scripts/setup/acme.sh issue              # default provider (name.com) DNS-01 → deploy → reload
+scripts/setup/acme.sh issue cloudflare   # …or pick another provider
 ```
 
 `issue` runs the DNS-01 challenge (no open port needed), writes the full chain to
 `keys/.server.crt` and the key to `keys/.server.key` (mode 600; both are dotfiles,
 gitignored by `**/.*`), and registers a reload command so Caddy picks up the cert
 now and on every renewal. acme.sh's cron auto-renews thereafter
-(`scripts/setup/acme.sh renew` forces one).
+(`scripts/setup/acme.sh renew [provider]` forces one).
 
 - The default reload command is `caddy reload --config <root>/Caddyfile` (Caddy's
   admin API, no sudo); override with `EULER_TLS_RELOAD_CMD` if you run Caddy
@@ -122,8 +137,10 @@ now and on every renewal. acme.sh's cron auto-renews thereafter
 
 ### 5. Caddy configuration
 
-A short Caddyfile — Caddy loads the acme.sh cert (`tls <cert> <key>`) and does **no**
-ACME itself. `auto_https disable_redirects` keeps Caddy off :80 (unused with DNS-01):
+`caddy.sh install` **generates** this `Caddyfile` for the hostname you supply (§3);
+it is gitignored, so it is not tracked in the repo. Caddy loads the acme.sh cert
+(`tls <cert> <key>`) and does **no** ACME itself. `auto_https disable_redirects`
+keeps Caddy off :80 (unused with DNS-01):
 
 ```caddyfile
 {

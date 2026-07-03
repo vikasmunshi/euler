@@ -1,8 +1,5 @@
 **/*_c
 **/.*
-keys/users.json
-keys/pending.json
-keys/remember.json
 *.cover
 *.egg-info/
 *.log
@@ -16,6 +13,7 @@ keys/remember.json
 *.spec
 /CLAUDE.md
 /tmp/
+Caddyfile
 ENV/
 __pycache__/
 celerybeat-schedule
@@ -31,6 +29,9 @@ euler.iml
 euler.ipr
 euler.iws
 htmlcov/
+keys/pending.json
+keys/remember.json
+keys/users.json
 lib/
 lib64/
 local_settings.py

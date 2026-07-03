@@ -90,8 +90,14 @@ _euler_caddy_completions() {
 }
 
 _euler_acme_completions() {
-  local cur
+  local cur prev
   cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  # issue/renew take a DNS provider as their second word.
+  if [[ "${prev}" == "issue" || "${prev}" == "renew" ]]; then
+    COMPREPLY=($(compgen -W "namecom cloudflare route53 godaddy digitalocean gandi" -- "${cur}"))
+    return
+  fi
   COMPREPLY=($(compgen -W "install issue renew uninstall status help --help -h" -- "${cur}"))
 }
 
