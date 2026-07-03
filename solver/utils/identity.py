@@ -20,6 +20,10 @@ an isolation guarantee. Real confidentiality (web access, solution encryption)
 is enforced elsewhere — SRP in :mod:`solver.web.auth` and the git-filter master
 key in :mod:`solver.crypto`.
 
+It lives under :mod:`solver.utils` (an empty-``__init__`` package) rather than
+``solver.shell`` so :mod:`solver.config` can import it during construction
+without triggering the shell package's own import of ``solver.config``.
+
 The module depends only on the standard library (it is imported while
 :mod:`solver.config` is still being constructed, so it must not import back into
 ``solver``), and deliberately does **not** use ``python-dotenv`` — that is an

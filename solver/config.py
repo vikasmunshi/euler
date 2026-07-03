@@ -16,6 +16,8 @@ from typing import Any, ClassVar
 from prompt_toolkit.styles import Style
 from rich.theme import Theme
 
+from solver.utils.identity import resolve_identity
+
 
 class ExitCodes(enum.IntEnum):
     #: Conventional exit codes, following common shell practice.
@@ -121,11 +123,16 @@ class Config(AttributeDict):
     timeout_multiple: float
     timeout_single: float
     ecb_usd_rate: float
+    user: str
+    user_slug: str
     root_dir: Path
     backup_dir: Path
     cache_dir: Path
     docs_dir: Path
+    state_dir: Path
+    user_state_dir: Path
     history_file: Path
+    last_problem_file: Path
     modules_file: Path
     server_lock_file: Path
     session_file: Path
@@ -144,6 +151,12 @@ class Config(AttributeDict):
 
     def __init__(self) -> None:
         root_dir: Path = _root_dir()
+        # Ambient per-user identity (SOLVER_USER / .env / keys/.user-email / OS login),
+        # used to key per-user shell state (history, last problem). Personalisation
+        # only — not a security boundary (see solver.utils.identity).
+        user, user_slug = resolve_identity(root_dir)
+        user_state_dir: Path = root_dir / '.state' / user_slug
+        user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={
             'scripts': Scripts(),
 
@@ -164,14 +177,20 @@ class Config(AttributeDict):
             'timeout_single': 90.0,  # timeout in seconds for single run
             'ecb_usd_rate': 1.00,  # euros per US dollar, used by `costs`; updated by update-models cmd
 
+            'user': user,
+            'user_slug': user_slug,
             'root_dir': root_dir,
             'backup_dir': root_dir / '.backup',
             'cache_dir': root_dir / '.cache',
             'docs_dir': root_dir / 'docs',
-            'history_file': root_dir / '.history',
+            'state_dir': root_dir / '.state',
+            'user_state_dir': user_state_dir,
+            # Per-user shell state, keyed by the resolved identity's slug.
+            'history_file': user_state_dir / 'history',
+            'last_problem_file': user_state_dir / 'last_problem',
             'modules_file': root_dir / 'solver/modules.csv',
             'server_lock_file': root_dir / '.server.lock',
-            'session_file': root_dir / '.session',
+            'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
             'users_file': root_dir / 'keys' / 'users.json',  # web-auth SRP verifiers (separate from crypto keys)
             'pending_file': root_dir / 'keys' / 'pending.json',  # invite OTPs, shared shell<->server
