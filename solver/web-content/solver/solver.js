@@ -62,17 +62,20 @@ term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
 // ── Viewer panel ──
-// The web `show` command emits `OSC 5379 ; open ; <NNNN> ; <token>` on the shell's
-// stdout; it rides the PTY → WebSocket pipe into term.write() here. We point the
-// same-origin viewer iframe at /<NNNN>/ (its request carries the session cookie)
-// and reveal the split pane. The token is a server-side millisecond clock, strictly
-// increasing per `show`; we ignore any token we've already passed, so the copy the
-// PTY replay buffer re-sends on reconnect never re-opens a panel the user closed.
+// The web `show` and `edit` commands emit an `OSC 5379` sequence on the shell's
+// stdout — `open;<NNNN>;<token>` (show) or `edit;<NNNN>;<token>;<relpath>` (edit) —
+// which rides the PTY → WebSocket pipe into term.write() here. We point the
+// same-origin viewer iframe at the matching URL (its request carries the session
+// cookie) and reveal the split pane: `/<NNNN>/` for show, `/edit/<NNNN>/<relpath>`
+// (the code-editor view) for edit. The token is a server-side millisecond
+// clock, strictly increasing per command; we ignore any token we've already passed,
+// so the copy the PTY replay buffer re-sends on reconnect never re-opens a panel the
+// user closed.
 const viewerFrame = document.getElementById('viewer-frame');
-let lastShowToken = 0;
+let lastViewerToken = 0;
 
-function openViewer(n) {
-    viewerFrame.src = `${location.origin}/${n}/`;
+function openViewer(url) {
+    viewerFrame.src = url;
     document.body.classList.add('viewer-open');
     fitAddon.fit();
     sendResize();   // the terminal just got narrower — reflow the grid + tell the PTY
@@ -88,11 +91,18 @@ function closeViewer() {
 document.getElementById('viewer-close').addEventListener('click', closeViewer);
 
 term.parser.registerOscHandler(5379, (payload) => {
-    const [action, n, token] = payload.split(';');
+    const [action, n, token, ...rest] = payload.split(';');
     const t = Number(token) || 0;
-    if (action === 'open' && /^\d+$/.test(n || '') && t > lastShowToken) {
-        lastShowToken = t;
-        openViewer(n);
+    if (!/^\d+$/.test(n || '') || t <= lastViewerToken) return true;
+    if (action === 'open') {
+        lastViewerToken = t;
+        openViewer(`${location.origin}/${n}/`);
+    } else if (action === 'edit') {
+        const file = rest.join(';');   // rejoin so a relpath with a ';' survives the split
+        if (file) {
+            lastViewerToken = t;
+            openViewer(`${location.origin}/edit/${n}/${file}`);
+        }
     }
     return true;   // handled — don't let xterm treat it as printable text
 });

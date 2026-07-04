@@ -242,6 +242,7 @@ class _CommandSpec:
     bool_flags: dict[str, tuple[str, bool]]
     problem_param: inspect.Parameter | None
     problem_positional: bool
+    completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]]
 
 
 def _build_bool_flags(params: list[inspect.Parameter], quietable: bool) -> dict[str, tuple[str, bool]]:
@@ -292,6 +293,7 @@ def _build_command_spec(
         help_text: str,
         pass_ctx: bool,
         quietable: bool,
+        completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]] | None = None,
 ) -> _CommandSpec:
     """Introspect *func* and pre-compute everything the token-driven helpers need."""
     cmd_name: str = name or func.__name__.lstrip('_').replace('_', '-')
@@ -348,6 +350,7 @@ def _build_command_spec(
         bool_flags=_build_bool_flags(params, quietable),
         problem_param=problem_param,
         problem_positional=problem_positional,
+        completers=completers or {},
     )
 
 
@@ -480,6 +483,10 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
         # Special case: the `problem` special completes to problem numbers.
         if key == 'problem' and _is_problem_annotation(ann):
             return list(_problem_completions(incomplete, prefix=f'{key}='))
+        # A per-parameter dynamic completer (e.g. filenames) governs its value side too.
+        if key in spec.completers:
+            return [f'{key}={c}' for c in spec.completers[key](ctx, partial)
+                    if isinstance(c, str) and c.startswith(partial)]
         hints: list[str] = []
         origin = typing.get_origin(ann)
         if origin is typing.Union or origin is types.UnionType:
@@ -541,6 +548,14 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
             for v in typing.get_args(pos_param.annotation)
             if str(v).startswith(incomplete)
         )
+    # A per-parameter dynamic completer for the positional slot (e.g. `edit`'s filename,
+    # sourced from the current problem's solution directory — the `ls` file set).
+    if pos_param is not None and pos_param.name in spec.completers:
+        for cand in spec.completers[pos_param.name](ctx, incomplete):
+            if not isinstance(cand, str):
+                candidates.append(cand)
+            elif cand.startswith(incomplete):
+                candidates.append(cand)
     # Keyword name hints.
     for p in spec.params:
         if p.kind not in (inspect.Parameter.POSITIONAL_OR_KEYWORD,
@@ -639,6 +654,7 @@ def register[**P](
         aliases: tuple[str, ...] = (),
         pass_ctx: bool = False,
         quietable: bool = False,
+        completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]] | None = None,
 ) -> Callable[[Callable[P, int]], Callable[P, int]]:
     """Decorator that registers *func* as a shell command **without modifying it**.
 
@@ -683,6 +699,13 @@ def register[**P](
     unknown flag or a conflicting combination raises a 'ValueError' that the
     adapter reports through the shared console.
 
+    ``completers`` maps a parameter name to a callable ``(ctx, incomplete) ->
+    Iterable[str | Completion]`` that supplies dynamic value completions for that
+    parameter (positionally and as ``name=``), for values the type system cannot
+    enumerate — e.g. `edit`'s filename, sourced from the current problem's solution
+    directory.  Plain-string candidates are prefix-filtered against the partial
+    token; `Completion` objects are passed through verbatim.
+
     The wrapped function is returned unchanged, so it remains usable as a plain
     Python callable from any module.
 
@@ -695,7 +718,7 @@ def register[**P](
 
     def _register(func: Callable[P, int]) -> Callable[P, int]:
         name = func.__name__.replace('_', '-')
-        spec = _build_command_spec(func, name, help_text, pass_ctx, quietable)
+        spec = _build_command_spec(func, name, help_text, pass_ctx, quietable, completers)
 
         def _completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]:
             return _complete(spec, ctx, incomplete)

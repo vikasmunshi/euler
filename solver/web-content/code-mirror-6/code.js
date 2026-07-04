@@ -4,13 +4,19 @@ import {
     python, cpp, json,
 } from '/vendor/codemirror/cm6.js';
 
-// Problem number and filename come from the URL: /<n>/<filename>.
-const SEGMENTS = window.location.pathname.split('/').filter(Boolean);
+// The page is served either read-only at /<n>/<filename> or as the editor at
+// /edit/<n>/<filename>; drop the leading `edit` segment so the number/filename line up.
+const RAW = window.location.pathname.split('/').filter(Boolean);
+const EDIT_MODE = RAW[0] === 'edit';
+const SEGMENTS = EDIT_MODE ? RAW.slice(1) : RAW;
 const PROBLEM_NUMBER = SEGMENTS[0];
 const FILENAME = SEGMENTS[SEGMENTS.length - 1];
 const LANGUAGE = document.body.dataset.language;
-// Only real solution files are editable; the generated `solutions` view is not.
-const EDITABLE = /\.(py|c|json)$/.test(FILENAME);
+// Editing is only offered on the /edit/ route; the read-only viewer never edits.
+// Even there, only real solution files are editable (not the generated `solutions`
+// view). HTML stubs (notes / statement) edit as plain text — the vendor bundle has
+// no HTML language pack, so there is no LANG_EXT for them, but they save verbatim.
+const EDITABLE = EDIT_MODE && /\.(py|c|json|html)$/.test(FILENAME);
 // Source files can be evaluated / deleted; derive (lang, index) from p<NNNN>_s<K>.<ext>.
 const EVAL_MATCH = FILENAME.match(/_s(\d+)\.(py|c)$/);
 const EVALUABLE = EVAL_MATCH !== null;
@@ -36,17 +42,18 @@ const LANG_EXT = {python: python(), c: cpp(), json: json()}[LANGUAGE] || [];
 const editable = new Compartment();
 const editExt = on => [EditorView.editable.of(on), EditorState.readOnly.of(!on)];
 
-// Only real source files are linted; JSON / generated views have no server linter.
-const LINTABLE = /\.(py|c)$/.test(FILENAME);
+// Only real source files are linted, and only in the editor; JSON / generated /
+// read-only views have no server linter.
+const LINTABLE = EDIT_MODE && /\.(py|c)$/.test(FILENAME);
 
-// Lint the live buffer by sending it to /<n>/lint, where the server runs the same
+// Lint the live buffer by sending it to /edit/lint, where the server runs the same
 // validators as save (flake8 for Python, the runner-aware compile for C) and returns
 // structured diagnostics. CodeMirror renders them as inline squiggles + gutter marks.
 async function lintSource(v) {
     if (!LINTABLE) return [];
     let diagnostics = [];
     try {
-        const r = await fetch(`/${PROBLEM_NUMBER}/lint`, {
+        const r = await fetch('/edit/lint', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({filename: FILENAME, content: v.state.doc.toString()}),

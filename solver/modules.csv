@@ -9,10 +9,12 @@ solver.ai.update_models,True,True,True
 solver.config,,,
 solver.core.download,,,
 solver.core.evaluate,True,True,True
-solver.core.listing,True,True,True
+solver.core.list,True,True,True
+solver.core.new,True,True,True
 solver.core.problems,,,
 solver.core.results,True,True,True
 solver.core.test_cases,True,True,True
+solver.core.viewer,True,True,True
 solver.crypto.ciphers,,,
 solver.crypto.config,,,
 solver.crypto.gitfilter,,,
@@ -41,8 +43,6 @@ solver.utils.path_utils,,,
 solver.utils.scripts,True,True,True
 solver.utils.search,True,True,True
 solver.utils.shell_utils,True,True,True
-solver.utils.show,True,True,True
-solver.utils.solution_files,True,True,True
 solver.utils.summary,True,True,True
 solver.utils.update_doc,True,True,True
 solver.web.app,,,

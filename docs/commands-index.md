@@ -47,6 +47,7 @@ a parameter that accepts repetition.
 | [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
+| [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
@@ -355,6 +356,42 @@ The arguments are joined with single spaces and printed literally (no rich
 markup interpretation). Handy in command blocks to annotate progress or to
 surface a variable, since `{...}` references are substituted before the
 command runs — e.g. `echo solved {len(solved)} problems`.
+```
+
+---
+
+#### Command: `edit` (`ed`)
+
+Open a solution file in the web code editor.
+* ❏ takes an optional problem number (defaults to the current problem)
+* » supports `--silent`
+
+```
+edit <filename>
+[problem=<n>] (default current)
+[silent=true|--silent]
+```
+
+```text
+Open *filename* from *problem*'s solution directory in the web code editor.
+
+The counterpart to `show` (which opens the rendered problem): *problem* defaults
+to the current problem, and *filename* completes to the files `ls` lists. The
+file must already exist — run `new` to create a solution first. Profile-aware,
+like `show`:
+
+- **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
+  that the xterm.js page rides over the PTY → WebSocket pipe to point its viewer
+  panel at the file's editor (`<origin>/edit/NNNN/<relpath>`).
+
+- **terminal** — auto-starts `solver-web` and opens that editor URL in the named
+  browser tab "solver-edit" (via `browser open-in-tab`); errors early if the
+  `browser` command is unavailable.
+
+Arguments:
+    ctx:      The shell's command context (selects the profile-specific path).
+    problem:  The problem owning the file; defaults to the current problem.
+    filename: The solution-directory file to edit (as `ls` lists it).
 ```
 
 ---

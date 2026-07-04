@@ -1,6 +1,6 @@
 // Shared site header: injected into #page-header on every page. The problem
-// number comes from the URL (/<n>/ or /<n>/<file>); the summary and progress
-// pages have none (number 0).
+// number comes from the URL (/<n>/, /<n>/<file>, or /edit/<n>/<file>); the summary
+// and progress pages have none (number 0).
 //
 // Exposes window.SolverHeader = {ready, problemNumber, filename}, where `ready`
 // resolves once the header DOM is injected and wired — code.js awaits it before
@@ -8,7 +8,10 @@
 (function () {
     'use strict';
 
-    const SEGMENTS = window.location.pathname.split('/').filter(Boolean);
+    // Drop a leading `edit` segment (the /edit/<n>/<file> editor route) so the
+    // problem number and filename resolve the same as on the read-only /<n>/<file>.
+    const RAW = window.location.pathname.split('/').filter(Boolean);
+    const SEGMENTS = RAW[0] === 'edit' ? RAW.slice(1) : RAW;
     const PROBLEM_NUMBER = /^\d+$/.test(SEGMENTS[0] || '') ? parseInt(SEGMENTS[0], 10) : 0;
     // A trailing file segment (/<n>/<file>) means this is a code/viewer page.
     const FILENAME = SEGMENTS.length > 1 ? SEGMENTS[SEGMENTS.length - 1] : '';

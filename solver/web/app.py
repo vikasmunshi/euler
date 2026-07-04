@@ -18,9 +18,13 @@
   their `solver` shell holds in `variables.problem` — so the header can wire its
   "Active problem" link on pages that carry no problem number in the URL.
 
-- **Edits** — `POST /<n>/cmd` evaluates the problem's solutions; `POST /<n>/<file>`
-  validates and saves an edited solution file; `DELETE /<n>/<file>` removes a
-  solution; `POST /progress` saves the progress file.
+- **Code editor** — `GET /edit/<n>/<file>` serves the editable code editor for a
+  solution file (the read-only viewer above never edits); `POST /edit/<n>/<file>`
+  validates and saves it, `DELETE /edit/<n>/<file>` removes it, and `POST /edit/lint`
+  lints an unsaved buffer.
+
+- **Edits** — `POST /<n>/cmd` evaluates the problem's solutions and `POST /progress`
+  saves the progress file.
 """
 from __future__ import annotations
 
@@ -63,6 +67,13 @@ _STATIC_ASSETS: frozenset[str] = frozenset({
 _CODE_LANGUAGES: dict[str, str] = {
     'text/x-python': 'python',
     'text/x-csrc': 'c',
+}
+
+#: file suffix → editor language label for the `/edit/<n>/<file>` code-editor view
+#: (`_edit_file`). Governs syntax highlighting and, in code.js, whether the file is
+#: editable; an unlisted suffix opens read-only as plain text.
+_EDIT_LANGUAGES: dict[str, str] = {
+    '.py': 'python', '.c': 'c', '.json': 'json', '.html': 'html',
 }
 
 
@@ -275,7 +286,7 @@ def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[i
     accepted; on any validation failure the previous content is restored so a bad
     edit never lands.
     """
-    if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c', '.json'):
+    if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c', '.json', '.html'):
         return 400, f'{filename} is not an editable solution file'
     try:
         problem: Problem = Problem.from_number(problem_number)
@@ -287,6 +298,10 @@ def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[i
             json.loads(content)
         except (json.JSONDecodeError, UnicodeDecodeError) as exc:
             return 400, f'invalid JSON: {exc}'
+        target.write_bytes(content)
+        return 200, f'saved {filename}'
+    if filename.endswith('.html'):
+        # HTML stubs (notes / statement) have no validator — write them verbatim.
         target.write_bytes(content)
         return 200, f'saved {filename}'
     previous: bytes = target.read_bytes()
@@ -331,7 +346,7 @@ def _parse_diagnostics(output: str, suffix: str) -> list[dict[str, Any]]:
     return diagnostics
 
 
-def _lint_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str]:
+def _lint_content(filename: str, content: bytes) -> tuple[int, str]:
     """Lint edited content without saving it; return (status, JSON diagnostics).
 
     Runs the same validators as save — flake8 for Python, the runner-aware compile
@@ -432,12 +447,12 @@ async def _redirect_with_slash(request: web.Request) -> web.StreamResponse:
     raise web.HTTPMovedPermanently(f'/{request.match_info["problem_number"]}/')
 
 
-async def _problem_file(request: web.Request) -> web.StreamResponse:
-    """Serve a single problem file for `/<n>/<filename>`.
+def _resolve_solution_file(request: web.Request) -> tuple[Problem, str]:
+    """Validate the route's `<problem_number>`/`<filename>` and return (problem, filename).
 
-    `solutions` is the synthesised solution listing; source files render through
-    the code viewer on a browser navigation; JSON gets the viewer only when a human
-    is navigating (problem.js fetches with Accept: application/json for raw bytes).
+    Rejects path traversal and an out-of-range or unknown problem with 404. The file
+    itself need not exist — the caller reads it. Shared by the read-only viewer
+    (`_problem_file`) and the editor (`_edit_file`).
     """
     problem_number = int(request.match_info['problem_number'])
     filename = request.match_info['filename']
@@ -446,12 +461,23 @@ async def _problem_file(request: web.Request) -> web.StreamResponse:
     if problem_number < 1 or problem_number > problems.last_problem.number:
         raise web.HTTPNotFound()
     try:
-        problem: Problem = Problem.from_number(problem_number)
+        return Problem.from_number(problem_number), filename
     except ValueError:
         raise web.HTTPNotFound()
+
+
+async def _problem_file(request: web.Request) -> web.StreamResponse:
+    """Serve a single problem file, read-only, for `/<n>/<filename>`.
+
+    `solutions` is the synthesised solution listing; source files render through
+    the code viewer on a browser navigation; JSON gets the viewer only when a human
+    is navigating (problem.js fetches with Accept: application/json for raw bytes).
+    Editing lives under `/edit/<n>/<filename>` (`_edit_file`), not here.
+    """
+    problem, filename = _resolve_solution_file(request)
     if filename == 'solutions':
         files: list[str] = []
-        for file in problem.solution_dir.glob(f'p{problem_number:04d}_s*.*'):
+        for file in problem.solution_dir.glob(f'p{problem.number:04d}_s*.*'):
             files.append(f'{file.stem}_c' if file.suffix == '.c' else file.name)
         return _render_json(request, 'solutions', json.dumps(sorted(files), indent=2).encode('utf-8'))
     try:
@@ -470,13 +496,32 @@ async def _problem_file(request: web.Request) -> web.StreamResponse:
     return _bytes_response(content, mime or 'application/octet-stream')
 
 
+async def _edit_file(request: web.Request) -> web.StreamResponse:
+    """Serve the editable code editor for a solution file (`GET /edit/<n>/<filename>`).
+
+    The counterpart to `_problem_file`, which is always read-only: this always
+    renders the code editor for the file — including the HTML stubs (notes /
+    statement) that otherwise render — with the Save / Eval / Del buttons that the
+    sibling `/edit/...` write routes back. The suffix picks the editor language; an
+    unknown one opens read-only as plain text. A missing file is 404 (`edit` only
+    opens existing files; use `new` to create one first).
+    """
+    problem, filename = _resolve_solution_file(request)
+    try:
+        content: bytes = problem.solution_dir.joinpath(filename).read_bytes()
+    except (FileNotFoundError, KeyError, ValueError, IsADirectoryError):
+        raise web.HTTPNotFound()
+    edit_language = _EDIT_LANGUAGES.get(Path(filename).suffix, '')
+    return _bytes_response(_render_code_page(filename, content, edit_language), 'text/html')
+
+
 def _text(code: int, message: str) -> web.Response:
     """A plain-text response with the given HTTP status."""
     return web.Response(status=code, text=message, content_type='text/plain', charset='utf-8')
 
 
 async def _save_problem_file(request: web.Request) -> web.StreamResponse:
-    """Save an edited solution file (`POST /<n>/<filename>`)."""
+    """Save an edited solution file (`POST /edit/<n>/<filename>`)."""
     problem_number = int(request.match_info['problem_number'])
     filename = request.match_info['filename']
     body = await request.read()
@@ -486,7 +531,7 @@ async def _save_problem_file(request: web.Request) -> web.StreamResponse:
 
 
 async def _delete_problem_file(request: web.Request) -> web.StreamResponse:
-    """Delete a solution (`DELETE /<n>/<filename>`)."""
+    """Delete a solution (`DELETE /edit/<n>/<filename>`)."""
     problem_number = int(request.match_info['problem_number'])
     filename = request.match_info['filename']
     result = _del_solution(problem_number, filename)
@@ -518,14 +563,14 @@ async def _run_command(request: web.Request) -> web.StreamResponse:
     return web.json_response({'output': output, 'rcode': 0 if code == 200 else 1}, status=code)
 
 
-async def _lint_problem_file(request: web.Request) -> web.StreamResponse:
-    """Lint an edited (unsaved) solution file (`POST /<n>/lint`).
+async def _lint_file(request: web.Request) -> web.StreamResponse:
+    """Lint an edited (unsaved) solution file (`POST /edit/lint`).
 
-    Body: `{"filename": "p0007_s0.py", "content": "<source>"}`. Replies with JSON
+    Body: `{"filename": "p0007_s0.py", "content": "<source>"}` — the linter keys off
+    the filename's suffix, so no problem number is needed. Replies with JSON
     `{"diagnostics": [...]}` the editor renders as inline squiggles; 400 for a
     malformed body.
     """
-    problem_number = int(request.match_info['problem_number'])
     try:
         data = await request.json()
     except (json.JSONDecodeError, UnicodeDecodeError):
@@ -534,7 +579,7 @@ async def _lint_problem_file(request: web.Request) -> web.StreamResponse:
         raise web.HTTPBadRequest()
     content = str(data.get('content', '')).encode('utf-8')
     loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(None, _lint_content, problem_number, data['filename'], content)
+    result = await loop.run_in_executor(None, _lint_content, data['filename'], content)
     code, payload = result
     return web.Response(status=code, text=payload, content_type='application/json', charset='utf-8')
 
@@ -585,18 +630,19 @@ def build_app(save: bool) -> web.Application:
         web.get('/active-problem', _serve_active_problem),
         web.get('/favicon.ico', _serve_favicon),
         web.get(r'/{asset:[A-Za-z0-9_.-]+\.(?:css|js|html|json|svg)}', _serve_static),
-        # Problem viewer + edits (numeric problem number).
+        # Read-only problem viewer (numeric problem number). `/cmd` precedes the
+        # catch-all `/{filename}` so it matches as a command, not a file named "cmd".
         web.get(r'/{problem_number:\d+}', _redirect_with_slash),
         web.get(r'/{problem_number:\d+}/', _problem_page),
-        web.get(r'/{problem_number:\d+}/{filename:.+}', _problem_file),
-        # Post actions: a command (eval / benchmark), the progress save, and an
-        # edited-file save. `/cmd` precedes the catch-all `/{filename}` so it
-        # is matched as a command rather than a file named "cmd".
         web.post('/progress', _save_progress_page),
         web.post(r'/{problem_number:\d+}/cmd', _run_command),
-        web.post(r'/{problem_number:\d+}/lint', _lint_problem_file),
-        web.post(r'/{problem_number:\d+}/{filename}', _save_problem_file),
-        # Delete a solution file.
-        web.delete(r'/{problem_number:\d+}/{filename}', _delete_problem_file),
+        web.get(r'/{problem_number:\d+}/{filename:.+}', _problem_file),
+        # Code editor and its writes, all under `/edit/`: the editable page, an
+        # edited-file save/delete, and a stateless lint (keyed off the filename's
+        # suffix, so `/edit/lint` needs no problem number).
+        web.post('/edit/lint', _lint_file),
+        web.get(r'/edit/{problem_number:\d+}/{filename:.+}', _edit_file),
+        web.post(r'/edit/{problem_number:\d+}/{filename:.+}', _save_problem_file),
+        web.delete(r'/edit/{problem_number:\d+}/{filename:.+}', _delete_problem_file),
     ])
     return app

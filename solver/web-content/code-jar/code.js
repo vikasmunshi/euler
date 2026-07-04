@@ -2,13 +2,19 @@ import {CodeJar} from '/vendor/codejar.js';
 
 const hljs = window.hljs;
 
-// Problem number and filename come from the URL: /<n>/<filename>.
-const SEGMENTS = window.location.pathname.split('/').filter(Boolean);
+// The page is served either read-only at /<n>/<filename> or as the editor at
+// /edit/<n>/<filename>; drop the leading `edit` segment so the number/filename line up.
+const RAW = window.location.pathname.split('/').filter(Boolean);
+const EDIT_MODE = RAW[0] === 'edit';
+const SEGMENTS = EDIT_MODE ? RAW.slice(1) : RAW;
 const PROBLEM_NUMBER = SEGMENTS[0];
 const FILENAME = SEGMENTS[SEGMENTS.length - 1];
 const LANGUAGE = document.body.dataset.language;
-// Only real solution files are editable; the generated `solutions` view is not.
-const EDITABLE = /\.(py|c|json)$/.test(FILENAME);
+// Editing is only offered on the /edit/ route; the read-only viewer never edits.
+// Even there, only real solution files are editable (not the generated `solutions`
+// view). HTML stubs (notes / statement) edit as plain text (no highlight.js
+// language), but save verbatim.
+const EDITABLE = EDIT_MODE && /\.(py|c|json|html)$/.test(FILENAME);
 // Source files can be evaluated / deleted; derive (lang, index) from p<NNNN>_s<K>.<ext>.
 const EVAL_MATCH = FILENAME.match(/_s(\d+)\.(py|c)$/);
 const EVALUABLE = EVAL_MATCH !== null;
