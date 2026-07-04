@@ -281,8 +281,9 @@ async function loadAll() {
 document.addEventListener('DOMContentLoaded', loadAll);
 
 // ── Eval action button ──
-// Lives in the shared header (header.js); evaluates every solution for the problem
-// against its test cases via POST /<n>/cmd.
+// Lives in the shared header (header.js); dispatches `eval <n>` (every solution
+// against its test cases) to the user's web shell via POST /cmd — it runs there and
+// its output streams to the terminal panel, not back here.
 function showCmdOutput(text, kind) {
     const el = document.getElementById('cmd-output');
     if (!el) return;
@@ -292,21 +293,19 @@ function showCmdOutput(text, kind) {
 }
 
 async function runEval(evalBtn) {
-    showCmdOutput('eval…', '');
+    const command = `eval ${PROBLEM_NUMBER}`;
     evalBtn.disabled = true;
     try {
-        const r = await fetch(`/${PROBLEM_NUMBER}/cmd`, {
+        const r = await fetch('/cmd', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({cmd: 'eval'}),
+            body: JSON.stringify({command}),
         });
-        const res = await r.json().catch(() => ({}));
-        showCmdOutput(res.output || (r.ok ? 'eval ok' : 'eval failed'), r.ok ? 'ok' : 'error');
+        showCmdOutput(r.ok ? `→ ${command} (running in the shell)` : 'dispatch failed', r.ok ? 'ok' : 'error');
     } catch {
         showCmdOutput('network error', 'error');
     }
     evalBtn.disabled = false;
-    await loadAll();  // solutions may have changed: reload the page data.
 }
 
 function wireEvalButton() {

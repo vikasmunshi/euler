@@ -127,23 +127,19 @@ async function save() {
     }
 }
 
-// Evaluate just this solution (its language + index) via the /<n>/cmd endpoint.
+// Dispatch `eval <n> lang=<lang> solution_index=<i>` (just this solution) to the
+// user's web shell via /cmd; it runs there, output streaming to the terminal panel.
 async function runEval() {
     if (evalBtn.disabled) return;
     evalBtn.disabled = true;
-    showOutput('evaluating…', '');
+    const command = `eval ${PROBLEM_NUMBER} lang=${EVAL_MATCH[2]} solution_index=${parseInt(EVAL_MATCH[1], 10)}`;
     try {
-        const r = await fetch(`/${PROBLEM_NUMBER}/cmd`, {
+        const r = await fetch('/cmd', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({
-                cmd: 'eval',
-                lang: EVAL_MATCH[2],
-                solution_index: parseInt(EVAL_MATCH[1], 10),
-            }),
+            body: JSON.stringify({command}),
         });
-        const res = await r.json().catch(() => ({}));
-        showOutput(res.output || (r.ok ? 'eval ok' : 'eval failed'), r.ok ? 'ok' : 'error');
+        showOutput(r.ok ? `→ ${command} (running in the shell)` : 'dispatch failed', r.ok ? 'ok' : 'error');
     } catch {
         showOutput('network error', 'error');
     } finally {

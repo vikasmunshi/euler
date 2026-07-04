@@ -23,8 +23,9 @@
   validates and saves it, `DELETE /edit/<n>/<file>` removes it, and `POST /edit/lint`
   lints an unsaved buffer.
 
-- **Edits** — `POST /<n>/cmd` evaluates the problem's solutions and `POST /progress`
-  saves the progress file.
+- **Edits** — `POST /cmd` dispatches a shell command line to the signed-in user's
+  web shell (it runs in their live PTY session, output streaming to the terminal),
+  and `POST /progress` saves the progress file.
 """
 from __future__ import annotations
 
@@ -39,14 +40,12 @@ import re
 import tempfile
 from pathlib import Path
 from subprocess import run
-from typing import Any, Literal
+from typing import Any
 
 from aiohttp import WSCloseCode, WSMsgType, web
 
 from solver.config import config
-from solver.core.evaluate import benchmark, evaluate
 from solver.core.problems import Problem, problems
-from solver.shell import console
 from solver.shell.variables import variables
 from solver.utils.identity import slugify
 from solver.utils.summary import summary
@@ -97,7 +96,7 @@ async def _serve_favicon(request: web.Request) -> web.StreamResponse:
     return web.FileResponse(config.static_file_dir / 'favicon.svg')
 
 
-async def _serve_solver_page(request: web.Request) -> web.StreamResponse:
+async def _serve_landing_page(request: web.Request) -> web.StreamResponse:
     """Serve the xterm.js terminal page (the default landing page at `/`)."""
     return web.FileResponse(config.static_file_dir / 'solver/solver.html')
 
@@ -378,37 +377,6 @@ def _del_solution(problem_number: int, filename: str) -> tuple[int, str]:
     return 200, f'deleted {filename}'
 
 
-def _run_cmd(problem_number: int,
-             cmd: Literal['benchmark', 'eval'],
-             lang: Literal['*', 'py', 'c'] | None = None,
-             solution_index: int | None = None,
-             ) -> tuple[int, str]:
-    """Run a command on *problem_number*; return (status, output).
-
-    Each command maps onto the matching shell verb and its console output is
-    captured as plain text for the caller to display:
-
-    - `eval`      — evaluate solutions against the test cases. With neither *lang*
-      nor *solution_index* it evaluates every solution (the problem page's button);
-      the code page passes a specific (lang, index) to evaluate a single solution.
-    - `benchmark` — time the problem's solutions (same *lang* / *solution_index*
-      selection as `eval`).
-
-    Status mirrors HTTP: 200 when the command exits 0, 400 on a bad request or a
-    non-zero command exit.
-    """
-    problem: Problem = Problem.from_number(problem_number)
-    with console.capture() as capture:
-        if cmd == 'benchmark':
-            rcode = benchmark(problem, lang=lang or '*', solution_index=solution_index)
-        elif cmd == 'eval':
-            rcode = evaluate(problem, lang=lang or '*', solution_index=solution_index)
-        else:
-            return 400, f'unknown command {cmd}'  # type: ignore[unreachable]
-    output = capture.get().strip()
-    return (200 if rcode == 0 else 400), output
-
-
 # ---------------------------------------------------------------------------
 # Viewer routes
 # ---------------------------------------------------------------------------
@@ -538,29 +506,30 @@ async def _delete_problem_file(request: web.Request) -> web.StreamResponse:
     return _text(*result)
 
 
-async def _run_command(request: web.Request) -> web.StreamResponse:
-    """Run a command on the problem (`POST /<n>/cmd`).
+async def _run_command(request: web.Request, save: bool) -> web.StreamResponse:
+    """Dispatch a shell command to the signed-in user's web shell (`POST /cmd`).
 
-    Body: `{"cmd": "eval"|"benchmark", "lang"?: "py"|"c", "solution_index"?: int}`
-    — *lang* / *solution_index* select a single solution (omit them to run every
-    solution). Replies with JSON `{"output": <captured text>, "rcode": 0|1|null}`;
-    the page renders the output. 400 for a malformed body.
+    Body: `{"command": "<shell command line>"}`. The line is written to the user's
+    persistent PTY shell — created if none is attached yet — as if typed at the
+    prompt, so it runs in their live session and its output streams to the terminal
+    panel, exactly as the terminal page achieves by writing to its `/ws` socket
+    directly (a page with a shell can wire the button either way). The shell owns
+    the run, so the reply is just `{"dispatched": "<command>"}`; 400 for a malformed
+    body.
     """
-    problem_number: int = int(request.match_info['problem_number'])
+    email: str = request[USER_EMAIL]
     try:
         data = await request.json()
     except (json.JSONDecodeError, UnicodeDecodeError):
         raise web.HTTPBadRequest()
-    if not isinstance(data, dict):
+    if not isinstance(data, dict) or not isinstance(data.get('command'), str):
         raise web.HTTPBadRequest()
-    if (cmd := data.get('cmd')) not in ('eval', 'benchmark'):
+    command = data['command'].strip()
+    if not command:
         raise web.HTTPBadRequest()
-    lang: Literal['py', 'c'] | None = data.get('lang')
-    solution_index: int | None = data.get('solution_index')
-    loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(None, _run_cmd, problem_number, cmd, lang, solution_index)
-    code, output = result
-    return web.json_response({'output': output, 'rcode': 0 if code == 200 else 1}, status=code)
+    pty = request.app[PTY_MANAGER].get_or_create(email, save=save)
+    pty.write((command + '\n').encode('utf-8'))
+    return web.json_response({'dispatched': command})
 
 
 async def _lint_file(request: web.Request) -> web.StreamResponse:
@@ -618,31 +587,27 @@ def build_app(save: bool) -> web.Application:
     setup_pty_manager(app)
     app.on_shutdown.append(_close_all_sockets)
     ws_handler = functools.partial(_ws_handler, save=save)
+    # Routes are ordered by path, with the methods that share a path kept together.
+    # The dynamic routes are disjoint by regex (digits / extensions / segment counts),
+    # and every literal path precedes the `/{asset}` and `/{problem_number}` catch-alls,
+    # so this ordering is unambiguous for aiohttp's first-match dispatch.
     app.add_routes([
-        # Terminal + WebSocket. The terminal is the default landing page (`/`);
-        web.get('/', _serve_solver_page),
-        web.get('/ws', ws_handler),
-        # Vendored assets: `/vendor/<asset>` for the JS/CSS/etc. that the editor needs.
-        web.get(r'/vendor/{filename:.+}', _serve_vendor_asset),
-        # Static pages: `/summary` → the solutions summary, `/<asset>` for the rest.
-        web.get('/summary', _serve_summary_page),
-        web.get('/progress', _serve_progress_page),
+        web.get('/', _serve_landing_page),                                   # terminal (landing page)
         web.get('/active-problem', _serve_active_problem),
-        web.get('/favicon.ico', _serve_favicon),
-        web.get(r'/{asset:[A-Za-z0-9_.-]+\.(?:css|js|html|json|svg)}', _serve_static),
-        # Read-only problem viewer (numeric problem number). `/cmd` precedes the
-        # catch-all `/{filename}` so it matches as a command, not a file named "cmd".
-        web.get(r'/{problem_number:\d+}', _redirect_with_slash),
-        web.get(r'/{problem_number:\d+}/', _problem_page),
-        web.post('/progress', _save_progress_page),
-        web.post(r'/{problem_number:\d+}/cmd', _run_command),
-        web.get(r'/{problem_number:\d+}/{filename:.+}', _problem_file),
-        # Code editor and its writes, all under `/edit/`: the editable page, an
-        # edited-file save/delete, and a stateless lint (keyed off the filename's
-        # suffix, so `/edit/lint` needs no problem number).
-        web.post('/edit/lint', _lint_file),
-        web.get(r'/edit/{problem_number:\d+}/{filename:.+}', _edit_file),
+        web.post('/cmd', functools.partial(_run_command, save=save)),       # dispatch to the web shell
+        web.post('/edit/lint', _lint_file),                                 # stateless lint (suffix-keyed)
+        web.get(r'/edit/{problem_number:\d+}/{filename:.+}', _edit_file),    # code editor + its writes
         web.post(r'/edit/{problem_number:\d+}/{filename:.+}', _save_problem_file),
         web.delete(r'/edit/{problem_number:\d+}/{filename:.+}', _delete_problem_file),
+        web.get('/favicon.ico', _serve_favicon),
+        web.get('/progress', _serve_progress_page),
+        web.post('/progress', _save_progress_page),
+        web.get('/summary', _serve_summary_page),
+        web.get(r'/vendor/{filename:.+}', _serve_vendor_asset),             # vendored editor JS/CSS/etc.
+        web.get('/ws', ws_handler),                                         # terminal WebSocket
+        web.get(r'/{asset:[A-Za-z0-9_.-]+\.(?:css|js|html|json|svg)}', _serve_static),
+        web.get(r'/{problem_number:\d+}', _redirect_with_slash),           # read-only problem viewer
+        web.get(r'/{problem_number:\d+}/', _problem_page),
+        web.get(r'/{problem_number:\d+}/{filename:.+}', _problem_file),
     ])
     return app
