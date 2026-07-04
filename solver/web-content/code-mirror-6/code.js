@@ -39,6 +39,23 @@ function showOutput(text, kind) {
 // CodeMirror language extension for the file's language (none for generated views).
 const LANG_EXT = {python: python(), c: cpp(), json: json()}[LANGUAGE] || [];
 
+// A light editing box (default dark-on-light syntax is comfortable for editing) framed
+// by dark chrome: the line-number gutter is dark, aligned with the shell's theme. As a
+// theme extension (not plain CSS) it reliably overrides CodeMirror's injected base theme.
+const MONO = "'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', monospace";
+const editorTheme = EditorView.theme({
+    '&': {backgroundColor: '#edeff3', color: '#2a3048'},
+    '&.cm-focused': {outline: 'none'},
+    '.cm-scroller': {fontFamily: MONO, fontSize: '13px', lineHeight: '1.55'},
+    '.cm-content': {padding: '14px 0', caretColor: '#2a3048'},
+    '.cm-cursor, .cm-dropCursor': {borderLeftColor: '#2a3048'},
+    '.cm-activeLine': {backgroundColor: '#e3e7f0'},
+    '.cm-selectionBackground, .cm-content ::selection': {backgroundColor: '#cfe3fb'},
+    '&.cm-focused .cm-selectionBackground': {backgroundColor: '#bcd8f6'},
+    '.cm-gutters': {backgroundColor: '#21252b', color: '#7d8799', border: 'none', borderRight: '1px solid #3b414d'},
+    '.cm-activeLineGutter': {backgroundColor: '#2a2f3a', color: '#abb2bf'},
+});
+
 // Editable source files start read-only and are switched on once the header is ready
 // (generated views stay read-only) by reconfiguring this compartment.
 const editable = new Compartment();
@@ -84,7 +101,8 @@ const view = new EditorView({
         // basicSetup bundles the IDE essentials: line-number gutter, history/undo,
         // bracket matching & closing, autocompletion, code folding, search panel,
         // active-line + selection-match highlighting, and the default keymaps.
-        basicSetup,
+        basicSetup,             // default (light) highlight style — dark-on-light tokens
+        editorTheme,            // light editing box + dark gutter (overrides the base theme)
         LANG_EXT,
         indentUnit.of('    '),  // 4-space indentation (project style), not CM's 2-space default
         lintGutter(),

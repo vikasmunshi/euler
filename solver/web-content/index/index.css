@@ -1,9 +1,8 @@
-/* ── Guides index — the default left-pane content. Shares the light look of the
-   other content pages (common.css); this file holds the hero, the guide cards, and
-   the quick-link chips. ── */
+/* ── Guides index — the default left-pane content. Dark, sharing the tokens in
+   common.css; this file holds the hero, the guide cards, and the quick-link chips. ── */
 
 body {
-    padding: 24px 24px 40px;      /* 24px top: shared breathing room above the header */
+    padding: 24px 24px 40px;
 }
 
 .index-hero {
@@ -11,17 +10,17 @@ body {
 }
 .index-hero .kicker {
     margin: 0 0 6px;
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+    font-family: var(--mono);
     font-size: 0.68rem;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: #7c86a0;
+    color: var(--accent);
 }
 .index-hero h1 {
     margin: 0 0 8px;
     font-size: 1.7rem;
     font-weight: 700;
-    color: #1a2036;
+    color: var(--text-hi);
     letter-spacing: -0.01em;
     text-wrap: balance;
 }
@@ -29,7 +28,7 @@ body {
     margin: 0;
     max-width: 58ch;
     font-size: 0.95rem;
-    color: #4a5270;
+    color: var(--text);
 }
 
 /* ── Guide cards ── */
@@ -43,47 +42,46 @@ body {
     align-items: center;
     gap: 14px;
     padding: 13px 16px;
-    background: #ffffff;
-    border: 1px solid #dde1ed;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(30, 32, 48, 0.05);
     text-decoration: none;
-    transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
 }
 .guide:hover {
-    border-color: #9fc0ea;
+    border-color: var(--accent);
+    background: #313742;
     transform: translateX(2px);
-    box-shadow: 0 4px 12px rgba(30, 32, 48, 0.09);
 }
 .guide-ic {
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    font-family: var(--mono);
     font-size: 1rem;
     text-align: center;
-    color: #2a509a;
+    color: var(--accent);
 }
 .guide-title {
     display: block;
     font-size: 0.98rem;
     font-weight: 600;
-    color: #1a2036;
+    color: var(--text-hi);
 }
 .guide-desc {
     display: block;
     margin-top: 1px;
     font-size: 0.82rem;
-    color: #6b7390;
+    color: var(--muted);
 }
 .guide-desc code {
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    font-family: var(--mono);
     font-size: 0.9em;
-    color: #2a509a;
+    color: var(--accent);
 }
 .guide-go {
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
-    color: #b0b8cc;
+    font-family: var(--mono);
+    color: var(--muted);
     transition: color 0.15s ease;
 }
-.guide:hover .guide-go { color: #2a509a; }
+.guide:hover .guide-go { color: var(--accent); }
 
 /* ── Quick-link chips ── */
 .quicklinks {
@@ -97,15 +95,15 @@ body {
     align-items: center;
     gap: 7px;
     padding: 6px 12px;
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    font-family: var(--mono);
     font-size: 0.8rem;
-    color: #3a4060;
-    background: #ffffff;
-    border: 1px solid #dde1ed;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-2);
     border-radius: 999px;
     text-decoration: none;
     transition: border-color 0.15s ease, color 0.15s ease;
 }
-.chip:hover { border-color: #9fc0ea; color: #2a509a; }
-.chip .chip-ic { color: #7c86a0; }
-.chip:hover .chip-ic { color: #2a509a; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip .chip-ic { color: var(--muted); }
+.chip:hover .chip-ic { color: var(--accent); }

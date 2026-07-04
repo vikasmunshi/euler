@@ -1,10 +1,30 @@
-/* ── Common base shared by every content page (problem, summary, code, progress) ──
-   The box-sizing reset and the page's typography, colours, and content width all
-   live here so the pages agree on a single column width (problem.css's 860px) and
-   look. Each page's own stylesheet keeps only its layout specifics (padding,
-   full-height flex for the editors, sticky header positioning, …). Linked before
-   the per-page stylesheet so those specifics layer on top. The terminal page
-   (solver.html) is full-screen and does not use this. */
+/* ── Common base shared by every content page (problem, summary, code, docs, index) ──
+   Defines the One Dark token palette (matching the shell's solver-theme-dark.css) and
+   the page's typography + dark ground, so the content pane reads as one surface with
+   the shell around it. Each page's own stylesheet layers its specifics on top and
+   references these tokens. Linked before the per-page stylesheet. The terminal page
+   (solver.html) is the shell itself and does not use this. */
+
+:root {
+    --bg:         #282c34;   /* page ground — One Dark slate, matching the shell */
+    --surface:    #2d323c;   /* cards / raised panels */
+    --surface-2:  #21252b;   /* insets: code blocks, gutters, wells */
+    --border:     #3b414d;   /* hairlines */
+    --border-2:   #4b5263;   /* stronger dividers */
+    --text:       #abb2bf;   /* body */
+    --text-hi:    #e6e9ef;   /* headings / emphasis */
+    --muted:      #6b7385;   /* captions, inert */
+    --accent:     #61afef;   /* links, active, primary */
+    --accent-hi:  #7cc4ff;
+    --accent-dim: rgba(97, 175, 239, 0.14);
+    --green:      #98c379;
+    --red:        #e06c75;
+    --yellow:     #e5c07b;
+    --magenta:    #c678dd;
+    --cyan:       #56b6c2;
+    --shadow:     0 1px 3px rgba(0, 0, 0, 0.3);
+    --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+}
 
 *, *::before, *::after {
     box-sizing: border-box;
@@ -14,8 +34,13 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Arial, sans-serif;
     font-size: 13px;
     line-height: 1.65;
-    color: #1e2030;
-    background: #f4f6fb;
+    color: var(--text);
+    background: var(--bg);
     max-width: 980px;
     margin: 0 auto;
 }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 5px; }
+* { scrollbar-width: thin; scrollbar-color: var(--border-2) transparent; }

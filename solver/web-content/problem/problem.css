@@ -1,4 +1,4 @@
-/* ── Base ── (reset, typography, colours, and the 860px content width: common.css) */
+/* ── Base ── (reset, typography, colours, and the token palette live in common.css) */
 body {
     padding: 0 24px 64px;
 }
@@ -12,10 +12,10 @@ body {
 h2 {
     font-size: 1.25rem;
     font-weight: 700;
-    color: #1e2030;
+    color: var(--text-hi);
     margin: 0 0 10px;
     padding-bottom: 8px;
-    border-bottom: 2px solid #4a90d9;
+    border-bottom: 2px solid var(--accent);
 }
 
 h3 {
@@ -23,14 +23,14 @@ h3 {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    color: #7a82a0;
+    color: var(--muted);
     margin: 20px 0 6px;
 }
 
 h4 {
     font-size: 0.92rem;
     font-weight: 600;
-    color: #3a7a50;
+    color: var(--green);
     margin: 14px 0 4px;
 }
 
@@ -58,16 +58,16 @@ img {
 }
 
 code {
-    background: #eef1f8;
-    color: #2a3a6e;
+    background: var(--accent-dim);
+    color: var(--accent);
     padding: 2px 6px;
     border-radius: 4px;
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-family: var(--mono);
     font-size: 0.87em;
 }
 
 a {
-    color: #4a80c8;
+    color: var(--accent);
     text-decoration: none;
 }
 
@@ -77,9 +77,9 @@ a:hover {
 
 /* ── Reference / external-source links ── */
 a.reference-source {
-    color: #8a4ad0;
+    color: var(--magenta);
     text-decoration: none;
-    border-bottom: 1px solid #b07ae0;
+    border-bottom: 1px solid rgba(198, 120, 221, 0.5);
     transition: background 0.15s ease, color 0.15s ease;
 }
 
@@ -92,21 +92,21 @@ a.reference-source::after {
 
 a.reference-source:hover,
 a.reference-source:focus {
-    background: #f1e9fb;
-    border-bottom-color: #8a4ad0;
+    background: rgba(198, 120, 221, 0.14);
+    border-bottom-color: var(--magenta);
     text-decoration: none;
 }
 
 hr {
     border: none;
-    border-top: 1px solid #dde1ed;
+    border-top: 1px solid var(--border);
     margin: 28px 0;
 }
 
 /* ── Inline tooltips ── */
 .tooltip {
     position: relative;
-    border-bottom: 1px dotted #7a82a0;
+    border-bottom: 1px dotted var(--muted);
     cursor: help;
 }
 
@@ -121,14 +121,15 @@ hr {
     width: max-content;
     max-width: 280px;
     padding: 6px 10px;
-    background: #1e2030;
-    color: #fff;
+    background: #1b1f27;
+    color: var(--text-hi);
+    border: 1px solid var(--border-2);
     font-size: 0.82rem;
     font-weight: 400;
     line-height: 1.45;
     text-align: center;
     border-radius: 6px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
     pointer-events: none;
     white-space: normal;
     transition: opacity 0.15s ease;
@@ -147,29 +148,29 @@ table {
 }
 
 th {
-    background: #f0f2f8;
-    color: #3a4060;
+    background: var(--surface-2);
+    color: var(--text-hi);
     font-size: 0.82rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-align: left;
     padding: 7px 14px;
-    border: 1px solid #d0d5e8;
+    border: 1px solid var(--border);
 }
 
 td {
     padding: 7px 14px;
-    border: 1px solid #dde1ed;
+    border: 1px solid var(--border);
 }
 
 tr:nth-child(even) td {
-    background: #f8f9fd;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 /* ── Section cards ── */
 section {
-    background: #ffffff;
-    border: 1px solid #dde1ed;
+    background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: 10px;
     margin-bottom: 14px;
     overflow: hidden;
@@ -178,7 +179,7 @@ section {
 /* ── Problem statement ── */
 #problem-statement-content {
     padding: 20px 24px;
-    border-left: 4px solid #4a90d9;
+    border-left: 4px solid var(--accent);
     overflow-wrap: break-word;
 }
 
@@ -191,6 +192,8 @@ mjx-container.MathJax {
     overflow-y: hidden;
 }
 
+/* MathJax renders in currentColor, so the equations inherit the body ink. */
+
 #problem-statement-content h2 {
     margin-top: 0;
 }
@@ -202,8 +205,8 @@ mjx-container.MathJax {
 /* ── Test cases ── */
 #test-cases-content {
     padding: 14px 20px;
-    background: #f5f9ff;
-    border-left: 4px solid #7ab3e8;
+    background: rgba(97, 175, 239, 0.05);
+    border-left: 4px solid var(--accent);
 }
 
 #test-cases-content h3 {
@@ -218,13 +221,14 @@ mjx-container.MathJax {
 }
 
 #test-cases-table td {
-    border: 1px solid #c8d8ec;
+    border: 1px solid var(--border);
     padding: 5px 10px;
     vertical-align: middle;
     white-space: nowrap;
     font-size: 0.78rem;
     font-weight: 600;
     background: transparent;
+    color: var(--text);
 }
 
 /* Category badge */
@@ -234,40 +238,28 @@ mjx-container.MathJax {
     text-align: left;
     border-radius: 4px;
     min-width: 48px;
+    color: var(--text-hi);
 }
 
 /* Answer column – allow wrapping for long numbers */
 #test-cases-table td:nth-child(3) {
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-family: var(--mono);
     white-space: normal;
     overflow-wrap: break-word;
     max-width: 400px;
 }
 
-/* Row text colours by category */
-#test-cases-table tr.result-dev td {
-    color: #1d3a5c;
-}
-
-#test-cases-table tr.result-main td {
-    color: #14284a;
-}
-
-#test-cases-table tr.result-extra td {
-    color: #0a1c38;
-}
-
-/* Category badge backgrounds */
+/* Category badge backgrounds — increasing accent intensity dev → main → extra */
 #test-cases-table tr.result-dev td:nth-child(1) {
-    background: #d4e8f8;
+    background: rgba(97, 175, 239, 0.14);
 }
 
 #test-cases-table tr.result-main td:nth-child(1) {
-    background: #b0cef0;
+    background: rgba(97, 175, 239, 0.24);
 }
 
 #test-cases-table tr.result-extra td:nth-child(1) {
-    background: #8db8e8;
+    background: rgba(97, 175, 239, 0.36);
 }
 
 /* Spacer rows */
@@ -280,7 +272,7 @@ mjx-container.MathJax {
 /* ── Solutions ── */
 #solutions-content {
     padding: 14px 20px;
-    border-left: 4px solid #3faa72;
+    border-left: 4px solid var(--green);
 }
 
 .table-scroll {
@@ -303,59 +295,59 @@ mjx-container.MathJax {
 }
 
 #solutions-table th {
-    background: #e6f0ea;
-    color: #2a5040;
+    background: var(--surface-2);
+    color: var(--text-hi);
     font-size: 0.75rem;
     font-weight: 700;
     text-align: center;
     padding: 4px 10px;
-    border: 1px solid #c0d8c8;
+    border: 1px solid var(--border);
     letter-spacing: 0.04em;
     white-space: nowrap;
 }
 
 /* Per-category tint on the test-case column headers */
 #solutions-table thead th.result-dev {
-    background: #d4f0e2;
+    background: rgba(152, 195, 121, 0.12);
 }
 
 #solutions-table thead th.result-main {
-    background: #b0e2c8;
+    background: rgba(152, 195, 121, 0.2);
 }
 
 #solutions-table thead th.result-extra {
-    background: #8dd4b0;
+    background: rgba(152, 195, 121, 0.3);
 }
 
 /* Solution-name row headers (first column of each body row): C in a stronger
    shade, Python in a lighter tint. */
 #solutions-table tbody th.solution-name {
     text-align: left;
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-family: var(--mono);
     font-size: 0.75rem;
-    background: #eef3fb;
+    background: rgba(97, 175, 239, 0.06);
 }
 
 #solutions-table tbody th.solution-name.lang-c {
-    background: #d4e2f5;
+    background: rgba(97, 175, 239, 0.16);
 }
 
 #solutions-table tbody th.solution-name.lang-py {
-    background: #eef6fc;
+    background: rgba(97, 175, 239, 0.07);
 }
 
 #solutions-table tbody th.solution-name a {
-    color: #2a509a;
+    color: var(--accent);
 }
 
 #solutions-table td {
-    border: 1px solid #d8eed8;
+    border: 1px solid var(--border);
     padding: 5px 10px;
     vertical-align: middle;
     white-space: nowrap;
     font-size: 0.75rem;
     font-weight: 600;
-    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    font-family: var(--mono);
     background: transparent;
 }
 
@@ -369,49 +361,49 @@ mjx-container.MathJax {
 
 #solutions-table td.timing {
     text-align: right;
-    color: #2a4a38;
+    color: var(--muted);
     border-left: none;
 }
 
 /* Highlight the fastest correct solution for a test case (both its cells):
    C in the stronger colour, Python in a lighter tint. */
 #solutions-table td.fastest-c {
-    background: #fcf2c0;
-    color: #6a5300;
+    background: rgba(229, 192, 123, 0.22);
+    color: var(--yellow);
 }
 
 #solutions-table td.fastest-py {
-    background: #fdf8df;
-    color: #8a7330;
+    background: rgba(229, 192, 123, 0.1);
+    color: var(--yellow);
 }
 
 /* Heavier divider where each test-case group of two columns begins */
 #solutions-table .group-start {
-    border-left: 2px solid #c0d8c8;
+    border-left: 2px solid var(--border-2);
 }
 
 /* Correct result cells */
 #solutions-table td.result-correct {
-    color: #2a4a38;
+    color: var(--green);
 }
 
 /* Incorrect / errored result cells */
 #solutions-table td.result-incorrect {
-    color: #c0392b;
+    color: var(--red);
     font-weight: 700;
 }
 
 /* Missing (no result) cells */
 #solutions-table td.result-missing {
-    color: #b0b8b4;
+    color: var(--muted);
     font-weight: 400;
 }
 
 /* ── Solution notes ── */
 #solution-notes-content {
     padding: 20px 24px;
-    border-left: 4px solid #c8a020;
-    background: #fffef8;
+    border-left: 4px solid var(--yellow);
+    background: rgba(229, 192, 123, 0.04);
 }
 
 #solution-notes-content h3:first-child {
