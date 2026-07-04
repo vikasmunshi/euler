@@ -18,7 +18,6 @@
      problem / file from the iframe via postMessage (see solver.js + header.js). -->
 <header id="cmdbar">
     <span class="brand"><span class="sig">&#8721;</span> solver</span>
-    <span class="crumb" id="crumb">index</span>
     <span class="sep"></span>
     <nav class="nav" id="nav">
         <a id="nav-prev" class="nav-dummy" title="Previous problem">&laquo;</a>
@@ -33,6 +32,10 @@
         <a id="nav-summary" title="Summary">&#9636;</a>
         <a id="nav-progress" title="Progress">&#9969;</a>
     </nav>
+    <span class="sep"></span>
+    <!-- Context crumb sits after the nav so its variable length never shifts the
+         fixed-position glyph buttons. -->
+    <span class="crumb" id="crumb"></span>
     <span class="spacer"></span>
     <button id="eval-btn" type="button" hidden title="Evaluate this problem in the shell">eval</button>
     <span class="sep"></span>

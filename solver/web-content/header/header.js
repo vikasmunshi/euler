@@ -19,7 +19,6 @@
     // When this page is shown inside the workspace shell's content iframe, the shell's
     // command bar is the header; we report our context to it instead of drawing our own.
     const EMBEDDED = window.self !== window.top;
-    const IS_CODE_PAGE = !!document.body.dataset.language;
 
     const pad4 = n => String(n).padStart(4, '0');
 
@@ -77,34 +76,6 @@
         setLink(byId('nav-progress'), '/progress');
     }
 
-    // The filename + language badge only appear on code pages, which set
-    // <body data-language="…">; other pages leave the elements empty/hidden.
-    const LANG_ICONS = {
-        python: 'devicon-python-original.svg',
-        c: 'devicon-c-original.svg',
-        json: 'devicon-json-original.svg',
-    };
-
-    function fillCodeMeta() {
-        const language = document.body.dataset.language;
-        if (!language) return;
-        const filenameEl = document.getElementById('filename');
-        if (filenameEl) filenameEl.textContent = FILENAME;
-        const badge = document.getElementById('lang-badge');
-        if (!badge) return;
-        badge.hidden = false;
-        badge.title = language;
-        const icon = LANG_ICONS[language];
-        if (icon) {
-            const img = document.createElement('img');
-            img.src = `/vendor/${icon}`;
-            img.alt = language;
-            badge.appendChild(img);
-        } else {
-            badge.textContent = language;  // unknown language: fall back to text
-        }
-    }
-
     // The account menu (user icon → change password / log out): toggle on click,
     // close on an outside click.
     function wireUserMenu() {
@@ -153,20 +124,16 @@
             return;
         }
         if (EMBEDDED) {
+            // The shell's command bar is the header for embedded pages; report context
+            // to it and draw nothing here (the editor's own toolbar lives in its page).
             postContext();
-            // The shell's command bar is the header for embedded pages. The code editor
-            // still sources its Save/Del/Eval buttons from the shared header, so keep it
-            // on that page for now (a temporary second bar there only); others hide it.
-            if (!IS_CODE_PAGE) {
-                host.style.display = 'none';
-                return;
-            }
+            host.style.display = 'none';
+            return;
         }
         host.innerHTML = await fetch('/header.html').then(r => r.text());
         // The active-problem link always tracks the shell's variables.problem,
         // fetched from the server, on every page (the current problem included).
         wireNav(await fetchActiveProblem());
-        fillCodeMeta();
         wireUserMenu();
         document.dispatchEvent(new CustomEvent('header:ready'));
     }

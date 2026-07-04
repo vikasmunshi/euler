@@ -22,7 +22,7 @@ const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => (
 // ── Command bar: context + navigation ──
 // `ctx` mirrors whatever the iframe currently shows; `activeProblem` is the shell's
 // own variables.problem (from the server), where the ◇ link jumps from any page.
-let ctx = {problem: 0, filename: '', label: 'index'};
+let ctx = {problem: 0, filename: '', label: ''};
 let activeProblem = 0;
 
 function navigate(path) { content.src = path; }

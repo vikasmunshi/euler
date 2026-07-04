@@ -118,6 +118,9 @@ function testCaseLabels(testCases) {
 }
 
 function renderTestCases(testCases) {
+    // The heading links to the editable test-case file (`/edit/<n>/test_cases.json`).
+    const link = document.getElementById('test-cases-link');
+    if (link) link.href = `/edit/${PROBLEM_NUMBER}/test_cases.json`;
     const target = document.getElementById('test-cases-body');
     if (!testCases.length) {
         target.innerHTML = '<p><em>No test cases yet - someone has to go first.</em></p>';
@@ -223,7 +226,9 @@ function renderSolutions(testCases, results, solutions, problemsJson) {
             return `<td class="result-correct verdict group-start${fast}">✓</td>` +
                 `<td class="result-correct timing${fast}">${escapeHtml(fmtElapsed(r.average))}</td>`;
         }).join('');
-        const href = solutionHref(solution);
+        // Link to the editable editor (`/edit/<n>/<file>`), not the read-only view —
+        // clicking a solution opens it for editing, for any problem (not just the active one).
+        const href = `/edit/${PROBLEM_NUMBER}/${solutionHref(solution)}`;
         return `<tr><th class="solution-name lang-${lang}"><a href="${escapeHtml(href)}">${escapeHtml(solution)}</a></th>` +
             cells + `</tr>`;
     });

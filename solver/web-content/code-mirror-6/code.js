@@ -17,14 +17,15 @@ const LANGUAGE = document.body.dataset.language;
 // view). HTML stubs (notes / statement) edit as plain text — the vendor bundle has
 // no HTML language pack, so there is no LANG_EXT for them, but they save verbatim.
 const EDITABLE = EDIT_MODE && /\.(py|c|json|html)$/.test(FILENAME);
-// Source files can be evaluated / deleted; derive (lang, index) from p<NNNN>_s<K>.<ext>.
-const EVAL_MATCH = FILENAME.match(/_s(\d+)\.(py|c)$/);
-const EVALUABLE = EVAL_MATCH !== null;
+// Only real source files can be deleted.
 const DELETABLE = /\.(py|c)$/.test(FILENAME);
 
-// The nav bar, filename, and language badge are drawn by the shared header.js;
-// the Eval/Save/Del buttons live in that header too, wired up below once it loads.
+// Save / Delete and the filename / language / lint status live in the editor's own
+// toolbar (code.html); Eval is a global action in the workspace command bar. The
+// short language label shown on the badge.
+const BADGE = {python: 'PY', c: 'C', json: 'JSON', html: 'HTML'}[LANGUAGE] || (LANGUAGE || '').toUpperCase();
 const outputEl = document.getElementById('save-output');
+const lintEl = document.getElementById('lint-status');
 
 // All command feedback (result line + captured output) goes to the output panel;
 // kind ('ok' | 'error' | '') tints it.
@@ -60,6 +61,12 @@ async function lintSource(v) {
         });
         if (r.ok) ({diagnostics = []} = await r.json());
     } catch { /* server unreachable: no diagnostics */ }
+    if (lintEl) {
+        const n = diagnostics.length;
+        lintEl.hidden = false;
+        lintEl.textContent = n === 0 ? '● lint clean' : `● ${n} issue${n > 1 ? 's' : ''}`;
+        lintEl.className = 'lint-status ' + (n === 0 ? 'ok' : 'bad');
+    }
     const doc = v.state.doc;
     return diagnostics.map(d => {
         const line = doc.line(Math.min(Math.max(d.line, 1), doc.lines));
@@ -81,7 +88,7 @@ const view = new EditorView({
         indentUnit.of('    '),  // 4-space indentation (project style), not CM's 2-space default
         lintGutter(),
         linter(lintSource, {delay: 500}),
-        editable.of(editExt(false)),  // read-only until the header wires up editing
+        editable.of(editExt(false)),  // read-only until enableEditing() wires it up below
         // Tab indents (matching CodeJar's catchTab); Ctrl/Cmd+S saves.
         keymap.of([
             indentWithTab,
@@ -100,24 +107,28 @@ function setEditable(canEdit) {
     view.dispatch({effects: editable.reconfigure(editExt(canEdit))});
 }
 
-// ── Save / Eval / Delete: the buttons live in the shared header, so resolve them
-// once header.js has injected it, then wire their handlers and enable editing.
-let saveBtn, evalBtn, delBtn;
+// ── Editor toolbar: Save / Delete + filename / language / lint status live locally
+// in this page (code.html), so the editor is self-contained — Eval is global, in the
+// workspace command bar.
+const saveBtn = document.getElementById('save-btn');
+const delBtn = document.getElementById('del-btn');
 
-// Show and enable the Save / Eval / Delete buttons for an editable source file and
-// make the editor writable. Generated views (e.g. `solutions`) stay read-only.
+// The filename and language badge show for every view (read-only included); Save /
+// Del and editing turn on only for an editable source file.
+function fillMeta() {
+    const fn = document.getElementById('filename');
+    if (fn) fn.textContent = FILENAME;
+    const badge = document.getElementById('lang-badge');
+    if (badge && BADGE) { badge.hidden = false; badge.textContent = BADGE; }
+}
+
 function enableEditing() {
-    if (!EDITABLE) return;  // generated views stay read-only with no Save / Eval button
+    if (!EDITABLE) return;  // generated / read-only views stay read-only with no Save / Del
     saveBtn.hidden = false;
     saveBtn.disabled = false;
     saveBtn.title = 'Save (Ctrl/Cmd+S)';
     setEditable(true);
     if (LINTABLE) forceLinting(view);  // surface diagnostics without waiting for an edit
-    if (EVALUABLE) {
-        evalBtn.hidden = false;
-        evalBtn.disabled = false;
-        evalBtn.title = 'Evaluate this solution against its test cases';
-    }
     if (DELETABLE) {
         delBtn.hidden = false;
         delBtn.disabled = false;
@@ -144,27 +155,7 @@ async function save() {
     }
 }
 
-// Dispatch `eval <n> lang=<lang> solution_index=<i>` (just this solution) to the
-// user's web shell via /cmd; it runs there, output streaming to the terminal panel.
-async function runEval() {
-    if (evalBtn.disabled) return;
-    evalBtn.disabled = true;
-    const command = `eval ${PROBLEM_NUMBER} lang=${EVAL_MATCH[2]} solution_index=${parseInt(EVAL_MATCH[1], 10)}`;
-    try {
-        const r = await fetch('/cmd', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({command}),
-        });
-        showOutput(r.ok ? `→ ${command} (running in the shell)` : 'dispatch failed', r.ok ? 'ok' : 'error');
-    } catch {
-        showOutput('network error', 'error');
-    } finally {
-        enableEditing();
-    }
-}
-
-// Delete this solution file, then return to the problem page.
+// Delete this solution file, then return to the problem view.
 async function runDelete() {
     if (delBtn.disabled) return;
     if (!confirm(`Delete ${FILENAME}?`)) return;
@@ -176,8 +167,8 @@ async function runDelete() {
         showOutput(message || (r.ok ? 'deleted' : 'delete failed'), r.ok ? 'ok' : 'error');
         if (r.ok) {
             setTimeout(() => {
-                window.location.href = './';
-            }, 800);  // file is gone; leave the editor
+                window.location.href = `/${PROBLEM_NUMBER}/`;
+            }, 800);  // file is gone; leave the editor for the problem view
             return;
         }
     } catch {
@@ -186,13 +177,9 @@ async function runDelete() {
     enableEditing();
 }
 
-// The header (with the buttons) is injected asynchronously; wire up once it is ready.
-window.SolverHeader.ready.then(() => {
-    saveBtn = document.getElementById('save-btn');
-    evalBtn = document.getElementById('eval-btn');
-    delBtn = document.getElementById('del-btn');
-    saveBtn.addEventListener('click', save);
-    evalBtn.addEventListener('click', runEval);
-    delBtn.addEventListener('click', runDelete);
-    enableEditing();
-});
+// The toolbar buttons are in this page's own DOM (this module runs after it parses),
+// so wire them directly — no shared header to wait on.
+if (saveBtn) saveBtn.addEventListener('click', save);
+if (delBtn) delBtn.addEventListener('click', runDelete);
+fillMeta();
+enableEditing();

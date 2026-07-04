@@ -33,6 +33,77 @@ body {
     flex: 0 0 auto;
 }
 
+/* ── Editor toolbar: filename, language badge, and the file-local Save / Del
+   actions. A rounded card matching the header's look. ── */
+#editor-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 6px 10px;
+    background: linear-gradient(180deg, #f5f8fd 0%, #e9eff8 100%);
+    border: 1px solid #d6deec;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(30, 32, 48, 0.08);
+}
+
+#editor-bar .bar-spacer { flex: 1 1 auto; }
+
+#editor-bar .lang-badge {
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #2a509a;
+    background: #d7e6f8;
+    border: 1px solid #9fc0ea;
+    padding: 2px 6px;
+    border-radius: 5px;
+}
+#editor-bar .lang-badge[hidden] { display: none; }
+
+#editor-bar .filename {
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', monospace;
+    font-weight: 600;
+    color: #1e2030;
+    letter-spacing: 0.01em;
+}
+
+#editor-bar button {
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+#editor-bar button[hidden] { display: none; }
+#editor-bar button:disabled {
+    color: #aeb6c6;
+    background: #eef0f6;
+    border-color: #dde1ed;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+#editor-bar #save-btn {
+    color: #2a6f4f;
+    background: #d4ecdd;
+    border: 1px solid #8ecfa6;
+}
+#editor-bar #save-btn:hover:not(:disabled) { background: #c2e5cf; color: #1d4030; }
+#editor-bar #del-btn {
+    color: #a03228;
+    background: #f6dcd9;
+    border: 1px solid #e0a8a0;
+}
+#editor-bar #del-btn:hover:not(:disabled) { background: #f0c8c2; color: #7d2017; }
+
 /* ── Command output card (save result / eval results / diagnostics). A white
    card with a left accent stripe — success / error tint the stripe. ── */
 #save-output {

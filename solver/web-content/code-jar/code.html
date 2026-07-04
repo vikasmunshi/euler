@@ -12,9 +12,17 @@
          autocompletion and search; no separate highlight.js theme is needed. -->
 </head>
 <body data-language="{{LANGUAGE}}">
-<!-- header.js injects the shared nav bar and (on this code page) the filename,
-     language badge, and the Eval/Save/Del buttons that code.js wires up. -->
+<!-- Shared nav bar (standalone only; hidden when embedded in the workspace shell). -->
 <div id="page-header"></div>
+<!-- The editor's own toolbar: filename, language badge, and the file-local Save / Del
+     actions that code.js wires up. Eval is global (in the workspace command bar). -->
+<div id="editor-bar">
+    <span id="lang-badge" class="lang-badge" hidden></span>
+    <span id="filename" class="filename"></span>
+    <span class="bar-spacer"></span>
+    <button id="save-btn" type="button" hidden disabled>save</button>
+    <button id="del-btn" type="button" hidden disabled>del</button>
+</div>
 <pre id="save-output" hidden></pre>
 <main id="code-view">
     <!-- CodeMirror mounts its EditorView (with its own gutter) inside #editor. -->
@@ -22,7 +30,8 @@
 </main>
 <!-- The HTML-escaped source; a textarea decodes the entities back to plain text. -->
 <label for="source"></label><textarea id="source" hidden>{{CODE}}</textarea>
-<!-- header.js (classic) defines window.SolverHeader before the deferred code.js module awaits it. -->
+<!-- header.js draws the standalone nav bar and, when embedded, reports this page's
+     context to the workspace command bar; code.js owns the editor and its toolbar. -->
 <script src="/header.js"></script>
 <script type="module" src="/code.js"></script>
 </body>
