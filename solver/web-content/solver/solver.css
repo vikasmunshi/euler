@@ -29,26 +29,45 @@ html, body {
     color: var(--status-color);
 }
 
+/* Brand doubles as the home link (→ the guides index, the breadcrumb root). */
 .brand {
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 0 8px 0 4px;
+    padding: 0 6px 0 4px;
     color: var(--term-fg);
     font-weight: 600;
+    text-decoration: none;
+    border-radius: 7px;
+    cursor: pointer;
 }
+.brand:hover { color: var(--ansi-blue); }
 .brand .sig { color: var(--ansi-blue); font-size: 17px; line-height: 1; }
 
-.crumb {
+/* Breadcrumb: root → current. Segments with a target are links; the trailing current
+   leaf is inert. The trail can grow long, so it ellipsises rather than wrapping. */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
     font-size: 12.5px;
-    color: var(--status-color);
     white-space: nowrap;
+}
+.breadcrumb .bc-sep {
+    flex: 0 0 auto;
+    margin: 0 6px;
+    color: var(--scrollbar-thumb);
+}
+.breadcrumb .bc-seg {
+    color: var(--status-color);
+    text-decoration: none;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 34ch;
 }
-.crumb b { color: var(--term-fg); font-weight: 500; }
-.crumb .active { color: var(--ansi-blue); }
+a.bc-seg { cursor: pointer; }
+a.bc-seg:hover { color: var(--ansi-blue); }
+.breadcrumb .bc-current { color: var(--term-fg); font-weight: 500; }
 
 /* Glyph nav: every item is an <a>; an inert one (no target for the current context)
    carries .nav-dummy. Internal links navigate the content iframe (solver.js); the

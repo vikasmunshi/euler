@@ -100,7 +100,7 @@
     // the crumb, prev/next/euler/github targets, and the Eval button.
     function postContext() {
         const path = window.location.pathname;
-        const label = path === '/summary' ? 'summary'
+        const label = path === '/summary' ? 'problems'
             : path === '/edit/progress' ? 'progress'
                 : path === '/index' ? 'guides'
                     : path.startsWith('/docs/') ? decodeURIComponent(path.slice(6))
@@ -108,6 +108,7 @@
         try {
             window.parent.postMessage({
                 type: 'solver:ctx',
+                path,
                 problem: PROBLEM_NUMBER,
                 filename: FILENAME,
                 language: document.body.dataset.language || '',

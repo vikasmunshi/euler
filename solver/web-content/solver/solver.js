@@ -9,7 +9,7 @@
 // PTY → WebSocket pipe (OSC 5379). Eval dispatches a command to the shell via /cmd.
 
 const content = document.getElementById('content');
-const crumbEl = document.getElementById('crumb');
+const breadcrumbEl = document.getElementById('breadcrumb');
 const evalBtn = document.getElementById('eval-btn');
 const userBtn = document.getElementById('user-btn');
 const userDropdown = document.getElementById('user-dropdown');
@@ -44,16 +44,41 @@ function setExternal(el, href) {
     el.classList.remove('nav-dummy');
 }
 
+// The breadcrumb trail (root → current) for the content pane's context. Each segment
+// is {text, href?}; one with an href navigates the pane, the trailing current leaf has
+// none. The brand (home → /index) is the implicit root before the trail.
+function buildTrail() {
+    const {path, problem, filename, label} = ctx;
+    if (problem > 0) {
+        const trail = [{text: 'problems', href: '/summary'}];
+        if (filename) {
+            trail.push({text: String(problem), href: `/${pad4(problem)}/`});
+            trail.push({text: filename});
+        } else {
+            trail.push({text: String(problem)});
+        }
+        return trail;
+    }
+    if (path && path.startsWith('/docs/')) return [{text: 'guides', href: '/index'}, {text: label}];
+    if (path === '/edit/progress') return [{text: 'problems', href: '/summary'}, {text: 'progress'}];
+    if (path === '/index') return [{text: 'guides'}];
+    if (path === '/summary') return [{text: 'problems'}];
+    return label ? [{text: label}] : [];
+}
+
+function renderBreadcrumb() {
+    breadcrumbEl.innerHTML = buildTrail().map((s) => {
+        const seg = s.href
+            ? `<a class="bc-seg" data-nav="${s.href}">${escapeHtml(s.text)}</a>`
+            : `<span class="bc-seg bc-current">${escapeHtml(s.text)}</span>`;
+        return `<span class="bc-sep">/</span>${seg}`;
+    }).join('');
+}
+
 function applyContext() {
     const n = ctx.problem;
     const onProblem = n > 0;
-    if (onProblem) {
-        let html = `<b>${n}</b>`;
-        if (ctx.filename) html += ` &middot; editing ${escapeHtml(ctx.filename)}`;
-        crumbEl.innerHTML = html;
-    } else {
-        crumbEl.textContent = ctx.label || '';
-    }
+    renderBreadcrumb();
     setInternal(document.getElementById('nav-prev'), onProblem && n > 1 ? `/${pad4(n - 1)}/` : null);
     setInternal(document.getElementById('nav-next'), onProblem ? `/${pad4(n + 1)}/` : null);
     setExternal(document.getElementById('nav-euler'),
@@ -81,19 +106,23 @@ window.addEventListener('message', (e) => {
     if (e.origin !== location.origin) return;
     const d = e.data;
     if (!d || d.type !== 'solver:ctx') return;
-    ctx = {problem: Number(d.problem) || 0, filename: d.filename || '', label: d.label || ''};
+    ctx = {path: d.path || '', problem: Number(d.problem) || 0, filename: d.filename || '', label: d.label || ''};
     applyContext();
 });
 
-// Fixed internal targets + click delegation for every glyph that drives the iframe.
+// One delegated handler: anything in the bar carrying data-nav navigates the content
+// pane — the brand (home), the breadcrumb segments, the fixed section jumps, and the
+// prev/next glyphs (whose target applyContext sets). Euler/GitHub keep their real href
+// (they open a new tab); the ◇ jump resolves its target on click, below.
+document.getElementById('cmdbar').addEventListener('click', (e) => {
+    const el = e.target.closest('[data-nav]');
+    if (el) { e.preventDefault(); navigate(el.getAttribute('data-nav')); }
+});
+// Fixed section jumps — always available.
 setInternal(document.getElementById('nav-index'), '/index');
 setInternal(document.getElementById('nav-summary'), '/summary');
 setInternal(document.getElementById('nav-progress'), '/edit/progress');
-document.getElementById('nav').addEventListener('click', (e) => {
-    const a = e.target.closest('a');
-    if (a && a.dataset.nav) { e.preventDefault(); navigate(a.dataset.nav); }
-});
-// The ◇ jump is always live and resolves its target on click (not from a cached value).
+// The ◇ active-problem jump resolves its target on click (not from a cached value).
 const navActive = document.getElementById('nav-active');
 navActive.classList.remove('nav-dummy');
 navActive.addEventListener('click', (e) => { e.preventDefault(); goActiveProblem(); });
