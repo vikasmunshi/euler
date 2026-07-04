@@ -37,7 +37,7 @@ from pathlib import Path
 from subprocess import run
 from typing import Any, Literal
 
-from aiohttp import WSMsgType, web
+from aiohttp import WSCloseCode, WSMsgType, web
 
 from solver.config import config
 from solver.core.evaluate import benchmark, evaluate
@@ -539,6 +539,28 @@ async def _lint_problem_file(request: web.Request) -> web.StreamResponse:
     return web.Response(status=code, text=payload, content_type='application/json', charset='utf-8')
 
 
+async def _close_all_sockets(app: web.Application) -> None:
+    """on_shutdown hook: close every attached terminal WebSocket up front.
+
+    aiohttp's graceful shutdown fires `on_shutdown` first, then blocks up to its
+    `shutdown_timeout` waiting for in-flight request handlers to return, and only
+    then fires `on_cleanup` (where `_close_all_ptys` reaps the shells). The `/ws`
+    handler sits in `async for msg in ws`, which ends only when its socket closes
+    — so without this the server stalls on that wait for the full timeout whenever
+    a terminal is attached. Closing the sockets here ends those loops at once,
+    letting the handlers return before the wait; the persistent shells behind them
+    are still torn down later on `on_cleanup`.
+    """
+    connections = app[WS_CONNECTIONS]
+    sockets = [ws for group in connections.values() for ws in group]
+    connections.clear()
+    for ws in sockets:
+        try:
+            await ws.close(code=WSCloseCode.GOING_AWAY, message=b'server shutdown')
+        except Exception:  # noqa: BLE001 — best-effort teardown
+            pass
+
+
 def build_app(save: bool) -> web.Application:
     """Construct the aiohttp application: terminal, WebSocket, and read-only viewer.
 
@@ -549,6 +571,7 @@ def build_app(save: bool) -> web.Application:
     app = web.Application(middlewares=[auth_middleware])
     setup_auth(app)
     setup_pty_manager(app)
+    app.on_shutdown.append(_close_all_sockets)
     ws_handler = functools.partial(_ws_handler, save=save)
     app.add_routes([
         # Terminal + WebSocket. The terminal is the default landing page (`/`);
