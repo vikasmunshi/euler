@@ -9,6 +9,7 @@ solver.ai.update_models,True,True,True
 solver.config,,,
 solver.core.download,,,
 solver.core.evaluate,True,True,True
+solver.core.listing,True,True,True
 solver.core.problems,,,
 solver.core.results,True,True,True
 solver.core.test_cases,True,True,True

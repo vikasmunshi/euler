@@ -17,7 +17,7 @@ from solver.core.problems import Problem
 from solver.core.results import results_collector
 from solver.core.test_cases import TestCase, load_test_cases
 from solver.shell import console, register
-from solver.utils.path_utils import canonical_path, iterdir_recursive
+from solver.utils.path_utils import canonical_path
 
 # group 1: problem number, group 2: solution index, group 3: file type
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
@@ -364,24 +364,3 @@ def benchmark(problem: Problem,
         console.print('[muted]Benchmark interrupted by user.[/muted]')
         return ExitCodes.EXIT_ERROR
     return rc
-
-
-@register(help_text='List the solutions dir for given/current problem.', quietable=True)
-def ls(problem: Problem) -> int:
-    """This function lists all files found recursively in the solution directory of a
-    given problem while displaying their canonical paths and file sizes. The files
-    are shown in sorted order for easy navigation.
-
-    Args:
-        problem (Problem): The problem instance containing the solution directory.
-    """
-    files: list[tuple[str, int]] = []
-    for file in sorted(iterdir_recursive(problem.solution_dir, rt='path')):
-        files.append((canonical_path(file), file.stat().st_size))
-    if not files:
-        console.print('[error]error:[/error] no files found in the solution directory')
-        return ExitCodes.EXIT_ERROR
-    max_filename_length: int = max(len(filename) for filename, _ in files)
-    for filename, size in files:
-        console.print(f'{filename:<{max_filename_length}} {size:6d} bytes', highlight=True)
-    return ExitCodes.EXIT_OK

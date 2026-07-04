@@ -200,6 +200,7 @@ solver/
   core/
     download.py       — Utility for downloading and caching files via HTTP.
     evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
+    listing.py        — List solution directory contents.
     problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
     results.py        — Results: save and retrieve problem results.
     test_cases.py     — Load test cases for evaluation
