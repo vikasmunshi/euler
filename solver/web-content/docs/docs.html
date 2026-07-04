@@ -6,17 +6,14 @@
     <title>{{TITLE}} — solver docs</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/common.css">
-    <link rel="stylesheet" href="/header.css">
     <link rel="stylesheet" href="/vendor/highlight.css">
     <link rel="stylesheet" href="/docs.css">
-    <!-- header.js draws the standalone nav bar and, when embedded in the workspace
-         shell, reports this page's context to its command bar. -->
+    <!-- header.js reports this page's context to the workspace shell's command bar. -->
     <script defer src="/header.js"></script>
     <script defer src="/vendor/highlight.min.js"></script>
 </head>
 <body>
 <div id="page">
-    <div id="page-header"></div>
     <!-- Server-rendered Markdown (markdown-it-py); headings carry update_doc.py's
          slug ids so in-page and cross-guide anchors resolve. -->
     <article id="doc" class="markdown-body">{{CONTENT}}</article>

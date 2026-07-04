@@ -25,6 +25,18 @@
     return String(num).padStart(4, '0') + '/';
   }
 
+  // Clicking a problem runs `show <n>` in the shell (via /cmd) rather than navigating
+  // the content pane directly, so the console's current problem stays in sync with the
+  // view — the shell's `show` sets variables.problem and emits the OSC that moves the
+  // pane. The href stays as an open-in-new-tab fallback.
+  function showInShell(num) {
+    fetch('/cmd', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: 'show ' + num }),
+    }).catch(function () { /* the shell is the source of truth */ });
+  }
+
   function hasLevel(info) {
     return info.level !== '' && info.level !== null && info.level !== undefined;
   }
@@ -173,6 +185,13 @@
     updateTracker(problems, mtime);
     buildById(problems);
     initTooltips(document.body);
+    // Route a problem click through the shell (show <n>) instead of an iframe navigation.
+    document.getElementById('by-id').addEventListener('click', function (e) {
+      var td = e.target.closest('td[data-num]');
+      if (!td || !e.target.closest('a')) return;
+      e.preventDefault();
+      showInShell(td.getAttribute('data-num'));
+    });
   }
 
   function init() {

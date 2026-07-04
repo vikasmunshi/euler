@@ -1,6 +1,6 @@
 /* ── Guides index — the default left-pane content. Shares the light look of the
-   other content pages (common.css + header.css); this file holds the hero, the
-   guide cards, and the quick-link chips. ── */
+   other content pages (common.css); this file holds the hero, the guide cards, and
+   the quick-link chips. ── */
 
 body {
     padding: 24px 24px 40px;      /* 24px top: shared breathing room above the header */

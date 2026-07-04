@@ -1,6 +1,6 @@
 /* ── Docs viewer: server-rendered Markdown guides. Shares the light look of the
-   other content pages (common.css + header.css); this file styles the rendered
-   article (.markdown-body). Code blocks are themed by the vendored highlight.css. ── */
+   other content pages (common.css); this file styles the rendered article
+   (.markdown-body). Code blocks are themed by the vendored highlight.css. ── */
 
 body {
     padding: 24px 24px 48px;      /* 24px top: shared breathing room above the header */

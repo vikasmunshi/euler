@@ -18,15 +18,8 @@
      the iframe shows; it learns the current problem / file from the iframe via
      postMessage and drives the iframe from the breadcrumb + nav (see solver.js). -->
 <header id="cmdbar">
-    <a class="brand" id="nav-home" title="Home" data-nav="/index"><span class="sig">&#8721;</span> solver</a>
-    <!-- Breadcrumb: root → current, built by solver.js from the iframe's context; each
-         segment navigates the content pane. Sits on the left, right-anchored nav after
-         the spacer so a growing trail never shifts the glyph buttons. -->
-    <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
-    <span class="spacer"></span>
-    <!-- Dynamic items (change with the current problem / context) come before the fixed
-         ones: the problem-relative jumps (inert off a problem) and the Eval action. -->
-    <button id="eval-btn" type="button" hidden title="Evaluate this problem in the shell">eval</button>
+    <!-- Fixed items (always available) -->
+    <span class="sep"></span>
     <nav class="nav" id="nav">
         <a id="nav-prev" class="nav-dummy" title="Previous problem">&laquo;</a>
         <a id="nav-active" title="Active problem">&#9671;</a>
@@ -38,13 +31,23 @@
            target="_blank" rel="noopener noreferrer">&#8857;</a>
     </nav>
     <span class="sep"></span>
-    <!-- Fixed section jumps (always available), then the account menu. -->
     <nav class="nav" id="nav-sections">
         <a id="nav-index" title="Guides">&#8801;</a>
         <a id="nav-summary" title="Problems">&#9636;</a>
         <a id="nav-progress" title="Progress">&#9969;</a>
     </nav>
     <span class="sep"></span>
+    <!-- Breadcrumb: root → current, built by solver.js from the iframe's context; each
+         segment navigates the content pane. Sits on the left, right-anchored nav after
+         the spacer so a growing trail never shifts the glyph buttons. -->
+    <a class="brand" id="nav-home" title="Home" data-nav="/index"><span class="sig">&#8721;</span> solver</a>
+    <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
+    <span class="spacer"></span>
+    <!-- Dynamic items (change with the current problem / context) come before the fixed
+         ones: the problem-relative jumps (inert off a problem) and the Eval action. -->
+    <button id="eval-btn" type="button" hidden title="Evaluate this problem in the shell">eval</button>
+    <span class="sep"></span>
+    <!-- Fixed items (always available) -->
     <div class="user-menu" id="user-menu">
         <button id="user-btn" class="user-btn" type="button" title="connecting&hellip;"
                 aria-haspopup="true" aria-expanded="false">

@@ -106,10 +106,6 @@ h3 {
   margin: 20px 0 6px;
 }
 
-/* The shared nav bar's position and look both live in header.css. On the summary,
-   previous/next/this-problem have no meaning, so header.js renders them as inert,
-   muted placeholders. */
-
 /* White card surfaces matching the problem page's section cards. */
 .summary-info {
   background: #ffffff;

@@ -20,8 +20,8 @@ const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => (
     {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 
 // ── Command bar: context + navigation ──
-// `ctx` mirrors whatever the iframe currently shows. The ◇ link jumps to the shell's
-// own variables.problem, fetched from the server on each click (see goActiveProblem).
+// `ctx` mirrors whatever the iframe currently shows. The problem jumps (prev/active/
+// next) run `show` in the shell so its current problem tracks the view (see showInShell).
 let ctx = {problem: 0, filename: '', label: ''};
 
 function navigate(path) { content.src = path; }
@@ -75,30 +75,28 @@ function renderBreadcrumb() {
     }).join('');
 }
 
+// The GitHub URL for a problem's solution directory: public/pNNNN for the plaintext
+// problems (≤ 100), or the century-bucketed private/pXXXX_YYYY/pNNNN for the rest.
+function githubUrl(n) {
+    const base = 'https://github.com/vikasmunshi/euler/tree/master/solutions';
+    if (n <= 100) return `${base}/public/p${pad4(n)}`;
+    const bucket = Math.floor(n / 100) * 100;
+    return `${base}/private/p${pad4(bucket)}_${pad4(bucket + 99)}/p${pad4(n)}`;
+}
+
 function applyContext() {
     const n = ctx.problem;
     const onProblem = n > 0;
     renderBreadcrumb();
-    setInternal(document.getElementById('nav-prev'), onProblem && n > 1 ? `/${pad4(n - 1)}/` : null);
-    setInternal(document.getElementById('nav-next'), onProblem ? `/${pad4(n + 1)}/` : null);
+    // prev / active / next run `show` in the shell (wired below) instead of navigating
+    // the iframe directly, so they carry no data-nav here — only their inert/live state.
+    document.getElementById('nav-prev').classList.toggle('nav-dummy', !(onProblem && n > 1));
+    document.getElementById('nav-next').classList.toggle('nav-dummy', !onProblem);
     setExternal(document.getElementById('nav-euler'),
         onProblem ? `https://projecteuler.net/problem=${n}` : 'https://projecteuler.net/progress');
     setExternal(document.getElementById('nav-github'),
-        onProblem ? `https://github.com/vikasmunshi/euler/blob/master/solutions/${pad4(n).split('').join('/')}/`
-            : 'https://github.com/vikasmunshi/euler');
+        onProblem ? githubUrl(n) : 'https://github.com/vikasmunshi/euler');
     evalBtn.hidden = !onProblem;
-}
-
-// The active-problem jump (◇) fetches the shell's current variables.problem on every
-// click and navigates there, so it follows the active problem as it changes in the
-// shell — never a value cached at page load.
-async function goActiveProblem() {
-    try {
-        const r = await fetch('/active-problem', {cache: 'no-store', headers: {Accept: 'application/json'}});
-        if (!r.ok) return;
-        const {problem} = await r.json();
-        if (/^\d+$/.test(String(problem))) navigate(`/${pad4(Number(problem))}/`);
-    } catch { /* ignore: nothing to navigate to */ }
 }
 
 // The iframe (via header.js) reports what it is showing; the bar reflects it.
@@ -111,9 +109,9 @@ window.addEventListener('message', (e) => {
 });
 
 // One delegated handler: anything in the bar carrying data-nav navigates the content
-// pane — the brand (home), the breadcrumb segments, the fixed section jumps, and the
-// prev/next glyphs (whose target applyContext sets). Euler/GitHub keep their real href
-// (they open a new tab); the ◇ jump resolves its target on click, below.
+// pane directly — the brand (home), the breadcrumb segments, and the fixed section
+// jumps. Euler/GitHub keep their real href (they open a new tab); the problem jumps
+// (prev/active/next) go through the shell instead, below.
 document.getElementById('cmdbar').addEventListener('click', (e) => {
     const el = e.target.closest('[data-nav]');
     if (el) { e.preventDefault(); navigate(el.getAttribute('data-nav')); }
@@ -122,10 +120,28 @@ document.getElementById('cmdbar').addEventListener('click', (e) => {
 setInternal(document.getElementById('nav-index'), '/index');
 setInternal(document.getElementById('nav-summary'), '/summary');
 setInternal(document.getElementById('nav-progress'), '/edit/progress');
-// The ◇ active-problem jump resolves its target on click (not from a cached value).
-const navActive = document.getElementById('nav-active');
-navActive.classList.remove('nav-dummy');
-navActive.addEventListener('click', (e) => { e.preventDefault(); goActiveProblem(); });
+
+// prev / active / next run `show` in the shell rather than navigating the iframe
+// directly, so the console's current problem (variables.problem) stays in sync with
+// the view: the shell's `show` sets the current problem and emits the OSC that moves
+// the content pane. prev/next step from the viewed problem; the ◇ active jump shows
+// the shell's own current problem (`show` with no argument).
+function showInShell(arg) {
+    fetch('/cmd', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({command: arg === '' ? 'show' : `show ${arg}`}),
+    }).catch(() => { /* the shell is the source of truth */ });
+}
+document.getElementById('nav-prev').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (ctx.problem > 1) showInShell(ctx.problem - 1);
+});
+document.getElementById('nav-next').addEventListener('click', (e) => {
+    e.preventDefault();
+    if (ctx.problem > 0) showInShell(ctx.problem + 1);
+});
+document.getElementById('nav-active').addEventListener('click', (e) => { e.preventDefault(); showInShell(''); });
 applyContext();
 
 // Eval → dispatch `eval <n>` to the user's shell (the terminal shows the run). Uses

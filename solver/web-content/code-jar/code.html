@@ -6,14 +6,11 @@
     <title>{{FILENAME}}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/common.css">
-    <link rel="stylesheet" href="/header.css">
     <link rel="stylesheet" href="/code.css">
     <!-- CodeMirror 6 ships its own gutter, syntax highlighting, bracket matching,
          autocompletion and search; no separate highlight.js theme is needed. -->
 </head>
 <body data-language="{{LANGUAGE}}">
-<!-- Shared nav bar (standalone only; hidden when embedded in the workspace shell). -->
-<div id="page-header"></div>
 <!-- The editor's own toolbar: filename, language badge, and the file-local Save / Del
      actions that code.js wires up. Eval is global (in the workspace command bar). -->
 <div id="editor-bar">

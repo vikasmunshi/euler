@@ -59,7 +59,7 @@ from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
 
 #: Top-level static page assets served verbatim from `config.static_file_dir`.
 _STATIC_ASSETS: frozenset[str] = frozenset({
-    'code.css', 'code.html', 'code.js', 'common.css', 'favicon.svg', 'header.css', 'header.html',
+    'code.css', 'code.html', 'code.js', 'common.css', 'favicon.svg',
     'header.js', 'index.css', 'docs.css', 'problem.css', 'problem.html', 'problem.js', 'problems.json',
     'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
     'summary.html', 'summary.js',
