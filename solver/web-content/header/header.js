@@ -16,6 +16,11 @@
     // A trailing file segment (/<n>/<file>) means this is a code/viewer page.
     const FILENAME = SEGMENTS.length > 1 ? SEGMENTS[SEGMENTS.length - 1] : '';
 
+    // When this page is shown inside the workspace shell's content iframe, the shell's
+    // command bar is the header; we report our context to it instead of drawing our own.
+    const EMBEDDED = window.self !== window.top;
+    const IS_CODE_PAGE = !!document.body.dataset.language;
+
     const pad4 = n => String(n).padStart(4, '0');
 
     // The "active problem" — the number the signed-in user's solver shell holds
@@ -120,6 +125,22 @@
         });
     }
 
+    // Tell the workspace shell's command bar what this page is showing, so it can set
+    // the crumb, prev/next/euler/github targets, and the Eval button.
+    function postContext() {
+        const path = window.location.pathname;
+        const label = path === '/summary' ? 'summary' : path === '/progress' ? 'progress' : '';
+        try {
+            window.parent.postMessage({
+                type: 'solver:ctx',
+                problem: PROBLEM_NUMBER,
+                filename: FILENAME,
+                language: document.body.dataset.language || '',
+                label,
+            }, window.location.origin);
+        } catch { /* not embedded / cross-origin: nothing to report */ }
+    }
+
     async function init() {
         const host = document.getElementById('page-header');
         if (!host) return;
@@ -128,8 +149,18 @@
         // page document itself came from the browser cache.
         const auth = await fetch('/whoami', { cache: 'no-store', headers: { Accept: 'application/json' } });
         if (!auth.ok) {
-            window.location.replace('/login');
+            (EMBEDDED ? window.top : window).location.replace('/login');
             return;
+        }
+        if (EMBEDDED) {
+            postContext();
+            // The shell's command bar is the header for embedded pages. The code editor
+            // still sources its Save/Del/Eval buttons from the shared header, so keep it
+            // on that page for now (a temporary second bar there only); others hide it.
+            if (!IS_CODE_PAGE) {
+                host.style.display = 'none';
+                return;
+            }
         }
         host.innerHTML = await fetch('/header.html').then(r => r.text());
         // The active-problem link always tracks the shell's variables.problem,

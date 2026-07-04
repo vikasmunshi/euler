@@ -1,11 +1,116 @@
 'use strict';
 
+// ── The workspace shell ──
+// This page (`/`) owns the uniform command bar and the live terminal; the left
+// content pane is an iframe onto the summary / problem / editor pages. The bar is
+// independent of the iframe: it learns the current problem / file from the iframe
+// via a `solver:ctx` postMessage (posted by header.js), and its glyph nav drives the
+// iframe's `src`. The web `show` / `edit` commands navigate the iframe over the
+// PTY → WebSocket pipe (OSC 5379). Eval dispatches a command to the shell via /cmd.
+
+const content = document.getElementById('content');
+const crumbEl = document.getElementById('crumb');
+const evalBtn = document.getElementById('eval-btn');
 const userBtn = document.getElementById('user-btn');
 const userDropdown = document.getElementById('user-dropdown');
 const connToggle = document.getElementById('conn-toggle');
 
-// Reflect the WebSocket state in the account icon colour and the menu's
-// Connect/Disconnect item ('connecting' | 'connected' | 'disconnected' | 'error').
+const pad4 = (n) => String(n).padStart(4, '0');
+const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => (
+    {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+
+// ── Command bar: context + navigation ──
+// `ctx` mirrors whatever the iframe currently shows; `activeProblem` is the shell's
+// own variables.problem (from the server), where the ◇ link jumps from any page.
+let ctx = {problem: 0, filename: '', label: 'index'};
+let activeProblem = 0;
+
+function navigate(path) { content.src = path; }
+
+// Turn an internal glyph into a live link that drives the iframe, or an inert dummy.
+function setInternal(el, path) {
+    if (path) {
+        el.dataset.nav = path;
+        el.classList.remove('nav-dummy');
+    } else {
+        delete el.dataset.nav;
+        el.classList.add('nav-dummy');
+    }
+}
+
+// External links (Euler / GitHub) always have a target — a specific problem or the
+// site root off a problem.
+function setExternal(el, href) {
+    el.href = href;
+    el.classList.remove('nav-dummy');
+}
+
+function applyContext() {
+    const n = ctx.problem;
+    const onProblem = n > 0;
+    if (onProblem) {
+        let html = `<b>${n}</b>`;
+        if (ctx.filename) html += ` &middot; editing ${escapeHtml(ctx.filename)}`;
+        crumbEl.innerHTML = html;
+    } else {
+        crumbEl.textContent = ctx.label || '';
+    }
+    setInternal(document.getElementById('nav-prev'), onProblem && n > 1 ? `/${pad4(n - 1)}/` : null);
+    setInternal(document.getElementById('nav-next'), onProblem ? `/${pad4(n + 1)}/` : null);
+    setExternal(document.getElementById('nav-euler'),
+        onProblem ? `https://projecteuler.net/problem=${n}` : 'https://projecteuler.net/progress');
+    setExternal(document.getElementById('nav-github'),
+        onProblem ? `https://github.com/vikasmunshi/euler/blob/master/solutions/${pad4(n).split('').join('/')}/`
+            : 'https://github.com/vikasmunshi/euler');
+    evalBtn.hidden = !onProblem;
+}
+
+// The active-problem jump (◇) tracks the shell's variables.problem from the server,
+// so it points at the current problem from any page (not the browser URL).
+async function refreshActiveProblem() {
+    try {
+        const r = await fetch('/active-problem', {headers: {Accept: 'application/json'}});
+        if (!r.ok) return;
+        const {problem} = await r.json();
+        if (/^\d+$/.test(String(problem))) {
+            activeProblem = Number(problem);
+            setInternal(document.getElementById('nav-active'), `/${pad4(activeProblem)}/`);
+        }
+    } catch { /* leave the ◇ link inert */ }
+}
+
+// The iframe (via header.js) reports what it is showing; the bar reflects it.
+window.addEventListener('message', (e) => {
+    if (e.origin !== location.origin) return;
+    const d = e.data;
+    if (!d || d.type !== 'solver:ctx') return;
+    ctx = {problem: Number(d.problem) || 0, filename: d.filename || '', label: d.label || ''};
+    applyContext();
+});
+
+// Fixed internal targets + click delegation for every glyph that drives the iframe.
+setInternal(document.getElementById('nav-summary'), '/summary');
+setInternal(document.getElementById('nav-progress'), '/progress');
+document.getElementById('nav').addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (a && a.dataset.nav) { e.preventDefault(); navigate(a.dataset.nav); }
+});
+applyContext();
+refreshActiveProblem();
+
+// Eval → dispatch `eval <n>` to the user's shell (the terminal shows the run). Uses
+// /cmd so it works regardless of this page's socket state.
+evalBtn.addEventListener('click', () => {
+    if (ctx.problem > 0) {
+        fetch('/cmd', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({command: `eval ${ctx.problem}`}),
+        }).catch(() => { /* ignore: the shell is the source of truth */ });
+    }
+});
+
+// ── Terminal (right pane) ──
 function setConnState(state) {
     const connected = state === 'connected';
     const busy = connected || state === 'connecting';
@@ -14,33 +119,22 @@ function setConnState(state) {
     connToggle.textContent = busy ? 'Disconnect' : 'Connect';
 }
 
-// Build the xterm theme from the CSS variables the active solver-theme.css
-// defines, so swapping the theme symlink re-themes the terminal grid too.
+// Build the xterm theme from the CSS variables the active solver-theme.css defines,
+// so swapping the theme symlink re-themes the terminal grid too.
 function cssTheme() {
     const css = getComputedStyle(document.documentElement);
     const v = (name) => css.getPropertyValue(name).trim();
     return {
-        background: v('--term-bg'),
-        foreground: v('--term-fg'),
-        cursor: v('--term-cursor'),
-        cursorAccent: v('--term-cursor-accent'),
+        background: v('--term-bg'), foreground: v('--term-fg'),
+        cursor: v('--term-cursor'), cursorAccent: v('--term-cursor-accent'),
         selectionBackground: v('--term-selection'),
-        black: v('--ansi-black'),
-        red: v('--ansi-red'),
-        green: v('--ansi-green'),
-        yellow: v('--ansi-yellow'),
-        blue: v('--ansi-blue'),
-        magenta: v('--ansi-magenta'),
-        cyan: v('--ansi-cyan'),
-        white: v('--ansi-white'),
-        brightBlack: v('--ansi-bright-black'),
-        brightRed: v('--ansi-bright-red'),
-        brightGreen: v('--ansi-bright-green'),
-        brightYellow: v('--ansi-bright-yellow'),
-        brightBlue: v('--ansi-bright-blue'),
-        brightMagenta: v('--ansi-bright-magenta'),
-        brightCyan: v('--ansi-bright-cyan'),
-        brightWhite: v('--ansi-bright-white'),
+        black: v('--ansi-black'), red: v('--ansi-red'), green: v('--ansi-green'),
+        yellow: v('--ansi-yellow'), blue: v('--ansi-blue'), magenta: v('--ansi-magenta'),
+        cyan: v('--ansi-cyan'), white: v('--ansi-white'),
+        brightBlack: v('--ansi-bright-black'), brightRed: v('--ansi-bright-red'),
+        brightGreen: v('--ansi-bright-green'), brightYellow: v('--ansi-bright-yellow'),
+        brightBlue: v('--ansi-bright-blue'), brightMagenta: v('--ansi-bright-magenta'),
+        brightCyan: v('--ansi-bright-cyan'), brightWhite: v('--ansi-bright-white'),
     };
 }
 
@@ -48,10 +142,8 @@ const term = new Terminal({
     cursorBlink: true,
     fontFamily: 'monospace',
     fontSize: 14,
-    // The DOM renderer clips each glyph to the cell height; at the default
-    // lineHeight (1) the underscore sits on the bottom pixel row and is cut
-    // off, so a typed/echoed '_' renders as blank background. A small bump
-    // gives the descender room to show.
+    // A small lineHeight bump gives the underscore descender room (else a typed '_'
+    // is clipped to the cell's bottom pixel row and renders blank).
     lineHeight: 1.1,
     theme: cssTheme(),
     scrollback: 5000,
@@ -61,81 +153,42 @@ term.loadAddon(fitAddon);
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
-// ── Viewer panel ──
-// The web `show` and `edit` commands emit an `OSC 5379` sequence on the shell's
-// stdout — `open;<NNNN>;<token>` (show) or `edit;<NNNN>;<token>;<relpath>` (edit) —
-// which rides the PTY → WebSocket pipe into term.write() here. We point the
-// same-origin viewer iframe at the matching URL (its request carries the session
-// cookie) and reveal the split pane: `/<NNNN>/` for show, `/edit/<NNNN>/<relpath>`
-// (the code-editor view) for edit. The token is a server-side millisecond
-// clock, strictly increasing per command; we ignore any token we've already passed,
-// so the copy the PTY replay buffer re-sends on reconnect never re-opens a panel the
-// user closed.
-const viewerFrame = document.getElementById('viewer-frame');
+// ── Content navigation over the PTY pipe ──
+// The web `show` / `edit` commands emit an OSC 5379 sequence on the shell's stdout —
+// `open;<NNNN>;<token>` (show) or `edit;<NNNN>;<token>;<relpath>` (edit) — which rides
+// the PTY → WebSocket pipe into term.write() here. We point the content iframe at the
+// matching URL: `/<NNNN>/` for show, `/edit/<NNNN>/<relpath>` for edit. The token is a
+// server-side millisecond clock, strictly increasing per command; we ignore any token
+// we've already passed, so the copy the PTY replay buffer re-sends on reconnect never
+// re-navigates the pane.
 let lastViewerToken = 0;
-
-function openViewer(url) {
-    viewerFrame.src = url;
-    document.body.classList.add('viewer-open');
-    fitAddon.fit();
-    sendResize();   // the terminal just got narrower — reflow the grid + tell the PTY
-}
-
-function closeViewer() {
-    document.body.classList.remove('viewer-open');
-    viewerFrame.src = 'about:blank';
-    fitAddon.fit();
-    sendResize();
-}
-
-document.getElementById('viewer-close').addEventListener('click', closeViewer);
-
 term.parser.registerOscHandler(5379, (payload) => {
     const [action, n, token, ...rest] = payload.split(';');
     const t = Number(token) || 0;
     if (!/^\d+$/.test(n || '') || t <= lastViewerToken) return true;
     if (action === 'open') {
         lastViewerToken = t;
-        openViewer(`${location.origin}/${n}/`);
+        navigate(`/${n}/`);
     } else if (action === 'edit') {
         const file = rest.join(';');   // rejoin so a relpath with a ';' survives the split
-        if (file) {
-            lastViewerToken = t;
-            openViewer(`${location.origin}/edit/${n}/${file}`);
-        }
+        if (file) { lastViewerToken = t; navigate(`/edit/${n}/${file}`); }
     }
     return true;   // handled — don't let xterm treat it as printable text
 });
 
-// In a browser, Ctrl-C with text selected is "copy", not "interrupt". Intercept
-// it before xterm turns it into a ^C byte: when there is a selection, copy it to
-// the clipboard and clear it; otherwise let the key through so it still sends
-// SIGINT to the shell. (Only act on keydown — keypress/keyup would double-fire.)
+// In a browser, Ctrl-C with text selected is "copy", not "interrupt". Intercept it
+// before xterm turns it into a ^C byte; likewise route Ctrl-V through the clipboard API.
 term.attachCustomKeyEventHandler((e) => {
-    if (e.type === 'keydown' && e.ctrlKey && !e.altKey && !e.metaKey &&
-        (e.key === 'c' || e.key === 'C')) {
+    if (e.type === 'keydown' && e.ctrlKey && !e.altKey && !e.metaKey && (e.key === 'c' || e.key === 'C')) {
         const sel = term.getSelection();
-        if (sel) {
-            navigator.clipboard?.writeText(sel);
-            term.clearSelection();
-            return false;   // swallow: don't send ^C to the PTY
-        }
+        if (sel) { navigator.clipboard?.writeText(sel); term.clearSelection(); return false; }
     }
-    // Ctrl-V → paste. We always do it ourselves via the clipboard API (below),
-    // so swallow the key here to stop xterm's own keydown→paste path.
-    if (e.type === 'keydown' && e.ctrlKey && !e.altKey && !e.metaKey &&
-        (e.key === 'v' || e.key === 'V')) {
-        navigator.clipboard?.readText().then((text) => {
-            if (text) term.paste(text);
-        });
+    if (e.type === 'keydown' && e.ctrlKey && !e.altKey && !e.metaKey && (e.key === 'v' || e.key === 'V')) {
+        navigator.clipboard?.readText().then((text) => { if (text) term.paste(text); });
         return false;
     }
     return true;
 });
-
-// Whichever browser/xterm build, a native `paste` event may still fire on the
-// hidden textarea and trigger xterm's built-in paste. Suppress it in the capture
-// phase so our clipboard-API path above is the single source of one paste.
 if (term.textarea) {
     term.textarea.addEventListener('paste', (e) => {
         e.preventDefault();
@@ -143,19 +196,16 @@ if (term.textarea) {
     }, true);
 }
 
-// Bounce to the login screen if the session has ended (e.g. this page came from the
-// browser cache after logout); the /ws upgrade below would otherwise just fail.
-fetch('/whoami', { cache: 'no-store', headers: { Accept: 'application/json' } })
+// Bounce to login if the session has ended (e.g. this page came from the browser
+// cache after logout); the /ws upgrade below would otherwise just fail.
+fetch('/whoami', {cache: 'no-store', headers: {Accept: 'application/json'}})
     .then((r) => { if (!r.ok) window.location.replace('/login'); });
 
 const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
 const encoder = new TextEncoder();
-
 let ws = null;
 
-function isLive() {
-    return ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING);
-}
+const isLive = () => ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING);
 
 function sendResize() {
     if (ws && ws.readyState === WebSocket.OPEN) {
@@ -173,23 +223,18 @@ function connect() {
     setConnState('connecting');
     ws = new WebSocket(`${wsProto}//${location.host}/ws`);
     ws.binaryType = 'arraybuffer';
-
     ws.onopen = () => {
         setConnState('connected');
         sendResize();          // prompt-toolkit/rich need the real geometry up front
-        window.addEventListener('beforeunload', guardUnload);   // warn before any reload/navigation
+        window.addEventListener('beforeunload', guardUnload);
     };
-    // Binary frames are raw terminal bytes; write them straight to xterm.
     ws.onmessage = (ev) => {
-        if (typeof ev.data === 'string') {
-            term.write(ev.data);
-        } else {
-            term.write(new Uint8Array(ev.data));
-        }
+        if (typeof ev.data === 'string') term.write(ev.data);
+        else term.write(new Uint8Array(ev.data));
     };
     ws.onclose = () => {
         setConnState('disconnected');
-        window.removeEventListener('beforeunload', guardUnload);   // closed → nothing left to protect
+        window.removeEventListener('beforeunload', guardUnload);
         term.write('\r\n\x1b[2m[connection closed]\x1b[0m\r\n');
     };
     ws.onerror = () => setConnState('error');
@@ -200,16 +245,11 @@ function disconnect() {
     if (ws) ws.close();
 }
 
-// Keystrokes from xterm → PTY input, as binary.
 term.onData((data) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(encoder.encode(data));
-    }
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(encoder.encode(data));
 });
 
-// Swallow the F5 reload shortcut while connected, before the browser acts on
-// it. Ctrl+R / ⌘-R are left alone so they reach the terminal (reverse-search).
-// Does not cover the reload button — beforeunload does.
+// Swallow F5 (reload) while connected; Ctrl+R / ⌘-R reach the terminal (reverse-search).
 window.addEventListener('keydown', (e) => {
     if (e.key === 'F5' && ws && ws.readyState === WebSocket.OPEN) {
         e.preventDefault();
@@ -217,10 +257,7 @@ window.addEventListener('keydown', (e) => {
     }
 }, true);
 
-window.addEventListener('resize', () => {
-    fitAddon.fit();
-    sendResize();
-});
+window.addEventListener('resize', () => { fitAddon.fit(); sendResize(); });
 
 // Account menu: toggle on click, close on an outside click.
 userBtn.addEventListener('click', (e) => {
@@ -236,8 +273,8 @@ document.addEventListener('click', () => {
     }
 });
 connToggle.addEventListener('click', () => (isLive() ? disconnect() : connect()));
-// A deliberate navigation from the menu (log out / change password) should not
-// trigger the unsaved-session warning.
+// A deliberate menu navigation (log out / change password) shouldn't trip the
+// unsaved-session warning.
 userDropdown.querySelectorAll('a').forEach((link) => {
     link.addEventListener('click', () => window.removeEventListener('beforeunload', guardUnload));
 });

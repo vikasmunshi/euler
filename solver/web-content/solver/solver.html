@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SolverShell</title>
+    <title>solver</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="vendor/xterm.css">
     <!-- Theme variables; symlink to a solver-theme-*.css variant. Linked first so
@@ -12,32 +12,51 @@
     <link rel="stylesheet" href="solver.css">
 </head>
 <body>
-<div id="user-menu" class="user-menu">
-    <button id="user-btn" class="user-btn" type="button" title="connecting&hellip;"
-            aria-haspopup="true" aria-expanded="false">
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-            <path fill="currentColor"
-                  d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/>
-        </svg>
-    </button>
-    <div id="user-dropdown" class="user-dropdown" hidden>
-        <button id="conn-toggle" type="button">Disconnect</button>
-        <a href="/password">Change password</a>
-        <a href="/logout">Log out</a>
-    </div>
-</div>
-<div id="workspace">
-    <!-- Viewer panel (left): hidden until the web `show` command reveals it
-         (body.viewer-open). The iframe is same-origin, so its /NNNN/ request
-         carries the session cookie. The shell sits to its right. -->
-    <aside id="viewer" class="viewer" aria-label="problem viewer">
-        <div class="viewer-bar">
-            <span class="viewer-title">doc viewer</span>
-            <button id="viewer-close" class="viewer-close" type="button"
-                    title="Close viewer" aria-label="Close viewer">&times;</button>
+<!-- Uniform command bar across the whole page: brand + context crumb, the glyph nav
+     (which drives the content iframe), the shell-bound Eval action, and the account
+     menu. The bar is independent of whatever the iframe shows; it learns the current
+     problem / file from the iframe via postMessage (see solver.js + header.js). -->
+<header id="cmdbar">
+    <span class="brand"><span class="sig">&#8721;</span> solver</span>
+    <span class="crumb" id="crumb">index</span>
+    <span class="sep"></span>
+    <nav class="nav" id="nav">
+        <a id="nav-prev" class="nav-dummy" title="Previous problem">&laquo;</a>
+        <a id="nav-active" class="nav-dummy" title="Active problem">&#9671;</a>
+        <a id="nav-next" class="nav-dummy" title="Next problem">&raquo;</a>
+        <span class="sep"></span>
+        <a id="nav-euler" class="nav-dummy" title="View on Project Euler"
+           target="_blank" rel="noopener noreferrer">&#8962;</a>
+        <a id="nav-github" class="nav-dummy" title="View on GitHub"
+           target="_blank" rel="noopener noreferrer">&#8857;</a>
+        <span class="sep"></span>
+        <a id="nav-summary" title="Summary">&#9636;</a>
+        <a id="nav-progress" title="Progress">&#9969;</a>
+    </nav>
+    <span class="spacer"></span>
+    <button id="eval-btn" type="button" hidden title="Evaluate this problem in the shell">eval</button>
+    <span class="sep"></span>
+    <div class="user-menu" id="user-menu">
+        <button id="user-btn" class="user-btn" type="button" title="connecting&hellip;"
+                aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path fill="currentColor"
+                      d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/>
+            </svg>
+        </button>
+        <div id="user-dropdown" class="user-dropdown" hidden>
+            <button id="conn-toggle" type="button">Disconnect</button>
+            <a href="/password">Change password</a>
+            <a href="/logout">Log out</a>
         </div>
-        <iframe id="viewer-frame" class="viewer-frame" title="problem viewer" src="about:blank"></iframe>
-    </aside>
+    </div>
+</header>
+
+<!-- Always-on split: the content iframe (left) beside the live terminal (right).
+     The iframe is same-origin, so its requests carry the session cookie; the web
+     `show` / `edit` commands navigate it via an OSC sequence (see solver.js). -->
+<div id="workspace">
+    <iframe id="content" title="content" src="/summary"></iframe>
     <div id="terminal"></div>
 </div>
 
