@@ -144,7 +144,6 @@ class Config(AttributeDict):
     static_file_dir: Path
     static_file_problems: Path
     static_file_progress: Path
-    static_file_progress_editor: Path
     templates_dir: Path
     theme: Theme
     style: Style
@@ -199,7 +198,6 @@ class Config(AttributeDict):
             'static_file_dir': root_dir / 'solver/web-content',
             'static_file_problems': root_dir / 'solver/web-content/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
-            'static_file_progress_editor': root_dir / 'solver/web-content/progress/progress.html',
             'templates_dir': root_dir / 'solver/templates',
 
             'theme': Theme({

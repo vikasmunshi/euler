@@ -20,10 +20,9 @@ const escapeHtml = (s) => s.replace(/[&<>"]/g, (c) => (
     {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
 
 // ── Command bar: context + navigation ──
-// `ctx` mirrors whatever the iframe currently shows; `activeProblem` is the shell's
-// own variables.problem (from the server), where the ◇ link jumps from any page.
+// `ctx` mirrors whatever the iframe currently shows. The ◇ link jumps to the shell's
+// own variables.problem, fetched from the server on each click (see goActiveProblem).
 let ctx = {problem: 0, filename: '', label: ''};
-let activeProblem = 0;
 
 function navigate(path) { content.src = path; }
 
@@ -65,18 +64,16 @@ function applyContext() {
     evalBtn.hidden = !onProblem;
 }
 
-// The active-problem jump (◇) tracks the shell's variables.problem from the server,
-// so it points at the current problem from any page (not the browser URL).
-async function refreshActiveProblem() {
+// The active-problem jump (◇) fetches the shell's current variables.problem on every
+// click and navigates there, so it follows the active problem as it changes in the
+// shell — never a value cached at page load.
+async function goActiveProblem() {
     try {
-        const r = await fetch('/active-problem', {headers: {Accept: 'application/json'}});
+        const r = await fetch('/active-problem', {cache: 'no-store', headers: {Accept: 'application/json'}});
         if (!r.ok) return;
         const {problem} = await r.json();
-        if (/^\d+$/.test(String(problem))) {
-            activeProblem = Number(problem);
-            setInternal(document.getElementById('nav-active'), `/${pad4(activeProblem)}/`);
-        }
-    } catch { /* leave the ◇ link inert */ }
+        if (/^\d+$/.test(String(problem))) navigate(`/${pad4(Number(problem))}/`);
+    } catch { /* ignore: nothing to navigate to */ }
 }
 
 // The iframe (via header.js) reports what it is showing; the bar reflects it.
@@ -90,13 +87,16 @@ window.addEventListener('message', (e) => {
 
 // Fixed internal targets + click delegation for every glyph that drives the iframe.
 setInternal(document.getElementById('nav-summary'), '/summary');
-setInternal(document.getElementById('nav-progress'), '/progress');
+setInternal(document.getElementById('nav-progress'), '/edit/progress');
 document.getElementById('nav').addEventListener('click', (e) => {
     const a = e.target.closest('a');
     if (a && a.dataset.nav) { e.preventDefault(); navigate(a.dataset.nav); }
 });
+// The ◇ jump is always live and resolves its target on click (not from a cached value).
+const navActive = document.getElementById('nav-active');
+navActive.classList.remove('nav-dummy');
+navActive.addEventListener('click', (e) => { e.preventDefault(); goActiveProblem(); });
 applyContext();
-refreshActiveProblem();
 
 // Eval → dispatch `eval <n>` to the user's shell (the terminal shows the run). Uses
 // /cmd so it works regardless of this page's socket state.

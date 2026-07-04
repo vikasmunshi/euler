@@ -55,8 +55,8 @@ from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
 #: Top-level static page assets served verbatim from `config.static_file_dir`.
 _STATIC_ASSETS: frozenset[str] = frozenset({
     'code.css', 'code.html', 'code.js', 'common.css', 'favicon.svg', 'header.css', 'header.html',
-    'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json', 'progress.css',
-    'progress.js', 'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
+    'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json',
+    'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
     'summary.html', 'summary.js',
     'login.css', 'login.js', 'srp-client.js', 'register.css', 'register.js',
     'password.css', 'password.js',
@@ -134,31 +134,39 @@ async def _serve_active_problem(request: web.Request) -> web.StreamResponse:
 
 
 async def _serve_progress_page(request: web.Request) -> web.StreamResponse:
-    """Serve the progress file in an editable textarea (`GET /progress`).
+    """Serve the progress file in the shared code editor (`GET /edit/progress`).
 
-    The file (`config.static_file_progress`) lives outside the solution tree; its
-    content is HTML-escaped into a textarea that POSTs back to `/progress` via the
-    Save button.
+    The progress file (`config.static_file_progress`) lives outside the solution
+    tree; it renders through the same code editor as solution files — an editable
+    HTML buffer that saves back to `/edit/progress` (`_save_progress_page`).
     """
-    path = config.static_file_progress
-    content = path.read_text(encoding='utf-8') if path.is_file() else ''
-    page = config.static_file_progress_editor.read_text().replace('{{CONTENT}}', html.escape(content))
-    return _bytes_response(page.encode('utf-8'), 'text/html')
+    progress_file = config.static_file_progress
+    try:
+        content: bytes = progress_file.read_bytes()
+    except (FileNotFoundError, KeyError, ValueError, IsADirectoryError):
+        raise web.HTTPNotFound()
+    edit_language = _EDIT_LANGUAGES.get(Path(progress_file.name).suffix, '')
+    return _bytes_response(_render_code_page(progress_file.name, content, edit_language), 'text/html')
 
 
 def _save_progress(content: bytes) -> tuple[int, str]:
-    """Write edited content to the progress file; return (status, message).
+    """Write edited progress content, rolling back if it no longer parses; return (status, message).
 
-    The file is outside the solution tree, so no per-problem checks apply — the
-    bytes are written verbatim (status mirrors HTTP: 200 saved).
+    The progress file is outside the solution tree, so no per-problem checks apply.
+    After writing, `summary()` re-parses it into problems.json; if that fails the
+    previous bytes are restored so a broken edit never lands (status mirrors HTTP).
     """
-    config.static_file_progress.write_bytes(content)
-    summary()
-    return 200, f'saved {config.static_file_progress.name}'
+    progress_file = config.static_file_progress
+    previous = progress_file.read_bytes() if progress_file.is_file() else b''
+    progress_file.write_bytes(content)
+    if summary() != 0:
+        progress_file.write_bytes(previous)
+        return 400, 'invalid progress — rolled back'
+    return 200, f'saved {progress_file.name}'
 
 
 async def _save_progress_page(request: web.Request) -> web.StreamResponse:
-    """Save the edited progress file (`POST /progress`)."""
+    """Save the edited progress file (`POST /edit/progress`)."""
     body = await request.read()
     loop = asyncio.get_running_loop()
     result = await loop.run_in_executor(None, _save_progress, body)
@@ -204,7 +212,7 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
     ws = web.WebSocketResponse()
     await ws.prepare(request)
 
-    email: str = request[USER_EMAIL]   # set by auth_middleware (the /ws route is gated)
+    email: str = request[USER_EMAIL]  # set by auth_middleware (the /ws route is gated)
     connections = request.app[WS_CONNECTIONS]
     connections.setdefault(email, set()).add(ws)
 
@@ -220,7 +228,7 @@ async def _ws_handler(request: web.Request, save: bool) -> web.WebSocketResponse
             elif msg.type == WSMsgType.ERROR:
                 break
     finally:
-        pty.detach(ws)   # the shell keeps running; only this socket goes away
+        pty.detach(ws)  # the shell keeps running; only this socket goes away
         if (live := connections.get(email)) is not None:
             live.discard(ws)
             if not live:
@@ -494,7 +502,7 @@ async def _save_problem_file(request: web.Request) -> web.StreamResponse:
     filename = request.match_info['filename']
     body = await request.read()
     loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(None, functools.partial(_save_content, problem_number, filename, body))
+    result = await loop.run_in_executor(None, _save_content, problem_number, filename, body)
     return _text(*result)
 
 
@@ -592,21 +600,21 @@ def build_app(save: bool) -> web.Application:
     # and every literal path precedes the `/{asset}` and `/{problem_number}` catch-alls,
     # so this ordering is unambiguous for aiohttp's first-match dispatch.
     app.add_routes([
-        web.get('/', _serve_landing_page),                                   # terminal (landing page)
+        web.get('/', _serve_landing_page),  # terminal (landing page)
         web.get('/active-problem', _serve_active_problem),
-        web.post('/cmd', functools.partial(_run_command, save=save)),       # dispatch to the web shell
-        web.post('/edit/lint', _lint_file),                                 # stateless lint (suffix-keyed)
-        web.get(r'/edit/{problem_number:\d+}/{filename:.+}', _edit_file),    # code editor + its writes
+        web.post('/cmd', functools.partial(_run_command, save=save)),  # dispatch to the web shell
+        web.post('/edit/lint', _lint_file),  # stateless lint (suffix-keyed)
+        web.get('/edit/progress', _serve_progress_page),
+        web.post('/edit/progress', _save_progress_page),
+        web.get(r'/edit/{problem_number:\d+}/{filename:.+}', _edit_file),  # code editor + its writes
         web.post(r'/edit/{problem_number:\d+}/{filename:.+}', _save_problem_file),
         web.delete(r'/edit/{problem_number:\d+}/{filename:.+}', _delete_problem_file),
         web.get('/favicon.ico', _serve_favicon),
-        web.get('/progress', _serve_progress_page),
-        web.post('/progress', _save_progress_page),
         web.get('/summary', _serve_summary_page),
-        web.get(r'/vendor/{filename:.+}', _serve_vendor_asset),             # vendored editor JS/CSS/etc.
-        web.get('/ws', ws_handler),                                         # terminal WebSocket
+        web.get(r'/vendor/{filename:.+}', _serve_vendor_asset),  # vendored editor JS/CSS/etc.
+        web.get('/ws', ws_handler),  # terminal WebSocket
         web.get(r'/{asset:[A-Za-z0-9_.-]+\.(?:css|js|html|json|svg)}', _serve_static),
-        web.get(r'/{problem_number:\d+}', _redirect_with_slash),           # read-only problem viewer
+        web.get(r'/{problem_number:\d+}', _redirect_with_slash),  # read-only problem viewer
         web.get(r'/{problem_number:\d+}/', _problem_page),
         web.get(r'/{problem_number:\d+}/{filename:.+}', _problem_file),
     ])

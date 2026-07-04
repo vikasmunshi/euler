@@ -11,10 +11,10 @@ const PROBLEM_NUMBER = SEGMENTS[0];
 const FILENAME = SEGMENTS[SEGMENTS.length - 1];
 const LANGUAGE = document.body.dataset.language;
 // Editing is only offered on the /edit/ route; the read-only viewer never edits.
-// Even there, only real solution files are editable (not the generated `solutions`
-// view). HTML stubs (notes / statement) edit as plain text (no highlight.js
-// language), but save verbatim.
-const EDITABLE = EDIT_MODE && /\.(py|c|json|html)$/.test(FILENAME);
+// Editability follows the server-set language (data-language) — set for real solution
+// files, the HTML stubs, and the progress file, but empty for the generated
+// `solutions` view and non-source resources. HTML edits as plain text, but saves verbatim.
+const EDITABLE = EDIT_MODE && ['python', 'c', 'json', 'html'].includes(LANGUAGE);
 // Only real source files can be deleted.
 const DELETABLE = /\.(py|c)$/.test(FILENAME);
 
