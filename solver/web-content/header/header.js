@@ -100,7 +100,11 @@
     // the crumb, prev/next/euler/github targets, and the Eval button.
     function postContext() {
         const path = window.location.pathname;
-        const label = path === '/summary' ? 'summary' : path === '/edit/progress' ? 'progress' : '';
+        const label = path === '/summary' ? 'summary'
+            : path === '/edit/progress' ? 'progress'
+                : path === '/index' ? 'guides'
+                    : path.startsWith('/docs/') ? decodeURIComponent(path.slice(6))
+                        : '';
         try {
             window.parent.postMessage({
                 type: 'solver:ctx',

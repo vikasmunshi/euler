@@ -18,6 +18,10 @@
   their `solver` shell holds in `variables.problem` — so the header can wire its
   "Active problem" link on pages that carry no problem number in the URL.
 
+- **Guides** — `GET /index` serves the guides index (the default left-pane content),
+  and `GET /docs/<name>` renders a `docs/` Markdown guide to HTML (markdown-it-py,
+  with heading anchors matching `update_doc.py` and code highlighted client-side).
+
 - **Code editor** — `GET /edit/<n>/<file>` serves the editable code editor for a
   solution file (the read-only viewer above never edits); `POST /edit/<n>/<file>`
   validates and saves it, `DELETE /edit/<n>/<file>` removes it, and `POST /edit/lint`
@@ -43,6 +47,7 @@ from subprocess import run
 from typing import Any
 
 from aiohttp import WSCloseCode, WSMsgType, web
+from markdown_it import MarkdownIt
 
 from solver.config import config
 from solver.core.problems import Problem, problems
@@ -55,12 +60,15 @@ from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
 #: Top-level static page assets served verbatim from `config.static_file_dir`.
 _STATIC_ASSETS: frozenset[str] = frozenset({
     'code.css', 'code.html', 'code.js', 'common.css', 'favicon.svg', 'header.css', 'header.html',
-    'header.js', 'problem.css', 'problem.html', 'problem.js', 'problems.json',
+    'header.js', 'index.css', 'docs.css', 'problem.css', 'problem.html', 'problem.js', 'problems.json',
     'solver.css', 'solver-theme.css', 'solver.html', 'solver.js', 'summary.css',
     'summary.html', 'summary.js',
     'login.css', 'login.js', 'srp-client.js', 'register.css', 'register.js',
     'password.css', 'password.js',
 })
+
+#: Markdown renderer for the docs/ guides (GitHub-flavoured: tables + strikethrough).
+_MD = MarkdownIt('commonmark').enable(['table', 'strikethrough'])
 
 #: mime type of a served problem file → highlight.js language for the code viewer.
 _CODE_LANGUAGES: dict[str, str] = {
@@ -104,6 +112,53 @@ async def _serve_landing_page(request: web.Request) -> web.StreamResponse:
 async def _serve_summary_page(request: web.Request) -> web.StreamResponse:
     """Serve the solutions summary page (`/summary`)."""
     return web.FileResponse(config.static_file_dir / 'summary/summary.html')
+
+
+async def _serve_index_page(request: web.Request) -> web.StreamResponse:
+    """Serve the guides index — the default left-pane content (`GET /index`)."""
+    return web.FileResponse(config.static_file_dir / 'index/index.html')
+
+
+def _doc_slug(text: str) -> str:
+    """GitHub-style heading slug — matches `update_doc.py`'s catalogue anchors, so a
+    guide's `commands-index.md#command-…` links resolve to the rendered headings."""
+    return re.sub(r'[^a-z0-9 -]+', '', text.lower()).strip(' ').replace(' ', '-').strip('-')
+
+
+def _render_markdown(text: str) -> str:
+    """Render a guide's Markdown to HTML: slugged heading ids + intra-doc links rewired.
+
+    Each heading gets the same slug `update_doc.py` assumes, so in-page and cross-doc
+    `#anchor` links land; relative `foo.md` links are rewritten to the `/docs/` route.
+    """
+    tokens = _MD.parse(text)
+    for i, token in enumerate(tokens):
+        if token.type == 'heading_open':
+            token.attrSet('id', _doc_slug(tokens[i + 1].content))
+    rendered = _MD.renderer.render(tokens, _MD.options, {})
+    return re.sub(r'href="([\w-]+)\.md(#[^"]*)?"', r'href="/docs/\1\2"', rendered)
+
+
+async def _serve_doc(request: web.Request) -> web.StreamResponse:
+    """Render a `docs/` Markdown guide as an HTML page (`GET /docs/<name>`).
+
+    *name* is a guide stem (an optional `.md` suffix is stripped, so a rewritten
+    `foo.md` cross-link resolves); anything that is not a bare `[\\w-]+` name, or a
+    guide that does not exist, is 404. The rendered HTML is injected into the docs
+    viewer template, which highlights code client-side (highlight.js).
+    """
+    name = request.match_info['name']
+    if name.endswith('.md'):
+        name = name[:-3]
+    if not re.fullmatch(r'[\w-]+', name):
+        raise web.HTTPNotFound()
+    try:
+        text = (config.docs_dir / f'{name}.md').read_text(encoding='utf-8')
+    except (FileNotFoundError, OSError):
+        raise web.HTTPNotFound()
+    template = (config.static_file_dir / 'docs/docs.html').read_text(encoding='utf-8')
+    page = template.replace('{{TITLE}}', html.escape(name)).replace('{{CONTENT}}', _render_markdown(text))
+    return _bytes_response(page.encode('utf-8'), 'text/html')
 
 
 def _active_problem(email: str) -> int:
@@ -603,6 +658,7 @@ def build_app(save: bool) -> web.Application:
         web.get('/', _serve_landing_page),  # terminal (landing page)
         web.get('/active-problem', _serve_active_problem),
         web.post('/cmd', functools.partial(_run_command, save=save)),  # dispatch to the web shell
+        web.get(r'/docs/{name}', _serve_doc),  # a rendered docs/ Markdown guide
         web.post('/edit/lint', _lint_file),  # stateless lint (suffix-keyed)
         web.get('/edit/progress', _serve_progress_page),
         web.post('/edit/progress', _save_progress_page),
@@ -610,6 +666,7 @@ def build_app(save: bool) -> web.Application:
         web.post(r'/edit/{problem_number:\d+}/{filename:.+}', _save_problem_file),
         web.delete(r'/edit/{problem_number:\d+}/{filename:.+}', _delete_problem_file),
         web.get('/favicon.ico', _serve_favicon),
+        web.get('/index', _serve_index_page),  # guides index (default left-pane content)
         web.get('/summary', _serve_summary_page),
         web.get(r'/vendor/{filename:.+}', _serve_vendor_asset),  # vendored editor JS/CSS/etc.
         web.get('/ws', ws_handler),  # terminal WebSocket

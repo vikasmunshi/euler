@@ -86,6 +86,7 @@ window.addEventListener('message', (e) => {
 });
 
 // Fixed internal targets + click delegation for every glyph that drives the iframe.
+setInternal(document.getElementById('nav-index'), '/index');
 setInternal(document.getElementById('nav-summary'), '/summary');
 setInternal(document.getElementById('nav-progress'), '/edit/progress');
 document.getElementById('nav').addEventListener('click', (e) => {
