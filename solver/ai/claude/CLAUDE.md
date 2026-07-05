@@ -136,15 +136,15 @@ solver/
     pty_manager.py   — Persistent per-user PTY shells: one long-lived `solver` shell per web user.
     auth/            — Web authentication for solver-web.
       commands.py    — The `users` shell command: manage web-auth accounts from the solver shell.
-      mail.py        — Send the registration OTP by email via Gmail SMTP.
-      otp.py         — One-time passwords and the shared pending-registration store.
+      mail.py        — Send the registration / reset link by email via Gmail SMTP.
+      pending.py     — Persistent pending-registration store: the secure registration / reset links.
       policy.py      — Auth policy constants (lifetimes, cookie names, password rules).
       ratelimit.py   — A small in-memory sliding-window rate limiter for the auth endpoints.
       remember.py    — Persistent "remember me" tokens (selector\:validator, rotated on use).
       routes.py      — HTTP layer for web authentication: SRP login endpoints + the gating middleware.
       sessions.py    — In-memory web session table.
       srp.py         — Secure Remote Password (SRP-6a) primitives for web authentication.
-      users.py       — User store for web authentication: the SRP verifier database at ``keys/users.json``.
+      users.py       — User store for web authentication: the SRP verifier database at ``keys/.users.json``.
 ```
 <!-- /GEN:package-layout -->
 

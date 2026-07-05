@@ -29,9 +29,6 @@ euler.iml
 euler.ipr
 euler.iws
 htmlcov/
-keys/pending.json
-keys/remember.json
-keys/users.json
 lib/
 lib64/
 local_settings.py

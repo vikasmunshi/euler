@@ -48,7 +48,7 @@ solver.utils.update_doc,True,True,True
 solver.web.app,,,
 solver.web.auth.commands,True,True,True
 solver.web.auth.mail,,,
-solver.web.auth.otp,,,
+solver.web.auth.pending,,,
 solver.web.auth.policy,,,
 solver.web.auth.ratelimit,,,
 solver.web.auth.remember,,,

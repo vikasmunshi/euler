@@ -11,36 +11,42 @@
 <body>
     <main class="login-card">
         <h1>solver</h1>
-        <p class="subtitle">Complete your registration</p>
+        <p class="subtitle">Set your password</p>
 
-        <section id="step1">
-            <form id="verify-form" novalidate>
-                <label for="email">Email</label>
-                <input id="email" name="email" type="email" autocomplete="username"
-                       required autofocus spellcheck="false">
-                <label for="otp">Registration code</label>
-                <input id="otp" name="otp" inputmode="numeric" autocomplete="one-time-code"
-                       required spellcheck="false">
-                <p class="hint">Enter the code sent to your email.</p>
-                <button id="verify" type="submit">Verify code</button>
-            </form>
+        <section id="checking">
+            <p class="hint">Validating your link…</p>
         </section>
 
-        <section id="step2" class="hidden">
+        <section id="invalid" class="hidden">
+            <p class="error">This link is invalid or has expired. Ask an admin to send a new one.</p>
+        </section>
+
+        <section id="step-password" class="hidden">
             <form id="password-form" novalidate>
+                <label for="account">Account</label>
+                <input id="account" name="account" type="email" autocomplete="username"
+                       readonly tabindex="-1">
                 <label for="password">Choose a password</label>
                 <input id="password" name="password" type="password"
-                       autocomplete="new-password" required>
+                       autocomplete="new-password" required autofocus>
                 <label for="confirm">Confirm password</label>
                 <input id="confirm" name="confirm" type="password"
                        autocomplete="new-password" required>
-                <p class="hint">At least 12 characters.</p>
+                <div class="generator">
+                    <button id="generate" type="button" class="secondary">Generate</button>
+                    <input id="generated" type="text" readonly placeholder="a strong password"
+                           spellcheck="false" tabindex="-1">
+                    <button id="copy" type="button" class="secondary" hidden>Copy</button>
+                    <button id="use" type="button" class="secondary" hidden>Use</button>
+                </div>
+                <p class="hint">At least 16 characters, with a lowercase and uppercase letter,
+                   a digit, and a special character.</p>
                 <button id="create" type="submit">Create account</button>
             </form>
         </section>
 
         <section id="done" class="hidden">
-            <p class="success">Account created. You can now <a href="/login">sign in</a>.</p>
+            <p class="success">Password set. You can now <a href="/login">sign in</a>.</p>
         </section>
 
         <p id="error" class="error" role="alert" aria-live="polite"></p>

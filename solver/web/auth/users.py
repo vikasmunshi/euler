@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""User store for web authentication: the SRP verifier database at ``keys/users.json``.
+"""User store for web authentication: the SRP verifier database at ``keys/.users.json``.
 
 Holds one entry per user, keyed by normalised email, recording only the SRP
 ``{salt, verifier}`` (never a password or password-equivalent) plus bookkeeping.

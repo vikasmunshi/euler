@@ -4,8 +4,8 @@
 
 Slows brute force against the unauthenticated login/registration endpoints:
 at most `max_requests` per `window_seconds` for a given key (the client IP). It
-is per-process and best-effort — coarse defense-in-depth alongside the per-OTP
-attempt cap and SRP itself, not a distributed quota.
+is per-process and best-effort — coarse defense-in-depth alongside the single-use
+secure-link tokens and SRP itself, not a distributed quota.
 """
 from __future__ import annotations
 

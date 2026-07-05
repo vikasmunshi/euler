@@ -17,7 +17,7 @@ from aiohttp import web
 from aiohttp.test_utils import AioHTTPTestCase
 
 from solver.web.auth import policy, routes
-from solver.web.auth.otp import PendingStore
+from solver.web.auth.pending import PendingStore
 from solver.web.auth.remember import RememberStore
 from solver.web.auth.routes import auth_middleware, setup_auth
 from solver.web.auth.srp import SrpClient, SrpToken
@@ -124,36 +124,47 @@ class AuthRoutesTests(AioHTTPTestCase):
         self.assertEqual(verify.status, 401)
 
     async def test_registration_flow_creates_active_user(self) -> None:
-        email, otp, password = 'newuser@nowhere.test', '135790', 'a brand new password'
+        email, password = 'newuser@nowhere.test', 'a brand new password'
         self.app[routes.USERS].invite(email)
-        self.pending.invite(email, otp)
+        link_token = self.pending.invite(email, 'register')     # admin `users add`
 
-        pre = await self.client.post('/register/verify', json={'email': email, 'otp': otp})
-        self.assertEqual(pre.status, 200)                       # OTP pre-check (non-consuming)
+        validate = await self.client.post('/register/validate', json={'token': link_token})
+        self.assertEqual(validate.status, 200)                  # non-consuming pre-check
+        self.assertEqual((await validate.json())['email'], email)  # token binds the email
 
-        token = SrpToken.create(email, password)                # browser derives salt+verifier
+        srp = SrpToken.create(email, password)                  # browser derives salt+verifier
         complete = await self.client.post('/register/complete', json={
-            'email': email, 'otp': otp, 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+            'token': link_token, 'salt': srp.salt.hex(), 'verifier': format(srp.verifier, 'x')})
         self.assertEqual(complete.status, 200)
         self.assertTrue(self.app[routes.USERS].is_active(email))
 
         _client, verify = await self._login(email, password)    # can now log in
         self.assertEqual(verify.status, 200)
 
-    async def test_register_verify_rejects_bad_otp(self) -> None:
-        self.pending.invite('newuser@nowhere.test', '135790')
-        resp = await self.client.post('/register/verify', json={'email': 'newuser@nowhere.test', 'otp': '000000'})
+    async def test_register_validate_rejects_bad_token(self) -> None:
+        resp = await self.client.post('/register/validate', json={'token': 'bogus'})
         self.assertEqual(resp.status, 401)
 
-    async def test_register_complete_rejects_bad_otp(self) -> None:
+    async def test_register_complete_rejects_bad_token(self) -> None:
         email = 'newuser@nowhere.test'
         self.app[routes.USERS].invite(email)
-        self.pending.invite(email, '135790')
-        token = SrpToken.create(email, 'a brand new password')
-        resp = await self.client.post('/register/complete', json={
-            'email': email, 'otp': '999999', 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+        self.pending.invite(email, 'register')                  # a real token exists…
+        srp = SrpToken.create(email, 'a brand new password')
+        resp = await self.client.post('/register/complete', json={  # …but the wrong one is sent
+            'token': 'wrong', 'salt': srp.salt.hex(), 'verifier': format(srp.verifier, 'x')})
         self.assertEqual(resp.status, 401)
         self.assertFalse(self.app[routes.USERS].is_active(email))
+
+    async def test_register_token_is_single_use(self) -> None:
+        email = 'newuser@nowhere.test'
+        self.app[routes.USERS].invite(email)
+        link_token = self.pending.invite(email, 'register')
+        srp = SrpToken.create(email, 'a brand new password')
+        body = {'token': link_token, 'salt': srp.salt.hex(), 'verifier': format(srp.verifier, 'x')}
+        first = await self.client.post('/register/complete', json=body)
+        self.assertEqual(first.status, 200)
+        second = await self.client.post('/register/complete', json=body)  # consumed → gone
+        self.assertEqual(second.status, 401)
 
     async def test_remember_me_sets_cookie_only_when_requested(self) -> None:
         _c, without = await self._login(_EMAIL, _PASSWORD, remember=False)
@@ -214,12 +225,12 @@ class AuthRoutesTests(AioHTTPTestCase):
         self.assertEqual(resp.headers.get('Referrer-Policy'), 'no-referrer')
 
     async def test_password_reset_overwrites_verifier(self) -> None:
-        # `users reset` seeds an OTP; the browser then re-registers with a new password.
-        self.pending.invite(_EMAIL, '246800')
+        # `users reset` mints a secure link; the browser then re-registers with a new password.
+        link_token = self.pending.invite(_EMAIL, 'reset')
         new_password = 'a totally different passphrase'
         token = SrpToken.create(_EMAIL, new_password)
         complete = await self.client.post('/register/complete', json={
-            'email': _EMAIL, 'otp': '246800', 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
+            'token': link_token, 'salt': token.salt.hex(), 'verifier': format(token.verifier, 'x')})
         self.assertEqual(complete.status, 200)
         _c, with_new = await self._login(_EMAIL, new_password)
         self.assertEqual(with_new.status, 200)

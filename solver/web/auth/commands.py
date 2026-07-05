@@ -3,10 +3,11 @@
 """The `users` shell command: manage web-auth accounts from the solver shell.
 
 Registration is invite-only. ``users add <email>`` creates a **disabled,
-password-less** account in ``keys/users.json`` and emails a one-time code; the
-user chooses their own password in the browser at ``/register`` (the server never
-sees it). If Gmail SMTP is not configured, the code is printed on the console so
-the admin can deliver it manually. The other actions manage existing accounts.
+password-less** account in ``keys/.users.json`` and emails a **secure link** (valid
+24 h); the user opens it and chooses their own password in the browser at
+``/register`` (the server never sees it). If Gmail SMTP is not configured, the link
+is printed on the console so the admin can deliver it manually. The other actions
+manage existing accounts.
 """
 from __future__ import annotations
 
@@ -17,19 +18,19 @@ from typing import Literal
 from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.web.auth import mail
-from solver.web.auth.otp import PendingStore, generate_otp
+from solver.web.auth.pending import PendingStore
 from solver.web.auth.users import UserStore, normalize_email
 
 
 @register(help_text='Manage web-auth users ([accent.dim]list|add|reset|remove|disable|enable[/accent.dim]).')
 def users(action: Literal['list', 'add', 'reset', 'remove', 'disable', 'enable'] = 'list',
           email: str = '') -> int:
-    """List or manage the web-auth accounts in `keys/users.json`.
+    """List or manage the web-auth accounts in `keys/.users.json`.
 
     Args:
         action:  'list' (default) shows every account; 'add' invites an email
-                 (disabled + emailed OTP; the user sets their own password at
-                 /register); 'reset' emails a fresh code so a registered user can
+                 (disabled + emailed secure link; the user sets their own password
+                 at /register); 'reset' emails a fresh link so a registered user can
                  choose a new password; 'remove' deletes an account; 'disable' /
                  'enable' toggle whether a registered account may log in.
         email:   The account email (required for every action except 'list').
@@ -49,7 +50,7 @@ def users(action: Literal['list', 'add', 'reset', 'remove', 'disable', 'enable']
         return _reset_user(store, PendingStore(config.pending_file), key)
     if action == 'remove':
         removed = store.remove(key)
-        PendingStore(config.pending_file).remove(key)  # also drop any pending OTP
+        PendingStore(config.pending_file).remove_email(key)  # also drop any pending link
         return _report(removed, f'removed {key}', f'no such user: {key}')
     if action == 'disable':
         return _report(store.set_disabled(key, True), f'disabled {key}', f'no such user: {key}')
@@ -75,21 +76,20 @@ def _list_users(store: UserStore) -> int:
 
 
 def _invite_user(store: UserStore, pending: PendingStore, key: str) -> int:
-    """Invite `key`: create a disabled account, seed a pending OTP, and email the code."""
+    """Invite `key`: create a disabled account, mint a secure link, and email it."""
     record = store.get(key)
     if record is not None and record.registered:
         console.print(f'[error]error:[/error] [muted]{key} is already registered '
-                      f'(use `users reset` to send a new-password code, or remove it first)[/muted]')
+                      f'(use `users reset` to send a new-password link, or remove it first)[/muted]')
         return ExitCodes.EXIT_ERROR
     store.invite(key)
-    otp = generate_otp()
-    pending.invite(key, otp)
-    return _deliver_otp(key, otp, f'[success]invited {key}[/success] '
-                        f'[muted]— OTP emailed; they set their password at /register[/muted]')
+    token = pending.invite(key, 'register')
+    return _deliver_link(key, token, 'register', f'[success]invited {key}[/success] '
+                         f'[muted]— link emailed; they set their password at /register[/muted]')
 
 
 def _reset_user(store: UserStore, pending: PendingStore, key: str) -> int:
-    """Send a fresh OTP so a registered `key` can choose a new password at /register.
+    """Send a fresh secure link so a registered `key` can choose a new password at /register.
 
     The account stays enabled and keeps its current password until the user completes
     the reset (registration overwrites the verifier), so a reset never locks anyone out.
@@ -98,19 +98,19 @@ def _reset_user(store: UserStore, pending: PendingStore, key: str) -> int:
     if record is None or not record.registered:
         console.print(f'[error]error:[/error] [muted]{key} is not a registered user[/muted]')
         return ExitCodes.EXIT_ERROR
-    otp = generate_otp()
-    pending.invite(key, otp)
-    return _deliver_otp(key, otp, f'[success]reset code sent to {key}[/success] '
-                        f'[muted]— they set a new password at /register[/muted]')
+    token = pending.invite(key, 'reset')
+    return _deliver_link(key, token, 'reset', f'[success]reset link sent to {key}[/success] '
+                         f'[muted]— they set a new password at /register[/muted]')
 
 
-def _deliver_otp(key: str, otp: str, success: str) -> int:
-    """Email the OTP to `key`; on SMTP failure print it for manual delivery. Prints `success`."""
+def _deliver_link(key: str, token: str, kind: str, success: str) -> int:
+    """Email the secure `kind` link to `key`; on SMTP failure print it for manual delivery."""
     try:
-        mail.send_otp(key, otp)
+        mail.send_registration_link(key, token, kind)
     except Exception as exc:
-        console.print(f'[warning]could not email code to {key}:[/warning] [muted]{exc}[/muted]')
-        console.print(f'[muted]deliver this code to {key} manually (valid ~10 min):[/muted] [accent]{otp}[/accent]')
+        console.print(f'[warning]could not email link to {key}:[/warning] [muted]{exc}[/muted]')
+        console.print(f'[muted]deliver this link to {key} manually (valid 24 h):[/muted] '
+                      f'[accent]{mail.registration_link(token)}[/accent]')
         return ExitCodes.EXIT_OK
     console.print(success)
     return ExitCodes.EXIT_OK

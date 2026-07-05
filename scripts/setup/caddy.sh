@@ -3,7 +3,7 @@
 # ==================
 #
 # Installs, updates, or removes the Caddy web server used as the HTTPS front end
-# for solver-web (see docs/tls-setup.md). Caddy terminates TLS and reverse-proxies
+# for solver-web (see docs/tls-and-auth.md). Caddy terminates TLS and reverse-proxies
 # to the aiohttp server on loopback.
 #
 # Stock Caddy from the official apt repository is sufficient: certificates are
@@ -17,7 +17,7 @@
 # not clash on :80/:443 with our own configuration, then installs our own
 # `caddy-euler.service` (runs Caddy as the repo owner against ./Caddyfile). That
 # unit is enabled immediately and started once the cert + Caddyfile are in place
-# (see docs/tls-setup.md for the full flow: acme.sh issues the cert Caddy loads).
+# (see docs/tls-and-auth.md for the full flow: acme.sh issues the cert Caddy loads).
 #
 # The Caddyfile itself carries the deployment's hostname, so it is gitignored and
 # generated here at install time from a hostname supplied on the command line
@@ -120,7 +120,7 @@ disable_default_service() {
 # TLS with the acme.sh-issued cert (loaded via `tls`, paths relative to the unit's
 # WorkingDirectory = repo root) and reverse-proxies to the loopback aiohttp server.
 # The Caddyfile is gitignored (it carries the deployment hostname) and regenerated
-# here, so keep it in sync with the reference in docs/tls-setup.md.
+# here, so keep it in sync with the reference in docs/tls-and-auth.md.
 generate_caddyfile() {
     local hostname="$1"
     echo "Writing ${CADDYFILE} for ${hostname}..."
@@ -133,7 +133,7 @@ generate_caddyfile() {
 # to keys/ — Caddy loads it via the \`tls\` directive and performs no ACME itself.
 # Cert paths are relative to Caddy's working directory (the repo root, set by
 # caddy-euler.service's WorkingDirectory) so this file is not machine-specific.
-# See docs/tls-setup.md.
+# See docs/tls-and-auth.md.
 {
 	# DNS-01 needs no inbound port, so keep Caddy off :80 (no HTTP->HTTPS redirect).
 	auto_https disable_redirects

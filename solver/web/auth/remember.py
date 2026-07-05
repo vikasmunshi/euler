@@ -4,7 +4,7 @@
 
 A remember-me cookie is ``<selector>:<validator>``. The server stores, per
 selector, the user's email, an HMAC of the validator (keyed by a persistent server
-secret), and an expiry — in ``keys/remember.json`` (gitignored, ``0600``) so logins
+secret), and an expiry — in ``keys/.remember.json`` (gitignored, ``0600``) so logins
 survive a server restart even though in-memory sessions do not.
 
 On each use the validator is **rotated** (one-time-use): a fresh validator replaces

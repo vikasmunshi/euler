@@ -4,7 +4,7 @@
 #
 # Installs the acme.sh ACME client and issues/renews the Let's Encrypt certificate
 # for the solver-web HTTPS front end using a DNS-01 challenge, then deploys the cert
-# into keys/ where Caddy loads it (see docs/tls-setup.md).
+# into keys/ where Caddy loads it (see docs/tls-and-auth.md).
 #
 # Why acme.sh: DNS-01 issuance is delegated to acme.sh rather than Caddy, whose DNS
 # provider plugins must be compiled in (and caddy-dns/namedotcom is unmaintained and

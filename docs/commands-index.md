@@ -1098,12 +1098,12 @@ users
 ```
 
 ```text
-List or manage the web-auth accounts in `keys/users.json`.
+List or manage the web-auth accounts in `keys/.users.json`.
 
 Args:
     action:  'list' (default) shows every account; 'add' invites an email
-             (disabled + emailed OTP; the user sets their own password at
-             /register); 'reset' emails a fresh code so a registered user can
+             (disabled + emailed secure link; the user sets their own password
+             at /register); 'reset' emails a fresh link so a registered user can
              choose a new password; 'remove' deletes an account; 'disable' /
              'enable' toggle whether a registered account may log in.
     email:   The account email (required for every action except 'list').

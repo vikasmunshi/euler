@@ -156,26 +156,80 @@ export async function srpMakeVerifier(email, password) {
     return { salt: bytesToHex(salt), verifier: modpow(g, x, N).toString(16) };
 }
 
-// Pre-check an OTP (does not consume it) — for immediate feedback on the register page.
-export async function srpVerifyOtp(email, otp) {
-    const response = await fetch('/register/verify', {
+// Validate a registration/reset secure-link token (does not consume it). Returns the
+// bound email so the register page can show it before the user sets a password.
+export async function srpValidateToken(token) {
+    const response = await fetch('/register/validate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizeEmail(email), otp }),
+        body: JSON.stringify({ token }),
+    });
+    if (!response.ok) return { ok: false };
+    const { email } = await response.json();
+    return { ok: true, email };
+}
+
+// Complete registration: derive the verifier locally (for `email`, which the server
+// re-derives from the token) and submit it with the secure-link token.
+export async function srpRegister(token, email, password) {
+    const { salt, verifier } = await srpMakeVerifier(email, password);
+    const response = await fetch('/register/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, salt, verifier }),
     });
     return { ok: response.ok };
 }
 
-// Complete registration: derive the verifier locally and submit it with the OTP.
-export async function srpRegister(email, otp, password) {
-    const nemail = normalizeEmail(email);
-    const { salt, verifier } = await srpMakeVerifier(nemail, password);
-    const response = await fetch('/register/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: nemail, otp, salt, verifier }),
-    });
-    return { ok: response.ok };
+// --- password policy (mirrors solver/web/auth/policy.py) --------------------
+export const MIN_PASSWORD_LENGTH = 16;
+const _LOWER = 'abcdefghijklmnopqrstuvwxyz';
+const _UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const _DIGIT = '0123456789';
+const _SPECIAL = '!@#$%^&*()-_=+[]{};:,.<>?';
+
+function _hasClass(password, set) {
+    for (const ch of password) if (set.includes(ch)) return true;
+    return false;
+}
+
+// Validate against the complexity policy: >= MIN length and at least one lowercase,
+// uppercase, digit, and special character. Returns { ok, message }.
+export function validatePassword(password) {
+    if (password.length < MIN_PASSWORD_LENGTH) {
+        return { ok: false, message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.` };
+    }
+    const missing = [];
+    if (!_hasClass(password, _LOWER)) missing.push('a lowercase letter');
+    if (!_hasClass(password, _UPPER)) missing.push('an uppercase letter');
+    if (!_hasClass(password, _DIGIT)) missing.push('a digit');
+    if (!_hasClass(password, _SPECIAL)) missing.push('a special character');
+    if (missing.length) return { ok: false, message: 'Password must include ' + missing.join(', ') + '.' };
+    return { ok: true, message: '' };
+}
+
+// Unbiased index in [0, n) via rejection sampling over crypto.getRandomValues.
+function _randIndex(n) {
+    const limit = Math.floor(0x100000000 / n) * n;
+    const buf = new Uint32Array(1);
+    let x;
+    do { crypto.getRandomValues(buf); x = buf[0]; } while (x >= limit);
+    return x % n;
+}
+
+// Generate a random policy-compliant password: one char from each required class,
+// filled to length from the full set, then shuffled — all draws crypto-random.
+export function generatePassword(length = 20) {
+    const size = Math.max(length, MIN_PASSWORD_LENGTH);
+    const all = _LOWER + _UPPER + _DIGIT + _SPECIAL;
+    const pick = (set) => set[_randIndex(set.length)];
+    const chars = [pick(_LOWER), pick(_UPPER), pick(_DIGIT), pick(_SPECIAL)];
+    while (chars.length < size) chars.push(pick(all));
+    for (let i = chars.length - 1; i > 0; i--) {           // Fisher–Yates shuffle
+        const j = _randIndex(i + 1);
+        [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+    return chars.join('');
 }
 
 // Change the signed-in user's password: fetch their email (for the SRP salt/verifier
@@ -241,5 +295,6 @@ export async function _selfTest() {
     return pass;
 }
 
-export const SRP = { srpLogin, srpMakeVerifier, srpVerifyOtp, srpRegister, srpChangePassword, _selfTest };
+export const SRP = { srpLogin, srpMakeVerifier, srpValidateToken, srpRegister, srpChangePassword,
+    validatePassword, generatePassword, _selfTest };
 if (typeof window !== 'undefined') window.SRP = SRP;

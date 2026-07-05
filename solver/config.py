@@ -191,9 +191,9 @@ class Config(AttributeDict):
             'server_lock_file': root_dir / '.server.lock',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
-            'users_file': root_dir / 'keys' / 'users.json',  # web-auth SRP verifiers (separate from crypto keys)
-            'pending_file': root_dir / 'keys' / 'pending.json',  # invite OTPs, shared shell<->server
-            'remember_file': root_dir / 'keys' / 'remember.json',  # persistent remember-me tokens
+            'users_file': root_dir / 'keys' / '.users.json',  # web-auth SRP verifiers (separate from crypto keys)
+            'pending_file': root_dir / 'keys' / '.pending.json',  # invite/reset link tokens, shared shell<->server
+            'remember_file': root_dir / 'keys' / '.remember.json',  # persistent remember-me tokens
             'session_secret_file': root_dir / 'keys' / '.session-secret',  # HMAC key for remember-me
             'static_file_dir': root_dir / 'solver/web-content',
             'static_file_problems': root_dir / 'solver/web-content/problems.json',

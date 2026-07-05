@@ -1,59 +1,53 @@
-// register.js — drive the two-step invite registration (verify OTP → set password).
-import { srpVerifyOtp, srpRegister } from '/srp-client.js';
+// register.js — validate the emailed secure link, then set the password.
+import { srpValidateToken, srpRegister, validatePassword, generatePassword } from '/srp-client.js';
 
-const MIN_PASSWORD_LENGTH = 12;  // mirrors solver.web.auth.policy.MIN_PASSWORD_LENGTH
-
-const step1 = document.getElementById('step1');
-const step2 = document.getElementById('step2');
+const checking = document.getElementById('checking');
+const invalid = document.getElementById('invalid');
+const stepPassword = document.getElementById('step-password');
 const done = document.getElementById('done');
 const errorBox = document.getElementById('error');
 
-const emailInput = document.getElementById('email');
-const otpInput = document.getElementById('otp');
-const verifyButton = document.getElementById('verify');
+const accountInput = document.getElementById('account');
 const passwordInput = document.getElementById('password');
 const confirmInput = document.getElementById('confirm');
 const createButton = document.getElementById('create');
 
-let verifiedEmail = null;
-let verifiedOtp = null;
+const token = new URLSearchParams(location.search).get('token') || '';
+let accountEmail = null;
 
-// Prefill the email from the link in the OTP email (/register?email=…).
-const prefillEmail = new URLSearchParams(location.search).get('email');
-if (prefillEmail) {
-    emailInput.value = prefillEmail;
-    otpInput.focus();
-}
+wireGenerator(passwordInput, confirmInput);
 
-document.getElementById('verify-form').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    errorBox.textContent = '';
-    verifyButton.disabled = true;
+// On load: the page is reachable only through the emailed link, so validate the
+// token up front and show the target email (or an "invalid link" message).
+(async () => {
+    if (!token) {
+        checking.classList.add('hidden');
+        invalid.classList.remove('hidden');
+        return;
+    }
     try {
-        const email = emailInput.value;
-        const otp = otpInput.value.trim();
-        const { ok } = await srpVerifyOtp(email, otp);
+        const { ok, email } = await srpValidateToken(token);
+        checking.classList.add('hidden');
         if (ok) {
-            verifiedEmail = email;
-            verifiedOtp = otp;
-            step1.classList.add('hidden');
-            step2.classList.remove('hidden');
+            accountEmail = email;
+            accountInput.value = email;
+            stepPassword.classList.remove('hidden');
             passwordInput.focus();
         } else {
-            errorBox.textContent = 'Invalid or expired code.';
+            invalid.classList.remove('hidden');
         }
     } catch (err) {
-        errorBox.textContent = 'Verification failed — please try again.';
-    } finally {
-        verifyButton.disabled = false;
+        checking.classList.add('hidden');
+        invalid.classList.remove('hidden');
     }
-});
+})();
 
 document.getElementById('password-form').addEventListener('submit', async (event) => {
     event.preventDefault();
     errorBox.textContent = '';
-    if (passwordInput.value.length < MIN_PASSWORD_LENGTH) {
-        errorBox.textContent = `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
+    const { ok: valid, message } = validatePassword(passwordInput.value);
+    if (!valid) {
+        errorBox.textContent = message;
         return;
     }
     if (passwordInput.value !== confirmInput.value) {
@@ -62,12 +56,12 @@ document.getElementById('password-form').addEventListener('submit', async (event
     }
     createButton.disabled = true;
     try {
-        const { ok } = await srpRegister(verifiedEmail, verifiedOtp, passwordInput.value);
+        const { ok } = await srpRegister(token, accountEmail, passwordInput.value);
         if (ok) {
-            step2.classList.add('hidden');
+            stepPassword.classList.add('hidden');
             done.classList.remove('hidden');
         } else {
-            errorBox.textContent = 'Registration failed — the code may have expired.';
+            errorBox.textContent = 'Registration failed — the link may have expired.';
         }
     } catch (err) {
         errorBox.textContent = 'Registration failed — please try again.';
@@ -75,3 +69,34 @@ document.getElementById('password-form').addEventListener('submit', async (event
         createButton.disabled = false;
     }
 });
+
+// Wire the "Generate / Copy / Use" password generator (same UI on the change-password
+// page). `fields` are the inputs the "Use" button fills.
+function wireGenerator(...fields) {
+    const generate = document.getElementById('generate');
+    const output = document.getElementById('generated');
+    const copy = document.getElementById('copy');
+    const use = document.getElementById('use');
+    if (!generate || !output) return;
+
+    generate.addEventListener('click', () => {
+        output.value = generatePassword();
+        copy.hidden = false;
+        use.hidden = false;
+    });
+    copy.addEventListener('click', async () => {
+        if (!output.value) return;
+        try {
+            await navigator.clipboard.writeText(output.value);
+            copy.textContent = 'Copied';
+            setTimeout(() => { copy.textContent = 'Copy'; }, 1500);
+        } catch (err) {
+            output.select();  // clipboard blocked → let the user copy manually
+        }
+    });
+    use.addEventListener('click', () => {
+        if (!output.value) return;
+        for (const field of fields) field.value = output.value;
+        fields[0].focus();
+    });
+}
