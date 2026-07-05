@@ -1139,7 +1139,7 @@ Wrap the current master key to `public_key` and add it to enc-key.json (proof-of
 #### Command: `users`
 
 Manage web-auth users (list|add|reset|remove|disable|enable).
-* channels: terminal · profiles: admin
+* channels: terminal, web · profiles: admin
 
 ```
 users
