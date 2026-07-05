@@ -44,9 +44,9 @@ solver.utils.scripts,True,True,True
 solver.utils.search,True,True,True
 solver.utils.shell_utils,True,True,True
 solver.utils.summary,True,True,True
-solver.utils.update_doc,True,True,True
+solver.utils.update_doc,True,True,False
 solver.web.app,,,
-solver.web.auth.commands,True,True,True
+solver.web.auth.commands,True,True,False
 solver.web.auth.mail,,,
 solver.web.auth.pending,,,
 solver.web.auth.policy,,,

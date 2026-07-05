@@ -42,7 +42,15 @@ class UserStoreTests(unittest.TestCase):
         self.assertTrue(record.registered)
         self.assertFalse(record.disabled)
         self.assertEqual(record.token, token)
+        self.assertEqual(record.profile, 'user')             # default profile
         self.assertTrue(self.store.is_active('USER@b.com'))  # lookup normalizes too
+
+    def test_profile_assigned_at_invite_and_preserved_through_register(self) -> None:
+        self.store.invite('admin@b.com', 'admin')
+        self.assertEqual(self.store.get('admin@b.com').profile, 'admin')  # type: ignore[union-attr]
+        registered = self.store.register('admin@b.com', self._token('admin@b.com'),
+                                         self.store.get('admin@b.com').profile)  # type: ignore[union-attr]
+        self.assertEqual(registered.profile, 'admin')        # survives registration
 
     def test_token_drives_successful_handshake(self) -> None:
         self.store.register('a@b.com', srp.SrpToken.create('a@b.com', 's3cret-passphrase'))
@@ -59,6 +67,7 @@ class UserStoreTests(unittest.TestCase):
         self.assertIsNone(record.salt)
         self.assertIsNone(record.verifier)
         self.assertFalse(self.store.is_active('new@user.com'))  # invited != active
+        self.assertEqual(record.profile, 'user')                 # default profile at invite
         with self.assertRaises(ValueError):
             _ = record.token                                     # no verifier yet
 

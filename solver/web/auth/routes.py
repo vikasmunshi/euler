@@ -260,15 +260,23 @@ async def _register_complete(request: web.Request) -> web.StreamResponse:
     resolved = request.app[PENDING_REG].consume(link_token)
     if resolved is None:
         return _auth_failed()
-    email, _kind = resolved
-    request.app[USERS].register(email, srp_token)
+    email, kind = resolved
+    user = request.app[USERS].get(email)
+    if user is None:
+        raise web.HTTPForbidden()
+    # 'register' completes a fresh invite (must not already be registered); 'reset'
+    # re-keys an existing account (must already be registered). Either way the
+    # stored profile is preserved.
+    if (kind == 'register') == user.registered:
+        raise web.HTTPForbidden()
+    request.app[USERS].register(email, srp_token, user.profile)
     return web.json_response({'ok': True})
 
 
 async def _close_user_sockets(app: web.Application, email: str) -> None:
     """Terminate the user's persistent shell and close its WebSockets (used on logout)."""
     if PTY_MANAGER in app:
-        await app[PTY_MANAGER].close(email)   # kill the background shell itself
+        await app[PTY_MANAGER].close(email)  # kill the background shell itself
     connections = app[WS_CONNECTIONS].pop(email, None)
     for socket in list(connections or ()):
         try:
@@ -280,7 +288,7 @@ async def _close_user_sockets(app: web.Application, email: str) -> None:
 async def _logout(request: web.Request) -> web.StreamResponse:
     """Drop the session/remember token, close the user's web shells, clear cookies, redirect."""
     token = request.cookies.get(policy.SESSION_COOKIE)
-    email = request.app[SESSIONS].email_for(token)   # who is logging out (before we destroy it)
+    email = request.app[SESSIONS].email_for(token)  # who is logging out (before we destroy it)
     request.app[SESSIONS].destroy(token)
     request.app[REMEMBER].revoke(request.cookies.get(policy.REMEMBER_COOKIE))
     if email is not None:
@@ -313,7 +321,10 @@ async def _password_change(request: web.Request) -> web.StreamResponse:
     except (KeyError, ValueError):
         raise web.HTTPBadRequest()
     email = current_email(request)
-    request.app[USERS].register(email, token)
+    user = request.app[USERS].get(email)
+    if user is None or not user.registered:
+        raise web.HTTPForbidden()
+    request.app[USERS].register(email, token, user.profile)
     request.app[REMEMBER].revoke_all(email)
     return web.json_response({'ok': True})
 
@@ -334,7 +345,7 @@ async def auth_middleware(request: web.Request, handler: Handler) -> web.StreamR
     try:
         response = await handler(request)
     except web.HTTPException as exc:
-        _apply_cookies(exc, cookies)   # a promoted request that redirects still gets its cookies
+        _apply_cookies(exc, cookies)  # a promoted request that redirects still gets its cookies
         raise
     _apply_cookies(response, cookies)
     if _wants_html(request):

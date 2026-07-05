@@ -232,7 +232,7 @@ solver/
     new.py           — Solution to Euler $problem.
   utils/
     gh.py            — Utility to retrieve authenticated GitHub user's email and repository owner's email.
-    identity.py      — Ambient user identity: who is this shell running as, for per-user state.
+    identity.py      — Ambient user identity **and profile**: who is this shell running as.
     linter.py        — Utilities for linting code.
     loader.py        — Utility for loading modules.
     misc.py          — The `problems` and `manage-config` commands.

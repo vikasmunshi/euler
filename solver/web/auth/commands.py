@@ -19,12 +19,12 @@ from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.web.auth import mail
 from solver.web.auth.pending import PendingStore
-from solver.web.auth.users import UserStore, normalize_email
+from solver.web.auth.users import Profile, UserStore, normalize_email
 
 
 @register(help_text='Manage web-auth users ([accent.dim]list|add|reset|remove|disable|enable[/accent.dim]).')
 def users(action: Literal['list', 'add', 'reset', 'remove', 'disable', 'enable'] = 'list',
-          email: str = '') -> int:
+          email: str = '', profile: Profile = 'user') -> int:
     """List or manage the web-auth accounts in `keys/.users.json`.
 
     Args:
@@ -34,6 +34,9 @@ def users(action: Literal['list', 'add', 'reset', 'remove', 'disable', 'enable']
                  choose a new password; 'remove' deletes an account; 'disable' /
                  'enable' toggle whether a registered account may log in.
         email:   The account email (required for every action except 'list').
+        profile: Authorization profile for 'add' — 'admin', 'user' (default), or
+                 'guest'; governs which commands the account may run. Ignored by
+                 the other actions (a profile is only assigned at invite time).
     """
     store = UserStore(config.users_file)
     if action == 'list':
@@ -45,7 +48,7 @@ def users(action: Literal['list', 'add', 'reset', 'remove', 'disable', 'enable']
         return ExitCodes.EXIT_ERROR
 
     if action == 'add':
-        return _invite_user(store, PendingStore(config.pending_file), key)
+        return _invite_user(store, PendingStore(config.pending_file), key, profile)
     if action == 'reset':
         return _reset_user(store, PendingStore(config.pending_file), key)
     if action == 'remove':
@@ -71,20 +74,21 @@ def _list_users(store: UserStore) -> int:
             status = '[error]disabled[/error]'
         else:
             status = '[success]active[/success]'
-        console.print(f'[accent.dim]{record.email:<{width}}[/accent.dim] {status} [muted]{record.created}[/muted]')
+        console.print(f'[accent.dim]{record.email:<{width}}[/accent.dim] {status} '
+                      f'[muted]{record.profile:<6} {record.created}[/muted]')
     return ExitCodes.EXIT_OK
 
 
-def _invite_user(store: UserStore, pending: PendingStore, key: str) -> int:
-    """Invite `key`: create a disabled account, mint a secure link, and email it."""
+def _invite_user(store: UserStore, pending: PendingStore, key: str, profile: Profile) -> int:
+    """Invite `key` with `profile`: create a disabled account, mint a secure link, and email it."""
     record = store.get(key)
     if record is not None and record.registered:
         console.print(f'[error]error:[/error] [muted]{key} is already registered '
                       f'(use `users reset` to send a new-password link, or remove it first)[/muted]')
         return ExitCodes.EXIT_ERROR
-    store.invite(key)
+    store.invite(key, profile)
     token = pending.invite(key, 'register')
-    return _deliver_link(key, token, 'register', f'[success]invited {key}[/success] '
+    return _deliver_link(key, token, 'register', f'[success]invited {key} ({profile})[/success] '
                          f'[muted]— link emailed; they set their password at /register[/muted]')
 
 

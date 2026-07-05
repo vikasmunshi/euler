@@ -22,16 +22,21 @@ The file is JSON, written atomically at mode ``0600``:
 """
 from __future__ import annotations
 
-__all__ = ['UserRecord', 'UserStore', 'normalize_email']
+__all__ = ['Profile', 'PROFILES', 'UserRecord', 'UserStore', 'normalize_email']
 
 import json
 import os
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import Any, Literal, NamedTuple, get_args
 
-from solver.web.auth.srp import VERSION, SrpToken
+from solver.web.auth.srp import SrpToken, VERSION
+
+#: A user's authorization profile (drives command availability; see solver.shell.command).
+Profile = Literal['admin', 'user', 'guest']
+#: The profile values, in descending order of privilege (for validation / choices).
+PROFILES: tuple[Profile, ...] = get_args(Profile)
 
 
 def normalize_email(email: str) -> str:
@@ -51,6 +56,7 @@ class UserRecord(NamedTuple):
     verifier: int | None
     created: str
     disabled: bool
+    profile: Profile
 
     @property
     def registered(self) -> bool:
@@ -112,6 +118,7 @@ class UserStore:
             verifier=int(verifier_hex, 16) if verifier_hex else None,
             created=entry['created'],
             disabled=bool(entry.get('disabled', False)),
+            profile=entry.get('profile', 'user')
         )
 
     # -- queries ------------------------------------------------------------
@@ -136,20 +143,22 @@ class UserStore:
         return [self._to_record(email, users[email]) for email in sorted(users)]
 
     # -- mutations ----------------------------------------------------------
-    def invite(self, email: str) -> UserRecord:
-        """Create a disabled, password-less invited account (no-op if it already exists).
+    def invite(self, email: str, profile: Profile = 'user') -> UserRecord:
+        """Create a disabled, password-less invited account with `profile` (no-op if it exists).
 
         Returns the record (existing or new). Registration later sets the verifier and
-        enables it; callers should refuse to re-invite an already-registered user.
+        enables it, preserving this profile; callers should refuse to re-invite an
+        already-registered user.
         """
         key = normalize_email(email)
         data = self._load()
         if key not in data['users']:
-            data['users'][key] = {'created': datetime.now(timezone.utc).isoformat(), 'disabled': True}
+            data['users'][key] = {'created': datetime.now(timezone.utc).isoformat(),
+                                  'disabled': True, 'profile': profile}
             self._save(data)
         return self._to_record(key, data['users'][key])
 
-    def register(self, email: str, token: SrpToken) -> UserRecord:
+    def register(self, email: str, token: SrpToken, profile: Profile = 'user') -> UserRecord:
         """Store the user's SRP verifier and enable the account (registration complete).
 
         Creates the account if absent, otherwise preserves its `created`; always clears
@@ -163,6 +172,7 @@ class UserStore:
             'verifier': format(token.verifier, 'x'),
             'created': existing.get('created') or datetime.now(timezone.utc).isoformat(),
             'disabled': False,
+            'profile': profile,
         }
         data['users'][key] = entry
         self._save(data)

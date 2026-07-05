@@ -15,6 +15,8 @@ remote code execution as the repo owner.** Two independent layers guard it:
   It authenticates *nobody*.
 - **Authentication** (aiohttp `solver/web/auth/`) is the access gate. It sits in
   the app, not in Caddy — Caddy stays a pure TLS reverse proxy.
+- **Authorization** (`solver/commands.csv` + the shell) narrows *which commands* a
+  signed-in identity may run, by profile — see [Part 3](#part-3--command-authorization).
 
 
 ## Architecture
@@ -450,6 +452,90 @@ The `users` command group (`commands.py`) manages accounts without the web flow:
   `no-store`.
 - **No secrets in logs**; `.users.json` / `.pending.json` / `.remember.json` /
   `.session-secret` at `0600`.
+
+---
+
+# Part 3 — Command authorization
+
+Authentication proves *who* the shell is running as; **authorization** decides
+*which commands* that identity may run. The shell is the same `solver` program
+everywhere, so a single mechanism narrows it per context. There are two
+independent, complementary layers:
+
+| Layer | Question | Driven by | Enforced at |
+|---|---|---|---|
+| **Channel-based** | which commands' *modules* load at all | `solver/modules.csv` (`terminal` / `web` columns) | module import (`shell/loader.py`) |
+| **User-based** | which loaded commands a *profile* may run | `solver/commands.csv` (`admin` / `user` / `guest` columns) | the `@command` decorator (`shell/command.py`) |
+
+Channel-based gating is the pre-existing `modules.csv`: e.g. `solver.web.auth.commands`
+and `solver.utils.update_doc` are `web=False`, so the `users` and `update-docs`
+commands don't even load in a web shell. User-based gating is the new
+`commands.csv`, applied on top.
+
+## Profiles
+
+Every identity carries one **profile** — `admin`, `user`, or `guest` — in
+descending privilege. It is resolved once at startup (`solver/utils/identity.py`)
+and exposed as `config.user_profile`:
+
+- **Web** — the SRP-authenticated email is looked up in `keys/.users.json`; its
+  stored `profile` is used. The web tier vouches for the email (it ran the SRP
+  handshake) when it forks the per-user shell with `SOLVER_USER=<email>`.
+- **Local terminal** — with no identity configured, the shell falls through to the
+  OS login name and is granted **`admin`**: access to the checkout *is* the trust
+  (the channel-based half of the model). A local operator may `export SOLVER_USER=…`
+  to *drop* to a named account's lower profile, but cannot thereby gain privilege.
+
+An explicitly configured identity (env / `keys/.user-email` / `.env`) that is not
+an enabled account in `.users.json` aborts startup (`invalid user`).
+
+## The policy file (`solver/commands.csv`)
+
+Mirrors `modules.csv`: a `command` column then one boolean column per profile. A
+truthy cell grants that profile the command.
+
+```csv
+command,admin,user,guest
+benchmark,True,True,
+users,True,,
+show,True,True,True
+```
+
+Semantics (`is_authorized` in `shell/command.py`):
+
+- A command **listed** in the policy is allowed only for the profiles its row
+  grants (`benchmark` → admin + user; `users` → admin only; `show` → everyone).
+- A command **absent** from the policy is **admin-only** — a fail-safe default, so
+  a newly added command is never silently exposed to `user`/`guest` before it is
+  added to `commands.csv`.
+
+## Enforcement (decoration time)
+
+The check lives in the `@command` decorator: as each command module is imported,
+`command()` computes the command name and calls `is_authorized(cmd_name)` against
+`config.user_profile`. If the profile is not permitted, the command is simply
+**not registered** — it is invisible to `?`/help and tab-completion, and invoking
+it yields `unknown command` (exit `127`). The decorated function is still returned
+unchanged, so it remains a normal Python callable.
+
+Because one shell process serves exactly one identity, the profile (and therefore
+the registered command set) is fixed for the life of the process; the policy is
+read and cached once.
+
+## Assigning a profile
+
+`users add <email> [profile]` seeds the invite with the chosen profile
+(`admin` / `user` / `guest`; default `user`), stored on the invited account and
+preserved through registration and password resets. Example:
+
+```
+users add alice@example.com          # a standard user
+users add bob@example.com guest      # read-only browse access
+users add carol@example.com admin    # full access
+```
+
+The per-command availability (both channel and profile) is listed in
+[`commands-index.md`](commands-index.md).
 
 ---
 

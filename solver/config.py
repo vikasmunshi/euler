@@ -125,6 +125,7 @@ class Config(AttributeDict):
     ecb_usd_rate: float
     user: str
     user_slug: str
+    user_profile: str
     root_dir: Path
     backup_dir: Path
     cache_dir: Path
@@ -134,6 +135,7 @@ class Config(AttributeDict):
     history_file: Path
     last_problem_file: Path
     modules_file: Path
+    commands_file: Path
     server_lock_file: Path
     session_file: Path
     solutions_dir: Path
@@ -153,7 +155,8 @@ class Config(AttributeDict):
         # Ambient per-user identity (SOLVER_USER / .env / keys/.user-email / OS login),
         # used to key per-user shell state (history, last problem). Personalisation
         # only — not a security boundary (see solver.utils.identity).
-        user, user_slug = resolve_identity(root_dir)
+        users_file: Path = root_dir / 'keys' / '.users.json'  # web-auth SRP verifiers (separate from crypto keys)
+        user, user_slug, user_profile = resolve_identity(root_dir, users_file)
         user_state_dir: Path = root_dir / '.state' / user_slug
         user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={
@@ -178,6 +181,7 @@ class Config(AttributeDict):
 
             'user': user,
             'user_slug': user_slug,
+            'user_profile': user_profile,
             'root_dir': root_dir,
             'backup_dir': root_dir / '.backup',
             'cache_dir': root_dir / '.cache',
@@ -188,10 +192,11 @@ class Config(AttributeDict):
             'history_file': user_state_dir / 'history',
             'last_problem_file': user_state_dir / 'last_problem',
             'modules_file': root_dir / 'solver/modules.csv',
+            'commands_file': root_dir / 'solver/commands.csv',  # per-profile command authorization policy
             'server_lock_file': root_dir / '.server.lock',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
-            'users_file': root_dir / 'keys' / '.users.json',  # web-auth SRP verifiers (separate from crypto keys)
+            'users_file': users_file,
             'pending_file': root_dir / 'keys' / '.pending.json',  # invite/reset link tokens, shared shell<->server
             'remember_file': root_dir / 'keys' / '.remember.json',  # persistent remember-me tokens
             'session_secret_file': root_dir / 'keys' / '.session-secret',  # HMAC key for remember-me

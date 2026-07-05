@@ -3,10 +3,11 @@
 """Regenerate the machine-maintained sections of the guides under `docs/`.
 
 Some parts of the documentation mirror the live command registry (the command
-table in the user guide, the per-command reference in `commands-index.md`).
-Rather than hand-edit them whenever a command's name, alias, help text, or usage
-changes, those sections are delimited with HTML marker comments and rebuilt from
-the registry::
+table in the user guide, the per-command reference in `commands-index.md`), and
+the authorization policy `solver/commands.csv` is likewise reconciled with the
+registry (see :func:`_sync_commands`). Rather than hand-edit them whenever a
+command's name, alias, help text, or usage changes, those sections are delimited
+with HTML marker comments and rebuilt from the registry::
 
     <!-- GEN:command-table -->
     ...generated content (do not edit by hand)...
@@ -24,7 +25,9 @@ from within the solver shell, or non-interactively for a pre-commit / CI lane �
 from __future__ import annotations
 
 import ast
+import csv
 import inspect
+import io
 import re
 from pathlib import Path
 from typing import Callable
@@ -33,6 +36,11 @@ from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
 from solver.utils.loader import load_commands, update_modules
+
+#: Cells read as "granted"/"on" in the modules.csv / commands.csv policy files.
+_TRUTHY: frozenset[str] = frozenset({'true', '1', 'yes'})
+#: Authorization profiles, in descending order of privilege.
+_PROFILES: tuple[str, ...] = ('admin', 'user', 'guest')
 
 #: The docs directory whose marked blocks we maintain.
 ROOT: Path = config.root_dir
@@ -101,6 +109,42 @@ def _docstring(cmd: Command) -> str:
     return inspect.getdoc(func) or ''
 
 
+def _csv_flags(path: Path, key_col: str, flag_cols: tuple[str, ...]) -> dict[str, tuple[bool, ...]]:
+    """Read *path* into ``{key → (bool per flag_col)}`` (truthy cells → True)."""
+    out: dict[str, tuple[bool, ...]] = {}
+    for row in csv.DictReader(path.read_text(encoding='utf-8').splitlines()):
+        key = (row.get(key_col) or '').strip()
+        if key:
+            out[key] = tuple((row.get(col) or '').strip().lower() in _TRUTHY for col in flag_cols)
+    return out
+
+
+def _command_module(cmd: Command) -> str:
+    """The dotted module that defines *cmd* (unwrapping the register/command decorators)."""
+    func = cmd.func
+    while hasattr(func, '__wrapped__'):
+        func = func.__wrapped__
+    return getattr(func, '__module__', '')
+
+
+def _availability(cmd: Command, channels: dict[str, tuple[bool, ...]],
+                  profiles: dict[str, tuple[bool, ...]]) -> str:
+    """A one-line `channels: … · profiles: …` availability note for *cmd*.
+
+    Channels come from the command's module row in ``modules.csv`` (terminal / web);
+    profiles from its row in ``commands.csv`` (admin / user / guest, admin-only when
+    the command is absent, matching the runtime fail-safe default).
+    """
+    term, web = channels.get(_command_module(cmd), (True, True))
+    chans = [name for name, on in (('terminal', term), ('web', web)) if on] or ['none']
+    granted = profiles.get(cmd.name)
+    if granted is None:
+        allowed = ['admin']
+    else:
+        allowed = [name for name, on in zip(_PROFILES, granted) if on] or ['none']
+    return f'* channels: {", ".join(chans)} · profiles: {", ".join(allowed)}'
+
+
 def _command_table(link_prefix: str) -> str:
     """A compact `Command | Aliases | Description` table; names link to the index.
 
@@ -128,15 +172,19 @@ def gen_command_summary() -> str:
 
 
 def gen_command_index() -> str:
-    """A per-command reference (heading, flags, usage, docstring), rule-separated."""
+    """A per-command reference (heading, flags, availability, usage, docstring), rule-separated."""
+    channels = _csv_flags(config.modules_file, 'module', ('terminal', 'web'))
+    profiles = _csv_flags(config.commands_file, 'command', _PROFILES)
     sections: list[str] = []
     for cmd in registry.all():
         description, glyphs = _clean_help(cmd.help)
         parts = [f'#### {_heading_text(cmd)}', '']
         if description:
             parts += [description]
+        availability = [_availability(cmd, channels, profiles)]
         if glyphs:
-            parts += ['\n'.join(f'* {g} {_LEGEND[g]}' for g in glyphs)]
+            availability += [f'* {g} {_LEGEND[g]}' for g in glyphs]
+        parts += ['\n'.join(availability)]
         parts += ['']
         parts.append(_usage_block(cmd))
         docstring = _docstring(cmd)
@@ -244,6 +292,50 @@ def _render(text: str) -> tuple[str, list[str]]:
     return text, changed
 
 
+#: Per-profile cells a brand-new command gets in commands.csv (admin + user, not guest).
+_DEFAULT_COMMAND_POLICY: tuple[str, str, str] = ('True', 'True', '')
+
+
+def _sync_commands(check: bool) -> str | None:
+    """Reconcile ``solver/commands.csv`` with the live command registry.
+
+    Mirrors :func:`solver.utils.loader.update_modules` for the authorization policy:
+    the row set follows ``registry.all()`` (new commands appended with the default
+    :data:`_DEFAULT_COMMAND_POLICY`, removed commands dropped), while every existing
+    row's ``admin``/``user``/``guest`` cells are **preserved verbatim** so manual
+    grants survive. Returns a ``file: reason`` entry when the file (would) change,
+    else None; with *check* True nothing is written.
+
+    Guarded to the ``admin`` profile — the only one whose registry holds every
+    command — so it never prunes commands merely hidden from a lesser profile.
+    ``update-docs`` is admin- and terminal-only, so this always holds in practice.
+    """
+    if config.user_profile != 'admin':
+        return None
+    existing: dict[str, tuple[str, str, str]] = {}
+    if config.commands_file.exists():
+        with open(config.commands_file, newline='') as handle:
+            existing = {row[0]: (row[1], row[2], row[3]) for row in csv.reader(handle) if len(row) == 4}
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, lineterminator='\n')
+    writer.writerow(['command', *_PROFILES])
+    for cmd in registry.all():
+        writer.writerow([cmd.name, *existing.get(cmd.name, _DEFAULT_COMMAND_POLICY)])
+    new_text = buffer.getvalue()
+
+    old_text = config.commands_file.read_text(encoding='utf-8') if config.commands_file.exists() else ''
+    if new_text == old_text:
+        return None
+    if not check:
+        config.commands_file.write_text(new_text, encoding='utf-8')
+    try:
+        label = str(config.commands_file.relative_to(ROOT))
+    except ValueError:
+        label = config.commands_file.name
+    return f'{label}: command policy'
+
+
 def _apply(check: bool) -> tuple[list[str], list[str]]:
     """Render every doc; return *(updated, stale)* as `<file>: <blocks>` strings.
 
@@ -274,9 +366,12 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
     the in-index summary, the per-command reference, and the README package-layout
     tree (built from each module's docstring) — from the live command registry and
-    the source tree, leaving all hand-written prose untouched. Run it after
-    changing any command's name, alias, help text, or signature, or a module's
-    first docstring line.
+    the source tree, leaving all hand-written prose untouched. It also reconciles
+    the authorization policy `solver/commands.csv` with the registry (new commands
+    added with the default admin+user grant, removed ones dropped, existing grants
+    preserved) — the counterpart to `modules.csv`. Run it after changing any
+    command's name, alias, help text, or signature, or a module's first docstring
+    line.
 
     Args:
         ctx:    The command context.
@@ -290,7 +385,10 @@ def update_docs(ctx: Context, check: bool = False) -> int:
         console.print('[success]modules updated[/success]')
     else:
         console.print('[muted]modules already up to date[/muted]')
+    command_entry = _sync_commands(check)   # keep commands.csv in step with the registry first
     updated, stale = _apply(check)
+    if command_entry:
+        (stale if check else updated).insert(0, command_entry)
     if check:
         if stale:
             console.print('[error]docs out of date[/error] (run [accent]update-docs[/accent]):')

@@ -8,16 +8,58 @@ followed by its parsed argv tokens, and returning an `int` exit code.
 """
 from __future__ import annotations
 
-__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'registry']
+__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'is_authorized', 'registry']
 
+import csv
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Any, Callable, Iterable
 
 from prompt_toolkit.completion import Completion
 from rich.console import Console
 
+from solver.config import config
 from solver.shell.tty import console
 from solver.shell.variables import Variables, variables
+
+#: Column values read as "granted" in the command-authorization CSV.
+_TRUTHY: frozenset[str] = frozenset({'true', '1', 'yes'})
+
+
+@lru_cache(maxsize=1)
+def _authorization_policy() -> dict[str, frozenset[str]]:
+    """Map ``command name → the profiles allowed to use it``, from ``config.commands_file``.
+
+    The CSV (``solver/commands.csv``) mirrors ``modules.csv``: a header ``command``
+    then one boolean column per profile (``admin``/``user``/``guest``), a truthy cell
+    granting that profile the command. A missing or unreadable file yields an empty
+    policy — every command then falls back to admin-only (see :func:`is_authorized`).
+    Cached: the policy is fixed for a process (one shell serves one identity).
+    """
+    try:
+        rows = list(csv.DictReader(config.commands_file.read_text(encoding='utf-8').splitlines()))
+    except OSError:
+        return {}
+    profiles = ('admin', 'user', 'guest')
+    policy: dict[str, frozenset[str]] = {}
+    for row in rows:
+        name = (row.get('command') or '').strip()
+        if name:
+            policy[name] = frozenset(p for p in profiles if (row.get(p) or '').strip().lower() in _TRUTHY)
+    return policy
+
+
+def is_authorized(cmd_name: str) -> bool:
+    """True if the current user's profile may use *cmd_name* (see ``config.user_profile``).
+
+    A command listed in the policy is allowed only for the profiles its row grants; a
+    command **absent** from the policy is admin-only, so a newly added command is never
+    silently exposed to ``user``/``guest`` until it is added to ``commands.csv``.
+    """
+    allowed = _authorization_policy().get(cmd_name)
+    if allowed is None:
+        return config.user_profile == 'admin'
+    return config.user_profile in allowed
 
 
 @dataclass
@@ -116,6 +158,11 @@ def command(
 
     def _decorate(func: CommandFn) -> CommandFn:
         cmd_name = name or func.__name__.lstrip('_').replace('_', '-')
+        if not is_authorized(cmd_name):
+            # Not permitted for this shell's profile → leave it unregistered (invisible to
+            # help/completion, "unknown command" if invoked). The function is returned
+            # unchanged so it still works as a plain Python callable.
+            return func
         cmd_help = help_text
         if not cmd_help and func.__doc__:
             cmd_help = func.__doc__.strip().splitlines()[0]

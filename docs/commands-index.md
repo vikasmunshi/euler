@@ -13,6 +13,14 @@ or usage.
 
 ## Legend
 
+Each command entry opens with an **availability** line —
+`channels: … · profiles: …`. *Channels* (`terminal` / `web`) is where the
+command's module loads (from `modules.csv`); *profiles* (`admin` / `user` /
+`guest`) is which authorization profiles may run it (from `commands.csv`). A
+command absent from `commands.csv` is admin-only. See the
+[TLS & authentication guide](tls-and-auth.md#part-3--command-authorization) for
+the channel-vs-profile model.
+
 A command's *flags* line lists the behaviours marked by these glyphs (the same
 ones shown after a command's help by `?`):
 
@@ -89,6 +97,7 @@ a parameter that accepts repetition.
 #### Command: `!` (`sh`, `bash`)
 
 Run a bash command.
+* channels: terminal, web · profiles: admin
 
 ```
 ! <command> [args]...
@@ -119,6 +128,7 @@ Aliased as `sh` and `bash`, so `sh <command>` is shorthand for `! <command>`.
 #### Command: `?` (`help`)
 
 List commands or show help for a specific command.
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 ? [command]
@@ -144,6 +154,7 @@ Aliased as `help`.
 #### Command: `benchmark`
 
 Benchmark solutions to given/current problem.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -214,6 +225,7 @@ Args:
 #### Command: `claude-api`
 
 Generate specified target using Claude API.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -243,6 +255,7 @@ Prints the USD/EUR cost of the call and returns non-zero if the generator report
 #### Command: `claude-skill`
 
 Launch the Claude Euler Solver skill.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -276,6 +289,7 @@ Args:
 #### Command: `clear` (`cls`)
 
 Clear the screen.
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 clear
@@ -293,6 +307,7 @@ A convenience wrapper over the console's clear; equivalent to the shell
 #### Command: `compile-c` (`compile`)
 
 Build all C source files for given/current problem.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -321,6 +336,7 @@ Args:
 #### Command: `costs`
 
 Display total cost of AI API tokens consumed in session.
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 costs
@@ -344,6 +360,7 @@ Args:
 #### Command: `echo`
 
 Print text.
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 echo <text>
@@ -363,6 +380,7 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 #### Command: `edit` (`ed`)
 
 Open a solution file in the web code editor.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -399,6 +417,7 @@ Arguments:
 #### Command: `evaluate` (`eval`)
 
 Evaluate solutions to given/current problem.
+* channels: terminal, web · profiles: admin, user, guest
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -444,6 +463,7 @@ verbose:            If True, prints error information during evaluation. Default
 #### Command: `git-commit` (`commit`)
 
 Commit everything, optionally resetting to origin/master.
+* channels: terminal, web · profiles: admin
 * » supports `--silent`
 
 ```
@@ -474,6 +494,7 @@ Aliased as `commit`.
 #### Command: `git-hooks` (`hooks`)
 
 Run pre-commit hook and simulated pre-push hook.
+* channels: terminal, web · profiles: admin
 * » supports `--silent`
 
 ```
@@ -497,6 +518,7 @@ Aliased as `hooks`.
 #### Command: `git-publish` (`publish`)
 
 Push targets (keys|scripts|solutions|solver) to remote.
+* channels: terminal, web · profiles: admin
 * » supports `--silent`
 
 ```
@@ -523,6 +545,7 @@ Raises:
 #### Command: `git-status` (`status`)
 
 Display sync state between local and origin/master.
+* channels: terminal, web · profiles: admin
 
 ```
 git-status
@@ -542,6 +565,7 @@ Args:
 #### Command: `git-sync` (`sync`)
 
 Bring the local repository in sync with origin/master.
+* channels: terminal, web · profiles: admin
 
 ```
 git-sync
@@ -560,6 +584,7 @@ Args:
 #### Command: `key-reconstruct`
 
 Recover master key from shares.
+* channels: terminal, web · profiles: admin
 
 ```
 key-reconstruct
@@ -575,6 +600,7 @@ Prompt for `threshold` shares, reconstruct the master key, and store it wrapped 
 #### Command: `key-rekey` (`rekey`)
 
 Rotate the enc key and re-wrap to users.
+* channels: terminal, web · profiles: admin
 
 ```
 key-rekey
@@ -592,6 +618,7 @@ rotation re-encrypts the tracked private files via `git add --renormalize`.
 #### Command: `key-split`
 
 Split master key into shares (n-of-m secret sharing).
+* channels: terminal, web · profiles: admin
 
 ```
 key-split
@@ -608,6 +635,7 @@ Print `num_shares` Shamir shares of the current master key (threshold needed to 
 #### Command: `lint`
 
 Lint current problem, auto-fix with --auto-fix.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -638,6 +666,7 @@ Args:
 #### Command: `ls`
 
 List the solutions dir for given/current problem.
+* channels: terminal, web · profiles: admin, user, guest
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -661,6 +690,7 @@ Args:
 #### Command: `manage-config`
 
 Manage configuration settings.
+* channels: terminal, web · profiles: admin
 
 ```
 manage-config
@@ -688,6 +718,7 @@ Args:
 #### Command: `mark` (`mark-solved`)
 
 Mark the current problem as solved, after checking.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -721,6 +752,7 @@ Args:
 #### Command: `new`
 
 Generate new solution/test-case file for a problem.
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -758,6 +790,7 @@ are created.
 #### Command: `pause`
 
 Pause for user confirmation to continue.
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 pause
@@ -772,6 +805,7 @@ Pause the program execution until the user presses Enter.
 #### Command: `pip-upgrade` (`upgrade`)
 
 Upgrade dependency group (all|ai|core|dev|solutions|show).
+* channels: terminal, web · profiles: admin
 
 ```
 pip-upgrade
@@ -795,6 +829,7 @@ Args:
 #### Command: `problems`
 
 Show list of problems (all|solved|unsolved).
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 problems
@@ -816,6 +851,7 @@ Args:
 #### Command: `progress`
 
 Print progress statistics about Euler problems.
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 progress
@@ -835,6 +871,7 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 #### Command: `results`
 
 list the results for the problem.
+* channels: terminal, web · profiles: admin, user, guest
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -859,6 +896,7 @@ Returns:
 #### Command: `search` (`find`)
 
 Find content in the stack.
+* channels: terminal, web · profiles: admin, user, guest
 
 ```
 search <query>
@@ -890,6 +928,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open documentation in a browser or the web viewer panel.
+* channels: terminal, web · profiles: admin, user, guest
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -929,6 +968,7 @@ Arguments:
 #### Command: `summary`
 
 Parse .progress.html into problems.json.
+* channels: terminal, web · profiles: admin, user
 * » supports `--silent`
 
 ```
@@ -954,6 +994,7 @@ the progress page, copy its Page Source into that file, and retry.
 #### Command: `sys-setup` (`install`)
 
 Installs or uninstalls system resources.
+* channels: terminal, web · profiles: admin
 
 ```
 sys-setup <chrome|dev-env|upgrade-service>
@@ -977,6 +1018,7 @@ Parameters:
 #### Command: `test-cases`
 
 list the test cases for the problem.
+* channels: terminal, web · profiles: admin, user, guest
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -1002,6 +1044,7 @@ Returns:
 #### Command: `update-docs`
 
 Regenerate the generated sections of the docs/ guides.
+* channels: terminal · profiles: admin
 * » supports `--silent`
 
 ```
@@ -1016,9 +1059,12 @@ Rebuild the registry-generated blocks in the `docs/` guides and the README.
 Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
 the in-index summary, the per-command reference, and the README package-layout
 tree (built from each module's docstring) — from the live command registry and
-the source tree, leaving all hand-written prose untouched. Run it after
-changing any command's name, alias, help text, or signature, or a module's
-first docstring line.
+the source tree, leaving all hand-written prose untouched. It also reconciles
+the authorization policy `solver/commands.csv` with the registry (new commands
+added with the default admin+user grant, removed ones dropped, existing grants
+preserved) — the counterpart to `modules.csv`. Run it after changing any
+command's name, alias, help text, or signature, or a module's first docstring
+line.
 
 Args:
     ctx:    The command context.
@@ -1032,6 +1078,7 @@ Args:
 #### Command: `update-models`
 
 Update Model enum, pricing, and USD→EUR rate.
+* channels: terminal, web · profiles: admin
 * » supports `--silent`
 
 ```
@@ -1061,6 +1108,7 @@ Args:
 #### Command: `user`
 
 Show public key & enc-key access; --regen for new key-pair.
+* channels: terminal, web · profiles: admin
 
 ```
 user
@@ -1076,6 +1124,7 @@ Show the current identity and whether it can decrypt; create a key pair on first
 #### Command: `user-authorize` (`authorize`)
 
 Authorise another public key (hex) to access the enc key.
+* channels: terminal, web · profiles: admin
 
 ```
 user-authorize <public_key>
@@ -1090,11 +1139,13 @@ Wrap the current master key to `public_key` and add it to enc-key.json (proof-of
 #### Command: `users`
 
 Manage web-auth users (list|add|reset|remove|disable|enable).
+* channels: terminal · profiles: admin
 
 ```
 users
 [action=list|add|reset|remove|disable|enable] (default list)
 [email=<str>] (default '')
+[profile=admin|user|guest] (default user)
 ```
 
 ```text
@@ -1107,5 +1158,8 @@ Args:
              choose a new password; 'remove' deletes an account; 'disable' /
              'enable' toggle whether a registered account may log in.
     email:   The account email (required for every action except 'list').
+    profile: Authorization profile for 'add' — 'admin', 'user' (default), or
+             'guest'; governs which commands the account may run. Ignored by
+             the other actions (a profile is only assigned at invite time).
 ```
 <!-- /GEN:command-index -->
