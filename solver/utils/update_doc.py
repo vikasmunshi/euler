@@ -385,18 +385,24 @@ def update_docs(ctx: Context, check: bool = False) -> int:
         console.print('[success]modules updated[/success]')
     else:
         console.print('[muted]modules already up to date[/muted]')
-    command_entry = _sync_commands(check)   # keep commands.csv in step with the registry first
+
+    command_stale = _sync_commands(check) is not None   # reconcile commands.csv with the registry first
+    if not command_stale:
+        console.print('[muted]commands.csv already up to date[/muted]')
+    elif check:
+        console.print('[warning]commands.csv out of date[/warning] (run [accent]update-docs[/accent])')
+    else:
+        console.print('[success]commands.csv updated[/success]')
+
     updated, stale = _apply(check)
-    if command_entry:
-        (stale if check else updated).insert(0, command_entry)
     if check:
         if stale:
             console.print('[error]docs out of date[/error] (run [accent]update-docs[/accent]):')
             for entry in stale:
                 console.print(f'  [warning]{entry}[/warning]')
-            return ExitCodes.EXIT_ERROR
-        console.print('[success]docs are up to date[/success]')
-        return ExitCodes.EXIT_OK
+        elif not command_stale:
+            console.print('[success]docs are up to date[/success]')
+        return ExitCodes.EXIT_ERROR if (stale or command_stale) else ExitCodes.EXIT_OK
     if updated:
         for entry in updated:
             console.print(f'[success]updated[/success] {entry}')
