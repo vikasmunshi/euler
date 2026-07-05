@@ -238,9 +238,19 @@ def _strip_frontmatter(text: str) -> str:
     return re.sub(r'\A---\n.*?\n---\n', '', text, count=1, flags=re.DOTALL)
 
 
+def _collate(*sections: str) -> str:
+    """Join composed sections with a thematic-break separator.
+
+    Each section is trimmed and the `---` gets a blank line on both sides, so a
+    section ending in a paragraph cannot turn the separator into a setext heading
+    underline (which would render that trailing paragraph as a big bold heading).
+    """
+    return '\n\n---\n\n'.join(section.strip() for section in sections)
+
+
 def _compose_skill_page() -> str:
     """Intro + the SKILL.md definition (front-matter stripped)."""
-    return _AI_SKILL_INTRO + '\n---\n\n' + _strip_frontmatter(_SKILL_MD.read_text(encoding='utf-8'))
+    return _collate(_AI_SKILL_INTRO, _strip_frontmatter(_SKILL_MD.read_text(encoding='utf-8')))
 
 
 def _fence(content: str) -> str:
@@ -252,17 +262,15 @@ def _fence(content: str) -> str:
 
 def _compose_api_page() -> str:
     """Intro + every `prompt_*.txt` template, each fenced verbatim under its filename."""
-    parts = [_AI_API_INTRO]
-    for path in sorted(config.templates_dir.glob('prompt_*.txt')):
-        parts.append(f'## `{path.name}`\n\n' + _fence(path.read_text(encoding='utf-8').strip()))
-    return '\n---\n\n'.join(parts)
+    prompts = [f'## `{path.name}`\n\n' + _fence(path.read_text(encoding='utf-8').strip())
+               for path in sorted(config.templates_dir.glob('prompt_*.txt'))]
+    return _collate(_AI_API_INTRO, *prompts)
 
 
 def _compose_conventions_page() -> str:
     """Intro + every convention guide, collated."""
-    parts = [_AI_CONVENTIONS_INTRO]
-    parts += [(config.docs_dir / f'{name}.md').read_text(encoding='utf-8') for name in _AI_CONVENTIONS]
-    return '\n---\n\n'.join(parts)
+    guides = [(config.docs_dir / f'{name}.md').read_text(encoding='utf-8') for name in _AI_CONVENTIONS]
+    return _collate(_AI_CONVENTIONS_INTRO, *guides)
 
 
 #: Composed AI pages keyed by the `/ai/<name>` path segment.
