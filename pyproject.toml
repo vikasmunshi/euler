@@ -38,6 +38,7 @@ show = [
 web = [
     "aiohttp",
     "markdown-it-py",
+    "html5lib",  # advisory (non-blocking) HTML linting for notes.html in the code editor
 ]
 solutions = [
     # NOTE: `pip install primesieve` builds only the base extension; its optional

@@ -55,6 +55,7 @@ from solver.core.problems import Problem, problems
 from solver.shell.command import is_authorized_for
 from solver.shell.variables import variables
 from solver.utils.identity import slugify
+from solver.utils.linter import lazy_import_fix_code
 from solver.utils.summary import summary
 from solver.web.auth.routes import USER_EMAIL, WS_CONNECTIONS, auth_middleware, profile_for, setup_auth
 from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
@@ -85,6 +86,21 @@ _EDIT_LANGUAGES: dict[str, str] = {
     '.py': 'python', '.c': 'c', '.json': 'json', '.html': 'html',
 }
 
+fix_py_code: Callable[[str], str] | None = lazy_import_fix_code()
+
+
+def _lazy_html5lib() -> Any:
+    """Import html5lib for advisory HTML linting; None when the `web` extra is absent."""
+    try:
+        import html5lib
+    except ImportError:
+        return None
+    return html5lib
+
+
+#: html5lib module for advisory notes.html linting, or None when unavailable.
+_HTML5LIB: Any = _lazy_html5lib()
+
 
 def requires(capability: str) -> Callable[[Handler], Handler]:
     """Gate a route by the requester's profile against a ``commands.csv`` capability.
@@ -101,13 +117,16 @@ def requires(capability: str) -> Callable[[Handler], Handler]:
     ungated: the terminal is any authenticated user's, and the shell restricts the
     commands it will run there by the same policy.
     """
+
     def wrap(handler: Handler) -> Handler:
         @functools.wraps(handler)
         async def guarded(request: web.Request) -> web.StreamResponse:
             if not is_authorized_for(capability, profile_for(request)):
                 raise web.HTTPForbidden(text=f'{capability}: not permitted for your profile')
             return await handler(request)
+
         return guarded
+
     return wrap
 
 
@@ -476,39 +495,49 @@ def _validate_source(path: Path) -> tuple[bool, str]:
     return False, (proc.stdout + ('\n' if proc.stdout and proc.stderr else '') + proc.stderr).strip()
 
 
-def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str]:
-    """Validate edited content and write it into the solution directory; return (status, message).
+def _save_content(problem_number: int, filename: str, content: bytes) -> tuple[int, str, bytes | None]:
+    """Validate edited content and write it into the solution directory; return (status, message, saved).
 
     Status mirrors HTTP — 200 saved, 400 on a bad request or failed validation.
     JSON is parsed, Python is flake8-linted, and C is compiled before the file is
     accepted; on any validation failure the previous content is restored so a bad
-    edit never lands.
+    edit never lands. On success *saved* is the canonical bytes actually written
+    (JSON re-indented, Python auto-fixed) so the caller can echo them back to the
+    editor; it is None on any failure.
     """
     if Path(filename).name != filename or Path(filename).suffix not in ('.py', '.c', '.json', '.html'):
-        return 400, f'{filename} is not an editable solution file'
+        return 400, f'{filename} is not an editable solution file', None
     try:
         problem: Problem = Problem.from_number(problem_number)
     except ValueError:
-        return 400, f'problem {problem_number} not found'
+        return 400, f'problem {problem_number} not found', None
     target: Path = problem.solution_dir.joinpath(filename)
-    if filename.endswith('.json'):
+
+    if target.suffix == '.json':
         try:
-            json.loads(content)
+            content = json.dumps(json.loads(content), indent=2, ensure_ascii=False).encode('utf-8')
         except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-            return 400, f'invalid JSON: {exc}'
+            return 400, f'{filename} is not valid JSON: {exc}', None
         target.write_bytes(content)
-        return 200, f'saved {filename}'
-    if filename.endswith('.html'):
-        # HTML stubs (notes / statement) have no validator — write them verbatim.
+        return 200, f'saved {filename}', content
+
+    if target.suffix == '.html':
         target.write_bytes(content)
-        return 200, f'saved {filename}'
+        return 200, f'saved {filename}', content
+
+    # write .py and .c files
+    if target.suffix == '.py' and fix_py_code is not None:
+        try:
+            content = fix_py_code(content.decode('utf-8')).encode('utf-8')  # auto lint and fix
+        except Exception:  # noqa: BLE001 — broken/undecodable source: skip the fixer, flake8 reports below
+            pass
     previous: bytes = target.read_bytes()
     target.write_bytes(content)
     ok, message = _validate_source(target)
     if not ok:
         target.write_bytes(previous)  # reject: never leave a broken file behind
-        return 400, message or f'{filename} failed validation'
-    return 200, f'saved {filename}'
+        return 400, message or f'{filename} failed validation', None
+    return 200, f'saved {filename}', content
 
 
 #: flake8 line: `path:row:col: CODE message`.
@@ -544,17 +573,69 @@ def _parse_diagnostics(output: str, suffix: str) -> list[dict[str, Any]]:
     return diagnostics
 
 
+#: html5lib parse-error codes muted in the advisory HTML linter: document-scaffolding
+#: pedantry that cannot arise from a well-formed fragment and would only add noise.
+_HTML_MUTED_CODES: frozenset[str] = frozenset({
+    'expected-doctype-but-got-start-tag', 'expected-doctype-but-got-chars',
+    'expected-doctype-but-got-eof', 'non-html-root',
+})
+
+
+def _html_advisories(content: bytes) -> list[dict[str, Any]]:
+    """Advisory (warning-only) diagnostics for a notes.html fragment, via html5lib.
+
+    html5lib implements the real HTML5 parsing algorithm, so — like a browser — it
+    never rejects; it records every spec deviation in `parser.errors` instead. The
+    stub has no `<html>`/`<body>` wrapper, so it is parsed as a *fragment* (parsing
+    it as a document would flag the missing scaffolding on every file). Each error
+    becomes a `warning` (never an `error`): the HTML path does not gate the save, so
+    these are guidance only. Muted codes and duplicate (line, message) pairs are
+    dropped; `[]` when html5lib is unavailable or the parser itself faults.
+    """
+    if _HTML5LIB is None:
+        return []
+    try:
+        parser = _HTML5LIB.HTMLParser(strict=False)
+        parser.parseFragment(content.decode('utf-8', errors='replace'))
+    except Exception:  # noqa: BLE001 — advisory only: a parser fault must never break linting
+        return []
+    templates = _HTML5LIB.constants.E
+    diagnostics: list[dict[str, Any]] = []
+    seen: set[tuple[int, str]] = set()
+    for position, code, datavars in parser.errors:
+        if code in _HTML_MUTED_CODES:
+            continue
+        try:
+            line, col = int(position[0]), max(int(position[1]), 1)
+        except (TypeError, ValueError, IndexError):
+            line, col = 1, 1
+        template = templates.get(code, code)
+        try:
+            message = template % datavars if datavars else template
+        except (KeyError, TypeError, ValueError):
+            message = template
+        if (key := (line, message)) in seen:
+            continue
+        seen.add(key)
+        diagnostics.append({'line': line, 'col': col, 'severity': 'warning',
+                            'code': code, 'message': message})
+    return diagnostics
+
+
 def _lint_content(filename: str, content: bytes) -> tuple[int, str]:
     """Lint edited content without saving it; return (status, JSON diagnostics).
 
     Runs the same validators as save — flake8 for Python, the runner-aware compile
-    for C — against a throwaway temp copy, so the solution file is never touched
-    and a syntactically broken buffer is still diagnosable. The reply is
+    for C — against a throwaway temp copy, so the solution file is never touched and
+    a syntactically broken buffer is still diagnosable. HTML gets html5lib advisories
+    (warnings only, they never block the save). The reply is
     `{"diagnostics": [{line, col, severity, message, code?}, ...]}` (empty when clean).
     """
     suffix = Path(filename).suffix
-    if Path(filename).name != filename or suffix not in ('.py', '.c'):
+    if Path(filename).name != filename or suffix not in ('.py', '.c', '.html'):
         return 400, json.dumps({'diagnostics': []})
+    if suffix == '.html':
+        return 200, json.dumps({'diagnostics': _html_advisories(content)})
     with tempfile.TemporaryDirectory() as tmp:
         tmp_file = Path(tmp) / f'lint{suffix}'  # compile.sh finds runner.h via an absolute -I
         tmp_file.write_bytes(content)
@@ -689,13 +770,21 @@ def _text(code: int, message: str) -> web.Response:
 
 @requires('edit')
 async def _save_problem_file(request: web.Request) -> web.StreamResponse:
-    """Save an edited solution file (`POST /edit/<n>/<filename>`)."""
+    """Save an edited solution file (`POST /edit/<n>/<filename>`).
+
+    On success replies JSON `{"message", "content"}` — *content* is the canonical
+    bytes written (JSON re-indented, Python auto-fixed), which the editor swaps into
+    its buffer so what is displayed matches what landed on disk. A failure replies
+    plain text with the 400 diagnostic (no content to echo).
+    """
     problem_number = int(request.match_info['problem_number'])
     filename = request.match_info['filename']
     body = await request.read()
     loop = asyncio.get_running_loop()
-    result = await loop.run_in_executor(None, _save_content, problem_number, filename, body)
-    return _text(*result)
+    status, message, saved = await loop.run_in_executor(None, _save_content, problem_number, filename, body)
+    if status == 200 and saved is not None:
+        return web.json_response({'message': message, 'content': saved.decode('utf-8', errors='replace')})
+    return _text(status, message)
 
 
 @requires('edit')

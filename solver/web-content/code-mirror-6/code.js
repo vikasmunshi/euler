@@ -61,13 +61,15 @@ const editorTheme = EditorView.theme({
 const editable = new Compartment();
 const editExt = on => [EditorView.editable.of(on), EditorState.readOnly.of(!on)];
 
-// Only real source files are linted, and only in the editor; JSON / generated /
-// read-only views have no server linter.
-const LINTABLE = EDIT_MODE && /\.(py|c)$/.test(FILENAME);
+// Linted only in the editor: Python / C get the save-time validators; HTML gets
+// advisory html5lib warnings (they never block a save). JSON / generated / read-only
+// views have no server linter.
+const LINTABLE = EDIT_MODE && /\.(py|c|html)$/.test(FILENAME);
 
 // Lint the live buffer by sending it to /edit/lint, where the server runs the same
-// validators as save (flake8 for Python, the runner-aware compile for C) and returns
-// structured diagnostics. CodeMirror renders them as inline squiggles + gutter marks.
+// validators as save (flake8 for Python, the runner-aware compile for C, and
+// advisory html5lib checks for HTML) and returns structured diagnostics. CodeMirror
+// renders them as inline squiggles + gutter marks.
 async function lintSource(v) {
     if (!LINTABLE) return [];
     let diagnostics = [];
@@ -122,6 +124,11 @@ const view = new EditorView({
 
 // CodeJar parity: read the current source / flip the editable state.
 const getSource = () => view.state.doc.toString();
+// Replace the whole document — used to reflect the server's canonical bytes after a
+// save (JSON re-indented, Python auto-fixed) so the buffer matches what is on disk.
+const setSource = (text) => view.dispatch({
+    changes: {from: 0, to: view.state.doc.length, insert: text},
+});
 function setEditable(canEdit) {
     view.dispatch({effects: editable.reconfigure(editExt(canEdit))});
 }
@@ -171,8 +178,16 @@ async function save() {
             headers: {'Content-Type': 'text/plain; charset=utf-8'},
             body: getSource(),
         });
-        const message = await r.text();
-        showOutput(message || (r.ok ? 'saved' : 'save failed'), r.ok ? 'ok' : 'error');
+        // Success replies JSON with the canonical bytes the server wrote; swap them
+        // into the buffer so the displayed source matches what landed on disk.
+        if (r.ok && (r.headers.get('Content-Type') || '').includes('application/json')) {
+            const {message, content} = await r.json();
+            if (typeof content === 'string' && content !== getSource()) setSource(content);
+            showOutput(message || 'saved', 'ok');
+        } else {
+            const message = await r.text();
+            showOutput(message || (r.ok ? 'saved' : 'save failed'), r.ok ? 'ok' : 'error');
+        }
     } catch {
         showOutput('network error', 'error');
     } finally {
