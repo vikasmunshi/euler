@@ -23,7 +23,8 @@
             : path === '/edit/progress' ? 'progress'
                 : path === '/index' ? 'guides'
                     : path.startsWith('/docs/') ? decodeURIComponent(path.slice(6))
-                        : '';
+                        : path.startsWith('/ai/') ? decodeURIComponent(path.slice(4))
+                            : '';
         try {
             window.parent.postMessage({
                 type: 'solver:ctx',

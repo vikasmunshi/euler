@@ -45,7 +45,13 @@ body {
 /* ── Guide cards ── */
 .guides {
     display: grid;
+    grid-template-columns: 1fr 1fr;   /* two cards per row… */
     gap: 8px;
+}
+.guide.full { grid-column: 1 / -1; }  /* …except a full-width card spans both */
+
+@media (max-width: 620px) {
+    .guides { grid-template-columns: 1fr; }   /* one per row when the pane is narrow */
 }
 .guide {
     display: grid;

@@ -61,7 +61,9 @@ function buildTrail() {
         }
         return trail;
     }
-    if (path && path.startsWith('/docs/')) return [{text: 'guides', href: '/index'}, {text: label}];
+    if (path && (path.startsWith('/docs/') || path.startsWith('/ai/'))) {
+        return [{text: 'guides', href: '/index'}, {text: label}];
+    }
     if (path === '/edit/progress') return [{text: 'problems', href: '/summary'}, {text: 'progress'}];
     if (path === '/index') return [{text: 'guides'}];
     if (path === '/summary') return [{text: 'problems'}];

@@ -156,14 +156,15 @@ def _render_markdown(text: str) -> str:
     """Render a guide's Markdown to HTML: slugged heading ids + intra-doc links rewired.
 
     Each heading gets the same slug `update_doc.py` assumes, so in-page and cross-doc
-    `#anchor` links land; relative `foo.md` links are rewritten to the `/docs/` route.
+    `#anchor` links land; relative `foo.md` (or `docs/foo.md`) links are rewritten to
+    the `/docs/` route.
     """
     tokens = _MD.parse(text)
     for i, token in enumerate(tokens):
         if token.type == 'heading_open':
             token.attrSet('id', _doc_slug(tokens[i + 1].content))
     rendered = _MD.renderer.render(tokens, _MD.options, {})
-    return re.sub(r'href="([\w-]+)\.md(#[^"]*)?"', r'href="/docs/\1\2"', rendered)
+    return re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"', r'href="/docs/\1\2"', rendered)
 
 
 async def _serve_doc(request: web.Request) -> web.StreamResponse:
@@ -185,6 +186,105 @@ async def _serve_doc(request: web.Request) -> web.StreamResponse:
         raise web.HTTPNotFound()
     template = (config.static_file_dir / 'docs/docs.html').read_text(encoding='utf-8')
     page = template.replace('{{TITLE}}', html.escape(name)).replace('{{CONTENT}}', _render_markdown(text))
+    return _bytes_response(page.encode('utf-8'), 'text/html')
+
+
+# ---------------------------------------------------------------------------
+# AI reference pages — collate several sources into one rendered view (`/ai/<name>`)
+# ---------------------------------------------------------------------------
+#: The claude-euler-solver skill definition.
+_SKILL_MD: Path = config.root_dir / 'solver/ai/claude/skills/claude-euler-solver/SKILL.md'
+#: The convention guides (shared by the skill and the API prompts), in reading order.
+_AI_CONVENTIONS: tuple[str, ...] = (
+    'convention_python_solution', 'convention_c_translation',
+    'convention_source_documentation', 'convention_documentation', 'convention_test_cases',
+)
+
+_AI_SKILL_INTRO = """\
+# AI · Euler Solver skill
+
+The **claude-euler-solver** skill runs Claude Code **headless** against a single
+problem's solution files. The shell's `claude-skill` command launches it as
+`claude -p /claude-euler-solver <problem_number> <action>` — `<action>` is `solve`
+or `review` — and Claude edits the solution directory directly, prints a short
+summary, and ends the turn. The standards it must meet are the shared
+[conventions](/ai/conventions). Below is the skill definition verbatim.
+"""
+
+_AI_API_INTRO = """\
+# AI · generation prompts
+
+The shell's `claude-api` command generates solution artifacts — Python and C code,
+`notes.html`, and `test_cases.json` — through the Claude API rather than an
+interactive agent. Each target is produced from a **prompt template** in
+`solver/templates/`, rendered by `engine.py` with the problem statement, the current
+solution files, and the shared [conventions](/ai/conventions) substituted in. Below
+are those prompt templates verbatim.
+"""
+
+_AI_CONVENTIONS_INTRO = """\
+# AI · conventions
+
+The standards every generated solution must meet, shared by both AI paths: the
+[skill](/ai/skill) reads them before acting, and each is injected into the matching
+[API](/ai/api) prompt. They are the single source of truth for their slice of a
+solution — the Python `solve()`, the C port, in-source documentation, `notes.html`,
+and `test_cases.json`. All are collated below.
+"""
+
+
+def _strip_frontmatter(text: str) -> str:
+    """Drop a leading YAML front-matter block so it does not render as body text."""
+    return re.sub(r'\A---\n.*?\n---\n', '', text, count=1, flags=re.DOTALL)
+
+
+def _compose_skill_page() -> str:
+    """Intro + the SKILL.md definition (front-matter stripped)."""
+    return _AI_SKILL_INTRO + '\n---\n\n' + _strip_frontmatter(_SKILL_MD.read_text(encoding='utf-8'))
+
+
+def _fence(content: str) -> str:
+    """Wrap *content* in a `text` code fence long enough to survive backticks inside it."""
+    longest = max((len(run) for run in re.findall(r'`+', content)), default=0)
+    ticks = '`' * max(3, longest + 1)
+    return f'{ticks}text\n{content}\n{ticks}'
+
+
+def _compose_api_page() -> str:
+    """Intro + every `prompt_*.txt` template, each fenced verbatim under its filename."""
+    parts = [_AI_API_INTRO]
+    for path in sorted(config.templates_dir.glob('prompt_*.txt')):
+        parts.append(f'## `{path.name}`\n\n' + _fence(path.read_text(encoding='utf-8').strip()))
+    return '\n---\n\n'.join(parts)
+
+
+def _compose_conventions_page() -> str:
+    """Intro + every convention guide, collated."""
+    parts = [_AI_CONVENTIONS_INTRO]
+    parts += [(config.docs_dir / f'{name}.md').read_text(encoding='utf-8') for name in _AI_CONVENTIONS]
+    return '\n---\n\n'.join(parts)
+
+
+#: Composed AI pages keyed by the `/ai/<name>` path segment.
+_AI_PAGES: dict[str, Callable[[], str]] = {
+    'skill': _compose_skill_page,
+    'api': _compose_api_page,
+    'conventions': _compose_conventions_page,
+}
+
+
+async def _serve_ai_page(request: web.Request) -> web.StreamResponse:
+    """Render a composed AI reference page (`GET /ai/<name>`, name in {skill, api, conventions}).
+
+    Collates several source files (the skill, the API prompt templates, or the
+    convention guides) into a single view, reusing the docs viewer template.
+    """
+    composer = _AI_PAGES.get(request.match_info['name'])
+    if composer is None:
+        raise web.HTTPNotFound()
+    template = (config.static_file_dir / 'docs/docs.html').read_text(encoding='utf-8')
+    page = template.replace('{{TITLE}}', html.escape(request.match_info['name'])).replace(
+        '{{CONTENT}}', _render_markdown(composer()))
     return _bytes_response(page.encode('utf-8'), 'text/html')
 
 
@@ -689,6 +789,7 @@ def build_app(save: bool) -> web.Application:
         web.get('/', _serve_landing_page),  # terminal (landing page)
         web.get('/active-problem', _serve_active_problem),
         web.post('/cmd', functools.partial(_run_command, save=save)),  # dispatch to the web shell
+        web.get(r'/ai/{name}', _serve_ai_page),  # a composed AI reference page (skill / api / conventions)
         web.get(r'/docs/{name}', _serve_doc),  # a rendered docs/ Markdown guide
         web.post('/edit/lint', _lint_file),  # stateless lint (suffix-keyed)
         web.get('/edit/progress', _serve_progress_page),
