@@ -105,25 +105,27 @@ Variable storage, the reserved names, and the two write channels are defined by
   subtraction `a-b`). It may not be a reserved name or a registered command name.
 * **Special (reserved) variables** — seeded by `variables.py`:
 
-  | name       | type              | meaning                                              | writable by user |
-  |------------|-------------------|------------------------------------------------------|------------------|
-  | `loop`     | Any               | current loop value (set only by `loop`; `None` outside a loop) | no    |
-  | `problem`  | Problem \| None   | the workspace problem, as an object                  | no (shell-set)   |
-  | `rcode`    | int               | exit code of the most recently run evaluation        | no (shell-set)   |
-  | `reserved` | list[str]         | sorted list of every reserved name                   | no               |
-  | `problems` | list[Problem]     | every known problem                                  | no               |
-  | `next`     | int               | number of the next unsolved problem                  | no (computed)    |
-  | `random`   | int               | number of a random unsolved problem                  | no (computed)    |
-  | `solved`   | list[Problem]     | the solved problems                                  | no (computed)    |
-  | `unsolved` | list[Problem]     | the unsolved problems                                | no (computed)    |
-  | `stale`    | list[Problem]     | the stale problems                                   | no (computed)    |
+  | name       | type            | meaning                                                        | writable by user |
+  |------------|-----------------|----------------------------------------------------------------|------------------|
+  | `config`   | Config          | the global configuration singleton                             | no               |
+  | `loop`     | Any             | current loop value (set only by `loop`; `None` outside a loop) | no               |
+  | `problem`  | Problem \| None | the workspace problem, as an object                            | no (shell-set)   |
+  | `rcode`    | int             | exit code of the most recently run evaluation                  | no (shell-set)   |
+  | `reserved` | list[str]       | sorted list of every reserved name                             | no               |
+  | `problems` | list[Problem]   | every known problem                                            | no               |
+  | `last`     | int             | number of the last solved problem                              | no (computed)    |
+  | `next`     | int             | number of the next unsolved problem                            | no (computed)    |
+  | `random`   | int             | number of a random unsolved problem                            | no (computed)    |
+  | `solved`   | list[Problem]   | the solved problems                                            | no (computed)    |
+  | `unsolved` | list[Problem]   | the unsolved problems                                          | no (computed)    |
 
-  The *computed* specials are dynamic — re-evaluated on **each** `{…}` reference
-  (so `{random}` yields a fresh pick and `{next}` / `{solved}` reflect current
-  progress), whereas the others hold a fixed (shell-updated) value.
+  The *computed* specials (`last` / `next` / `random` / `problems` / `solved` /
+  `unsolved`) are dynamic — re-evaluated on **each** `{…}` reference (so `{random}`
+  yields a fresh pick and `{next}` / `{solved}` reflect current progress), whereas
+  the others (`config`, and the shell-set `problem` / `rcode`) hold a fixed value.
 
-  `next` / `random` are bare problem **numbers** (handy as command arguments:
-  `init {next}`), while `problems` / `solved` / `unsolved` / `stale` hold
+  `last` / `next` / `random` are bare problem **numbers** (handy as command
+  arguments: `init {next}`), while `problems` / `solved` / `unsolved` hold
   `Problem` objects — use an attribute path to reach a field, e.g.
   `{problem.number}`, `{loop.title}`.
 

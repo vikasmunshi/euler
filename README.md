@@ -47,6 +47,12 @@ design notes.
 
 ### Installation
 
+> **Prefer not to install?** A live instance of the web front end runs at
+> **[euler.vikasmunshi.com](https://euler.vikasmunshi.com)** — the same `solver` shell,
+> read-only viewer, and editor in the browser, served over HTTPS. Access is gated by a
+> login (see [Authentication](docs/authentication.md)); if you'd like an account to explore
+> or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your own copy, install below.
+
 Clone the repository and install system dependencies via [make](Makefile) or the bash [scripts](scripts);
 the framework itself is installed with `pip`. Solutions can be written in any language – anything that runs as a
 script or compiles to a binary will work.
@@ -155,8 +161,8 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 - **Interactive shell** - `prompt-toolkit`-based REPL with persistent history, auto-suggest, tab
   completion (including bash-native completion for `!`-prefixed commands), `{name}` variables and
   side-effect-free expressions (comparisons, arithmetic, indexing/slicing, safe builtins), and a
-  `loop <list>: <block>` construct over sliceable number lists (`{problems}`, `{solved}`, `{unsolved}`,
-  `{stale}`). The command language - surface syntax, canonical form, and semantics - is specified in
+  `loop <list>: <block>` construct over sliceable problem lists (`{problems}`, `{solved}`,
+  `{unsolved}`). The command language - surface syntax, canonical form, and semantics - is specified in
   [`docs/syntax.md`](docs/syntax.md).
 - **Rich UI** - `rich` panels, tables, and a themed colour palette throughout, so the terminal output is as
   readable as a rendered page.
@@ -166,6 +172,14 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   in-browser **editor** that saves, evaluates, and deletes a problem's solution files. It runs detached
   (survives the launching shell); `solver-web start|stop|status|restart` manages it, and `show N` auto-starts
   it to open a problem (or the index) in the browser.
+- **Hosted over HTTPS** - the web front end is served publicly at
+  [euler.vikasmunshi.com](https://euler.vikasmunshi.com). **Caddy** terminates TLS and reverse-proxies to the
+  loopback aiohttp server, loading a Let's Encrypt certificate that **acme.sh** issues and auto-renews through a
+  name.com **DNS-01** challenge (no inbound port 80). Access is gated in the app - not Caddy - by browser-side
+  **SRP-6a** login (the password never crosses the wire), with per-identity **profiles** (admin / user / guest)
+  deciding which commands and routes each caller may use. Setup scripts (`scripts/setup/caddy.sh`,
+  `scripts/setup/acme.sh`) install Caddy and issue the cert; the full stack is documented in three guides:
+  [TLS](docs/tls-guide.md), [authentication](docs/authentication.md), and [authorization](docs/authorization.md).
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
   any language that compiles or runs as a script.
