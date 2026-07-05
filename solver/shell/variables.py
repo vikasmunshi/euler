@@ -61,6 +61,7 @@ class Variables():
     problems: list[Problem]
     solved: list[Problem]
     unsolved: list[Problem]
+    last: int
     next: int
     random: int
 
@@ -70,6 +71,7 @@ class Variables():
             'loop': None,
             'problem': None,
             'rcode': 0,
+            'last': lambda: problems.last_solved_problem.number,
             'next': lambda: problems.next_unsolved_problem.number,
             'random': lambda: problems.random_problem.number,
             'problems': lambda: problems.problems_list,
