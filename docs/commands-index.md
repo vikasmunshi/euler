@@ -75,7 +75,7 @@ a parameter that accepts repetition.
 | [`progress`](#command-progress) | — | Print progress statistics about Euler problems. |
 | [`results`](#command-results) | — | list the results for the problem. ❏ |
 | [`search`](#command-search-find) | `find` | Find content in the stack. |
-| [`show`](#command-show-open-view) | `open`, `view` | Open documentation in a browser or the web viewer panel. ❏ » |
+| [`show`](#command-show-open-view) | `open`, `view` | Open problem/file in a browser or the web viewer panel. ❏ » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`test-cases`](#command-test-cases) | — | list the test cases for the problem. ❏ |
@@ -926,7 +926,7 @@ Args:
 
 #### Command: `show` (`open`, `view`)
 
-Open documentation in a browser or the web viewer panel.
+Open problem/file in a browser or the web viewer panel.
 * channels: terminal, web · profiles: admin, user, guest
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
@@ -934,6 +934,7 @@ Open documentation in a browser or the web viewer panel.
 ```
 show
 [problem=<n>] (default current)
+[filename=<str>|none] (default None)
 [silent=true|--silent]
 ```
 
@@ -957,9 +958,15 @@ shell profile:
   the monotonic token lets the page ignore the sequence when the PTY replay
   buffer re-sends it on reconnect.
 
+When *filename* is given, `show` opens that solution file in the code editor
+instead of the rendered page — it delegates to `edit`, so the same file lookup,
+profile handling, and browser tab apply.
+
 Arguments:
     ctx:      The shell's command context (selects the profile-specific path).
     problem:  The `problem` to open; defaults to the current problem.
+    filename: A solution file to open in the code editor; when omitted, opens
+              the rendered documentation page instead.
 ```
 
 ---
