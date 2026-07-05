@@ -98,8 +98,8 @@ a.bc-seg:hover { color: var(--ansi-blue); }
 }
 .spacer { flex: 1 1 auto; }
 
-/* Eval action — dispatched into the live shell (writes `eval <n>` to the PTY). */
-#eval-btn {
+/* Command-bar actions (bench / eval / show) — each dispatched into the live shell. */
+#bench-btn, #eval-btn, #show-btn {
     font: 700 11px/1 ui-monospace, 'Cascadia Code', 'JetBrains Mono', monospace;
     letter-spacing: 0.07em;
     text-transform: uppercase;
@@ -112,8 +112,8 @@ a.bc-seg:hover { color: var(--ansi-blue); }
     cursor: pointer;
     transition: background 0.14s ease;
 }
-#eval-btn:hover { background: var(--ansi-bright-blue); }
-#eval-btn[hidden] { display: none; }
+#bench-btn:hover, #eval-btn:hover, #show-btn:hover { background: var(--ansi-bright-blue); }
+#bench-btn[hidden], #eval-btn[hidden], #show-btn[hidden] { display: none; }
 
 /* ── Workspace: content iframe (left) beside the terminal (right) ── */
 #workspace {

@@ -237,15 +237,39 @@ class AuthRoutesTests(AioHTTPTestCase):
         _c, with_old = await self._login(_EMAIL, _PASSWORD)
         self.assertEqual(with_old.status, 401)
 
-    async def test_whoami_returns_email(self) -> None:
+    async def test_whoami_returns_email_and_profile(self) -> None:
         _c, verify = await self._login(_EMAIL, _PASSWORD)
         session = verify.cookies[policy.SESSION_COOKIE].value
         resp = await self.client.get('/whoami', headers={'Cookie': f'{policy.SESSION_COOKIE}={session}'})
         self.assertEqual(resp.status, 200)
-        self.assertEqual((await resp.json())['email'], _EMAIL)
+        body = await resp.json()
+        self.assertEqual(body['email'], _EMAIL)
+        self.assertEqual(body['profile'], 'user')        # setUp registers _EMAIL with the default profile
 
     async def test_whoami_requires_auth(self) -> None:
         self.assertEqual((await self.client.get('/whoami')).status, 401)
+
+    async def test_authz_reflects_user_profile(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD)     # a 'user'
+        session = verify.cookies[policy.SESSION_COOKIE].value
+        resp = await self.client.get('/authz?cmd=evaluate&cmd=users&cmd=unlisted-cmd',
+                                     headers={'Cookie': f'{policy.SESSION_COOKIE}={session}'})
+        self.assertEqual(resp.status, 200)
+        # evaluate is granted to user; users is admin-only; an unlisted command is admin-only
+        self.assertEqual(await resp.json(), {'evaluate': True, 'users': False, 'unlisted-cmd': False})
+
+    async def test_authz_restricts_guest(self) -> None:
+        self.app[routes.USERS].register('guest@nowhere.test',
+                                        SrpToken.create('guest@nowhere.test', _PASSWORD), 'guest')
+        _c, verify = await self._login('guest@nowhere.test', _PASSWORD)
+        session = verify.cookies[policy.SESSION_COOKIE].value
+        resp = await self.client.get('/authz?cmd=show&cmd=benchmark',
+                                     headers={'Cookie': f'{policy.SESSION_COOKIE}={session}'})
+        # show is granted to everyone; benchmark is not granted to guest
+        self.assertEqual(await resp.json(), {'show': True, 'benchmark': False})
+
+    async def test_authz_requires_auth(self) -> None:
+        self.assertEqual((await self.client.get('/authz?cmd=show')).status, 401)
 
     async def test_self_service_password_change(self) -> None:
         _c, verify = await self._login(_EMAIL, _PASSWORD, remember=True)

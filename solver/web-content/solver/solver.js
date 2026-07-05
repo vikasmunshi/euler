@@ -10,7 +10,9 @@
 
 const content = document.getElementById('content');
 const breadcrumbEl = document.getElementById('breadcrumb');
+const benchBtn = document.getElementById('bench-btn');
 const evalBtn = document.getElementById('eval-btn');
+const showBtn = document.getElementById('show-btn');
 const userBtn = document.getElementById('user-btn');
 const userDropdown = document.getElementById('user-dropdown');
 const connToggle = document.getElementById('conn-toggle');
@@ -96,7 +98,6 @@ function applyContext() {
         onProblem ? `https://projecteuler.net/problem=${n}` : 'https://projecteuler.net/progress');
     setExternal(document.getElementById('nav-github'),
         onProblem ? githubUrl(n) : 'https://github.com/vikasmunshi/euler');
-    evalBtn.hidden = !onProblem;
 }
 
 // The iframe (via header.js) reports what it is showing; the bar reflects it.
@@ -144,25 +145,53 @@ document.getElementById('nav-next').addEventListener('click', (e) => {
 document.getElementById('nav-active').addEventListener('click', (e) => { e.preventDefault(); showInShell(''); });
 applyContext();
 
-// Eval → dispatch `eval <n>` to the user's shell (the terminal shows the run). Uses
-// /cmd so it works regardless of this page's socket state.
-evalBtn.addEventListener('click', () => {
-    if (ctx.problem > 0) {
-        fetch('/cmd', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({command: `eval ${ctx.problem}`}),
-        }).catch(() => { /* ignore: the shell is the source of truth */ });
-    }
-});
+// Command-bar action buttons. Each dispatches a SolverShell command to the user's shell
+// via /cmd (so it works regardless of this page's socket state); the terminal shows the
+// run. A command targets the problem currently in view, or the shell's own current
+// problem when none is shown. The map key is the canonical command name (as in
+// commands.csv), used both to dispatch and to check authorization below.
+const barCommands = [
+    {btn: benchBtn, cmd: 'benchmark'},
+    {btn: evalBtn, cmd: 'evaluate'},
+    {btn: showBtn, cmd: 'show'},
+];
+
+function dispatchCmd(cmd) {
+    const line = ctx.problem > 0 ? `${cmd} ${ctx.problem}` : cmd;
+    fetch('/cmd', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({command: line}),
+    }).catch(() => { /* ignore: the shell is the source of truth */ });
+}
+barCommands.forEach(({btn, cmd}) => btn.addEventListener('click', () => dispatchCmd(cmd)));
+
+// Visibility follows the signed-in user's *profile* (command authorization), fixed for
+// the session — not the viewer's content. Ask the server which of these commands this
+// profile may run; leave a button hidden if it may not (or the check fails).
+const authzQuery = barCommands.map(({cmd}) => `cmd=${encodeURIComponent(cmd)}`).join('&');
+fetch(`/authz?${authzQuery}`, {cache: 'no-store', headers: {Accept: 'application/json'}})
+    .then((r) => (r.ok ? r.json() : {}))
+    .then((allowed) => barCommands.forEach(({btn, cmd}) => { btn.hidden = !allowed[cmd]; }))
+    .catch(() => { /* leave the buttons hidden */ });
 
 // ── Terminal (right pane) ──
-function setConnState(state) {
-    const connected = state === 'connected';
-    const busy = connected || state === 'connecting';
+// The account button reflects the live connection state; its tooltip pairs that state
+// with the signed-in user's email (filled in once /whoami resolves, below).
+let userEmail = '';
+let connState = 'connecting';
+
+function renderUserBtn() {
+    const connected = connState === 'connected';
+    const busy = connected || connState === 'connecting';
     userBtn.className = 'user-btn ' + (connected ? 'connected' : (busy ? '' : 'disconnected'));
-    userBtn.title = state;
+    userBtn.title = userEmail ? `${userEmail} ${connState}` : connState;
     connToggle.textContent = busy ? 'Disconnect' : 'Connect';
+}
+
+function setConnState(state) {
+    connState = state;
+    renderUserBtn();
 }
 
 // Build the xterm theme from the CSS variables the active solver-theme.css defines,
@@ -245,7 +274,12 @@ if (term.textarea) {
 // Bounce to login if the session has ended (e.g. this page came from the browser
 // cache after logout); the /ws upgrade below would otherwise just fail.
 fetch('/whoami', {cache: 'no-store', headers: {Accept: 'application/json'}})
-    .then((r) => { if (!r.ok) window.location.replace('/login'); });
+    .then((r) => {
+        if (!r.ok) { window.location.replace('/login'); return null; }
+        return r.json();
+    })
+    .then((who) => { if (who) { userEmail = who.email || ''; renderUserBtn(); } })
+    .catch(() => { /* transient network error; the tooltip just omits the email */ });
 
 const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
 const encoder = new TextEncoder();

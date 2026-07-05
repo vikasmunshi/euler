@@ -29,6 +29,7 @@ from aiohttp import web
 from aiohttp.typedefs import Handler
 
 from solver.config import config
+from solver.shell.command import is_authorized_for
 from solver.web.auth import policy
 from solver.web.auth.pending import PendingStore
 from solver.web.auth.ratelimit import RateLimiter
@@ -299,9 +300,27 @@ async def _logout(request: web.Request) -> web.StreamResponse:
     raise response
 
 
+def _request_profile(request: web.Request) -> str:
+    """The signed-in user's authorization profile, defaulting to the least-privileged."""
+    user = request.app[USERS].get(current_email(request))
+    return user.profile if user is not None else 'guest'
+
+
 async def _whoami(request: web.Request) -> web.StreamResponse:
-    """`GET /whoami` → `{email}` for the signed-in user (the password page needs it for SRP)."""
-    return web.json_response({'email': current_email(request)})
+    """`GET /whoami` → `{email, profile}` for the signed-in user (SRP + UI gating)."""
+    return web.json_response({'email': current_email(request), 'profile': _request_profile(request)})
+
+
+async def _authz(request: web.Request) -> web.StreamResponse:
+    """`GET /authz?cmd=…&cmd=…` → `{cmd: bool}` command authorization for the user's profile.
+
+    The web server runs as a single process, so command authorization is resolved against
+    the *requesting* user's profile (from `.users.json`) rather than the server's own.
+    Lets the UI show a command action only to a profile permitted to run it.
+    """
+    profile = _request_profile(request)
+    return web.json_response({name: is_authorized_for(name, profile)
+                              for name in request.query.getall('cmd', [])})
 
 
 async def _serve_password(request: web.Request) -> web.StreamResponse:
@@ -376,6 +395,7 @@ def setup_auth(app: web.Application) -> None:
         web.post('/register/validate', _register_validate),
         web.post('/register/complete', _register_complete),
         web.get('/whoami', _whoami),
+        web.get('/authz', _authz),
         web.get('/password', _serve_password),
         web.post('/password/change', _password_change),
         web.get('/logout', _logout),

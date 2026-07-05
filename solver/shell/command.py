@@ -8,7 +8,8 @@ followed by its parsed argv tokens, and returning an `int` exit code.
 """
 from __future__ import annotations
 
-__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'is_authorized', 'registry']
+__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'is_authorized', 'is_authorized_for',
+           'registry']
 
 import csv
 from dataclasses import dataclass, field
@@ -49,17 +50,24 @@ def _authorization_policy() -> dict[str, frozenset[str]]:
     return policy
 
 
-def is_authorized(cmd_name: str) -> bool:
-    """True if the current user's profile may use *cmd_name* (see ``config.user_profile``).
+def is_authorized_for(cmd_name: str, profile: str) -> bool:
+    """True if *profile* may use *cmd_name* under the ``commands.csv`` policy.
 
     A command listed in the policy is allowed only for the profiles its row grants; a
     command **absent** from the policy is admin-only, so a newly added command is never
-    silently exposed to ``user``/``guest`` until it is added to ``commands.csv``.
+    silently exposed to ``user``/``guest`` until it is added to ``commands.csv``. Takes
+    the profile explicitly so a caller (e.g. the web tier, running as one process for
+    many users) can check on behalf of an identity other than its own.
     """
     allowed = _authorization_policy().get(cmd_name)
     if allowed is None:
-        return config.user_profile == 'admin'
-    return config.user_profile in allowed
+        return profile == 'admin'
+    return profile in allowed
+
+
+def is_authorized(cmd_name: str) -> bool:
+    """True if the current process's profile (``config.user_profile``) may use *cmd_name*."""
+    return is_authorized_for(cmd_name, config.user_profile)
 
 
 @dataclass
