@@ -18,7 +18,7 @@ answered with a stable decoy salt/B so the endpoints do not reveal which account
 """
 from __future__ import annotations
 
-__all__ = ['auth_middleware', 'setup_auth', 'is_authenticated']
+__all__ = ['auth_middleware', 'setup_auth', 'is_authenticated', 'profile_for']
 
 import secrets
 import time
@@ -300,25 +300,29 @@ async def _logout(request: web.Request) -> web.StreamResponse:
     raise response
 
 
-def _request_profile(request: web.Request) -> str:
-    """The signed-in user's authorization profile, defaulting to the least-privileged."""
+def profile_for(request: web.Request) -> str:
+    """The signed-in user's authorization profile, defaulting to the least-privileged.
+
+    The web server runs as a single process for many users, so callers gating a route
+    (or a command) must resolve the *requesting* user's profile from ``.users.json``
+    rather than trusting the server's own ``config.user_profile``.
+    """
     user = request.app[USERS].get(current_email(request))
     return user.profile if user is not None else 'guest'
 
 
 async def _whoami(request: web.Request) -> web.StreamResponse:
     """`GET /whoami` → `{email, profile}` for the signed-in user (SRP + UI gating)."""
-    return web.json_response({'email': current_email(request), 'profile': _request_profile(request)})
+    return web.json_response({'email': current_email(request), 'profile': profile_for(request)})
 
 
 async def _authz(request: web.Request) -> web.StreamResponse:
     """`GET /authz?cmd=…&cmd=…` → `{cmd: bool}` command authorization for the user's profile.
 
-    The web server runs as a single process, so command authorization is resolved against
-    the *requesting* user's profile (from `.users.json`) rather than the server's own.
-    Lets the UI show a command action only to a profile permitted to run it.
+    Lets the UI show a command action only to a profile permitted to run it (the same
+    check the server-side route guards apply — see ``solver.web.app.requires``).
     """
-    profile = _request_profile(request)
+    profile = profile_for(request)
     return web.json_response({name: is_authorized_for(name, profile)
                               for name in request.query.getall('cmd', [])})
 

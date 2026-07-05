@@ -141,17 +141,23 @@ function fillMeta() {
     if (badge && BADGE) { badge.hidden = false; badge.textContent = BADGE; }
 }
 
+// Save / delete are server-gated by the 'edit' capability (commands.csv). `canEdit`
+// mirrors that authorization (confirmed via /authz below); until it is granted the
+// toolbar shows the actions **dimmed** rather than pretending they work, and the buffer
+// stays read-only — there is no point editing what cannot be saved.
+let canEdit = false;
+
 function enableEditing() {
     if (!EDITABLE) return;  // generated / read-only views stay read-only with no Save / Del
     saveBtn.hidden = false;
-    saveBtn.disabled = false;
-    saveBtn.title = 'Save (Ctrl/Cmd+S)';
-    setEditable(true);
-    if (LINTABLE) forceLinting(view);  // surface diagnostics without waiting for an edit
+    saveBtn.disabled = !canEdit;
+    saveBtn.title = canEdit ? 'Save (Ctrl/Cmd+S)' : 'Saving is not permitted for your profile';
+    setEditable(canEdit);
+    if (canEdit && LINTABLE) forceLinting(view);  // surface diagnostics without waiting for an edit
     if (DELETABLE) {
         delBtn.hidden = false;
-        delBtn.disabled = false;
-        delBtn.title = 'Delete this solution';
+        delBtn.disabled = !canEdit;
+        delBtn.title = canEdit ? 'Delete this solution' : 'Deleting is not permitted for your profile';
     }
 }
 
@@ -201,4 +207,13 @@ async function runDelete() {
 if (saveBtn) saveBtn.addEventListener('click', save);
 if (delBtn) delBtn.addEventListener('click', runDelete);
 fillMeta();
-enableEditing();
+enableEditing();  // buttons appear dimmed until /authz confirms the edit capability
+
+// Reflect the server-side gate: ask whether this profile may run `edit`, then re-render
+// the toolbar. On failure the actions stay dimmed (safe default).
+if (EDITABLE) {
+    fetch('/authz?cmd=edit', {cache: 'no-store', headers: {Accept: 'application/json'}})
+        .then((r) => (r.ok ? r.json() : {}))
+        .then((a) => { canEdit = !!a.edit; enableEditing(); })
+        .catch(() => { /* authz unreachable: leave the actions dimmed */ });
+}

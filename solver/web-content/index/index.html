@@ -15,8 +15,9 @@
     <header class="index-hero">
         <p class="kicker">start here</p>
         <h1>Solve Project Euler, end to end</h1>
-        <p class="lede">Seven living guides, rendered from the repo's Markdown. </p>
-        <p class="lede">Type a command in the shell or follow a link - they do the same thing.</p>
+        <p class="lede">Nine guides stand between you and the next unsolved problem.
+            Read one, ignore the rest, feel briefly invincible.</p>
+        <p class="lede">Type a command or follow a link — same machine, different outfit.</p>
     </header>
 
     <nav class="guides" aria-label="Guides">
@@ -72,11 +73,27 @@
             </span>
             <span class="guide-go">&rarr;</span>
         </a>
-        <a class="guide" href="/docs/tls-and-auth">
+        <a class="guide" href="/docs/tls-guide">
             <span class="guide-ic">&#128274;</span>
             <span class="guide-text">
-                <span class="guide-title">Access Control</span>
-                <span class="guide-desc">Serving the web front end: Caddy + acme.sh TLS, SRP login, and command authorization.</span>
+                <span class="guide-title">TLS</span>
+                <span class="guide-desc">Serving <code>solver-web</code> over HTTPS: Caddy + acme.sh, the DNS-01 certificate, going public.</span>
+            </span>
+            <span class="guide-go">&rarr;</span>
+        </a>
+        <a class="guide" href="/docs/authentication">
+            <span class="guide-ic">&#128100;</span>
+            <span class="guide-text">
+                <span class="guide-title">Authentication</span>
+                <span class="guide-desc">Who you are: browser-side SRP-6a login, invite-only registration, sessions and remember-me.</span>
+            </span>
+            <span class="guide-go">&rarr;</span>
+        </a>
+        <a class="guide" href="/docs/authorization">
+            <span class="guide-ic">&#128737;</span>
+            <span class="guide-text">
+                <span class="guide-title">Authorization</span>
+                <span class="guide-desc">What you may do: profiles and <code>commands.csv</code> gating shell commands and web routes.</span>
             </span>
             <span class="guide-go">&rarr;</span>
         </a>

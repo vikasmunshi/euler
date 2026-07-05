@@ -19,6 +19,7 @@ from aiohttp.test_utils import AioHTTPTestCase
 from solver.web.auth import policy, routes
 from solver.web.auth.pending import PendingStore
 from solver.web.auth.remember import RememberStore
+from solver.web.app import requires
 from solver.web.auth.routes import auth_middleware, setup_auth
 from solver.web.auth.srp import SrpClient, SrpToken
 from solver.web.auth.users import UserStore
@@ -43,10 +44,16 @@ class AuthRoutesTests(AioHTTPTestCase):
         app[routes.PENDING_REG] = self.pending
         app[routes.REMEMBER] = self.remember
         app.router.add_get('/protected', self._protected)
+        # A route gated by the app's `requires` decorator against the 'edit' capability
+        # (admin + user, not guest), to exercise the server-side profile guard.
+        app.router.add_post('/needs-edit', requires('edit')(self._ok))
         return app
 
     async def _protected(self, request: web.Request) -> web.Response:
         return web.Response(text='secret')
+
+    async def _ok(self, request: web.Request) -> web.Response:
+        return web.Response(text='ok')
 
     async def _login(self, email: str, password: str,
                      remember: bool = False) -> tuple[SrpClient, web.HTTPException | object]:
@@ -270,6 +277,21 @@ class AuthRoutesTests(AioHTTPTestCase):
 
     async def test_authz_requires_auth(self) -> None:
         self.assertEqual((await self.client.get('/authz?cmd=show')).status, 401)
+
+    async def test_route_guard_allows_authorized_profile(self) -> None:
+        _c, verify = await self._login(_EMAIL, _PASSWORD)     # a 'user' — may 'edit'
+        headers = self._cookie_header(verify)
+        self.assertEqual((await self.client.post('/needs-edit', headers=headers)).status, 200)
+
+    async def test_route_guard_forbids_unprivileged_profile(self) -> None:
+        self.app[routes.USERS].register('guest@nowhere.test',
+                                        SrpToken.create('guest@nowhere.test', _PASSWORD), 'guest')
+        _c, verify = await self._login('guest@nowhere.test', _PASSWORD)
+        headers = self._cookie_header(verify)
+        self.assertEqual((await self.client.post('/needs-edit', headers=headers)).status, 403)
+
+    async def test_route_guard_requires_auth(self) -> None:
+        self.assertEqual((await self.client.post('/needs-edit')).status, 401)
 
     async def test_self_service_password_change(self) -> None:
         _c, verify = await self._login(_EMAIL, _PASSWORD, remember=True)

@@ -44,17 +44,19 @@ import re
 import tempfile
 from pathlib import Path
 from subprocess import run
-from typing import Any
+from typing import Any, Callable
 
 from aiohttp import WSCloseCode, WSMsgType, web
+from aiohttp.typedefs import Handler
 from markdown_it import MarkdownIt
 
 from solver.config import config
 from solver.core.problems import Problem, problems
+from solver.shell.command import is_authorized_for
 from solver.shell.variables import variables
 from solver.utils.identity import slugify
 from solver.utils.summary import summary
-from solver.web.auth.routes import USER_EMAIL, WS_CONNECTIONS, auth_middleware, setup_auth
+from solver.web.auth.routes import USER_EMAIL, WS_CONNECTIONS, auth_middleware, profile_for, setup_auth
 from solver.web.pty_manager import PTY_MANAGER, setup_pty_manager
 
 #: Top-level static page assets served verbatim from `config.static_file_dir`.
@@ -82,6 +84,31 @@ _CODE_LANGUAGES: dict[str, str] = {
 _EDIT_LANGUAGES: dict[str, str] = {
     '.py': 'python', '.c': 'c', '.json': 'json', '.html': 'html',
 }
+
+
+def requires(capability: str) -> Callable[[Handler], Handler]:
+    """Gate a route by the requester's profile against a ``commands.csv`` capability.
+
+    The web mutating routes (file save/delete, the code editor, lint, progress save)
+    act directly on the solution tree rather than through the profile-gated shell, so
+    they need the same authorization enforced here. *capability* is a command name;
+    a profile that may run that command in the shell may use the route, keeping
+    ``commands.csv`` the single source of truth for both surfaces. The check resolves
+    the *requesting* user's profile (the server process itself runs as admin), and a
+    disallowed profile gets 403 (it is authenticated — just not permitted).
+
+    Read-only routes and the terminal (``/ws``, ``/cmd``) are intentionally left
+    ungated: the terminal is any authenticated user's, and the shell restricts the
+    commands it will run there by the same policy.
+    """
+    def wrap(handler: Handler) -> Handler:
+        @functools.wraps(handler)
+        async def guarded(request: web.Request) -> web.StreamResponse:
+            if not is_authorized_for(capability, profile_for(request)):
+                raise web.HTTPForbidden(text=f'{capability}: not permitted for your profile')
+            return await handler(request)
+        return guarded
+    return wrap
 
 
 # ---------------------------------------------------------------------------
@@ -220,6 +247,7 @@ def _save_progress(content: bytes) -> tuple[int, str]:
     return 200, f'saved {progress_file.name}'
 
 
+@requires('summary')
 async def _save_progress_page(request: web.Request) -> web.StreamResponse:
     """Save the edited progress file (`POST /edit/progress`)."""
     body = await request.read()
@@ -551,6 +579,7 @@ def _text(code: int, message: str) -> web.Response:
     return web.Response(status=code, text=message, content_type='text/plain', charset='utf-8')
 
 
+@requires('edit')
 async def _save_problem_file(request: web.Request) -> web.StreamResponse:
     """Save an edited solution file (`POST /edit/<n>/<filename>`)."""
     problem_number = int(request.match_info['problem_number'])
@@ -561,6 +590,7 @@ async def _save_problem_file(request: web.Request) -> web.StreamResponse:
     return _text(*result)
 
 
+@requires('edit')
 async def _delete_problem_file(request: web.Request) -> web.StreamResponse:
     """Delete a solution (`DELETE /edit/<n>/<filename>`)."""
     problem_number = int(request.match_info['problem_number'])
@@ -595,6 +625,7 @@ async def _run_command(request: web.Request, save: bool) -> web.StreamResponse:
     return web.json_response({'dispatched': command})
 
 
+@requires('lint')
 async def _lint_file(request: web.Request) -> web.StreamResponse:
     """Lint an edited (unsaved) solution file (`POST /edit/lint`).
 

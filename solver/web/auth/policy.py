@@ -3,7 +3,7 @@
 """Auth policy constants (lifetimes, cookie names, password rules).
 
 Kept in one place so the server and (where relevant) the browser client agree.
-Values match the design in docs/tls-and-auth.md.
+Values match the design in docs/authentication.md.
 """
 from __future__ import annotations
 
