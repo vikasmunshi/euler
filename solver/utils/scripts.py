@@ -30,7 +30,7 @@ def run_cmdline(cmdline: str) -> int:
 
 
 @register(help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
-def git_commit(reset: bool = False, verify: bool = True) -> int:
+def git_commit(reset: bool = False, verify: bool = True, message: str = '') -> int:
     """Stage and commit the solutions and solver package as a timestamped checkpoint.
 
     Adds everything under `solutions/` and `solver/` and commits it with a
@@ -42,13 +42,16 @@ def git_commit(reset: bool = False, verify: bool = True) -> int:
                 tree untouched). Defaults to False.
         verify: When True (default), run the pre-commit hook (flake8 + mypy).
                 When False, commit with `--no-verify`, skipping the hook.
+        message: The commit message. When empty (default), a
+                 `checkpoint <timestamp>` message is used.
 
     Aliased as `commit`.
     """
+    text: str = message or f'checkpoint {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
     cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
     cmdline += ['git', 'add', '-A', 'solutions', 'solver', '&&']
     cmdline += ['git', 'commit', '-a'] if verify else ['git', 'commit', '-a', '--no-verify']
-    cmdline += ['--message', f'"checkpoint {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}"']
+    cmdline += ['--message', f'"{text}"']
     result = run_cmdline(' '.join(cmdline))
     return result
 

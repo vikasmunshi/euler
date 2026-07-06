@@ -213,6 +213,11 @@ then summarise:
 2. **(solve only) Confirm the verdict.** Re-run `solver "eval <n>"` and make sure
    every solution's verdict is `correct` and `results.json` reflects the latest
    sources.
+3. **Commit:** `solver "commit <message>"`. Keep `<message>` short — a single line
+   that does **not** reveal the solution approach. Make it generic but with a bit of
+   personality, e.g. `"solved problem 0042 with a smile"` or
+   `"problem 0042 cracked — another one bites the dust"`. Never mention the
+   algorithm, formula, or any hint of how it was solved.
 
 Then **summarise the session** in one or two sentences (the action, and what was
 found or done) and end the turn.

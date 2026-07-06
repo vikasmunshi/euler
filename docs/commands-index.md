@@ -469,6 +469,7 @@ Commit everything, optionally resetting to origin/master.
 git-commit
 [reset=true|--reset]
 [verify=false|--no-verify]
+[message=<str>] (default '')
 [silent=true|--silent]
 ```
 
@@ -484,6 +485,8 @@ Args:
             tree untouched). Defaults to False.
     verify: When True (default), run the pre-commit hook (flake8 + mypy).
             When False, commit with `--no-verify`, skipping the hook.
+    message: The commit message. When empty (default), a
+             `checkpoint <timestamp>` message is used.
 
 Aliased as `commit`.
 ```
