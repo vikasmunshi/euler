@@ -61,6 +61,14 @@ const editorTheme = EditorView.theme({
 const editable = new Compartment();
 const editExt = on => [EditorView.editable.of(on), EditorState.readOnly.of(!on)];
 
+// Word wrap is off by default — long lines scroll horizontally so column alignment is
+// preserved — and toggled per view via the toolbar `wrap` button by reconfiguring this
+// compartment. The preference is remembered across pages in localStorage.
+const lineWrap = new Compartment();
+const WRAP_KEY = 'cm6-word-wrap';
+let wrapOn = localStorage.getItem(WRAP_KEY) === '1';
+const wrapExt = on => (on ? EditorView.lineWrapping : []);
+
 // Linted only in the editor: Python / C get the save-time validators; HTML gets
 // advisory html5lib warnings (they never block a save). JSON / generated / read-only
 // views have no server linter.
@@ -109,6 +117,7 @@ const view = new EditorView({
         indentUnit.of('    '),  // 4-space indentation (project style), not CM's 2-space default
         lintGutter(),
         linter(lintSource, {delay: 500}),
+        lineWrap.of(wrapExt(wrapOn)),  // word wrap off by default; toggled by the toolbar button
         editable.of(editExt(false)),  // read-only until enableEditing() wires it up below
         // Tab indents (matching CodeJar's catchTab); Ctrl/Cmd+S saves.
         keymap.of([
@@ -216,6 +225,22 @@ async function runDelete() {
     }
     enableEditing();
 }
+
+// Word-wrap toggle: available on every view (read-only included) since wrapping is a
+// display aid, not an edit. Reconfigures the lineWrap compartment and persists the choice.
+const wrapBtn = document.getElementById('wrap-btn');
+function renderWrap() {
+    if (!wrapBtn) return;
+    wrapBtn.setAttribute('aria-pressed', String(wrapOn));
+    wrapBtn.classList.toggle('active', wrapOn);
+}
+function toggleWrap() {
+    wrapOn = !wrapOn;
+    view.dispatch({effects: lineWrap.reconfigure(wrapExt(wrapOn))});
+    localStorage.setItem(WRAP_KEY, wrapOn ? '1' : '0');
+    renderWrap();
+}
+if (wrapBtn) { wrapBtn.addEventListener('click', toggleWrap); renderWrap(); }
 
 // The toolbar buttons are in this page's own DOM (this module runs after it parses),
 // so wire them directly — no shared header to wait on.

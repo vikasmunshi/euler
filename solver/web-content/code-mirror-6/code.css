@@ -95,6 +95,19 @@ body {
 }
 #editor-bar #del-btn:hover:not(:disabled) { background: rgba(224, 108, 117, 0.22); color: #ff7b86; }
 
+/* Word-wrap toggle: a neutral button that lights up in the accent colour while active. */
+#editor-bar #wrap-btn {
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+}
+#editor-bar #wrap-btn:hover { color: var(--text-hi); background: rgba(255, 255, 255, 0.07); }
+#editor-bar #wrap-btn.active {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: rgba(97, 175, 239, 0.35);
+}
+
 /* ── Command output panel (save result / eval results / diagnostics). A dark inset
    with a left accent stripe that success / error tint. ── */
 #save-output {
