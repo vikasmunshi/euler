@@ -61,12 +61,13 @@ const editorTheme = EditorView.theme({
 const editable = new Compartment();
 const editExt = on => [EditorView.editable.of(on), EditorState.readOnly.of(!on)];
 
-// Word wrap is off by default — long lines scroll horizontally so column alignment is
-// preserved — and toggled per view via the toolbar `wrap` button by reconfiguring this
-// compartment. The preference is remembered across pages in localStorage.
+// Word wrap is on by default — long lines soft-wrap so nothing runs off-screen — and
+// toggled per view via the toolbar `wrap` button by reconfiguring this compartment.
+// Turning it off restores horizontal scroll. The preference is remembered across pages
+// in localStorage (unset ⇒ default on).
 const lineWrap = new Compartment();
 const WRAP_KEY = 'cm6-word-wrap';
-let wrapOn = localStorage.getItem(WRAP_KEY) === '1';
+let wrapOn = localStorage.getItem(WRAP_KEY) !== '0';
 const wrapExt = on => (on ? EditorView.lineWrapping : []);
 
 // Linted only in the editor: Python / C get the save-time validators; HTML gets
