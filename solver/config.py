@@ -38,7 +38,9 @@ def _root_dir() -> Path:
         env_path = [p for p in env_path if not p.startswith('/mnt')]
         env_path = list(dict.fromkeys(env_path))
         os.environ['PATH'] = ':'.join(env_path)
-        return Path(git_root)
+        root_dir: Path = Path(git_root)
+        os.environ['HOME'] = root_dir.as_posix()
+        return root_dir
     raise ValueError('Failed to get git root')
 
 
