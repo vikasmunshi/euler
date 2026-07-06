@@ -1452,8 +1452,8 @@
     "title": "Robot Walks",
     "level": 15,
     "pct": 41,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Mon, 6 Jul 2026, 08:03"
   },
   "209": {
     "title": "Circular Logic",

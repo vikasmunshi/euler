@@ -48,10 +48,11 @@ design notes.
 ### Installation
 
 > **Prefer not to install?** A live instance of the web front end runs at
-> **[euler.vikasmunshi.com](https://euler.vikasmunshi.com)** — the same `solver` shell,
-> read-only viewer, and editor in the browser, served over HTTPS. Access is gated by a
+> **[euler.vikasmunshi.com](https://euler.vikasmunshi.com)** - the same `solver` shell,
+> documentation viewer, and editor, all in the browser and served over HTTPS. Access is gated by a
 > login (see [Authentication](docs/authentication.md)); if you'd like an account to explore
-> or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your own copy, install below.
+> or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your own copy, see the
+> installation steps below.
 
 Clone the repository and install system dependencies via [make](Makefile) or the bash [scripts](scripts);
 the framework itself is installed with `pip`. Solutions can be written in any language – anything that runs as a
