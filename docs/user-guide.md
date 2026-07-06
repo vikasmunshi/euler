@@ -101,6 +101,13 @@ read-only viewer pages; `show N` (below) auto-starts this server and opens the
 problem's page in a dedicated browser tab named `solver-doc`, which every later
 `show` reuses (refreshing it for the same problem, navigating it for another).
 
+The code editor (and the read-only file viewer) is CodeMirror 6, with a
+line-number gutter, syntax highlighting, and inline lint diagnostics. Its toolbar
+carries a **`wrap`** toggle: word-wrap is **on** by default (long lines soft-wrap
+so nothing runs off-screen); switch it off to fall back to horizontal scrolling
+with column alignment preserved. The choice is remembered in your browser across
+files and pages.
+
 ---
 
 ## 2. Command blocks
