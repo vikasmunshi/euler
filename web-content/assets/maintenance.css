@@ -1,0 +1,87 @@
+/* Maintenance holding page — the first real response served through the edge.
+ * Establishes the web-content look & feel and proves the edge CSP fallback
+ * (default-src 'self'; style-src 'self') on a static response: this file is the
+ * only style source, loaded same-origin, with no inline styles anywhere.
+ * Theme-aware (prefers-color-scheme); no JavaScript. */
+
+:root {
+  --bg: #f7f8fa;
+  --bg-accent: #eef1f6;
+  --card: #ffffff;
+  --fg: #1b2330;
+  --muted: #6b7688;
+  --accent: #3b6ea5;
+  --border: #e3e7ee;
+  --shadow: 0 10px 40px rgba(27, 35, 48, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1319;
+    --bg-accent: #141a22;
+    --card: #171e28;
+    --fg: #e7ecf3;
+    --muted: #8b97a8;
+    --accent: #6fa8dc;
+    --border: #232c38;
+    --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: var(--fg);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, var(--bg-accent), transparent 70%),
+    var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  line-height: 1.55;
+}
+
+.card {
+  width: 100%;
+  max-width: 30rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 3rem 2.5rem;
+  text-align: center;
+}
+
+.glyph {
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+h1 {
+  margin: 1rem 0 0.75rem;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+}
+
+.lead {
+  margin: 0 0 1.25rem;
+  font-size: 1.02rem;
+  color: var(--fg);
+}
+
+.muted {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+strong { color: var(--accent); }

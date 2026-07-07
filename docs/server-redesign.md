@@ -262,7 +262,7 @@ framework, Jinja2 replaces homegrown templating." Rendering contract:
   live updates reuse the same templates — maximal code reuse, zero client-side
   duplication of markup.
 - "Live" feel with **no framework and no build step**: ~14 kB, vendorable into
-  `solver/web-content/vendor/` exactly like `xterm.js`/`codemirror` today (pinned +
+  `web-content/vendor/` exactly like `xterm.js`/`codemirror` today (pinned +
   SRI + `LICENSES` entry).
 - **Security posture improves**: no client-side string→DOM assembly means no
   DOM-XSS class; all escaping is Jinja autoescape, server-side. Smaller JS surface
@@ -357,7 +357,7 @@ existing `scripts/setup/caddy.sh` convention (idempotent, header block documenti
    - *Python deps* (Jinja2, nh3, aiohttp-jinja2): pinned in a `pyproject` optional
      group + a `check` that verifies importability and wheel availability.
    - *Vendored browser assets* (htmx, SSE ext): a vendoring script that downloads a
-     **pinned** version into `solver/web-content/vendor/`, records the **SRI hash**,
+     **pinned** version into `web-content/vendor/`, records the **SRI hash**,
      and appends to `vendor/LICENSES` — the pattern already used for
      `xterm.js`/`codemirror`/`mathjax`.
    - *System deps* (caddy, squid): apt repo + package, plus `euler-web` group /
@@ -415,14 +415,26 @@ Built as `scripts/setup/egress.sh` (sibling to `frontend.sh`).
   (preserves operator edits); root-owned, boot-enabled `euler-proxy.service`; `status`
   probes an allowed and a denied domain through the proxy.
 
-### Phase 3 — Maintenance page (static)
+### Phase 3 — Maintenance page (static) ✅
+Folded into `scripts/setup/frontend.sh` (no new script — the edge orchestrator owns it).
 - **Deliver:** a single static **"site under maintenance"** page served through Caddy
   end-to-end — proves TLS, routing, headers, and CSP fallback on a real response. No
   app framework yet. Reusable later as the holding page Caddy serves when an upstream
   is down or during a deploy.
-- **Establishes:** the `web-content` static layout and the CSP baseline the app
-  services will inherit.
-- **Kit:** the page + its assets; no new runtime dep; wired into Caddy routing.
+- **Establishes:** the `web-content` static layout (repo-root `web-content/`:
+  `maintenance.html` + `assets/maintenance.css`) and the CSP baseline the app services
+  will inherit — the page is authored to pass the edge fallback CSP
+  (`default-src 'self'; style-src 'self'`): one same-origin stylesheet, **no** inline
+  styles or scripts.
+- **Wiring:** `frontend.sh` deploys the repo `web-content/` tree to
+  `/etc/euler/web-content` (`root:euler-web`, `0644`/`0755`) so `euler-caddy` can read
+  it, and generates a Caddyfile where `/healthz` and `/assets/*` are served directly
+  while **every other request falls through to the maintenance page** (HTTP `503` +
+  `Retry-After`, its CSS still served `200` so the page renders styled). The future
+  content/ws/auth upstreams are commented stubs; a `handle_errors` block reuses the
+  same holding page so it also shows whenever a later-phase upstream is down.
+- **Kit:** the page + its assets; no new runtime dep; deployed and wired into Caddy
+  routing by `frontend.sh install`/`upgrade` (`make install-frontend`/`upgrade-frontend`).
 
 ### Phase 4 — Auth service
 - **Deliver:** aiohttp auth service exposing (a) SRP login/session/remember-me/reset
