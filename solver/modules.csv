@@ -14,7 +14,7 @@ solver.core.new,True,True,True
 solver.core.problems,,,
 solver.core.results,True,True,True
 solver.core.test_cases,True,True,True
-solver.core.viewer,True,,
+solver.core.viewer,True,True,True
 solver.crypto.ciphers,,,
 solver.crypto.config,,,
 solver.crypto.gitfilter,,,

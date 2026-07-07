@@ -6,7 +6,7 @@ claude-api,True,True,
 claude-skill,True,True,
 clear,True,True,True
 compile-c,True,True,
-costs,True,True,True
+costs,True,True,
 echo,True,True,True
 edit,True,True,
 evaluate,True,True,True
@@ -30,11 +30,10 @@ progress,True,True,True
 results,True,True,True
 search,True,True,True
 show,True,True,True
-summary,True,True,
+summary,True,,
 sys-setup,True,,
 test-cases,True,True,True
 update-docs,True,,
 update-models,True,,
 user,True,,
 user-authorize,True,,
-users,True,,

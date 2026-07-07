@@ -83,7 +83,6 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
-| [`users`](#command-users) | — | Manage web-auth users (list|add|reset|remove|disable|enable). |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -339,7 +338,7 @@ Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1448)
+[ecb_usd_rate=<float>] (default 1.1415)
 ```
 
 ```text
@@ -401,9 +400,9 @@ like `show`:
   that the xterm.js page rides over the PTY → WebSocket pipe to point its viewer
   panel at the file's editor (`<origin>/edit/NNNN/<relpath>`).
 
-- **terminal** — auto-starts `solver-web` and opens that editor URL in the named
-  browser tab "solver-edit" (via `browser open-in-tab`); errors early if the
-  `browser` command is unavailable.
+- **terminal** — opens that editor URL in the named browser tab "solver-edit"
+  (via `browser open-in-tab`); errors early if the `browser` command is
+  unavailable.
 
 Arguments:
     ctx:      The shell's command context (selects the profile-specific path).
@@ -930,7 +929,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open problem/file in a browser or the web viewer panel.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin, user
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -947,8 +946,8 @@ Open a problem's documentation page, in a browser or the web viewer panel.
 When *problem* is omitted, opens the current problem. The path depends on the
 shell profile:
 
-- **terminal** — auto-starts the `solver-web` server and opens its page for the
-  problem (`<base_url>/NNNN/`) in the named browser tab "solver-doc" (via
+- **terminal** — opens the problem's page (`<base_url>/NNNN/`) in the named
+  browser tab "solver-doc" (via
   `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
   focused and refreshed, a different problem navigates the tab in place, and the
   tab is recreated if it has been closed. Prints an error and returns early if
@@ -1141,34 +1140,5 @@ user-authorize <public_key>
 
 ```text
 Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession).
-```
-
----
-
-#### Command: `users`
-
-Manage web-auth users (list|add|reset|remove|disable|enable).
-* channels: terminal, web · profiles: admin
-
-```
-users
-[action=list|add|reset|remove|disable|enable] (default list)
-[email=<str>] (default '')
-[profile=admin|user|guest] (default user)
-```
-
-```text
-List or manage the web-auth accounts in `keys/.users.json`.
-
-Args:
-    action:  'list' (default) shows every account; 'add' invites an email
-             (disabled + emailed secure link; the user sets their own password
-             at /register); 'reset' emails a fresh link so a registered user can
-             choose a new password; 'remove' deletes an account; 'disable' /
-             'enable' toggle whether a registered account may log in.
-    email:   The account email (required for every action except 'list').
-    profile: Authorization profile for 'add' — 'admin', 'user' (default), or
-             'guest'; governs which commands the account may run. Ignored by
-             the other actions (a profile is only assigned at invite time).
 ```
 <!-- /GEN:command-index -->
