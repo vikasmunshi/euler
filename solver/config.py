@@ -204,7 +204,7 @@ class Config(AttributeDict):
             'remember_file': root_dir / 'keys' / '.remember.json',  # persistent remember-me tokens
             'session_secret_file': root_dir / 'keys' / '.session-secret',  # HMAC key for remember-me
             'static_file_dir': root_dir / 'solver/web-content',
-            'static_file_problems': root_dir / 'solver/web-content/problems.json',
+            'static_file_problems': root_dir / 'solutions/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
             'templates_dir': root_dir / 'solver/templates',
 
