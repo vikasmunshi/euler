@@ -40,7 +40,7 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 |---|---|
 | TLS / edge / routing | **Caddy** (reverse proxy, `forward_auth` gate), certs via **acme.sh** DNS-01. |
 | Inter-service transport | **Unix domain sockets** under `/run/euler/`, not loopback TCP — see [DD-1](#design-decisions). |
-| Service identity | Dedicated system users `euler-caddy` / `euler-auth` / `euler-content` / `euler-ws` (in the **`euler-web`** group), plus `euler-proxy` for egress — see [DD-2](#design-decisions). |
+| Service identity | Dedicated nologin system users — `euler-caddy` / `euler-auth` / `euler-content` / `euler-ws` (in **`euler-web`**), plus `euler-proxy` (egress), `euler-acme` (cert), `euler-ddns` (DNS). **None run as root** — see [DD-2](#design-decisions), [DD-4](#design-decisions). |
 | Edge setup & lifecycle | One `scripts/setup/frontend.sh` (install/uninstall/upgrade) installs **root-owned systemd units** (start/stop needs `sudo`), superseding `caddy.sh` + `acme.sh` — see [DD-3](#design-decisions). |
 | Egress control | **Squid** forward proxy, domain allowlist; shell/AI/scrapers reach the network only via `HTTPS_PROXY`. |
 | Response headers | **Content-Security-Policy on every served page** (see [CSP](#content-security-policy)). |
@@ -181,6 +181,38 @@ require **`sudo`** (`sudo systemctl … euler-*`, or `sudo frontend.sh {start,st
 This supersedes the old relocatable, user-owned `caddy-euler.service` (which ran as the
 repo owner and needed no sudo) and the detached-process + `fcntl.flock` fallback — the
 edge now **assumes systemd** (present on both dev and the deployment host).
+
+### DD-4 · No service runs as root (acme + ddns get dedicated users)
+
+**Decision.** No `euler-*` service runs as root. Phases 1–2 left two exceptions —
+acme.sh and the DDNS updater both ran as **root** — and this closes them with dedicated,
+nologin system users, each in its own group (outside `euler-web`):
+
+| Service | User | Code | Config | Renewal/run |
+|---|---|---|---|---|
+| cert issue/renew | `euler-acme` | acme.sh in `/usr/local/share/euler-acme` | caches its own state; DNS creds passed at issue time | `euler-acme.timer` (daily) |
+| dynamic DNS | `euler-ddns` | `/usr/local/bin/euler-ddns` | `/etc/euler/ddns.env` (`root:euler-ddns 0640`) | `euler-ddns.timer` |
+
+**Cert reload without root.** The reload of `euler-caddy` uses **Caddy's admin API**
+(`caddy reload --config /etc/euler/Caddyfile`, loopback `:2019`), not `systemctl` — so a
+non-root `euler-acme` triggers it. The Caddyfile is `0644` (non-secret) so `euler-acme`
+reads it without joining `euler-web`.
+
+**Cert deploy without chown.** `/etc/euler/tls` is `euler-acme:euler-web`, **`setgid`
+(2750)** — acme.sh (as `euler-acme`) writes `server.{crt,key}` there and they inherit
+group `euler-web`; the reloadcmd `chmod`s the key `0640`, so `euler-caddy` reads it via
+the group. No `chown`, no root.
+
+**Renewal on a timer, not a crontab.** acme.sh is installed `--nocron`; renewal runs from
+`euler-acme.timer` (a root-owned systemd timer running `acme.sh --cron` as `euler-acme`),
+consistent with DD-3 and sidestepping system-user crontab quirks.
+
+**Config source.** `keys/.env` stays the **install-time authoring** source of truth; the
+installer (repo owner + sudo) deploys the *scoped* runtime config into `/etc/euler`
+(`edge.env` = FQDN + email; `ddns.env` = FQDN + name.com creds), which the dedicated users
+read — so no runtime service needs the repo checkout. `/usr/local/bin/euler-ddns` is a
+copy of the updater for the same reason. This also scopes secrets: `euler-ddns` sees only
+the name.com creds, never the full `keys/.env` (Anthropic key, SMTP password).
 
 ---
 

@@ -7,15 +7,15 @@
 # changing ISP address. Replaces the "external updater" hand-wave in docs/tls-guide.md
 # with a repo-scripted updater on a systemd timer.
 #
-# Model:
+# Model (DD-4 — runs as the non-root euler-ddns user):
 #   - `update` reads the public IP (api.ipify.org) and PUTs/creates the name.com A
 #     record only when it has changed (idempotent, quiet on no-change).
-#   - A root-owned `euler-ddns.timer` runs `update` periodically (like the acme.sh
-#     renewal cron). The updater is **infra egress** — like acme.sh, it does NOT go
-#     through the Squid proxy (that gate is for the shell / AI / scraper / gh).
-#   - The FQDN and the name.com token both come from the project env file keys/.env
-#     (EULER_TLS_DOMAIN + the DNS-01 credentials — the single source of truth); the root
-#     timer can read it, so nothing is duplicated or baked into the unit.
+#   - The updater is deployed to /usr/local/bin/euler-ddns and run by a root-owned
+#     `euler-ddns.timer` as the dedicated `euler-ddns` user. It is **infra egress** —
+#     like acme.sh, it does NOT go through the Squid proxy.
+#   - Config is the scoped /etc/euler/ddns.env (root:euler-ddns 0640): just the FQDN
+#     (EULER_TLS_DOMAIN) + the name.com token, deployed by the installer from keys/.env
+#     (the authoring source). euler-ddns never reads the full keys/.env.
 #
 # name.com v4 REST API, HTTP Basic auth (username : API token).
 #
@@ -29,8 +29,14 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-SELF="${PROJECT_ROOT}/scripts/setup/ddns.sh"
-ENV_FILE="${PROJECT_ROOT}/keys/.env"          # name.com credentials (read by root)
+SELF="${SCRIPT_DIR}/ddns.sh"                    # this script in the repo (for deploy)
+ENV_FILE="${PROJECT_ROOT}/keys/.env"            # authoring source (operator-readable)
+
+SYS_DIR="/etc/euler"
+DDNS_ENV="${SYS_DIR}/ddns.env"                  # scoped runtime config (root:euler-ddns 0640)
+DDNS_BIN="/usr/local/bin/euler-ddns"            # deployed updater (euler-ddns runs this)
+DDNS_USER="euler-ddns"
+DDNS_GROUP="euler-ddns"
 
 API="https://api.name.com/v4"
 IP_SERVICE="${EULER_DDNS_IP_SERVICE:-https://api.ipify.org}"
@@ -41,8 +47,8 @@ TIMER_NAME="euler-ddns.timer"
 SERVICE_DEST="/etc/systemd/system/${SERVICE_NAME}"
 TIMER_DEST="/etc/systemd/system/${TIMER_NAME}"
 
-# Set by load_fqdn / load_creds / split_fqdn.
-FQDN=""              # full deployment FQDN, from keys/.env (EULER_TLS_DOMAIN)
+# Set by load_config / split_fqdn.
+FQDN=""              # full deployment FQDN (EULER_TLS_DOMAIN)
 NAMECOM_USER=""
 NAMECOM_TOKEN=""
 DOMAIN=""            # registered domain (last two labels of FQDN)
@@ -58,8 +64,9 @@ Usage: $0 [install|update|status|uninstall|help]
   status     Show the timer state, the host's public IP, and the live A record.
   uninstall  Remove the timer + service (name.com records left untouched).
 
-  keys/.env (single source of truth): EULER_TLS_DOMAIN (the FQDN) and
-  NAMEDOTCOM_USERNAME / NAMEDOTCOM_TOKEN. Commands fail if the FQDN is unset.
+  Authoring config in keys/.env: EULER_TLS_DOMAIN (the FQDN) and NAMEDOTCOM_USERNAME /
+  NAMEDOTCOM_TOKEN. install deploys a scoped copy to /etc/euler/ddns.env for euler-ddns;
+  commands fail if the FQDN is unset.
 USAGE
 }
 
@@ -88,39 +95,63 @@ ensure_deps() {
     fi
 }
 
-# Load the deployment FQDN from keys/.env into $FQDN — the single source of truth.
-# Fails if EULER_TLS_DOMAIN is unset there.
-load_fqdn() {
-    if [ -f "${ENV_FILE}" ]; then
+# Source the config and resolve the FQDN + name.com creds. Prefers the deployed scoped
+# /etc/euler/ddns.env (readable by euler-ddns / root); falls back to the repo keys/.env
+# (operator). Fails if the FQDN is set in neither.
+load_config() {
+    local src=""
+    if [ -r "${DDNS_ENV}" ]; then
+        src="${DDNS_ENV}"
+    elif [ -r "${ENV_FILE}" ]; then
+        src="${ENV_FILE}"
+    fi
+    if [ -n "${src}" ]; then
         set -a
         # shellcheck disable=SC1090
-        . "${ENV_FILE}"
+        . "${src}"
         set +a
     fi
     FQDN="${EULER_TLS_DOMAIN:-}"
+    NAMECOM_USER="${Namecom_Username:-${NAMEDOTCOM_USERNAME:-}}"
+    NAMECOM_TOKEN="${Namecom_Token:-${NAMEDOTCOM_TOKEN:-}}"
     if [ -z "${FQDN}" ]; then
-        echo "Error: EULER_TLS_DOMAIN is not set in ${ENV_FILE}" >&2
-        echo "       Add a line like:  EULER_TLS_DOMAIN=euler.example.com" >&2
+        echo "Error: EULER_TLS_DOMAIN not set in ${DDNS_ENV} or ${ENV_FILE}" >&2
         return 1
     fi
 }
 
-# Load the name.com username/token from keys/.env (accepting either the NAMEDOTCOM_*
-# or the acme.sh Namecom_* spelling). Errors if unset.
-load_creds() {
-    if [ -f "${ENV_FILE}" ]; then
-        set -a
-        # shellcheck disable=SC1090
-        . "${ENV_FILE}"
-        set +a
-    fi
-    NAMECOM_USER="${Namecom_Username:-${NAMEDOTCOM_USERNAME:-}}"
-    NAMECOM_TOKEN="${Namecom_Token:-${NAMEDOTCOM_TOKEN:-}}"
+# Assert the name.com credentials were found (needed for update + the status A-lookup).
+require_creds() {
     if [ -z "${NAMECOM_USER}" ] || [ -z "${NAMECOM_TOKEN}" ]; then
-        echo "Error: name.com credentials not found in ${ENV_FILE}" \
-             "(NAMEDOTCOM_USERNAME / NAMEDOTCOM_TOKEN)" >&2
+        echo "Error: name.com credentials not found (NAMEDOTCOM_USERNAME / NAMEDOTCOM_TOKEN)" >&2
         return 1
     fi
+}
+
+# Create the dedicated euler-ddns user (own group, nologin) — DD-4.
+ensure_ddns_user() {
+    if ! getent group "${DDNS_GROUP}" > /dev/null; then
+        sudo groupadd --system "${DDNS_GROUP}"
+    fi
+    if ! getent passwd "${DDNS_USER}" > /dev/null; then
+        echo "Creating system user ${DDNS_USER}..."
+        sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
+            -g "${DDNS_GROUP}" "${DDNS_USER}"
+    fi
+}
+
+# Deploy the scoped runtime config euler-ddns reads (FQDN + name.com creds only).
+deploy_ddns_env() {
+    sudo mkdir -p "${SYS_DIR}"
+    sudo tee "${DDNS_ENV}" > /dev/null <<EOF
+# GENERATED by scripts/setup/ddns.sh — scoped runtime config for euler-ddns (DD-4).
+# Authoring source: keys/.env.
+EULER_TLS_DOMAIN=${FQDN}
+NAMEDOTCOM_USERNAME=${NAMECOM_USER}
+NAMEDOTCOM_TOKEN=${NAMECOM_TOKEN}
+EOF
+    sudo chown root:"${DDNS_GROUP}" "${DDNS_ENV}"
+    sudo chmod 0640 "${DDNS_ENV}"
 }
 
 # Split a FQDN into the registered domain (last two labels) and the host prefix.
@@ -142,8 +173,8 @@ get_public_ip() {
 # ── update ────────────────────────────────────────────────────────────────────────
 
 do_update() {
-    load_fqdn || return 1
-    load_creds || return 1
+    load_config || return 1
+    require_creds || return 1
     split_fqdn "${FQDN}"
 
     local ip
@@ -193,13 +224,15 @@ do_update() {
 do_install() {
     check_can_sudo || return 1
     require_systemd || return 1
-    load_fqdn || return 1
+    load_config || return 1
+    require_creds || return 1      # fail early if the token is missing
     ensure_deps
-    load_creds || return 1        # fail early if the token is missing
+    ensure_ddns_user
+    deploy_ddns_env
+    echo "Deploying updater to ${DDNS_BIN}..."
+    sudo install -m 0755 "${SELF}" "${DDNS_BIN}"
 
-    echo "Installing ${TIMER_NAME} for ${FQDN} (updates every 5 min)..."
-    # ExecStart takes no FQDN argument: the updater reads it from keys/.env at run time,
-    # so changing EULER_TLS_DOMAIN there is picked up without re-installing.
+    echo "Installing ${TIMER_NAME} for ${FQDN} (every 5 min, as ${DDNS_USER})..."
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler dynamic DNS updater (name.com A record for ${FQDN})
@@ -209,7 +242,9 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=${SELF} update
+User=${DDNS_USER}
+Group=${DDNS_GROUP}
+ExecStart=${DDNS_BIN} update
 EOF
     sudo tee "${TIMER_DEST}" > /dev/null <<EOF
 [Unit]
@@ -241,11 +276,20 @@ do_uninstall() {
         sudo rm -f "${SERVICE_DEST}"
     fi
     sudo systemctl daemon-reload
+    sudo rm -f "${DDNS_BIN}"
+
+    local reply
+    read -r -p "Remove ${DDNS_ENV} and the ${DDNS_USER} user? [y/N] " reply
+    if [[ "${reply}" =~ ^[Yy]$ ]]; then
+        sudo rm -f "${DDNS_ENV}"
+        if getent passwd "${DDNS_USER}" > /dev/null; then sudo userdel "${DDNS_USER}" 2>/dev/null || true; fi
+        if getent group "${DDNS_GROUP}" > /dev/null; then sudo groupdel "${DDNS_GROUP}" 2>/dev/null || true; fi
+    fi
     echo "DDNS uninstall complete (name.com records left untouched)."
 }
 
 do_status() {
-    load_fqdn || return 1
+    load_config || return 1
     echo "DDNS target: ${FQDN}"
     if [ -f "${TIMER_DEST}" ] && command -v systemctl &> /dev/null; then
         echo "${TIMER_NAME}: $(systemctl is-active "${TIMER_NAME}" 2>/dev/null)/$(systemctl is-enabled "${TIMER_NAME}" 2>/dev/null)"
@@ -256,7 +300,7 @@ do_status() {
     local ip
     ip="$(get_public_ip 2>/dev/null || true)"
     echo "Public IP:   ${ip:-unknown}"
-    if load_creds 2>/dev/null; then
+    if require_creds 2>/dev/null; then
         split_fqdn "${FQDN}"
         local cur
         cur="$(curl -sS -u "${NAMECOM_USER}:${NAMECOM_TOKEN}" --max-time 15 \

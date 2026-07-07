@@ -48,11 +48,11 @@ Internet / LAN
       ├─►  unix //run/euler/content.sock    (euler-content)   — Phase 5
       └─►  unix //run/euler/ws.sock         (euler-ws)        — Phase 6
    ▲
- acme.sh (root, /root/.acme.sh)
+ acme.sh (euler-acme, /usr/local/share/euler-acme)
    └─  DNS-01 ─► name.com API (writes _acme-challenge TXT) ─► Let's Encrypt
-       reloadcmd: re-apply cert perms + `systemctl reload euler-caddy.service`
+       reloadcmd: fix key mode + `caddy reload` (admin API — no root)
 
- DDNS updater ─► name.com API (keeps the euler A record → current public IP)
+ euler-ddns ─► name.com API (keeps the euler A record → current public IP)
 ```
 
 No app service binds a TCP port — Caddy reaches each one over a **unix domain socket**
@@ -96,13 +96,15 @@ scripts/setup/frontend.sh install
 unset** — there is no hostname argument or prompt. `install` is idempotent and does, in
 order:
 
-1. creates the **`euler-web`** group and the **`euler-caddy`** system user (DD-2);
+1. creates the **`euler-web`** group and the **`euler-caddy`** + **`euler-acme`** users
+   (DD-2/DD-4);
 2. installs stock Caddy from the official apt repo and **disables** any conflicting
    unit (the stock `caddy.service` and the old `caddy-euler.service`);
 3. generates **`/etc/euler/Caddyfile`** for the FQDN (§ below);
-4. installs **acme.sh as root** (`/root/.acme.sh`, with a root renewal cron);
-5. issues the certificate via DNS-01 and deploys it to **`/etc/euler/tls`**;
-6. installs the root-owned, boot-enabled **`euler-caddy.service`** and starts it.
+4. installs **acme.sh as `euler-acme`** (`/usr/local/share/euler-acme`, `--nocron`);
+5. issues the certificate via DNS-01 and deploys it to setgid **`/etc/euler/tls`**;
+6. installs the root-owned units — **`euler-caddy.service`** (started) and
+   **`euler-acme.timer`** (daily renewal).
 
 ### DNS credentials
 
@@ -118,16 +120,16 @@ its credentials to `keys/.env` (the same file that holds `ANTHROPIC_API_KEY`):
 | `digitalocean` | `dns_dgon` | `DO_API_KEY` |
 | `gandi` | `dns_gandi_livedns` | `GANDI_LIVEDNS_KEY` |
 
-`frontend.sh` reads `keys/.env` as the invoking user and passes the credentials to the
-root acme.sh **as environment** (acme.sh caches them under `/root/.acme.sh` for
-unattended renewals). acme.sh refuses to run under a bare `sudo`, so the script invokes
-it as *clean* root (stripping the `SUDO_*` markers) — no manual step needed.
+`frontend.sh` reads `keys/.env` as the invoking user and passes the credentials to
+acme.sh (run as `euler-acme`) **as environment** — acme.sh caches them under
+`/usr/local/share/euler-acme` for unattended renewals. acme.sh refuses to run under a
+bare `sudo`, so the script strips the `SUDO_*` markers — no manual step needed.
 
 ## The Caddyfile
 
-`frontend.sh` **generates** `/etc/euler/Caddyfile` (`root:euler-web`, mode `0640`, so
-`euler-caddy` can read it). Caddy loads the acme.sh certificate by **absolute path** and
-performs no ACME of its own:
+`frontend.sh` **generates** `/etc/euler/Caddyfile` (`root:euler-web`, mode `0644` —
+non-secret, so `euler-caddy` and `euler-acme` can read it). Caddy loads the acme.sh
+certificate by **absolute path** and performs no ACME of its own:
 
 ```caddyfile
 {
@@ -199,8 +201,8 @@ scripts/setup/frontend.sh reload          # sudo systemctl reload euler-caddy
 `euler-caddy` cannot traverse the repo owner's `0750` home directory, so a repo-local
 Caddyfile or key would be unreadable. `frontend.sh` therefore writes the Caddyfile to
 `/etc/euler/Caddyfile` and the certificate to `/etc/euler/tls`, fully decoupling the
-edge from the checkout (DD-3). Cert perms: `server.crt` `0644`, `server.key` `0640`,
-both `root:euler-web` — readable by `euler-caddy` via the group.
+edge from the checkout (DD-3/DD-4). Cert perms: `server.crt` `0644`, `server.key` `0640`,
+both `euler-acme:euler-web` (setgid dir) — readable by `euler-caddy` via the group.
 
 ## Going public (router + firewall)
 
@@ -239,24 +241,25 @@ scripts/setup/ddns.sh status     # timer state, public IP, live A record
 ```
 
 It reads the public IP (`api.ipify.org`) and PUTs the name.com A record via the v4 API
-only when it has changed, using the **same name.com token as the DNS-01 challenge**
-(`keys/.env`). `euler-ddns.timer` runs it as **root** (like the acme.sh renewal cron),
-so — being infra egress — it does **not** pass through the Squid proxy.
+only when it has changed, using the **same name.com token as the DNS-01 challenge**. The
+updater is deployed to `/usr/local/bin/euler-ddns` and `euler-ddns.timer` runs it as the
+dedicated **`euler-ddns`** user, reading a scoped `/etc/euler/ddns.env` (DD-4). Being
+infra egress, it does **not** pass through the Squid proxy.
 
 ## Renewal & operation
 
-- **acme.sh** (root cron) renews the certificate before expiry and runs its
-  `--reloadcmd`, which **re-applies the `root:euler-web` ownership/mode** (that
-  `--install-cert` resets) and then `systemctl reload euler-caddy.service`. No
-  Caddy-side ACME is involved.
-- **Renewal needs no DNS credentials re-supplied.** acme.sh saves the name.com token
-  in the certificate's `.conf` at issue time (`SAVED_Namecom_*`) and re-exports it for
-  the DNS-01 challenge on renewal — which is exactly what lets the unattended root cron
-  work. `frontend.sh renew` therefore does *not* load `keys/.env`.
+- **acme.sh** runs as the non-root **`euler-acme`** user on **`euler-acme.timer`**
+  (daily, `acme.sh --cron`). Its `--reloadcmd` fixes the key mode (`chmod 0640`) and
+  reloads the edge via Caddy's **admin API** (`caddy reload`) — no `systemctl`, no root
+  (DD-4). No Caddy-side ACME is involved.
+- **Renewal needs no DNS credentials re-supplied.** acme.sh saves the name.com token in
+  the certificate's `.conf` at issue time (`SAVED_Namecom_*`) and re-exports it for the
+  DNS-01 challenge on renewal — which is what lets the unattended timer work.
+  `frontend.sh renew` therefore does *not* load `keys/.env`.
 - Force a renewal with `scripts/setup/frontend.sh renew`; check the schedule with
-  `frontend.sh status` (the `Renewal:` line shows the root cron + next renewal).
-- The **DDNS** updater (public access only) runs from `euler-ddns.timer`
-  (`scripts/setup/ddns.sh`).
+  `frontend.sh status` (the `Renewal:` line shows `euler-acme.timer` + next renewal).
+- The **DDNS** updater (public access only) runs as **`euler-ddns`** from
+  `euler-ddns.timer` (`scripts/setup/ddns.sh`).
 
 ## Configuration summary
 
@@ -267,7 +270,7 @@ shared by `frontend.sh` and `ddns.sh`) and the chosen DNS provider's credential 
 | Layer | Setting |
 |---|---|
 | DNS provider | API token; `_acme-challenge` TXT via acme.sh; the `euler` A record via the DDNS updater (public only) |
-| acme.sh | root install (`/root/.acme.sh`); issues/renews via the DNS-01 hook; deploys to `/etc/euler/tls`; reload hook fixes perms + reloads the unit |
+| acme.sh | runs as `euler-acme` (`/usr/local/share/euler-acme`); issues/renews via the DNS-01 hook on `euler-acme.timer`; deploys to setgid `/etc/euler/tls`; reload hook fixes the key mode + `caddy reload` (admin API) |
 | Caddy | stock apt build; runs as `euler-caddy`; loads `/etc/euler/tls/server.{crt,key}`; config `/etc/euler/Caddyfile` |
 | Upstreams | `unix//run/euler/*` sockets behind `forward_auth` (later phases) |
 | Router | forward TCP 443 → the host's LAN IP; static lease (public only) |
