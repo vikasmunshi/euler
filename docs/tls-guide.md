@@ -1,63 +1,71 @@
-# TLS for `solver-web` (Caddy + acme.sh, DNS-01)
+# TLS for the web edge (Caddy + acme.sh, DNS-01)
 
-> **Partly superseded by the server redesign.** Phase 1 folds the old
-> `scripts/setup/caddy.sh` + `scripts/setup/acme.sh` into a single
-> `scripts/setup/frontend.sh`, runs the edge as the dedicated `euler-caddy` user, and
-> moves the Caddyfile + cert to `/etc/euler` (acme.sh runs as root). The TLS/DNS-01
-> mechanics below still apply, but the commands, paths, and service model are current
-> only in [`docs/server-redesign.md`](server-redesign.md) (DD-1…DD-3). This guide will
-> be rewritten to the new model in a later pass.
-
-This guide covers serving `solver-web` over HTTPS: TLS termination and an
-auto-renewing certificate. It is the transport layer of a three-part story —
-[authentication](authentication.md) establishes *who* the caller is, and
+This guide covers the **edge**: TLS termination on `:443` and an auto-renewing
+certificate, as built by `scripts/setup/frontend.sh` (Phase 1 of the
+[server redesign](server-redesign.md)). It is the transport layer of a three-part
+story — [authentication](authentication.md) establishes *who* the caller is, and
 [authorization](authorization.md) decides *what* they may do.
+
+The edge runs as the dedicated **`euler-caddy`** user, and its config + certificate
+live under **`/etc/euler`** (decoupled from the repo). See the design of record —
+[`server-redesign.md`](server-redesign.md) — for the full service topology and the
+locked decisions DD-1 (unix-socket transport), DD-2 (service users), and DD-3
+(`frontend.sh` + root-owned systemd).
 
 ## What this protects
 
-`GET /ws` hands a browser a full interactive `solver` shell on a PTY, and the
-`POST /<n>/…` routes write files and run commands — arbitrary remote code
-execution as the repo owner. Three layers guard that surface:
+The web front end exposes a PTY-backed `solver` shell (over a WebSocket) and file
+write / command routes — arbitrary remote code execution by design. Three
+independent layers guard that surface:
 
 - **TLS** (Caddy, this guide) encrypts the channel and presents a browser-trusted
-  certificate. It authenticates nobody — it only secures the transport.
-- **[Authentication](authentication.md)** (`solver/web/auth/`) is the access gate,
-  in the aiohttp app rather than Caddy, which stays a pure TLS reverse proxy.
+  certificate. It authenticates nobody — it only secures the transport — and adds
+  the transport-level security headers (HSTS, `X-Content-Type-Options`,
+  `Referrer-Policy`) plus a fallback CSP.
+- **[Authentication](authentication.md)** is the access gate: Caddy routes every
+  request through the auth service's `forward_auth` endpoint before it reaches
+  content or the shell, so those services never see an unauthenticated caller.
 - **[Authorization](authorization.md)** (`solver/commands.csv` and the shell)
   decides which commands and routes an authenticated identity may use.
+
+> **Build status.** Phase 1 (this guide) delivers the edge: TLS, the cert, security
+> headers, a Caddy-native `/healthz`, and a maintenance placeholder. The
+> `forward_auth` gate and the `unix//run/euler/*` upstreams below are shipped as
+> commented stubs in the generated Caddyfile and activated by later phases (auth =
+> Phase 4, content = Phase 5, shell WS = Phase 6).
 
 ## Architecture
 
 ```
 Internet / LAN
    │  https :443
-   ▼  Router : forward TCP 443 → <host ip> TCP 443
-   ▼  System firewall(s): inbound allow TCP 443
+   ▼  Router: forward TCP 443 → <host LAN ip>:443   ·   Firewall: inbound allow 443
    ▼
-   Caddy  :443  ── terminates TLS ──►  reverse_proxy  ──►  aiohttp 127.0.0.1:8080
-          ▲   loads keys/.server.crt + keys/.server.key                 │  SRP auth gate
-          │   reload on renewal                                         │  (solver/web/auth/)
- acme.sh ─┘   DNS-01 ──► Provider API (writes _acme-challenge TXT)  ──► Let's Encrypt
+   Caddy :443   ── runs as euler-caddy, config /etc/euler/Caddyfile ──
+      │  terminates TLS (loads /etc/euler/tls/server.{crt,key})
+      │  security headers + fallback CSP; forward_auth gate
+      ├─►  unix //run/euler/auth.sock       (euler-auth)      — Phase 4
+      ├─►  unix //run/euler/content.sock    (euler-content)   — Phase 5
+      └─►  unix //run/euler/ws.sock         (euler-ws)        — Phase 6
+   ▲
+ acme.sh (root, /root/.acme.sh)
+   └─  DNS-01 ─► name.com API (writes _acme-challenge TXT) ─► Let's Encrypt
+       reloadcmd: re-apply cert perms + `systemctl reload euler-caddy.service`
 
-   DDNS updater ──► Provider API (keeps euler A → current public IP)
+ DDNS updater ─► name.com API (keeps the euler A record → current public IP)
 ```
 
-Port 8080 binds to loopback (`solver/web/cli.py` uses `host='127.0.0.1'`) and is
-unreachable from the LAN; only Caddy on :443 is exposed. DNS-01 needs no inbound
-port for the challenge, so nothing listens on :80.
-
-The aiohttp front end is served at `https://euler.vikasmunshi.com` with an
-auto-renewing Let's Encrypt certificate. `solver-web` binds loopback and is
-otherwise unchanged; **Caddy** terminates TLS and reverse-proxies to it, loading a
-certificate that **acme.sh** issues and renews through a DNS-01 challenge.
+No app service binds a TCP port — Caddy reaches each one over a **unix domain socket**
+under `/run/euler` (DD-1), and only Caddy on `:443` is network-exposed. DNS-01 needs no
+inbound port for the challenge, so nothing listens on `:80`
+(`auto_https disable_redirects`).
 
 **Why acme.sh rather than Caddy's own ACME:** the `caddy-dns/namedotcom` plugin is
-unmaintained and no longer builds against current Caddy (its download service
-returns HTTP 400), so stock Caddy cannot run the name.com DNS-01 challenge itself.
-Issuance is therefore delegated to **acme.sh**, whose `dns_namecom` client speaks
-the name.com API, and stock Caddy simply loads the resulting certificate. This
-keeps the DNS-01 benefit — a real certificate with no inbound port open — without
-depending on a broken plugin.
+unmaintained and no longer builds against current Caddy, so stock Caddy cannot run the
+name.com DNS-01 challenge itself. Issuance is delegated to **acme.sh** (whose
+`dns_namecom` client speaks the name.com API); stock Caddy simply loads the resulting
+certificate. This keeps the DNS-01 benefit — a real certificate with no inbound port
+open — without a broken plugin.
 
 ## The DNS API token
 
@@ -68,108 +76,135 @@ One name.com API token drives two things, both **outside** Caddy:
 | **DNS-01 challenge** | `_acme-challenge.euler.vikasmunshi.com` TXT | **acme.sh** (`dns_namecom`) | at issue/renewal; created then deleted |
 | **Dynamic DNS** | `euler.vikasmunshi.com` A | **external updater** | only when public |
 
-### 1. Create the token
-
-In the name.com account, open **API** (api.name.com) and create a token. Record
-the **username** and the **token**; both go in the project env file `keys/.env` (below), and
+Create a token in the name.com account (**API**, api.name.com) and record the
+**username** and the **token**; both go in the project env file `keys/.env` (below), and
 acme.sh caches them for renewals.
 
-### 2. Install Caddy (stock)
+## Install the edge
+
+One command stands up the whole edge — group + user, Caddy, acme.sh, the Caddyfile,
+the certificate, and the systemd unit:
 
 ```bash
-scripts/setup/caddy.sh install euler.vikasmunshi.com   # also: update | service | uninstall | status
+scripts/setup/frontend.sh install euler.vikasmunshi.com
+# also: uninstall | upgrade | status | renew | reload
 ```
 
-This installs stock Caddy from the official apt repo, **stops and disables the
-default `caddy.service`** so it cannot clash, **generates the `Caddyfile`** for the
-given hostname, and installs the **`caddy-euler.service`** unit — enabled
-immediately and started once the certificate and `Caddyfile` are both in place. No
-DNS plugin is required.
+Supply the hostname as the `install` argument, via `$EULER_TLS_DOMAIN`, or at the
+prompt; on a re-run or `upgrade` the hostname is read back from the existing Caddyfile.
+`install` is idempotent and does, in order:
 
-Supply the hostname as the `install` argument, via `$EULER_TLS_DOMAIN` (shared with
-acme.sh), or at the prompt. The `Caddyfile` is gitignored — it carries the
-deployment hostname — and is rewritten on each `install`; a repeated `install` with
-no hostname leaves an existing `Caddyfile` untouched.
+1. creates the **`euler-web`** group and the **`euler-caddy`** system user (DD-2);
+2. installs stock Caddy from the official apt repo and **disables** any conflicting
+   unit (the stock `caddy.service` and the old `caddy-euler.service`);
+3. generates **`/etc/euler/Caddyfile`** for the hostname (§ below);
+4. installs **acme.sh as root** (`/root/.acme.sh`, with a root renewal cron);
+5. issues the certificate via DNS-01 and deploys it to **`/etc/euler/tls`**;
+6. installs the root-owned, boot-enabled **`euler-caddy.service`** and starts it.
 
-### 3. Issue the certificate with acme.sh
+### DNS credentials
 
-`acme.sh issue` needs the `Caddyfile` (its reload command points at it), so run
-step 2 first. The DNS provider is selectable: pass it to `issue`/`renew`, or set
-`$EULER_TLS_DNS_PROVIDER` (default `namecom`). Add the provider's credentials to the
-project env file `keys/.env` (the same file that holds `ANTHROPIC_API_KEY`):
+The DNS provider is selectable via `$EULER_TLS_DNS_PROVIDER` (default `namecom`); add
+its credentials to `keys/.env` (the same file that holds `ANTHROPIC_API_KEY`):
 
-| provider (arg) | acme.sh hook | credentials in `keys/.env` |
+| provider | acme.sh hook | credentials in `keys/.env` |
 | --- | --- | --- |
-| `namecom` (default) | `dns_namecom` | `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` |
+| `namecom` (default) | `dns_namecom` | `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` (or `Namecom_Username` / `Namecom_Token`) |
 | `cloudflare` | `dns_cf` | `CF_Token` / `CF_Account_ID` |
 | `route53` | `dns_aws` | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` |
 | `godaddy` | `dns_gd` | `GD_Key` / `GD_Secret` |
 | `digitalocean` | `dns_dgon` | `DO_API_KEY` |
 | `gandi` | `dns_gandi_livedns` | `GANDI_LIVEDNS_KEY` |
 
-```bash
-scripts/setup/acme.sh install            # installs acme.sh, default CA = Let's Encrypt
-scripts/setup/acme.sh issue              # default provider (name.com) DNS-01 → deploy → reload
-scripts/setup/acme.sh issue cloudflare   # …or pick another provider
-```
+`frontend.sh` reads `keys/.env` as the invoking user and passes the credentials to the
+root acme.sh **as environment** (acme.sh caches them under `/root/.acme.sh` for
+unattended renewals). acme.sh refuses to run under a bare `sudo`, so the script invokes
+it as *clean* root (stripping the `SUDO_*` markers) — no manual step needed.
 
-`issue` runs the DNS-01 challenge (no open port), writes the full chain to
-`keys/.server.crt` and the key to `keys/.server.key` (mode 600; both dot-files,
-gitignored by `**/.*`), and registers a reload command so Caddy picks up the
-certificate immediately and on every renewal. acme.sh's cron then auto-renews
-(`scripts/setup/acme.sh renew [provider]` forces a renewal).
+## The Caddyfile
 
-- The default reload command is `caddy reload --config <root>/Caddyfile` (Caddy's
-  admin API, no sudo); override it with `EULER_TLS_RELOAD_CMD`. Override the
-  domain/email with `EULER_TLS_DOMAIN` / `EULER_TLS_EMAIL`.
-- On the very first `issue`, Caddy may not be running yet, so the reload is a
-  harmless no-op — the certificate still deploys; start Caddy (§4) and it loads it.
-
-### 4. The Caddyfile & service
-
-`caddy.sh install` **generates** this `Caddyfile` for the hostname (gitignored, not
-tracked). Caddy loads the acme.sh certificate and performs no ACME of its own;
-`auto_https disable_redirects` keeps it off :80:
+`frontend.sh` **generates** `/etc/euler/Caddyfile` (`root:euler-web`, mode `0640`, so
+`euler-caddy` can read it). Caddy loads the acme.sh certificate by **absolute path** and
+performs no ACME of its own:
 
 ```caddyfile
 {
+    # DNS-01 needs no inbound :80, so keep Caddy off :80 (no HTTP->HTTPS redirect).
     auto_https disable_redirects
 }
 
 euler.vikasmunshi.com {
-    tls keys/.server.crt keys/.server.key
-    reverse_proxy 127.0.0.1:8080
+    tls /etc/euler/tls/server.crt /etc/euler/tls/server.key
+
+    # Transport-level security headers; the per-response nonce'd CSP is minted by the
+    # app tier in later phases — this is the static/edge fallback.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+        Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
+        -Server
+    }
+
+    # Health probe — Caddy-native, no upstream (Phase 1).
+    handle /healthz {
+        respond "ok" 200
+    }
+
+    # --- Later phases (shipped as commented stubs) ---
+    #   forward_auth unix//run/euler/auth.sock { uri /verify; copy_headers X-User }
+    #   handle_path /ws* { reverse_proxy unix//run/euler/ws.sock }     # Phase 6
+    #   handle          { reverse_proxy unix//run/euler/content.sock }  # Phase 5
+
+    # Until app services exist, everything else is the maintenance holding page.
+    handle {
+        respond "euler - under maintenance" 200
+    }
 }
 ```
 
-- Certificate paths are **relative to Caddy's working directory** — the systemd
-  unit sets `WorkingDirectory` to the repo root, so the file carries no
-  machine-specific paths. (For a manual `caddy run`, `cd` to the repo root first.)
-- `reverse_proxy` upgrades WebSocket connections automatically, so `/ws` works.
-- Validate from the repo root: `caddy validate --config Caddyfile`.
+- `reverse_proxy` upgrades WebSocket connections automatically, so `/ws` will work once
+  the Phase-6 upstream is uncommented.
+- Regenerate + validate: `scripts/setup/frontend.sh upgrade` rewrites the Caddyfile and
+  reloads the unit; `sudo caddy validate --config /etc/euler/Caddyfile` checks it.
 
-acme.sh deploys the certificate into `keys/` as the repo owner, and the packaged
-Caddy runs as the unprivileged `caddy` user, which cannot read files under the
-owner's home. The generated **`caddy-euler.service`** therefore runs Caddy **as the
-repo owner**: `User`/`Group` are the checkout's owner, `WorkingDirectory` is the
-repo root, and the binary and config paths are derived (`CAP_NET_BIND_SERVICE` lets
-it bind :443 without root). If the certificate is absent at install time, the unit
-is enabled but not started; start it once §3 has issued one:
+## The service
+
+The generated **`euler-caddy.service`** is a **root-owned** system unit
+(`/etc/systemd/system`), enabled at boot, that runs Caddy as the unprivileged
+`euler-caddy` user:
+
+- `User=euler-caddy`, `Group=euler-web`, `WorkingDirectory=/etc/euler`.
+- `AmbientCapabilities=CAP_NET_BIND_SERVICE` lets it bind `:443` without root.
+- `RuntimeDirectory=euler` provisions `/run/euler` (mode `0770`) for the app-service
+  sockets; `StateDirectory=euler-caddy` + `XDG_*` give Caddy a writable home.
+- Hardening: `NoNewPrivileges`, `ProtectHome`, `ProtectSystem=full`, `PrivateTmp`.
+
+Because the unit lives in **root's** systemd and runs as a locked-down user, lifecycle
+is privileged — **start/stop/restart need `sudo`** (DD-3):
 
 ```bash
-scripts/setup/caddy.sh service     # validates the Caddyfile, then starts the unit
-systemctl status caddy-euler
+sudo systemctl status euler-caddy         # or: scripts/setup/frontend.sh status
+sudo systemctl restart euler-caddy
+scripts/setup/frontend.sh reload          # sudo systemctl reload euler-caddy
 ```
 
-The unit is named `caddy-euler` to avoid colliding with the default
-`caddy.service`; do **not** re-enable that default. acme.sh's `--reloadcmd` reloads
-the running instance on every renewal.
+`euler-caddy.service` supersedes the old repo-owner `caddy-euler.service` (which
+`frontend.sh` removes); do **not** re-enable the stock `caddy.service`.
+
+### Why /etc/euler (not the repo)
+
+`euler-caddy` cannot traverse the repo owner's `0750` home directory, so a repo-local
+Caddyfile or key would be unreadable. `frontend.sh` therefore writes the Caddyfile to
+`/etc/euler/Caddyfile` and the certificate to `/etc/euler/tls`, fully decoupling the
+edge from the checkout (DD-3). Cert perms: `server.crt` `0644`, `server.key` `0640`,
+both `root:euler-web` — readable by `euler-caddy` via the group.
 
 ## Going public (router + firewall)
 
-These steps expose the server beyond the LAN. They are needed only for public
-access; [authentication](authentication.md) and [authorization](authorization.md)
-are what make that access safe.
+These steps expose the server beyond the LAN. They are needed only for public access;
+[authentication](authentication.md) and [authorization](authorization.md) are what make
+that access safe.
 
 ### Router
 
@@ -192,53 +227,52 @@ per-port rules only. Requires `[wsl2] firewall=true` in `.wslconfig` (the defaul
 
 ### Dynamic DNS
 
-The A record must track the ISP's changing public IP. Caddy's DDNS relies on the
-same broken name.com plugin, so drive it separately with a **small updater in WSL**
-on a systemd timer or cron: read the public IP (`curl https://api.ipify.org`) and
-`PUT` the name.com A record when it changes. (Router DynDNS is awkward against
-name.com's REST API and is not recommended.)
+The A record must track the ISP's changing public IP. Caddy's DDNS relies on the same
+broken name.com plugin, so drive it separately with a **small updater in WSL** on a
+systemd timer or cron: read the public IP (`curl https://api.ipify.org`) and `PUT` the
+name.com A record when it changes.
+
+## Renewal & operation
+
+- **acme.sh** (root cron) renews the certificate before expiry and runs its
+  `--reloadcmd`, which **re-applies the `root:euler-web` ownership/mode** (that
+  `--install-cert` resets) and then `systemctl reload euler-caddy.service`. No
+  Caddy-side ACME is involved.
+- Force a renewal with `scripts/setup/frontend.sh renew`.
+- The **DDNS** updater (public access only) runs from its own timer or cron.
 
 ## Configuration summary
 
-`keys/.env` keys for TLS: `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` (or the chosen DNS
-provider's pair). The certificate files (`keys/.server.crt`, `keys/.server.key`) are
-dot-files, gitignored by `**/.*`.
+`keys/.env` keys for TLS: the chosen DNS provider's credential pair (default
+`NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN`).
 
 | Layer | Setting |
 |---|---|
 | DNS provider | API token; `_acme-challenge` TXT via acme.sh; the `euler` A record via the DDNS updater (public only) |
-| acme.sh | issues/renews via the provider's DNS-01 hook; deploys the cert to `keys/`; reloads Caddy |
-| Caddy | stock apt build; loads `keys/.server.crt` + `keys/.server.key`; runs as the repo owner |
-| aiohttp | `solver-web`, bound to `127.0.0.1:8080`; SRP auth gate in `solver/web/auth/` |
+| acme.sh | root install (`/root/.acme.sh`); issues/renews via the DNS-01 hook; deploys to `/etc/euler/tls`; reload hook fixes perms + reloads the unit |
+| Caddy | stock apt build; runs as `euler-caddy`; loads `/etc/euler/tls/server.{crt,key}`; config `/etc/euler/Caddyfile` |
+| Upstreams | `unix//run/euler/*` sockets behind `forward_auth` (later phases) |
 | Router | forward TCP 443 → the host's LAN IP; static lease (public only) |
 | System firewall | inbound allow TCP 443 (public only) |
 
 ## Verify
 
-1. `scripts/setup/caddy.sh status` shows Caddy installed and the default service
-   inactive/disabled.
-2. `keys/.server.crt` and `keys/.server.key` exist (key mode `0600`);
-   `caddy validate --config Caddyfile` passes and the service logs the loaded
-   certificate with no ACME attempt.
-3. From a LAN device, `curl -v https://euler.vikasmunshi.com/login` returns the login
-   page over a valid, browser-trusted certificate.
-4. For public access, add the router forward and firewall rule, wire up DDNS, and
-   re-test from outside the LAN. (Do this only once authentication is in place — see
+1. `scripts/setup/frontend.sh status` shows Caddy + acme.sh installed, the cert expiry,
+   `euler-caddy.service` `active/enabled`, and `/healthz → HTTP 200`.
+2. `/etc/euler/tls/server.crt` and `server.key` exist (`root:euler-web`, key `0640`);
+   `sudo caddy validate --config /etc/euler/Caddyfile` passes and the service logs the
+   loaded certificate with no ACME attempt.
+3. From a LAN device, `curl -v https://euler.vikasmunshi.com/healthz` returns `ok` over a
+   valid, browser-trusted certificate.
+4. For public access, add the router forward and firewall rule, wire up DDNS, and re-test
+   from outside the LAN. (Do this only once authentication is in place — see
    [authentication](authentication.md).)
-
-## Renewal & operation
-
-- **acme.sh** renews the certificate (its cron re-issues before expiry) and runs
-  `--reloadcmd` to reload Caddy; no Caddy-side ACME is involved.
-- Run the dedicated **`caddy-euler.service`**, not the packaged default; it runs as
-  the repo owner so it can read `keys/`. Do not re-enable the default
-  `caddy.service`.
-- The **DDNS** updater (public access only) runs from its own timer or cron.
 
 ## Sources
 
 - [acme.sh](https://github.com/acmesh-official/acme.sh) ·
-  [dnsapi guide](https://github.com/acmesh-official/acme.sh/wiki/dnsapi)
+  [dnsapi guide](https://github.com/acmesh-official/acme.sh/wiki/dnsapi) ·
+  [running under sudo](https://github.com/acmesh-official/acme.sh/wiki/sudo)
 - [Caddy `tls` directive (manual certificates)](https://caddyserver.com/docs/caddyfile/directives/tls)
 - [Accessing network applications with WSL — Microsoft Learn](https://learn.microsoft.com/en-us/windows/wsl/networking)
 - [Hyper-V Firewall — Microsoft Learn](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)
