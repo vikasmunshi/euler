@@ -38,7 +38,10 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 
 | Concern | Decision |
 |---|---|
-| TLS / edge / routing | **Caddy** (reverse proxy, `forward_auth` gate), certs via **acme.sh** DNS-01 — reuse `scripts/setup/caddy.sh` + `scripts/setup/acme.sh`. |
+| TLS / edge / routing | **Caddy** (reverse proxy, `forward_auth` gate), certs via **acme.sh** DNS-01. |
+| Inter-service transport | **Unix domain sockets** under `/run/euler/`, not loopback TCP — see [DD-1](#design-decisions). |
+| Service identity | Dedicated system users `euler-caddy` / `euler-auth` / `euler-content` / `euler-ws` (in the **`euler-web`** group), plus `euler-proxy` for egress — see [DD-2](#design-decisions). |
+| Edge setup & lifecycle | One `scripts/setup/frontend.sh` (install/uninstall/upgrade) installs **root-owned systemd units** (start/stop needs `sudo`), superseding `caddy.sh` + `acme.sh` — see [DD-3](#design-decisions). |
 | Egress control | **Squid** forward proxy, domain allowlist; shell/AI/scrapers reach the network only via `HTTPS_PROXY`. |
 | Response headers | **Content-Security-Policy on every served page** (see [CSP](#content-security-policy)). |
 
@@ -58,11 +61,11 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
                      │  Caddy    │  edge: TLS, routing by path, security headers
                      │  (edge)   │  forward_auth ─────────────┐
                      └────┬──────┘                            │
-            loopback / unix sockets                           ▼
+            unix sockets /run/euler                           ▼
         ┌───────────┬─────────────┬──────────────┐     ┌────────────┐
         ▼           ▼             ▼               ▼     │   auth      │  SRP login,
    ┌─────────┐ ┌──────────┐ ┌───────────┐              │  service    │  sessions,
-   │ welcome │ │ content   │ │  ws /      │◀────────────│ (aiohttp)   │  forward_auth
+   │ maint.  │ │ content   │ │  ws /      │◀────────────│ (aiohttp)   │  forward_auth
    │ (static)│ │ (aiohttp  │ │  shell     │             └────────────┘  → 200 + X-User
    └─────────┘ │ + Jinja2) │ │ (aiohttp   │                              or 401
                └────┬──────┘ │  + PTY)    │
@@ -76,10 +79,91 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
                               └──────────┘
 ```
 
-Every app process binds loopback (or a unix socket); **only Caddy is publicly
-bound**. Caddy authenticates every request through the auth service's
-`forward_auth` endpoint before it reaches content or shell, so those services never
-see an unauthenticated caller even if they have a bug.
+Every app service binds a **unix domain socket** under `/run/euler/` (see the
+[Design decisions](#design-decisions)); **only Caddy is publicly bound**. Caddy
+authenticates every request through the auth service's `forward_auth` endpoint before
+it reaches content or shell, so those services never see an unauthenticated caller
+even if they have a bug.
+
+---
+
+## Design decisions
+
+Locked, ADR-style. These fix the Phase-1 choices the rest of the doc left implicit;
+each is summarised in the [Locked decisions](#locked-decisions) table.
+
+### DD-1 · Inter-service transport = unix domain sockets
+
+**Decision.** Every app service (auth, content, shell-ws) listens on a **unix domain
+socket** under `/run/euler/`; Caddy reverse-proxies to it
+(`reverse_proxy unix//run/euler/<svc>.sock`). No app service binds a TCP port — only
+Caddy is network-bound (`:443`).
+
+| Service | Socket | Runs as |
+|---|---|---|
+| auth | `/run/euler/auth.sock` | `euler-auth` |
+| content | `/run/euler/content.sock` | `euler-content` |
+| shell-ws | `/run/euler/ws.sock` | `euler-ws` |
+| maintenance (static) | — served by Caddy directly | `euler-caddy` |
+
+**Why.** Filesystem permissions become OS-enforced access control (only members of
+`euler-web` can `connect()`); there is no port registry to maintain; and the services
+have **zero network surface** — nothing to port-scan, and no `0.0.0.0` mis-bind one
+typo away. Marginally lower latency also helps the streaming shell WS. The one cost —
+socket lifecycle (create the dir, unlink a stale socket, set owner/mode) — is absorbed
+by systemd (`RuntimeDirectory=`) under DD-3.
+
+**Health probes.** The Phase-1 health endpoint is **Caddy-native** (`respond
+/healthz 200`), so it needs no socket. Per-service probes use
+`curl --unix-socket /run/euler/<svc>.sock http://x/healthz`.
+
+### DD-2 · Service-user strategy = dedicated users + shared group
+
+**Decision.** One shared group **`euler-web`**, and a dedicated system user per
+service: **`euler-caddy`**, **`euler-auth`**, **`euler-content`**, **`euler-ws`**,
+plus **`euler-proxy`** for the Squid egress (Phase 2). Each *app* service's socket is
+`owner=euler-<svc>`, `group=euler-web`, mode `0660`, in the `root:euler-web` runtime
+dir `/run/euler`. Caddy runs as `euler-caddy` (a member of `euler-web`) so it can
+`connect()` to every upstream socket; its unit also grants `CAP_NET_BIND_SERVICE` to
+bind `:443` without root, and the TLS cert/key are readable only by `euler-caddy`.
+`euler-proxy` owns no `/run/euler` socket — Squid is a forward proxy reached via
+`HTTPS_PROXY`, not a Caddy upstream — so it stays outside `euler-web`.
+
+**Why.** DD-1's isolation is only real across **distinct uids** — same-user processes
+can always reach each other's sockets. Separate users give each service its own blast
+radius: a compromised service cannot read another's files, send it signals, or inspect
+its memory, and the highest-risk `euler-ws` (RCE by design) is fully separated.
+
+**Scope note.** A single shared `euler-web` group means any group member could — in
+principle — also `connect()` to a peer's socket; the guards against direct
+service-to-service calls remain uid separation plus `forward_auth` at the edge. If
+strict socket-level peer isolation is later needed, split into per-service groups
+(`euler-auth-fe`, …) each containing only Caddy + the owning user. Deferred as a
+refinement; not needed for the phased build.
+
+### DD-3 · Edge orchestrator = `frontend.sh` + root-owned systemd
+
+**Decision.** Replace the separate `scripts/setup/caddy.sh` and
+`scripts/setup/acme.sh` with a single **`scripts/setup/frontend.sh`** exposing full
+**`install` / `uninstall` / `upgrade`** (plus `status`) for the whole edge. It:
+
+1. creates the `euler-web` group and the `euler-*` service users (idempotent);
+2. installs Caddy (apt) and acme.sh;
+3. issues + deploys the TLS cert via acme.sh DNS-01, readable by `euler-caddy`, with
+   auto-renewal reloading the edge;
+4. generates the gitignored **unix-socket Caddyfile router** (path → `unix//run/euler/*`
+   upstreams, the `forward_auth` block, security headers + fallback CSP);
+5. installs **root-owned systemd *system* units** in `/etc/systemd/system` —
+   `euler-caddy.service` now, then `euler-auth` / `euler-content` / `euler-ws` /
+   `euler-proxy` as later phases land — each `WantedBy=multi-user.target`, so the edge
+   comes up at **boot**.
+
+**Privilege model.** Because the units live in **root's** systemd and run as the
+locked-down `euler-*` users, lifecycle is privileged: `start` / `stop` / `restart`
+require **`sudo`** (`sudo systemctl … euler-*`, or `sudo frontend.sh {start,stop}`).
+This supersedes the old relocatable, user-owned `caddy-euler.service` (which ran as the
+repo owner and needed no sudo) and the detached-process + `fcntl.flock` fallback — the
+edge now **assumes systemd** (present on both dev and the deployment host).
 
 ---
 
@@ -205,7 +289,7 @@ Locked: **every served page carries a CSP.** Design:
   object-src 'none'`. No `unsafe-inline`, no `unsafe-eval`.
 - **Caddy** adds the transport-level headers that don't need per-response state
   (HSTS, `X-Content-Type-Options`, `Referer-Policy`) and can set a **fallback CSP**
-  for purely static responses (the welcome page, vendored assets).
+  for purely static responses (the maintenance page, vendored assets).
 - Vendored JS (htmx, xterm, codemirror, MathJax) is served from `'self'`, so
   `script-src 'self'` covers it. MathJax may need `style-src 'self'` +
   its nonce; confirm during the content phase.
@@ -227,18 +311,19 @@ existing `scripts/setup/caddy.sh` convention (idempotent, header block documenti
      **pinned** version into `solver/web-content/vendor/`, records the **SRI hash**,
      and appends to `vendor/LICENSES` — the pattern already used for
      `xterm.js`/`codemirror`/`mathjax`.
-   - *System deps* (caddy, squid): apt repo + package, reusing the caddy.sh shape.
+   - *System deps* (caddy, squid): apt repo + package, plus `euler-web` group /
+     `euler-*` user creation — all via the idempotent `frontend.sh` (DD-3).
 3. **Configuration** — generator for any host-specific config (Caddyfile, Squid
    allowlist, service env), gitignored when it carries a hostname/secret, generated
-   at install from a CLI arg / env var / prompt (as caddy.sh does for the hostname).
-4. **Lifecycle** — `start` / `stop` / `status` / `restart`. Prefer a **systemd unit
-   per service** (the relocatable `caddy-euler.service` pattern), falling back to
-   the detached-process + `fcntl.flock` model in `solver/web/cli.py` where systemd
-   is absent. Each service is independently restartable.
+   at install from a CLI arg / env var / prompt (as `frontend.sh` does for the hostname).
+4. **Lifecycle** — `start` / `stop` / `status` / `restart` via a **root-owned systemd
+   *system* unit per service** (`euler-<svc>.service`, boot-enabled), so lifecycle
+   needs `sudo` (DD-3). The edge assumes systemd; the old detached-process +
+   `fcntl.flock` fallback is dropped. Each service is independently restartable.
 5. **Health probe** — a `status` that reports actually-serving (flock/HTTP ping),
    not just "process exists".
 
-An **umbrella orchestrator** (`solver-web` reworked, or a `make web-*` target)
+An **umbrella orchestrator** (`scripts/setup/frontend.sh`, or a `make web-*` target)
 composes the per-service lifecycles so the whole stack starts/stops/reports as one,
 while each service remains independently operable.
 
@@ -252,26 +337,33 @@ and demonstrable at the end of every phase.
 
 ### Phase 1 — Caddy + ACME (edge)
 - **Deliver:** public `:443` edge terminating TLS, auto-renewing cert, reverse-proxy
-  skeleton routing to (initially nothing but) a health endpoint. Security headers +
-  fallback CSP for static responses.
-- **Reuse:** `scripts/setup/caddy.sh`, `scripts/setup/acme.sh`, the generated
-  gitignored Caddyfile. Restructure the Caddyfile as the new topology's router
-  (path-based upstreams, `forward_auth` block stubbed).
-- **Kit:** install/uninstall/update Caddy + acme.sh; Caddyfile generator; systemd
-  unit (`caddy-euler.service`); `status` via cert + HTTP ping.
+  skeleton routing to (initially nothing but) a Caddy-native health endpoint
+  (`respond /healthz 200`). Security headers + fallback CSP for static responses.
+- **Build:** the `scripts/setup/frontend.sh` orchestrator (folding in the old
+  `caddy.sh` + `acme.sh`): create the `euler-web` group + `euler-caddy` user, install
+  Caddy + acme.sh, issue/deploy the cert (readable by `euler-caddy`), generate the
+  gitignored **unix-socket** Caddyfile router (path → `unix//run/euler/*` upstreams,
+  `forward_auth` block stubbed), and install the **root-owned** `euler-caddy.service`
+  (see [Design decisions](#design-decisions) DD-1…DD-3).
+- **Kit:** `frontend.sh install/uninstall/upgrade`; Caddyfile generator; root-owned
+  systemd unit (`euler-caddy.service`, boot-enabled, `sudo` to start/stop); `status`
+  via cert + HTTP ping (`curl --unix-socket` once app services exist).
 
 ### Phase 2 — Squid (egress)
 - **Deliver:** forward proxy with a **domain allowlist** (`api.anthropic.com`,
-  `projecteuler.net`, GitHub); default-deny. Nothing routes out except via it.
+  `projecteuler.net`, GitHub); default-deny. Nothing routes out except via it. Runs
+  as the dedicated `euler-proxy` user (DD-2).
 - **Wire:** `HTTPS_PROXY`/`HTTP_PROXY` in the service env used by AI features, the
   problem scraper, and `gh`. This operationalises the "plaintext must never leave
   the repo" rule at the network layer.
-- **Kit:** install/uninstall/update squid; allowlist config generator; systemd unit;
-  `status` that asserts allow + deny behaviour with a probe.
+- **Kit:** install/uninstall/update squid; allowlist config generator; root-owned
+  `euler-proxy.service`; `status` that asserts allow + deny behaviour with a probe.
 
-### Phase 3 — Dummy welcome page
-- **Deliver:** a single static page served through Caddy end-to-end — proves TLS,
-  routing, headers, and CSP fallback on a real response. No app framework yet.
+### Phase 3 — Maintenance page (static)
+- **Deliver:** a single static **"site under maintenance"** page served through Caddy
+  end-to-end — proves TLS, routing, headers, and CSP fallback on a real response. No
+  app framework yet. Reusable later as the holding page Caddy serves when an upstream
+  is down or during a deploy.
 - **Establishes:** the `web-content` static layout and the CSP baseline the app
   services will inherit.
 - **Kit:** the page + its assets; no new runtime dep; wired into Caddy routing.
