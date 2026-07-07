@@ -14,7 +14,7 @@ solver.core.new,True,True,True
 solver.core.problems,,,
 solver.core.results,True,True,True
 solver.core.test_cases,True,True,True
-solver.core.viewer,True,True,True
+solver.core.viewer,True,,
 solver.crypto.ciphers,,,
 solver.crypto.config,,,
 solver.crypto.gitfilter,,,
@@ -45,17 +45,3 @@ solver.utils.search,True,True,True
 solver.utils.shell_utils,True,True,True
 solver.utils.summary,True,True,True
 solver.utils.update_doc,True,True,False
-solver.web.app,,,
-solver.web.auth.commands,True,True,True
-solver.web.auth.mail,,,
-solver.web.auth.pending,,,
-solver.web.auth.policy,,,
-solver.web.auth.ratelimit,,,
-solver.web.auth.remember,,,
-solver.web.auth.routes,,,
-solver.web.auth.sessions,,,
-solver.web.auth.srp,,,
-solver.web.auth.users,,,
-solver.web.cli,,,
-solver.web.pty_bridge,,,
-solver.web.pty_manager,,,

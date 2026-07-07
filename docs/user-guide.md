@@ -297,7 +297,7 @@ EOF
 
 Two complementary AI paths are wired into the shell (both require the `ai`
 dependency group;
-API requires `ANTHROPIC_API_KEY` in `.env`;
+API requires `ANTHROPIC_API_KEY` in `keys/.env`;
 Claude Code requires authentication in the CLI `claude /login`):
 
 - **`claude-api <target>`** — a single templated Claude API call that writes one
@@ -320,7 +320,7 @@ you have solved a problem, or translate your Python into C for comparison.
 - **Per-user state.** The shell runs as a resolved *identity* and keeps that
   user's state under `.state/<slug>/` (command history, session log, last active
   problem). The identity is taken from the first of: the `SOLVER_USER` environment
-  variable, `SOLVER_USER` in the project `.env`, the `keys/.user-email` file, or
+  variable, the `keys/.user-email` file, `SOLVER_USER` in `keys/.env`, or
   your OS login name. In the web front end it is your signed-in account — the
   server forks the shell with `SOLVER_USER` set to your email — so each user gets
   their own history and last problem. (This is personalisation, not an access

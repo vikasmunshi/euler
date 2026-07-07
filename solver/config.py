@@ -38,9 +38,7 @@ def _root_dir() -> Path:
         env_path = [p for p in env_path if not p.startswith('/mnt')]
         env_path = list(dict.fromkeys(env_path))
         os.environ['PATH'] = ':'.join(env_path)
-        root_dir: Path = Path(git_root)
-        os.environ['HOME'] = root_dir.as_posix()
-        return root_dir
+        return Path(git_root)
     raise ValueError('Failed to get git root')
 
 
@@ -132,6 +130,7 @@ class Config(AttributeDict):
     backup_dir: Path
     cache_dir: Path
     docs_dir: Path
+    env_file: Path
     state_dir: Path
     user_state_dir: Path
     history_file: Path
@@ -154,11 +153,12 @@ class Config(AttributeDict):
 
     def __init__(self) -> None:
         root_dir: Path = _root_dir()
-        # Ambient per-user identity (SOLVER_USER / .env / keys/.user-email / OS login),
+        # Ambient per-user identity (SOLVER_USER / keys/.env / keys/.user-email / OS login),
         # used to key per-user shell state (history, last problem). Personalisation
         # only — not a security boundary (see solver.utils.identity).
+        env_file: Path = root_dir / 'keys' / '.env'  # project dotenv: API key, SMTP + DNS credentials
         users_file: Path = root_dir / 'keys' / '.users.json'  # web-auth SRP verifiers (separate from crypto keys)
-        user, user_slug, user_profile = resolve_identity(root_dir, users_file)
+        user, user_slug, user_profile = resolve_identity(root_dir, users_file, env_file)
         user_state_dir: Path = root_dir / '.state' / user_slug
         user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={
@@ -188,6 +188,7 @@ class Config(AttributeDict):
             'backup_dir': root_dir / '.backup',
             'cache_dir': root_dir / '.cache',
             'docs_dir': root_dir / 'docs',
+            'env_file': env_file,
             'state_dir': root_dir / '.state',
             'user_state_dir': user_state_dir,
             # Per-user shell state, keyed by the resolved identity's slug.

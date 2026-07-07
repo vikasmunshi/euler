@@ -141,7 +141,17 @@ generate_caddyfile() {
 
 ${hostname} {
 	tls keys/.server.crt keys/.server.key
-	reverse_proxy 127.0.0.1:8080
+
+	# HSTS: the site is HTTPS-only (DNS-01, no :80), so pin HTTPS for a year including
+	# subdomains of this host. (docs/security-assessment.md SEC-05.)
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	# Overwrite (not append) X-Forwarded-For with the real transport peer, so a client
+	# cannot inject a spoofed left-most hop that the app trusts for rate-limiting.
+	# (docs/security-assessment.md SEC-04.)
+	reverse_proxy 127.0.0.1:8080 {
+		header_up X-Forwarded-For {remote_host}
+	}
 }
 EOF
 }

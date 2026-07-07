@@ -63,7 +63,7 @@ One name.com API token drives two things, both **outside** Caddy:
 ### 1. Create the token
 
 In the name.com account, open **API** (api.name.com) and create a token. Record
-the **username** and the **token**; both go in the project `.env` (below), and
+the **username** and the **token**; both go in the project env file `keys/.env` (below), and
 acme.sh caches them for renewals.
 
 ### 2. Install Caddy (stock)
@@ -88,9 +88,9 @@ no hostname leaves an existing `Caddyfile` untouched.
 `acme.sh issue` needs the `Caddyfile` (its reload command points at it), so run
 step 2 first. The DNS provider is selectable: pass it to `issue`/`renew`, or set
 `$EULER_TLS_DNS_PROVIDER` (default `namecom`). Add the provider's credentials to the
-project `.env` (the same file that holds `ANTHROPIC_API_KEY`):
+project env file `keys/.env` (the same file that holds `ANTHROPIC_API_KEY`):
 
-| provider (arg) | acme.sh hook | credentials in `.env` |
+| provider (arg) | acme.sh hook | credentials in `keys/.env` |
 | --- | --- | --- |
 | `namecom` (default) | `dns_namecom` | `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` |
 | `cloudflare` | `dns_cf` | `CF_Token` / `CF_Account_ID` |
@@ -192,7 +192,7 @@ name.com's REST API and is not recommended.)
 
 ## Configuration summary
 
-`.env` keys for TLS: `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` (or the chosen DNS
+`keys/.env` keys for TLS: `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` (or the chosen DNS
 provider's pair). The certificate files (`keys/.server.crt`, `keys/.server.key`) are
 dot-files, gitignored by `**/.*`.
 

@@ -131,7 +131,7 @@ def costs(ecb_usd_rate: float = config.ecb_usd_rate) -> int:
 
 @lru_cache(maxsize=None)
 def get_api_key() -> str:
-    """Read 'ANTHROPIC_API_KEY' from the project's '.env' file.
+    """Read 'ANTHROPIC_API_KEY' from the project env file (`config.env_file`).
 
     Delegates to 'python-dotenv' ('ai' extra), which handles the full dotenv grammar:
     'export' prefix, single/double-quoted values, inline '#' comments, escape sequences,
@@ -141,8 +141,7 @@ def get_api_key() -> str:
     from dotenv import dotenv_values
 
     name = 'ANTHROPIC_API_KEY'
-    env_file = config.root_dir / '.env'
-    value = dotenv_values(env_file).get(name)
+    value = dotenv_values(config.env_file).get(name)
     if not value:
-        raise ValueError(f'{name} not found in .env file, please set it to your Anthropic API key')
+        raise ValueError(f'{name} not found in {config.env_file}, please set it to your Anthropic API key')
     return value

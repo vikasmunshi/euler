@@ -35,7 +35,7 @@ as `config.user_profile`:
   to *drop* to a named account's lower profile, but cannot gain privilege that way.
 
 An explicitly configured identity (via the environment, `keys/.user-email`, or
-`.env`) that is not an enabled account in `.users.json` aborts startup with
+`keys/.env`) that is not an enabled account in `.users.json` aborts startup with
 `invalid user`.
 
 ## The policy file (`solver/commands.csv`)

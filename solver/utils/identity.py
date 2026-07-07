@@ -10,14 +10,15 @@ this precedence order:
    tier ran the SRP handshake; the child trusts its parent). A terminal user
    may also ``export SOLVER_USER=…`` to pick an identity explicitly.
 2. The contents of ``keys/.user-email`` — a machine-local dotfile.
-3. ``SOLVER_USER`` in the project ``.env`` file — a project-level default.
+3. ``SOLVER_USER`` in the project env file (``keys/.env``, ``config.env_file``) —
+   a project-level default.
 4. :func:`getpass.getuser` — the OS login name (the unconfigured local operator).
 
 ``display`` keys per-user shell state (history, last problem) via ``slug``;
 ``profile`` (``admin`` / ``user`` / ``guest``) drives **command authorization**
 (see :mod:`solver.shell.command`). The two trust anchors are:
 
-- **Web** — an explicit identity (env / ``.user-email`` / ``.env``) *must* be a
+- **Web** — an explicit identity (env / ``.user-email`` / ``keys/.env``) *must* be a
   real, enabled account in ``keys/.users.json``; its stored ``profile`` is used.
   An unknown or disabled identity aborts startup. This is where a web user's
   profile comes from (the parent vouches for the SRP-authenticated email).
@@ -52,7 +53,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-#: Environment variable / ``.env`` key naming the current user.
+#: Environment variable / env-file key naming the current user.
 ENV_VAR: str = 'SOLVER_USER'
 #: Machine-local dotfile holding the current user's identity (one line).
 USER_EMAIL_FILE: str = 'keys/.user-email'
@@ -63,14 +64,13 @@ LOCAL_PROFILE: str = 'admin'
 _SLUG_KEEP = re.compile(r'[^a-z0-9._-]+')
 
 
-def _read_env_user(root_dir: Path) -> str | None:
-    """Return ``SOLVER_USER`` from the project ``.env`` file, or None.
+def _read_env_user(env_file: Path) -> str | None:
+    """Return ``SOLVER_USER`` from the project env file, or None.
 
     A minimal single-key reader (``KEY=VALUE`` lines, ``#`` comments, optional
     surrounding quotes) so identity resolution carries no dependency on
     ``python-dotenv``. A missing or unreadable file yields None.
     """
-    env_file = root_dir / '.env'
     try:
         lines = env_file.read_text(encoding='utf-8').splitlines()
     except OSError:
@@ -120,7 +120,7 @@ def _load_users(users_file: Path) -> dict[str, Any]:
     return users if isinstance(users, dict) else {}
 
 
-def resolve_identity(root_dir: Path, users_file: Path) -> tuple[str, str, str]:
+def resolve_identity(root_dir: Path, users_file: Path, env_file: Path) -> tuple[str, str, str]:
     """Resolve the current user, returning ``(display, slug, profile)``.
 
     *display* is the raw identity for prompts/logs; *slug* is its filesystem-safe
@@ -128,12 +128,12 @@ def resolve_identity(root_dir: Path, users_file: Path) -> tuple[str, str, str]:
     drives command authorization. See the module docstring for the precedence
     order and the trust model.
 
-    An **explicitly configured** identity (env / ``.user-email`` / ``.env``) must
+    An **explicitly configured** identity (env / ``.user-email`` / ``env_file``) must
     resolve to an enabled account in ``users_file`` — an unknown or disabled one
     raises :class:`SystemExit`. With nothing configured, the local operator is
     resolved via :func:`getpass.getuser` and granted the ``admin`` profile.
     """
-    display = (os.environ.get(ENV_VAR) or '').strip() or _read_user_file(root_dir) or _read_env_user(root_dir)
+    display = (os.environ.get(ENV_VAR) or '').strip() or _read_user_file(root_dir) or _read_env_user(env_file)
     if display:
         user = _load_users(users_file).get(display.strip().lower())
         if user is None or user.get('disabled', True):

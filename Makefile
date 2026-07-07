@@ -60,11 +60,10 @@ uninstall-hooks:
 	./scripts/setup/githooks.sh uninstall
 	@printf "✓ uninstall-hooks complete: git hooks removed\n"
 
-## Configure gh as the git credential helper (logging in first if needed)
+## Configure gh as the git credential helper (logging in first if needed) and set the git identity
 install-credentials:
-	gh auth status >/dev/null 2>&1 || gh auth login
-	gh auth setup-git
-	@printf "✓ install-credentials complete: gh configured as git credential helper\n"
+	./scripts/git/configure-identity.sh
+	@printf "✓ install-credentials complete: gh configured as git credential helper, git identity set\n"
 
 ## Install the Claude Code CLI (used by the AI features: claude-solver / make)
 install-claude:

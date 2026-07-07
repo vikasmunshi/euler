@@ -28,7 +28,6 @@ from solver.shell import console, register
 from solver.shell.command import Context
 from solver.shell.variables import variables
 from solver.utils.path_utils import iterdir_recursive
-from solver.web.cli import ensure_running
 
 #: OSC identifier shared with solver.js's `registerOscHandler`: `ESC ] 5379 ; <payload> BEL`.
 #: `open;<NNNN>;<token>` (show) or `edit;<NNNN>;<token>;<relpath>` (edit).
@@ -108,9 +107,9 @@ def edit(ctx: Context, problem: Problem, filename: str) -> int:
       that the xterm.js page rides over the PTY → WebSocket pipe to point its viewer
       panel at the file's editor (`<origin>/edit/NNNN/<relpath>`).
 
-    - **terminal** — auto-starts `solver-web` and opens that editor URL in the named
-      browser tab "solver-edit" (via `browser open-in-tab`); errors early if the
-      `browser` command is unavailable.
+    - **terminal** — opens that editor URL in the named browser tab "solver-edit"
+      (via `browser open-in-tab`); errors early if the `browser` command is
+      unavailable.
 
     Arguments:
         ctx:      The shell's command context (selects the profile-specific path).
@@ -135,7 +134,6 @@ def edit(ctx: Context, problem: Problem, filename: str) -> int:
 
     if not _browser_is_available():
         return _browser_unavailable_error()
-    ensure_running()
     url: str = f'{config.base_url}/edit/{problem.number:04d}/{rel}'
     pipe = DEVNULL if console.quiet else None
     run(f'browser open-in-tab solver-edit {url}', shell=True, stdout=pipe, stderr=pipe)
@@ -155,8 +153,8 @@ def show(ctx: Context, problem: Problem, filename: str | None = None) -> int:
     When *problem* is omitted, opens the current problem. The path depends on the
     shell profile:
 
-    - **terminal** — auto-starts the `solver-web` server and opens its page for the
-      problem (`<base_url>/NNNN/`) in the named browser tab "solver-doc" (via
+    - **terminal** — opens the problem's page (`<base_url>/NNNN/`) in the named
+      browser tab "solver-doc" (via
       `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
       focused and refreshed, a different problem navigates the tab in place, and the
       tab is recreated if it has been closed. Prints an error and returns early if
@@ -192,7 +190,6 @@ def show(ctx: Context, problem: Problem, filename: str | None = None) -> int:
 
     if not _browser_is_available():
         return _browser_unavailable_error()
-    ensure_running()
     url: str = f'{config.base_url}/{problem.number:04d}/'
     pipe = DEVNULL if console.quiet else None
     run(f'browser open-in-tab solver-doc {url}', shell=True, stdout=pipe, stderr=pipe)
