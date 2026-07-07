@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -104,6 +104,16 @@ uninstall-egress:
 upgrade-egress:
 	./scripts/setup/egress.sh upgrade
 	@printf "✓ upgrade-egress complete: egress proxy upgraded\n"
+
+## Install the dynamic-DNS updater timer (public access only — keeps the A record current)
+install-ddns:
+	./scripts/setup/ddns.sh install
+	@printf "✓ install-ddns complete: DDNS timer installed\n"
+
+## Remove the dynamic-DNS updater timer (name.com records left untouched)
+uninstall-ddns:
+	./scripts/setup/ddns.sh uninstall
+	@printf "✓ uninstall-ddns complete: DDNS timer removed\n"
 
 ## Create venv if it doesn't exist
 $(VENV):

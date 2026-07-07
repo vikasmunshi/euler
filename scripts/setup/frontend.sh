@@ -576,6 +576,17 @@ do_status() {
     else
         echo "Cert:       ✗ not deployed (run '$0 install')"
     fi
+    # Auto-renewal: acme.sh installs a daily --cron job in root's crontab; show it and
+    # the next scheduled renewal (acme.sh renews from the ARI window before expiry).
+    if acme_is_installed; then
+        if sudo crontab -l 2>/dev/null | grep -q 'acme.sh --cron'; then
+            local next
+            next="$(acme_root --info -d "${DOMAIN}" 2>/dev/null | sed -n 's/^Le_NextRenewTimeStr=//p' | tr -d "\"'")"
+            echo "Renewal:    ✓ acme.sh root cron active${next:+ — next: ${next}}"
+        else
+            echo "Renewal:    ✗ acme.sh --cron not in root crontab (renewals will not run)"
+        fi
+    fi
     if command -v systemctl &> /dev/null && [ -f "${SERVICE_DEST}" ]; then
         echo "${SERVICE_NAME}: $(systemctl is-active "${SERVICE_NAME}" 2>/dev/null)/$(systemctl is-enabled "${SERVICE_NAME}" 2>/dev/null)"
     else

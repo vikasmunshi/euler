@@ -74,7 +74,7 @@ One name.com API token drives two things, both **outside** Caddy:
 | Purpose | Record | Driven by | When |
 |---|---|---|---|
 | **DNS-01 challenge** | `_acme-challenge.euler.vikasmunshi.com` TXT | **acme.sh** (`dns_namecom`) | at issue/renewal; created then deleted |
-| **Dynamic DNS** | `euler.vikasmunshi.com` A | **external updater** | only when public |
+| **Dynamic DNS** | `euler.vikasmunshi.com` A | **`scripts/setup/ddns.sh`** (host timer) | only when public |
 
 Create a token in the name.com account (**API**, api.name.com) and record the
 **username** and the **token**; both go in the project env file `keys/.env` (below), and
@@ -227,10 +227,19 @@ per-port rules only. Requires `[wsl2] firewall=true` in `.wslconfig` (the defaul
 
 ### Dynamic DNS
 
-The A record must track the ISP's changing public IP. Caddy's DDNS relies on the same
-broken name.com plugin, so drive it separately with a **small updater in WSL** on a
-systemd timer or cron: read the public IP (`curl https://api.ipify.org`) and `PUT` the
-name.com A record when it changes.
+The A record must track the ISP's changing public IP. `scripts/setup/ddns.sh` does this
+from the host — no external service:
+
+```bash
+scripts/setup/ddns.sh install    # installs euler-ddns.timer (root, every 5 min)
+scripts/setup/ddns.sh update     # update the A record now
+scripts/setup/ddns.sh status     # timer state, public IP, live A record
+```
+
+It reads the public IP (`api.ipify.org`) and PUTs the name.com A record via the v4 API
+only when it has changed, using the **same name.com token as the DNS-01 challenge**
+(`keys/.env`). `euler-ddns.timer` runs it as **root** (like the acme.sh renewal cron),
+so — being infra egress — it does **not** pass through the Squid proxy.
 
 ## Renewal & operation
 
@@ -238,8 +247,14 @@ name.com A record when it changes.
   `--reloadcmd`, which **re-applies the `root:euler-web` ownership/mode** (that
   `--install-cert` resets) and then `systemctl reload euler-caddy.service`. No
   Caddy-side ACME is involved.
-- Force a renewal with `scripts/setup/frontend.sh renew`.
-- The **DDNS** updater (public access only) runs from its own timer or cron.
+- **Renewal needs no DNS credentials re-supplied.** acme.sh saves the name.com token
+  in the certificate's `.conf` at issue time (`SAVED_Namecom_*`) and re-exports it for
+  the DNS-01 challenge on renewal — which is exactly what lets the unattended root cron
+  work. `frontend.sh renew` therefore does *not* load `keys/.env`.
+- Force a renewal with `scripts/setup/frontend.sh renew`; check the schedule with
+  `frontend.sh status` (the `Renewal:` line shows the root cron + next renewal).
+- The **DDNS** updater (public access only) runs from `euler-ddns.timer`
+  (`scripts/setup/ddns.sh`).
 
 ## Configuration summary
 

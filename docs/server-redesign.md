@@ -159,12 +159,14 @@ refinement; not needed for the phased build.
    `/etc/systemd/system` (`WantedBy=multi-user.target`, so the edge comes up at
    **boot**).
 
-**Per-concern kits.** `frontend.sh` owns the *edge* (Caddy). Each other concern gets a
-**sibling setup script of the same shape** as its phase lands — `egress.sh` →
-`euler-proxy.service` (Squid, Phase 2), then the app services (`euler-auth` /
-`euler-content` / `euler-ws`) — each creating its own user and root-owned unit. A
-`make` umbrella (`install-frontend`, `install-egress`, …) composes them; every service
-stays independently installable and restartable.
+**Per-concern kits.** `frontend.sh` owns the *edge* (Caddy) — its `renew` reissues the
+cert (no DNS creds needed; acme.sh caches them) and `status` reports the acme.sh renewal
+cron + next renewal. Each other concern gets a **sibling setup script of the same shape**
+as its phase lands — `egress.sh` → `euler-proxy.service` (Squid, Phase 2), `ddns.sh` →
+`euler-ddns.timer` (dynamic DNS, public access only), then the app services
+(`euler-auth` / `euler-content` / `euler-ws`) — each creating its own user and root-owned
+unit. A `make` umbrella (`install-frontend`, `install-egress`, `install-ddns`, …)
+composes them; every service stays independently installable and restartable.
 
 **Config location.** The edge's config and secrets live under **`/etc/euler`**, not in
 the repo: the dedicated `euler-caddy` user cannot traverse the repo owner's `0750` home

@@ -10,6 +10,7 @@
 #   scripts/git/sync.sh               --dry-run
 #   scripts/setup/frontend.sh         install, uninstall, upgrade, status, renew, reload, help
 #   scripts/setup/egress.sh           install, uninstall, upgrade, status, reload, help
+#   scripts/setup/ddns.sh             install, update, status, uninstall, help
 #   scripts/setup/chrome.sh           install, install-script, uninstall, help
 #   scripts/setup/dev_env.sh          [--dry-run] [install|uninstall|status] [all|c|lua|primesieve|ruby|python]...
 #   scripts/setup/upgrade_service.sh  install, uninstall, --help
@@ -95,6 +96,12 @@ _euler_egress_completions() {
   COMPREPLY=($(compgen -W "install uninstall upgrade status reload help --help -h" -- "${cur}"))
 }
 
+_euler_ddns_completions() {
+  local cur
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  COMPREPLY=($(compgen -W "install update status uninstall help --help -h" -- "${cur}"))
+}
+
 _euler_dev_env_completions() {
   local cur prev
   cur="${COMP_WORDS[COMP_CWORD]}"
@@ -139,6 +146,7 @@ STATIC_EOF
         echo "complete -F _euler_sync_completions            '${PROJECT_ROOT}/scripts/git/sync.sh'"
         echo "complete -F _euler_frontend_completions        '${PROJECT_ROOT}/scripts/setup/frontend.sh'"
         echo "complete -F _euler_egress_completions          '${PROJECT_ROOT}/scripts/setup/egress.sh'"
+        echo "complete -F _euler_ddns_completions            '${PROJECT_ROOT}/scripts/setup/ddns.sh'"
         echo "complete -F _euler_chrome_completions          '${PROJECT_ROOT}/scripts/setup/chrome.sh'"
         echo "complete -F _euler_dev_env_completions         '${PROJECT_ROOT}/scripts/setup/dev_env.sh'"
         echo "complete -F _euler_upgrade_service_completions '${PROJECT_ROOT}/scripts/setup/upgrade_service.sh'"
@@ -149,6 +157,7 @@ STATIC_EOF
         echo "complete -F _euler_sync_completions            'scripts/git/sync.sh'"
         echo "complete -F _euler_frontend_completions        'scripts/setup/frontend.sh'"
         echo "complete -F _euler_egress_completions          'scripts/setup/egress.sh'"
+        echo "complete -F _euler_ddns_completions            'scripts/setup/ddns.sh'"
         echo "complete -F _euler_chrome_completions          'scripts/setup/chrome.sh'"
         echo "complete -F _euler_dev_env_completions         'scripts/setup/dev_env.sh'"
         echo "complete -F _euler_upgrade_service_completions 'scripts/setup/upgrade_service.sh'"
@@ -159,6 +168,7 @@ STATIC_EOF
         echo "complete -F _euler_sync_completions            './scripts/git/sync.sh'"
         echo "complete -F _euler_frontend_completions        './scripts/setup/frontend.sh'"
         echo "complete -F _euler_egress_completions          './scripts/setup/egress.sh'"
+        echo "complete -F _euler_ddns_completions            './scripts/setup/ddns.sh'"
         echo "complete -F _euler_chrome_completions          './scripts/setup/chrome.sh'"
         echo "complete -F _euler_dev_env_completions         './scripts/setup/dev_env.sh'"
         echo "complete -F _euler_upgrade_service_completions './scripts/setup/upgrade_service.sh'"
