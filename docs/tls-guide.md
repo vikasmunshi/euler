@@ -82,22 +82,24 @@ acme.sh caches them for renewals.
 
 ## Install the edge
 
-One command stands up the whole edge — group + user, Caddy, acme.sh, the Caddyfile,
-the certificate, and the systemd unit:
+Set the deployment FQDN once in `keys/.env` (the **single source of truth**, shared with
+`ddns.sh`), then one command stands up the whole edge — group + user, Caddy, acme.sh, the
+Caddyfile, the certificate, and the systemd unit:
 
 ```bash
-scripts/setup/frontend.sh install euler.vikasmunshi.com
+echo 'EULER_TLS_DOMAIN=euler.vikasmunshi.com' >> keys/.env   # if not already set
+scripts/setup/frontend.sh install
 # also: uninstall | upgrade | status | renew | reload
 ```
 
-Supply the hostname as the `install` argument, via `$EULER_TLS_DOMAIN`, or at the
-prompt; on a re-run or `upgrade` the hostname is read back from the existing Caddyfile.
-`install` is idempotent and does, in order:
+`frontend.sh` reads the FQDN from `keys/.env` (`EULER_TLS_DOMAIN`) and **fails if it is
+unset** — there is no hostname argument or prompt. `install` is idempotent and does, in
+order:
 
 1. creates the **`euler-web`** group and the **`euler-caddy`** system user (DD-2);
 2. installs stock Caddy from the official apt repo and **disables** any conflicting
    unit (the stock `caddy.service` and the old `caddy-euler.service`);
-3. generates **`/etc/euler/Caddyfile`** for the hostname (§ below);
+3. generates **`/etc/euler/Caddyfile`** for the FQDN (§ below);
 4. installs **acme.sh as root** (`/root/.acme.sh`, with a root renewal cron);
 5. issues the certificate via DNS-01 and deploys it to **`/etc/euler/tls`**;
 6. installs the root-owned, boot-enabled **`euler-caddy.service`** and starts it.
@@ -258,8 +260,9 @@ so — being infra egress — it does **not** pass through the Squid proxy.
 
 ## Configuration summary
 
-`keys/.env` keys for TLS: the chosen DNS provider's credential pair (default
-`NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN`).
+`keys/.env` keys for the edge: **`EULER_TLS_DOMAIN`** (the FQDN — single source of truth,
+shared by `frontend.sh` and `ddns.sh`) and the chosen DNS provider's credential pair
+(default `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN`).
 
 | Layer | Setting |
 |---|---|

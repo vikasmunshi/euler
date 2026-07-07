@@ -32,9 +32,9 @@
 #   /etc/euler/tls/server.key     root:euler-web 0640   (readable by euler-caddy)
 #   /etc/systemd/system/euler-caddy.service   (root-owned, boot-enabled)
 #
-# The Caddyfile carries the deployment hostname, so it is host-specific and generated
-# here at install time from a hostname on the command line (`install <hostname>`), via
-# $EULER_TLS_DOMAIN, or an interactive prompt.
+# The deployment FQDN is the single source of truth in the project env file keys/.env
+# (`EULER_TLS_DOMAIN=...`); install / upgrade / renew / status all read it from there
+# and fail if it is unset. The Caddyfile is regenerated from it on install/upgrade.
 #
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
 # (start/stop/restart) requires sudo (DD-3).
@@ -75,11 +75,11 @@ ACME_HOME="/root/.acme.sh"
 ACME_BIN="${ACME_HOME}/acme.sh"
 ACME_INSTALL_URL="https://get.acme.sh"
 
-# ── Overridable via environment (also via CLI arg for the domain) ─────────────────
-DOMAIN="${EULER_TLS_DOMAIN:-euler.vikasmunshi.com}"
+# ── Config ────────────────────────────────────────────────────────────────────────
+ENV_FILE="${PROJECT_ROOT}/keys/.env"       # single source of truth: FQDN + DNS creds
+DOMAIN=""                                  # the deployment FQDN, loaded from keys/.env (load_fqdn)
 ACME_EMAIL="${EULER_TLS_EMAIL:-vikas.munshi@gmail.com}"
 DNS_PROVIDER="${EULER_TLS_DNS_PROVIDER:-namecom}"
-ENV_FILE="${PROJECT_ROOT}/keys/.env"       # DNS provider credentials (read as the caller)
 
 # acme.sh re-runs this on every renewal: it re-applies the euler-web ownership/mode
 # that --install-cert resets to root:root, then reloads the edge (best effort — on
@@ -88,19 +88,20 @@ RELOAD_CMD="chown root:${WEB_GROUP} ${CERT_FILE} ${KEY_FILE}; chmod 0644 ${CERT_
 
 usage() {
     cat <<USAGE
-Usage: $0 [install [hostname]|uninstall|upgrade|status|renew|reload|help]
+Usage: $0 [install|uninstall|upgrade|status|renew|reload|help]
 
-  install [host]  Full edge setup: create euler-web group + euler-caddy user,
-                  install Caddy + acme.sh, generate /etc/euler/Caddyfile for <host>
-                  (prompted / \$EULER_TLS_DOMAIN if omitted), issue+deploy the cert,
-                  and install the root-owned ${SERVICE_NAME} (boot-enabled).
-  uninstall       Remove the unit and Caddy; prompt before deleting /etc/euler,
-                  acme.sh, and the service users/group.
-  upgrade         Upgrade Caddy + acme.sh and regenerate the Caddyfile + unit.
-  status          Show install state, cert expiry, unit state, and a /healthz ping.
-  renew           Force-renew the certificate now (as root; creds cached by acme.sh).
-  reload          Reload the running edge (sudo systemctl reload).
+  install    Full edge setup: create euler-web group + euler-caddy user, install
+             Caddy + acme.sh, generate /etc/euler/Caddyfile for the FQDN from keys/.env
+             (EULER_TLS_DOMAIN), issue+deploy the cert, and install the root-owned
+             ${SERVICE_NAME} (boot-enabled).
+  uninstall  Remove the unit and Caddy; prompt before deleting /etc/euler, acme.sh,
+             and the service users/group.
+  upgrade    Upgrade Caddy + acme.sh and regenerate the Caddyfile + unit.
+  status     Show install state, cert expiry, unit state, and a /healthz ping.
+  renew      Force-renew the certificate now (as root; creds cached by acme.sh).
+  reload     Reload the running edge (sudo systemctl reload).
 
+  The deployment FQDN is read from keys/.env (EULER_TLS_DOMAIN); commands fail if unset.
   DNS provider (\$EULER_TLS_DNS_PROVIDER, default ${DNS_PROVIDER}): one of
   namecom, cloudflare, route53, godaddy, digitalocean, gandi.
 USAGE
@@ -123,6 +124,23 @@ check_can_sudo() {
 require_systemd() {
     if [ ! -d /run/systemd/system ] || ! command -v systemctl &> /dev/null; then
         echo "Error: systemd is required for the edge (root-owned units); it is not active here." >&2
+        return 1
+    fi
+}
+
+# Load the deployment FQDN from keys/.env into $DOMAIN — the single source of truth.
+# Fails if EULER_TLS_DOMAIN is unset there.
+load_fqdn() {
+    if [ -f "${ENV_FILE}" ]; then
+        set -a
+        # shellcheck disable=SC1090
+        . "${ENV_FILE}"
+        set +a
+    fi
+    DOMAIN="${EULER_TLS_DOMAIN:-}"
+    if [ -z "${DOMAIN}" ]; then
+        echo "Error: EULER_TLS_DOMAIN is not set in ${ENV_FILE}" >&2
+        echo "       Add a line like:  EULER_TLS_DOMAIN=euler.example.com" >&2
         return 1
     fi
 }
@@ -310,26 +328,6 @@ issue_cert() {
 
 # ── Caddyfile router (Phase 1) ────────────────────────────────────────────────────
 
-# Resolve the hostname (CLI arg, then $EULER_TLS_DOMAIN, then existing Caddyfile, then
-# prompt) into $DOMAIN and (re)generate /etc/euler/Caddyfile.
-ensure_caddyfile() {
-    local hostname="${1:-${EULER_TLS_DOMAIN:-}}"
-    # No hostname given: reuse the one baked into an existing Caddyfile (so re-run and
-    # `upgrade` keep the host and pick up template changes), else prompt.
-    if [ -z "${hostname}" ] && sudo test -f "${CADDYFILE}"; then
-        hostname="$(sudo grep -m1 -oE '^[A-Za-z0-9.-]+ \{' "${CADDYFILE}" | awk '{print $1}')"
-    fi
-    if [ -z "${hostname}" ]; then
-        read -rp "Enter the hostname for the HTTPS front end (e.g. euler.example.com): " hostname
-        if [ -z "${hostname}" ]; then
-            echo "Error: a hostname is required to generate the Caddyfile" >&2
-            return 1
-        fi
-    fi
-    DOMAIN="${hostname}"
-    generate_caddyfile
-}
-
 generate_caddyfile() {
     echo "Writing ${CADDYFILE} for ${DOMAIN}..."
     sudo tee "${CADDYFILE}" > /dev/null <<EOF
@@ -468,14 +466,14 @@ remove_service() {
 # ── Actions ───────────────────────────────────────────────────────────────────────
 
 do_install() {
-    local hostname="${1:-}"
     check_can_sudo || return 1
     require_systemd || return 1
+    load_fqdn || return 1
 
     install_caddy_pkg
     ensure_group_and_users
     ensure_sys_dirs
-    ensure_caddyfile "${hostname}" || return 1
+    generate_caddyfile
     install_acme
     issue_cert
     install_service
@@ -486,6 +484,7 @@ do_install() {
 do_upgrade() {
     check_can_sudo || return 1
     require_systemd || return 1
+    load_fqdn || return 1
 
     if caddy_is_installed; then
         echo "Upgrading Caddy..."
@@ -502,13 +501,14 @@ do_upgrade() {
     fi
     ensure_group_and_users
     ensure_sys_dirs
-    ensure_caddyfile "" || return 1   # regenerate from the existing hostname
+    generate_caddyfile                 # regenerate from the keys/.env FQDN
     install_service                    # re-lay the unit and reload
     echo "Frontend upgrade complete: $(caddy_version)"
 }
 
 do_renew() {
     check_can_sudo || return 1
+    load_fqdn || return 1
     if ! acme_is_installed; then
         echo "Error: acme.sh is not installed (root); run '$0 install' first." >&2
         return 1
@@ -556,6 +556,7 @@ do_uninstall() {
 }
 
 do_status() {
+    load_fqdn || return 1
     if caddy_is_installed; then
         echo "Caddy:      ✓ installed ($(caddy_bin)) — $(caddy_version)"
     else
@@ -603,7 +604,7 @@ do_status() {
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install "${2:-}" ;;
+    install)   do_install ;;
     uninstall) do_uninstall ;;
     upgrade)   do_upgrade ;;
     renew)     do_renew ;;

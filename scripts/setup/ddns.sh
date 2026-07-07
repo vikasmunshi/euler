@@ -13,12 +13,13 @@
 #   - A root-owned `euler-ddns.timer` runs `update` periodically (like the acme.sh
 #     renewal cron). The updater is **infra egress** — like acme.sh, it does NOT go
 #     through the Squid proxy (that gate is for the shell / AI / scraper / gh).
-#   - Credentials come from the project env file keys/.env (the same name.com token as
-#     the DNS-01 challenge); the root timer can read it, so nothing is duplicated.
+#   - The FQDN and the name.com token both come from the project env file keys/.env
+#     (EULER_TLS_DOMAIN + the DNS-01 credentials — the single source of truth); the root
+#     timer can read it, so nothing is duplicated or baked into the unit.
 #
 # name.com v4 REST API, HTTP Basic auth (username : API token).
 #
-# Actions: install [fqdn] | update [fqdn] | status [fqdn] | uninstall | help
+# Actions: install | update | status | uninstall | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -31,7 +32,6 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SELF="${PROJECT_ROOT}/scripts/setup/ddns.sh"
 ENV_FILE="${PROJECT_ROOT}/keys/.env"          # name.com credentials (read by root)
 
-DEFAULT_FQDN="${EULER_TLS_DOMAIN:-euler.vikasmunshi.com}"
 API="https://api.name.com/v4"
 IP_SERVICE="${EULER_DDNS_IP_SERVICE:-https://api.ipify.org}"
 TTL="${EULER_DDNS_TTL:-300}"
@@ -41,23 +41,25 @@ TIMER_NAME="euler-ddns.timer"
 SERVICE_DEST="/etc/systemd/system/${SERVICE_NAME}"
 TIMER_DEST="/etc/systemd/system/${TIMER_NAME}"
 
-# Set by load_creds / split_fqdn.
+# Set by load_fqdn / load_creds / split_fqdn.
+FQDN=""              # full deployment FQDN, from keys/.env (EULER_TLS_DOMAIN)
 NAMECOM_USER=""
 NAMECOM_TOKEN=""
-DOMAIN=""
-HOST=""
+DOMAIN=""            # registered domain (last two labels of FQDN)
+HOST=""              # subdomain prefix
 
 usage() {
     cat <<USAGE
-Usage: $0 [install [fqdn]|update [fqdn]|status [fqdn]|uninstall|help]
+Usage: $0 [install|update|status|uninstall|help]
 
-  install [fqdn]  Install the euler-ddns systemd timer (root) that periodically
-                  updates the A record for <fqdn> (default ${DEFAULT_FQDN}).
-  update  [fqdn]  Update the name.com A record now if the public IP changed.
-  status  [fqdn]  Show the timer state, the host's public IP, and the live A record.
-  uninstall       Remove the timer + service (name.com records left untouched).
+  install    Install the euler-ddns systemd timer (root) that periodically updates
+             the A record for the FQDN from keys/.env.
+  update     Update the name.com A record now if the public IP changed.
+  status     Show the timer state, the host's public IP, and the live A record.
+  uninstall  Remove the timer + service (name.com records left untouched).
 
-  Credentials: NAMEDOTCOM_USERNAME / NAMEDOTCOM_TOKEN in ${ENV_FILE}.
+  keys/.env (single source of truth): EULER_TLS_DOMAIN (the FQDN) and
+  NAMEDOTCOM_USERNAME / NAMEDOTCOM_TOKEN. Commands fail if the FQDN is unset.
 USAGE
 }
 
@@ -83,6 +85,23 @@ ensure_deps() {
     if ! command -v jq &> /dev/null; then
         echo "Installing jq..."
         sudo apt-get install -y jq
+    fi
+}
+
+# Load the deployment FQDN from keys/.env into $FQDN — the single source of truth.
+# Fails if EULER_TLS_DOMAIN is unset there.
+load_fqdn() {
+    if [ -f "${ENV_FILE}" ]; then
+        set -a
+        # shellcheck disable=SC1090
+        . "${ENV_FILE}"
+        set +a
+    fi
+    FQDN="${EULER_TLS_DOMAIN:-}"
+    if [ -z "${FQDN}" ]; then
+        echo "Error: EULER_TLS_DOMAIN is not set in ${ENV_FILE}" >&2
+        echo "       Add a line like:  EULER_TLS_DOMAIN=euler.example.com" >&2
+        return 1
     fi
 }
 
@@ -123,9 +142,9 @@ get_public_ip() {
 # ── update ────────────────────────────────────────────────────────────────────────
 
 do_update() {
-    local fqdn="${1:-${DEFAULT_FQDN}}"
+    load_fqdn || return 1
     load_creds || return 1
-    split_fqdn "${fqdn}"
+    split_fqdn "${FQDN}"
 
     local ip
     if ! ip="$(get_public_ip)"; then
@@ -147,7 +166,7 @@ do_update() {
         'first(.records[]? | select(.host==$h and .type=="A") | .answer) // empty')"
 
     if [ "${cur}" = "${ip}" ]; then
-        echo "DDNS: ${fqdn} already ${ip} (no change)"
+        echo "DDNS: ${FQDN} already ${ip} (no change)"
         return 0
     fi
 
@@ -156,39 +175,41 @@ do_update() {
         '{host:$h, type:"A", answer:$a, ttl:$t}')"
 
     if [ -n "${id}" ]; then
-        echo "DDNS: updating ${fqdn} ${cur:-<none>} -> ${ip} (record ${id})"
+        echo "DDNS: updating ${FQDN} ${cur:-<none>} -> ${ip} (record ${id})"
         curl -sS -u "${NAMECOM_USER}:${NAMECOM_TOKEN}" --max-time 20 -X PUT \
             -H 'Content-Type: application/json' -d "${body}" \
             "${API}/domains/${DOMAIN}/records/${id}" > /dev/null
     else
-        echo "DDNS: creating ${fqdn} A ${ip}"
+        echo "DDNS: creating ${FQDN} A ${ip}"
         curl -sS -u "${NAMECOM_USER}:${NAMECOM_TOKEN}" --max-time 20 -X POST \
             -H 'Content-Type: application/json' -d "${body}" \
             "${API}/domains/${DOMAIN}/records" > /dev/null
     fi
-    echo "DDNS: ${fqdn} -> ${ip} done"
+    echo "DDNS: ${FQDN} -> ${ip} done"
 }
 
 # ── install / uninstall (root timer) ──────────────────────────────────────────────
 
 do_install() {
-    local fqdn="${1:-${DEFAULT_FQDN}}"
     check_can_sudo || return 1
     require_systemd || return 1
+    load_fqdn || return 1
     ensure_deps
     load_creds || return 1        # fail early if the token is missing
 
-    echo "Installing ${TIMER_NAME} for ${fqdn} (updates every 5 min)..."
+    echo "Installing ${TIMER_NAME} for ${FQDN} (updates every 5 min)..."
+    # ExecStart takes no FQDN argument: the updater reads it from keys/.env at run time,
+    # so changing EULER_TLS_DOMAIN there is picked up without re-installing.
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
-Description=euler dynamic DNS updater (name.com A record for ${fqdn})
+Description=euler dynamic DNS updater (name.com A record for ${FQDN})
 Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/tls-guide.md
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=${SELF} update ${fqdn}
+ExecStart=${SELF} update
 EOF
     sudo tee "${TIMER_DEST}" > /dev/null <<EOF
 [Unit]
@@ -206,7 +227,7 @@ EOF
     sudo systemctl enable --now "${TIMER_NAME}"
     echo "Running an initial update..."
     sudo systemctl start "${SERVICE_NAME}" || true
-    do_status "${fqdn}"
+    do_status
 }
 
 do_uninstall() {
@@ -224,8 +245,8 @@ do_uninstall() {
 }
 
 do_status() {
-    local fqdn="${1:-${DEFAULT_FQDN}}"
-    echo "DDNS target: ${fqdn}"
+    load_fqdn || return 1
+    echo "DDNS target: ${FQDN}"
     if [ -f "${TIMER_DEST}" ] && command -v systemctl &> /dev/null; then
         echo "${TIMER_NAME}: $(systemctl is-active "${TIMER_NAME}" 2>/dev/null)/$(systemctl is-enabled "${TIMER_NAME}" 2>/dev/null)"
         systemctl list-timers "${TIMER_NAME}" --no-pager 2>/dev/null | sed -n '2p' | sed 's/^/  next: /'
@@ -236,7 +257,7 @@ do_status() {
     ip="$(get_public_ip 2>/dev/null || true)"
     echo "Public IP:   ${ip:-unknown}"
     if load_creds 2>/dev/null; then
-        split_fqdn "${fqdn}"
+        split_fqdn "${FQDN}"
         local cur
         cur="$(curl -sS -u "${NAMECOM_USER}:${NAMECOM_TOKEN}" --max-time 15 \
             "${API}/domains/${DOMAIN}/records" 2>/dev/null \
@@ -253,9 +274,9 @@ do_status() {
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install "${2:-}" ;;
-    update)    do_update "${2:-}" ;;
-    status)    do_status "${2:-}" ;;
+    install)   do_install ;;
+    update)    do_update ;;
+    status)    do_status ;;
     uninstall) do_uninstall ;;
     -h | --help | help) usage ;;
     *) echo "Unknown action: ${ACTION}"; usage; exit 1 ;;

@@ -333,7 +333,7 @@ existing `scripts/setup/caddy.sh` convention (idempotent, header block documenti
 3. **Configuration** — generator for any host-specific config (Caddyfile, Squid
    allowlist, service env), written to a system path (`/etc/euler`, so the service
    users can read it) or gitignored in-repo when repo-local, generated at install from
-   a CLI arg / env var / prompt (as `frontend.sh` does for the hostname).
+   the single-source-of-truth `keys/.env` (e.g. the FQDN `EULER_TLS_DOMAIN`) or a prompt.
 4. **Lifecycle** — `start` / `stop` / `status` / `restart` via a **root-owned systemd
    *system* unit per service** (`euler-<svc>.service`, boot-enabled), so lifecycle
    needs `sudo` (DD-3). The edge assumes systemd; the old detached-process +
