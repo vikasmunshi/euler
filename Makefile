@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -89,6 +89,21 @@ uninstall-frontend:
 upgrade-frontend:
 	./scripts/setup/frontend.sh upgrade
 	@printf "✓ upgrade-frontend complete: web edge upgraded\n"
+
+## Install the egress proxy: Squid domain-allowlist + euler-proxy.service (see docs/server-redesign.md)
+install-egress:
+	./scripts/setup/egress.sh install
+	@printf "✓ install-egress complete: egress proxy installed (sudo systemctl for lifecycle)\n"
+
+## Remove the egress proxy (prompts before deleting /etc/euler-proxy and the euler-proxy user)
+uninstall-egress:
+	./scripts/setup/egress.sh uninstall
+	@printf "✓ uninstall-egress complete: egress proxy removed\n"
+
+## Upgrade the egress proxy (Squid; regenerate the config + unit)
+upgrade-egress:
+	./scripts/setup/egress.sh upgrade
+	@printf "✓ upgrade-egress complete: egress proxy upgraded\n"
 
 ## Create venv if it doesn't exist
 $(VENV):

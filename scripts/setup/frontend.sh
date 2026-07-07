@@ -582,10 +582,11 @@ do_status() {
         echo "${SERVICE_NAME}: ✗ not installed"
     fi
     # Health ping (resolve the domain to loopback so it works without public DNS).
+    # curl's -w prints 000 on failure; capture it (|| true) instead of appending another.
     local code
     code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 \
-        --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/healthz" 2>/dev/null || echo '000')"
-    echo "/healthz:   HTTP ${code} (expect 200)"
+        --resolve "${DOMAIN}:443:127.0.0.1" "https://${DOMAIN}/healthz" 2>/dev/null || true)"
+    echo "/healthz:   HTTP ${code:-000} (expect 200)"
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────────

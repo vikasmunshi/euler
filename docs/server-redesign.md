@@ -155,10 +155,16 @@ refinement; not needed for the phased build.
    re-applies that ownership/mode and reloads the edge;
 4. generates the **`/etc/euler/Caddyfile`** unix-socket router (path → `unix//run/euler/*`
    upstreams, the `forward_auth` block, security headers + fallback CSP);
-5. installs **root-owned systemd *system* units** in `/etc/systemd/system` —
-   `euler-caddy.service` now, then `euler-auth` / `euler-content` / `euler-ws` /
-   `euler-proxy` as later phases land — each `WantedBy=multi-user.target`, so the edge
-   comes up at **boot**.
+5. installs the **root-owned systemd *system* unit** `euler-caddy.service` in
+   `/etc/systemd/system` (`WantedBy=multi-user.target`, so the edge comes up at
+   **boot**).
+
+**Per-concern kits.** `frontend.sh` owns the *edge* (Caddy). Each other concern gets a
+**sibling setup script of the same shape** as its phase lands — `egress.sh` →
+`euler-proxy.service` (Squid, Phase 2), then the app services (`euler-auth` /
+`euler-content` / `euler-ws`) — each creating its own user and root-owned unit. A
+`make` umbrella (`install-frontend`, `install-egress`, …) composes them; every service
+stays independently installable and restartable.
 
 **Config location.** The edge's config and secrets live under **`/etc/euler`**, not in
 the repo: the dedicated `euler-caddy` user cannot traverse the repo owner's `0750` home
@@ -360,15 +366,20 @@ and demonstrable at the end of every phase.
   systemd unit (`euler-caddy.service`, boot-enabled, `sudo` to start/stop); `status`
   via cert + HTTP ping (`curl --unix-socket` once app services exist).
 
-### Phase 2 — Squid (egress)
-- **Deliver:** forward proxy with a **domain allowlist** (`api.anthropic.com`,
-  `projecteuler.net`, GitHub); default-deny. Nothing routes out except via it. Runs
-  as the dedicated `euler-proxy` user (DD-2).
-- **Wire:** `HTTPS_PROXY`/`HTTP_PROXY` in the service env used by AI features, the
-  problem scraper, and `gh`. This operationalises the "plaintext must never leave
-  the repo" rule at the network layer.
-- **Kit:** install/uninstall/update squid; allowlist config generator; root-owned
-  `euler-proxy.service`; `status` that asserts allow + deny behaviour with a probe.
+### Phase 2 — Squid (egress) ✅
+Built as `scripts/setup/egress.sh` (sibling to `frontend.sh`).
+- **Deliver:** Squid forward proxy on loopback `127.0.0.1:3128` with a **domain
+  allowlist** (`api.anthropic.com`, `.projecteuler.net`, `.github.com`,
+  `.githubusercontent.com`); default-deny. Runs as the dedicated `euler-proxy` user
+  (DD-2), in its own group **outside** `euler-web`. Config in `/etc/euler-proxy`
+  (`squid.conf` + the editable `squid.allowlist`).
+- **Wire:** `HTTPS_PROXY`/`HTTP_PROXY` written to `/etc/euler/egress.env`, which the
+  app-service units load via `EnvironmentFile=` so AI features, the problem scraper,
+  and `gh` egress only via Squid — operationalising the "plaintext must never leave the
+  repo" rule at the network layer.
+- **Kit:** `egress.sh install/uninstall/upgrade/status/reload`; allowlist generator
+  (preserves operator edits); root-owned, boot-enabled `euler-proxy.service`; `status`
+  probes an allowed and a denied domain through the proxy.
 
 ### Phase 3 — Maintenance page (static)
 - **Deliver:** a single static **"site under maintenance"** page served through Caddy
