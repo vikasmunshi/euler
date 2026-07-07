@@ -6,9 +6,14 @@ skeleton-page + client-fetch architecture). This is the design of record for tha
 rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md),
 [authentication.md](authentication.md), and [authorization.md](authorization.md).
 
-> Status: design. Built feature-by-feature (see [Phases](#phases)); each phase
-> ships its full [maintenance kit](#the-maintenance-kit-per-feature-contract)
-> before the next begins.
+> **Status (2026-07-07).** Built feature-by-feature (see [Phases](#phases)); each phase
+> ships its full [maintenance kit](#the-maintenance-kit-per-feature-contract) before the
+> next begins.
+> - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
+> - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
+> - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
+> - 📐 **Phase 4** — Auth service: **designed, decisions locked** ([DD-5](#design-decisions)…[DD-8](#design-decisions)); **implementation pending** (build order in the [Phase 4](#phase-4--auth-service) section).
+> - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## Goals & non-goals
 
@@ -40,14 +45,19 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 |---|---|
 | TLS / edge / routing | **Caddy** (reverse proxy, `forward_auth` gate), certs via **acme.sh** DNS-01. |
 | Inter-service transport | **Unix domain sockets** under `/run/euler/`, not loopback TCP — see [DD-1](#design-decisions). |
-| Service identity | Dedicated nologin system users — `euler-caddy` / `euler-auth` / `euler-content` / `euler-ws` (in **`euler-web`**), plus `euler-proxy` (egress), `euler-acme` (cert), `euler-ddns` (DNS). **None run as root** — see [DD-2](#design-decisions), [DD-4](#design-decisions). |
+| Service identity | Dedicated nologin system users — `euler-caddy` / `euler-auth` / `euler-content` / `euler-ws` (in **`euler-web`**), plus `euler-proxy` (egress), `euler-acme` (cert), `euler-ddns` (DNS), `euler-smtp` (mail relay). **None run as root** — see [DD-2](#design-decisions), [DD-4](#design-decisions). |
 | Edge setup & lifecycle | One `scripts/setup/frontend.sh` (install/uninstall/upgrade) installs **root-owned systemd units** (start/stop needs `sudo`), superseding `caddy.sh` + `acme.sh` — see [DD-3](#design-decisions). |
 | Egress control | **Squid** forward proxy, domain allowlist; shell/AI/scrapers reach the network only via `HTTPS_PROXY`. |
 | Response headers | **Content-Security-Policy on every served page** (see [CSP](#content-security-policy)). |
+| App framework / templating | **aiohttp + Jinja2** (autoescape on) across the app services — see [DD-5](#design-decisions), [Framework/templating](#framework--templating). |
+| App runtime | Deployed to a **root-owned `/opt/euler` system venv** (`pip install .`); services run `/opt/euler/venv/bin/python -m …`. Repo stays unreadable to service users — see [DD-5](#design-decisions). |
+| Auth state & admin plane | Auth state in **`/var/lib/euler-auth`** (`euler-auth`-only, `0600`); admin ops (`users add/list/disable`) go through an **admin API on the auth socket**, never file-sharing — see [DD-6](#design-decisions). |
+| Registration | **Invite-only**, two-channel: admin-minted **7-day** email link → Terms acceptance → **10-min OTP** → set SRP password — see [DD-7](#design-decisions). |
+| Egress firewall | **Kernel-enforced**: systemd per-unit `IPAddressDeny` (loopback-only app tier) + host **nftables** owner-match; mail via a loopback `euler-smtp` relay — see [DD-8](#design-decisions). |
 
 ## Open decisions (this document argues, you choose)
 
-- **Framework/templating**: aiohttp-only vs Jinja2 vs FastAPI → [decision](#framework--templating).
+- ~~**Framework/templating**~~ → **resolved: aiohttp + Jinja2** ([DD-5](#design-decisions)).
 - **htmx**: adopt for liveness? → [benefits vs consequences](#htmx).
 - **nh3**: adopt for HTML sanitisation? → [benefits vs consequences](#nh3).
 
@@ -213,6 +223,174 @@ installer (repo owner + sudo) deploys the *scoped* runtime config into `/etc/eul
 read — so no runtime service needs the repo checkout. `/usr/local/bin/euler-ddns` is a
 copy of the updater for the same reason. This also scopes secrets: `euler-ddns` sees only
 the name.com creds, never the full `keys/.env` (Anthropic key, SMTP password).
+
+### DD-5 · App runtime = `/opt/euler` system venv, framework = aiohttp + Jinja2
+
+**Decision.** The Python app services (`euler-auth` first, then content/ws) run from a
+**root-owned system venv at `/opt/euler`**, *not* from the repo checkout: the dedicated
+service users cannot traverse the repo owner's `0750` home (same constraint that put the
+edge config in `/etc/euler`, DD-3). The installer (`scripts/setup/auth.sh`, repo owner +
+sudo) does `pip install .` (the `web` extra) into `/opt/euler/venv`, and the unit runs
+`ExecStart=/opt/euler/venv/bin/python -m solver.web.auth`. `upgrade` re-installs from the
+repo. The **framework is aiohttp + Jinja2** (autoescape on), resolving the
+[Framework/templating](#framework--templating) open decision — one framework shared with
+the shell service; Jinja replaces the homegrown string templating.
+
+**System paths (app runtime).**
+
+| Path | Owner / mode | Purpose |
+|---|---|---|
+| `/opt/euler/venv/` | `root:euler-web` `0755` | the deployed venv; `solver` + `web` deps `pip install`ed here. Service users execute it; only root writes it (install/upgrade). |
+| `/opt/euler/venv/bin/python` | `root:euler-web` `0755` | interpreter the units run (`-m solver.web.<svc>`). |
+| `/run/euler/` | `root:euler-web` `0770` (`RuntimeDirectory`, tmpfs) | shared socket dir; each service creates its own `*.sock` (`0660 euler-<svc>:euler-web`) so `euler-caddy` connects and no peer can bind another's name. |
+
+Jinja **page templates** ship as package data inside the venv
+(`solver/web/templates/*.html`); **static assets** (CSS/JS) stay in the repo-root
+`web-content/` tree deployed to `/etc/euler/web-content` and served by Caddy under
+`/assets/*` (Phase 3) — so rendered pages reference `'self'` assets and the CSP holds.
+
+**Why not run from the repo.** Rejected for the DD-3 reason: it would require opening
+`/home/vikas` to the service uids, widening a compromised service's read surface to the
+entire home dir. A system venv keeps runtime fully decoupled from the checkout.
+
+### DD-6 · Auth state is `euler-auth`-private; admin ops go through an admin API
+
+**Decision.** All auth state is owned by **`euler-auth` alone** (`0600`, under the unit's
+`StateDirectory=/var/lib/euler-auth`); no file is shared with the repo owner. The admin
+shell commands — `users add` / `list` / `enable` / `disable` / `remove` (run as *you*) —
+never touch those files; they call an **admin API on the auth service** over a socket,
+authenticated by `X-Admin-Token`. Admins **cannot** reset passwords (reset is self-service,
+[DD-7](#design-decisions)). The service is the **sole reader/writer** of its state.
+
+**System paths (auth state + config).**
+
+| Path | Owner / mode | Purpose |
+|---|---|---|
+| `/var/lib/euler-auth/users.json` | `euler-auth:euler-auth` `0600` | SRP verifier DB (`{salt, verifier, profile, terms_version, terms_accepted_at, disabled}` per email). Never a password. |
+| `/var/lib/euler-auth/pending.json` | `euler-auth:euler-auth` `0600` | in-flight invites/resets keyed by `hash(link-token)` (see [DD-7](#design-decisions)). |
+| `/var/lib/euler-auth/remember.json` | `euler-auth:euler-auth` `0600` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
+| `/var/lib/euler-auth/session-secret` | `euler-auth:euler-auth` `0600` | 32-byte HMAC key for remember-me; created on first start. |
+| `/etc/euler/auth.env` | `root:euler-auth` `0640` | scoped runtime config: `EULER_BASE_URL`, `EULER_ADMIN_TOKEN`, `TERMS_VERSION`, `EULER_SMTP_RELAY` (loopback `host:port` of the mail relay). Deployed from `keys/.env` (authoring source, DD-4). |
+
+Sessions themselves are **in-memory** (per-process): a restart drops live sessions, and
+remember-me cookies restore them — matching the parked design. `euler-auth` reads only
+`auth.env` — never the full `keys/.env`, and (per [DD-8](#design-decisions)) **not even the
+SMTP credentials**: it submits mail to a loopback relay that holds them. So a compromised
+auth service leaks neither the Anthropic key nor the Gmail app password.
+
+**Admin plane.** The admin API is **local-only** — a dedicated admin listener
+(`/run/euler/auth-admin.sock`, `euler-auth:euler-adm 0660`; you join `euler-adm`), **never
+routed through Caddy**, so admin endpoints have zero public surface. `X-Admin-Token`
+(shared secret in `keys/.env` ↔ `auth.env`) is a second check. The public `auth.sock`
+(via Caddy) exposes only login / registration / `forward_auth`.
+
+**Why an API over shared files.** Chosen over group-writable files (the rejected
+alternative): keeps auth state single-writer and `0600`, so no other uid — not even a
+mis-scoped admin tool — can corrupt or read the verifier DB. The admin CLI is a thin HTTP
+client; the service owns all invariants (validation, sweeping, state transitions).
+
+### DD-7 · Registration = invite link → Terms → OTP → SRP password
+
+**Decision.** Registration is **invite-only and two-channel**. An admin mints an invite; the
+invitee proves live control of the mailbox (OTP) and accepts Terms before a password is
+ever set. All secrets are stored hashed; every step is single-use and time-boxed. The same
+link→OTP→password pipeline serves password **reset** (`kind=reset`, skipping the Terms
+step) — but reset is **self-service** (a user initiates it from `/forgot`); admins never
+reset passwords (they only add / enable / disable / remove accounts — see [DD-6](#design-decisions)).
+
+**Flow.**
+
+1. **Invite** — admin runs `users add <email> --profile <p>`; the shell calls the admin API
+   (`POST /admin/users`). The service creates a `pending.json` record keyed by
+   `hash(link-token)`: `{email, profile, kind=register, state=invited, expiry=+7d}`, and
+   emails `https://<FQDN>/register?token=<link-token>` (32-byte URL-safe token). No user
+   record exists yet.
+2. **Open link** — invitee `GET /register?token=…`. Valid + unexpired + `state=invited` →
+   render the registration page (email shown read-only, **Terms of Use**, "I accept" +
+   "email me a code"). Invalid/expired → generic error page (no enumeration).
+3. **Accept Terms + request OTP** — `POST /register/otp` (token, `accepted=true`). Service
+   records `terms_version` + timestamp, generates a **6-digit OTP**, stores
+   `hash(otp)` + `otp_expiry=+10min` + `attempts=0`, sets `state=otp_sent`, and emails the
+   OTP. Re-renders with an OTP field. Resends are rate-limited/capped.
+4. **Verify OTP** — `POST /register/verify` (token, otp). `hash(otp)` match, unexpired,
+   `attempts<5` → `state=verified`. Wrong/expired → decrement; **5 failed tries invalidate
+   the OTP** (a fresh one must be requested).
+5. **Set password (SRP)** — the browser derives `{salt, verifier}` client-side from a
+   password meeting the policy (≥16 chars, 4 classes; the server never sees it) and
+   `POST /register/complete` (token, salt, verifier). `state=verified` + valid token →
+   create the `users.json` record (with the recorded Terms acceptance), **consume** the
+   pending record (single-use), and land on **`/login`** (no auto-login).
+
+**State machine.** `invited → otp_sent → verified → completed` (records sweep on the 7-day
+link expiry; the OTP sweeps on its 10-minute expiry independently).
+
+**Token vs OTP.** The **link token** (32 bytes, 7-day, single registration session) proves
+possession of the invite; the **OTP** (6 digits, 10-min, few attempts) proves *live* control
+of the mailbox at completion time and gates Terms→password. Both are stored only as hashes;
+neither is ever logged. Per-token and per-IP rate limits guard OTP request/verify; generic
+responses avoid account enumeration.
+
+**Self-service reset.** A user starts reset at `/forgot` (enters their email). If the
+account exists and is enabled, the service mints a `kind=reset` pending record and emails a
+`/reset?token=…` link; the link → OTP (10-min, 5-try) → set-password steps are identical to
+registration but skip Terms. Responses are **generic regardless of whether the email exists**
+(no enumeration), and the endpoint is rate-limited per IP. Admins have **no** reset verb.
+
+**Confirmed parameters.** OTP = **6 digits, 5 tries** then invalidate; completion lands on
+**`/login`** (no auto-login); Terms text at **`web-content/terms.html`**, versioned by
+`TERMS_VERSION` (acceptance recorded on the user record).
+
+### DD-8 · Kernel-enforced egress firewall + loopback mail relay
+
+**Decision.** "Egress only via Squid" is enforced at the **kernel**, not just by the
+`HTTPS_PROXY` env var (which a compromised process can ignore). Two layers:
+
+1. **systemd per-unit IP filter** — every app unit (`euler-caddy`, `euler-auth`,
+   `euler-content`, `euler-ws`) carries `IPAddressDeny=any` + `IPAddressAllow=localhost`,
+   so the app tier can reach **only loopback** (their `/run/euler` sockets, the Squid proxy
+   at `127.0.0.1:3128`, and the loopback mail relay). This defense travels with the unit.
+2. **host nftables owner-match** (`scripts/setup/firewall.sh` → `euler-firewall.service`,
+   ruleset in `/etc/euler/nftables.conf`) — a dedicated `table inet euler` with an
+   **egress-only** (`hook output`) chain that, **scoped to the `euler-*` uids**, permits
+   loopback and only the specific `(uid, port)` egress each service genuinely needs, then
+   drops the rest:
+
+   | uid | allowed egress |
+   |---|---|
+   | `euler-proxy` (Squid) | `tcp dport {80,443}` — the **only** service with real internet; its L7 domain allowlist still applies |
+   | `euler-acme` | `tcp dport 443` (ACME + DNS-provider API) |
+   | `euler-ddns` | `tcp dport 443` (name.com API, ipify) |
+   | `euler-smtp` (relay) | `tcp dport 587` (Gmail submission) |
+   | `euler-acme`,`euler-ddns`,`euler-proxy`,`euler-smtp` | `udp/tcp dport 53` (DNS, unless the host resolver is on loopback) |
+   | all `euler-*` | `oif lo` (loopback); **everything else dropped** |
+
+   The chain uses `policy accept` and drops **only** the enumerated `euler-*` uids (a final
+   `skuid { … } drop`), so non-service traffic — SSH, root, your shell — is untouched (no
+   lock-out risk). The ruleset is **egress-focused**; host `INPUT` policy is left alone
+   (inbound `:443` is Caddy's; SSH stays reachable). Per-service network namespaces (DD's
+   rejected option C) remain a future hardening.
+
+**Mail relay (`euler-smtp`).** So the app tier needs **no** direct-internet exception, OTP/
+invite mail goes through a small **loopback submission relay** running as a dedicated
+`euler-smtp` user (its own group, outside `euler-web`): it listens on `127.0.0.1` and is the
+**sole holder of the Gmail credentials** and the **sole uid permitted `:587`**. `euler-auth`
+submits via loopback SMTP (`EULER_SMTP_RELAY`) with no credentials of its own. Relay config
+(`SMTP_ADDRESS`, `SMTP_APP_PASSWORD`) is scoped to the relay
+(`/etc/euler/smtp.env`, `root:euler-smtp 0640`), deployed from `keys/.env` (DD-4).
+
+**System paths (firewall + relay).**
+
+| Path | Owner / mode | Purpose |
+|---|---|---|
+| `/etc/euler/nftables.conf` | `root:root` `0644` | generated `table inet euler` egress ruleset |
+| `euler-firewall.service` | root-owned unit | loads/flushes the euler ruleset at boot |
+| `/etc/euler/smtp.env` | `root:euler-smtp` `0640` | Gmail creds — read **only** by the relay |
+| `euler-smtp.service` | root-owned unit | loopback submission relay (`User=euler-smtp`) |
+
+**Why.** Without this, "plaintext must never leave the repo" and the Squid allowlist rest on
+an environment variable. The firewall makes Squid the *only* path to the internet for the
+app tier at the packet level; the relay keeps the SMTP exception off the app uids and the
+Gmail password out of every service but one.
 
 ---
 
@@ -437,14 +615,50 @@ Folded into `scripts/setup/frontend.sh` (no new script — the edge orchestrator
   routing by `frontend.sh install`/`upgrade` (`make install-frontend`/`upgrade-frontend`).
 
 ### Phase 4 — Auth service
-- **Deliver:** aiohttp auth service exposing (a) SRP login/session/remember-me/reset
-  (reuse `web/auth/*`: `srp.py`, `sessions.py`, `remember.py`, `ratelimit.py`,
-  `mail.py`) and (b) a **`forward_auth` endpoint** returning `200 + X-User…` or
-  `401`. Caddy gates all downstream routes through it.
-- **Deliver:** the **CSP middleware** (nonce minting) lives here and is shared with
-  content. Login/register/password pages are the first Jinja-rendered pages.
-- **Kit:** Python deps (aiohttp-jinja2, Jinja2) install/update/check; service env +
-  session/key config; systemd unit + `status`; Caddy `forward_auth` block activated.
+**Status: 📐 designed, not yet implemented.** Design decisions
+[DD-5](#design-decisions) (runtime + framework), [DD-6](#design-decisions) (state + admin
+plane), [DD-7](#design-decisions) (registration flow) and [DD-8](#design-decisions) (egress
+firewall + mail relay) are locked; this phase implements them.
+
+**Build order** (each step independently landable/testable):
+1. **`firewall.sh` + `smtp.sh` kits (DD-8)** — the host nftables egress ruleset
+   (`euler-firewall.service`) and the `euler-smtp` loopback mail relay, so the app tier is
+   loopback-only from its first deploy and mail has a credential-scoped path out.
+2. **`web` extra + `/opt/euler` deploy (DD-5)** — pin `aiohttp`/`aiohttp-jinja2`/`Jinja2`
+   in the `web` optional group; `auth.sh` provisions the `euler-auth`/`euler-adm` identities
+   and `pip install .[web]` into `/opt/euler/venv`.
+3. **Rehome `web/auth/*` + admin API (DD-6)** — port the parked stores onto
+   `/var/lib/euler-auth` (`0600`), add the local admin listener + `users
+   add/list/enable/disable/remove` shell commands.
+4. **Jinja pages + CSP-nonce middleware (DD-7)** — login / register / Terms / `/forgot`
+   pages and the invite→OTP→SRP flow; the shared per-response-nonce middleware in
+   `solver/web/`.
+5. **Activate Caddy `forward_auth`** — gate all downstream routes through the auth socket
+   (`/login`, `/register*`, `/reset*`, `/forgot`, `/assets/*`, `/healthz` public); the
+   maintenance page remains the fallback until the content service lands.
+- **Deliver:** aiohttp + Jinja2 auth service on `unix//run/euler/auth.sock`, running as
+  `euler-auth` from the `/opt/euler` venv (DD-5). Reuses the parked `web/auth/*`
+  (`srp.py`, `sessions.py`, `remember.py`, `ratelimit.py`, `mail.py`, `users.py`,
+  `pending.py`, `policy.py`) rehomed onto the new state paths (DD-6). Exposes SRP
+  login/session/remember-me, the invite→Terms→OTP→SRP registration flow (DD-7), and a
+  **`forward_auth` endpoint** returning `200 + X-User…` or `401`; Caddy gates all
+  downstream routes through it, with `/login`, `/register*`, `/assets/*`, `/healthz`
+  public.
+- **Deliver:** a **local admin listener** (`/run/euler/auth-admin.sock`, not routed
+  through Caddy) for `users add/list/disable`, authenticated by `X-Admin-Token` (DD-6).
+- **Deliver:** the **CSP middleware** (per-response nonce) lives in a shared
+  `solver/web/` module and is imported by content later; the login / registration /
+  Terms pages are the first Jinja-rendered pages.
+- **Deliver (DD-8):** the kernel egress firewall (`scripts/setup/firewall.sh` →
+  `euler-firewall.service`, per-uid nftables) and the loopback mail relay
+  (`scripts/setup/smtp.sh` → `euler-smtp.service`), so the auth service is loopback-only
+  from its first deploy and OTP/invite mail has a credential-scoped path out.
+- **Kit:** `scripts/setup/auth.sh` (install/uninstall/upgrade/status) — create
+  `euler-auth` + `euler-adm`, `pip install .[web]` into `/opt/euler/venv`, deploy
+  `/etc/euler/auth.env` from `keys/.env`, provision `/var/lib/euler-auth`, install the
+  root-owned `euler-auth.service` (with `IPAddressDeny=any`/`IPAddressAllow=localhost`);
+  sibling `firewall.sh` + `smtp.sh` kits (DD-8); Python deps pinned in the `web` extra;
+  `status` pings `forward_auth` over the socket; Caddy `forward_auth` block activated.
 
 ### Phase 5 — Content service
 Built as four sub-steps; each independently shippable.
