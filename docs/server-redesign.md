@@ -148,15 +148,24 @@ refinement; not needed for the phased build.
 **`install` / `uninstall` / `upgrade`** (plus `status`) for the whole edge. It:
 
 1. creates the `euler-web` group and the `euler-*` service users (idempotent);
-2. installs Caddy (apt) and acme.sh;
-3. issues + deploys the TLS cert via acme.sh DNS-01, readable by `euler-caddy`, with
-   auto-renewal reloading the edge;
-4. generates the gitignored **unix-socket Caddyfile router** (path → `unix//run/euler/*`
+2. installs Caddy (apt) and acme.sh **as root** (`/root/.acme.sh`), so the renewal
+   cron is unattended;
+3. issues + deploys the TLS cert via acme.sh DNS-01 into **`/etc/euler/tls`**
+   (`root:euler-web`, key `0640`) so `euler-caddy` can read it; the renewal hook
+   re-applies that ownership/mode and reloads the edge;
+4. generates the **`/etc/euler/Caddyfile`** unix-socket router (path → `unix//run/euler/*`
    upstreams, the `forward_auth` block, security headers + fallback CSP);
 5. installs **root-owned systemd *system* units** in `/etc/systemd/system` —
    `euler-caddy.service` now, then `euler-auth` / `euler-content` / `euler-ws` /
    `euler-proxy` as later phases land — each `WantedBy=multi-user.target`, so the edge
    comes up at **boot**.
+
+**Config location.** The edge's config and secrets live under **`/etc/euler`**, not in
+the repo: the dedicated `euler-caddy` user cannot traverse the repo owner's `0750` home
+dir, so a repo-local Caddyfile/key would be unreadable. `frontend.sh` therefore writes
+`/etc/euler/Caddyfile` and `/etc/euler/tls/`, fully decoupling the edge from the
+checkout. (Static assets the edge serves — e.g. the Phase-3 maintenance page — are
+likewise deployed under `/etc/euler`.)
 
 **Privilege model.** Because the units live in **root's** systemd and run as the
 locked-down `euler-*` users, lifecycle is privileged: `start` / `stop` / `restart`
@@ -314,8 +323,9 @@ existing `scripts/setup/caddy.sh` convention (idempotent, header block documenti
    - *System deps* (caddy, squid): apt repo + package, plus `euler-web` group /
      `euler-*` user creation — all via the idempotent `frontend.sh` (DD-3).
 3. **Configuration** — generator for any host-specific config (Caddyfile, Squid
-   allowlist, service env), gitignored when it carries a hostname/secret, generated
-   at install from a CLI arg / env var / prompt (as `frontend.sh` does for the hostname).
+   allowlist, service env), written to a system path (`/etc/euler`, so the service
+   users can read it) or gitignored in-repo when repo-local, generated at install from
+   a CLI arg / env var / prompt (as `frontend.sh` does for the hostname).
 4. **Lifecycle** — `start` / `stop` / `status` / `restart` via a **root-owned systemd
    *system* unit per service** (`euler-<svc>.service`, boot-enabled), so lifecycle
    needs `sudo` (DD-3). The edge assumes systemd; the old detached-process +
@@ -341,9 +351,10 @@ and demonstrable at the end of every phase.
   (`respond /healthz 200`). Security headers + fallback CSP for static responses.
 - **Build:** the `scripts/setup/frontend.sh` orchestrator (folding in the old
   `caddy.sh` + `acme.sh`): create the `euler-web` group + `euler-caddy` user, install
-  Caddy + acme.sh, issue/deploy the cert (readable by `euler-caddy`), generate the
-  gitignored **unix-socket** Caddyfile router (path → `unix//run/euler/*` upstreams,
-  `forward_auth` block stubbed), and install the **root-owned** `euler-caddy.service`
+  Caddy + acme.sh (as root), issue/deploy the cert to `/etc/euler/tls` (readable by
+  `euler-caddy`), generate the **`/etc/euler/Caddyfile`** unix-socket router (path →
+  `unix//run/euler/*` upstreams, `forward_auth` block stubbed, health endpoint), and
+  install the **root-owned** `euler-caddy.service`
   (see [Design decisions](#design-decisions) DD-1…DD-3).
 - **Kit:** `frontend.sh install/uninstall/upgrade`; Caddyfile generator; root-owned
   systemd unit (`euler-caddy.service`, boot-enabled, `sudo` to start/stop); `status`

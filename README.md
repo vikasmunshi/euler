@@ -178,9 +178,10 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   loopback aiohttp server, loading a Let's Encrypt certificate that **acme.sh** issues and auto-renews through a
   name.com **DNS-01** challenge (no inbound port 80). Access is gated in the app - not Caddy - by browser-side
   **SRP-6a** login (the password never crosses the wire), with per-identity **profiles** (admin / user / guest)
-  deciding which commands and routes each caller may use. Setup scripts (`scripts/setup/caddy.sh`,
-  `scripts/setup/acme.sh`) install Caddy and issue the cert; the full stack is documented in three guides:
-  [TLS](docs/tls-guide.md), [authentication](docs/authentication.md), and [authorization](docs/authorization.md).
+  deciding which commands and routes each caller may use. The setup script
+  (`scripts/setup/frontend.sh`) installs Caddy + acme.sh and issues the cert; the front end is being
+  rebuilt as isolated services per the [server redesign](docs/server-redesign.md) (see also
+  [authentication](docs/authentication.md) and [authorization](docs/authorization.md)).
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
   any language that compiles or runs as a script.

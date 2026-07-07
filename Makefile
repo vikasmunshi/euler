@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-caddy uninstall-caddy install-acme uninstall-acme test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -75,25 +75,20 @@ uninstall-claude:
 	./scripts/setup/claude_code.sh uninstall
 	@printf "✓ uninstall-claude complete: Claude Code CLI removed\n"
 
-## Install Caddy (HTTPS reverse-proxy front end for solver-web — see docs/tls-setup.md)
-install-caddy:
-	./scripts/setup/caddy.sh install
-	@printf "✓ install-caddy complete: Caddy installed\n"
+## Install the web edge: Caddy + acme.sh + euler-caddy.service (see docs/server-redesign.md)
+install-frontend:
+	./scripts/setup/frontend.sh install
+	@printf "✓ install-frontend complete: web edge installed (sudo systemctl for lifecycle)\n"
 
-## Remove Caddy and its apt repository configuration
-uninstall-caddy:
-	./scripts/setup/caddy.sh uninstall
-	@printf "✓ uninstall-caddy complete: Caddy removed\n"
+## Remove the web edge (prompts before deleting /etc/euler, acme.sh, and the service users)
+uninstall-frontend:
+	./scripts/setup/frontend.sh uninstall
+	@printf "✓ uninstall-frontend complete: web edge removed\n"
 
-## Install the acme.sh client (TLS cert issuance; run 'acme.sh issue' after — see docs/tls-setup.md)
-install-acme:
-	./scripts/setup/acme.sh install
-	@printf "✓ install-acme complete: acme.sh client installed (run scripts/setup/acme.sh issue next)\n"
-
-## Remove the acme.sh client and its renewal cron
-uninstall-acme:
-	./scripts/setup/acme.sh uninstall
-	@printf "✓ uninstall-acme complete: acme.sh client removed\n"
+## Upgrade the web edge (Caddy + acme.sh; regenerate the Caddyfile + unit)
+upgrade-frontend:
+	./scripts/setup/frontend.sh upgrade
+	@printf "✓ upgrade-frontend complete: web edge upgraded\n"
 
 ## Create venv if it doesn't exist
 $(VENV):

@@ -309,8 +309,8 @@ untrustworthy client-IP logs.
 - Edge (`Caddyfile`): `reverse_proxy … { header_up X-Forwarded-For {remote_host} }` overwrites
   the header with the real transport peer, so a client-supplied value never reaches the app.
   Belt-and-suspenders: the app is correct whether Caddy overwrites or appends. The Caddyfile
-  is generated (and gitignored), so this lives in the tracked generator
-  `scripts/setup/caddy.sh` (`generate_caddyfile`); regenerate with `caddy.sh install`/`service`
+  is generated, so this lives in the tracked generator
+  `scripts/setup/frontend.sh` (`generate_caddyfile`); regenerate with `frontend.sh install`/`upgrade`
   and `caddy reload` to deploy.
 
 **Regression test.** `tests/test_auth_routes.py::test_rate_limit_keys_on_rightmost_xff_hop`
@@ -362,8 +362,8 @@ injected script (compounds SEC-03).
 **Fix.**
 - HSTS (`Caddyfile`): `header Strict-Transport-Security "max-age=31536000; includeSubDomains"`.
   Safe because the site is HTTPS-only (DNS-01, no `:80`). `preload` intentionally omitted.
-  Baked into the tracked generator `scripts/setup/caddy.sh` (`generate_caddyfile`), since the
-  Caddyfile itself is generated and gitignored.
+  Baked into the tracked generator `scripts/setup/frontend.sh` (`generate_caddyfile`), since the
+  Caddyfile itself is generated.
 - CSP (`solver/web/auth/routes.py`, `_add_security_headers`), applied to every response:
 
   ```
@@ -463,7 +463,7 @@ key via the sandbox's environment (SEC-02) over a repo-relative file.
 `config.env_file` (`solver/config.py`), consumed by `get_api_key`
 (`solver/ai/models.py`), the SMTP mailer (`solver/web/auth/mail.py`), identity
 resolution (`solver/utils/identity.py`, via a `resolve_identity` parameter), and
-`scripts/setup/acme.sh`.
+`scripts/setup/frontend.sh` (DNS-01 credentials).
 
 **Validation results** (against the new path):
 - `stat -c '%a' keys/.env` → `600`.

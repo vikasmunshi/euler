@@ -8,8 +8,7 @@
 #   scripts/git/publish.sh            --dry-run, -h/--help, <dir>...
 #   scripts/git/status.sh             --summary
 #   scripts/git/sync.sh               --dry-run
-#   scripts/setup/acme.sh             install, issue, renew, uninstall, status, help
-#   scripts/setup/caddy.sh            install, update, service, uninstall, status, help
+#   scripts/setup/frontend.sh         install, uninstall, upgrade, status, renew, reload, help
 #   scripts/setup/chrome.sh           install, install-script, uninstall, help
 #   scripts/setup/dev_env.sh          [--dry-run] [install|uninstall|status] [all|c|lua|primesieve|ruby|python]...
 #   scripts/setup/upgrade_service.sh  install, uninstall, --help
@@ -83,22 +82,10 @@ _euler_chrome_completions() {
   COMPREPLY=($(compgen -W "install install-script uninstall help --help -h" -- "${cur}"))
 }
 
-_euler_caddy_completions() {
+_euler_frontend_completions() {
   local cur
   cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "install update service uninstall status help --help -h" -- "${cur}"))
-}
-
-_euler_acme_completions() {
-  local cur prev
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
-  # issue/renew take a DNS provider as their second word.
-  if [[ "${prev}" == "issue" || "${prev}" == "renew" ]]; then
-    COMPREPLY=($(compgen -W "namecom cloudflare route53 godaddy digitalocean gandi" -- "${cur}"))
-    return
-  fi
-  COMPREPLY=($(compgen -W "install issue renew uninstall status help --help -h" -- "${cur}"))
+  COMPREPLY=($(compgen -W "install uninstall upgrade status renew reload help --help -h" -- "${cur}"))
 }
 
 _euler_dev_env_completions() {
@@ -143,8 +130,7 @@ STATIC_EOF
         echo "complete -F _euler_publish_completions         '${PROJECT_ROOT}/scripts/git/publish.sh'"
         echo "complete -F _euler_status_completions          '${PROJECT_ROOT}/scripts/git/status.sh'"
         echo "complete -F _euler_sync_completions            '${PROJECT_ROOT}/scripts/git/sync.sh'"
-        echo "complete -F _euler_acme_completions            '${PROJECT_ROOT}/scripts/setup/acme.sh'"
-        echo "complete -F _euler_caddy_completions           '${PROJECT_ROOT}/scripts/setup/caddy.sh'"
+        echo "complete -F _euler_frontend_completions        '${PROJECT_ROOT}/scripts/setup/frontend.sh'"
         echo "complete -F _euler_chrome_completions          '${PROJECT_ROOT}/scripts/setup/chrome.sh'"
         echo "complete -F _euler_dev_env_completions         '${PROJECT_ROOT}/scripts/setup/dev_env.sh'"
         echo "complete -F _euler_upgrade_service_completions '${PROJECT_ROOT}/scripts/setup/upgrade_service.sh'"
@@ -153,8 +139,7 @@ STATIC_EOF
         echo "complete -F _euler_publish_completions         'scripts/git/publish.sh'"
         echo "complete -F _euler_status_completions          'scripts/git/status.sh'"
         echo "complete -F _euler_sync_completions            'scripts/git/sync.sh'"
-        echo "complete -F _euler_acme_completions            'scripts/setup/acme.sh'"
-        echo "complete -F _euler_caddy_completions           'scripts/setup/caddy.sh'"
+        echo "complete -F _euler_frontend_completions        'scripts/setup/frontend.sh'"
         echo "complete -F _euler_chrome_completions          'scripts/setup/chrome.sh'"
         echo "complete -F _euler_dev_env_completions         'scripts/setup/dev_env.sh'"
         echo "complete -F _euler_upgrade_service_completions 'scripts/setup/upgrade_service.sh'"
@@ -163,8 +148,7 @@ STATIC_EOF
         echo "complete -F _euler_publish_completions         './scripts/git/publish.sh'"
         echo "complete -F _euler_status_completions          './scripts/git/status.sh'"
         echo "complete -F _euler_sync_completions            './scripts/git/sync.sh'"
-        echo "complete -F _euler_acme_completions            './scripts/setup/acme.sh'"
-        echo "complete -F _euler_caddy_completions           './scripts/setup/caddy.sh'"
+        echo "complete -F _euler_frontend_completions        './scripts/setup/frontend.sh'"
         echo "complete -F _euler_chrome_completions          './scripts/setup/chrome.sh'"
         echo "complete -F _euler_dev_env_completions         './scripts/setup/dev_env.sh'"
         echo "complete -F _euler_upgrade_service_completions './scripts/setup/upgrade_service.sh'"

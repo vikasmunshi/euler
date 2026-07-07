@@ -1,5 +1,13 @@
 # TLS for `solver-web` (Caddy + acme.sh, DNS-01)
 
+> **Partly superseded by the server redesign.** Phase 1 folds the old
+> `scripts/setup/caddy.sh` + `scripts/setup/acme.sh` into a single
+> `scripts/setup/frontend.sh`, runs the edge as the dedicated `euler-caddy` user, and
+> moves the Caddyfile + cert to `/etc/euler` (acme.sh runs as root). The TLS/DNS-01
+> mechanics below still apply, but the commands, paths, and service model are current
+> only in [`docs/server-redesign.md`](server-redesign.md) (DD-1…DD-3). This guide will
+> be rewritten to the new model in a later pass.
+
 This guide covers serving `solver-web` over HTTPS: TLS termination and an
 auto-renewing certificate. It is the transport layer of a three-part story —
 [authentication](authentication.md) establishes *who* the caller is, and
