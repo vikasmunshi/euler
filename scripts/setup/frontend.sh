@@ -201,18 +201,32 @@ ensure_sys_dirs() {
 
 acme_is_installed() { sudo test -x "${ACME_BIN}"; }
 
+# Run acme.sh as clean root. acme.sh refuses to run under `sudo` (it detects the
+# SUDO_* env vars and points at its sudo wiki), so strip those markers and pin HOME to
+# /root (its working dir is /root/.acme.sh). For calls needing extra environment (the
+# DNS credentials at issue time) use `acme_env` to prepend `VAR=val` pairs.
+ACME_CLEAN_ENV=(env -u SUDO_COMMAND -u SUDO_USER -u SUDO_UID -u SUDO_GID HOME=/root)
+acme_root() {
+    sudo "${ACME_CLEAN_ENV[@]}" "${ACME_BIN}" "$@"
+}
+# Like acme_root, but injects the DNS-credential env pairs collected in $cred_env
+# *before* the acme.sh binary so acme.sh sees them as environment, not arguments.
+acme_root_with_creds() {
+    sudo "${ACME_CLEAN_ENV[@]}" "${cred_env[@]}" "${ACME_BIN}" "$@"
+}
+
 install_acme() {
     if ! command -v curl &> /dev/null; then
         echo "Error: curl is required to install acme.sh" >&2
         return 1
     fi
     if acme_is_installed; then
-        echo "acme.sh already installed (root): $(sudo "${ACME_BIN}" --version 2>/dev/null | tail -n1)"
+        echo "acme.sh already installed (root): $(acme_root --version 2>/dev/null | tail -n1)"
     else
         echo "Installing acme.sh as root (into ${ACME_HOME})..."
-        sudo sh -c "curl -fsSL '${ACME_INSTALL_URL}' | sh -s email='${ACME_EMAIL}'"
+        sudo env HOME=/root sh -c "curl -fsSL '${ACME_INSTALL_URL}' | sh -s email='${ACME_EMAIL}'"
     fi
-    sudo "${ACME_BIN}" --set-default-ca --server letsencrypt
+    acme_root --set-default-ca --server letsencrypt
     echo "acme.sh ready (default CA: Let's Encrypt)"
 }
 
@@ -223,8 +237,10 @@ DNS_HOOK=""
 REQUIRED=()
 load_dns_creds() {
     if [ -f "${ENV_FILE}" ]; then
+        set -a
         # shellcheck disable=SC1090
-        set -a; . "${ENV_FILE}"; set +a
+        . "${ENV_FILE}"
+        set +a
     fi
     case "${DNS_PROVIDER}" in
         namecom)
@@ -268,8 +284,7 @@ issue_cert() {
 
     echo "Issuing certificate for ${DOMAIN} via ${DNS_PROVIDER} DNS-01 (${DNS_HOOK})..."
     local rc=0
-    sudo env "${cred_env[@]}" HOME=/root "${ACME_BIN}" \
-        --issue --dns "${DNS_HOOK}" -d "${DOMAIN}" || rc=$?
+    acme_root_with_creds --issue --dns "${DNS_HOOK}" -d "${DOMAIN}" || rc=$?
     # exit code 2 = "skipped, still valid" — success for our purposes.
     if [ "${rc}" -ne 0 ] && [ "${rc}" -ne 2 ]; then
         echo "Error: certificate issuance failed (acme.sh exit ${rc})" >&2
@@ -277,7 +292,7 @@ issue_cert() {
     fi
 
     echo "Deploying certificate to ${TLS_DIR}..."
-    sudo env HOME=/root "${ACME_BIN}" --install-cert -d "${DOMAIN}" \
+    acme_root --install-cert -d "${DOMAIN}" \
         --fullchain-file "${CERT_FILE}" \
         --key-file "${KEY_FILE}" \
         --reloadcmd "${RELOAD_CMD}"
@@ -299,11 +314,12 @@ issue_cert() {
 # prompt) into $DOMAIN and (re)generate /etc/euler/Caddyfile.
 ensure_caddyfile() {
     local hostname="${1:-${EULER_TLS_DOMAIN:-}}"
+    # No hostname given: reuse the one baked into an existing Caddyfile (so re-run and
+    # `upgrade` keep the host and pick up template changes), else prompt.
+    if [ -z "${hostname}" ] && sudo test -f "${CADDYFILE}"; then
+        hostname="$(sudo grep -m1 -oE '^[A-Za-z0-9.-]+ \{' "${CADDYFILE}" | awk '{print $1}')"
+    fi
     if [ -z "${hostname}" ]; then
-        if sudo test -f "${CADDYFILE}"; then
-            echo "Using hostname from existing ${CADDYFILE}"
-            return 0
-        fi
         read -rp "Enter the hostname for the HTTPS front end (e.g. euler.example.com): " hostname
         if [ -z "${hostname}" ]; then
             echo "Error: a hostname is required to generate the Caddyfile" >&2
@@ -482,7 +498,7 @@ do_upgrade() {
     disable_conflicting_services
     if acme_is_installed; then
         echo "Upgrading acme.sh..."
-        sudo "${ACME_BIN}" --upgrade || true
+        acme_root --upgrade || true
     fi
     ensure_group_and_users
     ensure_sys_dirs
@@ -498,7 +514,7 @@ do_renew() {
         return 1
     fi
     echo "Renewing certificate for ${DOMAIN} (force)..."
-    sudo env HOME=/root "${ACME_BIN}" --renew -d "${DOMAIN}" --force
+    acme_root --renew -d "${DOMAIN}" --force
     echo "Renewal complete for ${DOMAIN}"
 }
 
@@ -526,14 +542,14 @@ do_uninstall() {
 
     read -r -p "Remove the acme.sh client (root) and its renewal cron? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]] && acme_is_installed; then
-        sudo "${ACME_BIN}" --uninstall || true
+        acme_root --uninstall || true
         sudo rm -rf "${ACME_HOME}"
     fi
 
     read -r -p "Remove service user ${CADDY_USER} and group ${WEB_GROUP}? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]]; then
-        getent passwd "${CADDY_USER}" > /dev/null && sudo userdel "${CADDY_USER}" 2>/dev/null || true
-        getent group "${WEB_GROUP}" > /dev/null && sudo groupdel "${WEB_GROUP}" 2>/dev/null || true
+        if getent passwd "${CADDY_USER}" > /dev/null; then sudo userdel "${CADDY_USER}" 2>/dev/null || true; fi
+        if getent group "${WEB_GROUP}" > /dev/null; then sudo groupdel "${WEB_GROUP}" 2>/dev/null || true; fi
         sudo rm -rf /var/lib/euler-caddy
     fi
     echo "Frontend uninstall complete."
@@ -546,7 +562,7 @@ do_status() {
         echo "Caddy:      ✗ not installed"
     fi
     if acme_is_installed; then
-        echo "acme.sh:    ✓ installed (root) — $(sudo "${ACME_BIN}" --version 2>/dev/null | tail -n1)"
+        echo "acme.sh:    ✓ installed (root) — $(acme_root --version 2>/dev/null | tail -n1)"
     else
         echo "acme.sh:    ✗ not installed"
     fi
