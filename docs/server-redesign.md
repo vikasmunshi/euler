@@ -782,7 +782,7 @@ are locked; this phase implements them.
    `login.js`/`register.js` (policy check client-side) and `auth.css`/`terms.html`,
    all same-origin `/assets` files so the CSP holds with no inline code.
    Verified: `tests/test_srp_interop.py` (the real JS asset under Node vs the
-   Python server — `make install-node-js`) and a 27-check flow harness driving
+   Python server — `make install-nodejs`) and a 27-check flow harness driving
    invite → Terms → OTP (wrong/right/exhausted) → JS-derived verifier →
    single-use completion → JS SRP login → forgot → reset (old password and old
    sessions dead, new password works).

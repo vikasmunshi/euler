@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-node-js uninstall-node-js test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -155,28 +155,33 @@ upgrade-auth:
 	./scripts/setup/auth.sh upgrade
 	@printf "✓ upgrade-auth complete: auth service upgraded\n"
 
-# Standalone Node.js (no sudo): used only by dev tooling — e.g. the JS↔Python
-# SRP interop test (tests/test_srp_interop.py) driving web-content/assets/srp.js.
-NODE_VERSION := 22.14.0
-NODE_DIR := $(HOME)/.local/opt/node-v$(NODE_VERSION)-linux-x64
-
 ## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
-install-node-js:
-	@if [ -x "$(NODE_DIR)/bin/node" ]; then \
-		printf "✓ node v$(NODE_VERSION) already at $(NODE_DIR)\n"; \
-	else \
-		mkdir -p $(HOME)/.local/opt && \
-		curl -fsSL https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-linux-x64.tar.xz \
-			| tar -xJ -C $(HOME)/.local/opt; \
-	fi
-	@mkdir -p $(HOME)/.local/bin && ln -sf $(NODE_DIR)/bin/node $(HOME)/.local/bin/node
-	@printf "✓ install-node-js complete: $$($(NODE_DIR)/bin/node --version) (~/.local/bin/node)\n"
+install-nodejs:
+	./scripts/setup/nodejs.sh install
+	@printf "✓ install-nodejs complete\n"
 
-## Remove the standalone Node.js installed by install-node-js
-uninstall-node-js:
-	rm -rf $(NODE_DIR)
-	@if [ -L $(HOME)/.local/bin/node ]; then rm -f $(HOME)/.local/bin/node; fi
-	@printf "✓ uninstall-node-js complete\n"
+## Remove the standalone Node.js installed by install-nodejs
+uninstall-nodejs:
+	./scripts/setup/nodejs.sh uninstall
+	@printf "✓ uninstall-nodejs complete\n"
+
+## Install the full web stack, in dependency order: edge (Caddy+ACME+web-content),
+## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service.
+## Each kit stays independently operable; the later kits reload the firewall as
+## their service users appear. (sudo required; see docs/server-redesign.md)
+install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth
+	@printf "✓ install-web complete: full web stack installed\n"
+
+## Remove the full web stack (reverse order; the kits prompt before deleting state)
+uninstall-web: uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
+	@printf "✓ uninstall-web complete: full web stack removed\n"
+
+## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
+## ddns.sh install is its idempotent upgrade, and the firewall reload is the
+## final consistency pass over the euler uids)
+upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth
+	./scripts/setup/firewall.sh reload
+	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
 # Standalone Node.js (no sudo):
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """JS ↔ Python SRP-6a interop: the browser client (web-content/assets/srp.js)
 against the service's srp.py, byte-for-byte (RFC 5054 2048-bit group, SHA-256,
-PAD to |N|). Skips when Node.js is absent — install it with `make install-node-js`.
+PAD to |N|). Skips when Node.js is absent — install it with `make install-nodejs`.
 """
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ def _find_node() -> str | None:
     return str(candidates[-1]) if candidates else None
 
 
-@unittest.skipIf(_find_node() is None, 'node not installed (make install-node-js)')
+@unittest.skipIf(_find_node() is None, 'node not installed (make install-nodejs)')
 class SrpInteropTest(unittest.TestCase):
     """Drive the real browser asset under Node against the Python server."""
 
