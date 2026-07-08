@@ -93,61 +93,8 @@ cd "$INSTALL_DIR"
 mkdir workspace || true
 make install-all
 
-# Install a quick-start launcher at ~/.local/bin/euler
-LAUNCHER_DIR="${HOME}/.local/bin"
-LAUNCHER="${LAUNCHER_DIR}/euler"
-INSTALL_DIR="$(realpath "$INSTALL_DIR")"
-mkdir -p "$LAUNCHER_DIR"
-cat > "$LAUNCHER" <<EOF
-#!/usr/bin/env bash
-# Quick-start launcher for the Project Euler Solver (installed by ${INSTALL_DIR}/install.sh)
-#
-# Usage: euler [--web | --shell] [args...]
-#   --web    (default) start the browser front end and open it
-#   --shell  run the interactive terminal shell
-set -euo pipefail
-
-usage() {
-    echo "Usage: euler [--web | --shell] [args...]"
-    echo "  --web    (default) start the interactive web shell"
-    echo "  --shell  start the interactive terminal shell"
-    exit 0
-}
-
-mode="web"
-case "\${1-}" in
-    --web)   mode="web";   shift ;;
-    --shell) mode="shell"; shift ;;
-    -h|--help) usage ;;
-esac
-
-cd "${INSTALL_DIR}" || exit 1
-source .venv/bin/activate
-
-if [[ "\$mode" == "shell" ]]; then
-    # Interactive terminal shell — replaces this process.
-    exec .venv/bin/solver "\$@"
-elif [[ "\$mode" == "web" ]]; then
-    # Web mode: start (or reuse) the server.
-    .venv/bin/solver-web "\$@"
-else
-    usage
-fi
-EOF
-chmod +x "$LAUNCHER"
-
 echo ""
 echo "Installation complete. To get started:"
-echo "  euler            # web front end (default)"
-echo "  euler --shell    # interactive terminal shell"
-if ! command -v euler &>/dev/null; then
-    echo ""
-    echo "note: ${LAUNCHER_DIR} is not on your PATH. Add it with:"
-    echo "  export PATH=\"${LAUNCHER_DIR}:\$PATH\""
-    echo "Or run the launcher directly: ${LAUNCHER}"
-fi
-echo ""
-echo "Or activate the virtual environment manually:"
 echo "  cd ${INSTALL_DIR}"
 echo "  source .venv/bin/activate"
-echo "  solver"
+echo "  solver            # interactive terminal shell"

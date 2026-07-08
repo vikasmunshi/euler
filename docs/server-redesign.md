@@ -12,7 +12,7 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 > - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
 > - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
-> - 📐 **Phase 4** — Auth service: **designed, decisions locked** ([DD-5](#design-decisions)…[DD-8](#design-decisions)); **implementation pending** (build order in the [Phase 4](#phase-4--auth-service) section).
+> - 📐 **Phase 4** — Auth service: **designed, decisions locked** ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **implementation pending** (build order in the [Phase 4](#phase-4--auth-service) section).
 > - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## Goals & non-goals
@@ -54,6 +54,7 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 | Auth state & admin plane | Auth state in **`/var/lib/euler-auth`** (`euler-auth`-only, `0600`); admin ops (`users add/list/disable`) go through an **admin API on the auth socket**, never file-sharing — see [DD-6](#design-decisions). |
 | Registration | **Invite-only**, two-channel: admin-minted **7-day** email link → Terms acceptance → **10-min OTP** → set SRP password — see [DD-7](#design-decisions). |
 | Egress firewall | **Kernel-enforced**: systemd per-unit `IPAddressDeny` (loopback-only app tier) + host **nftables** owner-match; mail via a loopback `euler-smtp` relay — see [DD-8](#design-decisions). |
+| Identity & masquerade | Three planes — web requests (`forward_auth` → `X-User`/`X-Profile`), web shells (**one-time shell ticket** redeemed over `auth.sock`), local terminal (**checkout-owner uid** → admin). Fresh **`solver/web/auth`** package; the `keys/` web-auth store is **not ported** — see [DD-9](#design-decisions). |
 
 ## Open decisions (this document argues, you choose)
 
@@ -392,6 +393,89 @@ an environment variable. The firewall makes Squid the *only* path to the interne
 app tier at the packet level; the relay keeps the SMTP exception off the app uids and the
 Gmail password out of every service but one.
 
+### DD-9 · Identity, authentication, and masquerade prevention
+
+**Decision.** The auth service is built **fresh** as the **`solver/web/auth`** sub-package
+(the parked `old-web-server` branch remains a *cherry-pick source* — the SRP-6a math,
+policy constants, and rate limiter port cleanly — but the stores are re-implemented on the
+DD-6 state paths). The current `keys/` web-auth store (`.users.json`, `.pending.json`,
+`.remember.json`, `.session-secret`) is **not ported**: state starts empty in
+`/var/lib/euler-auth`, and the live service is proven by minting invites and registering
+users afresh (DD-7). Those `keys/` dotfiles are retired once Phase 4 lands. Identity
+resolution (`solver/utils/identity.py`) is redesigned around **three planes**, each with an
+explicit voucher:
+
+| Plane | Who vouches | Mechanism |
+|---|---|---|
+| Web request | auth service | SRP session cookie → `forward_auth` → `200 + X-User, X-Profile` |
+| Web shell (PTY child) | auth service | **one-time shell ticket**, redeemed over `auth.sock` at startup |
+| Local terminal | the OS | `os.getuid()` **owns the repo checkout** → `admin` |
+
+**Web authentication (requests).** As designed in [authentication.md](authentication.md):
+browser-side SRP-6a (RFC 5054 2048-bit group, `g=2`, SHA-256; server stores only
+`{salt, verifier}`), in-memory sessions + rotating remember-me (DD-6), invite → Terms →
+OTP → SRP registration and self-service reset (DD-7). The `forward_auth` endpoint returns
+`200` with **both `X-User`** (email) **and `X-Profile`** (`admin`/`user`/`guest` from the
+user record) or `401`. Caddy copies those two response headers onto the proxied request
+and **deletes any client-supplied `X-User`/`X-Profile` first**, so an identity header can
+never be injected from outside; content/ws trust the headers because their sockets are
+reachable only via Caddy (DD-1/DD-2).
+
+**Web shell identity (the shell ticket).** Every PTY shell runs as uid `euler-ws` (no
+root, so no per-user setuid), and `/proc/<pid>/environ` is readable by same-uid processes
+— so **nothing carried in the environment can be the credential**: a signed-but-reusable
+assertion could be replayed by any other web user's shell. Instead, identity transfers by
+a consumable ticket:
+
+1. On WS attach, the ws service forwards the user's session **cookie** to
+   `POST /shell-ticket` on `auth.sock`; the auth service validates the session and mints a
+   **single-use, 60-second** ticket bound to `(email, profile)` (held in memory, stored
+   hashed, never logged).
+2. The ws service forks the PTY child with `SOLVER_TICKET=<ticket>`
+   (plus `SOLVER_USER=<email>` for display only — it grants nothing).
+3. At startup the shell **redeems** the ticket over `auth.sock`
+   (`POST /shell-ticket/redeem`); redemption consumes it and returns the authoritative
+   `(email, profile)`. Missing/expired/reused ticket → shell startup aborts.
+
+Minting requires a live session cookie (which a shell user does not hold), and redemption
+is single-use — so a web user re-execing `solver` inside their PTY can obtain no identity
+but their own. The `/shell-ticket*` endpoints are **not routed by Caddy** (socket-peer
+only), keeping them off the public surface entirely.
+
+**Local authentication.** The local trust anchor becomes precise: the fallback that grants
+the **`admin`** profile applies **only when the process uid owns the repo checkout**
+(`os.getuid() == stat(root_dir).st_uid`) — physical/login access to *the checkout* is the
+trust, stated exactly. Service uids never fall through to admin. The old
+**assume-an-identity** path (`export SOLVER_USER=…` verified against `keys/.users.json`,
+plus the `keys/.user-email` / `keys/.env` identity inputs) is **dropped**: the user DB is
+now `euler-auth`-private so there is nothing local to verify against, and exercising a
+lesser profile is done through a real web login instead.
+
+**Resolution order (new `identity.py`).**
+1. `SOLVER_TICKET` set → redeem over `auth.sock` → `(email, slug, profile)`;
+   redemption failure aborts startup.
+2. else uid owns the checkout → `(getpass.getuser(), slug, 'admin')`.
+3. else → abort (`SystemExit`); there is no anonymous fallback.
+
+**Masquerade vectors → guards.**
+
+| Vector | Guard |
+|---|---|
+| Browser sends its own `X-User`/`X-Profile` | Caddy strips inbound copies; only `forward_auth` response headers are forwarded; app sockets unreachable except via Caddy |
+| Web user re-execs `solver` with a chosen `SOLVER_USER` | env is display-only; identity requires a ticket; the local fallback refuses non-owner uids |
+| Replaying another shell's credential from `/proc/*/environ` | tickets are single-use — already consumed by the victim's own startup |
+| Bare `solver` as a service uid claiming admin | admin fallback requires the checkout-owner uid |
+| Minting a ticket from inside a PTY (same uid *can* connect to `auth.sock`) | minting demands a live session cookie the shell user does not possess |
+| Admin-plane abuse | local-only `auth-admin.sock` (`euler-adm` group) + `X-Admin-Token`, never routed by Caddy (DD-6) |
+
+**Residual risk (accepted).** All web shells share uid `euler-ws`: a hostile shell user
+with arbitrary code execution could attack *sibling* shells of that uid (Yama
+`ptrace_scope=1` blocks non-ancestor ptrace; files and sockets writable by the uid remain
+shared). The standing controls are authorization (`!`/`bash` stays **admin-only** in
+`commands.csv`) and the fact that identity never rests on the uid — masquerade against the
+auth service stays impossible even under same-uid compromise. Per-user helper uids or
+namespaces remain a Phase-6 hardening option.
+
 ---
 
 ## Framework / templating
@@ -617,8 +701,9 @@ Folded into `scripts/setup/frontend.sh` (no new script — the edge orchestrator
 ### Phase 4 — Auth service
 **Status: 📐 designed, not yet implemented.** Design decisions
 [DD-5](#design-decisions) (runtime + framework), [DD-6](#design-decisions) (state + admin
-plane), [DD-7](#design-decisions) (registration flow) and [DD-8](#design-decisions) (egress
-firewall + mail relay) are locked; this phase implements them.
+plane), [DD-7](#design-decisions) (registration flow), [DD-8](#design-decisions) (egress
+firewall + mail relay) and [DD-9](#design-decisions) (identity + masquerade prevention)
+are locked; this phase implements them.
 
 **Build order** (each step independently landable/testable):
 1. **`firewall.sh` + `smtp.sh` kits (DD-8)** — the host nftables egress ruleset
@@ -627,9 +712,15 @@ firewall + mail relay) are locked; this phase implements them.
 2. **`web` extra + `/opt/euler` deploy (DD-5)** — pin `aiohttp`/`aiohttp-jinja2`/`Jinja2`
    in the `web` optional group; `auth.sh` provisions the `euler-auth`/`euler-adm` identities
    and `pip install .[web]` into `/opt/euler/venv`.
-3. **Rehome `web/auth/*` + admin API (DD-6)** — port the parked stores onto
-   `/var/lib/euler-auth` (`0600`), add the local admin listener + `users
-   add/list/enable/disable/remove` shell commands.
+3. **Fresh `solver/web/auth` + admin API (DD-6, DD-9)** — implement the package **from
+   scratch** on `/var/lib/euler-auth` (`0600`): stores (users / pending / remember),
+   sessions, the shell-ticket mint/redeem endpoints, the local admin listener, and the
+   `users add/list/enable/disable/remove` shell commands. The parked branch is a
+   cherry-pick source for the SRP-6a math, policy constants, and rate limiter only —
+   the `keys/` web-auth store is **not ported** (no data migration): the service is
+   live-tested by inviting and registering users afresh. Includes the `identity.py`
+   redesign (ticket redemption; checkout-owner-uid admin anchor; the `SOLVER_USER` /
+   `keys/.user-email` identity inputs dropped) and retiring the dead `keys/` dotfiles.
 4. **Jinja pages + CSP-nonce middleware (DD-7)** — login / register / Terms / `/forgot`
    pages and the invite→OTP→SRP flow; the shared per-response-nonce middleware in
    `solver/web/`.
@@ -637,12 +728,13 @@ firewall + mail relay) are locked; this phase implements them.
    (`/login`, `/register*`, `/reset*`, `/forgot`, `/assets/*`, `/healthz` public); the
    maintenance page remains the fallback until the content service lands.
 - **Deliver:** aiohttp + Jinja2 auth service on `unix//run/euler/auth.sock`, running as
-  `euler-auth` from the `/opt/euler` venv (DD-5). Reuses the parked `web/auth/*`
-  (`srp.py`, `sessions.py`, `remember.py`, `ratelimit.py`, `mail.py`, `users.py`,
-  `pending.py`, `policy.py`) rehomed onto the new state paths (DD-6). Exposes SRP
-  login/session/remember-me, the invite→Terms→OTP→SRP registration flow (DD-7), and a
-  **`forward_auth` endpoint** returning `200 + X-User…` or `401`; Caddy gates all
-  downstream routes through it, with `/login`, `/register*`, `/assets/*`, `/healthz`
+  `euler-auth` from the `/opt/euler` venv (DD-5). A **fresh `solver/web/auth`** build on
+  the DD-6 state paths (parked branch cherry-picked for the SRP-6a math, policy, rate
+  limiter only; no store port — see DD-9). Exposes SRP login/session/remember-me, the
+  invite→Terms→OTP→SRP registration flow (DD-7), the **shell-ticket mint/redeem**
+  endpoints (DD-9, socket-peer only), and a **`forward_auth` endpoint** returning
+  `200 + X-User + X-Profile` or `401`; Caddy strips inbound identity headers and gates
+  all downstream routes through it, with `/login`, `/register*`, `/assets/*`, `/healthz`
   public.
 - **Deliver:** a **local admin listener** (`/run/euler/auth-admin.sock`, not routed
   through Caddy) for `users add/list/disable`, authenticated by `X-Admin-Token` (DD-6).
