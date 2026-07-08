@@ -3,7 +3,7 @@
 # ====================================================================================
 #
 # Installs / uninstalls / upgrades the runtime for the auth service: the service
-# identities (euler-auth + the euler-adm admin group), the root-owned /opt/euler
+# identity (euler-auth) and wheel-gated admin plane, the root-owned /opt/euler
 # system venv the app services run from (DD-5), the scoped /etc/euler/auth.env,
 # the /var/lib/euler-auth state dir (DD-6), and — once the solver.web.auth module
 # exists in the deployed venv — the root-owned euler-auth.service. Sibling to
@@ -15,14 +15,18 @@
 #     repo checkout: the service users cannot traverse the repo owner's 0750 home
 #     (DD-5). install/upgrade does `pip install <repo>[web]` into it as root.
 #   - euler-auth: own primary group (state files are euler-auth:euler-auth 0600),
-#     supplementary member of euler-web (binds its sockets group euler-web in
-#     /run/euler). euler-adm: the local admin-plane group — members (you) may
-#     connect to /run/euler/auth-admin.sock (DD-6).
-#   - /run/euler is provisioned via tmpfiles.d (root:euler-web 0770) so every app
-#     service shares one socket dir without owning it.
+#     supplementary member of euler-web (binds its public socket group euler-web
+#     in /run/euler).
+#   - The admin plane is WHEEL-GATED (DD-6): the admin socket is euler-auth-private
+#     (0600, in /run/euler-adm) and EULER_ADMIN_TOKEN lives only in the
+#     root-readable auth.env — the `users` command re-executes the admin CLI under
+#     sudo. No admin group, no operator-held credentials.
+#   - /run/euler (root:euler-web 0770) and /run/euler-adm (euler-auth 0750) are
+#     provisioned via tmpfiles.d.
 #   - Scoped runtime config /etc/euler/auth.env (root:euler-auth 0640) is deployed
-#     from keys/.env (the authoring source); EULER_ADMIN_TOKEN is generated into
-#     keys/.env on first install. euler-auth never reads the full keys/.env.
+#     from keys/.env (the authoring source); EULER_ADMIN_TOKEN is generated
+#     directly into auth.env (never keys/.env) and preserved across upgrades.
+#     euler-auth never reads the full keys/.env.
 #   - The systemd unit is installed only when solver.web.auth is importable from
 #     the deployed venv (build-order step 4); until then install/upgrade report it
 #     as deferred. Unit carries the DD-8 layer-1 filter (IPAddressDeny=any +
@@ -63,7 +67,7 @@ PYTHON="python3.14"                             # the project's floor; deadsnake
 WEB_GROUP="euler-web"
 AUTH_USER="euler-auth"
 AUTH_GROUP="euler-auth"
-ADM_GROUP="euler-adm"
+LEGACY_ADM_GROUP="euler-adm"   # pre-wheel-gate admin group; removed on install/upgrade
 
 # The loopback mail relay the auth service submits to (must match smtp.sh).
 SMTP_RELAY="127.0.0.1:8025"
@@ -80,18 +84,19 @@ usage() {
     cat <<USAGE
 Usage: $0 [install|uninstall|upgrade|status|help]
 
-  install    Create euler-auth + euler-adm, build the /opt/euler system venv
-             (pip install <repo>[web] as root), deploy /etc/euler/auth.env and
-             /var/lib/euler-auth, and — when solver.web.auth exists in the venv —
-             install the root-owned, boot-enabled euler-auth.service.
+  install    Create euler-auth, build the /opt/euler system venv (pip install
+             <repo>[web] as root), deploy /etc/euler/auth.env (with a generated
+             root-only EULER_ADMIN_TOKEN) and /var/lib/euler-auth, and — when
+             solver.web.auth exists in the venv — install the root-owned,
+             boot-enabled euler-auth.service.
   uninstall  Remove the service + venv (prompts before removing auth.env, the
              state dir, and the users/groups).
   upgrade    Re-deploy the venv from the repo, refresh auth.env + unit, restart.
   status     Show venv/deps/identities/config/state/unit health.
 
-  Authoring config in keys/.env: EULER_TLS_DOMAIN (base URL) and EULER_ADMIN_TOKEN
-  (generated on first install), optional TERMS_VERSION. install deploys a scoped
-  copy to ${AUTH_ENV} for ${AUTH_USER}.
+  Authoring config in keys/.env: EULER_TLS_DOMAIN (base URL), optional
+  TERMS_VERSION. The admin plane is wheel-gated: the admin socket and token are
+  root-only, and the users shell command wraps its API calls in sudo.
 USAGE
 }
 
@@ -137,7 +142,6 @@ load_config() {
         set +a
     fi
     FQDN="${EULER_TLS_DOMAIN:-}"
-    ADMIN_TOKEN="${EULER_ADMIN_TOKEN:-}"
     TERMS_VERSION="${TERMS_VERSION:-1}"
     if [ -z "${FQDN}" ]; then
         echo "Error: EULER_TLS_DOMAIN not set in ${ENV_FILE}" >&2
@@ -145,22 +149,25 @@ load_config() {
     fi
 }
 
+# Resolve the admin token (root-only material, DD-6): preserve the one already
+# deployed in auth.env, else generate afresh. Also scrub any legacy copy out of
+# keys/.env — the operator's uid must hold no admin credential.
 ensure_admin_token() {
-    if [ -n "${ADMIN_TOKEN}" ]; then
-        return 0
+    ADMIN_TOKEN="$(sudo grep -s '^EULER_ADMIN_TOKEN=' "${AUTH_ENV}" 2>/dev/null | head -1 | cut -d= -f2- || true)"
+    if [ -z "${ADMIN_TOKEN}" ]; then
+        echo "Generating EULER_ADMIN_TOKEN (kept only in root-readable ${AUTH_ENV})..."
+        ADMIN_TOKEN="$(${PYTHON} -c 'import secrets; print(secrets.token_hex(32))')"
     fi
-    if [ ! -w "${ENV_FILE}" ]; then
-        echo "Error: EULER_ADMIN_TOKEN unset and ${ENV_FILE} is not writable" >&2
-        return 1
+    if [ -w "${ENV_FILE}" ] && grep -q '^EULER_ADMIN_TOKEN=' "${ENV_FILE}" 2>/dev/null; then
+        echo "Scrubbing legacy EULER_ADMIN_TOKEN from keys/.env (root-only material now)..."
+        sed -i '/^# Admin-plane shared secret for the auth service (X-Admin-Token, DD-6)\.$/d;/^EULER_ADMIN_TOKEN=/d' \
+            "${ENV_FILE}"
     fi
-    echo "Generating EULER_ADMIN_TOKEN into keys/.env (authoring source, DD-6)..."
-    ADMIN_TOKEN="$(${PYTHON} -c 'import secrets; print(secrets.token_hex(32))')"
-    printf '\n# Admin-plane shared secret for the auth service (X-Admin-Token, DD-6).\nEULER_ADMIN_TOKEN=%s\n' \
-        "${ADMIN_TOKEN}" >> "${ENV_FILE}"
 }
 
-# Create the service identities (idempotent): euler-auth (own group, in euler-web)
-# and the euler-adm admin-plane group with the invoking operator as a member.
+# Create the service identities (idempotent): euler-auth (own group, in euler-web).
+# The admin plane is wheel-gated — no admin group; a legacy euler-adm from earlier
+# installs is dismantled.
 ensure_identities() {
     if ! getent group "${WEB_GROUP}" > /dev/null; then
         sudo groupadd --system "${WEB_GROUP}"
@@ -172,13 +179,15 @@ ensure_identities() {
         echo "Creating system user ${AUTH_USER} (group ${AUTH_GROUP}, +${WEB_GROUP})..."
         sudo useradd --system --no-create-home --shell /usr/sbin/nologin \
             -g "${AUTH_GROUP}" -G "${WEB_GROUP}" "${AUTH_USER}"
+    else
+        sudo usermod -aG "${WEB_GROUP}" "${AUTH_USER}"
     fi
-    if ! getent group "${ADM_GROUP}" > /dev/null; then
-        sudo groupadd --system "${ADM_GROUP}"
-    fi
-    if ! id -nG "${USER}" | tr ' ' '\n' | grep -qx "${ADM_GROUP}"; then
-        echo "Adding ${USER} to ${ADM_GROUP} (admin plane — re-login for it to take effect)..."
-        sudo usermod -aG "${ADM_GROUP}" "${USER}"
+    # Migration: drop the legacy admin group (the admin plane is sudo-gated now).
+    if getent group "${LEGACY_ADM_GROUP}" > /dev/null; then
+        echo "Removing legacy ${LEGACY_ADM_GROUP} group (admin plane is sudo-gated now)..."
+        sudo gpasswd -d "${USER}" "${LEGACY_ADM_GROUP}" 2>/dev/null || true
+        sudo gpasswd -d "${AUTH_USER}" "${LEGACY_ADM_GROUP}" 2>/dev/null || true
+        sudo groupdel "${LEGACY_ADM_GROUP}" 2>/dev/null || true
     fi
 }
 
@@ -200,9 +209,13 @@ deploy_venv() {
 # exists at boot before any service and no service owns it (DD-1/DD-5).
 deploy_tmpfiles() {
     sudo tee "${TMPFILES_CONF}" > /dev/null <<EOF
-# GENERATED by scripts/setup/auth.sh — shared unix-socket dir for the euler app
-# services (DD-1/DD-5). Each service creates its own *.sock (0660 euler-<svc>:euler-web).
+# GENERATED by scripts/setup/auth.sh — runtime socket dirs (DD-1/DD-5/DD-6).
+# /run/euler: the shared app-service fabric; each service creates its own *.sock
+#   (0660 euler-<svc>:euler-web). Operators are deliberately NOT in euler-web.
+# /run/euler-adm: the local admin plane — euler-auth binds auth-admin.sock here
+#   (0600); it is wheel-gated: only root (sudo) reaches it.
 d /run/euler 0770 root ${WEB_GROUP} -
+d /run/euler-adm 0750 ${AUTH_USER} ${AUTH_GROUP} -
 EOF
     sudo systemd-tmpfiles --create "${TMPFILES_CONF}"
 }
@@ -263,9 +276,12 @@ StateDirectoryMode=0700
 IPAddressDeny=any
 IPAddressAllow=localhost
 
-# Hardening.
+# Hardening. ProtectSystem=strict mounts /run read-only, so the shared socket
+# dir (provisioned by tmpfiles.d, not RuntimeDirectory= — no service owns it)
+# must be opened up explicitly for the service's two sockets.
 NoNewPrivileges=true
 ProtectSystem=strict
+ReadWritePaths=/run/euler /run/euler-adm
 ProtectHome=true
 PrivateTmp=true
 PrivateDevices=true
@@ -328,13 +344,13 @@ do_uninstall() {
         sudo rm -rf "${OPT_DIR}"
         sudo rm -f "${TMPFILES_CONF}"
     fi
-    read -r -p "Remove ${AUTH_ENV}, the ${STATE_DIR} state (user DB!), and the ${AUTH_USER}/${ADM_GROUP} identities? [y/N] " reply
+    read -r -p "Remove ${AUTH_ENV} (admin token), the ${STATE_DIR} state (user DB!), and the ${AUTH_USER} identity? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]]; then
         sudo rm -f "${AUTH_ENV}"
         sudo rm -rf "${STATE_DIR}"
         if getent passwd "${AUTH_USER}" > /dev/null; then sudo userdel "${AUTH_USER}" 2>/dev/null || true; fi
         if getent group "${AUTH_GROUP}" > /dev/null; then sudo groupdel "${AUTH_GROUP}" 2>/dev/null || true; fi
-        if getent group "${ADM_GROUP}" > /dev/null; then sudo groupdel "${ADM_GROUP}" 2>/dev/null || true; fi
+        if getent group "${LEGACY_ADM_GROUP}" > /dev/null; then sudo groupdel "${LEGACY_ADM_GROUP}" 2>/dev/null || true; fi
     fi
     echo "Auth service uninstall complete."
 }
@@ -352,18 +368,15 @@ do_status() {
     else
         echo "venv:        ✗ ${VENV_DIR} not deployed"
     fi
-    local u
-    for u in "${AUTH_USER}"; do
-        if getent passwd "${u}" > /dev/null; then
-            echo "identity:    ✓ ${u} (groups: $(id -nG "${u}" 2>/dev/null))"
-        else
-            echo "identity:    ✗ ${u} missing"
-        fi
-    done
-    if getent group "${ADM_GROUP}" > /dev/null; then
-        echo "admin plane: ✓ ${ADM_GROUP} (members: $(getent group "${ADM_GROUP}" | cut -d: -f4))"
+    if getent passwd "${AUTH_USER}" > /dev/null; then
+        echo "identity:    ✓ ${AUTH_USER} (groups: $(id -nG "${AUTH_USER}" 2>/dev/null))"
     else
-        echo "admin plane: ✗ ${ADM_GROUP} missing"
+        echo "identity:    ✗ ${AUTH_USER} missing"
+    fi
+    if [ -d /run/euler-adm ]; then
+        echo "admin plane: ✓ /run/euler-adm (wheel-gated: sudo required; no admin group)"
+    else
+        echo "admin plane: ✗ /run/euler-adm missing (tmpfiles not applied)"
     fi
     if [ -f "${AUTH_ENV}" ]; then
         echo "config:      ✓ ${AUTH_ENV}"

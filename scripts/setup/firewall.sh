@@ -170,13 +170,18 @@ EOF
         cat <<EOF
 
         # Relay guard: of the euler tier, only euler-auth may reach the mail relay.
-        oif "lo" tcp dport ${SMTP_RELAY_PORT} meta skuid { ${barred_uids} } drop
+        ip daddr 127.0.0.0/8 tcp dport ${SMTP_RELAY_PORT} meta skuid { ${barred_uids} } drop
 EOF
     fi
     cat <<EOF
 
         # Loopback is the service fabric: /run/euler sockets, Squid :3128, the relay.
-        oif "lo" accept
+        # Matched by DESTINATION ADDRESS, not 'oif "lo"': the interface-index match
+        # does not hit loopback output on the WSL2 kernel (observed on
+        # 6.6.114.1-microsoft-standard — euler uids' loopback SYNs fell through to
+        # the final drop), and the security intent is the loopback address space.
+        ip daddr 127.0.0.0/8 accept
+        ip6 daddr ::1 accept
 EOF
     if [ -n "${proxy_uid}" ]; then
         cat <<EOF

@@ -140,10 +140,6 @@ class Config(AttributeDict):
     server_lock_file: Path
     session_file: Path
     solutions_dir: Path
-    users_file: Path
-    pending_file: Path
-    remember_file: Path
-    session_secret_file: Path
     static_file_dir: Path
     static_file_problems: Path
     static_file_progress: Path
@@ -153,12 +149,11 @@ class Config(AttributeDict):
 
     def __init__(self) -> None:
         root_dir: Path = _root_dir()
-        # Ambient per-user identity (SOLVER_USER / keys/.env / keys/.user-email / OS login),
-        # used to key per-user shell state (history, last problem). Personalisation
-        # only — not a security boundary (see solver.utils.identity).
+        # Ambient identity + profile (DD-9): a one-time shell ticket (web PTY) or the
+        # checkout-owner uid (local terminal); anything else aborts. Keys per-user
+        # shell state (history, last problem) and command authorization.
         env_file: Path = root_dir / 'keys' / '.env'  # project dotenv: API key, SMTP + DNS credentials
-        users_file: Path = root_dir / 'keys' / '.users.json'  # web-auth SRP verifiers (separate from crypto keys)
-        user, user_slug, user_profile = resolve_identity(root_dir, users_file, env_file)
+        user, user_slug, user_profile = resolve_identity(root_dir)
         user_state_dir: Path = root_dir / '.state' / user_slug
         user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={
@@ -199,10 +194,6 @@ class Config(AttributeDict):
             'server_lock_file': root_dir / '.server.lock',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
-            'users_file': users_file,
-            'pending_file': root_dir / 'keys' / '.pending.json',  # invite/reset link tokens, shared shell<->server
-            'remember_file': root_dir / 'keys' / '.remember.json',  # persistent remember-me tokens
-            'session_secret_file': root_dir / 'keys' / '.session-secret',  # HMAC key for remember-me
             'static_file_dir': root_dir / 'solver/web-content',
             'static_file_problems': root_dir / 'solutions/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',

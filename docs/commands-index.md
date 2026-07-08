@@ -83,6 +83,7 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
+| [`users`](#command-users) | — | Manage web accounts via the auth service (sudo-gated admin API). |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -334,7 +335,7 @@ Args:
 #### Command: `costs`
 
 Display total cost of AI API tokens consumed in session.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin, user
 
 ```
 costs
@@ -929,7 +930,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open problem/file in a browser or the web viewer panel.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin, user, guest
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -976,7 +977,7 @@ Arguments:
 #### Command: `summary`
 
 Parse .progress.html into problems.json.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * » supports `--silent`
 
 ```
@@ -1140,5 +1141,34 @@ user-authorize <public_key>
 
 ```text
 Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession).
+```
+
+---
+
+#### Command: `users`
+
+Manage web accounts via the auth service (sudo-gated admin API).
+* channels: terminal · profiles: admin
+
+```
+users
+[action=list|add|enable|disable|remove] (default list)
+[email=<str>] (default '')
+[profile=admin|user|guest] (default user)
+```
+
+```text
+Administer web accounts through the auth service's local admin socket.
+
+Re-executes ``python -m solver.web.auth.admin`` under ``sudo`` (the admin
+socket and token are root-only), so expect a sudo password prompt unless
+the timestamp is cached.
+
+Args:
+    action:  add (mint + email a registration invite), list (accounts and
+             pending invites), enable / disable (account switch; disable also
+             kills live sessions), or remove (delete account and invites).
+    email:   The account's email (required for everything except list).
+    profile: Authorization profile for a new invite (add only).
 ```
 <!-- /GEN:command-index -->

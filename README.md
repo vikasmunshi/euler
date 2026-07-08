@@ -248,7 +248,7 @@ solver/
     new.py           — Solution to Euler $problem.
   utils/
     gh.py            — Utility to retrieve authenticated GitHub user's email and repository owner's email.
-    identity.py      — Ambient user identity **and profile**: who is this shell running as.
+    identity.py      — Ambient user identity **and profile**: who is this shell running as (DD-9).
     linter.py        — Utilities for linting code.
     loader.py        — Utility for loading modules.
     misc.py          — The `problems` and `manage-config` commands.
@@ -258,6 +258,24 @@ solver/
     shell_utils.py   — Utility for running shell commands and capturing their output.
     summary.py       — Progress: parse .progress.html into problems.json and refresh in-memory state.
     update_doc.py    — Regenerate the machine-maintained sections of the guides under `docs/`.
+  web/               — The web app services (server redesign, docs/server-redesign.md).
+    auth/            — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
+      __main__.py    — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
+      admin.py       — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6).
+      app.py         — The auth service: public + admin aiohttp apps over unix sockets (DD-6/DD-9).
+      client.py      — Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
+      commands.py    — The ``users`` shell command: account administration, gated by sudo (DD-6).
+      config.py      — Auth-service runtime configuration, read from the environment (DD-5/DD-6).
+      mail.py        — Outbound mail via the loopback relay (DD-8).
+      pending.py     — Pending invite / reset store at ``<state>/pending.json`` (DD-7).
+      policy.py      — Auth policy constants (lifetimes, cookie names, password and OTP rules).
+      ratelimit.py   — A small in-memory sliding-window rate limiter for the auth endpoints.
+      remember.py    — Persistent "remember me" tokens at ``<state>/remember.json`` (DD-6).
+      sessions.py    — In-memory web session table (DD-6).
+      srp.py         — Secure Remote Password (SRP-6a) primitives for web authentication.
+      storage.py     — Shared JSON persistence for the auth stores (DD-6).
+      tickets.py     — One-time shell tickets: web identity for PTY children (DD-9).
+      users.py       — User store: the SRP verifier database at ``<state>/users.json`` (DD-6).
 ```
 <!-- /GEN:package-layout -->
 

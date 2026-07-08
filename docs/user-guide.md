@@ -247,6 +247,7 @@ command name below links to its full entry — usage and description — in the
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
+| [`users`](commands-index.md#command-users) | — | Manage web accounts via the auth service (sudo-gated admin API). |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-table -->
@@ -318,12 +319,11 @@ you have solved a problem, or translate your Python into C for comparison.
 
 - **Per-user state.** The shell runs as a resolved *identity* and keeps that
   user's state under `.state/<slug>/` (command history, session log, last active
-  problem). The identity is taken from the first of: the `SOLVER_USER` environment
-  variable, the `keys/.user-email` file, `SOLVER_USER` in `keys/.env`, or
-  your OS login name. In the web front end it is your signed-in account — the
-  server forks the shell with `SOLVER_USER` set to your email — so each user gets
-  their own history and last problem. (This is personalisation, not an access
-  boundary: on a shared machine it is not isolation, only convenience.)
+  problem). On a local terminal the identity is your OS login name (granted only
+  to the checkout's owner); in the web front end it is your signed-in account,
+  vouched by a one-time shell ticket the server redeems with the auth service at
+  startup (see docs/server-redesign.md, DD-9). Each user gets their own history
+  and last problem.
 - **History** persists across sessions, per user; auto-suggest offers your past lines.
 - **Last problem** is remembered per user: every shell — interactive, a
   `cmdline` block, or piped stdin — restores the problem you last worked on when
