@@ -744,8 +744,8 @@ uninstall_chrome() {
 }
 
 # Main execution
-# Defaults to 'install' if no argument provided
-ACTION="${1:-install}"
+# Defaults to 'status' if no argument provided
+ACTION="${1:-status}"
 
 case "${ACTION}" in
     install)

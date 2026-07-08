@@ -15,6 +15,7 @@ dependencies = [
     "flake8",
     "mypy",
     "prompt-toolkit",
+    "python-dotenv",
     "requests",
     "rich",
     "types-requests",
@@ -23,7 +24,6 @@ dependencies = [
 [project.optional-dependencies]
 ai = [
     "anthropic",
-    "python-dotenv",
 ]
 dev = [
     "autoflake",
@@ -36,9 +36,13 @@ show = [
     "PyQt5",
 ]
 web = [
-    "aiohttp",
-    "markdown-it-py",
-    "html5lib",  # advisory (non-blocking) HTML linting for notes.html in the code editor
+    # The app-service stack (DD-5): aiohttp is the one framework across the app
+    # services; Jinja2 (via aiohttp-jinja2, autoescape on) replaces homegrown
+    # string templating. Deployed by scripts/setup/auth.sh into the root-owned
+    # /opt/euler system venv the euler-* services run from.
+    "aiohttp>=3.12",
+    "aiohttp-jinja2>=1.6",
+    "jinja2>=3.1",
 ]
 solutions = [
     # NOTE: `pip install primesieve` builds only the base extension; its optional
@@ -81,8 +85,10 @@ script = "./scripts/setup/primesieve_numpy_extension.sh"
 actions = ["install", "check", "uninstall"]
 
 [project.scripts]
+# NOTE: no solver-web script — the web services are systemd units run from the
+# /opt/euler system venv (python -m solver.web.<svc>, DD-3/DD-5), not a
+# detached-process CLI.
 solver = "solver.main:main"
-solver-web = "solver.web.cli:main"
 solver-gitfilter = "solver.crypto.gitfilter:main"
 
 [tool.setuptools.packages.find]

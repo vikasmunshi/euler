@@ -12,7 +12,7 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 > - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
 > - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
-> - 🔨 **Phase 4** — Auth service: decisions locked ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **in progress** — build-order step 1 (firewall + smtp kits) ✅, steps 2–5 pending (see [Phase 4](#phase-4--auth-service)).
+> - 🔨 **Phase 4** — Auth service: decisions locked ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **in progress** — steps 1 (firewall + smtp) and 2 (`web` extra + `/opt/euler` runtime) ✅, steps 3–5 pending (see [Phase 4](#phase-4--auth-service)).
 > - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## Goals & non-goals
@@ -706,7 +706,7 @@ Folded into `scripts/setup/frontend.sh` (no new script — the edge orchestrator
   routing by `frontend.sh install`/`upgrade` (`make install-frontend`/`upgrade-frontend`).
 
 ### Phase 4 — Auth service
-**Status: 🔨 in progress — build-order step 1 shipped.** Design decisions
+**Status: 🔨 in progress — build-order steps 1–2 shipped.** Design decisions
 [DD-5](#design-decisions) (runtime + framework), [DD-6](#design-decisions) (state + admin
 plane), [DD-7](#design-decisions) (registration flow), [DD-8](#design-decisions) (egress
 firewall + mail relay) and [DD-9](#design-decisions) (identity + masquerade prevention)
@@ -720,9 +720,19 @@ are locked; this phase implements them.
    so the app tier is loopback-only from its first deploy and mail has a credential-scoped
    path out. `make install-firewall` / `install-smtp`; `smtp.sh test` sends a real probe
    mail; `firewall.sh status` probes an allowed and a dropped uid.
-2. **`web` extra + `/opt/euler` deploy (DD-5)** — pin `aiohttp`/`aiohttp-jinja2`/`Jinja2`
-   in the `web` optional group; `auth.sh` provisions the `euler-auth`/`euler-adm` identities
-   and `pip install .[web]` into `/opt/euler/venv`.
+2. ✅ **`web` extra + `/opt/euler` deploy (DD-5)** — the `web` optional group is now
+   exactly the app-service stack (`aiohttp`/`aiohttp-jinja2`/`jinja2`; `markdown-it-py` +
+   `html5lib` dropped until Phase 5 needs them; `python-dotenv` promoted to a core dep;
+   the dead `solver-web` console script removed — services are `python -m solver.web.<svc>`
+   units). `scripts/setup/auth.sh` (`make install-auth`/`upgrade-auth`) provisions the
+   `euler-auth` (own group, +`euler-web`) and `euler-adm` identities (operator added),
+   builds the root-owned `/opt/euler/venv` (`pip install <repo>[web]`), deploys the scoped
+   `/etc/euler/auth.env` (generating `EULER_ADMIN_TOKEN` into `keys/.env` on first run),
+   provisions `/var/lib/euler-auth` (0700) and the shared `/run/euler` socket dir
+   (tmpfiles.d, `root:euler-web` 0770), and reloads the egress firewall. The
+   `euler-auth.service` unit (with the DD-8 `IPAddressDeny` filter) is generated but
+   **deferred** until `solver.web.auth` is importable from the venv — `upgrade` installs
+   it once step 4 lands.
 3. **Fresh `solver/web/auth` + admin API (DD-6, DD-9)** — implement the package **from
    scratch** on `/var/lib/euler-auth` (`0600`): stores (users / pending / remember),
    sessions, the shell-ticket mint/redeem endpoints, the local admin listener, and the

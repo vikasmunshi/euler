@@ -215,8 +215,8 @@ status_claude() {
     status_link "CLAUDE.md" "solver/ai/claude/CLAUDE.md"
 }
 
-# Main execution — defaults to 'install' if no argument provided.
-ACTION="${1:-install}"
+# Main execution — defaults to 'status' if no argument provided.
+ACTION="${1:-status}"
 
 case "${ACTION}" in
     install)

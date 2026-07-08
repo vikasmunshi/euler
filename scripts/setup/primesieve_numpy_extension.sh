@@ -173,7 +173,7 @@ uninstall_extension() {
 # --------------------------------------------------------------------------
 
 main() {
-    local action="${1:-install}"
+    local action="${1:-check}"
     case "${action}" in
         install)   install_extension ;;
         check)     check_extension ;;

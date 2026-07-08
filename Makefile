@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -139,6 +139,21 @@ uninstall-smtp:
 upgrade-smtp:
 	./scripts/setup/smtp.sh upgrade
 	@printf "✓ upgrade-smtp complete: loopback mail relay upgraded\n"
+
+## Install the auth-service runtime: euler-auth/euler-adm + /opt/euler venv + auth.env (DD-5/DD-6)
+install-auth:
+	./scripts/setup/auth.sh install
+	@printf "✓ install-auth complete: auth runtime deployed (unit deferred until solver.web.auth lands)\n"
+
+## Remove the auth service (prompts before deleting the venv, state, and identities)
+uninstall-auth:
+	./scripts/setup/auth.sh uninstall
+	@printf "✓ uninstall-auth complete: auth service removed\n"
+
+## Upgrade the auth service (pip re-install the repo into /opt/euler, refresh config + unit)
+upgrade-auth:
+	./scripts/setup/auth.sh upgrade
+	@printf "✓ upgrade-auth complete: auth service upgraded\n"
 
 ## Create venv if it doesn't exist
 $(VENV):
