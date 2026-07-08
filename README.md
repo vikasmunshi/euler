@@ -259,6 +259,7 @@ solver/
     summary.py       — Progress: parse .progress.html into problems.json and refresh in-memory state.
     update_doc.py    — Regenerate the machine-maintained sections of the guides under `docs/`.
   web/               — The web app services (server redesign, docs/server-redesign.md).
+    csp.py           — Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
     auth/            — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
       __main__.py    — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
       admin.py       — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6).
@@ -267,6 +268,7 @@ solver/
       commands.py    — The ``users`` shell command: account administration, gated by sudo (DD-6).
       config.py      — Auth-service runtime configuration, read from the environment (DD-5/DD-6).
       mail.py        — Outbound mail via the loopback relay (DD-8).
+      pages.py       — The auth service's HTML pages: login, registration, reset, forgot (DD-7).
       pending.py     — Pending invite / reset store at ``<state>/pending.json`` (DD-7).
       policy.py      — Auth policy constants (lifetimes, cookie names, password and OTP rules).
       ratelimit.py   — A small in-memory sliding-window rate limiter for the auth endpoints.

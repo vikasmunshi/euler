@@ -97,3 +97,4 @@ include = ["solver*"]
 
 [tool.setuptools.package-data]
 solver = ["*.html"]
+"solver.web" = ["templates/*.html"]  # Jinja pages ship inside the deployed venv (DD-5)

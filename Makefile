@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-node-js uninstall-node-js test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -154,6 +154,31 @@ uninstall-auth:
 upgrade-auth:
 	./scripts/setup/auth.sh upgrade
 	@printf "✓ upgrade-auth complete: auth service upgraded\n"
+
+# Standalone Node.js (no sudo): used only by dev tooling — e.g. the JS↔Python
+# SRP interop test (tests/test_srp_interop.py) driving web-content/assets/srp.js.
+NODE_VERSION := 22.14.0
+NODE_DIR := $(HOME)/.local/opt/node-v$(NODE_VERSION)-linux-x64
+
+## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
+install-node-js:
+	@if [ -x "$(NODE_DIR)/bin/node" ]; then \
+		printf "✓ node v$(NODE_VERSION) already at $(NODE_DIR)\n"; \
+	else \
+		mkdir -p $(HOME)/.local/opt && \
+		curl -fsSL https://nodejs.org/dist/v$(NODE_VERSION)/node-v$(NODE_VERSION)-linux-x64.tar.xz \
+			| tar -xJ -C $(HOME)/.local/opt; \
+	fi
+	@mkdir -p $(HOME)/.local/bin && ln -sf $(NODE_DIR)/bin/node $(HOME)/.local/bin/node
+	@printf "✓ install-node-js complete: $$($(NODE_DIR)/bin/node --version) (~/.local/bin/node)\n"
+
+## Remove the standalone Node.js installed by install-node-js
+uninstall-node-js:
+	rm -rf $(NODE_DIR)
+	@if [ -L $(HOME)/.local/bin/node ]; then rm -f $(HOME)/.local/bin/node; fi
+	@printf "✓ uninstall-node-js complete\n"
+
+# Standalone Node.js (no sudo):
 
 ## Create venv if it doesn't exist
 $(VENV):

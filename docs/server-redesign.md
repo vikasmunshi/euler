@@ -12,7 +12,7 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 > - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
 > - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
-> - 🔨 **Phase 4** — Auth service: decisions locked ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **in progress** — steps 1 (firewall + smtp), 2 (`web` extra + `/opt/euler` runtime) and 3 (fresh `solver/web/auth` + admin API + DD-9 identity) ✅; steps 4–5 pending (see [Phase 4](#phase-4--auth-service)).
+> - 🔨 **Phase 4** — Auth service: decisions locked ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **in progress** — steps 1–4 ✅ (firewall + smtp; `/opt/euler` runtime; fresh `solver/web/auth` + admin API + DD-9 identity; Jinja pages + CSP middleware + browser SRP); step 5 (activate Caddy `forward_auth`) pending (see [Phase 4](#phase-4--auth-service)).
 > - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## Goals & non-goals
@@ -718,7 +718,7 @@ Folded into `scripts/setup/frontend.sh` (no new script — the edge orchestrator
   routing by `frontend.sh install`/`upgrade` (`make install-frontend`/`upgrade-frontend`).
 
 ### Phase 4 — Auth service
-**Status: 🔨 in progress — build-order steps 1–3 shipped.** Design decisions
+**Status: 🔨 in progress — build-order steps 1–4 shipped.** Design decisions
 [DD-5](#design-decisions) (runtime + framework), [DD-6](#design-decisions) (state + admin
 plane), [DD-7](#design-decisions) (registration flow), [DD-8](#design-decisions) (egress
 firewall + mail relay) and [DD-9](#design-decisions) (identity + masquerade prevention)
@@ -767,9 +767,23 @@ are locked; this phase implements them.
    (incl. decoy challenges + wrong password), forward_auth, single-use tickets (replay
    dead, reuse aborts the shell), remember-me rotation (old token dead), disable
    revokes live sessions, state files `0600`.
-4. **Jinja pages + CSP-nonce middleware (DD-7)** — login / register / Terms / `/forgot`
-   pages and the invite→OTP→SRP flow; the shared per-response-nonce middleware in
-   `solver/web/`.
+4. ✅ **Jinja pages + CSP-nonce middleware (DD-7)** — the shared CSP middleware
+   (`solver/web/csp.py`: per-response nonce, the locked baseline policy, no
+   `unsafe-inline`; content imports the same module in Phase 5) and the first
+   Jinja-rendered pages (`solver/web/templates/`, package data per DD-5): login,
+   the staged register/reset page (Terms → OTP → set-password), `/forgot`, and a
+   generic no-enumeration message page. Flow handlers in `solver/web/auth/pages.py`
+   (POST→redirect→GET throughout; OTP mail in a worker thread; rate-limited).
+   Browser side: `web-content/assets/srp.js` — an SRP-6a client interoperating
+   byte-for-byte with `srp.py` (registration derives `{salt, verifier}` locally;
+   login is the zero-knowledge handshake with mutual M2 verification) — plus
+   `login.js`/`register.js` (policy check client-side) and `auth.css`/`terms.html`,
+   all same-origin `/assets` files so the CSP holds with no inline code.
+   Verified: `tests/test_srp_interop.py` (the real JS asset under Node vs the
+   Python server — `make install-node-js`) and a 27-check flow harness driving
+   invite → Terms → OTP (wrong/right/exhausted) → JS-derived verifier →
+   single-use completion → JS SRP login → forgot → reset (old password and old
+   sessions dead, new password works).
 5. **Activate Caddy `forward_auth`** — gate all downstream routes through the auth socket
    (`/login`, `/register*`, `/reset*`, `/forgot`, `/assets/*`, `/healthz` public); the
    maintenance page remains the fallback until the content service lands.
@@ -840,4 +854,6 @@ Built as four sub-steps; each independently shippable.
 - [ ] Choose Jinja **fragment mechanism** (`jinja2-fragments` vs manual block render).
 - [ ] Decide **`notes.html`: raw-HTML+nh3 vs Markdown-authored+render+nh3**.
 - [ ] Decide **`html5lib` advisory kept vs dropped** once nh3 is the gate.
-- [ ] Fix **CSP nonce ownership** (auth service mints; content reuses the middleware).
+- [x] Fix **CSP nonce ownership** — resolved in Phase 4: the shared `solver/web/csp.py`
+  middleware mints the per-response nonce; every rendering service (auth now, content
+  in Phase 5) applies the same module.

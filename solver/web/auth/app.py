@@ -29,11 +29,15 @@ import logging
 import secrets
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
+import aiohttp_jinja2
+import jinja2
 from aiohttp import web
 
 from solver.web.auth import policy
+from solver.web.csp import csp_middleware
 from solver.web.auth.config import AuthConfig
 from solver.web.auth.mail import Mailer
 from solver.web.auth.pending import PendingStore
@@ -253,7 +257,10 @@ def build_public_app(service: AuthService) -> web.Application:
         log.info('shell ticket redeemed for %s', email)
         return web.json_response({'email': email, 'profile': profile})
 
-    app = web.Application()
+    app = web.Application(middlewares=[csp_middleware])
+    # Templates ship as package data (DD-5): solver/web/templates, autoescape on.
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(
+        str(Path(__file__).resolve().parent.parent / 'templates')))
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/auth/check', check),
@@ -264,6 +271,9 @@ def build_public_app(service: AuthService) -> web.Application:
         web.post('/shell-ticket', ticket_mint),
         web.post('/shell-ticket/redeem', ticket_redeem),
     ])
+    # Deferred import: pages.py imports AuthService from this module.
+    from solver.web.auth.pages import add_page_routes
+    add_page_routes(app, service)
     return app
 
 
