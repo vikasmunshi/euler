@@ -194,6 +194,12 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
     async def forgot_page(request: web.Request) -> web.Response:
         return aiohttp_jinja2.render_template('forgot.html', request, {})
 
+    async def terms_page(request: web.Request) -> web.Response:
+        """Standalone view of the Terms of Use (the same _terms.html partial the
+        registration page embeds)."""
+        return aiohttp_jinja2.render_template('terms.html', request, {
+            'terms_version': service.config.terms_version})
+
     async def forgot_submit(request: web.Request) -> web.Response:
         if not service.rate.allow(_client_key(request)):
             return web.Response(status=429, text='rate limited')
@@ -224,4 +230,5 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         web.post('/reset/complete', flow_complete),
         web.get('/forgot', forgot_page),
         web.post('/forgot', forgot_submit),
+        web.get('/terms', terms_page),
     ])

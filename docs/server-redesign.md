@@ -12,7 +12,7 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 > - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
 > - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
-> - 🔨 **Phase 4** — Auth service: decisions locked ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **in progress** — steps 1–4 ✅ (firewall + smtp; `/opt/euler` runtime; fresh `solver/web/auth` + admin API + DD-9 identity; Jinja pages + CSP middleware + browser SRP); step 5 (activate Caddy `forward_auth`) pending (see [Phase 4](#phase-4--auth-service)).
+> - ✅ **Phase 4** — Auth service ([DD-5](#design-decisions)…[DD-9](#design-decisions)): firewall + smtp relay, `/opt/euler` runtime, fresh `solver/web/auth` (SRP, sessions, tickets, wheel-gated admin API), DD-9 identity, Jinja pages + CSP middleware + browser SRP, Caddy `forward_auth` active. **Live-verified end-to-end**: invite → Terms (scroll-gated) → OTP → browser-derived verifier → login for all three profiles.
 > - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## Goals & non-goals
@@ -718,7 +718,9 @@ Folded into `scripts/setup/frontend.sh` (no new script — the edge orchestrator
   routing by `frontend.sh install`/`upgrade` (`make install-frontend`/`upgrade-frontend`).
 
 ### Phase 4 — Auth service
-**Status: 🔨 in progress — build-order steps 1–4 shipped.** Design decisions
+**Status: ✅ complete — all five build-order steps shipped and live-verified**
+(invite → scroll-gated Terms → OTP → browser-derived SRP verifier → login, exercised
+for admin/user/guest accounts through the public edge). Design decisions
 [DD-5](#design-decisions) (runtime + framework), [DD-6](#design-decisions) (state + admin
 plane), [DD-7](#design-decisions) (registration flow), [DD-8](#design-decisions) (egress
 firewall + mail relay) and [DD-9](#design-decisions) (identity + masquerade prevention)
@@ -784,9 +786,14 @@ are locked; this phase implements them.
    invite → Terms → OTP (wrong/right/exhausted) → JS-derived verifier →
    single-use completion → JS SRP login → forgot → reset (old password and old
    sessions dead, new password works).
-5. **Activate Caddy `forward_auth`** — gate all downstream routes through the auth socket
-   (`/login`, `/register*`, `/reset*`, `/forgot`, `/assets/*`, `/healthz` public); the
-   maintenance page remains the fallback until the content service lands.
+5. ✅ **Activate Caddy `forward_auth`** — `frontend.sh` now generates the Phase-4
+   Caddyfile: client-supplied `X-User`/`X-Profile` stripped up front (DD-9); the public
+   auth surface (`/login`, `/register*`, `/reset*`, `/forgot`, `/auth/*`) routed to
+   `unix//run/euler/auth.sock` (shell-ticket + admin endpoints deliberately unrouted);
+   `/assets/*` + `/healthz` public; **everything else** gated by `forward_auth`
+   (`/auth/check` → `200 + X-User + X-Profile` copied onto the proxied request, `401` →
+   `302 /login`), falling through to the maintenance holding page until the content
+   service lands. Deployed by `make upgrade-frontend`.
 - **Deliver:** aiohttp + Jinja2 auth service on `unix//run/euler/auth.sock`, running as
   `euler-auth` from the `/opt/euler` venv (DD-5). A **fresh `solver/web/auth`** build on
   the DD-6 state paths (parked branch cherry-picked for the SRP-6a math, policy, rate

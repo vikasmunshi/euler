@@ -6,7 +6,7 @@
   const form = document.getElementById('login-form');
   if (!form) return;
   const errorBox = document.getElementById('form-error');
-  const submit = document.getElementById('submit');
+  const submit = document.getElementById('submit-btn');
 
   function fail(message) {
     errorBox.textContent = message;

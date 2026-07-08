@@ -7,7 +7,7 @@
   const form = document.getElementById('password-form');
   if (!form) return;
   const errorBox = document.getElementById('form-error');
-  const submit = document.getElementById('submit');
+  const submit = document.getElementById('submit-btn');
   const MIN_LENGTH = 16;   // keep in sync with solver/web/auth/policy.py
 
   function fail(message) {
@@ -40,7 +40,8 @@
       form.elements.verifier.value = verifier;
       document.getElementById('password').value = '';
       document.getElementById('confirm').value = '';
-      form.submit();
+      // Prototype call: immune to named form controls shadowing .submit().
+      HTMLFormElement.prototype.submit.call(form);
     } catch (err) {
       fail('Could not derive the verifier: ' + (err && err.message ? err.message : 'unexpected error'));
     }

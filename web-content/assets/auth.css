@@ -128,3 +128,18 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 0.25rem; }
 }
 .flash-error { background: var(--error-bg); color: var(--error-fg); }
 .flash-notice { background: var(--notice-bg); color: var(--notice-fg); }
+
+/* The inline Terms of Use on the registration page (strong acceptance: the text
+ * is read on the page it is accepted on) and the standalone /terms rendering. */
+.terms-box {
+  max-height: 14rem;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.25rem 0.9rem;
+  font-size: 0.9rem;
+  text-align: left;
+}
+.terms-box a, .terms-text a { color: var(--accent); }
+.terms-text { text-align: left; }
