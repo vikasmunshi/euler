@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -114,6 +114,31 @@ install-ddns:
 uninstall-ddns:
 	./scripts/setup/ddns.sh uninstall
 	@printf "✓ uninstall-ddns complete: DDNS timer removed\n"
+
+## Install the kernel egress firewall: per-uid nftables ruleset + euler-firewall.service (DD-8)
+install-firewall:
+	./scripts/setup/firewall.sh install
+	@printf "✓ install-firewall complete: euler egress ruleset loaded (boot-enabled)\n"
+
+## Remove the kernel egress firewall (flushes the euler table; nothing else touched)
+uninstall-firewall:
+	./scripts/setup/firewall.sh uninstall
+	@printf "✓ uninstall-firewall complete: euler egress ruleset removed\n"
+
+## Install the loopback SMTP relay: euler-smtp user + service, scoped Gmail creds (DD-8)
+install-smtp:
+	./scripts/setup/smtp.sh install
+	@printf "✓ install-smtp complete: loopback mail relay installed (sudo systemctl for lifecycle)\n"
+
+## Remove the loopback SMTP relay (prompts before deleting smtp.env and the euler-smtp user)
+uninstall-smtp:
+	./scripts/setup/smtp.sh uninstall
+	@printf "✓ uninstall-smtp complete: loopback mail relay removed\n"
+
+## Upgrade the loopback SMTP relay (redeploy the relay + config + unit, restart)
+upgrade-smtp:
+	./scripts/setup/smtp.sh upgrade
+	@printf "✓ upgrade-smtp complete: loopback mail relay upgraded\n"
 
 ## Create venv if it doesn't exist
 $(VENV):

@@ -12,7 +12,7 @@ rebuild; it is the transport/app-layer companion to [tls-guide.md](tls-guide.md)
 > - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
 > - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
-> - 📐 **Phase 4** — Auth service: **designed, decisions locked** ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **implementation pending** (build order in the [Phase 4](#phase-4--auth-service) section).
+> - 🔨 **Phase 4** — Auth service: decisions locked ([DD-5](#design-decisions)…[DD-9](#design-decisions)); **in progress** — build-order step 1 (firewall + smtp kits) ✅, steps 2–5 pending (see [Phase 4](#phase-4--auth-service)).
 > - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## Goals & non-goals
@@ -346,10 +346,14 @@ registration but skip Terms. Responses are **generic regardless of whether the e
 **Decision.** "Egress only via Squid" is enforced at the **kernel**, not just by the
 `HTTPS_PROXY` env var (which a compromised process can ignore). Two layers:
 
-1. **systemd per-unit IP filter** — every app unit (`euler-caddy`, `euler-auth`,
+1. **systemd per-unit IP filter** — every loopback-only app unit (`euler-auth`,
    `euler-content`, `euler-ws`) carries `IPAddressDeny=any` + `IPAddressAllow=localhost`,
    so the app tier can reach **only loopback** (their `/run/euler` sockets, the Squid proxy
    at `127.0.0.1:3128`, and the loopback mail relay). This defense travels with the unit.
+   `euler-caddy` is the exception — it terminates public inbound `:443`, which the systemd
+   filter (it applies to both directions) would block; its egress lock comes from layer 2:
+   `ct state established,related` permits its replies while any *NEW* outbound it initiates
+   hits the final drop.
 2. **host nftables owner-match** (`scripts/setup/firewall.sh` → `euler-firewall.service`,
    ruleset in `/etc/euler/nftables.conf`) — a dedicated `table inet euler` with an
    **egress-only** (`hook output`) chain that, **scoped to the `euler-*` uids**, permits
@@ -373,10 +377,13 @@ registration but skip Terms. Responses are **generic regardless of whether the e
 
 **Mail relay (`euler-smtp`).** So the app tier needs **no** direct-internet exception, OTP/
 invite mail goes through a small **loopback submission relay** running as a dedicated
-`euler-smtp` user (its own group, outside `euler-web`): it listens on `127.0.0.1` and is the
-**sole holder of the Gmail credentials** and the **sole uid permitted `:587`**. `euler-auth`
-submits via loopback SMTP (`EULER_SMTP_RELAY`) with no credentials of its own. Relay config
-(`SMTP_ADDRESS`, `SMTP_APP_PASSWORD`) is scoped to the relay
+`euler-smtp` user (its own group, outside `euler-web`): it listens on **`127.0.0.1:8025`**
+(the `EULER_SMTP_RELAY` value) and is the **sole holder of the Gmail credentials** and the
+**sole uid permitted `:587`**. `euler-auth` submits via loopback SMTP with no credentials of
+its own; the relay **forces the envelope sender** to `SMTP_ADDRESS` and never logs message
+bodies (they carry OTPs). A firewall **relay guard** additionally bars every other euler-*
+uid from connecting to `:8025`, so a compromised `euler-ws`/`euler-content` cannot send mail.
+Relay config (`SMTP_ADDRESS`, `SMTP_APP_PASSWORD`) is scoped to the relay
 (`/etc/euler/smtp.env`, `root:euler-smtp 0640`), deployed from `keys/.env` (DD-4).
 
 **System paths (firewall + relay).**
@@ -699,16 +706,20 @@ Folded into `scripts/setup/frontend.sh` (no new script — the edge orchestrator
   routing by `frontend.sh install`/`upgrade` (`make install-frontend`/`upgrade-frontend`).
 
 ### Phase 4 — Auth service
-**Status: 📐 designed, not yet implemented.** Design decisions
+**Status: 🔨 in progress — build-order step 1 shipped.** Design decisions
 [DD-5](#design-decisions) (runtime + framework), [DD-6](#design-decisions) (state + admin
 plane), [DD-7](#design-decisions) (registration flow), [DD-8](#design-decisions) (egress
 firewall + mail relay) and [DD-9](#design-decisions) (identity + masquerade prevention)
 are locked; this phase implements them.
 
 **Build order** (each step independently landable/testable):
-1. **`firewall.sh` + `smtp.sh` kits (DD-8)** — the host nftables egress ruleset
-   (`euler-firewall.service`) and the `euler-smtp` loopback mail relay, so the app tier is
-   loopback-only from its first deploy and mail has a credential-scoped path out.
+1. ✅ **`firewall.sh` + `smtp.sh` kits (DD-8)** — the host nftables egress ruleset
+   (`euler-firewall.service`; per-uid, generated with only the euler-* users that exist,
+   `reload` regenerates as later kits add users) and the `euler-smtp` loopback mail relay
+   (`scripts/setup/euler-smtp.py`, stdlib-only, deployed to `/usr/local/bin/euler-smtp`),
+   so the app tier is loopback-only from its first deploy and mail has a credential-scoped
+   path out. `make install-firewall` / `install-smtp`; `smtp.sh test` sends a real probe
+   mail; `firewall.sh status` probes an allowed and a dropped uid.
 2. **`web` extra + `/opt/euler` deploy (DD-5)** — pin `aiohttp`/`aiohttp-jinja2`/`Jinja2`
    in the `web` optional group; `auth.sh` provisions the `euler-auth`/`euler-adm` identities
    and `pip install .[web]` into `/opt/euler/venv`.
