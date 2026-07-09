@@ -16,6 +16,8 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
 > - ✅ **Phase 4** — Auth service (SRP login, sessions, tickets, wheel-gated admin,
 >   Jinja pages, Caddy `forward_auth`); live-verified end-to-end.
+> - 📐 **Phase 4a** — Authorization refinements (DD-11/DD-12: `solver/auth` RBAC kernel +
+>   `authorizations.json`); **designed, not started** — a prerequisite for Phase 5.
 > - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## 1 · Purpose & scope
@@ -867,8 +869,74 @@ admin plane), DD-8 (firewall + relay). Delivered in five steps:
    auth surface, gate everything else; falls through to the maintenance page until
    content lands.
 
+### Phase 4a — Authorization refinements ⬜
+Implements [DD-11](#dd-11--profiles--content-service-access) (the profile ladder) and
+[DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson) (the unified RBAC
+kernel) — a **prerequisite for Phase 5**, whose content routes need the kernel to exist.
+It replaces the shell-only `commands.csv` + the web-only profile-on-user-record with one
+policy (`authorizations.json`) enforced on both surfaces. Built shell-first (fully testable
+with no web), then wired into the live auth service, then migrated. The **OS second layer**
+(per-profile service instances + content-tree ACLs, DD-12) is *not* here — it is built with
+the services it instantiates (content in Phase 5, ws in Phase 6); 4a delivers the policy
+kernel, enforcement, and migration.
+
+**Build order** (each step independently landable/testable):
+
+1. **`solver/auth` kernel (shell-side).** New sub-package: `Subject(user, channel,
+   auth_method, profile, permissions)`; the `authorizations.json` loader
+   (`profiles`/`users`/`objects` + single-parent inheritance expansion); `resolve_subject()`
+   (absorbs `solver/utils/identity.py` — ticket / owner-uid floor / os-login map, per DD-12);
+   the registration-time `requires ⊆ perms` check and a **runtime `subject.has(obj:perm)`**
+   query. Reads `/etc/euler/authorizations.json`, falling back to a repo default for dev.
+   **Test:** unit tests for inheritance expansion, the three resolution planes, and
+   fail-closed — no web needed.
+2. **Decorator `requires=` / `channels=`; retire `commands.csv`.** Add both params to
+   `@register`/`@command`; enforce `channel ∈ channels` **and** `requires ⊆ perms` at
+   registration; **no-`requires` ⇒ fail-closed `infra:execute`**. Delete `commands.csv`,
+   `_authorization_policy()`, `is_authorized*`; slim `modules.csv` to `(module,
+   registers_commands)` and update `shell/loader.py`. **Test:** the local owner (admin) sees
+   every command; a dev profile override hides the right ones.
+3. **Annotate every command.** Add `requires=`/`channels=` to all commands per the DD-12
+   mapping (`show → solutions:read`, `edit`/`new → solutions:write`, `evaluate`/`benchmark →
+   solutions:execute`, `!` → `shell:execute`, `claude-* → ai:execute`, `git-*`/`key-* →
+   infra:execute`, `users list → users:read` / mutations → `users:write`, `update-docs →
+   channels=('terminal',)`, …). Regenerate the audit view **`solver/commands.json`** and
+   `commands-index.md` via `update-docs`. **Test:** `commands.json` matches intent; the
+   per-profile command set is correct; `flake8`/`mypy` clean.
+4. **`authorizations.json` SoR + install seeding.** A kit (`scripts/setup/authz.sh`, or
+   folded into `auth.sh`) deploys `/etc/euler/authorizations.json` (`root:root 0644`) from
+   the repo bootstrap template, **seeds the checkout owner as `admin`**, and migrates the
+   live accounts (`vikas.munshi@…` → `maintainer`, `vikasmunshi@…` → `contributor`,
+   `mercanther@…` → `reader`). **Test:** the file exists with the right ownership/mode; the
+   local shell resolves `admin`.
+5. **Auth-service integration.** `euler-auth` resolves the profile from
+   `/etc/euler/authorizations.json` (drop the `profile` field from `users.json` / the SRP
+   record); `forward_auth` returns `X-Profile` from the map; the shell ticket carries the
+   map profile. Redeploy via `auth.sh upgrade`. **Test:** `forward_auth`'s `X-Profile`
+   matches the map; a later `users change` takes effect on re-login.
+6. **`users` command rework.** Two-path `add` (`@`-address → web invite; bare os-login →
+   direct map entry); add `users change`; split `users list` (`users:read`, non-sudo roster
+   from the world-readable SoR) from the mutating verbs (`users:write`, sudo, editing the
+   root-owned SoR + the SRP record for web accounts). **Test:** `users list` as a non-admin
+   shows the roster; `users add <os-login> <profile>` adds a map entry; `users change`
+   promotes + revokes sessions; mutations prompt for `sudo`.
+7. **Cleanup + regression.** Remove `commands.csv` and every reference; `update-docs
+   --check` clean; the full test suite + the Phase-4 auth/flow harnesses green (no
+   regression). **Test:** end-to-end — register/login still work; a `reader` web session's
+   `forward_auth` yields `X-Profile: reader`; the local owner is `admin`.
+
+- **Deliver:** `solver/auth` (the shared RBAC kernel + identity), the `requires`/`channels`
+  decorator, `authorizations.json` as the SoR under `/etc/euler`, the reworked `users`
+  command, and the live-account migration — `commands.csv` retired, profile off the SRP
+  record.
+- **Kit:** `authz.sh` (deploy/seed/migrate the SoR) or folded into `auth.sh`; `update-docs`
+  emits `commands.json`; no new runtime dependency.
+
 ### Phase 5 — Content service ⬜
-Four independently shippable sub-steps:
+**Prerequisite: Phase 4a** (the `solver/auth` kernel + `authorizations.json`) — the content
+routes below are gated by its `requires`/`X-Profile` check, and their per-profile service
+instances + content-tree ACLs (the DD-12 OS layer) are built here. Four independently
+shippable sub-steps:
 
 - **5a — Home, navigation, look & feel.** `base.html` + partials, shared CSS, header/nav,
   **htmx** vendored and wired for fragment-swap navigation. A **placeholder panel stands
