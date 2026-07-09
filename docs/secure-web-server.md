@@ -576,32 +576,41 @@ All resolved:
 
 ```
                           :443
-  browser ───TLS──▶  ┌──────────┐
-                     │  Caddy    │  edge: TLS, routing by path, security headers
-                     │  (edge)   │  forward_auth ─────────────┐
-                     └────┬──────┘                            │
-            unix sockets /run/euler                           ▼
-        ┌───────────┬─────────────┬──────────────┐     ┌────────────┐
-        ▼           ▼             ▼               ▼     │   auth      │  SRP login,
-   ┌─────────┐ ┌──────────┐ ┌───────────┐              │  service    │  sessions,
-   │ maint.  │ │ content   │ │  ws /      │◀────────────│ (aiohttp)   │  forward_auth
-   │ (static)│ │ (aiohttp  │ │  shell     │             └────────────┘  → 200 + X-User
-   └─────────┘ │ + Jinja2) │ │ (aiohttp   │                              or 401
-               └────┬──────┘ │  + PTY)    │
-                    │        └─────┬──────┘
-      reads solution tree          │ spawns `python -m solver`
-      (plaintext, incl.            │
-       solutions/private)          ▼
-                              ┌──────────┐   allowlist egress only
-        all outbound ────────▶│  Squid    │──▶ api.anthropic.com,
-        (AI, scraper, gh)     │ (egress)  │    projecteuler.net, github
-                              └──────────┘
+  browser ───TLS──▶  ┌──────────┐  edge: TLS, security headers
+                     │  Caddy    │  · strips client X-User / X-Profile
+                     │  (edge)   │  · forward_auth ────────────────┐
+                     └────┬──────┘  · then routes by X-Profile     ▼
+            unix sockets /run/euler                          ┌────────────┐
+                          │                                  │   auth      │ SRP login,
+   ┌──────────┬───────────┴────────────┬─────────────┐      │  service    │ sessions,
+   ▼          ▼                         ▼             ▼      │ (aiohttp)   │ tickets,
+┌────────┐ ┌─────────────────┐ ┌──────────────────┐         └─────┬──────┘ forward_auth
+│ maint. │ │ content@<prof>  │ │  ws@<prof>        │◀──────────────┘  ⇒ 200 + X-User
+│(static)│ │ (aiohttp+Jinja) │ │  (aiohttp + PTY)  │  shell ticket       + X-Profile
+└────────┘ │ euler-content-* │ │  euler-ws-*  uid  │  (redeemed)         or 401 → /login
+           │  per-profile uid│ └────────┬──────────┘
+           └────────┬────────┘          │ spawns `python -m solver`
+                    │  read/write        │ (as the per-profile euler-ws-<prof> uid)
+                    ▼  the REPO working  ▼
+        solutions/ · docs/ · web-content/   ┌──────────┐  allowlist egress only
+        (plaintext at rest — git filter;    │  Squid    │─▶ api.anthropic.com,
+         NO master key on the web tier)     │ (egress)  │   projecteuler.net, github
+        via per-profile group ACLs   ──────▶└──────────┘   (AI, scraper, gh)
+                    ▲
+        policy: /etc/euler/authorizations.json  (solver/auth) — read by auth + every service
 ```
 
 Every app service binds a **unix domain socket** under `/run/euler/`; **only Caddy is
-publicly bound**. Caddy authenticates every request through `forward_auth` before it
-reaches content or shell, so those services never see an unauthenticated caller even
-with a bug.
+publicly bound**. Caddy authenticates every request through `forward_auth` first (strips
+any client-supplied `X-User`/`X-Profile`, then forwards the `200 + X-User + X-Profile`
+copies), so content/shell never see an unauthenticated caller — and it **routes by
+`X-Profile`** to the matching **per-profile instance** (`content@<profile>` /
+`ws@<profile>`, each its own `euler-<svc>-<profile>` uid; DD-12). Those instances
+read/write the **repo working tree directly** (`solutions/`/`docs/`/`web-content/`, where
+the git filter leaves plaintext at rest) via scoped per-profile group ACLs — **no master
+key ever reaches the web tier** (it stays with the operator for git ops). Authorization
+for both the routes and the spawned shell is the one `authorizations.json` policy
+(`solver/auth`, DD-12).
 
 ### 4.2 The edge (Caddy + acme.sh DNS-01)
 
