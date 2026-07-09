@@ -202,82 +202,86 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
 <!-- GEN:package-layout -->
 ```
 solver/
-  __main__.py        — Module entry point.
-  config.py          — Singleton Config: all paths, constants, command modules, and managed settings.
-  main.py            — Entry point for the "solver shell" CLI.
+  __main__.py         — Module entry point.
+  config.py           — Singleton Config: all paths, constants, command modules, and managed settings.
+  main.py             — Entry point for the "solver shell" CLI.
   ai/
-    api.py           — The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
-    code.py          — Generate and re-document Project Euler solutions (Python and C) via the Claude API.
-    docs.py          — Module to generate notes for solver solutions, leveraging AI.
-    facts.py         — Utility function for gathering problem inputs for AI
-    models.py        — Available models and their pricing, plus a utility function to calculate costs.
-    skill.py         — The `claude-skill` command: run Claude Code in-shell against a problem's solution files.
-    update_models.py — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
+    api.py            — The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
+    code.py           — Generate and re-document Project Euler solutions (Python and C) via the Claude API.
+    docs.py           — Module to generate notes for solver solutions, leveraging AI.
+    facts.py          — Utility function for gathering problem inputs for AI
+    models.py         — Available models and their pricing, plus a utility function to calculate costs.
+    skill.py          — The `claude-skill` command: run Claude Code in-shell against a problem's solution files.
+    update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
+  auth/               — The authorization kernel — identity, profiles, and permissions (DD-12).
+    authorizations.py — The authorization policy — ``authorizations.json`` (DD-12).
+    identity.py       — Identity resolution → a :class:`~solver.auth.subject.Subject` (DD-9/DD-12).
+    subject.py        — The authorization **subject** — the resolved security principal (DD-12).
   core/
-    download.py      — Utility for downloading and caching files via HTTP.
-    evaluate.py      — Solution evaluation: runs standalone scripts against test cases and reports results.
-    list.py          — List solution directory contents.
-    new.py           — The `new` command and solution-file formatting (black / isort / autoflake).
-    problems.py      — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
-    results.py       — Results: save and retrieve problem results.
-    test_cases.py    — Load test cases for evaluation
-    viewer.py        — Open a problem or its files in the web front end: the `show` and `edit` commands.
+    download.py       — Utility for downloading and caching files via HTTP.
+    evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
+    list.py           — List solution directory contents.
+    new.py            — The `new` command and solution-file formatting (black / isort / autoflake).
+    problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
+    results.py        — Results: save and retrieve problem results.
+    test_cases.py     — Load test cases for evaluation
+    viewer.py         — Open a problem or its files in the web front end: the `show` and `edit` commands.
   crypto/
-    ciphers.py       — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
-    config.py        — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
-    gitfilter.py     — Transparent git clean/smudge encryption for tracked solution files.
-    keys.py          — Cipher key management: create, persist, rotate and share the crypto key material.
+    ciphers.py        — Ciphers: read keys from disk and lock/unlock, encrypt/decrypt with no user interaction.
+    config.py         — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
+    gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
+    keys.py           — Cipher key management: create, persist, rotate and share the crypto key material.
   runners/
-    runner.h         — Runner framework for Project Euler solutions with benchmarking and validation.
-    runner.py        — Runner framework for Project Euler solutions with benchmarking and validation.
-  shell/             — Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
-    bash.py          — The `!` (`sh` / `bash`) built-in command: run a bash command in the current
-    builtins.py      — Built-in framework commands for shell v2: echo, clear, help.
-    command.py       — Command framework for shell v2: Context, Command, registry, and decorator.
-    interpreter.py   — Interpreter for shell v2: execute the parser's statements.
-    lexer.py         — Lexer for shell v2: syntax-check a command block and normalise it.
-    parser.py        — Parser for shell v2: canonical form (the lexer's output) → typed statements.
-    register.py      — The `@register` decorator: register a function as a shell command with type-safe coercion and completion.
-    session.py       — Session capture: tee shell output and typed input to a plain-text log file.
-    shell.py         — Interactive shell for v2: readline → lexer → parser → interpreter.
-    tty.py           — Terminal I/O: the shared rich console, the prompt-toolkit session, and the command-block reader.
-    variables.py     — Variable store for shell v2.
+    runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
+    runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.
+  shell/              — Shell framework (prompt-toolkit + rich): the readline → lexer → parser → interpreter pipeline.
+    bash.py           — The `!` (`sh` / `bash`) built-in command: run a bash command in the current
+    builtins.py       — Built-in framework commands for shell v2: echo, clear, help.
+    command.py        — Command framework for shell v2: Context, Command, registry, and decorator.
+    interpreter.py    — Interpreter for shell v2: execute the parser's statements.
+    lexer.py          — Lexer for shell v2: syntax-check a command block and normalise it.
+    parser.py         — Parser for shell v2: canonical form (the lexer's output) → typed statements.
+    register.py       — The `@register` decorator: register a function as a shell command with type-safe coercion and completion.
+    session.py        — Session capture: tee shell output and typed input to a plain-text log file.
+    shell.py          — Interactive shell for v2: readline → lexer → parser → interpreter.
+    tty.py            — Terminal I/O: the shared rich console, the prompt-toolkit session, and the command-block reader.
+    variables.py      — Variable store for shell v2.
   templates/
-    engine.py        — Template rendering: the Templates enum and string.Template engine with shared prompt/solution vars.
-    new.c            — Solution to Euler $problem.
-    new.py           — Solution to Euler $problem.
+    engine.py         — Template rendering: the Templates enum and string.Template engine with shared prompt/solution vars.
+    new.c             — Solution to Euler $problem.
+    new.py            — Solution to Euler $problem.
   utils/
-    gh.py            — Utility to retrieve authenticated GitHub user's email and repository owner's email.
-    identity.py      — Ambient user identity **and profile**: who is this shell running as (DD-9).
-    linter.py        — Utilities for linting code.
-    loader.py        — Utility for loading modules.
-    misc.py          — The `problems` and `manage-config` commands.
-    path_utils.py    — Utility functions for file and directory operations.
-    scripts.py       — A set of utilities to manage Git repository workflows.
-    search.py        — 'find' command: grep the solution stack for a regular expression.
-    shell_utils.py   — Utility for running shell commands and capturing their output.
-    summary.py       — Progress: parse .progress.html into problems.json and refresh in-memory state.
-    update_doc.py    — Regenerate the machine-maintained sections of the guides under `docs/`.
-  web/               — The web app services (see docs/secure-web-server.md).
-    csp.py           — Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
-    auth/            — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
-      __main__.py    — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
-      admin.py       — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6).
-      app.py         — The auth service: public + admin aiohttp apps over unix sockets (DD-6/DD-9).
-      client.py      — Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
-      commands.py    — The ``users`` shell command: account administration, gated by sudo (DD-6).
-      config.py      — Auth-service runtime configuration, read from the environment (DD-5/DD-6).
-      mail.py        — Outbound mail via the loopback relay (DD-8).
-      pages.py       — The auth service's HTML pages: login, registration, reset, forgot (DD-7).
-      pending.py     — Pending invite / reset store at ``<state>/pending.json`` (DD-7).
-      policy.py      — Auth policy constants (lifetimes, cookie names, password and OTP rules).
-      ratelimit.py   — A small in-memory sliding-window rate limiter for the auth endpoints.
-      remember.py    — Persistent "remember me" tokens at ``<state>/remember.json`` (DD-6).
-      sessions.py    — In-memory web session table (DD-6).
-      srp.py         — Secure Remote Password (SRP-6a) primitives for web authentication.
-      storage.py     — Shared JSON persistence for the auth stores (DD-6).
-      tickets.py     — One-time shell tickets: web identity for PTY children (DD-9).
-      users.py       — User store: the SRP verifier database at ``<state>/users.json`` (DD-6).
+    gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
+    identity.py       — Ambient user identity **and profile**: who is this shell running as (DD-9).
+    linter.py         — Utilities for linting code.
+    loader.py         — Utility for loading modules.
+    misc.py           — The `problems` and `manage-config` commands.
+    path_utils.py     — Utility functions for file and directory operations.
+    scripts.py        — A set of utilities to manage Git repository workflows.
+    search.py         — 'find' command: grep the solution stack for a regular expression.
+    shell_utils.py    — Utility for running shell commands and capturing their output.
+    summary.py        — Progress: parse .progress.html into problems.json and refresh in-memory state.
+    update_doc.py     — Regenerate the machine-maintained sections of the guides under `docs/`.
+  web/                — The web app services (see docs/secure-web-server.md).
+    csp.py            — Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
+    auth/             — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
+      __main__.py     — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
+      admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6).
+      app.py          — The auth service: public + admin aiohttp apps over unix sockets (DD-6/DD-9).
+      client.py       — Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
+      commands.py     — The ``users`` shell command: account administration, gated by sudo (DD-6).
+      config.py       — Auth-service runtime configuration, read from the environment (DD-5/DD-6).
+      mail.py         — Outbound mail via the loopback relay (DD-8).
+      pages.py        — The auth service's HTML pages: login, registration, reset, forgot (DD-7).
+      pending.py      — Pending invite / reset store at ``<state>/pending.json`` (DD-7).
+      policy.py       — Auth policy constants (lifetimes, cookie names, password and OTP rules).
+      ratelimit.py    — A small in-memory sliding-window rate limiter for the auth endpoints.
+      remember.py     — Persistent "remember me" tokens at ``<state>/remember.json`` (DD-6).
+      sessions.py     — In-memory web session table (DD-6).
+      srp.py          — Secure Remote Password (SRP-6a) primitives for web authentication.
+      storage.py      — Shared JSON persistence for the auth stores (DD-6).
+      tickets.py      — One-time shell tickets: web identity for PTY children (DD-9).
+      users.py        — User store: the SRP verifier database at ``<state>/users.json`` (DD-6).
 ```
 <!-- /GEN:package-layout -->
 

@@ -6,6 +6,9 @@ solver.ai.facts,,,
 solver.ai.models,True,True,True
 solver.ai.skill,True,True,True
 solver.ai.update_models,True,True,True
+solver.auth.authorizations,,,
+solver.auth.identity,,,
+solver.auth.subject,,,
 solver.config,,,
 solver.core.download,,,
 solver.core.evaluate,True,True,True
