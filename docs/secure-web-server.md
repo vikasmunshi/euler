@@ -311,14 +311,51 @@ lives in [access-control.md § 4.5](access-control.md) and its
 `forward_auth` response headers, and that app sockets are reachable only via Caddy
 (DD-1/DD-2).
 
+### DD-10 · Phase-5 content-service choices
+
+**Decision.** The four choices flagged for the content service, resolved before its
+build (see [Build plan → Phase 5](#phase-5--content-service-)):
+
+- **HTML sanitisation = nh3, sanitize-and-store-clean.** Adopt **nh3** as the
+  save-time gate for `.html` solution files. The `cp38-abi3-manylinux_2_17_x86_64`
+  stable-ABI wheel installs and imports on this project's Python 3.14 — **no Rust
+  toolchain** — so it is pinned in the `web` extra with a kit `check` that verifies the
+  import. On save, nh3 runs a tailored allowlist (`article/h3/h4/p/ul/li/table/code/a`,
+  keeping `a`'s `class/target/rel/href`; MathJax `$…$` survives as text) and the
+  **sanitised output is stored** — like the JSON-reindent path, and the editor shows the
+  diff. *Store-clean, not reject-and-restore:* nh3 always normalises (adds `<tbody>`,
+  rewrites `rel`), so reject-and-restore would bounce essentially every save. nh3 gates
+  what is *stored*; the CSP (§4.7) blocks what would *execute* — independent layers.
+
+- **Fragment mechanism = a manual named-block render helper.** htmx fragments render a
+  named `{% block %}` of the same template via Jinja's own API
+  (`tmpl.blocks[name](tmpl.new_context(ctx))`), wrapped in a ~5-line async-safe helper in
+  `solver/web/`. Verified on Jinja2 3.1.6. **No new dependency** — `jinja2-fragments`
+  would add a pinned dep that is mostly Flask/Quart glue for the same few lines.
+
+- **`notes.html` stays raw HTML (+ nh3), not Markdown.** Notes are semantic HTML5 — as
+  the AI convention (`convention_documentation.md`) and the entire existing corpus
+  already are — with math as MathJax TeX **text** (`$…$`, never `<script>`/MathML). nh3
+  simply closes the stored-XSS hole; there is no hand-authored-raw-HTML hazard for
+  Markdown to remove. A Markdown switch would mean rewriting the convention, re-adding
+  `markdown-it-py`, retraining the AI skill's emit format, and migrating the corpus —
+  churn with no safety gain.
+
+- **`html5lib` dropped.** With nh3 as the enforcing gate, its sanitised-vs-original diff
+  is the author's feedback in the editor; a second HTML parser for advisory
+  well-formedness is not worth the extra dependency. `html5lib` stays out of the `web`
+  extra (where Phase 4 already dropped it).
+
 ### Open decisions
 
-- ~~**Framework/templating**~~ → resolved: aiohttp + Jinja2 (DD-5).
-- ~~**CSP nonce ownership**~~ → resolved: shared `solver/web/csp.py` middleware mints a
+All resolved:
+
+- ~~**Framework/templating**~~ → aiohttp + Jinja2 (DD-5).
+- ~~**CSP nonce ownership**~~ → shared `solver/web/csp.py` middleware mints a
   per-response nonce; every rendering service applies it.
-- **htmx** for liveness → [§4.6](#46--liveness--htmx); adopt.
-- **nh3** for HTML sanitisation → [§4.7](#47--content-security-policy--nh3); adopt as the
-  Phase-5 save gate (pending a cp314-wheel check).
+- ~~**htmx** for liveness~~ → adopt ([§4.6](#46--liveness--htmx)).
+- ~~**nh3 / fragments / notes format / html5lib**~~ → the Phase-5 content-service
+  choices, [DD-10](#dd-10--phase-5-content-service-choices).
 
 ## 4 · How it works
 
@@ -441,7 +478,8 @@ Rendering contract:
 - Autoescape **on**. Any pre-sanitised HTML is injected through an explicit `| safe`
   only after passing [nh3](#47--content-security-policy--nh3).
 - A route renders either the **whole page** or a **named block/fragment** of the same
-  template, so a full load and a live update share one source of truth.
+  template — via a manual block-render helper ([DD-10](#dd-10--phase-5-content-service-choices))
+  — so a full load and a live update share one source of truth.
 
 ### 4.6 Liveness · htmx
 
@@ -480,11 +518,13 @@ is served from `'self'`.
 verbatim would be a **stored-XSS hole** (`notes.html` is served back and rendered).
 **nh3** (the Rust/Ammonia sanitiser, maintained successor to `bleach`) closes it with an
 allowlist on save — strip `<script>`, `on*` handlers, `javascript:`/`data:` URLs,
-unknown tags/attrs. Defence in depth with the CSP (nh3 gates what is *stored*, CSP blocks
-what would *execute*). Caveats to settle in Phase 5: it is a **native wheel** (verify a
-`cp314` wheel exists, else budget a Rust toolchain); it is **lossy** (tune the allowlist
-for `notes.html`'s tables/code/MathJax); and there is an open call between raw-HTML+nh3
-and Markdown-authored+render+nh3 for notes. **Verdict: adopt** as the save gate.
+unknown tags/attrs — running **sanitize-and-store-clean** (nh3 normalises, so
+reject-and-restore would bounce every save). Defence in depth with the CSP (nh3 gates
+what is *stored*, CSP blocks what would *execute*). The Phase-5 caveats are settled in
+[DD-10](#dd-10--phase-5-content-service-choices): the `cp38-abi3` wheel installs on 3.14
+(no Rust toolchain); the allowlist is tuned for `notes.html`'s HTML5 tag set with MathJax
+TeX surviving as text; notes stay raw-HTML (not Markdown); and the advisory `html5lib`
+check is dropped in favour of nh3's own diff. **Verdict: adopt** as the save gate.
 
 ## 5 · Operating it
 
@@ -625,14 +665,16 @@ Four independently shippable sub-steps:
   Establishes the full-page-vs-block rendering contract.
 - **5b — View paths.** Server-rendered summary, problem, code, and docs pages, reading
   each problem's `solution_dir` (plaintext, incl. decrypted `solutions/private`).
-- **5c — Content validation.** Port the `.py`/`.c`/`.json` checks; **add the `.html` gate
-  via [nh3](#47--content-security-policy--nh3)**; keep reject-and-restore.
-- **5d — Edit paths.** htmx save/delete/eval/benchmark returning rendered fragments;
-  benchmark progress via SSE. Every write goes through 5c; every response carries CSP.
+- **5c — Content validation.** Port the `.py`/`.c`/`.json` reject-and-restore checks;
+  **add the `.html` gate via [nh3](#47--content-security-policy--nh3)**, sanitize-and-store-clean
+  ([DD-10](#dd-10--phase-5-content-service-choices)).
+- **5d — Edit paths.** htmx save/delete/eval/benchmark returning rendered fragments (via
+  the DD-10 block-render helper); benchmark progress via SSE. Every write goes through 5c;
+  every response carries CSP.
 
-**Decisions to close before 5c:** nh3 cp314-wheel availability; the Jinja fragment
-mechanism (`jinja2-fragments` vs manual block render); `notes.html` raw-HTML+nh3 vs
-Markdown-authored; whether the advisory `html5lib` check is kept once nh3 is the gate.
+**Design decisions:** the four content-service choices (nh3 gate, fragment mechanism,
+notes format, html5lib) are **resolved** — see
+[DD-10](#dd-10--phase-5-content-service-choices).
 
 ### Phase 6 — Web shell ⬜
 The PTY-backed interactive `solver` shell over WebSocket, **reusing**
