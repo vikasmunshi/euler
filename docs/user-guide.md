@@ -297,7 +297,7 @@ EOF
 
 Two complementary AI paths are wired into the shell (both require the `ai`
 dependency group;
-API requires `ANTHROPIC_API_KEY` in `keys/.env`;
+API requires `ANTHROPIC_API_KEY` in `~/.euler/env`;
 Claude Code requires authentication in the CLI `claude /login`):
 
 - **`claude-api <target>`** — a single templated Claude API call that writes one
@@ -351,23 +351,29 @@ needs nothing. The mechanics of the filter itself are covered in the
 ### The two keys
 
 ```
-~/.solver/id            - your X25519 private key (PKCS8 PEM, password-protected)
-keys/.user-pass         - the private-key password (machine-local; gitignored, never committed)
+~/.euler/id             - your X25519 private key (PKCS8 PEM, plain; machine-local 0600, outside the repo)
 keys/enc-key.json       - { <public-key-hex>: <master key wrapped for that key>, "verify": <check ciphertext> }
 ```
+
+`~/.euler` is a machine-local secrets dir — a sibling dot-directory named for the
+repo (`~/euler` → `~/.euler`) — that holds the private key and the project env file
+(`~/.euler/env`), kept **outside** the checkout so secrets never sit in the work tree.
+Only `enc-key.json` stays in-repo (wrapped master keys are useless without a private
+key). The private key carries no passphrase; its `0600` file permissions are its
+protection.
 
 There is a single 32-byte **master key**. It is never stored in the clear: each
 authorised user holds their own copy, wrapped to their X25519 public key with an
 ephemeral ECDH exchange (HKDF-SHA256 + ChaCha20-Poly1305). Keys are identified by
-their **public key**, not by email. Loading reads the password from `keys/.user-pass`,
-decrypts the private key, unwraps the master key, and proves it correct against the
-`verify` ciphertext before use. Authority is **proof-of-possession** — anyone who can
-unwrap and verify the master key may rotate it, authorise another key, or split it.
+their **public key**, not by email. Loading reads the private key from `~/.euler/id`,
+unwraps the master key, and proves it correct against the `verify` ciphertext before
+use. Authority is **proof-of-possession** — anyone who can unwrap and verify the master
+key may rotate it, authorise another key, or split it.
 
 ### Gaining access (new user)
 
 ```bash
-solver "user"        # creates ~/.solver/id (prompts for a password) and prints your public key
+solver "user"        # creates ~/.euler/id and prints your public key
 ```
 
 Send your public key to an existing user, who authorises it:

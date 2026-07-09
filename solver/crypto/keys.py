@@ -6,10 +6,10 @@ Cipher key management: create, persist, rotate and share the crypto key material
 This is the **interactive** half of `solver.crypto` -- all user interaction (password prompts, share
 entry, confirmations) lives here, and nowhere else. It owns the lifecycle of two keys:
 
-- The **asymmetric** identity: an X25519 key pair. The private key is generated here, password-
-  protected, and written to `~/.solver/id` (PKCS8 PEM, encrypted); the password is stored alongside
-  the repo in `keys/.user-pass` (a gitignored dotfile) so the non-interactive load path
-  (`solver.crypto.ciphers.load_private_key`) needs no prompt.
+- The **asymmetric** identity: an X25519 key pair. The private key is generated here and written
+  **plain** (unencrypted PKCS8 PEM) to `~/.euler/id` -- a machine-local `0600` file outside the
+  repo, whose file permissions are its protection -- so the non-interactive load path
+  (`solver.crypto.ciphers.load_private_key`) needs no password.
 - The **symmetric** master key: a single 32-byte AES key, wrapped to each authorised user's public
   key in `keys/enc-key.json` -- a `{<public-key-hex>: <locked-master-key-hex>}` map plus a `verify`
   ciphertext. Authority is **proof-of-possession**: anyone who can unwrap and verify the current
@@ -32,7 +32,7 @@ from subprocess import run
 
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
-from cryptography.hazmat.primitives.serialization import BestAvailableEncryption, Encoding, PrivateFormat
+from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
 from solver.crypto.ciphers import (encrypt_blob, load_private_key, lock, public_key_hex, read_enc_key_file,
                                    read_master_key, verify_master_key)
@@ -47,20 +47,6 @@ _VERIFY: str = 'verify'
 # ==================================================================================================================== #
 #                                       asymmetric key: create + persist
 # ==================================================================================================================== #
-def _prompt_new_password() -> bytes:
-    """Prompt (twice, hidden) for a non-empty private-key password and return it as bytes."""
-    while True:
-        first: str = console.input('[accent]Choose a password for the new private key:[/accent] ', password=True)
-        if not first:
-            console.print('[error]password must not be empty[/error]')
-            continue
-        if first != console.input('[accent]Confirm password:[/accent] ', password=True):
-            console.print('[error]passwords do not match; try again[/error]')
-            continue
-        return first.encode()
-    raise AssertionError('unreachable')
-
-
 def _rotate_backups(key_file: Path) -> None:
     """Rotate up to `private_key_backups` rolling backups of key_file (.1 newest ... .N oldest)."""
     if not key_file.exists():
@@ -76,29 +62,25 @@ def _rotate_backups(key_file: Path) -> None:
     key_file.rename(key_file.with_suffix('.1'))
 
 
-def _persist_private_key(private_key: X25519PrivateKey, password: bytes) -> None:
-    """Write the password-encrypted private key to disk (rotating backups) and store the password."""
+def _persist_private_key(private_key: X25519PrivateKey) -> None:
+    """Write the plain (unencrypted) private key to disk `0600` (rotating backups)."""
     key_file: Path = config['private_key_file']
-    _rotate_backups(key_file)
     key_file.parent.mkdir(parents=True, exist_ok=True)
     key_file.parent.chmod(0o700)
+    _rotate_backups(key_file)
     key_file.write_bytes(private_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8,
-                                                   BestAvailableEncryption(password)))
+                                                   NoEncryption()))
     key_file.chmod(0o600)
-    pass_file: Path = config['user_pass_file']
-    pass_file.parent.mkdir(parents=True, exist_ok=True)
-    pass_file.write_bytes(password)
-    pass_file.chmod(0o600)
     load_private_key.cache_clear()
     read_master_key.cache_clear()
     console.print(f'[success]Private key written to [accent]{key_file}[/accent] '
-                  f'(password in [accent]{pass_file}[/accent])[/success]')
+                  f'(plain, machine-local `0600`)[/success]')
 
 
 def _create_user_key() -> X25519PrivateKey:
-    """Generate a fresh X25519 key pair, persist it password-protected, and return the private key."""
+    """Generate a fresh X25519 key pair, persist it plain (`0600`), and return the private key."""
     private_key: X25519PrivateKey = x25519.X25519PrivateKey.generate()
-    _persist_private_key(private_key, _prompt_new_password())
+    _persist_private_key(private_key)
     return private_key
 
 

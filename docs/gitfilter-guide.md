@@ -71,8 +71,9 @@ enc-key.json
 
 No email is stored anywhere — a key is identified solely by its public-key value.
 To use the master key the filter unwraps the current user's entry with the private
-key at `~/.solver/id` (PKCS8 PEM, password-protected; the password is read from the
-gitignored `keys/.user-pass`). All of this lives in `solver/crypto/ciphers.py`.
+key at `~/.euler/id` (PKCS8 PEM, plain/unencrypted; a machine-local `0600` file in
+the sibling secrets dir outside the checkout, so its file permissions are its
+protection). All of this lives in `solver/crypto/ciphers.py`.
 
 The `verify` field makes the key **self-checking**: loading the master key always
 decrypts `verify` and compares it to the known text. A wrong or corrupt key is
@@ -227,7 +228,7 @@ any private file would be pushed in the clear.
 | Symptom | Cause / fix |
 | --- | --- |
 | `git add` hangs | A stale `process` filter or `.git/index.lock` from an interrupted run. Kill leftover `gitfilter process` procs and remove `.git/index.lock`. |
-| `master key check FAILED` on `install` | No `keys/enc-key.json` yet, no `~/.solver/id` / `keys/.user-pass`, or your public key has no entry. Run `solver user`, then have an existing user `authorize` your public key (the master key is committed in `keys/enc-key.json`). |
+| `master key check FAILED` on `install` | No `keys/enc-key.json` yet, no `~/.euler/id`, or your public key has no entry. Run `solver user`, then have an existing user `authorize` your public key (the master key is committed in `keys/enc-key.json`). |
 | Checkout/commit of private files aborts | `required = true` and the master key is unavailable. Obtain master-key access (see §6), or you genuinely cannot read these files. |
 | Other clones see ciphertext in the working tree | `.gitattributes` was not committed, or the filter was never `install`-ed on that clone. Commit `.gitattributes`; run `solver-gitfilter install`. |
 | Spurious "modified" on `status` with no edits | Determinism broke — the master key in use differs from the one a blob was encrypted with (e.g. after a partial rekey). Reconcile the master key, then `git add --renormalize`. |

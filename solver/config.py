@@ -152,7 +152,9 @@ class Config(AttributeDict):
         # Ambient identity + profile (DD-9): a one-time shell ticket (web PTY) or the
         # checkout-owner uid (local terminal); anything else aborts. Keys per-user
         # shell state (history, last problem) and command authorization.
-        env_file: Path = root_dir / 'keys' / '.env'  # project dotenv: API key, SMTP + DNS credentials
+        # Project dotenv: API key, SMTP + DNS credentials. Machine-local, in the
+        # sibling secrets dir outside the checkout (repo `~/euler` -> `~/.euler/env`).
+        env_file: Path = root_dir.parent / f'.{root_dir.name}' / 'env'
         user, user_slug, user_profile = resolve_identity(root_dir)
         user_state_dir: Path = root_dir / '.state' / user_slug
         user_state_dir.mkdir(parents=True, exist_ok=True)

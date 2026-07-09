@@ -218,12 +218,12 @@ the group. No `chown`, no root.
 `euler-acme.timer` (a root-owned systemd timer running `acme.sh --cron` as `euler-acme`),
 consistent with DD-3 and sidestepping system-user crontab quirks.
 
-**Config source.** `keys/.env` stays the **install-time authoring** source of truth; the
+**Config source.** `~/.euler/env` stays the **install-time authoring** source of truth; the
 installer (repo owner + sudo) deploys the *scoped* runtime config into `/etc/euler`
 (`edge.env` = FQDN + email; `ddns.env` = FQDN + name.com creds), which the dedicated users
 read — so no runtime service needs the repo checkout. `/usr/local/bin/euler-ddns` is a
 copy of the updater for the same reason. This also scopes secrets: `euler-ddns` sees only
-the name.com creds, never the full `keys/.env` (Anthropic key, SMTP password).
+the name.com creds, never the full `~/.euler/env` (Anthropic key, SMTP password).
 
 ### DD-5 · App runtime = `/opt/euler` system venv, framework = aiohttp + Jinja2
 
@@ -271,11 +271,11 @@ authenticated by `X-Admin-Token`. Admins **cannot** reset passwords (reset is se
 | `/var/lib/euler-auth/pending.json` | `euler-auth:euler-auth` `0600` | in-flight invites/resets keyed by `hash(link-token)` (see [DD-7](#design-decisions)). |
 | `/var/lib/euler-auth/remember.json` | `euler-auth:euler-auth` `0600` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `/var/lib/euler-auth/session-secret` | `euler-auth:euler-auth` `0600` | 32-byte HMAC key for remember-me; created on first start. |
-| `/etc/euler/auth.env` | `root:euler-auth` `0640` | scoped runtime config: `EULER_BASE_URL`, `EULER_ADMIN_TOKEN`, `TERMS_VERSION`, `EULER_SMTP_RELAY` (loopback `host:port` of the mail relay). Deployed from `keys/.env` (authoring source, DD-4). |
+| `/etc/euler/auth.env` | `root:euler-auth` `0640` | scoped runtime config: `EULER_BASE_URL`, `EULER_ADMIN_TOKEN`, `TERMS_VERSION`, `EULER_SMTP_RELAY` (loopback `host:port` of the mail relay). Deployed from `~/.euler/env` (authoring source, DD-4). |
 
 Sessions themselves are **in-memory** (per-process): a restart drops live sessions, and
 remember-me cookies restore them — matching the parked design. `euler-auth` reads only
-`auth.env` — never the full `keys/.env`, and (per [DD-8](#design-decisions)) **not even the
+`auth.env` — never the full `~/.euler/env`, and (per [DD-8](#design-decisions)) **not even the
 SMTP credentials**: it submits mail to a loopback relay that holds them. So a compromised
 auth service leaks neither the Anthropic key nor the Gmail app password.
 
@@ -285,7 +285,7 @@ through Caddy**, so admin endpoints have zero public surface. Only **root** can 
 the `users` shell command re-executes the admin CLI (`solver.web.auth.admin`) under
 `sudo`, so every admin action passes sudo's password gate and audit trail. The
 `X-Admin-Token` shared secret lives **only** in the root-readable `auth.env` (generated
-there at install, never in `keys/.env`) as a second check. Rationale: the operator is a
+there at install, never in `~/.euler/env`) as a second check. Rationale: the operator is a
 sudoer, and the operator's ordinary uid is the most *exposed* uid on the host (browsers,
 dev tooling, AI agents) — a bespoke admin group + operator-readable token would let any
 process running as the operator silently mint admin invites, gating the highest-privilege
@@ -396,7 +396,7 @@ its own; the relay **forces the envelope sender** to `SMTP_ADDRESS` and never lo
 bodies (they carry OTPs). A firewall **relay guard** additionally bars every other euler-*
 uid from connecting to `:8025`, so a compromised `euler-ws`/`euler-content` cannot send mail.
 Relay config (`SMTP_ADDRESS`, `SMTP_APP_PASSWORD`) is scoped to the relay
-(`/etc/euler/smtp.env`, `root:euler-smtp 0640`), deployed from `keys/.env` (DD-4).
+(`/etc/euler/smtp.env`, `root:euler-smtp 0640`), deployed from `~/.euler/env` (DD-4).
 
 **System paths (firewall + relay).**
 
@@ -466,7 +466,7 @@ the **`admin`** profile applies **only when the process uid owns the repo checko
 (`os.getuid() == stat(root_dir).st_uid`) — physical/login access to *the checkout* is the
 trust, stated exactly. Service uids never fall through to admin. The old
 **assume-an-identity** path (`export SOLVER_USER=…` verified against `keys/.users.json`,
-plus the `keys/.user-email` / `keys/.env` identity inputs) is **dropped**: the user DB is
+plus the `keys/.user-email` / `~/.euler/env` identity inputs) is **dropped**: the user DB is
 now `euler-auth`-private so there is nothing local to verify against, and exercising a
 lesser profile is done through a real web login instead.
 
@@ -646,7 +646,7 @@ existing `scripts/setup/caddy.sh` convention (idempotent, header block documenti
 3. **Configuration** — generator for any host-specific config (Caddyfile, Squid
    allowlist, service env), written to a system path (`/etc/euler`, so the service
    users can read it) or gitignored in-repo when repo-local, generated at install from
-   the single-source-of-truth `keys/.env` (e.g. the FQDN `EULER_TLS_DOMAIN`) or a prompt.
+   the single-source-of-truth `~/.euler/env` (e.g. the FQDN `EULER_TLS_DOMAIN`) or a prompt.
 4. **Lifecycle** — `start` / `stop` / `status` / `restart` via a **root-owned systemd
    *system* unit per service** (`euler-<svc>.service`, boot-enabled), so lifecycle
    needs `sudo` (DD-3). The edge assumes systemd; the old detached-process +
@@ -763,7 +763,7 @@ are locked; this phase implements them.
    The `users` shell command and ticket redemption use a stdlib unix-socket HTTP client
    (`client.py`), so a base install needs no aiohttp. `identity.py` redesigned per DD-9
    (ticket plane / checkout-owner plane / abort; `SOLVER_USER`, `keys/.user-email`, and
-   the `keys/.env` identity input dropped; `config` no longer references the dead
+   the `~/.euler/env` identity input dropped; `config` no longer references the dead
    `keys/` dotfiles). Access logs are disabled on both listeners (tokens travel in
    query strings). Verified end-to-end by a 31-check harness: admin plane, SRP login
    (incl. decoy challenges + wrong password), forward_auth, single-use tickets (replay
@@ -815,7 +815,7 @@ are locked; this phase implements them.
   from its first deploy and OTP/invite mail has a credential-scoped path out.
 - **Kit:** `scripts/setup/auth.sh` (install/uninstall/upgrade/status) — create
   `euler-auth`, `pip install .[web]` into `/opt/euler/venv`, deploy
-  `/etc/euler/auth.env` from `keys/.env`, provision `/var/lib/euler-auth`, install the
+  `/etc/euler/auth.env` from `~/.euler/env`, provision `/var/lib/euler-auth`, install the
   root-owned `euler-auth.service` (with `IPAddressDeny=any`/`IPAddressAllow=localhost`);
   sibling `firewall.sh` + `smtp.sh` kits (DD-8); Python deps pinned in the `web` extra;
   `status` pings `forward_auth` over the socket; Caddy `forward_auth` block activated.

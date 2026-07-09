@@ -27,8 +27,7 @@ class CryptoConfig(TypedDict):
 
     root_dir: Path
     # key material
-    private_key_file: Path  # password-protected X25519 private key (PKCS8 PEM)
-    user_pass_file: Path  # private-key password (machine-local; gitignored dotfile)
+    private_key_file: Path  # plain (unencrypted) X25519 private key (PKCS8 PEM)
     enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
     private_key_backups: int  # rolling backups kept of the private key file
     # git-filter wire format
@@ -50,6 +49,11 @@ def _root_dir() -> Path:
 
 
 _ROOT: Path = _root_dir()
+#: Machine-local secrets dir: a sibling dot-directory named for the repo (e.g.
+#: repo `~/euler` -> `~/.euler`), *outside* the checkout so secrets never sit in
+#: the work tree. Holds the plain private key and the project env file; only
+#: `enc-key.json` (wrapped master keys, useless without a private key) stays in-repo.
+_SECRETS_DIR: Path = _ROOT.parent / f'.{_ROOT.name}'
 _MAGIC: bytes = b'SLVR\x01'  # 4-byte tag + 1-byte format version
 _NONCE_LEN: int = 12
 _FILTER_NAME: str = 'solver-crypt'  # git filter driver name (.gitattributes / git config)
@@ -58,8 +62,7 @@ _FILTER_NAME: str = 'solver-crypt'  # git filter driver name (.gitattributes / g
 config: CryptoConfig = {
     'root_dir': _ROOT,
     # key material
-    'private_key_file': _ROOT / 'keys' / '.id',  # password-protected X25519 private key (PKCS8 PEM)
-    'user_pass_file': _ROOT / 'keys' / '.user-pass',  # private-key password (machine-local; gitignored dotfile)
+    'private_key_file': _SECRETS_DIR / 'id',  # plain (unencrypted) X25519 private key (PKCS8 PEM)
     'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
     'private_key_backups': 5,  # rolling backups kept of the private key file
     # git-filter wire format

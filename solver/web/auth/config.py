@@ -4,7 +4,7 @@
 
 The service runs as ``euler-auth`` from the ``/opt/euler`` system venv and reads
 its scoped ``/etc/euler/auth.env`` (via the unit's ``EnvironmentFile=``) — never
-the repo's ``keys/.env`` and **never** :mod:`solver.config` (which resolves the
+the repo owner's ``~/.euler/env`` and **never** :mod:`solver.config` (which resolves the
 shell's identity and repo paths the service user cannot read). Every value has
 an env override so the whole service can run unprivileged in a scratch dir for
 local testing.

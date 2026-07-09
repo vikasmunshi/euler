@@ -77,22 +77,22 @@ One name.com API token drives two things, both **outside** Caddy:
 | **Dynamic DNS** | `euler.vikasmunshi.com` A | **`scripts/setup/ddns.sh`** (host timer) | only when public |
 
 Create a token in the name.com account (**API**, api.name.com) and record the
-**username** and the **token**; both go in the project env file `keys/.env` (below), and
+**username** and the **token**; both go in the project env file `~/.euler/env` (below), and
 acme.sh caches them for renewals.
 
 ## Install the edge
 
-Set the deployment FQDN once in `keys/.env` (the **single source of truth**, shared with
+Set the deployment FQDN once in `~/.euler/env` (the **single source of truth**, shared with
 `ddns.sh`), then one command stands up the whole edge — group + user, Caddy, acme.sh, the
 Caddyfile, the certificate, and the systemd unit:
 
 ```bash
-echo 'EULER_TLS_DOMAIN=euler.vikasmunshi.com' >> keys/.env   # if not already set
+echo 'EULER_TLS_DOMAIN=euler.vikasmunshi.com' >> ~/.euler/env   # if not already set
 scripts/setup/frontend.sh install
 # also: uninstall | upgrade | status | renew | reload
 ```
 
-`frontend.sh` reads the FQDN from `keys/.env` (`EULER_TLS_DOMAIN`) and **fails if it is
+`frontend.sh` reads the FQDN from `~/.euler/env` (`EULER_TLS_DOMAIN`) and **fails if it is
 unset** — there is no hostname argument or prompt. `install` is idempotent and does, in
 order:
 
@@ -109,9 +109,9 @@ order:
 ### DNS credentials
 
 The DNS provider is selectable via `$EULER_TLS_DNS_PROVIDER` (default `namecom`); add
-its credentials to `keys/.env` (the same file that holds `ANTHROPIC_API_KEY`):
+its credentials to `~/.euler/env` (the same file that holds `ANTHROPIC_API_KEY`):
 
-| provider | acme.sh hook | credentials in `keys/.env` |
+| provider | acme.sh hook | credentials in `~/.euler/env` |
 | --- | --- | --- |
 | `namecom` (default) | `dns_namecom` | `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN` (or `Namecom_Username` / `Namecom_Token`) |
 | `cloudflare` | `dns_cf` | `CF_Token` / `CF_Account_ID` |
@@ -120,7 +120,7 @@ its credentials to `keys/.env` (the same file that holds `ANTHROPIC_API_KEY`):
 | `digitalocean` | `dns_dgon` | `DO_API_KEY` |
 | `gandi` | `dns_gandi_livedns` | `GANDI_LIVEDNS_KEY` |
 
-`frontend.sh` reads `keys/.env` as the invoking user and passes the credentials to
+`frontend.sh` reads `~/.euler/env` as the invoking user and passes the credentials to
 acme.sh (run as `euler-acme`) **as environment** — acme.sh caches them under
 `/usr/local/share/euler-acme` for unattended renewals. acme.sh refuses to run under a
 bare `sudo`, so the script strips the `SUDO_*` markers — no manual step needed.
@@ -255,7 +255,7 @@ infra egress, it does **not** pass through the Squid proxy.
 - **Renewal needs no DNS credentials re-supplied.** acme.sh saves the name.com token in
   the certificate's `.conf` at issue time (`SAVED_Namecom_*`) and re-exports it for the
   DNS-01 challenge on renewal — which is what lets the unattended timer work.
-  `frontend.sh renew` therefore does *not* load `keys/.env`.
+  `frontend.sh renew` therefore does *not* load `~/.euler/env`.
 - Force a renewal with `scripts/setup/frontend.sh renew`; check the schedule with
   `frontend.sh status` (the `Renewal:` line shows `euler-acme.timer` + next renewal).
 - The **DDNS** updater (public access only) runs as **`euler-ddns`** from
@@ -263,7 +263,7 @@ infra egress, it does **not** pass through the Squid proxy.
 
 ## Configuration summary
 
-`keys/.env` keys for the edge: **`EULER_TLS_DOMAIN`** (the FQDN — single source of truth,
+`~/.euler/env` keys for the edge: **`EULER_TLS_DOMAIN`** (the FQDN — single source of truth,
 shared by `frontend.sh` and `ddns.sh`) and the chosen DNS provider's credential pair
 (default `NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN`).
 

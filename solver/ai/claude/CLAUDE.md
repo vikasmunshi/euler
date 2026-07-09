@@ -187,12 +187,15 @@ locations + git-filter wire constants — **no `solver.config` dependency** — 
 encrypt/decrypt helpers), `keys.py` (all interactive create/persist/rotate/share and
 the shell commands), and `gitfilter.py` (the git clean/smudge filter, depending only on `ciphers`).
 
-- Per-user private key: `~/.solver/id` (X25519, PKCS8 PEM, password-protected). The password is read
-  from `keys/.user-pass` (machine-local, a gitignored dotfile) so the load path needs no prompt.
+- Per-user private key: `~/.euler/id` (X25519, PKCS8 PEM, **plain/unencrypted**). It lives in a
+  machine-local `0600` secrets dir — a sibling dot-directory named for the repo (`~/euler` →
+  `~/.euler`), **outside** the checkout — so file permissions are its protection and the load path
+  needs no password.
 - `keys/enc-key.json`: a single 32-byte master key, identified-by-public-key — `{<public-key-hex>:
   <master key wrapped to that key>}` plus a `verify` ciphertext for self-checking. One entry per
-  authorised public key; no email is stored. Authority is proof-of-possession.
-- Decryption path: read password → unlock private key → unwrap master key → verify → decrypt files.
+  authorised public key; no email is stored. Authority is proof-of-possession. (Stays in-repo:
+  wrapped master keys are useless without a private key.)
+- Decryption path: load private key → unwrap master key → verify → decrypt files.
 
 ### Solution file naming
 
@@ -215,7 +218,7 @@ See `solver/templates/new.py` / `new.c` for the canonical templates.
 
 ### AI features
 
-Two AI entry points, both calling the Claude API. Install the optional deps with `pip install -e ".[ai]"` (`anthropic` + `python-dotenv`); the key is `ANTHROPIC_API_KEY`, read from the project env file `keys/.env` (`config.env_file`, `models.py:get_api_key`).
+Two AI entry points, both calling the Claude API. Install the optional deps with `pip install -e ".[ai]"` (`anthropic` + `python-dotenv`); the key is `ANTHROPIC_API_KEY`, read from the project env file `~/.euler/env` (`config.env_file`, `models.py:get_api_key`).
 
 - **`claude-api`** (`solver/ai/api.py`) generates solution artifacts, dispatching to per-target generators — `code.py` (Python/C), `docs.py` (notes), `facts.py` (test cases) — with prompts in `solver/templates/prompt_*.txt`. Default models: Opus for code (Python + C) and notes, Sonnet for test cases. The `costs` command (`models.py`) reports accumulated token spend.
 - **`claude-skill`** (`solver/ai/skill.py`) launches Claude Code headless against a problem's solution files, via the `claude-euler-solver` skill (`solver/ai/claude/skills/claude-euler-solver/`). Invoked as `claude -p /claude-euler-solver <problem_number> <action>`, running at the repo root; its actions are `solve` and `review`. The skill's standards live in the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`).

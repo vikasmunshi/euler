@@ -93,7 +93,7 @@ Contrast: `GET /1/../../../etc/passwd` **is** correctly blocked by the `..` chec
 
 The server runs as OS user `vikas`, so this reads any file that user can read:
 
-- `keys/.user-pass` + `keys/.id` + `keys/enc-key.json` → reconstruct the AES master key
+- `~/.euler/id` + `~/.euler/id` + `keys/enc-key.json` → reconstruct the AES master key
   offline → decrypt the **entire** `solutions/private/` history from the ciphertext that
   is public on GitHub. Total defeat of encryption-at-rest.
 - `.env` → `ANTHROPIC_API_KEY` disclosure.
@@ -204,7 +204,7 @@ other finding: with SEC-02 access, an attacker need not bother with SEC-01's cle
    user, inside a container/VM or a systemd sandbox: `NoNewPrivileges=`, `ProtectHome=`,
    `PrivateTmp=`, `ReadWritePaths=` scoped to the repo only, a seccomp profile, and
    resource limits. This also blunts SEC-01's blast radius.
-2. Move the crypto master-key material (`keys/.id`, `keys/.user-pass`), `~/.ssh`, and
+2. Move the crypto master-key material (`~/.euler/id`, `~/.euler/id`), `~/.ssh`, and
    `.env` out of any path that process can read; supply the API key via an environment
    file the sandbox controls, not a repo-relative `.env`.
 3. Treat every invited account as equivalent to handing out a shell; keep the invite list
@@ -215,7 +215,7 @@ other finding: with SEC-02 access, an attacker need not bother with SEC-01's cle
 1. `ps`/`systemctl show` confirms the server and a forked PTY child run as the dedicated
    non-`vikas` user.
 2. From an authenticated shell, `evaluate` of a solution that attempts to read
-   `keys/.user-pass` or `~/.ssh/id_*` fails (permission denied / not visible).
+   `~/.euler/id` or `~/.ssh/id_*` fails (permission denied / not visible).
 3. `systemd-analyze security caddy-euler.service` (and the solver-web unit) shows the
    hardening directives applied.
 
@@ -458,7 +458,7 @@ key via the sandbox's environment (SEC-02) over a repo-relative file.
 
 ### <a id="sec-07-resolution"></a>Resolution (2026-07-07)
 
-**Fix.** The file was relocated to `keys/.env` — alongside the other secrets, all mode
+**Fix.** The file was relocated to `~/.euler/env` — alongside the other secrets, all mode
 `600` — and set to mode `600` itself. Its location is now a single config item,
 `config.env_file` (`solver/config.py`), consumed by `get_api_key`
 (`solver/ai/models.py`), the SMTP mailer (`solver/web/auth/mail.py`), identity
@@ -466,9 +466,9 @@ resolution (`solver/utils/identity.py`, via a `resolve_identity` parameter), and
 `scripts/setup/frontend.sh` (DNS-01 credentials).
 
 **Validation results** (against the new path):
-- `stat -c '%a' keys/.env` → `600`.
-- `git check-ignore keys/.env` → still ignored (the `**/.*` rule).
-- `config.env_file` resolves to `keys/.env`; `get_api_key()` and the SMTP credential
+- `stat -c '%a' ~/.euler/env` → `600`.
+- `git check-ignore ~/.euler/env` → still ignored (the `**/.*` rule).
+- `config.env_file` resolves to `~/.euler/env`; `get_api_key()` and the SMTP credential
   lookup both read it there (verified live); full suite (106) green.
 
 The remediation's second preference — supplying the key via a sandbox-controlled

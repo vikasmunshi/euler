@@ -7,8 +7,8 @@ This is the non-interactive heart of `solver.crypto`. File locations and git-fil
 constants come from the `config` TypedDict in `solver.crypto.config` (the crypto package does **not**
 import `solver.config`). On top of that, this module owns:
 
-- the asymmetric primitives -- load the password-protected X25519 private key from `~/.solver/id`
-  (the password is read from `keys/.user-pass`), and `lock`/`unlock` (wrap/unwrap) a secret to an
+- the asymmetric primitives -- load the plain (unencrypted) X25519 private key from `~/.euler/id`
+  (a machine-local `0600` file outside the repo), and `lock`/`unlock` (wrap/unwrap) a secret to an
   X25519 public key via ephemeral ECDH -> HKDF-SHA256 -> ChaCha20-Poly1305.
 - the master (symmetrical) key -- `read_master_key` unwraps the current user's entry from
   `keys/enc-key.json` (a `{<public-key-hex>: <locked-master-key-hex>}` map plus a `verify` entry)
@@ -70,21 +70,20 @@ def public_key_hex(public_key: X25519PublicKey) -> str:
 
 @lru_cache(maxsize=None)
 def load_private_key() -> X25519PrivateKey:
-    """Load the password-protected X25519 private key from disk (no interaction; password read from file).
+    """Load the (plain, unencrypted) X25519 private key from disk (no interaction).
+
+    The key file is machine-local, `0600`, and outside the repo (`~/.euler/id`);
+    file permissions are its protection, so it carries no passphrase.
 
     Raises:
-        FileNotFoundError: If the private key file or the password file is missing.
-        ValueError:        If the password is wrong or the key file is malformed.
+        FileNotFoundError: If the private key file is missing.
+        ValueError:        If the key file is malformed.
     Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
     """
     key_file: Path = config['private_key_file']
-    pass_file: Path = config['user_pass_file']
     if not key_file.exists():
         raise FileNotFoundError(f'private key {key_file} not found; run `solver user` to create one')
-    if not pass_file.exists():
-        raise FileNotFoundError(f'password file {pass_file} not found; run `solver user` to create the key')
-    password: bytes = pass_file.read_bytes().strip()
-    key = load_pem_private_key(key_file.read_bytes(), password=password or None)
+    key = load_pem_private_key(key_file.read_bytes(), password=None)
     if not isinstance(key, X25519PrivateKey):
         raise ValueError(f'{key_file} does not contain an X25519 private key')
     return key

@@ -17,7 +17,7 @@ different package, different import path, different key files.
 
 | Subsystem | Purpose | Lives in | Key material |
 |---|---|---|---|
-| Solution encryption | git clean/smudge of `solutions/private/` | `solver/crypto/` | `keys/.id`, `keys/enc-key.json` |
+| Solution encryption | git clean/smudge of `solutions/private/` | `solver/crypto/` | `~/.euler/id`, `keys/enc-key.json` |
 | Web authentication | gate the web front end | `solver/web/auth/` | `keys/.users.json`, `keys/.remember.json`, `keys/.pending.json`, `keys/.session-secret` |
 
 Web login gates *access* only. Decrypting private solutions flows through the
@@ -162,7 +162,7 @@ The invited user opens the link and completes registration in the browser:
 existing account.
 
 **Gmail delivery** (`mail.py`): `smtp.gmail.com:587` over STARTTLS, authenticated
-with the Gmail address and an **App Password**. Credentials come from `keys/.env`
+with the Gmail address and an **App Password**. Credentials come from `~/.euler/env`
 (`SMTP_ADDRESS`, `SMTP_APP_PASSWORD`); `EULER_BASE_URL` (default
 `https://euler.vikasmunshi.com`) forms the link's base URL. Sending runs via
 `smtplib` in `run_in_executor`.
@@ -288,7 +288,7 @@ base_url:            EULER_BASE_URL or 'https://euler.vikasmunshi.com'
 server_port:         8080
 ```
 
-`keys/.env` keys: `SMTP_ADDRESS`, `SMTP_APP_PASSWORD` (Gmail App Password), and optionally
+`~/.euler/env` keys: `SMTP_ADDRESS`, `SMTP_APP_PASSWORD` (Gmail App Password), and optionally
 `EULER_BASE_URL`. Every auth file is a dot-file, so `**/.*` in `.gitignore` covers
 them all (`.users.json`, `.pending.json`, `.remember.json`, `.session-secret`) with
 no per-file entries.
