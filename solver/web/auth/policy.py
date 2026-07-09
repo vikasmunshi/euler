@@ -4,7 +4,7 @@
 
 Kept in one place so the server and (where relevant) the browser client agree.
 Values implement the locked design decisions DD-6/DD-7/DD-9 in
-docs/server-redesign.md.
+docs/secure-web-server.md.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ __all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MI
            'TICKET_TTL_SECONDS', 'PROFILES']
 
 #: A user's authorization profile, in descending order of privilege (drives
-#: command/route authorization; see solver/commands.csv and docs/authorization.md).
+#: command/route authorization; see solver/commands.csv and docs/access-control.md).
 PROFILES: tuple[str, ...] = ('admin', 'user', 'guest')
 
 #: Name of the short-lived session cookie set on a successful SRP login.

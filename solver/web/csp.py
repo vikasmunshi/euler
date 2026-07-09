@@ -3,7 +3,7 @@
 """Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
 
 Every page an app service renders carries the locked baseline CSP
-(docs/server-redesign.md § Content-Security-Policy): same-origin everything,
+(docs/secure-web-server.md § Content-Security-Policy): same-origin everything,
 no ``unsafe-inline``, no ``unsafe-eval``, no framing. The middleware mints a
 fresh nonce per response and exposes it as ``request['csp_nonce']`` so a
 template *can* mark an unavoidable inline ``<script>``/``<style>`` — the auth

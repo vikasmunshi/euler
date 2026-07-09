@@ -3,7 +3,7 @@
 """Ambient user identity **and profile**: who is this shell running as (DD-9).
 
 Resolution yields ``(display, slug, profile)``, resolved **once** at startup.
-Two identity planes, each with an explicit voucher (docs/server-redesign.md,
+Two identity planes, each with an explicit voucher (docs/secure-web-server.md,
 DD-9); there is no anonymous fallback:
 
 1. **Web shell** — ``SOLVER_TICKET`` in the environment: a **one-time shell

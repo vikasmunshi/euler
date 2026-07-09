@@ -6,7 +6,7 @@
 # Caddy (TLS + reverse-proxy edge) and the acme.sh cert client, creates the
 # dedicated service identities, generates the Caddyfile router, deploys the static
 # maintenance page, and installs the root-owned systemd unit. Supersedes the old
-# scripts/setup/caddy.sh + scripts/setup/acme.sh. See docs/server-redesign.md
+# scripts/setup/caddy.sh + scripts/setup/acme.sh. See docs/secure-web-server.md
 # (Design decisions DD-1..DD-4, DD-6/DD-9 routing; Phases 1, 3 and 4).
 #
 # Topology through Phase 4:
@@ -437,7 +437,7 @@ generate_caddyfile() {
 # Transport-level security headers + edge fallback CSP, shared by the live routes and
 # the maintenance/error responses. The per-response nonce'd CSP is minted by the app
 # tier in later phases; this static policy is the edge fallback and what the Phase-3
-# maintenance page is validated against. (docs/server-redesign.md,
+# maintenance page is validated against. (docs/secure-web-server.md,
 # docs/security-assessment.md SEC-04/SEC-05.)
 (security_headers) {
 	header {
@@ -560,7 +560,7 @@ install_service() {
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler web edge (Caddy)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/server-redesign.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/secure-web-server.md
 After=network-online.target
 Wants=network-online.target
 
@@ -627,7 +627,7 @@ install_acme_timer() {
     sudo tee "${ACME_SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler certificate renewal (acme.sh --cron)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/tls-guide.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/secure-web-server.md
 After=network-online.target
 Wants=network-online.target
 

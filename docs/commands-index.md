@@ -18,7 +18,7 @@ Each command entry opens with an **availability** line —
 command's module loads (from `modules.csv`); *profiles* (`admin` / `user` /
 `guest`) is which authorization profiles may run it (from `commands.csv`). A
 command absent from `commands.csv` is admin-only. See the
-[authorization guide](authorization.md) for the channel-vs-profile model.
+[access-control guide](access-control.md) for the channel-vs-profile model.
 
 A command's *flags* line lists the behaviours marked by these glyphs (the same
 ones shown after a command's help by `?`):

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The web app services (server redesign, docs/server-redesign.md).
+"""The web app services (see docs/secure-web-server.md).
 
 Each sub-package is one isolated service (DD-1/DD-2): it listens on a unix
 domain socket under ``/run/euler/``, runs as its own dedicated system user from

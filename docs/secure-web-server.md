@@ -1,0 +1,669 @@
+# Secure web server — transport & infrastructure
+
+The design of record for the `solver` web front end: a set of **isolated services**
+behind a single TLS edge, delivering **server-rendered pages that feel live** (no
+skeleton-page + client-fetch architecture). It is one half of a matched pair —
+[access-control.md](access-control.md) covers identity and authorization; this guide
+covers the transport, the service topology, and the operational build — and it holds
+the authoritative **design-decision log** (DD-1…DD-9) both guides reference.
+Accepted risks and regression guards are in [security-notes.md](security-notes.md).
+
+> **Status.** Built feature-by-feature (see [Build plan](#6--build-plan)); each phase
+> ships its full [maintenance kit](#51--the-maintenance-kit-per-feature-contract)
+> before the next begins.
+> - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
+> - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
+> - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
+> - ✅ **Phase 4** — Auth service (SRP login, sessions, tickets, wheel-gated admin,
+>   Jinja pages, Caddy `forward_auth`); live-verified end-to-end.
+> - ⬜ **Phases 5–6** — content service, web shell (not started).
+
+## 1 · Purpose & scope
+
+The front end exposes a PTY-backed `solver` shell (over a WebSocket) plus file and
+command routes — arbitrary remote code execution by design. The job of this layer is
+**containment and correctness of the transport**: terminate TLS at one publicly-bound
+edge, isolate every app service in its own blast radius, and route the network so no
+service sees traffic it should not.
+
+**Goals**
+
+- Every page is **composed server-side** from shared templates; the browser never
+  assembles content from JSON. One template set renders both full pages and the
+  fragments that update them.
+- **Feels live** without a client framework or build toolchain: request-driven
+  fragment swaps + server-pushed updates for long-running work.
+- **Service isolation**: edge, egress, auth, content, and shell are separate
+  processes with separate blast radii, wired only over loopback / unix sockets.
+- **Server-side security validation** on every write path; a strict
+  **Content-Security-Policy on every served page**.
+- Each feature arrives with a complete **maintenance kit** — install/uninstall/
+  upgrade, config generation, start/stop/status — so the system is operable at every
+  step, not only when finished.
+
+**Non-goals**
+
+- No SPA / client-side router / client-side templating. "HTML5 app feel" is met by
+  server-rendered fragment swaps, not by moving rendering to the client.
+- No second language runtime. Everything stays Python + vendored browser assets; the
+  PTY shell (the hardest existing code) is reused, not rewritten.
+- No offline/PWA service worker in scope.
+
+## 2 · Threat model
+
+A home-hosted service whose login is code execution for invited collaborators (see
+[security-notes.md](security-notes.md) AR-1). Three independent layers guard that
+surface:
+
+- **TLS** (Caddy) encrypts the channel and presents a browser-trusted certificate.
+  It authenticates nobody — it only secures transport — and adds the transport-level
+  security headers plus a fallback CSP.
+- **[Authentication](access-control.md)** is the access gate: Caddy routes every
+  request through the auth service's `forward_auth` endpoint before it reaches
+  content or the shell, so those services never see an unauthenticated caller.
+- **[Authorization](access-control.md)** (`solver/commands.csv` and the shell) decides
+  which commands and routes an authenticated identity may use.
+
+Because login *is* RCE, the design spends its effort on **blast-radius containment**:
+dedicated nologin service users (DD-2), a loopback-only app tier behind a kernel
+egress firewall (DD-8), an app runtime decoupled from the repo checkout (DD-5), and
+secrets scoped so no single compromise yields them all (DD-4/DD-6/DD-8).
+
+## 3 · Design decisions
+
+Locked, ADR-style. Each is summarised in the table, then argued below.
+
+| Concern | Decision |
+|---|---|
+| TLS / edge / routing | **Caddy** (reverse proxy, `forward_auth` gate), certs via **acme.sh** DNS-01. |
+| Inter-service transport | **Unix domain sockets** under `/run/euler/`, not loopback TCP — [DD-1](#dd-1--inter-service-transport--unix-domain-sockets). |
+| Service identity | Dedicated nologin system users — `euler-caddy` / `euler-auth` / `euler-content` / `euler-ws` (in **`euler-web`**), plus `euler-proxy`, `euler-acme`, `euler-ddns`, `euler-smtp`. **None run as root** — [DD-2](#dd-2--service-user-strategy--dedicated-users--shared-group), [DD-4](#dd-4--no-service-runs-as-root-acme--ddns-get-dedicated-users). |
+| Edge setup & lifecycle | One `scripts/setup/frontend.sh` installs **root-owned systemd units** (start/stop needs `sudo`) — [DD-3](#dd-3--edge-orchestrator--frontendsh--root-owned-systemd). |
+| Egress control | **Squid** forward proxy, domain allowlist; shell/AI/scrapers reach the network only via `HTTPS_PROXY`. |
+| Response headers | **Content-Security-Policy on every served page** (see [CSP](#47--content-security-policy)). |
+| App framework / templating | **aiohttp + Jinja2** (autoescape on) across the app services — [DD-5](#dd-5--app-runtime--opteuler-system-venv-framework--aiohttp--jinja2). |
+| App runtime | Root-owned **`/opt/euler`** system venv; services run `/opt/euler/venv/bin/python -m …`. Repo unreadable to service users — [DD-5](#dd-5--app-runtime--opteuler-system-venv-framework--aiohttp--jinja2). |
+| Auth state & admin plane | State in **`/var/lib/euler-auth`** (`0600`); admin ops via a **sudo-gated admin API** — [DD-6](#dd-6--auth-state-is-euler-auth-private-admin-ops-go-through-an-admin-api). |
+| Registration | **Invite-only**, two-channel: **7-day** email link → Terms → **10-min OTP** → set SRP password — [DD-7](#dd-7--registration--invite-link--terms--otp--srp-password). |
+| Egress firewall | **Kernel-enforced**: systemd per-unit `IPAddressDeny` + host **nftables** owner-match; mail via a loopback `euler-smtp` relay — [DD-8](#dd-8--kernel-enforced-egress-firewall--loopback-mail-relay). |
+| Identity & masquerade | Three planes — `forward_auth` headers, one-time shell ticket, checkout-owner uid — [DD-9](#dd-9--identity-authentication-and-masquerade-prevention). |
+
+### DD-1 · Inter-service transport = unix domain sockets
+
+**Decision.** Every app service (auth, content, shell-ws) listens on a **unix domain
+socket** under `/run/euler/`; Caddy reverse-proxies to it
+(`reverse_proxy unix//run/euler/<svc>.sock`). No app service binds a TCP port — only
+Caddy is network-bound (`:443`).
+
+| Service | Socket | Runs as |
+|---|---|---|
+| auth | `/run/euler/auth.sock` | `euler-auth` |
+| content | `/run/euler/content.sock` | `euler-content` |
+| shell-ws | `/run/euler/ws.sock` | `euler-ws` |
+| maintenance (static) | — served by Caddy directly | `euler-caddy` |
+
+**Why.** Filesystem permissions become OS-enforced access control (only members of
+`euler-web` can `connect()`); there is no port registry to maintain; the services have
+**zero network surface** — nothing to port-scan, no `0.0.0.0` mis-bind one typo away.
+Marginally lower latency helps the streaming shell WS. The one cost — socket lifecycle
+— is absorbed by systemd (`RuntimeDirectory=` / tmpfiles.d) under DD-3.
+
+**Health probes.** The health endpoint is **Caddy-native** (`respond /healthz 200`),
+so it needs no socket. Per-service probes use
+`curl --unix-socket /run/euler/<svc>.sock http://x/healthz`.
+
+### DD-2 · Service-user strategy = dedicated users + shared group
+
+**Decision.** One shared group **`euler-web`**, and a dedicated system user per app
+service: **`euler-caddy`**, **`euler-auth`**, **`euler-content`**, **`euler-ws`**,
+plus **`euler-proxy`** (Squid egress). Each app service's socket is `owner=euler-<svc>`,
+`group=euler-web`, mode `0660`, in the `root:euler-web` runtime dir `/run/euler`. Caddy
+runs as `euler-caddy` (in `euler-web`) so it can `connect()` to every upstream; its
+unit grants `CAP_NET_BIND_SERVICE` to bind `:443` without root. `euler-proxy` owns no
+`/run/euler` socket — Squid is reached via `HTTPS_PROXY`, not as a Caddy upstream — so
+it stays outside `euler-web`.
+
+**Why.** DD-1's isolation is only real across **distinct uids** — same-user processes
+can always reach each other's sockets. Separate users give each service its own blast
+radius: a compromised service cannot read another's files, signal it, or inspect its
+memory, and the highest-risk `euler-ws` (RCE by design) is fully separated.
+
+**Scope note.** A single shared `euler-web` group means any member could, in principle,
+`connect()` to a peer's socket; the guards remain uid separation plus `forward_auth`
+at the edge. Strict per-service socket isolation (split into `euler-auth-fe`, … each
+containing only Caddy + the owner) is deferred, not needed for the phased build.
+
+### DD-3 · Edge orchestrator = `frontend.sh` + root-owned systemd
+
+**Decision.** A single **`scripts/setup/frontend.sh`** exposes full **`install` /
+`uninstall` / `upgrade`** (plus `status` / `renew` / `reload`) for the whole edge. It:
+
+1. creates the `euler-web` group and the `euler-*` service users (idempotent);
+2. installs Caddy (apt) and acme.sh as the dedicated `euler-acme` user (DD-4);
+3. issues + deploys the TLS cert via acme.sh DNS-01 into **`/etc/euler/tls`** (setgid,
+   key `0640`) so `euler-caddy` reads it; the renewal hook re-applies mode + reloads;
+4. generates the **`/etc/euler/Caddyfile`** unix-socket router (path →
+   `unix//run/euler/*` upstreams, the `forward_auth` block, security headers +
+   fallback CSP);
+5. installs the **root-owned systemd *system* unit** `euler-caddy.service`
+   (`WantedBy=multi-user.target`, so the edge comes up at **boot**).
+
+**Per-concern kits.** Each other concern gets a **sibling script of the same shape** as
+its phase lands — `egress.sh` (Squid), `ddns.sh` (dynamic DNS), `firewall.sh` +
+`smtp.sh` (DD-8), `auth.sh` (the app tier). A `make` umbrella (`install-web`, plus
+per-kit `install-frontend`, `install-egress`, …) composes them; every service stays
+independently installable and restartable.
+
+**Config location.** The edge's config and secrets live under **`/etc/euler`**, not the
+repo: the dedicated `euler-caddy` user cannot traverse the repo owner's `0750` home, so
+a repo-local Caddyfile/key would be unreadable. The authoring source `~/.euler/env` is
+read by the installer (repo owner + sudo), which deploys scoped runtime config into
+`/etc/euler`.
+
+**Privilege model.** Because the units live in **root's** systemd and run as the
+locked-down `euler-*` users, lifecycle is privileged: `start`/`stop`/`restart` require
+**`sudo`**. The edge **assumes systemd** (present on dev and the deployment host).
+
+### DD-4 · No service runs as root (acme + ddns get dedicated users)
+
+**Decision.** No `euler-*` service runs as root. acme.sh and the DDNS updater get
+dedicated nologin users, each in its own group (outside `euler-web`):
+
+| Service | User | Code | Config | Run |
+|---|---|---|---|---|
+| cert issue/renew | `euler-acme` | acme.sh in `/usr/local/share/euler-acme` | caches its own state | `euler-acme.timer` (daily) |
+| dynamic DNS | `euler-ddns` | `/usr/local/bin/euler-ddns` | `/etc/euler/ddns.env` (`root:euler-ddns 0640`) | `euler-ddns.timer` |
+
+**Cert reload without root.** The reload uses **Caddy's admin API** (`caddy reload
+--config /etc/euler/Caddyfile`, loopback `:2019`), not `systemctl` — so non-root
+`euler-acme` triggers it. The Caddyfile is `0644` (non-secret).
+
+**Cert deploy without chown.** `/etc/euler/tls` is `euler-acme:euler-web`, **setgid
+(2750)** — acme.sh writes `server.{crt,key}` there, they inherit group `euler-web`, and
+the reloadcmd `chmod`s the key `0640` so `euler-caddy` reads it via the group.
+
+**Config source.** `~/.euler/env` is the **install-time authoring** source of truth;
+the installer deploys *scoped* runtime config into `/etc/euler` (`edge.env` = FQDN +
+email; `ddns.env` = FQDN + name.com creds), so no runtime service needs the repo. This
+scopes secrets: `euler-ddns` sees only the name.com creds, never the full `~/.euler/env`.
+
+### DD-5 · App runtime = `/opt/euler` system venv, framework = aiohttp + Jinja2
+
+**Decision.** The Python app services run from a **root-owned system venv at
+`/opt/euler`**, *not* the repo checkout: the service users cannot traverse the repo
+owner's `0750` home. The installer (`scripts/setup/auth.sh`, repo owner + sudo) does
+`pip install .[web]` into `/opt/euler/venv`, and the unit runs
+`ExecStart=/opt/euler/venv/bin/python -m solver.web.<svc>`. `upgrade` re-installs from
+the repo. The **framework is aiohttp + Jinja2** (autoescape on) — one framework shared
+with the shell service; Jinja replaces the homegrown string templating.
+
+**System paths.**
+
+| Path | Owner / mode | Purpose |
+|---|---|---|
+| `/opt/euler/venv/` | `root:euler-web` `0755` | the deployed venv; only root writes it (install/upgrade). |
+| `/run/euler/` | `root:euler-web` `0770` (tmpfiles.d) | shared socket dir; each service creates its own `*.sock` (`0660`). |
+
+Jinja **page templates** ship as package data inside the venv
+(`solver/web/templates/*.html`); **static assets** (CSS/JS) stay in the repo-root
+`web-content/` tree, deployed to `/etc/euler/web-content` and served by Caddy under
+`/assets/*` — so rendered pages reference `'self'` assets and the CSP holds.
+
+### DD-6 · Auth state is `euler-auth`-private; admin ops go through an admin API
+
+**Decision.** All auth state is owned by **`euler-auth` alone** (`0600`, under the
+unit's `StateDirectory=/var/lib/euler-auth`); no file is shared with the repo owner.
+The admin shell commands never touch those files — they call an **admin API on the auth
+service**. Full state schema and the admin plane are in
+[access-control.md](access-control.md); the security-relevant shape:
+
+| Path | Owner / mode | Purpose |
+|---|---|---|
+| `/var/lib/euler-auth/*.json`, `session-secret` | `euler-auth:euler-auth` `0600` | verifier DB, pending invites, remember-me, HMAC secret. |
+| `/etc/euler/auth.env` | `root:euler-auth` `0640` | scoped runtime config; deployed from `~/.euler/env` (DD-4). Holds the root-only `EULER_ADMIN_TOKEN`. |
+
+**Admin plane (wheel-gated).** The admin API is **local-only** — a dedicated listener
+(`/run/euler-adm/auth-admin.sock`, `0600` `euler-auth`-private), **never routed through
+Caddy**. Only **root** can connect: the `users` command re-executes the admin CLI under
+`sudo`, so every admin action passes sudo's password gate and audit trail. The
+`X-Admin-Token` lives **only** in root-readable `auth.env`. Rationale: the operator is a
+sudoer, and the operator's ordinary uid is the most *exposed* on the host (browsers,
+dev tooling, AI agents) — a bespoke admin group + operator-readable token would let any
+process running as the operator silently mint admin invites, gating the highest-privilege
+API *below* sudo.
+
+**Why an API over shared files.** Keeps auth state single-writer and `0600`, so no other
+uid can corrupt or read the verifier DB; the service owns all invariants.
+
+### DD-7 · Registration = invite link → Terms → OTP → SRP password
+
+**Decision.** Registration is **invite-only and two-channel**: an admin mints an invite;
+the invitee proves live mailbox control (OTP) and accepts Terms before a password is
+set. All secrets are stored hashed; every step is single-use and time-boxed. The same
+link→OTP→password pipeline serves self-service password **reset** (skipping Terms);
+admins never reset passwords. The full flow, state machine, and parameters (7-day link,
+6-digit/10-min/5-try OTP, scroll-gated Terms) are in
+[access-control.md § 4.1](access-control.md).
+
+### DD-8 · Kernel-enforced egress firewall + loopback mail relay
+
+**Decision.** "Egress only via Squid" is enforced at the **kernel**, not just by the
+`HTTPS_PROXY` env var (which a compromised process can ignore). Two layers:
+
+1. **systemd per-unit IP filter** — every loopback-only app unit (`euler-auth`,
+   `euler-content`, `euler-ws`) carries `IPAddressDeny=any` + `IPAddressAllow=localhost`,
+   so the app tier reaches **only loopback** (their `/run/euler` sockets, the Squid
+   proxy at `127.0.0.1:3128`, and the loopback mail relay). `euler-caddy` is the
+   exception — it terminates public inbound `:443`, which the (bidirectional) systemd
+   filter would block; its egress lock comes from layer 2: `ct state
+   established,related` permits its replies while any *NEW* outbound it initiates hits
+   the drop.
+2. **host nftables owner-match** (`scripts/setup/firewall.sh` → `euler-firewall.service`,
+   `/etc/euler/nftables.conf`) — a `table inet euler` with an **egress-only**
+   (`hook output`) chain, scoped to the `euler-*` uids, permitting loopback and only the
+   specific `(uid, port)` each service needs, then dropping the rest:
+
+   | uid | allowed egress |
+   |---|---|
+   | `euler-proxy` (Squid) | `tcp dport {80,443}` — the **only** service with real internet; its L7 allowlist still applies |
+   | `euler-acme` | `tcp dport 443` (ACME + DNS-provider API) |
+   | `euler-ddns` | `tcp dport 443` (name.com API, ipify) |
+   | `euler-smtp` (relay) | `tcp dport 587` (Gmail submission) |
+   | infra uids | `udp/tcp dport 53` (DNS, unless the resolver is on loopback) |
+   | all `euler-*` | loopback; **everything else dropped** |
+
+   The chain uses `policy accept` and drops **only** the enumerated `euler-*` uids (a
+   final `skuid { … } drop`), so non-service traffic — SSH, root, your shell — is
+   untouched (no lock-out risk). **Loopback is matched by destination address** (`ip
+   daddr 127.0.0.0/8` / `ip6 daddr ::1`), not `oif "lo"`: the interface-index match does
+   not hit loopback output on the WSL2 kernel (observed on
+   `6.6.114.1-microsoft-standard` — euler uids' loopback SYNs fell through to the final
+   drop while replies still passed via `ct state established`, so only *new*
+   service-to-service connects broke), and the address space is the actual security
+   intent. Host `INPUT` policy is left alone (inbound `:443` is Caddy's; SSH stays
+   reachable).
+
+**Mail relay (`euler-smtp`).** So the app tier needs **no** direct-internet exception,
+OTP/invite mail goes through a small **loopback submission relay** (dedicated
+`euler-smtp` user, own group): it listens on `127.0.0.1:8025`, is the **sole holder of
+the Gmail credentials** and the **sole uid permitted `:587`**, **forces the envelope
+sender** to `SMTP_ADDRESS`, and never logs bodies (they carry OTPs). A firewall relay
+guard bars every other euler-* uid from `:8025`. `euler-auth` submits via loopback SMTP
+with no credentials of its own. Relay config (`/etc/euler/smtp.env`, `root:euler-smtp
+0640`) is deployed from `~/.euler/env`.
+
+**Why.** Without this, "plaintext must never leave the repo" and the Squid allowlist
+rest on an environment variable. The firewall makes Squid the *only* internet path for
+the app tier at the packet level; the relay keeps the SMTP exception off the app uids
+and the Gmail password out of every service but one.
+
+### DD-9 · Identity, authentication, and masquerade prevention
+
+**Decision.** The auth service is built **fresh** as `solver/web/auth`; identity
+resolution (`solver/utils/identity.py`) is redesigned around **three planes**, each with
+an explicit voucher — web request (`forward_auth` → `X-User`/`X-Profile`), web shell
+(one-time ticket redeemed over `auth.sock`), local terminal (checkout-owner uid →
+admin). `SOLVER_USER` is display-only; there is no anonymous fallback. The full
+mechanism (the shell ticket, the masquerade vector→guard table, the resolution order)
+lives in [access-control.md § 4.5](access-control.md) and its
+[threat model](access-control.md#2--threat-model); the transport-side guarantee is that
+**Caddy strips client-supplied `X-User`/`X-Profile`** and forwards only the
+`forward_auth` response headers, and that app sockets are reachable only via Caddy
+(DD-1/DD-2).
+
+### Open decisions
+
+- ~~**Framework/templating**~~ → resolved: aiohttp + Jinja2 (DD-5).
+- ~~**CSP nonce ownership**~~ → resolved: shared `solver/web/csp.py` middleware mints a
+  per-response nonce; every rendering service applies it.
+- **htmx** for liveness → [§4.6](#46--liveness--htmx); adopt.
+- **nh3** for HTML sanitisation → [§4.7](#47--content-security-policy--nh3); adopt as the
+  Phase-5 save gate (pending a cp314-wheel check).
+
+## 4 · How it works
+
+### 4.1 Target topology
+
+```
+                          :443
+  browser ───TLS──▶  ┌──────────┐
+                     │  Caddy    │  edge: TLS, routing by path, security headers
+                     │  (edge)   │  forward_auth ─────────────┐
+                     └────┬──────┘                            │
+            unix sockets /run/euler                           ▼
+        ┌───────────┬─────────────┬──────────────┐     ┌────────────┐
+        ▼           ▼             ▼               ▼     │   auth      │  SRP login,
+   ┌─────────┐ ┌──────────┐ ┌───────────┐              │  service    │  sessions,
+   │ maint.  │ │ content   │ │  ws /      │◀────────────│ (aiohttp)   │  forward_auth
+   │ (static)│ │ (aiohttp  │ │  shell     │             └────────────┘  → 200 + X-User
+   └─────────┘ │ + Jinja2) │ │ (aiohttp   │                              or 401
+               └────┬──────┘ │  + PTY)    │
+                    │        └─────┬──────┘
+      reads solution tree          │ spawns `python -m solver`
+      (plaintext, incl.            │
+       solutions/private)          ▼
+                              ┌──────────┐   allowlist egress only
+        all outbound ────────▶│  Squid    │──▶ api.anthropic.com,
+        (AI, scraper, gh)     │ (egress)  │    projecteuler.net, github
+                              └──────────┘
+```
+
+Every app service binds a **unix domain socket** under `/run/euler/`; **only Caddy is
+publicly bound**. Caddy authenticates every request through `forward_auth` before it
+reaches content or shell, so those services never see an unauthenticated caller even
+with a bug.
+
+### 4.2 The edge (Caddy + acme.sh DNS-01)
+
+```
+Internet / LAN
+   │  https :443
+   ▼  Router: forward TCP 443 → <host LAN ip>:443   ·   Firewall: inbound allow 443
+   ▼
+   Caddy :443   ── runs as euler-caddy, config /etc/euler/Caddyfile ──
+      │  terminates TLS (loads /etc/euler/tls/server.{crt,key})
+      │  strips client X-User/X-Profile; security headers; forward_auth gate
+      ├─►  unix //run/euler/auth.sock       (euler-auth)      — Phase 4
+      ├─►  unix //run/euler/content.sock    (euler-content)   — Phase 5
+      └─►  unix //run/euler/ws.sock         (euler-ws)        — Phase 6
+   ▲
+ acme.sh (euler-acme, /usr/local/share/euler-acme)
+   └─  DNS-01 ─► name.com API (writes _acme-challenge TXT) ─► Let's Encrypt
+       reloadcmd: fix key mode + `caddy reload` (admin API — no root)
+ euler-ddns ─► name.com API (keeps the euler A record → current public IP)
+```
+
+No app service binds a TCP port — Caddy reaches each over a **unix domain socket**
+(DD-1), and only Caddy on `:443` is network-exposed. DNS-01 needs no inbound port, so
+nothing listens on `:80` (`auto_https disable_redirects`).
+
+**Why acme.sh rather than Caddy's own ACME:** the `caddy-dns/namedotcom` plugin is
+unmaintained and no longer builds against current Caddy. Issuance is delegated to
+**acme.sh** (whose `dns_namecom` client speaks the name.com API); stock Caddy simply
+loads the resulting certificate by absolute path. This keeps the DNS-01 benefit — a real
+certificate with no inbound port open — without a broken plugin.
+
+**The DNS API token** drives two things, both outside Caddy: the **DNS-01 challenge**
+(acme.sh writes `_acme-challenge.<FQDN>` TXT at issue/renewal) and **dynamic DNS**
+(`ddns.sh` keeps the `<FQDN>` A record on the current public IP, public access only).
+Both use the same name.com token; acme.sh caches it for renewals.
+
+**The Caddyfile** (generated to `/etc/euler/Caddyfile`, `0644`): Caddy loads the acme.sh
+cert by absolute path and performs no ACME of its own. It strips client
+`X-User`/`X-Profile` (DD-9), serves `/healthz` (Caddy-native) and `/assets/*` (static),
+routes the public auth surface (`/login`, `/register*`, `/reset*`, `/forgot`, `/terms`,
+`/auth/*`) to `unix//run/euler/auth.sock`, and gates everything else through
+`forward_auth` (`/auth/check` → `200` + `X-User`/`X-Profile` copied onto the request, or
+`401` → `302 /login`), falling through to the maintenance holding page until the content
+service lands. Regenerate + validate with `frontend.sh upgrade` and `sudo caddy validate
+--config /etc/euler/Caddyfile`.
+
+**The service.** `euler-caddy.service` is a **root-owned** system unit, boot-enabled,
+running Caddy as unprivileged `euler-caddy`: `AmbientCapabilities=CAP_NET_BIND_SERVICE`
+to bind `:443`, `RuntimeDirectory`/tmpfiles for `/run/euler`, and the hardening set
+(`NoNewPrivileges`, `ProtectHome`, `ProtectSystem`, `PrivateTmp`). Lifecycle needs
+`sudo` (DD-3).
+
+### 4.3 Egress (Squid)
+
+A Squid forward proxy on loopback `127.0.0.1:3128` with a **domain allowlist**
+(`api.anthropic.com`, `.projecteuler.net`, `.github.com`, `.githubusercontent.com`;
+default-deny), running as the dedicated `euler-proxy` user outside `euler-web`. The
+client-side `HTTPS_PROXY`/`HTTP_PROXY` is written to `/etc/euler/egress.env`, loaded by
+the app-service units via `EnvironmentFile=`, so AI features, the problem scraper, and
+`gh` egress only through Squid — operationalising "plaintext must never leave the repo"
+at the network layer. Config in `/etc/euler-proxy` (`squid.conf` + editable
+`squid.allowlist`). The kernel firewall (DD-8) makes Squid the *only* internet path at
+the packet level, so the allowlist cannot be bypassed by ignoring the env var.
+
+### 4.4 App runtime
+
+The Python services run from the root-owned `/opt/euler` venv (DD-5), never the repo.
+`scripts/setup/auth.sh` provisions the `euler-auth` identity, builds the venv (`pip
+install .[web]`), deploys the scoped `/etc/euler/auth.env`, provisions
+`/var/lib/euler-auth` and the runtime socket dirs, and installs the root-owned
+`euler-auth.service` (carrying the DD-8 `IPAddressDeny` filter). Content and shell
+services follow the same shape in Phases 5–6.
+
+### 4.5 Framework / templating
+
+aiohttp stays the one framework across content + shell; **Jinja2** (via
+`aiohttp-jinja2`, autoescape on) replaces the homegrown `template.replace(...)` +
+manual `html.escape` string engine (no inheritance, no partials, no autoescaping — an
+XSS footgun). FastAPI was considered and rejected: its headline value (pydantic JSON +
+OpenAPI) is for JSON APIs, precisely what this SSR design moves away from, and it adds
+starlette + pydantic + uvicorn weight beside the aiohttp shell service.
+
+Rendering contract:
+
+- `base.html` owns `<head>` (shared CSS, vendored JS), the header/nav include, and the
+  footer. Every page `{% extends "base.html" %}`.
+- Autoescape **on**. Any pre-sanitised HTML is injected through an explicit `| safe`
+  only after passing [nh3](#47--content-security-policy--nh3).
+- A route renders either the **whole page** or a **named block/fragment** of the same
+  template, so a full load and a live update share one source of truth.
+
+### 4.6 Liveness · htmx
+
+"Feels live" has two regimes, both keeping the server as the sole renderer:
+
+1. **Request-driven** (edit → save → validation panel; navigate a file list; quick
+   eval) → **htmx**: `hx-get`/`hx-post` fetch a rendered HTML fragment (a Jinja block)
+   and swap it in. No client JSON, no client templating.
+2. **Server-pushed** (benchmark progress, long output) → **SSE** (htmx SSE extension)
+   or the existing shell WebSocket. Prefer SSE for one-way content-service progress;
+   reserve the WS for the interactive shell.
+
+htmx is ~14 kB, vendored into `web-content/vendor/` (pinned + SRI + `LICENSES`) exactly
+like xterm.js/codemirror. It **strengthens** the CSP/XSS story: no client-side
+string→DOM assembly (no DOM-XSS class), all escaping is Jinja autoescape server-side.
+**CSP interaction (must design for):** with `script-src 'self'` and no `unsafe-inline`,
+use `hx-*` attributes (fine — not inline script) and **avoid `hx-on:` handlers**; set
+`htmx.config.includeIndicatorStyles = false` and ship the indicator CSS in the bundle so
+`style-src 'self'` needs no `unsafe-inline`. **Verdict: adopt** (Phase 5).
+
+### 4.7 Content-Security-Policy · nh3
+
+**CSP — locked: every served page carries one.** It is emitted by an **app middleware**
+(`solver/web/csp.py`, shared by every rendering service), because a strict policy uses a
+**per-response nonce** for any unavoidable inline `<script>`/`<style>`; the app that
+renders the page mints the nonce and stamps it into both the header and the template.
+Baseline: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'
+data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'`
+— no `unsafe-inline`, no `unsafe-eval`. **Caddy** adds the transport-level headers that
+need no per-response state (HSTS, `X-Content-Type-Options`, `Referrer-Policy`) and a
+fallback CSP for purely static responses. Vendored JS (htmx, xterm, codemirror, MathJax)
+is served from `'self'`.
+
+**nh3 (Phase 5 save gate).** The edit path validates `.py` (flake8 + autofix), `.c`
+(compile), and `.json` (parse/reserialise) with reject-and-restore, but writing `.html`
+verbatim would be a **stored-XSS hole** (`notes.html` is served back and rendered).
+**nh3** (the Rust/Ammonia sanitiser, maintained successor to `bleach`) closes it with an
+allowlist on save — strip `<script>`, `on*` handlers, `javascript:`/`data:` URLs,
+unknown tags/attrs. Defence in depth with the CSP (nh3 gates what is *stored*, CSP blocks
+what would *execute*). Caveats to settle in Phase 5: it is a **native wheel** (verify a
+`cp314` wheel exists, else budget a Rust toolchain); it is **lossy** (tune the allowlist
+for `notes.html`'s tables/code/MathJax); and there is an open call between raw-HTML+nh3
+and Markdown-authored+render+nh3 for notes. **Verdict: adopt** as the save gate.
+
+## 5 · Operating it
+
+### 5.1 The maintenance-kit (per-feature contract)
+
+Every phase ships **all** of these before it is "done":
+
+1. **Design note** — a section here or a dedicated `docs/*.md`, cross-linked.
+2. **Dependency management** — `install`/`uninstall`/`update` for the feature's deps:
+   Python deps pinned in a `pyproject` optional group + an importability/wheel check;
+   vendored browser assets via a pinned + SRI + `LICENSES` vendoring script; system deps
+   (caddy, squid, nftables) via the idempotent kit.
+3. **Configuration** — a generator for host-specific config, written to `/etc/euler`
+   (readable by the service users) or gitignored in-repo, from the single-source
+   `~/.euler/env` (e.g. the FQDN `EULER_TLS_DOMAIN`).
+4. **Lifecycle** — `start`/`stop`/`status`/`restart` via a **root-owned systemd system
+   unit per service** (boot-enabled), so lifecycle needs `sudo` (DD-3).
+5. **Health probe** — a `status` that reports actually-serving (HTTP/socket ping), not
+   just "process exists".
+
+An **umbrella** (`make install-web` / `uninstall-web` / `upgrade-web`) composes the
+per-service kits so the whole stack installs/removes/upgrades as one, while each service
+remains independently operable.
+
+### 5.2 Install the stack
+
+Set the deployment FQDN once in the authoring env file, then bring up the whole stack:
+
+```bash
+echo 'EULER_TLS_DOMAIN=euler.vikasmunshi.com' >> ~/.euler/env   # if not already set
+make install-web        # frontend → egress → ddns → firewall → smtp → auth (sudo)
+# or per kit: make install-frontend | install-egress | install-firewall | install-smtp | install-auth
+```
+
+`~/.euler/env` also carries the DNS provider's credential pair (default
+`NAMEDOTCOM_USERNAME` / `NAMEDOTCOM_TOKEN`), the Gmail relay creds (`SMTP_ADDRESS`,
+`SMTP_APP_PASSWORD`), and `ANTHROPIC_API_KEY`. The DNS provider is selectable via
+`$EULER_TLS_DNS_PROVIDER` (default `namecom`; also `cloudflare`, `route53`, `godaddy`,
+`digitalocean`, `gandi`) — each maps to an acme.sh hook and its credential pair.
+
+Lifecycle is privileged (DD-3): `sudo systemctl restart euler-<svc>`, or the kit's own
+`status`/`reload`/`renew`. Register the first admin account with `users add` (see
+[access-control § 6](access-control.md)).
+
+### 5.3 Going public (router + firewall + DDNS)
+
+Needed only for access beyond the LAN; [access-control.md](access-control.md) is what
+makes that access safe.
+
+- **Router:** port-forward **TCP 443 → the host's LAN IP** (no port 80 for DNS-01), and
+  give the host a **DHCP reservation** so its LAN IP does not drift.
+- **System firewall (WSL2 mirrored mode → Windows Hyper-V Firewall):** from an elevated
+  PowerShell —
+
+  ```powershell
+  New-NetFirewallHyperVRule -Name "WSL-Caddy-443" -DisplayName "WSL Caddy HTTPS" `
+    -Direction Inbound -VMCreatorId '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}' `
+    -Protocol TCP -LocalPorts 443 -Action Allow
+  ```
+
+  Confirm the VMCreatorId with `Get-NetFirewallHyperVVMCreator`; requires `[wsl2]
+  firewall=true` in `.wslconfig` (the default).
+- **Dynamic DNS:** `scripts/setup/ddns.sh install` runs `euler-ddns.timer` (every 5 min,
+  as `euler-ddns`), PUTting the name.com A record only when the public IP
+  (`api.ipify.org`) changes, using the **same name.com token as DNS-01**. Being infra
+  egress, it does **not** pass through Squid.
+
+### 5.4 Renewal & lifecycle
+
+- **acme.sh** runs as non-root `euler-acme` on `euler-acme.timer` (daily, `acme.sh
+  --cron`); its `--reloadcmd` fixes the key mode and reloads via Caddy's **admin API** —
+  no `systemctl`, no root. Renewal needs no DNS credentials re-supplied: acme.sh saves
+  the token in the cert `.conf` at issue time. Force one with `frontend.sh renew`.
+- **status** across the stack: each kit's `status` reports unit + health; `frontend.sh
+  status` shows cert expiry and `/healthz`.
+
+### 5.5 Configuration summary
+
+| Layer | Key config |
+|---|---|
+| Authoring source | `~/.euler/env`: `EULER_TLS_DOMAIN`, DNS creds, `SMTP_ADDRESS`/`SMTP_APP_PASSWORD`, `ANTHROPIC_API_KEY` (repo owner reads; installer deploys scoped copies) |
+| Edge | `/etc/euler/Caddyfile` (`0644`), `/etc/euler/tls/server.{crt,key}` (setgid, key `0640`), `/etc/euler/web-content` |
+| Egress | `/etc/euler-proxy/{squid.conf,squid.allowlist}`; client `HTTPS_PROXY` in `/etc/euler/egress.env` |
+| Firewall + relay | `/etc/euler/nftables.conf`; `/etc/euler/smtp.env` (`root:euler-smtp 0640`) |
+| App tier | `/opt/euler/venv`; `/etc/euler/auth.env` (`root:euler-auth 0640`); `/var/lib/euler-auth` (`0600`) |
+| Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` (`0600`) |
+
+## 6 · Build plan
+
+Built strictly in order; each phase is independently runnable and shipped with its full
+[maintenance kit](#51--the-maintenance-kit-per-feature-contract). The stack is useful
+and demonstrable at the end of every phase.
+
+### Phase 1 — Caddy + ACME (edge) ✅
+Public `:443` edge terminating TLS with an auto-renewing cert, a Caddy-native `/healthz`,
+security headers + fallback CSP. Built as `scripts/setup/frontend.sh`: the `euler-web`
+group + `euler-caddy`/`euler-acme` users, Caddy + acme.sh (DNS-01), the cert to
+`/etc/euler/tls`, the generated Caddyfile, and the root-owned `euler-caddy.service`.
+
+### Phase 2 — Squid (egress) ✅
+`scripts/setup/egress.sh`: Squid on loopback `127.0.0.1:3128` with a domain allowlist
+(default-deny), as `euler-proxy`; `HTTPS_PROXY` wired to the app units via
+`/etc/euler/egress.env`. `status` probes an allowed and a denied domain.
+
+### Phase 3 — Maintenance page (static) ✅
+Folded into `frontend.sh`: a single static "under maintenance" page served end-to-end —
+proves TLS, routing, headers, and CSP fallback on a real response. Establishes the
+`web-content/` static layout and the CSP baseline the app services inherit; a
+`handle_errors` block reuses it whenever a later upstream is down.
+
+### Phase 4 — Auth service ✅
+The full access layer, live-verified end-to-end (invite → scroll-gated Terms → OTP →
+browser-derived SRP verifier → login, for admin/user/guest). Design and mechanism in
+[access-control.md](access-control.md); infrastructure in DD-5 (runtime), DD-6 (state +
+admin plane), DD-8 (firewall + relay). Delivered in five steps:
+
+1. **`firewall.sh` + `smtp.sh` kits (DD-8)** — the per-uid nftables egress ruleset and
+   the loopback mail relay, so the app tier is loopback-only from its first deploy.
+2. **`web` extra + `/opt/euler` deploy (DD-5)** — the `web` optional group
+   (`aiohttp`/`aiohttp-jinja2`/`jinja2`); `auth.sh` provisions `euler-auth`, the venv,
+   the scoped `auth.env` (root-only `EULER_ADMIN_TOKEN`), state, and socket dirs.
+3. **Fresh `solver/web/auth` + admin API (DD-6, DD-9)** — stores on `/var/lib/euler-auth`,
+   sessions, one-time shell tickets, the wheel-gated admin API + `users` command, and the
+   DD-9 `identity.py` redesign. Verified by a 31-check harness.
+4. **Jinja pages + CSP-nonce middleware (DD-7)** — `solver/web/csp.py`, the login /
+   register / reset / forgot / terms pages, and the browser SRP client (byte-for-byte
+   interop-tested under Node). Verified by a 27-check flow harness.
+5. **Activate Caddy `forward_auth`** — strip client identity headers, route the public
+   auth surface, gate everything else; falls through to the maintenance page until
+   content lands.
+
+### Phase 5 — Content service ⬜
+Four independently shippable sub-steps:
+
+- **5a — Home, navigation, look & feel.** `base.html` + partials, shared CSS, header/nav,
+  **htmx** vendored and wired for fragment-swap navigation. A **placeholder panel stands
+  in for the web shell** so the layout and liveness are demonstrable before Phase 6.
+  Establishes the full-page-vs-block rendering contract.
+- **5b — View paths.** Server-rendered summary, problem, code, and docs pages, reading
+  each problem's `solution_dir` (plaintext, incl. decrypted `solutions/private`).
+- **5c — Content validation.** Port the `.py`/`.c`/`.json` checks; **add the `.html` gate
+  via [nh3](#47--content-security-policy--nh3)**; keep reject-and-restore.
+- **5d — Edit paths.** htmx save/delete/eval/benchmark returning rendered fragments;
+  benchmark progress via SSE. Every write goes through 5c; every response carries CSP.
+
+**Decisions to close before 5c:** nh3 cp314-wheel availability; the Jinja fragment
+mechanism (`jinja2-fragments` vs manual block render); `notes.html` raw-HTML+nh3 vs
+Markdown-authored; whether the advisory `html5lib` check is kept once nh3 is the gate.
+
+### Phase 6 — Web shell ⬜
+The PTY-backed interactive `solver` shell over WebSocket, **reusing**
+`web/pty_bridge.py` + `web/pty_manager.py` (one persistent shell per user). Replaces the
+5a placeholder with the live terminal (`xterm.js`). Highest-risk service (RCE by design):
+its own unit/user (`euler-ws`), egress only via Squid, behind `forward_auth`, and it
+mints/redeems the DD-9 shell ticket at attach. Per-user helper uids/namespaces are a
+future hardening (see [security-notes AR-1](security-notes.md)).
+
+## 7 · Verify
+
+1. `scripts/setup/frontend.sh status` shows Caddy + acme.sh installed, cert expiry,
+   `euler-caddy.service` `active/enabled`, and `/healthz → HTTP 200`.
+2. `sudo caddy validate --config /etc/euler/Caddyfile` passes; the service logs the
+   loaded certificate with no ACME attempt.
+3. From a LAN device, `curl -v https://<FQDN>/healthz` returns `ok` over a valid,
+   browser-trusted certificate; `curl -sI https://<FQDN>/login` shows HSTS + CSP.
+4. `scripts/setup/firewall.sh status` — an allowed uid (`euler-ddns` → ipify) reaches the
+   net, a dropped uid (`euler-caddy`) does not; `smtp.sh test` delivers a probe mail.
+5. Auth end-to-end and masquerade checks: see [access-control § 8](access-control.md).
+6. For public access, add the router forward + firewall rule, wire DDNS, and re-test from
+   outside the LAN (only once auth is in place).
+
+## 8 · Sources
+
+- [acme.sh](https://github.com/acmesh-official/acme.sh) ·
+  [dnsapi guide](https://github.com/acmesh-official/acme.sh/wiki/dnsapi) ·
+  [running under sudo](https://github.com/acmesh-official/acme.sh/wiki/sudo)
+- [Caddy `tls` directive (manual certificates)](https://caddyserver.com/docs/caddyfile/directives/tls) ·
+  [`forward_auth`](https://caddyserver.com/docs/caddyfile/directives/forward_auth)
+- [Accessing network applications with WSL — Microsoft Learn](https://learn.microsoft.com/en-us/windows/wsl/networking) ·
+  [Hyper-V Firewall — Microsoft Learn](https://learn.microsoft.com/en-us/windows/security/operating-system-security/network-security/windows-firewall/hyper-v-firewall)
+- [nftables wiki](https://wiki.nftables.org/) · [Squid](http://www.squid-cache.org/) ·
+  [htmx](https://htmx.org/) · [nh3](https://nh3.readthedocs.io/)

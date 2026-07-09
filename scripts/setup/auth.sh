@@ -8,7 +8,7 @@
 # the /var/lib/euler-auth state dir (DD-6), and — once the solver.web.auth module
 # exists in the deployed venv — the root-owned euler-auth.service. Sibling to
 # frontend.sh / egress.sh / ddns.sh / firewall.sh / smtp.sh; see
-# docs/server-redesign.md (Phase 4, DD-5..DD-9).
+# docs/secure-web-server.md (Phase 4, DD-5..DD-9).
 #
 # Model:
 #   - The app services run from a root-owned system venv at /opt/euler, NOT the
@@ -254,7 +254,7 @@ install_unit() {
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler auth service (SRP login, sessions, forward_auth — DD-5..DD-9)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/server-redesign.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/secure-web-server.md
 After=network.target euler-smtp.service
 Wants=euler-smtp.service
 

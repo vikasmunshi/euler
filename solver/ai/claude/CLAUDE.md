@@ -129,7 +129,7 @@ solver/
     shell_utils.py   — Utility for running shell commands and capturing their output.
     summary.py       — Progress: parse .progress.html into problems.json and refresh in-memory state.
     update_doc.py    — Regenerate the machine-maintained sections of the guides under `docs/`.
-  web/               — The web app services (server redesign, docs/server-redesign.md).
+  web/               — The web app services (see docs/secure-web-server.md).
     csp.py           — Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
     auth/            — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
       __main__.py    — Auth service entry point: ``python -m solver.web.auth`` (DD-5).

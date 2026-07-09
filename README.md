@@ -50,7 +50,7 @@ design notes.
 > **Prefer not to install?** A live instance of the web front end runs at
 > **[euler.vikasmunshi.com](https://euler.vikasmunshi.com)** - the same `solver` shell,
 > documentation viewer, and editor, all in the browser and served over HTTPS. Access is gated by a
-> login (see [Authentication](docs/authentication.md)); if you'd like an account to explore
+> login (see [Access control](docs/access-control.md)); if you'd like an account to explore
 > or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your own copy, see the
 > installation steps below.
 
@@ -180,8 +180,8 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   **SRP-6a** login (the password never crosses the wire), with per-identity **profiles** (admin / user / guest)
   deciding which commands and routes each caller may use. The setup script
   (`scripts/setup/frontend.sh`) installs Caddy + acme.sh and issues the cert; the front end is being
-  rebuilt as isolated services per the [server redesign](docs/server-redesign.md) (see also
-  [authentication](docs/authentication.md) and [authorization](docs/authorization.md)).
+  rebuilt as isolated services per the [secure web server](docs/secure-web-server.md) design (see
+  also [access control](docs/access-control.md)).
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
   any language that compiles or runs as a script.
@@ -258,7 +258,7 @@ solver/
     shell_utils.py   — Utility for running shell commands and capturing their output.
     summary.py       — Progress: parse .progress.html into problems.json and refresh in-memory state.
     update_doc.py    — Regenerate the machine-maintained sections of the guides under `docs/`.
-  web/               — The web app services (server redesign, docs/server-redesign.md).
+  web/               — The web app services (see docs/secure-web-server.md).
     csp.py           — Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
     auth/            — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
       __main__.py    — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
