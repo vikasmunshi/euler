@@ -25,37 +25,43 @@ shell.
 
 ## Accepted risks
 
-### AR-1 · An authenticated non-guest login is host code execution
+### AR-1 · A `contributor`+ login is host code execution
 
-A `user`-profile account can `new` + `edit` a solution and `evaluate` it — that
-runs arbitrary Python on the host. `claude-skill` (also `user`) launches a
-headless agent with host tool access. Gating `!`/`bash` to `admin` in
-`commands.csv` does **not** contain this: the effective trust boundary is *who
-receives an invite*, not the command policy.
+A `contributor`-profile account (or above) can `edit` a solution and `evaluate` it —
+that runs arbitrary Python on the host. `claude-skill` (`maintainer`) launches a
+headless agent with host tool access. Gating `!`/`bash` to `admin` in `commands.csv`
+does **not** contain this: the effective trust boundary is *who receives which
+profile*, not the command policy.
 
-**Why accepted.** The service exists to run collaborators' code. Instead of
-denying it, the redesign **contains** it: the web shell runs as the dedicated
-`euler-ws` uid (not the operator), from the `/opt/euler` venv (DD-5), loopback-only
-with a kernel egress firewall (DD-8), so a compromised shell reaches neither the
-operator's home, the crypto private key (`~/.euler/id`), nor the open internet.
-Identity never rests on the uid (DD-9), so same-uid compromise cannot masquerade to
-the auth service. **Standing controls:** keep the invite list minimal and audited;
-keep `!`/`bash`/`claude-*` `admin`-only in `commands.csv`; do not widen the
-`euler-ws` unit's `ReadWritePaths`/egress. Per-user helper uids or namespaces
-(one shell per uid) remain a future hardening (Phase 6 note).
+**Why accepted, and narrowed (DD-11).** The service exists to run collaborators' code.
+The profile ladder **bounds** it: `reader` (the default invite tier) is **read-only —
+no execute, no web shell**, so a new/untrusted invitee triggers no host execution; and
+`admin` (infra: `git`/`key`/`users`) is **local-only**, so no web account can administer
+accounts or touch the crypto master key. Execution is thus confined to `contributor`+.
+The redesign then **contains** what remains: the web shell runs as the dedicated
+`euler-ws` uid (not the operator), from the `/opt/euler` venv (DD-5), loopback-only with
+a kernel egress firewall (DD-8), so a compromised shell reaches neither the operator's
+home, the crypto private key (`~/.euler/id`), nor the open internet. Identity never rests
+on the uid (DD-9/DD-11), so same-uid compromise cannot masquerade to the auth service.
+**Standing controls:** grant `contributor`+ deliberately, keep the invite list audited;
+keep `!`/`bash` `admin`-only and `claude-*` `maintainer`+ in `commands.csv`; do not widen
+the `euler-ws` unit's `ReadWritePaths`/egress. Per-user helper uids or namespaces remain
+a future hardening (Phase 6).
 
 ### AR-2 · Web auth grants plaintext read of all private solutions
 
-Every authenticated user can read (and `user`+ can write) the **decrypted**
-`solutions/private/` tree through the viewer/editor. This relaxes the project's
-"plaintext never leaves the repo" rule to "plaintext is served to any authenticated
-web user," and there is no per-user isolation on the solution tree.
+Every authenticated account — **`reader` included** (read scope is uniform, DD-11) —
+can read the **decrypted** `solutions/private/` tree through the viewer; `contributor`+
+can also write it. This relaxes the project's "plaintext never leaves the repo" rule to
+"plaintext is served to any authenticated web account," and there is no per-user
+isolation on the solution tree.
 
-**Why accepted.** A shared solver is the intent; the invite list bounds the
-audience. If compartmentalisation is ever needed, the options are: gate
-`solutions/private/**` behind a higher profile, or add per-solution ownership/ACLs.
-Documented here rather than enforced. (The content viewer/editor lands in Phase 5;
-this note precedes it so the decision is explicit before that surface exists.)
+**Why accepted.** A shared solver is the intent; the invite list bounds the audience,
+and a `reader` is still an invited account. If compartmentalisation is ever wanted, the
+knobs are: gate `solutions/private/**` to `contributor`+ (make private-read part of
+graduating from `reader`), or add per-solution ownership/ACLs. Documented here rather
+than enforced. (The content viewer/editor lands in Phase 5; this note precedes it so the
+decision is explicit before that surface exists.)
 
 ## Regression guards
 
@@ -92,5 +98,5 @@ web server. Its findings are retired: SEC-01 (path traversal), SEC-04 (XFF
 spoofing), SEC-05 (edge headers/CSP), SEC-07 (`.env` perms) were fixed; SEC-01/03/08
 concern `solver/web/app.py` / `routes.py`, which the ground-up redesign
 ([secure-web-server](secure-web-server.md)) replaced. The two design-level risks
-survive here as [AR-1](#ar-1--an-authenticated-non-guest-login-is-host-code-execution)
+survive here as [AR-1](#ar-1--a-contributor-login-is-host-code-execution)
 and [AR-2](#ar-2--web-auth-grants-plaintext-read-of-all-private-solutions).

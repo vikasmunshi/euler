@@ -18,10 +18,11 @@ Three concerns, cleanly separated:
 
 - **Authentication** — proving identity. Browser-side SRP-6a for web requests, a
   one-time ticket for web shells, the checkout-owner uid for the local terminal.
-- **Authorization** — what a proven identity may do. A single **profile**
-  (`admin`/`user`/`guest`) drives command and route availability.
-- **Administration** — minting invites and enabling/disabling accounts, over a
-  sudo-gated local admin plane.
+- **Authorization** — what a proven identity may do. A single **profile** on a
+  four-rung ladder (`reader` → `contributor` → `maintainer` web-side, `admin` local
+  only) drives command and route availability (DD-11).
+- **Administration** — minting invites, promoting/demoting, and enabling/disabling
+  accounts, over a sudo-gated local admin plane.
 
 ### The no-mixing rule
 
@@ -52,7 +53,8 @@ profile that is not theirs. The vectors and their guards:
 | Vector | Guard |
 |---|---|
 | Browser sends its own `X-User`/`X-Profile` | Caddy strips inbound copies; only the `forward_auth` response headers are forwarded; app sockets are unreachable except via Caddy |
-| Web user re-execs `solver` with a chosen `SOLVER_USER` | env is display-only; identity requires a single-use ticket; the local fallback refuses non-owner uids |
+| Web user re-execs `solver` with a chosen `SOLVER_USER` | env is display-only; identity requires a single-use ticket |
+| `reader` web shell `unset SOLVER_TICKET; solver` to gain `contributor` | a `euler-*` service uid without a ticket **aborts** — the non-owner→`contributor` fallback is for real logins only (DD-11 §4.5) |
 | Replaying another shell's credential from `/proc/*/environ` | tickets are single-use — already consumed by the victim's own startup |
 | Bare `solver` as a service uid claiming admin | the admin fallback requires the checkout-owner uid |
 | Minting a ticket from inside a PTY | minting demands a live session cookie the shell user does not hold |
@@ -160,7 +162,7 @@ with no anonymous fallback:
 |---|---|---|
 | Web request | auth service | SRP session cookie → `forward_auth` → `X-User` + `X-Profile` |
 | Web shell (PTY child) | auth service | **one-time shell ticket**, redeemed over `auth.sock` |
-| Local terminal | the OS | `os.getuid()` **owns the repo checkout** → `admin` |
+| Local terminal | the OS | `os.getuid()` **owns the repo checkout** → `admin`; a real non-owner login → `contributor` |
 
 **The shell ticket.** Every web shell runs as the shared `euler-ws` uid, and
 `/proc/<pid>/environ` is same-uid-readable — so nothing env-carried can be the
@@ -172,14 +174,18 @@ the authoritative identity. Missing/expired/reused → the shell aborts. Minting
 a live cookie the shell user does not hold; the `/shell-ticket*` endpoints are not
 routed by Caddy (socket-peer only).
 
-**Local terminal.** The admin fallback applies **only** when the process uid owns
+**Local terminal.** The `admin` profile applies **only** when the process uid owns
 the checkout (`os.getuid() == stat(root_dir).st_uid`) — physical/login access to the
-checkout is the trust. Service uids never fall through to admin. The old
+checkout is the trust, and `admin` (infra: `git-*`/`key-*`/`users`) is reachable *only*
+this way, never over the web (DD-11). A real non-owner login resolves to `contributor`;
+a `euler-*` **service uid without a ticket aborts**, so a `reader` web shell cannot
+`unset SOLVER_TICKET` and re-exec `solver` as `euler-ws` to gain `contributor`. The old
 assume-an-identity path (`SOLVER_USER` / `keys/.user-email` / env verified against a
 user DB) is gone; `SOLVER_USER` is display-only.
 
 Resolution order: `SOLVER_TICKET` set → redeem (failure aborts); else owner uid →
-`admin`; else `SystemExit`.
+`admin`; else a `euler-*` service uid → `SystemExit`; else a real non-owner login →
+`contributor`; else `SystemExit`.
 
 ## 5 · How authorization works
 
@@ -189,28 +195,41 @@ composing layers:
 | Layer | Question | Driven by | Enforced at |
 |---|---|---|---|
 | **Channel** | which command *modules* load at all | `solver/modules.csv` (`terminal` / `web` columns) | module import (`shell/loader.py`) |
-| **Profile** | which loaded commands a profile may run | `solver/commands.csv` (`admin`/`user`/`guest`) | the `@register`/`@command` decorator (`shell/command.py`) |
+| **Profile** | which loaded commands a profile may run | `solver/commands.csv` (`admin`/`maintainer`/`contributor`/`reader`) | the `@register`/`@command` decorator (`shell/command.py`) |
 
 `modules.csv` decides what loads per channel — e.g. `update-docs` is `web=False`, so
 it never loads in a web shell; `users` is terminal-only. `commands.csv` then applies
 per profile on top.
 
-### Profiles
+### Profiles (the four-rung ladder, DD-11)
 
-Every identity carries one profile — `admin`, `user`, `guest`, descending privilege
-— resolved at startup (§4.5) and exposed as `config.user_profile`. Web identities
-carry the profile stored on their `users.json` record; the local operator (checkout
-owner) is `admin`.
+Every identity carries one profile, resolved at startup (§4.5) and exposed as
+`config.user_profile`. The ladder, most→least privileged:
+
+| Profile | Reached by | Gains over the rung below |
+|---|---|---|
+| **reader** | web invite (default) | **view** — docs, the full solution tree (public + decrypted private), assets |
+| **contributor** | web (promoted), or a local non-owner login | + **edit** solutions + **execute** (eval/benchmark, Phase-6 shell) |
+| **maintainer** | web (promoted) | + **delete** solutions + AI commands (`claude-*`, owner's budget) |
+| **admin** | **local terminal only** (checkout owner) | + infra: `git-*`, `key-*`, `users`, `manage-config`. **Never web-assignable.** |
+
+`admin` reachable only by owning the checkout means no web account can administer
+accounts or touch the crypto master key. `reader` is a **stepping stone** — a new
+invitee starts read-only and is promoted (`users change`, §6) as trust grows. Read
+scope is uniform: every account, `reader` included, may read the decrypted
+`solutions/private` plaintext (the [AR-2](security-notes.md) posture). See DD-11 for the
+content-service resource×verb matrix.
 
 ### The policy file (`solver/commands.csv`)
 
-A `command` column followed by one boolean column per profile:
+A `command` column followed by one boolean column per profile (`admin`, `maintainer`,
+`contributor`, `reader`):
 
 ```csv
-command,admin,user,guest
-benchmark,True,True,
-users,True,,
-show,True,True,True
+command,admin,maintainer,contributor,reader
+benchmark,True,True,True,
+users,True,,,
+show,True,True,True,True
 ```
 
 Semantics (`is_authorized`, `shell/command.py`):
@@ -220,9 +239,8 @@ Semantics (`is_authorized`, `shell/command.py`):
   command is never silently exposed before it is added to `commands.csv`.
 
 `update-docs` keeps `commands.csv` reconciled with the live registry (appends new
-commands with the default `admin`+`user` grant, drops removed ones, preserves every
-existing grant). Per-command availability is listed in
-[commands-index.md](commands-index.md).
+commands with a safe default grant, drops removed ones, preserves every existing grant).
+Per-command availability is listed in [commands-index.md](commands-index.md).
 
 ### Enforcement in the shell (decoration time)
 
@@ -234,12 +252,20 @@ identity, so the registered set is fixed for the life of the process.
 
 ### Enforcement on web routes (Phase 5)
 
-The content service (Phase 5) exposes some of the same power outside the shell — file
-save/delete, lint, progress — acting directly on the solution tree. Those routes are
-gated by the **same policy** via a `requires(<command>)` decorator keyed on the
-requester's `X-Profile`, so `commands.csv` stays the single source of truth across
-both surfaces. (The content service is not yet built; this is the contract it will
-honour.)
+The content service (Phase 5) exposes some of the same power outside the shell — view,
+edit, delete, execute (eval/benchmark) — acting directly on the solution tree. Those
+routes are gated by the **same policy** via a `requires(<capability>)` decorator keyed on
+the requester's `X-Profile`, so `commands.csv` stays the single source of truth across
+both surfaces. The resource×verb → profile matrix is DD-11:
+
+| Verb | Routes | reader | contributor | maintainer | admin |
+|---|---|:---:|:---:|:---:|:---:|
+| view | GET summary / problem / code / docs; file reads | ✓ | ✓ | ✓ | ✓ |
+| edit | save a solution file (incl. `notes.html`, + nh3) | | ✓ | ✓ | ✓ |
+| delete | delete a solution file | | | ✓ | ✓ |
+| execute | eval / benchmark; the Phase-6 web PTY shell | | ✓ | ✓ | ✓ |
+
+(The content service is not yet built; this is the contract it will honour.)
 
 ## 6 · Administration (the `users` command)
 
@@ -251,19 +277,23 @@ operator process holds no admin capability. It is terminal-only (`modules.csv`) 
 never routed through Caddy.
 
 ```bash
-users list                                # accounts + pending invites (never secrets)
-users add alice@example.com               # mint + email an invite (default profile: user)
-users add bob@example.com guest           # read-only browsing
-users add carol@example.com admin         # full access
-users disable alice@example.com           # also kills live sessions + remember tokens
+users list                                    # accounts + pending invites (never secrets)
+users add alice@example.com                   # mint + email an invite (default profile: reader)
+users add bob@example.com contributor         # invite a contributor (edit + run)
+users change alice@example.com contributor    # promote/demote — the stepping-stone verb
+users disable alice@example.com               # also kills live sessions + remember tokens
 users enable  alice@example.com
-users remove  alice@example.com           # delete the account and any pending invites
+users remove  alice@example.com               # delete the account and any pending invites
 ```
 
-`add` only mints an emailed invite — the account record is created when the invitee
-completes registration (§4.1), with the profile assigned here preserved through
-registration. There is deliberately **no reset verb**: reset is self-service (§4.1).
-Expect a `sudo` password prompt (cached per sudo's usual timestamp).
+Web-assignable profiles are `reader` (default) / `contributor` / `maintainer` — **not
+`admin`** (local-only, DD-11). `add` only mints an emailed invite; the account record is
+created when the invitee completes registration (§4.1), with the assigned profile
+preserved. `change` promotes/demotes an existing account and, like `disable`, **revokes
+its live sessions and remember tokens** so the new profile takes effect on next login
+(the profile is baked into the session at login and the shell at ticket-redeem). There is
+deliberately **no reset verb**: reset is self-service (§4.1). Expect a `sudo` password
+prompt (cached per sudo's usual timestamp).
 
 ## 7 · Reference
 

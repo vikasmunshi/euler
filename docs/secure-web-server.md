@@ -87,6 +87,7 @@ Locked, ADR-style. Each is summarised in the table, then argued below.
 | Registration | **Invite-only**, two-channel: **7-day** email link → Terms → **10-min OTP** → set SRP password — [DD-7](#dd-7--registration--invite-link--terms--otp--srp-password). |
 | Egress firewall | **Kernel-enforced**: systemd per-unit `IPAddressDeny` + host **nftables** owner-match; mail via a loopback `euler-smtp` relay — [DD-8](#dd-8--kernel-enforced-egress-firewall--loopback-mail-relay). |
 | Identity & masquerade | Three planes — `forward_auth` headers, one-time shell ticket, checkout-owner uid — [DD-9](#dd-9--identity-authentication-and-masquerade-prevention). |
+| Profiles & access | Four-rung ladder `reader`/`contributor`/`maintainer` (web) + `admin` (**local-only**); content routes gated by a resource×verb matrix; `users change` promotes/demotes — [DD-11](#dd-11--profiles--content-service-access). |
 
 ### DD-1 · Inter-service transport = unix domain sockets
 
@@ -303,7 +304,9 @@ and the Gmail password out of every service but one.
 resolution (`solver/utils/identity.py`) is redesigned around **three planes**, each with
 an explicit voucher — web request (`forward_auth` → `X-User`/`X-Profile`), web shell
 (one-time ticket redeemed over `auth.sock`), local terminal (checkout-owner uid →
-admin). `SOLVER_USER` is display-only; there is no anonymous fallback. The full
+`admin`, a real non-owner login → `contributor`, a `euler-*` service uid without a ticket
+→ abort; see [DD-11](#dd-11--profiles--content-service-access)). `SOLVER_USER` is
+display-only; there is no anonymous fallback. The full
 mechanism (the shell ticket, the masquerade vector→guard table, the resolution order)
 lives in [access-control.md § 4.5](access-control.md) and its
 [threat model](access-control.md#2--threat-model); the transport-side guarantee is that
@@ -345,6 +348,61 @@ build (see [Build plan → Phase 5](#phase-5--content-service-)):
   is the author's feedback in the editor; a second HTML parser for advisory
   well-formedness is not worth the extra dependency. `html5lib` stays out of the `web`
   extra (where Phase 4 already dropped it).
+
+### DD-11 · Profiles & content-service access
+
+**Decision.** Authorization runs on a **four-rung profile ladder**, re-columning
+`commands.csv` (was `admin`/`user`/`guest`). The headline: **`admin` is local-only** —
+the top *web* tier is `maintainer`, so **no web account can reach the infra commands**
+(`git-*`, `key-*`, `users`, `manage-config`) or the crypto master key. The lowest tier,
+`reader`, is a **stepping stone**: a new invitee starts read-only and is promoted as
+trust grows.
+
+| Profile | Reached by | Gains over the rung below |
+|---|---|---|
+| **reader** | web invite (default) | **view** only — framework docs, the full solution tree (public **and** decrypted private), static assets |
+| **contributor** | web (promoted), or a local non-owner login | + **edit** solution files (code / notes / tests) + **execute** (eval / benchmark, and the Phase-6 web shell) |
+| **maintainer** | web (promoted) | + **delete** solution files + the AI commands (`claude-api` / `claude-skill`, which spend the owner's API budget) |
+| **admin** | **local terminal only** (uid == repo-owner) | + infra: `git-*`, `key-*`, `users`, `manage-config`, `update-*`. **Never web-assignable.** |
+
+Read scope is **uniform** — every authenticated account, `reader` included, may read the
+decrypted `solutions/private` plaintext (the [AR-2](security-notes.md) posture; the
+invite list is the trust boundary).
+
+**Content-service access matrix.** Route guards map to `commands.csv` capabilities — one
+policy across shell and web (the DD-6 invariant) — with a `view` capability added for
+pure-GET pages:
+
+| Verb | Routes | reader | contributor | maintainer | admin |
+|---|---|:---:|:---:|:---:|:---:|
+| view | GET summary / problem / code / docs; file reads | ✓ | ✓ | ✓ | ✓ |
+| edit | save a solution file (incl. `notes.html`, + nh3, DD-10) | | ✓ | ✓ | ✓ |
+| delete | delete a solution file | | | ✓ | ✓ |
+| execute | eval / benchmark; the Phase-6 web PTY shell | | ✓ | ✓ | ✓ |
+
+Static `web-content` assets are Caddy-served and never writable through the service.
+`execute` at `contributor`+ keeps the Project-Euler workflow intact (a contributor runs
+the solution they wrote) while making `reader` genuinely RCE-free
+([AR-1](security-notes.md)); the web PTY shell (Phase 6) is likewise `contributor`+, so
+`reader` gets no terminal.
+
+**Identity resolution (refines DD-9).** The local-terminal plane now yields *two*
+profiles, but service uids must not escalate:
+
+1. `SOLVER_TICKET` set → redeem over `auth.sock` → the account's stored profile; failure
+   aborts.
+2. else uid == repo-owner → **admin**.
+3. else a **`euler-*` service account** (no ticket) → **abort** — this blocks a `reader`
+   web shell from re-execing `solver` as `euler-ws` (after `unset SOLVER_TICKET`) to gain
+   `contributor`.
+4. else a real non-owner login → **contributor**.
+5. else abort.
+
+**`users change`.** Promotion/demotion is a first-class admin verb —
+`users change <email> <profile>` (profile ∈ `reader`/`contributor`/`maintainer`; `admin`
+is not web-assignable) on the sudo-gated admin plane. Like `disable`, it **revokes the
+account's live sessions and remember tokens**: the profile is baked into the session at
+login and into the shell at ticket-redeem, so a change takes effect on next login.
 
 ### Open decisions
 
@@ -637,7 +695,7 @@ proves TLS, routing, headers, and CSP fallback on a real response. Establishes t
 
 ### Phase 4 — Auth service ✅
 The full access layer, live-verified end-to-end (invite → scroll-gated Terms → OTP →
-browser-derived SRP verifier → login, for admin/user/guest). Design and mechanism in
+browser-derived SRP verifier → login, across the profile tiers). Design and mechanism in
 [access-control.md](access-control.md); infrastructure in DD-5 (runtime), DD-6 (state +
 admin plane), DD-8 (firewall + relay). Delivered in five steps:
 
