@@ -174,18 +174,19 @@ the authoritative identity. Missing/expired/reused → the shell aborts. Minting
 a live cookie the shell user does not hold; the `/shell-ticket*` endpoints are not
 routed by Caddy (socket-peer only).
 
-**Local terminal.** The `admin` profile applies **only** when the process uid owns
-the checkout (`os.getuid() == stat(root_dir).st_uid`) — physical/login access to the
-checkout is the trust, and `admin` (infra: `git-*`/`key-*`/`users`) is reachable *only*
-this way, never over the web (DD-11). A real non-owner login resolves to `contributor`;
-a `euler-*` **service uid without a ticket aborts**, so a `reader` web shell cannot
-`unset SOLVER_TICKET` and re-exec `solver` as `euler-ws` to gain `contributor`. The old
-assume-an-identity path (`SOLVER_USER` / `keys/.user-email` / env verified against a
-user DB) is gone; `SOLVER_USER` is display-only.
+**Local terminal.** The profile is the `authorizations.json` `users`-map value for the OS
+login (DD-12) — the same map that carries web emails. The **checkout owner is seeded
+`admin` at install**, and if the owner is somehow absent from the map the owner-uid still
+floors to `admin` (you cannot lock yourself out of your own checkout); an explicit entry
+wins, so the operator *can* deliberately run local at a lower profile. `admin` (infra:
+`git-*`/`key-*`, plus `users:write`) is reachable only locally, never over the web (DD-11).
+A `euler-*` **service uid without a ticket aborts**, so a `reader` web shell cannot `unset
+SOLVER_TICKET` and re-exec `solver` as `euler-ws` to escalate. The old assume-an-identity
+path (`SOLVER_USER` / `keys/.user-email` / env) is gone; `SOLVER_USER` is display-only.
 
-Resolution order: `SOLVER_TICKET` set → redeem (failure aborts); else owner uid →
-`admin`; else a `euler-*` service uid → `SystemExit`; else a real non-owner login →
-`contributor`; else `SystemExit`.
+Resolution order: `SOLVER_TICKET` set → redeem (failure aborts); else a `euler-*` service
+uid → `SystemExit`; else `users.get(os_login)`; else owner-uid floor → `admin`; else
+`contributor`.
 
 ## 5 · How authorization works
 
@@ -248,7 +249,8 @@ A command/route declares `requires=[obj:perm]`; enforcement is `requires ⊆ per
 `infra:execute` (admin-only), so a new command is never silently exposed. Example mapping:
 `show → solutions:read`; `new`/`edit` → `solutions:write`; `evaluate`/`benchmark` →
 `solutions:execute`; `!` → `shell:execute`; `claude-*` → `ai:execute`;
-`git-*`/`key-*`/`users` → `infra:execute`. The DD-11 content matrix is exactly these grants
+`git-*`/`key-*` → `infra:execute`; `users` splits (`list → users:read` for `reader`+,
+mutations → `users:write` for `admin`). The DD-11 content matrix is exactly these grants
 (view=read, edit=write, delete=delete, execute=execute). `update-docs` regenerates
 **`solver/commands.json`** — the audit view of each command's `requires`/`channels`,
 distinct from the authored `authorizations.json`.
@@ -269,31 +271,31 @@ distinct from the authored `authorizations.json`.
 
 ## 6 · Administration (the `users` command)
 
-Account administration is the **wheel-gated admin plane** (DD-6). The `users` shell
-command re-executes the admin CLI (`solver.web.auth.admin`) under `sudo` — the admin
-socket (`/run/euler-adm/auth-admin.sock`) is `0600` euler-auth-private and the
-`X-Admin-Token` lives only in root-readable `/etc/euler/auth.env`, so an ordinary
-operator process holds no admin capability. It is terminal-only (`modules.csv`) and
-never routed through Caddy.
+`users` is split by verb (DD-12): **`users list`** requires `users:read` (a `reader`+
+grant) and reads the world-readable `/etc/euler/authorizations.json` roster; the
+**mutating verbs** require `users:write` (`admin`) and go through the **wheel-gated admin
+plane** (DD-6) — the CLI (`solver.web.auth.admin`) re-executed under `sudo`, editing the
+root-owned SoR. So an ordinary operator process can *list* but not *change*.
 
 ```bash
-users list                                    # accounts + pending invites (never secrets)
-users add alice@example.com                   # mint + email an invite (default profile: reader)
-users add bob@example.com contributor         # invite a contributor (edit + run)
+users list                                    # roster (reader+); full account state needs admin
+users add alice@example.com                   # WEB: mint + email an invite (default profile: reader)
+users add bob@example.com contributor         # WEB: invite a contributor
+users add vikas admin                         # LOCAL: a bare os-login → direct map entry, no invite
 users change alice@example.com contributor    # promote/demote — the stepping-stone verb
 users disable alice@example.com               # also kills live sessions + remember tokens
 users enable  alice@example.com
-users remove  alice@example.com               # delete the account and any pending invites
+users remove  alice@example.com               # delete the account/entry and any pending invites
 ```
 
-Web-assignable profiles are `reader` (default) / `contributor` / `maintainer` — **not
-`admin`** (local-only, DD-11). `add` only mints an emailed invite; the account record is
-created when the invitee completes registration (§4.1), with the assigned profile
-preserved. `change` promotes/demotes an existing account and, like `disable`, **revokes
-its live sessions and remember tokens** so the new profile takes effect on next login
-(the profile is baked into the session at login and the shell at ticket-redeem). There is
-deliberately **no reset verb**: reset is self-service (§4.1). Expect a `sudo` password
-prompt (cached per sudo's usual timestamp).
+**Two-path `add`** (DD-12): an `@`-address is the **web** path (mint an invite → the
+account's profile lands in `authorizations.json` on registration); a bare **os-login** is
+the **local** path — a direct `users`-map entry, no invite (a local login authenticates by
+*being* that OS user). Web-assignable profiles are `reader` (default) / `contributor` /
+`maintainer` — **not `admin`** (local-only; the checkout owner is seeded `admin` at
+install). `change` promotes/demotes and, like `disable`, **revokes live sessions +
+remember tokens** so the new profile takes effect on next login. No reset verb — reset is
+self-service (§4.1). Mutating verbs prompt for `sudo`.
 
 ## 7 · Reference
 
@@ -319,12 +321,17 @@ prompt (cached per sudo's usual timestamp).
 | `TICKET_TTL_SECONDS` | 60 s | one-time shell ticket (DD-9) |
 | `AUTH_RATE_MAX` / `AUTH_RATE_WINDOW_SECONDS` | 30 / 60 s | per-client rate limit on unauthenticated endpoints |
 
-### Runtime config (`/etc/euler/auth.env`, `root:euler-auth 0640`)
+### Runtime config
 
-`EULER_BASE_URL`, `EULER_ADMIN_TOKEN` (root-only), `TERMS_VERSION`,
-`EULER_SMTP_RELAY`. Deployed from the authoring source `~/.euler/env` by
-`scripts/setup/auth.sh`; the auth service never reads the full `~/.euler/env` (no
-Anthropic key, no SMTP creds — mail goes through the loopback relay, DD-8).
+- **`/etc/euler/auth.env`** (`root:euler-auth 0640`): `EULER_BASE_URL`,
+  `EULER_ADMIN_TOKEN` (root-only), `TERMS_VERSION`, `EULER_SMTP_RELAY`. Deployed from the
+  authoring source `~/.euler/env` by `scripts/setup/auth.sh`; the auth service never reads
+  the full `~/.euler/env` (no Anthropic key, no SMTP creds — mail via the loopback relay,
+  DD-8).
+- **`/etc/euler/authorizations.json`** (`root:root 0644`, DD-12): the authorization
+  system of record — `profiles` / `users` / `objects`. World-readable (non-secret policy),
+  **root-write only**; mutated exclusively through the sudo-gated `users` path. Read by
+  both the local shell and the app services.
 
 ## 8 · Verify
 

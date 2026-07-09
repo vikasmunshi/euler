@@ -447,23 +447,35 @@ shell-ticket, SRP-session); `permissions` is the inheritance-expanded grant set.
 separate and **imports `solver/auth`** to turn an authenticated email into a subject —
 authN and authZ are distinct packages.
 
-**`authorizations.json`** (deployed to `/etc/euler/authorizations.json`, `0644` non-secret
-policy; the repo ships a template; the sudo-gated `users` commands edit the deployed copy;
-read by both the local shell and the services):
+**`authorizations.json`** is the **system of record, outside the repo** —
+`/etc/euler/authorizations.json`, `root`-owned (`0644`: world-readable non-secret policy,
+**root-write only**). It is *not* a repo file: a repo write cannot change policy, and every
+mutation goes through the **sudo-gated `users` path** (DD-6). The repo ships only a
+bootstrap template; the installer seeds the real file (including the **checkout owner as
+`admin`**, below). Both the local shell and the services read it.
 
 ```json
 {
   "profiles": {
-    "reader":      { "inherits": null,          "grants": ["solver:execute","solutions:read","docs:read","web-content:read"] },
+    "reader":      { "inherits": null,          "grants": ["solver:execute","solutions:read","docs:read","web-content:read","users:read"] },
     "contributor": { "inherits": "reader",      "grants": ["solutions:write","solutions:execute"] },
     "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute"] },
-    "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute"] }
+    "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute","users:write"] }
   },
-  "users":   { "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
+  "users":   { "vikas": "admin", "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
   "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["web-content/"],
-               "solver": [], "shell": ["/bin/bash"], "ai": [], "infra": [] }
+               "solver": [], "shell": ["/bin/bash"], "ai": [], "users": [], "infra": [] }
 }
 ```
+
+- **users** — keyed by **web email _or_ os-login name** (so it scales to both channels).
+  `"vikas": "admin"` is the checkout owner, seeded at install. The web channel is capped at
+  `maintainer` (a `users` entry granting `admin` is never honoured over the web).
+- **`users` is itself an object**: `users:read` (roster listing) is a `reader` grant;
+  `users:write` (add / change / enable / disable / remove) is `admin` only. This needs the
+  kernel to answer **runtime** permission queries (`subject.has('users:write')`), not just
+  the registration-time gate — so one `users` command serves a read path to `reader`+ and
+  gates its mutating verbs to `admin`.
 
 - **profiles** — each a set of `object:permission` grants (`permission ∈ read/write/
   execute/delete`), with single-parent `inherits` so grants stay DRY (the DD-11 ladder,
@@ -484,9 +496,10 @@ read by both the local shell and the services):
 defaults fail-closed** to `infra:execute` (admin-only) — a new command is never silently
 exposed. Example mapping: `show → solutions:read`; `new`/`edit` → `solutions:write`;
 `evaluate`/`benchmark` → `solutions:execute`; `!` → `shell:execute`; `claude-*` →
-`ai:execute`; `git-*`/`key-*`/`users`/`manage-config` → `infra:execute`. A generated
-**`solver/commands.json`** (by `update-docs`) reports each command's `requires`/`channels`
-for audit — the generated audit view, distinct from the authored `authorizations.json`.
+`ai:execute`; `git-*`/`key-*`/`manage-config` → `infra:execute`; `users` splits by verb
+(`list → users:read`, mutations → `users:write`). A generated **`solver/commands.json`**
+(by `update-docs`) reports each command's `requires`/`channels` for audit — the generated
+audit view, distinct from the authored `authorizations.json`.
 
 **`modules.csv` → loader-only.** It keeps just `(module, registers_commands)`; the
 `terminal`/`web` columns are gone (channel now lives on the decorator, finer-grained). All
@@ -526,10 +539,19 @@ ACL-shared with `euler-web`, per-profile — a targeted share, not the blanket h
 DD-5 rejected. The master key never reaches the services; a web compromise reads
 working-tree plaintext (accepted, [AR-2](security-notes.md)) but cannot obtain the key.
 
-**Profile resolution (map + anchors).**
+**Profile resolution (`solver/auth`, replacing `utils/identity.py`).** The profile is the
+`users` map's value for the resolved identity — one source for both channels:
 1. **web** (channel=web): `profile = users.get(email)`, **capped at `maintainer`**.
-2. **local terminal**: uid == checkout owner → `admin`; else a `euler-*` service uid without
-   a ticket → abort; else `users.get(os_username, 'contributor')`.
+2. **local terminal**: a `euler-*` service uid without a ticket → abort; else
+   `users.get(os_login)`; else — if not in the map and the uid **owns the checkout** →
+   `admin` (an un-lock-out-able floor; the installer also seeds the owner explicitly, so an
+   explicit map entry wins and lets the operator run local at a lower profile deliberately);
+   else `contributor`.
+
+**Two-path `users add`.** `users add <email>` is the web path (mint an invite → registration
+→ the account's profile entry); `users add <os-login>` is the local path — a bare username
+gets a direct `users`-map entry, no invite (a local login authenticates by *being* that OS
+user). Both write the sudo-gated `/etc/euler/authorizations.json`.
 
 **Staleness = re-login.** The subject resolves its permissions once at process start, so an
 `authorizations.json` edit takes effect on the next login / shell-start; `users change`
