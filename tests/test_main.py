@@ -36,7 +36,7 @@ class MainArgvTests(unittest.TestCase):
     def test_cmdline_argv_is_honored(self) -> None:
         """A positional block in argv runs as a command block (not sys.argv)."""
         rc = main(['ls 42'])
-        self.mock_load.assert_called_once_with('terminal')
+        self.mock_load.assert_called_once_with()
         self.MockShell.assert_called_once_with(save=False, profile='terminal')
         self.instance.run_command.assert_called_once_with(['ls 42'])
         self.instance.run_interactive.assert_not_called()
@@ -75,7 +75,7 @@ class MainArgvTests(unittest.TestCase):
     def test_web_profile_selected(self) -> None:
         """`--web` loads and constructs the shell with the web profile."""
         main(['--web', 'ls 1'])
-        self.mock_load.assert_called_once_with('web')
+        self.mock_load.assert_called_once_with()
         self.MockShell.assert_called_once_with(save=False, profile='web')
 
     def test_profiles_are_mutually_exclusive(self) -> None:

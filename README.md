@@ -252,9 +252,8 @@ solver/
     new.py            — Solution to Euler $problem.
   utils/
     gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
-    identity.py       — Ambient user identity **and profile**: who is this shell running as (DD-9).
     linter.py         — Utilities for linting code.
-    loader.py         — Utility for loading modules.
+    loader.py         — Utility for loading command modules.
     misc.py           — The `problems` and `manage-config` commands.
     path_utils.py     — Utility functions for file and directory operations.
     scripts.py        — A set of utilities to manage Git repository workflows.

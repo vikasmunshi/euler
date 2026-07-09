@@ -16,7 +16,7 @@ from typing import Any, ClassVar
 from prompt_toolkit.styles import Style
 from rich.theme import Theme
 
-from solver.utils.identity import resolve_identity
+from solver.auth import Subject, resolve_subject
 
 
 class ExitCodes(enum.IntEnum):
@@ -123,6 +123,7 @@ class Config(AttributeDict):
     timeout_multiple: float
     timeout_single: float
     ecb_usd_rate: float
+    subject: Subject
     user: str
     user_slug: str
     user_profile: str
@@ -136,7 +137,6 @@ class Config(AttributeDict):
     history_file: Path
     last_problem_file: Path
     modules_file: Path
-    commands_file: Path
     server_lock_file: Path
     session_file: Path
     solutions_dir: Path
@@ -155,8 +155,11 @@ class Config(AttributeDict):
         # Project dotenv: API key, SMTP + DNS credentials. Machine-local, in the
         # sibling secrets dir outside the checkout (repo `~/euler` -> `~/.euler/env`).
         env_file: Path = root_dir.parent / f'.{root_dir.name}' / 'env'
-        user, user_slug, user_profile = resolve_identity(root_dir)
-        user_state_dir: Path = root_dir / '.state' / user_slug
+        # Resolve the security subject once (DD-12): identity + channel + profile +
+        # inheritance-expanded permissions, from authorizations.json (deployed SoR →
+        # built-in default). Drives per-user state and command/route authorization.
+        subject: Subject = resolve_subject(root_dir)
+        user_state_dir: Path = root_dir / '.state' / subject.slug
         user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={
             'scripts': Scripts(),
@@ -178,9 +181,10 @@ class Config(AttributeDict):
             'timeout_single': 90.0,  # timeout in seconds for single run
             'ecb_usd_rate': 1.00,  # euros per US dollar, used by `costs`; updated by update-models cmd
 
-            'user': user,
-            'user_slug': user_slug,
-            'user_profile': user_profile,
+            'subject': subject,
+            'user': subject.user,
+            'user_slug': subject.slug,
+            'user_profile': subject.profile,
             'root_dir': root_dir,
             'backup_dir': root_dir / '.backup',
             'cache_dir': root_dir / '.cache',
@@ -192,7 +196,6 @@ class Config(AttributeDict):
             'history_file': user_state_dir / 'history',
             'last_problem_file': user_state_dir / 'last_problem',
             'modules_file': root_dir / 'solver/modules.csv',
-            'commands_file': root_dir / 'solver/commands.csv',  # per-profile command authorization policy
             'server_lock_file': root_dir / '.server.lock',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',

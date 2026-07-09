@@ -8,66 +8,34 @@ followed by its parsed argv tokens, and returning an `int` exit code.
 """
 from __future__ import annotations
 
-__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'is_authorized', 'is_authorized_for',
-           'registry']
+__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'effective_requires',
+           'is_permitted', 'registry']
 
-import csv
 from dataclasses import dataclass, field
-from functools import lru_cache
 from typing import Any, Callable, Iterable
 
 from prompt_toolkit.completion import Completion
 from rich.console import Console
 
+from solver.auth import FAILCLOSED_PERMISSION
 from solver.config import config
 from solver.shell.tty import console
 from solver.shell.variables import Variables, variables
 
-#: Column values read as "granted" in the command-authorization CSV.
-_TRUTHY: frozenset[str] = frozenset({'true', '1', 'yes'})
+
+def effective_requires(requires: tuple[str, ...]) -> tuple[str, ...]:
+    """Normalise a command's ``requires`` — an empty list is **fail-closed** to
+    ``infra:execute`` (admin-only), so a command that declares nothing is never
+    silently exposed (DD-12)."""
+    return requires or (FAILCLOSED_PERMISSION,)
 
 
-@lru_cache(maxsize=1)
-def _authorization_policy() -> dict[str, frozenset[str]]:
-    """Map ``command name → the profiles allowed to use it``, from ``config.commands_file``.
-
-    The CSV (``solver/commands.csv``) mirrors ``modules.csv``: a header ``command``
-    then one boolean column per profile (``admin``/``user``/``guest``), a truthy cell
-    granting that profile the command. A missing or unreadable file yields an empty
-    policy — every command then falls back to admin-only (see :func:`is_authorized`).
-    Cached: the policy is fixed for a process (one shell serves one identity).
-    """
-    try:
-        rows = list(csv.DictReader(config.commands_file.read_text(encoding='utf-8').splitlines()))
-    except OSError:
-        return {}
-    profiles = ('admin', 'user', 'guest')
-    policy: dict[str, frozenset[str]] = {}
-    for row in rows:
-        name = (row.get('command') or '').strip()
-        if name:
-            policy[name] = frozenset(p for p in profiles if (row.get(p) or '').strip().lower() in _TRUTHY)
-    return policy
-
-
-def is_authorized_for(cmd_name: str, profile: str) -> bool:
-    """True if *profile* may use *cmd_name* under the ``commands.csv`` policy.
-
-    A command listed in the policy is allowed only for the profiles its row grants; a
-    command **absent** from the policy is admin-only, so a newly added command is never
-    silently exposed to ``user``/``guest`` until it is added to ``commands.csv``. Takes
-    the profile explicitly so a caller (e.g. the web tier, running as one process for
-    many users) can check on behalf of an identity other than its own.
-    """
-    allowed = _authorization_policy().get(cmd_name)
-    if allowed is None:
-        return profile == 'admin'
-    return profile in allowed
-
-
-def is_authorized(cmd_name: str) -> bool:
-    """True if the current process's profile (``config.user_profile``) may use *cmd_name*."""
-    return is_authorized_for(cmd_name, config.user_profile)
+def is_permitted(requires: tuple[str, ...], channels: tuple[str, ...]) -> bool:
+    """True if the current process's :class:`~solver.auth.Subject` may run a command
+    with these *requires* / *channels* — i.e. its channel is allowed **and** it holds
+    every required ``object:permission`` (DD-12). One process serves one subject."""
+    subject = config.subject
+    return subject.channel in channels and subject.has_all(effective_requires(requires))
 
 
 @dataclass
@@ -99,6 +67,11 @@ class Command:
     usage: str = ''
     aliases: tuple[str, ...] = ()
     completer: Callable[[Context, str], Iterable[str | Completion]] | None = None
+    #: The ``object:permission`` grants this command needs (DD-12). Empty ⇒ the
+    #: fail-closed default (admin-only); stored expanded so it is never empty.
+    requires: tuple[str, ...] = ()
+    #: The channels this command is valid in (``terminal``/``web``).
+    channels: tuple[str, ...] = ('terminal', 'web')
 
     def invoke(self, ctx: Context) -> int:
         """Call the command's function with *ctx* and the parsed argv, returning its exit code."""
@@ -161,15 +134,22 @@ def command(
         usage: str = '',
         aliases: tuple[str, ...] = (),
         completer: Callable[[Context, str], Iterable[str | Completion]] | None = None,
+        requires: tuple[str, ...] = (),
+        channels: tuple[str, ...] = ('terminal', 'web'),
 ) -> Callable[[CommandFn], CommandFn]:
-    """Decorator that registers *func* as a shell command (returned unchanged)."""
+    """Decorator that registers *func* as a shell command (returned unchanged).
+
+    ``requires`` is the ``object:permission`` grants the command needs and
+    ``channels`` the channels it is valid in (DD-12); an empty ``requires`` is
+    fail-closed to admin-only. The command registers only if the current subject's
+    channel is allowed and it holds every required permission — otherwise it is
+    left unregistered (invisible to help/completion, "unknown command" if invoked),
+    while the function is returned unchanged so it stays a plain Python callable.
+    """
 
     def _decorate(func: CommandFn) -> CommandFn:
         cmd_name = name or func.__name__.lstrip('_').replace('_', '-')
-        if not is_authorized(cmd_name):
-            # Not permitted for this shell's profile → leave it unregistered (invisible to
-            # help/completion, "unknown command" if invoked). The function is returned
-            # unchanged so it still works as a plain Python callable.
+        if not is_permitted(requires, channels):
             return func
         cmd_help = help_text
         if not cmd_help and func.__doc__:
@@ -181,6 +161,8 @@ def command(
             usage=usage,
             aliases=tuple(aliases),
             completer=completer,
+            requires=effective_requires(requires),
+            channels=tuple(channels),
         ))
         return func
 

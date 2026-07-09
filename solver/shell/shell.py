@@ -16,7 +16,7 @@ import re
 import shlex
 import sys
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Iterable, Iterator
+from typing import Any, Iterable, Iterator, Literal
 
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.document import Document
@@ -34,8 +34,8 @@ from solver.shell.session import SessionLog
 from solver.shell.tty import console, make_session, read_blocks, trim_history
 from solver.shell.variables import variables
 
-if TYPE_CHECKING:
-    from solver.utils.loader import Profile
+#: The shell's channel (informational; authorization uses ``config.subject``).
+Profile = Literal['terminal', 'web']
 
 #: A variable reference being typed at the cursor: `{` then an optional partial
 #: name. Used to switch completion from command names to variable names.

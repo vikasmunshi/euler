@@ -25,22 +25,28 @@ from within the solver shell, or non-interactively for a pre-commit / CI lane �
 from __future__ import annotations
 
 import ast
-import csv
 import inspect
-import io
+import json
 import re
 from pathlib import Path
 from typing import Callable
 
+from solver.auth import Authorizations
 from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
 from solver.utils.loader import load_commands, update_modules
 
-#: Cells read as "granted"/"on" in the modules.csv / commands.csv policy files.
-_TRUTHY: frozenset[str] = frozenset({'true', '1', 'yes'})
-#: Authorization profiles, in descending order of privilege.
-_PROFILES: tuple[str, ...] = ('admin', 'user', 'guest')
+#: Authorization profiles, in descending order of privilege (for the audit report).
+_PROFILES: tuple[str, ...] = ('admin', 'maintainer', 'contributor', 'reader')
+#: The policy used only to *report* per-command availability (not enforcement).
+_AUTHZ: Authorizations = Authorizations.load(repo_fallback=config.root_dir / 'authorizations.json')
+
+
+def _allowed_profiles(cmd: Command) -> list[str]:
+    """Which profiles satisfy *cmd*'s ``requires`` under the reporting policy (audit)."""
+    return [p for p in _PROFILES if _AUTHZ.permissions_for(p).issuperset(cmd.requires)] or ['none']
+
 
 #: The docs directory whose marked blocks we maintain.
 ROOT: Path = config.root_dir
@@ -109,40 +115,15 @@ def _docstring(cmd: Command) -> str:
     return inspect.getdoc(func) or ''
 
 
-def _csv_flags(path: Path, key_col: str, flag_cols: tuple[str, ...]) -> dict[str, tuple[bool, ...]]:
-    """Read *path* into ``{key → (bool per flag_col)}`` (truthy cells → True)."""
-    out: dict[str, tuple[bool, ...]] = {}
-    for row in csv.DictReader(path.read_text(encoding='utf-8').splitlines()):
-        key = (row.get(key_col) or '').strip()
-        if key:
-            out[key] = tuple((row.get(col) or '').strip().lower() in _TRUTHY for col in flag_cols)
-    return out
-
-
-def _command_module(cmd: Command) -> str:
-    """The dotted module that defines *cmd* (unwrapping the register/command decorators)."""
-    func = cmd.func
-    while hasattr(func, '__wrapped__'):
-        func = func.__wrapped__
-    return getattr(func, '__module__', '')
-
-
-def _availability(cmd: Command, channels: dict[str, tuple[bool, ...]],
-                  profiles: dict[str, tuple[bool, ...]]) -> str:
+def _availability(cmd: Command) -> str:
     """A one-line `channels: … · profiles: …` availability note for *cmd*.
 
-    Channels come from the command's module row in ``modules.csv`` (terminal / web);
-    profiles from its row in ``commands.csv`` (admin / user / guest, admin-only when
-    the command is absent, matching the runtime fail-safe default).
+    Both come from the command's own declaration (DD-12): ``channels`` verbatim,
+    and the profiles whose permissions satisfy its ``requires`` (fail-closed to
+    admin when a command declares nothing).
     """
-    term, web = channels.get(_command_module(cmd), (True, True))
-    chans = [name for name, on in (('terminal', term), ('web', web)) if on] or ['none']
-    granted = profiles.get(cmd.name)
-    if granted is None:
-        allowed = ['admin']
-    else:
-        allowed = [name for name, on in zip(_PROFILES, granted) if on] or ['none']
-    return f'* channels: {", ".join(chans)} · profiles: {", ".join(allowed)}'
+    chans = ', '.join(cmd.channels) or 'none'
+    return f'* channels: {chans} · profiles: {", ".join(_allowed_profiles(cmd))}'
 
 
 def _command_table(link_prefix: str) -> str:
@@ -173,15 +154,13 @@ def gen_command_summary() -> str:
 
 def gen_command_index() -> str:
     """A per-command reference (heading, flags, availability, usage, docstring), rule-separated."""
-    channels = _csv_flags(config.modules_file, 'module', ('terminal', 'web'))
-    profiles = _csv_flags(config.commands_file, 'command', _PROFILES)
     sections: list[str] = []
     for cmd in registry.all():
         description, glyphs = _clean_help(cmd.help)
         parts = [f'#### {_heading_text(cmd)}', '']
         if description:
             parts += [description]
-        availability = [_availability(cmd, channels, profiles)]
+        availability = [_availability(cmd)]
         if glyphs:
             availability += [f'* {g} {_LEGEND[g]}' for g in glyphs]
         parts += ['\n'.join(availability)]
@@ -292,48 +271,35 @@ def _render(text: str) -> tuple[str, list[str]]:
     return text, changed
 
 
-#: Per-profile cells a brand-new command gets in commands.csv (admin + user, not guest).
-_DEFAULT_COMMAND_POLICY: tuple[str, str, str] = ('True', 'True', '')
+#: The generated authorization **audit** view of the registry (not the policy — that
+#: is the authored ``authorizations.json``). Regenerated here for reporting/review.
+_COMMANDS_JSON: Path = Path(__file__).resolve().parents[1] / 'commands.json'
 
 
 def _sync_commands(check: bool) -> str | None:
-    """Reconcile ``solver/commands.csv`` with the live command registry.
+    """Regenerate ``solver/commands.json`` — the audit view of each command's
+    ``requires``/``channels`` — from the live registry (DD-12).
 
-    Mirrors :func:`solver.utils.loader.update_modules` for the authorization policy:
-    the row set follows ``registry.all()`` (new commands appended with the default
-    :data:`_DEFAULT_COMMAND_POLICY`, removed commands dropped), while every existing
-    row's ``admin``/``user``/``guest`` cells are **preserved verbatim** so manual
-    grants survive. Returns a ``file: reason`` entry when the file (would) change,
-    else None; with *check* True nothing is written.
-
-    Guarded to the ``admin`` profile — the only one whose registry holds every
-    command — so it never prunes commands merely hidden from a lesser profile.
-    ``update-docs`` is admin- and terminal-only, so this always holds in practice.
+    Returns a ``file: reason`` entry when the file (would) change, else None; with
+    *check* True nothing is written. Guarded to a registry that holds **every**
+    command (the local ``admin`` owner), so it never prunes commands merely hidden
+    from a lesser profile.
     """
-    if config.user_profile != 'admin':
+    if config.subject.profile != 'admin':
         return None
-    existing: dict[str, tuple[str, str, str]] = {}
-    if config.commands_file.exists():
-        with open(config.commands_file, newline='') as handle:
-            existing = {row[0]: (row[1], row[2], row[3]) for row in csv.reader(handle) if len(row) == 4}
-
-    buffer = io.StringIO()
-    writer = csv.writer(buffer, lineterminator='\n')
-    writer.writerow(['command', *_PROFILES])
-    for cmd in registry.all():
-        writer.writerow([cmd.name, *existing.get(cmd.name, _DEFAULT_COMMAND_POLICY)])
-    new_text = buffer.getvalue()
-
-    old_text = config.commands_file.read_text(encoding='utf-8') if config.commands_file.exists() else ''
+    audit = {cmd.name: {'requires': list(cmd.requires), 'channels': list(cmd.channels)}
+             for cmd in registry.all()}
+    new_text = json.dumps(audit, indent=2, sort_keys=True) + '\n'
+    old_text = _COMMANDS_JSON.read_text(encoding='utf-8') if _COMMANDS_JSON.exists() else ''
     if new_text == old_text:
         return None
     if not check:
-        config.commands_file.write_text(new_text, encoding='utf-8')
+        _COMMANDS_JSON.write_text(new_text, encoding='utf-8')
     try:
-        label = str(config.commands_file.relative_to(ROOT))
+        label = str(_COMMANDS_JSON.relative_to(ROOT))
     except ValueError:
-        label = config.commands_file.name
-    return f'{label}: command policy'
+        label = _COMMANDS_JSON.name
+    return f'{label}: command audit'
 
 
 def _apply(check: bool) -> tuple[list[str], list[str]]:
@@ -379,20 +345,19 @@ def update_docs(ctx: Context, check: bool = False) -> int:
                 of date, listing the stale files. When False (default), rewrite
                 the docs in place and report which were updated.
     """
-    profile = ctx.shell.profile
-    if update_modules(profile):
-        load_commands(profile)
+    if update_modules():
+        load_commands(refresh_modules=True)
         console.print('[success]modules updated[/success]')
     else:
         console.print('[muted]modules already up to date[/muted]')
 
-    command_stale = _sync_commands(check) is not None   # reconcile commands.csv with the registry first
+    command_stale = _sync_commands(check) is not None   # regenerate commands.json (audit) first
     if not command_stale:
-        console.print('[muted]commands.csv already up to date[/muted]')
+        console.print('[muted]commands.json already up to date[/muted]')
     elif check:
-        console.print('[warning]commands.csv out of date[/warning] (run [accent]update-docs[/accent])')
+        console.print('[warning]commands.json out of date[/warning] (run [accent]update-docs[/accent])')
     else:
-        console.print('[success]commands.csv updated[/success]')
+        console.print('[success]commands.json updated[/success]')
 
     updated, stale = _apply(check)
     if check:

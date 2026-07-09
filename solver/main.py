@@ -39,7 +39,7 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
 
     args = parser.parse_args(argv)
 
-    load_commands(args.profile)
+    load_commands()
     shell = SolverShell(save=args.save and not args.cmdline, profile=args.profile)
     if args.cmdline:
         return shell.run_command(args.cmdline)

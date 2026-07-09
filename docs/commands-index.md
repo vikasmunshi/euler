@@ -14,11 +14,12 @@ or usage.
 ## Legend
 
 Each command entry opens with an **availability** line —
-`channels: … · profiles: …`. *Channels* (`terminal` / `web`) is where the
-command's module loads (from `modules.csv`); *profiles* (`admin` / `user` /
-`guest`) is which authorization profiles may run it (from `commands.csv`). A
-command absent from `commands.csv` is admin-only. See the
-[access-control guide](access-control.md) for the channel-vs-profile model.
+`channels: … · profiles: …`. *Channels* (`terminal` / `web`) are the channels the
+command declares (`@register(channels=…)`); *profiles* are those whose permissions
+satisfy the command's `requires=` grants under `authorizations.json` — reported from
+the live registry (the generated `solver/commands.json` audit view). A command that
+declares no `requires` is fail-closed to `admin`. See the
+[access-control guide](access-control.md) for the RBAC model (DD-12).
 
 A command's *flags* line lists the behaviours marked by these glyphs (the same
 ones shown after a command's help by `?`):
@@ -127,7 +128,7 @@ Aliased as `sh` and `bash`, so `sh <command>` is shorthand for `! <command>`.
 #### Command: `?` (`help`)
 
 List commands or show help for a specific command.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 
 ```
 ? [command]
@@ -153,7 +154,7 @@ Aliased as `help`.
 #### Command: `benchmark`
 
 Benchmark solutions to given/current problem.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -224,7 +225,7 @@ Args:
 #### Command: `claude-api`
 
 Generate specified target using Claude API.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -254,7 +255,7 @@ Prints the USD/EUR cost of the call and returns non-zero if the generator report
 #### Command: `claude-skill`
 
 Launch the Claude Euler Solver skill.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -288,7 +289,7 @@ Args:
 #### Command: `clear` (`cls`)
 
 Clear the screen.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 
 ```
 clear
@@ -306,7 +307,7 @@ A convenience wrapper over the console's clear; equivalent to the shell
 #### Command: `compile-c` (`compile`)
 
 Build all C source files for given/current problem.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -335,7 +336,7 @@ Args:
 #### Command: `costs`
 
 Display total cost of AI API tokens consumed in session.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 
 ```
 costs
@@ -359,7 +360,7 @@ Args:
 #### Command: `echo`
 
 Print text.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 
 ```
 echo <text>
@@ -379,7 +380,7 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 #### Command: `edit` (`ed`)
 
 Open a solution file in the web code editor.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -416,7 +417,7 @@ Arguments:
 #### Command: `evaluate` (`eval`)
 
 Evaluate solutions to given/current problem.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -637,7 +638,7 @@ Print `num_shares` Shamir shares of the current master key (threshold needed to 
 #### Command: `lint`
 
 Lint current problem, auto-fix with --auto-fix.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -668,7 +669,7 @@ Args:
 #### Command: `ls`
 
 List the solutions dir for given/current problem.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -720,7 +721,7 @@ Args:
 #### Command: `mark` (`mark-solved`)
 
 Mark the current problem as solved, after checking.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -754,7 +755,7 @@ Args:
 #### Command: `new`
 
 Generate new solution/test-case file for a problem.
-* channels: terminal, web · profiles: admin, user
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -792,7 +793,7 @@ are created.
 #### Command: `pause`
 
 Pause for user confirmation to continue.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 
 ```
 pause
@@ -831,7 +832,7 @@ Args:
 #### Command: `problems`
 
 Show list of problems (all|solved|unsolved).
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 
 ```
 problems
@@ -853,7 +854,7 @@ Args:
 #### Command: `progress`
 
 Print progress statistics about Euler problems.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 
 ```
 progress
@@ -873,7 +874,7 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 #### Command: `results`
 
 list the results for the problem.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -898,7 +899,7 @@ Returns:
 #### Command: `search` (`find`)
 
 Find content in the stack.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 
 ```
 search <query>
@@ -930,7 +931,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open problem/file in a browser or the web viewer panel.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -1027,7 +1028,7 @@ Parameters:
 #### Command: `test-cases`
 
 list the test cases for the problem.
-* channels: terminal, web · profiles: admin, user, guest
+* channels: terminal, web · profiles: admin
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -1053,7 +1054,7 @@ Returns:
 #### Command: `update-docs`
 
 Regenerate the generated sections of the docs/ guides.
-* channels: terminal · profiles: admin
+* channels: terminal, web · profiles: admin
 * » supports `--silent`
 
 ```
@@ -1148,7 +1149,7 @@ Wrap the current master key to `public_key` and add it to enc-key.json (proof-of
 #### Command: `users`
 
 Manage web accounts via the auth service (sudo-gated admin API).
-* channels: terminal · profiles: admin
+* channels: terminal, web · profiles: admin
 
 ```
 users

@@ -1,0 +1,353 @@
+{
+  "!": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "?": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "benchmark": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "claude-api": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "claude-skill": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "clear": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "compile-c": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "costs": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "echo": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "edit": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "evaluate": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "git-commit": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "git-hooks": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "git-publish": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "git-status": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "git-sync": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "key-reconstruct": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "key-rekey": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "key-split": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "lint": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "ls": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "manage-config": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "mark": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "new": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "pause": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "pip-upgrade": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "problems": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "progress": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "results": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "search": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "show": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "summary": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "sys-setup": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "test-cases": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "update-docs": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "update-models": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "user": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "user-authorize": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  },
+  "users": {
+    "channels": [
+      "terminal",
+      "web"
+    ],
+    "requires": [
+      "infra:execute"
+    ]
+  }
+}
