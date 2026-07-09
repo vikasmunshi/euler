@@ -48,20 +48,32 @@ keep `!`/`bash` `admin`-only and `claude-*` `maintainer`+ in `commands.csv`; do 
 the `euler-ws` unit's `ReadWritePaths`/egress. Per-user helper uids or namespaces remain
 a future hardening (Phase 6).
 
-### AR-2 · Web auth grants plaintext read of all private solutions
+### AR-2 · The web tier serves decrypted private solutions — a web compromise reads all current private plaintext
 
-Every authenticated account — **`reader` included** (read scope is uniform, DD-11) —
-can read the **decrypted** `solutions/private/` tree through the viewer; `contributor`+
-can also write it. This relaxes the project's "plaintext never leaves the repo" rule to
-"plaintext is served to any authenticated web account," and there is no per-user
-isolation on the solution tree.
+**This is a deliberately-accepted _high_ risk.** The content service reads the repo
+working tree (DD-12), where the git filter leaves `solutions/private/**` **plaintext at
+rest**. Every authenticated account — `reader` included (uniform read, DD-11) — can read
+it through the viewer; `contributor`+ can write it. So a compromise of any web service (and
+the web shell is RCE **by design**, AR-1) exposes **all current private-solution
+plaintext**.
 
-**Why accepted.** A shared solver is the intent; the invite list bounds the audience,
-and a `reader` is still an invited account. If compartmentalisation is ever wanted, the
-knobs are: gate `solutions/private/**` to `contributor`+ (make private-read part of
-graduating from `reader`), or add per-solution ownership/ACLs. Documented here rather
-than enforced. (The content viewer/editor lands in Phase 5; this note precedes it so the
-decision is explicit before that surface exists.)
+**What is *not* exposed — the containment.** The web tier does **no git operations** and
+therefore **never holds the master key** (`~/.euler/id`, used only for commit/checkout,
+stays with the operator locally, DD-12). So a web compromise gets the *current decrypted
+files* but **not** the key: it cannot rotate, forge ciphertext, decrypt history not
+checked out, nor read the far larger encrypted corpus straight off GitHub. The blast
+radius is "the current working tree's plaintext," not "encryption-at-rest is defeated
+forever" (the SEC-01 class, which *is* avoided).
+
+**Why accepted.** A shared solver over the invited set is the product intent, and the
+operator chose web-serves-private with this trade-off explicit. **Standing mitigations:**
+the invite list is the trust boundary; per-profile uids + content-tree ACLs (DD-12)
+contain write/delete; the DD-8 loopback egress firewall means a compromised service has no
+arbitrary off-host path to exfiltrate in bulk (only via an attacker's own authenticated
+session). **If the exposure is later judged too high, the knobs are:** serve
+`solutions/private` to `contributor`+ only (make private-read part of graduating from
+`reader`), or restrict private to the local terminal entirely (public-only web) — either
+narrows or removes this risk.
 
 ## Regression guards
 
@@ -99,4 +111,4 @@ spoofing), SEC-05 (edge headers/CSP), SEC-07 (`.env` perms) were fixed; SEC-01/0
 concern `solver/web/app.py` / `routes.py`, which the ground-up redesign
 ([secure-web-server](secure-web-server.md)) replaced. The two design-level risks
 survive here as [AR-1](#ar-1--a-contributor-login-is-host-code-execution)
-and [AR-2](#ar-2--web-auth-grants-plaintext-read-of-all-private-solutions).
+and [AR-2](#ar-2--the-web-tier-serves-decrypted-private-solutions--a-web-compromise-reads-all-current-private-plaintext).

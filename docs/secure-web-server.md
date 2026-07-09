@@ -61,8 +61,9 @@ surface:
 - **[Authentication](access-control.md)** is the access gate: Caddy routes every
   request through the auth service's `forward_auth` endpoint before it reaches
   content or the shell, so those services never see an unauthenticated caller.
-- **[Authorization](access-control.md)** (`solver/commands.csv` and the shell) decides
-  which commands and routes an authenticated identity may use.
+- **[Authorization](access-control.md)** (the `solver/auth` RBAC kernel +
+  `authorizations.json`, DD-12) decides which commands and routes an authenticated
+  identity may use.
 
 Because login *is* RCE, the design spends its effort on **blast-radius containment**:
 dedicated nologin service users (DD-2), a loopback-only app tier behind a kernel
@@ -88,6 +89,7 @@ Locked, ADR-style. Each is summarised in the table, then argued below.
 | Egress firewall | **Kernel-enforced**: systemd per-unit `IPAddressDeny` + host **nftables** owner-match; mail via a loopback `euler-smtp` relay — [DD-8](#dd-8--kernel-enforced-egress-firewall--loopback-mail-relay). |
 | Identity & masquerade | Three planes — `forward_auth` headers, one-time shell ticket, checkout-owner uid — [DD-9](#dd-9--identity-authentication-and-masquerade-prevention). |
 | Profiles & access | Four-rung ladder `reader`/`contributor`/`maintainer` (web) + `admin` (**local-only**); content routes gated by a resource×verb matrix; `users change` promotes/demotes — [DD-11](#dd-11--profiles--content-service-access). |
+| Authorization | One `solver/auth` kernel + `authorizations.json` (RBAC) for shell **and** web; retires `commands.csv`; per-profile service instances + content-tree ACLs as the OS layer — [DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson). |
 
 ### DD-1 · Inter-service transport = unix domain sockets
 
@@ -133,6 +135,12 @@ memory, and the highest-risk `euler-ws` (RCE by design) is fully separated.
 `connect()` to a peer's socket; the guards remain uid separation plus `forward_auth`
 at the edge. Strict per-service socket isolation (split into `euler-auth-fe`, … each
 containing only Caddy + the owner) is deferred, not needed for the phased build.
+
+**Per-profile instances (DD-12).** The content and shell services additionally run as
+**per-profile uids** — `euler-content-<profile>` / `euler-ws-<profile>`, one systemd
+template-unit instance each, Caddy routing to them by `X-Profile` — so the OS layer backs
+web authorization per profile, not just per service. See
+[DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson).
 
 ### DD-3 · Edge orchestrator = `frontend.sh` + root-owned systemd
 
@@ -190,13 +198,20 @@ scopes secrets: `euler-ddns` sees only the name.com creds, never the full `~/.eu
 
 ### DD-5 · App runtime = `/opt/euler` system venv, framework = aiohttp + Jinja2
 
-**Decision.** The Python app services run from a **root-owned system venv at
+**Decision.** The Python app **code** runs from a **root-owned system venv at
 `/opt/euler`**, *not* the repo checkout: the service users cannot traverse the repo
-owner's `0750` home. The installer (`scripts/setup/auth.sh`, repo owner + sudo) does
-`pip install .[web]` into `/opt/euler/venv`, and the unit runs
+owner's `0750` home for *code*. The installer (`scripts/setup/auth.sh`, repo owner + sudo)
+does `pip install .[web]` into `/opt/euler/venv`, and the unit runs
 `ExecStart=/opt/euler/venv/bin/python -m solver.web.<svc>`. `upgrade` re-installs from
 the repo. The **framework is aiohttp + Jinja2** (autoescape on) — one framework shared
 with the shell service; Jinja replaces the homegrown string templating.
+
+**Code vs. data.** This isolates the *code*; the content services still read/write the
+repo's **content tree** (`solutions/`, `docs/`, `web-content/`) — the git filter leaves
+plaintext at rest there, so no master key is needed. That data access is a **scoped,
+per-profile ACL** on those subtrees only (never `.git`/`keys/`/`solver/`), added by
+[DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson) — a targeted share
+with `euler-web`, not the blanket home-open this DD otherwise avoids.
 
 **System paths.**
 
@@ -384,7 +399,10 @@ Static `web-content` assets are Caddy-served and never writable through the serv
 `execute` at `contributor`+ keeps the Project-Euler workflow intact (a contributor runs
 the solution they wrote) while making `reader` genuinely RCE-free
 ([AR-1](security-notes.md)); the web PTY shell (Phase 6) is likewise `contributor`+, so
-`reader` gets no terminal.
+`reader` gets no terminal. The *mechanism* that enforces this matrix — the RBAC kernel,
+`authorizations.json`, and the per-profile OS layer — is
+[DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson) (which retires
+`commands.csv` and moves the profile off the SRP user record).
 
 **Identity resolution (refines DD-9).** The local-terminal plane now yields *two*
 profiles, but service uids must not escalate:
@@ -403,6 +421,119 @@ profiles, but service uids must not escalate:
 is not web-assignable) on the sudo-gated admin plane. Like `disable`, it **revokes the
 account's live sessions and remember tokens**: the profile is baked into the session at
 login and into the shell at ticket-redeem, so a change takes effect on next login.
+
+### DD-12 · Unified authorization (`solver/auth` + `authorizations.json`)
+
+**Decision.** One authorization kernel — the **`solver/auth`** sub-package — serves both
+the shell and the web from one policy file, **`authorizations.json`**. It supersedes the
+per-command `commands.csv` (retired) and the profile field on the SRP user record
+(DD-6/DD-11), which were shell-only and web-only respectively and did not compose.
+Enforcement is layered: the command decorator (shell) and the app router (web) are the
+primary check; a per-profile **OS-ACL** layer backs it on the filesystem (DD-2/DD-5
+extensions below). Roles→permissions→objects is classic RBAC, expressive enough for the
+web content service's path-scoped read/write/execute.
+
+**The kernel & the subject.** `solver/auth` owns identity resolution (absorbing
+`solver/utils/identity.py`), the profile ladder, and the permission model. It resolves a
+single **subject** once per process:
+
+```
+Subject(user, channel, auth_method, profile, permissions)
+```
+
+`channel ∈ {terminal, web}`; `auth_method` records *how* identity was proven (checkout-uid,
+shell-ticket, SRP-session); `permissions` is the inheritance-expanded grant set. The web
+*authentication* service (`solver/web/auth`: SRP, sessions, tickets, registration) stays
+separate and **imports `solver/auth`** to turn an authenticated email into a subject —
+authN and authZ are distinct packages.
+
+**`authorizations.json`** (deployed to `/etc/euler/authorizations.json`, `0644` non-secret
+policy; the repo ships a template; the sudo-gated `users` commands edit the deployed copy;
+read by both the local shell and the services):
+
+```json
+{
+  "profiles": {
+    "reader":      { "inherits": null,          "grants": ["solver:execute","solutions:read","docs:read","web-content:read"] },
+    "contributor": { "inherits": "reader",      "grants": ["solutions:write","solutions:execute"] },
+    "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute"] },
+    "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute"] }
+  },
+  "users":   { "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
+  "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["web-content/"],
+               "solver": [], "shell": ["/bin/bash"], "ai": [], "infra": [] }
+}
+```
+
+- **profiles** — each a set of `object:permission` grants (`permission ∈ read/write/
+  execute/delete`), with single-parent `inherits` so grants stay DRY (the DD-11 ladder,
+  exactly).
+- **users** — identity→profile for **web emails** and, optionally, named local logins.
+  The **checkout owner is `admin` by the uid anchor** (DD-11 §resolution) and need not be
+  listed; the **web channel is capped at `maintainer`** (a `users` entry granting `admin`
+  is never honoured over the web).
+- **objects** — the permission namespace, each mapped to zero or more filesystem paths.
+  Path-bearing objects (`solutions`/`docs`/`web-content`) drive the OS-ACL layer; the
+  path-less ones (`solver`/`shell`/`ai`/`infra`) are pure capabilities checked in-app.
+
+**The decorator (policy-*requirement* point).** `@register`/`@command` gain two lists:
+`requires=[...]` (the `object:permission`s the command needs) and `channels=(...)`
+(default both). Enforcement, at registration: the command is registered only if
+`channel ∈ channels` **and** `requires ⊆ subject.permissions`; otherwise it is invisible
+(unknown-command / not-registered), exactly as today. A command with **no `requires`
+defaults fail-closed** to `infra:execute` (admin-only) — a new command is never silently
+exposed. Example mapping: `show → solutions:read`; `new`/`edit` → `solutions:write`;
+`evaluate`/`benchmark` → `solutions:execute`; `!` → `shell:execute`; `claude-*` →
+`ai:execute`; `git-*`/`key-*`/`users`/`manage-config` → `infra:execute`. A generated
+**`solver/commands.json`** (by `update-docs`) reports each command's `requires`/`channels`
+for audit — the generated audit view, distinct from the authored `authorizations.json`.
+
+**`modules.csv` → loader-only.** It keeps just `(module, registers_commands)`; the
+`terminal`/`web` columns are gone (channel now lives on the decorator, finer-grained). All
+modules import; wrong-channel commands simply don't register.
+
+**Enforcement points.**
+
+| Surface | Primary check | Second layer |
+|---|---|---|
+| Shell (terminal + web PTY) | the command decorator (`requires ⊆ perms`, `channel`) | the per-profile uid's filesystem ACLs |
+| Web routes (content service) | app-router `requires(<capability>)` on `X-Profile` | the per-profile instance's uid + ACLs |
+
+**OS second layer — per-profile instances (extends DD-2).** All web users share one uid,
+so the filesystem cannot tell a `reader` request from a `contributor` one *within* a single
+service process. To make the OS layer real per-profile, the web app services run as
+**per-profile instances** — systemd **template units** `euler-content@<profile>.service` /
+`euler-ws@<profile>.service`, each `User=euler-content-<profile>` on its own socket — and
+**Caddy routes by the `X-Profile`** that `forward_auth` returns to the matching upstream
+(`unix//run/euler/content-<profile>.sock`). No process changes uid (no root, no setuid);
+each instance is *born* as the right uid. A shell's redeemed-ticket profile must match its
+instance's uid, else it aborts.
+
+**OS second layer — content-tree ACLs (refines DD-5).** The services read/write the repo
+**working tree directly** (`solutions/`, `docs/`, `web-content/`) — the git clean/smudge
+filter already leaves **plaintext at rest** there, so the web tier needs *filesystem
+access, not the master key*, and does **no git operations** (commit/checkout, where the key
+is used, stay with the operator locally). Access is a **scoped ACL**: a traverse ACL
+(`g:euler-web:x`) on the home path + repo root so services can *reach* the content subtrees
+without reading the rest of home, then per-profile group ACLs — `euler-sol-read` (traverse
++ read `solutions/`), `euler-sol-write` (write), `euler-sol-delete` — mapped to the
+per-profile uids. **`.git`, `keys/` (the `enc-key.json`), and the `solver/` source are
+never in the ACL set.** `authorizations.json`'s `objects`→paths is the single source that a
+setup kit turns into these ACLs, so the app policy and the filesystem enforcement can't
+drift. This *refines* DD-5 (which kept the whole repo unreadable to service users): the
+venv still lives in `/opt/euler` for code isolation, but the **content tree** is
+ACL-shared with `euler-web`, per-profile — a targeted share, not the blanket home-open
+DD-5 rejected. The master key never reaches the services; a web compromise reads
+working-tree plaintext (accepted, [AR-2](security-notes.md)) but cannot obtain the key.
+
+**Profile resolution (map + anchors).**
+1. **web** (channel=web): `profile = users.get(email)`, **capped at `maintainer`**.
+2. **local terminal**: uid == checkout owner → `admin`; else a `euler-*` service uid without
+   a ticket → abort; else `users.get(os_username, 'contributor')`.
+
+**Staleness = re-login.** The subject resolves its permissions once at process start, so an
+`authorizations.json` edit takes effect on the next login / shell-start; `users change`
+already revokes sessions to force it. Consistent with DD-11.
 
 ### Open decisions
 

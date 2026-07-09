@@ -189,22 +189,25 @@ Resolution order: `SOLVER_TICKET` set → redeem (failure aborts); else owner ui
 
 ## 5 · How authorization works
 
-The shell is the same `solver` program everywhere, narrowed to its context by two
-composing layers:
+Authorization runs on **one RBAC kernel — `solver/auth` — shared by the shell and the
+web** (DD-12), from one policy file `authorizations.json`. A command/route declares the
+permissions it *needs*; the policy declares what each *profile has*; enforcement is the
+subset check. Two orthogonal axes narrow a command to its context:
 
-| Layer | Question | Driven by | Enforced at |
+| Axis | Question | Driven by | Enforced at |
 |---|---|---|---|
-| **Channel** | which command *modules* load at all | `solver/modules.csv` (`terminal` / `web` columns) | module import (`shell/loader.py`) |
-| **Profile** | which loaded commands a profile may run | `solver/commands.csv` (`admin`/`maintainer`/`contributor`/`reader`) | the `@register`/`@command` decorator (`shell/command.py`) |
+| **Channel** | is the command valid in this channel? | the decorator's `channels=(terminal,web)` | registration (`solver/auth` + the decorator) |
+| **Permission** | does the profile hold what the command requires? | the decorator's `requires=[obj:perm]` vs `authorizations.json` profile grants | registration (shell) / app router (web) |
 
-`modules.csv` decides what loads per channel — e.g. `update-docs` is `web=False`, so
-it never loads in a web shell; `users` is terminal-only. `commands.csv` then applies
-per profile on top.
+`modules.csv` is now a **pure loader manifest** (`module, registers_commands`) — the old
+`terminal`/`web` columns moved to the per-command `channels=` axis, so `update-docs`
+(`channels=('terminal',)`) never registers in a web shell and `!` (`shell:execute`) never
+registers for a profile lacking it.
 
 ### Profiles (the four-rung ladder, DD-11)
 
 Every identity carries one profile, resolved at startup (§4.5) and exposed as
-`config.user_profile`. The ladder, most→least privileged:
+the subject's `profile` (DD-12). The ladder, most→least privileged:
 
 | Profile | Reached by | Gains over the rung below |
 |---|---|---|
@@ -217,53 +220,50 @@ Every identity carries one profile, resolved at startup (§4.5) and exposed as
 accounts or touch the crypto master key. `reader` is a **stepping stone** — a new
 invitee starts read-only and is promoted (`users change`, §6) as trust grows. Read
 scope is uniform: every account, `reader` included, may read the decrypted
-`solutions/private` plaintext (the [AR-2](security-notes.md) posture). See DD-11 for the
-content-service resource×verb matrix.
+`solutions/private` plaintext (the [AR-2](security-notes.md) posture).
 
-### The policy file (`solver/commands.csv`)
+### The policy file (`authorizations.json`)
 
-A `command` column followed by one boolean column per profile (`admin`, `maintainer`,
-`contributor`, `reader`):
+The ladder is expressed as **RBAC grants**, not a per-command CSV (`commands.csv` is
+retired, DD-12). `authorizations.json` (deployed to `/etc/euler`, read by shell and
+services) has `profiles` (grants + single-parent `inherits`), `users` (email/os-login →
+profile), and `objects` (permission namespace → filesystem paths):
 
-```csv
-command,admin,maintainer,contributor,reader
-benchmark,True,True,True,
-users,True,,,
-show,True,True,True,True
+```json
+{
+  "profiles": {
+    "reader":      { "inherits": null,          "grants": ["solver:execute","solutions:read","docs:read","web-content:read"] },
+    "contributor": { "inherits": "reader",      "grants": ["solutions:write","solutions:execute"] },
+    "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute"] },
+    "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute"] }
+  },
+  "users":   { "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
+  "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["web-content/"],
+               "solver": [], "shell": ["/bin/bash"], "ai": [], "infra": [] }
+}
 ```
 
-Semantics (`is_authorized`, `shell/command.py`):
+A command/route declares `requires=[obj:perm]`; enforcement is `requires ⊆ perms(profile)`
+(inheritance-expanded). A command with **no `requires`** defaults fail-closed to
+`infra:execute` (admin-only), so a new command is never silently exposed. Example mapping:
+`show → solutions:read`; `new`/`edit` → `solutions:write`; `evaluate`/`benchmark` →
+`solutions:execute`; `!` → `shell:execute`; `claude-*` → `ai:execute`;
+`git-*`/`key-*`/`users` → `infra:execute`. The DD-11 content matrix is exactly these grants
+(view=read, edit=write, delete=delete, execute=execute). `update-docs` regenerates
+**`solver/commands.json`** — the audit view of each command's `requires`/`channels`,
+distinct from the authored `authorizations.json`.
 
-- A command **listed** is allowed only for the profiles its row grants.
-- A command **absent** is **admin-only** — a fail-safe default, so a freshly added
-  command is never silently exposed before it is added to `commands.csv`.
+### Enforcement (shell + web)
 
-`update-docs` keeps `commands.csv` reconciled with the live registry (appends new
-commands with a safe default grant, drops removed ones, preserves every existing grant).
-Per-command availability is listed in [commands-index.md](commands-index.md).
-
-### Enforcement in the shell (decoration time)
-
-As each command module is imported, the decorator derives the command name and calls
-`is_authorized(name)` against `config.user_profile`. If the profile is not permitted,
-the command is simply **not registered** — invisible to `?`/help and completion,
-`unknown command` (exit 127) if invoked. One shell process serves exactly one
-identity, so the registered set is fixed for the life of the process.
-
-### Enforcement on web routes (Phase 5)
-
-The content service (Phase 5) exposes some of the same power outside the shell — view,
-edit, delete, execute (eval/benchmark) — acting directly on the solution tree. Those
-routes are gated by the **same policy** via a `requires(<capability>)` decorator keyed on
-the requester's `X-Profile`, so `commands.csv` stays the single source of truth across
-both surfaces. The resource×verb → profile matrix is DD-11:
-
-| Verb | Routes | reader | contributor | maintainer | admin |
-|---|---|:---:|:---:|:---:|:---:|
-| view | GET summary / problem / code / docs; file reads | ✓ | ✓ | ✓ | ✓ |
-| edit | save a solution file (incl. `notes.html`, + nh3) | | ✓ | ✓ | ✓ |
-| delete | delete a solution file | | | ✓ | ✓ |
-| execute | eval / benchmark; the Phase-6 web PTY shell | | ✓ | ✓ | ✓ |
+- **Shell (decoration time):** as each command module imports, the decorator checks
+  `channel ∈ channels` and `requires ⊆ subject.permissions`. If not permitted the command
+  is **not registered** — invisible to `?`/help/completion, `unknown command` (exit 127)
+  if invoked. One process serves one identity, so the set is fixed for the process's life.
+- **Web routes:** the content service gates each route with `requires(<capability>)` on the
+  requester's `X-Profile` — the **same policy**, so `authorizations.json` is the single
+  source across both surfaces. The DD-11 matrix (view / edit / delete / execute) is the
+  contract. A **per-profile OS layer** (per-profile service uids + content-tree ACLs,
+  DD-12) sits behind the app check on the web.
 
 (The content service is not yet built; this is the contract it will honour.)
 
@@ -301,7 +301,7 @@ prompt (cached per sudo's usual timestamp).
 
 | File | Purpose |
 |---|---|
-| `users.json` | SRP verifier DB: `{salt, verifier, profile, terms_version, terms_accepted_at, created, disabled}` per email. Never a password. |
+| `users.json` | SRP verifier DB: `{salt, verifier, terms_version, terms_accepted_at, created, disabled}` per email. Never a password. The **profile lives in `authorizations.json`** (DD-12), not here. |
 | `pending.json` | in-flight invites/resets, keyed by `hash(link-token)` (DD-7 state machine). |
 | `remember.json` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `session-secret` | 32-byte HMAC key for remember-me; created on first start. |
