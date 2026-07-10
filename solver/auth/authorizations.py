@@ -104,6 +104,10 @@ class Authorizations:
         """The profile assigned to *identity* in the ``users`` map, or None if unlisted."""
         return self._users.get(_normalise(identity))
 
+    def all_users(self) -> dict[str, str]:
+        """The whole ``users`` map (identity → profile) — web emails and OS logins alike."""
+        return dict(self._users)
+
     def permissions_for(self, profile: str) -> frozenset[str]:
         """The full ``object:permission`` set for *profile*, expanding ``inherits``.
 

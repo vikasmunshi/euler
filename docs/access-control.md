@@ -303,7 +303,7 @@ self-service (§4.1). Mutating verbs prompt for `sudo`.
 
 | File | Purpose |
 |---|---|
-| `users.json` | SRP verifier DB: `{salt, verifier, terms_version, terms_accepted_at, created, disabled}` per email. Never a password. The **profile lives in `authorizations.json`** (DD-12), not here. |
+| `users.json` | SRP verifier DB: `{salt, verifier, terms_version, terms_accepted_at, created, disabled}` per email — **no profile** (it lives in `authorizations.json`, DD-12). `euler-auth` resolves the profile fresh from the map at each login (`AuthService.profile_for`), capped at `maintainer`, defaulting `reader` when unmapped. |
 | `pending.json` | in-flight invites/resets, keyed by `hash(link-token)` (DD-7 state machine). |
 | `remember.json` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `session-secret` | 32-byte HMAC key for remember-me; created on first start. |

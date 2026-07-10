@@ -109,14 +109,17 @@ def main(argv: list[str]) -> int:
 
 
 def _print_listing(data: dict[str, Any]) -> None:
-    for record in data.get('users', []):
-        state = 'disabled' if record.get('disabled') else 'enabled'
-        print(f'  {record.get("email"):40} {record.get("profile"):6} {state:8}'
-              f' since {str(record.get("created", "?"))[:10]}')
+    """Render the roster — every identity in authorizations.json (web + local) with its
+    profile and registration state — plus in-flight invites (DD-12)."""
+    roster = data.get('roster', [])
+    for entry in roster:
+        print(f'  {entry.get("user"):40} {entry.get("profile"):18} '
+              f'{entry.get("scope"):6} {entry.get("state")}')
     for record in data.get('pending', []):
-        print(f'  {record.get("email"):40} {record.get("profile"):6} invited '
-              f' {record.get("kind")}/{record.get("state")}, expires in {record.get("expires_in_h")}h')
-    if not data.get('users') and not data.get('pending'):
+        print(f'  {record.get("email"):40} {record.get("profile"):18} '
+              f'web    pending {record.get("kind")}/{record.get("state")}, '
+              f'expires in {record.get("expires_in_h")}h')
+    if not roster and not data.get('pending'):
         print('no accounts or pending invites')
 
 

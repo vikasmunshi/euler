@@ -36,6 +36,7 @@ import aiohttp_jinja2
 import jinja2
 from aiohttp import web
 
+from solver.auth import Authorizations
 from solver.web.auth import policy
 from solver.web.csp import csp_middleware
 from solver.web.auth.config import AuthConfig
@@ -141,7 +142,17 @@ class AuthService:
         user = self.users.get(key)
         if user is None or user.disabled:      # re-check: state may have moved under us
             return None
-        return proof.hex(), user.profile
+        return proof.hex(), self.profile_for(key)
+
+    def profile_for(self, email: str) -> str:
+        """The web profile for *email* from ``authorizations.json`` (DD-12), capped at
+        ``maintainer`` (``admin`` is local-only), defaulting to ``reader`` when unmapped.
+
+        Loaded **fresh** so a ``users change`` takes effect on the next login (sessions
+        bake the profile in at login, and a change revokes them — DD-11 staleness rule).
+        """
+        profile = Authorizations.load().profile_for(email) or 'reader'
+        return 'maintainer' if profile == 'admin' else profile
 
     # ── account lifecycle (admin plane) ───────────────────────────────────────────
 
@@ -216,8 +227,9 @@ def build_public_app(service: AuthService) -> web.Application:
         user = service.users.get(email)
         if user is None or user.disabled:
             return web.Response(status=401, text=_GENERIC_401)
-        response = web.json_response({'email': email, 'profile': user.profile})
-        token = service.sessions.create(email, user.profile)
+        profile = service.profile_for(email)
+        response = web.json_response({'email': email, 'profile': profile})
+        token = service.sessions.create(email, profile)
         service._set_cookie(response, policy.SESSION_COOKIE, token, policy.SESSION_TTL_SECONDS)
         service._set_cookie(response, policy.REMEMBER_COOKIE, new_cookie, policy.REMEMBER_TTL_SECONDS)
         log.info('session resumed for %s', email)
@@ -295,8 +307,27 @@ def build_admin_app(service: AuthService) -> web.Application:
         return web.Response(text='ok')
 
     async def list_users(_request: web.Request) -> web.Response:
+        """The roster (DD-12): every identity in ``authorizations.json`` — web emails
+        **and** OS logins — with its profile, joined with SRP registration state for the
+        web ones (and any registered web account not yet in the map)."""
+        authz_users = Authorizations.load().all_users()          # identity → profile (web + local)
+        srp = {rec.email: rec for rec in service.users.all()}    # registered web accounts
+        roster: list[dict[str, Any]] = []
+        for name, profile in sorted(authz_users.items()):
+            scope = 'web' if '@' in name else 'local'
+            if scope == 'local':
+                state = 'os-login'
+            elif name in srp:
+                state = 'disabled' if srp[name].disabled else 'registered'
+            else:
+                state = 'invited'
+            roster.append({'user': name, 'profile': profile, 'scope': scope, 'state': state})
+        for email in sorted(srp):                                # registered but unmapped → default reader
+            if email not in authz_users:
+                roster.append({'user': email, 'profile': 'reader (unmapped)', 'scope': 'web',
+                               'state': 'disabled' if srp[email].disabled else 'registered'})
         return web.json_response({
-            'users': [user.summary() for user in service.users.all()],
+            'roster': roster,
             'pending': [record.summary() for record in service.pending.all()],
         })
 
@@ -304,7 +335,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         """Mint + mail an invite (DD-7 step 1). No user record exists until completion."""
         body = await _json_body(request)
         email = normalize_email(str(body.get('email', '')))
-        profile = str(body.get('profile', 'user'))
+        profile = str(body.get('profile', 'reader'))
         if '@' not in email:
             return web.Response(status=400, text='valid email required')
         if profile not in policy.PROFILES:

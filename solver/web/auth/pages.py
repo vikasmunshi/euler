@@ -178,9 +178,11 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         if record is None or record.kind != kind:
             return _bad_link(request)
         if kind == 'register':
-            service.users.create(record.email, salt, verifier, record.profile,
+            # The profile is not stored on the SRP record (DD-12) — it lives in
+            # authorizations.json, assigned by the admin `users add/change` path.
+            service.users.create(record.email, salt, verifier,
                                  record.terms_version, record.terms_accepted_at)
-            log.info('registration completed for %s (%s)', record.email, record.profile)
+            log.info('registration completed for %s (profile from authorizations.json)', record.email)
             raise web.HTTPSeeOther(location='/login?registered=1')
         if not service.users.set_credentials(record.email, salt, verifier):
             return _bad_link(request)          # account vanished mid-flow
@@ -207,7 +209,9 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         email = normalize_email(str(form.get('email', '')))
         user = service.users.get(email) if '@' in email else None
         if user is not None and not user.disabled:
-            token = service.pending.mint(email, user.profile, 'reset')
+            # Reset does not change the profile (authorizations.json is authoritative);
+            # the pending record's profile is informational only.
+            token = service.pending.mint(email, service.profile_for(email), 'reset')
             try:
                 await asyncio.to_thread(service.mailer.send_invite, email, token, 'reset')
                 log.info('reset link sent for %s', email)

@@ -32,7 +32,7 @@ from solver.shell import console, register
 @register(requires=('users:write',), channels=('terminal',),
           help_text='Manage web accounts via the auth service (sudo-gated admin API).')
 def users(action: Literal['list', 'add', 'enable', 'disable', 'remove'] = 'list',
-          email: str = '', profile: Literal['admin', 'user', 'guest'] = 'user') -> int:
+          email: str = '', profile: Literal['reader', 'contributor', 'maintainer'] = 'reader') -> int:
     """Administer web accounts through the auth service's local admin socket.
 
     Re-executes ``python -m solver.web.auth.admin`` under ``sudo`` (the admin

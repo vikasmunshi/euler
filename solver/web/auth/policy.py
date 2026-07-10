@@ -14,9 +14,10 @@ __all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MI
            'REMEMBER_COOKIE', 'REMEMBER_TTL_SECONDS', 'AUTH_RATE_MAX', 'AUTH_RATE_WINDOW_SECONDS',
            'TICKET_TTL_SECONDS', 'PROFILES']
 
-#: A user's authorization profile, in descending order of privilege (drives
-#: command/route authorization; see solver/commands.csv and docs/access-control.md).
-PROFILES: tuple[str, ...] = ('admin', 'user', 'guest')
+#: Web-assignable profiles (DD-11/DD-12): `admin` is local-only. The authoritative
+#: policy is authorizations.json (see docs/access-control.md); this is the invite/
+#: validation set for the admin API.
+PROFILES: tuple[str, ...] = ('reader', 'contributor', 'maintainer')
 
 #: Name of the short-lived session cookie set on a successful SRP login.
 SESSION_COOKIE: str = 'solver_session'

@@ -922,11 +922,16 @@ kernel, enforcement, and migration.
    it with the state. Verified: the migration dry-run maps the live accounts correctly
    (owner→admin, `vikas.munshi@…`→maintainer, `vikasmunshi@…`→contributor,
    `mercanther@…`→reader); deployed by `make upgrade-auth`.
-5. **Auth-service integration.** `euler-auth` resolves the profile from
-   `/etc/euler/authorizations.json` (drop the `profile` field from `users.json` / the SRP
-   record); `forward_auth` returns `X-Profile` from the map; the shell ticket carries the
-   map profile. Redeploy via `auth.sh upgrade`. **Test:** `forward_auth`'s `X-Profile`
-   matches the map; a later `users change` takes effect on re-login.
+5. ✅ **Auth-service integration.** `euler-auth` resolves the profile from
+   `/etc/euler/authorizations.json` (`AuthService.profile_for`, a **fresh** read so a map
+   edit takes effect on the next login — DD-11 staleness), capped at `maintainer`,
+   defaulting `reader` when unmapped. The `profile` field is dropped from the `users.json`
+   SRP record; `finish_challenge`/`resume`/the ticket carry the map profile;
+   `forward_auth` returns it as `X-Profile`. `users list` now returns the **roster** — every
+   identity in the map (web **and** local OS logins) with its profile + registration state,
+   plus in-flight invites. Verified by a step-5 harness: login/forward_auth profile from the
+   map, roster shows web + local, and a map edit is picked up on re-login. Redeploy via
+   `make upgrade-auth`.
 6. **`users` command rework.** Two-path `add` (`@`-address → web invite; bare os-login →
    direct map entry); add `users change`; split `users list` (`users:read`, non-sudo roster
    from the world-readable SoR) from the mutating verbs (`users:write`, sudo, editing the

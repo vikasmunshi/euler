@@ -18,7 +18,7 @@ The file is JSON, written atomically at mode ``0600``::
       "version": "srp6a-sha256-2048",
       "users": {
         "user@example.com": {
-          "salt": "<hex>", "verifier": "<hex>", "profile": "user",
+          "salt": "<hex>", "verifier": "<hex>",
           "terms_version": "1", "terms_accepted_at": "<iso8601>",
           "created": "<iso8601>", "disabled": false
         }
@@ -53,7 +53,6 @@ class UserRecord(NamedTuple):
     email: str
     salt: str            # hex
     verifier: str        # hex
-    profile: str
     terms_version: str
     terms_accepted_at: str
     created: str
@@ -65,8 +64,9 @@ class UserRecord(NamedTuple):
         return SrpToken(salt=bytes.fromhex(self.salt), verifier=int(self.verifier, 16))
 
     def summary(self) -> dict[str, Any]:
-        """A secret-free view for listings (no salt/verifier)."""
-        return {'email': self.email, 'profile': self.profile, 'created': self.created,
+        """A secret-free view for listings (no salt/verifier). The **profile** is not
+        here — it lives in ``authorizations.json`` (DD-12), joined in by the caller."""
+        return {'email': self.email, 'created': self.created,
                 'disabled': self.disabled, 'terms_version': self.terms_version}
 
 
@@ -90,17 +90,18 @@ class UserStore:
             return None
         return UserRecord(
             email=normalize_email(email), salt=str(raw.get('salt', '')),
-            verifier=str(raw.get('verifier', '')), profile=str(raw.get('profile', 'user')),
+            verifier=str(raw.get('verifier', '')),
             terms_version=str(raw.get('terms_version', '')),
             terms_accepted_at=str(raw.get('terms_accepted_at', '')),
             created=str(raw.get('created', '')), disabled=bool(raw.get('disabled', True)))
 
-    def create(self, email: str, salt: str, verifier: str, profile: str,
+    def create(self, email: str, salt: str, verifier: str,
                terms_version: str, terms_accepted_at: str) -> UserRecord:
-        """Create the record at registration completion (DD-7 step 5); enabled."""
+        """Create the record at registration completion (DD-7 step 5); enabled. The
+        **profile is not stored here** — it lives in ``authorizations.json`` (DD-12)."""
         users = self._load()
         key = normalize_email(email)
-        users[key] = {'salt': salt, 'verifier': verifier, 'profile': profile,
+        users[key] = {'salt': salt, 'verifier': verifier,
                       'terms_version': terms_version, 'terms_accepted_at': terms_accepted_at,
                       'created': _now(), 'disabled': False}
         self._save(users)
