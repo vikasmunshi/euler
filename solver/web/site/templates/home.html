@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}euler — home{% endblock %}
-{% block main %}
+{% block title %}ς euler — home{% endblock %}
+{% block content %}
 <section class="panel">
   <h1>Project&nbsp;Euler workspace</h1>
   <p class="lead">
@@ -8,14 +8,19 @@
     {% if subject %}<strong>{{ subject.user or 'anon' }}</strong>
       with the <strong>{{ subject.profile }}</strong> profile.{% else %}a guest.{% endif %}
   </p>
+  {% if total %}
+  <p><strong>{{ solved }}</strong> of <strong>{{ total }}</strong> problems solved —
+     <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML"
+        hx-push-url="true">the century grids</a>.</p>
+  {% endif %}
   <ul class="feature-list">
-    <li><strong>Views</strong> — summary, problem, code, and docs pages <span class="muted">(5b)</span>.</li>
-    <li><strong>Edit</strong> — save, delete, evaluate, benchmark, live <span class="muted">(5c/5d)</span>.</li>
-    <li><strong>Shell</strong> — the interactive web terminal <span class="muted">(Phase 6)</span>.</li>
+    <li><a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><strong>Solutions</strong></a>
+        — the problem grid: statements, code, test cases, results, notes.</li>
+    <li><a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><strong>Docs</strong></a>
+        — the framework guides and the AI reference.</li>
+    <li><a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><strong>Topics</strong></a>
+        — writeups on the mathematics behind the problems.</li>
+    <li><strong>Terminal</strong> — the solver shell, in the right pane <span class="muted">(Phase 6)</span>.</li>
   </ul>
-  <p class="muted">
-    Navigation swaps this panel in place via htmx; each link is also a real URL
-    that renders the whole page on a direct visit.
-  </p>
 </section>
 {% endblock %}

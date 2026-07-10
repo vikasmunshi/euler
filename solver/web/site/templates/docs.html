@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}ς euler — docs{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>Docs</h1>
+  <p class="lead">The framework guides, conventions, and the AI reference.</p>
+  <ul class="doc-list">
+    {% for e in entries %}
+    <li><a href="/docs/{{ e.name }}"
+           hx-get="/docs/{{ e.name }}" hx-target="#content" hx-swap="innerHTML"
+           hx-push-url="true">{{ e.title }}</a>
+        <span class="muted"><code>{{ e.name }}</code></span></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

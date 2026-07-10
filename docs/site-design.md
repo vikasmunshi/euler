@@ -9,8 +9,8 @@ swapped by **htmx** fragments, never a client-side SPA. Every route is gated by 
 and every response carries the per-response CSP nonce
 ([§4.7](secure-web-server.md), [DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)).
 
-> **Status.** 5a shell live (to be revised to the four-region layout below); 5b (view) /
-> 5c (validation) / 5d (edit) are the plan.
+> **Status.** 5a shell live **in the four-region layout below** (ς, dark-first);
+> 5b (view) live; 5c (validation) / 5d (edit) are the plan.
 
 ## 1 · The app shell — four regions
 
@@ -101,13 +101,13 @@ per-profile instance also refuses a mismatched `X-Profile` (401 — the `EULER_P
 a **direct** hit on the same path returns the whole shell with that pane pre-populated
 (deep-link). Writes always return a fragment.
 
-### 5a — shell ✅ *(revise to §1's four-region layout + ς + dark-first)*
+### 5a — shell ✅ *(revised to §1's four-region layout + ς + dark-first)*
 
 | Method | Path | Renders | Requires |
 |---|---|---|---|
 | GET | `/` | the app shell; left pane = the **landing** (default content), right pane = ws | `web-content:read` |
 
-### 5b — read (left-pane content)
+### 5b — read (left-pane content) ✅
 
 | Method | Path | Renders | Requires |
 |---|---|---|---|
@@ -173,16 +173,18 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
 1. **App-shell layout** — one page `/`, four regions (§1); content is htmx fragments into
    `#content`, terminal in `#ws`. 5a's current single-column shell is revised to this. ✅
 2. **URL scheme under `/solutions/`** (`/solutions/{n}/`, `/edit/solutions/{n}/{filename}`).
-   **`core/viewer.py` must be updated** — `show` → `/solutions/NNNN/`, `edit` →
-   `/edit/solutions/NNNN/<file>` (it currently emits `/NNNN/` and `/edit/NNNN/<file>`). ⬜
+   `core/viewer.py` updated — `show` → `/solutions/NNNN/`, `edit` →
+   `/edit/solutions/NNNN/<file>`. ✅
 3. **Folded away:** `/summary` → the `/solutions/` century grids; `/ai/{name}` →
    `/docs/{name}`; `/{n}/cmd` → the `/ws` command set. The **progress editor** returns as
    the collection-level `/edit/solutions/` (GET/POST, no DELETE), gated `solutions:execute`
    — contributor-floored, so the existing `euler-sol-write` ACL already covers its write to
    `solutions/.progress.html`: no `progress:write` grant and no new ACL. ✅
 4. **`topics/` is a new content tree** (blog-style). It joins the `euler-sol-read` content
-   ACL (add `topics/` to `content.sh`'s read paths) and is gated `docs:read`. A problem's
-   `topics` field is **new data** — needs a per-problem tagging source. ⬜
+   ACL — `topics/` added to the `docs` object in `authorizations.json` (the template;
+   `auth.sh`'s `deploy_authz` unions new template object paths into a deployed SoR, and
+   `content.sh` derives its read paths from it) — and is gated `docs:read`. ✅
+   A problem's `topics` field is **new data** — needs a per-problem tagging source. ⬜
 5. **Data:** `level` / `pct` / `solved` / `date` come from `problems.json` today; `topics`
    does not (see 4). Difficulty renders from `Problem.difficulty`.
 6. **Execute via `/ws`** with `set`/`show`/`ls`/`eval`/`benchmark`; dummy until Phase 6,

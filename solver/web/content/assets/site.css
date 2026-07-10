@@ -1,8 +1,32 @@
-/* Content-service app shell (Phase 5a). Same-origin, no @import, no external
-   fonts — CSP-clean. Theme-aware via prefers-color-scheme. Accent matches the
-   shell's warm orange. */
+/* Content-service app shell (site-design §1/§2). Same-origin, no @import, no
+   external fonts — CSP-clean. Dark-first: the dark palette is :root; light is
+   offered via prefers-color-scheme and an explicit data-theme override (the
+   header toggle, /assets/site.js). Accent = the shell's warm orange. */
 
 :root {
+  --bg: #0f1115;
+  --surface: #171a21;
+  --border: #2a2f3a;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #f97316;
+  --accent-ink: #fed7aa;
+  --radius: 10px;
+}
+/* The light palette, twice by necessity: once for the OS preference (only while
+   no explicit choice is stored) and once for the explicit data-theme choice. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f7f7f8;
+    --surface: #ffffff;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --accent: #f97316;
+    --accent-ink: #7c2d12;
+  }
+}
+:root[data-theme="light"] {
   --bg: #f7f7f8;
   --surface: #ffffff;
   --border: #e5e7eb;
@@ -10,18 +34,6 @@
   --muted: #6b7280;
   --accent: #f97316;
   --accent-ink: #7c2d12;
-  --radius: 10px;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1115;
-    --surface: #171a21;
-    --border: #2a2f3a;
-    --text: #e5e7eb;
-    --muted: #9ca3af;
-    --accent: #f97316;
-    --accent-ink: #fed7aa;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -34,8 +46,10 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Header + nav */
+/* ── Header (fixed control surface) ─────────────────────────────────────── */
 .app-header {
   display: flex;
   align-items: center;
@@ -58,7 +72,18 @@ body {
   color: var(--muted);
 }
 .app-nav a:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
-.app-who { margin-left: auto; display: flex; align-items: center; gap: 0.5rem; }
+.app-who { margin-left: auto; display: flex; align-items: center; gap: 0.6rem; }
+.theme-toggle {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--accent); }
+.account-pill { display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none; }
 .who-user { color: var(--muted); }
 
 .pill {
@@ -72,29 +97,128 @@ body {
   color: var(--accent-ink);
   background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
+.pill-solved { color: var(--accent-ink); }
 
-/* Main + panels */
-.app-main { flex: 1; width: min(880px, 92vw); margin: 1.6rem auto; }
+/* ── The two middle panes (§1): left #content (swapped), right #ws (persistent) ── */
+.app-panes {
+  flex: 1;
+  display: flex;
+  gap: 1rem;
+  width: min(1400px, 96vw);
+  margin: 1.2rem auto;
+  align-items: flex-start;
+}
+.pane-content { flex: 3; min-width: 0; }
+.pane-ws { flex: 2; min-width: 0; position: sticky; top: 3.6rem; }
+@media (max-width: 900px) {
+  .app-panes { flex-direction: column; }
+  .pane-ws { position: static; width: 100%; }
+}
+
 .panel {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.4rem 1.6rem;
+  margin-bottom: 1rem;
 }
 .panel h1 { margin: 0 0 0.5rem; font-size: 1.4rem; }
+.panel h2 { margin: 0 0 0.6rem; font-size: 1.15rem; }
 .lead { font-size: 1.02rem; }
+.meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 .feature-list { padding-left: 1.1rem; }
 .feature-list li { margin: 0.3rem 0; }
 .muted { color: var(--muted); }
 code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9em; }
 
-/* Placeholder terminal */
-.term-frame { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin: 1rem 0; }
+/* ── Solutions century grids ────────────────────────────────────────────── */
+.century-label { margin: 1.2rem 0 0.4rem; font-size: 1rem; }
+.century-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 3px;
+}
+.cell {
+  display: block;
+  padding: 0.28rem 0;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  text-align: center;
+  font-size: 0.72rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-decoration: none;
+  color: var(--muted);
+  background: var(--bg);
+}
+.cell.empty { border-color: transparent; background: transparent; }
+a.cell:hover { border-color: var(--accent); color: var(--text); }
+.cell.solved { color: var(--text); }
+.cell.heat-1 { background: color-mix(in srgb, var(--accent) 16%, var(--bg)); }
+.cell.heat-2 { background: color-mix(in srgb, var(--accent) 32%, var(--bg)); }
+.cell.heat-3 { background: color-mix(in srgb, var(--accent) 48%, var(--bg)); }
+.cell.heat-4 { background: color-mix(in srgb, var(--accent) 66%, var(--bg)); }
+.cell.heat-5 { background: color-mix(in srgb, var(--accent) 85%, var(--bg)); color: #1f2937; }
+
+/* ── Problem page ───────────────────────────────────────────────────────── */
+.statement, .notes, .doc-body { overflow-wrap: break-word; }
+.statement img, .notes img, .doc-body img { max-width: 100%; }
+.file-list { padding-left: 1.1rem; }
+.file-list li { margin: 0.2rem 0; }
+.table-scroll { overflow-x: auto; }
+table.results { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+table.results th, table.results td {
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.6rem;
+  text-align: left;
+  white-space: nowrap;
+}
+tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
+
+.code-block {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+/* ── Docs / topics ──────────────────────────────────────────────────────── */
+.doc-list { padding-left: 1.1rem; }
+.doc-list li { margin: 0.35rem 0; }
+.doc-body pre {
+  padding: 0.8rem 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  font-size: 0.86rem;
+}
+.doc-body table { border-collapse: collapse; display: block; overflow-x: auto; }
+.doc-body th, .doc-body td { border: 1px solid var(--border); padding: 0.3rem 0.6rem; }
+.doc-body blockquote {
+  margin: 0.8rem 0;
+  padding: 0.1rem 1rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+
+/* ── Account ────────────────────────────────────────────────────────────── */
+dl.account { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1.2rem; }
+dl.account dt { color: var(--muted); }
+dl.account dd { margin: 0; }
+.perm-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+/* ── Placeholder terminal (right pane, until Phase 6) ───────────────────── */
+.term-frame { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .term-bar { display: flex; gap: 0.4rem; padding: 0.5rem 0.7rem; background: color-mix(in srgb, var(--text) 6%, var(--surface)); border-bottom: 1px solid var(--border); }
 .term-bar .dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--border); }
 .term-body {
   margin: 0;
   padding: 0.9rem 1rem;
+  min-height: 14rem;
   background: #0b0e14;
   color: #d7dbe0;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -103,5 +227,5 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 }
 .term-body .cursor { color: var(--accent); }
 
-/* Footer */
+/* ── Footer (fixed) ─────────────────────────────────────────────────────── */
 .app-footer { padding: 0.9rem 1.1rem; border-top: 1px solid var(--border); background: var(--surface); text-align: center; }

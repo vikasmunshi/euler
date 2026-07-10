@@ -400,7 +400,7 @@ like `show`:
 
 - **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
   that the xterm.js page rides over the PTY → WebSocket pipe to point its viewer
-  panel at the file's editor (`<origin>/edit/NNNN/<relpath>`).
+  panel at the file's editor (`<origin>/edit/solutions/NNNN/<relpath>`).
 
 - **terminal** — opens that editor URL in the named browser tab "solver-edit"
   (via `browser open-in-tab`); errors early if the `browser` command is
@@ -948,7 +948,7 @@ Open a problem's documentation page, in a browser or the web viewer panel.
 When *problem* is omitted, opens the current problem. The path depends on the
 shell profile:
 
-- **terminal** — opens the problem's page (`<base_url>/NNNN/`) in the named
+- **terminal** — opens the problem's page (`<base_url>/solutions/NNNN/`) in the named
   browser tab "solver-doc" (via
   `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
   focused and refreshed, a different problem navigates the tab in place, and the
@@ -958,7 +958,7 @@ shell profile:
 - **web** — the shell has no local browser to drive (it runs on the server while
   the user's browser is elsewhere), so it emits an `OSC 5379` control sequence
   (`open;<NNNN>;<token>`) on stdout. The xterm.js page rides it over the
-  PTY → WebSocket pipe and points its in-page viewer iframe at `<origin>/NNNN/`;
+  PTY → WebSocket pipe and points its in-page viewer iframe at `<origin>/solutions/NNNN/`;
   the monotonic token lets the page ignore the sequence when the PTY replay
   buffer re-sends it on reconnect.
 

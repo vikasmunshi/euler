@@ -3,13 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}euler{% endblock %}</title>
+  <title>{% block title %}ς euler{% endblock %}</title>
   <meta name="robots" content="noindex">
-  {# CSP-safe by construction: same-origin /assets CSS and /vendor JS only, no
+  {# CSP-safe by construction: same-origin /assets CSS+JS and /vendor JS only, no
      inline script or style. The per-response nonce (csp_nonce) is available
      should an inline block ever become unavoidable. #}
   <link rel="stylesheet" href="/assets/site.css">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ctext%20y='26'%20font-size='26'%3E%E2%88%91%3C/text%3E%3C/svg%3E">
+  {# The site glyph ς (final sigma, U+03C2 = %CF%82) in the accent orange. #}
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ctext%20y='26'%20font-size='28'%20fill='%23f97316'%3E%CF%82%3C/text%3E%3C/svg%3E">
+  {# Applies a stored data-theme before first paint (no FOUC), then wires the toggle. #}
+  <script src="/assets/site.js"></script>
   <script src="/vendor/htmx.min.js"
           integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
           crossorigin="anonymous" defer></script>
@@ -17,11 +20,19 @@
 </head>
 <body>
   {% include "_nav.html" %}
-  <main id="main" class="app-main" role="main">
-    {% block main %}{% endblock %}
-  </main>
+  {# The two variable-length middle panes (site-design §1): the left pane is the
+     htmx swap target; the right pane hosts the terminal and is never swapped, so
+     its session persists across left-pane navigation. #}
+  <div class="app-panes">
+    <main id="content" class="pane pane-content" role="main">
+      {% block content %}{% endblock %}
+    </main>
+    <aside id="ws" class="pane pane-ws" aria-label="solver terminal">
+      {% include "_ws.html" %}
+    </aside>
+  </div>
   <footer class="app-footer">
-    <span class="muted">Project&nbsp;Euler solutions &amp; tooling</span>
+    <span class="muted">ς euler — Project&nbsp;Euler solutions &amp; tooling</span>
   </footer>
 </body>
 </html>

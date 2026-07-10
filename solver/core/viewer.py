@@ -5,8 +5,8 @@
 Both drive the same profile-aware bridge to the browser — the in-page viewer panel
 (web profile) or a named browser tab (terminal profile) — differing only in the URL:
 
-- `show` opens a problem's rendered documentation page (`<base_url>/NNNN/`).
-- `edit` opens a solution file in the code editor (`<base_url>/edit/NNNN/<file>`).
+- `show` opens a problem's rendered documentation page (`<base_url>/solutions/NNNN/`).
+- `edit` opens a solution file in the code editor (`<base_url>/edit/solutions/NNNN/<file>`).
 """
 from __future__ import annotations
 
@@ -106,7 +106,7 @@ def edit(ctx: Context, problem: Problem, filename: str) -> int:
 
     - **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
       that the xterm.js page rides over the PTY → WebSocket pipe to point its viewer
-      panel at the file's editor (`<origin>/edit/NNNN/<relpath>`).
+      panel at the file's editor (`<origin>/edit/solutions/NNNN/<relpath>`).
 
     - **terminal** — opens that editor URL in the named browser tab "solver-edit"
       (via `browser open-in-tab`); errors early if the `browser` command is
@@ -135,7 +135,7 @@ def edit(ctx: Context, problem: Problem, filename: str) -> int:
 
     if not _browser_is_available():
         return _browser_unavailable_error()
-    url: str = f'{config.base_url}/edit/{problem.number:04d}/{rel}'
+    url: str = f'{config.base_url}/edit/solutions/{problem.number:04d}/{rel}'
     pipe = DEVNULL if console.quiet else None
     run(f'browser open-in-tab solver-edit {url}', shell=True, stdout=pipe, stderr=pipe)
     return ExitCodes.EXIT_OK
@@ -155,7 +155,7 @@ def show(ctx: Context, problem: Problem, filename: str | None = None) -> int:
     When *problem* is omitted, opens the current problem. The path depends on the
     shell profile:
 
-    - **terminal** — opens the problem's page (`<base_url>/NNNN/`) in the named
+    - **terminal** — opens the problem's page (`<base_url>/solutions/NNNN/`) in the named
       browser tab "solver-doc" (via
       `browser open-in-tab`). Every `show` reuses that one tab: the same problem is
       focused and refreshed, a different problem navigates the tab in place, and the
@@ -165,7 +165,7 @@ def show(ctx: Context, problem: Problem, filename: str | None = None) -> int:
     - **web** — the shell has no local browser to drive (it runs on the server while
       the user's browser is elsewhere), so it emits an `OSC 5379` control sequence
       (`open;<NNNN>;<token>`) on stdout. The xterm.js page rides it over the
-      PTY → WebSocket pipe and points its in-page viewer iframe at `<origin>/NNNN/`;
+      PTY → WebSocket pipe and points its in-page viewer iframe at `<origin>/solutions/NNNN/`;
       the monotonic token lets the page ignore the sequence when the PTY replay
       buffer re-sends it on reconnect.
 
@@ -192,7 +192,7 @@ def show(ctx: Context, problem: Problem, filename: str | None = None) -> int:
 
     if not _browser_is_available():
         return _browser_unavailable_error()
-    url: str = f'{config.base_url}/{problem.number:04d}/'
+    url: str = f'{config.base_url}/solutions/{problem.number:04d}/'
     pipe = DEVNULL if console.quiet else None
     run(f'browser open-in-tab solver-doc {url}', shell=True, stdout=pipe, stderr=pipe)
     return ExitCodes.EXIT_OK

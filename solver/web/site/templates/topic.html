@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}ς euler — {{ name }}{% endblock %}
+{% block content %}
+<section class="panel">
+  <p class="meta"><a href="/topics/" hx-get="/topics/" hx-target="#content"
+     hx-swap="innerHTML" hx-push-url="true">← topics</a></p>
+  <div class="doc-body">{{ body | safe }}</div>
+</section>
+{% endblock %}

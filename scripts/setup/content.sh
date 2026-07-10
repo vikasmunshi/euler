@@ -29,7 +29,7 @@
 #     and does no git operations. Access is a scoped ACL derived from
 #     authorizations.json's `objects`→paths (the single source, so app policy and
 #     filesystem enforcement can't drift):
-#       euler-sol-read    rX  on docs/ · solutions/ · solver/web/content/  (reader+)
+#       euler-sol-read    rX  on docs/ · topics/ · solutions/ · solver/web/content/  (reader+)
 #       euler-sol-write   rwX on solutions/                                (contributor+)
 #       euler-sol-delete  rwX on solutions/  (POSIX: delete = dir-write)   (maintainer)
 #     plus a traverse-only ACL (g:euler-web:x) on the home path + repo root so the
@@ -140,8 +140,9 @@ require_acl() {
 
 # Resolve the content subtrees from authorizations.json's objects map (the deployed SoR
 # if present, else the repo template) so the ACLs can never drift from the app policy.
-# READ  = docs + solutions + web-content; WRITE/DELETE = solutions. Absolute or empty
-# object paths (e.g. shell:/bin/bash) are ignored — only repo-relative content trees.
+# READ  = docs (incl. topics/) + solutions + web-content; WRITE/DELETE = solutions.
+# Absolute or empty object paths (e.g. shell:/bin/bash) are ignored — only
+# repo-relative content trees.
 resolve_content_paths() {
     local src="${AUTHZ_TEMPLATE}"
     [ -f "${AUTHZ_FILE}" ] && src="${AUTHZ_FILE}"

@@ -36,7 +36,7 @@
   "users": {},
   "objects": {
     "ai": [],
-    "docs": ["docs/"],
+    "docs": ["docs/", "topics/"],
     "infra": [],
     "shell": ["/bin/bash"],
     "solutions": ["solutions/"],

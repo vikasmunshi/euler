@@ -248,10 +248,11 @@ deploy_state_dir() {
 
 # Deploy the authorization system of record (DD-12): /etc/euler/authorizations.json
 # (root:root 0644 — world-readable non-secret policy, root-write only). First deploy
-# copies the repo template; every run seeds the checkout owner as `admin` and migrates
+# copies the repo template; every run seeds the checkout owner as `admin`, migrates
 # any existing web accounts' profiles out of the euler-auth-private SRP DB into the map
-# (old admin/user/guest → new maintainer/contributor/reader). Never clobbers an existing
-# file's edits — it merges.
+# (old admin/user/guest → new maintainer/contributor/reader), and unions any *new*
+# template objects/paths (e.g. a new content tree like topics/) into the objects map.
+# Never clobbers an existing file's edits — it merges.
 deploy_authz() {
     local owner
     owner="$(stat -c '%U' "${PROJECT_ROOT}")"
@@ -260,9 +261,9 @@ deploy_authz() {
         echo "Deploying authorizations.json SoR from the repo template..."
         sudo install -m 0644 -o root -g root "${AUTHZ_TEMPLATE}" "${AUTHZ_FILE}"
     fi
-    sudo "${PYTHON}" - "${AUTHZ_FILE}" "${owner}" "${STATE_DIR}/users.json" <<'PY'
+    sudo "${PYTHON}" - "${AUTHZ_FILE}" "${owner}" "${STATE_DIR}/users.json" "${AUTHZ_TEMPLATE}" <<'PY'
 import json, pathlib, sys
-authz_path, owner, users_path = sys.argv[1], sys.argv[2], sys.argv[3]
+authz_path, owner, users_path, template_path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 authz = json.loads(pathlib.Path(authz_path).read_text())
 users = authz.setdefault('users', {})
 users.setdefault(owner, 'admin')                         # local owner anchor (seeded for visibility)
@@ -275,6 +276,11 @@ for email, rec in srp.items():
     if email not in users:
         old = str(rec.get('profile', 'user'))
         users[email] = migrate.get(old, old)             # already-new names pass through
+template = json.loads(pathlib.Path(template_path).read_text())
+objects = authz.setdefault('objects', {})                # union new template objects/paths;
+for name, paths in template.get('objects', {}).items():  # local additions are kept as-is
+    merged = objects.setdefault(name, [])
+    merged.extend(p for p in paths if p not in merged)
 pathlib.Path(authz_path).write_text(json.dumps(authz, indent=2, sort_keys=True) + '\n')
 print(f'authorizations.json: {len(users)} user(s) mapped (owner {owner}=admin)')
 PY

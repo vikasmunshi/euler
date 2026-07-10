@@ -21,11 +21,14 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 >   ladder live, `users` reworked, the `/etc/euler` SoR seeded + migrated. (The OS second
 >   layer — per-profile service instances + content-tree ACLs — lands per service: content
 >   in Phase 5a, shell in Phase 6.)
-> - 🚧 **Phase 5** — Content service. **5a landed**: the home/navigation shell + vendored
->   htmx (`solver/web/site`), the full-page-vs-block render contract, and the **DD-12 OS
->   layer** — per-profile `euler-content@<profile>` instances (`content.sh`), content-tree
->   ACLs, Caddy `X-Profile` routing, and the app-side profile pin. 5b–5d (views, `.html`
->   validation, edits) remain.
+> - 🚧 **Phase 5** — Content service. **5a landed** (and revised to the
+>   [site-design](site-design.md) four-region app shell, ς + dark-first): the shell +
+>   vendored htmx (`solver/web/site`), the full-page-vs-block render contract, and the
+>   **DD-12 OS layer** — per-profile `euler-content@<profile>` instances (`content.sh`),
+>   content-tree ACLs, Caddy `X-Profile` routing, and the app-side profile pin.
+>   **5b landed**: the read routes — `/solutions/` century grids, problem pages + files,
+>   `/docs/`, `/topics/`, `/account` — with canonical trailing-slash 301s. 5c–5d
+>   (`.html` validation, edits) remain.
 > - ⬜ **Phase 6** — Web shell (not started).
 
 ## 1 · Purpose & scope
@@ -981,8 +984,11 @@ shippable sub-steps:
   content-tree ACLs (`euler-sol-{read,write,delete}`, derived from `authorizations.json`),
   Caddy routing by `X-Profile` to the matching instance, and the app-side `EULER_PROFILE`
   pin that refuses a mismatched request.
-- **5b — View paths.** Server-rendered summary, problem, code, and docs pages, reading
-  each problem's `solution_dir` (plaintext, incl. decrypted `solutions/private`).
+- **5b — View paths.** ✅ Server-rendered read routes per the
+  [site-design route table](site-design.md#5--routes): the `/solutions/` century grids,
+  problem pages + files (reading each problem's `solution_dir` — plaintext, incl.
+  decrypted `solutions/private`), rendered `/docs/` guides (+ the composed `ai`
+  reference), the new `/topics/` tree, and `/account`.
 - **5c — Content validation.** Port the `.py`/`.c`/`.json` reject-and-restore checks;
   **add the `.html` gate via [nh3](#47--content-security-policy--nh3)**, sanitize-and-store-clean
   ([DD-10](#dd-10--phase-5-content-service-choices)).

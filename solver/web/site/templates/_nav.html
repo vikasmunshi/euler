@@ -1,19 +1,27 @@
-{# Header + primary navigation. Links carry both a plain href (no-JS full-page
-   fallback) and htmx attributes that swap the #main block in place and push the
-   URL — the full-page-vs-block contract (DD-10). No hx-on / inline JS (CSP). #}
+{# The fixed header (site-design §1): brand, primary nav, theme toggle, account
+   pill — a stable control surface, identical on every page. Links carry both a
+   plain href (no-JS full-page fallback) and htmx attributes that swap the
+   #content pane in place and push the URL (the full-page-vs-block contract,
+   DD-10). No hx-on / inline JS (CSP). #}
 <header class="app-header">
-  <a class="brand" href="/" hx-get="/" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">
-    <span class="brand-glyph" aria-hidden="true">&sum;</span>
+  <a class="brand" href="/" hx-get="/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+    <span class="brand-glyph" aria-hidden="true">&sigmaf;</span>
     <span class="brand-name">euler</span>
   </a>
   <nav class="app-nav" aria-label="Primary">
-    <a href="/" hx-get="/" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Home</a>
-    <a href="/shell" hx-get="/shell" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Shell</a>
+    <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Solutions</a>
+    <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Docs</a>
+    <a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Topics</a>
   </nav>
   <div class="app-who">
+    <button id="theme-toggle" class="theme-toggle" type="button"
+            aria-label="toggle light/dark theme" title="theme">&#9681;</button>
     {% if subject %}
-      <span class="who-user">{{ subject.user or 'anon' }}</span>
-      <span class="who-profile pill pill-{{ subject.profile }}">{{ subject.profile }}</span>
+      <a class="account-pill" href="/account"
+         hx-get="/account" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+        <span class="who-user">{{ subject.user or 'anon' }}</span>
+        <span class="pill pill-{{ subject.profile }}">{{ subject.profile }}</span>
+      </a>
     {% endif %}
   </div>
 </header>

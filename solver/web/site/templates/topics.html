@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}ς euler — topics{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1>Topics</h1>
+  <p class="lead">Writeups on the mathematics and techniques behind the problems.</p>
+  {% if entries %}
+  <ul class="doc-list">
+    {% for e in entries %}
+    <li><a href="/topics/{{ e.name }}"
+           hx-get="/topics/{{ e.name }}" hx-target="#content" hx-swap="innerHTML"
+           hx-push-url="true">{{ e.title }}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="muted">No topics written yet.</p>
+  {% endif %}
+</section>
+{% endblock %}
