@@ -287,6 +287,20 @@ _probe() {
     printf '%s' "${code:-000}"
 }
 
+# ── Allow-probe with a short settle retry: right after `install`, Squid may not
+#    yet be ready to dial upstream and refuses the first CONNECT, printing a false
+#    ✗ HTTP 000. Retry the *allow* probe until it succeeds (a warm proxy passes on
+#    the first try, so this adds no delay to the common path).
+_probe_allow() {
+    local code i
+    for i in 1 2 3 4 5; do
+        code="$(_probe "$1")"
+        [[ "${code}" =~ ^[23] ]] && { printf '%s' "${code}"; return; }
+        sleep 1
+    done
+    printf '%s' "${code:-000}"
+}
+
 # ── Actions ───────────────────────────────────────────────────────────────────────
 
 do_install() {
@@ -372,7 +386,7 @@ do_status() {
     fi
     # Allow/deny probe through the proxy.
     local allow deny
-    allow="$(_probe https://projecteuler.net/)"
+    allow="$(_probe_allow https://projecteuler.net/)"
     deny="$(_probe https://example.com/)"
     if [[ "${allow}" =~ ^[23] ]]; then
         echo "allow probe (projecteuler.net): ✓ HTTP ${allow}"
