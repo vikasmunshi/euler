@@ -86,7 +86,7 @@ The web ladder caps at `maintainer` (`admin` is local-only,
 | `web-content:read` | reader | the app shell (header/footer/panes) |
 | `docs:read` | reader | guides, composed reference pages, topics |
 | `solutions:read` | reader | the solutions grid, problem pages, files |
-| `solutions:execute` | contributor | `eval` / `benchmark` (via `/ws`) |
+| `solutions:execute` | contributor | `eval` / `benchmark` (via `/ws`); the progress editor |
 | `solutions:write` | contributor | editor, save, lint |
 | `solutions:delete` | maintainer | delete a solution file |
 | `ai:execute` | maintainer | regenerate notes |
@@ -131,6 +131,8 @@ is served back and rendered, so raw HTML is stored-XSS;
 
 | Method | Path | Renders | Requires |
 |---|---|---|---|
+| GET | `/edit/solutions/` | the **progress editor** (collection-level; no problem number) | `solutions:execute` |
+| POST | `/edit/solutions/` | save progress → grid block + status (writes `solutions/.progress.html`) | `solutions:execute` |
 | GET | `/edit/solutions/{n}/{filename}` | code-editor for the file | `solutions:write` |
 | POST | `/edit/solutions/{n}/{filename}` | save → editor block + status | `solutions:write` |
 | DELETE | `/edit/solutions/{n}/{filename}` | delete → updated file-list block | `solutions:delete` |
@@ -171,8 +173,10 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
    **`core/viewer.py` must be updated** — `show` → `/solutions/NNNN/`, `edit` →
    `/edit/solutions/NNNN/<file>` (it currently emits `/NNNN/` and `/edit/NNNN/<file>`). ⬜
 3. **Folded away:** `/summary` → the `/solutions/` century grids; `/ai/{name}` →
-   `/docs/{name}`; `/{n}/cmd` and `/edit/progress` → the `/ws` command set. The
-   `progress:write` grant is **not** needed. ✅
+   `/docs/{name}`; `/{n}/cmd` → the `/ws` command set. The **progress editor** returns as
+   the collection-level `/edit/solutions/` (GET/POST, no DELETE), gated `solutions:execute`
+   — contributor-floored, so the existing `euler-sol-write` ACL already covers its write to
+   `solutions/.progress.html`: no `progress:write` grant and no new ACL. ✅
 4. **`topics/` is a new content tree** (blog-style). It joins the `euler-sol-read` content
    ACL (add `topics/` to `content.sh`'s read paths) and is gated `docs:read`. A problem's
    `topics` field is **new data** — needs a per-problem tagging source. ⬜
