@@ -34,6 +34,7 @@
 #
 #   /opt/euler/venv                        root:euler-web 0755  (deployed venv)
 #   /etc/euler/auth.env                    root:euler-auth 0640 (generated here)
+#   /etc/euler/authorizations.json         root:root 0644       (DD-12 SoR; seeded + migrated)
 #   /var/lib/euler-auth                    euler-auth:euler-auth 0700 (state, DD-6)
 #   /etc/tmpfiles.d/euler.conf             root:root 0644       (/run/euler socket dir)
 #   /etc/systemd/system/euler-auth.service (root-owned, boot-enabled; deferred until
@@ -56,6 +57,8 @@ ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"      
 
 SYS_DIR="/etc/euler"
 AUTH_ENV="${SYS_DIR}/auth.env"                  # scoped runtime config (root:euler-auth 0640)
+AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # DD-12 authorization SoR (root:root 0644)
+AUTHZ_TEMPLATE="${PROJECT_ROOT}/authorizations.json"  # repo bootstrap template
 OPT_DIR="/opt/euler"
 VENV_DIR="${OPT_DIR}/venv"
 VENV_PY="${VENV_DIR}/bin/python"
@@ -243,6 +246,42 @@ deploy_state_dir() {
     sudo chmod 0700 "${STATE_DIR}"
 }
 
+# Deploy the authorization system of record (DD-12): /etc/euler/authorizations.json
+# (root:root 0644 — world-readable non-secret policy, root-write only). First deploy
+# copies the repo template; every run seeds the checkout owner as `admin` and migrates
+# any existing web accounts' profiles out of the euler-auth-private SRP DB into the map
+# (old admin/user/guest → new maintainer/contributor/reader). Never clobbers an existing
+# file's edits — it merges.
+deploy_authz() {
+    local owner
+    owner="$(stat -c '%U' "${PROJECT_ROOT}")"
+    sudo mkdir -p "${SYS_DIR}"
+    if [ ! -f "${AUTHZ_FILE}" ]; then
+        echo "Deploying authorizations.json SoR from the repo template..."
+        sudo install -m 0644 -o root -g root "${AUTHZ_TEMPLATE}" "${AUTHZ_FILE}"
+    fi
+    sudo "${PYTHON}" - "${AUTHZ_FILE}" "${owner}" "${STATE_DIR}/users.json" <<'PY'
+import json, pathlib, sys
+authz_path, owner, users_path = sys.argv[1], sys.argv[2], sys.argv[3]
+authz = json.loads(pathlib.Path(authz_path).read_text())
+users = authz.setdefault('users', {})
+users.setdefault(owner, 'admin')                         # local owner anchor (seeded for visibility)
+migrate = {'admin': 'maintainer', 'user': 'contributor', 'guest': 'reader'}
+try:                                                     # migrate existing web accounts from the SRP DB
+    srp = json.loads(pathlib.Path(users_path).read_text()).get('users', {})
+except (OSError, json.JSONDecodeError):
+    srp = {}
+for email, rec in srp.items():
+    if email not in users:
+        old = str(rec.get('profile', 'user'))
+        users[email] = migrate.get(old, old)             # already-new names pass through
+pathlib.Path(authz_path).write_text(json.dumps(authz, indent=2, sort_keys=True) + '\n')
+print(f'authorizations.json: {len(users)} user(s) mapped (owner {owner}=admin)')
+PY
+    sudo chown root:root "${AUTHZ_FILE}"
+    sudo chmod 0644 "${AUTHZ_FILE}"
+}
+
 # True when the deployed venv contains the auth service module (build-order step 4).
 venv_has_auth() {
     [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -c 'import solver.web.auth' 2>/dev/null
@@ -314,6 +353,7 @@ do_install() {
     deploy_tmpfiles
     deploy_auth_env
     deploy_state_dir
+    deploy_authz
 
     if venv_has_auth; then
         install_unit
@@ -346,7 +386,7 @@ do_uninstall() {
     fi
     read -r -p "Remove ${AUTH_ENV} (admin token), the ${STATE_DIR} state (user DB!), and the ${AUTH_USER} identity? [y/N] " reply
     if [[ "${reply}" =~ ^[Yy]$ ]]; then
-        sudo rm -f "${AUTH_ENV}"
+        sudo rm -f "${AUTH_ENV}" "${AUTHZ_FILE}"
         sudo rm -rf "${STATE_DIR}"
         if getent passwd "${AUTH_USER}" > /dev/null; then sudo userdel "${AUTH_USER}" 2>/dev/null || true; fi
         if getent group "${AUTH_GROUP}" > /dev/null; then sudo groupdel "${AUTH_GROUP}" 2>/dev/null || true; fi
@@ -382,6 +422,11 @@ do_status() {
         echo "config:      ✓ ${AUTH_ENV}"
     else
         echo "config:      ✗ ${AUTH_ENV} missing"
+    fi
+    if [ -f "${AUTHZ_FILE}" ]; then
+        echo "authz:       ✓ ${AUTHZ_FILE} ($(python3 -c "import json;print(len(json.load(open('${AUTHZ_FILE}')).get('users',{})))" 2>/dev/null || echo '?') users)"
+    else
+        echo "authz:       ✗ ${AUTHZ_FILE} missing (local shell uses the repo template)"
     fi
     if [ -d "${STATE_DIR}" ]; then
         echo "state:       ✓ ${STATE_DIR} ($(stat -c '%U:%G %a' "${STATE_DIR}" 2>/dev/null))"

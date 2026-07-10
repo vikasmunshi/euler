@@ -912,12 +912,16 @@ kernel, enforcement, and migration.
    channels=('terminal',)`, …). Regenerate the audit view **`solver/commands.json`** and
    `commands-index.md` via `update-docs`. **Test:** `commands.json` matches intent; the
    per-profile command set is correct; `flake8`/`mypy` clean.
-4. **`authorizations.json` SoR + install seeding.** A kit (`scripts/setup/authz.sh`, or
-   folded into `auth.sh`) deploys `/etc/euler/authorizations.json` (`root:root 0644`) from
-   the repo bootstrap template, **seeds the checkout owner as `admin`**, and migrates the
-   live accounts (`vikas.munshi@…` → `maintainer`, `vikasmunshi@…` → `contributor`,
-   `mercanther@…` → `reader`). **Test:** the file exists with the right ownership/mode; the
-   local shell resolves `admin`.
+4. ✅ **`authorizations.json` SoR + install seeding.** Folded into `auth.sh`
+   (`deploy_authz`): deploys `/etc/euler/authorizations.json` (`root:root 0644`) from the
+   repo bootstrap template (`authorizations.json`, which also serves as the kernel's dev
+   fallback), **seeds the checkout owner as `admin`**, and migrates existing web accounts
+   by reading their profile out of the `euler-auth`-private SRP DB and mapping old→new
+   (`admin`→`maintainer`, `user`→`contributor`, `guest`→`reader`) — idempotent, never
+   clobbering operator edits. `status` reports the file + user count; `uninstall` removes
+   it with the state. Verified: the migration dry-run maps the live accounts correctly
+   (owner→admin, `vikas.munshi@…`→maintainer, `vikasmunshi@…`→contributor,
+   `mercanther@…`→reader); deployed by `make upgrade-auth`.
 5. **Auth-service integration.** `euler-auth` resolves the profile from
    `/etc/euler/authorizations.json` (drop the `profile` field from `users.json` / the SRP
    record); `forward_auth` returns `X-Profile` from the map; the shell ticket carries the
