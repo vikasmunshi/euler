@@ -29,7 +29,8 @@ from typing import Literal
 from solver.shell import console, register
 
 
-@register(help_text='Manage web accounts via the auth service (sudo-gated admin API).')
+@register(requires=('users:write',), channels=('terminal',),
+          help_text='Manage web accounts via the auth service (sudo-gated admin API).')
 def users(action: Literal['list', 'add', 'enable', 'disable', 'remove'] = 'list',
           email: str = '', profile: Literal['admin', 'user', 'guest'] = 'user') -> int:
     """Administer web accounts through the auth service's local admin socket.

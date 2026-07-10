@@ -10,7 +10,8 @@ from solver.core.problems import Problem, problems as problem_set
 from solver.shell import register, console
 
 
-@register(help_text='Show list of problems ([accent.dim]all[/accent.dim]|solved|unsolved).')
+@register(requires=('solutions:read',),
+          help_text='Show list of problems ([accent.dim]all[/accent.dim]|solved|unsolved).')
 def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     """Print a list of problems and their count.
 
@@ -34,7 +35,7 @@ def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
     return 0
 
 
-@register(help_text='Manage configuration settings.')
+@register(requires=('infra:execute',), help_text='Manage configuration settings.')
 def manage_config(
         param: Literal['all', 'server_port', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate'] = 'all',
         value: float | int | None = None, /,

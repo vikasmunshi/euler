@@ -11,7 +11,7 @@ from solver.shell import console, register
 from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 
-@register(help_text='List the solutions dir for given/current problem.', quietable=True)
+@register(requires=('solutions:read',), help_text='List the solutions dir for given/current problem.', quietable=True)
 def ls(problem: Problem) -> int:
     """This function lists all files found recursively in the solution directory of a
     given problem while displaying their canonical paths and file sizes. The files

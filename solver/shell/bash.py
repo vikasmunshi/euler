@@ -156,7 +156,7 @@ def _run_streamed(ctx: Context, cmdline: str, cwd: Path) -> int:
         return proc.wait()
 
 
-@command(name='!',
+@command(requires=('shell:execute',), name='!',
          help_text='Run a bash command.',
          usage='\t! <command> [args]...\n'
                '\t! sh → escape to a bash shell.\n'

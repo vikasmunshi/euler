@@ -41,7 +41,7 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
     }
 
 
-@register(help_text='Generate specified target using Claude API.')
+@register(requires=('ai:execute',), help_text='Generate specified target using Claude API.')
 def claude_api(problem: Problem,
                target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
                force: bool = False,

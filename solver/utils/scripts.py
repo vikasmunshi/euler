@@ -29,7 +29,8 @@ def run_cmdline(cmdline: str) -> int:
     return result
 
 
-@register(help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
+@register(requires=('infra:execute',),
+          help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
 def git_commit(reset: bool = False, verify: bool = True, message: str = '') -> int:
     """Stage and commit the solutions and solver package as a timestamped checkpoint.
 
@@ -57,6 +58,7 @@ def git_commit(reset: bool = False, verify: bool = True, message: str = '') -> i
 
 
 @register(
+    requires=('infra:execute',),
     help_text='Push targets (keys|scripts|[accent]solutions[/accent]|solver) to remote.',
     aliases=('publish',),
     quietable=True,
@@ -84,7 +86,8 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
     return result
 
 
-@register(help_text='Display sync state between local and origin/master.', aliases=('status',),)
+@register(requires=('infra:execute',),
+          help_text='Display sync state between local and origin/master.', aliases=('status',),)
 def git_status(details: bool = False) -> int:
     """Display the sync state between the local branch and origin/master.
 
@@ -99,7 +102,8 @@ def git_status(details: bool = False) -> int:
     return result
 
 
-@register(help_text='Bring the local repository in sync with origin/master.', aliases=('sync',),)
+@register(requires=('infra:execute',),
+          help_text='Bring the local repository in sync with origin/master.', aliases=('sync',),)
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
 
@@ -114,6 +118,7 @@ def git_sync(dry_run: bool = False) -> int:
 
 
 @register(
+    requires=('infra:execute',),
     help_text="Upgrade dependency group ([accent.dim]all[/accent.dim]|ai|core|dev|solutions|show).",
     aliases=('upgrade',),
 )
@@ -147,6 +152,7 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
 
 
 @register(
+    requires=('infra:execute',),
     help_text='Run pre-commit hook and simulated pre-push hook.',
     aliases=('hooks',),
     quietable=True,
@@ -171,6 +177,7 @@ def git_hooks() -> int:
 
 
 @register(
+    requires=('infra:execute',),
     help_text='Installs or uninstalls system resources.',
     aliases=('install',),
 )

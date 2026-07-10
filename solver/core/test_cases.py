@@ -102,7 +102,7 @@ def load_test_cases(problem: Problem,
     return test_cases_list
 
 
-@register(help_text='list the test cases for the problem.')
+@register(requires=('solutions:read',), help_text='list the test cases for the problem.')
 def test_cases(problem: Problem, *categories: Literal['all', 'dev', 'main', 'extra']) -> int:
     """
     List the test cases for a given problem based on specified categories.

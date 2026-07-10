@@ -14,7 +14,7 @@ from solver.shell import console, register
 from solver.utils.path_utils import canonical_path, iterdir_recursive
 
 
-@register(help_text='Lint current problem, auto-fix with --auto-fix.', quietable=True)
+@register(requires=('solutions:write',), help_text='Lint current problem, auto-fix with --auto-fix.', quietable=True)
 def lint(problem: Problem, auto_fix: bool = False) -> int:
     """Lint the problem's solution files, optionally auto-fixing them.
 

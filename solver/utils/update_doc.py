@@ -4,7 +4,7 @@
 
 Some parts of the documentation mirror the live command registry (the command
 table in the user guide, the per-command reference in `commands-index.md`), and
-the authorization policy `solver/commands.csv` is likewise reconciled with the
+the authorization audit `solver/commands.json` is likewise regenerated from the
 registry (see :func:`_sync_commands`). Rather than hand-edit them whenever a
 command's name, alias, help text, or usage changes, those sections are delimited
 with HTML marker comments and rebuilt from the registry::
@@ -325,7 +325,8 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
     return updated, stale
 
 
-@register(help_text='Regenerate the generated sections of the docs/ guides.', pass_ctx=True, quietable=True)
+@register(requires=('infra:execute',), channels=('terminal',),
+          help_text='Regenerate the generated sections of the docs/ guides.', pass_ctx=True, quietable=True)
 def update_docs(ctx: Context, check: bool = False) -> int:
     """Rebuild the registry-generated blocks in the `docs/` guides and the README.
 

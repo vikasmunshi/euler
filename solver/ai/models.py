@@ -99,7 +99,7 @@ def get_accumulated_charges() -> float:
                for model in consumed_tokens)
 
 
-@register(help_text='Display total cost of AI API tokens consumed in session.')
+@register(requires=('solver:execute',), help_text='Display total cost of AI API tokens consumed in session.')
 def costs(ecb_usd_rate: float = config.ecb_usd_rate) -> int:
     """
     Print the total cost of all AI tokens consumed in the session so far, broken down per model,

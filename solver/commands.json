@@ -5,7 +5,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "shell:execute"
     ]
   },
   "?": {
@@ -14,7 +14,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solver:execute"
     ]
   },
   "benchmark": {
@@ -23,7 +23,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:execute"
     ]
   },
   "claude-api": {
@@ -32,7 +32,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "ai:execute"
     ]
   },
   "claude-skill": {
@@ -41,7 +41,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "ai:execute"
     ]
   },
   "clear": {
@@ -50,7 +50,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solver:execute"
     ]
   },
   "compile-c": {
@@ -59,7 +59,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:execute"
     ]
   },
   "costs": {
@@ -68,7 +68,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solver:execute"
     ]
   },
   "echo": {
@@ -77,16 +77,15 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solver:execute"
     ]
   },
   "edit": {
     "channels": [
-      "terminal",
-      "web"
+      "terminal"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:write"
     ]
   },
   "evaluate": {
@@ -95,7 +94,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:execute"
     ]
   },
   "git-commit": {
@@ -176,7 +175,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:write"
     ]
   },
   "ls": {
@@ -185,7 +184,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:read"
     ]
   },
   "manage-config": {
@@ -203,7 +202,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:execute"
     ]
   },
   "new": {
@@ -212,7 +211,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:write"
     ]
   },
   "pause": {
@@ -221,7 +220,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solver:execute"
     ]
   },
   "pip-upgrade": {
@@ -239,7 +238,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:read"
     ]
   },
   "progress": {
@@ -248,7 +247,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:read"
     ]
   },
   "results": {
@@ -257,7 +256,7 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:read"
     ]
   },
   "search": {
@@ -266,16 +265,15 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:read"
     ]
   },
   "show": {
     "channels": [
-      "terminal",
-      "web"
+      "terminal"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:read"
     ]
   },
   "summary": {
@@ -302,13 +300,12 @@
       "web"
     ],
     "requires": [
-      "infra:execute"
+      "solutions:read"
     ]
   },
   "update-docs": {
     "channels": [
-      "terminal",
-      "web"
+      "terminal"
     ],
     "requires": [
       "infra:execute"
@@ -316,8 +313,7 @@
   },
   "update-models": {
     "channels": [
-      "terminal",
-      "web"
+      "terminal"
     ],
     "requires": [
       "infra:execute"
@@ -343,11 +339,10 @@
   },
   "users": {
     "channels": [
-      "terminal",
-      "web"
+      "terminal"
     ],
     "requires": [
-      "infra:execute"
+      "users:write"
     ]
   }
 }

@@ -105,7 +105,7 @@ def _wrapped_for_all(master_key: bytes, public_keys: list[str]) -> dict[str, str
     return data
 
 
-@register(help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
+@register(requires=('infra:execute',), help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
 def key_rekey() -> int:
     """Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
 
@@ -129,7 +129,8 @@ def key_rekey() -> int:
     return 0
 
 
-@register(help_text='Authorise another public key (hex) to access the enc key.', aliases=('authorize',))
+@register(requires=('infra:execute',),
+          help_text='Authorise another public key (hex) to access the enc key.', aliases=('authorize',))
 def user_authorize(public_key: str) -> int:
     """Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession)."""
     try:
@@ -152,7 +153,7 @@ def user_authorize(public_key: str) -> int:
 # ==================================================================================================================== #
 #                                               user identity
 # ==================================================================================================================== #
-@register(help_text="Show public key & enc-key access; --regen for new key-pair.")
+@register(requires=('infra:execute',), help_text="Show public key & enc-key access; --regen for new key-pair.")
 def user(regen: bool = False) -> int:
     """Show the current identity and whether it can decrypt; create a key pair on first run or --regen."""
     try:
@@ -256,7 +257,7 @@ def _reconstruct_secret(shares: list[str]) -> bytes:
     return secret_int.to_bytes(_SECRET_BYTES, 'big')
 
 
-@register(help_text='Split master key into shares (n-of-m secret sharing).')
+@register(requires=('infra:execute',), help_text='Split master key into shares (n-of-m secret sharing).')
 def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     """Print `num_shares` Shamir shares of the current master key (threshold needed to reconstruct)."""
     if num_shares < threshold or threshold < 2:
@@ -277,7 +278,7 @@ def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     return 0
 
 
-@register(help_text='Recover master key from shares.')
+@register(requires=('infra:execute',), help_text='Recover master key from shares.')
 def key_reconstruct(threshold: int = 2) -> int:
     """Prompt for `threshold` shares, reconstruct the master key, and store it wrapped to this user."""
     try:

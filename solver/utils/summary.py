@@ -79,7 +79,7 @@ def _update_problems_state(_problems: dict[int, dict[str, str | int | bool]]) ->
     problems.clear_cache()
 
 
-@register(help_text='Parse .progress.html into problems.json.', quietable=True)
+@register(requires=('infra:execute',), help_text='Parse .progress.html into problems.json.', quietable=True)
 def summary() -> int:
     """Refresh the solved/unsolved state from your Project Euler progress page.
 
@@ -109,7 +109,7 @@ def summary() -> int:
     return ExitCodes.EXIT_OK
 
 
-@register(help_text='Print progress statistics about Euler problems.')
+@register(requires=('solutions:read',), help_text='Print progress statistics about Euler problems.')
 def progress() -> int:
     """Print overall progress through the Euler problems.
 
@@ -138,7 +138,7 @@ def progress() -> int:
 
 
 @register(
-    help_text='Mark the current problem as solved, after checking.',
+    requires=('solutions:execute',), help_text='Mark the current problem as solved, after checking.',
     aliases=('mark-solved',),
     quietable=True,
 )

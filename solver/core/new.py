@@ -41,7 +41,8 @@ new_test_case: bytes = (
 )
 
 
-@register(help_text='Generate new solution/test-case file for a problem.', quietable=True)
+@register(requires=('solutions:write',),
+          help_text='Generate new solution/test-case file for a problem.', quietable=True)
 def new(problem: Problem, py: bool = False, c: bool = False, tc: bool = False) -> int:
     """Generate new solution and/or test-case files for the problem.
 
