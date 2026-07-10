@@ -288,12 +288,12 @@ users enable  alice@example.com
 users remove  alice@example.com               # delete the account/entry and any pending invites
 ```
 
-**Two-path `add`** (DD-12): an `@`-address is the **web** path (mint an invite → the
-account's profile lands in `authorizations.json` on registration); a bare **os-login** is
-the **local** path — a direct `users`-map entry, no invite (a local login authenticates by
-*being* that OS user). Web-assignable profiles are `reader` (default) / `contributor` /
-`maintainer` — **not `admin`** (local-only; the checkout owner is seeded `admin` at
-install). `change` promotes/demotes and, like `disable`, **revokes live sessions +
+**Two-path `add`** (DD-12): an `@`-address is the **web** path — the CLI (as root) writes
+`authorizations.json[email]=profile` **and** mints an emailed invite (rolled back if the
+mail fails); a bare **os-login** is the **local** path — just the map entry, no invite (a
+local login authenticates by *being* that OS user). Web-assignable profiles are `reader`
+(default) / `contributor` / `maintainer` — **`admin` only for a local os-login**, never a
+web account. `change` rewrites the map and, for a web account, **revokes live sessions +
 remember tokens** so the new profile takes effect on next login. No reset verb — reset is
 self-service (§4.1). Mutating verbs prompt for `sudo`.
 

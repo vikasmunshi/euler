@@ -374,12 +374,21 @@ def build_admin_app(service: AuthService) -> web.Application:
         log.info('removed %s', email)
         return web.json_response({'email': email, 'removed': True})
 
+    async def revoke_sessions(request: web.Request) -> web.Response:
+        """Drop a web account's live sessions + remember tokens so a profile change
+        (written to authorizations.json by the sudo CLI) takes effect on next login."""
+        email = normalize_email(request.match_info['email'])
+        n = service.sessions.revoke_email(email) + service.remember.revoke_email(email)
+        log.info('revoked %d session/remember token(s) for %s', n, email)
+        return web.json_response({'email': email, 'revoked': n})
+
     app = web.Application(middlewares=[require_token])
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/admin/users', list_users),
         web.post('/admin/users', add_user),
         web.post('/admin/users/{email}/{action:enable|disable}', set_enabled),
+        web.post('/admin/users/{email}/revoke', revoke_sessions),
         web.delete('/admin/users/{email}', remove_user),
     ])
     return app

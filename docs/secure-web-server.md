@@ -932,12 +932,17 @@ kernel, enforcement, and migration.
    plus in-flight invites. Verified by a step-5 harness: login/forward_auth profile from the
    map, roster shows web + local, and a map edit is picked up on re-login. Redeploy via
    `make upgrade-auth`.
-6. **`users` command rework.** Two-path `add` (`@`-address → web invite; bare os-login →
-   direct map entry); add `users change`; split `users list` (`users:read`, non-sudo roster
-   from the world-readable SoR) from the mutating verbs (`users:write`, sudo, editing the
-   root-owned SoR + the SRP record for web accounts). **Test:** `users list` as a non-admin
-   shows the roster; `users add <os-login> <profile>` adds a map entry; `users change`
-   promotes + revokes sessions; mutations prompt for `sudo`.
+6. ✅ **`users` command rework.** The command is registered for `users:read`; `list` is
+   non-sudo (reads the world-readable SoR roster directly) while the mutating verbs are
+   gated at **runtime** on `users:write` (admin) and re-execute the admin CLI under `sudo`.
+   The CLI (`solver.web.auth.admin`), as root, **writes the SoR** (atomic `0644`) and
+   reaches the euler-auth socket: two-path `add` (`@`-address → map entry **+** minted
+   invite, rolled back on mail failure; bare os-login → map entry only, no invite);
+   `change` (rewrites the map, and for a web account calls a new `POST
+   /admin/users/{email}/revoke` so the new profile takes on re-login); `remove` (drops the
+   map entry, and the SRP record for a web account); `enable`/`disable` (web SRP state).
+   `admin` is assignable only to a local os-login, never a web account. Verified by a
+   step-6 harness (both add paths, web-admin rejection, change, remove, list).
 7. **Cleanup + regression.** Remove `commands.csv` and every reference; `update-docs
    --check` clean; the full test suite + the Phase-4 auth/flow harnesses green (no
    regression). **Test:** end-to-end — register/login still work; a `reader` web session's
