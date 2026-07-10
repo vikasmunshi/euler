@@ -967,9 +967,10 @@ kernel, enforcement, and migration.
 ### Phase 5 — Content service 🚧
 **Prerequisite: Phase 4a** (the `solver/auth` kernel + `authorizations.json`) — the content
 routes below are gated by its `requires`/`X-Profile` check, and their per-profile service
-instances + content-tree ACLs (the DD-12 OS layer) are built here. The **route surface —
-every path, its capability gate, and the full-page/block contract — is [`site-map.md`](site-map.md)**,
-the contract 5b–5d build to. Four independently shippable sub-steps:
+instances + content-tree ACLs (the DD-12 OS layer) are built here. The **layout, visual
+identity, and route surface — the app shell, every path, and its capability gate — are
+[`site-design.md`](site-design.md)**, the contract 5b–5d build to. Four independently
+shippable sub-steps:
 
 - **5a — Home, navigation, look & feel.** ✅ `base.html` + partials, shared CSS, header/nav,
   **htmx** vendored and wired for fragment-swap navigation, in a standalone `solver/web/site`
