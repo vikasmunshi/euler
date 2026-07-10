@@ -54,12 +54,17 @@ SMTP_RELAY_PORT="8025"
 # ── The euler service tier (DD-2/DD-4/DD-8) ───────────────────────────────────────
 # Every euler-* uid subject to the egress drop. Generated rules include only the
 # users that exist at generation time.
-ALL_USERS=(euler-caddy euler-auth euler-content euler-ws
-           euler-proxy euler-acme euler-ddns euler-smtp)
+# The content service runs as per-profile uids (euler-content-<profile>, DD-12);
+# euler-ws stays singular until Phase 6 splits it the same way. resolve_uids skips
+# names that don't exist yet, so listing them ahead of content.sh is harmless.
+ALL_USERS=(euler-caddy euler-auth
+           euler-content-reader euler-content-contributor euler-content-maintainer
+           euler-ws euler-proxy euler-acme euler-ddns euler-smtp)
 # Infra uids allowed direct DNS (the app tier resolves via loopback only).
 DNS_USERS=(euler-proxy euler-acme euler-ddns euler-smtp)
 # App-tier uids barred from the mail relay port (euler-auth is the one legit client).
-RELAY_BARRED=(euler-caddy euler-content euler-ws euler-proxy euler-acme euler-ddns)
+RELAY_BARRED=(euler-caddy euler-ws euler-proxy euler-acme euler-ddns
+              euler-content-reader euler-content-contributor euler-content-maintainer)
 
 usage() {
     cat <<USAGE

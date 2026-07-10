@@ -40,16 +40,24 @@ _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 VIEW = 'web-content:read'
 
 
-def _subject_from_headers(request: web.Request, authz: Authorizations) -> Subject | None:
+def _subject_from_headers(request: web.Request, authz: Authorizations,
+                          pin: str = '') -> Subject | None:
     """Build the request's Subject from the forward_auth headers, or None.
 
     Caddy guarantees these headers on every routed request (and strips any
     client-supplied copies). A missing/unknown profile yields None — the
     identity middleware then answers 401, since only Caddy should reach us.
+
+    *pin* is this instance's own profile (``EULER_PROFILE``, DD-12): when set, a
+    request whose ``X-Profile`` differs is refused (None). Caddy routes each
+    profile to its own per-profile uid's socket, so a mismatch means misrouting
+    or a bypass — the code-side backstop to the OS per-profile boundary.
     """
     user = request.headers.get('X-User', '').strip()
     profile = request.headers.get('X-Profile', '').strip()
     if not profile or profile not in authz.known_profiles():
+        return None
+    if pin and profile != pin:
         return None
     return Subject(user=user, slug=slugify(user or profile), channel='web',
                    auth_method='forward-auth', profile=profile,
@@ -101,10 +109,11 @@ async def shell_panel(request: web.Request) -> web.StreamResponse:
 def build_app(config: SiteConfig) -> web.Application:
     """Build the content-service application for one process."""
     authz = Authorizations.load()
+    pin = config.profile
 
     @web.middleware
     async def identity_middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
-        request[SUBJECT_KEY] = _subject_from_headers(request, authz)
+        request[SUBJECT_KEY] = _subject_from_headers(request, authz, pin)
         return await handler(request)
 
     app = web.Application(middlewares=[csp_middleware, identity_middleware])

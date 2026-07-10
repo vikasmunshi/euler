@@ -40,6 +40,10 @@ class SiteConfig(NamedTuple):
     tcp_bind: str
     #: Serve /assets and /vendor from the app (dev only; Caddy serves them in prod).
     serve_static: bool
+    #: The profile this instance is *born* as (``EULER_PROFILE=%i``, DD-12). When set,
+    #: the app refuses a request whose ``X-Profile`` differs — the code-side backstop
+    #: to Caddy's per-profile routing. Empty (dev) accepts any known profile.
+    profile: str
 
     @classmethod
     def from_env(cls) -> SiteConfig:
@@ -54,4 +58,5 @@ class SiteConfig(NamedTuple):
             socket_group=os.environ.get('EULER_WEB_GROUP', 'euler-web'),
             tcp_bind=os.environ.get('EULER_CONTENT_TCP', '').strip(),
             serve_static=_truthy(os.environ.get('EULER_CONTENT_SERVE_STATIC', '')),
+            profile=os.environ.get('EULER_PROFILE', '').strip(),
         )

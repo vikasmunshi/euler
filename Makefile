@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -155,6 +155,22 @@ upgrade-auth:
 	./scripts/setup/auth.sh upgrade
 	@printf "✓ upgrade-auth complete: auth service upgraded\n"
 
+## Install the content service: per-profile euler-content-<profile> uids + content-tree
+## ACLs + euler-content@.service template (needs the /opt/euler venv from install-auth) (DD-12)
+install-content:
+	./scripts/setup/content.sh install
+	@printf "✓ install-content complete: per-profile content service deployed\n"
+
+## Remove the content service (prompts before stripping ACLs and removing identities)
+uninstall-content:
+	./scripts/setup/content.sh uninstall
+	@printf "✓ uninstall-content complete: content service removed\n"
+
+## Upgrade the content service (re-assert identities + ACLs + units, restart instances)
+upgrade-content:
+	./scripts/setup/content.sh upgrade
+	@printf "✓ upgrade-content complete: content service upgraded\n"
+
 ## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
 install-nodejs:
 	./scripts/setup/nodejs.sh install
@@ -169,17 +185,17 @@ uninstall-nodejs:
 ## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service.
 ## Each kit stays independently operable; the later kits reload the firewall as
 ## their service users appear. (sudo required; see docs/server-redesign.md)
-install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth
+install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-content
 	@printf "✓ install-web complete: full web stack installed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-uninstall-web: uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
+uninstall-web: uninstall-content uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
 	@printf "✓ uninstall-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
 ## ddns.sh install is its idempotent upgrade, and the firewall reload is the
 ## final consistency pass over the euler uids)
-upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth
+upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth upgrade-content
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 

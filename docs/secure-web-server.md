@@ -19,8 +19,14 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 > - ✅ **Phase 4a** — Authorization refinements (DD-11/DD-12): `solver/auth` RBAC kernel +
 >   `authorizations.json` for shell **and** web; `commands.csv` retired, the four-rung
 >   ladder live, `users` reworked, the `/etc/euler` SoR seeded + migrated. (The OS second
->   layer — per-profile service instances + content-tree ACLs — lands with Phase 5/6.)
-> - ⬜ **Phases 5–6** — content service, web shell (not started).
+>   layer — per-profile service instances + content-tree ACLs — lands per service: content
+>   in Phase 5a, shell in Phase 6.)
+> - 🚧 **Phase 5** — Content service. **5a landed**: the home/navigation shell + vendored
+>   htmx (`solver/web/site`), the full-page-vs-block render contract, and the **DD-12 OS
+>   layer** — per-profile `euler-content@<profile>` instances (`content.sh`), content-tree
+>   ACLs, Caddy `X-Profile` routing, and the app-side profile pin. 5b–5d (views, `.html`
+>   validation, edits) remain.
+> - ⬜ **Phase 6** — Web shell (not started).
 
 ## 1 · Purpose & scope
 
@@ -958,16 +964,21 @@ kernel, enforcement, and migration.
 - **Kit:** `authz.sh` (deploy/seed/migrate the SoR) or folded into `auth.sh`; `update-docs`
   emits the `authorizations.md` audit table; no new runtime dependency.
 
-### Phase 5 — Content service ⬜
+### Phase 5 — Content service 🚧
 **Prerequisite: Phase 4a** (the `solver/auth` kernel + `authorizations.json`) — the content
 routes below are gated by its `requires`/`X-Profile` check, and their per-profile service
 instances + content-tree ACLs (the DD-12 OS layer) are built here. Four independently
 shippable sub-steps:
 
-- **5a — Home, navigation, look & feel.** `base.html` + partials, shared CSS, header/nav,
-  **htmx** vendored and wired for fragment-swap navigation. A **placeholder panel stands
-  in for the web shell** so the layout and liveness are demonstrable before Phase 6.
-  Establishes the full-page-vs-block rendering contract.
+- **5a — Home, navigation, look & feel.** ✅ `base.html` + partials, shared CSS, header/nav,
+  **htmx** vendored and wired for fragment-swap navigation, in a standalone `solver/web/site`
+  package. A **placeholder panel stands in for the web shell** so the layout and liveness are
+  demonstrable before Phase 6. Establishes the full-page-vs-block rendering contract. The
+  **DD-12 OS layer** ships here too (`scripts/setup/content.sh`, `make install-content`):
+  per-profile `euler-content-<profile>` uids + the `euler-content@.service` template,
+  content-tree ACLs (`euler-sol-{read,write,delete}`, derived from `authorizations.json`),
+  Caddy routing by `X-Profile` to the matching instance, and the app-side `EULER_PROFILE`
+  pin that refuses a mismatched request.
 - **5b — View paths.** Server-rendered summary, problem, code, and docs pages, reading
   each problem's `solution_dir` (plaintext, incl. decrypted `solutions/private`).
 - **5c — Content validation.** Port the `.py`/`.c`/`.json` reject-and-restore checks;

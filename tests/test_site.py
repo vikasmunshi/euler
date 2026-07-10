@@ -21,11 +21,11 @@ _READER = {'X-User': 'r@example.com', 'X-Profile': 'reader'}
 _ADMIN = {'X-User': 'a@example.com', 'X-Profile': 'admin'}
 
 
-def _config() -> SiteConfig:
+def _config(profile: str = '') -> SiteConfig:
     repo = Path(__file__).resolve().parents[1]
     return SiteConfig(repo_root=repo, static_dir=repo / 'solver/web/content',
                       socket_path=Path('/tmp/unused.sock'), socket_group='',
-                      tcp_bind='', serve_static=False)
+                      tcp_bind='', serve_static=False, profile=profile)
 
 
 class ContentServiceTests(AioHTTPTestCase):
@@ -83,6 +83,28 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn("default-src 'self'", csp)
         self.assertIn("frame-ancestors 'none'", csp)
         self.assertNotIn('unsafe-inline', csp)
+
+
+class PinnedInstanceTests(AioHTTPTestCase):
+    """A per-profile instance (EULER_PROFILE set) serves only its own profile —
+    the code-side backstop to Caddy's per-profile routing (DD-12)."""
+
+    async def get_application(self):
+        os.environ['EULER_AUTHZ_FILE'] = str(DEFAULT_POLICY_FILE)
+        self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
+        return build_app(_config(profile='reader'))
+
+    @unittest_run_loop
+    async def test_matching_profile_is_served(self) -> None:
+        resp = await self.client.get('/', headers=_READER)
+        self.assertEqual(resp.status, 200)
+
+    @unittest_run_loop
+    async def test_mismatched_profile_is_refused(self) -> None:
+        # A maintainer request that reached the reader instance = misrouting/bypass.
+        headers = {'X-User': 'm@example.com', 'X-Profile': 'maintainer'}
+        resp = await self.client.get('/', headers=headers)
+        self.assertEqual(resp.status, 401)
 
 
 if __name__ == '__main__':

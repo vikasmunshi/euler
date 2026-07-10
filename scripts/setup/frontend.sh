@@ -471,6 +471,14 @@ ${DOMAIN} {
 	request_header -X-User
 	request_header -X-Profile
 
+	# Per-profile content routing (DD-12): matchers on the X-Profile that
+	# forward_auth returns, used to pick the matching per-profile content instance
+	# below. Defined at site scope, evaluated where referenced (after forward_auth
+	# has set the header). admin is local-only; the web ladder caps at maintainer.
+	@content_reader header X-Profile reader
+	@content_contributor header X-Profile contributor
+	@content_maintainer header X-Profile maintainer
+
 	# Health probe — Caddy-native, no upstream.
 	handle /healthz {
 		respond "ok" 200
@@ -507,26 +515,34 @@ ${DOMAIN} {
 
 	# Everything else requires an authenticated session (DD-6): the auth service
 	# answers 200 + X-User/X-Profile (copied onto the proxied request) or 401,
-	# which becomes a redirect to the login page.
+	# which becomes a redirect to the login page. route{} preserves written order —
+	# forward_auth runs first (setting X-Profile or 401→redirect), then the first
+	# matching per-profile content upstream proxies, else the holding page.
 	handle {
-		forward_auth unix//run/euler/auth.sock {
-			uri /auth/check
-			copy_headers X-User X-Profile
-			@unauthed status 401
-			handle_response @unauthed {
-				redir * /login 302
+		route {
+			forward_auth unix//run/euler/auth.sock {
+				uri /auth/check
+				copy_headers X-User X-Profile
+				@unauthed status 401
+				handle_response @unauthed {
+					redir * /login 302
+				}
 			}
+
+			# Phase 5 (DD-12): route by the profile forward_auth returned to the
+			# matching per-profile content instance, each its own euler-content-<p>
+			# uid + socket. An unknown/absent profile falls through to maintenance.
+			reverse_proxy @content_maintainer unix//run/euler/content-maintainer.sock
+			reverse_proxy @content_contributor unix//run/euler/content-contributor.sock
+			reverse_proxy @content_reader unix//run/euler/content-reader.sock
+
+			# --- Later phases (authenticated routes) ---
+			# Phase 6 shell WebSocket:
+			#   handle_path /ws* { reverse_proxy unix//run/euler/ws-{X-Profile}.sock }
+
+			# No profile matched (or the content instance is unset) → holding page.
+			import maintenance
 		}
-
-		# --- Later phases (authenticated routes) ---
-		# Phase 6 shell WebSocket:
-		#   handle_path /ws* { reverse_proxy unix//run/euler/ws.sock }
-		# Phase 5 content:
-		#   reverse_proxy unix//run/euler/content.sock
-
-		# Until the content service lands, an authenticated request gets the
-		# maintenance holding page.
-		import maintenance
 	}
 
 	# When a later-phase upstream reverse_proxy fails, serve the same holding page
