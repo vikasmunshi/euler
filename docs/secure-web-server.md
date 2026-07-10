@@ -16,8 +16,10 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
 > - ✅ **Phase 4** — Auth service (SRP login, sessions, tickets, wheel-gated admin,
 >   Jinja pages, Caddy `forward_auth`); live-verified end-to-end.
-> - 📐 **Phase 4a** — Authorization refinements (DD-11/DD-12: `solver/auth` RBAC kernel +
->   `authorizations.json`); **designed, not started** — a prerequisite for Phase 5.
+> - ✅ **Phase 4a** — Authorization refinements (DD-11/DD-12): `solver/auth` RBAC kernel +
+>   `authorizations.json` for shell **and** web; `commands.csv` retired, the four-rung
+>   ladder live, `users` reworked, the `/etc/euler` SoR seeded + migrated. (The OS second
+>   layer — per-profile service instances + content-tree ACLs — lands with Phase 5/6.)
 > - ⬜ **Phases 5–6** — content service, web shell (not started).
 
 ## 1 · Purpose & scope
