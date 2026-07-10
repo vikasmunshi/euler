@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}euler{% endblock %}</title>
+  <meta name="robots" content="noindex">
+  {# CSP-safe by construction: same-origin /assets CSS and /vendor JS only, no
+     inline script or style. The per-response nonce (csp_nonce) is available
+     should an inline block ever become unavoidable. #}
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ctext%20y='26'%20font-size='26'%3E%E2%88%91%3C/text%3E%3C/svg%3E">
+  <script src="/vendor/htmx.min.js"
+          integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+          crossorigin="anonymous" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% include "_nav.html" %}
+  <main id="main" class="app-main" role="main">
+    {% block main %}{% endblock %}
+  </main>
+  <footer class="app-footer">
+    <span class="muted">Project&nbsp;Euler solutions &amp; tooling</span>
+  </footer>
+</body>
+</html>

@@ -152,6 +152,11 @@ solver/
       storage.py      — Shared JSON persistence for the auth stores (DD-6).
       tickets.py      — One-time shell tickets: web identity for PTY children (DD-9).
       users.py        — User store: the SRP verifier database at ``<state>/users.json`` (DD-6).
+    site/             — The content service — server-rendered pages + htmx fragments (Phase 5).
+      __main__.py     — Content service entry point: ``python -m solver.web.site`` (DD-5/DD-12).
+      app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.
+      config.py       — Content-service runtime configuration, read from the environment (DD-5/DD-12).
+      render.py       — The full-page-vs-block render contract (DD-10, §4.5).
 ```
 <!-- /GEN:package-layout -->
 

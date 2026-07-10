@@ -1,0 +1,75 @@
+#!/usr/bin/env python3.14
+# -*- coding: utf-8 -*-
+"""The full-page-vs-block render contract (DD-10, §4.5).
+
+A content route renders either the **whole page** or a **named block** of the
+*same* template, so a full navigation and an htmx fragment-swap share one source
+of truth. The block path uses Jinja's own API — ``tmpl.blocks[name](ctx)`` — in
+a small helper rather than pulling in ``jinja2-fragments`` (a pinned dep that is
+mostly Flask/Quart glue for these few lines).
+
+:func:`render` is the one entry point handlers call: when the request is an htmx
+fetch (``HX-Request: true``) *and* a ``block`` is named, it returns just that
+block; otherwise the full template. Either way the shared context (the request's
+CSP nonce and resolved subject) is injected, and the response is ``text/html``
+so the shared CSP middleware stamps its header.
+"""
+from __future__ import annotations
+
+__all__ = ['render', 'render_block', 'is_htmx']
+
+from typing import Any
+
+import aiohttp_jinja2
+import jinja2
+from aiohttp import web
+
+from solver.web.csp import NONCE_KEY
+
+#: aiohttp request key under which the identity middleware stores the Subject.
+SUBJECT_KEY: str = 'subject'
+#: htmx sets this on every fetch; its presence selects fragment rendering.
+_HX_HEADER = 'HX-Request'
+
+
+def is_htmx(request: web.Request) -> bool:
+    """True when *request* is an htmx-driven fetch (``HX-Request: true``)."""
+    return request.headers.get(_HX_HEADER, '').lower() == 'true'
+
+
+def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, Any]:
+    """The template context: the shared nonce + subject, then the handler's vars."""
+    ctx: dict[str, Any] = {
+        'csp_nonce': request.get(NONCE_KEY, ''),
+        'subject': request.get(SUBJECT_KEY),
+    }
+    if extra:
+        ctx.update(extra)
+    return ctx
+
+
+def render_block(env: jinja2.Environment, template_name: str, block_name: str,
+                 context: dict[str, Any]) -> str:
+    """Render a single named ``{% block %}`` of *template_name* to a string.
+
+    Raises :class:`KeyError` if the template has no block called *block_name* —
+    a programming error (route/template mismatch), surfaced loudly.
+    """
+    tmpl = env.get_template(template_name)
+    if block_name not in tmpl.blocks:
+        raise KeyError(f'template {template_name!r} has no block {block_name!r}')
+    ctx = tmpl.new_context(context)
+    return ''.join(tmpl.blocks[block_name](ctx))
+
+
+def render(request: web.Request, template_name: str,
+           context: dict[str, Any] | None = None, *,
+           block: str | None = None, status: int = 200) -> web.Response:
+    """Render *template_name* — its *block* for an htmx fetch, else the full page."""
+    env = aiohttp_jinja2.get_env(request.app)
+    ctx = _context(request, context)
+    if block and is_htmx(request):
+        body = render_block(env, template_name, block, ctx)
+    else:
+        body = env.get_template(template_name).render(ctx)
+    return web.Response(text=body, content_type='text/html', status=status)

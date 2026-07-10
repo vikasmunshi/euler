@@ -1,0 +1,19 @@
+{# Header + primary navigation. Links carry both a plain href (no-JS full-page
+   fallback) and htmx attributes that swap the #main block in place and push the
+   URL — the full-page-vs-block contract (DD-10). No hx-on / inline JS (CSP). #}
+<header class="app-header">
+  <a class="brand" href="/" hx-get="/" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">
+    <span class="brand-glyph" aria-hidden="true">&sum;</span>
+    <span class="brand-name">euler</span>
+  </a>
+  <nav class="app-nav" aria-label="Primary">
+    <a href="/" hx-get="/" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Home</a>
+    <a href="/shell" hx-get="/shell" hx-target="#main" hx-swap="innerHTML" hx-push-url="true">Shell</a>
+  </nav>
+  <div class="app-who">
+    {% if subject %}
+      <span class="who-user">{{ subject.user or 'anon' }}</span>
+      <span class="who-profile pill pill-{{ subject.profile }}">{{ subject.profile }}</span>
+    {% endif %}
+  </div>
+</header>

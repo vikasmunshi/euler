@@ -39,7 +39,6 @@ pip-log.txt
 pip-wheel-metadata/
 profile_default/
 sdist/
-site/
 solver.egg-info/
 target/
 var/

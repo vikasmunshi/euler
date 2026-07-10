@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}euler — home{% endblock %}
+{% block main %}
+<section class="panel">
+  <h1>Project&nbsp;Euler workspace</h1>
+  <p class="lead">
+    Browse solutions, notes, and results, and run them in place. Signed in as
+    {% if subject %}<strong>{{ subject.user or 'anon' }}</strong>
+      with the <strong>{{ subject.profile }}</strong> profile.{% else %}a guest.{% endif %}
+  </p>
+  <ul class="feature-list">
+    <li><strong>Views</strong> — summary, problem, code, and docs pages <span class="muted">(5b)</span>.</li>
+    <li><strong>Edit</strong> — save, delete, evaluate, benchmark, live <span class="muted">(5c/5d)</span>.</li>
+    <li><strong>Shell</strong> — the interactive web terminal <span class="muted">(Phase 6)</span>.</li>
+  </ul>
+  <p class="muted">
+    Navigation swaps this panel in place via htmx; each link is also a real URL
+    that renders the whole page on a direct visit.
+  </p>
+</section>
+{% endblock %}
