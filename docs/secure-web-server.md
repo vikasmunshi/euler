@@ -318,7 +318,7 @@ and the Gmail password out of every service but one.
 ### DD-9 · Identity, authentication, and masquerade prevention
 
 **Decision.** The auth service is built **fresh** as `solver/web/auth`; identity
-resolution (`solver/utils/identity.py`) is redesigned around **three planes**, each with
+resolution (`solver/auth`, formerly `solver/utils/identity.py`) is redesigned around **three planes**, each with
 an explicit voucher — web request (`forward_auth` → `X-User`/`X-Profile`), web shell
 (one-time ticket redeemed over `auth.sock`), local terminal (checkout-owner uid →
 `admin`, a real non-owner login → `contributor`, a `euler-*` service uid without a ticket

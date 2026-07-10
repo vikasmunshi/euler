@@ -84,7 +84,7 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
-| [`users`](#command-users) | — | Manage web accounts via the auth service (sudo-gated admin API). |
+| [`users`](#command-users) | — | List / administer accounts (list is read-only; changes need admin + sudo). |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -1069,12 +1069,11 @@ Rebuild the registry-generated blocks in the `docs/` guides and the README.
 Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
 the in-index summary, the per-command reference, and the README package-layout
 tree (built from each module's docstring) — from the live command registry and
-the source tree, leaving all hand-written prose untouched. It also reconciles
-the authorization policy `solver/commands.csv` with the registry (new commands
-added with the default admin+user grant, removed ones dropped, existing grants
-preserved) — the counterpart to `modules.csv`. Run it after changing any
-command's name, alias, help text, or signature, or a module's first docstring
-line.
+the source tree, leaving all hand-written prose untouched. It also regenerates
+the authorization audit `solver/commands.json` (each command's `requires` /
+`channels`, from the registry) — the counterpart to `modules.csv`. Run it after
+changing any command's name, alias, help text, signature, or a module's first
+docstring line.
 
 Args:
     ctx:    The command context.
@@ -1148,28 +1147,28 @@ Wrap the current master key to `public_key` and add it to enc-key.json (proof-of
 
 #### Command: `users`
 
-Manage web accounts via the auth service (sudo-gated admin API).
-* channels: terminal · profiles: admin
+List / administer accounts (list is read-only; changes need admin + sudo).
+* channels: terminal · profiles: admin, maintainer, contributor, reader
 
 ```
 users
-[action=list|add|enable|disable|remove] (default list)
-[email=<str>] (default '')
-[profile=admin|user|guest] (default user)
+[action=list|add|change|enable|disable|remove] (default list)
+[identity=<str>] (default '')
+[profile=reader|contributor|maintainer|admin] (default reader)
 ```
 
 ```text
-Administer web accounts through the auth service's local admin socket.
+Administer accounts on the authorization map + the auth service (DD-12).
 
-Re-executes ``python -m solver.web.auth.admin`` under ``sudo`` (the admin
-socket and token are root-only), so expect a sudo password prompt unless
-the timestamp is cached.
+`list` is read-only (``users:read``) and needs no sudo; every mutating verb needs
+``users:write`` (admin) and re-executes the admin CLI under ``sudo``.
 
 Args:
-    action:  add (mint + email a registration invite), list (accounts and
-             pending invites), enable / disable (account switch; disable also
-             kills live sessions), or remove (delete account and invites).
-    email:   The account's email (required for everything except list).
-    profile: Authorization profile for a new invite (add only).
+    action:   list (roster), add (map entry — ``@email`` also mints an invite;
+              a bare os-login is local-only), change (reassign a profile),
+              enable / disable (web SRP state), remove (drop the account/entry).
+    identity: a web email (``@``) or a local OS login (required except for list).
+    profile:  the profile to assign (add / change). ``admin`` is valid only for a
+              local os-login, never a web account.
 ```
 <!-- /GEN:command-index -->

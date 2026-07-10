@@ -342,7 +342,7 @@
       "terminal"
     ],
     "requires": [
-      "users:write"
+      "users:read"
     ]
   }
 }

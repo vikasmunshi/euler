@@ -333,12 +333,11 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
     the in-index summary, the per-command reference, and the README package-layout
     tree (built from each module's docstring) — from the live command registry and
-    the source tree, leaving all hand-written prose untouched. It also reconciles
-    the authorization policy `solver/commands.csv` with the registry (new commands
-    added with the default admin+user grant, removed ones dropped, existing grants
-    preserved) — the counterpart to `modules.csv`. Run it after changing any
-    command's name, alias, help text, or signature, or a module's first docstring
-    line.
+    the source tree, leaving all hand-written prose untouched. It also regenerates
+    the authorization audit `solver/commands.json` (each command's `requires` /
+    `channels`, from the registry) — the counterpart to `modules.csv`. Run it after
+    changing any command's name, alias, help text, signature, or a module's first
+    docstring line.
 
     Args:
         ctx:    The command context.

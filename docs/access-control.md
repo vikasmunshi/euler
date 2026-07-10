@@ -155,8 +155,8 @@ because the socket is reachable only via Caddy (DD-1/DD-2). A `401` is turned in
 
 ### 4.5 Identity resolution (three planes, DD-9)
 
-`solver/utils/identity.py` resolves `(display, slug, profile)` **once** at startup,
-with no anonymous fallback:
+`solver/auth` (`resolve_subject`) resolves the `Subject` (user, channel, auth_method,
+profile, permissions) **once** at startup, with no anonymous fallback:
 
 | Plane | Voucher | Mechanism |
 |---|---|---|

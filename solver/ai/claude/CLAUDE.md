@@ -136,10 +136,10 @@ solver/
     csp.py            — Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
     auth/             — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
       __main__.py     — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
-      admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6).
+      admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6/DD-12).
       app.py          — The auth service: public + admin aiohttp apps over unix sockets (DD-6/DD-9).
       client.py       — Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
-      commands.py     — The ``users`` shell command: account administration, gated by sudo (DD-6).
+      commands.py     — The ``users`` shell command: account administration, split by permission (DD-12).
       config.py       — Auth-service runtime configuration, read from the environment (DD-5/DD-6).
       mail.py         — Outbound mail via the loopback relay (DD-8).
       pages.py        — The auth service's HTML pages: login, registration, reset, forgot (DD-7).
@@ -235,7 +235,7 @@ Two AI entry points, both calling the Claude API. Install the optional deps with
 - **Read-only viewer** — the summary/problem pages and problem files, read directly from each problem's `solution_dir`.
 - **Edits** — `POST/DELETE /<n>/<file>` saves/deletes a solution file and `POST /<n>/cmd` evaluates or benchmarks the problem; the write helpers return `(status, message)`.
 
-The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree, running as the user who attached it (`SOLVER_USER`) so it reads and writes that user's per-user state — command history, session log, and last active problem under `.state/<slug>/` (the identity/slug resolved by `solver/utils/identity.py`, wired into `config`). The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page.
+The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree, running as the user who attached it (`SOLVER_USER`) so it reads and writes that user's per-user state — command history, session log, and last active problem under `.state/<slug>/` (the identity/slug resolved by `solver/auth`, wired into `config`). The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page.
 
 ## Solution Code Conventions
 
