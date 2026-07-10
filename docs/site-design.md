@@ -158,6 +158,9 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
 - **Shell vs fragment.** `/` returns the full shell. A read/edit path returns its
   `#content` fragment on `HX-Request`, or the full shell with `#content` pre-populated on a
   direct visit — so links are shareable and reload-safe.
+- **Canonical trailing slash.** Every GET path is canonical *with* its trailing slash
+  (`/solutions/`, `/docs/`, `/topics/`, `/solutions/{n}/`, `/edit/solutions/`). A GET
+  missing the slash → **301** redirect to the slashed form, so each view has one URL.
 - **Terminal persistence.** htmx swaps only `#content`; `#ws` (the terminal) is untouched
   by navigation and keeps its session.
 - **Nav (fixed header):** brand `ς` → `/`, `Solutions` → `/solutions/`, `Docs` → `/docs/`,
