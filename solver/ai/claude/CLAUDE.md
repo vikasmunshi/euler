@@ -158,6 +158,7 @@ solver/
       config.py       — Content-service runtime configuration, read from the environment (DD-5/DD-12).
       content.py      — Config-free readers for the content trees the service renders (Phase 5b).
       render.py       — The full-page-vs-block render contract (DD-10, §4.5).
+      validate.py     — The save gate (Phase 5c): the checks every 5d write passes (DD-10).
 ```
 <!-- /GEN:package-layout -->
 

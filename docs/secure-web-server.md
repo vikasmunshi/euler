@@ -27,8 +27,10 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 >   **DD-12 OS layer** — per-profile `euler-content@<profile>` instances (`content.sh`),
 >   content-tree ACLs, Caddy `X-Profile` routing, and the app-side profile pin.
 >   **5b landed**: the read routes — `/solutions/` century grids, problem pages + files,
->   `/docs/`, `/topics/`, `/account` — with canonical trailing-slash 301s. 5c–5d
->   (`.html` validation, edits) remain.
+>   `/docs/`, `/topics/`, `/account` — with canonical trailing-slash 301s.
+>   **5c landed**: the save gate (`site/validate.py`) — `.py`/`.c`/`.json` checks and the
+>   nh3 `.html` sanitize-and-store-clean, nh3 in the `web` extra with the kit check.
+>   5d (edit routes) remains.
 > - ⬜ **Phase 6** — Web shell (not started).
 
 ## 1 · Purpose & scope
@@ -989,9 +991,12 @@ shippable sub-steps:
   problem pages + files (reading each problem's `solution_dir` — plaintext, incl.
   decrypted `solutions/private`), rendered `/docs/` guides (+ the composed `ai`
   reference), the new `/topics/` tree, and `/account`.
-- **5c — Content validation.** Port the `.py`/`.c`/`.json` reject-and-restore checks;
-  **add the `.html` gate via [nh3](#47--content-security-policy--nh3)**, sanitize-and-store-clean
-  ([DD-10](#dd-10--phase-5-content-service-choices)).
+- **5c — Content validation.** ✅ The save gate `solver/web/site/validate.py`
+  (config-free, DD-12): `.py` auto-fix + flake8 over stdin, `.c` scratch-dir compile
+  against the runner header (mirroring `scripts/c/compile.sh`'s flags), `.json`
+  re-indent, and **the `.html` gate via [nh3](#47--content-security-policy--nh3)**,
+  sanitize-and-store-clean ([DD-10](#dd-10--phase-5-content-service-choices)) — nh3
+  pinned in the `web` extra, import verified by `content.sh`'s deploy/status checks.
 - **5d — Edit paths.** htmx save/delete/eval/benchmark returning rendered fragments (via
   the DD-10 block-render helper); benchmark progress via SSE. Every write goes through 5c;
   every response carries CSP.

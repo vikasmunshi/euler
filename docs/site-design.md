@@ -10,7 +10,7 @@ and every response carries the per-response CSP nonce
 ([§4.7](secure-web-server.md), [DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)).
 
 > **Status.** 5a shell live **in the four-region layout below** (ς, dark-first);
-> 5b (view) live; 5c (validation) / 5d (edit) are the plan.
+> 5b (view) and 5c (validation) live; 5d (edit) is the plan.
 
 ## 1 · The app shell — four regions
 
@@ -120,12 +120,15 @@ a **direct** hit on the same path returns the whole shell with that pane pre-pop
 | GET | `/topics/{name}` | a topic page (e.g. `prime-numbers`, `graph-theory`, `number-theory`) | `docs:read` |
 | GET | `/account` | the signed-in user + profile (from `X-User` / `X-Profile`) | `users:read` |
 
-### 5c — validation (the save gate)
+### 5c — validation (the save gate) ✅
 
-Not routes — the checks every 5d write passes: `.py` (flake8 + autofix), `.c`, `.json`
-reject-and-restore, and the **`.html` gate via nh3** (sanitize-and-store-clean — `notes.html`
-is served back and rendered, so raw HTML is stored-XSS;
-[DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)). `nh3` not yet installed.
+Not routes — the checks every 5d write passes, in `solver/web/site/validate.py`
+(config-free, DD-12): `.py` (auto-fix + flake8 over stdin), `.c` (scratch-dir compile
+against the runner header), `.json` re-indent, and the **`.html` gate via nh3**
+(sanitize-and-store-clean — `notes.html` is served back and rendered, so raw HTML is
+stored-XSS; [DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)).
+`nh3` is in the `web` extra; `content.sh`'s deploy/status probes verify its import.
+Verified against the notes corpus: no tag lost, diffs are normalisation only.
 
 ### 5d — edit (each write → 5c; each response carries CSP)
 

@@ -231,10 +231,11 @@ deploy_venv() {
     sudo "${VENV_PY}" -m pip install --quiet "${PROJECT_ROOT}[web]"
     sudo chown -R root:"${WEB_GROUP}" "${OPT_DIR}"
     # -P: ignore cwd, so this probes the venv's copy (not the repo we're standing in).
-    if sudo "${VENV_PY}" -P -c 'import solver.web.site' 2>/dev/null; then
-        echo "Deployed: ✓ solver.web.site importable from ${VENV_DIR}"
+    # nh3 rides along: the DD-10 kit check that the .html save gate (5c) can import.
+    if sudo "${VENV_PY}" -P -c 'import solver.web.site, nh3' 2>/dev/null; then
+        echo "Deployed: ✓ solver.web.site (+ nh3) importable from ${VENV_DIR}"
     else
-        echo "Deployed: ✗ solver.web.site NOT importable from the venv" >&2
+        echo "Deployed: ✗ solver.web.site (or nh3) NOT importable from the venv" >&2
     fi
 }
 
@@ -430,10 +431,10 @@ do_uninstall() {
 
 do_status() {
     if [ -x "${VENV_PY}" ]; then
-        if "${VENV_PY}" -P -c 'import solver.web.site' 2>/dev/null; then
-            echo "venv:        ✓ solver.web.site importable from ${VENV_DIR}"
+        if "${VENV_PY}" -P -c 'import solver.web.site, nh3' 2>/dev/null; then
+            echo "venv:        ✓ solver.web.site (+ nh3) importable from ${VENV_DIR}"
         else
-            echo "venv:        ✗ solver.web.site not importable from the venv"
+            echo "venv:        ✗ solver.web.site (or nh3) not importable from the venv"
         fi
     else
         echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh / content.sh install)"

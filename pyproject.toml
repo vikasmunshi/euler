@@ -43,6 +43,10 @@ web = [
     "aiohttp",
     "aiohttp-jinja2",
     "jinja2",
+    # The `.html` save gate (DD-10, Phase 5c): sanitize-and-store-clean. The
+    # cp38-abi3 stable-ABI wheel installs on 3.14 with no Rust toolchain;
+    # content.sh's deploy/status checks verify the import in the system venv.
+    "nh3",
 ]
 solutions = [
     # NOTE: `pip install primesieve` builds only the base extension; its optional
