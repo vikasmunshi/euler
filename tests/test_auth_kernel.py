@@ -66,10 +66,10 @@ class AuthorizationsTest(unittest.TestCase):
             self.assertEqual(loaded.profile_for('bob'), 'contributor')
 
     def test_load_falls_back_to_builtin_default(self) -> None:
-        # No env, no /etc/euler file in the test env, no repo fallback → built-in ladder.
+        # No env, no /etc/euler file in the test env → the bundled template ladder.
         with mock.patch.dict(os.environ, {}, clear=False):
             os.environ.pop(AUTHZ_FILE_ENV, None)
-            loaded = Authorizations.load(repo_fallback=Path('/nonexistent/authorizations.json'))
+            loaded = Authorizations.load()
         self.assertIn('solutions:read', loaded.permissions_for('reader'))
         self.assertIn('infra:execute', loaded.permissions_for('admin'))
 

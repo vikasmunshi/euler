@@ -14,18 +14,23 @@ The single RBAC policy shared by the shell and the web. Three sections:
 
 **System of record** is ``/etc/euler/authorizations.json`` (root-owned, outside
 the repo; mutated only through the sudo-gated ``users`` path). This module reads
-it — or the ``EULER_AUTHZ_FILE`` override — and falls back to a built-in default
-(the DD-12 ladder) so a fresh checkout works before the file is deployed.
+it — or the ``EULER_AUTHZ_FILE`` override — and falls back to the built-in default
+policy shipped with the package (``solver/templates/authorizations.json``, the
+DD-12 ladder) so a fresh checkout works before the file is deployed. That template
+is the single authored source of the ladder — its ``users`` map is empty, the
+checkout owner floors to ``admin`` by uid, and real deployments seed the map at
+install.
 
 Stdlib-only and free of any ``solver.config`` dependency: :mod:`solver.config`
 imports the resolver during its own construction.
 """
 from __future__ import annotations
 
-__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE']
+__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE', 'DEFAULT_POLICY_FILE']
 
 import json
 import os
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -33,32 +38,28 @@ from typing import Any
 AUTHZ_FILE_ENV: str = 'EULER_AUTHZ_FILE'
 #: The deployed system-of-record location (DD-12).
 DEFAULT_AUTHZ_FILE: str = '/etc/euler/authorizations.json'
+#: The built-in default policy — the authored ladder shipped inside the package.
+DEFAULT_POLICY_FILE: Path = Path(__file__).resolve().parents[1] / 'templates' / 'authorizations.json'
 
 #: Permission a command/route falls back to when it declares no ``requires`` —
 #: fail-closed to admin-only, so a new command is never silently exposed.
 FAILCLOSED_PERMISSION: str = 'infra:execute'
 
-#: Built-in default policy (the DD-12 ladder), used when no file is deployed. The
-#: ``users`` map is intentionally empty here — the checkout owner floors to
-#: ``admin`` by uid, and real deployments seed the map at install.
-_DEFAULT_POLICY: dict[str, Any] = {
-    'profiles': {
-        'reader': {'inherits': None,
-                   'grants': ['solver:execute', 'solutions:read', 'docs:read',
-                              'web-content:read', 'users:read']},
-        'contributor': {'inherits': 'reader',
-                        'grants': ['solutions:write', 'solutions:execute']},
-        'maintainer': {'inherits': 'contributor',
-                       'grants': ['solutions:delete', 'ai:execute']},
-        'admin': {'inherits': 'maintainer',
-                  'grants': ['shell:execute', 'infra:execute', 'users:write']},
-    },
-    'users': {},
-    'objects': {
-        'solutions': ['solutions/'], 'docs': ['docs/'], 'web-content': ['web-content/'],
-        'solver': [], 'shell': ['/bin/bash'], 'ai': [], 'users': [], 'infra': [],
-    },
-}
+
+@lru_cache(maxsize=1)
+def _default_policy() -> dict[str, Any]:
+    """The built-in default policy, read once from the packaged template.
+
+    Raised loudly if the bundled file is missing or malformed — it is the single
+    source of the ladder, so a broken install must not be papered over.
+    """
+    try:
+        data = json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8'))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f'bundled authorization policy unreadable: {DEFAULT_POLICY_FILE}: {exc}') from exc
+    if not isinstance(data, dict):
+        raise RuntimeError(f'bundled authorization policy is not an object: {DEFAULT_POLICY_FILE}')
+    return data
 
 
 def _normalise(identity: str) -> str:
@@ -78,12 +79,11 @@ class Authorizations:
     # ── loading ────────────────────────────────────────────────────────────────────
 
     @classmethod
-    def load(cls, *, repo_fallback: Path | None = None) -> Authorizations:
+    def load(cls) -> Authorizations:
         """Load the policy from the first of: ``$EULER_AUTHZ_FILE``, the deployed SoR,
-        an optional repo fallback, else the built-in default.
+        else the built-in default (the packaged ``authorizations.json`` template).
         """
-        for candidate in (os.environ.get(AUTHZ_FILE_ENV), DEFAULT_AUTHZ_FILE,
-                          str(repo_fallback) if repo_fallback else None):
+        for candidate in (os.environ.get(AUTHZ_FILE_ENV), DEFAULT_AUTHZ_FILE):
             if not candidate:
                 continue
             try:
@@ -92,7 +92,7 @@ class Authorizations:
                 continue
             if isinstance(data, dict):
                 return cls(data)
-        return cls(_DEFAULT_POLICY)
+        return cls(_default_policy())
 
     # ── queries ────────────────────────────────────────────────────────────────────
 

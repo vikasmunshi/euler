@@ -3,11 +3,10 @@
 """Regenerate the machine-maintained sections of the guides under `docs/`.
 
 Some parts of the documentation mirror the live command registry (the command
-table in the user guide, the per-command reference in `commands-index.md`), and
-the authorization audit `solver/commands.json` is likewise regenerated from the
-registry (see :func:`_sync_commands`). Rather than hand-edit them whenever a
-command's name, alias, help text, or usage changes, those sections are delimited
-with HTML marker comments and rebuilt from the registry::
+table in the user guide, the per-command reference in `commands-index.md`, and
+the authorization audit table in `authorizations.md`). Rather than hand-edit them
+whenever a command's name, alias, help text, or usage changes, those sections are
+delimited with HTML marker comments and rebuilt from the registry::
 
     <!-- GEN:command-table -->
     ...generated content (do not edit by hand)...
@@ -26,7 +25,6 @@ from __future__ import annotations
 
 import ast
 import inspect
-import json
 import re
 from pathlib import Path
 from typing import Callable
@@ -40,12 +38,25 @@ from solver.utils.loader import load_commands, update_modules
 #: Authorization profiles, in descending order of privilege (for the audit report).
 _PROFILES: tuple[str, ...] = ('admin', 'maintainer', 'contributor', 'reader')
 #: The policy used only to *report* per-command availability (not enforcement).
-_AUTHZ: Authorizations = Authorizations.load(repo_fallback=config.root_dir / 'authorizations.json')
+_AUTHZ: Authorizations = Authorizations.load()
 
 
 def _allowed_profiles(cmd: Command) -> list[str]:
     """Which profiles satisfy *cmd*'s ``requires`` under the reporting policy (audit)."""
     return [p for p in _PROFILES if _AUTHZ.permissions_for(p).issuperset(cmd.requires)] or ['none']
+
+
+def _least_profile(cmd: Command) -> str:
+    """The least-privileged profile that may run *cmd* (last of the descending set)."""
+    return _allowed_profiles(cmd)[-1]
+
+
+def _module_of(cmd: Command) -> str:
+    """The dotted module a command was defined in (decorators unwrapped)."""
+    func = cmd.func
+    while hasattr(func, '__wrapped__'):
+        func = func.__wrapped__
+    return getattr(func, '__module__', '') or ''
 
 
 #: The docs directory whose marked blocks we maintain.
@@ -173,6 +184,21 @@ def gen_command_index() -> str:
     return '\n\n---\n\n'.join(sections)
 
 
+def gen_authorization_table() -> str:
+    """The authorization audit table: one row per command with its module, channels,
+    required ``object:permission`` grants, and the least-privileged profile that
+    satisfies them. Rows are grouped by module, then command (DD-12).
+    """
+    rows = ['| Module | Command | Channels | Requires | Least profile |',
+            '|--------|---------|----------|----------|---------------|']
+    for cmd in sorted(registry.all(), key=lambda c: (_module_of(c), c.name)):
+        channels = ', '.join(cmd.channels) or '—'
+        requires = ', '.join(f'`{r}`' for r in cmd.requires) or '—'
+        rows.append(f'| `{_module_of(cmd)}` | `{cmd.name}` | {channels} | {requires} | '
+                    f'`{_least_profile(cmd)}` |')
+    return '\n'.join(rows)
+
+
 #: The package whose module tree is rendered into the README package-layout block.
 _PACKAGE = 'solver'
 
@@ -240,6 +266,7 @@ GENERATORS: dict[str, Callable[[], str]] = {
     'command-table': gen_command_table,
     'command-summary': gen_command_summary,
     'command-index': gen_command_index,
+    'authorization-table': gen_authorization_table,
     'package-layout': gen_package_layout,
 }
 
@@ -271,37 +298,6 @@ def _render(text: str) -> tuple[str, list[str]]:
     return text, changed
 
 
-#: The generated authorization **audit** view of the registry (not the policy — that
-#: is the authored ``authorizations.json``). Regenerated here for reporting/review.
-_COMMANDS_JSON: Path = Path(__file__).resolve().parents[1] / 'commands.json'
-
-
-def _sync_commands(check: bool) -> str | None:
-    """Regenerate ``solver/commands.json`` — the audit view of each command's
-    ``requires``/``channels`` — from the live registry (DD-12).
-
-    Returns a ``file: reason`` entry when the file (would) change, else None; with
-    *check* True nothing is written. Guarded to a registry that holds **every**
-    command (the local ``admin`` owner), so it never prunes commands merely hidden
-    from a lesser profile.
-    """
-    if config.subject.profile != 'admin':
-        return None
-    audit = {cmd.name: {'requires': list(cmd.requires), 'channels': list(cmd.channels)}
-             for cmd in registry.all()}
-    new_text = json.dumps(audit, indent=2, sort_keys=True) + '\n'
-    old_text = _COMMANDS_JSON.read_text(encoding='utf-8') if _COMMANDS_JSON.exists() else ''
-    if new_text == old_text:
-        return None
-    if not check:
-        _COMMANDS_JSON.write_text(new_text, encoding='utf-8')
-    try:
-        label = str(_COMMANDS_JSON.relative_to(ROOT))
-    except ValueError:
-        label = _COMMANDS_JSON.name
-    return f'{label}: command audit'
-
-
 def _apply(check: bool) -> tuple[list[str], list[str]]:
     """Render every doc; return *(updated, stale)* as `<file>: <blocks>` strings.
 
@@ -331,13 +327,12 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     """Rebuild the registry-generated blocks in the `docs/` guides and the README.
 
     Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
-    the in-index summary, the per-command reference, and the README package-layout
-    tree (built from each module's docstring) — from the live command registry and
-    the source tree, leaving all hand-written prose untouched. It also regenerates
-    the authorization audit `solver/commands.json` (each command's `requires` /
-    `channels`, from the registry) — the counterpart to `modules.csv`. Run it after
-    changing any command's name, alias, help text, signature, or a module's first
-    docstring line.
+    the in-index summary, the per-command reference, the authorization audit table
+    in `docs/authorizations.md` (module / command / channels / requires / least
+    profile), and the README package-layout tree (built from each module's
+    docstring) — from the live command registry and the source tree, leaving all
+    hand-written prose untouched. Run it after changing any command's name, alias,
+    help text, signature, `requires`/`channels`, or a module's first docstring line.
 
     Args:
         ctx:    The command context.
@@ -351,23 +346,15 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     else:
         console.print('[muted]modules already up to date[/muted]')
 
-    command_stale = _sync_commands(check) is not None   # regenerate commands.json (audit) first
-    if not command_stale:
-        console.print('[muted]commands.json already up to date[/muted]')
-    elif check:
-        console.print('[warning]commands.json out of date[/warning] (run [accent]update-docs[/accent])')
-    else:
-        console.print('[success]commands.json updated[/success]')
-
     updated, stale = _apply(check)
     if check:
         if stale:
             console.print('[error]docs out of date[/error] (run [accent]update-docs[/accent]):')
             for entry in stale:
                 console.print(f'  [warning]{entry}[/warning]')
-        elif not command_stale:
+        else:
             console.print('[success]docs are up to date[/success]')
-        return ExitCodes.EXIT_ERROR if (stale or command_stale) else ExitCodes.EXIT_OK
+        return ExitCodes.EXIT_ERROR if stale else ExitCodes.EXIT_OK
     if updated:
         for entry in updated:
             console.print(f'[success]updated[/success] {entry}')

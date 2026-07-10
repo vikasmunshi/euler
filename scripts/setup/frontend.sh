@@ -72,7 +72,7 @@ KEY_FILE="${TLS_DIR}/server.key"           # private key (readable by euler-web)
 # ── Static web content (Phase 3 maintenance page + assets) ────────────────────────
 # Authored in the repo, deployed under /etc/euler because euler-caddy cannot read the
 # repo owner's 0750 home dir (DD-3 config-location rationale).
-WEB_CONTENT_SRC="${PROJECT_ROOT}/web-content"          # repo source of truth
+WEB_CONTENT_SRC="${PROJECT_ROOT}/solver/web/content"   # repo source of truth
 WEB_CONTENT_DIR="${SYS_DIR}/web-content"               # deployed, readable by euler-caddy
 
 # ── Service identity (DD-2) ───────────────────────────────────────────────────────

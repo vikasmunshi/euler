@@ -93,11 +93,10 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
     """Resolve the current :class:`Subject` (identity + profile + permissions).
 
     *authz* is the loaded policy; if omitted it is loaded (deployed SoR → built-in
-    default, with *root_dir* as the repo fallback). Raises :class:`SystemExit`
-    when no identity plane matches.
+    default). Raises :class:`SystemExit` when no identity plane matches.
     """
     if authz is None:
-        authz = Authorizations.load(repo_fallback=root_dir / 'authorizations.json')
+        authz = Authorizations.load()
 
     ticket = os.environ.get(TICKET_ENV, '').strip()
     if ticket:

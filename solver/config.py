@@ -199,7 +199,7 @@ class Config(AttributeDict):
             'server_lock_file': root_dir / '.server.lock',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
-            'static_file_dir': root_dir / 'solver/web-content',
+            'static_file_dir': root_dir / 'solver/web/content',
             'static_file_problems': root_dir / 'solutions/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
             'templates_dir': root_dir / 'solver/templates',

@@ -1,0 +1,47 @@
+{
+  "profiles": {
+    "reader": {
+      "inherits": null,
+      "grants": [
+        "docs:read",
+        "solutions:read",
+        "solver:execute",
+        "users:read",
+        "web-content:read"
+      ]
+    },
+    "contributor": {
+      "inherits": "reader",
+      "grants": [
+        "solutions:execute",
+        "solutions:write"
+      ]
+    },
+    "maintainer": {
+      "inherits": "contributor",
+      "grants": [
+        "ai:execute",
+        "solutions:delete"
+      ]
+    },
+    "admin": {
+      "inherits": "maintainer",
+      "grants": [
+        "infra:execute",
+        "shell:execute",
+        "users:write"
+      ]
+    }
+  },
+  "users": {},
+  "objects": {
+    "ai": [],
+    "docs": ["docs/"],
+    "infra": [],
+    "shell": ["/bin/bash"],
+    "solutions": ["solutions/"],
+    "solver": [],
+    "users": [],
+    "web-content": ["solver/web/content/"]
+  }
+}

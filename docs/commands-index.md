@@ -17,8 +17,8 @@ Each command entry opens with an **availability** line —
 `channels: … · profiles: …`. *Channels* (`terminal` / `web`) are the channels the
 command declares (`@register(channels=…)`); *profiles* are those whose permissions
 satisfy the command's `requires=` grants under `authorizations.json` — reported from
-the live registry (the generated `solver/commands.json` audit view). A command that
-declares no `requires` is fail-closed to `admin`. See the
+the live registry (see the generated [`authorizations.md`](authorizations.md) audit
+table). A command that declares no `requires` is fail-closed to `admin`. See the
 [access-control guide](access-control.md) for the RBAC model (DD-12).
 
 A command's *flags* line lists the behaviours marked by these glyphs (the same
@@ -1067,13 +1067,12 @@ update-docs
 Rebuild the registry-generated blocks in the `docs/` guides and the README.
 
 Rewrites only the marked `<!-- GEN:... -->` sections — the command catalogue,
-the in-index summary, the per-command reference, and the README package-layout
-tree (built from each module's docstring) — from the live command registry and
-the source tree, leaving all hand-written prose untouched. It also regenerates
-the authorization audit `solver/commands.json` (each command's `requires` /
-`channels`, from the registry) — the counterpart to `modules.csv`. Run it after
-changing any command's name, alias, help text, signature, or a module's first
-docstring line.
+the in-index summary, the per-command reference, the authorization audit table
+in `docs/authorizations.md` (module / command / channels / requires / least
+profile), and the README package-layout tree (built from each module's
+docstring) — from the live command registry and the source tree, leaving all
+hand-written prose untouched. Run it after changing any command's name, alias,
+help text, signature, `requires`/`channels`, or a module's first docstring line.
 
 Args:
     ctx:    The command context.

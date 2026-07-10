@@ -312,10 +312,10 @@ the optional groups summarised under [Requirements](#requirements) above (`solut
 `dev`, `web`) - install only what you need.
 
 The web front end bundles its JavaScript/CSS assets locally so it runs fully offline, with no CDN
-calls. These vendored assets live under `solver/web-content/vendor/` - xterm.js (MIT),
+calls. These vendored assets live under `solver/web/content/vendor/` - xterm.js (MIT),
 highlight.js (BSD-3-Clause), CodeJar (MIT), MathJax (Apache-2.0), and Devicon (MIT). Each is
 redistributed under its permissive license; the full license texts and an inventory of every file
-are in the [vendor README](solver/web-content/vendor/README.md).
+are in the [vendor README](solver/web/content/vendor/README.md).
 
 ### Authors
 

@@ -127,7 +127,7 @@ Completing a reset revokes every live session and remember-me token for the acco
    `remember`, the remember-me cookie); on failure, a generic 401.
 3. The browser verifies `M2` — mutual authentication — and is logged in.
 
-The browser client (`web-content/assets/srp.js`) interoperates byte-for-byte with
+The browser client (`solver/web/content/assets/srp.js`) interoperates byte-for-byte with
 `srp.py`: RFC 5054 2048-bit group, `g=2`, SHA-256, `PAD`-to-`|N|` on `A`/`B`/`S`.
 It is cross-tested against the Python server (`tests/test_srp_interop.py`, needs
 `make install-nodejs`).
@@ -239,7 +239,7 @@ profile), and `objects` (permission namespace → filesystem paths):
     "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute"] }
   },
   "users":   { "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
-  "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["web-content/"],
+  "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["solver/web/content/"],
                "solver": [], "shell": ["/bin/bash"], "ai": [], "infra": [] }
 }
 ```
@@ -252,8 +252,9 @@ A command/route declares `requires=[obj:perm]`; enforcement is `requires ⊆ per
 `git-*`/`key-*` → `infra:execute`; `users` splits (`list → users:read` for `reader`+,
 mutations → `users:write` for `admin`). The DD-11 content matrix is exactly these grants
 (view=read, edit=write, delete=delete, execute=execute). `update-docs` regenerates
-**`solver/commands.json`** — the audit view of each command's `requires`/`channels`,
-distinct from the authored `authorizations.json`.
+the audit table in **`docs/authorizations.md`** — module / command / channels /
+requires / least-profile for every command, distinct from the authored
+`authorizations.json`.
 
 ### Enforcement (shell + web)
 

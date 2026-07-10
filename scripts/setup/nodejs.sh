@@ -4,7 +4,7 @@
 #
 # Installs / uninstalls a pinned standalone Node.js under ~/.local, used only by
 # developer tooling — currently the JS↔Python SRP interop test
-# (tests/test_srp_interop.py, driving web-content/assets/srp.js against
+# (tests/test_srp_interop.py, driving solver/web/content/assets/srp.js against
 # solver/web/auth/srp.py). It is NOT a runtime dependency: no service, no unit,
 # nothing system-wide — which is why this kit, unlike its scripts/setup siblings,
 # needs no sudo and installs no systemd unit.

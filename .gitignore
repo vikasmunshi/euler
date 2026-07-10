@@ -16,6 +16,7 @@
 Caddyfile
 ENV/
 __pycache__/
+build/
 celerybeat-schedule
 coverage.xml
 db.sqlite3
@@ -39,6 +40,7 @@ pip-wheel-metadata/
 profile_default/
 sdist/
 site/
+solver.egg-info/
 target/
 var/
 venv/

@@ -211,7 +211,7 @@ the repo. The **framework is aiohttp + Jinja2** (autoescape on) — one framewor
 with the shell service; Jinja replaces the homegrown string templating.
 
 **Code vs. data.** This isolates the *code*; the content services still read/write the
-repo's **content tree** (`solutions/`, `docs/`, `web-content/`) — the git filter leaves
+repo's **content tree** (`solutions/`, `docs/`, `solver/web/content/`) — the git filter leaves
 plaintext at rest there, so no master key is needed. That data access is a **scoped,
 per-profile ACL** on those subtrees only (never `.git`/`keys/`/`solver/`), added by
 [DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson) — a targeted share
@@ -226,7 +226,7 @@ with `euler-web`, not the blanket home-open this DD otherwise avoids.
 
 Jinja **page templates** ship as package data inside the venv
 (`solver/web/templates/*.html`); **static assets** (CSS/JS) stay in the repo-root
-`web-content/` tree, deployed to `/etc/euler/web-content` and served by Caddy under
+`solver/web/content/` tree, deployed to `/etc/euler/web-content` and served by Caddy under
 `/assets/*` — so rendered pages reference `'self'` assets and the CSP holds.
 
 ### DD-6 · Auth state is `euler-auth`-private; admin ops go through an admin API
@@ -467,7 +467,7 @@ bootstrap template; the installer seeds the real file (including the **checkout 
     "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute","users:write"] }
   },
   "users":   { "vikas": "admin", "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
-  "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["web-content/"],
+  "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["solver/web/content/"],
                "solver": [], "shell": ["/bin/bash"], "ai": [], "users": [], "infra": [] }
 }
 ```
@@ -501,9 +501,10 @@ defaults fail-closed** to `infra:execute` (admin-only) — a new command is neve
 exposed. Example mapping: `show → solutions:read`; `new`/`edit` → `solutions:write`;
 `evaluate`/`benchmark` → `solutions:execute`; `!` → `shell:execute`; `claude-*` →
 `ai:execute`; `git-*`/`key-*`/`manage-config` → `infra:execute`; `users` splits by verb
-(`list → users:read`, mutations → `users:write`). A generated **`solver/commands.json`**
-(by `update-docs`) reports each command's `requires`/`channels` for audit — the generated
-audit view, distinct from the authored `authorizations.json`.
+(`list → users:read`, mutations → `users:write`). A generated audit table in
+**`docs/authorizations.md`** (by `update-docs`) reports each command's module /
+channels / requires / least-profile — the generated audit view, distinct from the
+authored `authorizations.json`.
 
 **`modules.csv` → loader-only.** It keeps just `(module, registers_commands)`; the
 `terminal`/`web` columns are gone (channel now lives on the decorator, finer-grained). All
@@ -527,7 +528,7 @@ each instance is *born* as the right uid. A shell's redeemed-ticket profile must
 instance's uid, else it aborts.
 
 **OS second layer — content-tree ACLs (refines DD-5).** The services read/write the repo
-**working tree directly** (`solutions/`, `docs/`, `web-content/`) — the git clean/smudge
+**working tree directly** (`solutions/`, `docs/`, `solver/web/content/`) — the git clean/smudge
 filter already leaves **plaintext at rest** there, so the web tier needs *filesystem
 access, not the master key*, and does **no git operations** (commit/checkout, where the key
 is used, stay with the operator locally). Access is a **scoped ACL**: a traverse ACL
@@ -594,7 +595,7 @@ All resolved:
            └────────┬────────┘          │ spawns `python -m solver`
                     │  read/write        │ (as the per-profile euler-ws-<prof> uid)
                     ▼  the REPO working  ▼
-        solutions/ · docs/ · web-content/   ┌──────────┐  allowlist egress only
+        solutions/ · docs/ · solver/web/content/   ┌──────────┐  allowlist egress only
         (plaintext at rest — git filter;    │  Squid    │─▶ api.anthropic.com,
          NO master key on the web tier)     │ (egress)  │   projecteuler.net, github
         via per-profile group ACLs   ──────▶└──────────┘   (AI, scraper, gh)
@@ -608,7 +609,7 @@ any client-supplied `X-User`/`X-Profile`, then forwards the `200 + X-User + X-Pr
 copies), so content/shell never see an unauthenticated caller — and it **routes by
 `X-Profile`** to the matching **per-profile instance** (`content@<profile>` /
 `ws@<profile>`, each its own `euler-<svc>-<profile>` uid; DD-12). Those instances
-read/write the **repo working tree directly** (`solutions/`/`docs/`/`web-content/`, where
+read/write the **repo working tree directly** (`solutions/`/`docs/`/`solver/web/content/`, where
 the git filter leaves plaintext at rest) via scoped per-profile group ACLs — **no master
 key ever reaches the web tier** (it stays with the operator for git ops). Authorization
 for both the routes and the spawned shell is the one `authorizations.json` policy
@@ -716,7 +717,7 @@ Rendering contract:
    or the existing shell WebSocket. Prefer SSE for one-way content-service progress;
    reserve the WS for the interactive shell.
 
-htmx is ~14 kB, vendored into `web-content/vendor/` (pinned + SRI + `LICENSES`) exactly
+htmx is ~14 kB, vendored into `solver/web/content/vendor/` (pinned + SRI + `LICENSES`) exactly
 like xterm.js/codemirror. It **strengthens** the CSP/XSS story: no client-side
 string→DOM assembly (no DOM-XSS class), all escaping is Jinja autoescape server-side.
 **CSP interaction (must design for):** with `script-src 'self'` and no `unsafe-inline`,
@@ -856,7 +857,7 @@ group + `euler-caddy`/`euler-acme` users, Caddy + acme.sh (DNS-01), the cert to
 ### Phase 3 — Maintenance page (static) ✅
 Folded into `frontend.sh`: a single static "under maintenance" page served end-to-end —
 proves TLS, routing, headers, and CSP fallback on a real response. Establishes the
-`web-content/` static layout and the CSP baseline the app services inherit; a
+`solver/web/content/` static layout and the CSP baseline the app services inherit; a
 `handle_errors` block reuses it whenever a later upstream is down.
 
 ### Phase 4 — Auth service ✅
@@ -911,9 +912,9 @@ kernel, enforcement, and migration.
    mapping (`show → solutions:read`, `edit`/`new → solutions:write`, `evaluate`/`benchmark →
    solutions:execute`, `!` → `shell:execute`, `claude-* → ai:execute`, `git-*`/`key-* →
    infra:execute`, `users list → users:read` / mutations → `users:write`, `update-docs →
-   channels=('terminal',)`, …). Regenerate the audit view **`solver/commands.json`** and
-   `commands-index.md` via `update-docs`. **Test:** `commands.json` matches intent; the
-   per-profile command set is correct; `flake8`/`mypy` clean.
+   channels=('terminal',)`, …). Regenerate the audit table **`docs/authorizations.md`**
+   and `commands-index.md` via `update-docs`. **Test:** `authorizations.md` matches
+   intent; the per-profile command set is correct; `flake8`/`mypy` clean.
 4. ✅ **`authorizations.json` SoR + install seeding.** Folded into `auth.sh`
    (`deploy_authz`): deploys `/etc/euler/authorizations.json` (`root:root 0644`) from the
    repo bootstrap template (`authorizations.json`, which also serves as the kernel's dev
@@ -955,7 +956,7 @@ kernel, enforcement, and migration.
   command, and the live-account migration — `commands.csv` retired, profile off the SRP
   record.
 - **Kit:** `authz.sh` (deploy/seed/migrate the SoR) or folded into `auth.sh`; `update-docs`
-  emits `commands.json`; no new runtime dependency.
+  emits the `authorizations.md` audit table; no new runtime dependency.
 
 ### Phase 5 — Content service ⬜
 **Prerequisite: Phase 4a** (the `solver/auth` kernel + `authorizations.json`) — the content
