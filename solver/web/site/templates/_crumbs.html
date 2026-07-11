@@ -1,0 +1,14 @@
+{# Breadcrumbs (site-design §6): ancestors clickable, leaf plain. Lives in the
+   fixed header; fragment responses re-send it with hx-swap-oob so it tracks the
+   pane. `crumbs` = [(label, href-or-None), …]. #}
+<nav id="crumbs" class="crumbs" aria-label="Breadcrumb"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {%- for label, href in crumbs -%}
+    {%- if not loop.first %}<span class="crumb-sep" aria-hidden="true">&#8250;</span>{% endif -%}
+    {%- if href -%}
+      <a href="{{ href }}" hx-get="{{ href }}" hx-target="#content" hx-swap="innerHTML"
+         hx-push-url="true">{{ label }}</a>
+    {%- else -%}
+      <span class="crumb-leaf">{{ label }}</span>
+    {%- endif -%}
+  {%- endfor -%}
+</nav>

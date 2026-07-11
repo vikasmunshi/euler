@@ -12,15 +12,16 @@ when the uid may not read them.
 """
 from __future__ import annotations
 
-__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES',
+__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
-           'resolve_file', 'load_json', 'render_markdown',
-           'list_docs', 'read_doc', 'list_topics', 'read_topic',
-           'parse_progress', 'save_progress', 'read_progress']
+           'resolve_file', 'load_json', 'render_markdown', 'git_status',
+           'list_docs', 'read_doc', 'list_topics', 'read_topic', 'read_about',
+           'parse_progress', 'save_progress']
 
 import json
 import mimetypes
 import re
+import subprocess
 from pathlib import Path
 from typing import Any, NamedTuple
 
@@ -129,13 +130,50 @@ def centuries(problems: dict[int, ProblemInfo]) -> list[Century]:
 
 def problem_files(sdir: Path) -> list[str]:
     """The problem's viewable files (mimetype-guessable, as ``ls`` lists them),
-    as POSIX paths relative to the solution directory."""
+    as POSIX paths relative to the solution directory. **Zero-size files are
+    hidden** (site-design §7) — an empty stub says nothing worth a link."""
     if not sdir.is_dir():
         return []
     return sorted(
         p.relative_to(sdir).as_posix() for p in sdir.rglob('*')
-        if p.is_file() and mimetypes.guess_type(p.name)[0] is not None
+        if p.is_file() and p.stat().st_size > 0
+        and mimetypes.guess_type(p.name)[0] is not None
     )
+
+
+def git_status(repo_root: Path, sdir: Path) -> dict[str, tuple[str, str]]:
+    """Best-effort git status for *sdir*: relative name → (css class, hover title).
+
+    The web tier does no git operations and the deployed uids cannot read
+    ``.git`` (kept off the content ACLs, DD-12) — so any failure degrades to
+    ``{}`` and files render plain. A dev run as the owner gets the colours.
+    A name absent from the porcelain output is clean/committed.
+    """
+    try:
+        proc = subprocess.run(
+            ['git', '-C', str(repo_root), 'status', '--porcelain', '--', str(sdir)],
+            capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.TimeoutExpired):
+        return {}
+    if proc.returncode != 0:
+        return {}
+    states: dict[str, tuple[str, str]] = {}
+    for line in proc.stdout.splitlines():
+        if len(line) < 4:
+            continue
+        # Porcelain: X = index (staged) state, Y = worktree state, then the path.
+        x, y, path = line[0], line[1], line[3:].split(' -> ')[-1].strip().strip('"')
+        try:
+            name = (repo_root / path).relative_to(sdir).as_posix()
+        except ValueError:
+            continue
+        if x == '?' or y == '?':
+            states[name] = ('untracked', 'untracked — not yet added to git')
+        elif y != ' ':
+            states[name] = ('modified', 'modified since the last commit')
+        else:
+            states[name] = ('staged', 'staged — not yet committed')
+    return states
 
 
 def resolve_file(sdir: Path, filename: str) -> Path | None:
@@ -236,12 +274,28 @@ def save_progress(repo_root: Path, content: bytes) -> tuple[bool, str]:
                  f'{sum(1 for p in problems.values() if p["solved"])} solved'
 
 
-def read_progress(repo_root: Path) -> str:
-    """The current ``solutions/.progress.html`` source, or '' when absent."""
+# ── about (the footer pages, 5e) ────────────────────────────────────────────────────
+
+#: ``/about/{name}`` → (repo-relative source file, page title, render as markdown?).
+#: These are the paths behind the ``about`` object in ``authorizations.json`` —
+#: keep the two lists in step so the DD-12 ACL derivation covers exactly them.
+ABOUT_PAGES: dict[str, tuple[str, str, bool]] = {
+    'readme': ('README.md', 'README', True),
+    'license': ('LICENSE', 'MIT license', False),
+    'acknowledgements': ('solver/web/content/vendor/README.md', 'Acknowledgements', True),
+}
+
+
+def read_about(repo_root: Path, name: str) -> tuple[str, str, bool] | None:
+    """One footer page: (title, raw text, is_markdown), or None (unknown/missing)."""
+    entry = ABOUT_PAGES.get(name)
+    if entry is None:
+        return None
+    path, title, is_markdown = entry
     try:
-        return (repo_root / 'solutions' / '.progress.html').read_text(encoding='utf-8')
+        return title, (repo_root / path).read_text(encoding='utf-8'), is_markdown
     except OSError:
-        return ''
+        return None
 
 
 # ── markdown (docs + topics) ────────────────────────────────────────────────────────

@@ -1,19 +1,25 @@
 {% extends "base.html" %}
-{% block title %}ς euler — topics{% endblock %}
+{% block title %}topics · euler{% endblock %}
 {% block content %}
-<section class="panel">
-  <h1>Topics</h1>
-  <p class="lead">Writeups on the mathematics and techniques behind the problems.</p>
-  {% if entries %}
-  <ul class="doc-list">
-    {% for e in entries %}
-    <li><a href="/topics/{{ e.name }}"
-           hx-get="/topics/{{ e.name }}" hx-target="#content" hx-swap="innerHTML"
-           hx-push-url="true">{{ e.title }}</a></li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p class="muted">No topics written yet.</p>
-  {% endif %}
-</section>
+<header class="hero">
+  <p class="kicker">topics</p>
+  <h1>The mathematics</h1>
+  <p class="lede">Writeups on the ideas the problems keep reusing — sieve once,
+     solve forever.</p>
+</header>
+{% if entries %}
+<nav class="cards" aria-label="Topics">
+  {% for e in entries %}
+  <a class="card" href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
+     hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+    <span class="card-ic">&lambda;</span>
+    <span><span class="card-title">{{ e.title }}</span>
+      <span class="card-desc"><code>{{ e.name }}</code></span></span>
+    <span class="card-go">&rarr;</span>
+  </a>
+  {% endfor %}
+</nav>
+{% else %}
+<p class="muted">Nothing written yet — the mathematics is still oral tradition.</p>
+{% endif %}
 {% endblock %}

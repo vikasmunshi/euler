@@ -1,33 +1,31 @@
 {% extends "base.html" %}
-{% block title %}ς euler — solutions{% endblock %}
+{% block title %}solutions · euler{% endblock %}
 {% block content %}
 <section class="panel">
   <h1>Solutions</h1>
   {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
-  <p class="lead"><strong>{{ solved }}</strong> of <strong>{{ total }}</strong> problems solved.
-     <span class="muted">Shading follows difficulty; hover a cell for the title.</span>
-     {% if subject.has('solutions:execute') %}
-     <a class="file-action" href="/edit/solutions/"
-        hx-get="/edit/solutions/" hx-target="#content" hx-swap="innerHTML"
-        hx-push-url="true">edit progress</a>
-     {% endif %}
-  </p>
-  {% for grid in grids %}
-  <h2 class="century-label">{{ '%04d' % grid.start }} – {{ '%04d' % (grid.start + 99) }}
-      <span class="muted">({{ grid.solved }} solved)</span></h2>
-  <div class="century-grid">
-    {% for cell in grid.cells %}
-      {% set n = grid.start + loop.index0 %}
-      {% if cell %}
-        <a class="cell {{ 'solved heat-%d' % cell.heat if cell.solved else 'unsolved' }}"
-           href="/solutions/{{ '%04d' % n }}/"
-           hx-get="/solutions/{{ '%04d' % n }}/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
-           title="{{ n }} · {{ cell.title }}{% if cell.pct %} · {{ cell.pct }}%{% endif %}">{{ n }}</a>
-      {% else %}
-        <span class="cell empty"></span>
-      {% endif %}
+  <p class="lead"><strong>{{ solved }}</strong> of <strong>{{ total }}</strong> solved —
+     the shading is difficulty, the hover is the title.</p>
+  <div class="grid-row">
+    {% for grid in grids %}
+    <div class="century">
+      <h2 class="century-label">{{ '%04d' % grid.start }} – {{ '%04d' % (grid.start + 99) }}
+          <span class="muted">({{ grid.solved }} solved)</span></h2>
+      <div class="century-grid">
+        {% for cell in grid.cells %}
+          {% set n = grid.start + loop.index0 %}
+          {% if cell %}
+            <a class="cell {{ 'solved heat-%d' % cell.heat if cell.solved else 'unsolved' }}"
+               href="/solutions/{{ '%04d' % n }}/"
+               hx-get="/solutions/{{ '%04d' % n }}/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+               title="{{ n }} · {{ cell.title }}{% if cell.pct %} · {{ cell.pct }}%{% endif %}">{{ n }}</a>
+          {% else %}
+            <span class="cell empty"></span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
     {% endfor %}
   </div>
-  {% endfor %}
 </section>
 {% endblock %}

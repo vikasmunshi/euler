@@ -1,19 +1,9 @@
 {% extends "base.html" %}
-{% block title %}ς euler — {{ filename }}{% endblock %}
+{% block title %}{{ filename }} · euler{% endblock %}
 {% block content %}
 <section class="panel">
   <h1><code>{{ filename }}</code></h1>
-  <p class="meta">
-    <a href="/solutions/{{ '%04d' % number }}/"
-       hx-get="/solutions/{{ '%04d' % number }}/" hx-target="#content"
-       hx-swap="innerHTML" hx-push-url="true">← problem {{ number }}</a>
-    <span class="muted">· {{ lines }} lines</span>
-    {% if editable and subject.has('solutions:write') %}
-    <a class="file-action" href="/edit/solutions/{{ '%04d' % number }}/{{ filename }}"
-       hx-get="/edit/solutions/{{ '%04d' % number }}/{{ filename }}" hx-target="#content"
-       hx-swap="innerHTML" hx-push-url="true">edit</a>
-    {% endif %}
-  </p>
+  <p class="meta"><span class="muted">problem {{ number }} · {{ lines }} lines</span></p>
   <pre class="code-block"><code>{{ text }}</code></pre>
 </section>
 {% endblock %}

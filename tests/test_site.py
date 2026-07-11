@@ -57,10 +57,15 @@ class ContentServiceTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('<!DOCTYPE html>', body)              # full page
         self.assertIn('Project', body)                      # content
-        self.assertIn('reader', body)                       # profile pill in header
+        self.assertIn('reader', body)                       # profile pill in the user menu
         self.assertIn('id="content"', body)                 # left pane (§1)
         self.assertIn('id="ws"', body)                      # right pane (§1)
-        self.assertIn('&sigmaf;', body)                     # the ς brand glyph
+        self.assertIn('e<sup>iπ</sup>', body)               # the identity wordmark
+        self.assertIn('id="crumbs"', body)                  # chrome placed in the header
+        self.assertIn('id="actions"', body)
+        self.assertIn('id="theme-toggle"', body)            # the slider
+        self.assertIn('/auth/logout', body)                 # the user menu
+        self.assertIn('/about/license', body)               # footer links
         self.assertIn('/vendor/htmx.min.js', body)          # htmx wired
         self.assertIn('integrity="sha384-', body)           # with SRI
 
@@ -70,9 +75,20 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertEqual(resp.status, 200)
         body = await resp.text()
         self.assertNotIn('<!DOCTYPE html>', body)           # fragment only
-        self.assertNotIn('<nav', body)                      # no chrome
+        self.assertNotIn('app-header', body)                # no shell chrome re-render
         self.assertNotIn('id="ws"', body)                   # the terminal pane is untouched
-        self.assertIn('Project', body)                      # just the content block
+        self.assertIn('Project', body)                      # the content block…
+        self.assertIn('hx-swap-oob', body)                  # …plus the OOB header chrome (§6)
+
+    @unittest_run_loop
+    async def test_about_pages_for_reader(self) -> None:
+        for name, marker in (('readme', 'Project Euler'), ('license', 'MIT License'),
+                             ('acknowledgements', 'htmx')):
+            resp = await self.client.get(f'/about/{name}', headers=_READER)
+            self.assertEqual(resp.status, 200, name)
+            self.assertIn(marker, await resp.text())
+        resp = await self.client.get('/about/no-such-page', headers=_READER)
+        self.assertEqual(resp.status, 404)
 
     @unittest_run_loop
     async def test_no_profile_is_unauthorized(self) -> None:
@@ -122,7 +138,10 @@ class ContentServiceTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('Problem 42', body)
         self.assertIn('triangle', body)                     # the cached statement
-        self.assertIn('p0042_s0.py', body)                  # the file list
+        self.assertIn('p0042_s0.py', body)                  # the file flow
+        self.assertIn('test-cases', body)                   # test cases as a table (§7)
+        self.assertLess(body.index('test-cases'), body.index('file-flow'))
+        self.assertLess(body.index('class="results"'), body.index('file-flow'))
 
     @unittest_run_loop
     async def test_problem_file_view_and_traversal_guard(self) -> None:
@@ -273,13 +292,15 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertTrue((self.pdir / 'p0009_s0.py').exists())
 
     @unittest_run_loop
-    async def test_delete_removes_file_and_returns_file_list(self) -> None:
+    async def test_delete_removes_file_and_returns_problem_page(self) -> None:
         resp = await self.client.delete('/edit/solutions/0009/p0009_s0.py', headers=_MAINTAINER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
-        self.assertIn('id="files"', body)                            # the file-list block
+        self.assertNotIn('<!DOCTYPE html>', body)                    # a fragment…
+        self.assertIn('Problem 9', body)                             # …of the problem page (§8d)
         self.assertIn('deleted p0009_s0.py', body)
         self.assertNotIn('p0009_s0.py</code>', body)
+        self.assertEqual(resp.headers.get('HX-Push-Url'), '/solutions/0009/')
         self.assertFalse((self.pdir / 'p0009_s0.py').exists())
 
     @unittest_run_loop
@@ -291,10 +312,13 @@ class EditRouteTests(AioHTTPTestCase):
     # ── progress editor ──────────────────────────────────────────────────────
 
     @unittest_run_loop
-    async def test_progress_editor_for_contributor(self) -> None:
+    async def test_progress_upload_starts_empty(self) -> None:
+        (self.scratch / 'solutions' / '.progress.html').write_text('<p>PREVIOUS-UPLOAD</p>')
         resp = await self.client.get('/edit/solutions/', headers=_CONTRIBUTOR)
         self.assertEqual(resp.status, 200)
-        self.assertIn('projecteuler.net/progress', await resp.text())
+        body = await resp.text()
+        self.assertIn('projecteuler.net/progress', body)
+        self.assertNotIn('PREVIOUS-UPLOAD', body)            # upload-replace, never round-tripped
 
     @unittest_run_loop
     async def test_progress_slashless_301s(self) -> None:
@@ -339,17 +363,65 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertIn('id="notes"', body)                            # the notes block
         self.assertIn('claude-api docs 9', body)                     # the shell pointer
 
-    # ── profile-gated affordances (§6: hiding is UX, the gate is the boundary) ──
+    # ── the Actions menu follows the profile (§6: hiding is UX, the gate is the boundary) ──
 
     @unittest_run_loop
-    async def test_affordances_follow_the_profile(self) -> None:
+    async def test_actions_follow_the_profile(self) -> None:
+        # problem page: Regenerate is maintainer-only (ai:execute)
         page = await (await self.client.get('/solutions/0009/', headers=_READER)).text()
-        self.assertNotIn('hx-delete', page)
-        self.assertNotIn('>edit</a>', page)
+        self.assertNotIn('Regenerate notes', page)
         page = await (await self.client.get('/solutions/0009/', headers=_MAINTAINER)).text()
+        self.assertIn('Regenerate notes', page)
+        # file view: Edit needs write, Delete needs delete
+        page = await (await self.client.get('/solutions/0009/p0009_s0.py', headers=_READER)).text()
+        self.assertNotIn('hx-delete', page)
+        page = await (await self.client.get('/solutions/0009/p0009_s0.py', headers=_CONTRIBUTOR)).text()
+        self.assertIn('>Edit</a>', page)
+        self.assertNotIn('hx-delete', page)
+        page = await (await self.client.get('/solutions/0009/p0009_s0.py', headers=_MAINTAINER)).text()
         self.assertIn('hx-delete', page)
-        self.assertIn('>edit</a>', page)
-        self.assertIn('regenerate', page)
+        # solutions index: Upload progress is contributor+ (solutions:execute)
+        page = await (await self.client.get('/solutions/', headers=_READER)).text()
+        self.assertNotIn('Upload progress', page)
+        page = await (await self.client.get('/solutions/', headers=_CONTRIBUTOR)).text()
+        self.assertIn('Upload progress', page)
+
+    @unittest_run_loop
+    async def test_fragment_carries_oob_chrome(self) -> None:
+        resp = await self.client.get('/solutions/0009/', headers={**_MAINTAINER, **_HTMX})
+        body = await resp.text()
+        self.assertNotIn('<!DOCTYPE html>', body)
+        self.assertIn('id="crumbs" class="crumbs" aria-label="Breadcrumb" hx-swap-oob="true"', body)
+        self.assertIn('id="actions" class="actions" hx-swap-oob="true"', body)
+        self.assertIn('0009', body)                          # the crumb leaf
+
+
+class GitStatusTests(unittest.TestCase):
+    """content.git_status: the three porcelain states, and graceful degradation
+    outside a git checkout (the deployed posture — .git unreadable, DD-12)."""
+
+    def test_states_and_degradation(self) -> None:
+        import subprocess
+        from solver.web.site import content as site_content
+        scratch = Path(tempfile.mkdtemp(prefix='euler-git-test-'))
+        self.addCleanup(shutil.rmtree, scratch, True)
+        pdir = scratch / 'solutions' / 'public' / 'p0009'
+        pdir.mkdir(parents=True)
+        self.assertEqual(site_content.git_status(scratch, pdir), {})   # no .git → plain
+        subprocess.run(['git', 'init', '-q', str(scratch)], check=True)
+        subprocess.run(['git', '-C', str(scratch), 'config', 'user.email', 't@t'], check=True)
+        subprocess.run(['git', '-C', str(scratch), 'config', 'user.name', 't'], check=True)
+        (pdir / 'committed.py').write_text('x = 1\n')
+        subprocess.run(['git', '-C', str(scratch), 'add', '-A'], check=True)
+        subprocess.run(['git', '-C', str(scratch), 'commit', '-qm', 'init'], check=True)
+        (pdir / 'committed.py').write_text('x = 2\n')                  # modified
+        (pdir / 'staged.py').write_text('y = 1\n')
+        subprocess.run(['git', '-C', str(scratch), 'add', str(pdir / 'staged.py')], check=True)
+        (pdir / 'new.py').write_text('z = 1\n')                        # untracked
+        states = site_content.git_status(scratch, pdir)
+        self.assertEqual(states['committed.py'][0], 'modified')
+        self.assertEqual(states['staged.py'][0], 'staged')
+        self.assertEqual(states['new.py'][0], 'untracked')
 
 
 class PinnedInstanceTests(AioHTTPTestCase):

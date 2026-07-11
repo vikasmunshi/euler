@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}ς euler — {{ '%04d' % number }}{% endblock %}
+{% block title %}{{ '%04d' % number }} · euler{% endblock %}
 {% block content %}
 <section class="panel">
   <h1>Problem {{ number }}{% if info and info.title %} — {{ info.title }}{% endif %}</h1>
+  {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
   {% if info %}
   <p class="meta">
     {% if info.solved %}<span class="pill pill-solved">solved</span>
@@ -22,8 +23,24 @@
   {% endif %}
 </section>
 
-{% if files %}
-{% include "_files.html" %}
+{% if test_cases %}
+<section class="panel">
+  <h2>Test cases</h2>
+  <div class="table-scroll">
+  <table class="test-cases">
+    <thead><tr><th>category</th><th>input</th><th>answer</th></tr></thead>
+    <tbody>
+    {% for tc in test_cases %}
+      <tr>
+        <td>{{ tc.category }}</td>
+        <td><code class="pre-line">{{ tc.input }}</code></td>
+        <td><code>{{ tc.answer }}</code></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
 {% endif %}
 
 {% if results %}
@@ -50,11 +67,8 @@
 </section>
 {% endif %}
 
-{% if test_cases %}
-<section class="panel">
-  <h2>Test cases</h2>
-  <pre class="code-block"><code>{{ test_cases }}</code></pre>
-</section>
+{% if files %}
+{% include "_files.html" %}
 {% endif %}
 
 {% include "_notes.html" %}

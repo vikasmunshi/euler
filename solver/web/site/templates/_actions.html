@@ -1,0 +1,30 @@
+{# The Actions menu (site-design §6): the current page's verbs, filtered by the
+   subject's grants in the handler (hiding is UX; requires() is the boundary).
+   Re-sent hx-swap-oob with every fragment; hides itself when the page has none.
+   Each item: {label, kind: get|post|delete|submit, path?, target?, swap?, confirm?}. #}
+<div id="actions" class="actions"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if actions %}
+  <details class="menu">
+    <summary>Actions</summary>
+    <ul class="menu-list">
+      {% for a in actions %}
+      <li>
+        {% if a.kind == 'get' %}
+        <a href="{{ a.path }}" hx-get="{{ a.path }}" hx-target="#content"
+           hx-swap="innerHTML" hx-push-url="true">{{ a.label }}</a>
+        {% elif a.kind == 'submit' %}
+        {# Submits the pane's editor form (site.js) — Save without leaving the menu bar. #}
+        <button type="button" data-action="submit-editor">{{ a.label }}</button>
+        {% else %}
+        <button type="button"
+                {% if a.kind == 'post' %}hx-post="{{ a.path }}"{% else %}hx-delete="{{ a.path }}"{% endif %}
+                hx-target="{{ a.target | default('#content') }}"
+                hx-swap="{{ a.swap | default('innerHTML') }}"
+                {% if a.confirm %}hx-confirm="{{ a.confirm }}"{% endif %}>{{ a.label }}</button>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+</div>

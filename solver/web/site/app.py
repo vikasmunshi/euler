@@ -10,13 +10,13 @@ into a :class:`~solver.auth.subject.Subject`. Routes gate on it with
 (DD-12): the same ``object:permission`` grants, checked against ``X-Profile``.
 
 The route surface is the contract in ``docs/site-design.md``: the app shell at
-``/`` (four regions: header · ``#content`` · ``#ws`` · footer), the 5b read routes
-rendering into ``#content`` (full page on a direct visit, fragment on htmx —
-:mod:`solver.web.site.render`), the canonical trailing-slash 301s, and the 5d
-edit routes — file editor, collection-level progress editor, delete, notes
-regenerate — each write passing the 5c gate (:mod:`solver.web.site.validate`)
-and always answering with a fragment. The live terminal (Phase 6) lands on the
-same spine.
+``/`` (four fixed regions filling the viewport), read routes rendering into
+``#content`` (full page on a direct visit, fragment + out-of-band header chrome
+on htmx — :mod:`solver.web.site.render`), canonical trailing-slash 301s, and the
+edit routes — file editor, collection-level progress upload, delete, notes
+regenerate — each write passing the save gate (:mod:`solver.web.site.validate`)
+and always answering with a fragment. Every handler supplies its breadcrumbs and
+Actions (§6); the live terminal (Phase 6) lands on the same spine.
 """
 from __future__ import annotations
 
@@ -24,10 +24,9 @@ __all__ = ['build_app']
 
 import asyncio
 import html
-import json
 import logging
 from pathlib import Path
-from typing import Awaitable, Callable, TypedDict
+from typing import Any, Awaitable, Callable, TypedDict
 
 import aiohttp_jinja2
 import jinja2
@@ -56,28 +55,47 @@ CONFIG_KEY = web.AppKey('site_config', SiteConfig)
 _MAX_BODY = 4 * 1024 * 1024
 
 #: Only a bare *solution* file may be deleted — never the statement, notes,
-#: test cases, results, or resources (old-app parity).
+#: test cases, results, or resources.
 _DELETABLE_SUFFIXES = frozenset({'.py', '.c'})
+
+#: A breadcrumb: (label, href) — href None marks the leaf.
+_Crumb = tuple[str, str | None]
+_HOME: _Crumb = ('home', '/')
 
 
 class FileEntry(TypedDict):
-    """One file-list row: the name plus the affordances the templates gate on."""
+    """One file-flow entry: the name plus its best-effort git state (§7)."""
 
     name: str
-    editable: bool
-    deletable: bool
+    git_css: str
+    git_title: str
 
 
-def _file_entries(sdir: Path) -> list[FileEntry]:
-    """The problem's files with their per-file edit/delete affordances.
+class Action(TypedDict, total=False):
+    """One Actions-menu item (§6): a verb the current page offers."""
 
-    Only a bare (top-level) file with an editable suffix opens in the editor;
-    nested resources are view-only.
-    """
+    label: str
+    kind: str      # 'get' | 'post' | 'delete' | 'submit'
+    path: str
+    target: str
+    swap: str
+    confirm: str
+
+
+def _subject(request: web.Request) -> Subject:
+    """The resolved Subject — handlers behind ``requires()`` always have one."""
+    subject: Subject | None = request.get(SUBJECT_KEY)
+    assert subject is not None
+    return subject
+
+
+def _file_entries(repo_root: Path, sdir: Path) -> list[FileEntry]:
+    """The problem's files with their git state (clean files carry empty css)."""
+    states = content.git_status(repo_root, sdir)
     return [
         FileEntry(name=name,
-                  editable='/' not in name and Path(name).suffix in EDITABLE_SUFFIXES,
-                  deletable='/' not in name and Path(name).suffix in _DELETABLE_SUFFIXES)
+                  git_css=states.get(name, ('', ''))[0],
+                  git_title=states.get(name, ('', 'committed'))[1])
         for name in content.problem_files(sdir)
     ]
 
@@ -130,7 +148,7 @@ def requires(capability: str) -> Callable[[_Handler], _Handler]:
 # ── path helpers ─────────────────────────────────────────────────────────────────────
 
 async def redirect_slash(request: web.Request) -> web.StreamResponse:
-    """301 a slashless GET to its canonical trailing-slash form (site-design §6)."""
+    """301 a slashless GET to its canonical trailing-slash form (site-design §9)."""
     location = request.rel_url.path + '/'
     if request.rel_url.query_string:
         location += '?' + request.rel_url.query_string
@@ -151,7 +169,7 @@ def _problem_number(request: web.Request) -> int:
     return number
 
 
-# ── handlers ────────────────────────────────────────────────────────────────────────
+# ── handlers: shell + read ──────────────────────────────────────────────────────────
 
 async def healthz(request: web.Request) -> web.Response:
     """Liveness probe (unauthenticated) — Caddy/monitoring only."""
@@ -163,26 +181,37 @@ async def home(request: web.Request) -> web.StreamResponse:
     """The landing — the default ``#content`` (full shell on a direct visit)."""
     problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
     solved = sum(1 for p in problems.values() if p.solved)
-    return render(request, 'home.html', {'solved': solved, 'total': len(problems)},
-                  block='content')
+    return render(request, 'home.html', {
+        'solved': solved, 'total': len(problems),
+        'crumbs': [('home', None)],
+    }, block='content')
+
+
+def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]:
+    """The `/solutions/` view context: grids, counts, crumbs, and its actions."""
+    problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
+    actions: list[Action] = []
+    if _subject(request).has('solutions:execute'):
+        actions.append(Action(label='Upload progress', kind='get', path='/edit/solutions/'))
+    return {
+        'grids': content.centuries(problems),
+        'solved': sum(1 for p in problems.values() if p.solved),
+        'total': len(problems),
+        'status': status,
+        'crumbs': [_HOME, ('solutions', None)],
+        'actions': actions,
+    }
 
 
 @requires('solutions:read')
 async def solutions_index(request: web.Request) -> web.StreamResponse:
-    """``GET /solutions/`` — problems.json as 10×10 century grids + summary."""
-    problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
-    grids = content.centuries(problems)
-    solved = sum(1 for p in problems.values() if p.solved)
-    return render(request, 'solutions.html',
-                  {'grids': grids, 'solved': solved, 'total': len(problems)},
-                  block='content')
+    """``GET /solutions/`` — problems.json as 10×10 century grids, two per row."""
+    return render(request, 'solutions.html', _solutions_context(request), block='content')
 
 
-@requires('solutions:read')
-async def problem_page(request: web.Request) -> web.StreamResponse:
-    """``GET /solutions/{n}/`` — the solution_dir rendered: statement, files,
-    test cases, results, notes."""
-    number = _problem_number(request)
+def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
+    """The problem-page context (§7 order): statement · test-cases · results ·
+    files · notes — shared by the GET view and the post-delete fragment."""
     repo_root = request.app[CONFIG_KEY].repo_root
     info = content.load_problems(repo_root).get(number)
     sdir = content.solution_dir(repo_root, number)
@@ -195,19 +224,40 @@ async def problem_page(request: web.Request) -> web.StreamResponse:
         except OSError:
             return ''
 
-    def pretty(name: str) -> str:
-        data = content.load_json(sdir / name)
-        return json.dumps(data, indent=2, ensure_ascii=False) if data is not None else ''
+    raw_cases = content.load_json(sdir / 'test_cases.json') or []
+    test_cases = [{
+        'category': tc.get('category', ''),
+        'input': '\n'.join(f'{k} = {v}' for k, v in tc.get('input', {}).items())
+                 if isinstance(tc.get('input'), dict) else str(tc.get('input', '')),
+        'answer': tc.get('answer', ''),
+    } for tc in raw_cases if isinstance(tc, dict)]
 
-    return render(request, 'problem.html', {
+    actions: list[Action] = []
+    subject = _subject(request)
+    if subject.has('ai:execute'):
+        actions.append(Action(label='Regenerate notes', kind='post',
+                              path=f'/solutions/{number:04d}/notes/regenerate',
+                              target='#notes', swap='outerHTML',
+                              confirm=f'Regenerate notes for problem {number}?'))
+    return {
         'number': number,
         'info': info,
         'statement': read_html('statement.html'),
         'notes': read_html('notes.html'),
-        'files': _file_entries(sdir),
-        'test_cases': pretty('test_cases.json'),
+        'files': _file_entries(repo_root, sdir),
+        'test_cases': test_cases,
         'results': content.load_json(sdir / 'results.json') or [],
-    }, block='content')
+        'crumbs': [_HOME, ('solutions', '/solutions/'), (f'{number:04d}', None)],
+        'actions': actions,
+    }
+
+
+@requires('solutions:read')
+async def problem_page(request: web.Request) -> web.StreamResponse:
+    """``GET /solutions/{n}/`` — the solution_dir rendered (§7 order)."""
+    number = _problem_number(request)
+    return render(request, 'problem.html', _problem_context(request, number),
+                  block='content')
 
 
 @requires('solutions:read')
@@ -226,21 +276,35 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
         text = target.read_text(encoding='utf-8')
     except UnicodeDecodeError:
         return web.FileResponse(target)
+
+    subject = _subject(request)
+    bare = '/' not in filename
+    actions: list[Action] = []
+    if bare and target.suffix in EDITABLE_SUFFIXES and subject.has('solutions:write'):
+        actions.append(Action(label='Edit', kind='get',
+                              path=f'/edit/solutions/{number:04d}/{filename}'))
+    if bare and target.suffix in _DELETABLE_SUFFIXES and subject.has('solutions:delete'):
+        actions.append(Action(label='Delete', kind='delete',
+                              path=f'/edit/solutions/{number:04d}/{filename}',
+                              confirm=f'Delete {filename}?'))
     return render(request, 'file.html', {
         'number': number,
         'filename': filename,
         'text': text,
         'lines': text.count('\n') + 1,
-        'editable': '/' not in filename and target.suffix in EDITABLE_SUFFIXES,
+        'crumbs': [_HOME, ('solutions', '/solutions/'),
+                   (f'{number:04d}', f'/solutions/{number:04d}/'), (filename, None)],
+        'actions': actions,
     }, block='content')
 
 
 @requires('docs:read')
 async def docs_index(request: web.Request) -> web.StreamResponse:
-    """``GET /docs/`` — the guides index (docs/*.md + the composed `ai` reference)."""
-    return render(request, 'docs.html',
-                  {'entries': content.list_docs(request.app[CONFIG_KEY].repo_root)},
-                  block='content')
+    """``GET /docs/`` — the guides index (card grid)."""
+    return render(request, 'docs.html', {
+        'entries': content.list_docs(request.app[CONFIG_KEY].repo_root),
+        'crumbs': [_HOME, ('docs', None)],
+    }, block='content')
 
 
 @requires('docs:read')
@@ -253,15 +317,17 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
     return render(request, 'doc.html', {
         'name': name,
         'body': content.render_markdown(text),
+        'crumbs': [_HOME, ('docs', '/docs/'), (name, None)],
     }, block='content')
 
 
 @requires('docs:read')
 async def topics_index(request: web.Request) -> web.StreamResponse:
-    """``GET /topics/`` — the topics index (blog-style writeups)."""
-    return render(request, 'topics.html',
-                  {'entries': content.list_topics(request.app[CONFIG_KEY].repo_root)},
-                  block='content')
+    """``GET /topics/`` — the topics index (card grid)."""
+    return render(request, 'topics.html', {
+        'entries': content.list_topics(request.app[CONFIG_KEY].repo_root),
+        'crumbs': [_HOME, ('topics', None)],
+    }, block='content')
 
 
 @requires('docs:read')
@@ -274,16 +340,35 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
     return render(request, 'topic.html', {
         'name': name,
         'body': content.render_markdown(text, route_base='/topics/'),
+        'crumbs': [_HOME, ('topics', '/topics/'), (name, None)],
     }, block='content')
 
 
 @requires('users:read')
 async def account(request: web.Request) -> web.StreamResponse:
     """``GET /account`` — the signed-in user + profile (from X-User / X-Profile)."""
-    return render(request, 'account.html', block='content')
+    return render(request, 'account.html', {
+        'crumbs': [_HOME, ('account', None)],
+    }, block='content')
 
 
-# ── 5d: edit routes — every write passes the 5c gate, every response is a fragment ──
+@requires('about:read')
+async def about_page(request: web.Request) -> web.StreamResponse:
+    """``GET /about/{name}`` — a footer page: readme · license · acknowledgements."""
+    name = request.match_info['name']
+    page = content.read_about(request.app[CONFIG_KEY].repo_root, name)
+    if page is None:
+        raise web.HTTPNotFound(text=f'no page called {html.escape(name)}')
+    title, text, is_markdown = page
+    return render(request, 'about.html', {
+        'title': title,
+        'body': content.render_markdown(text) if is_markdown else '',
+        'text': '' if is_markdown else text,
+        'crumbs': [_HOME, (name, None)],
+    }, block='content')
+
+
+# ── handlers: edit — every write passes the save gate, every response is a fragment ──
 
 def _editor_target(request: web.Request) -> tuple[int, str, Path]:
     """Resolve an ``/edit/solutions/{n}/{filename}`` route to its on-disk file.
@@ -300,21 +385,37 @@ def _editor_target(request: web.Request) -> tuple[int, str, Path]:
     return number, filename, target
 
 
+def _editor_context(request: web.Request, number: int, filename: str, text: str,
+                    status: str = '', ok: bool = True,
+                    diagnostics: list[Any] | None = None) -> dict[str, Any]:
+    """The file-editor view context, shared by GET / save-ok / save-refused."""
+    actions: list[Action] = [Action(label='Save', kind='submit')]
+    if Path(filename).suffix in _DELETABLE_SUFFIXES and _subject(request).has('solutions:delete'):
+        actions.append(Action(label='Delete', kind='delete',
+                              path=f'/edit/solutions/{number:04d}/{filename}',
+                              confirm=f'Delete {filename}?'))
+    return {
+        'number': number, 'filename': filename, 'text': text,
+        'status': status, 'ok': ok, 'diagnostics': diagnostics or [],
+        'crumbs': [_HOME, ('solutions', '/solutions/'),
+                   (f'{number:04d}', f'/solutions/{number:04d}/'),
+                   (filename, f'/solutions/{number:04d}/{filename}'), ('edit', None)],
+        'actions': actions,
+    }
+
+
 @requires('solutions:write')
 async def file_editor(request: web.Request) -> web.StreamResponse:
     """``GET /edit/solutions/{n}/{filename}`` — the code editor for the file."""
     number, filename, target = _editor_target(request)
-    return render(request, 'edit_file.html', {
-        'number': number,
-        'filename': filename,
-        'text': target.read_text(encoding='utf-8', errors='replace'),
-        'status': '', 'ok': True, 'diagnostics': [],
-    }, block='content')
+    text = target.read_text(encoding='utf-8', errors='replace')
+    return render(request, 'edit_file.html',
+                  _editor_context(request, number, filename, text), block='content')
 
 
 @requires('solutions:write')
 async def file_save(request: web.Request) -> web.StreamResponse:
-    """``POST /edit/solutions/{n}/{filename}`` — gate (5c), write, editor block.
+    """``POST /edit/solutions/{n}/{filename}`` — gate, write, editor block.
 
     The submission runs :func:`~solver.web.site.validate.validate`; what lands
     on disk — and returns in the editor buffer — is the gate's *canonical*
@@ -329,10 +430,11 @@ async def file_save(request: web.Request) -> web.StreamResponse:
         None, validate, filename, submitted.encode('utf-8'),
         request.app[CONFIG_KEY].repo_root)
     if not result.ok:
-        return render(request, 'edit_file.html', {
-            'number': number, 'filename': filename, 'text': submitted,
-            'status': result.message, 'ok': False, 'diagnostics': result.diagnostics,
-        }, block='content', fragment=True)
+        return render(request, 'edit_file.html',
+                      _editor_context(request, number, filename, submitted,
+                                      status=result.message, ok=False,
+                                      diagnostics=list(result.diagnostics)),
+                      block='content', fragment=True)
     stored = result.content.decode('utf-8', errors='replace')
     message = result.message
     if stored != submitted:
@@ -340,22 +442,23 @@ async def file_save(request: web.Request) -> web.StreamResponse:
     try:
         target.write_bytes(result.content)
     except OSError as exc:
-        return render(request, 'edit_file.html', {
-            'number': number, 'filename': filename, 'text': submitted,
-            'status': f'could not write {filename}: {exc}', 'ok': False, 'diagnostics': [],
-        }, block='content', fragment=True)
-    return render(request, 'edit_file.html', {
-        'number': number, 'filename': filename, 'text': stored,
-        'status': message, 'ok': True, 'diagnostics': [],
-    }, block='content', fragment=True)
+        return render(request, 'edit_file.html',
+                      _editor_context(request, number, filename, submitted,
+                                      status=f'could not write {filename}: {exc}', ok=False),
+                      block='content', fragment=True)
+    return render(request, 'edit_file.html',
+                  _editor_context(request, number, filename, stored,
+                                  status=message, ok=True),
+                  block='content', fragment=True)
 
 
 @requires('solutions:delete')
 async def file_delete(request: web.Request) -> web.StreamResponse:
-    """``DELETE /edit/solutions/{n}/{filename}`` — delete → the file-list block.
+    """``DELETE /edit/solutions/{n}/{filename}`` — delete → the problem fragment.
 
     Only a bare ``.py``/``.c`` *solution* file is deletable — never the
-    statement, notes, test cases, results, or resources.
+    statement, notes, test cases, results, or resources. The response swaps the
+    problem page back into ``#content`` (the deleted file has no page to stay on).
     """
     number = _problem_number(request)
     filename = request.match_info['filename']
@@ -363,19 +466,26 @@ async def file_delete(request: web.Request) -> web.StreamResponse:
     if Path(filename).suffix not in _DELETABLE_SUFFIXES:
         raise web.HTTPBadRequest(text=f'{filename} is not a deletable solution file')
     (sdir / filename).unlink(missing_ok=True)
-    return render(request, '_files.html', {
-        'number': number,
-        'files': _file_entries(sdir),
-        'status': f'deleted {filename}',
-    })
+    ctx = _problem_context(request, number)
+    ctx['status'] = f'deleted {filename}'
+    response = render(request, 'problem.html', ctx, block='content', fragment=True)
+    # The pane now shows the problem page — move the address bar with it.
+    response.headers['HX-Push-Url'] = f'/solutions/{number:04d}/'
+    return response
 
 
 @requires('solutions:execute')
 async def progress_editor(request: web.Request) -> web.StreamResponse:
-    """``GET /edit/solutions/`` — the collection-level progress editor."""
-    source = content.read_progress(request.app[CONFIG_KEY].repo_root)
+    """``GET /edit/solutions/`` — the progress upload: an **empty** paste buffer.
+
+    Upload-replace, not edit (site-design §7): the paste supersedes
+    ``solutions/.progress.html`` wholesale, so the current content is never
+    shipped into the page.
+    """
     return render(request, 'edit_progress.html', {
-        'source': source, 'status': '', 'ok': True,
+        'status': '', 'ok': True,
+        'crumbs': [_HOME, ('solutions', '/solutions/'), ('upload', None)],
+        'actions': [Action(label='Save', kind='submit')],
     }, block='content')
 
 
@@ -383,10 +493,10 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
 async def progress_save(request: web.Request) -> web.StreamResponse:
     """``POST /edit/solutions/`` — save progress → the grid block + status.
 
-    Parse-or-reject (5c semantics): the paste must yield at least one problem
-    before ``solutions/.progress.html`` and the re-derived ``problems.json``
-    are written; a broken paste never lands. Success renders the refreshed
-    century grids, failure re-renders the editor with the reason.
+    Parse-or-reject: the paste must yield at least one problem before
+    ``solutions/.progress.html`` and the re-derived ``problems.json`` are
+    written; a broken paste never lands. Success renders the refreshed
+    century grids, failure re-renders the upload with the reason.
     """
     repo_root = request.app[CONFIG_KEY].repo_root
     form = await request.post()
@@ -395,15 +505,14 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
         None, content.save_progress, repo_root, submitted.encode('utf-8'))
     if not ok:
         return render(request, 'edit_progress.html', {
-            'source': submitted, 'status': message, 'ok': False,
+            'status': message, 'ok': False,
+            'crumbs': [_HOME, ('solutions', '/solutions/'), ('upload', None)],
+            'actions': [Action(label='Save', kind='submit')],
         }, block='content', fragment=True)
-    problems = content.load_problems(repo_root)
-    return render(request, 'solutions.html', {
-        'grids': content.centuries(problems),
-        'solved': sum(1 for p in problems.values() if p.solved),
-        'total': len(problems),
-        'status': message,
-    }, block='content', fragment=True)
+    response = render(request, 'solutions.html', _solutions_context(request, status=message),
+                      block='content', fragment=True)
+    response.headers['HX-Push-Url'] = '/solutions/'
+    return response
 
 
 @requires('ai:execute')
@@ -449,23 +558,24 @@ def build_app(config: SiteConfig) -> web.Application:
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/', home),
-        # solutions — canonical with the trailing slash (site-design §6)
+        # solutions — canonical with the trailing slash (site-design §9)
         web.get('/solutions', redirect_slash),
         web.get('/solutions/', solutions_index),
         web.get(r'/solutions/{n:\d+}', redirect_slash),
         web.get(r'/solutions/{n:\d+}/', problem_page),
         web.post(r'/solutions/{n:\d+}/notes/regenerate', notes_regenerate),
         web.get(r'/solutions/{n:\d+}/{filename:.+}', problem_file),
-        # docs + topics
+        # docs + topics + about
         web.get('/docs', redirect_slash),
         web.get('/docs/', docs_index),
         web.get(r'/docs/{name}', doc_page),
         web.get('/topics', redirect_slash),
         web.get('/topics/', topics_index),
         web.get(r'/topics/{name}', topic_page),
+        web.get(r'/about/{name}', about_page),
         # account
         web.get('/account', account),
-        # 5d — edit routes (writes always answer with a fragment)
+        # edit routes (writes always answer with a fragment)
         web.get('/edit/solutions', redirect_slash),
         web.get('/edit/solutions/', progress_editor),
         web.post('/edit/solutions/', progress_save),

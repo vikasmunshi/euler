@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}ς euler{% endblock %}</title>
+  <title>{% block title %}e^iπ+1=0 · euler{% endblock %}</title>
   <meta name="robots" content="noindex">
   {# CSP-safe by construction: same-origin /assets CSS+JS and /vendor JS only, no
      inline script or style. The per-response nonce (csp_nonce) is available
      should an inline block ever become unavoidable. #}
   <link rel="stylesheet" href="/assets/site.css">
-  {# The site glyph ς (final sigma, U+03C2 = %CF%82) in the accent orange. #}
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Ctext%20y='26'%20font-size='28'%20fill='%23f97316'%3E%CF%82%3C/text%3E%3C/svg%3E">
-  {# Applies a stored data-theme before first paint (no FOUC), then wires the toggle. #}
+  {# The brand figure: Euler's identity on the unit circle — the semicircle 1 → −1
+     plus the unit segment −1 → 0, in the accent orange. #}
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='-1.3%20-1.35%202.6%201.75'%3E%3Cpath%20d='M%201%200%20A%201%201%200%200%200%20-1%200%20M%20-1%200%20H%200'%20fill='none'%20stroke='%23f97316'%20stroke-width='0.16'%20stroke-linecap='round'/%3E%3Ccircle%20cx='0'%20cy='0'%20r='0.1'%20fill='%23f97316'/%3E%3C/svg%3E">
+  {# Applies a stored data-theme before first paint (no FOUC), then wires the
+     theme slider, menu closing, and the Actions Save hook. #}
   <script src="/assets/site.js"></script>
   <script src="/vendor/htmx.min.js"
           integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
@@ -20,9 +22,10 @@
 </head>
 <body>
   {% include "_nav.html" %}
-  {# The two variable-length middle panes (site-design §1): the left pane is the
-     htmx swap target; the right pane hosts the terminal and is never swapped, so
-     its session persists across left-pane navigation. #}
+  {# The two equal middle panes (site-design §1): together with header + footer
+     they fill the viewport exactly — the page never scrolls, each pane does.
+     The left pane is the htmx swap target; the right pane hosts the terminal
+     and is never swapped, so its session persists across navigation. #}
   <div class="app-panes">
     <main id="content" class="pane pane-content" role="main">
       {% block content %}{% endblock %}
@@ -32,7 +35,18 @@
     </aside>
   </div>
   <footer class="app-footer">
-    <span class="muted">ς euler — Project&nbsp;Euler solutions &amp; tooling</span>
+    <span class="muted">©&nbsp;Vikas&nbsp;Munshi</span>
+    <span class="fsep" aria-hidden="true">·</span>
+    <a href="/about/license" hx-get="/about/license" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">MIT license</a>
+    <span class="fsep" aria-hidden="true">·</span>
+    <a href="/terms">terms of use</a>
+    <span class="fsep" aria-hidden="true">·</span>
+    <a href="/about/readme" hx-get="/about/readme" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">readme</a>
+    <span class="fsep" aria-hidden="true">·</span>
+    <a href="/about/acknowledgements" hx-get="/about/acknowledgements" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">acknowledgements</a>
   </footer>
 </body>
 </html>

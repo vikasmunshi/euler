@@ -13,6 +13,12 @@ fetch (``HX-Request: true``) *and* a ``block`` is named, it returns just that
 block; otherwise the full template. Either way the shared context (the request's
 CSP nonce and resolved subject) is injected, and the response is ``text/html``
 so the shared CSP middleware stamps its header.
+
+**Page chrome (site-design §6).** Breadcrumbs and the Actions menu live in the
+fixed header, which htmx never re-renders — so every *block* response appends
+the ``_crumbs.html`` / ``_actions.html`` partials with ``hx-swap-oob``, keeping
+the header in step with the pane. A full-page render places the same partials
+in the header directly (``oob`` unset).
 """
 from __future__ import annotations
 
@@ -38,10 +44,16 @@ def is_htmx(request: web.Request) -> bool:
 
 
 def _context(request: web.Request, extra: dict[str, Any] | None) -> dict[str, Any]:
-    """The template context: the shared nonce + subject, then the handler's vars."""
+    """The template context: the shared nonce + subject, then the handler's vars.
+
+    ``crumbs`` / ``actions`` (the §6 page chrome) default empty so every
+    template — and the chrome partials — can rely on them existing.
+    """
     ctx: dict[str, Any] = {
         'csp_nonce': request.get(NONCE_KEY, ''),
         'subject': request.get(SUBJECT_KEY),
+        'crumbs': [],
+        'actions': [],
     }
     if extra:
         ctx.update(extra)
@@ -74,7 +86,11 @@ def render(request: web.Request, template_name: str,
     env = aiohttp_jinja2.get_env(request.app)
     ctx = _context(request, context)
     if block and (fragment or is_htmx(request)):
-        body = render_block(env, template_name, block, ctx)
+        # The pane fragment + the header chrome as out-of-band swaps (§6).
+        oob_ctx = {**ctx, 'oob': True}
+        body = (render_block(env, template_name, block, ctx)
+                + env.get_template('_crumbs.html').render(oob_ctx)
+                + env.get_template('_actions.html').render(oob_ctx))
     else:
         body = env.get_template(template_name).render(ctx)
     return web.Response(text=body, content_type='text/html', status=status)

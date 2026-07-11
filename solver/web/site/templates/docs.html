@@ -1,16 +1,21 @@
 {% extends "base.html" %}
-{% block title %}ς euler — docs{% endblock %}
+{% block title %}docs · euler{% endblock %}
 {% block content %}
-<section class="panel">
-  <h1>Docs</h1>
-  <p class="lead">The framework guides, conventions, and the AI reference.</p>
-  <ul class="doc-list">
-    {% for e in entries %}
-    <li><a href="/docs/{{ e.name }}"
-           hx-get="/docs/{{ e.name }}" hx-target="#content" hx-swap="innerHTML"
-           hx-push-url="true">{{ e.title }}</a>
-        <span class="muted"><code>{{ e.name }}</code></span></li>
-    {% endfor %}
-  </ul>
-</section>
+<header class="hero">
+  <p class="kicker">documentation</p>
+  <h1>The guides</h1>
+  <p class="lede">{{ entries | length }} guides stand between you and the next
+     unsolved problem. Read one, ignore the rest, feel briefly invincible.</p>
+</header>
+<nav class="cards" aria-label="Guides">
+  {% for e in entries %}
+  <a class="card" href="/docs/{{ e.name }}" hx-get="/docs/{{ e.name }}"
+     hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+    <span class="card-ic">&sect;</span>
+    <span><span class="card-title">{{ e.title }}</span>
+      <span class="card-desc"><code>{{ e.name }}</code></span></span>
+    <span class="card-go">&rarr;</span>
+  </a>
+  {% endfor %}
+</nav>
 {% endblock %}

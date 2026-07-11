@@ -3,6 +3,7 @@
     "reader": {
       "inherits": null,
       "grants": [
+        "about:read",
         "docs:read",
         "solutions:read",
         "solver:execute",
@@ -35,6 +36,7 @@
   },
   "users": {},
   "objects": {
+    "about": ["README.md", "LICENSE", "solver/web/content/vendor/README.md"],
     "ai": [],
     "docs": ["docs/", "topics/"],
     "infra": [],

@@ -1,32 +1,16 @@
-{# The Files panel (#files): included by problem.html and returned whole as the
-   DELETE response's file-list block. Per-file edit/delete affordances are
-   hidden from profiles that lack them — nav hiding is UX, the route gate is
-   the boundary (site-design §6). #}
+{# The Files panel: names flow horizontally, no underline, coloured by git
+   status with the state spelled out on hover (site-design §7). Zero-size files
+   are already filtered out. Edit/delete live in the Actions menu of the file's
+   own pages, not here. #}
 <section class="panel" id="files">
   <h2>Files</h2>
-  {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
-  {% if files %}
-  <ul class="file-list">
+  <ul class="file-flow">
     {% for f in files %}
-    <li>
-      <a href="/solutions/{{ '%04d' % number }}/{{ f.name }}"
-         hx-get="/solutions/{{ '%04d' % number }}/{{ f.name }}" hx-target="#content"
-         hx-swap="innerHTML" hx-push-url="true"><code>{{ f.name }}</code></a>
-      {% if f.editable and subject.has('solutions:write') %}
-      <a class="file-action" href="/edit/solutions/{{ '%04d' % number }}/{{ f.name }}"
-         hx-get="/edit/solutions/{{ '%04d' % number }}/{{ f.name }}" hx-target="#content"
-         hx-swap="innerHTML" hx-push-url="true">edit</a>
-      {% endif %}
-      {% if f.deletable and subject.has('solutions:delete') %}
-      <button class="file-action danger" type="button"
-              hx-delete="/edit/solutions/{{ '%04d' % number }}/{{ f.name }}"
-              hx-target="#files" hx-swap="outerHTML"
-              hx-confirm="Delete {{ f.name }}?">delete</button>
-      {% endif %}
-    </li>
+    <li><a class="{% if f.git_css %}git-{{ f.git_css }}{% endif %}"
+           href="/solutions/{{ '%04d' % number }}/{{ f.name }}"
+           hx-get="/solutions/{{ '%04d' % number }}/{{ f.name }}" hx-target="#content"
+           hx-swap="innerHTML" hx-push-url="true"
+           title="{{ f.git_title }}"><code>{{ f.name }}</code></a></li>
     {% endfor %}
   </ul>
-  {% else %}
-  <p class="muted">No files.</p>
-  {% endif %}
 </section>

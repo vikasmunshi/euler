@@ -1,22 +1,22 @@
 {% extends "base.html" %}
-{% block title %}ς euler — edit progress{% endblock %}
+{% block title %}upload progress · euler{% endblock %}
 {% block content %}
 <section class="panel editor">
-  <h1>Progress</h1>
+  <h1>Upload progress</h1>
   <p class="lead">
-    Paste the Page Source of your authenticated
-    <code>https://projecteuler.net/progress</code> page. Saving re-derives
-    <code>problems.json</code> — the solved/level data behind the
-    <a href="/solutions/" hx-get="/solutions/" hx-target="#content"
-       hx-swap="innerHTML" hx-push-url="true">century grids</a>.
-    A paste that parses to no problems is rejected and nothing changes.
+    Paste the Page Source of your signed-in
+    <code>projecteuler.net/progress</code> page — the whole thing, view-source
+    and all. It replaces the previous upload and re-derives the grids; a paste
+    that parses to no problems is refused and nothing changes.
   </p>
   {% if status %}<p class="status {{ 'ok' if ok else 'err' }}">{{ status }}</p>{% endif %}
-  <form hx-post="/edit/solutions/" hx-target="#content" hx-swap="innerHTML"
-        method="post" action="/edit/solutions/">
+  {# Upload-replace: the buffer starts empty by design — the previous
+     .progress.html is superseded wholesale, never round-tripped. #}
+  <form class="editor-form" hx-post="/edit/solutions/" hx-target="#content"
+        hx-swap="innerHTML" method="post" action="/edit/solutions/">
     <textarea class="editor-buffer" name="content" spellcheck="false"
               autocomplete="off" autocapitalize="off"
-              placeholder="&lt;!DOCTYPE html&gt; … the projecteuler.net/progress page source">{{ source }}</textarea>
+              placeholder="&lt;!DOCTYPE html&gt; … the projecteuler.net/progress page source"></textarea>
     <div class="editor-actions">
       <button class="btn btn-primary" type="submit">Save</button>
     </div>

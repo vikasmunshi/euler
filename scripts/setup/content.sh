@@ -140,9 +140,9 @@ require_acl() {
 
 # Resolve the content subtrees from authorizations.json's objects map (the deployed SoR
 # if present, else the repo template) so the ACLs can never drift from the app policy.
-# READ  = docs (incl. topics/) + solutions + web-content; WRITE/DELETE = solutions.
-# Absolute or empty object paths (e.g. shell:/bin/bash) are ignored — only
-# repo-relative content trees.
+# READ  = docs (incl. topics/) + solutions + web-content + about (the footer files);
+# WRITE/DELETE = solutions. Absolute or empty object paths (e.g. shell:/bin/bash)
+# are ignored — only repo-relative content trees/files.
 resolve_content_paths() {
     local src="${AUTHZ_TEMPLATE}"
     [ -f "${AUTHZ_FILE}" ] && src="${AUTHZ_FILE}"
@@ -152,7 +152,7 @@ import json, sys
 objs = json.loads(open(sys.argv[1]).read()).get('objects', {})
 def paths(name):
     return [p for p in objs.get(name, []) if p and not p.startswith('/')]
-read = paths('docs') + paths('solutions') + paths('web-content')
+read = paths('docs') + paths('solutions') + paths('web-content') + paths('about')
 print('READ\t' + '\t'.join(dict.fromkeys(read)))     # de-dup, keep order
 print('WRITE\t' + '\t'.join(paths('solutions')))
 print('DELETE\t' + '\t'.join(paths('solutions')))
@@ -267,7 +267,11 @@ deploy_acls() {
         [ -e "${abs}" ] || continue
         echo "  read  (${SOL_READ_GROUP}:rX)  ${rel}"
         sudo setfacl -R  -m "g:${SOL_READ_GROUP}:rX" "${abs}"
-        sudo setfacl -R -d -m "g:${SOL_READ_GROUP}:rX" "${abs}"
+        # Default (inherit) ACLs exist only on directories — the `about` object
+        # maps single files (README.md, LICENSE, …), which take just the plain ACL.
+        if [ -d "${abs}" ]; then
+            sudo setfacl -R -d -m "g:${SOL_READ_GROUP}:rX" "${abs}"
+        fi
     done
     for rel in "${WRITE_PATHS[@]}"; do
         abs="${PROJECT_ROOT}/${rel%/}"

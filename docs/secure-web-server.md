@@ -32,7 +32,10 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 >   nh3 `.html` sanitize-and-store-clean, nh3 in the `web` extra with the kit check.
 >   **5d landed**: the edit routes — file editor + save/delete through the gate, the
 >   collection-level progress editor, notes-regenerate — writes always answering with
->   fragments. **Phase 5 complete** per [site-design](site-design.md).
+>   fragments. **5e landed**: the refined shell per [site-design](site-design.md) —
+>   full-viewport four-region layout, the Euler-identity brand, header chrome
+>   (breadcrumbs + Actions via OOB swaps, theme slider, user menu), footer `about`
+>   pages behind a new `about:read` object. **Phase 5 complete.**
 > - ⬜ **Phase 6** — Web shell (not started).
 
 ## 1 · Purpose & scope
