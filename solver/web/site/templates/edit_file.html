@@ -1,33 +1,32 @@
 {% extends "base.html" %}
 {% block title %}edit {{ filename }} · euler{% endblock %}
 {% block content %}
-<section class="panel editor">
-  <h1>edit <code>{{ filename }}</code></h1>
-  {% if status %}<p class="status {{ 'ok' if ok else 'err' }}">{{ status }}</p>{% endif %}
-  {% if diagnostics %}
-  <ul class="diagnostics">
-    {% for d in diagnostics %}
-    <li class="diag-{{ d.severity }}"><code>{{ d.line }}:{{ d.col }}</code>
-        <span class="diag-sev">{{ d.severity }}</span> {{ d.message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
+<section class="panel editor editor-fill">
+  <div class="editor-head">
+    <h1>edit <code>{{ filename }}</code></h1>
+    {% if status %}<p class="status {{ 'ok' if ok else 'err' }}">{{ status }}</p>{% endif %}
+    {% if diagnostics %}
+    <ul class="diagnostics">
+      {% for d in diagnostics %}
+      <li class="diag-{{ d.severity }}"><code>{{ d.line }}:{{ d.col }}</code>
+          <span class="diag-sev">{{ d.severity }}</span> {{ d.message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
   {# The buffer always shows what is (or would be) stored: a save echoes the
-     gate's canonical content back (auto-fixed / re-indented / sanitised). #}
+     gate's canonical content back. Save lives in the Actions menu (and ⌘/Ctrl-S);
+     no in-form button. data-cm enhances this into CodeMirror on JS (site.js
+     lazy-loads it); with no JS the plain textarea still edits and submits. #}
   <form class="editor-form"
         hx-post="/edit/solutions/{{ '%04d' % number }}/{{ filename }}"
         hx-target="#content" hx-swap="innerHTML"
         method="post" action="/edit/solutions/{{ '%04d' % number }}/{{ filename }}">
-    {# data-cm enhances this into a CodeMirror editor on JS (site.js lazy-loads it);
-       with no JS the plain textarea still edits and submits — same 5c gate. #}
     <textarea class="editor-buffer" name="content" data-cm data-language="{{ language }}"
               spellcheck="false" autocomplete="off" autocapitalize="off">{{ text }}</textarea>
-    <div class="editor-actions">
-      <button class="btn btn-primary" type="submit">Save</button>
-      <span class="muted">every save passes the validation gate — Python is
-        auto-fixed and flake8-checked, C compiled, JSON re-indented, HTML sanitised.
-        <kbd>⌘/Ctrl-S</kbd> saves.</span>
-    </div>
   </form>
+  <p class="muted editor-hint">Save with <strong>Actions ▸ Save</strong> or
+     <kbd>⌘/Ctrl-S</kbd> — every save passes the validation gate (Python auto-fixed
+     &amp; flake8-checked, C compiled, JSON re-indented, HTML sanitised).</p>
 </section>
 {% endblock %}

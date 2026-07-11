@@ -65,6 +65,13 @@ function enhance(textarea) {
   });
   // Belt-and-suspenders: guarantee the textarea holds the latest buffer at submit.
   textarea.form.addEventListener('submit', () => sync(view));
+
+  // The editor often mounts during an htmx swap, before the flex container has its
+  // final height — CodeMirror would then lay out against a 0-height box (gutter
+  // stacked above the content). Re-measure once layout settles so the gutter sits
+  // beside the code and the scroller fills the pane.
+  requestAnimationFrame(() => view.requestMeasure());
+  return view;
 }
 
 //: (Re)mount CodeMirror on every enhanceable textarea under *root* (the swapped

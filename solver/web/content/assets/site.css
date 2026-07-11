@@ -427,9 +427,21 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   white-space: pre;
 }
 .editor-buffer:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-/* CodeMirror mounts here (site.js/editor.js), replacing the textarea on JS. */
+
+/* The edit page fills the pane: a flex column of head · editor (grows) · hint,
+   so the editor occupies all remaining height and scrolls internally. */
+.editor-fill { display: flex; flex-direction: column; height: 100%; margin-bottom: 0; }
+.editor-head { flex: none; }
+.editor-fill .editor-form { flex: 1; display: flex; min-height: 0; }
+.editor-fill .editor-form .editor-buffer { flex: 1; }   /* no-JS fallback fills */
+.editor-fill .cm-host { flex: 1; }
+.editor-hint { flex: none; margin: 0.6rem 0 0; font-size: 0.85rem; }
+
+/* CodeMirror mounts here (site.js/editor.js), replacing the textarea on JS.
+   .cm-editor is the flex child that fills the host; its own scroller lays the
+   gutter beside the content. */
 .cm-host {
-  height: min(65vh, 40rem);
+  min-height: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
