@@ -438,16 +438,19 @@ generate_caddyfile() {
 }
 
 # Transport-level security headers + edge fallback CSP, shared by the live routes and
-# the maintenance/error responses. The per-response nonce'd CSP is minted by the app
-# tier in later phases; this static policy is the edge fallback and what the Phase-3
-# maintenance page is validated against. (docs/secure-web-server.md,
-# docs/security-assessment.md SEC-04/SEC-05.)
+# the maintenance/error responses. The CSP uses the `?` (set-if-absent) operator so it
+# is only a **fallback**: the app tier mints a per-response, nonce'd CSP with the
+# exceptions its pages need (style-src 'unsafe-inline' for MathJax/CodeMirror injected
+# styles; frame-ancestors 'self' for the terminal iframe — docs/secure-web-server.md
+# §4.7), and Caddy leaves that untouched. This strict policy applies only to
+# Caddy-native responses (maintenance / static / redirects) that carry no app CSP.
+# (docs/secure-web-server.md, docs/security-assessment.md SEC-04/SEC-05.)
 (security_headers) {
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "no-referrer"
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
+		?Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'"
 		-Server
 	}
 }
