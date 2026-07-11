@@ -14,7 +14,7 @@ from __future__ import annotations
 
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
-           'resolve_file', 'load_json', 'render_markdown', 'git_status',
+           'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'git_status',
            'list_docs', 'read_doc', 'list_topics', 'read_topic', 'read_about',
            'parse_progress', 'save_progress']
 
@@ -194,6 +194,36 @@ def resolve_file(sdir: Path, filename: str) -> Path | None:
     return target if target.is_file() else None
 
 
+def resolve_repo_file(repo_root: Path, roots: list[str], rel: str) -> Path | None:
+    """Resolve a repo-relative path to a file under one of *roots*, or None.
+
+    *roots* are the **declared-readable** content-object paths (the ``docs`` /
+    ``about`` object trees — dirs or single files); the returned file must sit
+    under one of them, keeping the ``/docs/file/`` view DD-12-honest (it can only
+    serve what the policy declares readable). Rejects traversal + symlink escape.
+    """
+    relative = Path(rel)
+    if not rel or relative.is_absolute() or '..' in relative.parts:
+        return None
+    target = repo_root / relative
+    try:
+        resolved = target.resolve()
+        if not resolved.is_relative_to(repo_root.resolve()):
+            return None
+    except OSError:
+        return None
+    for root in roots:
+        try:
+            base = (repo_root / root).resolve()
+        except OSError:
+            continue
+        if base.is_file() and resolved == base:
+            return target if target.is_file() else None
+        if base.is_dir() and resolved.is_relative_to(base):
+            return target if target.is_file() else None
+    return None
+
+
 def load_json(path: Path) -> Any | None:
     """Parse a JSON file, or None when it is missing or malformed."""
     try:
@@ -311,18 +341,34 @@ def _doc_slug(text: str) -> str:
 
 
 def render_markdown(text: str, route_base: str = '/docs/') -> str:
-    """Render Markdown to HTML: slugged heading ids + `.md` cross-links rewired.
+    """Render Markdown to HTML: slugged heading ids + links rewired for the shell.
 
     Each heading gets the same slug `update_doc.py` assumes, so in-page and
-    cross-doc `#anchor` links land; a relative `foo.md` (or `docs/foo.md`) link is
-    rewritten to the *route_base* route.
+    cross-doc `#anchor` links land. Then three link rewrites:
+
+    - a relative ``foo.md`` (or ``docs/foo.md``) link → the *route_base* route;
+    - a repo-relative ``../<path>`` link (docs/topics sit one level under the
+      repo root, so ``../`` reaches it) → the ``/docs/file/<path>`` view route,
+      so a link like ``../solver/templates/authorizations.json`` — which
+      resolves natively on GitHub — also resolves in the app viewer;
+    - every **internal, absolute** ``/…`` link gets ``hx-*`` attributes so it
+      swaps the content pane in place (the shell + terminal persist) instead of
+      a full reload. External (``http…``) and ``#anchor`` links are untouched,
+      so they navigate/scroll normally.
     """
     tokens = _MD.parse(text)
     for i, token in enumerate(tokens):
         if token.type == 'heading_open':
             token.attrSet('id', _doc_slug(tokens[i + 1].content))
     rendered: str = _MD.renderer.render(tokens, _MD.options, {})
-    return re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"', rf'href="{route_base}\1\2"', rendered)
+    rendered = re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"',
+                      rf'href="{route_base}\1\2"', rendered)
+    rendered = re.sub(r'href="\.\./([^"#]+)"', r'href="/docs/file/\1"', rendered)
+    rendered = re.sub(
+        r'<a href="(/[^"]*)"',
+        r'<a href="\1" hx-get="\1" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"',
+        rendered)
+    return rendered
 
 
 def _page_title(text: str, fallback: str) -> str:

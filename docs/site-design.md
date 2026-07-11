@@ -230,6 +230,7 @@ a **direct** hit on the same path returns the whole shell with that pane pre-pop
 | GET | `/solutions/{n}/` | the `solution_dir`: statement, then test-cases · results · files · notes (§7) | `solutions:read` |
 | GET | `/solutions/{n}/{filename}` | one problem file (solution source, `statement.html`, `resources/*`) | `solutions:read` |
 | GET | `/docs/` | docs index (card grid) | `docs:read` |
+| GET | `/docs/file/{path}` | a doc-referenced repo file (under the `docs`/`about` object trees only, DD-12) rendered in the viewer | `docs:read` |
 | GET | `/docs/{name}` | a rendered doc — **all** guides incl. `ai` / `convention_*` (the file may live in `docs/` or elsewhere) | `docs:read` |
 | GET | `/topics/` | topics index (card grid, blog-style writeups) | `docs:read` |
 | GET | `/topics/{name}` | a topic page (e.g. `prime-numbers`) | `docs:read` |
@@ -304,6 +305,11 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
   missing the slash → **301** redirect to the slashed form, so each view has one URL.
 - **Terminal persistence.** htmx swaps only `#content`; `#ws` (the terminal) is untouched
   by navigation and keeps its session.
+- **Rendered-doc links.** `render_markdown` rewires a doc's links for the shell: a
+  `foo.md` cross-link → the `/docs/` (or `/topics/`) route; a repo-relative
+  `../<path>` → the `/docs/file/<path>` viewer (so one authored link resolves both on
+  GitHub and in-app); and every internal `/…` link is given `hx-*` so it swaps the
+  pane in place. External and `#anchor` links are left alone.
 - **Nav (fixed header):** brand → `/`, `Solutions` → `/solutions/`, `Docs` → `/docs/`,
   `Topics` → `/topics/`, user glyph → account / password / logout (all left pane
   but logout). Profile-gated

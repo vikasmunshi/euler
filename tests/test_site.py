@@ -217,6 +217,38 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertNotIn('href="user-guide.md', page)       # .md cross-links rewired
 
     @unittest_run_loop
+    async def test_doc_body_links_rewired_and_boosted(self) -> None:
+        # authorizations.md links ../solver/templates/authorizations.json and
+        # access-control.md; both must resolve in-app and swap the pane (hx-*).
+        resp = await self.client.get('/docs/authorizations', headers=_READER)
+        page = await resp.text()
+        self.assertIn('href="/docs/file/solver/templates/authorizations.json"', page)
+        self.assertIn('href="/docs/access-control"', page)   # .md rewrite
+        self.assertNotIn('href="../solver', page)            # no dangling repo-relative link
+        # internal links are boosted (swap #content), externals are left alone
+        self.assertRegex(page, r'href="/docs/file/[^"]+" hx-get="/docs/file/')
+
+    @unittest_run_loop
+    async def test_doc_file_view_and_scope(self) -> None:
+        # a doc-referenced template file renders in the viewer…
+        resp = await self.client.get('/docs/file/solver/templates/authorizations.json', headers=_READER)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('profiles', body)                      # the JSON (escaped) in a code block
+        self.assertIn('about:read', body)
+        self.assertIn('solver/templates/authorizations.json', body)
+        # …but nothing outside the declared-readable trees, and no traversal
+        for path in ('/docs/file/solver/config.py',          # solver source, not readable
+                     '/docs/file/keys/enc-key.json',         # the key material
+                     '/docs/file/solver/templates/../config.py',
+                     '/docs/file/../README.md'):
+            resp = await self.client.get(path, headers=_READER)
+            self.assertEqual(resp.status, 404, path)
+        # an about-object file (README) is viewable through the same route
+        resp = await self.client.get('/docs/file/README.md', headers=_READER)
+        self.assertEqual(resp.status, 200)
+
+    @unittest_run_loop
     async def test_composed_ai_doc(self) -> None:
         resp = await self.client.get('/docs/ai', headers=_READER)
         self.assertEqual(resp.status, 200)

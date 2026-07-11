@@ -50,6 +50,10 @@ VIEW = 'web-content:read'
 #: Request key under which build_app stores its SiteConfig for handlers.
 CONFIG_KEY = web.AppKey('site_config', SiteConfig)
 
+#: Repo-relative roots the ``/docs/file/`` view may serve — the ``docs`` + ``about``
+#: object trees (declared-readable, DD-12). Computed once from the policy in build_app.
+READABLE_KEY = web.AppKey('readable_roots', list)
+
 #: Ceiling on a request body: the progress-page source (~600 KB today) + headroom;
 #: solution files are tiny. aiohttp's 1 MB default is already too close.
 _MAX_BODY = 4 * 1024 * 1024
@@ -314,6 +318,36 @@ async def docs_index(request: web.Request) -> web.StreamResponse:
 
 
 @requires('docs:read')
+async def doc_file(request: web.Request) -> web.StreamResponse:
+    """``GET /docs/file/{path}`` — view a doc-referenced repo file.
+
+    Serves a file under the declared-readable content trees (the ``docs`` +
+    ``about`` object paths, DD-12) — e.g. ``solver/templates/authorizations.json``
+    linked from a guide. Text renders in the viewer; other bytes are served raw.
+    Anything outside those trees (or a traversal attempt) is 404, so the route
+    can never read the wider ``solver/`` source or the key material.
+    """
+    rel = request.match_info['path']
+    config = request.app[CONFIG_KEY]
+    target = content.resolve_repo_file(config.repo_root, request.app[READABLE_KEY], rel)
+    if target is None:
+        raise web.HTTPNotFound(text=f'{html.escape(rel)} is not a viewable file')
+    if target.suffix not in content.TEXT_SUFFIXES:
+        return web.FileResponse(target)
+    try:
+        text = target.read_text(encoding='utf-8')
+    except UnicodeDecodeError:
+        return web.FileResponse(target)
+    return render(request, 'docfile.html', {
+        'path': rel,
+        'text': text,
+        'lines': text.count('\n') + 1,
+        'crumbs': [_HOME, ('docs', '/docs/'), (Path(rel).name, None)],
+        'actions': [],
+    }, block='content')
+
+
+@requires('docs:read')
 async def doc_page(request: web.Request) -> web.StreamResponse:
     """``GET /docs/{name}`` — one rendered guide (the file may live outside docs/)."""
     name = request.match_info['name']
@@ -536,6 +570,9 @@ def build_app(config: SiteConfig) -> web.Application:
     app = web.Application(middlewares=[csp_middleware, identity_middleware],
                           client_max_size=_MAX_BODY)
     app[CONFIG_KEY] = config
+    # The /docs/file/ view may serve only the declared-readable object trees (DD-12).
+    app[READABLE_KEY] = [p for obj in ('docs', 'about') for p in authz.paths_for(obj)
+                         if p and not p.startswith('/')]
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
                          autoescape=jinja2.select_autoescape(['html', 'xml']))
     app.add_routes([
@@ -551,6 +588,7 @@ def build_app(config: SiteConfig) -> web.Application:
         # docs + topics + about
         web.get('/docs', redirect_slash),
         web.get('/docs/', docs_index),
+        web.get(r'/docs/file/{path:.+}', doc_file),   # before {name}: a multi-segment view
         web.get(r'/docs/{name}', doc_page),
         web.get('/topics', redirect_slash),
         web.get('/topics/', topics_index),

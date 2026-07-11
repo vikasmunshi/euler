@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ path }} · euler{% endblock %}
+{% block content %}
+<section class="panel">
+  <h1><code>{{ path }}</code></h1>
+  <p class="meta">
+    <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML"
+       hx-push-url="true">← docs</a>
+    <span class="muted">· {{ lines }} lines</span>
+  </p>
+  <pre class="code-block"><code>{{ text }}</code></pre>
+</section>
+{% endblock %}
