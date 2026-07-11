@@ -14,7 +14,10 @@
   // MathJax's defaults already skip pre/code/textarea, so source views and the
   // editors are never typeset.
   window.MathJax = {
-    tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true }
+    tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true },
+    // The TeX font's optical size runs large against the 15px system-ui body —
+    // scale it down so inline math sits flush with the surrounding text.
+    chtml: { scale: 0.9 }
   };
 
   function currentTheme() {
