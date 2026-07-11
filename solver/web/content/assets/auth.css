@@ -1,39 +1,57 @@
-/* Auth pages (login / register / reset / forgot) — the first app-rendered pages.
- * Shares the maintenance page's design tokens and its CSP discipline: this file
- * is the only style source, same-origin, no inline styles anywhere. */
+/* Auth pages (login / register / reset / forgot / password) — the site design
+ * (docs/site-design.md §2) applied to the auth tier: the same dark-first token
+ * palette, Euler-identity brand, and warm-orange accent as the app shell, with
+ * the same CSP discipline: this file is the only style source, same-origin.
+ * Dark is :root; light comes via prefers-color-scheme or the shell's
+ * remembered data-theme (site.js stamps it before first paint). */
 
 :root {
-  --bg: #f7f8fa;
-  --bg-accent: #eef1f6;
-  --card: #ffffff;
-  --fg: #1b2330;
-  --muted: #6b7688;
-  --accent: #3b6ea5;
-  --accent-fg: #ffffff;
-  --border: #e3e7ee;
-  --error-bg: #fdecec;
-  --error-fg: #a13333;
-  --notice-bg: #e8f4ea;
-  --notice-fg: #2e6b3f;
-  --shadow: 0 10px 40px rgba(27, 35, 48, 0.08);
+  --bg: #0f1115;
+  --bg-accent: #171a21;
+  --card: #171a21;
+  --fg: #e5e7eb;
+  --muted: #9ca3af;
+  --accent: #f97316;
+  --accent-fg: #1f2937;
+  --border: #2a2f3a;
+  --error-bg: #3a1f22;
+  --error-fg: #fca5a5;
+  --notice-bg: color-mix(in srgb, #f97316 14%, transparent);
+  --notice-fg: #fed7aa;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1319;
-    --bg-accent: #141a22;
-    --card: #171e28;
-    --fg: #e7ecf3;
-    --muted: #8b97a8;
-    --accent: #6fa8dc;
-    --accent-fg: #0f1319;
-    --border: #232c38;
-    --error-bg: #3a1f22;
-    --error-fg: #f2b8b5;
-    --notice-bg: #1d3324;
-    --notice-fg: #a9d8b2;
-    --shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #f7f7f8;
+    --bg-accent: #f1f2f4;
+    --card: #ffffff;
+    --fg: #1f2937;
+    --muted: #6b7280;
+    --accent: #f97316;
+    --accent-fg: #1f2937;
+    --border: #e5e7eb;
+    --error-bg: #fdecec;
+    --error-fg: #b91c1c;
+    --notice-bg: color-mix(in srgb, #f97316 12%, transparent);
+    --notice-fg: #7c2d12;
+    --shadow: 0 10px 40px rgba(27, 35, 48, 0.08);
   }
+}
+:root[data-theme="light"] {
+  --bg: #f7f7f8;
+  --bg-accent: #f1f2f4;
+  --card: #ffffff;
+  --fg: #1f2937;
+  --muted: #6b7280;
+  --accent: #f97316;
+  --accent-fg: #1f2937;
+  --border: #e5e7eb;
+  --error-bg: #fdecec;
+  --error-fg: #b91c1c;
+  --notice-bg: color-mix(in srgb, #f97316 12%, transparent);
+  --notice-fg: #7c2d12;
+  --shadow: 0 10px 40px rgba(27, 35, 48, 0.08);
 }
 
 * { box-sizing: border-box; }
@@ -65,7 +83,11 @@ body {
   text-align: center;
 }
 
-.glyph { font-size: 2.5rem; color: var(--accent); }
+/* The brand: the Euler-identity figure + formula wordmark (site-design §2). */
+.brand-row { display: inline-flex; align-items: center; gap: 0.6rem; color: var(--fg); }
+.brand-glyph { width: 2.6rem; height: 1.8rem; color: var(--accent); }
+.brand-name { font-weight: 700; letter-spacing: 0.02em; font-size: 1.15rem; }
+.brand-name sup { font-size: 0.68em; }
 
 h1 { font-size: 1.4rem; margin: 0.5rem 0 0.25rem; }
 

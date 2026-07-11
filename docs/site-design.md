@@ -37,7 +37,8 @@ page itself never scrolls; each middle pane scrolls its own overflow.
   **Actions** menu (page-specific verbs, §6) · **breadcrumbs** (the current path,
   ancestors clickable) · the **theme slider** (◐, light⇄dark) · the **user glyph**
   (initial in a circle) opening a sub-menu: *Account* (`/account`, left pane),
-  *Change password* (`/forgot`, auth tier), *Logout* (`POST /auth/logout`).
+  *Change password* (`/password`, auth tier: current password + new twice, SRP —
+  distinct from the unauthenticated `/forgot` reset), *Logout* (`POST /auth/logout`).
 - **Left pane** `#content` — the navigable region. Nav and in-page links `hx-get` a
   route and swap it here; the URL updates (`hx-push-url`) so every view is
   deep-linkable. Scrolls **both axes** when content overflows.
@@ -110,7 +111,7 @@ authenticated catch-all and must not collide with a reserved path.
 | Owner | Paths | Notes |
 |---|---|---|
 | **Caddy-native / static** | `/healthz`, `/assets/*`, `/vendor/*`, `/favicon.ico` | served from `/etc/euler/web-content`; same-origin |
-| **Auth service** (`auth.sock`) | `/login`, `/register*`, `/reset*`, `/forgot`, `/terms`, `/auth/*` | public surface + `forward_auth` gate |
+| **Auth service** (`auth.sock`) | `/login`, `/register*`, `/reset*`, `/forgot`, `/password`, `/terms`, `/auth/*` | public surface + `forward_auth` gate; **styled per §2** (shared tokens/brand, `data-theme` honoured) |
 | **ws service** (`ws-<profile>.sock`, Phase 6) | `/ws` | PTY WebSocket; the right pane connects here |
 | **Content service** (`content-<profile>.sock`) | everything else below | per-profile instance, chosen on `X-Profile` |
 

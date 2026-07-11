@@ -191,6 +191,20 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         log.info('password reset completed for %s', record.email)
         raise web.HTTPSeeOther(location='/login?reset=1')
 
+    # ── change password (signed-in self-service; distinct from forgot/reset) ──────
+
+    async def password_page(request: web.Request) -> web.Response:
+        """The signed-in change-password page (``GET /password``).
+
+        Current password + new password twice; the browser proves the current
+        password over SRP and derives the new verifier locally (no mailbox
+        round-trip — that is the *forgot* flow's job). No session → login.
+        """
+        identity = service.session_identity(request)
+        if identity is None:
+            raise web.HTTPFound('/login')
+        return aiohttp_jinja2.render_template('password.html', request, {'email': identity[0]})
+
     # ── forgot (self-service reset entry, DD-7) ───────────────────────────────────
 
     async def forgot_page(request: web.Request) -> web.Response:
@@ -234,5 +248,6 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         web.post('/reset/complete', flow_complete),
         web.get('/forgot', forgot_page),
         web.post('/forgot', forgot_submit),
+        web.get('/password', password_page),
         web.get('/terms', terms_page),
     ])

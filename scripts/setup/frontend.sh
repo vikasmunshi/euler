@@ -513,6 +513,9 @@ ${DOMAIN} {
 	handle /forgot {
 		reverse_proxy unix//run/euler/auth.sock
 	}
+	handle /password {
+		reverse_proxy unix//run/euler/auth.sock
+	}
 	handle /terms {
 		reverse_proxy unix//run/euler/auth.sock
 	}

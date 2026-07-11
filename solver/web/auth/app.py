@@ -235,6 +235,48 @@ def build_public_app(service: AuthService) -> web.Application:
         log.info('session resumed for %s', email)
         return response
 
+    async def password_change(request: web.Request) -> web.Response:
+        """Change the signed-in user's password (``POST /auth/password``).
+
+        One atomic exchange, distinct from the unauthenticated forgot/reset
+        flow: the browser proves the **current** password with an SRP handshake
+        (``/auth/challenge`` first, then ``A``/``M1`` here) and submits the new
+        ``{salt, verifier}`` derived locally — no password ever reaches the
+        server. The email comes from the live session, never the client. On
+        success every *other* session and all remember-me tokens are revoked;
+        the session that made the change stays signed in.
+        """
+        if not service.rate.allow(_client_key(request)):
+            return web.Response(status=429, text='rate limited')
+        identity = service.session_identity(request)
+        if identity is None:
+            return web.Response(status=401, text=_GENERIC_401)
+        email = identity[0]
+        body = await _json_body(request)
+        try:
+            result = service.finish_challenge(email, str(body.get('A', '')),
+                                              str(body.get('M1', '')))
+        except ValueError:
+            result = None
+        if result is None:
+            log.info('password change failed for %s (current password not proven)', email)
+            return web.Response(status=401, text='current password incorrect')
+        salt = str(body.get('salt', '')).lower()
+        verifier = str(body.get('verifier', '')).lower()
+        try:                                    # sanity: well-formed hex of sane size
+            if not (len(salt) == 32 and 0 < len(verifier) <= 512 and int(verifier, 16) > 0):
+                raise ValueError
+            bytes.fromhex(salt)
+        except ValueError:
+            return web.Response(status=400, text='malformed credentials')
+        if not service.users.set_credentials(email, salt, verifier):
+            return web.Response(status=401, text=_GENERIC_401)
+        current = request.cookies.get(policy.SESSION_COOKIE)
+        service.sessions.revoke_email(email, keep=current)   # other devices out;
+        service.remember.revoke_email(email)                 # persistent tokens die
+        log.info('password changed for %s', email)
+        return web.json_response({'M2': result[0]})
+
     async def logout(request: web.Request) -> web.Response:
         service.sessions.drop(request.cookies.get(policy.SESSION_COOKIE))
         remember_cookie = request.cookies.get(policy.REMEMBER_COOKIE)
@@ -285,6 +327,7 @@ def build_public_app(service: AuthService) -> web.Application:
         web.post('/auth/challenge', challenge),
         web.post('/auth/verify', verify),
         web.post('/auth/resume', resume),
+        web.post('/auth/password', password_change),
         web.post('/auth/logout', logout),
         web.post('/shell-ticket', ticket_mint),
         web.post('/shell-ticket/redeem', ticket_redeem),

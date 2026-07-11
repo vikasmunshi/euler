@@ -48,10 +48,16 @@ class SessionStore:
         if token:
             self._sessions.pop(token, None)
 
-    def revoke_email(self, email: str) -> int:
-        """Close every session for *email* (disable/remove); return how many."""
+    def revoke_email(self, email: str, keep: str | None = None) -> int:
+        """Close every session for *email* (disable/remove); return how many.
+
+        *keep* spares one token: the signed-in session that performed a
+        self-service password change stays live while every other device
+        logs out (the disable/remove callers pass no *keep* — full revoke).
+        """
         key_email = normalize_email(email)
-        doomed = [token for token, (owner, _, _) in self._sessions.items() if owner == key_email]
+        doomed = [token for token, (owner, _, _) in self._sessions.items()
+                  if owner == key_email and token != keep]
         for token in doomed:
             del self._sessions[token]
         return len(doomed)
