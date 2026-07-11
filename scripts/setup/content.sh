@@ -173,12 +173,14 @@ PY
         esac
     done <<< "${out}"
     # Safety: no content path may resolve under .git/, keys/, or the solver/ source
-    # (except solver/web/content/) — the master key and history stay out of the ACL set.
+    # — except the two deliberately viewable subtrees, solver/web/content/ and
+    # solver/templates/ (the doc-referenced code/prompt templates + the non-secret
+    # authorizations template). The master key, history, and app source stay out.
     local rel abs
     for rel in "${READ_PATHS[@]}" "${WRITE_PATHS[@]}" "${DELETE_PATHS[@]}"; do
         abs="${PROJECT_ROOT}/${rel}"
         case "${rel%/}" in
-            .git | .git/* | keys | keys/* | solver | solver/ai* | solver/auth* | solver/core* | solver/crypto* | solver/runners* | solver/shell* | solver/templates* | solver/utils* | solver/web/auth*)
+            .git | .git/* | keys | keys/* | solver | solver/ai* | solver/auth* | solver/core* | solver/crypto* | solver/runners* | solver/shell* | solver/utils* | solver/web/auth*)
                 echo "Error: refusing to ACL a protected path: ${rel}" >&2; return 1 ;;
         esac
         if [ ! -e "${abs}" ]; then
