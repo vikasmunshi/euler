@@ -237,6 +237,12 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('profiles', body)                      # the JSON (escaped) in a code block
         self.assertIn('about:read', body)
         self.assertIn('solver/templates/authorizations.json', body)
+        # …and a solution file (the solutions object tree — e.g. a topic linking
+        # ../solutions/…) and an about file (README) view through the same route…
+        for path in ('/docs/file/solutions/public/p0042/p0042_s0.py',
+                     '/docs/file/README.md'):
+            resp = await self.client.get(path, headers=_READER)
+            self.assertEqual(resp.status, 200, path)
         # …but nothing outside the declared-readable trees, and no traversal
         for path in ('/docs/file/solver/config.py',          # solver source, not readable
                      '/docs/file/keys/enc-key.json',         # the key material
@@ -244,9 +250,6 @@ class ContentServiceTests(AioHTTPTestCase):
                      '/docs/file/../README.md'):
             resp = await self.client.get(path, headers=_READER)
             self.assertEqual(resp.status, 404, path)
-        # an about-object file (README) is viewable through the same route
-        resp = await self.client.get('/docs/file/README.md', headers=_READER)
-        self.assertEqual(resp.status, 200)
 
     @unittest_run_loop
     async def test_composed_ai_doc(self) -> None:

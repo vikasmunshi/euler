@@ -322,10 +322,12 @@ async def doc_file(request: web.Request) -> web.StreamResponse:
     """``GET /docs/file/{path}`` — view a doc-referenced repo file.
 
     Serves a file under the declared-readable content trees (the ``docs`` +
-    ``about`` object paths, DD-12) — e.g. ``solver/templates/authorizations.json``
-    linked from a guide. Text renders in the viewer; other bytes are served raw.
-    Anything outside those trees (or a traversal attempt) is 404, so the route
-    can never read the wider ``solver/`` source or the key material.
+    ``about`` + ``solutions`` object paths, DD-12) — e.g.
+    ``solver/templates/authorizations.json`` linked from a guide, or a
+    ``../solutions/…`` file linked from a topic. Text renders in the viewer;
+    other bytes are served raw. Anything outside those trees (or a traversal
+    attempt) is 404, so the route can never read the wider ``solver/`` source
+    or the key material.
     """
     rel = request.match_info['path']
     config = request.app[CONFIG_KEY]
@@ -570,9 +572,12 @@ def build_app(config: SiteConfig) -> web.Application:
     app = web.Application(middlewares=[csp_middleware, identity_middleware],
                           client_max_size=_MAX_BODY)
     app[CONFIG_KEY] = config
-    # The /docs/file/ view may serve only the declared-readable object trees (DD-12).
-    app[READABLE_KEY] = [p for obj in ('docs', 'about') for p in authz.paths_for(obj)
-                         if p and not p.startswith('/')]
+    # The /docs/file/ view may serve only the declared-readable object trees (DD-12):
+    # docs + about + solutions — every one a reader-floor read, so serving them from a
+    # docs:read-gated route grants nothing a docs:read holder can't already read (in
+    # the ladder docs:read and solutions:read are always co-granted).
+    app[READABLE_KEY] = [p for obj in ('docs', 'about', 'solutions')
+                         for p in authz.paths_for(obj) if p and not p.startswith('/')]
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
                          autoescape=jinja2.select_autoescape(['html', 'xml']))
     app.add_routes([

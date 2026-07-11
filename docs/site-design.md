@@ -230,7 +230,7 @@ a **direct** hit on the same path returns the whole shell with that pane pre-pop
 | GET | `/solutions/{n}/` | the `solution_dir`: statement, then test-cases · results · files · notes (§7) | `solutions:read` |
 | GET | `/solutions/{n}/{filename}` | one problem file (solution source, `statement.html`, `resources/*`) | `solutions:read` |
 | GET | `/docs/` | docs index (card grid) | `docs:read` |
-| GET | `/docs/file/{path}` | a doc-referenced repo file (under the `docs`/`about` object trees only, DD-12) rendered in the viewer | `docs:read` |
+| GET | `/docs/file/{path}` | a doc-referenced repo file (under the `docs`/`about`/`solutions` object trees only, DD-12) rendered in the viewer | `docs:read` |
 | GET | `/docs/{name}` | a rendered doc — **all** guides incl. `ai` / `convention_*` (the file may live in `docs/` or elsewhere) | `docs:read` |
 | GET | `/topics/` | topics index (card grid, blog-style writeups) | `docs:read` |
 | GET | `/topics/{name}` | a topic page (e.g. `prime-numbers`) | `docs:read` |
