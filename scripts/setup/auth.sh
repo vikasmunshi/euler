@@ -251,8 +251,10 @@ deploy_state_dir() {
 # copies the repo template; every run seeds the checkout owner as `admin`, migrates
 # any existing web accounts' profiles out of the euler-auth-private SRP DB into the map
 # (old admin/user/guest → new maintainer/contributor/reader), and unions any *new*
-# template objects/paths (e.g. a new content tree like topics/) into the objects map.
-# Never clobbers an existing file's edits — it merges.
+# template objects/paths (e.g. a new content tree like topics/) and *new* profile
+# grants (e.g. about:read) into the deployed policy, so a template addition reaches
+# a live SoR on upgrade. Never clobbers an existing file's edits — it merges (a
+# grant deliberately removed from the template must also be removed here by hand).
 deploy_authz() {
     local owner
     owner="$(stat -c '%U' "${PROJECT_ROOT}")"
@@ -281,6 +283,16 @@ objects = authz.setdefault('objects', {})                # union new template ob
 for name, paths in template.get('objects', {}).items():  # local additions are kept as-is
     merged = objects.setdefault(name, [])
     merged.extend(p for p in paths if p not in merged)
+profiles = authz.setdefault('profiles', {})              # union new profiles/grants likewise
+for name, spec in template.get('profiles', {}).items():
+    if name not in profiles:
+        profiles[name] = spec
+        continue
+    grants = profiles[name].setdefault('grants', [])
+    added = [g for g in spec.get('grants', []) if g not in grants]
+    if added:
+        print(f'authorizations.json: profile {name} gains {", ".join(added)}')
+        profiles[name]['grants'] = sorted(grants + added)
 pathlib.Path(authz_path).write_text(json.dumps(authz, indent=2, sort_keys=True) + '\n')
 print(f'authorizations.json: {len(users)} user(s) mapped (owner {owner}=admin)')
 PY
