@@ -15,9 +15,11 @@
   // editors are never typeset.
   window.MathJax = {
     tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true },
-    // The TeX font's optical size runs large against the 15px system-ui body —
-    // scale it down so inline math sits flush with the surrounding text.
-    chtml: { scale: 0.9 }
+    // matchFontHeight measures the surrounding font's x-height and inflates the
+    // math (~20% over system-ui), and the measurement varies with load timing —
+    // the "large math until a refresh" symptom. Off = deterministic: math
+    // renders at exactly the surrounding font size, every client, every load.
+    chtml: { scale: 1, matchFontHeight: false }
   };
 
   function currentTheme() {

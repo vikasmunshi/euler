@@ -69,8 +69,11 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
+/* Small-type baseline: 13px is the rem root, so every rem/em-sized rule —
+   headings, cells, menus, tables, code — scales down with it. */
+html { font-size: 13px; }
 body {
-  font: 15px/1.55 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  font: 1rem/1.55 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   color: var(--text);
   background: var(--bg);
   /* the whole shell = exactly one viewport: fixed header + panes + fixed footer */
