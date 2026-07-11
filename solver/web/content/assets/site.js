@@ -8,6 +8,15 @@
   try { stored = localStorage.getItem('theme'); } catch (e) { /* private mode */ }
   if (stored === 'light' || stored === 'dark') { root.dataset.theme = stored; }
 
+  // MathJax v3 config — this file loads before the deferred /vendor/mathjax
+  // bundle, so the loader reads it on init. Statements and notes carry TeX as
+  // $…$ / $$…$$ text (convention_documentation.md); \$ escapes a literal dollar.
+  // MathJax's defaults already skip pre/code/textarea, so source views and the
+  // editors are never typeset.
+  window.MathJax = {
+    tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']], processEscapes: true }
+  };
+
   function currentTheme() {
     return root.dataset.theme ||
       (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -23,6 +32,15 @@
       root.dataset.theme = next;
       try { localStorage.setItem('theme', next); } catch (e) { /* private mode */ }
     });
+  });
+
+  // htmx swaps replace pane content after MathJax's initial pass — re-typeset
+  // the left pane (its math state first cleared so removed nodes are forgotten).
+  document.addEventListener('htmx:afterSwap', function () {
+    if (window.MathJax && MathJax.typesetPromise) {
+      if (MathJax.typesetClear) { MathJax.typesetClear(); }
+      MathJax.typesetPromise([document.getElementById('content')]);
+    }
   });
 
   document.addEventListener('click', function (ev) {

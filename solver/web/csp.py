@@ -27,9 +27,14 @@ from aiohttp import web
 #: Request key under which the per-response nonce is exposed to handlers/templates.
 NONCE_KEY: str = 'csp_nonce'
 
+#: ``style-src`` carries ``'unsafe-inline'`` for exactly one consumer: MathJax
+#: (and htmx's indicator rules) inject their stylesheets at runtime with no
+#: nonce hook — verified blocked under bare ``'self'`` (headless-Chrome CSP
+#: violations, garbled math). Scripts stay strict: ``'self'`` + nonce only.
+#: See docs/secure-web-server.md §4.7 for the recorded trade-off.
 _POLICY = ("default-src 'self'; "
            "script-src 'self' 'nonce-{nonce}'; "
-           "style-src 'self'; "
+           "style-src 'self' 'unsafe-inline'; "
            "img-src 'self' data:; "
            "connect-src 'self'; "
            "frame-ancestors 'none'; "

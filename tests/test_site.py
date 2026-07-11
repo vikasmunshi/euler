@@ -106,7 +106,12 @@ class ContentServiceTests(AioHTTPTestCase):
         csp = resp.headers.get('Content-Security-Policy', '')
         self.assertIn("default-src 'self'", csp)
         self.assertIn("frame-ancestors 'none'", csp)
-        self.assertNotIn('unsafe-inline', csp)
+        # Scripts stay strict — no inline execution, ever. Styles carry the
+        # recorded 'unsafe-inline' exception for MathJax/htmx runtime styles (§4.7).
+        self.assertRegex(csp, r"script-src 'self' 'nonce-[^']+'")
+        self.assertNotIn("script-src 'self' 'unsafe-inline'", csp)
+        self.assertIn("style-src 'self' 'unsafe-inline'", csp)
+        self.assertNotIn('unsafe-eval', csp)
 
     # ── 5b: solutions ────────────────────────────────────────────────────────
 

@@ -18,6 +18,11 @@
   <script src="/vendor/htmx.min.js"
           integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
           crossorigin="anonymous" defer></script>
+  {# Typesets the $…$ TeX in statements/notes; site.js (above) holds its config
+     and re-typesets after htmx swaps. Vendored — same-origin, CSP-clean. #}
+  <script id="MathJax-script" defer src="/vendor/mathjax/tex-mml-chtml.js"
+          integrity="sha384-Wuix6BuhrWbjDBs24bXrjf4ZQ5aFeFWBuKkFekO2t8xFU0iNaLQfp2K6/1Nxveei"
+          crossorigin="anonymous"></script>
   {% block head %}{% endblock %}
 </head>
 <body>

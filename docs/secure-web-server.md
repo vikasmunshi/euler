@@ -737,9 +737,9 @@ htmx is ~14 kB, vendored into `solver/web/content/vendor/` (pinned + SRI + `LICE
 like xterm.js/codemirror. It **strengthens** the CSP/XSS story: no client-side
 string→DOM assembly (no DOM-XSS class), all escaping is Jinja autoescape server-side.
 **CSP interaction (must design for):** with `script-src 'self'` and no `unsafe-inline`,
-use `hx-*` attributes (fine — not inline script) and **avoid `hx-on:` handlers**; set
-`htmx.config.includeIndicatorStyles = false` and ship the indicator CSS in the bundle so
-`style-src 'self'` needs no `unsafe-inline`. **Verdict: adopt** (Phase 5).
+use `hx-*` attributes (fine — not inline script) and **avoid `hx-on:` handlers**.
+*(Superseded in 5e: `style-src` now carries `'unsafe-inline'` for MathJax — see §4.7 —
+which also covers htmx's runtime indicator styles.)* **Verdict: adopt** (Phase 5).
 
 ### 4.7 Content-Security-Policy · nh3
 
@@ -747,12 +747,18 @@ use `hx-*` attributes (fine — not inline script) and **avoid `hx-on:` handlers
 (`solver/web/csp.py`, shared by every rendering service), because a strict policy uses a
 **per-response nonce** for any unavoidable inline `<script>`/`<style>`; the app that
 renders the page mints the nonce and stamps it into both the header and the template.
-Baseline: `default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'
-data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; object-src 'none'`
-— no `unsafe-inline`, no `unsafe-eval`. **Caddy** adds the transport-level headers that
-need no per-response state (HSTS, `X-Content-Type-Options`, `Referrer-Policy`) and a
-fallback CSP for purely static responses. Vendored JS (htmx, xterm, codemirror, MathJax)
-is served from `'self'`.
+Baseline: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
+img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none';
+object-src 'none'` — **scripts** allow no `unsafe-inline` and no `unsafe-eval`, ever.
+**Styles carry `'unsafe-inline'` as a recorded exception (5e):** MathJax v3 (and htmx's
+indicator rules) inject their stylesheets at runtime with **no nonce hook** — verified
+empirically (headless Chrome logged the CSP violations; the math rendered garbled under
+bare `'self'`). The residual risk is CSS injection only, and the markup paths that could
+carry it are closed upstream (Jinja autoescape; nh3 strips `style` tags/attrs from
+stored HTML) — script execution remains nonce-gated. **Caddy** adds the transport-level
+headers that need no per-response state (HSTS, `X-Content-Type-Options`,
+`Referrer-Policy`) and a fallback CSP for purely static responses. Vendored JS (htmx,
+xterm, codemirror, MathJax) is served from `'self'`.
 
 **nh3 (Phase 5 save gate).** The edit path validates `.py` (flake8 + autofix), `.c`
 (compile), and `.json` (parse/reserialise) with reject-and-restore, but writing `.html`

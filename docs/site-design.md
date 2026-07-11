@@ -82,7 +82,10 @@ scroll container (`min-height: 0`). Controls never move between pages; only pane
   tokens too, with **distinct values per theme** — a light background needs
   stronger mixes than a dark one.
 - Self-contained + same-origin only (CSP `'self'`): no external fonts/CDNs; system
-  font stack; vendored htmx from `/vendor`.
+  font stack; vendored htmx + **MathJax** from `/vendor`. Statements and notes carry
+  math as TeX text (`$…$` / `$$…$$`); MathJax typesets on load and after every htmx
+  swap (`site.js`). Its runtime stylesheet is why `style-src` carries
+  `'unsafe-inline'` ([§4.7](secure-web-server.md)) — scripts remain nonce-only.
 
 ## 3 · Writing style — created pages
 
