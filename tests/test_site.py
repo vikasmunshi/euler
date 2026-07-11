@@ -65,7 +65,11 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('id="actions"', body)
         self.assertIn('id="theme-toggle"', body)            # the slider
         self.assertIn('/auth/logout', body)                 # the user menu
-        self.assertIn('/about/license', body)               # footer links
+        self.assertIn('/about/license?bare=1', body)        # footer popups…
+        self.assertIn('data-popup', body)
+        self.assertNotIn('/about/readme', body)             # …without readme
+        self.assertIn('>license</a>', body)                 # label, not "MIT license"
+        self.assertIn('/account?bare=1', body)              # account is a popup too
         self.assertIn('/vendor/htmx.min.js', body)          # htmx wired
         self.assertIn('integrity="sha384-', body)           # with SRI
 
@@ -89,6 +93,19 @@ class ContentServiceTests(AioHTTPTestCase):
             self.assertIn(marker, await resp.text())
         resp = await self.client.get('/about/no-such-page', headers=_READER)
         self.assertEqual(resp.status, 404)
+
+    @unittest_run_loop
+    async def test_bare_mode_renders_just_the_document(self) -> None:
+        for path, marker in (('/about/license?bare=1', 'MIT License'),
+                             ('/account?bare=1', 'users:read')):
+            resp = await self.client.get(path, headers=_ADMIN)
+            self.assertEqual(resp.status, 200, path)
+            body = await resp.text()
+            self.assertIn(marker, body, path)
+            self.assertIn('class="bare"', body, path)        # the minimal wrapper…
+            self.assertNotIn('app-header', body, path)       # …no shell
+            self.assertNotIn('id="ws"', body, path)
+            self.assertNotIn('hx-swap-oob', body, path)      # …no chrome
 
     @unittest_run_loop
     async def test_no_profile_is_unauthorized(self) -> None:

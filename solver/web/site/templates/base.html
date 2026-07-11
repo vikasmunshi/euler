@@ -39,19 +39,16 @@
       {% include "_ws.html" %}
     </aside>
   </div>
+  {# Footer documents open in a small popup window (site.js), leaving the shell
+     — and the terminal session — untouched; ?bare renders just the document. #}
   <footer class="app-footer">
     <span class="muted">©&nbsp;Vikas&nbsp;Munshi</span>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/about/license" hx-get="/about/license" hx-target="#content"
-       hx-swap="innerHTML" hx-push-url="true">MIT license</a>
+    <a href="/about/license?bare=1" data-popup>license</a>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/terms">terms of use</a>
+    <a href="/terms" data-popup>terms of use</a>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/about/readme" hx-get="/about/readme" hx-target="#content"
-       hx-swap="innerHTML" hx-push-url="true">readme</a>
-    <span class="fsep" aria-hidden="true">·</span>
-    <a href="/about/acknowledgements" hx-get="/about/acknowledgements" hx-target="#content"
-       hx-swap="innerHTML" hx-push-url="true">acknowledgements</a>
+    <a href="/about/acknowledgements?bare=1" data-popup>acknowledgements</a>
   </footer>
 </body>
 </html>

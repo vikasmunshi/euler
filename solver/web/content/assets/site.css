@@ -437,6 +437,15 @@ dl.account dd { margin: 0; }
 }
 .term-body .cursor { color: var(--accent); }
 
+/* ── Bare pages (the ?bare popups: license, acknowledgements, account) ───── */
+body.bare {
+  display: block;
+  height: auto;
+  min-height: 100vh;
+  overflow: auto;
+}
+.bare-main { max-width: 46rem; margin: 0 auto; padding: 1.2rem 1.4rem; }
+
 /* ── Footer (fixed) ──────────────────────────────────────────────────────── */
 .app-footer {
   display: flex;

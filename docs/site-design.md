@@ -36,18 +36,21 @@ page itself never scrolls; each middle pane scrolls its own overflow.
   every page: the brand (→ `/`) · primary nav `Solutions · Docs · Topics` · the
   **Actions** menu (page-specific verbs, §6) · **breadcrumbs** (the current path,
   ancestors clickable) · the **theme slider** (◐, light⇄dark) · the **user glyph**
-  (initial in a circle) opening a sub-menu: *Account* (`/account`, left pane),
-  *Change password* (`/password`, auth tier: current password + new twice, SRP —
-  distinct from the unauthenticated `/forgot` reset), *Logout* (`POST /auth/logout`).
+  (initial in a circle) opening a sub-menu: *Account* (`/account?bare=1`, a
+  **popup** like the footer documents), *Change password* (`/password`, auth
+  tier: current password + new twice, SRP — distinct from the unauthenticated
+  `/forgot` reset), *Logout* (`POST /auth/logout`).
 - **Left pane** `#content` — the navigable region. Nav and in-page links `hx-get` a
   route and swap it here; the URL updates (`hx-push-url`) so every view is
   deep-linkable. Scrolls **both axes** when content overflows.
 - **Right pane** `#ws` — the PTY terminal (Phase 6). It talks only to `/ws`;
   **left-pane navigation never touches `/ws`**, so the terminal session persists
   while content swaps. Scrolls **vertically** when needed (wired in Phase 6).
-- **Footer** (fixed) — © Vikas Munshi · MIT license (`/about/license`) ·
-  terms of use (`/terms`) · readme (`/about/readme`) ·
-  acknowledgements (`/about/acknowledgements`).
+- **Footer** (fixed) — © Vikas Munshi · license (`/about/license`) ·
+  terms of use (`/terms`) · acknowledgements (`/about/acknowledgements`).
+  Footer documents open in a **popup window** (`?bare` renders just the
+  document, no shell/chrome), leaving the shell — and the terminal session —
+  untouched. (`/about/readme` stays routable but is not linked.)
 
 **Layout principle.** `body` is a viewport-high grid (`auto 1fr auto`); the two
 middle panes are **equal width and height** (`1fr 1fr`), each an independent
@@ -273,7 +276,7 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
 - **Terminal persistence.** htmx swaps only `#content`; `#ws` (the terminal) is untouched
   by navigation and keeps its session.
 - **Nav (fixed header):** brand → `/`, `Solutions` → `/solutions/`, `Docs` → `/docs/`,
-  `Topics` → `/topics/`, user glyph → account/password/logout. Profile-gated
+  `Topics` → `/topics/`, user glyph → account (popup) / password / logout. Profile-gated
   affordances (the Actions menu, §6) are hidden from profiles that lack them; the
   route still enforces the gate server-side — hiding is UX, `requires()` is the
   boundary.

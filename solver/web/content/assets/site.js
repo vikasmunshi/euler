@@ -61,5 +61,12 @@
       var form = document.querySelector('#content form.editor-form');
       if (form) { form.requestSubmit(); }
     }
+    // data-popup links (footer documents, account) open in a small popup
+    // window, leaving the shell — and the terminal session — untouched.
+    var popup = ev.target.closest('a[data-popup]');
+    if (popup) {
+      ev.preventDefault();
+      window.open(popup.href, 'euler-doc', 'popup=yes,width=760,height=840');
+    }
   });
 })();
