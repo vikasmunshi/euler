@@ -66,9 +66,13 @@ class Century(NamedTuple):
 
 
 class DocEntry(NamedTuple):
-    """A docs/topics index row: the URL name and the page's leading title."""
+    """A docs/topics index row (site-design §7): the URL *name*, the *heading*
+    derived from the filename (title-cased, separators → spaces — the card's
+    first line), and the *title* from the page's leading ``#`` heading (second
+    line). Index lists are sorted by *name* (the filename)."""
 
     name: str
+    heading: str
     title: str
 
 
@@ -329,8 +333,14 @@ def _page_title(text: str, fallback: str) -> str:
     return fallback
 
 
+def _filename_heading(stem: str) -> str:
+    """A readable title from a filename stem: `_`/`-` → space, title-cased
+    (e.g. ``convention_c_translation`` → ``Convention C Translation``)."""
+    return stem.replace('_', ' ').replace('-', ' ').title()
+
+
 def _list_pages(tree: Path) -> list[DocEntry]:
-    """Index the `*.md` pages of a content tree by name + leading title."""
+    """Index the `*.md` pages of a content tree, sorted by filename (site-design §7)."""
     if not tree.is_dir():
         return []
     entries = []
@@ -339,7 +349,8 @@ def _list_pages(tree: Path) -> list[DocEntry]:
             text = path.read_text(encoding='utf-8')
         except OSError:
             continue
-        entries.append(DocEntry(name=path.stem, title=_page_title(text, path.stem)))
+        entries.append(DocEntry(name=path.stem, heading=_filename_heading(path.stem),
+                                title=_page_title(text, path.stem)))
     return entries
 
 
@@ -427,10 +438,11 @@ def _compose_ai_doc(repo_root: Path) -> str:
 
 
 def list_docs(repo_root: Path) -> list[DocEntry]:
-    """The docs index: every `docs/*.md` guide plus the composed `ai` reference."""
+    """The docs index: every `docs/*.md` guide plus the composed `ai` reference,
+    sorted by filename (site-design §7)."""
     entries = _list_pages(repo_root / 'docs')
-    entries.append(DocEntry(name='ai', title='AI reference'))
-    return sorted(entries)
+    entries.append(DocEntry(name='ai', heading='AI', title='AI reference'))
+    return sorted(entries, key=lambda e: e.name)
 
 
 def read_doc(repo_root: Path, name: str) -> str | None:

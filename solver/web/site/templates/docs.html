@@ -12,8 +12,8 @@
   <a class="card" href="/docs/{{ e.name }}" hx-get="/docs/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
     <span class="card-ic">&sect;</span>
-    <span><span class="card-title">{{ e.title }}</span>
-      <span class="card-desc"><code>{{ e.name }}</code></span></span>
+    <span><span class="card-title">{{ e.heading }}</span>
+      <span class="card-desc">{{ e.title }}</span></span>
     <span class="card-go">&rarr;</span>
   </a>
   {% endfor %}
