@@ -491,6 +491,13 @@ ${DOMAIN} {
 		file_server
 	}
 
+	# Vendored front-end libraries (htmx, MathJax + its fonts) — Caddy-native,
+	# same-origin, per the site-design path-ownership table.
+	handle /vendor/* {
+		root * ${WEB_CONTENT_DIR}
+		file_server
+	}
+
 	# Public auth surface (DD-7): the login/registration/reset/forgot pages and
 	# the JSON auth API, straight to the auth service. The shell-ticket and admin
 	# endpoints are deliberately NOT routed (socket-peer / local-only, DD-6/DD-9).
