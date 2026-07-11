@@ -1,8 +1,11 @@
 {% extends "base.html" %}
-{% block title %}e^iπ+1=0 · euler{% endblock %}
+{% block title %}euler{% endblock %}
 {% block content %}
 <header class="hero">
-  <p class="kicker">e<sup>iπ</sup> + 1 = 0</p>
+  {# Derived from the opening of Blake's "Auguries of Innocence" ("To see a World
+     in a Grain of Sand") — the same quatrain the crypto master-key verify text
+     uses (solver/crypto/config.py). #}
+  <p class="kicker">To see infinity in a finite form</p>
   <h1>Project Euler workspace</h1>
   <p class="lede">{{ solved }} of {{ total }} problems down.
      The remaining {{ total - solved }} are not going to solve themselves —
