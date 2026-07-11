@@ -87,7 +87,7 @@ DELETE_PATHS=()
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|upgrade|status|help]
+Usage: $0 [install|uninstall|upgrade|redeploy|status|help]
 
   install    Create the per-profile euler-content-<profile> identities and the
              euler-sol-{read,write,delete} ACL groups, apply the content-tree ACLs
@@ -98,6 +98,9 @@ Usage: $0 [install|uninstall|upgrade|status|help]
   uninstall  Disable the instances, remove the unit + content.env, strip the
              content-tree ACLs, and (prompted) remove the identities/groups.
   upgrade    Re-assert identities, ACLs, config, and units; restart the instances.
+  redeploy   Fast path: refresh /etc/euler/content.env and restart the per-profile
+             instances to pick up new code — no identities, ACLs, or unit changes.
+             (The shared /opt/euler venv is rebuilt by 'auth.sh redeploy'.)
   status     Show venv/deps, identities, ACL groups, config, and instance health.
 
   Requires: the /opt/euler venv (auth.sh) and the acl package (auto-installed).
@@ -364,6 +367,12 @@ UMask=0007
 WantedBy=multi-user.target
 EOF
     sudo systemctl daemon-reload
+    restart_instances
+}
+
+# Restart every per-profile instance (they re-exec the /opt/euler venv, picking up
+# freshly deployed code). Enable --now so a not-yet-started instance comes up too.
+restart_instances() {
     local profile
     for profile in "${PROFILES[@]}"; do
         sudo systemctl enable --now "euler-content@${profile}.service"
@@ -394,6 +403,22 @@ do_install() {
     if [ -f /etc/systemd/system/euler-firewall.service ]; then
         echo "Reloading the egress firewall to include the euler-content-* uids..."
         "${SCRIPT_DIR}/firewall.sh" reload
+    fi
+    do_status
+}
+
+# Fast redeploy: refresh content.env and restart the instances so they re-exec the
+# freshly rebuilt /opt/euler venv (rebuilt by 'auth.sh redeploy'). No identities,
+# ACLs, unit re-lay, or firewall reload.
+do_redeploy() {
+    check_can_sudo || return 1
+    require_systemd || return 1
+    deploy_content_env
+    if [ -f "${SERVICE_DEST}" ] && venv_has_site; then
+        restart_instances
+        echo "Restarted the per-profile content instances."
+    else
+        echo "note: content instances not installed yet — run '$0 install'."
     fi
     do_status
 }
@@ -475,6 +500,7 @@ ACTION="${1:-status}"
 case "${ACTION}" in
     install)   do_install ;;
     upgrade)   do_install ;;
+    redeploy)  do_redeploy ;;
     uninstall) do_uninstall ;;
     status)    do_status ;;
     -h | --help | help) usage ;;

@@ -107,7 +107,7 @@ DNS_PROVIDER="${EULER_TLS_DNS_PROVIDER:-namecom}"
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|upgrade|status|renew|reload|help]
+Usage: $0 [install|uninstall|upgrade|redeploy|status|renew|reload|help]
 
   install    Full edge setup: create euler-web group + euler-caddy user, install
              Caddy + acme.sh, generate /etc/euler/Caddyfile for the FQDN from ~/.euler/env
@@ -116,6 +116,9 @@ Usage: $0 [install|uninstall|upgrade|status|renew|reload|help]
   uninstall  Remove the unit and Caddy; prompt before deleting /etc/euler, acme.sh,
              and the service users/group.
   upgrade    Upgrade Caddy + acme.sh and regenerate the Caddyfile + unit.
+  redeploy   Fast path: re-copy the static web-content (assets + vendor), regenerate
+             the Caddyfile (picking up route changes), validate, and reload — no
+             package upgrade, cert, or unit changes.
   status     Show install state, cert expiry, unit state, and a /healthz ping.
   renew      Force-renew the certificate now (as root; creds cached by acme.sh).
   reload     Reload the running edge (sudo systemctl reload).
@@ -759,6 +762,26 @@ do_reload() {
     echo "Reloaded ${SERVICE_NAME}"
 }
 
+# Fast redeploy: push the repo's static web-content + regenerated Caddyfile to the
+# running edge, then reload. No package upgrade, cert issuance, or unit re-lay — the
+# common "I changed CSS/JS/vendor or a Caddy route" turnaround.
+do_redeploy() {
+    check_can_sudo || return 1
+    load_fqdn || return 1
+    if ! sudo test -f "${CERT_FILE}"; then
+        echo "Error: edge not installed (no cert at ${CERT_FILE}); run '$0 install' first." >&2
+        return 1
+    fi
+    deploy_web_content
+    generate_caddyfile
+    if ! validate_caddyfile; then
+        echo "Error: generated Caddyfile failed validation; not reloading." >&2
+        return 1
+    fi
+    do_reload
+    echo "Frontend redeploy complete: web-content + Caddyfile refreshed and reloaded."
+}
+
 do_uninstall() {
     check_can_sudo || return 1
     remove_service
@@ -842,6 +865,7 @@ case "${ACTION}" in
     install)   do_install ;;
     uninstall) do_uninstall ;;
     upgrade)   do_upgrade ;;
+    redeploy)  do_redeploy ;;
     renew)     do_renew ;;
     reload)    do_reload ;;
     status)    do_status ;;

@@ -799,6 +799,15 @@ An **umbrella** (`make install-web` / `uninstall-web` / `upgrade-web`) composes 
 per-service kits so the whole stack installs/removes/upgrades as one, while each service
 remains independently operable.
 
+**Fast redeploy.** `make web-redeploy` (each kit's `redeploy` action) pushes new
+**code, templates, and static assets** without touching identities, ACLs, units, certs,
+or the firewall: `auth.sh redeploy` reinstalls the repo into the shared `/opt/euler`
+venv (the code both auth and content run) and restarts auth; `content.sh redeploy`
+restarts the per-profile instances against it; `frontend.sh redeploy` refreshes
+`/etc/euler/web-content` + the Caddyfile and reloads the edge. It is the everyday
+turnaround after a source change — reach for `upgrade-web` only when identities, ACLs,
+units, or the Caddy/acme packages themselves change.
+
 ### 5.2 Install the stack
 
 Set the deployment FQDN once in the authoring env file, then bring up the whole stack:

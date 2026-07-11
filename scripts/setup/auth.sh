@@ -85,7 +85,7 @@ TERMS_VERSION=""
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|upgrade|status|help]
+Usage: $0 [install|uninstall|upgrade|redeploy|status|help]
 
   install    Create euler-auth, build the /opt/euler system venv (pip install
              <repo>[web] as root), deploy /etc/euler/auth.env (with a generated
@@ -95,6 +95,9 @@ Usage: $0 [install|uninstall|upgrade|status|help]
   uninstall  Remove the service + venv (prompts before removing auth.env, the
              state dir, and the users/groups).
   upgrade    Re-deploy the venv from the repo, refresh auth.env + unit, restart.
+  redeploy   Fast path: reinstall the repo into the /opt/euler venv (the shared
+             code for auth AND content), re-merge the authorizations SoR, and
+             restart the auth service — no identities, token, or unit changes.
   status     Show venv/deps/identities/config/state/unit health.
 
   Authoring config in ~/.euler/env: EULER_TLS_DOMAIN (base URL), optional
@@ -388,6 +391,25 @@ do_install() {
     do_status
 }
 
+# Fast redeploy: reinstall the repo into the shared /opt/euler venv (refreshing the
+# code for both auth and content), re-merge the authorizations SoR (picks up new
+# template objects/grants), and restart the auth service. No identities, admin
+# token, tmpfiles, state dir, unit re-lay, or firewall reload.
+do_redeploy() {
+    check_can_sudo || return 1
+    require_python || return 1
+    load_config || return 1
+    deploy_venv
+    deploy_authz
+    if [ -f "${SERVICE_DEST}" ] && venv_has_auth; then
+        sudo systemctl restart "${SERVICE_NAME}"
+        echo "Restarted ${SERVICE_NAME}"
+    else
+        echo "note: ${SERVICE_NAME} not installed yet — run '$0 install'."
+    fi
+    do_status
+}
+
 do_uninstall() {
     check_can_sudo || return 1
     if [ -f "${SERVICE_DEST}" ]; then
@@ -463,6 +485,7 @@ ACTION="${1:-status}"
 case "${ACTION}" in
     install)   do_install ;;
     upgrade)   do_install ;;
+    redeploy)  do_redeploy ;;
     uninstall) do_uninstall ;;
     status)    do_status ;;
     -h | --help | help) usage ;;

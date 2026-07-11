@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content redeploy-auth redeploy-content redeploy-frontend web-redeploy install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -198,6 +198,28 @@ uninstall-web: uninstall-content uninstall-auth uninstall-smtp uninstall-firewal
 upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth upgrade-content
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
+
+## Redeploy the shared /opt/euler venv (auth.sh owns it) + restart the auth service
+redeploy-auth:
+	./scripts/setup/auth.sh redeploy
+	@printf "✓ redeploy-auth complete: venv + authorizations refreshed, auth restarted\n"
+
+## Restart the per-profile content instances against the freshly rebuilt venv
+redeploy-content:
+	./scripts/setup/content.sh redeploy
+	@printf "✓ redeploy-content complete: content instances restarted\n"
+
+## Refresh the static web-content + Caddyfile and reload the edge
+redeploy-frontend:
+	./scripts/setup/frontend.sh redeploy
+	@printf "✓ redeploy-frontend complete: web-content + Caddyfile reloaded\n"
+
+## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
+## ACLs, units, certs, or the firewall: rebuild the shared venv (auth) → restart the
+## content instances against it → refresh the edge's static content + Caddyfile. The
+## everyday "I changed Python/templates/CSS/JS, push it" turnaround.
+web-redeploy: redeploy-auth redeploy-content redeploy-frontend
+	@printf "✓ web-redeploy complete: code, templates, and static assets redeployed\n"
 
 # Standalone Node.js (no sudo):
 
