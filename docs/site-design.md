@@ -182,10 +182,11 @@ selection.
 ## 7 · Content pages
 
 - **Landing (`/`), docs index, topics index** — visually alike: a short hero
-  (kicker · title · one wry lede) over a **card grid, two/three per row** — each
-  card an icon, a title, and a blurb that earns its place (§3). The landing's
-  cards are the entry points (Solutions · Docs · Topics · Terminal); the docs and
-  topics indexes list their pages the same way. **Index cards** show the
+  (kicker · title · one wry lede) over a **card grid** — each card an icon, a
+  title, and a blurb that earns its place (§3). The landing stacks its entry
+  points **one box per row** (Solutions · Docs · Topics · Terminal — no Account
+  card; it lives in the user menu); the docs and topics indexes list their pages
+  **two/three per row**. **Index cards** show the
   **filename** (separators → spaces, title-cased) as the first line and the
   page's markdown `#` title as the second, **sorted by filename**.
 - **Solutions (`/solutions/`)** — the 10×10 century grids: **square cells** (and

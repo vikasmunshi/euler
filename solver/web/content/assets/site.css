@@ -275,6 +275,7 @@ body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
   grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
 }
+.cards.cards-1 { grid-template-columns: 1fr; }        /* the landing: one box per row */
 .cards.cards-3 { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 1200px) { .cards.cards-3 { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 700px) { .cards, .cards.cards-3 { grid-template-columns: 1fr; } }
