@@ -61,45 +61,7 @@
       var form = document.querySelector('#content form.editor-form');
       if (form) { form.requestSubmit(); }
     }
-    // data-dialog links (footer documents, account) open in the shell's modal:
-    // fetch the link's ?bare page and show its <main> in <dialog id="doc-dialog">.
-    // The shell — and the terminal — stay untouched; no-JS falls back to the href.
-    var dialogLink = ev.target.closest('a[data-dialog]');
-    if (dialogLink) {
-      ev.preventDefault();
-      openDocDialog(dialogLink.href);
-    }
-    // data-popup links (change password: its SRP scripts need a real document)
-    // still open a small popup window.
-    var popup = ev.target.closest('a[data-popup]');
-    if (popup) {
-      ev.preventDefault();
-      window.open(popup.href, 'euler-doc', 'popup=yes,width=760,height=840');
-    }
-    // close the modal on ✕ or a backdrop click (Esc is native)
-    var dialog = document.getElementById('doc-dialog');
-    if (dialog && dialog.open &&
-        (ev.target.closest('[data-action="close-dialog"]') || ev.target === dialog)) {
-      dialog.close();
-    }
   });
-
-  function openDocDialog(href) {
-    var dialog = document.getElementById('doc-dialog');
-    var body = document.getElementById('doc-dialog-body');
-    if (!dialog || !body) { window.location.href = href; return; }
-    fetch(href, { credentials: 'same-origin' }).then(function (resp) {
-      if (!resp.ok) { throw new Error(resp.status); }
-      return resp.text();
-    }).then(function (text) {
-      var doc = new DOMParser().parseFromString(text, 'text/html');
-      var main = doc.querySelector('main') || doc.body;
-      // the auth-tier card (terms) brings its own brand + footer line — drop them
-      main.querySelectorAll('.brand-row, .footer').forEach(function (n) { n.remove(); });
-      body.innerHTML = main.innerHTML;
-      dialog.showModal();
-    }).catch(function () { window.location.href = href; });
-  }
 
   // A deliberate exit (logout) should not trip the terminal's beforeunload
   // guard: tell the /terminal iframe to disarm before the shell navigates

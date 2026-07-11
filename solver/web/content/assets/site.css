@@ -297,27 +297,34 @@ body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
 .card-go { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--muted); transition: color 0.15s ease; }
 .card:hover .card-go { color: var(--accent); }
 
-/* ── Solutions century grids: two per row, per-theme heat (§7) ───────────── */
+/* ── Solutions century grids: square, as many per row as fit (§7) ────────── */
+/* auto-fill packs as many ~14rem tracks as the pane allows — ~3 on a normal
+   window, fewer when narrow, more when wide (the old-web-server flex-wrap,
+   in grid form). Each century is square because its 10 columns are equal and
+   the cells carry aspect-ratio: 1. */
 .grid-row {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  gap: 1.1rem 1.2rem;
+  justify-content: center;
+  align-items: start;
 }
-@media (max-width: 900px) { .grid-row { grid-template-columns: 1fr; } }
-.century { margin: 0; }
-.century-label { margin: 0 0 0.35rem; font-size: 0.85rem; }
+.century { margin: 0; min-width: 0; }
+.century-label { margin: 0 0 0.35rem; font-size: 0.78rem; }
 .century-grid {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   gap: 2px;
 }
 .cell {
-  display: block;
-  padding: 0.22rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;                            /* square cells → square grid */
   border: 1px solid var(--border);
-  border-radius: 4px;
-  text-align: center;
-  font-size: 0.62rem;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  line-height: 1;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   text-decoration: none;
   color: var(--muted);
@@ -416,6 +423,21 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #1f2937; font-weight: 600; }
 .btn-primary:hover { filter: brightness(1.08); }
 
+/* Auth forms rendered into the content pane (change password) — the auth pages'
+   own auth.css is not loaded in the shell, so mirror the input styling here. */
+.pane-form { display: flex; flex-direction: column; gap: 0.4rem; max-width: 26rem; }
+.pane-form label { font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem; }
+.pane-form input {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.7rem;
+}
+.pane-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pane-form .btn { margin-top: 0.6rem; align-self: flex-start; }
+
 .status { padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); }
 .status.ok  { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); color: var(--accent-ink);
               background: color-mix(in srgb, var(--accent) 12%, transparent); }
@@ -451,46 +473,6 @@ dl.account dd { margin: 0; }
   white-space: pre-wrap;
 }
 .term-body .cursor { color: var(--accent); }
-
-/* ── The shell's modal (footer documents, account) ───────────────────────── */
-dialog.doc-dialog {
-  width: min(46rem, 92vw);
-  max-height: 84vh;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--bg);
-  color: var(--text);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
-}
-dialog.doc-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
-.dialog-close {
-  position: sticky;
-  top: 0.5rem;
-  float: right;
-  margin: 0.5rem 0.6rem 0 0;
-  z-index: 2;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  width: 1.8rem;
-  height: 1.8rem;
-  background: var(--surface);
-  color: var(--muted);
-  font: inherit;
-  cursor: pointer;
-}
-.dialog-close:hover { color: var(--text); border-color: var(--accent); }
-.dialog-body { padding: 0.9rem 1.1rem 1.1rem; overflow: auto; max-height: calc(84vh - 1rem); }
-.dialog-body .panel { margin-bottom: 0.8rem; }
-
-/* ── Bare pages (the ?bare fetch source / no-JS fallback) ────────────────── */
-body.bare {
-  display: block;
-  height: auto;
-  min-height: 100vh;
-  overflow: auto;
-}
-.bare-main { max-width: 46rem; margin: 0 auto; padding: 1.2rem 1.4rem; }
 
 /* ── Footer (fixed) ──────────────────────────────────────────────────────── */
 .app-footer {

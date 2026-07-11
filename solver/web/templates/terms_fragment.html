@@ -1,0 +1,16 @@
+{# Terms of use as a content-shell fragment (auth /terms on HX-Request): the
+   text + an OOB breadcrumb, swapped straight into the shell's #content. Styled
+   with the content shell's own classes (site.css). #}
+<section class="panel">
+  <h1>Terms of use</h1>
+  <div class="doc-body">
+    {% include "_terms.html" %}
+  </div>
+  <p class="muted">Version&nbsp;{{ terms_version }}</p>
+</section>
+<nav id="crumbs" class="crumbs" aria-label="Breadcrumb" hx-swap-oob="true">
+  <a href="/" hx-get="/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">home</a>
+  <span class="crumb-sep" aria-hidden="true">&#8250;</span>
+  <span class="crumb-leaf">terms</span>
+</nav>
+<div id="actions" class="actions" hx-swap-oob="true"></div>

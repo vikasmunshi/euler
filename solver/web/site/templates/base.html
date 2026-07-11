@@ -41,24 +41,21 @@
               title="solver terminal"></iframe>
     </aside>
   </div>
-  {# Footer documents open in the modal dialog below (site.js data-dialog),
-     leaving the shell — and the terminal session — untouched; the ?bare pages
-     are what the dialog fetches (and the no-JS fallback destination). #}
+  {# Footer documents swap into the left pane like any nav (never the shell or
+     the terminal). license/acknowledgements are content routes; terms is the
+     auth tier, which returns a bare fragment on HX-Request (a direct visit
+     gets the full auth page — the no-JS/deep-link fallback). #}
   <footer class="app-footer">
     <span class="muted">©&nbsp;Vikas&nbsp;Munshi</span>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/about/license?bare=1" data-dialog>license</a>
+    <a href="/about/license" hx-get="/about/license" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">license</a>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/terms" data-dialog>terms of use</a>
+    <a href="/terms" hx-get="/terms" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">terms of use</a>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/about/acknowledgements?bare=1" data-dialog>acknowledgements</a>
+    <a href="/about/acknowledgements" hx-get="/about/acknowledgements" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">acknowledgements</a>
   </footer>
-  {# The shell's one modal (footer documents, account): native <dialog>, filled
-     by site.js from the link's ?bare page; Esc / ✕ / backdrop close it. #}
-  <dialog id="doc-dialog" class="doc-dialog">
-    <button class="dialog-close" type="button" data-action="close-dialog"
-            aria-label="close">&#10005;</button>
-    <div id="doc-dialog-body" class="dialog-body"></div>
-  </dialog>
 </body>
 </html>

@@ -85,12 +85,7 @@ def render(request: web.Request, template_name: str,
     """
     env = aiohttp_jinja2.get_env(request.app)
     ctx = _context(request, context)
-    if block and request.method == 'GET' and 'bare' in request.query:
-        # ?bare — just the document in a minimal standalone page (no shell, no
-        # chrome): the footer popups (license, acknowledgements) render this way.
-        ctx['body'] = render_block(env, template_name, block, ctx)
-        body = env.get_template('bare.html').render(ctx)
-    elif block and (fragment or is_htmx(request)):
+    if block and (fragment or is_htmx(request)):
         # The pane fragment + the header chrome as out-of-band swaps (§6).
         oob_ctx = {**ctx, 'oob': True}
         body = (render_block(env, template_name, block, ctx)

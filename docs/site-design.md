@@ -36,11 +36,10 @@ page itself never scrolls; each middle pane scrolls its own overflow.
   every page: the brand (→ `/`) · primary nav `Solutions · Docs · Topics` · the
   **Actions** menu (page-specific verbs, §6) · **breadcrumbs** (the current path,
   ancestors clickable) · the **theme slider** (◐, light⇄dark) · the **user glyph**
-  (initial in a circle) opening a sub-menu: *Account* (`/account?bare=1`, the
-  **modal dialog** like the footer documents), *Change password* (`/password`,
-  auth tier, a **popup window** — its SRP scripts need a real document; current
-  password + new twice, distinct from the unauthenticated `/forgot` reset),
-  *Logout* (`POST /auth/logout`).
+  (initial in a circle) opening a sub-menu: *Account* (`/account`, left pane),
+  *Change password* (`/password`, auth tier — current password + new twice, SRP,
+  distinct from the unauthenticated `/forgot` reset; it renders **into the left
+  pane** as a bare fragment on `HX-Request`, §9), *Logout* (`POST /auth/logout`).
 - **Left pane** `#content` — the navigable region. Nav and in-page links `hx-get` a
   route and swap it here; the URL updates (`hx-push-url`) so every view is
   deep-linkable. Scrolls **both axes** when content overflows.
@@ -52,10 +51,11 @@ page itself never scrolls; each middle pane scrolls its own overflow.
   **vertically** inside the iframe when needed (wired in Phase 6).
 - **Footer** (fixed) — © Vikas Munshi · license (`/about/license`) ·
   terms of use (`/terms`) · acknowledgements (`/about/acknowledgements`).
-  Footer documents open in the shell's **modal dialog** (a native `<dialog>`,
-  filled by fetching the `?bare` page — just the document, no shell/chrome),
-  leaving the shell — and the terminal session — untouched; Esc/✕/backdrop
-  close it. (`/about/readme` stays routable but is not linked.)
+  Footer documents swap **into the left pane** like any other navigation
+  (`hx-get` → `#content`), never touching the shell or the terminal.
+  license/acknowledgements are content routes; terms is the auth tier, which
+  returns a bare fragment on `HX-Request` (§9). (`/about/readme` stays routable
+  but is not linked.)
 
 **Layout principle.** `body` is a viewport-high grid (`auto 1fr auto`); the two
 middle panes are **equal width and height** (`1fr 1fr`), each an independent
@@ -183,9 +183,12 @@ selection.
   card an icon, a title, and a blurb that earns its place (§3). The landing's
   cards are the entry points (Solutions · Docs · Topics · Terminal); the docs and
   topics indexes list their pages the same way.
-- **Solutions (`/solutions/`)** — the 10×10 century grids, **two grids per row**,
-  cells shaded by difficulty with **per-theme heat tokens** (§2), title + pct on
-  hover. Page action: **Upload progress** → `/edit/solutions/`.
+- **Solutions (`/solutions/`)** — the 10×10 century grids: **square cells** (and
+  so square grids, via `aspect-ratio`), packed **as many per row as fit** — ~3 in
+  a normal left pane, fewer/narrower or more/wider (CSS `auto-fill`, the
+  old-web-server flex-wrap in grid form). Cells shaded by difficulty with
+  **per-theme heat tokens** (§2), title + pct on hover. Page action: **Upload
+  progress** → `/edit/solutions/`.
 - **Progress upload (`/edit/solutions/`)** — an **empty** paste buffer (this is a
   *replace*, not an edit — the previous `.progress.html` is superseded wholesale);
   parse-or-reject before anything lands, success answers with the refreshed grids.
@@ -217,7 +220,7 @@ a **direct** hit on the same path returns the whole shell with that pane pre-pop
 
 | Method | Path | Renders | Requires |
 |---|---|---|---|
-| GET | `/solutions/` | `problems.json` as **10×10 century grids** (two per row, per-theme heat) + summary | `solutions:read` |
+| GET | `/solutions/` | `problems.json` as **10×10 century grids** (square, auto-fit ~3/row, per-theme heat) + summary | `solutions:read` |
 | GET | `/solutions/{n}/` | the `solution_dir`: statement, then test-cases · results · files · notes (§7) | `solutions:read` |
 | GET | `/solutions/{n}/{filename}` | one problem file (solution source, `statement.html`, `resources/*`) | `solutions:read` |
 | GET | `/docs/` | docs index (card grid) | `docs:read` |
@@ -275,9 +278,13 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
   reload-safe.
 - **Navigation refreshes only the left pane.** Every in-app link swaps `#content`
   (htmx, incl. back/forward via its history handling); the shell (header, footer,
-  the `#ws` iframe) is never re-rendered by navigation. Account and the footer
-  documents open in the **modal dialog**, change password in a **popup window**;
-  only logout deliberately leaves the shell.
+  the `#ws` iframe) is never re-rendered by navigation. Account, the footer
+  documents, terms, and change password **all swap into the left pane** — the
+  auth-tier pages (terms, password) return a bare fragment on `HX-Request` so
+  they render in `#content` without nesting a page, and the change-password
+  fragment carries its SRP scripts (htmx executes them; `srp.js` is idempotent,
+  and on success `password.js` swaps the pane to `/account`). Only logout
+  deliberately leaves the shell.
 - **The terminal survives the shell (Phase 6 contract).** A *full* load (F5,
   address-bar entry, tab close) is the only thing that can reach the terminal —
   and the terminal iframe guards it exactly like the parked front end: a
@@ -292,7 +299,8 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
 - **Terminal persistence.** htmx swaps only `#content`; `#ws` (the terminal) is untouched
   by navigation and keeps its session.
 - **Nav (fixed header):** brand → `/`, `Solutions` → `/solutions/`, `Docs` → `/docs/`,
-  `Topics` → `/topics/`, user glyph → account (popup) / password / logout. Profile-gated
+  `Topics` → `/topics/`, user glyph → account / password / logout (all left pane
+  but logout). Profile-gated
   affordances (the Actions menu, §6) are hidden from profiles that lack them; the
   route still enforces the gate server-side — hiding is UX, `requires()` is the
   boundary.

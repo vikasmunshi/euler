@@ -54,6 +54,16 @@ _FLAGS = {
 }
 
 
+def _is_htmx(request: web.Request) -> bool:
+    """True when the content shell fetched this page for its left pane (``HX-Request``).
+
+    The terms / change-password pages then answer with a bare fragment instead
+    of the full auth card, so the shell can swap it into ``#content`` without
+    nesting a second page.
+    """
+    return request.headers.get('HX-Request', '').lower() == 'true'
+
+
 def _bad_link(request: web.Request) -> web.Response:
     """The one generic answer for any invalid/expired/foreign token."""
     return aiohttp_jinja2.render_template('message.html', request, {
@@ -199,11 +209,16 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         Current password + new password twice; the browser proves the current
         password over SRP and derives the new verifier locally (no mailbox
         round-trip — that is the *forgot* flow's job). No session → login.
+
+        On ``HX-Request`` it returns a **bare fragment** (form + SRP scripts +
+        OOB breadcrumb) so the content shell can swap it straight into the left
+        pane; a direct visit gets the full auth page (the no-JS/deep-link form).
         """
         identity = service.session_identity(request)
         if identity is None:
             raise web.HTTPFound('/login')
-        return aiohttp_jinja2.render_template('password.html', request, {'email': identity[0]})
+        template = 'password_fragment.html' if _is_htmx(request) else 'password.html'
+        return aiohttp_jinja2.render_template(template, request, {'email': identity[0]})
 
     # ── forgot (self-service reset entry, DD-7) ───────────────────────────────────
 
@@ -212,8 +227,12 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
 
     async def terms_page(request: web.Request) -> web.Response:
         """Standalone view of the Terms of Use (the same _terms.html partial the
-        registration page embeds)."""
-        return aiohttp_jinja2.render_template('terms.html', request, {
+        registration page embeds).
+
+        On ``HX-Request`` it returns a bare fragment (the terms + OOB breadcrumb)
+        for the content shell's left pane; a direct visit gets the full page."""
+        template = 'terms_fragment.html' if _is_htmx(request) else 'terms.html'
+        return aiohttp_jinja2.render_template(template, request, {
             'terms_version': service.config.terms_version})
 
     async def forgot_submit(request: web.Request) -> web.Response:

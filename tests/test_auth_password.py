@@ -71,6 +71,29 @@ class ChangePasswordTests(AioHTTPTestCase):
         self.assertIn(_EMAIL, body)
         self.assertIn('Current password', body)
         self.assertIn('/assets/password.js', body)
+        self.assertIn('<!DOCTYPE', body)                     # the full standalone page
+
+    @unittest_run_loop
+    async def test_htmx_gets_a_bare_fragment(self) -> None:
+        # The content shell fetches /password (and /terms) for its left pane: a
+        # bare fragment (no auth card / no <html>), with the OOB breadcrumb and
+        # the external SRP scripts htmx will execute.
+        resp = await self.client.get('/password', headers={'HX-Request': 'true'},
+                                     cookies={policy.SESSION_COOKIE: self._session()})
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertNotIn('<!DOCTYPE', body)                  # a fragment…
+        self.assertIn('id="password-form"', body)            # …just the form…
+        self.assertIn('/assets/srp.js', body)                # …+ the SRP scripts…
+        self.assertIn('hx-swap-oob', body)                   # …+ the OOB crumb
+        self.assertIn(_EMAIL, body)
+
+        resp = await self.client.get('/terms', headers={'HX-Request': 'true'})
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertNotIn('<!DOCTYPE', body)
+        self.assertIn('invitation-only', body)               # the terms text
+        self.assertIn('hx-swap-oob', body)
 
     @unittest_run_loop
     async def test_endpoint_requires_session(self) -> None:

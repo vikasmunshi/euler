@@ -66,13 +66,13 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('id="actions"', body)
         self.assertIn('id="theme-toggle"', body)            # the slider
         self.assertIn('/auth/logout', body)                 # the user menu
-        self.assertIn('/about/license?bare=1', body)        # footer → modal dialog…
-        self.assertIn('data-dialog', body)
-        self.assertIn('id="doc-dialog"', body)              # …the shell's <dialog>
+        self.assertIn('hx-get="/about/license"', body)      # footer → left pane…
         self.assertNotIn('/about/readme', body)             # …without readme
+        self.assertNotIn('data-dialog', body)               # no modal, no popup
+        self.assertNotIn('data-popup', body)
         self.assertIn('>license</a>', body)                 # label, not "MIT license"
-        self.assertIn('/account?bare=1', body)              # account in the dialog too
-        self.assertIn('data-popup', body)                   # /password stays a window
+        self.assertIn('hx-get="/account"', body)            # account swaps the pane
+        self.assertIn('hx-get="/password"', body)           # change password too
         self.assertIn('/vendor/htmx.min.js', body)          # htmx wired
         self.assertIn('integrity="sha384-', body)           # with SRI
 
@@ -109,17 +109,17 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertEqual(resp.status, 401)
 
     @unittest_run_loop
-    async def test_bare_mode_renders_just_the_document(self) -> None:
-        for path, marker in (('/about/license?bare=1', 'MIT License'),
-                             ('/account?bare=1', 'users:read')):
-            resp = await self.client.get(path, headers=_ADMIN)
+    async def test_footer_and_account_swap_into_the_pane(self) -> None:
+        # htmx fetch of a footer/account route → the #content fragment + OOB chrome
+        for path, marker in (('/about/license', 'MIT License'),
+                             ('/about/acknowledgements', 'htmx'),
+                             ('/account', 'users:read')):
+            resp = await self.client.get(path, headers={**_ADMIN, **_HTMX})
             self.assertEqual(resp.status, 200, path)
             body = await resp.text()
             self.assertIn(marker, body, path)
-            self.assertIn('class="bare"', body, path)        # the minimal wrapper…
-            self.assertNotIn('app-header', body, path)       # …no shell
-            self.assertNotIn('id="ws"', body, path)
-            self.assertNotIn('hx-swap-oob', body, path)      # …no chrome
+            self.assertNotIn('<!DOCTYPE html>', body, path)  # a fragment, not the shell
+            self.assertIn('hx-swap-oob', body, path)         # with the header chrome
 
     @unittest_run_loop
     async def test_no_profile_is_unauthorized(self) -> None:

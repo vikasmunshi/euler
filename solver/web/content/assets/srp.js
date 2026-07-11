@@ -12,7 +12,12 @@
  */
 'use strict';
 
-const SRP = (() => {
+// globalThis.SRP, defined once and idempotently: htmx may re-inject this script
+// when the change-password fragment swaps into the content pane a second time. No
+// top-level `const SRP` (that would redeclare on re-execution) — the guard makes
+// a second run a no-op; unqualified `SRP` in the sibling scripts resolves here.
+// globalThis (not window) so the Node interop test can load it too.
+globalThis.SRP = globalThis.SRP || (() => {
   const N_HEX =
     'AC6BDB41324A9A9BF166DE5E1389582FAF72B6651987EE07FC3192943DB56050' +
     'A37329CBB4A099ED8193E0757767A13DD52312AB4B03310DCD7F48A9DA04FD50' +
@@ -144,4 +149,4 @@ const SRP = (() => {
   return { computeVerifier, startLogin, normalizeEmail };
 })();
 
-if (typeof module !== 'undefined' && module.exports) module.exports = SRP;  // node (tests)
+if (typeof module !== 'undefined' && module.exports) module.exports = globalThis.SRP;  // node (tests)
