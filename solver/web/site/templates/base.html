@@ -41,16 +41,24 @@
               title="solver terminal"></iframe>
     </aside>
   </div>
-  {# Footer documents open in a small popup window (site.js), leaving the shell
-     — and the terminal session — untouched; ?bare renders just the document. #}
+  {# Footer documents open in the modal dialog below (site.js data-dialog),
+     leaving the shell — and the terminal session — untouched; the ?bare pages
+     are what the dialog fetches (and the no-JS fallback destination). #}
   <footer class="app-footer">
     <span class="muted">©&nbsp;Vikas&nbsp;Munshi</span>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/about/license?bare=1" data-popup>license</a>
+    <a href="/about/license?bare=1" data-dialog>license</a>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/terms" data-popup>terms of use</a>
+    <a href="/terms" data-dialog>terms of use</a>
     <span class="fsep" aria-hidden="true">·</span>
-    <a href="/about/acknowledgements?bare=1" data-popup>acknowledgements</a>
+    <a href="/about/acknowledgements?bare=1" data-dialog>acknowledgements</a>
   </footer>
+  {# The shell's one modal (footer documents, account): native <dialog>, filled
+     by site.js from the link's ?bare page; Esc / ✕ / backdrop close it. #}
+  <dialog id="doc-dialog" class="doc-dialog">
+    <button class="dialog-close" type="button" data-action="close-dialog"
+            aria-label="close">&#10005;</button>
+    <div id="doc-dialog-body" class="dialog-body"></div>
+  </dialog>
 </body>
 </html>

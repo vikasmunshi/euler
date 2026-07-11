@@ -66,11 +66,13 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('id="actions"', body)
         self.assertIn('id="theme-toggle"', body)            # the slider
         self.assertIn('/auth/logout', body)                 # the user menu
-        self.assertIn('/about/license?bare=1', body)        # footer popups…
-        self.assertIn('data-popup', body)
+        self.assertIn('/about/license?bare=1', body)        # footer → modal dialog…
+        self.assertIn('data-dialog', body)
+        self.assertIn('id="doc-dialog"', body)              # …the shell's <dialog>
         self.assertNotIn('/about/readme', body)             # …without readme
         self.assertIn('>license</a>', body)                 # label, not "MIT license"
-        self.assertIn('/account?bare=1', body)              # account is a popup too
+        self.assertIn('/account?bare=1', body)              # account in the dialog too
+        self.assertIn('data-popup', body)                   # /password stays a window
         self.assertIn('/vendor/htmx.min.js', body)          # htmx wired
         self.assertIn('integrity="sha384-', body)           # with SRI
 

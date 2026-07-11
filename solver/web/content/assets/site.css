@@ -452,7 +452,38 @@ dl.account dd { margin: 0; }
 }
 .term-body .cursor { color: var(--accent); }
 
-/* ── Bare pages (the ?bare popups: license, acknowledgements, account) ───── */
+/* ── The shell's modal (footer documents, account) ───────────────────────── */
+dialog.doc-dialog {
+  width: min(46rem, 92vw);
+  max-height: 84vh;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+}
+dialog.doc-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+.dialog-close {
+  position: sticky;
+  top: 0.5rem;
+  float: right;
+  margin: 0.5rem 0.6rem 0 0;
+  z-index: 2;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 1.8rem;
+  height: 1.8rem;
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+.dialog-close:hover { color: var(--text); border-color: var(--accent); }
+.dialog-body { padding: 0.9rem 1.1rem 1.1rem; overflow: auto; max-height: calc(84vh - 1rem); }
+.dialog-body .panel { margin-bottom: 0.8rem; }
+
+/* ── Bare pages (the ?bare fetch source / no-JS fallback) ────────────────── */
 body.bare {
   display: block;
   height: auto;

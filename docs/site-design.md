@@ -36,10 +36,11 @@ page itself never scrolls; each middle pane scrolls its own overflow.
   every page: the brand (→ `/`) · primary nav `Solutions · Docs · Topics` · the
   **Actions** menu (page-specific verbs, §6) · **breadcrumbs** (the current path,
   ancestors clickable) · the **theme slider** (◐, light⇄dark) · the **user glyph**
-  (initial in a circle) opening a sub-menu: *Account* (`/account?bare=1`, a
-  **popup** like the footer documents), *Change password* (`/password`, auth
-  tier: current password + new twice, SRP — distinct from the unauthenticated
-  `/forgot` reset), *Logout* (`POST /auth/logout`).
+  (initial in a circle) opening a sub-menu: *Account* (`/account?bare=1`, the
+  **modal dialog** like the footer documents), *Change password* (`/password`,
+  auth tier, a **popup window** — its SRP scripts need a real document; current
+  password + new twice, distinct from the unauthenticated `/forgot` reset),
+  *Logout* (`POST /auth/logout`).
 - **Left pane** `#content` — the navigable region. Nav and in-page links `hx-get` a
   route and swap it here; the URL updates (`hx-push-url`) so every view is
   deep-linkable. Scrolls **both axes** when content overflows.
@@ -51,9 +52,10 @@ page itself never scrolls; each middle pane scrolls its own overflow.
   **vertically** inside the iframe when needed (wired in Phase 6).
 - **Footer** (fixed) — © Vikas Munshi · license (`/about/license`) ·
   terms of use (`/terms`) · acknowledgements (`/about/acknowledgements`).
-  Footer documents open in a **popup window** (`?bare` renders just the
-  document, no shell/chrome), leaving the shell — and the terminal session —
-  untouched. (`/about/readme` stays routable but is not linked.)
+  Footer documents open in the shell's **modal dialog** (a native `<dialog>`,
+  filled by fetching the `?bare` page — just the document, no shell/chrome),
+  leaving the shell — and the terminal session — untouched; Esc/✕/backdrop
+  close it. (`/about/readme` stays routable but is not linked.)
 
 **Layout principle.** `body` is a viewport-high grid (`auto 1fr auto`); the two
 middle panes are **equal width and height** (`1fr 1fr`), each an independent
@@ -273,9 +275,9 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
   reload-safe.
 - **Navigation refreshes only the left pane.** Every in-app link swaps `#content`
   (htmx, incl. back/forward via its history handling); the shell (header, footer,
-  the `#ws` iframe) is never re-rendered by navigation. Account, change password,
-  and the footer documents open as **popups**; only logout deliberately leaves
-  the shell.
+  the `#ws` iframe) is never re-rendered by navigation. Account and the footer
+  documents open in the **modal dialog**, change password in a **popup window**;
+  only logout deliberately leaves the shell.
 - **The terminal survives the shell (Phase 6 contract).** A *full* load (F5,
   address-bar entry, tab close) is the only thing that can reach the terminal —
   and the terminal iframe guards it exactly like the parked front end: a
