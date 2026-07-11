@@ -39,7 +39,7 @@
         <li class="menu-info">{{ subject.user or 'anon' }}
             <span class="pill pill-{{ subject.profile }}">{{ subject.profile }}</span></li>
         <li><a href="/account?bare=1" data-popup>Account</a></li>
-        <li><a href="/password">Change password</a></li>
+        <li><a href="/password" data-popup>Change password</a></li>
         <li><form method="post" action="/auth/logout"><button type="submit">Logout</button></form></li>
       </ul>
     </details>

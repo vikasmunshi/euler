@@ -748,8 +748,11 @@ which also covers htmx's runtime indicator styles.)* **Verdict: adopt** (Phase 5
 **per-response nonce** for any unavoidable inline `<script>`/`<style>`; the app that
 renders the page mints the nonce and stamps it into both the header and the template.
 Baseline: `default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
-img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none';
+img-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'none';
 object-src 'none'` — **scripts** allow no `unsafe-inline` and no `unsafe-eval`, ever.
+`frame-ancestors` is `'self'` (5e): the app shell frames its own `/terminal`
+document so the Phase-6 terminal lives in an isolated browsing context
+([site-design decision 14](site-design.md)); cross-origin embedding stays blocked.
 **Styles carry `'unsafe-inline'` as a recorded exception (5e):** MathJax v3 (and htmx's
 indicator rules) inject their stylesheets at runtime with **no nonce hook** — verified
 empirically (headless Chrome logged the CSP violations; the math rendered garbled under

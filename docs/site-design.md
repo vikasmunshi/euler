@@ -43,9 +43,12 @@ page itself never scrolls; each middle pane scrolls its own overflow.
 - **Left pane** `#content` — the navigable region. Nav and in-page links `hx-get` a
   route and swap it here; the URL updates (`hx-push-url`) so every view is
   deep-linkable. Scrolls **both axes** when content overflows.
-- **Right pane** `#ws` — the PTY terminal (Phase 6). It talks only to `/ws`;
-  **left-pane navigation never touches `/ws`**, so the terminal session persists
-  while content swaps. Scrolls **vertically** when needed (wired in Phase 6).
+- **Right pane** `#ws` — a same-origin **iframe** onto `/terminal`, its own
+  document (the pattern proven by the parked front end, where the terminal and
+  the content lived in separate browsing contexts). The terminal talks only to
+  `/ws`; **left-pane navigation is htmx-only and can never touch the iframe's
+  document**, so the session persists structurally, not by discipline. Scrolls
+  **vertically** inside the iframe when needed (wired in Phase 6).
 - **Footer** (fixed) — © Vikas Munshi · license (`/about/license`) ·
   terms of use (`/terms`) · acknowledgements (`/about/acknowledgements`).
   Footer documents open in a **popup window** (`?bare` renders just the
@@ -205,7 +208,8 @@ a **direct** hit on the same path returns the whole shell with that pane pre-pop
 
 | Method | Path | Renders | Requires |
 |---|---|---|---|
-| GET | `/` | the app shell; left pane = the **landing** (default content), right pane = ws | `web-content:read` |
+| GET | `/` | the app shell; left pane = the **landing** (default content), right pane = the `/terminal` iframe | `web-content:read` |
+| GET | `/terminal` | the right pane's standalone document (placeholder now; xterm + `/ws` in Phase 6) | `web-content:read` |
 
 ### 8b — read (left-pane content) ✅
 
@@ -267,9 +271,19 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
   `#content` fragment on `HX-Request` (plus the §6 chrome out-of-band), or the full
   shell with `#content` pre-populated on a direct visit — so links are shareable and
   reload-safe.
-- **Navigation refreshes only the left pane.** Every in-app link swaps `#content`;
-  the shell (header, footer, `#ws`) is never re-rendered by navigation. Only the
-  auth-tier destinations (change password, logout, terms) leave the shell.
+- **Navigation refreshes only the left pane.** Every in-app link swaps `#content`
+  (htmx, incl. back/forward via its history handling); the shell (header, footer,
+  the `#ws` iframe) is never re-rendered by navigation. Account, change password,
+  and the footer documents open as **popups**; only logout deliberately leaves
+  the shell.
+- **The terminal survives the shell (Phase 6 contract).** A *full* load (F5,
+  address-bar entry, tab close) is the only thing that can reach the terminal —
+  and the terminal iframe guards it exactly like the parked front end: a
+  `beforeunload` confirmation armed while its WebSocket is open, disarmed on
+  disconnect/close and on deliberate exits (the shell posts
+  `{euler: 'disarm'}` to the iframe before logout). The PTY itself survives
+  server-side regardless (one persistent shell per user, replay on reconnect) —
+  the dialog protects the *scrollback and flow*, not the process.
 - **Canonical trailing slash.** Every GET path is canonical *with* its trailing slash
   (`/solutions/`, `/docs/`, `/topics/`, `/solutions/{n}/`, `/edit/solutions/`). A GET
   missing the slash → **301** redirect to the slashed form, so each view has one URL.
@@ -317,3 +331,9 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
     web tier. ✅
 13. **Index pages are card grids (5e)** in the §3 voice; the landing, docs index, and
     topics index share the visual system. ✅
+14. **The right pane is an iframe (5e → Phase 6).** `#ws` hosts `/terminal` — a
+    standalone document — so the terminal is isolated in its own browsing context
+    (the old-web-server pattern): htmx swaps, content-page JS, and history restores
+    cannot touch it, and its `beforeunload` guard owns the refresh/close
+    confirmation (§9). Consequence: CSP `frame-ancestors` moves `'none'` → `'self'`
+    (same-origin framing only; cross-origin embedding stays blocked). ✅

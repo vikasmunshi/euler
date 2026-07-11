@@ -59,7 +59,8 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('Project', body)                      # content
         self.assertIn('reader', body)                       # profile pill in the user menu
         self.assertIn('id="content"', body)                 # left pane (§1)
-        self.assertIn('id="ws"', body)                      # right pane (§1)
+        self.assertIn('id="ws"', body)                      # right pane (§1)…
+        self.assertIn('src="/terminal"', body)              # …an iframe (decision 14)
         self.assertIn('e<sup>iπ</sup>', body)               # the identity wordmark
         self.assertIn('id="crumbs"', body)                  # chrome placed in the header
         self.assertIn('id="actions"', body)
@@ -95,6 +96,17 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertEqual(resp.status, 404)
 
     @unittest_run_loop
+    async def test_terminal_is_a_standalone_document(self) -> None:
+        resp = await self.client.get('/terminal', headers=_READER)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('terminal-doc', body)                  # its own page…
+        self.assertNotIn('app-header', body)                 # …not the shell
+        self.assertNotIn('id="content"', body)
+        resp = await self.client.get('/terminal')            # still gated
+        self.assertEqual(resp.status, 401)
+
+    @unittest_run_loop
     async def test_bare_mode_renders_just_the_document(self) -> None:
         for path, marker in (('/about/license?bare=1', 'MIT License'),
                              ('/account?bare=1', 'users:read')):
@@ -122,7 +134,9 @@ class ContentServiceTests(AioHTTPTestCase):
         resp = await self.client.get('/', headers=_READER)
         csp = resp.headers.get('Content-Security-Policy', '')
         self.assertIn("default-src 'self'", csp)
-        self.assertIn("frame-ancestors 'none'", csp)
+        # 'self', not 'none': the shell frames its own /terminal (decision 14);
+        # cross-origin embedding stays blocked.
+        self.assertIn("frame-ancestors 'self'", csp)
         # Scripts stay strict — no inline execution, ever. Styles carry the
         # recorded 'unsafe-inline' exception for MathJax/htmx runtime styles (§4.7).
         self.assertRegex(csp, r"script-src 'self' 'nonce-[^']+'")

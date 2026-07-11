@@ -61,12 +61,23 @@
       var form = document.querySelector('#content form.editor-form');
       if (form) { form.requestSubmit(); }
     }
-    // data-popup links (footer documents, account) open in a small popup
-    // window, leaving the shell — and the terminal session — untouched.
+    // data-popup links (footer documents, account, change password) open in a
+    // small popup window, leaving the shell — and the terminal — untouched.
     var popup = ev.target.closest('a[data-popup]');
     if (popup) {
       ev.preventDefault();
       window.open(popup.href, 'euler-doc', 'popup=yes,width=760,height=840');
+    }
+  });
+
+  // A deliberate exit (logout) should not trip the terminal's beforeunload
+  // guard: tell the /terminal iframe to disarm before the shell navigates
+  // (the guard itself arrives with the Phase 6 terminal; the contract is here).
+  document.addEventListener('submit', function (ev) {
+    if (!ev.target.matches('form[action="/auth/logout"]')) { return; }
+    var terminal = document.getElementById('terminal');
+    if (terminal && terminal.contentWindow) {
+      terminal.contentWindow.postMessage({ euler: 'disarm' }, window.location.origin);
     }
   });
 })();

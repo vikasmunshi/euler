@@ -29,14 +29,16 @@
   {% include "_nav.html" %}
   {# The two equal middle panes (site-design §1): together with header + footer
      they fill the viewport exactly — the page never scrolls, each pane does.
-     The left pane is the htmx swap target; the right pane hosts the terminal
-     and is never swapped, so its session persists across navigation. #}
+     The left pane is the htmx swap target; the right pane is an iframe onto
+     /terminal — its own browsing context (decision 14), so navigation, htmx,
+     and content-page JS structurally cannot touch the terminal session. #}
   <div class="app-panes">
     <main id="content" class="pane pane-content" role="main">
       {% block content %}{% endblock %}
     </main>
     <aside id="ws" class="pane pane-ws" aria-label="solver terminal">
-      {% include "_ws.html" %}
+      <iframe id="terminal" class="terminal-frame" src="/terminal"
+              title="solver terminal"></iframe>
     </aside>
   </div>
   {# Footer documents open in a small popup window (site.js), leaving the shell

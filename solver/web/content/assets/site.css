@@ -225,7 +225,22 @@ summary.user-glyph::after { content: none; }
 }
 .pane { min-width: 0; min-height: 0; }
 .pane-content { overflow: auto; }            /* both axes when content overflows */
-.pane-ws { overflow-y: auto; }               /* vertical only (Phase 6 wires the rest) */
+.pane-ws { overflow: hidden; }               /* the iframe's document scrolls itself */
+.terminal-frame {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+/* /terminal — the iframe's own document: the frame fills it edge to edge */
+body.terminal-doc {
+  display: block;
+  height: 100vh;
+  overflow: hidden;
+}
+body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
 
 /* ── Panels & shared content styling ─────────────────────────────────────── */
 .panel {

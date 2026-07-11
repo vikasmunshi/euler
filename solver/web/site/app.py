@@ -177,6 +177,17 @@ async def healthz(request: web.Request) -> web.Response:
 
 
 @requires(VIEW)
+async def terminal(request: web.Request) -> web.StreamResponse:
+    """``GET /terminal`` — the right pane's own document (decision 14).
+
+    A standalone page in its own browsing context, framed by the shell at
+    ``#ws``: the Phase 6 xterm.js + ``/ws`` client replaces the placeholder,
+    with the beforeunload guard owning the refresh/close confirmation.
+    """
+    return render(request, 'terminal.html')
+
+
+@requires(VIEW)
 async def home(request: web.Request) -> web.StreamResponse:
     """The landing — the default ``#content`` (full shell on a direct visit)."""
     problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
@@ -558,6 +569,7 @@ def build_app(config: SiteConfig) -> web.Application:
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/', home),
+        web.get('/terminal', terminal),
         # solutions — canonical with the trailing slash (site-design §9)
         web.get('/solutions', redirect_slash),
         web.get('/solutions/', solutions_index),

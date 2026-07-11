@@ -31,13 +31,15 @@ NONCE_KEY: str = 'csp_nonce'
 #: (and htmx's indicator rules) inject their stylesheets at runtime with no
 #: nonce hook — verified blocked under bare ``'self'`` (headless-Chrome CSP
 #: violations, garbled math). Scripts stay strict: ``'self'`` + nonce only.
-#: See docs/secure-web-server.md §4.7 for the recorded trade-off.
+#: ``frame-ancestors 'self'`` (not ``'none'``): the app shell frames its own
+#: ``/terminal`` document (site-design §1/decision 14) — cross-origin embedding
+#: stays blocked. See docs/secure-web-server.md §4.7 for the recorded trade-offs.
 _POLICY = ("default-src 'self'; "
            "script-src 'self' 'nonce-{nonce}'; "
            "style-src 'self' 'unsafe-inline'; "
            "img-src 'self' data:; "
            "connect-src 'self'; "
-           "frame-ancestors 'none'; "
+           "frame-ancestors 'self'; "
            "base-uri 'none'; "
            "object-src 'none'")
 

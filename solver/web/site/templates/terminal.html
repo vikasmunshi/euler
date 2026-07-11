@@ -1,0 +1,23 @@
+{# The right pane's document (site-design §1/decision 14): a standalone page in
+   its own browsing context, framed by the shell at #ws. Phase 6 replaces the
+   placeholder with xterm.js + the /ws socket and arms the beforeunload guard
+   while connected (disarmed on close and on a {euler: 'disarm'} postMessage
+   from the shell before deliberate exits). Theme-aware via site.js. #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>solver terminal</title>
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/assets/site.css">
+  <script src="/assets/site.js"></script>
+</head>
+<body class="terminal-doc">
+  <div class="term-frame" role="img" aria-label="placeholder terminal">
+    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+    <pre class="term-body">euler:~$ <span class="cursor">▍</span>
+<span class="muted"># the solver shell attaches here over /ws (Phase 6)</span></pre>
+  </div>
+</body>
+</html>
