@@ -4,7 +4,7 @@
 headers, the requires-gate, the full-page-vs-block render contract, the baseline
 CSP, the 5b read routes (solutions grid, problem pages/files, docs, topics,
 account) with their canonical trailing-slash redirects, and the 5d edit routes
-(file editor through the 5c gate, delete, progress editor, notes regenerate) —
+(file editor through the 5c gate, delete, the progress editor) —
 the writes run against a scratch repo tree, never this checkout.
 
 Uses aiohttp's stdlib test utilities (no extra dep). The authorization policy is
@@ -206,6 +206,10 @@ class ContentServiceTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('/docs/user-guide', body)
         self.assertIn('/docs/ai', body)                     # the composed reference
+        # card line 1 = the filename title-cased; line 2 = the markdown title
+        self.assertIn('>User Guide<', body)
+        self.assertLess(body.index('/docs/commands-index'),  # sorted by filename…
+                        body.index('/docs/user-guide'))      # …commands- before user-
         resp = await self.client.get('/docs/user-guide', headers=_READER)
         self.assertEqual(resp.status, 200)
         page = await resp.text()
@@ -386,30 +390,19 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertIn('no problems parsed', await resp.text())
         self.assertFalse((self.scratch / 'solutions' / '.progress.html').exists())
 
-    # ── notes regenerate ─────────────────────────────────────────────────────
-
-    @unittest_run_loop
-    async def test_regenerate_gated_from_contributor(self) -> None:
-        resp = await self.client.post('/solutions/9/notes/regenerate', headers=_CONTRIBUTOR)
-        self.assertEqual(resp.status, 403)
-
-    @unittest_run_loop
-    async def test_regenerate_returns_notes_block(self) -> None:
-        resp = await self.client.post('/solutions/9/notes/regenerate', headers=_MAINTAINER)
-        self.assertEqual(resp.status, 200)
-        body = await resp.text()
-        self.assertIn('id="notes"', body)                            # the notes block
-        self.assertIn('claude-api docs 9', body)                     # the shell pointer
-
     # ── the Actions menu follows the profile (§6: hiding is UX, the gate is the boundary) ──
 
     @unittest_run_loop
-    async def test_actions_follow_the_profile(self) -> None:
-        # problem page: Regenerate is maintainer-only (ai:execute)
-        page = await (await self.client.get('/solutions/0009/', headers=_READER)).text()
-        self.assertNotIn('Regenerate notes', page)
+    async def test_actions_menu_always_present(self) -> None:
+        # The problem page carries no actions — the menu is still shown (muted,
+        # "No actions here"), never hidden, and never regenerate.
         page = await (await self.client.get('/solutions/0009/', headers=_MAINTAINER)).text()
-        self.assertIn('Regenerate notes', page)
+        self.assertIn('>Actions</summary>', page)
+        self.assertIn('No actions here', page)
+        self.assertNotIn('Regenerate', page)
+
+    @unittest_run_loop
+    async def test_actions_follow_the_profile(self) -> None:
         # file view: Edit needs write, Delete needs delete
         page = await (await self.client.get('/solutions/0009/p0009_s0.py', headers=_READER)).text()
         self.assertNotIn('hx-delete', page)

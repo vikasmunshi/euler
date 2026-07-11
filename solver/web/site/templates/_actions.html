@@ -1,12 +1,13 @@
 {# The Actions menu (site-design §6): the current page's verbs, filtered by the
    subject's grants in the handler (hiding is UX; requires() is the boundary).
-   Re-sent hx-swap-oob with every fragment; hides itself when the page has none.
+   Re-sent hx-swap-oob with every fragment. Always visible — when the page has
+   no verbs the menu is shown muted with a "No actions here" note (never hidden).
    Each item: {label, kind: get|post|delete|submit, path?, target?, swap?, confirm?}. #}
 <div id="actions" class="actions"{% if oob %} hx-swap-oob="true"{% endif %}>
-  {% if actions %}
-  <details class="menu">
+  <details class="menu actions-menu{% if not actions %} is-empty{% endif %}">
     <summary>Actions</summary>
     <ul class="menu-list">
+      {% if actions %}
       {% for a in actions %}
       <li>
         {% if a.kind == 'get' %}
@@ -24,7 +25,9 @@
         {% endif %}
       </li>
       {% endfor %}
+      {% else %}
+      <li class="menu-info">No actions here</li>
+      {% endif %}
     </ul>
   </details>
-  {% endif %}
 </div>

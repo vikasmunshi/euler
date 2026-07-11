@@ -34,7 +34,9 @@
     {% if subject %}
     <details class="menu user-menu">
       <summary class="user-glyph" title="{{ subject.user or subject.profile }}">
-        {{ (subject.user or subject.profile)[:1] | upper }}</summary>
+        <svg viewBox="0 0 24 24" aria-label="account"><path fill="currentColor"
+          d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+      </summary>
       <ul class="menu-list menu-right">
         <li class="menu-info">{{ subject.user or 'anon' }}
             <span class="pill pill-{{ subject.profile }}">{{ subject.profile }}</span></li>

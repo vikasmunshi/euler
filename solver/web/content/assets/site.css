@@ -118,6 +118,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
 .crumbs a:hover { color: var(--accent); }
 .crumb-sep { color: var(--border); }
 .crumb-leaf { color: var(--text); overflow: hidden; text-overflow: ellipsis; }
+.crumb-home { width: 1.05rem; height: 1.05rem; vertical-align: -0.15em; display: inline-block; }
 
 /* dropdown menus (Actions, user) — native <details>, closed by site.js */
 details.menu { position: relative; }
@@ -130,9 +131,11 @@ details.menu > summary {
   user-select: none;
 }
 details.menu > summary::-webkit-details-marker { display: none; }
-details.menu > summary::after { content: ' ▾'; font-size: 0.75em; }
 details.menu[open] > summary,
 details.menu > summary:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+/* Actions is always present; when the page has no verbs it reads muted. */
+.actions-menu.is-empty > summary { color: var(--border); }
+.actions-menu.is-empty > summary:hover { background: none; color: var(--muted); }
 .menu-list {
   position: absolute;
   top: calc(100% + 6px);
@@ -176,9 +179,8 @@ summary.user-glyph {
   border: 1px solid var(--border);
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   color: var(--accent-ink);
-  font-weight: 700;
 }
-summary.user-glyph::after { content: none; }
+summary.user-glyph svg { width: 1.15rem; height: 1.15rem; display: block; }
 
 /* the theme slider: ◐ off = light, on = dark */
 .theme-switch { display: inline-flex; align-items: center; cursor: pointer; }

@@ -1,15 +1,8 @@
-{# The Notes panel (#notes): included by problem.html and returned whole as the
-   regenerate response's block (the Regenerate verb lives in the Actions menu,
-   targeting #notes). notes.html is stored sanitised (the nh3 gate); math stays
-   TeX text. #}
-{% if notes or (subject and subject.has('ai:execute')) %}
+{# The Notes panel: included by problem.html. notes.html is stored sanitised
+   (the nh3 gate); math stays TeX text (MathJax typesets it). #}
+{% if notes %}
 <section class="panel" id="notes">
   <h2>Notes</h2>
-  {% if status %}<p class="status {{ 'ok' if ok else 'err' }}">{{ status }}</p>{% endif %}
-  {% if notes %}
   <div class="notes">{{ notes | safe }}</div>
-  {% else %}
-  <p class="muted">No notes for this problem yet.</p>
-  {% endif %}
 </section>
 {% endif %}

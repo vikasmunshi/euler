@@ -20,7 +20,7 @@ page itself never scrolls; each middle pane scrolls its own overflow.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions ▾ │ crumbs… │ ◐ │ 🯅 ▾ │  fixed
+│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs… │ ◐ │ 🯅 │  fixed
 ├──────────────────────────────────────┬───────────────────────────────────────┤
 │  LEFT PANE  (#content)                │  RIGHT PANE  (#ws)                    │
 │  navigable content, htmx-swapped;     │  the solver PTY terminal over /ws     │  equal
@@ -34,9 +34,11 @@ page itself never scrolls; each middle pane scrolls its own overflow.
 
 - **Header** (fixed) — one control surface, grouped by **separators**, identical on
   every page: the brand (→ `/`) · primary nav `Solutions · Docs · Topics` · the
-  **Actions** menu (page-specific verbs, §6) · **breadcrumbs** (the current path,
-  ancestors clickable) · the **theme slider** (◐, light⇄dark) · the **user glyph**
-  (initial in a circle) opening a sub-menu: *Account* (`/account`, left pane),
+  **Actions** menu (page-specific verbs, §6 — labelled just "Actions", no
+  caret, **always present** even when the page has none) · **breadcrumbs** (the
+  current path; the leading crumb is a **house glyph**, ancestors clickable) ·
+  the **theme slider** (◐, light⇄dark) · the **user glyph** (a person icon in a
+  circle) opening a sub-menu: *Account* (`/account`, left pane),
   *Change password* (`/password`, auth tier — current password + new twice, SRP,
   distinct from the unauthenticated `/forgot` reset; it renders **into the left
   pane** as a bare fragment on `HX-Request`, §9), *Logout* (`POST /auth/logout`).
@@ -160,16 +162,17 @@ page: the handler supplies `crumbs` (ancestors clickable, leaf plain) and
 
 **Actions** is a dropdown of the current page's verbs, populated per route and
 **filtered by the subject's grants** (hidden = UX; `requires()` on the backing
-route remains the boundary):
+route remains the boundary). It is **always shown** (labelled "Actions", no
+caret); a page with no verbs reads muted and opens to "No actions here":
 
 | Page | Actions (floor) |
 |---|---|
 | `/solutions/` | Upload progress (`solutions:execute`) |
-| `/solutions/{n}/` | Regenerate notes (`ai:execute`) |
+| `/solutions/{n}/` | — (none) |
 | `/solutions/{n}/{file}` (editable) | Edit (`solutions:write`) · Delete (`solutions:delete`, bare `.py`/`.c`) |
 | `/edit/solutions/{n}/{file}` | Save (`solutions:write`) · Delete (`solutions:delete`) |
 | `/edit/solutions/` | Save (`solutions:execute`) |
-| elsewhere | — (the menu hides when empty) |
+| elsewhere | — (menu shown, empty) |
 
 *Save* submits the page's editor form; *Delete* confirms, then swaps the problem
 page back into `#content`. Menus (`Actions`, the user glyph) are native
@@ -182,7 +185,9 @@ selection.
   (kicker · title · one wry lede) over a **card grid, two/three per row** — each
   card an icon, a title, and a blurb that earns its place (§3). The landing's
   cards are the entry points (Solutions · Docs · Topics · Terminal); the docs and
-  topics indexes list their pages the same way.
+  topics indexes list their pages the same way. **Index cards** show the
+  **filename** (separators → spaces, title-cased) as the first line and the
+  page's markdown `#` title as the second, **sorted by filename**.
 - **Solutions (`/solutions/`)** — the 10×10 century grids: **square cells** (and
   so square grids, via `aspect-ratio`), packed **as many per row as fit** — ~3 in
   a normal left pane, fewer/narrower or more/wider (CSS `auto-fill`, the
@@ -248,12 +253,12 @@ stored-XSS; [DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)
 | GET | `/edit/solutions/{n}/{filename}` | code-editor for the file (bare editable names; the editor edits, `new` creates) | `solutions:write` |
 | POST | `/edit/solutions/{n}/{filename}` | save → editor block + status (the buffer echoes the 8c **canonical** content) | `solutions:write` |
 | DELETE | `/edit/solutions/{n}/{filename}` | delete (bare `.py`/`.c` only) → the **problem page** fragment | `solutions:delete` |
-| POST | `/solutions/{n}/notes/regenerate` | AI-regenerate `notes.html` → notes block | `ai:execute` |
 
-**Writes always return a fragment** (never the shell). The regenerate route
-returns the notes block with a pointer to the shell path (`claude-api docs {n}`) —
-the content tier deliberately cannot reach the Claude API (no key on the service
-uid, no egress, no `ai` extra), so a real backend awaits a brokered design (Phase 6+).
+**Writes always return a fragment** (never the shell). *(A notes-regenerate
+route was removed: the content tier cannot reach the Claude API — no key on the
+service uid, no egress, no `ai` extra — so the affordance was dropped rather than
+ship a dead stub; regenerate notes via `claude-api docs {n}` in the shell. The
+`ai:execute` grant thus has no web surface today.)*
 
 ### execute — via the terminal (`/ws`), Phase 6
 

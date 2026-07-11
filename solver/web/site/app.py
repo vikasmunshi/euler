@@ -243,13 +243,8 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'answer': tc.get('answer', ''),
     } for tc in raw_cases if isinstance(tc, dict)]
 
-    actions: list[Action] = []
-    subject = _subject(request)
-    if subject.has('ai:execute'):
-        actions.append(Action(label='Regenerate notes', kind='post',
-                              path=f'/solutions/{number:04d}/notes/regenerate',
-                              target='#notes', swap='outerHTML',
-                              confirm=f'Regenerate notes for problem {number}?'))
+    # The problem page carries no page-actions (the notes-regenerate stub was
+    # dropped — it could not reach the Claude API from the content tier anyway).
     return {
         'number': number,
         'info': info,
@@ -259,7 +254,7 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'test_cases': test_cases,
         'results': content.load_json(sdir / 'results.json') or [],
         'crumbs': [_HOME, ('solutions', '/solutions/'), (f'{number:04d}', None)],
-        'actions': actions,
+        'actions': [],
     }
 
 
@@ -526,29 +521,6 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
     return response
 
 
-@requires('ai:execute')
-async def notes_regenerate(request: web.Request) -> web.StreamResponse:
-    """``POST /solutions/{n}/notes/regenerate`` — AI-regenerate → the notes block.
-
-    The content tier deliberately cannot reach the Claude API (no key on the
-    service uid, no egress off the Squid allowlist, no ``ai`` extra in the
-    system venv — the AR-1/AR-2 containment), so this returns the notes block
-    with a pointer to the shell path until a brokered backend exists.
-    """
-    number = _problem_number(request)
-    sdir = content.solution_dir(request.app[CONFIG_KEY].repo_root, number)
-    try:
-        notes = (sdir / 'notes.html').read_text(encoding='utf-8')
-    except OSError:
-        notes = ''
-    return render(request, '_notes.html', {
-        'number': number, 'notes': notes,
-        'status': ('AI regeneration is not wired to the content service — run '
-                   f'claude-api docs {number} in the solver shell'),
-        'ok': False,
-    })
-
-
 # ── app wiring ────────────────────────────────────────────────────────────────────────
 
 def build_app(config: SiteConfig) -> web.Application:
@@ -575,7 +547,6 @@ def build_app(config: SiteConfig) -> web.Application:
         web.get('/solutions/', solutions_index),
         web.get(r'/solutions/{n:\d+}', redirect_slash),
         web.get(r'/solutions/{n:\d+}/', problem_page),
-        web.post(r'/solutions/{n:\d+}/notes/regenerate', notes_regenerate),
         web.get(r'/solutions/{n:\d+}/{filename:.+}', problem_file),
         # docs + topics + about
         web.get('/docs', redirect_slash),
