@@ -240,7 +240,13 @@ def build_public_app(service: AuthService) -> web.Application:
         remember_cookie = request.cookies.get(policy.REMEMBER_COOKIE)
         if remember_cookie:
             service.remember.revoke(remember_cookie)
-        response = web.json_response({'ok': True})
+        # A browser form post (the site's user menu) lands on home — 303 turns
+        # the POST into GET /, where the now-absent session bounces to /login.
+        # A programmatic caller (no text/html Accept) keeps the JSON contract.
+        if 'text/html' in request.headers.get('Accept', ''):
+            response: web.Response = web.HTTPSeeOther('/')
+        else:
+            response = web.json_response({'ok': True})
         response.del_cookie(policy.SESSION_COOKIE, path='/')
         response.del_cookie(policy.REMEMBER_COOKIE, path='/')
         return response
