@@ -310,17 +310,32 @@ body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
   align-items: start;
 }
 .century { margin: 0; min-width: 0; }
-.century-label { margin: 0 0 0.35rem; font-size: 0.78rem; }
+/* Two-class selector so it beats `.panel h2` (which would otherwise force 1.12rem
+   and wrap the longest title). nowrap keeps every title on one line — the track
+   min-width below (14rem) comfortably holds the widest ("NNNN – NNNN (100
+   solved)") at this size, so all 11 grids stay identical in size. */
+.grid-row .century-label {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .century-grid {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  aspect-ratio: 1;                            /* the grid box is square: its height
+                                                 follows its width, so every grid is
+                                                 identical (all widths are equal) —
+                                                 the cells fill it via the 1fr rows,
+                                                 immune to per-cell rounding drift. */
   gap: 2px;
 }
 .cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;                            /* square cells → square grid */
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: 3px;
   font-size: 0.6rem;
