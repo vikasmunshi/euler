@@ -322,6 +322,10 @@ class EditRouteTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('editor-buffer', body)
         self.assertIn('return str(42)', body)
+        # the textarea is the CodeMirror mount + no-JS submit source (data-cm),
+        # tagged with the file language for highlighting
+        self.assertIn('data-cm', body)
+        self.assertIn('data-language="python"', body)
 
     @unittest_run_loop
     async def test_editor_gated_from_reader(self) -> None:

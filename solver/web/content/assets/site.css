@@ -427,6 +427,14 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   white-space: pre;
 }
 .editor-buffer:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* CodeMirror mounts here (site.js/editor.js), replacing the textarea on JS. */
+.cm-host {
+  height: min(65vh, 40rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.cm-host .cm-editor { height: 100%; }
 .editor-actions { display: flex; align-items: center; gap: 0.8rem; margin-top: 0.7rem; }
 .btn {
   border: 1px solid var(--border);

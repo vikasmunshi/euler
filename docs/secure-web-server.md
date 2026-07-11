@@ -753,10 +753,10 @@ object-src 'none'` — **scripts** allow no `unsafe-inline` and no `unsafe-eval`
 `frame-ancestors` is `'self'` (5e): the app shell frames its own `/terminal`
 document so the Phase-6 terminal lives in an isolated browsing context
 ([site-design decision 14](site-design.md)); cross-origin embedding stays blocked.
-**Styles carry `'unsafe-inline'` as a recorded exception (5e):** MathJax v3 (and htmx's
-indicator rules) inject their stylesheets at runtime with **no nonce hook** — verified
-empirically (headless Chrome logged the CSP violations; the math rendered garbled under
-bare `'self'`). The residual risk is CSS injection only, and the markup paths that could
+**Styles carry `'unsafe-inline'` as a recorded exception (5e):** MathJax v3, CodeMirror 6
+(the edit-page editor), and htmx's indicator rules all inject their stylesheets at
+runtime with **no nonce hook** — verified empirically (headless Chrome logged the CSP
+violations; the math rendered garbled under bare `'self'`). The residual risk is CSS injection only, and the markup paths that could
 carry it are closed upstream (Jinja autoescape; nh3 strips `style` tags/attrs from
 stored HTML) — script execution remains nonce-gated. **Caddy** adds the transport-level
 headers that need no per-response state (HSTS, `X-Content-Type-Options`,

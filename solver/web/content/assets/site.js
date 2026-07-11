@@ -46,7 +46,21 @@
       if (MathJax.typesetClear) { MathJax.typesetClear(); }
       MathJax.typesetPromise([document.getElementById('content')]);
     }
+    enhanceEditors();
   });
+
+  // Lazy-load the CodeMirror editor only when an edit page appears in the pane —
+  // its vendored graph (~630 KB) never loads on other pages. The module is cached
+  // after first import; each visit just (re)mounts on the fresh textarea.
+  var cm = null;
+  function enhanceEditors() {
+    var pane = document.getElementById('content') || document;
+    if (!pane.querySelector('textarea.editor-buffer[data-cm]')) { return; }
+    if (cm) { cm.mount(pane); return; }
+    import('/assets/editor.js').then(function (m) { cm = m; m.mount(pane); })
+      .catch(function () { /* no-JS/blocked: the plain textarea still works */ });
+  }
+  document.addEventListener('DOMContentLoaded', enhanceEditors);
 
   document.addEventListener('click', function (ev) {
     // Native <details> dropdowns (Actions, user menu): close on selection or

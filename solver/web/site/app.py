@@ -62,6 +62,10 @@ _MAX_BODY = 4 * 1024 * 1024
 #: test cases, results, or resources.
 _DELETABLE_SUFFIXES = frozenset({'.py', '.c'})
 
+#: File suffix → the editor language token (drives CodeMirror highlighting in
+#: editor.js). An unlisted suffix edits as plain text.
+_EDIT_LANGUAGES = {'.py': 'python', '.c': 'c', '.h': 'c', '.json': 'json', '.html': 'html'}
+
 #: A breadcrumb: (label, href) — href None marks the leaf.
 _Crumb = tuple[str, str | None]
 _HOME: _Crumb = ('home', '/')
@@ -438,6 +442,7 @@ def _editor_context(request: web.Request, number: int, filename: str, text: str,
                               confirm=f'Delete {filename}?'))
     return {
         'number': number, 'filename': filename, 'text': text,
+        'language': _EDIT_LANGUAGES.get(Path(filename).suffix, ''),
         'status': status, 'ok': ok, 'diagnostics': diagnostics or [],
         'crumbs': [_HOME, ('solutions', '/solutions/'),
                    (f'{number:04d}', f'/solutions/{number:04d}/'),

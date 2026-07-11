@@ -18,12 +18,15 @@
         hx-post="/edit/solutions/{{ '%04d' % number }}/{{ filename }}"
         hx-target="#content" hx-swap="innerHTML"
         method="post" action="/edit/solutions/{{ '%04d' % number }}/{{ filename }}">
-    <textarea class="editor-buffer" name="content" spellcheck="false"
-              autocomplete="off" autocapitalize="off">{{ text }}</textarea>
+    {# data-cm enhances this into a CodeMirror editor on JS (site.js lazy-loads it);
+       with no JS the plain textarea still edits and submits — same 5c gate. #}
+    <textarea class="editor-buffer" name="content" data-cm data-language="{{ language }}"
+              spellcheck="false" autocomplete="off" autocapitalize="off">{{ text }}</textarea>
     <div class="editor-actions">
       <button class="btn btn-primary" type="submit">Save</button>
       <span class="muted">every save passes the validation gate — Python is
-        auto-fixed and flake8-checked, C compiled, JSON re-indented, HTML sanitised</span>
+        auto-fixed and flake8-checked, C compiled, JSON re-indented, HTML sanitised.
+        <kbd>⌘/Ctrl-S</kbd> saves.</span>
     </div>
   </form>
 </section>
