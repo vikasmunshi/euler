@@ -3,8 +3,15 @@
 {% block content %}
 <section class="panel">
   <h1>Solutions</h1>
+  {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
   <p class="lead"><strong>{{ solved }}</strong> of <strong>{{ total }}</strong> problems solved.
-     <span class="muted">Shading follows difficulty; hover a cell for the title.</span></p>
+     <span class="muted">Shading follows difficulty; hover a cell for the title.</span>
+     {% if subject.has('solutions:execute') %}
+     <a class="file-action" href="/edit/solutions/"
+        hx-get="/edit/solutions/" hx-target="#content" hx-swap="innerHTML"
+        hx-push-url="true">edit progress</a>
+     {% endif %}
+  </p>
   {% for grid in grids %}
   <h2 class="century-label">{{ '%04d' % grid.start }} – {{ '%04d' % (grid.start + 99) }}
       <span class="muted">({{ grid.solved }} solved)</span></h2>

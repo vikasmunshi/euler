@@ -30,7 +30,9 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 >   `/docs/`, `/topics/`, `/account` — with canonical trailing-slash 301s.
 >   **5c landed**: the save gate (`site/validate.py`) — `.py`/`.c`/`.json` checks and the
 >   nh3 `.html` sanitize-and-store-clean, nh3 in the `web` extra with the kit check.
->   5d (edit routes) remains.
+>   **5d landed**: the edit routes — file editor + save/delete through the gate, the
+>   collection-level progress editor, notes-regenerate — writes always answering with
+>   fragments. **Phase 5 complete** per [site-design](site-design.md).
 > - ⬜ **Phase 6** — Web shell (not started).
 
 ## 1 · Purpose & scope
@@ -997,9 +999,14 @@ shippable sub-steps:
   re-indent, and **the `.html` gate via [nh3](#47--content-security-policy--nh3)**,
   sanitize-and-store-clean ([DD-10](#dd-10--phase-5-content-service-choices)) — nh3
   pinned in the `web` extra, import verified by `content.sh`'s deploy/status checks.
-- **5d — Edit paths.** htmx save/delete/eval/benchmark returning rendered fragments (via
-  the DD-10 block-render helper); benchmark progress via SSE. Every write goes through 5c;
-  every response carries CSP.
+- **5d — Edit paths.** ✅ htmx save/delete returning rendered fragments (via the DD-10
+  block-render helper) per the 5d route table in [site-design](site-design.md#5--routes):
+  the file editor (save echoes the gate's canonical content), the collection-level
+  progress editor (`/edit/solutions/`, parse-or-reject → grids), delete
+  (`solutions:delete`, bare `.py`/`.c` only), and notes-regenerate (`ai:execute`,
+  shell-pointer until a brokered AI backend exists). Every write goes through 5c;
+  every response carries CSP. *(eval/benchmark — and with them SSE progress — folded
+  into the Phase-6 `/ws` terminal, site-design §7.3/§7.6.)*
 
 **Design decisions:** the four content-service choices (nh3 gate, fragment mechanism,
 notes format, html5lib) are **resolved** — see

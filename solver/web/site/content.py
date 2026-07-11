@@ -15,7 +15,8 @@ from __future__ import annotations
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
            'resolve_file', 'load_json', 'render_markdown',
-           'list_docs', 'read_doc', 'list_topics', 'read_topic']
+           'list_docs', 'read_doc', 'list_topics', 'read_topic',
+           'parse_progress', 'save_progress', 'read_progress']
 
 import json
 import mimetypes
@@ -23,6 +24,7 @@ import re
 from pathlib import Path
 from typing import Any, NamedTuple
 
+from bs4 import BeautifulSoup, Tag
 from markdown_it import MarkdownIt
 
 #: Markdown renderer for the guides/topics (GitHub-flavoured: tables + strikethrough).
@@ -156,6 +158,90 @@ def load_json(path: Path) -> Any | None:
         return json.loads(path.read_text(encoding='utf-8'))
     except (OSError, json.JSONDecodeError, UnicodeDecodeError):
         return None
+
+
+# ── progress (the /edit/solutions/ collection editor, 5d) ──────────────────────────
+
+def parse_progress(text: str) -> dict[int, dict[str, str | int | bool]]:
+    """Parse a saved projecteuler.net progress page into problem metadata.
+
+    The config-free port of ``solver.utils.summary._parse_progress_html``,
+    operating on the submitted text (so a bad edit is rejected *before* anything
+    lands on disk). Returns ``{number: {title, level, pct, solved, date}}`` —
+    ``level``/``pct`` are ints or ``''`` when unknown, matching the shell's
+    writer so the two producers of ``problems.json`` stay interchangeable.
+    """
+    soup = BeautifulSoup(text, 'html.parser')
+    problems: dict[int, dict[str, str | int | bool]] = {}
+    for td in soup.find_all('td', class_='tooltip'):
+        a_tag = td.find('a', href=True)
+        if not a_tag or not str(a_tag.get('href', '')).startswith('problem='):
+            continue
+        try:
+            num = int(str(a_tag['href']).split('=')[1])
+        except (ValueError, IndexError):
+            continue
+        # Difficulty level from CSS class t_N
+        level: int | str = ''
+        for cls in (td.get('class') or []):
+            if cls.startswith('t_'):
+                try:
+                    level = int(cls[2:])
+                except ValueError:
+                    pass
+        # Title, percentage, and completion date from tooltip span
+        title: str = ''
+        pct: int | str = ''
+        date: str = ''
+        tooltip: Tag | None = a_tag.find('span', class_='tooltiptext_narrow')
+        if tooltip:
+            for div in tooltip.find_all('div'):
+                text_div: str = div.get_text(strip=True)
+                if text_div.startswith('"') and text_div.endswith('"'):
+                    title = text_div[1:-1]
+                elif 'Difficulty:' in text_div and '[' in text_div:
+                    try:
+                        pct = int(text_div.split('[')[1].split('%')[0].strip())
+                        if level == '' and 'Level' in text_div:
+                            level = int(text_div.split('Level')[1].split('[')[0].strip())
+                    except (ValueError, IndexError):
+                        pass
+                elif text_div.startswith('Completed on '):
+                    date = text_div[len('Completed on '):]
+        solved: bool = 'problem_solved' in (td.get('class') or [])
+        problems[num] = {'title': title, 'level': level, 'pct': pct, 'solved': solved, 'date': date}
+    return problems
+
+
+def save_progress(repo_root: Path, content: bytes) -> tuple[bool, str]:
+    """The progress save gate: parse-or-reject, then write both derived files.
+
+    The submitted page source must parse to at least one problem (the 5c
+    reject semantics — a broken paste never lands); on success it is stored as
+    ``solutions/.progress.html`` and re-derived into ``solutions/problems.json``
+    in the same shape the shell's ``summary`` command writes.
+    """
+    try:
+        text = content.decode('utf-8')
+    except UnicodeDecodeError as exc:
+        return False, f'progress page is not valid UTF-8: {exc}'
+    problems = parse_progress(text)
+    if not problems:
+        return False, ('no problems parsed — paste the full Page Source of '
+                       'https://projecteuler.net/progress')
+    (repo_root / 'solutions' / '.progress.html').write_text(text, encoding='utf-8')
+    (repo_root / 'solutions' / 'problems.json').write_text(
+        json.dumps(problems, indent=2), encoding='utf-8')
+    return True, f'saved progress — {len(problems)} problems, ' \
+                 f'{sum(1 for p in problems.values() if p["solved"])} solved'
+
+
+def read_progress(repo_root: Path) -> str:
+    """The current ``solutions/.progress.html`` source, or '' when absent."""
+    try:
+        return (repo_root / 'solutions' / '.progress.html').read_text(encoding='utf-8')
+    except OSError:
+        return ''
 
 
 # ── markdown (docs + topics) ────────────────────────────────────────────────────────

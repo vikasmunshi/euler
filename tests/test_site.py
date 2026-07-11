@@ -1,16 +1,20 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the content service (Phase 5a/5b): identity from forward_auth headers,
-the requires-gate, the full-page-vs-block render contract, the baseline CSP, and
-the 5b read routes (solutions grid, problem pages/files, docs, topics, account)
-with their canonical trailing-slash redirects.
+"""Tests for the content service (Phase 5a/5b/5d): identity from forward_auth
+headers, the requires-gate, the full-page-vs-block render contract, the baseline
+CSP, the 5b read routes (solutions grid, problem pages/files, docs, topics,
+account) with their canonical trailing-slash redirects, and the 5d edit routes
+(file editor through the 5c gate, delete, progress editor, notes regenerate) —
+the writes run against a scratch repo tree, never this checkout.
 
 Uses aiohttp's stdlib test utilities (no extra dep). The authorization policy is
-pinned to the packaged template so profiles/permissions are deterministic; the
-content routes read this repo's own working tree."""
+pinned to the packaged template so profiles/permissions are deterministic."""
 from __future__ import annotations
 
+import json
 import os
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -21,6 +25,8 @@ from solver.web.site.app import build_app
 from solver.web.site.config import SiteConfig
 
 _READER = {'X-User': 'r@example.com', 'X-Profile': 'reader'}
+_CONTRIBUTOR = {'X-User': 'c@example.com', 'X-Profile': 'contributor'}
+_MAINTAINER = {'X-User': 'm@example.com', 'X-Profile': 'maintainer'}
 _ADMIN = {'X-User': 'a@example.com', 'X-Profile': 'admin'}
 _HTMX = {'HX-Request': 'true'}
 
@@ -177,6 +183,173 @@ class ContentServiceTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('a@example.com', body)
         self.assertIn('users:read', body)                   # the expanded grant set
+
+
+_PY_OK = 'def solve() -> str:\n    return str(42)\n'
+_PY_BAD = 'def solve() -> str:\n    return str(missing_name)\n'
+_PY_FIXABLE = 'import os\n\n\ndef solve() -> str:\n    return str(42)\n'
+
+#: A minimal projecteuler.net progress-page extract the parser accepts.
+_PROGRESS_OK = '''<table><tr>
+<td class="tooltip problem_solved t_3"><a href="problem=9">9
+<span class="tooltiptext_narrow"><div>"Special Pythagorean Triplet"</div>
+<div>Difficulty: [30%]</div><div>Completed on Mon, 1 Jan 2024, 00:00</div></span></a></td>
+</tr></table>'''
+
+
+class EditRouteTests(AioHTTPTestCase):
+    """The 5d edit routes, against a scratch repo tree (site-design §5d):
+    every write passes the 5c gate and answers with a fragment."""
+
+    async def get_application(self):
+        os.environ['EULER_AUTHZ_FILE'] = str(DEFAULT_POLICY_FILE)
+        self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
+        scratch = Path(tempfile.mkdtemp(prefix='euler-site-test-'))
+        self.addCleanup(shutil.rmtree, scratch, True)
+        self.pdir = scratch / 'solutions' / 'public' / 'p0009'
+        self.pdir.mkdir(parents=True)
+        (self.pdir / 'p0009_s0.py').write_text(_PY_OK)
+        (self.pdir / 'test_cases.json').write_text('[{"category": "main", "answer": 31875000}]')
+        (scratch / 'solutions' / 'problems.json').write_text(
+            json.dumps({'9': {'title': 'T', 'level': 1, 'pct': 30, 'solved': True, 'date': ''}}))
+        self.scratch = scratch
+        return build_app(SiteConfig(
+            repo_root=scratch, static_dir=scratch, socket_path=Path('/tmp/unused.sock'),
+            socket_group='', tcp_bind='', serve_static=False, profile=''))
+
+    # ── file editor ──────────────────────────────────────────────────────────
+
+    @unittest_run_loop
+    async def test_editor_page_for_contributor(self) -> None:
+        resp = await self.client.get('/edit/solutions/0009/p0009_s0.py', headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('editor-buffer', body)
+        self.assertIn('return str(42)', body)
+
+    @unittest_run_loop
+    async def test_editor_gated_from_reader(self) -> None:
+        for method, path in (('GET', '/edit/solutions/0009/p0009_s0.py'),
+                             ('POST', '/edit/solutions/0009/p0009_s0.py'),
+                             ('GET', '/edit/solutions/'),
+                             ('POST', '/edit/solutions/')):
+            resp = await self.client.request(method, path, headers=_READER)
+            self.assertEqual(resp.status, 403, f'{method} {path}')
+
+    @unittest_run_loop
+    async def test_editor_404_for_missing_or_uneditable(self) -> None:
+        for path in ('/edit/solutions/0009/nope.py',       # editor edits; `new` creates
+                     '/edit/solutions/0009/data.txt'):     # not an editable suffix
+            (self.pdir / 'data.txt').write_text('x')
+            resp = await self.client.get(path, headers=_CONTRIBUTOR)
+            self.assertEqual(resp.status, 404, path)
+
+    @unittest_run_loop
+    async def test_save_writes_canonical_content(self) -> None:
+        resp = await self.client.post('/edit/solutions/0009/p0009_s0.py',
+                                      data={'content': _PY_FIXABLE}, headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertNotIn('<!DOCTYPE html>', body)                    # writes answer fragments
+        self.assertIn('canonicalised', body)                         # submitted ≠ stored note
+        self.assertNotIn('import os', (self.pdir / 'p0009_s0.py').read_text())
+
+    @unittest_run_loop
+    async def test_rejected_save_leaves_file_untouched(self) -> None:
+        resp = await self.client.post('/edit/solutions/0009/p0009_s0.py',
+                                      data={'content': _PY_BAD}, headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('F821', body)                                  # the gate's diagnostics
+        self.assertIn('diag-error', body)
+        self.assertEqual((self.pdir / 'p0009_s0.py').read_text(), _PY_OK)
+
+    # ── delete ───────────────────────────────────────────────────────────────
+
+    @unittest_run_loop
+    async def test_delete_gated_from_contributor(self) -> None:
+        resp = await self.client.delete('/edit/solutions/0009/p0009_s0.py', headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 403)
+        self.assertTrue((self.pdir / 'p0009_s0.py').exists())
+
+    @unittest_run_loop
+    async def test_delete_removes_file_and_returns_file_list(self) -> None:
+        resp = await self.client.delete('/edit/solutions/0009/p0009_s0.py', headers=_MAINTAINER)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('id="files"', body)                            # the file-list block
+        self.assertIn('deleted p0009_s0.py', body)
+        self.assertNotIn('p0009_s0.py</code>', body)
+        self.assertFalse((self.pdir / 'p0009_s0.py').exists())
+
+    @unittest_run_loop
+    async def test_only_solution_files_are_deletable(self) -> None:
+        resp = await self.client.delete('/edit/solutions/0009/test_cases.json', headers=_MAINTAINER)
+        self.assertEqual(resp.status, 400)
+        self.assertTrue((self.pdir / 'test_cases.json').exists())
+
+    # ── progress editor ──────────────────────────────────────────────────────
+
+    @unittest_run_loop
+    async def test_progress_editor_for_contributor(self) -> None:
+        resp = await self.client.get('/edit/solutions/', headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 200)
+        self.assertIn('projecteuler.net/progress', await resp.text())
+
+    @unittest_run_loop
+    async def test_progress_slashless_301s(self) -> None:
+        resp = await self.client.get('/edit/solutions', headers=_CONTRIBUTOR, allow_redirects=False)
+        self.assertEqual(resp.status, 301)
+        self.assertEqual(resp.headers['Location'], '/edit/solutions/')
+
+    @unittest_run_loop
+    async def test_progress_save_rederives_problems_json(self) -> None:
+        resp = await self.client.post('/edit/solutions/', data={'content': _PROGRESS_OK},
+                                      headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('century-grid', body)                          # the grid block + status
+        self.assertIn('saved progress', body)
+        derived = json.loads((self.scratch / 'solutions' / 'problems.json').read_text())
+        self.assertEqual(derived['9']['pct'], 30)
+        self.assertEqual(derived['9']['level'], 3)                   # from the t_3 class
+        self.assertTrue(derived['9']['solved'])
+        self.assertTrue((self.scratch / 'solutions' / '.progress.html').exists())
+
+    @unittest_run_loop
+    async def test_broken_progress_paste_never_lands(self) -> None:
+        resp = await self.client.post('/edit/solutions/', data={'content': '<p>not a progress page</p>'},
+                                      headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 200)
+        self.assertIn('no problems parsed', await resp.text())
+        self.assertFalse((self.scratch / 'solutions' / '.progress.html').exists())
+
+    # ── notes regenerate ─────────────────────────────────────────────────────
+
+    @unittest_run_loop
+    async def test_regenerate_gated_from_contributor(self) -> None:
+        resp = await self.client.post('/solutions/9/notes/regenerate', headers=_CONTRIBUTOR)
+        self.assertEqual(resp.status, 403)
+
+    @unittest_run_loop
+    async def test_regenerate_returns_notes_block(self) -> None:
+        resp = await self.client.post('/solutions/9/notes/regenerate', headers=_MAINTAINER)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('id="notes"', body)                            # the notes block
+        self.assertIn('claude-api docs 9', body)                     # the shell pointer
+
+    # ── profile-gated affordances (§6: hiding is UX, the gate is the boundary) ──
+
+    @unittest_run_loop
+    async def test_affordances_follow_the_profile(self) -> None:
+        page = await (await self.client.get('/solutions/0009/', headers=_READER)).text()
+        self.assertNotIn('hx-delete', page)
+        self.assertNotIn('>edit</a>', page)
+        page = await (await self.client.get('/solutions/0009/', headers=_MAINTAINER)).text()
+        self.assertIn('hx-delete', page)
+        self.assertIn('>edit</a>', page)
+        self.assertIn('regenerate', page)
 
 
 class PinnedInstanceTests(AioHTTPTestCase):

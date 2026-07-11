@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}ς euler — edit progress{% endblock %}
+{% block content %}
+<section class="panel editor">
+  <h1>Progress</h1>
+  <p class="lead">
+    Paste the Page Source of your authenticated
+    <code>https://projecteuler.net/progress</code> page. Saving re-derives
+    <code>problems.json</code> — the solved/level data behind the
+    <a href="/solutions/" hx-get="/solutions/" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">century grids</a>.
+    A paste that parses to no problems is rejected and nothing changes.
+  </p>
+  {% if status %}<p class="status {{ 'ok' if ok else 'err' }}">{{ status }}</p>{% endif %}
+  <form hx-post="/edit/solutions/" hx-target="#content" hx-swap="innerHTML"
+        method="post" action="/edit/solutions/">
+    <textarea class="editor-buffer" name="content" spellcheck="false"
+              autocomplete="off" autocapitalize="off"
+              placeholder="&lt;!DOCTYPE html&gt; … the projecteuler.net/progress page source">{{ source }}</textarea>
+    <div class="editor-actions">
+      <button class="btn btn-primary" type="submit">Save</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

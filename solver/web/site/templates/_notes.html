@@ -1,0 +1,22 @@
+{# The Notes panel (#notes): included by problem.html and returned whole as the
+   regenerate response's notes block. notes.html is stored sanitised (the 5c
+   nh3 gate); math stays TeX text. #}
+{% if notes or subject.has('ai:execute') %}
+<section class="panel" id="notes">
+  <h2>Notes</h2>
+  {% if status %}<p class="status {{ 'ok' if ok else 'err' }}">{{ status }}</p>{% endif %}
+  {% if subject.has('ai:execute') %}
+  <form class="inline-form"
+        hx-post="/solutions/{{ '%04d' % number }}/notes/regenerate"
+        hx-target="#notes" hx-swap="outerHTML"
+        hx-confirm="Regenerate notes for problem {{ number }} via the Claude API?">
+    <button class="btn" type="submit">Regenerate</button>
+  </form>
+  {% endif %}
+  {% if notes %}
+  <div class="notes">{{ notes | safe }}</div>
+  {% else %}
+  <p class="muted">No notes for this problem yet.</p>
+  {% endif %}
+</section>
+{% endif %}

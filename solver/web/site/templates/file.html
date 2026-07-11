@@ -8,6 +8,11 @@
        hx-get="/solutions/{{ '%04d' % number }}/" hx-target="#content"
        hx-swap="innerHTML" hx-push-url="true">← problem {{ number }}</a>
     <span class="muted">· {{ lines }} lines</span>
+    {% if editable and subject.has('solutions:write') %}
+    <a class="file-action" href="/edit/solutions/{{ '%04d' % number }}/{{ filename }}"
+       hx-get="/edit/solutions/{{ '%04d' % number }}/{{ filename }}" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">edit</a>
+    {% endif %}
   </p>
   <pre class="code-block"><code>{{ text }}</code></pre>
 </section>

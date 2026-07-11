@@ -9,8 +9,9 @@ swapped by **htmx** fragments, never a client-side SPA. Every route is gated by 
 and every response carries the per-response CSP nonce
 ([§4.7](secure-web-server.md), [DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)).
 
-> **Status.** 5a shell live **in the four-region layout below** (ς, dark-first);
-> 5b (view) and 5c (validation) live; 5d (edit) is the plan.
+> **Status.** Phase 5 complete: 5a shell live **in the four-region layout below**
+> (ς, dark-first); 5b (view), 5c (validation), and 5d (edit) live. Next: Phase 6
+> (the `/ws` terminal in the right pane).
 
 ## 1 · The app shell — four regions
 
@@ -130,16 +131,22 @@ stored-XSS; [DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)
 `nh3` is in the `web` extra; `content.sh`'s deploy/status probes verify its import.
 Verified against the notes corpus: no tag lost, diffs are normalisation only.
 
-### 5d — edit (each write → 5c; each response carries CSP)
+### 5d — edit (each write → 5c; each response carries CSP) ✅
 
 | Method | Path | Renders | Requires |
 |---|---|---|---|
 | GET | `/edit/solutions/` | the **progress editor** (collection-level; no problem number) | `solutions:execute` |
 | POST | `/edit/solutions/` | save progress → grid block + status (writes `solutions/.progress.html`) | `solutions:execute` |
-| GET | `/edit/solutions/{n}/{filename}` | code-editor for the file | `solutions:write` |
-| POST | `/edit/solutions/{n}/{filename}` | save → editor block + status | `solutions:write` |
-| DELETE | `/edit/solutions/{n}/{filename}` | delete → updated file-list block | `solutions:delete` |
-| POST | `/{n}/notes/regenerate` | AI-regenerate `notes.html` → notes block | `ai:execute` |
+| GET | `/edit/solutions/{n}/{filename}` | code-editor for the file (bare editable names; the editor edits, `new` creates) | `solutions:write` |
+| POST | `/edit/solutions/{n}/{filename}` | save → editor block + status (the buffer echoes the 5c **canonical** content) | `solutions:write` |
+| DELETE | `/edit/solutions/{n}/{filename}` | delete (bare `.py`/`.c` only) → updated file-list block | `solutions:delete` |
+| POST | `/solutions/{n}/notes/regenerate` | AI-regenerate `notes.html` → notes block | `ai:execute` |
+
+**Writes always return a fragment** (never the shell). The regenerate route is
+anchored under `/solutions/` (the pre-`/solutions/` `/{n}/…` form is retired); it
+returns the notes block with a pointer to the shell path (`claude-api docs {n}`) —
+the content tier deliberately cannot reach the Claude API (no key on the service
+uid, no egress, no `ai` extra), so a real backend awaits a brokered design (Phase 6+).
 
 ### execute — via the terminal (`/ws`), Phase 6
 

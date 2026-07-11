@@ -23,16 +23,7 @@
 </section>
 
 {% if files %}
-<section class="panel">
-  <h2>Files</h2>
-  <ul class="file-list">
-    {% for f in files %}
-    <li><a href="/solutions/{{ '%04d' % number }}/{{ f }}"
-           hx-get="/solutions/{{ '%04d' % number }}/{{ f }}" hx-target="#content"
-           hx-swap="innerHTML" hx-push-url="true"><code>{{ f }}</code></a></li>
-    {% endfor %}
-  </ul>
-</section>
+{% include "_files.html" %}
 {% endif %}
 
 {% if results %}
@@ -66,11 +57,5 @@
 </section>
 {% endif %}
 
-{% if notes %}
-<section class="panel">
-  <h2>Notes</h2>
-  {# notes.html is stored sanitised (the 5c nh3 gate); math stays TeX text. #}
-  <div class="notes">{{ notes | safe }}</div>
-</section>
-{% endif %}
+{% include "_notes.html" %}
 {% endblock %}

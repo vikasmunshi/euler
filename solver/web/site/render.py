@@ -64,11 +64,16 @@ def render_block(env: jinja2.Environment, template_name: str, block_name: str,
 
 def render(request: web.Request, template_name: str,
            context: dict[str, Any] | None = None, *,
-           block: str | None = None, status: int = 200) -> web.Response:
-    """Render *template_name* — its *block* for an htmx fetch, else the full page."""
+           block: str | None = None, status: int = 200,
+           fragment: bool = False) -> web.Response:
+    """Render *template_name* — its *block* for an htmx fetch, else the full page.
+
+    *fragment* forces the block regardless of ``HX-Request``: the write routes
+    (5d) always answer with a fragment (site-design §5), never the whole shell.
+    """
     env = aiohttp_jinja2.get_env(request.app)
     ctx = _context(request, context)
-    if block and is_htmx(request):
+    if block and (fragment or is_htmx(request)):
         body = render_block(env, template_name, block, ctx)
     else:
         body = env.get_template(template_name).render(ctx)

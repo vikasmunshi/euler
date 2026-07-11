@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}ς euler — edit {{ filename }}{% endblock %}
+{% block content %}
+<section class="panel editor">
+  <h1>edit <code>{{ filename }}</code></h1>
+  <p class="meta">
+    <a href="/solutions/{{ '%04d' % number }}/"
+       hx-get="/solutions/{{ '%04d' % number }}/" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">← problem {{ number }}</a>
+  </p>
+  {% if status %}<p class="status {{ 'ok' if ok else 'err' }}">{{ status }}</p>{% endif %}
+  {% if diagnostics %}
+  <ul class="diagnostics">
+    {% for d in diagnostics %}
+    <li class="diag-{{ d.severity }}"><code>{{ d.line }}:{{ d.col }}</code>
+        <span class="diag-sev">{{ d.severity }}</span> {{ d.message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {# The buffer always shows what is (or would be) stored: a save echoes the
+     gate's canonical content back (auto-fixed / re-indented / sanitised). #}
+  <form hx-post="/edit/solutions/{{ '%04d' % number }}/{{ filename }}"
+        hx-target="#content" hx-swap="innerHTML"
+        method="post" action="/edit/solutions/{{ '%04d' % number }}/{{ filename }}">
+    <textarea class="editor-buffer" name="content" spellcheck="false"
+              autocomplete="off" autocapitalize="off">{{ text }}</textarea>
+    <div class="editor-actions">
+      <button class="btn btn-primary" type="submit">Save</button>
+      <span class="muted">every save passes the validation gate — Python is
+        auto-fixed and flake8-checked, C compiled, JSON re-indented, HTML sanitised</span>
+    </div>
+  </form>
+</section>
+{% endblock %}

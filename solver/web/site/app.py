@@ -12,18 +12,22 @@ into a :class:`~solver.auth.subject.Subject`. Routes gate on it with
 The route surface is the contract in ``docs/site-design.md``: the app shell at
 ``/`` (four regions: header · ``#content`` · ``#ws`` · footer), the 5b read routes
 rendering into ``#content`` (full page on a direct visit, fragment on htmx —
-:mod:`solver.web.site.render`), and the canonical trailing-slash 301s. The edit
-routes (5c/5d) and the live terminal (Phase 6) land on the same spine.
+:mod:`solver.web.site.render`), the canonical trailing-slash 301s, and the 5d
+edit routes — file editor, collection-level progress editor, delete, notes
+regenerate — each write passing the 5c gate (:mod:`solver.web.site.validate`)
+and always answering with a fragment. The live terminal (Phase 6) lands on the
+same spine.
 """
 from __future__ import annotations
 
 __all__ = ['build_app']
 
+import asyncio
 import html
 import json
 import logging
 from pathlib import Path
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, TypedDict
 
 import aiohttp_jinja2
 import jinja2
@@ -34,6 +38,7 @@ from solver.web.csp import csp_middleware
 from solver.web.site import content
 from solver.web.site.config import SiteConfig
 from solver.web.site.render import SUBJECT_KEY, render
+from solver.web.site.validate import EDITABLE_SUFFIXES, validate
 
 log = logging.getLogger('euler-content')
 
@@ -45,6 +50,36 @@ VIEW = 'web-content:read'
 
 #: Request key under which build_app stores its SiteConfig for handlers.
 CONFIG_KEY = web.AppKey('site_config', SiteConfig)
+
+#: Ceiling on a request body: the progress-page source (~600 KB today) + headroom;
+#: solution files are tiny. aiohttp's 1 MB default is already too close.
+_MAX_BODY = 4 * 1024 * 1024
+
+#: Only a bare *solution* file may be deleted — never the statement, notes,
+#: test cases, results, or resources (old-app parity).
+_DELETABLE_SUFFIXES = frozenset({'.py', '.c'})
+
+
+class FileEntry(TypedDict):
+    """One file-list row: the name plus the affordances the templates gate on."""
+
+    name: str
+    editable: bool
+    deletable: bool
+
+
+def _file_entries(sdir: Path) -> list[FileEntry]:
+    """The problem's files with their per-file edit/delete affordances.
+
+    Only a bare (top-level) file with an editable suffix opens in the editor;
+    nested resources are view-only.
+    """
+    return [
+        FileEntry(name=name,
+                  editable='/' not in name and Path(name).suffix in EDITABLE_SUFFIXES,
+                  deletable='/' not in name and Path(name).suffix in _DELETABLE_SUFFIXES)
+        for name in content.problem_files(sdir)
+    ]
 
 
 def _subject_from_headers(request: web.Request, authz: Authorizations,
@@ -103,15 +138,15 @@ async def redirect_slash(request: web.Request) -> web.StreamResponse:
 
 
 def _problem_number(request: web.Request) -> int:
-    """The route's problem number; 301s a non-zero-padded form to the canonical
-    ``NNNN`` (one URL per view), 404s an out-of-range number."""
+    """The route's problem number; a GET 301s a non-zero-padded form to the
+    canonical ``NNNN`` (one URL per view — writes just accept the number),
+    and an out-of-range number is 404."""
     raw = request.match_info['n']
     number = int(raw)
     if not 0 < number < 10000:
         raise web.HTTPNotFound(text=f'problem {raw} not found')
-    if raw != f'{number:04d}':
-        tail = request.match_info.get('filename', '')
-        location = f'/solutions/{number:04d}/{tail}'
+    if request.method == 'GET' and raw != f'{number:04d}':
+        location = request.rel_url.path.replace(f'/{raw}/', f'/{number:04d}/', 1)
         raise web.HTTPMovedPermanently(location=location)
     return number
 
@@ -169,7 +204,7 @@ async def problem_page(request: web.Request) -> web.StreamResponse:
         'info': info,
         'statement': read_html('statement.html'),
         'notes': read_html('notes.html'),
-        'files': content.problem_files(sdir),
+        'files': _file_entries(sdir),
         'test_cases': pretty('test_cases.json'),
         'results': content.load_json(sdir / 'results.json') or [],
     }, block='content')
@@ -196,6 +231,7 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
         'filename': filename,
         'text': text,
         'lines': text.count('\n') + 1,
+        'editable': '/' not in filename and target.suffix in EDITABLE_SUFFIXES,
     }, block='content')
 
 
@@ -247,6 +283,152 @@ async def account(request: web.Request) -> web.StreamResponse:
     return render(request, 'account.html', block='content')
 
 
+# ── 5d: edit routes — every write passes the 5c gate, every response is a fragment ──
+
+def _editor_target(request: web.Request) -> tuple[int, str, Path]:
+    """Resolve an ``/edit/solutions/{n}/{filename}`` route to its on-disk file.
+
+    The route pattern keeps *filename* bare (no ``/``); here it must also carry
+    an editable suffix and already exist — the editor edits, `new` creates.
+    """
+    number = _problem_number(request)
+    filename = request.match_info['filename']
+    sdir = content.solution_dir(request.app[CONFIG_KEY].repo_root, number)
+    target = sdir / filename
+    if Path(filename).suffix not in EDITABLE_SUFFIXES or not target.is_file():
+        raise web.HTTPNotFound(text=f'{filename} is not an editable file of problem {number}')
+    return number, filename, target
+
+
+@requires('solutions:write')
+async def file_editor(request: web.Request) -> web.StreamResponse:
+    """``GET /edit/solutions/{n}/{filename}`` — the code editor for the file."""
+    number, filename, target = _editor_target(request)
+    return render(request, 'edit_file.html', {
+        'number': number,
+        'filename': filename,
+        'text': target.read_text(encoding='utf-8', errors='replace'),
+        'status': '', 'ok': True, 'diagnostics': [],
+    }, block='content')
+
+
+@requires('solutions:write')
+async def file_save(request: web.Request) -> web.StreamResponse:
+    """``POST /edit/solutions/{n}/{filename}`` — gate (5c), write, editor block.
+
+    The submission runs :func:`~solver.web.site.validate.validate`; what lands
+    on disk — and returns in the editor buffer — is the gate's *canonical*
+    content (auto-fixed / re-indented / sanitised), so the buffer always shows
+    exactly what is stored. A refusal returns the submission unmodified with
+    the gate's diagnostics; nothing is written.
+    """
+    number, filename, target = _editor_target(request)
+    form = await request.post()
+    submitted = str(form.get('content', ''))
+    result = await asyncio.get_running_loop().run_in_executor(
+        None, validate, filename, submitted.encode('utf-8'),
+        request.app[CONFIG_KEY].repo_root)
+    if not result.ok:
+        return render(request, 'edit_file.html', {
+            'number': number, 'filename': filename, 'text': submitted,
+            'status': result.message, 'ok': False, 'diagnostics': result.diagnostics,
+        }, block='content', fragment=True)
+    stored = result.content.decode('utf-8', errors='replace')
+    message = result.message
+    if stored != submitted:
+        message += ' — stored content was canonicalised (shown below)'
+    try:
+        target.write_bytes(result.content)
+    except OSError as exc:
+        return render(request, 'edit_file.html', {
+            'number': number, 'filename': filename, 'text': submitted,
+            'status': f'could not write {filename}: {exc}', 'ok': False, 'diagnostics': [],
+        }, block='content', fragment=True)
+    return render(request, 'edit_file.html', {
+        'number': number, 'filename': filename, 'text': stored,
+        'status': message, 'ok': True, 'diagnostics': [],
+    }, block='content', fragment=True)
+
+
+@requires('solutions:delete')
+async def file_delete(request: web.Request) -> web.StreamResponse:
+    """``DELETE /edit/solutions/{n}/{filename}`` — delete → the file-list block.
+
+    Only a bare ``.py``/``.c`` *solution* file is deletable — never the
+    statement, notes, test cases, results, or resources.
+    """
+    number = _problem_number(request)
+    filename = request.match_info['filename']
+    sdir = content.solution_dir(request.app[CONFIG_KEY].repo_root, number)
+    if Path(filename).suffix not in _DELETABLE_SUFFIXES:
+        raise web.HTTPBadRequest(text=f'{filename} is not a deletable solution file')
+    (sdir / filename).unlink(missing_ok=True)
+    return render(request, '_files.html', {
+        'number': number,
+        'files': _file_entries(sdir),
+        'status': f'deleted {filename}',
+    })
+
+
+@requires('solutions:execute')
+async def progress_editor(request: web.Request) -> web.StreamResponse:
+    """``GET /edit/solutions/`` — the collection-level progress editor."""
+    source = content.read_progress(request.app[CONFIG_KEY].repo_root)
+    return render(request, 'edit_progress.html', {
+        'source': source, 'status': '', 'ok': True,
+    }, block='content')
+
+
+@requires('solutions:execute')
+async def progress_save(request: web.Request) -> web.StreamResponse:
+    """``POST /edit/solutions/`` — save progress → the grid block + status.
+
+    Parse-or-reject (5c semantics): the paste must yield at least one problem
+    before ``solutions/.progress.html`` and the re-derived ``problems.json``
+    are written; a broken paste never lands. Success renders the refreshed
+    century grids, failure re-renders the editor with the reason.
+    """
+    repo_root = request.app[CONFIG_KEY].repo_root
+    form = await request.post()
+    submitted = str(form.get('content', ''))
+    ok, message = await asyncio.get_running_loop().run_in_executor(
+        None, content.save_progress, repo_root, submitted.encode('utf-8'))
+    if not ok:
+        return render(request, 'edit_progress.html', {
+            'source': submitted, 'status': message, 'ok': False,
+        }, block='content', fragment=True)
+    problems = content.load_problems(repo_root)
+    return render(request, 'solutions.html', {
+        'grids': content.centuries(problems),
+        'solved': sum(1 for p in problems.values() if p.solved),
+        'total': len(problems),
+        'status': message,
+    }, block='content', fragment=True)
+
+
+@requires('ai:execute')
+async def notes_regenerate(request: web.Request) -> web.StreamResponse:
+    """``POST /solutions/{n}/notes/regenerate`` — AI-regenerate → the notes block.
+
+    The content tier deliberately cannot reach the Claude API (no key on the
+    service uid, no egress off the Squid allowlist, no ``ai`` extra in the
+    system venv — the AR-1/AR-2 containment), so this returns the notes block
+    with a pointer to the shell path until a brokered backend exists.
+    """
+    number = _problem_number(request)
+    sdir = content.solution_dir(request.app[CONFIG_KEY].repo_root, number)
+    try:
+        notes = (sdir / 'notes.html').read_text(encoding='utf-8')
+    except OSError:
+        notes = ''
+    return render(request, '_notes.html', {
+        'number': number, 'notes': notes,
+        'status': ('AI regeneration is not wired to the content service — run '
+                   f'claude-api docs {number} in the solver shell'),
+        'ok': False,
+    })
+
+
 # ── app wiring ────────────────────────────────────────────────────────────────────────
 
 def build_app(config: SiteConfig) -> web.Application:
@@ -259,7 +441,8 @@ def build_app(config: SiteConfig) -> web.Application:
         request[SUBJECT_KEY] = _subject_from_headers(request, authz, pin)
         return await handler(request)
 
-    app = web.Application(middlewares=[csp_middleware, identity_middleware])
+    app = web.Application(middlewares=[csp_middleware, identity_middleware],
+                          client_max_size=_MAX_BODY)
     app[CONFIG_KEY] = config
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
                          autoescape=jinja2.select_autoescape(['html', 'xml']))
@@ -271,6 +454,7 @@ def build_app(config: SiteConfig) -> web.Application:
         web.get('/solutions/', solutions_index),
         web.get(r'/solutions/{n:\d+}', redirect_slash),
         web.get(r'/solutions/{n:\d+}/', problem_page),
+        web.post(r'/solutions/{n:\d+}/notes/regenerate', notes_regenerate),
         web.get(r'/solutions/{n:\d+}/{filename:.+}', problem_file),
         # docs + topics
         web.get('/docs', redirect_slash),
@@ -281,6 +465,13 @@ def build_app(config: SiteConfig) -> web.Application:
         web.get(r'/topics/{name}', topic_page),
         # account
         web.get('/account', account),
+        # 5d — edit routes (writes always answer with a fragment)
+        web.get('/edit/solutions', redirect_slash),
+        web.get('/edit/solutions/', progress_editor),
+        web.post('/edit/solutions/', progress_save),
+        web.get(r'/edit/solutions/{n:\d+}/{filename:[^/]+}', file_editor),
+        web.post(r'/edit/solutions/{n:\d+}/{filename:[^/]+}', file_save),
+        web.delete(r'/edit/solutions/{n:\d+}/{filename:[^/]+}', file_delete),
     ])
     if config.serve_static:
         # Dev only — in production Caddy serves these from /etc/euler/web-content.
