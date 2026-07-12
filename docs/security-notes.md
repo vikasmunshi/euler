@@ -29,24 +29,28 @@ shell.
 
 A `contributor`-profile account (or above) can `edit` a solution and `evaluate` it —
 that runs arbitrary Python on the host. `claude-skill` (`maintainer`) launches a
-headless agent with host tool access. Gating `!`/`bash` to `admin` in `commands.csv`
-does **not** contain this: the effective trust boundary is *who receives which
-profile*, not the command policy.
+headless agent with host tool access. Gating `!`/`bash` to `admin` in
+`authorizations.json` does **not** contain this: the effective trust boundary is *who
+receives which profile*, not the command policy.
 
-**Why accepted, and narrowed (DD-11).** The service exists to run collaborators' code.
-The profile ladder **bounds** it: `reader` (the default invite tier) is **read-only —
-no execute, no web shell**, so a new/untrusted invitee triggers no host execution; and
-`admin` (infra: `git`/`key`/`users`) is **local-only**, so no web account can administer
-accounts or touch the crypto master key. Execution is thus confined to `contributor`+.
-The redesign then **contains** what remains: the web shell runs as the dedicated
-`euler-ws` uid (not the operator), from the `/opt/euler` venv (DD-5), loopback-only with
-a kernel egress firewall (DD-8), so a compromised shell reaches neither the operator's
-home, the crypto private key (`~/.euler/id`), nor the open internet. Identity never rests
+**Why accepted, and narrowed (DD-11/DD-13).** The service exists to run collaborators'
+code. The profile ladder **bounds** it: `reader` (the default invite tier) is
+**read-only** — its web terminal (attach = `solver:execute`, DD-13) registers only the
+read commands plus the shell's safe expression evaluator (no calls / attribute
+access): no `eval`/`benchmark`/`edit`, no shell escape — so a new/untrusted invitee
+triggers **no host execution of user code**; and `admin` (infra: `git`/`key`/`users`)
+is **local-only**, so no web account can administer accounts or touch the crypto
+master key. Execution of user code is thus confined to `contributor`+.
+The redesign then **contains** what remains: each web shell runs as its rung's
+dedicated `euler-ws-<profile>` uid (not the operator; DD-12/DD-13), from the
+`/opt/euler` venv (DD-5), loopback-only with a kernel egress firewall (DD-8), so a
+compromised shell reaches neither the operator's home, the crypto private key
+(`~/.euler/id`), nor the open internet. Identity never rests
 on the uid (DD-9/DD-11), so same-uid compromise cannot masquerade to the auth service.
 **Standing controls:** grant `contributor`+ deliberately, keep the invite list audited;
-keep `!`/`bash` `admin`-only and `claude-*` `maintainer`+ in `commands.csv`; do not widen
-the `euler-ws` unit's `ReadWritePaths`/egress. Per-user helper uids or namespaces remain
-a future hardening (Phase 6).
+keep `!`/`bash` `admin`-only and `claude-*` `maintainer`+ in the decorator `requires`;
+do not widen the `euler-ws@` units' `ReadWritePaths`/egress or the `euler-sol-*` ACL
+sets. Per-user helper uids or namespaces remain a future hardening (Phase 6).
 
 ### AR-2 · The web tier serves decrypted private solutions — a web compromise reads all current private plaintext
 
@@ -74,6 +78,33 @@ session). **If the exposure is later judged too high, the knobs are:** serve
 `solutions/private` to `contributor`+ only (make private-read part of graduating from
 `reader`), or restrict private to the local terminal entirely (public-only web) — either
 narrows or removes this risk.
+
+### AR-3 · `euler-git` (Phase 7) is a second master-key holder — its compromise is key compromise
+
+Accepted **in design** ([DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed));
+takes effect when Phase 7 builds the git broker. `euler-git` holds its own X25519
+keypair with a wrapped entry in `keys/enc-key.json` (plus a contents-scoped GitHub
+PAT) so a `maintainer` can commit/push from the web with **no key on any web uid**.
+Unlike AR-2 — where a web compromise reads only current working-tree plaintext — a
+compromise of the `euler-git` *process* yields the master-key class (SEC-01):
+decrypt the full encrypted corpus, forge ciphertext.
+
+**Why accepted.** The alternative that delivers the same feature — key material on
+the web tier — is strictly worse (AR-1's RCE tier would hold it). The broker
+concentrates the risk in a service that is **not web-reachable** (no Caddy route;
+a unix socket whose `SO_PEERCRED` allowlist admits only the `euler-ws-maintainer`
+uid), runs **no caller-supplied input as paths, refs, or code** (four
+strictly-typed verbs: `status`, `commit {n, message}`, `push` to `refs/heads/web/*`
+only, never `--force`, and `restore {n}` — the sole working-tree write,
+path-scoped to problem *n*'s `solution_dir` from the local `master` ref), never
+switches branches or pulls (HEAD and the operator's index are untouched), and is
+**loopback + Squid only** under the DD-8 firewall.
+Enrollment is an explicit operator act (`user-authorize` + committing
+`enc-key.json`) and is revocable: `key-rekey` rotates the master key and drops the
+broker's entry. **Standing controls:** keep both brokers off Caddy; never widen the
+verb surface toward caller-supplied paths/refs (`restore` stays scoped to a single
+problem's directory); keep the PAT contents-scoped to this repo; keep master
+merges of `web/*` a local, operator-reviewed act.
 
 ## Regression guards
 

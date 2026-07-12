@@ -36,7 +36,13 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 >   full-viewport four-region layout, the Euler-identity brand, header chrome
 >   (breadcrumbs + Actions via OOB swaps, theme slider, user menu), footer `about`
 >   pages behind a new `about:read` object. **Phase 5 complete.**
-> - ⬜ **Phase 6** — Web shell (not started).
+> - 🚧 **Phase 6** — Web shell: design closed ([DD-13](#dd-13--web-shell-topology--gating)/
+>   [DD-14](#dd-14--web-shell-lifecycle--revocation)); build plan in
+>   [§6](#phase-6--web-shell-); not yet built.
+> - ⬜ **Phase 7** — Credential brokers (`euler-ai`, `euler-git`): design closed
+>   ([DD-15](#dd-15--secrets-are-brokered-never-dispensed)); builds after Phase 6
+>   (until then the AI/git commands in a web shell fail with a clear
+>   no-credentials error — no interim key deploy).
 
 ## 1 · Purpose & scope
 
@@ -110,6 +116,9 @@ Locked, ADR-style. Each is summarised in the table, then argued below.
 | Identity & masquerade | Three planes — `forward_auth` headers, one-time shell ticket, checkout-owner uid — [DD-9](#dd-9--identity-authentication-and-masquerade-prevention). |
 | Profiles & access | Four-rung ladder `reader`/`contributor`/`maintainer` (web) + `admin` (**local-only**); content routes gated by a resource×verb matrix; `users change` promotes/demotes — [DD-11](#dd-11--profiles--content-service-access). |
 | Authorization | One `solver/auth` kernel + `authorizations.json` (RBAC) for shell **and** web; retires `commands.csv`; per-profile service instances + content-tree ACLs as the OS layer — [DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson). |
+| Web shell (Phase 6) | Per-profile `euler-ws@{reader,contributor,maintainer}` instances (mirroring content); attach = live session + **`solver:execute`** (a `reader` grant — everyone gets a terminal) + one-time ticket; the **full** solver shell, command set gated by the DD-12 decorator (`reader`: read-only commands, no shell escape; AI at `maintainer` via a scoped key) — [DD-13](#dd-13--web-shell-topology--gating). |
+| Web-shell lifecycle | One persistent PTY per user × instance; teardown on exit / logout / **revocation push** / service stop, plus a detached-TTL reaper — [DD-14](#dd-14--web-shell-lifecycle--revocation). |
+| Secrets & privileged ops | **Brokered, never dispensed**: a secret lives only with the service that performs its operation (`euler-smtp`, admin API — and Phase 7's `euler-ai` spend-metered Anthropic proxy + `euler-git` commit/push broker); no vault, no key on any web uid — [DD-15](#dd-15--secrets-are-brokered-never-dispensed). |
 
 ### DD-1 · Inter-service transport = unix domain sockets
 
@@ -121,8 +130,8 @@ Caddy is network-bound (`:443`).
 | Service | Socket | Runs as |
 |---|---|---|
 | auth | `/run/euler/auth.sock` | `euler-auth` |
-| content | `/run/euler/content.sock` | `euler-content` |
-| shell-ws | `/run/euler/ws.sock` | `euler-ws` |
+| content | `/run/euler/content-<profile>.sock` (per-profile, DD-12) | `euler-content-<profile>` |
+| shell-ws | `/run/euler/ws-<profile>.sock` (per-profile, DD-12/DD-13) | `euler-ws-<profile>` |
 | maintenance (static) | — served by Caddy directly | `euler-caddy` |
 
 **Why.** Filesystem permissions become OS-enforced access control (only members of
@@ -319,7 +328,9 @@ admins never reset passwords. The full flow, state machine, and parameters (7-da
    intent. Host `INPUT` policy is left alone (inbound `:443` is Caddy's; SSH stays
    reachable).
 
-**Mail relay (`euler-smtp`).** So the app tier needs **no** direct-internet exception,
+**Mail relay (`euler-smtp`).** The founding instance of the
+[DD-15](#dd-15--secrets-are-brokered-never-dispensed) broker principle. So the app
+tier needs **no** direct-internet exception,
 OTP/invite mail goes through a small **loopback submission relay** (dedicated
 `euler-smtp` user, own group): it listens on `127.0.0.1:8025`, is the **sole holder of
 the Gmail credentials** and the **sole uid permitted `:587`**, **forces the envelope
@@ -396,7 +407,7 @@ trust grows.
 | Profile | Reached by | Gains over the rung below |
 |---|---|---|
 | **reader** | web invite (default) | **view** only — framework docs, the full solution tree (public **and** decrypted private), static assets |
-| **contributor** | web (promoted), or a local non-owner login | + **edit** solution files (code / notes / tests) + **execute** (eval / benchmark, and the Phase-6 web shell) |
+| **contributor** | web (promoted), or a local non-owner login | + **edit** solution files (code / notes / tests) + **execute** (eval / benchmark in the web terminal) |
 | **maintainer** | web (promoted) | + **delete** solution files + the AI commands (`claude-api` / `claude-skill`, which spend the owner's API budget) |
 | **admin** | **local terminal only** (uid == repo-owner) | + infra: `git-*`, `key-*`, `users`, `manage-config`, `update-*`. **Never web-assignable.** |
 
@@ -413,13 +424,16 @@ pure-GET pages:
 | view | GET summary / problem / code / docs; file reads | ✓ | ✓ | ✓ | ✓ |
 | edit | save a solution file (incl. `notes.html`, + nh3, DD-10) | | ✓ | ✓ | ✓ |
 | delete | delete a solution file | | | ✓ | ✓ |
-| execute | eval / benchmark; the Phase-6 web PTY shell | | ✓ | ✓ | ✓ |
+| execute | eval / benchmark (run inside the Phase-6 web terminal) | | ✓ | ✓ | ✓ |
 
 Static `web-content` assets are Caddy-served and never writable through the service.
 `execute` at `contributor`+ keeps the Project-Euler workflow intact (a contributor runs
 the solution they wrote) while making `reader` genuinely RCE-free
-([AR-1](security-notes.md)); the web PTY shell (Phase 6) is likewise `contributor`+, so
-`reader` gets no terminal. The *mechanism* that enforces this matrix — the RBAC kernel,
+([AR-1](security-notes.md)). The web PTY *terminal* itself (Phase 6) attaches at
+`reader` — its gate is `solver:execute`, the reader-floor "may run the solver" grant —
+but a `reader` shell registers only the read commands, so `eval`/`benchmark` (the
+commands that run user code) remain `contributor`+ inside it
+([DD-13](#dd-13--web-shell-topology--gating)). The *mechanism* that enforces this matrix — the RBAC kernel,
 `authorizations.json`, and the per-profile OS layer — is
 [DD-12](#dd-12--unified-authorization-solverauth--authorizationsjson) (which retires
 `commands.csv` and moves the profile off the SRP user record).
@@ -479,12 +493,12 @@ bootstrap template; the installer seeds the real file (including the **checkout 
   "profiles": {
     "reader":      { "inherits": null,          "grants": ["solver:execute","solutions:read","docs:read","web-content:read","users:read"] },
     "contributor": { "inherits": "reader",      "grants": ["solutions:write","solutions:execute"] },
-    "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute"] },
+    "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute","git:execute"] },
     "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute","users:write"] }
   },
   "users":   { "vikas": "admin", "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
   "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["solver/web/content/"],
-               "solver": [], "shell": ["/bin/bash"], "ai": [], "users": [], "infra": [] }
+               "solver": [], "shell": ["/bin/bash"], "ai": [], "git": [], "users": [], "infra": [] }
 }
 ```
 
@@ -516,7 +530,8 @@ bootstrap template; the installer seeds the real file (including the **checkout 
 defaults fail-closed** to `infra:execute` (admin-only) — a new command is never silently
 exposed. Example mapping: `show → solutions:read`; `new`/`edit` → `solutions:write`;
 `evaluate`/`benchmark` → `solutions:execute`; `!` → `shell:execute`; `claude-*` →
-`ai:execute`; `git-*`/`key-*`/`manage-config` → `infra:execute`; `users` splits by verb
+`ai:execute`; `git-*`/`key-*`/`manage-config` → `infra:execute` (the Phase-7
+*brokered* git verbs → `git:execute`, [DD-15](#dd-15--secrets-are-brokered-never-dispensed)); `users` splits by verb
 (`list → users:read`, mutations → `users:write`). A generated audit table in
 **`docs/authorizations.md`** (by `update-docs`) reports each command's module /
 channels / requires / least-profile — the generated audit view, distinct from the
@@ -554,7 +569,9 @@ without reading the rest of home, then per-profile group ACLs — `euler-sol-rea
 per-profile uids. **`.git`, `keys/` (the `enc-key.json`), and the `solver/` source are
 never in the ACL set.** `authorizations.json`'s `objects`→paths is the single source that a
 setup kit turns into these ACLs, so the app policy and the filesystem enforcement can't
-drift. This *refines* DD-5 (which kept the whole repo unreadable to service users): the
+drift. (The sole exception to the never-ACL'd set is the Phase-7 **`euler-git` broker's
+own** `.git` ACL — a non-web-reachable service, [DD-15](#dd-15--secrets-are-brokered-never-dispensed);
+the rule continues to hold for every web-tier uid.) This *refines* DD-5 (which kept the whole repo unreadable to service users): the
 venv still lives in `/opt/euler` for code isolation, but the **content tree** is
 ACL-shared with `euler-web`, per-profile — a targeted share, not the blanket home-open
 DD-5 rejected. The master key never reaches the services; a web compromise reads
@@ -578,6 +595,247 @@ user). Both write the sudo-gated `/etc/euler/authorizations.json`.
 `authorizations.json` edit takes effect on the next login / shell-start; `users change`
 already revokes sessions to force it. Consistent with DD-11.
 
+### DD-13 · Web-shell topology & gating
+
+**Decision.** The Phase-6 shell service (**`solver/web/ws`**) takes the content
+service's DD-12 shape exactly — per-profile template-unit instances,
+socket-per-instance, profile pin — and **every web rung gets a terminal**: the
+terminal is the product's front door, and what varies by rung is what the shell
+*inside* it will run, not whether it exists.
+
+- **Instances mirror content.** `euler-ws@{reader,contributor,maintainer}` (uids
+  `euler-ws-<profile>`, sockets `/run/euler/ws-<profile>.sock`), Caddy routing
+  `/ws` by `X-Profile` to the matching instance — the same three-way split, the
+  same matchers, as `content@<profile>`.
+- **Attach gate = `solver:execute` + pin.** The permission to attach is the
+  permission to *run the solver at all* — **`solver:execute`**, a `reader`-floor
+  grant in `authorizations.json` — checked via the kernel
+  (`solver:execute ∈ permissions_for(profile)`), never hardcoded. The app pins
+  `EULER_PROFILE=%i` and refuses a mismatched `X-Profile` (exactly as content
+  does); the forked shell re-verifies from its side: the **redeemed ticket's
+  profile must equal the instance pin**, else it aborts (DD-12's ticket↔uid
+  match, now concrete).
+- **The terminal is the full `solver` shell**, not a curated command set. What a
+  web shell can run is decided by the DD-12 decorator (`requires`/`channels`)
+  against the ticket-resolved subject — the same policy as everywhere else. This
+  supersedes the interim stub list in [site-design § "execute"](site-design.md).
+  Concretely, per rung: a **`reader`** shell registers only the read commands
+  (`set`/`show`/`ls`/…, `solutions:read`) — no `eval`/`benchmark`
+  (`solutions:execute`), no `edit`/`new` (`solutions:write`), and **no shell
+  escape** (`!` is `shell:execute`, admin-only, and `admin` is never web — no web
+  account has raw bash); the shell's own expression language is the safe AST
+  evaluator (no calls, no attribute access), so a `reader` terminal runs no user
+  code. **`contributor`** adds edit + `eval`/`benchmark`; **`maintainer`** adds
+  delete and the AI commands (DD-11, unchanged).
+- **Identity flow (DD-9, unchanged).** The WS upgrade passes `forward_auth`; the ws
+  service forwards the caller's session cookie to `POST /shell-ticket` on
+  `auth.sock`, then forks `python -m solver` with **only `SOLVER_TICKET` (+ `TERM`)**
+  in the child environment. The child redeems → `Subject(channel='web')`.
+  `SOLVER_USER` is gone from the bridge, and the legacy `--web`/`--terminal` CLI
+  flags are retired — the channel now comes from the resolved subject, not an
+  argument a caller could choose.
+- **Filesystem.** The ws uids join the **existing** content-tree ACL groups per
+  rung — all three in `euler-sol-read`, `contributor`+ also in `euler-sol-write`,
+  the maintainer instance also in `euler-sol-delete` — no new object paths. One
+  addition the content tier never needed: an ACL on **`.state/`** (rwX + default
+  ACLs for the three ws uids), where the shell keeps per-user history /
+  last-problem / session state.
+- **AI at `maintainer`, per DD-11 — credentials via the DD-15 broker.** No web uid
+  ever holds the Anthropic key. `claude-api`/`claude-skill` register at
+  `maintainer` (`ai:execute`) on both channels, and on the web channel their
+  credentials come from the **`euler-ai` broker**
+  ([DD-15](#dd-15--secrets-are-brokered-never-dispensed), Phase 7) — the sole key
+  holder, metering and capping every call. Between Phases 6 and 7 the commands
+  are visible in a maintainer web shell but **fail with a clear no-credentials
+  error** — accepted deliberately, so no interim per-instance key file exists to
+  deploy and later claw back.
+- **Egress.** The units carry the DD-8 pair (`IPAddressDeny=any` +
+  `IPAddressAllow=localhost`) and load `/etc/euler/egress.env`, so the problem
+  scraper works through Squid and nothing else leaves (the AI commands reach the
+  DD-15 broker over loopback; only the broker itself talks to `api.anthropic.com`,
+  via Squid); `firewall.sh`'s uid set splits the singular `euler-ws` into the
+  three instance uids (all relay-barred).
+
+**Refines DD-11.** The web PTY terminal moves off the matrix's `execute` row: the
+*terminal* attaches at `reader` (`solver:execute` — view-tier, runs no user code),
+while `eval`/`benchmark` — the commands that *do* run user code — stay
+`solutions:execute`, `contributor`+, enforced inside the shell by the decorator.
+[AR-1](security-notes.md)'s posture is preserved in substance: a `reader` still
+triggers no host execution of user code; what it gains is a genuinely read-only
+terminal, as the read-only `euler-ws-reader` uid.
+
+**Why.** Reusing the DD-12 shape means Phase 6 adds no new *kind* of thing — one
+more instance triple on the patterns content already proved. Gating attach on
+`solver:execute` keeps one source of truth for "who may use the solver" in
+`authorizations.json` (demoting that grant would close the terminal without a
+deploy), and shipping the full shell rather than a bespoke `/ws` command protocol
+reuses the hardest proven code (lexer → parser → interpreter, prompt-toolkit) with
+authorization already enforced at registration.
+
+### DD-14 · Web-shell lifecycle & revocation
+
+**Decision.** One **persistent** shell per user × instance (the manager keys by
+email; a second tab for the same user attaches to the *same* shell, `tmux`-style). A
+single background drainer reads the PTY continuously into a bounded replay buffer
+and fans out to every attached socket, so the shell survives disconnects and a
+reconnect redraws — the parked `pty_manager` design, revived as-is. Its lifetime is
+decoupled from any socket and bounded by exactly four teardown paths:
+
+1. **In-shell exit** (`exit` / Ctrl-D) — the drainer sees EOF and reaps.
+2. **Logout** — the auth service (the only party that sees the event) POSTs a
+   best-effort **`/internal/logout {email}`** to every ws instance socket. It can:
+   `euler-auth` is in `euler-web`, and the sockets are `0660 euler-ws-<p>:euler-web`.
+   The endpoint is **socket-peer only** — Caddy routes `/ws` and nothing else to
+   these services, so no browser can reach it.
+3. **Revocation** — `users change`/`disable`/`remove` and password reset already
+   revoke sessions and remember tokens (DD-11); those same auth-service paths now
+   push the identical teardown. This closes the one real gap in DD-12's
+   "staleness = re-login" rule: a *running* shell resolved its permissions at
+   startup, and without the push a demoted or disabled account would keep its old
+   authority until the process happened to die. With it, revocation is immediate on
+   every plane.
+4. **Service stop** — `on_cleanup` closes every shell (and systemd's cgroup kill
+   collects any stragglers).
+
+Plus hygiene, not security: a **detached-TTL reaper** closes a shell that has had
+zero attached sockets for `EULER_WS_DETACHED_TTL` (default **24 h** — generous on
+purpose, so a long benchmark survives a closed laptop; no security property relies
+on it). Session *expiry* is deliberately **not** a teardown: the owner remains an
+authorized user, re-attach demands a fresh login anyway (forward_auth + a fresh
+ticket), and killing work on a timer would break the site-design §9 persistence
+contract.
+
+**Why.** Attach is freshly vouched every time (live session at the edge, one-time
+ticket at the fork), so the only residual risk a persistent shell carries is *stale
+authority inside an already-running process*. The revocation push removes exactly
+that risk at its source — the auth service, which owns every revocation event —
+rather than having the ws tier poll for something it cannot observe.
+
+### DD-15 · Secrets are brokered, never dispensed
+
+**Principle.** A secret lives **only** with the service that *performs the
+operation* it enables; that service exposes the **operation** — never the secret —
+over a kernel-guarded local channel, with policy and audit enforced at that
+boundary. No service "fetches" a credential, and no vault dispenses one. Two
+observations make this the only shape that works here:
+
+1. On a single host, a secret-dispensing vault adds surface without adding a
+   property — whatever protects the vault's storage and unseal material is, in the
+   end, a file readable by some uid, which is exactly the guarantee
+   `/etc/euler/*.env` (`root:svc 0640`) + dedicated uids (DD-2) + the kernel
+   firewall (DD-8) already provide. (And manual unseal would break DD-3's
+   unattended boot.)
+2. Dispensing a credential into a tier whose threat model *is* arbitrary code
+   execution (the web shells, [AR-1](security-notes.md)) merely relocates the
+   leak: env file or vault-fetched, the compromised process holds the same secret.
+   Security changes only when the secret **never crosses the channel** — when the
+   privileged side performs the operation itself and can therefore meter, bound,
+   audit, and kill it.
+
+The scoped env files of DD-4 remain correct where they are: each is held by the
+service that *is* the operation's sole performer (`euler-ddns` holds the DNS token
+because `euler-ddns` does the DNS update). The principle forbids only handing a
+secret to a *consumer tier* — and it is already load-bearing three times over:
+**`euler-smtp`** (the founding instance: sole Gmail-credential holder; every other
+uid gets "submit mail on loopback", firewall-barred from `:587` and the relay
+port), the **DD-6 admin API** (auth state stays `0600`-private; admins get verbs,
+not files), and **DD-12's key posture** (the web tier gets working-tree plaintext,
+never the master key). Phase 7 adds the two instances the web tier still lacks:
+
+**`euler-ai` — the Anthropic broker.** Sole holder of `ANTHROPIC_API_KEY`
+(`/etc/euler/ai.env`, `root:euler-ai 0640`, deployed from `~/.euler/env`),
+listening on **loopback TCP `127.0.0.1:8030`** — TCP rather than a unix socket
+because the Claude Code CLI can only follow `ANTHROPIC_BASE_URL`; the DD-8
+firewall uid-gates the port exactly like the smtp relay guard (only
+`euler-ws-maintainer` — later also `euler-content-maintainer` for
+notes-regenerate — may connect; every other `euler-*` uid is barred; loopback
+matched by `ip daddr 127.0.0.0/8`, per DD-8's WSL2 rule). It is an authenticated
+pass-through to `api.anthropic.com` (its own egress via Squid) that: **injects
+the real key** (whatever credential the caller sent is discarded), enforces a
+**model allowlist** and **per-profile / per-user spend caps** (priced from
+`solver/ai/models.py`, metered from the responses' `usage` fields; over-cap →
+`429`), and appends a per-call **audit ledger**
+(`/var/lib/euler-ai/ledger.jsonl`: caller uid, best-effort `X-Solver-User`,
+model, tokens, cost). Kill switch = `systemctl stop euler-ai` — one place, all
+web AI spend. Callers: `claude-api` (the anthropic SDK pointed at the broker
+when `EULER_AI_URL` is set in the instance env), `claude-skill` (the CLI via
+`ANTHROPIC_BASE_URL`), and later the content service's notes-regenerate (today a
+shell-pointer stub). The operator's local shell keeps reading `~/.euler/env`
+directly — the broker is the web tier's path. This **supersedes the scoped
+`ws-maintainer.env`** DD-13 briefly carried, before it was ever built.
+
+**`euler-git` — the git broker.** Web-triggered git operations with neither the
+master key nor the push credential ever reaching a web uid. It has its own uid,
+its own **X25519 keypair** (`/var/lib/euler-git/id`, `0600`) whose public key the
+operator enrolls into `keys/enc-key.json` with the existing **`user-authorize`**
+command — the identified-by-public-key scheme was built for exactly this — and a
+**fine-grained GitHub PAT** (contents read/write on this repo only) in
+`/etc/euler/git.env` (`root:euler-git 0640`). It exposes four strictly-typed
+verbs on `/run/euler/git.sock` (unix socket; `SO_PEERCRED` allowlist = the
+`euler-ws-maintainer` uid — the DD-12 per-profile uid split is what makes
+peercred meaningful authorization). No verb accepts a caller-supplied path, ref,
+or command:
+
+| Verb | Effect |
+|---|---|
+| `status` | porcelain summary of the content trees (per-problem names + state) |
+| `commit {n, message}` | stage **only** problem *n*'s directory into a **temporary index** (`GIT_INDEX_FILE`; the clean filter encrypts under the broker's key), `commit-tree` onto the broker branch, `update-ref` |
+| `push` | push the broker branch to **`refs/heads/web/…` only** — never master, never `--force` (enforced in the broker; GitHub branch protection is the backstop) |
+| `restore {n}` | rewrite problem *n*'s `solution_dir` from the local `master` ref (smudge under the broker's key) — discard botched web edits / resync one problem; the broker's **only** working-tree write, path-scoped to that directory |
+
+The broker **never switches branches, pulls, or resets** — `HEAD` and the
+operator's index are untouched and the operator's local workflow is unaffected;
+the sole working-tree mutation is the path-scoped `restore {n}` above (which is
+also the only smudge path in the broker).
+
+**Authorship needs a name.** Commits carry `author = <display name> <email>` of
+the acting web user, `committer = euler-git`, an `On-behalf-of:` trailer; merging
+`web/*` into master remains a local, operator-reviewed act (the review gate the
+web must not bypass). The account therefore gains a **display name**: captured at
+registration (the set-password page), stored on the `users.json` record, editable
+at `/account` (an auth-tier fragment, like change-password), shown in the `users
+list` roster. It travels the existing identity path — the shell ticket is bound to
+`(email, profile, name)` and the redeemed `Subject` carries it — so the git verbs
+send the subject's identity, which the broker **cross-checks against the roster**
+(the email must exist at `maintainer`+) before use. Within the shared
+`euler-ws-maintainer` uid, sibling shells are mutually unprotected as ever (the
+DD-9 same-uid reality), so intra-rung authorship is claim-based — bounded by the
+roster check, the trailer, and the broker's ledger.
+
+Filesystem: `euler-git` joins `euler-sol-read` **and `euler-sol-write`** (the
+`restore` verb's path-scoped writes), gets read on `keys/enc-key.json`
+(wrapped keys — useless without a private key), and **rwX on `.git`** — the sole,
+deliberate exception to DD-12's "never in the ACL set" rule, which continues to
+hold for every web-tier uid. One small crypto change: `solver.crypto.config`
+gains an env override for the private-key path (`SOLVER_PRIVATE_KEY_FILE`;
+stdlib-only and stdout-silent, as that module requires) so the filter can run
+under `/var/lib/euler-git` instead of the operator's `~/.euler/id`.
+
+**Shell surface: the existing `git-*` commands are reworked, not duplicated.**
+`git-status` and `git-commit` move their gate `infra:execute` → the **new
+`git:execute` grant** (a path-less `git` object, granted to `maintainer` in the
+policy template — `admin` inherits it; the operator can strip it in the SoR), and
+their implementation dispatches on the subject: a terminal admin keeps today's
+raw-git path unchanged, a web maintainer's calls go to `git.sock` (`git-commit`
+scoped to the active problem). New `git-push` and `git-restore` commands complete
+the brokered set. `git-sync`, `git-publish`, and `key-*` stay `infra:execute`,
+admin-only, local.
+
+**Accepted risk → [AR-3](security-notes.md).** `euler-git` is a second holder of
+a wrapped master-key entry on the same host as the RCE-by-design tier: its
+compromise is key compromise (the SEC-01 class AR-2 avoids for the web tier).
+Accepted with containment — no Caddy route, peercred-gated socket, a three-verb
+parser that runs no caller-supplied input as paths or code, explicit operator
+enrollment (revocable via `key-rekey`, which re-wraps to a fresh key set) — and
+recorded in security-notes before the service is built.
+
+**Why.** The broker is what the vault instinct is actually reaching for: central
+rotation, audit, caps, and a kill switch — delivered *without* a secret ever
+crossing into the consumer tier, on the idiom this design already trusts three
+times. The git broker additionally converts "maintainer can push from the web"
+from a key-distribution problem into a **review-workflow feature**: the web
+publishes to `web/*`, the operator merges.
+
 ### Open decisions
 
 All resolved:
@@ -588,6 +846,16 @@ All resolved:
 - ~~**htmx** for liveness~~ → adopt ([§4.6](#46--liveness--htmx)).
 - ~~**nh3 / fragments / notes format / html5lib**~~ → the Phase-5 content-service
   choices, [DD-10](#dd-10--phase-5-content-service-choices).
+- ~~**ws gating & the §7.6 command set** (site-design decision 6)~~ → the full
+  solver shell, gated by the DD-12 decorator; instances for all three web rungs,
+  attach at `solver:execute` (the reader floor)
+  ([DD-13](#dd-13--web-shell-topology--gating)).
+- ~~**Web-shell teardown on logout/revocation**~~ → the auth-service push +
+  detached-TTL reaper ([DD-14](#dd-14--web-shell-lifecycle--revocation)).
+- ~~**A vault service for the web tier's secrets (Anthropic key, git key)?**~~ →
+  no vault, ever: secrets are brokered, never dispensed — the `euler-ai` and
+  `euler-git` operation brokers
+  ([DD-15](#dd-15--secrets-are-brokered-never-dispensed)).
 
 ## 4 · How it works
 
@@ -869,7 +1137,8 @@ makes that access safe.
 | Egress | `/etc/euler-proxy/{squid.conf,squid.allowlist}`; client `HTTPS_PROXY` in `/etc/euler/egress.env` |
 | Firewall + relay | `/etc/euler/nftables.conf`; `/etc/euler/smtp.env` (`root:euler-smtp 0640`) |
 | App tier | `/opt/euler/venv`; `/etc/euler/auth.env` (`root:euler-auth 0640`); `/var/lib/euler-auth` (`0600`) |
-| Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` (`0600`) |
+| Brokers (Phase 7) | `/etc/euler/ai.env` (`root:euler-ai 0640`: key, allowlist, caps) + `/var/lib/euler-ai/ledger.jsonl`; `/etc/euler/git.env` (`root:euler-git 0640`: PAT) + `/var/lib/euler-git/id` (`0600` keypair) |
+| Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` (`0600`); `/run/euler/git.sock` (peercred-gated, DD-15); `euler-ai` on loopback TCP `:8030` (firewall uid-gated) |
 
 ## 6 · Build plan
 
@@ -1033,13 +1302,167 @@ shippable sub-steps:
 notes format, html5lib) are **resolved** — see
 [DD-10](#dd-10--phase-5-content-service-choices).
 
-### Phase 6 — Web shell ⬜
-The PTY-backed interactive `solver` shell over WebSocket, **reusing**
-`web/pty_bridge.py` + `web/pty_manager.py` (one persistent shell per user). Replaces the
-5a placeholder with the live terminal (`xterm.js`). Highest-risk service (RCE by design):
-its own unit/user (`euler-ws`), egress only via Squid, behind `forward_auth`, and it
-mints/redeems the DD-9 shell ticket at attach. Per-user helper uids/namespaces are a
-future hardening (see [security-notes AR-1](security-notes.md)).
+### Phase 6 — Web shell 🚧
+The PTY-backed interactive `solver` shell over WebSocket — the highest-risk service
+(RCE by design), and the last one. **Prerequisites: 4a + 5** (the kernel and
+per-profile OS layer it instantiates, and the 5e shell that frames `/terminal`).
+Design closed in [DD-13](#dd-13--web-shell-topology--gating) (topology & gating) and
+[DD-14](#dd-14--web-shell-lifecycle--revocation) (lifecycle & revocation); the
+client-side contract is [site-design § 9 / decision 14](site-design.md). The PTY core
+is **revived from the parked `old-web-server` branch** (`pty_bridge.py` +
+`pty_manager.py`: fork-on-PTY, single drainer, bounded replay, shared attach — proven
+code, adapted to ticket identity). Per-user helper uids/namespaces stay a future
+hardening ([security-notes AR-1](security-notes.md)).
+
+**Build order** (each step independently landable/testable):
+
+1. **`solver/web/ws` service.** New package (`__main__.py`, `app.py`, `pty.py`,
+   `manager.py`, `config.py`) on the DD-12 service shape. The WS handler: profile
+   pin, kernel **`solver:execute`** gate (the reader-floor attach, DD-13), session
+   cookie → `POST /shell-ticket`, fork `python -m solver` with `SOLVER_TICKET`
+   (+ `TERM`) only, **binary frames = raw PTY bytes both ways**, a
+   `{"resize": [cols, rows]}` text control frame, replay on attach. Plus `/healthz`
+   and the socket-peer `/internal/logout` (DD-14). **Test:** a step harness against
+   the live auth service — mint/redeem, attach + replay, resize, second-tab shared
+   attach, pin-mismatch and no-ticket refusals.
+2. **Shell-side enablement.** `show`/`edit` back to `channels=('terminal', 'web')`
+   (their web branch already emits the OSC 5379 navigation the client consumes);
+   the child aborts when the redeemed profile ≠ the `EULER_PROFILE` pin (DD-13);
+   retire `--web`/`--terminal` from `main.py` (channel comes from the subject);
+   `update-docs` regenerates the catalogue + audit table. **Test:** a per-rung
+   web-channel registration snapshot — `reader`: read commands only, no
+   `eval`/`benchmark`/`edit`; `contributor`: + edit/eval/benchmark; `maintainer`:
+   + delete/`claude-*`; at **every** web rung `!`, `users` mutations, and
+   `update-*`/infra are absent.
+3. **Terminal client (content-service side).** Vendor `@xterm/xterm` + the fit addon
+   (pinned + SRI + `LICENSES`, like htmx); replace the `terminal.html` placeholder
+   with the real document: WS connect + reconnect-with-replay, resize → control
+   frame, theme from the site palette (both themes), Ctrl-C/V clipboard handling,
+   the `beforeunload` guard armed while connected / disarmed on close and on the
+   shell's `{euler: 'disarm'}` postMessage (site-design § 9), and the OSC 5379
+   handler forwarding `show`/`edit` navigations up to the parent shell
+   (postMessage → htmx swap of `#content`). Every rung gets the terminal (DD-13).
+   `site.js`: post `disarm` before logout; handle the navigate messages. **Test:**
+   live in-browser across both themes; verify empirically that
+   `connect-src 'self'` admits the same-origin `wss:` upgrade and record the
+   result in §4.7.
+4. **`ws.sh` kit + wiring.** Mirror `content.sh`: the `euler-ws-{reader,
+   contributor,maintainer}` identities (∈ `euler-web` + the `euler-sol-*` groups
+   per rung, DD-13), the `euler-ws@.service` template unit (`EULER_PROFILE=%i`,
+   socket `ws-%i.sock`, DD-8 `IPAddressDeny` + `egress.env`, hardening set), the
+   `.state/` ACLs, the `firewall.sh` uid split (`euler-ws` → the three
+   instance uids, relay-barred), the `frontend.sh` `/ws` route (matchers
+   `@ws_reader`/`@ws_contributor`/`@ws_maintainer` → the per-profile sockets; an
+   unknown/absent profile → `403`), and Makefile `install-ws` + umbrella +
+   `web-redeploy`. **No key deploys to any ws uid** — AI credentials arrive with
+   the Phase-7 `euler-ai` broker (DD-15). **Test:** kit `status` health-probes
+   all three sockets; the firewall probe (a ws uid reaches Squid but not the
+   internet); `caddy validate`.
+5. **Lifecycle integration (DD-14).** The auth service pushes teardown on `logout`
+   and on every revocation path (`users change`/`disable`/`remove`, password reset)
+   to every ws socket, best-effort; the detached-TTL reaper (default 24 h).
+   **Test:** a step harness — logout kills the shell; `users change` against a live
+   shell kills it; a detached shell inside the TTL survives and replays.
+6. **End-to-end verification + docs.** The masquerade suite
+   ([access-control § 8](access-control.md)): ticket replay dead, `unset
+   SOLVER_TICKET` re-exec aborts, no cross-profile attach; a `contributor` E2E
+   (login → attach → `eval` a public problem → results land with the right
+   ownership); a `reader` E2E (attach succeeds, `show`/`ls` work,
+   `eval`/`benchmark`/`edit`/`!` are unknown commands); a `maintainer` `claude-api`
+   call fails with the clear no-credentials error (DD-15 pending, by design); the
+   Phase-4/4a/5 harnesses stay green. Docs: status flips here + site-design +
+   access-control; `update-docs --check` clean.
+
+- **Deliver:** `euler-ws@{reader,contributor,maintainer}` + the xterm terminal
+  replacing the 5a placeholder — the full solver shell in the right pane, gated by
+  the DD-12 policy and revocable in real time.
+- **Kit:** `scripts/setup/ws.sh`; `frontend.sh`/`firewall.sh`/Makefile wiring;
+  xterm vendored (pinned + SRI).
+
+### Phase 7 — Credential brokers ⬜
+Implements [DD-15](#dd-15--secrets-are-brokered-never-dispensed): `euler-ai` (the
+spend-metered Anthropic pass-through) and `euler-git` (the commit/push broker).
+Builds after Phase 6 — its callers are the web shells — and until it lands the AI
+and git commands in a maintainer web shell fail with a clear no-credentials error
+(deliberate: no interim key deploy exists to claw back).
+
+**Build order** (each step independently landable/testable):
+
+1. **`euler-ai` service + kit.** New package `solver/web/ai` (`__main__.py`,
+   `app.py`, `config.py`, `ledger.py`): the authenticated pass-through on
+   `127.0.0.1:8030` — inject the key, discard inbound credentials, model
+   allowlist, per-profile/per-user caps metered from the responses' `usage`
+   (priced via `solver/ai/models.py`), the JSONL ledger, `/healthz` and a local
+   `/usage` report. `scripts/setup/ai.sh`: the `euler-ai` identity, `ai.env` from
+   `~/.euler/env`, the unit (DD-8 pair + `egress.env`, `StateDirectory`), and the
+   `firewall.sh` port guard (only `euler-ws-maintainer` +
+   `euler-content-maintainer` reach `:8030`; `euler-ai` alone reaches Squid for
+   `api.anthropic.com`). **Test:** a call through the broker succeeds on an
+   allowed model and 429s over a test cap; a barred uid cannot connect; the
+   ledger row records uid/model/tokens/cost.
+2. **AI client wiring.** `claude-api`'s client construction honours
+   `EULER_AI_URL` (broker base URL + dummy key) — set in the ws-maintainer
+   instance env by `ws.sh`; local terminal behaviour (direct `~/.euler/env` key)
+   unchanged. **Test:** `claude-api` E2E from a maintainer web shell (generate
+   test-cases for a public problem); the `costs`/ledger figures agree.
+3. **`claude-skill` on the web tier.** `ai.sh` (or a sub-step of `ws.sh`)
+   provisions the Claude Code CLI for service use — system node + pinned CLI, a
+   per-instance writable `HOME`/state dir, `ANTHROPIC_BASE_URL` → the broker,
+   non-essential CLI traffic disabled (everything but the broker is
+   firewall-dropped anyway). **Test:** `claude-skill <n> review` from a
+   maintainer web shell completes with all its API traffic in the broker ledger.
+   *(Deferrable — ships whenever the CLI-provisioning story is settled; steps 4–6
+   do not depend on it.)*
+4. **Account display name (the authorship prerequisite).** Registration's
+   set-password page captures a display name onto the `users.json` record
+   (migration: existing accounts default to the email's local part); `/account`
+   gains an auth-tier edit fragment (the change-password pattern); `users list`
+   shows it; the shell ticket becomes `(email, profile, name)` and the redeemed
+   `Subject` carries `display_name`. **Test:** register-with-name E2E; edit at
+   `/account` sticks; ticket redeem returns the name; the Phase-4 flow harness
+   stays green.
+5. **`euler-git` service + kit.** The `SOLVER_PRIVATE_KEY_FILE` override in
+   `solver.crypto.config` (stdlib-only, stdout-silent). New package
+   `solver/web/git`: the four verbs (`status` / `commit {n, message}` / `push` /
+   `restore {n}`) on `/run/euler/git.sock` with the `SO_PEERCRED` allowlist;
+   temporary-index + `commit-tree` + `update-ref` plumbing (HEAD and the
+   operator's index never touched; `restore` is the only working-tree write,
+   path-scoped to problem *n*'s `solution_dir` from the local `master` ref);
+   pushes restricted to `refs/heads/web/*`, no force; commit authorship from the
+   subject's `(name, email)`, roster-checked at `maintainer`+.
+   `scripts/setup/gitbroker.sh`: the `euler-git` identity + keypair (prints the
+   public key; the operator enrolls it with **`user-authorize`** and commits
+   `enc-key.json`), `git.env` (the contents-scoped PAT), ACLs (`euler-sol-read` +
+   `euler-sol-write`, read on `keys/enc-key.json`, rwX on `.git`),
+   `safe.directory`, the unit + firewall rules (loopback + Squid only). **Test:**
+   a harness calling as the ws-maintainer uid — `commit` of a private problem
+   lands an **encrypted** blob on the `web/*` branch with the right
+   author/trailer and the working tree hash-compares untouched; `restore`
+   reverts an edited problem dir and touches nothing outside it; `push` reaches
+   GitHub; a forbidden ref/verb/uid or an off-roster author is refused;
+   redeeming the master key works under the override and fails without
+   enrollment.
+6. **Shell surface + policy.** The `git` object + `git:execute` grant
+   (`maintainer`) land in the `authorizations.json` template and migrate into the
+   SoR via `auth.sh deploy_authz` (union, idempotent). The **existing**
+   `git-status`/`git-commit` commands are reworked in place: gate
+   `infra:execute` → `git:execute`, implementation dispatching on the subject
+   (terminal admin → today's raw-git path, web maintainer → `git.sock`,
+   `git-commit` scoped to the active problem); new `git-push`/`git-restore`
+   commands complete the set; `git-sync`/`git-publish`/`key-*` untouched at
+   `infra:execute`. `update-docs` regenerates the catalogue + audit table.
+   **Test:** registration snapshot — a maintainer web shell sees the four verbs,
+   a contributor does not, a terminal admin's `git-status`/`git-commit`
+   behaviour is unchanged, `git-sync`/`git-publish` stay admin/local.
+7. **Verify + docs.** AR-3 checks live (no Caddy route to either broker; peercred
+   and port guards hold; `key-rekey` de-enrolls the broker key and `status`
+   reports it); Phases 4–6 harnesses green; security-notes AR-3 confirmed against
+   the built system; status flips; `update-docs --check` clean.
+
+- **Deliver:** web-tier AI with spend caps + audit and web-tier git publishing to
+  operator-reviewed `web/*` branches — no secret on any web uid, per DD-15.
+- **Kit:** `scripts/setup/ai.sh` + `scripts/setup/gitbroker.sh`; `firewall.sh`
+  guards; Makefile `install-ai`/`install-gitbroker` + umbrella + `web-redeploy`.
 
 ## 7 · Verify
 

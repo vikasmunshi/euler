@@ -243,7 +243,7 @@ a **direct** hit on the same path returns the whole shell with that pane pre-pop
 | GET | `/docs/{name}` | a rendered doc — **all** guides incl. `ai` / `convention_*` (the file may live in `docs/` or elsewhere) | `docs:read` |
 | GET | `/topics/` | topics index (card grid, blog-style writeups) | `docs:read` |
 | GET | `/topics/{name}` | a topic page (e.g. `prime-numbers`) | `docs:read` |
-| GET | `/account` | the signed-in user + profile (from `X-User` / `X-Profile`) | `users:read` |
+| GET | `/account` | the signed-in user + profile (from `X-User` / `X-Profile`) + display name (Phase 7: edited via an auth-tier fragment, the change-password pattern — DD-15 web-git authorship) | `users:read` |
 | GET | `/about/{name}` | the footer pages: `readme` · `license` · `acknowledgements` | `about:read` |
 
 ### 8c — validation (the save gate) ✅
@@ -269,22 +269,32 @@ stored-XSS; [DD-10](secure-web-server.md#dd-10--phase-5-content-service-choices)
 route was removed: the content tier cannot reach the Claude API — no key on the
 service uid, no egress, no `ai` extra — so the affordance was dropped rather than
 ship a dead stub; regenerate notes via `claude-api docs {n}` in the shell. The
-`ai:execute` grant thus has no web surface today.)*
+`ai:execute` grant thus has no web surface today. The Phase-7 `euler-ai` broker
+([DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed)) is the
+designed path to restore it: the maintainer content instance calls the broker —
+still no key, no direct egress on the service uid.)*
 
 ### execute — via the terminal (`/ws`), Phase 6
 
-Execution is **not** per-route POSTs; the right-pane terminal sends commands to `/ws`. The
-left-pane navigation never uses `/ws`. Commands to wire (all **dummy stubs until Phase 6**):
-
-| Command | Arg | Purpose | Intended floor |
-|---|---|---|---|
-| `set` | `<problem_number>` (required) | set the active problem for the session | `solutions:read` |
-| `show` | — | show the active problem / its files | `solutions:read` |
-| `ls` | — | list files of the active problem | `solutions:read` |
-| `eval` | — | evaluate the active solution | `solutions:execute` |
-| `benchmark` | — | benchmark the active solution | `solutions:execute` |
-
-Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
+Execution is **not** per-route POSTs; the right-pane terminal talks to `/ws`, and the
+left-pane navigation never does. **Resolved
+([DD-13](secure-web-server.md#dd-13--web-shell-topology--gating)): the terminal is the
+full `solver` shell**, not a curated command list — the stub set once sketched here
+(`set`/`show`/`ls`/`eval`/`benchmark`) arrives as the real commands, and what a web
+shell can run is the DD-12 decorator (`requires`/`channels`) against the
+ticket-resolved subject. The ws↔profile binding mirrors content: per-profile
+`euler-ws@<profile>` instances for **all three web rungs**, attach gated on
+`solver:execute` (a `reader`-floor grant — everyone gets a terminal). Inside it the
+rungs diverge: a `reader` shell registers only the read commands (`set`/`show`/`ls`;
+no `eval`/`benchmark`, no `edit`); `contributor` adds edit + eval/benchmark;
+`maintainer` adds delete + the AI commands (credentials via the Phase-7 `euler-ai`
+broker, [DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed);
+until it lands they fail with a clear no-credentials error) and, with Phase 7, the
+brokered git verbs (`git:execute`): `git-status`/`git-commit`/`git-push` publishing
+to operator-reviewed `web/*` branches, plus `git-restore` (discard/resync one
+problem dir from `master`) — the existing `git-status`/`git-commit` commands are
+reworked to dispatch terminal→raw / web→broker, not duplicated. `!` (`shell:execute`) is admin-only and `admin`
+is never web, so no web terminal has raw bash.
 
 ## 9 · Render & navigation contract
 
@@ -350,8 +360,13 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
    A problem's `topics` field is **new data** — needs a per-problem tagging source. ⬜
 5. **Data:** `level` / `pct` / `solved` / `date` come from `problems.json` today; `topics`
    does not (see 4). Difficulty renders from `Problem.difficulty`.
-6. **Execute via `/ws`** with `set`/`show`/`ls`/`eval`/`benchmark`; dummy until Phase 6,
-   where ws gating (`shell:execute` is admin-only vs the web maintainer cap) is resolved. ⬜
+6. **Execute via `/ws`** — resolved as the **full solver shell** gated by the DD-12
+   decorator (not a curated command set); per-profile instances for all three web
+   rungs, attach = `solver:execute` (reader-floor, so every account gets a
+   terminal — a `reader`'s is read-only, no shell escape); `!` stays admin-only
+   (never web), AI at `maintainer` via the Phase-7 `euler-ai` broker
+   ([DD-13](secure-web-server.md#dd-13--web-shell-topology--gating) /
+   [DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed)). ✅
 7. **Full-viewport shell (5e).** The four regions fill the viewport exactly; the panes
    are equal (`1fr 1fr`) independent scroll containers (left ↕↔, right ↕). ✅
 8. **Brand = Euler's identity (5e).** Geometric glyph (semicircle `1→−1` + unit segment

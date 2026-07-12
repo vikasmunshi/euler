@@ -104,9 +104,11 @@ passwords. All state is in `/var/lib/euler-auth/pending.json`, keyed by
    requested.
 5. **Set password (SRP)** — the browser derives `{salt, verifier}` locally from a
    policy-compliant password (the server never sees it) and `POST
-   /register/complete`. On a `verified` record this creates the `users.json` entry
-   (with the recorded Terms acceptance), **consumes** the pending record, and lands
-   on `/login` (no auto-login).
+   /register/complete`, which also carries the account's **display name** (Phase 7:
+   used for web-git authorship, editable later at `/account`). On a `verified`
+   record this creates the `users.json` entry (with the recorded Terms acceptance
+   and name), **consumes** the pending record, and lands on `/login` (no
+   auto-login).
 
 **Token vs OTP.** The link token (32 bytes, 7-day, one registration session) proves
 possession of the invite; the OTP (6 digits, 10-min, 5 tries) proves *live* mailbox
@@ -164,13 +166,19 @@ profile, permissions) **once** at startup, with no anonymous fallback:
 | Web shell (PTY child) | auth service | **one-time shell ticket**, redeemed over `auth.sock` |
 | Local terminal | the OS | `os.getuid()` **owns the repo checkout** → `admin`; a real non-owner login → `contributor` |
 
-**The shell ticket.** Every web shell runs as the shared `euler-ws` uid, and
-`/proc/<pid>/environ` is same-uid-readable — so nothing env-carried can be the
-credential (a sibling shell could replay it). Instead: on WS attach the ws service
+**The shell ticket.** Every web shell runs as its rung's shared
+`euler-ws-<profile>` uid (DD-12/DD-13), and `/proc/<pid>/environ` is
+same-uid-readable — so nothing env-carried can be the credential (a sibling
+shell on the same rung could replay it). Instead: on WS attach the ws service
 forwards the user's session cookie to `POST /shell-ticket`, which mints a
-**single-use, 60-second** ticket bound to `(email, profile)`; the forked child
+**single-use, 60-second** ticket bound to `(email, profile, display name)` — the
+name rides along for web-git authorship
+([DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed), Phase 7);
+the forked child
 redeems it at startup (`POST /shell-ticket/redeem`), which consumes it and returns
-the authoritative identity. Missing/expired/reused → the shell aborts. Minting needs
+the authoritative identity. Missing/expired/reused → the shell aborts; so does a
+redeemed profile that differs from the per-profile ws instance's `EULER_PROFILE`
+pin ([DD-13](secure-web-server.md#dd-13--web-shell-topology--gating)). Minting needs
 a live cookie the shell user does not hold; the `/shell-ticket*` endpoints are not
 routed by Caddy (socket-peer only).
 
@@ -213,7 +221,7 @@ the subject's `profile` (DD-12). The ladder, most→least privileged:
 | Profile | Reached by | Gains over the rung below |
 |---|---|---|
 | **reader** | web invite (default) | **view** — docs, the full solution tree (public + decrypted private), assets |
-| **contributor** | web (promoted), or a local non-owner login | + **edit** solutions + **execute** (eval/benchmark, Phase-6 shell) |
+| **contributor** | web (promoted), or a local non-owner login | + **edit** solutions + **execute** (eval/benchmark in the web terminal; the terminal itself attaches at `reader` via `solver:execute`, DD-13) |
 | **maintainer** | web (promoted) | + **delete** solutions + AI commands (`claude-*`, owner's budget) |
 | **admin** | **local terminal only** (checkout owner) | + infra: `git-*`, `key-*`, `users`, `manage-config`. **Never web-assignable.** |
 
@@ -235,12 +243,12 @@ profile), and `objects` (permission namespace → filesystem paths):
   "profiles": {
     "reader":      { "inherits": null,          "grants": ["solver:execute","solutions:read","docs:read","web-content:read"] },
     "contributor": { "inherits": "reader",      "grants": ["solutions:write","solutions:execute"] },
-    "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute"] },
+    "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute","git:execute"] },
     "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute"] }
   },
   "users":   { "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
   "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["solver/web/content/"],
-               "solver": [], "shell": ["/bin/bash"], "ai": [], "infra": [] }
+               "solver": [], "shell": ["/bin/bash"], "ai": [], "git": [], "infra": [] }
 }
 ```
 
@@ -249,7 +257,10 @@ A command/route declares `requires=[obj:perm]`; enforcement is `requires ⊆ per
 `infra:execute` (admin-only), so a new command is never silently exposed. Example mapping:
 `show → solutions:read`; `new`/`edit` → `solutions:write`; `evaluate`/`benchmark` →
 `solutions:execute`; `!` → `shell:execute`; `claude-*` → `ai:execute`;
-`git-*`/`key-*` → `infra:execute`; `users` splits (`list → users:read` for `reader`+,
+`git-*`/`key-*` → `infra:execute`, while the Phase-7 *brokered* git verbs
+(`git-status`/`git-commit`/`git-push` via `euler-git`,
+[DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed)) →
+`git:execute` (`maintainer`+); `users` splits (`list → users:read` for `reader`+,
 mutations → `users:write` for `admin`). The DD-11 content matrix is exactly these grants
 (view=read, edit=write, delete=delete, execute=execute). `update-docs` regenerates
 the audit table in **`docs/authorizations.md`** — module / command / channels /
@@ -295,7 +306,10 @@ mail fails); a bare **os-login** is the **local** path — just the map entry, n
 local login authenticates by *being* that OS user). Web-assignable profiles are `reader`
 (default) / `contributor` / `maintainer` — **`admin` only for a local os-login**, never a
 web account. `change` rewrites the map and, for a web account, **revokes live sessions +
-remember tokens** so the new profile takes effect on next login. No reset verb — reset is
+remember tokens** so the new profile takes effect on next login — and (Phase 6)
+the same auth-service paths **push a teardown to any live web shell**, so a
+running PTY's baked-in permissions die immediately, not at next login
+([DD-14](secure-web-server.md#dd-14--web-shell-lifecycle--revocation)). No reset verb — reset is
 self-service (§4.1). Mutating verbs prompt for `sudo`.
 
 ## 7 · Reference
@@ -304,7 +318,7 @@ self-service (§4.1). Mutating verbs prompt for `sudo`.
 
 | File | Purpose |
 |---|---|
-| `users.json` | SRP verifier DB: `{salt, verifier, terms_version, terms_accepted_at, created, disabled}` per email — **no profile** (it lives in `authorizations.json`, DD-12). `euler-auth` resolves the profile fresh from the map at each login (`AuthService.profile_for`), capped at `maintainer`, defaulting `reader` when unmapped. |
+| `users.json` | SRP verifier DB: `{salt, verifier, name, terms_version, terms_accepted_at, created, disabled}` per email — `name` is the display name (captured at registration, editable at `/account`; used for web-git authorship, DD-15/Phase 7) — **no profile** (it lives in `authorizations.json`, DD-12). `euler-auth` resolves the profile fresh from the map at each login (`AuthService.profile_for`), capped at `maintainer`, defaulting `reader` when unmapped. |
 | `pending.json` | in-flight invites/resets, keyed by `hash(link-token)` (DD-7 state machine). |
 | `remember.json` | remember-me `selector → (email, HMAC(validator), expiry)`, rotated on use. |
 | `session-secret` | 32-byte HMAC key for remember-me; created on first start. |
