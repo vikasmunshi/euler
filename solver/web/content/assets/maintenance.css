@@ -84,4 +84,18 @@ h1 {
   letter-spacing: 0.08em;
 }
 
+/* Notice · policy. Sentence case, not the .muted tagline's upper: a copyright
+   line reads as a shout in caps (and the © of a name is not a label). */
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.footer a { color: var(--accent); }
+.footer .fsep { opacity: 0.5; }
+
 strong { color: var(--accent); }
