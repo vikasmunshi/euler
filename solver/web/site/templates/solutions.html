@@ -4,8 +4,11 @@
 <section class="panel">
   <h1>Solutions</h1>
   {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
+  {# Frost, "Stopping by Woods on a Snowy Evening" — the count is the fact; the
+     lede is for the miles still to go, not for restating what the grid shows. #}
   <p class="lead"><strong>{{ solved }}</strong> of <strong>{{ total }}</strong> solved —
-     the shading is difficulty, the hover is the title.</p>
+     the woods are lovely, dark and deep, but I have promises to keep,
+     and miles to go before I sleep.</p>
   <div class="grid-row">
     {% for grid in grids %}
     <div class="century">
