@@ -231,7 +231,8 @@ async def solutions_index(request: web.Request) -> web.StreamResponse:
 def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
     """The problem-page context (§7 order): statement · test-cases · results ·
     files · notes — shared by the GET view and the post-delete fragment."""
-    repo_root = request.app[CONFIG_KEY].repo_root
+    config = request.app[CONFIG_KEY]
+    repo_root = config.repo_root
     info = content.load_problems(repo_root).get(number)
     sdir = content.solution_dir(repo_root, number)
     if info is None and not sdir.is_dir():
@@ -251,11 +252,20 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'answer': tc.get('answer', ''),
     } for tc in raw_cases if isinstance(tc, dict)]
 
+    # Off-site sources: the problem as projecteuler.net states it, and this
+    # problem's directory in the repo (private problems show as ciphertext there
+    # — that is the point of the git filter, not a leak). site.js opens both in a
+    # new tab, as it does every off-site link.
+    github = (f'{config.github_url}/tree/{config.github_branch}/'
+              f'{sdir.relative_to(repo_root).as_posix()}' if config.github_url else '')
+
     # The problem page carries no page-actions (the notes-regenerate stub was
     # dropped — it could not reach the Claude API from the content tier anyway).
     return {
         'number': number,
         'info': info,
+        'euler_url': f'https://projecteuler.net/problem={number}',
+        'github_url': github,
         'statement': read_html('statement.html'),
         'notes': read_html('notes.html'),
         'files': _file_entries(repo_root, sdir),

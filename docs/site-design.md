@@ -198,8 +198,13 @@ selection.
 - **Progress upload (`/edit/solutions/`)** — an **empty** paste buffer (this is a
   *replace*, not an edit — the previous `.progress.html` is superseded wholesale);
   parse-or-reject before anything lands, success answers with the refreshed grids.
+  Same furniture as the file editor (below): the buffer fills the pane, Save is an
+  Actions item, no in-form button.
 - **Problem (`/solutions/{n}/`)** — statement first, then **test cases · results ·
   files · notes** (in that order):
+  - Two **off-site links** on the meta line: the problem on **projecteuler.net**
+    and the solution directory on **github** (the repo URL is configuration —
+    `EULER_GITHUB_URL` — since the service uid cannot read `.git`).
   - **Test cases** render as a table (category · input · answer), not raw JSON.
   - **Files** flow **horizontally** (wrapping as needed), plain text links — no
     underline/highlight; **zero-size files are hidden**; each name is coloured by
@@ -309,7 +314,14 @@ Command gating and the ws↔profile binding are finalized in Phase 6 (§7.6).
   `foo.md` cross-link → the `/docs/` (or `/topics/`) route; a repo-relative
   `../<path>` → the `/docs/file/<path>` viewer (so one authored link resolves both on
   GitHub and in-app); and every internal `/…` link is given `hx-*` so it swaps the
-  pane in place. External and `#anchor` links are left alone.
+  pane in place. External and `#anchor` links are left alone here — they are handled
+  by the rule below.
+- **Every off-site link opens in a new tab.** `site.js` stamps `target="_blank"
+  rel="noopener noreferrer"` on any link whose host is not ours, on load and after
+  every swap. It is a document-wide rule, not per-link markup, precisely because the
+  riskiest links are the ones we do not author: the cached projecteuler.net
+  statements and the notes' reference links. Following one in place would tear down
+  the shell — and with it the terminal, which §9 promises never to lose.
 - **Nav (fixed header):** brand → `/`, `Solutions` → `/solutions/`, `Docs` → `/docs/`,
   `Topics` → `/topics/`, user glyph → account / password / logout (all left pane
   but logout). Profile-gated

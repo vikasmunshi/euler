@@ -4,15 +4,19 @@
 <section class="panel">
   <h1>Problem {{ number }}{% if info and info.title %} — {{ info.title }}{% endif %}</h1>
   {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
-  {% if info %}
   <p class="meta">
-    {% if info.solved %}<span class="pill pill-solved">solved</span>
-      {% if info.date %}<span class="muted">{{ info.date }}</span>{% endif %}
-    {% else %}<span class="pill">unsolved</span>{% endif %}
-    {% if info.level is not none %}<span class="muted">· level {{ info.level }}</span>{% endif %}
-    {% if info.pct %}<span class="muted">· difficulty {{ info.pct }}%</span>{% endif %}
+    {% if info %}
+      {% if info.solved %}<span class="pill pill-solved">solved</span>
+        {% if info.date %}<span class="muted">{{ info.date }}</span>{% endif %}
+      {% else %}<span class="pill">unsolved</span>{% endif %}
+      {% if info.level is not none %}<span class="muted">· level {{ info.level }}</span>{% endif %}
+      {% if info.pct %}<span class="muted">· difficulty {{ info.pct }}%</span>{% endif %}
+    {% endif %}
+    {# Off-site sources. site.js gives every external link target=_blank, so
+       these need no markup of their own to open in a new tab. #}
+    <a class="ext" href="{{ euler_url }}">projecteuler.net</a>
+    {% if github_url %}<a class="ext" href="{{ github_url }}">github</a>{% endif %}
   </p>
-  {% endif %}
 
   {% if statement %}
   {# statement.html is the cached projecteuler.net markup; its relative

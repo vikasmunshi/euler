@@ -20,6 +20,13 @@ from typing import NamedTuple
 #: default working tree for a dev run straight from a checkout.
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 
+#: This repo on GitHub — the default for :attr:`SiteConfig.github_url`, overridable
+#: with ``EULER_GITHUB_URL`` (a fork serves its own source links).
+_GITHUB_URL = 'https://github.com/vikasmunshi/euler'
+
+#: The branch the source links point at (``EULER_GITHUB_BRANCH``).
+_GITHUB_BRANCH = 'master'
+
 
 def _truthy(value: str) -> bool:
     return value.strip().lower() in {'1', 'true', 'yes', 'on'}
@@ -44,6 +51,12 @@ class SiteConfig(NamedTuple):
     #: the app refuses a request whose ``X-Profile`` differs — the code-side backstop
     #: to Caddy's per-profile routing. Empty (dev) accepts any known profile.
     profile: str
+    #: Base URL of the repo on GitHub, for the problem page's source link. It cannot
+    #: be derived from ``.git/config`` — the service uid has no read access to ``.git``
+    #: (DD-12) — so it is configuration. Empty drops the link rather than guessing.
+    github_url: str = _GITHUB_URL
+    #: The branch those source links point at.
+    github_branch: str = _GITHUB_BRANCH
 
     @classmethod
     def from_env(cls) -> SiteConfig:
@@ -59,4 +72,6 @@ class SiteConfig(NamedTuple):
             tcp_bind=os.environ.get('EULER_CONTENT_TCP', '').strip(),
             serve_static=_truthy(os.environ.get('EULER_CONTENT_SERVE_STATIC', '')),
             profile=os.environ.get('EULER_PROFILE', '').strip(),
+            github_url=os.environ.get('EULER_GITHUB_URL', _GITHUB_URL).strip().rstrip('/'),
+            github_branch=os.environ.get('EULER_GITHUB_BRANCH', _GITHUB_BRANCH).strip(),
         )

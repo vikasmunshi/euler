@@ -39,6 +39,23 @@
     });
   });
 
+  // Every off-site link opens in a new tab: following one in-place would tear
+  // down the shell — and with it the terminal in the right pane, which is the
+  // one thing the design promises never to lose. Applied document-wide (not per
+  // link), so it holds for markup we do not author: the cached projecteuler.net
+  // statements, generated notes, and the markdown docs alike.
+  function externalize(root) {
+    (root || document).querySelectorAll('a[href]:not([target])').forEach(function (a) {
+      var url;
+      try { url = new URL(a.getAttribute('href'), window.location.href); } catch (e) { return; }
+      if (url.protocol !== 'http:' && url.protocol !== 'https:') { return; }  // mailto:, #frag
+      if (url.host === window.location.host) { return; }
+      a.target = '_blank';
+      a.rel = (a.rel ? a.rel + ' ' : '') + 'noopener noreferrer';
+    });
+  }
+  document.addEventListener('DOMContentLoaded', function () { externalize(document); });
+
   // htmx swaps replace pane content after MathJax's initial pass — re-typeset
   // the left pane (its math state first cleared so removed nodes are forgotten).
   document.addEventListener('htmx:afterSwap', function () {
@@ -47,6 +64,7 @@
       MathJax.typesetPromise([document.getElementById('content')]);
     }
     enhanceEditors();
+    externalize(document);
   });
 
   // Lazy-load the CodeMirror editor only when an edit page appears in the pane —

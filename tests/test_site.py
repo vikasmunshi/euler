@@ -182,6 +182,19 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertLess(body.index('class="results"'), body.index('file-flow'))
 
     @unittest_run_loop
+    async def test_problem_page_off_site_links(self) -> None:
+        """The meta line links out to the problem and to its directory on GitHub.
+
+        No target/rel here by design — site.js stamps those on *every* off-site
+        link (including the ones inside the cached statement, which we do not author).
+        """
+        resp = await self.client.get('/solutions/0042/', headers=_READER)
+        body = await resp.text()
+        self.assertIn('https://projecteuler.net/problem=42', body)
+        self.assertIn('https://github.com/vikasmunshi/euler/tree/master/'
+                      'solutions/public/p0042', body)
+
+    @unittest_run_loop
     async def test_problem_file_view_and_traversal_guard(self) -> None:
         resp = await self.client.get('/solutions/0042/p0042_s0.py', headers=_READER)
         self.assertEqual(resp.status, 200)
