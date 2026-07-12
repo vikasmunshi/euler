@@ -4,8 +4,11 @@
    as a house glyph. #}
 {%- macro crumb_body(label) -%}
   {%- if label == 'home' -%}
-    <svg class="crumb-home" viewBox="0 0 24 24" aria-label="home"><path fill="currentColor"
-      d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>
+    <svg class="brand-glyph" viewBox="-1.3 -1.35 2.6 1.75" aria-hidden="true">
+      <path d="M 1 0 A 1 1 0 0 0 -1 0 M -1 0 H 0" fill="none"
+            stroke="currentColor" stroke-width="0.14" stroke-linecap="round"/>
+      <circle cx="0" cy="0" r="0.09" fill="currentColor" stroke="none"/>
+    </svg>
   {%- else -%}{{ label }}{%- endif -%}
 {%- endmacro -%}
 <nav id="crumbs" class="crumbs" aria-label="Breadcrumb"{% if oob %} hx-swap-oob="true"{% endif %}>

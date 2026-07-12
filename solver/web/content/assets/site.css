@@ -309,13 +309,13 @@ body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
 .card:hover .card-go { color: var(--accent); }
 
 /* ── Solutions century grids: square, as many per row as fit (§7) ────────── */
-/* auto-fill packs as many ~14rem tracks as the pane allows — ~3 on a normal
+/* auto-fill packs as many ~17rem tracks as the pane allows — ~3–4 on a normal
    window, fewer when narrow, more when wide (the old-web-server flex-wrap,
    in grid form). Each century is square because its 10 columns are equal and
    the cells carry aspect-ratio: 1. */
 .grid-row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
   gap: 1.1rem 1.2rem;
   justify-content: center;
   align-items: start;
@@ -323,11 +323,11 @@ body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
 .century { margin: 0; min-width: 0; }
 /* Two-class selector so it beats `.panel h2` (which would otherwise force 1.12rem
    and wrap the longest title). nowrap keeps every title on one line — the track
-   min-width below (14rem) comfortably holds the widest ("NNNN – NNNN (100
+   min-width below (17rem) comfortably holds the widest ("NNNN – NNNN (100
    solved)") at this size, so all 11 grids stay identical in size. */
 .grid-row .century-label {
   margin: 0 0 0.35rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -349,7 +349,7 @@ body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
   min-width: 0;
   border: 1px solid var(--border);
   border-radius: 3px;
-  font-size: 0.6rem;
+  font-size: 0.7rem;
   line-height: 1;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   text-decoration: none;
