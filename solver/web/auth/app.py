@@ -320,11 +320,19 @@ def build_public_app(service: AuthService) -> web.Application:
     app = web.Application(
         middlewares=[csp_middleware, aiohttp_jinja2.context_processors_middleware])
     # Templates ship as package data (DD-5): solver/web/templates, autoescape on.
+    # The content service's partials come second: /terms is an auth route that the
+    # shell swaps into its own left pane, so its fragment must wear the shell's
+    # chrome — and the chrome has one source of truth (site/templates/_crumbs.html,
+    # _actions.html), not a copy here that silently drifts from it.
     # request_processor puts the live request in every template's context — base.html's
     # footer needs its own path (?back=) to send the terms page's reader back here.
+    web_dir = Path(__file__).resolve().parent.parent
     aiohttp_jinja2.setup(
         app,
-        loader=jinja2.FileSystemLoader(str(Path(__file__).resolve().parent.parent / 'templates')),
+        loader=jinja2.ChoiceLoader([
+            jinja2.FileSystemLoader(str(web_dir / 'templates')),
+            jinja2.FileSystemLoader(str(web_dir / 'site' / 'templates')),
+        ]),
         context_processors=[aiohttp_jinja2.request_processor])
     app.add_routes([
         web.get('/healthz', healthz),

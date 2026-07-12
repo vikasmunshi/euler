@@ -1,6 +1,12 @@
-{# Terms of use as a content-shell fragment (auth /terms on HX-Request): the
-   text + an OOB breadcrumb, swapped straight into the shell's #content. Styled
-   with the content shell's own classes (site.css). #}
+{# Terms of use as a content-shell fragment (auth /terms on HX-Request): the text,
+   plus the shell's own out-of-band chrome, swapped straight into #content. Styled
+   with the content shell's classes (site.css) and — crumbs and Actions alike —
+   rendered from the *content service's* partials (site/templates, reachable via
+   the ChoiceLoader), so this page is chrome-identical to the pages either side of
+   it in the pane rather than a lookalike that drifts from them: the home crumb is
+   the euler glyph the shell now uses, and Actions is present-but-empty, which
+   renders as the muted "No actions here" menu. A page with no verbs still has the
+   menu; it is never dropped. #}
 <section class="panel">
   <h1>Terms of use</h1>
   <div class="doc-body">
@@ -8,11 +14,7 @@
   </div>
   <p class="muted">Version&nbsp;{{ terms_version }}</p>
 </section>
-<nav id="crumbs" class="crumbs" aria-label="Breadcrumb" hx-swap-oob="true">
-  <a href="/" hx-get="/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><svg
-     class="crumb-home" viewBox="0 0 24 24" aria-label="home"><path fill="currentColor"
-     d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg></a>
-  <span class="crumb-sep" aria-hidden="true">&#8250;</span>
-  <span class="crumb-leaf">terms</span>
-</nav>
-<div id="actions" class="actions" hx-swap-oob="true"></div>
+{% with crumbs = [('home', '/'), ('terms', None)], actions = [], oob = True %}
+  {%- include "_crumbs.html" -%}
+  {%- include "_actions.html" -%}
+{% endwith %}
