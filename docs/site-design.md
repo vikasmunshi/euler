@@ -35,8 +35,12 @@ page itself never scrolls; each middle pane scrolls its own overflow.
 - **Header** (fixed) — one control surface, grouped by **separators**, identical on
   every page: the brand (→ `/`) · primary nav `Solutions · Docs · Topics` · the
   **Actions** menu (page-specific verbs, §6 — labelled just "Actions", no
-  caret, **always present** even when the page has none) · **breadcrumbs** (the
-  current path; the leading crumb is a **house glyph**, ancestors clickable) ·
+  caret, **always present** even when the page has none) · the **back arrow**
+  (the previous page *in the pane*: the browser's back navigates the document
+  and would take the terminal with it, so the pane keeps a history of its own —
+  `site.js`, a swap not a navigation; on the first page of a visit it points at
+  that page itself) · **breadcrumbs** (the
+  current path; the leading crumb is the **euler glyph**, ancestors clickable) ·
   the **theme slider** (◐, light⇄dark) · the **user glyph** (a person icon in a
   circle) opening a sub-menu: *Account* (`/account`, left pane),
   *Change password* (`/password`, auth tier — current password + new twice, SRP,

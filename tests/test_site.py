@@ -231,6 +231,18 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertNotIn('href="user-guide.md', page)       # .md cross-links rewired
 
     @unittest_run_loop
+    async def test_header_carries_the_back_arrow(self) -> None:
+        """The pane's back arrow sits between Actions and the breadcrumbs, and ships
+        as a plain href (site.js turns it into a swap): the browser's own back would
+        reload the document and tear down the terminal with it."""
+        page = await (await self.client.get('/', headers=_READER)).text()
+        self.assertIn('id="nav-back"', page)
+        self.assertLess(page.index('id="actions"'), page.index('id="nav-back"'))
+        self.assertLess(page.index('id="nav-back"'), page.index('id="crumbs"'))
+        self.assertRegex(page, r'id="nav-back"[^>]*href="/"')     # a real link with no JS
+        self.assertNotRegex(page, r'id="nav-back"[^>]*hx-get')    # …and never an htmx binding
+
+    @unittest_run_loop
     async def test_docs_index_leads_with_the_readme(self) -> None:
         resp = await self.client.get('/docs/', headers=_READER)
         body = await resp.text()

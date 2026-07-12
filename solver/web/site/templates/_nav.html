@@ -24,6 +24,18 @@
   <span class="hsep" aria-hidden="true"></span>
   {% include "_actions.html" %}
   <span class="hsep" aria-hidden="true"></span>
+  {# The pane's own back arrow (§6). The browser's back reloads the *document*, and
+     the document holds the terminal in the right pane — the one thing the shell
+     promises never to lose — so going back cannot be left to the address bar. This
+     one swaps #content to the previous page the pane showed; site.js keeps the
+     stack and drives the swap (htmx binds hx-get at process time, so an arrow whose
+     target changes every navigation cannot be an hx-get). On the first page of a
+     visit there is nothing behind it, and it points at that page itself. #}
+  <a id="nav-back" class="nav-back is-first" href="/" title="back" aria-label="back">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
+      d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
+  </a>
+  <span class="hsep" aria-hidden="true"></span>
   {% include "_crumbs.html" %}
   <div class="app-who">
     <label class="theme-switch" title="light ⇄ dark">

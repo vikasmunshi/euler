@@ -67,6 +67,65 @@
     externalize(document);
   });
 
+  // ── the pane's back arrow (site-design §6) ─────────────────────────────────
+  // The address bar's back button navigates the *document*, which tears down the
+  // right pane's terminal — the session the shell promises never to lose. So the
+  // header carries a back of its own over the pages #content has shown: a swap,
+  // not a navigation, so the terminal never notices.
+  //
+  // The stack is the pane's, not the browser's. htmx pushes a URL for every pane
+  // navigation (hx-push-url), and that push is the signal a new page landed. The
+  // arrow's own swap pushes its URL directly (below) rather than through htmx, so
+  // it never lands here — going back pops, it does not stack.
+  var paneStack = [];
+
+  function panePath() { return window.location.pathname + window.location.search; }
+
+  //: The page behind the current one — or, on the first page of a visit, itself.
+  function backTarget() {
+    return paneStack.length > 1 ? paneStack[paneStack.length - 2] : (paneStack[0] || '/');
+  }
+
+  function refreshBack() {
+    var back = document.getElementById('nav-back');
+    if (!back) { return; }                              // the terminal frame has no header
+    var target = backTarget();
+    back.setAttribute('href', target);                  // a real href: no-JS, middle-click
+    back.classList.toggle('is-first', paneStack.length < 2);
+    back.title = paneStack.length > 1 ? 'back to ' + target : 'back';
+  }
+
+  function paneBack() {
+    var target = backTarget();
+    if (paneStack.length > 1) { paneStack.pop(); }      // leave the page we are on
+    // htmx binds hx-get at process time, so the arrow cannot carry a target that
+    // changes on every navigation — it asks htmx for the swap directly instead, and
+    // pushes the URL itself (htmx.ajax does not, and the address bar must keep up).
+    window.htmx.ajax('GET', target, { target: '#content', swap: 'innerHTML' })
+      .then(function () {
+        window.history.pushState({}, '', target);
+        refreshBack();
+      });
+  }
+
+  document.addEventListener('htmx:pushedIntoHistory', function (ev) {
+    var path = (ev.detail && ev.detail.path) || panePath();
+    if (paneStack[paneStack.length - 1] !== path) { paneStack.push(path); }
+    refreshBack();
+  });
+
+  // A browser back/forward still works (htmx restores the pane) — but its history
+  // is not ours, so re-seed rather than let the two drift apart.
+  window.addEventListener('popstate', function () {
+    paneStack = [panePath()];
+    refreshBack();
+  });
+
+  document.addEventListener('DOMContentLoaded', function () {
+    paneStack = [panePath()];                           // a fresh document: nothing behind us
+    refreshBack();
+  });
+
   // Lazy-load the CodeMirror editor only when an edit page appears in the pane —
   // its vendored graph (~630 KB) never loads on other pages. The module is cached
   // after first import; each visit just (re)mounts on the fresh textarea.
@@ -92,6 +151,12 @@
     if (ev.target.closest('[data-action="submit-editor"]')) {
       var form = document.querySelector('#content form.editor-form');
       if (form) { form.requestSubmit(); }
+    }
+    // The header's back arrow: a swap, never a document navigation (its href is
+    // the no-JS fallback, and what a middle-click opens in a new tab).
+    if (ev.target.closest('#nav-back') && window.htmx && !ev.metaKey && !ev.ctrlKey) {
+      ev.preventDefault();
+      paneBack();
     }
   });
 
