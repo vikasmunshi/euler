@@ -317,10 +317,15 @@ def build_public_app(service: AuthService) -> web.Application:
         log.info('shell ticket redeemed for %s', email)
         return web.json_response({'email': email, 'profile': profile})
 
-    app = web.Application(middlewares=[csp_middleware])
+    app = web.Application(
+        middlewares=[csp_middleware, aiohttp_jinja2.context_processors_middleware])
     # Templates ship as package data (DD-5): solver/web/templates, autoescape on.
-    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(
-        str(Path(__file__).resolve().parent.parent / 'templates')))
+    # request_processor puts the live request in every template's context — base.html's
+    # footer needs its own path (?back=) to send the terms page's reader back here.
+    aiohttp_jinja2.setup(
+        app,
+        loader=jinja2.FileSystemLoader(str(Path(__file__).resolve().parent.parent / 'templates')),
+        context_processors=[aiohttp_jinja2.request_processor])
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/auth/check', check),
