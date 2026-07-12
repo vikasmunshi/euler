@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -255,6 +256,21 @@ class ContentServiceTests(AioHTTPTestCase):
             self.assertIn(f'href="https://github.com/vikasmunshi/euler/blob/master/{name}"', page)
         # no repo-relative link survives the rewrite (each would 404 in the pane)
         self.assertNotRegex(page, r'(?:href|src)="(?!\w+:|/|#)')
+
+    @unittest_run_loop
+    async def test_readme_images_are_same_origin(self) -> None:
+        """Every image the README shows must load under ``img-src 'self' data:``
+        (csp.py) — so the badges are vendored in-repo and served by the viewer,
+        not fetched from img.shields.io, which the policy blocks outright."""
+        page = await (await self.client.get('/docs/readme', headers=_READER)).text()
+        sources = re.findall(r'<img[^>]*\bsrc="([^"]+)"', page)
+        self.assertTrue(sources)
+        for src in sources:
+            self.assertRegex(src, r'^(?:/|data:)', f'{src} is not same-origin')
+        for src in ('/docs/file/docs/badges/python.svg', '/docs/file/docs/badges/license.svg'):
+            resp = await self.client.get(src, headers=_READER)
+            self.assertEqual(resp.status, 200, src)
+            self.assertEqual(resp.content_type, 'image/svg+xml')
 
     @unittest_run_loop
     async def test_doc_body_links_rewired_and_boosted(self) -> None:

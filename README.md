@@ -1,7 +1,7 @@
 ## Project Euler Solutions
 
-[![Python](https://img.shields.io/badge/python-3.14+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Python](docs/badges/python.svg)](https://www.python.org/downloads/)
+[![License](docs/badges/license.svg)](LICENSE)
 
 **Mathematics and computing are not separate disciplines - they are two lenses on the same underlying structure.**
 Project Euler sits at that intersection: problems that look like puzzles but reward the kind of thinking that
