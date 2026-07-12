@@ -98,7 +98,7 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 0.25rem; }
 .muted { color: var(--muted); font-size: 0.9rem; }
 .muted a { color: var(--accent); }
 
-/* Notice · policy — the signed-out echo of the shell's footer. */
+/* Notice · terms — the signed-out echo of the shell's footer. */
 .footer {
   margin-top: 1.75rem;
   display: flex;
@@ -162,7 +162,7 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 0.25rem; }
 .flash-error { background: var(--error-bg); color: var(--error-fg); }
 .flash-notice { background: var(--notice-bg); color: var(--notice-fg); }
 
-/* The inline Terms of Use on the registration page (strong acceptance: the text
+/* The inline Terms of use on the registration page (strong acceptance: the text
  * is read on the page it is accepted on) and the standalone /terms rendering. */
 .terms-box {
   max-height: 14rem;
@@ -176,3 +176,8 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 0.25rem; }
 }
 .terms-box a, .terms-text a { color: var(--accent); }
 .terms-text { text-align: left; }
+
+/* The standalone /terms page's way back to the page that linked it. */
+.back-row { text-align: left; margin: 0 0 0.4rem; }
+.back-link { color: var(--muted); font-size: 0.9rem; text-decoration: none; }
+.back-link:hover { color: var(--accent); }

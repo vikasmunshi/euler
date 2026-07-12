@@ -30,13 +30,15 @@
     {% if notice %}<p class="flash flash-notice" role="status">{{ notice }}</p>{% endif %}
     {% block content %}{% endblock %}
     {# The signed-out footer mirrors the shell's (site-design §1): the notice, and
-       the one policy a visitor agrees to by using this. `/terms` is a full auth-tier
-       page here — the fragment form is for the shell's left pane. #}
+       the one document a visitor agrees to by using this. `/terms` is a full auth-tier
+       page here — the fragment form is for the shell's left pane. It carries the
+       page it was followed from (?back=, query and all), which is how the terms
+       page knows where to send the reader back to: there is no Referer to read. #}
     <p class="muted footer">
       <span>©&nbsp;Vikas&nbsp;Munshi</span>
       {% block footer_policy %}
       <span class="fsep" aria-hidden="true">·</span>
-      <a href="/terms">acceptable use policy</a>
+      <a href="/terms?back={{ request.path_qs|urlencode }}">terms of use</a>
       {% endblock %}
     </p>
   </main>

@@ -9,14 +9,14 @@
        text is shown inline — acceptance happens on the page that displays it. #}
     <form class="auth-form" method="post" action="{{ base }}/otp">
       <input type="hidden" name="token" value="{{ token }}">
-      <p class="muted">Terms of Use</p>
+      <p class="muted">Terms of use</p>
       <div id="terms-box" class="terms-box" tabindex="0">
         {% include "_terms.html" %}
       </div>
       <p id="terms-hint" class="muted">Scroll to the end of the terms to enable acceptance.</p>
       <label class="check">
         <input id="accept-box" type="checkbox" name="accepted" value="yes" required disabled>
-        I have read and accept these Terms of Use
+        I have read and accept these Terms of use
       </label>
       <button type="submit">Email me a verification code</button>
     </form>

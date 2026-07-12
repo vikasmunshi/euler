@@ -28,7 +28,7 @@ __all__ = ['add_page_routes']
 
 import asyncio
 import logging
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit, urlunsplit
 
 import aiohttp_jinja2
 from aiohttp import web
@@ -52,6 +52,39 @@ _FLAGS = {
     'mailfail': ('error', 'The code could not be emailed just now — try again shortly.'),
     'capped': ('error', 'No more codes can be sent for this link — ask for a fresh invite.'),
 }
+
+
+#: The signed-out pages that may link the standalone Terms — path → the name the
+#: back link calls it. Anything else (a stale bookmark, a foreign site, a typed
+#: URL) is not a page we can return someone to, so it falls back to sign-in.
+_BACK_LABELS = {
+    '/login': 'sign in',
+    '/register': 'registration',
+    '/reset': 'password reset',
+    '/forgot': 'password reset',
+    '/password': 'change password',
+}
+_BACK_DEFAULT = ('/login', _BACK_LABELS['/login'])
+
+
+def _back_link(request: web.Request) -> tuple[str, str]:
+    """The (href, label) the standalone Terms page returns a reader to.
+
+    ``Referrer-Policy: no-referrer`` (csp.py) means there is no ``Referer`` to
+    read, so the caller names itself: base.html's footer carries its own path in
+    ``?back=`` — with the query intact, so a half-finished registration comes
+    back to its own token rather than to a dead link. The value is only ever
+    honoured when it is a relative path (no scheme, no host — ``//evil.example``
+    is a netloc, not a path) naming one of our own pages.
+    """
+    raw = request.query.get('back', '')
+    parsed = urlsplit(raw)
+    if not raw.startswith('/') or parsed.scheme or parsed.netloc:
+        return _BACK_DEFAULT
+    label = _BACK_LABELS.get(parsed.path)
+    if label is None:
+        return _BACK_DEFAULT
+    return urlunsplit(('', '', parsed.path, parsed.query, '')), label
 
 
 def _is_htmx(request: web.Request) -> bool:
@@ -226,14 +259,20 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         return aiohttp_jinja2.render_template('forgot.html', request, {})
 
     async def terms_page(request: web.Request) -> web.Response:
-        """Standalone view of the Terms of Use (the same _terms.html partial the
+        """Standalone view of the Terms of use (the same _terms.html partial the
         registration page embeds).
 
         On ``HX-Request`` it returns a bare fragment (the terms + OOB breadcrumb)
-        for the content shell's left pane; a direct visit gets the full page."""
-        template = 'terms_fragment.html' if _is_htmx(request) else 'terms.html'
-        return aiohttp_jinja2.render_template(template, request, {
-            'terms_version': service.config.terms_version})
+        for the content shell's left pane; a direct visit gets the full page —
+        which carries a back link, being otherwise a dead end: it is the one
+        auth-tier page a reader arrives at with nothing to sign in to."""
+        if _is_htmx(request):                           # the shell's own crumbs lead back
+            return aiohttp_jinja2.render_template('terms_fragment.html', request, {
+                'terms_version': service.config.terms_version})
+        back_url, back_label = _back_link(request)
+        return aiohttp_jinja2.render_template('terms.html', request, {
+            'terms_version': service.config.terms_version,
+            'back_url': back_url, 'back_label': back_label})
 
     async def forgot_submit(request: web.Request) -> web.Response:
         if not service.rate.allow(_client_key(request)):

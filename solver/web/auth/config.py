@@ -38,7 +38,7 @@ class AuthConfig(NamedTuple):
     base_url: str
     #: host:port of the loopback mail relay (DD-8) — the only mail path out.
     smtp_relay: str
-    #: Version tag of the Terms of Use the registration flow records (DD-7).
+    #: Version tag of the Terms of use the registration flow records (DD-7).
     terms_version: str
 
     @classmethod

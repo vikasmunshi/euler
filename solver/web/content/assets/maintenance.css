@@ -84,7 +84,18 @@ h1 {
   letter-spacing: 0.08em;
 }
 
-/* Notice · policy. Sentence case, not the .muted tagline's upper: a copyright
+/* The way back to the site — quiet, sentence case, above the footer rule. */
+.back-row {
+  margin: 0 0 1.5rem;
+  font-size: 0.9rem;
+}
+.back-link {
+  color: var(--muted);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--accent); }
+
+/* Notice · terms. Sentence case, not the .muted tagline's upper: a copyright
    line reads as a shout in caps (and the © of a name is not a label). */
 .footer {
   display: flex;

@@ -93,7 +93,7 @@ passwords. All state is in `/var/lib/euler-auth/pending.json`, keyed by
    emails `https://<FQDN>/register?token=<32-byte token>`. No user record exists
    yet.
 2. **Open link** — `GET /register?token=…`. Valid + unexpired + `invited` renders
-   the page: the email (read-only), the **Terms of Use** in a scroll box (the
+   the page: the email (read-only), the **Terms of use** in a scroll box (the
    accept checkbox unlocks only at the end of the text), and "email me a code".
    Invalid/expired → a generic "link not valid" page (no enumeration).
 3. **Accept Terms + request OTP** — `POST /register/otp` records the Terms
