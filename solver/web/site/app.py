@@ -370,9 +370,12 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
     text = content.read_doc(request.app[CONFIG_KEY].repo_root, name)
     if text is None:
         raise web.HTTPNotFound(text=f'no guide called {html.escape(name)}')
+    # The README links its neighbours at the repo root (LICENSE, Makefile, …), which
+    # the file viewer may not serve: repo_base sends those to GitHub (content.py).
+    repo_base = content.README_REPO_BASE if name.startswith('readme') else ''
     return render(request, 'doc.html', {
         'name': name,
-        'body': content.render_markdown(text),
+        'body': content.render_markdown(text, repo_base=repo_base),
         'crumbs': [_HOME, ('docs', '/docs/'), (name, None)],
     }, block='content')
 

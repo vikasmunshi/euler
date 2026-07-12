@@ -340,17 +340,23 @@ def _doc_slug(text: str) -> str:
     return re.sub(r'[^a-z0-9 -]+', '', text.lower()).strip(' ').replace(' ', '-').strip('-')
 
 
-def render_markdown(text: str, route_base: str = '/docs/') -> str:
+def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '') -> str:
     """Render Markdown to HTML: slugged heading ids + links rewired for the shell.
 
     Each heading gets the same slug `update_doc.py` assumes, so in-page and
-    cross-doc `#anchor` links land. Then three link rewrites:
+    cross-doc `#anchor` links land. Then the link rewrites:
 
     - a relative ``foo.md`` (or ``docs/foo.md``) link → the *route_base* route;
     - a repo-relative ``../<path>`` link (docs/topics sit one level under the
       repo root, so ``../`` reaches it) → the ``/docs/file/<path>`` view route,
       so a link like ``../solver/templates/authorizations.json`` — which
       resolves natively on GitHub — also resolves in the app viewer;
+    - with *repo_base* set (the README, which sits **at** the repo root and so
+      links its neighbours with no ``../`` to give them away): every remaining
+      relative link and image → the ``/docs/file/`` viewer when it names a
+      declared-readable tree, and *repo_base* (GitHub) otherwise. ``LICENSE``,
+      ``Makefile``, ``pyproject.toml`` are outside the content ACLs — the viewer
+      would 404 on them, so they leave for the source of truth instead;
     - every **internal, absolute** ``/…`` link gets ``hx-*`` attributes so it
       swaps the content pane in place (the shell + terminal persist) instead of
       a full reload. External (``http…``) and ``#anchor`` links are untouched,
@@ -364,11 +370,27 @@ def render_markdown(text: str, route_base: str = '/docs/') -> str:
     rendered = re.sub(r'href="(?:docs/)?([\w-]+)\.md(#[^"]*)?"',
                       rf'href="{route_base}\1\2"', rendered)
     rendered = re.sub(r'href="\.\./([^"#]+)"', r'href="/docs/file/\1"', rendered)
+    if repo_base:
+        rendered = re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
+                          lambda m: f'{m.group(1)}{_repo_link(m.group(2), repo_base)}"',
+                          rendered)
     rendered = re.sub(
         r'<a href="(/[^"]*)"',
         r'<a href="\1" hx-get="\1" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"',
         rendered)
     return rendered
+
+
+def _repo_link(path: str, repo_base: str) -> str:
+    """One README link: the file viewer for a readable tree, else *repo_base* (GitHub).
+
+    The bare ``docs/`` link is the exception — the guides have an index route of
+    their own, and the file viewer serves files, not directories.
+    """
+    if path.rstrip('/') == 'docs':
+        return '/docs/'
+    root = path.split('/', 1)[0]
+    return f'/docs/file/{path}' if root in _README_VIEWABLE else f'{repo_base}{path}'
 
 
 def _page_title(text: str, fallback: str) -> str:
@@ -413,6 +435,16 @@ def _read_page(tree: Path, name: str) -> str | None:
 
 
 # ── docs ────────────────────────────────────────────────────────────────────────────
+
+#: The project's front page, served as the `readme` doc — it is the one page that
+#: says what all the others are *for*, so it belongs in the index the guides sit in
+#: (it lives at the repo root, not under `docs/`, hence the special case).
+_README_MD = 'README.md'
+#: Repo trees the README's relative links may resolve to in the file viewer: the
+#: declared-readable ones (DD-12). Anything else leaves for GitHub (`_repo_link`).
+_README_VIEWABLE = frozenset({'docs', 'about', 'solutions'})
+#: Where a README link the viewer cannot serve goes instead — the source of truth.
+README_REPO_BASE = 'https://github.com/vikasmunshi/euler/blob/master/'
 
 #: The AI reference sources composed into the `ai` doc. They live under `solver/`
 #: — outside the content ACLs — so each is read best-effort (see `_ai_section`).
@@ -484,17 +516,41 @@ def _compose_ai_doc(repo_root: Path) -> str:
 
 
 def list_docs(repo_root: Path) -> list[DocEntry]:
-    """The docs index: every `docs/*.md` guide plus the composed `ai` reference,
-    sorted by filename (site-design §7)."""
+    """The docs index: the README, then every `docs/*.md` guide plus the composed
+    `ai` reference, sorted by filename (site-design §7).
+
+    The README leads rather than taking its place in the sort: it is the page that
+    introduces the rest, and a reader who wants the overview should not have to
+    know it files under *r*."""
     entries = _list_pages(repo_root / 'docs')
     entries.append(DocEntry(name='ai', heading='AI', title='AI reference'))
-    return sorted(entries, key=lambda e: e.name)
+    readme = _readme_entry(repo_root)
+    return ([readme] if readme else []) + sorted(entries, key=lambda e: e.name)
+
+
+def _readme_entry(repo_root: Path) -> DocEntry | None:
+    """The index row for the README, or None when it is unreadable (never a 500)."""
+    try:
+        text = (repo_root / _README_MD).read_text(encoding='utf-8')
+    except OSError:
+        return None
+    # Its lead heading is an `##` (the `#` is the repo name on GitHub), so take the
+    # first heading of any level rather than _page_title's `# `.
+    match = re.search(r'^#{1,3}\s+(.+)$', text, re.MULTILINE)
+    return DocEntry(name='readme', heading='README',
+                    title=match.group(1).strip() if match else 'The project')
 
 
 def read_doc(repo_root: Path, name: str) -> str | None:
-    """The raw Markdown of `/docs/{name}`: a `docs/` guide, or the composed `ai` page."""
+    """The raw Markdown of `/docs/{name}`: the README, a `docs/` guide, or the
+    composed `ai` page."""
     if name in ('ai', 'ai.md'):
         return _compose_ai_doc(repo_root)
+    if name in ('readme', 'readme.md'):
+        try:
+            return (repo_root / _README_MD).read_text(encoding='utf-8')
+        except OSError:
+            return None
     return _read_page(repo_root / 'docs', name)
 
 

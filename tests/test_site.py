@@ -230,6 +230,33 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertNotIn('href="user-guide.md', page)       # .md cross-links rewired
 
     @unittest_run_loop
+    async def test_docs_index_leads_with_the_readme(self) -> None:
+        resp = await self.client.get('/docs/', headers=_READER)
+        body = await resp.text()
+        self.assertIn('/docs/readme', body)
+        self.assertIn('>README<', body)                      # the card's first line
+        self.assertLess(body.index('/docs/readme'),          # ahead of the sorted guides
+                        body.index('/docs/access-control'))
+
+    @unittest_run_loop
+    async def test_readme_page_links_resolve(self) -> None:
+        """The README lives at the repo root and links its neighbours with no `../`
+        to mark them: guides route into the pane, readable trees reach the viewer,
+        and what the viewer may not serve (LICENSE, Makefile) leaves for GitHub —
+        nothing stays a bare relative link, which in the pane would 404."""
+        resp = await self.client.get('/docs/readme', headers=_READER)
+        self.assertEqual(resp.status, 200)
+        page = await resp.text()
+        self.assertIn('Project Euler', page)
+        self.assertIn('href="/docs/user-guide#7-key-exchange"', page)   # docs/*.md → route
+        self.assertIn('href="/docs/"', page)                            # docs/ → the index
+        self.assertIn('src="/docs/file/docs/screenshot.png"', page)     # readable tree → viewer
+        for name in ('LICENSE', 'Makefile', 'pyproject.toml'):          # not readable → GitHub
+            self.assertIn(f'href="https://github.com/vikasmunshi/euler/blob/master/{name}"', page)
+        # no repo-relative link survives the rewrite (each would 404 in the pane)
+        self.assertNotRegex(page, r'(?:href|src)="(?!\w+:|/|#)')
+
+    @unittest_run_loop
     async def test_doc_body_links_rewired_and_boosted(self) -> None:
         # authorizations.md links ../solver/templates/authorizations.json and
         # access-control.md; both must resolve in-app and swap the pane (hx-*).
