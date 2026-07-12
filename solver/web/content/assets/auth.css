@@ -98,7 +98,16 @@ h1 { font-size: 1.4rem; margin: 0.5rem 0 0.25rem; }
 .muted { color: var(--muted); font-size: 0.9rem; }
 .muted a { color: var(--accent); }
 
-.footer { margin-top: 1.75rem; }
+/* Notice · policy — the signed-out echo of the shell's footer. */
+.footer {
+  margin-top: 1.75rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+.footer .fsep { opacity: 0.5; }
 
 .auth-form { display: flex; flex-direction: column; gap: 0.5rem; text-align: left; }
 .auth-form.inline { margin-top: 0.75rem; }

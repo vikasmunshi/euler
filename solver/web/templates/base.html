@@ -29,7 +29,16 @@
     {% if error %}<p class="flash flash-error" role="alert">{{ error }}</p>{% endif %}
     {% if notice %}<p class="flash flash-notice" role="status">{{ notice }}</p>{% endif %}
     {% block content %}{% endblock %}
-    <p class="muted footer">Project&nbsp;Euler solutions &amp; tooling</p>
+    {# The signed-out footer mirrors the shell's (site-design §1): the notice, and
+       the one policy a visitor agrees to by using this. `/terms` is a full auth-tier
+       page here — the fragment form is for the shell's left pane. #}
+    <p class="muted footer">
+      <span>©&nbsp;Vikas&nbsp;Munshi</span>
+      {% block footer_policy %}
+      <span class="fsep" aria-hidden="true">·</span>
+      <a href="/terms">acceptable use policy</a>
+      {% endblock %}
+    </p>
   </main>
   {% block scripts %}{% endblock %}
 </body>
