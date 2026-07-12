@@ -258,6 +258,14 @@ body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
 .meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 .pill-solved { color: var(--accent-ink); }
 
+/* Off-site source links (problem page: projecteuler.net · github). The ↗ says
+   "this leaves the site" — site.js has already made every such link open in a
+   new tab, and the marker is what tells the reader so before they click. */
+.meta .ext { margin-left: 0.35rem; }
+.ext { font-size: 0.85rem; text-decoration: none; border-bottom: 1px solid transparent; }
+.ext::after { content: ' ↗'; font-size: 0.8em; opacity: 0.75; }
+.ext:hover { border-bottom-color: currentColor; }
+
 /* hero + card grid — the landing / docs / topics visual system (§3/§7) */
 .hero { margin: 0.4rem 0 1rem; }
 .hero .kicker {
@@ -447,7 +455,6 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   overflow: hidden;
 }
 .cm-host .cm-editor { height: 100%; }
-.editor-actions { display: flex; align-items: center; gap: 0.8rem; margin-top: 0.7rem; }
 .btn {
   border: 1px solid var(--border);
   background: var(--surface);

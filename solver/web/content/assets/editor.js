@@ -9,7 +9,7 @@
  * ES module, same-origin ('self'); CodeMirror injects its stylesheet at runtime
  * (covered by the CSP style-src 'unsafe-inline', §4.7). No eval. */
 import {
-  EditorView, basicSetup, indentUnit, keymap, indentWithTab,
+  EditorView, basicSetup, indentUnit, keymap, indentWithTab, placeholder,
   python, cpp, json, oneDark,
 } from '/vendor/codemirror/cm6.js';
 
@@ -53,6 +53,7 @@ function enhance(textarea) {
       basicSetup,                                       // gutter, history, brackets, search, folding…
       ...(dark ? [oneDark] : []),                       // match the shell's theme
       langExt,
+      ...(textarea.placeholder ? [placeholder(textarea.placeholder)] : []),
       indentUnit.of('    '),                            // 4-space indent (project style)
       EditorView.lineWrapping,
       keymap.of([

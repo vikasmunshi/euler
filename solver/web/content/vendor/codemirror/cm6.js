@@ -5,7 +5,7 @@
    resolves to the legacy CodeMirror 5 UMD (v6.65.x) which lacks EditorView. */
 export {EditorView, basicSetup} from "./codemirror_6_0_2.js";
 export {EditorState, Compartment} from "./_codemirror_state_6.js";
-export {keymap, lineNumbers} from "./_codemirror_view_6.js";
+export {keymap, lineNumbers, placeholder} from "./_codemirror_view_6.js";
 export {indentWithTab} from "./_codemirror_commands_6.js";
 export {indentUnit} from "./_codemirror_language_6.js";
 export {linter, lintGutter, forceLinting} from "./_codemirror_lint_6.js";
