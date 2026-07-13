@@ -296,7 +296,16 @@ acme_is_installed() { sudo test -x "${ACME_BIN}"; }
 # (it detects the SUDO_* env vars), so strip those markers and pin HOME to its working
 # dir. For calls needing extra environment (the DNS credentials at issue time) use
 # acme_run_with_creds, which prepends the $cred_env `VAR=val` pairs before the binary.
-ACME_CLEAN_ENV=(env -u SUDO_COMMAND -u SUDO_USER -u SUDO_UID -u SUDO_GID "HOME=${ACME_HOME}" "LE_CONFIG_HOME=${ACME_HOME}")
+#
+# LE_WORKING_DIR is pinned to ACME_HOME because we install with `--home ${ACME_HOME}`
+# (everything directly in that dir, not the stock `$HOME/.acme.sh` subdir). Most
+# subcommands re-derive it from the script's own location, but `--upgrade` falls back
+# to `$HOME/.acme.sh` when it is unset — a dir that does not exist here, so the upgrade
+# `cd`s nowhere, then tries to download the tarball into the launch CWD (which euler-acme
+# cannot write) and fails with a "Permission denied". Setting it explicitly matches the
+# install layout for every call.
+ACME_CLEAN_ENV=(env -u SUDO_COMMAND -u SUDO_USER -u SUDO_UID -u SUDO_GID \
+    "HOME=${ACME_HOME}" "LE_CONFIG_HOME=${ACME_HOME}" "LE_WORKING_DIR=${ACME_HOME}")
 acme_run() {
     sudo -u "${ACME_USER}" "${ACME_CLEAN_ENV[@]}" "${ACME_BIN}" "$@"
 }
