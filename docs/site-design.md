@@ -378,10 +378,20 @@ is never web, so no web terminal has raw bash.
     files join the `content.sh` READ ACL derivation. ✅
 11. **Progress is upload-replace (5e).** `GET /edit/solutions/` opens an **empty**
     buffer; the paste supersedes `.progress.html` wholesale (parse-or-reject). ✅
-12. **File git status is best-effort (5e).** The web tier stays git-less (DD-12): the
-    colours appear only where `.git` is readable (dev/owner runs); deployed instances
-    degrade to plain names. No ACL on `.git` — history and the key path stay off the
-    web tier. ✅
+12. **File git status is live on deployed instances too (5e → Phase 6).** The colours
+    are real everywhere, not just on a dev run. The original claim here — that they
+    "degrade to plain names" because deployed uids cannot read `.git` — was wrong on
+    both halves, and worth stating precisely because the mechanism is not the obvious
+    one: `.git` is **world-readable** (mode `0755`), so a service uid with traverse on
+    the repo root reaches it without any ACL. What actually silenced the colours is
+    git's **ownership** check: it refuses a repository owned by another uid (*detected
+    dubious ownership*). The query therefore carries its own `-c safe.directory=<repo>`
+    — *command* scope is protected configuration, so the exception is honoured, and it
+    is scoped to that one invocation rather than written into the host's git config, so
+    no other uid or process gains anything. Verified: identical status output as the
+    owner and under a simulated foreign owner. Still no ACL on `.git`, and this stays
+    the **only** git the web tier runs — read-only `status`, no commits, no checkouts,
+    no key (DD-12; the Phase-7 `euler-git` broker is what does the rest). ✅
 13. **Index pages are card grids (5e)** in the §3 voice; the landing, docs index, and
     topics index share the visual system. ✅
 14. **The right pane is an iframe (5e → Phase 6).** `#ws` hosts `/terminal` — a

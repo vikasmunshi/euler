@@ -561,13 +561,24 @@ instance's uid, else it aborts.
 **OS second layer — content-tree ACLs (refines DD-5).** The services read/write the repo
 **working tree directly** (`solutions/`, `docs/`, `solver/web/content/`) — the git clean/smudge
 filter already leaves **plaintext at rest** there, so the web tier needs *filesystem
-access, not the master key*, and does **no git operations** (commit/checkout, where the key
-is used, stay with the operator locally). Access is a **scoped ACL**: a traverse ACL
+access, not the master key*, and does **no *mutating* git operations** (commit/checkout,
+where the key is used, stay with the operator locally — the Phase-7
+[`euler-git` broker](#dd-15--secrets-are-brokered-never-dispensed) is what changes that).
+The one exception is a **read-only `git status`**, which colours the file names on a
+problem page ([site-design decision 12](site-design.md)): harmless (no key, no writes,
+no history) and, note, *possible without any ACL* — `.git` is world-readable by mode, so
+what has to be granted is not access but a `-c safe.directory` exception to git's
+owned-by-another-uid refusal, scoped to that one invocation.
+Access is a **scoped ACL**: a traverse ACL
 (`g:euler-web:x`) on the home path + repo root so services can *reach* the content subtrees
 without reading the rest of home, then per-profile group ACLs — `euler-sol-read` (traverse
 + read `solutions/`), `euler-sol-write` (write), `euler-sol-delete` — mapped to the
 per-profile uids. **`.git`, `keys/` (the `enc-key.json`), and the `solver/` source are
-never in the ACL set.** `authorizations.json`'s `objects`→paths is the single source that a
+never in the ACL set** — though note the ACLs are what *grants* access, not what *bounds*
+it: `.git`'s own `0755` mode already lets any uid that can traverse the repo root read it
+(git history is ciphertext for `solutions/private`, so this leaks nothing the public
+GitHub repo does not — but `chmod o-rwx .git` is the cheap hardening if the reachability
+itself is unwanted). `authorizations.json`'s `objects`→paths is the single source that a
 setup kit turns into these ACLs, so the app policy and the filesystem enforcement can't
 drift. (The sole exception to the never-ACL'd set is the Phase-7 **`euler-git` broker's
 own** `.git` ACL — a non-web-reachable service, [DD-15](#dd-15--secrets-are-brokered-never-dispensed);

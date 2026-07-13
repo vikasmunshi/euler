@@ -148,14 +148,25 @@ def problem_files(sdir: Path) -> list[str]:
 def git_status(repo_root: Path, sdir: Path) -> dict[str, tuple[str, str]]:
     """Best-effort git status for *sdir*: relative name → (css class, hover title).
 
-    The web tier does no git operations and the deployed uids cannot read
-    ``.git`` (kept off the content ACLs, DD-12) — so any failure degrades to
-    ``{}`` and files render plain. A dev run as the owner gets the colours.
-    A name absent from the porcelain output is clean/committed.
+    Read-only, and the *only* git the web tier runs (DD-12: no commits, no
+    checkouts, no key). It works from the deployed per-profile uids because
+    ``.git`` is world-readable and the query carries its own
+    ``safe.directory`` exception: git otherwise **refuses a repository owned by
+    another uid** ("detected dubious ownership") — that ownership check, not the
+    file permissions, is what would silence the status colours on a deployed
+    instance. ``-c`` is *protected* configuration scope (like system/global), so
+    the exception is honoured; it is scoped to this one invocation rather than
+    written into the host's git config, so no other process or uid gains
+    anything.
+
+    Any failure still degrades to ``{}`` (files render plain) — a missing git
+    binary, a repo-less deployment, a timeout. A name absent from the porcelain
+    output is clean/committed.
     """
     try:
         proc = subprocess.run(
-            ['git', '-C', str(repo_root), 'status', '--porcelain', '--', str(sdir)],
+            ['git', '-C', str(repo_root), '-c', f'safe.directory={repo_root}',
+             'status', '--porcelain', '--', str(sdir)],
             capture_output=True, text=True, timeout=10)
     except (OSError, subprocess.TimeoutExpired):
         return {}
