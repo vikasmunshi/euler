@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content redeploy-auth redeploy-content redeploy-frontend web-redeploy install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content redeploy-auth redeploy-content redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -218,8 +218,8 @@ redeploy-frontend:
 ## ACLs, units, certs, or the firewall: rebuild the shared venv (auth) → restart the
 ## content instances against it → refresh the edge's static content + Caddyfile. The
 ## everyday "I changed Python/templates/CSS/JS, push it" turnaround.
-web-redeploy: redeploy-auth redeploy-content redeploy-frontend
-	@printf "✓ web-redeploy complete: code, templates, and static assets redeployed\n"
+redeploy-web: redeploy-auth redeploy-content redeploy-frontend
+	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
 
 # Standalone Node.js (no sudo):
 

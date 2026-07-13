@@ -1067,7 +1067,7 @@ An **umbrella** (`make install-web` / `uninstall-web` / `upgrade-web`) composes 
 per-service kits so the whole stack installs/removes/upgrades as one, while each service
 remains independently operable.
 
-**Fast redeploy.** `make web-redeploy` (each kit's `redeploy` action) pushes new
+**Fast redeploy.** `make redeploy-web` (each kit's `redeploy` action) pushes new
 **code, templates, and static assets** without touching identities, ACLs, units, certs,
 or the firewall: `auth.sh redeploy` reinstalls the repo into the shared `/opt/euler`
 venv (the code both auth and content run) and restarts auth; `content.sh redeploy`
@@ -1354,7 +1354,7 @@ hardening ([security-notes AR-1](security-notes.md)).
    instance uids, relay-barred), the `frontend.sh` `/ws` route (matchers
    `@ws_reader`/`@ws_contributor`/`@ws_maintainer` → the per-profile sockets; an
    unknown/absent profile → `403`), and Makefile `install-ws` + umbrella +
-   `web-redeploy`. **No key deploys to any ws uid** — AI credentials arrive with
+   `redeploy-web`. **No key deploys to any ws uid** — AI credentials arrive with
    the Phase-7 `euler-ai` broker (DD-15). **Test:** kit `status` health-probes
    all three sockets; the firewall probe (a ws uid reaches Squid but not the
    internet); `caddy validate`.
@@ -1462,7 +1462,7 @@ and git commands in a maintainer web shell fail with a clear no-credentials erro
 - **Deliver:** web-tier AI with spend caps + audit and web-tier git publishing to
   operator-reviewed `web/*` branches — no secret on any web uid, per DD-15.
 - **Kit:** `scripts/setup/ai.sh` + `scripts/setup/gitbroker.sh`; `firewall.sh`
-  guards; Makefile `install-ai`/`install-gitbroker` + umbrella + `web-redeploy`.
+  guards; Makefile `install-ai`/`install-gitbroker` + umbrella + `redeploy-web`.
 
 ## 7 · Verify
 
