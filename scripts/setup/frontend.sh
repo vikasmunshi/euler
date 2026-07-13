@@ -440,7 +440,7 @@ generate_caddyfile() {
 }
 
 # Transport-level security headers + edge fallback CSP, shared by the live routes and
-# the maintenance/error responses. The CSP uses the `?` (set-if-absent) operator so it
+# the maintenance/error responses. The CSP uses the '?' (set-if-absent) operator so it
 # is only a **fallback**: the app tier mints a per-response, nonce'd CSP with the
 # exceptions its pages need (style-src 'unsafe-inline' for MathJax/CodeMirror injected
 # styles; frame-ancestors 'self' for the terminal iframe — docs/secure-web-server.md

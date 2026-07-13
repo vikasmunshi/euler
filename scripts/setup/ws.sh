@@ -287,7 +287,7 @@ IPAddressAllow=localhost
 #                              .state (per-user shell state). Everything else read-only.
 #   MemoryDenyWriteExecute   — deliberately NOT set: solutions may legitimately need
 #                              W^X-violating runtimes (native extensions), and denying it
-#                              would break `evaluate` while buying little against a tier
+#                              would break 'evaluate' while buying little against a tier
 #                              that already runs the user's own code.
 NoNewPrivileges=true
 ProtectSystem=strict
