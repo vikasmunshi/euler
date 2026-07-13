@@ -22,6 +22,7 @@
       "inherits": "contributor",
       "grants": [
         "ai:execute",
+        "shell:execute",
         "solutions:delete"
       ]
     },
@@ -29,7 +30,6 @@
       "inherits": "maintainer",
       "grants": [
         "infra:execute",
-        "shell:execute",
         "users:write"
       ]
     }

@@ -97,7 +97,7 @@ a parameter that accepts repetition.
 #### Command: `!` (`sh`, `bash`)
 
 Run a bash command.
-* channels: terminal, web · profiles: admin
+* channels: terminal, web · profiles: admin, maintainer
 
 ```
 ! <command> [args]...

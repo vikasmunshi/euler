@@ -53,7 +53,7 @@ profile on each channel.
 | `solver.crypto.keys` | `key-split` | terminal, web | `infra:execute` | `admin` |
 | `solver.crypto.keys` | `user` | terminal, web | `infra:execute` | `admin` |
 | `solver.crypto.keys` | `user-authorize` | terminal, web | `infra:execute` | `admin` |
-| `solver.shell.bash` | `!` | terminal, web | `shell:execute` | `admin` |
+| `solver.shell.bash` | `!` | terminal, web | `shell:execute` | `maintainer` |
 | `solver.shell.builtins` | `?` | terminal, web | `solver:execute` | `reader` |
 | `solver.shell.builtins` | `clear` | terminal, web | `solver:execute` | `reader` |
 | `solver.shell.builtins` | `echo` | terminal, web | `solver:execute` | `reader` |
