@@ -185,7 +185,7 @@ number lists (each sliceable) or a literal.
 ```bash
 $ solver <<'EOF'
 loop {unsolved}[0:5]: {
-  claude-skill {loop.number} solve || break   # work it; stop the loop on failure
+  euler-solve {loop.number} solve || break   # work it; stop the loop on failure
 }
 
 loop [1, 2, 3]: echo {loop}       # body runs with loop = 1, then 2, then 3
@@ -213,12 +213,12 @@ command name below links to its full entry — usage and description — in the
 | [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
 | [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
 | [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. ❏ |
-| [`claude-skill`](commands-index.md#command-claude-skill) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](commands-index.md#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
 | [`costs`](commands-index.md#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
 | [`edit`](commands-index.md#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
+| [`euler-solve`](commands-index.md#command-euler-solve) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
@@ -287,7 +287,7 @@ them.
 
 ```bash
 solver <<'EOF'
-loop {unsolved}[0:5]: { claude-skill {loop.number} solve }
+loop {unsolved}[0:5]: { euler-solve {loop.number} solve }
 EOF
 ```
 
@@ -304,10 +304,10 @@ Claude Code requires authentication in the CLI `claude /login`):
   artifact: `py` / `c` (a solution), `notes` (the write-up), or `test-cases`. It
   is fast and cheap, and `costs` tracks its token spend, but the AI neither runs
   nor verifies its output — that happens afterwards in the script.
-- **`claude-skill <n> <action>`** — full Claude Code working directly on a
+- **`euler-solve <n> <action>`** — full Claude Code working directly on a
   problem's solution files: it runs `solver` commands, edits files, evaluates,
   benchmarks, and iterates. The actions are `review` and `solve` (e.g.
-  `claude-skill 42 solve`). Heavier and slower, it is meant for the harder job.
+  `euler-solve 42 solve`). Heavier and slower, it is meant for the harder job.
   `! claude <prompt>` drops into an interactive Claude Code session in the repo.
 
 The goal is to deepen understanding, not skip it: generate alternatives *after*

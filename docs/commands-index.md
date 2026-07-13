@@ -50,12 +50,12 @@ a parameter that accepts repetition.
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
 | [`benchmark`](#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
 | [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. ❏ |
-| [`claude-skill`](#command-claude-skill) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
 | [`echo`](#command-echo) | — | Print text. |
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
+| [`euler-solve`](#command-euler-solve) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
@@ -252,40 +252,6 @@ Prints the USD/EUR cost of the call and returns non-zero if the generator report
 
 ---
 
-#### Command: `claude-skill`
-
-Launch the Claude Euler Solver skill.
-* channels: terminal, web · profiles: admin, maintainer
-* ❏ takes an optional problem number (defaults to the current problem)
-
-```
-claude-skill <solve|review>
-[problem=<n>] (default current)
-[additional_prompt=<str>] (default '')
-```
-
-```text
-Run Claude Code over a problem's solution files via the claude-euler-solver skill.
-
-Launches Claude Code headless against the given problem's solution directory,
-runs the requested action, and streams a
-live-updating Markdown summary back into the shell, ending with a footer of
-turns / duration / cost. Heavier and slower than `claude-api` — it actually
-runs `solver` commands, edits files, evaluates, and iterates. Needs the
-`claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
-
-Args:
-    problem:            The `problem` to work on; defaults to the current problem.
-    action:             What to do — 'solve' (write and verify a Python
-                        solution, translate it to C, then document and
-                        summarise), or 'review' (audit an existing solution
-                        for C↔Python parity, in-source docs, and notes.html).
-    additional_prompt:  Extra free-text instructions appended to the skill
-                        invocation. Defaults to empty.
-```
-
----
-
 #### Command: `clear` (`cls`)
 
 Clear the screen.
@@ -409,6 +375,42 @@ like `show` (the channel is the resolved subject's, DD-13):
 Arguments:
     problem:  The problem owning the file; defaults to the current problem.
     filename: The solution-directory file to edit (as `ls` lists it).
+```
+
+---
+
+#### Command: `euler-solve`
+
+Launch the Claude Euler Solver skill.
+* channels: terminal, web · profiles: admin, maintainer
+* ❏ takes an optional problem number (defaults to the current problem)
+
+```
+euler-solve <solve|review>
+[problem=<n>] (default current)
+[additional_prompt=<str>] (default '')
+```
+
+```text
+Run Claude Code over a problem's solution files via the claude-euler-solver skill.
+
+Launches Claude Code headless against the given problem's solution directory,
+runs the requested action, and streams a
+live-updating Markdown summary back into the shell, ending with a footer of
+turns / duration / cost. Heavier and slower than `claude-api` — it actually
+runs `solver` commands, edits files, evaluates, and iterates. Needs the
+`claude` CLI on PATH and an `ANTHROPIC_API_KEY` (over the web tier both are
+provided by the deploy: the CLI from `/opt/euler`, the key via the `euler-ai`
+broker — DD-15).
+
+Args:
+    problem:            The `problem` to work on; defaults to the current problem.
+    action:             What to do — 'solve' (write and verify a Python
+                        solution, translate it to C, then document and
+                        summarise), or 'review' (audit an existing solution
+                        for C↔Python parity, in-source docs, and notes.html).
+    additional_prompt:  Extra free-text instructions appended to the skill
+                        invocation. Defaults to empty.
 ```
 
 ---

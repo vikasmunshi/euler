@@ -37,7 +37,7 @@ profile on each channel.
 |--------|---------|----------|----------|---------------|
 | `solver.ai.api` | `claude-api` | terminal, web | `ai:execute` | `maintainer` |
 | `solver.ai.models` | `costs` | terminal, web | `solver:execute` | `reader` |
-| `solver.ai.skill` | `claude-skill` | terminal, web | `ai:execute` | `maintainer` |
+| `solver.ai.skill` | `euler-solve` | terminal, web | `ai:execute` | `maintainer` |
 | `solver.ai.update_models` | `update-models` | terminal | `infra:execute` | `admin` |
 | `solver.core.evaluate` | `benchmark` | terminal, web | `solutions:execute` | `contributor` |
 | `solver.core.evaluate` | `compile-c` | terminal, web | `solutions:execute` | `contributor` |

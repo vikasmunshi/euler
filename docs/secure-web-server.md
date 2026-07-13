@@ -411,7 +411,7 @@ trust grows.
 |---|---|---|
 | **reader** | web invite (default) | **view** only — framework docs, the full solution tree (public **and** decrypted private), static assets |
 | **contributor** | web (promoted), or a local non-owner login | + **edit** solution files (code / notes / tests) + **execute** (eval / benchmark in the web terminal) |
-| **maintainer** | web (promoted) | + **delete** solution files + the AI commands (`claude-api` / `claude-skill`, which spend the owner's API budget) |
+| **maintainer** | web (promoted) | + **delete** solution files + the AI commands (`claude-api` / `euler-solve`, which spend the owner's API budget) |
 | **admin** | **local terminal only** (uid == repo-owner) | + infra: `git-*`, `key-*`, `users`, `manage-config`, `update-*`. **Never web-assignable.** |
 
 Read scope is **uniform** — every authenticated account, `reader` included, may read the
@@ -655,7 +655,7 @@ terminal is the product's front door, and what varies by rung is what the shell
   ACLs for the three ws uids), where the shell keeps per-user history /
   last-problem / session state.
 - **AI at `maintainer`, per DD-11 — credentials via the DD-15 broker.** No web uid
-  ever holds the Anthropic key. `claude-api`/`claude-skill` register at
+  ever holds the Anthropic key. `claude-api`/`euler-solve` register at
   `maintainer` (`ai:execute`) on both channels, and on the web channel their
   credentials come from the **`euler-ai` broker**
   ([DD-15](#dd-15--secrets-are-brokered-never-dispensed), Phase 7) — the sole key
@@ -773,7 +773,7 @@ the real key** (whatever credential the caller sent is discarded), enforces a
 (`/var/lib/euler-ai/ledger.jsonl`: caller uid, best-effort `X-Solver-User`,
 model, tokens, cost). Kill switch = `systemctl stop euler-ai` — one place, all
 web AI spend. Callers: `claude-api` (the anthropic SDK pointed at the broker
-when `EULER_AI_URL` is set in the instance env), `claude-skill` (the CLI via
+when `EULER_AI_URL` is set in the instance env), `euler-solve` (the CLI via
 `ANTHROPIC_BASE_URL`), and later the content service's notes-regenerate (today a
 shell-pointer stub). The operator's local shell keeps reading `~/.euler/env`
 directly — the broker is the web tier's path. This **supersedes the scoped
@@ -1444,11 +1444,11 @@ and git commands in a maintainer web shell fail with a clear no-credentials erro
    instance env by `ws.sh`; local terminal behaviour (direct `~/.euler/env` key)
    unchanged. **Test:** `claude-api` E2E from a maintainer web shell (generate
    test-cases for a public problem); the `costs`/ledger figures agree.
-3. **`claude-skill` on the web tier.** `ai.sh` (or a sub-step of `ws.sh`)
+3. **`euler-solve` on the web tier.** `ai.sh` (or a sub-step of `ws.sh`)
    provisions the Claude Code CLI for service use — system node + pinned CLI, a
    per-instance writable `HOME`/state dir, `ANTHROPIC_BASE_URL` → the broker,
    non-essential CLI traffic disabled (everything but the broker is
-   firewall-dropped anyway). **Test:** `claude-skill <n> review` from a
+   firewall-dropped anyway). **Test:** `euler-solve <n> review` from a
    maintainer web shell completes with all its API traffic in the broker ledger.
    *(Deferrable — ships whenever the CLI-provisioning story is settled; steps 4–6
    do not depend on it.)*

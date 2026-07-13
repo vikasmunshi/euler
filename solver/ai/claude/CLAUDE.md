@@ -82,7 +82,7 @@ solver/
     docs.py           — Module to generate notes for solver solutions, leveraging AI.
     facts.py          — Utility function for gathering problem inputs for AI
     models.py         — Available models and their pricing, plus a utility function to calculate costs.
-    skill.py          — The `claude-skill` command: run Claude Code in-shell against a problem's solution files.
+    skill.py          — The `euler-solve` command: run Claude Code in-shell against a problem's solution files.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   auth/               — The authorization kernel — identity, profiles, and permissions (DD-12).
     authorizations.py — The authorization policy — ``authorizations.json`` (DD-12).
@@ -237,7 +237,7 @@ See `solver/templates/new.py` / `new.c` for the canonical templates.
 Two AI entry points, both calling the Claude API. Install the optional deps with `pip install -e ".[ai]"` (`anthropic` + `python-dotenv`); the key is `ANTHROPIC_API_KEY`, read from the project env file `~/.euler/env` (`config.env_file`, `models.py:get_api_key`).
 
 - **`claude-api`** (`solver/ai/api.py`) generates solution artifacts, dispatching to per-target generators — `code.py` (Python/C), `docs.py` (notes), `facts.py` (test cases) — with prompts in `solver/templates/prompt_*.txt`. Default models: Opus for code (Python + C) and notes, Sonnet for test cases. The `costs` command (`models.py`) reports accumulated token spend.
-- **`claude-skill`** (`solver/ai/skill.py`) launches Claude Code headless against a problem's solution files, via the `claude-euler-solver` skill (`solver/ai/claude/skills/claude-euler-solver/`). Invoked as `claude -p /claude-euler-solver <problem_number> <action>`, running at the repo root; its actions are `solve` and `review`. The skill's standards live in the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`).
+- **`euler-solve`** (`solver/ai/skill.py`) launches Claude Code headless against a problem's solution files, via the `claude-euler-solver` skill (`solver/ai/claude/skills/claude-euler-solver/`). Invoked as `claude -p /claude-euler-solver <problem_number> <action>`, running at the repo root; its actions are `solve` and `review`. The skill's standards live in the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`).
 
 ### Web front end (`solver-web`)
 

@@ -466,7 +466,7 @@ _AI_INTRO = """\
 # AI reference
 
 The framework's two AI paths, collated into one reference. The shell's
-`claude-skill` command runs Claude Code **headless** against a single problem's
+`euler-solve` command runs Claude Code **headless** against a single problem's
 solution files (the **claude-euler-solver** skill, below); `claude-api` generates
 solution artifacts — Python and C code, `notes.html`, `test_cases.json` — through
 the Claude API from the **prompt templates** below. Both are held to the shared

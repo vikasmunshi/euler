@@ -86,7 +86,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
         self.assertLessEqual({'evaluate', 'benchmark', 'edit', 'new', 'show'}, contributor)
 
     def test_maintainer_adds_the_ai_commands(self) -> None:
-        self.assertLessEqual({'claude-api', 'claude-skill'}, self.web['maintainer'])
+        self.assertLessEqual({'claude-api', 'euler-solve'}, self.web['maintainer'])
         self.assertNotIn('claude-api', self.web['contributor'])
 
     def test_reader_and_contributor_have_no_shell_escape(self) -> None:

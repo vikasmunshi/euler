@@ -1,9 +1,9 @@
 #! /usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `claude-skill` command: run Claude Code in-shell against a problem's solution files."""
+"""The `euler-solve` command: run Claude Code in-shell against a problem's solution files."""
 from __future__ import annotations
 
-__all__ = ['claude_skill']
+__all__ = ['euler_solve']
 
 import json
 import shlex
@@ -22,7 +22,7 @@ from solver.shell.command import Context
 
 
 @register(requires=('ai:execute',), help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
-def claude_skill(
+def euler_solve(
         ctx: Context,
         problem: Problem,
         action: Literal['solve', 'review'],
@@ -35,7 +35,9 @@ def claude_skill(
     live-updating Markdown summary back into the shell, ending with a footer of
     turns / duration / cost. Heavier and slower than `claude-api` — it actually
     runs `solver` commands, edits files, evaluates, and iterates. Needs the
-    `claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
+    `claude` CLI on PATH and an `ANTHROPIC_API_KEY` (over the web tier both are
+    provided by the deploy: the CLI from `/opt/euler`, the key via the `euler-ai`
+    broker — DD-15).
 
     Args:
         problem:            The `problem` to work on; defaults to the current problem.

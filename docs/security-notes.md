@@ -28,7 +28,7 @@ shell.
 ### AR-1 · A `contributor`+ login is host code execution
 
 A `contributor`-profile account (or above) can `edit` a solution and `evaluate` it —
-that runs arbitrary Python on the host. `claude-skill` (`maintainer`) launches a
+that runs arbitrary Python on the host. `euler-solve` (`maintainer`) launches a
 headless agent with host tool access. Gating `!`/`bash` to `admin` in
 `authorizations.json` does **not** contain this: the effective trust boundary is *who
 receives which profile*, not the command policy.
