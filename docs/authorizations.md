@@ -46,8 +46,8 @@ profile on each channel.
 | `solver.core.new` | `new` | terminal, web | `solutions:write` | `contributor` |
 | `solver.core.results` | `results` | terminal, web | `solutions:read` | `reader` |
 | `solver.core.test_cases` | `test-cases` | terminal, web | `solutions:read` | `reader` |
-| `solver.core.viewer` | `edit` | terminal | `solutions:write` | `contributor` |
-| `solver.core.viewer` | `show` | terminal | `solutions:read` | `reader` |
+| `solver.core.viewer` | `edit` | terminal, web | `solutions:write` | `contributor` |
+| `solver.core.viewer` | `show` | terminal, web | `solutions:read` | `reader` |
 | `solver.crypto.keys` | `key-reconstruct` | terminal, web | `infra:execute` | `admin` |
 | `solver.crypto.keys` | `key-rekey` | terminal, web | `infra:execute` | `admin` |
 | `solver.crypto.keys` | `key-split` | terminal, web | `infra:execute` | `admin` |

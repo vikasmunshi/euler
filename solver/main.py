@@ -30,17 +30,14 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
                         help='run a command block, then exit with its status; omit for an interactive shell')
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {config.version}')
     parser.add_argument('-s', '--save', action='store_true', help=f'tee console output to {config.session_file.name}')
-    profile = parser.add_mutually_exclusive_group()
-    profile.add_argument('--terminal', dest='profile', action='store_const', const='terminal',
-                         help='load the full terminal command set (default)')
-    profile.add_argument('--web', dest='profile', action='store_const', const='web',
-                         help='load the web profile, dropping local-only commands (e.g. show)')
-    parser.set_defaults(profile='terminal')
 
     args = parser.parse_args(argv)
 
+    # The channel (terminal / web) is **not** a CLI flag (DD-13): it comes from the
+    # resolved subject — the checkout-owner uid or a redeemed shell ticket — so no
+    # caller can choose the command set it gets by passing an argument.
     load_commands()
-    shell = SolverShell(save=args.save and not args.cmdline, profile=args.profile)
+    shell = SolverShell(save=args.save and not args.cmdline)
     if args.cmdline:
         return shell.run_command(args.cmdline)
     return shell.run_interactive(intro_message='')

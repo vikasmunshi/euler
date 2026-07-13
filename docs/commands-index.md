@@ -380,7 +380,7 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 #### Command: `edit` (`ed`)
 
 Open a solution file in the web code editor.
-* channels: terminal · profiles: admin, maintainer, contributor
+* channels: terminal, web · profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -395,19 +395,18 @@ Open *filename* from *problem*'s solution directory in the web code editor.
 
 The counterpart to `show` (which opens the rendered problem): *problem* defaults
 to the current problem, and *filename* completes to the files `ls` lists. The
-file must already exist — run `new` to create a solution first. Profile-aware,
-like `show`:
+file must already exist — run `new` to create a solution first. Channel-aware,
+like `show` (the channel is the resolved subject's, DD-13):
 
 - **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
-  that the xterm.js page rides over the PTY → WebSocket pipe to point its viewer
-  panel at the file's editor (`<origin>/edit/solutions/NNNN/<relpath>`).
+  that the xterm.js page rides over the PTY → WebSocket pipe to point the app
+  shell's left pane at the file's editor (`<origin>/edit/solutions/NNNN/<relpath>`).
 
 - **terminal** — opens that editor URL in the named browser tab "solver-edit"
   (via `browser open-in-tab`); errors early if the `browser` command is
   unavailable.
 
 Arguments:
-    ctx:      The shell's command context (selects the profile-specific path).
     problem:  The problem owning the file; defaults to the current problem.
     filename: The solution-directory file to edit (as `ls` lists it).
 ```
@@ -931,7 +930,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open problem/file in a browser or the web viewer panel.
-* channels: terminal · profiles: admin, maintainer, contributor, reader
+* channels: terminal, web · profiles: admin, maintainer, contributor, reader
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -946,7 +945,7 @@ show
 Open a problem's documentation page, in a browser or the web viewer panel.
 
 When *problem* is omitted, opens the current problem. The path depends on the
-shell profile:
+shell's channel (from the resolved subject, DD-13):
 
 - **terminal** — opens the problem's page (`<base_url>/solutions/NNNN/`) in the named
   browser tab "solver-doc" (via
@@ -958,16 +957,15 @@ shell profile:
 - **web** — the shell has no local browser to drive (it runs on the server while
   the user's browser is elsewhere), so it emits an `OSC 5379` control sequence
   (`open;<NNNN>;<token>`) on stdout. The xterm.js page rides it over the
-  PTY → WebSocket pipe and points its in-page viewer iframe at `<origin>/solutions/NNNN/`;
-  the monotonic token lets the page ignore the sequence when the PTY replay
-  buffer re-sends it on reconnect.
+  PTY → WebSocket pipe and swaps the app shell's left pane to
+  `<origin>/solutions/NNNN/`; the monotonic token lets the page ignore the
+  sequence when the PTY replay buffer re-sends it on reconnect.
 
 When *filename* is given, `show` opens that solution file in the code editor
 instead of the rendered page — it delegates to `edit`, so the same file lookup,
-profile handling, and browser tab apply.
+channel handling, and browser tab apply.
 
 Arguments:
-    ctx:      The shell's command context (selects the profile-specific path).
     problem:  The `problem` to open; defaults to the current problem.
     filename: A solution file to open in the code editor; when omitted, opens
               the rendered documentation page instead.

@@ -6,7 +6,8 @@ The shell itself is stubbed out (``SolverShell`` and ``load_commands`` patched),
 so these tests exercise only the argument handling: that ``main`` honours the
 ``argv`` it is given, falls back to ``sys.argv`` when given ``None``, chooses the
 command-block vs. interactive path from the positional ``cmdline``, and derives
-the ``--save`` flag correctly.
+the ``--save`` flag correctly. There is no channel flag: the terminal/web channel
+comes from the resolved subject (DD-13), never from ``argv``.
 """
 from __future__ import annotations
 
@@ -37,7 +38,7 @@ class MainArgvTests(unittest.TestCase):
         """A positional block in argv runs as a command block (not sys.argv)."""
         rc = main(['ls 42'])
         self.mock_load.assert_called_once_with()
-        self.MockShell.assert_called_once_with(save=False, profile='terminal')
+        self.MockShell.assert_called_once_with(save=False)
         self.instance.run_command.assert_called_once_with(['ls 42'])
         self.instance.run_interactive.assert_not_called()
         self.assertEqual(rc, 0)
@@ -63,32 +64,30 @@ class MainArgvTests(unittest.TestCase):
     def test_save_flag_set_for_interactive(self) -> None:
         """`-s` with no block → an interactive session with save enabled."""
         main(['-s'])
-        self.MockShell.assert_called_once_with(save=True, profile='terminal')
+        self.MockShell.assert_called_once_with(save=True)
         self.instance.run_interactive.assert_called_once_with(intro_message='')
 
     def test_save_flag_ignored_with_cmdline(self) -> None:
         """`-s` alongside a block → save is suppressed (only interactive sessions log)."""
         main(['-s', 'ls 1'])
-        self.MockShell.assert_called_once_with(save=False, profile='terminal')
+        self.MockShell.assert_called_once_with(save=False)
         self.instance.run_command.assert_called_once_with(['ls 1'])
-
-    def test_web_profile_selected(self) -> None:
-        """`--web` loads and constructs the shell with the web profile."""
-        main(['--web', 'ls 1'])
-        self.mock_load.assert_called_once_with()
-        self.MockShell.assert_called_once_with(save=False, profile='web')
-
-    def test_profiles_are_mutually_exclusive(self) -> None:
-        """`--terminal --web` together is a usage error (argparse exit 2)."""
-        with contextlib.redirect_stderr(io.StringIO()):
-            with self.assertRaises(SystemExit) as ctx:
-                main(['--terminal', '--web'])
-        self.assertEqual(ctx.exception.code, 2)
 
     def test_return_code_is_forwarded(self) -> None:
         """main returns the shell's exit status verbatim."""
         self.instance.run_command.return_value = 3
         self.assertEqual(main(['ls 1']), 3)
+
+    def test_no_channel_flag(self) -> None:
+        """The channel is not selectable from argv (DD-13): the retired ``--web`` /
+        ``--terminal`` flags are usage errors, so no caller can pick its command set —
+        it follows from the resolved subject (ticket / checkout-owner uid)."""
+        for flag in ('--web', '--terminal'):
+            with contextlib.redirect_stderr(io.StringIO()):
+                with self.assertRaises(SystemExit) as ctx:
+                    main([flag, 'ls 1'])
+            self.assertEqual(ctx.exception.code, 2, flag)
+        self.MockShell.assert_not_called()
 
     def test_version_action_reads_from_argv(self) -> None:
         """`--version` in argv triggers argparse's version exit (proving argv is parsed)."""

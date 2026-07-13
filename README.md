@@ -288,6 +288,12 @@ solver/
       content.py      — Config-free readers for the content trees the service renders (Phase 5b).
       render.py       — The full-page-vs-block render contract (DD-10, §4.5).
       validate.py     — The save gate (Phase 5c): the checks every 5d write passes (DD-10).
+    ws/               — The web-shell service: the solver PTY terminal over WebSocket (Phase 6, DD-13/DD-14).
+      __main__.py     — Web-shell service entry point: ``python -m solver.web.ws`` (DD-5/DD-13).
+      app.py          — The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.
+      config.py       — Web-shell service runtime configuration, read from the environment (DD-5/DD-13).
+      manager.py      — Persistent per-user PTY shells: one long-lived solver shell per web user (DD-14).
+      pty.py          — PTY bridge: run an interactive ``solver`` shell on a pseudo-terminal (DD-13).
 ```
 <!-- /GEN:package-layout -->
 

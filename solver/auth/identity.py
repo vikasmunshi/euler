@@ -9,9 +9,11 @@ anonymous fallback; a process that matches no plane exits.
 1. **Web shell** — ``SOLVER_TICKET`` in the environment: a **one-time shell
    ticket** minted by the auth service against the user's live session and
    redeemed here over the auth socket. Redemption consumes it and returns the
-   authoritative ``(email, profile)``; a missing/expired/reused ticket aborts.
-   Nothing env-carried is the credential — ``/proc/<pid>/environ`` is
-   same-uid-readable across every web shell (all ``euler-ws``), so only a
+   authoritative ``(email, profile)``; a missing/expired/reused ticket aborts, and
+   so does one whose profile differs from the forking instance's
+   ``EULER_PROFILE`` pin (DD-13 — that instance *is* the rung's uid). Nothing
+   env-carried is the credential — ``/proc/<pid>/environ`` is same-uid-readable
+   across every web shell on a rung (all ``euler-ws-<profile>``), so only a
    consumable ticket prevents replay. The web channel is **capped at
    ``maintainer``** (``admin`` is local-only, DD-11).
 2. **Local terminal** — the OS login's profile from the ``users`` map
@@ -40,6 +42,9 @@ from solver.auth.subject import Subject
 
 #: Environment variable carrying the one-time shell ticket (set by the ws service).
 TICKET_ENV: str = 'SOLVER_TICKET'
+#: The per-profile ws instance's own profile (``EULER_PROFILE=%i``), exported to the
+#: PTY child: the redeemed ticket's profile must equal it, else the shell aborts (DD-13).
+PROFILE_PIN_ENV: str = 'EULER_PROFILE'
 #: Service accounts are named ``euler-*``; such a uid with no ticket must abort.
 _SERVICE_PREFIX: str = 'euler-'
 #: Web accounts never exceed this profile (``admin`` is local-only, DD-11).
@@ -103,6 +108,13 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
         email, profile = _redeem_ticket(ticket)
         if profile == 'admin':                      # web is capped at maintainer (DD-11)
             profile = _WEB_CAP
+        pin = os.environ.get(PROFILE_PIN_ENV, '').strip()
+        if pin and profile != pin:
+            # The forking ws instance *is* the profile's uid (euler-ws-<pin>, DD-13):
+            # a ticket for another rung means misrouting or a bypass attempt, and this
+            # process — with that uid's ACLs — must not run as the other rung.
+            raise SystemExit(f'identity: ticket profile {profile!r} does not match '
+                             f'this instance ({pin!r}) — refusing to start')
         return Subject(user=email, slug=slugify(email), channel='web',
                        auth_method='shell-ticket', profile=profile,
                        permissions=authz.permissions_for(profile))

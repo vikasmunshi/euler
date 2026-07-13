@@ -81,7 +81,8 @@ class ResolveSubjectTest(unittest.TestCase):
 
     def _resolve(self, **env: str) -> Subject:
         with mock.patch.dict(os.environ, env, clear=False):
-            os.environ.pop('SOLVER_TICKET', None)
+            os.environ.pop('SOLVER_TICKET', None)     # never inherit the caller's
+            os.environ.pop('EULER_PROFILE', None)     # ditto the instance pin
             for k, v in env.items():
                 os.environ[k] = v
             return resolve_subject(self.root, self.authz)
@@ -127,6 +128,25 @@ class ResolveSubjectTest(unittest.TestCase):
         with mock.patch('solver.auth.identity._redeem_ticket', side_effect=SystemExit('rejected')):
             with self.assertRaises(SystemExit):
                 self._resolve(SOLVER_TICKET='bad')
+
+    def test_ticket_profile_must_match_the_instance_pin(self) -> None:
+        """DD-13: the forking ws instance *is* the rung's uid, so a ticket for another
+        rung means misrouting or a bypass — the child refuses to start."""
+        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'maintainer')):
+            with self.assertRaises(SystemExit):
+                self._resolve(SOLVER_TICKET='t', EULER_PROFILE='reader')
+
+    def test_ticket_profile_matching_the_pin_starts(self) -> None:
+        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'contributor')):
+            subj = self._resolve(SOLVER_TICKET='t', EULER_PROFILE='contributor')
+        self.assertEqual(subj.profile, 'contributor')
+
+    def test_admin_ticket_capped_then_matched_against_a_maintainer_pin(self) -> None:
+        """The maintainer cap is applied *before* the pin check, so an (impossible)
+        admin ticket on the maintainer instance resolves as maintainer, not an abort."""
+        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'admin')):
+            subj = self._resolve(SOLVER_TICKET='t', EULER_PROFILE='maintainer')
+        self.assertEqual(subj.profile, 'maintainer')
 
 
 if __name__ == '__main__':
