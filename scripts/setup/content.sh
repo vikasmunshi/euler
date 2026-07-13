@@ -63,13 +63,13 @@ SYS_DIR="/etc/euler"
 CONTENT_ENV="${SYS_DIR}/content.env"                    # scoped runtime config (root:euler-web 0640)
 AUTHZ_FILE="${SYS_DIR}/authorizations.json"             # DD-12 SoR (deployed by auth.sh)
 AUTHZ_TEMPLATE="${PROJECT_ROOT}/solver/templates/authorizations.json"  # fallback before auth.sh runs
-OPT_DIR="/opt/euler"
-VENV_DIR="${OPT_DIR}/venv"
-VENV_PY="${VENV_DIR}/bin/python"
-
-PYTHON="python3.14"                                     # the project floor; deadsnakes on 24.04
 
 WEB_GROUP="euler-web"
+
+# The system venv (DD-5) — OPT_DIR / VENV_DIR / VENV_PY / PYTHON / deploy_venv, shared
+# by every app-service kit so the location + dependency set have one definition.
+# shellcheck source=scripts/setup/venv.sh
+. "${SCRIPT_DIR}/venv.sh"
 # The web profiles that get an instance (admin is local-only; web caps at maintainer, DD-11).
 PROFILES=(reader contributor maintainer)
 # Content-tree ACL groups (mapped to the per-profile uids below).
@@ -221,22 +221,12 @@ ensure_identities() {
     done
 }
 
-# Build/refresh the shared /opt/euler venv and (re)install the repo so the DEPLOYED
-# package always matches the current source — the units run `-m solver.web.site` from
-# it (cwd=/, so a stale venv fails even when the repo has the module). auth.sh builds
-# the same venv; installing again here is idempotent and keeps content.sh self-sufficient.
-deploy_venv() {
-    if [ ! -x "${VENV_PY}" ]; then
-        echo "Creating system venv at ${VENV_DIR} (${PYTHON})..."
-        sudo mkdir -p "${OPT_DIR}"
-        sudo "${PYTHON}" -m venv "${VENV_DIR}"
-    fi
-    echo "Installing solver[web] into ${VENV_DIR} (as root, from ${PROJECT_ROOT})..."
-    sudo "${VENV_PY}" -m pip install --quiet --upgrade pip
-    sudo "${VENV_PY}" -m pip install --quiet "${PROJECT_ROOT}[web]"
-    sudo chown -R root:"${WEB_GROUP}" "${OPT_DIR}"
+# Deploy the shared /opt/euler venv (venv.sh), then confirm the content module and nh3
+# (the DD-10 .html save-gate dep) import from it. The build/install/clean is the shared
+# deploy_venv; this wrapper adds the content-specific probe.
+deploy_content_venv() {
+    deploy_venv "${PROJECT_ROOT}" "${WEB_GROUP}"
     # -P: ignore cwd, so this probes the venv's copy (not the repo we're standing in).
-    # nh3 rides along: the DD-10 kit check that the .html save gate (5c) can import.
     if sudo "${VENV_PY}" -P -c 'import solver.web.site, nh3' 2>/dev/null; then
         echo "Deployed: ✓ solver.web.site (+ nh3) importable from ${VENV_DIR}"
     else
@@ -402,7 +392,7 @@ do_install() {
     require_python || return 1
     resolve_content_paths || return 1
     ensure_identities
-    deploy_venv
+    deploy_content_venv
     deploy_content_env
     deploy_acls
 

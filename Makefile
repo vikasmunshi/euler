@@ -8,7 +8,7 @@ PIP    := $(VENV)/bin/pip
 install-all: install-system install-chrome $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install --upgrade -e ".[ai,dev,show,solutions,web]"
-	rm -rf solver.egg-info
+	rm -rf build solver.egg-info
 	$(MAKE) install-primesieve-numpy
 	$(MAKE) install-hooks
 	$(MAKE) install-completions
@@ -20,7 +20,7 @@ install-all: install-system install-chrome $(VENV)
 install-minimal: install-system install-chrome $(VENV)
 	$(PIP) install --upgrade pip
 	$(PIP) install --upgrade -e ".[show,solutions,web]"
-	rm -rf solver.egg-info
+	rm -rf build solver.egg-info
 	$(MAKE) install-primesieve-numpy
 	@printf "✓ install-minimal complete: base environment ready\n"
 

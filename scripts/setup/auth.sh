@@ -13,7 +13,8 @@
 # Model:
 #   - The app services run from a root-owned system venv at /opt/euler, NOT the
 #     repo checkout: the service users cannot traverse the repo owner's 0750 home
-#     (DD-5). install/upgrade does `pip install <repo>[web]` into it as root.
+#     (DD-5). install/upgrade does `pip install <repo>[ai,dev,solutions,web]` into it
+#     as root (the shared venv.sh helper — one definition for all app-service kits).
 #   - euler-auth: own primary group (state files are euler-auth:euler-auth 0600),
 #     supplementary member of euler-web (binds its public socket group euler-web
 #     in /run/euler).
@@ -59,15 +60,15 @@ SYS_DIR="/etc/euler"
 AUTH_ENV="${SYS_DIR}/auth.env"                  # scoped runtime config (root:euler-auth 0640)
 AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # DD-12 authorization SoR (root:root 0644)
 AUTHZ_TEMPLATE="${PROJECT_ROOT}/solver/templates/authorizations.json"  # packaged bootstrap template (DD-12)
-OPT_DIR="/opt/euler"
-VENV_DIR="${OPT_DIR}/venv"
-VENV_PY="${VENV_DIR}/bin/python"
 STATE_DIR="/var/lib/euler-auth"                 # DD-6: euler-auth-only state
 TMPFILES_CONF="/etc/tmpfiles.d/euler.conf"      # /run/euler socket dir (DD-1/DD-5)
 
-PYTHON="python3.14"                             # the project's floor; deadsnakes on 24.04
-
 WEB_GROUP="euler-web"
+
+# The system venv (DD-5) — OPT_DIR / VENV_DIR / VENV_PY / PYTHON / deploy_venv, shared
+# by every app-service kit so the location + dependency set have one definition.
+# shellcheck source=scripts/setup/venv.sh
+. "${SCRIPT_DIR}/venv.sh"
 AUTH_USER="euler-auth"
 AUTH_GROUP="euler-auth"
 LEGACY_ADM_GROUP="euler-adm"   # pre-wheel-gate admin group; removed on install/upgrade
@@ -195,20 +196,6 @@ ensure_identities() {
         sudo gpasswd -d "${AUTH_USER}" "${LEGACY_ADM_GROUP}" 2>/dev/null || true
         sudo groupdel "${LEGACY_ADM_GROUP}" 2>/dev/null || true
     fi
-}
-
-# Build/refresh the root-owned system venv and install the repo (web extra) into it.
-deploy_venv() {
-    if [ ! -x "${VENV_PY}" ]; then
-        echo "Creating system venv at ${VENV_DIR} (${PYTHON})..."
-        sudo mkdir -p "${OPT_DIR}"
-        sudo "${PYTHON}" -m venv "${VENV_DIR}"
-    fi
-    echo "Installing solver[web] into ${VENV_DIR} (as root, from ${PROJECT_ROOT})..."
-    sudo "${VENV_PY}" -m pip install --quiet --upgrade pip
-    sudo "${VENV_PY}" -m pip install --quiet "${PROJECT_ROOT}[web]"
-    sudo chown -R root:"${WEB_GROUP}" "${OPT_DIR}"
-    echo "Deployed: $(${VENV_PY} -c 'import solver, sys; print(f"solver in {sys.prefix}")' 2>/dev/null || echo '?')"
 }
 
 # /run/euler — the shared socket dir (root:euler-web 0770), via tmpfiles.d so it
@@ -370,7 +357,7 @@ do_install() {
     load_config || return 1
     ensure_admin_token || return 1
     ensure_identities
-    deploy_venv
+    deploy_venv "${PROJECT_ROOT}" "${WEB_GROUP}"
     deploy_tmpfiles
     deploy_auth_env
     deploy_state_dir
@@ -399,7 +386,7 @@ do_redeploy() {
     check_can_sudo || return 1
     require_python || return 1
     load_config || return 1
-    deploy_venv
+    deploy_venv "${PROJECT_ROOT}" "${WEB_GROUP}"
     deploy_authz
     if [ -f "${SERVICE_DEST}" ] && venv_has_auth; then
         sudo systemctl restart "${SERVICE_NAME}"

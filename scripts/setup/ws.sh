@@ -58,13 +58,13 @@ HOME_DIR="$(dirname "${PROJECT_ROOT}")"                 # the operator home the 
 SYS_DIR="/etc/euler"
 WS_ENV="${SYS_DIR}/ws.env"                              # scoped runtime config (root:euler-web 0640)
 EGRESS_ENV="${SYS_DIR}/egress.env"                      # HTTPS_PROXY (egress.sh)
-OPT_DIR="/opt/euler"
-VENV_DIR="${OPT_DIR}/venv"
-VENV_PY="${VENV_DIR}/bin/python"
-
-PYTHON="python3.14"                                     # the project floor; deadsnakes on 24.04
 
 WEB_GROUP="euler-web"
+
+# The system venv (DD-5) — OPT_DIR / VENV_DIR / VENV_PY / PYTHON / deploy_venv, shared
+# by every app-service kit so the location + dependency set have one definition.
+# shellcheck source=scripts/setup/venv.sh
+. "${SCRIPT_DIR}/venv.sh"
 # The web profiles that get an instance (admin is local-only; web caps at maintainer, DD-11).
 # Every one of them gets a terminal — attach is `solver:execute`, a reader grant (DD-13).
 PROFILES=(reader contributor maintainer)
@@ -179,19 +179,10 @@ ensure_identities() {
     done
 }
 
-# Build/refresh the shared /opt/euler venv and (re)install the repo so the DEPLOYED
-# package matches the source — the units run `-m solver.web.ws` from it (cwd=/, so a
-# stale venv fails even when the repo has the module). Idempotent with auth.sh/content.sh.
-deploy_venv() {
-    if [ ! -x "${VENV_PY}" ]; then
-        echo "Creating system venv at ${VENV_DIR} (${PYTHON})..."
-        sudo mkdir -p "${OPT_DIR}"
-        sudo "${PYTHON}" -m venv "${VENV_DIR}"
-    fi
-    echo "Installing solver[web] into ${VENV_DIR} (as root, from ${PROJECT_ROOT})..."
-    sudo "${VENV_PY}" -m pip install --quiet --upgrade pip
-    sudo "${VENV_PY}" -m pip install --quiet "${PROJECT_ROOT}[web]"
-    sudo chown -R root:"${WEB_GROUP}" "${OPT_DIR}"
+# Deploy the shared /opt/euler venv (venv.sh), then confirm the web-shell module imports
+# from it. The build/install/clean is the shared deploy_venv; this wrapper adds the probe.
+deploy_ws_venv() {
+    deploy_venv "${PROJECT_ROOT}" "${WEB_GROUP}"
     # -P: ignore cwd, so this probes the venv's copy (not the repo we're standing in).
     if sudo "${VENV_PY}" -P -c 'import solver.web.ws' 2>/dev/null; then
         echo "Deployed: ✓ solver.web.ws importable from ${VENV_DIR}"
@@ -330,7 +321,7 @@ do_install() {
     require_python || return 1
     require_sol_groups || return 1
     ensure_identities
-    deploy_venv
+    deploy_ws_venv
     deploy_ws_env
     deploy_acls
 
