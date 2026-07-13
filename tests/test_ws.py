@@ -126,6 +126,7 @@ class _WsServiceCase(AioHTTPTestCase):
 
     profile: str = 'contributor'
     shell_argv: tuple[str, ...] = _STUB_ARGV
+    detached_ttl: int = 0                    # 0 disables the reaper (most tests)
 
     async def get_application(self) -> web.Application:
         # Deterministic policy: the bundled ladder (reader/contributor/maintainer/admin).
@@ -142,7 +143,7 @@ class _WsServiceCase(AioHTTPTestCase):
 
         config = WsConfig(socket_path=scratch / 'ws.sock', socket_group='', tcp_bind='',
                           profile=self.profile, auth_socket=str(self.auth_socket),
-                          shell_argv=self.shell_argv, detached_ttl=0)
+                          shell_argv=self.shell_argv, detached_ttl=self.detached_ttl)
         return build_app(config)
 
     async def tearDownAsync(self) -> None:
@@ -310,6 +311,41 @@ class PtySignalTest(unittest.TestCase):
         finally:
             session.close()
         self.assertFalse(session.is_alive())
+
+
+class ReaperTests(_WsServiceCase):
+    """The detached-TTL reaper (DD-14 hygiene): a shell nobody has reattached to for
+    longer than the TTL is closed; an attached one never is."""
+
+    detached_ttl = 1                          # reaper checks every ~1s (max(1, min(ttl, 60)))
+
+    async def _shell_alive(self, email: str) -> bool:
+        shells = self.app[PTY_MANAGER]._shells  # noqa: SLF001 — liveness probe
+        return email in shells and shells[email].alive
+
+    @unittest_run_loop
+    async def test_detached_shell_is_reaped(self) -> None:
+        ws = await self.client.ws_connect('/ws', headers=_HEADERS)
+        await _read_until(ws, b'BANNER')
+        session = self.app[PTY_MANAGER]._shells[_EMAIL].session  # noqa: SLF001
+        await ws.close()                      # detach: the shell keeps running, idle clock starts
+
+        for _ in range(80):                   # within a few reaper intervals it is gone
+            if not await self._shell_alive(_EMAIL):
+                break
+            await asyncio.sleep(0.1)
+        self.assertFalse(await self._shell_alive(_EMAIL), 'detached shell should be reaped')
+        self.assertFalse(session.is_alive(), 'the PTY process should be terminated')
+
+    @unittest_run_loop
+    async def test_attached_shell_survives_the_reaper(self) -> None:
+        ws = await self.client.ws_connect('/ws', headers=_HEADERS)
+        await _read_until(ws, b'BANNER')
+        await asyncio.sleep(2.5)              # several reaper intervals, socket still attached
+        self.assertTrue(await self._shell_alive(_EMAIL), 'an attached shell must not be reaped')
+        await ws.send_bytes(b'still-here\n')  # …and it still works
+        self.assertIn(b'GOT:still-here', await _read_until(ws, b'GOT:still-here'))
+        await ws.close()
 
 
 class RealShellTest(_WsServiceCase):

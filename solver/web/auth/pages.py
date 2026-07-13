@@ -231,6 +231,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
             return _bad_link(request)          # account vanished mid-flow
         service.sessions.revoke_email(record.email)     # a password change logs
         service.remember.revoke_email(record.email)     # every device out
+        await service.push_shell_teardown(record.email)  # …and any live shell (DD-14)
         log.info('password reset completed for %s', record.email)
         raise web.HTTPSeeOther(location='/login?reset=1')
 

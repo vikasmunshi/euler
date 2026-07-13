@@ -36,9 +36,12 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 >   full-viewport four-region layout, the Euler-identity brand, header chrome
 >   (breadcrumbs + Actions via OOB swaps, theme slider, user menu), footer `about`
 >   pages behind a new `about:read` object. **Phase 5 complete.**
-> - 🚧 **Phase 6** — Web shell: design closed ([DD-13](#dd-13--web-shell-topology--gating)/
->   [DD-14](#dd-14--web-shell-lifecycle--revocation)); build plan in
->   [§6](#phase-6--web-shell-); not yet built.
+> - 🚧 **Phase 6** — Web shell ([DD-13](#dd-13--web-shell-topology--gating)/
+>   [DD-14](#dd-14--web-shell-lifecycle--revocation)): steps 1–5 landed — the
+>   `solver/web/ws` service, the subject-driven channel, the xterm terminal on
+>   `/ws`, the `ws.sh` kit (deployed + serving on the host), and the DD-14
+>   teardown push + reaper. **Step 6** (end-to-end masquerade/E2E verification) is
+>   what remains.
 > - ⬜ **Phase 7** — Credential brokers (`euler-ai`, `euler-git`): design closed
 >   ([DD-15](#dd-15--secrets-are-brokered-never-dispensed)); builds after Phase 6
 >   (until then the AI/git commands in a web shell fail with a clear
@@ -1332,7 +1335,7 @@ hardening ([security-notes AR-1](security-notes.md)).
 
 **Build order** (each step independently landable/testable):
 
-1. **`solver/web/ws` service.** New package (`__main__.py`, `app.py`, `pty.py`,
+1. ✅ **`solver/web/ws` service.** New package (`__main__.py`, `app.py`, `pty.py`,
    `manager.py`, `config.py`) on the DD-12 service shape. The WS handler: profile
    pin, kernel **`solver:execute`** gate (the reader-floor attach, DD-13), session
    cookie → `POST /shell-ticket`, fork `python -m solver` with `SOLVER_TICKET`
@@ -1341,7 +1344,7 @@ hardening ([security-notes AR-1](security-notes.md)).
    and the socket-peer `/internal/logout` (DD-14). **Test:** a step harness against
    the live auth service — mint/redeem, attach + replay, resize, second-tab shared
    attach, pin-mismatch and no-ticket refusals.
-2. **Shell-side enablement.** `show`/`edit` back to `channels=('terminal', 'web')`
+2. ✅ **Shell-side enablement.** `show`/`edit` back to `channels=('terminal', 'web')`
    (their web branch already emits the OSC 5379 navigation the client consumes);
    the child aborts when the redeemed profile ≠ the `EULER_PROFILE` pin (DD-13);
    retire `--web`/`--terminal` from `main.py` (channel comes from the subject);
@@ -1350,7 +1353,7 @@ hardening ([security-notes AR-1](security-notes.md)).
    `eval`/`benchmark`/`edit`; `contributor`: + edit/eval/benchmark; `maintainer`:
    + delete/`claude-*`; at **every** web rung `!`, `users` mutations, and
    `update-*`/infra are absent.
-3. **Terminal client (content-service side).** Vendor `@xterm/xterm` + the fit addon
+3. ✅ **Terminal client (content-service side).** Vendor `@xterm/xterm` + the fit addon
    (pinned + SRI + `LICENSES`, like htmx); replace the `terminal.html` placeholder
    with the real document: WS connect + reconnect-with-replay, resize → control
    frame, theme from the site palette (both themes), Ctrl-C/V clipboard handling,
@@ -1362,7 +1365,7 @@ hardening ([security-notes AR-1](security-notes.md)).
    live in-browser across both themes; verify empirically that
    `connect-src 'self'` admits the same-origin `wss:` upgrade and record the
    result in §4.7.
-4. **`ws.sh` kit + wiring.** Mirror `content.sh`: the `euler-ws-{reader,
+4. ✅ **`ws.sh` kit + wiring.** Mirror `content.sh`: the `euler-ws-{reader,
    contributor,maintainer}` identities (∈ `euler-web` + the `euler-sol-*` groups
    per rung, DD-13), the `euler-ws@.service` template unit (`EULER_PROFILE=%i`,
    socket `ws-%i.sock`, DD-8 `IPAddressDeny` + `egress.env`, hardening set), the
@@ -1374,11 +1377,20 @@ hardening ([security-notes AR-1](security-notes.md)).
    the Phase-7 `euler-ai` broker (DD-15). **Test:** kit `status` health-probes
    all three sockets; the firewall probe (a ws uid reaches Squid but not the
    internet); `caddy validate`.
-5. **Lifecycle integration (DD-14).** The auth service pushes teardown on `logout`
-   and on every revocation path (`users change`/`disable`/`remove`, password reset)
-   to every ws socket, best-effort; the detached-TTL reaper (default 24 h).
-   **Test:** a step harness — logout kills the shell; `users change` against a live
-   shell kills it; a detached shell inside the TTL survives and replays.
+5. ✅ **Lifecycle integration (DD-14).** `AuthService.push_shell_teardown(email)`
+   POSTs `/internal/logout` to every per-profile ws socket
+   (`<run>/ws-<profile>.sock`, derived in the auth config; `euler-auth` reaches them
+   as a fellow `euler-web` member) — best-effort and parallel, a socket that is
+   absent or refuses is skipped, and a failure never fails the logout/revocation
+   itself. Wired at every revocation point: `logout`, the signed-in
+   password-change, the admin `disable`/`remove`/`revoke` (the `users change` path),
+   and register/reset completion. The ws service runs the **detached-TTL reaper** —
+   a background task (cadence `max(1, min(ttl, 60))s`, so the 24 h default is checked
+   each minute and a short test TTL each second) that closes shells with zero
+   attached sockets past `EULER_WS_DETACHED_TTL`. **Test:** `test_ws_teardown` drives
+   each revocation path against a fake ws socket and asserts the reap (plus enable =
+   no push, and all-sockets-absent still succeeds); `test_ws` reaper cases — a
+   detached shell is reaped, an attached one survives and still answers.
 6. **End-to-end verification + docs.** The masquerade suite
    ([access-control § 8](access-control.md)): ticket replay dead, `unset
    SOLVER_TICKET` re-exec aborts, no cross-profile attach; a `contributor` E2E

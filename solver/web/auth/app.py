@@ -32,6 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import aiohttp
 import aiohttp_jinja2
 import jinja2
 from aiohttp import web
@@ -169,6 +170,39 @@ class AuthService:
         self.remember.revoke_email(email)
         self.pending.revoke_email(email)
 
+    async def push_shell_teardown(self, email: str) -> None:
+        """Tear down *email*'s live web shell on every ws instance (DD-14).
+
+        The auth service is the only party that sees a logout or a revocation, and
+        a *running* shell baked its permissions in at startup — so a demoted or
+        logged-out account would keep its old authority until the PTY happened to
+        die. This closes that gap at the source: on those events we POST
+        ``/internal/logout`` to each per-profile ws socket, which reaps the user's
+        shell (and its attached tabs).
+
+        Best-effort and parallel: a socket that is absent (instance not running) or
+        refuses is skipped — the shell simply isn't there. Never raises into the
+        caller (a teardown failure must not fail the logout / revocation itself).
+        The endpoint is socket-peer only (Caddy never routes it), and ``euler-auth``
+        reaches it as a fellow ``euler-web`` member.
+        """
+        sockets = self.config.ws_sockets
+        if not sockets:
+            return
+        payload = {'email': normalize_email(email)}
+
+        async def _one(sock: Path) -> None:
+            try:
+                connector = aiohttp.UnixConnector(path=str(sock))
+                timeout = aiohttp.ClientTimeout(total=3)
+                async with aiohttp.ClientSession(connector=connector, timeout=timeout) as http:
+                    async with http.post('http://ws/internal/logout', json=payload) as resp:
+                        await resp.read()
+            except (OSError, aiohttp.ClientError, asyncio.TimeoutError):
+                pass                     # absent / down / slow — the shell isn't reachable
+
+        await asyncio.gather(*(_one(sock) for sock in sockets))
+
 
 # ── public app (auth.sock — via Caddy, plus the socket-peer ticket endpoints) ──────
 
@@ -274,14 +308,18 @@ def build_public_app(service: AuthService) -> web.Application:
         current = request.cookies.get(policy.SESSION_COOKIE)
         service.sessions.revoke_email(email, keep=current)   # other devices out;
         service.remember.revoke_email(email)                 # persistent tokens die
+        await service.push_shell_teardown(email)             # …and any live shell (DD-14)
         log.info('password changed for %s', email)
         return web.json_response({'M2': result[0]})
 
     async def logout(request: web.Request) -> web.Response:
+        identity = service.session_identity(request)         # (email, profile) — before we drop it
         service.sessions.drop(request.cookies.get(policy.SESSION_COOKIE))
         remember_cookie = request.cookies.get(policy.REMEMBER_COOKIE)
         if remember_cookie:
             service.remember.revoke(remember_cookie)
+        if identity is not None:
+            await service.push_shell_teardown(identity[0])   # the user left — reap the shell (DD-14)
         # A browser form post (the site's user menu) lands on home — 303 turns
         # the POST into GET /, where the now-absent session bounces to /login.
         # A programmatic caller (no text/html Accept) keeps the JSON contract.
@@ -423,6 +461,7 @@ def build_admin_app(service: AuthService) -> web.Application:
             return web.Response(status=404, text='no such user')
         if not enable:
             service.revoke_access(email)
+            await service.push_shell_teardown(email)         # DD-14: disable ends the shell now
         log.info('%s %s', 'enabled' if enable else 'disabled', email)
         return web.json_response({'email': email, 'disabled': not enable})
 
@@ -431,6 +470,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         existed = service.users.remove(email)
         revoked = service.pending.revoke_email(email)
         service.revoke_access(email)
+        await service.push_shell_teardown(email)             # DD-14: remove ends the shell now
         if not existed and not revoked:
             return web.Response(status=404, text='no such user or invite')
         log.info('removed %s', email)
@@ -438,9 +478,12 @@ def build_admin_app(service: AuthService) -> web.Application:
 
     async def revoke_sessions(request: web.Request) -> web.Response:
         """Drop a web account's live sessions + remember tokens so a profile change
-        (written to authorizations.json by the sudo CLI) takes effect on next login."""
+        (written to authorizations.json by the sudo CLI) takes effect on next login —
+        and tear down the live shell so the *running* PTY's baked-in permissions die
+        with them, not at next login (DD-14; this is the `users change` path)."""
         email = normalize_email(request.match_info['email'])
         n = service.sessions.revoke_email(email) + service.remember.revoke_email(email)
+        await service.push_shell_teardown(email)
         log.info('revoked %d session/remember token(s) for %s', n, email)
         return web.json_response({'email': email, 'revoked': n})
 

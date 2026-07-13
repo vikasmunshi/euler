@@ -204,6 +204,23 @@ class PtyManager:
         await pty.close()
         return True
 
+    async def reap_detached(self, ttl_seconds: int) -> list[str]:
+        """Close and forget shells with **zero attached sockets** for longer than
+        *ttl_seconds*; return the reaped emails (DD-14 hygiene, not security).
+
+        A shell keeps running while detached so a long benchmark survives a closed
+        laptop and a reconnect replays — but a shell nobody has reattached to in a
+        day is almost certainly abandoned, so it is reaped to free the process. The
+        stale set is materialised before closing (``close`` mutates the dict).
+        """
+        if ttl_seconds <= 0:
+            return []
+        stale = [email for email, pty in self._shells.items()
+                 if pty.detached_for > ttl_seconds]
+        for email in stale:
+            await self.close(email)
+        return stale
+
     async def close_all(self) -> None:
         """Terminate every shell (server stop / app cleanup)."""
         shells = list(self._shells.values())

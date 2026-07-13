@@ -43,8 +43,10 @@ log = logging.getLogger('euler-ws')
 #: The attach gate (DD-13): the reader-floor "may run the solver at all" grant.
 ATTACH_REQUIRES: str = 'solver:execute'
 
-#: Per-app PtyManager, for tests and the step-5 lifecycle hooks.
+#: Per-app PtyManager, for tests and the lifecycle hooks.
 PTY_MANAGER: web.AppKey[PtyManager] = web.AppKey('pty_manager', PtyManager)
+#: The detached-TTL reaper task (DD-14), stored so cleanup can cancel it.
+_REAPER_TASK: web.AppKey[asyncio.Task[None]] = web.AppKey('reaper_task', asyncio.Task)
 
 
 def _subject_from_headers(request: web.Request, authz: Authorizations,
@@ -176,6 +178,36 @@ def build_app(config: WsConfig) -> web.Application:
     async def _close_all(app: web.Application) -> None:
         await app[PTY_MANAGER].close_all()
 
+    async def _reaper() -> None:
+        """Periodically reap shells detached longer than the TTL (DD-14 hygiene).
+
+        The cadence tracks the TTL (a short test TTL is checked often; the 24 h
+        production default every 60 s), so a shell is reaped within one interval of
+        crossing it. A reaper failure must not take the loop down.
+        """
+        ttl = config.detached_ttl
+        interval = max(1, min(ttl, 60))
+        while True:
+            await asyncio.sleep(interval)
+            try:
+                for email in await manager.reap_detached(ttl):
+                    log.info('reaped detached shell for %s (idle > %ds)', email, ttl)
+            except Exception:                # noqa: BLE001 — the reaper must keep running
+                log.exception('reaper pass failed')
+
+    async def _on_startup(app: web.Application) -> None:
+        if config.detached_ttl > 0:
+            app[_REAPER_TASK] = asyncio.create_task(_reaper())
+
+    async def _cancel_reaper(app: web.Application) -> None:
+        task = app.get(_REAPER_TASK)
+        if task is not None:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+
     app = web.Application()
     app[PTY_MANAGER] = manager
     app.add_routes([
@@ -183,5 +215,7 @@ def build_app(config: WsConfig) -> web.Application:
         web.get('/ws', websocket),
         web.post('/internal/logout', internal_logout),
     ])
+    app.on_startup.append(_on_startup)
+    app.on_cleanup.append(_cancel_reaper)
     app.on_cleanup.append(_close_all)
     return app
