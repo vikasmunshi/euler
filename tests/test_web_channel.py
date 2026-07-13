@@ -13,9 +13,14 @@ The invariants it pins (DD-13):
 
 - ``reader`` gets a terminal, but a **read-only** one — no ``eval``/``benchmark``
   (``solutions:execute``), no ``edit``/``new`` (``solutions:write``).
-- **no** web rung — not even ``maintainer`` — gets the shell escape (``!``,
-  ``shell:execute``, admin-only), the infra commands (``git-*``/``key-*``), or
-  the mutating ``users`` verbs.
+- the ``reader`` and ``contributor`` tiers — where a fresh invitee lands and where
+  a promoted collaborator sits — **never** get the shell escape (``!``,
+  ``shell:execute``), the infra commands (``git-*``/``key-*``), or the mutating
+  ``users`` verbs. ``maintainer``'s access to ``!`` simply **tracks the policy**:
+  the design ships it ``admin``-only, but the operator may grant ``shell:execute``
+  to ``maintainer`` deliberately (e.g. to evaluate the surface with themselves the
+  only maintainer), and the test verifies the decorator honours whatever the policy
+  says rather than hardcoding one rung — so it holds under both.
 - ``show``/``edit`` are back on the web channel (their OSC bridge drives the app
   shell's left pane, Phase 6 step 2).
 """
@@ -37,6 +42,10 @@ from solver.utils.loader import load_commands
 #: tests guard is the one the repo ships.
 _AUTHZ = Authorizations(json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8')))
 _WEB_RUNGS = ('reader', 'contributor', 'maintainer')
+#: The tiers where a shell escape is a hard no, whatever the policy: a fresh invitee
+#: (``reader``) and a promoted collaborator (``contributor``). ``maintainer`` is the
+#: operator's own tier and tracks the grant (see the module docstring / DD-13).
+_NO_ESCAPE_RUNGS = ('reader', 'contributor')
 
 
 def _visible(profile: str, channel: str = 'web') -> set[str]:
@@ -80,11 +89,25 @@ class WebChannelCommandSetTest(unittest.TestCase):
         self.assertLessEqual({'claude-api', 'claude-skill'}, self.web['maintainer'])
         self.assertNotIn('claude-api', self.web['contributor'])
 
-    def test_no_web_rung_has_a_shell_escape(self) -> None:
-        """`!` is shell:execute — admin-only, and admin is never web (DD-11)."""
-        for rung in _WEB_RUNGS:
+    def test_reader_and_contributor_have_no_shell_escape(self) -> None:
+        """The tiers below maintainer never get raw bash (`!` = shell:execute):
+        a fresh reader and a promoted contributor, whatever the policy says."""
+        for rung in _NO_ESCAPE_RUNGS:
             self.assertNotIn('!', self.web[rung], f'{rung} must not have raw bash')
-        self.assertIn('!', self.admin_terminal)      # …but the local admin does
+        self.assertIn('!', self.admin_terminal)      # …the local admin always does
+
+    def test_shell_escape_tracks_the_policy_grant(self) -> None:
+        """`!` is gated on shell:execute, so a rung sees it **iff** its profile holds
+        that grant — the decorator faithfully implements the policy, not a hardcoded
+        rung. Ships admin-only (so no web rung has it); if the operator grants
+        shell:execute to maintainer, maintainer's terminal gains `!` and nothing
+        below it does. Either way this passes; a decorator that leaked `!` to a
+        profile without the grant fails."""
+        for rung in _WEB_RUNGS:
+            has_grant = 'shell:execute' in _AUTHZ.permissions_for(rung)
+            self.assertEqual(has_grant, '!' in self.web[rung],
+                             f'{rung}: `!` visible={"!" in self.web[rung]} '
+                             f'but shell:execute held={has_grant}')
 
     def test_no_web_rung_has_infra_or_user_mutation(self) -> None:
         """infra:execute (git-*/key-*/manage-config/update-*) and users:write are
