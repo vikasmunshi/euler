@@ -27,19 +27,39 @@ class ExitCodes(enum.IntEnum):
     EXIT_NOTFOUND = 127  #: unknown command
 
 
+#: Env var naming the repo working tree explicitly (the deployed web tier sets it).
+REPO_ROOT_ENV: str = 'EULER_REPO_ROOT'
+
+
+def _enter_root(root: Path) -> Path:
+    """chdir into *root* and clean ``PATH`` (drop the WSL ``/mnt`` entries), then return it."""
+    os.chdir(root)
+    env_path: list[str] = [Path(sys.executable).parent.as_posix()] + os.getenv('PATH', '').split(':')
+    env_path = [p for p in env_path if not p.startswith('/mnt')]
+    env_path = list(dict.fromkeys(env_path))
+    os.environ['PATH'] = ':'.join(env_path)
+    return root
+
+
 def _root_dir() -> Path:
-    """Return the git repository root directory and set the os env PATH, cached after the first lookup."""
+    """Return the repo working-tree root, cd into it, and clean PATH (cached after first use).
+
+    ``EULER_REPO_ROOT`` wins when set: the deployed web shell runs from the
+    ``/opt/euler`` venv, not a checkout, so ``git rev-parse`` from the package dir
+    finds nothing — and its service uid does not own the working tree, so git would
+    refuse it anyway (*dubious ownership*). The ws/content units set this to the real
+    tree. Otherwise ask git (the operator's local checkout, the normal case).
+    """
+    override = os.environ.get(REPO_ROOT_ENV, '').strip()
+    if override and (root := Path(override)).is_dir():
+        return _enter_root(root)
+
     a_package_dir = Path(__file__).parent.resolve()
     result = subprocess.run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True,
                             cwd=a_package_dir)
     if result.returncode == 0 and (git_root := result.stdout.strip()) != '':
-        os.chdir(git_root)
-        env_path: list[str] = [Path(sys.executable).parent.as_posix()] + os.getenv('PATH', '').split(':')
-        env_path = [p for p in env_path if not p.startswith('/mnt')]
-        env_path = list(dict.fromkeys(env_path))
-        os.environ['PATH'] = ':'.join(env_path)
-        return Path(git_root)
-    raise ValueError('Failed to get git root')
+        return _enter_root(Path(git_root))
+    raise ValueError(f'Failed to get git root (set {REPO_ROOT_ENV} for a non-checkout deploy)')
 
 
 class AttributeDict:

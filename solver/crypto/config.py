@@ -14,6 +14,7 @@ from __future__ import annotations
 
 __all__ = ['config']
 
+import os
 from pathlib import Path
 from subprocess import run
 from typing import TypedDict
@@ -43,15 +44,20 @@ class CryptoConfig(TypedDict):
 def _root_dir() -> Path:
     """Return the repository root (pure: captures git's output, no chdir / PATH side-effects).
 
-    Asks git first — it is authoritative for a checkout — but falls back to this
-    file's own location (``solver/crypto/config.py`` → up 2) when git cannot
-    answer. That is not a rare case: the **web shells run as ``euler-ws-*`` uids
-    that do not own the checkout** (DD-12/DD-13), so git refuses with *detected
-    dubious ownership*, and git may not be installed at all in a deployed tier
-    that does no git operations by design. This module is imported at shell
-    startup (the crypto commands register from it), so a hard failure here would
-    take the whole shell down over a path this package can derive itself.
+    ``EULER_REPO_ROOT`` wins when set — the deployed web tier points every service
+    at the real working tree with it (``solver.config`` honours the same var), and
+    the git filter must agree with the shell on where the tree is. Otherwise ask git
+    (authoritative for a checkout), and finally fall back to this file's own location
+    (``solver/crypto/config.py`` → up 2). The fallbacks matter: the **web shells run
+    as ``euler-ws-*`` uids that do not own the checkout** (DD-12/DD-13), so git refuses
+    with *detected dubious ownership*, and git may not be installed at all in a deployed
+    tier that does no git operations by design. This module is imported at shell startup
+    (the crypto commands register from it), so a hard failure here would take the whole
+    shell down over a path this package can derive itself.
     """
+    override = os.environ.get('EULER_REPO_ROOT', '').strip()
+    if override and (root_override := Path(override)).is_dir():
+        return root_override
     try:
         result = run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
                      cwd=Path(__file__).parent)
