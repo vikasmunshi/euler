@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content redeploy-auth redeploy-content redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content install-ws uninstall-ws upgrade-ws redeploy-ws redeploy-auth redeploy-content redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -171,6 +171,28 @@ upgrade-content:
 	./scripts/setup/content.sh upgrade
 	@printf "✓ upgrade-content complete: content service upgraded\n"
 
+## Install the web shell: per-profile euler-ws-<profile> uids + .state ACLs +
+## euler-ws@.service template (needs install-auth's venv and install-content's ACL groups) (DD-13)
+install-ws:
+	./scripts/setup/ws.sh install
+	@printf "✓ install-ws complete: per-profile web shell deployed\n"
+
+## Remove the web shell (prompts before stripping ACLs and removing identities)
+uninstall-ws:
+	./scripts/setup/ws.sh uninstall
+	@printf "✓ uninstall-ws complete: web shell removed\n"
+
+## Upgrade the web shell (re-assert identities + ACLs + units, restart instances)
+upgrade-ws:
+	./scripts/setup/ws.sh upgrade
+	@printf "✓ upgrade-ws complete: web shell upgraded\n"
+
+## Restart the per-profile web-shell instances against the freshly rebuilt venv
+## (this drops every live web shell — the PTYs die with their service)
+redeploy-ws:
+	./scripts/setup/ws.sh redeploy
+	@printf "✓ redeploy-ws complete: web-shell instances restarted\n"
+
 ## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
 install-nodejs:
 	./scripts/setup/nodejs.sh install
@@ -185,17 +207,17 @@ uninstall-nodejs:
 ## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service.
 ## Each kit stays independently operable; the later kits reload the firewall as
 ## their service users appear. (sudo required; see docs/server-redesign.md)
-install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-content
+install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-content install-ws
 	@printf "✓ install-web complete: full web stack installed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-uninstall-web: uninstall-content uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
+uninstall-web: uninstall-ws uninstall-content uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
 	@printf "✓ uninstall-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
 ## ddns.sh install is its idempotent upgrade, and the firewall reload is the
 ## final consistency pass over the euler uids)
-upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth upgrade-content
+upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth upgrade-content upgrade-ws
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
@@ -216,9 +238,10 @@ redeploy-frontend:
 
 ## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
 ## ACLs, units, certs, or the firewall: rebuild the shared venv (auth) → restart the
-## content instances against it → refresh the edge's static content + Caddyfile. The
+## content + web-shell instances against it → refresh the edge's static content +
+## Caddyfile. Note the web shells are restarted, so live terminals are dropped. The
 ## everyday "I changed Python/templates/CSS/JS, push it" turnaround.
-redeploy-web: redeploy-auth redeploy-content redeploy-frontend
+redeploy-web: redeploy-auth redeploy-content redeploy-ws redeploy-frontend
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
 
 # Standalone Node.js (no sudo):

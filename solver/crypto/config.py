@@ -41,11 +41,28 @@ class CryptoConfig(TypedDict):
 
 
 def _root_dir() -> Path:
-    """Return the git repository root (pure: captures git's output, no chdir / PATH side-effects)."""
-    result = run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True, cwd=Path(__file__).parent)
-    if result.returncode != 0 or not (root := result.stdout.strip()):
-        raise ValueError('solver.crypto: failed to locate the git repository root')
-    return Path(root)
+    """Return the repository root (pure: captures git's output, no chdir / PATH side-effects).
+
+    Asks git first — it is authoritative for a checkout — but falls back to this
+    file's own location (``solver/crypto/config.py`` → up 2) when git cannot
+    answer. That is not a rare case: the **web shells run as ``euler-ws-*`` uids
+    that do not own the checkout** (DD-12/DD-13), so git refuses with *detected
+    dubious ownership*, and git may not be installed at all in a deployed tier
+    that does no git operations by design. This module is imported at shell
+    startup (the crypto commands register from it), so a hard failure here would
+    take the whole shell down over a path this package can derive itself.
+    """
+    try:
+        result = run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
+                     cwd=Path(__file__).parent)
+    except OSError:                                   # git not installed at all
+        result = None
+    if result is not None and result.returncode == 0 and (root := result.stdout.strip()):
+        return Path(root)
+    fallback = Path(__file__).resolve().parents[2]
+    if not (fallback / 'solver').is_dir():
+        raise ValueError('solver.crypto: failed to locate the repository root')
+    return fallback
 
 
 _ROOT: Path = _root_dir()

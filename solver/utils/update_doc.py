@@ -25,11 +25,13 @@ from __future__ import annotations
 
 import ast
 import inspect
+import json
 import re
 from pathlib import Path
 from typing import Callable
 
 from solver.auth import Authorizations
+from solver.auth.authorizations import DEFAULT_POLICY_FILE
 from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
@@ -38,7 +40,13 @@ from solver.utils.loader import load_commands, update_modules
 #: Authorization profiles, in descending order of privilege (for the audit report).
 _PROFILES: tuple[str, ...] = ('admin', 'maintainer', 'contributor', 'reader')
 #: The policy used only to *report* per-command availability (not enforcement).
-_AUTHZ: Authorizations = Authorizations.load()
+#: Deliberately the **repo's** template rather than ``Authorizations.load()``: the
+#: generated audit table documents the ladder this repo ships, so it must not vary
+#: with whatever an operator has deployed to ``/etc/euler`` on the machine that
+#: happens to run ``update-docs`` (which would make ``update-docs --check`` — a
+#: pre-push gate — pass or fail by host).
+_AUTHZ: Authorizations = Authorizations(
+    json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8')))
 
 
 def _allowed_profiles(cmd: Command) -> list[str]:

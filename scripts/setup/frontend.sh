@@ -16,9 +16,11 @@
 #     auth service's unix socket, and gates every other request through the auth
 #     service's forward_auth endpoint (200 + X-User/X-Profile continues; 401
 #     redirects to /login). Client-supplied X-User/X-Profile are stripped (DD-9).
-#     Until the content service lands (Phase 5), authenticated requests fall
-#     through to the static "under maintenance" holding page (HTTP 503), which a
-#     handle_errors block also serves when an upstream is down.
+#     Authenticated requests are then routed **by X-Profile** to the matching
+#     per-profile instance (DD-12/DD-13): /ws to euler-ws-<profile> (the terminal's
+#     WebSocket, Phase 6), everything else to euler-content-<profile> (Phase 5). An
+#     unknown/absent profile falls through to the static "under maintenance" holding
+#     page (HTTP 503), which a handle_errors block also serves when an upstream is down.
 #   - The cert is issued out-of-band by acme.sh via DNS-01 (Caddy performs no ACME).
 #
 # Service identity (DD-2):
@@ -485,6 +487,23 @@ ${DOMAIN} {
 	@content_contributor header X-Profile contributor
 	@content_maintainer header X-Profile maintainer
 
+	# The web shell (Phase 6, DD-13): /ws goes to the per-profile euler-ws instance,
+	# same X-Profile split. Every web rung gets a terminal — attach is solver:execute,
+	# a reader grant — and what the shell inside it may run is the DD-12 decorator's
+	# call, not the edge's. Caddy proxies the WebSocket upgrade natively.
+	@ws_reader {
+		path /ws
+		header X-Profile reader
+	}
+	@ws_contributor {
+		path /ws
+		header X-Profile contributor
+	}
+	@ws_maintainer {
+		path /ws
+		header X-Profile maintainer
+	}
+
 	# Health probe — Caddy-native, no upstream.
 	handle /healthz {
 		respond "ok" 200
@@ -545,16 +564,19 @@ ${DOMAIN} {
 				}
 			}
 
+			# Phase 6 (DD-13): the terminal's WebSocket, to the matching per-profile
+			# euler-ws instance. Matched *before* the content routes, since /ws is a
+			# path both would otherwise claim.
+			reverse_proxy @ws_maintainer unix//run/euler/ws-maintainer.sock
+			reverse_proxy @ws_contributor unix//run/euler/ws-contributor.sock
+			reverse_proxy @ws_reader unix//run/euler/ws-reader.sock
+
 			# Phase 5 (DD-12): route by the profile forward_auth returned to the
 			# matching per-profile content instance, each its own euler-content-<p>
 			# uid + socket. An unknown/absent profile falls through to maintenance.
 			reverse_proxy @content_maintainer unix//run/euler/content-maintainer.sock
 			reverse_proxy @content_contributor unix//run/euler/content-contributor.sock
 			reverse_proxy @content_reader unix//run/euler/content-reader.sock
-
-			# --- Later phases (authenticated routes) ---
-			# Phase 6 shell WebSocket:
-			#   handle_path /ws* { reverse_proxy unix//run/euler/ws-{X-Profile}.sock }
 
 			# No profile matched (or the content instance is unset) → holding page.
 			import maintenance

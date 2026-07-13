@@ -21,13 +21,21 @@ The invariants it pins (DD-13):
 """
 from __future__ import annotations
 
+import json
 import unittest
 
 from solver.auth import Authorizations, Subject
+from solver.auth.authorizations import DEFAULT_POLICY_FILE
 from solver.shell.command import effective_requires, registry
 from solver.utils.loader import load_commands
 
-_AUTHZ = Authorizations.load()          # the bundled ladder
+#: The **repo's** policy template, not ``Authorizations.load()``: that prefers the
+#: deployed ``/etc/euler/authorizations.json``, so the invariants below would be
+#: asserted against whatever policy this particular host happens to be running —
+#: green on a machine with no deployment, red on one whose operator has edited the
+#: SoR, for reasons having nothing to do with the code under test. The ladder these
+#: tests guard is the one the repo ships.
+_AUTHZ = Authorizations(json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8')))
 _WEB_RUNGS = ('reader', 'contributor', 'maintainer')
 
 
