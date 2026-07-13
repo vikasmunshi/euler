@@ -130,7 +130,7 @@ def build_app(config: WsConfig) -> web.Application:
         async def spawn() -> PtySession:
             ticket = await _mint_ticket(cookie)
             return PtySession(ticket=ticket, profile=config.profile or subject.profile,
-                              argv=config.shell_argv)
+                              argv=config.shell_argv, auth_socket=config.auth_socket)
 
         try:
             pty = await manager.get_or_create(subject.user, spawn)

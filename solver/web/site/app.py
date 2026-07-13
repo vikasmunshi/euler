@@ -189,8 +189,14 @@ async def terminal(request: web.Request) -> web.StreamResponse:
     """``GET /terminal`` — the right pane's own document (decision 14).
 
     A standalone page in its own browsing context, framed by the shell at
-    ``#ws``: the Phase 6 xterm.js + ``/ws`` client replaces the placeholder,
-    with the beforeunload guard owning the refresh/close confirmation.
+    ``#ws``: xterm.js + the ``/ws`` client (``/assets/terminal.js``), whose
+    ``beforeunload`` guard owns the refresh/close confirmation, and which
+    forwards the shell's OSC 5379 ``show``/``edit`` sequences to the shell
+    document so *it* swaps the left pane (Phase 6).
+
+    Note the socket is **not** this service's: Caddy routes ``/ws`` to the
+    per-profile ``euler-ws`` instance (DD-13). Same origin, so the CSP's
+    ``connect-src 'self'`` covers the ``wss:`` upgrade.
     """
     return render(request, 'terminal.html')
 

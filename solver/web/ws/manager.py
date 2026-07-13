@@ -20,9 +20,10 @@ recent scrollback and live prompt instead of a blank screen.
 """
 from __future__ import annotations
 
-__all__ = ['PersistentPty', 'PtyManager']
+__all__ = ['PersistentPty', 'PtyManager', 'REPLAY_END']
 
 import asyncio
+import json
 import time
 from typing import Awaitable, Callable
 
@@ -32,6 +33,12 @@ from solver.web.ws.pty import PtySession
 
 #: Cap (bytes) on the per-shell replay buffer sent to a (re)attaching terminal.
 _REPLAY_CAP: int = 256 * 1024
+
+#: Text frame closing the replay on attach: everything before it is scrollback,
+#: everything after is live. The client must not act on control sequences carried
+#: by the replay (an already-run ``show`` would re-navigate the pane on every
+#: load) — see :meth:`PersistentPty.attach`.
+REPLAY_END: str = json.dumps({'replay': 'end'})
 
 
 class PersistentPty:
@@ -112,13 +119,25 @@ class PersistentPty:
     # -- attach / input -----------------------------------------------------
 
     async def attach(self, ws: web.WebSocketResponse) -> None:
-        """Register *ws* and replay the recent output so it redraws immediately."""
+        """Register *ws* and replay the recent output so it redraws immediately.
+
+        The replay is followed by the :data:`REPLAY_END` marker — a text frame,
+        so it cannot collide with the raw PTY byte stream. The client needs it:
+        the buffer may contain the *control sequences* of commands already run
+        (``show``/``edit`` emit OSC 5379), and a terminal that acted on those
+        again would hijack the pane on every page load — a deep link to one
+        problem would bounce to whatever the shell last showed. Everything before
+        the marker is scrollback to redraw; only what comes after is live.
+        """
         self._subscribers.add(ws)
-        if self._buffer and not ws.closed:
-            try:
+        if ws.closed:
+            return
+        try:
+            if self._buffer:
                 await ws.send_bytes(bytes(self._buffer))
-            except (ConnectionError, RuntimeError):
-                self.detach(ws)
+            await ws.send_str(REPLAY_END)
+        except (ConnectionError, RuntimeError):
+            self.detach(ws)
 
     def detach(self, ws: web.WebSocketResponse) -> None:
         """Stop forwarding to *ws*; the shell keeps running for other/later clients."""

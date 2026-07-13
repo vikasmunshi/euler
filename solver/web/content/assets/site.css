@@ -253,13 +253,13 @@ summary.user-glyph svg { width: 1.15rem; height: 1.15rem; display: block; }
   background: var(--surface);
 }
 
-/* /terminal — the iframe's own document: the frame fills it edge to edge */
+/* /terminal — the iframe's own document: the terminal fills it edge to edge
+   (the pane's own border and radius come from .pane-ws in the shell). */
 body.terminal-doc {
   display: block;
   height: 100vh;
   overflow: hidden;
 }
-body.terminal-doc .term-frame { height: 100%; border: 0; border-radius: 0; }
 
 /* ── Panels & shared content styling ─────────────────────────────────────── */
 .panel {
@@ -518,23 +518,26 @@ dl.account dt { color: var(--muted); }
 dl.account dd { margin: 0; }
 .perm-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 
-/* ── Placeholder terminal (right pane, until Phase 6) ────────────────────── */
-.term-frame { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
-              display: flex; flex-direction: column; min-height: 100%; }
-.term-bar { display: flex; gap: 0.4rem; padding: 0.5rem 0.7rem; flex: none;
-            background: color-mix(in srgb, var(--text) 6%, var(--surface)); border-bottom: 1px solid var(--border); }
-.term-bar .dot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--border); }
-.term-body {
-  margin: 0;
-  padding: 0.9rem 1rem;
-  flex: 1;
-  background: #0b0e14;
-  color: #d7dbe0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.9rem;
-  white-space: pre-wrap;
+/* ── The terminal (right pane, Phase 6) ──────────────────────────────────── */
+/* xterm renders into #term. The host is **dark in both site themes** — not an
+   oversight: it shows the shell's own output, and the shell paints with absolute
+   xterm-256 indices picked for a dark terminal (see terminal.js). The colour is
+   the site's dark --surface, literally, so it is the same surface even when the
+   page around it is light. The small pad keeps the first glyph column off the
+   pane border. */
+.term-host {
+  height: 100%;
+  padding: 0.35rem 0.2rem 0.2rem 0.45rem;
+  background: #171a21;
 }
-.term-body .cursor { color: var(--accent); }
+.term-host .xterm { height: 100%; }
+.term-host .xterm-viewport { background: transparent !important; }
+/* xterm's viewport is the scroll container: give it the site's scrollbar look
+   rather than the platform default sitting on a themed surface. */
+.term-host .xterm-viewport::-webkit-scrollbar { width: 10px; }
+.term-host .xterm-viewport::-webkit-scrollbar-thumb {
+  background: var(--border); border-radius: 6px;
+}
 
 /* ── Footer (fixed) ──────────────────────────────────────────────────────── */
 .app-footer {

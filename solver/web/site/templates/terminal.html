@@ -1,8 +1,16 @@
 {# The right pane's document (site-design §1/decision 14): a standalone page in
-   its own browsing context, framed by the shell at #ws. Phase 6 replaces the
-   placeholder with xterm.js + the /ws socket and arms the beforeunload guard
-   while connected (disarmed on close and on a {euler: 'disarm'} postMessage
-   from the shell before deliberate exits). Theme-aware via site.js. #}
+   its own browsing context, framed by the shell at #ws, so htmx swaps, history
+   restores, and content-page JS structurally cannot touch the session.
+
+   xterm.js + the fit addon are vendored classic scripts (SRI-pinned, `'self'`);
+   terminal.js opens /ws, arms the beforeunload guard while connected, and
+   forwards the shell's OSC 5379 `show`/`edit` sequences to the parent, which
+   swaps the left pane. site.js is loaded (without defer) only for the pre-paint
+   theme: this document reads the same CSS custom properties for its palette.
+
+   Every web rung gets a terminal (attach is `solver:execute`, the reader floor —
+   DD-13); what differs is the command set the shell inside it registers. A refused
+   attach (1008) is reported in the terminal itself rather than retried. #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,14 +18,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>solver terminal</title>
   <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/vendor/xterm/xterm.css"
+        integrity="sha384-8Xk9wy/gzEDUKrXtrmCFa2bBuK3BpjpDuL/p0SeKQX19Khl/M+lHOgD/CyYf7efP"
+        crossorigin="anonymous">
   <link rel="stylesheet" href="/assets/site.css">
   <script src="/assets/site.js"></script>
+  <script src="/vendor/xterm/xterm.js"
+          integrity="sha384-M169f14mRZOXm3hD/v2Ti0ThIT/RnAQagXA9nlE15yHAtrW19gdePJh/HaTzUOe/"
+          crossorigin="anonymous" defer></script>
+  <script src="/vendor/xterm/xterm-addon-fit.js"
+          integrity="sha384-iF+jqbuti4XlB64clWgFWYEscb+UnSRv3VgVikGYZu+otNFnSHr7y7NcKfBnGizn"
+          crossorigin="anonymous" defer></script>
+  <script src="/assets/terminal.js" defer></script>
 </head>
 <body class="terminal-doc">
-  <div class="term-frame" role="img" aria-label="placeholder terminal">
-    <div class="term-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
-    <pre class="term-body">euler:~$ <span class="cursor">▍</span>
-<span class="muted"># the solver shell attaches here over /ws (Phase 6)</span></pre>
-  </div>
+  <div id="term" class="term-host" role="application" aria-label="solver terminal"></div>
 </body>
 </html>

@@ -1026,7 +1026,12 @@ document so the Phase-6 terminal lives in an isolated browsing context
 runtime with **no nonce hook** — verified empirically (headless Chrome logged the CSP
 violations; the math rendered garbled under bare `'self'`). The residual risk is CSS injection only, and the markup paths that could
 carry it are closed upstream (Jinja autoescape; nh3 strips `style` tags/attrs from
-stored HTML) — script execution remains nonce-gated. **Caddy** adds the transport-level
+stored HTML) — script execution remains nonce-gated. **`connect-src 'self'` needs no
+`wss:` exception (Phase 6, verified):** the terminal's WebSocket is same-origin, and
+`'self'` covers the `ws:`/`wss:` upgrade to the page's own host — headless Chrome logs
+**zero** CSP violations across the shell + the framed `/terminal` document with the
+socket live. (CSP 3 says so; it was worth confirming, because CSP 1 did not and older
+engines required listing the `wss:` origin.) **Caddy** adds the transport-level
 headers that need no per-response state (HSTS, `X-Content-Type-Options`,
 `Referrer-Policy`) and a fallback CSP for purely static responses. Vendored JS (htmx,
 xterm, codemirror, MathJax) is served from `'self'`.

@@ -229,7 +229,7 @@ a **direct** hit on the same path returns the whole shell with that pane pre-pop
 | Method | Path | Renders | Requires |
 |---|---|---|---|
 | GET | `/` | the app shell; left pane = the **landing** (default content), right pane = the `/terminal` iframe | `web-content:read` |
-| GET | `/terminal` | the right pane's standalone document (placeholder now; xterm + `/ws` in Phase 6) | `web-content:read` |
+| GET | `/terminal` | the right pane's standalone document: xterm.js + the `/ws` client (Phase 6) | `web-content:read` |
 
 ### 8b — read (left-pane content) ✅
 
@@ -390,3 +390,21 @@ is never web, so no web terminal has raw bash.
     cannot touch it, and its `beforeunload` guard owns the refresh/close
     confirmation (§9). Consequence: CSP `frame-ancestors` moves `'none'` → `'self'`
     (same-origin framing only; cross-origin embedding stays blocked). ✅
+15. **The terminal is dark in both themes (Phase 6).** The one surface that does not
+    follow the theme slider. It renders the *shell's own* output, and the shell paints
+    with absolute xterm-256 indices chosen for a dark terminal (near-whites like 254/247
+    for body text, 238 for rules): on a light background its banner and prompt wash out
+    to illegible — observed, not assumed. Re-theming the surface without re-tuning the
+    shell's palette would only break the contrast the shell already designs for. So the
+    pane keeps the site's **dark** `--surface`, literally, and reads as an embedded
+    console on a light page. (Re-tuning the shell's palette per theme is the alternative
+    if this ever matters; it is a shell change, not a client one.) ✅
+16. **The attach replay is drawn, never obeyed (Phase 6).** A (re)attaching terminal is
+    sent the shell's recent scrollback — which contains the *control sequences* of
+    commands that already ran, `show`/`edit`'s OSC 5379 among them. A client that acted
+    on those again would hijack the pane on **every page load**: deep-link to one problem
+    and land on whatever the shell last showed. So the server closes the replay with an
+    explicit `{"replay":"end"}` text frame (the raw byte stream cannot carry an in-band
+    marker), and the client honours OSC only after it — sequenced *through* xterm's write
+    queue, since `write()` is asynchronous and the bytes are still being parsed when the
+    marker arrives. The monotonic token stays as the within-session guard. ✅

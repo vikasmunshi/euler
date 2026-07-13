@@ -31,6 +31,7 @@ from solver.auth.authorizations import DEFAULT_POLICY_FILE
 from solver.web.auth.tickets import TicketStore
 from solver.web.ws.app import PTY_MANAGER, build_app
 from solver.web.ws.config import WsConfig
+from solver.web.ws.manager import REPLAY_END
 from solver.web.ws.pty import PtySession
 
 _EMAIL = 'user@example.com'
@@ -42,7 +43,9 @@ _HEADERS = {'X-User': _EMAIL, 'X-Profile': 'contributor', 'Cookie': _GOOD_COOKIE
 _STUB_CODE = """
 import os, sys
 print(f"BANNER ticket_len={len(os.environ.get('SOLVER_TICKET',''))} "
-      f"profile={os.environ.get('EULER_PROFILE','')}", flush=True)
+      f"profile={os.environ.get('EULER_PROFILE','')} "
+      f"auth_socket={os.environ.get('EULER_AUTH_SOCKET','')} "
+      f"solver_user={os.environ.get('SOLVER_USER','-none-')}", flush=True)
 for line in sys.stdin:
     line = line.strip()
     if line == 'exit':
@@ -96,6 +99,16 @@ async def _read_until(ws: aiohttp.ClientWebSocketResponse, needle: bytes,
         elif msg.type in (WSMsgType.CLOSE, WSMsgType.CLOSED, WSMsgType.ERROR):
             break
     return buffer
+
+
+async def _read_text(ws: aiohttp.ClientWebSocketResponse, timeout: float = 15.0) -> str:
+    """The next text frame (the control channel: today, the replay-end marker)."""
+    while True:
+        msg = await asyncio.wait_for(ws.receive(), timeout=timeout)
+        if msg.type == WSMsgType.TEXT:
+            return str(msg.data)
+        if msg.type in (WSMsgType.CLOSE, WSMsgType.CLOSED, WSMsgType.ERROR):
+            return ''
 
 
 async def _read_close(ws: aiohttp.ClientWebSocketResponse, timeout: float = 15.0) -> None:
@@ -165,8 +178,13 @@ class WsAttachTests(_WsServiceCase):
     @unittest_run_loop
     async def test_attach_ticket_echo_and_resize(self) -> None:
         ws = await self.client.ws_connect('/ws', headers=_HEADERS)
-        banner = await _read_until(ws, b'profile=contributor')
+        banner = await _read_until(ws, b'solver_user=')
         self.assertIn(b'ticket_len=43', banner)          # token_urlsafe(32) → 43 chars
+        self.assertIn(b'profile=contributor', banner)    # the instance pin (DD-13)
+        # The child must redeem against the socket the service minted from — not a
+        # compiled-in default that is right only by accident of how it was configured.
+        self.assertIn(f'auth_socket={self.auth_socket}'.encode(), banner)
+        self.assertIn(b'solver_user=-none-', banner)     # display-only value is dropped
         self.assertEqual(self.auth.mints, 1)
 
         await ws.send_bytes(b'hello\n')
@@ -176,6 +194,29 @@ class WsAttachTests(_WsServiceCase):
         await ws.send_bytes(b'size\n')
         self.assertIn(b'SIZE 91x33', await _read_until(ws, b'SIZE'))
         await ws.close()
+
+    @unittest_run_loop
+    async def test_attach_closes_the_replay_with_a_marker(self) -> None:
+        """Every attach ends its replay with a text-frame marker, so the client can
+        tell scrollback from live output — the replay carries the control sequences
+        of commands that already ran (`show` → OSC 5379), and a terminal that obeyed
+        them again would re-navigate the pane on every page load."""
+        first = await self.client.ws_connect('/ws', headers=_HEADERS)
+        self.assertEqual(await _read_text(first), REPLAY_END)   # even with no scrollback
+        await _read_until(first, b'BANNER')
+
+        second = await self.client.ws_connect('/ws', headers=_HEADERS)   # replays
+        seen, marker = b'', ''
+        while not marker:                                # the marker follows the bytes
+            msg = await asyncio.wait_for(second.receive(), timeout=10)
+            if msg.type == WSMsgType.BINARY:
+                seen += msg.data
+            elif msg.type == WSMsgType.TEXT:
+                marker = msg.data
+        self.assertIn(b'BANNER', seen)                   # scrollback came first…
+        self.assertEqual(marker, REPLAY_END)             # …then the boundary
+        await first.close()
+        await second.close()
 
     @unittest_run_loop
     async def test_second_tab_shares_the_shell(self) -> None:
@@ -231,7 +272,7 @@ class ReaderAttachTests(_WsServiceCase):
     async def test_reader_attaches(self) -> None:
         headers = {'X-User': _EMAIL, 'X-Profile': 'reader', 'Cookie': _GOOD_COOKIE}
         ws = await self.client.ws_connect('/ws', headers=headers)
-        banner = await _read_until(ws, b'profile=reader')  # the pin is exported to the child
+        banner = await _read_until(ws, b'profile=reader')   # the pin is exported to the child
         self.assertIn(b'profile=reader', banner)
         await ws.close()
 

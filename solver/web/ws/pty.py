@@ -21,11 +21,12 @@ terminal's size.
 
 Identity transfers by the **one-time shell ticket** (DD-9), never the
 environment as a credential: the child gets ``SOLVER_TICKET`` and redeems it at
-startup (:mod:`solver.auth.identity`), which consumes the ticket and returns
-the authoritative ``(email, profile, …)``. ``EULER_PROFILE`` carries this
-instance's pin so the child can refuse a redeemed profile that differs (DD-13);
-any inherited ``SOLVER_USER`` is dropped — it is display-only and the ticket is
-the truth.
+startup (:mod:`solver.auth.identity`) over ``EULER_AUTH_SOCKET`` — the same
+socket the service minted it from — which consumes the ticket and returns the
+authoritative ``(email, profile, …)``. ``EULER_PROFILE`` carries this instance's
+pin so the child can refuse a redeemed profile that differs (DD-13); any
+inherited ``SOLVER_USER`` is dropped — it is display-only and the ticket is the
+truth.
 """
 from __future__ import annotations
 
@@ -38,6 +39,8 @@ import struct
 import subprocess
 import sys
 import termios
+
+from solver.web.auth import AUTH_SOCKET_ENV
 
 #: How many bytes to pull off the master fd per read.
 _READ_CHUNK: int = 65536
@@ -64,12 +67,19 @@ class PtySession:
     geometry, ``close()`` terminates the child.
     """
 
-    def __init__(self, ticket: str, profile: str, argv: tuple[str, ...]) -> None:
+    def __init__(self, ticket: str, profile: str, argv: tuple[str, ...],
+                 auth_socket: str = '') -> None:
         env = dict(os.environ)
         env['TERM'] = 'xterm-256color'  # prompt-toolkit/rich render styled output
         env['SOLVER_TICKET'] = ticket   # single-use; consumed at redemption (DD-9)
         if profile:
             env['EULER_PROFILE'] = profile
+        if auth_socket:
+            # The child redeems against the *same* socket the parent minted from.
+            # Without this it falls back to the compiled-in default path, which is
+            # right only when the service happened to be configured by that env var
+            # — the socket is the service's configuration, so pass it explicitly.
+            env[AUTH_SOCKET_ENV] = auth_socket
         env.pop('SOLVER_USER', None)    # display-only; the ticket is the identity
         master, slave = pty.openpty()
         try:

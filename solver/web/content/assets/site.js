@@ -36,6 +36,10 @@
       var next = toggle.checked ? 'dark' : 'light';
       root.dataset.theme = next;
       try { localStorage.setItem('theme', next); } catch (e) { /* private mode */ }
+      // The terminal deliberately does *not* follow the slider (terminal.js): it
+      // renders the shell's own dark-tuned ANSI palette, so it stays a dark panel
+      // in both themes. Nothing to mirror into the iframe — and nothing to reload,
+      // which is what would cost the session.
     });
   });
 
@@ -161,13 +165,31 @@
   });
 
   // A deliberate exit (logout) should not trip the terminal's beforeunload
-  // guard: tell the /terminal iframe to disarm before the shell navigates
-  // (the guard itself arrives with the Phase 6 terminal; the contract is here).
+  // guard: tell the /terminal iframe to disarm before the shell navigates.
   document.addEventListener('submit', function (ev) {
     if (!ev.target.matches('form[action="/auth/logout"]')) { return; }
     var terminal = document.getElementById('terminal');
     if (terminal && terminal.contentWindow) {
       terminal.contentWindow.postMessage({ euler: 'disarm' }, window.location.origin);
     }
+  });
+
+  // ── the terminal drives the left pane (Phase 6) ────────────────────────────
+  // `show` / `edit` in a web shell emit an OSC 5379 sequence on the PTY; the
+  // terminal document turns it into {euler: 'navigate', path} and posts it here
+  // (it never touches this DOM itself). We swap the pane exactly as a link would
+  // — same htmx target, same pushed URL — so the back arrow's stack stays honest
+  // and the terminal, which is not part of #content, is untouched.
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'navigate') { return; }
+    var path = String(ev.data.path || '');
+    if (path.charAt(0) !== '/' || path.charAt(1) === '/') { return; }   // same-origin paths only
+    if (!window.htmx) { window.location.assign(path); return; }         // no-JS-htmx fallback
+    window.htmx.ajax('GET', path, { target: '#content', swap: 'innerHTML' })
+      .then(function () {
+        window.history.pushState({}, '', path);
+        if (paneStack[paneStack.length - 1] !== path) { paneStack.push(path); }
+        refreshBack();
+      });
   });
 })();
