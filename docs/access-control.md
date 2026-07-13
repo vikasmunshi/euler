@@ -359,5 +359,9 @@ self-service (§4.1). Mutating verbs prompt for `sudo`.
    `/assets/*` stay public.
 4. `/forgot` for a nonexistent email returns the same generic "check your mailbox"
    page as a real one (no enumeration).
-5. Masquerade: a request with a forged `X-User` header is ignored (Caddy strips it);
-   a bare `solver` run as a non-owner uid with no ticket aborts at startup.
+5. Masquerade (all verified, Phase 6): a request with a forged `X-User` header is
+   ignored — Caddy strips it and the upstream sees only the `forward_auth` value; a
+   bare `solver` run as a `euler-*` service uid with no ticket aborts at startup; the
+   web-shell **ticket is single-use** (a replay from a sibling shell's
+   `/proc/<pid>/environ` is dead on arrival); and a ticket whose profile differs from
+   the forking instance's `EULER_PROFILE` pin aborts, so no cross-profile attach.

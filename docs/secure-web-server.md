@@ -36,12 +36,12 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 >   full-viewport four-region layout, the Euler-identity brand, header chrome
 >   (breadcrumbs + Actions via OOB swaps, theme slider, user menu), footer `about`
 >   pages behind a new `about:read` object. **Phase 5 complete.**
-> - 🚧 **Phase 6** — Web shell ([DD-13](#dd-13--web-shell-topology--gating)/
->   [DD-14](#dd-14--web-shell-lifecycle--revocation)): steps 1–5 landed — the
->   `solver/web/ws` service, the subject-driven channel, the xterm terminal on
->   `/ws`, the `ws.sh` kit (deployed + serving on the host), and the DD-14
->   teardown push + reaper. **Step 6** (end-to-end masquerade/E2E verification) is
->   what remains.
+> - ✅ **Phase 6** — Web shell ([DD-13](#dd-13--web-shell-topology--gating)/
+>   [DD-14](#dd-14--web-shell-lifecycle--revocation)): the `solver/web/ws` service,
+>   the subject-driven channel, the xterm terminal on `/ws`, the `ws.sh` kit
+>   (deployed + serving on the host), the DD-14 teardown push + reaper, and the
+>   end-to-end masquerade/per-rung verification. The full solver shell in the
+>   right pane, gated by the DD-12 policy and revocable in real time.
 > - ⬜ **Phase 7** — Credential brokers (`euler-ai`, `euler-git`): design closed
 >   ([DD-15](#dd-15--secrets-are-brokered-never-dispensed)); builds after Phase 6
 >   (until then the AI/git commands in a web shell fail with a clear
@@ -660,9 +660,10 @@ terminal is the product's front door, and what varies by rung is what the shell
   credentials come from the **`euler-ai` broker**
   ([DD-15](#dd-15--secrets-are-brokered-never-dispensed), Phase 7) — the sole key
   holder, metering and capping every call. Between Phases 6 and 7 the commands
-  are visible in a maintainer web shell but **fail with a clear no-credentials
-  error** — accepted deliberately, so no interim per-instance key file exists to
-  deploy and later claw back.
+  are visible in a maintainer web shell but **fail with a clear, actionable error**
+  — on the `[web]`-only tier `claude-api` reports `needs the ai dependency group
+  (anthropic is not installed)` (verified) — accepted deliberately, so no interim
+  per-instance key file exists to deploy and later claw back.
 - **Egress.** The units carry the DD-8 pair (`IPAddressDeny=any` +
   `IPAddressAllow=localhost`) and load `/etc/euler/egress.env`, so the problem
   scraper works through Squid and nothing else leaves (the AI commands reach the
@@ -1321,7 +1322,7 @@ shippable sub-steps:
 notes format, html5lib) are **resolved** — see
 [DD-10](#dd-10--phase-5-content-service-choices).
 
-### Phase 6 — Web shell 🚧
+### Phase 6 — Web shell ✅
 The PTY-backed interactive `solver` shell over WebSocket — the highest-risk service
 (RCE by design), and the last one. **Prerequisites: 4a + 5** (the kernel and
 per-profile OS layer it instantiates, and the 5e shell that frames `/terminal`).
@@ -1391,15 +1392,25 @@ hardening ([security-notes AR-1](security-notes.md)).
    each revocation path against a fake ws socket and asserts the reap (plus enable =
    no push, and all-sockets-absent still succeeds); `test_ws` reaper cases — a
    detached shell is reaped, an attached one survives and still answers.
-6. **End-to-end verification + docs.** The masquerade suite
-   ([access-control § 8](access-control.md)): ticket replay dead, `unset
-   SOLVER_TICKET` re-exec aborts, no cross-profile attach; a `contributor` E2E
-   (login → attach → `eval` a public problem → results land with the right
-   ownership); a `reader` E2E (attach succeeds, `show`/`ls` work,
-   `eval`/`benchmark`/`edit`/`!` are unknown commands); a `maintainer` `claude-api`
-   call fails with the clear no-credentials error (DD-15 pending, by design); the
-   Phase-4/4a/5 harnesses stay green. Docs: status flips here + site-design +
-   access-control; `update-docs --check` clean.
+6. ✅ **End-to-end verification + docs.** The masquerade suite
+   ([access-control § 8](access-control.md)) is verified: the shell **ticket is
+   single-use** (a replay from a sibling's environ is dead — `test_tickets`); a
+   **service uid with no ticket aborts** and a **ticket whose profile ≠ the
+   instance pin aborts** (`test_auth_kernel`); the app **refuses a mismatched
+   `X-Profile`** (`test_ws`); and **Caddy strips a forged `X-User`** — driven
+   through a real Caddy, the upstream saw only the `forward_auth` value, never the
+   forgery. Per-rung E2E, driving a real `python -m solver` over the real ws
+   service: a **`reader`** runs `ls`/`show` (the latter emits its OSC pane-swap)
+   while `evaluate`/`edit`/`!` are *unknown commands*; a **`contributor`**'s
+   `eval 1` compiles and runs the real solution (→ `233168`); a **`maintainer`**
+   additionally has `claude-api` **registered**, which on the `[web]`-only tier
+   fails at runtime with `claude-api needs the ai dependency group (anthropic is
+   not installed)` — the DD-15-pending path, an actionable error, not a silent
+   gap. Under the **shipped** policy no web rung has `!` (verified: `unknown
+   command`); the operator's live `shell:execute`-to-maintainer grant is the sole
+   reason a maintainer bash works today, and the guard test tracks that
+   ([DD-13](#dd-13--web-shell-topology--gating)). Full suite green (146). Docs
+   flipped here + site-design decision 12 + this build plan.
 
 - **Deliver:** `euler-ws@{reader,contributor,maintainer}` + the xterm terminal
   replacing the 5a placeholder — the full solver shell in the right pane, gated by
