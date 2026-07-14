@@ -137,11 +137,31 @@ def get_api_key() -> str:
     'export' prefix, single/double-quoted values, inline '#' comments, escape sequences,
     multi-line quoted values, and variable interpolation. Imported on demand so this module
     (and the `costs` command it registers) loads without the 'ai' group installed.
+
+    The env file is read either plain or -- once a per-user vault is initialised -- decrypted from
+    its vault form under the session vault key (`solver.crypto.vault`) before parsing, so the
+    Anthropic key rests encrypted at the same boundary as the private key.
     """
+    from io import StringIO
+
     from dotenv import dotenv_values
 
+    from solver.crypto.vault import decrypt_secret, is_vault_encrypted, session_vault_key
+
+    env_file = config.env_file
     name = 'ANTHROPIC_API_KEY'
-    value = dotenv_values(config.env_file).get(name)
+    if not env_file.exists():
+        values: dict[str, str | None] = {}
+    else:
+        raw = env_file.read_bytes()
+        if is_vault_encrypted(raw):
+            vault_key = session_vault_key()
+            if vault_key is None:
+                raise ValueError(f'{env_file} is vault-encrypted but the vault is locked; unlock it first')
+            values = dotenv_values(stream=StringIO(decrypt_secret(vault_key, raw).decode('utf-8')))
+        else:
+            values = dotenv_values(env_file)
+    value = values.get(name)
     if not value:
-        raise ValueError(f'{name} not found in {config.env_file}, please set it to your Anthropic API key')
+        raise ValueError(f'{name} not found in {env_file}, please set it to your Anthropic API key')
     return value

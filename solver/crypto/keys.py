@@ -23,20 +23,24 @@ Shell commands registered here: `user`, `rekey`, `authorize`, `key-split`, `key-
 """
 from __future__ import annotations
 
-__all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'user', 'user_authorize']
+__all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'user', 'user_authorize', 'vault']
 
 from json import dumps
 from pathlib import Path
 from secrets import randbelow, token_bytes
 from subprocess import run
+from typing import Literal
 
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.asymmetric import x25519
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
+from solver.config import config as app_config
 from solver.crypto.ciphers import (encrypt_blob, load_private_key, lock, public_key_hex, read_enc_key_file,
                                    read_master_key, verify_master_key)
 from solver.crypto.config import config
+from solver.crypto import vault as vault_mod
 from solver.shell import console, register
 from solver.utils.shell_utils import confirm
 
@@ -187,6 +191,122 @@ def user(regen: bool = False) -> int:
         console.print(f'[primary]public key:[/primary] {pub}\n[error]✗ cannot encrypt/decrypt[/error]')
         console.print('[muted]Have an existing user `authorize` this public key, or `key-reconstruct` '
                       'from shares.[/muted]')
+    return 0
+
+
+# ==================================================================================================================== #
+#                                       per-user vault (envelope encryption of id + env)
+# ==================================================================================================================== #
+def _write_user_pass(password: str) -> None:
+    """Persist the terminal password to `~/.euler/user_pass` (0600), the off-line unlock source."""
+    pass_file: Path = config['user_pass_file']
+    pass_file.parent.mkdir(parents=True, exist_ok=True)
+    pass_file.parent.chmod(0o700)
+    pass_file.write_text(password)
+    pass_file.chmod(0o600)
+
+
+def _prompt_new_password(prompt: str) -> str | None:
+    """Prompt for a password twice (hidden); return it, or None on mismatch / empty input."""
+    first: str = console.input(f'[accent]{prompt}:[/accent] ', password=True)
+    if not first:
+        console.print('[error]error:[/error] password must not be empty')
+        return None
+    if console.input('[accent]Confirm password:[/accent] ', password=True) != first:
+        console.print('[error]error:[/error] passwords do not match')
+        return None
+    return first
+
+
+def _encrypt_secret_file(path: Path, vault_key: bytes) -> bool:
+    """Encrypt `path` in place under `vault_key` if it exists and is still plaintext. Returns True if written."""
+    if not path.exists():
+        return False
+    raw: bytes = path.read_bytes()
+    if vault_mod.is_vault_encrypted(raw):
+        return False
+    path.write_bytes(vault_mod.encrypt_secret(vault_key, raw))
+    path.chmod(0o600)
+    return True
+
+
+def _vault_status() -> int:
+    """Report whether the vault exists, which secrets are encrypted, and whether the session is unlocked."""
+    id_file: Path = config['private_key_file']
+    env_file: Path = app_config.env_file
+
+    def _state(path: Path) -> str:
+        if not path.exists():
+            return '[muted]absent[/muted]'
+        return ('[success]encrypted[/success]' if vault_mod.is_vault_encrypted(path.read_bytes())
+                else '[warning]plaintext[/warning]')
+
+    if not vault_mod.vault_exists():
+        console.print('[warning]No vault.[/warning] `id` and `env` rest in plaintext; run '
+                      '[accent]vault init[/accent] to encrypt them.')
+    else:
+        unlocked: bool = vault_mod.session_vault_key() is not None
+        console.print(f'[primary]vault:[/primary] present · '
+                      f'session {"[success]unlocked[/success]" if unlocked else "[error]locked[/error]"}')
+    console.print(f'[primary]id  ({id_file}):[/primary] {_state(id_file)}')
+    console.print(f'[primary]env ({env_file}):[/primary] {_state(env_file)}')
+    return 0
+
+
+@register(requires=('infra:execute',),
+          help_text='Manage the per-user secrets vault: status | init | change-password.')
+def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> int:
+    """Encrypt this user's `id` + `env` at rest under a password-derived vault key (MT-6).
+
+    - `status` (default): show whether the vault exists, which secret files are encrypted, and
+      whether this session can decrypt them.
+    - `init`: create the vault and migrate the existing plaintext `id`/`env` into it in place, then
+      unlock the current session. Prompts for a new password (stored in `~/.euler/user_pass` for the
+      terminal off-line unlock path).
+    - `change-password`: re-wrap the vault key under a new password (the secrets are not re-encrypted).
+    """
+    if action == 'status':
+        return _vault_status()
+
+    if action == 'init':
+        if vault_mod.vault_exists():
+            console.print('[error]error:[/error] a vault already exists; use `vault change-password` '
+                          'to change the password.')
+            return 1
+        password: str | None = _prompt_new_password('New vault password')
+        if password is None:
+            return 1
+        vault_key: bytes = vault_mod.init_vault(password)
+        _write_user_pass(password)
+        vault_mod.write_session_key(vault_key)  # keep this shell working; exports EULER_VAULT_KEY_FILE
+        encrypted: list[str] = []
+        if _encrypt_secret_file(config['private_key_file'], vault_key):
+            encrypted.append('id')
+        if _encrypt_secret_file(app_config.env_file, vault_key):
+            encrypted.append('env')
+        load_private_key.cache_clear()
+        read_master_key.cache_clear()
+        console.print(f'[success]Vault initialised.[/success] Encrypted: '
+                      f'[accent]{", ".join(encrypted) or "nothing (no plaintext secrets found)"}[/accent].')
+        return 0
+
+    # change-password
+    if not vault_mod.vault_exists():
+        console.print('[error]error:[/error] no vault to change; run `vault init` first.')
+        return 1
+    current: str = console.input('[accent]Current vault password:[/accent] ', password=True)
+    try:
+        vault_mod.unlock_vault(current)
+    except InvalidTag:
+        console.print('[error]error:[/error] wrong password.')
+        return 1
+    new_password: str | None = _prompt_new_password('New vault password')
+    if new_password is None:
+        return 1
+    vault_mod.rewrap_vault(current, new_password)
+    if config['user_pass_file'].exists():
+        _write_user_pass(new_password)
+    console.print('[success]Vault password changed.[/success]')
     return 0
 
 

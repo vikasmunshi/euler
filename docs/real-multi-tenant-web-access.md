@@ -136,12 +136,23 @@ yours," not a file-permission fig leaf. Both `~/.euler/env` (Anthropic key, gh/o
 secrets) and `~/.euler/id` (the X25519 private key) are stored **encrypted**.
 
 **Envelope encryption (not direct password-encryption):**
-- A random per-user **vault key `VK`** encrypts the secrets.
-- `VK` is stored **wrapped** under `PK = KDF(password, salt)` — reusing the SRP salt —
-  in `~/.euler/vault`.
+- A random per-user **vault key `VK`** (32 bytes) encrypts the secrets (AES-256-GCM, a
+  random nonce per blob; a `VLT\x01` magic header distinguishes a vault-encrypted file
+  from a plaintext one at rest, so both forms load transparently).
+- `VK` is stored **wrapped** under `PK = PBKDF2-HMAC-SHA256(password, salt, 600 000)` —
+  reusing the SRP salt — in `~/.euler/vault` (which also records the salt and iteration
+  count, so the terminal path is self-contained).
 - Use: derive `PK` → unwrap `VK` → decrypt secrets. **Rotation (change-password)
   re-wraps only the small `VK` blob** with the new `PK`; the secrets are never
   re-encrypted. Cheap and standard.
+
+  *KDF choice — PBKDF2, not scrypt (resolved at build step 1).* PBKDF2-HMAC-SHA256 is
+  **WebCrypto-native**, so the browser derives the identical `PK` from the password it
+  already holds and the salt from the SRP challenge (MT-12) with no bundled KDF and no
+  extra round-trip; scrypt would need a shipped JS implementation. 600 000 rounds is the
+  OWASP floor for PBKDF2-SHA256. The cost is paid once per session (on the terminal path
+  the derived `VK` is cached to the tmpfs key file, §MT-12, so per-file git-filter
+  invocations never re-run the KDF).
 
 At rest the operator holds `{salt, verifier}` (auth), `wrap(PK,VK)`, and `VK`-encrypted
 secrets — and can decrypt **none** of it without the password. SRP already guarantees
@@ -165,6 +176,23 @@ comes from:
 - **Terminal:** `~/.euler/user_pass` (uid-private) holds the password; the shell derives
   `PK` from it at start. Weaker (password at rest) but it is the terminal-convenience
   path, and the terminal user is typically the operator on their own box.
+
+**Password change vs. reset — MT-6c.** These differ fundamentally:
+- **Change (current password known): the vault survives.** `change-password` re-wraps only
+  `VK` under the new `PK` (the secrets, encrypted under `VK`, are untouched) — cheap and
+  lossless. Built and tested in step 1.
+- **Reset (password forgotten): the vault does *not* survive — by design.** `VK` is
+  recoverable only from the password (operator-opaque, MT-6a); an SRP reset re-mints the
+  *login verifier* but shares nothing with the vault, so the new password's `PK` cannot
+  unwrap the old `VK`. The secrets are unrecoverable and must be **re-provisioned**:
+  `user --regen` (new keypair → admin re-`user-authorize`) + re-upload the Anthropic key.
+  This is a *feature*: a malicious operator cannot use reset as a covert vault backdoor —
+  a reset visibly destroys the vault (the user's keys stop working). **Build consequence
+  (step 5):** the web reset flow (`auth/pending.py`, `pages.py`) must *re-initialise* the
+  vault on reset (not leave a stale blob wrapped under the dead `PK`) and prompt
+  re-provisioning. A recovery-code escape hatch (a second independent `VK` wrap, like a
+  disk-encryption recovery key) is deliberately **not** adopted — it adds a second
+  `VK`-holder and weakens the opacity story for this trusted-invite tool.
 
 **The threat boundary, stated honestly (MT-6a).** The secrets are *used server-side*
 (the Anthropic key by `claude-api`, the private key by the git filter — both in the
@@ -282,9 +310,17 @@ changes:
 
 ## 13 · Build-plan sketch (subject to §14)
 
-1. **Per-user vault in `solver.crypto`** (MT-6): envelope `wrap(PK,VK)`; `load_private_key`
-   / `get_api_key` decrypt with a session `VK`; the `user_pass` terminal path; migration
-   of the operator's own `~/.euler`.
+1. **Per-user vault in `solver.crypto`** (MT-6) — **✅ built.** `solver/crypto/vault.py`:
+   envelope `wrap(PK,VK)` (PBKDF2 `PK`, AES-256-GCM secrets); `load_private_key`
+   (`ciphers.py`) and `get_api_key` (`ai/models.py`) transparently decrypt the vault form
+   with a session `VK`; `session_vault_key()`/`ensure_session_key()` deliver `VK` via the
+   uid-private tmpfs key file (`EULER_VAULT_KEY_FILE`), falling back to the `user_pass`
+   terminal path; the `vault` command (`keys.py`) does `status | init | change-password`,
+   `init` migrating the operator's own plaintext `~/.euler/id`+`env` in place. Tests in
+   `tests/test_vault.py` (18); the subprocess `VK` inheritance (the git-filter path) and the
+   `vault` CLI were driven end-to-end. **Follow-up for later steps:** `user --regen`
+   (`keys.py`) still writes the private key *plain* — once the vault is standard, regen must
+   re-encrypt under the session `VK`.
 2. **Per-user identity in `solver/auth`** (MT-3/MT-4): email → slug → uid/home; the web
    plane of `resolve_subject` resolves a *user*; drop the channel authorization axis (MT-10).
 3. **Provisioning kit** (MT-7): `users add` extension (uid, home, filter-disabled clone

@@ -58,6 +58,7 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.primitives.serialization import (Encoding, PublicFormat, load_pem_private_key)
 
 from solver.crypto.config import config
+from solver.crypto.vault import decrypt_secret, is_vault_encrypted, session_vault_key
 
 
 # ==================================================================================================================== #
@@ -70,20 +71,28 @@ def public_key_hex(public_key: X25519PublicKey) -> str:
 
 @lru_cache(maxsize=None)
 def load_private_key() -> X25519PrivateKey:
-    """Load the (plain, unencrypted) X25519 private key from disk (no interaction).
+    """Load the X25519 private key from disk (no interaction).
 
-    The key file is machine-local, `0600`, and outside the repo (`~/.euler/id`);
-    file permissions are its protection, so it carries no passphrase.
+    The key file is machine-local, `0600`, and outside the repo (`~/.euler/id`). It is stored either
+    plain (file permissions are its protection) or -- once a per-user vault is initialised -- encrypted
+    under the session vault key (`solver.crypto.vault`); this loader transparently decrypts the vault
+    form, so callers are unaffected.
 
     Raises:
         FileNotFoundError: If the private key file is missing.
-        ValueError:        If the key file is malformed.
+        ValueError:        If the key file is malformed, or is vault-encrypted while the vault is locked.
     Note: Used in solver.crypto.gitfilter; must not emit anything to stdout.
     """
     key_file: Path = config['private_key_file']
     if not key_file.exists():
         raise FileNotFoundError(f'private key {key_file} not found; run `solver user` to create one')
-    key = load_pem_private_key(key_file.read_bytes(), password=None)
+    raw: bytes = key_file.read_bytes()
+    if is_vault_encrypted(raw):
+        vault_key: bytes | None = session_vault_key()
+        if vault_key is None:
+            raise ValueError(f'{key_file} is vault-encrypted but the vault is locked; unlock it first')
+        raw = decrypt_secret(vault_key, raw)
+    key = load_pem_private_key(raw, password=None)
     if not isinstance(key, X25519PrivateKey):
         raise ValueError(f'{key_file} does not contain an X25519 private key')
     return key

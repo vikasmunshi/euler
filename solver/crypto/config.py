@@ -31,6 +31,12 @@ class CryptoConfig(TypedDict):
     private_key_file: Path  # plain (unencrypted) X25519 private key (PKCS8 PEM)
     enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
     private_key_backups: int  # rolling backups kept of the private key file
+    # per-user vault (envelope encryption of the private key + env; MT-6)
+    vault_file: Path  # {salt, iterations, wrapped_vk}: the vault key wrapped under the password key
+    user_pass_file: Path  # terminal-only: the password, to derive the password key off-line
+    vault_magic: bytes  # header marking a file as vault-encrypted (vs. plaintext at rest)
+    vault_kdf_iterations: int  # PBKDF2-HMAC-SHA256 rounds deriving the password key from the password
+    vault_key_env: str  # env var naming the uid-private tmpfs file that holds the session vault key
     # git-filter wire format
     magic: bytes
     nonce_len: int
@@ -80,6 +86,7 @@ _SECRETS_DIR: Path = _ROOT.parent / f'.{_ROOT.name}'
 _MAGIC: bytes = b'SLVR\x01'  # 4-byte tag + 1-byte format version
 _NONCE_LEN: int = 12
 _FILTER_NAME: str = 'solver-crypt'  # git filter driver name (.gitattributes / git config)
+_VAULT_MAGIC: bytes = b'VLT\x01'  # 3-byte tag + 1-byte format version; marks a vault-encrypted secret
 
 #: All crypto configuration -- file locations and git-filter wire-format constants -- in one place.
 config: CryptoConfig = {
@@ -88,6 +95,13 @@ config: CryptoConfig = {
     'private_key_file': _SECRETS_DIR / 'id',  # plain (unencrypted) X25519 private key (PKCS8 PEM)
     'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
     'private_key_backups': 5,  # rolling backups kept of the private key file
+    # per-user vault (MT-6): both `id` and `env` live encrypted under a random vault key, itself
+    # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.
+    'vault_file': _SECRETS_DIR / 'vault',  # {salt, iterations, wrapped_vk}
+    'user_pass_file': _SECRETS_DIR / 'user_pass',  # terminal-only password, to derive the key off-line
+    'vault_magic': _VAULT_MAGIC,
+    'vault_kdf_iterations': 600_000,  # PBKDF2-HMAC-SHA256; WebCrypto-native so a browser can derive the same key
+    'vault_key_env': 'EULER_VAULT_KEY_FILE',
     # git-filter wire format
     'magic': _MAGIC,
     'nonce_len': _NONCE_LEN,
