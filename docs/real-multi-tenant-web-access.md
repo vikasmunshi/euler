@@ -147,13 +147,21 @@ At rest the operator holds `{salt, verifier}` (auth), `wrap(PK,VK)`, and `VK`-en
 secrets — and can decrypt **none** of it without the password. SRP already guarantees
 the password never reaches the server; `PK` is derived only where the password is known.
 
-**Key delivery:**
+**Key delivery (MT-12, resolved).** The crypto that needs `VK` — `load_private_key`
+and the git clean/smudge filter — runs as **subprocesses** (git spawns the filter per
+file), so `VK` must be reachable by the user's child processes, not just the interactive
+shell. Resolved as: `VK` lives in a **uid-private tmpfs file** (`0600`, e.g.
+`$XDG_RUNTIME_DIR/euler/vk` or `/run/euler/vk-<slug>`), written at session start and
+removed at session end; only its **path** is exported (`EULER_VAULT_KEY_FILE`), inherited
+by subprocesses so the git filter finds it. The key itself is never in any process's
+environment (so not in `ps e`, core dumps, or every child's `/proc/environ`) — only in
+the tmpfs file and, transiently, in the memory of the code that decrypts. Where `VK`
+comes from:
 - **Web:** the browser derives `PK` at login (it has the password; the salt arrives in
   the SRP challenge — no extra round-trip) and passes it to the user's own service at
-  shell-attach; the service unwraps `VK`, holds it in **session memory only**, and
-  decrypts on demand. `PK`/`VK` never touch server disk. (The auth service *cannot*
-  derive `PK` — it never sees the password — which is precisely what keeps the vault
-  operator-opaque at rest.)
+  shell-attach; the service unwraps `VK` and writes the tmpfs file. `PK`/`VK` never
+  touch server disk. (The auth service *cannot* derive `PK` — it never sees the
+  password — which is precisely what keeps the vault operator-opaque at rest.)
 - **Terminal:** `~/.euler/user_pass` (uid-private) holds the password; the shell derives
   `PK` from it at start. Weaker (password at rest) but it is the terminal-convenience
   path, and the terminal user is typically the operator on their own box.
@@ -247,6 +255,13 @@ changes:
     web-reachable; containment is the profile grant + SRP + isolation, not the channel.
   - **AR-(vault, MT-6a):** the vault is at-rest opacity only — a malicious active root
     can read a live session's memory; unavoidable when secrets are used server-side.
+  - **AR-(eval, MT-6b):** `eval`/`benchmark` run untrusted *solution* code **as the
+    user**, in the same uid that holds the vault — so a malicious solution can read the
+    running user's own `VK`, Anthropic key, and (if authorized) master key. Blast radius
+    is **the user themselves** (not other users — different uids), which is the normal
+    property of any shell that runs untrusted code as you; egress is still Squid-gated.
+    Sandboxing `eval` in a lower-privilege sub-uid / namespace is the future hardening
+    (the same one AR-1 already defers).
 - **Unchanged:** a collaborator's login is host code execution *as their own contained
   uid* (AR-1, now better bounded — their own sandbox, their own egress via Squid).
 
@@ -286,19 +301,35 @@ changes:
 `make uninstall-web` before the multi-tenant stack is installed; current web accounts
 are recreated, not migrated (§14.5).
 
-## 14 · Open items (mechanics to confirm at build time)
+## 14 · Mechanics — resolved (verified against real tooling)
 
-1. **Caddy per-user routing** — a dynamic upstream `unix//run/euler/user-{X-User-Slug}.sock`
-   from the `forward_auth` header, vs. `forward_auth` returning the socket path outright.
-   Needs verifying against Caddy's placeholder/dynamic-upstream support.
-2. **`VK` process delivery** — env var vs. memfd vs. an inherited fd at fork; scoped so
-   it does not leak into unrelated child processes.
-3. **Disk & scale** — clone object-store sharing (per-user clone with read-only
-   `--reference` alternates) to bound disk for the invite list; confirm the ceiling.
-4. **Slug scheme** — reuse `solver/auth.slugify` (email → fs-safe slug + hash); confirm
-   uid-name length limits.
-5. ~~Migration~~ — **none.** The current per-profile deployment is torn down with a
-   clean `make uninstall-web` and the multi-tenant stack installed fresh; existing web
-   accounts are **not** migrated — they are recreated under the new provisioning (§8).
-   Only the operator's own local `~/.euler` needs the one-time vault migration (MT-6,
-   build step 1). This is a hard reset, not an in-place upgrade.
+1. **Caddy per-user routing (MT-11) — verified.** A single Caddyfile routes to
+   `reverse_proxy unix//run/euler/user-{http.request.header.X-User-Slug}.sock`, with
+   `request_header -X-User-Slug` stripping any client copy and `forward_auth …
+   copy_headers X-User-Slug` supplying the trusted value. Tested against Caddy **2.11.4**
+   (the deployed version): a session routes to *its* user's socket, the **WebSocket
+   upgrade survives** the placeholder upstream, a **forged `X-User-Slug` is stripped**
+   (a user cannot reach another's socket), and no session → 401. No dynamic-upstream
+   module needed — a request-header placeholder in the dial address suffices.
+2. **`VK` delivery (MT-12) — resolved & verified.** Uid-private tmpfs file + inherited
+   `EULER_VAULT_KEY_FILE` path (§7). Verified that a git clean/smudge **filter subprocess
+   inherits** the delivery env from the shell → git → filter, so the filter can reach
+   `VK` at checkout time.
+3. **Disk & scale (MT-13) — verified.** Per-user `git clone --reference <shared-mirror>`
+   points `objects/info/alternates` at a **shared read-only object store** (ciphertext
+   blobs shared once); each user's clone carries only its own new commits, and the smudge
+   runs **per-clone with that user's key** → plaintext only in their worktree. Confirmed:
+   the reference clone shares objects and checks out plaintext with the key in the tmpfs
+   file. Provisioning maintains one shared bare mirror refreshed from `origin/master`.
+4. **Slug scheme (MT-14) — decided.** `solver/auth.slugify` emits `.` (e.g.
+   `mercanther_gmail.com-3f9e97`), which **fails `useradd`'s `NAME_REGEX`**
+   (`[a-zA-Z0-9_-]` only). The multi-tenant **system slug** is therefore a stricter
+   derivation — `[a-z0-9-]`, letter-start, a sanitized+truncated local-part plus a short
+   hash suffix, bounded so `euler-user-<slug>` stays well under the name limit (e.g.
+   `euler-user-mercanther-3f9e97`, 27 chars). The email stays the login identity; the
+   slug is the derived system identity used for the uid, home, socket, and `X-User-Slug`.
+
+**Migration — none.** The per-profile deployment is torn down with `make uninstall-web`
+and the multi-tenant stack installed fresh; existing web accounts are **recreated**, not
+migrated (§8). Only the operator's own local `~/.euler` needs the one-time vault
+migration (MT-6, build step 1). A hard reset, not an in-place upgrade.
