@@ -248,6 +248,7 @@ command name below links to its full entry — usage and description — in the
 | [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](commands-index.md#command-users) | — | List / administer accounts (list is read-only; changes need admin + sudo). |
+| [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | change-password. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-table -->

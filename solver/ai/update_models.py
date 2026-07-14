@@ -203,7 +203,7 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
     ])
 
 
-@register(requires=('infra:execute',), channels=('terminal',),
+@register(requires=('infra:execute',),
           help_text='Update Model enum, pricing, and USD→EUR rate.',
           quietable=True)
 def update_models(check: bool = False) -> int:

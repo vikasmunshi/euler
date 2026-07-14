@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -13,6 +14,7 @@ from unittest import mock
 
 from solver.auth import Authorizations, Subject, resolve_subject
 from solver.auth.authorizations import AUTHZ_FILE_ENV
+from solver.auth.identity import system_slug
 
 _POLICY = {
     'profiles': {
@@ -147,6 +149,36 @@ class ResolveSubjectTest(unittest.TestCase):
         with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'admin')):
             subj = self._resolve(SOLVER_TICKET='t', EULER_PROFILE='maintainer')
         self.assertEqual(subj.profile, 'maintainer')
+
+
+class SystemSlugTest(unittest.TestCase):
+    """The MT-14 system slug: a ``useradd``-safe name derived from an e-mail identity."""
+
+    #: ``useradd`` NAME_REGEX: start with a letter/underscore, then [a-z0-9_-]; we emit no '_'.
+    _USERADD_SAFE = re.compile(r'^[a-z][a-z0-9-]*$')
+
+    def test_slug_is_useradd_safe(self) -> None:
+        for email in ('MercAnther@gmail.com', 'a.b+tag@x.co', '123@host', 'x@y.z',
+                      'UPPER.CASE@EXAMPLE.COM', 'weird!!name@d.com', '@leading', '_under@d.com'):
+            slug = system_slug(email)
+            self.assertRegex(slug, self._USERADD_SAFE, f'{email!r} → {slug!r} not useradd-safe')
+            self.assertLess(len(f'euler-user-{slug}'), 32, f'{slug!r} too long for a system name')
+
+    def test_slug_has_no_dot(self) -> None:
+        # The bug that motivated MT-14: slugify emitted '.', which useradd rejects.
+        self.assertNotIn('.', system_slug('merc.anther@gmail.com'))
+
+    def test_slug_is_stable_and_case_insensitive(self) -> None:
+        self.assertEqual(system_slug('Alice@Example.com'), system_slug('  alice@example.COM '))
+
+    def test_distinct_emails_do_not_collide(self) -> None:
+        # Same sanitised local-part, different domains → the hash keeps them apart.
+        a, b = system_slug('sam@one.com'), system_slug('sam@two.com')
+        self.assertNotEqual(a, b)
+        self.assertTrue(a.startswith('sam-') and b.startswith('sam-'))
+
+    def test_digit_leading_localpart_gets_a_letter_prefix(self) -> None:
+        self.assertTrue(system_slug('42@host.com').startswith('u42-'))
 
 
 if __name__ == '__main__':

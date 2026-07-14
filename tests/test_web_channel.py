@@ -1,15 +1,15 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The per-rung web-shell command set (Phase 6 step 2, DD-11/DD-13).
+"""The per-rung web-shell command set (Phase 6 step 2; MT-10 profile-only authorization).
 
-The web terminal is the **full** solver shell; what a rung may run is decided by
-the DD-12 decorator (``requires`` ⊆ the subject's permissions, and the command's
-``channels``) — not by a curated list. This suite is the snapshot of that
-decision: it loads every command module (so the registry holds the whole
-catalogue, this process being the checkout owner → ``admin``/terminal) and then
-asks, for each web rung, which commands *would* register.
+The web terminal is the **full** solver shell; what a rung may run is decided **solely** by
+the DD-12 decorator's ``requires`` ⊆ the subject's permissions — not by a curated list, and
+(since MT-10) not by any channel axis. This suite is the snapshot of that decision: it loads
+every command module (so the registry holds the whole catalogue, this process being the
+checkout owner → ``admin``/terminal) and then asks, for each rung, which commands *would*
+register.
 
-The invariants it pins (DD-13):
+The invariants it pins:
 
 - ``reader`` gets a terminal, but a **read-only** one — no ``eval``/``benchmark``
   (``solutions:execute``), no ``edit``/``new`` (``solutions:write``).
@@ -21,8 +21,9 @@ The invariants it pins (DD-13):
   to ``maintainer`` deliberately (e.g. to evaluate the surface with themselves the
   only maintainer), and the test verifies the decorator honours whatever the policy
   says rather than hardcoding one rung — so it holds under both.
-- ``show``/``edit`` are back on the web channel (their OSC bridge drives the app
-  shell's left pane, Phase 6 step 2).
+- infra (``infra:execute``) and roster mutation (``users:write``) reach **no** web rung —
+  now guarded by the ladder grant alone, the channel gate having been the redundant backstop
+  that MT-10 removes.
 """
 from __future__ import annotations
 
@@ -49,12 +50,12 @@ _NO_ESCAPE_RUNGS = ('reader', 'contributor')
 
 
 def _visible(profile: str, channel: str = 'web') -> set[str]:
-    """The commands that would register for *profile* on *channel* (DD-12)."""
+    """The commands that would register for *profile* (DD-12). The channel is informational only
+    (MT-10) — it does not affect what registers — so visibility is a pure ``requires`` query."""
     subject = Subject(user='t', slug='t-000000', channel=channel, auth_method='test',
                       profile=profile, permissions=_AUTHZ.permissions_for(profile))
     return {cmd.name for cmd in registry.all()
-            if channel in cmd.channels
-            and subject.has_all(effective_requires(cmd.requires))}
+            if subject.has_all(effective_requires(cmd.requires))}
 
 
 class WebChannelCommandSetTest(unittest.TestCase):
@@ -119,20 +120,23 @@ class WebChannelCommandSetTest(unittest.TestCase):
             self.assertFalse(infra & self.web[rung],
                              f'{rung} must not see infra commands: {sorted(infra & self.web[rung])}')
 
-    def test_show_and_edit_are_on_the_web_channel(self) -> None:
-        """Step 2: the OSC 5379 bridge drives the app shell's left pane, so the
-        viewer commands are no longer terminal-only."""
-        for name in ('show', 'edit'):
-            cmd = registry.resolve(name)
-            assert cmd is not None
-            self.assertIn('web', cmd.channels, f'{name} must register in a web shell')
+    def test_show_and_edit_are_available_to_the_right_rungs(self) -> None:
+        """The OSC 5379 bridge drives the app shell's left pane over web, so the viewer commands
+        run there gated only by their grants: show (solutions:read) reaches a reader, edit
+        (solutions:write) a contributor and not a reader."""
+        self.assertIn('show', self.web['reader'])
+        self.assertIn('edit', self.web['contributor'])
+        self.assertNotIn('edit', self.web['reader'])
 
-    def test_terminal_only_commands_stay_off_the_web(self) -> None:
-        """A command declaring channels=('terminal',) never registers in a web shell,
-        whatever the profile — the channel axis is orthogonal to permissions (DD-12)."""
-        terminal_only = {cmd.name for cmd in registry.all() if cmd.channels == ('terminal',)}
-        for rung in _WEB_RUNGS:
-            self.assertFalse(terminal_only & self.web[rung])
+    def test_formerly_terminal_only_commands_are_now_profile_gated(self) -> None:
+        """MT-10: the commands that were ``channels=('terminal',)`` are gated purely by
+        ``requires`` now. The infra ones (``update-models``/``update-docs``, ``infra:execute``)
+        reach no web rung; ``users`` (``users:read``) does register for members, but its listing
+        is self-scoped in the command (MT-10b), so it discloses no roster."""
+        for infra_cmd in ('update-models', 'update-docs'):
+            for rung in _WEB_RUNGS:
+                self.assertNotIn(infra_cmd, self.web[rung], f'{infra_cmd} must not reach {rung}')
+        self.assertIn('users', self.web['reader'])          # visible (users:read), but self-scoped
 
 
 if __name__ == '__main__':

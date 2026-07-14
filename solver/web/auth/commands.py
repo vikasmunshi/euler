@@ -4,19 +4,22 @@
 
 Two paths behind one command:
 
-- **`users list`** needs only ``users:read`` (a ``reader`` grant). It reads the
-  world-readable ``authorizations.json`` roster **directly** — no sudo — and prints
-  every identity (web email + local OS login) with its profile. An operator holding
-  ``users:write`` (admin) additionally gets the full listing (registration state +
-  pending invites) via the sudo admin plane.
+- **`users list`** needs only ``users:read`` (a ``reader`` grant). A non-admin sees only
+  **their own** entry, read directly from the world-readable ``authorizations.json`` — no
+  sudo (``users:read`` is sight of your own account, not the roster; MT-10b, since the channel
+  axis that used to keep this off the web is gone). An operator holding ``users:write`` (admin)
+  gets the **full** listing (every identity + registration state + pending invites) via the
+  sudo admin plane.
 - **mutations** (`add` / `change` / `enable` / `disable` / `remove`) need
   ``users:write`` (admin) and re-execute the admin CLI (:mod:`solver.web.auth.admin`)
   under ``sudo`` — which writes the root-owned SoR and reaches the euler-auth admin
   socket. The command is registered for ``users:read``; the write verbs are gated at
   **runtime** against the subject's permissions.
 
-Local-terminal only (`channels=('terminal',)`, DD-6): the admin plane is never routed
-through Caddy and a web shell cannot sudo.
+No longer channel-gated (MT-10 drops the channel axis): the write verbs' real containment is
+that they reach the root-owned SoR and the euler-auth **admin socket** only under ``sudo``, which
+a web shell (a per-user, non-privileged uid) cannot obtain — so `list` may run anywhere but a
+mutation attempted over the web fails at the socket, not at a channel check.
 
 `add` is two-path: an ``@``-address mints a web invite (the account record appears when
 the invitee registers); a bare os-login is a direct map entry (no invite). Password
@@ -35,11 +38,19 @@ from solver.config import config
 from solver.shell import console, register
 
 
-def _print_roster() -> int:
-    """Non-sudo roster from the world-readable authorizations.json (``users:read``)."""
+def _print_roster(only: str | None = None) -> int:
+    """Non-sudo roster from the world-readable authorizations.json (``users:read``).
+
+    When *only* is given (a non-admin caller), the listing is **scoped to that identity's own
+    entry** — ``users:read`` grants a member sight of their own account, not the whole roster
+    (MT-10b). The full roster is an admin (``users:write``) view.
+    """
     users = Authorizations.load().all_users()
+    if only is not None:
+        key = only.strip().lower()
+        users = {k: v for k, v in users.items() if k == key}
     if not users:
-        console.print('[muted]no users mapped[/muted]')
+        console.print('[muted]no users mapped[/muted]' if only is None else '[muted]no account entry[/muted]')
         return 0
     for name, profile in sorted(users.items()):
         scope = 'web' if '@' in name else 'local'
@@ -59,7 +70,7 @@ def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
         return 1
 
 
-@register(requires=('users:read',), channels=('terminal',),
+@register(requires=('users:read',),
           help_text='List / administer accounts (list is read-only; changes need admin + sudo).')
 def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'] = 'list',
           identity: str = '', profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
@@ -77,9 +88,9 @@ def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'
                   local os-login, never a web account.
     """
     if action == 'list':
-        # Admins get the full sudo listing (SRP state + pending); everyone else the
-        # non-sudo roster from the world-readable map.
-        return _sudo_admin('list') if config.subject.has('users:write') else _print_roster()
+        # Admins get the full sudo listing (SRP state + pending); a non-admin sees only their
+        # own entry (users:read = read your own account, not the roster — MT-10b).
+        return _sudo_admin('list') if config.subject.has('users:write') else _print_roster(config.subject.user)
 
     if not config.subject.has('users:write'):
         console.print('[error]error:[/error] this action needs the [accent]users:write[/accent] '

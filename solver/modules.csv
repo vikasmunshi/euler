@@ -22,6 +22,7 @@ solver.crypto.ciphers,
 solver.crypto.config,
 solver.crypto.gitfilter,
 solver.crypto.keys,True
+solver.crypto.vault,
 solver.main,
 solver.runners.runner,
 solver.shell.bash,True

@@ -24,7 +24,6 @@ profile on each channel.
 
 - **Module** — the Python module the command is defined in.
 - **Command** — the registered command name.
-- **Channels** — where the command is reachable (`terminal` / `web`).
 - **Requires** — the `object:permission` grants the command declares. A command
   that declares nothing is fail-closed to `infra:execute` (admin-only).
 - **Least profile** — the least-privileged profile whose expanded permissions
@@ -33,45 +32,46 @@ profile on each channel.
 ## Command authorization
 
 <!-- GEN:authorization-table -->
-| Module | Command | Channels | Requires | Least profile |
-|--------|---------|----------|----------|---------------|
-| `solver.ai.api` | `claude-api` | terminal, web | `ai:execute` | `maintainer` |
-| `solver.ai.models` | `costs` | terminal, web | `solver:execute` | `reader` |
-| `solver.ai.skill` | `euler-solve` | terminal, web | `ai:execute` | `maintainer` |
-| `solver.ai.update_models` | `update-models` | terminal | `infra:execute` | `admin` |
-| `solver.core.evaluate` | `benchmark` | terminal, web | `solutions:execute` | `contributor` |
-| `solver.core.evaluate` | `compile-c` | terminal, web | `solutions:execute` | `contributor` |
-| `solver.core.evaluate` | `evaluate` | terminal, web | `solutions:execute` | `contributor` |
-| `solver.core.list` | `ls` | terminal, web | `solutions:read` | `reader` |
-| `solver.core.new` | `new` | terminal, web | `solutions:write` | `contributor` |
-| `solver.core.results` | `results` | terminal, web | `solutions:read` | `reader` |
-| `solver.core.test_cases` | `test-cases` | terminal, web | `solutions:read` | `reader` |
-| `solver.core.viewer` | `edit` | terminal, web | `solutions:write` | `contributor` |
-| `solver.core.viewer` | `show` | terminal, web | `solutions:read` | `reader` |
-| `solver.crypto.keys` | `key-reconstruct` | terminal, web | `infra:execute` | `admin` |
-| `solver.crypto.keys` | `key-rekey` | terminal, web | `infra:execute` | `admin` |
-| `solver.crypto.keys` | `key-split` | terminal, web | `infra:execute` | `admin` |
-| `solver.crypto.keys` | `user` | terminal, web | `infra:execute` | `admin` |
-| `solver.crypto.keys` | `user-authorize` | terminal, web | `infra:execute` | `admin` |
-| `solver.shell.bash` | `!` | terminal, web | `shell:execute` | `maintainer` |
-| `solver.shell.builtins` | `?` | terminal, web | `solver:execute` | `reader` |
-| `solver.shell.builtins` | `clear` | terminal, web | `solver:execute` | `reader` |
-| `solver.shell.builtins` | `echo` | terminal, web | `solver:execute` | `reader` |
-| `solver.utils.linter` | `lint` | terminal, web | `solutions:write` | `contributor` |
-| `solver.utils.misc` | `manage-config` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.misc` | `problems` | terminal, web | `solutions:read` | `reader` |
-| `solver.utils.scripts` | `git-commit` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.scripts` | `git-hooks` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.scripts` | `git-publish` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.scripts` | `git-status` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.scripts` | `git-sync` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.scripts` | `pip-upgrade` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.scripts` | `sys-setup` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.search` | `search` | terminal, web | `solutions:read` | `reader` |
-| `solver.utils.shell_utils` | `pause` | terminal, web | `solver:execute` | `reader` |
-| `solver.utils.summary` | `mark` | terminal, web | `solutions:execute` | `contributor` |
-| `solver.utils.summary` | `progress` | terminal, web | `solutions:read` | `reader` |
-| `solver.utils.summary` | `summary` | terminal, web | `infra:execute` | `admin` |
-| `solver.utils.update_doc` | `update-docs` | terminal | `infra:execute` | `admin` |
-| `solver.web.auth.commands` | `users` | terminal | `users:read` | `reader` |
+| Module | Command | Requires | Least profile |
+|--------|---------|----------|---------------|
+| `solver.ai.api` | `claude-api` | `ai:execute` | `maintainer` |
+| `solver.ai.models` | `costs` | `solver:execute` | `reader` |
+| `solver.ai.skill` | `euler-solve` | `ai:execute` | `maintainer` |
+| `solver.ai.update_models` | `update-models` | `infra:execute` | `admin` |
+| `solver.core.evaluate` | `benchmark` | `solutions:execute` | `contributor` |
+| `solver.core.evaluate` | `compile-c` | `solutions:execute` | `contributor` |
+| `solver.core.evaluate` | `evaluate` | `solutions:execute` | `contributor` |
+| `solver.core.list` | `ls` | `solutions:read` | `reader` |
+| `solver.core.new` | `new` | `solutions:write` | `contributor` |
+| `solver.core.results` | `results` | `solutions:read` | `reader` |
+| `solver.core.test_cases` | `test-cases` | `solutions:read` | `reader` |
+| `solver.core.viewer` | `edit` | `solutions:write` | `contributor` |
+| `solver.core.viewer` | `show` | `solutions:read` | `reader` |
+| `solver.crypto.keys` | `key-reconstruct` | `infra:execute` | `admin` |
+| `solver.crypto.keys` | `key-rekey` | `infra:execute` | `admin` |
+| `solver.crypto.keys` | `key-split` | `infra:execute` | `admin` |
+| `solver.crypto.keys` | `user` | `infra:execute` | `admin` |
+| `solver.crypto.keys` | `user-authorize` | `infra:execute` | `admin` |
+| `solver.crypto.keys` | `vault` | `infra:execute` | `admin` |
+| `solver.shell.bash` | `!` | `shell:execute` | `maintainer` |
+| `solver.shell.builtins` | `?` | `solver:execute` | `reader` |
+| `solver.shell.builtins` | `clear` | `solver:execute` | `reader` |
+| `solver.shell.builtins` | `echo` | `solver:execute` | `reader` |
+| `solver.utils.linter` | `lint` | `solutions:write` | `contributor` |
+| `solver.utils.misc` | `manage-config` | `infra:execute` | `admin` |
+| `solver.utils.misc` | `problems` | `solutions:read` | `reader` |
+| `solver.utils.scripts` | `git-commit` | `infra:execute` | `admin` |
+| `solver.utils.scripts` | `git-hooks` | `infra:execute` | `admin` |
+| `solver.utils.scripts` | `git-publish` | `infra:execute` | `admin` |
+| `solver.utils.scripts` | `git-status` | `infra:execute` | `admin` |
+| `solver.utils.scripts` | `git-sync` | `infra:execute` | `admin` |
+| `solver.utils.scripts` | `pip-upgrade` | `infra:execute` | `admin` |
+| `solver.utils.scripts` | `sys-setup` | `infra:execute` | `admin` |
+| `solver.utils.search` | `search` | `solutions:read` | `reader` |
+| `solver.utils.shell_utils` | `pause` | `solver:execute` | `reader` |
+| `solver.utils.summary` | `mark` | `solutions:execute` | `contributor` |
+| `solver.utils.summary` | `progress` | `solutions:read` | `reader` |
+| `solver.utils.summary` | `summary` | `infra:execute` | `admin` |
+| `solver.utils.update_doc` | `update-docs` | `infra:execute` | `admin` |
+| `solver.web.auth.commands` | `users` | `users:read` | `reader` |
 <!-- /GEN:authorization-table -->

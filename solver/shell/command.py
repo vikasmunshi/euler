@@ -30,12 +30,13 @@ def effective_requires(requires: tuple[str, ...]) -> tuple[str, ...]:
     return requires or (FAILCLOSED_PERMISSION,)
 
 
-def is_permitted(requires: tuple[str, ...], channels: tuple[str, ...]) -> bool:
-    """True if the current process's :class:`~solver.auth.Subject` may run a command
-    with these *requires* / *channels* — i.e. its channel is allowed **and** it holds
-    every required ``object:permission`` (DD-12). One process serves one subject."""
-    subject = config.subject
-    return subject.channel in channels and subject.has_all(effective_requires(requires))
+def is_permitted(requires: tuple[str, ...]) -> bool:
+    """True if the current process's :class:`~solver.auth.Subject` may run a command with these
+    *requires* — i.e. it holds every required ``object:permission`` (DD-12). Authorization is by
+    profile only; the channel (terminal vs web) is **not** an authorization axis (MT-10) — a user's
+    web shell is bash in their own per-user sandbox, no different from their terminal. One process
+    serves one subject."""
+    return config.subject.has_all(effective_requires(requires))
 
 
 @dataclass
@@ -70,8 +71,6 @@ class Command:
     #: The ``object:permission`` grants this command needs (DD-12). Empty ⇒ the
     #: fail-closed default (admin-only); stored expanded so it is never empty.
     requires: tuple[str, ...] = ()
-    #: The channels this command is valid in (``terminal``/``web``).
-    channels: tuple[str, ...] = ('terminal', 'web')
 
     def invoke(self, ctx: Context) -> int:
         """Call the command's function with *ctx* and the parsed argv, returning its exit code."""
@@ -135,21 +134,20 @@ def command(
         aliases: tuple[str, ...] = (),
         completer: Callable[[Context, str], Iterable[str | Completion]] | None = None,
         requires: tuple[str, ...] = (),
-        channels: tuple[str, ...] = ('terminal', 'web'),
 ) -> Callable[[CommandFn], CommandFn]:
     """Decorator that registers *func* as a shell command (returned unchanged).
 
-    ``requires`` is the ``object:permission`` grants the command needs and
-    ``channels`` the channels it is valid in (DD-12); an empty ``requires`` is
-    fail-closed to admin-only. The command registers only if the current subject's
-    channel is allowed and it holds every required permission — otherwise it is
-    left unregistered (invisible to help/completion, "unknown command" if invoked),
-    while the function is returned unchanged so it stays a plain Python callable.
+    ``requires`` is the ``object:permission`` grants the command needs (DD-12); an empty
+    ``requires`` is fail-closed to admin-only. The command registers only if the current subject
+    holds every required permission — otherwise it is left unregistered (invisible to
+    help/completion, "unknown command" if invoked), while the function is returned unchanged so it
+    stays a plain Python callable. Authorization is by profile only; the channel is not an axis
+    (MT-10).
     """
 
     def _decorate(func: CommandFn) -> CommandFn:
         cmd_name = name or func.__name__.lstrip('_').replace('_', '-')
-        if not is_permitted(requires, channels):
+        if not is_permitted(requires):
             return func
         cmd_help = help_text
         if not cmd_help and func.__doc__:
@@ -162,7 +160,6 @@ def command(
             aliases=tuple(aliases),
             completer=completer,
             requires=effective_requires(requires),
-            channels=tuple(channels),
         ))
         return func
 

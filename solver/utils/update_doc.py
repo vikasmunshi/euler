@@ -135,14 +135,13 @@ def _docstring(cmd: Command) -> str:
 
 
 def _availability(cmd: Command) -> str:
-    """A one-line `channels: … · profiles: …` availability note for *cmd*.
+    """A one-line `profiles: …` availability note for *cmd*.
 
-    Both come from the command's own declaration (DD-12): ``channels`` verbatim,
-    and the profiles whose permissions satisfy its ``requires`` (fail-closed to
-    admin when a command declares nothing).
+    The profiles whose permissions satisfy the command's ``requires`` (fail-closed
+    to admin when a command declares nothing). Authorization is by profile only —
+    the channel is not an axis (MT-10).
     """
-    chans = ', '.join(cmd.channels) or 'none'
-    return f'* channels: {chans} · profiles: {", ".join(_allowed_profiles(cmd))}'
+    return f'* profiles: {", ".join(_allowed_profiles(cmd))}'
 
 
 def _command_table(link_prefix: str) -> str:
@@ -193,16 +192,16 @@ def gen_command_index() -> str:
 
 
 def gen_authorization_table() -> str:
-    """The authorization audit table: one row per command with its module, channels,
-    required ``object:permission`` grants, and the least-privileged profile that
-    satisfies them. Rows are grouped by module, then command (DD-12).
+    """The authorization audit table: one row per command with its module, required
+    ``object:permission`` grants, and the least-privileged profile that satisfies
+    them. Rows are grouped by module, then command (DD-12). Authorization is by
+    profile only — the channel is not an axis (MT-10).
     """
-    rows = ['| Module | Command | Channels | Requires | Least profile |',
-            '|--------|---------|----------|----------|---------------|']
+    rows = ['| Module | Command | Requires | Least profile |',
+            '|--------|---------|----------|---------------|']
     for cmd in sorted(registry.all(), key=lambda c: (_module_of(c), c.name)):
-        channels = ', '.join(cmd.channels) or '—'
         requires = ', '.join(f'`{r}`' for r in cmd.requires) or '—'
-        rows.append(f'| `{_module_of(cmd)}` | `{cmd.name}` | {channels} | {requires} | '
+        rows.append(f'| `{_module_of(cmd)}` | `{cmd.name}` | {requires} | '
                     f'`{_least_profile(cmd)}` |')
     return '\n'.join(rows)
 
@@ -329,7 +328,7 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
     return updated, stale
 
 
-@register(requires=('infra:execute',), channels=('terminal',),
+@register(requires=('infra:execute',),
           help_text='Regenerate the generated sections of the docs/ guides.', pass_ctx=True, quietable=True)
 def update_docs(ctx: Context, check: bool = False) -> int:
     """Rebuild the registry-generated blocks in the `docs/` guides and the README.

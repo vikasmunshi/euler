@@ -13,12 +13,12 @@ or usage.
 
 ## Legend
 
-Each command entry opens with an **availability** line —
-`channels: … · profiles: …`. *Channels* (`terminal` / `web`) are the channels the
-command declares (`@register(channels=…)`); *profiles* are those whose permissions
-satisfy the command's `requires=` grants under `authorizations.json` — reported from
-the live registry (see the generated [`authorizations.md`](authorizations.md) audit
-table). A command that declares no `requires` is fail-closed to `admin`. See the
+Each command entry opens with an **availability** line — `profiles: …`. *Profiles*
+are those whose permissions satisfy the command's `requires=` grants under
+`authorizations.json` — reported from the live registry (see the generated
+[`authorizations.md`](authorizations.md) audit table). Authorization is by profile
+only; the channel (terminal / web) is not an axis (MT-10). A command that declares no
+`requires` is fail-closed to `admin`. See the
 [access-control guide](access-control.md) for the RBAC model (DD-12).
 
 A command's *flags* line lists the behaviours marked by these glyphs (the same
@@ -85,6 +85,7 @@ a parameter that accepts repetition.
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](#command-users) | — | List / administer accounts (list is read-only; changes need admin + sudo). |
+| [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | change-password. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -97,7 +98,7 @@ a parameter that accepts repetition.
 #### Command: `!` (`sh`, `bash`)
 
 Run a bash command.
-* channels: terminal, web · profiles: admin, maintainer
+* profiles: admin, maintainer
 
 ```
 ! <command> [args]...
@@ -128,7 +129,7 @@ Aliased as `sh` and `bash`, so `sh <command>` is shorthand for `! <command>`.
 #### Command: `?` (`help`)
 
 List commands or show help for a specific command.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 ? [command]
@@ -154,7 +155,7 @@ Aliased as `help`.
 #### Command: `benchmark`
 
 Benchmark solutions to given/current problem.
-* channels: terminal, web · profiles: admin, maintainer, contributor
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -225,7 +226,7 @@ Args:
 #### Command: `claude-api`
 
 Generate specified target using Claude API.
-* channels: terminal, web · profiles: admin, maintainer
+* profiles: admin, maintainer
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -255,7 +256,7 @@ Prints the USD/EUR cost of the call and returns non-zero if the generator report
 #### Command: `clear` (`cls`)
 
 Clear the screen.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 clear
@@ -273,7 +274,7 @@ A convenience wrapper over the console's clear; equivalent to the shell
 #### Command: `compile-c` (`compile`)
 
 Build all C source files for given/current problem.
-* channels: terminal, web · profiles: admin, maintainer, contributor
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -302,7 +303,7 @@ Args:
 #### Command: `costs`
 
 Display total cost of AI API tokens consumed in session.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 costs
@@ -326,7 +327,7 @@ Args:
 #### Command: `echo`
 
 Print text.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 echo <text>
@@ -346,7 +347,7 @@ command runs — e.g. `echo solved {len(solved)} problems`.
 #### Command: `edit` (`ed`)
 
 Open a solution file in the web code editor.
-* channels: terminal, web · profiles: admin, maintainer, contributor
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -382,7 +383,7 @@ Arguments:
 #### Command: `euler-solve`
 
 Launch the Claude Euler Solver skill.
-* channels: terminal, web · profiles: admin, maintainer
+* profiles: admin, maintainer
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -399,9 +400,7 @@ runs the requested action, and streams a
 live-updating Markdown summary back into the shell, ending with a footer of
 turns / duration / cost. Heavier and slower than `claude-api` — it actually
 runs `solver` commands, edits files, evaluates, and iterates. Needs the
-`claude` CLI on PATH and an `ANTHROPIC_API_KEY` (over the web tier both are
-provided by the deploy: the CLI from `/opt/euler`, the key via the `euler-ai`
-broker — DD-15).
+`claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
 
 Args:
     problem:            The `problem` to work on; defaults to the current problem.
@@ -418,7 +417,7 @@ Args:
 #### Command: `evaluate` (`eval`)
 
 Evaluate solutions to given/current problem.
-* channels: terminal, web · profiles: admin, maintainer, contributor
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -464,7 +463,7 @@ verbose:            If True, prints error information during evaluation. Default
 #### Command: `git-commit` (`commit`)
 
 Commit everything, optionally resetting to origin/master.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 * » supports `--silent`
 
 ```
@@ -498,7 +497,7 @@ Aliased as `commit`.
 #### Command: `git-hooks` (`hooks`)
 
 Run pre-commit hook and simulated pre-push hook.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 * » supports `--silent`
 
 ```
@@ -522,7 +521,7 @@ Aliased as `hooks`.
 #### Command: `git-publish` (`publish`)
 
 Push targets (keys|scripts|solutions|solver) to remote.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 * » supports `--silent`
 
 ```
@@ -549,7 +548,7 @@ Raises:
 #### Command: `git-status` (`status`)
 
 Display sync state between local and origin/master.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 git-status
@@ -569,7 +568,7 @@ Args:
 #### Command: `git-sync` (`sync`)
 
 Bring the local repository in sync with origin/master.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 git-sync
@@ -588,7 +587,7 @@ Args:
 #### Command: `key-reconstruct`
 
 Recover master key from shares.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 key-reconstruct
@@ -604,7 +603,7 @@ Prompt for `threshold` shares, reconstruct the master key, and store it wrapped 
 #### Command: `key-rekey` (`rekey`)
 
 Rotate the enc key and re-wrap to users.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 key-rekey
@@ -622,7 +621,7 @@ rotation re-encrypts the tracked private files via `git add --renormalize`.
 #### Command: `key-split`
 
 Split master key into shares (n-of-m secret sharing).
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 key-split
@@ -639,7 +638,7 @@ Print `num_shares` Shamir shares of the current master key (threshold needed to 
 #### Command: `lint`
 
 Lint current problem, auto-fix with --auto-fix.
-* channels: terminal, web · profiles: admin, maintainer, contributor
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -670,7 +669,7 @@ Args:
 #### Command: `ls`
 
 List the solutions dir for given/current problem.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -694,7 +693,7 @@ Args:
 #### Command: `manage-config`
 
 Manage configuration settings.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 manage-config
@@ -722,7 +721,7 @@ Args:
 #### Command: `mark` (`mark-solved`)
 
 Mark the current problem as solved, after checking.
-* channels: terminal, web · profiles: admin, maintainer, contributor
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -756,7 +755,7 @@ Args:
 #### Command: `new`
 
 Generate new solution/test-case file for a problem.
-* channels: terminal, web · profiles: admin, maintainer, contributor
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -794,7 +793,7 @@ are created.
 #### Command: `pause`
 
 Pause for user confirmation to continue.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 pause
@@ -809,7 +808,7 @@ Pause the program execution until the user presses Enter.
 #### Command: `pip-upgrade` (`upgrade`)
 
 Upgrade dependency group (all|ai|core|dev|solutions|show).
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 pip-upgrade
@@ -833,7 +832,7 @@ Args:
 #### Command: `problems`
 
 Show list of problems (all|solved|unsolved).
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 problems
@@ -855,7 +854,7 @@ Args:
 #### Command: `progress`
 
 Print progress statistics about Euler problems.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 progress
@@ -875,7 +874,7 @@ lowest-numbered unsolved one). Reads the state maintained by `summary`; run
 #### Command: `results`
 
 list the results for the problem.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -900,7 +899,7 @@ Returns:
 #### Command: `search` (`find`)
 
 Find content in the stack.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 search <query>
@@ -932,7 +931,7 @@ Args:
 #### Command: `show` (`open`, `view`)
 
 Open problem/file in a browser or the web viewer panel.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 * ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
@@ -978,7 +977,7 @@ Arguments:
 #### Command: `summary`
 
 Parse .progress.html into problems.json.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 * » supports `--silent`
 
 ```
@@ -1004,7 +1003,7 @@ the progress page, copy its Page Source into that file, and retry.
 #### Command: `sys-setup` (`install`)
 
 Installs or uninstalls system resources.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 sys-setup <chrome|dev-env|upgrade-service>
@@ -1028,7 +1027,7 @@ Parameters:
 #### Command: `test-cases`
 
 list the test cases for the problem.
-* channels: terminal, web · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -1054,7 +1053,7 @@ Returns:
 #### Command: `update-docs`
 
 Regenerate the generated sections of the docs/ guides.
-* channels: terminal · profiles: admin
+* profiles: admin
 * » supports `--silent`
 
 ```
@@ -1086,7 +1085,7 @@ Args:
 #### Command: `update-models`
 
 Update Model enum, pricing, and USD→EUR rate.
-* channels: terminal · profiles: admin
+* profiles: admin
 * » supports `--silent`
 
 ```
@@ -1116,7 +1115,7 @@ Args:
 #### Command: `user`
 
 Show public key & enc-key access; --regen for new key-pair.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 user
@@ -1132,7 +1131,7 @@ Show the current identity and whether it can decrypt; create a key pair on first
 #### Command: `user-authorize` (`authorize`)
 
 Authorise another public key (hex) to access the enc key.
-* channels: terminal, web · profiles: admin
+* profiles: admin
 
 ```
 user-authorize <public_key>
@@ -1147,7 +1146,7 @@ Wrap the current master key to `public_key` and add it to enc-key.json (proof-of
 #### Command: `users`
 
 List / administer accounts (list is read-only; changes need admin + sudo).
-* channels: terminal · profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor, reader
 
 ```
 users
@@ -1169,5 +1168,28 @@ Args:
     identity: a web email (``@``) or a local OS login (required except for list).
     profile:  the profile to assign (add / change). ``admin`` is valid only for a
               local os-login, never a web account.
+```
+
+---
+
+#### Command: `vault`
+
+Manage the per-user secrets vault: status | init | change-password.
+* profiles: admin
+
+```
+vault
+[action=status|init|change-password] (default status)
+```
+
+```text
+Encrypt this user's `id` + `env` at rest under a password-derived vault key (MT-6).
+
+- `status` (default): show whether the vault exists, which secret files are encrypted, and
+  whether this session can decrypt them.
+- `init`: create the vault and migrate the existing plaintext `id`/`env` into it in place, then
+  unlock the current session. Prompts for a new password (stored in `~/.euler/user_pass` for the
+  terminal off-line unlock path).
+- `change-password`: re-wrap the vault key under a new password (the secrets are not re-encrypted).
 ```
 <!-- /GEN:command-index -->

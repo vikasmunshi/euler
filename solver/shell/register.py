@@ -656,7 +656,6 @@ def register[**P](
         quietable: bool = False,
         completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]] | None = None,
         requires: tuple[str, ...] = (),
-        channels: tuple[str, ...] = ('terminal', 'web'),
 ) -> Callable[[Callable[P, int]], Callable[P, int]]:
     """Decorator that registers *func* as a shell command **without modifying it**.
 
@@ -726,7 +725,7 @@ def register[**P](
             return _complete(spec, ctx, incomplete)
 
         @command(name=name, help_text=spec.help_text, usage=spec.usage, aliases=aliases,
-                 completer=_completer, requires=requires, channels=channels)
+                 completer=_completer, requires=requires)
         @wraps(func)
         def _adapter(ctx: Context, *args: str) -> int:
             return _run_command(spec, ctx, args)

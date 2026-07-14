@@ -231,6 +231,7 @@ solver/
     config.py         — Crypto configuration: the single source of truth for every file location and git-filter wire constant.
     gitfilter.py      — Transparent git clean/smudge encryption for tracked solution files.
     keys.py           — Cipher key management: create, persist, rotate and share the crypto key material.
+    vault.py          — The per-user vault: envelope encryption that makes a user's secrets opaque to the operator at rest.
   runners/
     runner.h          — Runner framework for Project Euler solutions with benchmarking and validation.
     runner.py         — Runner framework for Project Euler solutions with benchmarking and validation.

@@ -29,7 +29,7 @@ redemption lazily imports the equally-stdlib ``solver.web.auth.client``.
 """
 from __future__ import annotations
 
-__all__ = ['resolve_subject', 'slugify', 'TICKET_ENV']
+__all__ = ['resolve_subject', 'slugify', 'system_slug', 'TICKET_ENV']
 
 import getpass
 import hashlib
@@ -51,17 +51,40 @@ _SERVICE_PREFIX: str = 'euler-'
 _WEB_CAP: str = 'maintainer'
 
 _SLUG_KEEP = re.compile(r'[^a-z0-9._-]+')
+_SYSTEM_SLUG_STRIP = re.compile(r'[^a-z0-9]+')
+#: Cap on the sanitised local-part so ``euler-user-<slug>`` stays well under the
+#: system name limit (``euler-user-`` + ≤13 + ``-`` + 6-hex ≈ 31 chars).
+_SYSTEM_LOCALPART_MAX: int = 12
 
 
 def slugify(identity: str) -> str:
-    """Return a filesystem-safe directory name for *identity*.
+    """Return a filesystem-safe directory name for *identity* (per-user state dirs).
 
     Lower-cases, collapses any run of characters outside ``[a-z0-9._-]`` to a
     single ``_``, and appends a short hash of the raw identity so two distinct
-    identities can never collide onto the same slug (e.g. ``a@x``/``a_x``).
+    identities can never collide onto the same slug (e.g. ``a@x``/``a_x``). Used
+    for terminal identities; the web/system identity uses :func:`system_slug`.
     """
     base = _SLUG_KEEP.sub('_', identity.strip().lower()).strip('_.')
     digest = hashlib.sha1(identity.encode('utf-8')).hexdigest()[:6]
+    return f'{base}-{digest}'
+
+
+def system_slug(identity: str) -> str:
+    """Return a **system-account** slug for *identity* — the per-user uid/home/socket name (MT-14).
+
+    Stricter than :func:`slugify`: the result matches ``^[a-z][a-z0-9-]*$`` (no ``.`` or ``_``), so
+    ``useradd``'s ``NAME_REGEX`` accepts ``euler-user-<slug>``. Built from the sanitised, truncated
+    e-mail local-part plus a short hash of the normalised identity — the hash keeps distinct
+    identities from colliding even when their local-parts sanitise to the same prefix. The e-mail
+    remains the login identity; this is only its derived system name.
+    """
+    normalized = identity.strip().lower()
+    localpart = normalized.split('@', 1)[0]
+    base = _SYSTEM_SLUG_STRIP.sub('-', localpart).strip('-')[:_SYSTEM_LOCALPART_MAX].strip('-')
+    if not base or not base[0].isalpha():
+        base = f'u{base}'                            # force a letter start (useradd NAME_REGEX)
+    digest = hashlib.sha1(normalized.encode('utf-8')).hexdigest()[:6]
     return f'{base}-{digest}'
 
 
@@ -115,7 +138,7 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
             # process — with that uid's ACLs — must not run as the other rung.
             raise SystemExit(f'identity: ticket profile {profile!r} does not match '
                              f'this instance ({pin!r}) — refusing to start')
-        return Subject(user=email, slug=slugify(email), channel='web',
+        return Subject(user=email, slug=system_slug(email), channel='web',
                        auth_method='shell-ticket', profile=profile,
                        permissions=authz.permissions_for(profile))
 

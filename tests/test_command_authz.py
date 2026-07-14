@@ -39,18 +39,21 @@ class RequiresTests(unittest.TestCase):
 
     def test_is_permitted_checks_permission(self) -> None:
         with as_subject('reader'):
-            self.assertTrue(is_permitted(('solutions:read',), ('terminal', 'web')))
-            self.assertFalse(is_permitted(('solutions:write',), ('terminal', 'web')))
-            self.assertFalse(is_permitted((), ('terminal', 'web')))     # fail-closed → admin-only
+            self.assertTrue(is_permitted(('solutions:read',)))
+            self.assertFalse(is_permitted(('solutions:write',)))
+            self.assertFalse(is_permitted(()))     # fail-closed → admin-only
         with as_subject('contributor'):
-            self.assertTrue(is_permitted(('solutions:write',), ('terminal', 'web')))
+            self.assertTrue(is_permitted(('solutions:write',)))
         with as_subject('admin'):
-            self.assertTrue(is_permitted((), ('terminal', 'web')))      # admin has infra:execute
+            self.assertTrue(is_permitted(()))      # admin has infra:execute
 
-    def test_is_permitted_checks_channel(self) -> None:
+    def test_permission_is_channel_agnostic(self) -> None:
+        """The channel is not an authorization axis (MT-10): the same profile is permitted the
+        same commands on terminal and web — only ``requires`` decides."""
         with as_subject('reader', channel='web'):
-            self.assertTrue(is_permitted(('solutions:read',), ('terminal', 'web')))
-            self.assertFalse(is_permitted(('solutions:read',), ('terminal',)))   # web excluded
+            self.assertTrue(is_permitted(('solutions:read',)))
+        with as_subject('reader', channel='terminal'):
+            self.assertTrue(is_permitted(('solutions:read',)))
 
 
 class DecoratorEnforcementTests(unittest.TestCase):
@@ -76,12 +79,15 @@ class DecoratorEnforcementTests(unittest.TestCase):
         assert cmd is not None
         self.assertEqual(cmd.requires, ('solutions:read',))
 
-    def test_channel_gating_hides_wrong_channel(self) -> None:
+    def test_registration_is_channel_agnostic(self) -> None:
+        """A command registers on any channel when the subject holds its ``requires`` — the channel
+        is no longer an axis (MT-10). An admin over web registers an ``infra:execute`` command that
+        the old channel gate would have hidden."""
         with as_subject('admin', channel='web'):
-            @command(name='zz-test-web-only', requires=('infra:execute',), channels=('terminal',))
+            @command(name='zz-test-web-only', requires=('infra:execute',))
             def _f(ctx: Context) -> int:
                 return 0
-        self.assertIsNone(registry.resolve('zz-test-web-only'))   # terminal-only, hidden on web
+        self.assertIsNotNone(registry.resolve('zz-test-web-only'))
 
 
 if __name__ == '__main__':

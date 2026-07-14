@@ -266,6 +266,18 @@ box. The containment for those highest-privilege operations is now **the profile
 + SRP auth strength + per-user uid isolation**, with no channel backstop — an explicit,
 accepted posture change (recorded as [AR-4](security-notes.md), §11).
 
+**Grants must stand on their own now — MT-10b.** With the channel gate gone, every ladder
+grant is the *sole* gate for its capability, so a grant calibrated against the old
+channel backstop must be re-checked. The one that mattered: `users:read` sits at the
+`reader` rung so any member can read **their own** `/account` page — but the same grant
+also backed `users list`, whose non-admin path printed the **whole** roster (every
+collaborator's e-mail → profile), previously kept off the web only by the channel gate.
+Fix at the command, not the ladder: `users list` for a non-admin is **scoped to the
+caller's own entry**; the full roster stays an `admin` (`users:write`) view. So
+`users:read` means *read the account you're entitled to* — your own — consistently across
+`/account` and `users list`. (Verified through the CLI: a `reader` sees only itself, `add`
+is denied, infra commands do not register.)
+
 ## 11 · Threat model & accepted risks
 
 The trust boundary remains the **invite list** — named, trusted collaborators. What
@@ -321,8 +333,20 @@ changes:
    `vault` CLI were driven end-to-end. **Follow-up for later steps:** `user --regen`
    (`keys.py`) still writes the private key *plain* — once the vault is standard, regen must
    re-encrypt under the session `VK`.
-2. **Per-user identity in `solver/auth`** (MT-3/MT-4): email → slug → uid/home; the web
-   plane of `resolve_subject` resolves a *user*; drop the channel authorization axis (MT-10).
+2. **Per-user identity in `solver/auth`** (MT-3/MT-4/MT-10) — **✅ partly built.**
+   Built: `system_slug()` (`identity.py`, MT-14) — the `useradd`-safe `[a-z][a-z0-9-]*`
+   name (e-mail login → system slug), now the web subject's `slug`; the **channel
+   authorization axis is removed** (MT-10) — `is_permitted`, the `command`/`register`
+   decorators, and the `Command.channels` field drop `channels=`, `subject.channel`
+   survives informationally, the doc audit table drops its Channels column, and the three
+   formerly-terminal-only commands (`update-models`, `update-docs`, `users`) are now gated
+   by `requires` alone; plus the MT-10b `users list` self-scoping. Tests: `system_slug` in
+   `test_auth_kernel.py`, reworked `test_web_channel.py`/`test_command_authz.py`; the
+   `reader` `users list` self-scope driven through the CLI. **Deferred to step 4** (coupled
+   to the per-user service + ticket payload, testable only end-to-end there): the
+   `resolve_subject` web plane resolving a *user*'s uid/home, replacing the DD-13 per-profile
+   `EULER_PROFILE` pin with a per-user (slug) pin, and dropping the `_WEB_CAP` admin→maintainer
+   cap (MT-10a — admin becomes web-reachable) with its ticket rewrite.
 3. **Provisioning kit** (MT-7): `users add` extension (uid, home, filter-disabled clone
    on `user/<slug>`, socket-activated `euler-user@<slug>` unit); teardown.
 4. **The per-user service** (MT-4): fold content + `/ws` into one `solver/web/user`
