@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content install-ws uninstall-ws upgrade-ws redeploy-ws redeploy-auth redeploy-content redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content install-ws uninstall-ws upgrade-ws redeploy-ws install-user uninstall-user upgrade-user redeploy-user redeploy-auth redeploy-content redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -193,6 +193,29 @@ redeploy-ws:
 	./scripts/setup/ws.sh redeploy
 	@printf "✓ redeploy-ws complete: web-shell instances restarted\n"
 
+## Install the per-user provisioning layer (MT-7): the euler-user group, the shared
+## ciphertext mirror, /etc/euler/user.env, and the euler-user@.service/.socket template
+## (deferred until solver.web.user lands in step 4). Per-collaborator uids/homes/clones are
+## created later by `users add <email>` (solver.web.auth.commands → user.sh provision).
+install-user:
+	./scripts/setup/user.sh install
+	@printf "✓ install-user complete: per-user provisioning layer deployed\n"
+
+## Remove the per-user layer (refuses while any euler-user-<slug> remains; prompts for the mirror)
+uninstall-user:
+	./scripts/setup/user.sh uninstall
+	@printf "✓ uninstall-user complete: per-user provisioning layer removed\n"
+
+## Re-assert the shared per-user layer and refresh the mirror (picks up step-4's unit template)
+upgrade-user:
+	./scripts/setup/user.sh upgrade
+	@printf "✓ upgrade-user complete: per-user provisioning layer upgraded\n"
+
+## Fast path: refresh /etc/euler/user.env and the shared mirror only
+redeploy-user:
+	./scripts/setup/user.sh redeploy
+	@printf "✓ redeploy-user complete: per-user config + mirror refreshed\n"
+
 ## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
 install-nodejs:
 	./scripts/setup/nodejs.sh install
@@ -207,11 +230,11 @@ uninstall-nodejs:
 ## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service.
 ## Each kit stays independently operable; the later kits reload the firewall as
 ## their service users appear. (sudo required; see docs/server-redesign.md)
-install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-content install-ws
+install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-content install-ws install-user
 	@printf "✓ install-web complete: full web stack installed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-uninstall-web: uninstall-ws uninstall-content uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
+uninstall-web: uninstall-user uninstall-ws uninstall-content uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
 	@printf "✓ uninstall-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;

@@ -21,9 +21,12 @@ that they reach the root-owned SoR and the euler-auth **admin socket** only unde
 a web shell (a per-user, non-privileged uid) cannot obtain — so `list` may run anywhere but a
 mutation attempted over the web fails at the socket, not at a channel check.
 
-`add` is two-path: an ``@``-address mints a web invite (the account record appears when
-the invitee registers); a bare os-login is a direct map entry (no invite). Password
-reset is self-service (DD-7) — there is deliberately no reset verb.
+`add` is two-path: an ``@``-address provisions the collaborator's **own OS instance**
+(uid, home, a filter-disabled clone on ``user/<slug>``, the socket — via
+:mod:`scripts/setup/user.sh`, MT-7) and then mints a web invite (the account record
+appears when the invitee registers); a bare os-login is a direct map entry (no instance,
+no invite). ``remove`` reverses both: it drops the account, then deprovisions the
+instance. Password reset is self-service (DD-7) — there is deliberately no reset verb.
 """
 from __future__ import annotations
 
@@ -31,9 +34,11 @@ __all__ = ['users']
 
 import subprocess
 import sys
+from pathlib import Path
 from typing import Literal
 
 from solver.auth import Authorizations
+from solver.auth.identity import system_slug
 from solver.config import config
 from solver.shell import console, register
 
@@ -70,6 +75,26 @@ def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
         return 1
 
 
+def _provision_kit(action: str, slug: str, *rest: str) -> int:
+    """Drive the per-user provisioning kit (``scripts/setup/user.sh``) under sudo (MT-7).
+
+    ``provision``/``deprovision`` create or tear down the collaborator's OS instance —
+    uid, home, the filter-disabled clone on ``user/<slug>``, and the socket. Best-effort:
+    a host without the kit (a plain dev checkout without the web stack laid down) has
+    nothing to provision, so a missing script is a note, not a failure — the account map
+    + invite still stand and the instance can be laid down later with ``make install-user``.
+    """
+    script = Path(config.root_dir) / 'scripts' / 'setup' / 'user.sh'
+    if not script.exists():
+        console.print(f'[muted]note: {script} not present — skipping OS {action} (run make install-user)[/muted]')
+        return 0
+    try:
+        return subprocess.run(['sudo', 'bash', str(script), action, slug, *rest], check=False).returncode
+    except (OSError, KeyboardInterrupt) as exc:
+        console.print(f'[error]error:[/error] could not run the provisioning kit ({exc})')
+        return 1
+
+
 @register(requires=('users:read',),
           help_text='List / administer accounts (list is read-only; changes need admin + sudo).')
 def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'] = 'list',
@@ -99,4 +124,28 @@ def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'
     if not identity:
         console.print(f'[error]error:[/error] users {action} requires an email or os-login')
         return 2
-    return _sudo_admin(action, identity, profile)
+
+    # A web account (an @-address) gets its own OS instance (MT-7); a bare os-login is the
+    # operator's own terminal identity — an existing uid — so it is a map entry only.
+    is_web = '@' in identity
+    slug = system_slug(identity) if is_web else ''
+
+    if action == 'add':
+        if is_web:
+            # Provision the OS instance BEFORE minting the invite, so a failed host never
+            # leaves a dangling invite to a box with no shell. Provisioning is idempotent.
+            rc = _provision_kit('provision', slug, identity, profile)
+            if rc != 0:
+                console.print('[error]error:[/error] provisioning failed — no invite minted; '
+                              'fix the host and re-run `users add`')
+                return rc
+        return _sudo_admin('add', identity, profile)
+
+    if action == 'remove':
+        # Drop the account (SoR + SRP) first; then tear the OS instance down (prompted).
+        rc = _sudo_admin('remove', identity, profile)
+        if rc == 0 and is_web:
+            _provision_kit('deprovision', slug)        # teardown is advisory — the account is already gone
+        return rc
+
+    return _sudo_admin(action, identity, profile)      # change | enable | disable

@@ -137,13 +137,24 @@ describe_uids() {
 
 uid_of() { id -u "$1" 2>/dev/null || true; }
 
+# The per-user web tier (MT-7) creates euler-user-<slug> uids dynamically at provision
+# time, so they cannot be listed ahead of time like the fixed service uids. Enumerate
+# whatever exists now by the euler-user- prefix, so a reload after each provision folds
+# the new uid into the egress drop (chain policy is accept — an unlisted uid would reach
+# the internet directly, bypassing Squid). They are RCE-by-design (AR-1), so they are
+# also barred from the mail relay, exactly like the euler-ws-* rungs they replace.
+euler_user_names() { getent passwd | awk -F: '/^euler-user-/{print $1}'; }
+
 # Generate the ruleset to stdout. Uses the declare-then-flush pattern so re-applying
 # with `nft -f` is idempotent.
 render_conf() {
-    local all_uids dns_uids barred_uids
-    all_uids="$(resolve_uids "${ALL_USERS[@]}")"
+    local all_uids dns_uids barred_uids per_user
+    # Read the dynamic per-user uids (euler-user-<slug>) once; they join both the egress
+    # drop and the relay bar alongside the fixed service uids.
+    mapfile -t per_user < <(euler_user_names)
+    all_uids="$(resolve_uids "${ALL_USERS[@]}" "${per_user[@]}")"
     dns_uids="$(resolve_uids "${DNS_USERS[@]}")"
-    barred_uids="$(resolve_uids "${RELAY_BARRED[@]}")"
+    barred_uids="$(resolve_uids "${RELAY_BARRED[@]}" "${per_user[@]}")"
     if [ -z "${all_uids}" ]; then
         echo "Error: no euler-* service users exist yet — nothing to scope the firewall to." >&2
         return 1
@@ -161,7 +172,7 @@ render_conf() {
 # service tier (DD-8, docs/secure-web-server.md). Regenerate with 'firewall.sh reload'
 # after creating a new euler-* user; do not edit by hand.
 #
-# Scoped uids: $(describe_uids "${ALL_USERS[@]}")
+# Scoped uids: $(describe_uids "${ALL_USERS[@]}" "${per_user[@]}")
 # Policy accept — non-euler traffic (SSH, root, shells) is never touched.
 
 table inet euler

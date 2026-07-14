@@ -347,8 +347,26 @@ changes:
    `resolve_subject` web plane resolving a *user*'s uid/home, replacing the DD-13 per-profile
    `EULER_PROFILE` pin with a per-user (slug) pin, and dropping the `_WEB_CAP` admin→maintainer
    cap (MT-10a — admin becomes web-reachable) with its ticket rewrite.
-3. **Provisioning kit** (MT-7): `users add` extension (uid, home, filter-disabled clone
-   on `user/<slug>`, socket-activated `euler-user@<slug>` unit); teardown.
+3. **Provisioning kit** (MT-7) — **✅ built.** `scripts/setup/user.sh`: a shared plane
+   (`install`/`uninstall`/`status`) that lays down the `euler-user` group, a shared bare
+   **mirror** (`/var/lib/euler/mirror.git` — one ciphertext object store every clone
+   hardlinks from, refreshed from the operator tree, MT-13), `/etc/euler/user.env` (no
+   secrets), and the socket-activated `euler-user@.service`/`.socket` template (deferred
+   until `solver.web.user` lands in step 4, as `ws.sh` defers its unit); and a per-user
+   plane (`provision <slug> <email> <profile>` / `deprovision <slug>`) that creates the
+   `euler-user-<slug>` uid + home (`0700`), the **filter-disabled clone** on branch
+   `user/<slug>` (ciphertext at rest — the clone inherits the tracked `.gitattributes`
+   rule but not the local filter config, so private solutions pass through un-smudged; the
+   crux, **verified** against the real repo), `~/.euler` (the uid-private secrets dir), and
+   the instance socket. `users add`/`remove` (`solver.web.auth.commands`) drive it under
+   sudo: a web `add` provisions **before** minting the invite (no dangling invite to a box
+   with no shell), a `remove` deprovisions **after** dropping the account; a bare os-login
+   is a map entry only. Teardown reports the separate `key-rekey` needed to drop the
+   account's master-key access (that key was never on this root plane). `firewall.sh` now
+   enumerates the dynamic `euler-user-*` uids **by prefix** and folds them into the egress
+   drop + relay bar (the chain is policy-accept, so an un-enumerated uid would reach the
+   internet directly, bypassing Squid); `provision` reloads it. Makefile: `install-user`
+   (folded into `install-web`), `uninstall-user`, `upgrade-user`, `redeploy-user`.
 4. **The per-user service** (MT-4): fold content + `/ws` into one `solver/web/user`
    service; Caddy `X-User-Slug` routing; retire the per-profile instances.
 5. **The account page + vault UX** (MT-8/MT-9): pubkey, write-only secret upload/delete,
