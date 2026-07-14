@@ -8,9 +8,20 @@ covers the transport, the service topology, and the operational build — and it
 the authoritative **design-decision log** (DD-1…DD-9) both guides reference.
 Accepted risks and regression guards are in [security-notes.md](security-notes.md).
 
-> **Status.** Built feature-by-feature (see [Build plan](#6--build-plan)); each phase
-> ships its full [maintenance kit](#51--the-maintenance-kit-per-feature-contract)
-> before the next begins.
+> **Status — delivered (Phases 1–6).** The web front end is live: a TLS edge, kernel
+> egress firewall, SRP auth, the unified RBAC kernel, the content service, and the PTY
+> web shell — all deployed and serving. Built feature-by-feature (see
+> [Build plan](#6--build-plan)); each phase shipped its full
+> [maintenance kit](#51--the-maintenance-kit-per-feature-contract) before the next began.
+>
+> **Phase 7 (credential brokers) was designed but _dropped_, not built** — see the note
+> on that phase below. The web tier's per-*profile* shared-uid model (DD-13) is being
+> superseded by a per-*user* redesign in which each collaborator brings their own keys
+> (their Anthropic key and an `enc-key.json`-authorized X25519 public key), gets their
+> own uid / home / repo worktree / branch, and the "brokered, never dispensed" tension of
+> DD-15 is _inverted_ rather than brokered. That work is specified in its own design of
+> record: **[real-multi-tenant-web-access.md](real-multi-tenant-web-access.md)**. DD-15
+> and AR-3 remain here as recorded design history (the reasoning that led to the pivot).
 > - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
 > - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
@@ -1418,7 +1429,24 @@ hardening ([security-notes AR-1](security-notes.md)).
 - **Kit:** `scripts/setup/ws.sh`; `frontend.sh`/`firewall.sh`/Makefile wiring;
   xterm vendored (pinned + SRI).
 
-### Phase 7 — Credential brokers ⬜
+### Phase 7 — Credential brokers ❌ (designed, **dropped** — superseded)
+> **Not built.** Phase 7 would have added `euler-ai` (a spend-metered Anthropic
+> pass-through) and `euler-git` (a commit/push broker) to serve the *shared-uid* web
+> shells credentials **without dispensing** them ([DD-15](#dd-15--secrets-are-brokered-never-dispensed)).
+> Mid-build (the `euler-ai` broker was working and tested) the model was reconsidered:
+> the brokers exist **because** the web tier is a set of shared per-profile uids on
+> which no secret can safely rest, and that constraint is better removed than brokered
+> around. The web front end is therefore moving to a **per-user** model — each
+> collaborator brings their own keys (Anthropic key + an `enc-key.json`-authorized X25519
+> public key) and gets their own uid / home / repo worktree / branch — which *inverts*
+> the secrets problem instead of brokering it. The design of record for that work is
+> **[real-multi-tenant-web-access.md](real-multi-tenant-web-access.md)**. The broker code
+> was rolled back; DD-15 and [AR-3](security-notes.md) stay below as the recorded
+> reasoning that led to the pivot. The one keeper from the aborted build — the
+> `claude-skill` → `euler-solve` rename — is unrelated and retained.
+
+The original plan is kept below for the record (it is **not** the current direction):
+
 Implements [DD-15](#dd-15--secrets-are-brokered-never-dispensed): `euler-ai` (the
 spend-metered Anthropic pass-through) and `euler-git` (the commit/push broker).
 Builds after Phase 6 — its callers are the web shells — and until it lands the AI

@@ -35,9 +35,7 @@ def euler_solve(
     live-updating Markdown summary back into the shell, ending with a footer of
     turns / duration / cost. Heavier and slower than `claude-api` — it actually
     runs `solver` commands, edits files, evaluates, and iterates. Needs the
-    `claude` CLI on PATH and an `ANTHROPIC_API_KEY` (over the web tier both are
-    provided by the deploy: the CLI from `/opt/euler`, the key via the `euler-ai`
-    broker — DD-15).
+    `claude` CLI on PATH and an `ANTHROPIC_API_KEY`.
 
     Args:
         problem:            The `problem` to work on; defaults to the current problem.
