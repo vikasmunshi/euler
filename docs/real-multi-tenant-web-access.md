@@ -282,6 +282,10 @@ changes:
    user; admin merges `user/*` → master (web or terminal); enc-key pull flow.
 7. **Docs & security-notes**: the three new ARs (§11); retire DD-13/DD-15 as superseded.
 
+**Clean-slate start (no migration).** The live per-profile deployment is removed with
+`make uninstall-web` before the multi-tenant stack is installed; current web accounts
+are recreated, not migrated (§14.5).
+
 ## 14 · Open items (mechanics to confirm at build time)
 
 1. **Caddy per-user routing** — a dynamic upstream `unix//run/euler/user-{X-User-Slug}.sock`
@@ -293,5 +297,8 @@ changes:
    `--reference` alternates) to bound disk for the invite list; confirm the ceiling.
 4. **Slug scheme** — reuse `solver/auth.slugify` (email → fs-safe slug + hash); confirm
    uid-name length limits.
-5. **Migration** — turning the current single-tenant + per-profile deployment into the
-   per-user one on the live host without losing the operator's own setup.
+5. ~~Migration~~ — **none.** The current per-profile deployment is torn down with a
+   clean `make uninstall-web` and the multi-tenant stack installed fresh; existing web
+   accounts are **not** migrated — they are recreated under the new provisioning (§8).
+   Only the operator's own local `~/.euler` needs the one-time vault migration (MT-6,
+   build step 1). This is a hard reset, not an in-place upgrade.
