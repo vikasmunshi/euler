@@ -38,6 +38,7 @@ import jinja2
 from aiohttp import web
 
 from solver.auth import Authorizations
+from solver.auth.identity import system_slug
 from solver.web.auth import policy
 from solver.web.csp import csp_middleware
 from solver.web.auth.config import AuthConfig
@@ -146,14 +147,14 @@ class AuthService:
         return proof.hex(), self.profile_for(key)
 
     def profile_for(self, email: str) -> str:
-        """The web profile for *email* from ``authorizations.json`` (DD-12), capped at
-        ``maintainer`` (``admin`` is local-only), defaulting to ``reader`` when unmapped.
+        """The web profile for *email* from ``authorizations.json`` (DD-12), defaulting to
+        ``reader`` when unmapped. **Not capped** — in the per-user model an ``admin``
+        account is web-reachable (MT-10a), contained by its own uid + SRP, not the channel.
 
         Loaded **fresh** so a ``users change`` takes effect on the next login (sessions
         bake the profile in at login, and a change revokes them — DD-11 staleness rule).
         """
-        profile = Authorizations.load().profile_for(email) or 'reader'
-        return 'maintainer' if profile == 'admin' else profile
+        return Authorizations.load().profile_for(email) or 'reader'
 
     # ── account lifecycle (admin plane) ───────────────────────────────────────────
 
@@ -171,37 +172,35 @@ class AuthService:
         self.pending.revoke_email(email)
 
     async def push_shell_teardown(self, email: str) -> None:
-        """Tear down *email*'s live web shell on every ws instance (DD-14).
+        """Tear down *email*'s live web shell on their per-user instance (DD-14/MT-4).
 
         The auth service is the only party that sees a logout or a revocation, and
         a *running* shell baked its permissions in at startup — so a demoted or
         logged-out account would keep its old authority until the PTY happened to
         die. This closes that gap at the source: on those events we POST
-        ``/internal/logout`` to each per-profile ws socket, which reaps the user's
-        shell (and its attached tabs).
+        ``/internal/logout`` to **the user's own instance socket** (a single,
+        deterministic ``user-<slug>.sock`` in the per-user model — no fan-out), which
+        reaps that user's shell and its attached tabs.
 
-        Best-effort and parallel: a socket that is absent (instance not running) or
-        refuses is skipped — the shell simply isn't there. Never raises into the
-        caller (a teardown failure must not fail the logout / revocation itself).
-        The endpoint is socket-peer only (Caddy never routes it), and ``euler-auth``
-        reaches it as a fellow ``euler-web`` member.
+        Best-effort: an absent socket (instance not running) or a refusal is skipped —
+        the shell simply isn't there. Never raises into the caller (a teardown failure
+        must not fail the logout / revocation itself). The endpoint is socket-peer only
+        (Caddy never routes it), and ``euler-auth`` reaches it as a fellow ``euler-web``
+        member.
         """
-        sockets = self.config.ws_sockets
-        if not sockets:
+        base = self.config.user_socket_dir
+        if not base:
             return
-        payload = {'email': normalize_email(email)}
-
-        async def _one(sock: Path) -> None:
-            try:
-                connector = aiohttp.UnixConnector(path=str(sock))
-                timeout = aiohttp.ClientTimeout(total=3)
-                async with aiohttp.ClientSession(connector=connector, timeout=timeout) as http:
-                    async with http.post('http://ws/internal/logout', json=payload) as resp:
-                        await resp.read()
-            except (OSError, aiohttp.ClientError, asyncio.TimeoutError):
-                pass                     # absent / down / slow — the shell isn't reachable
-
-        await asyncio.gather(*(_one(sock) for sock in sockets))
+        email = normalize_email(email)
+        sock = Path(base) / f'user-{system_slug(email)}.sock'
+        try:
+            connector = aiohttp.UnixConnector(path=str(sock))
+            timeout = aiohttp.ClientTimeout(total=3)
+            async with aiohttp.ClientSession(connector=connector, timeout=timeout) as http:
+                async with http.post('http://user/internal/logout', json={'email': email}) as resp:
+                    await resp.read()
+        except (OSError, aiohttp.ClientError, asyncio.TimeoutError):
+            pass                         # absent / down / slow — the shell isn't reachable
 
 
 # ── public app (auth.sock — via Caddy, plus the socket-peer ticket endpoints) ──────
@@ -213,12 +212,18 @@ def build_public_app(service: AuthService) -> web.Application:
         return web.Response(text='ok')
 
     async def check(request: web.Request) -> web.Response:
-        """The Caddy ``forward_auth`` endpoint: 200 + identity headers, or 401."""
+        """The Caddy ``forward_auth`` endpoint: 200 + identity headers, or 401.
+
+        ``X-User-Slug`` (the e-mail's :func:`system_slug`) is what Caddy routes on in
+        the per-user model — every request goes to that user's own instance socket
+        (MT-4/MT-11). ``X-User``/``X-Profile`` still ride along for the app tier.
+        """
         identity = service.session_identity(request)
         if identity is None:
             return web.Response(status=401, text=_GENERIC_401)
         email, profile = identity
-        return web.Response(status=200, headers={'X-User': email, 'X-Profile': profile})
+        return web.Response(status=200, headers={
+            'X-User': email, 'X-Profile': profile, 'X-User-Slug': system_slug(email)})
 
     async def challenge(request: web.Request) -> web.Response:
         if not service.rate.allow(_client_key(request)):

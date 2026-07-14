@@ -21,6 +21,7 @@ from aiohttp import web
 from aiohttp.test_utils import TestClient, TestServer
 
 from solver.auth.authorizations import DEFAULT_POLICY_FILE
+from solver.auth.identity import system_slug
 from solver.web.auth.app import AuthService, build_admin_app, build_public_app
 from solver.web.auth.config import AuthConfig
 from solver.web.auth.policy import SESSION_COOKIE
@@ -31,7 +32,7 @@ _TOKEN = 'admin-token'
 
 
 class _FakeWsInstance:
-    """Records the emails a teardown push targets (one per profile socket in prod)."""
+    """Records the emails a teardown push targets (the user's own instance socket)."""
 
     def __init__(self) -> None:
         self.reaped: list[str] = []
@@ -57,21 +58,22 @@ class TeardownPushTests(unittest.IsolatedAsyncioTestCase):
         self.scratch = Path(tempfile.mkdtemp(prefix='euler-teardown-'))
         self.addCleanup(shutil.rmtree, self.scratch, True)
 
-        # The fake ws instance on its unix socket, where the real one would be.
+        # The fake instance on the user's own socket (user-<slug>.sock), where the real
+        # per-user instance would be (MT-4).
         self.ws = _FakeWsInstance()
-        self.ws_socket = self.scratch / 'ws-contributor.sock'
+        self.ws_socket = self.scratch / f'user-{system_slug(_EMAIL)}.sock'
         self._ws_runner = web.AppRunner(self.ws.build())
         await self._ws_runner.setup()
         await web.UnixSite(self._ws_runner, str(self.ws_socket)).start()
         self.addAsyncCleanup(self._ws_runner.cleanup)
 
-        # A missing socket alongside the live one: the push must skip it, not fail.
+        # The teardown push derives the target socket (user-<slug>.sock) from this dir.
         config = AuthConfig(
             state_dir=self.scratch, socket_path=self.scratch / 'auth.sock',
             admin_socket_path=self.scratch / 'admin.sock', socket_group='',
             admin_socket_group='', admin_token=_TOKEN, base_url='https://example.test',
             smtp_relay='127.0.0.1:25', terms_version='test',
-            ws_sockets=(self.ws_socket, self.scratch / 'ws-absent.sock'))
+            user_socket_dir=str(self.scratch))
         self.service = AuthService(config)
 
         salt = secrets.token_bytes(16)
@@ -122,10 +124,10 @@ class TeardownPushTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(self.ws.reaped, [])
 
-    async def test_push_is_best_effort_when_all_sockets_absent(self) -> None:
-        """With no reachable ws socket, a revocation still succeeds (the push swallows
-        the connection failure) — the shell simply isn't there to reap."""
-        self.service.config.ws_sockets[0].unlink()          # kill the one live socket
+    async def test_push_is_best_effort_when_the_socket_is_absent(self) -> None:
+        """With no reachable instance socket, a revocation still succeeds (the push
+        swallows the connection failure) — the shell simply isn't there to reap."""
+        self.ws_socket.unlink()                              # kill the user's socket
         await self._ws_runner.cleanup()
         resp = await self.admin.post(f'/admin/users/{_EMAIL}/revoke',
                                      headers={'X-Admin-Token': _TOKEN})

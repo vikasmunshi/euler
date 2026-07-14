@@ -10,12 +10,13 @@ anonymous fallback; a process that matches no plane exits.
    ticket** minted by the auth service against the user's live session and
    redeemed here over the auth socket. Redemption consumes it and returns the
    authoritative ``(email, profile)``; a missing/expired/reused ticket aborts, and
-   so does one whose profile differs from the forking instance's
-   ``EULER_PROFILE`` pin (DD-13 — that instance *is* the rung's uid). Nothing
-   env-carried is the credential — ``/proc/<pid>/environ`` is same-uid-readable
-   across every web shell on a rung (all ``euler-ws-<profile>``), so only a
-   consumable ticket prevents replay. The web channel is **capped at
-   ``maintainer``** (``admin`` is local-only, DD-11).
+   so does one whose e-mail's :func:`system_slug` differs from the forking
+   instance's ``EULER_USER_SLUG`` pin (MT-4/MT-7 — that instance *is* the user's
+   own uid, so a ticket for another user means misrouting or a bypass). Nothing
+   env-carried is the credential — a ticket is the only thing that survives replay
+   from a sibling process's ``/proc/<pid>/environ``. In the per-user model the web
+   channel is **not capped** (MT-10a): an ``admin`` account is web-reachable, its
+   authority contained by its own uid + SRP, not by the channel.
 2. **Local terminal** — the OS login's profile from the ``users`` map
    (DD-12); the **checkout owner floors to ``admin``** when unlisted (you cannot
    lock yourself out), an explicit entry wins, and a real non-owner login without
@@ -40,15 +41,16 @@ from pathlib import Path
 from solver.auth.authorizations import Authorizations
 from solver.auth.subject import Subject
 
-#: Environment variable carrying the one-time shell ticket (set by the ws service).
+#: Environment variable carrying the one-time shell ticket (set by the user service).
 TICKET_ENV: str = 'SOLVER_TICKET'
-#: The per-profile ws instance's own profile (``EULER_PROFILE=%i``), exported to the
-#: PTY child: the redeemed ticket's profile must equal it, else the shell aborts (DD-13).
-PROFILE_PIN_ENV: str = 'EULER_PROFILE'
-#: Service accounts are named ``euler-*``; such a uid with no ticket must abort.
+#: The per-user instance's own system slug (``EULER_USER_SLUG=%i``), exported to the
+#: PTY child: the redeemed ticket's e-mail must map to it (:func:`system_slug`), else the
+#: shell aborts — the instance *is* that user's uid, so a mismatch is misrouting (MT-4/MT-7).
+SLUG_PIN_ENV: str = 'EULER_USER_SLUG'
+#: Service accounts are named ``euler-*``; such a uid with no ticket must abort. (The
+#: per-user instances are ``euler-user-<slug>`` — they never resolve identity themselves;
+#: only the ticketed PTY children they fork do, and a ticket is present there.)
 _SERVICE_PREFIX: str = 'euler-'
-#: Web accounts never exceed this profile (``admin`` is local-only, DD-11).
-_WEB_CAP: str = 'maintainer'
 
 _SLUG_KEEP = re.compile(r'[^a-z0-9._-]+')
 _SYSTEM_SLUG_STRIP = re.compile(r'[^a-z0-9]+')
@@ -128,17 +130,16 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
 
     ticket = os.environ.get(TICKET_ENV, '').strip()
     if ticket:
-        email, profile = _redeem_ticket(ticket)
-        if profile == 'admin':                      # web is capped at maintainer (DD-11)
-            profile = _WEB_CAP
-        pin = os.environ.get(PROFILE_PIN_ENV, '').strip()
-        if pin and profile != pin:
-            # The forking ws instance *is* the profile's uid (euler-ws-<pin>, DD-13):
-            # a ticket for another rung means misrouting or a bypass attempt, and this
-            # process — with that uid's ACLs — must not run as the other rung.
-            raise SystemExit(f'identity: ticket profile {profile!r} does not match '
+        email, profile = _redeem_ticket(ticket)     # authoritative (email, profile); admin uncapped (MT-10a)
+        slug = system_slug(email)
+        pin = os.environ.get(SLUG_PIN_ENV, '').strip()
+        if pin and slug != pin:
+            # The forking instance *is* this user's uid (euler-user-<pin>, MT-4/MT-7):
+            # a ticket for another user means misrouting or a bypass attempt, and this
+            # process — with that uid's home, keys, and clone — must not run as them.
+            raise SystemExit(f'identity: ticket user {slug!r} does not match '
                              f'this instance ({pin!r}) — refusing to start')
-        return Subject(user=email, slug=system_slug(email), channel='web',
+        return Subject(user=email, slug=slug, channel='web',
                        auth_method='shell-ticket', profile=profile,
                        permissions=authz.permissions_for(profile))
 

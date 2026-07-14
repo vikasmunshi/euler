@@ -40,11 +40,11 @@ class AuthConfig(NamedTuple):
     smtp_relay: str
     #: Version tag of the Terms of use the registration flow records (DD-7).
     terms_version: str
-    #: The per-profile web-shell sockets to push teardown to on logout / revocation
-    #: (DD-14). Best-effort: a socket that is absent or refuses is skipped. Empty
-    #: disables the push (a deploy with no web shell, or a test that does not exercise
-    #: it) — the default, so ``from_env`` is the only place the real sockets are set.
-    ws_sockets: tuple[Path, ...] = ()
+    #: The directory holding the per-user instance sockets (``user-<slug>.sock``): the
+    #: DD-14 teardown push targets the one socket for the affected user (MT-4). Empty
+    #: disables the push (a deploy with no web tier, or a test that does not exercise it)
+    #: — the default, so ``from_env`` is the only place the real directory is set.
+    user_socket_dir: str = ''
 
     @classmethod
     def from_env(cls) -> AuthConfig:
@@ -67,23 +67,5 @@ class AuthConfig(NamedTuple):
             base_url=base_url,
             smtp_relay=os.environ.get('EULER_SMTP_RELAY', '127.0.0.1:8025'),
             terms_version=os.environ.get('TERMS_VERSION', '1'),
-            ws_sockets=_ws_sockets_from_env(),
+            user_socket_dir=os.environ.get('EULER_USER_SOCKET_DIR', '/run/euler').strip(),
         )
-
-
-#: The web profiles that run a shell instance (DD-13); admin is local-only.
-_WEB_PROFILES: tuple[str, ...] = ('reader', 'contributor', 'maintainer')
-
-
-def _ws_sockets_from_env() -> tuple[Path, ...]:
-    """The per-profile ws sockets for the DD-14 teardown push.
-
-    ``EULER_WS_SOCKETS`` (``:``-separated paths) overrides for tests / odd layouts;
-    otherwise derive ``<run>/ws-<profile>.sock`` from ``EULER_WS_SOCKET_DIR`` (default
-    ``/run/euler``). An explicit empty ``EULER_WS_SOCKETS`` disables the push.
-    """
-    override = os.environ.get('EULER_WS_SOCKETS')
-    if override is not None:
-        return tuple(Path(p) for p in override.split(':') if p)
-    run_dir = Path(os.environ.get('EULER_WS_SOCKET_DIR', '/run/euler'))
-    return tuple(run_dir / f'ws-{profile}.sock' for profile in _WEB_PROFILES)

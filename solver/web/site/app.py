@@ -20,7 +20,8 @@ Actions (§6); the live terminal (Phase 6) lands on the same spine.
 """
 from __future__ import annotations
 
-__all__ = ['build_app']
+__all__ = ['build_app', 'add_content_routes', 'install_content',
+           'CONFIG_KEY', 'READABLE_KEY', '_MAX_BODY']
 
 import asyncio
 import html
@@ -583,27 +584,13 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
 
 # ── app wiring ────────────────────────────────────────────────────────────────────────
 
-def build_app(config: SiteConfig) -> web.Application:
-    """Build the content-service application for one process."""
-    authz = Authorizations.load()
-    pin = config.profile
+def add_content_routes(app: web.Application) -> None:
+    """Register the content route surface (the site-design §route contract) on *app*.
 
-    @web.middleware
-    async def identity_middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
-        request[SUBJECT_KEY] = _subject_from_headers(request, authz, pin)
-        return await handler(request)
-
-    app = web.Application(middlewares=[csp_middleware, identity_middleware],
-                          client_max_size=_MAX_BODY)
-    app[CONFIG_KEY] = config
-    # The /docs/file/ view may serve only the declared-readable object trees (DD-12):
-    # docs + about + solutions — every one a reader-floor read, so serving them from a
-    # docs:read-gated route grants nothing a docs:read holder can't already read (in
-    # the ladder docs:read and solutions:read are always co-granted).
-    app[READABLE_KEY] = [p for obj in ('docs', 'about', 'solutions')
-                         for p in authz.paths_for(obj) if p and not p.startswith('/')]
-    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
-                         autoescape=jinja2.select_autoescape(['html', 'xml']))
+    Shared by :func:`build_app` (the per-profile content service) and the per-user
+    service (:mod:`solver.web.user`), which folds these routes together with ``/ws`` —
+    so the one route table has a single definition and the two tiers cannot drift.
+    """
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/', home),
@@ -633,8 +620,41 @@ def build_app(config: SiteConfig) -> web.Application:
         web.post(r'/edit/solutions/{n:\d+}/{filename:[^/]+}', file_save),
         web.delete(r'/edit/solutions/{n:\d+}/{filename:[^/]+}', file_delete),
     ])
+
+
+def install_content(app: web.Application, config: SiteConfig, authz: Authorizations) -> None:
+    """Wire the content surface (config, readable roots, jinja, routes, static) onto *app*.
+
+    The caller owns app creation + the middleware chain (the identity middleware differs
+    between the per-profile and per-user tiers); this installs everything else.
+    """
+    app[CONFIG_KEY] = config
+    # The /docs/file/ view may serve only the declared-readable object trees (DD-12):
+    # docs + about + solutions — every one a reader-floor read, so serving them from a
+    # docs:read-gated route grants nothing a docs:read holder can't already read (in
+    # the ladder docs:read and solutions:read are always co-granted).
+    app[READABLE_KEY] = [p for obj in ('docs', 'about', 'solutions')
+                         for p in authz.paths_for(obj) if p and not p.startswith('/')]
+    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
+                         autoescape=jinja2.select_autoescape(['html', 'xml']))
+    add_content_routes(app)
     if config.serve_static:
         # Dev only — in production Caddy serves these from /etc/euler/web-content.
         app.router.add_static('/assets', config.static_dir / 'assets')
         app.router.add_static('/vendor', config.static_dir / 'vendor')
+
+
+def build_app(config: SiteConfig) -> web.Application:
+    """Build the (per-profile) content-service application for one process."""
+    authz = Authorizations.load()
+    pin = config.profile
+
+    @web.middleware
+    async def identity_middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
+        request[SUBJECT_KEY] = _subject_from_headers(request, authz, pin)
+        return await handler(request)
+
+    app = web.Application(middlewares=[csp_middleware, identity_middleware],
+                          client_max_size=_MAX_BODY)
+    install_content(app, config, authz)
     return app

@@ -84,7 +84,7 @@ class ResolveSubjectTest(unittest.TestCase):
     def _resolve(self, **env: str) -> Subject:
         with mock.patch.dict(os.environ, env, clear=False):
             os.environ.pop('SOLVER_TICKET', None)     # never inherit the caller's
-            os.environ.pop('EULER_PROFILE', None)     # ditto the instance pin
+            os.environ.pop('EULER_USER_SLUG', None)   # ditto the instance pin
             for k, v in env.items():
                 os.environ[k] = v
             return resolve_subject(self.root, self.authz)
@@ -119,11 +119,14 @@ class ResolveSubjectTest(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 self._resolve()
 
-    def test_ticket_plane_web_capped_at_maintainer(self) -> None:
+    def test_ticket_plane_web_is_not_capped(self) -> None:
+        """MT-10a: the per-user model drops the admin→maintainer web cap — an admin
+        account keeps full authority over the web, contained by its own uid + SRP."""
         with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'admin')):
             subj = self._resolve(SOLVER_TICKET='t')
         self.assertEqual(subj.channel, 'web')
-        self.assertEqual(subj.profile, 'maintainer')      # admin capped
+        self.assertEqual(subj.profile, 'admin')           # NOT capped (MT-10a)
+        self.assertTrue(subj.has('infra:execute'))
         self.assertEqual(subj.auth_method, 'shell-ticket')
 
     def test_ticket_failure_aborts(self) -> None:
@@ -131,24 +134,24 @@ class ResolveSubjectTest(unittest.TestCase):
             with self.assertRaises(SystemExit):
                 self._resolve(SOLVER_TICKET='bad')
 
-    def test_ticket_profile_must_match_the_instance_pin(self) -> None:
-        """DD-13: the forking ws instance *is* the rung's uid, so a ticket for another
-        rung means misrouting or a bypass — the child refuses to start."""
+    def test_ticket_user_must_match_the_instance_slug_pin(self) -> None:
+        """MT-4/MT-7: the forking instance *is* the user's uid, so a ticket whose e-mail
+        maps to a different system slug means misrouting or a bypass — the child aborts."""
         with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'maintainer')):
             with self.assertRaises(SystemExit):
-                self._resolve(SOLVER_TICKET='t', EULER_PROFILE='reader')
+                self._resolve(SOLVER_TICKET='t', EULER_USER_SLUG='someone-else-000000')
 
-    def test_ticket_profile_matching_the_pin_starts(self) -> None:
+    def test_ticket_matching_the_slug_pin_starts(self) -> None:
         with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'contributor')):
-            subj = self._resolve(SOLVER_TICKET='t', EULER_PROFILE='contributor')
+            subj = self._resolve(SOLVER_TICKET='t', EULER_USER_SLUG=system_slug('x@y.z'))
         self.assertEqual(subj.profile, 'contributor')
+        self.assertEqual(subj.slug, system_slug('x@y.z'))
 
-    def test_admin_ticket_capped_then_matched_against_a_maintainer_pin(self) -> None:
-        """The maintainer cap is applied *before* the pin check, so an (impossible)
-        admin ticket on the maintainer instance resolves as maintainer, not an abort."""
-        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'admin')):
-            subj = self._resolve(SOLVER_TICKET='t', EULER_PROFILE='maintainer')
-        self.assertEqual(subj.profile, 'maintainer')
+    def test_admin_ticket_matches_its_own_slug_pin(self) -> None:
+        """An admin account's PTY child on its own per-user instance resolves as admin."""
+        with mock.patch('solver.auth.identity._redeem_ticket', return_value=('boss@y.z', 'admin')):
+            subj = self._resolve(SOLVER_TICKET='t', EULER_USER_SLUG=system_slug('boss@y.z'))
+        self.assertEqual(subj.profile, 'admin')
 
 
 class SystemSlugTest(unittest.TestCase):
