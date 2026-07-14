@@ -13,21 +13,19 @@
 #
 #   install / uninstall / status  — the SHARED layer, once per host:
 #     - the euler-user parent group (egress + traversal);
-#     - a shared bare mirror /var/lib/euler/mirror.git — one ciphertext object
-#       store every per-user clone hardlinks from, refreshed from the operator's
-#       working tree (MT-13). Objects in git are always ciphertext, so the mirror
-#       never holds plaintext;
 #     - /etc/euler/user.env (scoped runtime config, no secrets);
 #     - the socket-activated euler-user@.service + euler-user@.socket template,
 #       deferred until solver.web.user lands in the /opt/euler venv (step 4), exactly
 #       as ws.sh defers its unit until solver.web.ws exists.
 #
 #   provision / deprovision <slug>  — ONE collaborator:
-#     provision   create euler-user-<slug> + home (0700), clone the repo into
-#                 ~/euler on branch user/<slug> with the crypt filter DISABLED (so
-#                 solutions/private/** stays ciphertext at rest — the filter is wired
-#                 later, in the web shell, once the user is key-authorized, §6), lay
-#                 down ~/.euler (0700, secrets dir), and enable the instance socket.
+#     provision   create euler-user-<slug> + home (0700), clone ~/euler DIRECTLY from
+#                 the public GitHub repo (anonymous read — no credentials) on branch
+#                 user/<slug> with the crypt filter DISABLED (so solutions/private/**
+#                 stays ciphertext at rest — GitHub holds only the filter's ciphertext,
+#                 and the filter is wired later, in the web shell, once the user is
+#                 key-authorized, §6), lay down ~/.euler (0700, secrets dir), and enable
+#                 the instance socket.
 #     deprovision stop + disable the instance, then (prompted) userdel + remove the
 #                 home. Dropping the account's master-key access is a SEPARATE admin
 #                 crypto act (`key-rekey`), reported here — it needs the master key,
@@ -52,7 +50,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-HOME_DIR="$(dirname "${PROJECT_ROOT}")"                # the operator home the repo lives in
 
 SYS_DIR="/etc/euler"
 USER_ENV="${SYS_DIR}/user.env"                         # scoped runtime config (root:euler-web 0640)
@@ -60,8 +57,6 @@ EGRESS_ENV="${SYS_DIR}/egress.env"                     # HTTPS_PROXY (egress.sh)
 
 WEB_GROUP="euler-web"
 USER_GROUP="euler-user"                                # parent group: every per-user uid joins it
-STATE_LIB="/var/lib/euler"
-MIRROR="${STATE_LIB}/mirror.git"                       # shared ciphertext object store (MT-13)
 USER_HOME_BASE="/home"                                 # euler-user-<slug> homes live here
 
 SERVICE_TEMPLATE="euler-user@.service"
@@ -77,18 +72,18 @@ usage() {
     cat <<USAGE
 Usage: $0 <action> [args]
 
-  install                      Create the euler-user group, the shared bare mirror,
-                               /etc/euler/user.env, and — when solver.web.user is in
-                               the /opt/euler venv — the euler-user@.service/.socket
-                               template. Idempotent.
-  uninstall                    Remove the template + user.env + mirror (prompted).
-                               Provisioned users must be deprovisioned first.
-  upgrade                      Re-assert the shared layer and refresh the mirror.
-  redeploy                     Refresh /etc/euler/user.env and the mirror only.
+  install                      Create the euler-user group, /etc/euler/user.env, and —
+                               when solver.web.user is in the /opt/euler venv — the
+                               euler-user@.service/.socket template. Idempotent.
+  uninstall                    Remove the template + user.env (prompted). Provisioned
+                               users must be deprovisioned first.
+  upgrade                      Re-assert the shared layer.
+  redeploy                     Refresh /etc/euler/user.env only.
   provision <slug> <email> <profile>
                                Provision one collaborator: uid + home (0700), a
-                               filter-disabled clone on branch user/<slug>, ~/.euler,
-                               and the instance socket. Idempotent.
+                               filter-disabled clone of ~/euler from the public GitHub
+                               repo on branch user/<slug>, ~/.euler, and the instance
+                               socket. Idempotent.
   deprovision <slug>           Tear one collaborator down: stop/disable the instance,
                                then (prompted) userdel + remove the home. Reports the
                                required 'key-rekey' to drop master-key access.
@@ -160,23 +155,9 @@ deploy_user_venv() {
     fi
 }
 
-# The shared bare mirror: one ciphertext object store every per-user clone hardlinks
-# from (MT-13). Created from — and refreshed from — the operator's working tree, which
-# the operator keeps synced with origin/master by their normal git workflow. No network
-# and no credentials on this path: git objects are ciphertext, and the operator already
-# owns the plaintext tree.
-ensure_mirror() {
-    sudo mkdir -p "${STATE_LIB}"
-    if [ -d "${MIRROR}" ]; then
-        echo "Refreshing the shared mirror ${MIRROR} from ${PROJECT_ROOT}..."
-        sudo git -C "${MIRROR}" fetch --prune "${PROJECT_ROOT}" '+refs/heads/*:refs/heads/*'
-    else
-        echo "Creating the shared bare mirror ${MIRROR} from ${PROJECT_ROOT}..."
-        sudo git clone --bare "${PROJECT_ROOT}" "${MIRROR}"
-    fi
-    sudo chown -R root:"${USER_GROUP}" "${MIRROR}"
-    sudo chmod -R g+rX "${MIRROR}"
-}
+# The public GitHub URL every per-user clone is taken from — read straight off the
+# operator repo's origin remote, so there is one source of truth and no hard-coding.
+origin_url() { git -C "${PROJECT_ROOT}" remote get-url origin 2>/dev/null; }
 
 # Scoped runtime config for the per-user instances. No ANTHROPIC_API_KEY and no master
 # key: each user brings their own, in their own vault (MT-6). The per-instance
@@ -299,10 +280,11 @@ ensure_user_identity() {
 }
 
 # Clone the repo into ~/euler on branch user/<slug>, filter DISABLED → ciphertext at
-# rest. Clone from the shared mirror (local, hardlinked objects, no credentials); repoint
-# origin at the real remote so the user can push user/<slug> as themselves later (MT-2).
+# rest. Clone straight from the public GitHub repo: GitHub stores only the filter's
+# ciphertext (the clean output), anonymous read needs no credentials, and origin stays
+# the GitHub URL so the user can push user/<slug> as themselves later (MT-2).
 provision_clone() {
-    local slug="$1" user home clone origin_url
+    local slug="$1" user home clone url
     user="$(user_of "${slug}")"
     home="$(home_of "${slug}")"
     clone="${home}/euler"
@@ -310,16 +292,15 @@ provision_clone() {
         echo "Clone ${clone} already present — leaving it in place."
         return 0
     fi
-    if [ ! -d "${MIRROR}" ]; then
-        echo "Error: shared mirror ${MIRROR} missing — run '$0 install' first." >&2
+    url="$(origin_url)"
+    if [ -z "${url}" ]; then
+        echo "Error: could not read the origin URL from ${PROJECT_ROOT} — is it a checkout?" >&2
         return 1
     fi
-    origin_url="$(git -C "${PROJECT_ROOT}" remote get-url origin 2>/dev/null || echo "${PROJECT_ROOT}")"
-    echo "Cloning into ${clone} (filter disabled → ciphertext at rest)..."
+    echo "Cloning ${url} into ${clone} (filter disabled → ciphertext at rest)..."
     # No filter is wired in the clone's local config, and .gitattributes' rule is not
-    # 'required', so solutions/private/** checks out as the ciphertext held in git.
-    sudo git clone --branch master "${MIRROR}" "${clone}"
-    sudo git -C "${clone}" remote set-url origin "${origin_url}"
+    # 'required', so solutions/private/** checks out as the ciphertext GitHub holds.
+    sudo git clone --branch master "${url}" "${clone}"
     sudo git -C "${clone}" checkout -B "user/${slug}"
     sudo chown -R "${user}:${user}" "${clone}"
 }
@@ -340,10 +321,6 @@ do_provision() {
     check_can_sudo || return 1
     require_python || return 1
     ensure_shared_groups
-    if [ ! -d "${MIRROR}" ]; then
-        echo "Error: run '$0 install' before provisioning (shared mirror + config missing)." >&2
-        return 1
-    fi
     ensure_user_identity "${slug}"
     provision_clone "${slug}"
     enable_socket "${slug}"
@@ -404,7 +381,6 @@ do_install() {
     require_python || return 1
     ensure_shared_groups
     deploy_user_venv
-    ensure_mirror
     deploy_user_env
     sudo mkdir -p /run/euler
 
@@ -420,8 +396,7 @@ do_install() {
 do_redeploy() {
     check_can_sudo || return 1
     deploy_user_env
-    ensure_mirror
-    echo "Refreshed ${USER_ENV} and the shared mirror."
+    echo "Refreshed ${USER_ENV}."
     do_status
 }
 
@@ -443,8 +418,6 @@ do_uninstall() {
     sudo rm -f "${USER_ENV}"
 
     local reply
-    read -r -p "Remove the shared mirror ${MIRROR}? [y/N] " reply
-    [[ "${reply}" =~ ^[Yy]$ ]] && sudo rm -rf "${MIRROR}"
     read -r -p "Remove the ${USER_GROUP} group? [y/N] " reply
     [[ "${reply}" =~ ^[Yy]$ ]] && { getent group "${USER_GROUP}" > /dev/null && sudo groupdel "${USER_GROUP}" 2>/dev/null || true; }
     echo "Per-user provisioning uninstall complete."
@@ -462,7 +435,6 @@ do_status() {
     fi
     getent group "${USER_GROUP}" > /dev/null \
         && echo "group:       ✓ ${USER_GROUP}" || echo "group:       ✗ ${USER_GROUP} missing"
-    [ -d "${MIRROR}" ] && echo "mirror:      ✓ ${MIRROR}" || echo "mirror:      ✗ ${MIRROR} missing"
     [ -f "${USER_ENV}" ] && echo "config:      ✓ ${USER_ENV}" || echo "config:      ✗ ${USER_ENV} missing"
     if [ -f "${SOCKET_DEST}" ]; then
         echo "template:    ✓ ${SOCKET_TEMPLATE} + ${SERVICE_TEMPLATE}"

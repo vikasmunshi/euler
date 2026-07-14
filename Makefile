@@ -193,28 +193,29 @@ redeploy-ws:
 	./scripts/setup/ws.sh redeploy
 	@printf "✓ redeploy-ws complete: web-shell instances restarted\n"
 
-## Install the per-user provisioning layer (MT-7): the euler-user group, the shared
-## ciphertext mirror, /etc/euler/user.env, and the euler-user@.service/.socket template
-## (deferred until solver.web.user lands in step 4). Per-collaborator uids/homes/clones are
-## created later by `users add <email>` (solver.web.auth.commands → user.sh provision).
+## Install the per-user provisioning layer (MT-7): the euler-user group,
+## /etc/euler/user.env, and the euler-user@.service/.socket template (deferred until
+## solver.web.user lands in step 4). Per-collaborator uids/homes/clones are created later
+## by `users add <email>` (solver.web.auth.commands → user.sh provision), which clones
+## ~/euler straight from the public GitHub repo (ciphertext at rest, MT-13).
 install-user:
 	./scripts/setup/user.sh install
 	@printf "✓ install-user complete: per-user provisioning layer deployed\n"
 
-## Remove the per-user layer (refuses while any euler-user-<slug> remains; prompts for the mirror)
+## Remove the per-user layer (refuses while any euler-user-<slug> remains)
 uninstall-user:
 	./scripts/setup/user.sh uninstall
 	@printf "✓ uninstall-user complete: per-user provisioning layer removed\n"
 
-## Re-assert the shared per-user layer and refresh the mirror (picks up step-4's unit template)
+## Re-assert the shared per-user layer (picks up step-4's unit template)
 upgrade-user:
 	./scripts/setup/user.sh upgrade
 	@printf "✓ upgrade-user complete: per-user provisioning layer upgraded\n"
 
-## Fast path: refresh /etc/euler/user.env and the shared mirror only
+## Fast path: refresh /etc/euler/user.env only
 redeploy-user:
 	./scripts/setup/user.sh redeploy
-	@printf "✓ redeploy-user complete: per-user config + mirror refreshed\n"
+	@printf "✓ redeploy-user complete: per-user config refreshed\n"
 
 ## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
 install-nodejs:

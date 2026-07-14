@@ -221,8 +221,10 @@ pubkey simply isn't in `enc-key.json`) — MT-1 and MT-6 compose cleanly.
 
 `users add <email> <profile>` (admin, sudo) →
 1. create the system user `euler-user-<slug>` + home (`0700`);
-2. clone the repo into `~/euler` **using the admin's git credentials**, filter
-   **disabled** (ciphertext at rest, §6), checked out on a fresh branch `user/<slug>`;
+2. clone `~/euler` **directly from the public GitHub repo** (anonymous read — no
+   credentials), filter **disabled** (ciphertext at rest, §6), checked out on a fresh
+   branch `user/<slug>` (origin stays the GitHub URL, so the user pushes `user/<slug>`
+   as themselves later);
 3. lay down the socket-activated `euler-user@<slug>` unit + socket;
 4. mint the web **invite** (SRP registration → the user sets their password → their
    vault `VK`/`wrap(PK,VK)` is initialised on first login, §7);
@@ -348,16 +350,15 @@ changes:
    `EULER_PROFILE` pin with a per-user (slug) pin, and dropping the `_WEB_CAP` admin→maintainer
    cap (MT-10a — admin becomes web-reachable) with its ticket rewrite.
 3. **Provisioning kit** (MT-7) — **✅ built.** `scripts/setup/user.sh`: a shared plane
-   (`install`/`uninstall`/`status`) that lays down the `euler-user` group, a shared bare
-   **mirror** (`/var/lib/euler/mirror.git` — one ciphertext object store every clone
-   hardlinks from, refreshed from the operator tree, MT-13), `/etc/euler/user.env` (no
-   secrets), and the socket-activated `euler-user@.service`/`.socket` template (deferred
-   until `solver.web.user` lands in step 4, as `ws.sh` defers its unit); and a per-user
-   plane (`provision <slug> <email> <profile>` / `deprovision <slug>`) that creates the
-   `euler-user-<slug>` uid + home (`0700`), the **filter-disabled clone** on branch
-   `user/<slug>` (ciphertext at rest — the clone inherits the tracked `.gitattributes`
-   rule but not the local filter config, so private solutions pass through un-smudged; the
-   crux, **verified** against the real repo), `~/.euler` (the uid-private secrets dir), and
+   (`install`/`uninstall`/`status`) that lays down the `euler-user` group,
+   `/etc/euler/user.env` (no secrets), and the socket-activated
+   `euler-user@.service`/`.socket` template (deferred until `solver.web.user` lands in step
+   4, as `ws.sh` defers its unit); and a per-user plane (`provision <slug> <email> <profile>`
+   / `deprovision <slug>`) that creates the `euler-user-<slug>` uid + home (`0700`), the
+   **filter-disabled clone** of `~/euler` **straight from the public GitHub repo** on branch
+   `user/<slug>` (ciphertext at rest — the clone inherits the tracked `.gitattributes` rule
+   but not the local filter config, so private solutions pass through un-smudged; the crux,
+   **verified** against the real repo, MT-13), `~/.euler` (the uid-private secrets dir), and
    the instance socket. `users add`/`remove` (`solver.web.auth.commands`) drive it under
    sudo: a web `add` provisions **before** minting the invite (no dangling invite to a box
    with no shell), a `remove` deprovisions **after** dropping the account; a bare os-login
@@ -393,12 +394,16 @@ are recreated, not migrated (§14.5).
    `EULER_VAULT_KEY_FILE` path (§7). Verified that a git clean/smudge **filter subprocess
    inherits** the delivery env from the shell → git → filter, so the filter can reach
    `VK` at checkout time.
-3. **Disk & scale (MT-13) — verified.** Per-user `git clone --reference <shared-mirror>`
-   points `objects/info/alternates` at a **shared read-only object store** (ciphertext
-   blobs shared once); each user's clone carries only its own new commits, and the smudge
-   runs **per-clone with that user's key** → plaintext only in their worktree. Confirmed:
-   the reference clone shares objects and checks out plaintext with the key in the tmpfs
-   file. Provisioning maintains one shared bare mirror refreshed from `origin/master`.
+3. **Ciphertext at rest from a public clone (MT-13) — verified.** The repo is **public
+   on GitHub, and GitHub stores the filter's ciphertext** (only the clean output is ever
+   pushed), so provisioning just `git clone`s `~/euler` **directly from the public repo** —
+   no credentials to read, no shared mirror, no `--reference`/alternates machinery. The
+   clone lands ciphertext because it inherits the tracked `.gitattributes` rule but not the
+   local filter config (never cloned), so `solutions/private/**` checks out un-smudged; the
+   filter is wired **per-clone, later, with that user's own key** → plaintext only in their
+   worktree. Confirmed against the real repo: a filter-unwired clone checks the private tree
+   out as `SLVR\x01` ciphertext. (A shared bare mirror was considered for disk sharing but
+   dropped — for a named invite list a full public clone is simpler and the disk is trivial.)
 4. **Slug scheme (MT-14) — decided.** `solver/auth.slugify` emits `.` (e.g.
    `mercanther_gmail.com-3f9e97`), which **fails `useradd`'s `NAME_REGEX`**
    (`[a-zA-Z0-9_-]` only). The multi-tenant **system slug** is therefore a stricter
