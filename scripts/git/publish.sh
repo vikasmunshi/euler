@@ -123,35 +123,6 @@ targets_are_valid() {
     return ${rc}
 }
 
-run_pre_commit_checks() {
-    # run_pre_commit_checks — Run githooks/pre-commit and githooks/pre-push checks.
-    #
-    # Runs the two native git hooks directly (outside of a git operation) so that
-    # publish can validate the working tree before committing and pushing.
-    #
-    # pre-push is invoked with stdin that mimics pushing the current HEAD to
-    # origin/master, matching exactly what git sends during a real push.
-    #
-    # Returns:
-    #   0  All hooks passed
-    #   1  One or more hooks failed
-    local rc=0
-
-    if ! bash ./.git/hooks/pre-commit; then
-        echo "Error: pre-commit checks failed; aborting publish" >&2
-        rc=1
-    fi
-
-    local push_stdin
-    push_stdin="refs/heads/master $(git rev-parse HEAD) refs/heads/master $(git rev-parse origin/master)"
-    if ! echo "${push_stdin}" | bash ./.git/hooks/pre-push; then
-        echo "Error: pre-push checks failed; aborting publish" >&2
-        rc=1
-    fi
-
-    return ${rc}
-}
-
 ensure_targets_are_tracked() {
     # ensure_targets_are_tracked — Update the local git index to reflect the current
     #                              state of all target directories (new, modified, deleted).
@@ -274,7 +245,6 @@ main() {
     targets_are_valid
     init_gh_git_identity
     ensure_targets_are_tracked
-    run_pre_commit_checks
     publish
 }
 

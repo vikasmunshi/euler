@@ -33,9 +33,9 @@ usage() {
     cat <<EOF
 Usage: $0 [install|uninstall|status|cleanup] [--force]
 
-  install      Write git hooks into .git/hooks/ (default)
+  install      Write git hooks into .git/hooks/
   uninstall    Remove the managed hooks from .git/hooks/
-  status       Show installed hooks: present, current vs stale, venv, backups
+  status       Show installed hooks: present, current vs stale, venv, backups (default)
   cleanup      Remove rotated hook backups (.bak.*) after confirmation
   --force      Overwrite existing hooks without creating a backup
 EOF
@@ -152,7 +152,7 @@ cleanup_backups() {
 }
 
 # Argument parsing — supports `install|uninstall` plus `--force` in any order.
-ACTION="install"
+ACTION="status"
 ACTION_SET=0
 for arg in "$@"; do
     case "${arg}" in
@@ -174,7 +174,7 @@ for arg in "$@"; do
             ;;
     esac
 done
-: "${ACTION_SET}"  # silence unused-var lints; default action is install
+: "${ACTION_SET}"  # silence unused-var lints; default action is status (read-only)
 
 case "${ACTION}" in
     install)
