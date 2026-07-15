@@ -310,7 +310,15 @@ provision_clone() {
     home="$(home_of "${slug}")"
     clone="${home}/euler"
     if [ -d "${clone}/.git" ]; then
-        echo "Clone ${clone} already present — leaving it in place."
+        # A repair-run keeps the clone but re-renders the hooks: the templates evolve
+        # (new gates), and the hooks live in .git/hooks — untracked, so nothing else
+        # refreshes them. githooks.sh install is idempotent and --force skips the
+        # backup rotation (the rendered copies carry no local edits by contract).
+        echo "Clone ${clone} already present — re-rendering the git hooks (venv ${VENV_DIR})..."
+        as_user "${user}" EULER_VENV="${VENV_DIR}" <<'HOOKS'
+set -euo pipefail
+bash "${HOME}/euler/scripts/setup/githooks.sh" install --force
+HOOKS
         return 0
     fi
     url="$(origin_url)"
