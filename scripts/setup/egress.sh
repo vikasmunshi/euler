@@ -139,16 +139,32 @@ ensure_dirs() {
     sudo mkdir -p "${SYS_DIR}"          # shared dir; frontend.sh owns its perms if present
 }
 
-# Write the default allowlist only if absent, so operator edits survive `upgrade`.
+# Write the default allowlist if absent; otherwise UNION any new default entries
+# into it (same shape as auth.sh's policy merge): operator additions always
+# survive, and a domain the defaults gained (e.g. .claude.ai for the Claude Code
+# installer) reaches a live host on `upgrade` instead of silently staying blocked.
+# A default the operator deliberately REMOVED comes back — remove it again or
+# keep a local comment; default-deny plus a named list makes re-adding visible.
 generate_allowlist() {
-    if sudo test -f "${ALLOWLIST}"; then
-        echo "Keeping existing allowlist ${ALLOWLIST}"
+    local entry added=()
+    if ! sudo test -f "${ALLOWLIST}"; then
+        echo "Writing default allowlist ${ALLOWLIST}..."
+        printf '%s\n' "${DEFAULT_ALLOWLIST[@]}" | sudo tee "${ALLOWLIST}" > /dev/null
+        sudo chown root:"${PROXY_GROUP}" "${ALLOWLIST}"
+        sudo chmod 0640 "${ALLOWLIST}"
         return 0
     fi
-    echo "Writing default allowlist ${ALLOWLIST}..."
-    printf '%s\n' "${DEFAULT_ALLOWLIST[@]}" | sudo tee "${ALLOWLIST}" > /dev/null
-    sudo chown root:"${PROXY_GROUP}" "${ALLOWLIST}"
-    sudo chmod 0640 "${ALLOWLIST}"
+    for entry in "${DEFAULT_ALLOWLIST[@]}"; do
+        if ! sudo grep -qxF "${entry}" "${ALLOWLIST}"; then
+            echo "${entry}" | sudo tee -a "${ALLOWLIST}" > /dev/null
+            added+=("${entry}")
+        fi
+    done
+    if (( ${#added[@]} > 0 )); then
+        echo "Allowlist ${ALLOWLIST}: added new default entries: ${added[*]}"
+    else
+        echo "Allowlist ${ALLOWLIST}: up to date (operator edits kept)"
+    fi
 }
 
 generate_squid_conf() {
