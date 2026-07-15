@@ -65,9 +65,16 @@ def _root_dir() -> Path:
     override = os.environ.get('EULER_REPO_ROOT', '').strip()
     if override and (root_override := Path(override)).is_dir():
         return root_override
+    # Shed git's own environment before probing: when git runs the filter (stash,
+    # rebase, checkout) it exports GIT_DIR — and with GIT_DIR set but no
+    # GIT_WORK_TREE, `rev-parse --show-toplevel` reports the CWD as the toplevel,
+    # deriving a root of solver/crypto and a secrets dir of solver/.crypto — the
+    # filter then can't find the key and dies mid-protocol. The probe must resolve
+    # from its own cwd path alone.
+    probe_env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
     try:
         result = run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True,
-                     cwd=Path(__file__).parent)
+                     cwd=Path(__file__).parent, env=probe_env)
     except OSError:                                   # git not installed at all
         result = None
     if result is not None and result.returncode == 0 and (root := result.stdout.strip()):

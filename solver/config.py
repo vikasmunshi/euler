@@ -55,8 +55,12 @@ def _root_dir() -> Path:
         return _enter_root(root)
 
     a_package_dir = Path(__file__).parent.resolve()
+    # Shed git's own environment (GIT_DIR etc.): inherited from a git-spawned parent
+    # (hooks, filters), it makes rev-parse report the CWD as the toplevel — the wrong
+    # root. Same guard as solver.crypto.config._root_dir.
+    probe_env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
     result = subprocess.run('git rev-parse --show-toplevel', capture_output=True, text=True, shell=True,
-                            cwd=a_package_dir)
+                            cwd=a_package_dir, env=probe_env)
     if result.returncode == 0 and (git_root := result.stdout.strip()) != '':
         return _enter_root(Path(git_root))
     raise ValueError(f'Failed to get git root (set {REPO_ROOT_ENV} for a non-checkout deploy)')
