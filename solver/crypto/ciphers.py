@@ -91,7 +91,14 @@ def load_private_key() -> X25519PrivateKey:
         vault_key: bytes | None = session_vault_key()
         if vault_key is None:
             raise ValueError(f'{key_file} is vault-encrypted but the vault is locked; unlock it first')
-        raw = decrypt_secret(vault_key, raw)
+        try:
+            raw = decrypt_secret(vault_key, raw)
+        except InvalidTag:
+            # A stale/foreign session key must surface as the SAME failure type as a
+            # locked vault — "unreadable", never "absent" — so no caller can mistake a
+            # vault failure for a missing identity and mint a new key over the real one.
+            raise ValueError(f'{key_file} is vault-encrypted but the session vault key does not '
+                             'decrypt it (stale session key, or a foreign vault?)') from None
     key = load_pem_private_key(raw, password=None)
     if not isinstance(key, X25519PrivateKey):
         raise ValueError(f'{key_file} does not contain an X25519 private key')

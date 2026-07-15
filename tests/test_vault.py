@@ -308,5 +308,64 @@ class PersistPrivateKeyTest(VaultTestCase):
         self.assertTrue(self.id_file.read_bytes().startswith(b'-----BEGIN PRIVATE KEY-----'))
 
 
+class VaultFailureIsNeverANewIdentityTest(VaultTestCase):
+    """The fragility class: an id that EXISTS but cannot be read (locked vault, stale
+    session key, lost vault file) is a vault failure to fix — never 'no key, mint one'."""
+
+    def _encrypted_id(self) -> tuple[bytes, bytes]:
+        """A vault + a vault-encrypted id; returns (vk, the id file's bytes)."""
+        vk = vault.init_vault('pw')
+        key = self._write_plain_key()
+        del key
+        self.id_file.write_bytes(vault.encrypt_secret(vk, self.id_file.read_bytes()))
+        return vk, self.id_file.read_bytes()
+
+    def test_stale_session_key_is_unreadable_not_absent(self) -> None:
+        self._encrypted_id()
+        vault.write_session_key(vault.new_vault_key())      # a WRONG key in the session
+        with self.assertRaises(ValueError) as ctx:          # ValueError, never InvalidTag
+            ciphers.load_private_key()
+        self.assertIn('does not decrypt', str(ctx.exception))
+
+    def test_user_command_refuses_to_mint_over_a_locked_id(self) -> None:
+        from solver.crypto.keys import user
+        _, original = self._encrypted_id()
+        vault.clear_session_key()                           # locked
+        self._clear_caches()
+        self.assertEqual(user(), 1)
+        self.assertEqual(self.id_file.read_bytes(), original)   # byte-identical
+        self.assertFalse(self.id_file.with_suffix('.1').exists())  # no rotation either
+
+    def test_refused_persist_leaves_the_id_in_place(self) -> None:
+        from solver.crypto.keys import _persist_private_key
+        _, original = self._encrypted_id()
+        vault.clear_session_key()
+        self._clear_caches()
+        with self.assertRaises(PermissionError):
+            _persist_private_key(x25519.X25519PrivateKey.generate())
+        self.assertEqual(self.id_file.read_bytes(), original)   # not rotated away
+        self.assertFalse(self.id_file.with_suffix('.1').exists())
+
+    def test_orphaned_vault_files_are_detected_and_block_init(self) -> None:
+        from solver.crypto.keys import _orphaned_vault_files, vault as vault_cmd
+        vk, _ = self._encrypted_id()
+        self.env_file.write_bytes(vault.encrypt_secret(vk, b'ANTHROPIC_API_KEY=sk-x\n'))
+        crypto_config['vault_file'].unlink()                # the vault file is LOST
+        vault.clear_session_key()
+        self._clear_caches()
+        self.assertEqual(sorted(_orphaned_vault_files()), ['env', 'id'])
+        self.assertEqual(vault_cmd('init'), 1)              # refuses to paper over it
+        self.assertFalse(vault.vault_exists())
+
+    def test_stale_session_key_on_env_is_unreadable_not_missing(self) -> None:
+        vk = vault.init_vault('pw')
+        self.env_file.write_bytes(vault.encrypt_secret(vk, b'ANTHROPIC_API_KEY=sk-x\n'))
+        vault.write_session_key(vault.new_vault_key())      # wrong key
+        models.get_api_key.cache_clear()
+        with self.assertRaises(ValueError) as ctx:
+            models.get_api_key()
+        self.assertIn('does not decrypt', str(ctx.exception))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -77,9 +77,10 @@ def _persist_private_key(private_key: X25519PrivateKey) -> None:
     key_file: Path = config['private_key_file']
     key_file.parent.mkdir(parents=True, exist_ok=True)
     key_file.parent.chmod(0o700)
-    _rotate_backups(key_file)
     data: bytes = private_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8, NoEncryption())
     at_rest: str = 'plain, machine-local `0600`'
+    # Every refusal must happen BEFORE the backup rotation: a refused persist that has
+    # already rotated leaves no id file at all — worse than either state it refused.
     if vault_mod.vault_exists():
         vault_key: bytes | None = vault_mod.session_vault_key()
         if vault_key is None:
@@ -88,6 +89,7 @@ def _persist_private_key(private_key: X25519PrivateKey) -> None:
             raise PermissionError('vault locked')
         data = vault_mod.encrypt_secret(vault_key, data)
         at_rest = 'vault-encrypted'
+    _rotate_backups(key_file)
     key_file.write_bytes(data)
     key_file.chmod(0o600)
     load_private_key.cache_clear()
@@ -173,11 +175,31 @@ def user_authorize(public_key: str) -> int:
 # ==================================================================================================================== #
 @register(requires='reader', help_text="Show public key & enc-key access; --regen for new key-pair.")
 def user(regen: bool = False) -> int:
-    """Show the current identity and whether it can decrypt; create a key pair on first run or --regen."""
-    try:
-        private_key: X25519PrivateKey | None = load_private_key()
-    except (FileNotFoundError, ValueError):
-        private_key = None
+    """Show the current identity and whether it can decrypt; create a key pair on first run or --regen.
+
+    A key pair is created only when the identity file is **truly absent** (first run) or on
+    an explicitly confirmed ``--regen``. An id file that *exists but cannot be read* — the
+    vault is locked, the session key is stale, the vault file was lost — is a **vault
+    failure to fix, never a reason to mint a new identity**: replacing the key would
+    silently orphan the real one (and with it any enc-key authorization it carries).
+    """
+    id_file: Path = config['private_key_file']
+    private_key: X25519PrivateKey | None = None
+    if id_file.exists():
+        try:
+            private_key = load_private_key()
+        except ValueError as exc:
+            console.print(f'[error]error:[/error] your identity file exists but cannot be read: {exc}')
+            if not regen:
+                console.print('[muted]NOT creating a new key over it. Unlock the vault first '
+                              '(web: sign out and back in; terminal: check [accent]vault status[/accent] '
+                              'and ~/.euler/vault). To deliberately REPLACE the unreadable identity, '
+                              'run [accent]user --regen[/accent].[/muted]')
+                return 1
+            if not confirm('REPLACE the unreadable identity with a fresh key pair? '
+                           '(the old file is kept as a rotated backup; any enc-key access it had is lost)'):
+                console.print('[muted]Keeping the existing (unreadable) identity file.[/muted]')
+                return 1
     if regen and private_key is not None and not confirm('Replace the existing private key with a new one?'):
         console.print('[muted]Keeping the existing private key.[/muted]')
         regen = False
@@ -190,7 +212,10 @@ def user(regen: bool = False) -> int:
                 carry = (public_key_hex(private_key.public_key()), read_master_key())
             except (FileNotFoundError, KeyError, ValueError):
                 carry = None
-        private_key = _create_user_key()
+        try:
+            private_key = _create_user_key()
+        except PermissionError:
+            return 1                     # vault present but locked — persist refused (message printed)
         if carry is not None:
             old_pub, master_key = carry
             data: dict[str, str] = read_enc_key_file()
@@ -232,22 +257,50 @@ def _prompt_new_password(prompt: str) -> str | None:
     return first
 
 
+def _orphaned_vault_files() -> list[str]:
+    """Vault-encrypted secret files with NO vault file to unwrap their key — a broken state.
+
+    Their ``VK`` is unrecoverable without ``~/.euler/vault``, so they are unreadable by
+    anyone; every caller must surface this loudly rather than treat it as "no vault yet".
+    """
+    if vault_mod.vault_exists():
+        return []
+    return [p.name for p in (config['private_key_file'], config['env_file'])
+            if p.exists() and vault_mod.is_vault_encrypted(p.read_bytes())]
+
+
 def _vault_status() -> int:
-    """Report whether the vault exists, which secrets are encrypted, and whether the session is unlocked."""
+    """Report whether the vault exists, the state of each secret file, and whether this
+    session's key actually decrypts them (a stale/foreign key is flagged, not hidden)."""
     id_file: Path = config['private_key_file']
     env_file: Path = app_config.env_file
+    vault_key: bytes | None = vault_mod.session_vault_key() if vault_mod.vault_exists() else None
 
     def _state(path: Path) -> str:
         if not path.exists():
             return '[muted]absent[/muted]'
-        return ('[success]encrypted[/success]' if vault_mod.is_vault_encrypted(path.read_bytes())
-                else '[warning]plaintext[/warning]')
+        raw = path.read_bytes()
+        if not vault_mod.is_vault_encrypted(raw):
+            return '[warning]plaintext[/warning]'
+        if not vault_mod.vault_exists():
+            return '[error]encrypted — but the vault file is MISSING (key unrecoverable)[/error]'
+        if vault_key is None:
+            return '[success]encrypted[/success] [muted](locked — cannot verify)[/muted]'
+        try:
+            vault_mod.decrypt_secret(vault_key, raw)
+            return '[success]encrypted[/success] [muted](decrypts)[/muted]'
+        except InvalidTag:
+            return '[error]encrypted — the session key does NOT decrypt it (foreign vault?)[/error]'
 
-    if not vault_mod.vault_exists():
+    if orphans := _orphaned_vault_files():
+        console.print(f'[error]BROKEN:[/error] {", ".join(orphans)} are vault-encrypted but '
+                      '~/.euler/vault is missing — restore it from backup, or recover deliberately '
+                      '([accent]user --regen[/accent] for the id; re-create env).')
+    elif not vault_mod.vault_exists():
         console.print('[warning]No vault.[/warning] `id` and `env` rest in plaintext; run '
                       '[accent]vault init[/accent] to encrypt them.')
     else:
-        unlocked: bool = vault_mod.session_vault_key() is not None
+        unlocked: bool = vault_key is not None
         console.print(f'[primary]vault:[/primary] present · '
                       f'session {"[success]unlocked[/success]" if unlocked else "[error]locked[/error]"}')
     console.print(f'[primary]id  ({id_file}):[/primary] {_state(id_file)}')
@@ -274,6 +327,14 @@ def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> in
         if vault_mod.vault_exists():
             console.print('[error]error:[/error] a vault already exists; use `vault change-password` '
                           'to change the password.')
+            return 1
+        if orphans := _orphaned_vault_files():
+            # A fresh vault would LOOK healthy while these stay encrypted under the lost
+            # key forever — refuse rather than paper over a broken state.
+            console.print(f'[error]error:[/error] {", ".join(orphans)} are already vault-encrypted '
+                          'but ~/.euler/vault is missing — their key is unrecoverable without it. '
+                          'Restore the vault file from backup, or remove/replace the unreadable '
+                          'files first ([accent]user --regen[/accent] re-mints the id).')
             return 1
         password: str | None = _prompt_new_password('New vault password')
         if password is None:

@@ -1240,6 +1240,12 @@ user
 
 ```text
 Show the current identity and whether it can decrypt; create a key pair on first run or --regen.
+
+A key pair is created only when the identity file is **truly absent** (first run) or on
+an explicitly confirmed ``--regen``. An id file that *exists but cannot be read* — the
+vault is locked, the session key is stale, the vault file was lost — is a **vault
+failure to fix, never a reason to mint a new identity**: replacing the key would
+silently orphan the real one (and with it any enc-key authorization it carries).
 ```
 
 ---

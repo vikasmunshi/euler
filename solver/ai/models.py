@@ -146,6 +146,8 @@ def get_api_key() -> str:
 
     from dotenv import dotenv_values
 
+    from cryptography.exceptions import InvalidTag
+
     from solver.crypto.vault import decrypt_secret, is_vault_encrypted, session_vault_key
 
     env_file = config.env_file
@@ -158,7 +160,12 @@ def get_api_key() -> str:
             vault_key = session_vault_key()
             if vault_key is None:
                 raise ValueError(f'{env_file} is vault-encrypted but the vault is locked; unlock it first')
-            values = dotenv_values(stream=StringIO(decrypt_secret(vault_key, raw).decode('utf-8')))
+            try:
+                plaintext = decrypt_secret(vault_key, raw)
+            except InvalidTag:
+                raise ValueError(f'{env_file} is vault-encrypted but the session vault key does not '
+                                 'decrypt it (stale session key, or a foreign vault?)') from None
+            values = dotenv_values(stream=StringIO(plaintext.decode('utf-8')))
         else:
             values = dotenv_values(env_file)
     value = values.get(name)
