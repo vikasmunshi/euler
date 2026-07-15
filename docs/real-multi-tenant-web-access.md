@@ -1,15 +1,20 @@
 # Real multi-tenant web access — design of record
 
-> **Status: design, converging.** This supersedes the web tier's per-*profile*
-> shared-uid model ([secure-web-server.md](secure-web-server.md) DD-13) with a
-> per-*user* one, and **replaces the dropped Phase 7 brokers** (DD-15). Instead of
-> brokering secrets away from a shared RCE uid, we *invert* the problem: each user
-> runs in their **own uid** with their **own keys**, so a user's secrets are exposed
-> only to that user's own code. The JupyterHub / multi-tenant dev-environment shape,
-> built almost entirely on primitives the project already has.
+> **Status: DELIVERED (build steps 1–7, 2026-07-14/15).** This supersedes the web
+> tier's per-*profile* shared-uid model ([secure-web-server.md](secure-web-server.md)
+> DD-13) with a per-*user* one, and **replaces the dropped Phase 7 brokers** (DD-15).
+> Instead of brokering secrets away from a shared RCE uid, we *invert* the problem:
+> each user runs in their **own uid** with their **own keys**, so a user's secrets are
+> exposed only to that user's own code. The JupyterHub / multi-tenant dev-environment
+> shape, built almost entirely on primitives the project already had.
 >
-> Decisions are recorded as **MT-N**. Cross-references to the delivered design use its
-> **DD-N**. Nothing here is built yet; this is the specification to build to.
+> Decisions are recorded as **MT-N**. Cross-references to the earlier design use its
+> **DD-N**. Every build step in [§13](#13--build-plan-sketch-subject-to-14) is ✅
+> built, runtime-verified, and pushed; the accepted risks are recorded as
+> [AR-4…AR-7 in security-notes.md](security-notes.md#accepted-risks). Deployment to a
+> live host is the §14.5 clean slate: `make uninstall-web`, then `make install-web`
+> (+ `make upgrade-auth` on a host with an existing policy SoR, to union in the
+> `git` grants).
 
 ## 1 · Why — the pivot
 
@@ -289,21 +294,23 @@ changes:
   users); per-user blast radius (a compromised shell reaches only *that* user's home,
   keys, clone); no operator secret on the web tier; private plaintext gated per-person
   (tightens AR-2); at-rest operator-opacity for user secrets (§7).
-- **New accepted risks** (to record in [security-notes.md](security-notes.md)):
-  - **AR-(key):** a key-authorized user's uid can unwrap the master key — the SEC-01
+- **New accepted risks** (recorded in [security-notes.md](security-notes.md), step 7):
+  - **AR-5 (key):** a key-authorized user's uid can unwrap the master key — the SEC-01
     class (decrypt the full corpus, forge ciphertext). Accepted per-person, revocable
     (`key-rekey`); gated by the deliberate `user-authorize` trust act.
   - **AR-4 (admin-over-web, MT-10a):** the highest-privilege operations are
     web-reachable; containment is the profile grant + SRP + isolation, not the channel.
-  - **AR-(vault, MT-6a):** the vault is at-rest opacity only — a malicious active root
+  - **AR-6 (vault, MT-6a):** the vault is at-rest opacity only — a malicious active root
     can read a live session's memory; unavoidable when secrets are used server-side.
-  - **AR-(eval, MT-6b):** `eval`/`benchmark` run untrusted *solution* code **as the
+  - **AR-7 (eval, MT-6b):** `eval`/`benchmark` run untrusted *solution* code **as the
     user**, in the same uid that holds the vault — so a malicious solution can read the
     running user's own `VK`, Anthropic key, and (if authorized) master key. Blast radius
     is **the user themselves** (not other users — different uids), which is the normal
     property of any shell that runs untrusted code as you; egress is still Squid-gated.
     Sandboxing `eval` in a lower-privilege sub-uid / namespace is the future hardening
     (the same one AR-1 already defers).
+  - (Security-notes' AR-1/AR-2 were reworked to the per-user containment; AR-3 — the
+    `euler-git` broker — was retired unbuilt.)
 - **Unchanged:** a collaborator's login is host code execution *as their own contained
   uid* (AR-1, now better bounded — their own sandbox, their own egress via Squid).
 

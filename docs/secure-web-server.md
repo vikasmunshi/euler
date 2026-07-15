@@ -15,13 +15,18 @@ Accepted risks and regression guards are in [security-notes.md](security-notes.m
 > [maintenance kit](#51--the-maintenance-kit-per-feature-contract) before the next began.
 >
 > **Phase 7 (credential brokers) was designed but _dropped_, not built** — see the note
-> on that phase below. The web tier's per-*profile* shared-uid model (DD-13) is being
-> superseded by a per-*user* redesign in which each collaborator brings their own keys
-> (their Anthropic key and an `enc-key.json`-authorized X25519 public key), gets their
-> own uid / home / repo worktree / branch, and the "brokered, never dispensed" tension of
-> DD-15 is _inverted_ rather than brokered. That work is specified in its own design of
-> record: **[real-multi-tenant-web-access.md](real-multi-tenant-web-access.md)**. DD-15
-> and AR-3 remain here as recorded design history (the reasoning that led to the pivot).
+> on that phase below. The web tier's per-*profile* shared-uid model (DD-13) **has been
+> superseded and its deployment retired**: the per-*user* redesign is **built** — each
+> collaborator brings their own keys (their Anthropic key and an `enc-key.json`-authorized
+> X25519 public key), gets their own uid / home / clone / branch, one `euler-user@<slug>`
+> instance serves their content **and** `/ws`, git is **native** in their clone, and the
+> "brokered, never dispensed" tension of DD-15 is _inverted_ rather than brokered. The
+> per-profile `content.sh`/`ws.sh` kits refuse install (uninstall/status remain for
+> teardown); `solver/web/site` and `solver/web/ws` live on as the libraries the per-user
+> service imports. Design of record:
+> **[real-multi-tenant-web-access.md](real-multi-tenant-web-access.md)**. DD-13/DD-15
+> and the superseded AR-3 remain here as recorded design history (the reasoning that led
+> to the pivot).
 > - ✅ **Phase 1** — Caddy + ACME edge (TLS, renewal, health endpoint).
 > - ✅ **Phase 2** — Squid egress (allowlist, `euler-proxy`).
 > - ✅ **Phase 3** — static maintenance holding page (503 fallback + CSP).
@@ -544,12 +549,15 @@ bootstrap template; the installer seeds the real file (including the **checkout 
 defaults fail-closed** to `infra:execute` (admin-only) — a new command is never silently
 exposed. Example mapping: `show → solutions:read`; `new`/`edit` → `solutions:write`;
 `evaluate`/`benchmark` → `solutions:execute`; `!` → `shell:execute`; `claude-*` →
-`ai:execute`; `git-*`/`key-*`/`manage-config` → `infra:execute` (the Phase-7
-*brokered* git verbs → `git:execute`, [DD-15](#dd-15--secrets-are-brokered-never-dispensed)); `users` splits by verb
-(`list → users:read`, mutations → `users:write`). A generated audit table in
-**`docs/authorizations.md`** (by `update-docs`) reports each command's module /
-channels / requires / least-profile — the generated audit view, distinct from the
-authored `authorizations.json`.
+`ai:execute`; `key-*`/`manage-config`/`git-merge`/`git-publish` → `infra:execute`;
+the **native** per-user git verbs (MT-2, superseding the Phase-7 brokered design):
+`git-status`/`git-sync` → `git:read` (`reader`+) and
+`git-commit`/`git-push`/`git-identity` → `git:execute` (`contributor`+); `users`
+splits by verb (`list → users:read`, mutations → `users:write`). A generated audit
+table in **`docs/authorizations.md`** (by `update-docs`) reports each command's
+module / requires / least-profile — the generated audit view, distinct from the
+authored `authorizations.json`. (The `channels=` axis described above was later
+removed — authorization is by profile only, MT-10.)
 
 **`modules.csv` → loader-only.** It keeps just `(module, registers_commands)`; the
 `terminal`/`web` columns are gone (channel now lives on the decorator, finer-grained). All
@@ -621,6 +629,15 @@ user). Both write the sudo-gated `/etc/euler/authorizations.json`.
 already revokes sessions to force it. Consistent with DD-11.
 
 ### DD-13 · Web-shell topology & gating
+
+> **Superseded (design history).** The per-profile topology below was built, deployed,
+> and then replaced by the per-**user** model (MT-4,
+> [real-multi-tenant-web-access.md](real-multi-tenant-web-access.md)): one
+> `euler-user@<slug>` instance per collaborator serves their content **and** `/ws`, and
+> the per-profile deployment is retired. What survives unchanged: the attach gate
+> (`solver:execute`, every rung gets a terminal), the ticket handshake, the PTY
+> machinery (`solver/web/ws` is the library the per-user service runs its terminal on),
+> and the DD-14 lifecycle pushes.
 
 **Decision.** The Phase-6 shell service (**`solver/web/ws`**) takes the content
 service's DD-12 shape exactly — per-profile template-unit instances,
@@ -738,6 +755,16 @@ that risk at its source — the auth service, which owns every revocation event 
 rather than having the ws tier poll for something it cannot observe.
 
 ### DD-15 · Secrets are brokered, never dispensed
+
+> **Superseded (design history — the brokers were never built).** The per-**user**
+> model ([real-multi-tenant-web-access.md](real-multi-tenant-web-access.md)) *inverted*
+> this principle instead of implementing it: each collaborator brings their **own**
+> secrets (their Anthropic key in their vault, their own X25519 key in `enc-key.json`,
+> their own gh login for git), held in their own uid-private home — so there is no
+> shared secret left to broker. AR-3 is retired;
+> [AR-5](security-notes.md#ar-5--a-key-authorized-users-uid-holds-master-key-access)
+> records the per-person key holders that replaced it. The reasoning below stands as
+> the analysis that led to that pivot.
 
 **Principle.** A secret lives **only** with the service that *performs the
 operation* it enables; that service exposes the **operation** — never the secret —

@@ -241,14 +241,14 @@ profile), and `objects` (permission namespace → filesystem paths):
 ```json
 {
   "profiles": {
-    "reader":      { "inherits": null,          "grants": ["solver:execute","solutions:read","docs:read","web-content:read"] },
-    "contributor": { "inherits": "reader",      "grants": ["solutions:write","solutions:execute"] },
-    "maintainer":  { "inherits": "contributor", "grants": ["solutions:delete","ai:execute","git:execute"] },
-    "admin":       { "inherits": "maintainer",  "grants": ["shell:execute","infra:execute"] }
+    "reader":      { "inherits": null,          "grants": ["about:read","docs:read","git:read","solutions:read","solver:execute","users:read","web-content:read"] },
+    "contributor": { "inherits": "reader",      "grants": ["git:execute","solutions:execute","solutions:write"] },
+    "maintainer":  { "inherits": "contributor", "grants": ["ai:execute","shell:execute","solutions:delete"] },
+    "admin":       { "inherits": "maintainer",  "grants": ["infra:execute","users:write"] }
   },
-  "users":   { "vikas.munshi@gmail.com": "maintainer", "mercanther@gmail.com": "reader" },
-  "objects": { "solutions": ["solutions/"], "docs": ["docs/"], "web-content": ["solver/web/content/"],
-               "solver": [], "shell": ["/bin/bash"], "ai": [], "git": [], "infra": [] }
+  "users":   { "vikas.munshi@gmail.com": "admin", "mercanther@gmail.com": "reader" },
+  "objects": { "solutions": ["solutions/"], "docs": ["docs/", "topics/"], "web-content": ["solver/web/content/"],
+               "solver": [], "shell": ["/bin/bash"], "ai": [], "git": [], "infra": [], "users": [] }
 }
 ```
 
@@ -257,13 +257,15 @@ A command/route declares `requires=[obj:perm]`; enforcement is `requires ⊆ per
 `infra:execute` (admin-only), so a new command is never silently exposed. Example mapping:
 `show → solutions:read`; `new`/`edit` → `solutions:write`; `evaluate`/`benchmark` →
 `solutions:execute`; `!` → `shell:execute`; `claude-*` → `ai:execute`;
-`git-*`/`key-*` → `infra:execute`, while the Phase-7 *brokered* git verbs
-(`git-status`/`git-commit`/`git-push` via `euler-git`,
-[DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed)) →
-`git:execute` (`maintainer`+); `users` splits (`list → users:read` for `reader`+,
+`key-*`/`git-merge`/`git-publish` → `infra:execute`, while the **native** per-user
+git verbs (MT-2, [real-multi-tenant-web-access.md](real-multi-tenant-web-access.md))
+split by weight — `git-status`/`git-sync` → `git:read` (`reader`+: everyone can
+fetch/pull), `git-commit`/`git-push`/`git-identity` → `git:execute` (`contributor`+:
+commit and push **their own** `user/<slug>` branch; master lands only via the
+admin's `git-merge`); `users` splits (`list → users:read` for `reader`+, self-scoped;
 mutations → `users:write` for `admin`). The DD-11 content matrix is exactly these grants
 (view=read, edit=write, delete=delete, execute=execute). `update-docs` regenerates
-the audit table in **`docs/authorizations.md`** — module / command / channels /
+the audit table in **`docs/authorizations.md`** — module / command /
 requires / least-profile for every command, distinct from the authored
 `authorizations.json`.
 

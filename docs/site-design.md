@@ -278,23 +278,23 @@ still no key, no direct egress on the service uid.)*
 
 Execution is **not** per-route POSTs; the right-pane terminal talks to `/ws`, and the
 left-pane navigation never does. **Resolved
-([DD-13](secure-web-server.md#dd-13--web-shell-topology--gating)): the terminal is the
-full `solver` shell**, not a curated command list — the stub set once sketched here
-(`set`/`show`/`ls`/`eval`/`benchmark`) arrives as the real commands, and what a web
-shell can run is the DD-12 decorator (`requires`/`channels`) against the
-ticket-resolved subject. The ws↔profile binding mirrors content: per-profile
-`euler-ws@<profile>` instances for **all three web rungs**, attach gated on
+([DD-13](secure-web-server.md#dd-13--web-shell-topology--gating), since superseded by
+the per-user model — [real-multi-tenant-web-access.md](real-multi-tenant-web-access.md)):
+the terminal is the full `solver` shell**, not a curated command list — the stub set
+once sketched here (`set`/`show`/`ls`/`eval`/`benchmark`) arrives as the real commands,
+and what a web shell can run is the DD-12 decorator (`requires`) against the
+ticket-resolved subject. The shell runs on **the user's own `euler-user@<slug>`
+instance** (one per collaborator, serving their content *and* `/ws`), attach gated on
 `solver:execute` (a `reader`-floor grant — everyone gets a terminal). Inside it the
-rungs diverge: a `reader` shell registers only the read commands (`set`/`show`/`ls`;
-no `eval`/`benchmark`, no `edit`); `contributor` adds edit + eval/benchmark;
-`maintainer` adds delete + the AI commands (credentials via the Phase-7 `euler-ai`
-broker, [DD-15](secure-web-server.md#dd-15--secrets-are-brokered-never-dispensed);
-until it lands they fail with a clear no-credentials error) and, with Phase 7, the
-brokered git verbs (`git:execute`): `git-status`/`git-commit`/`git-push` publishing
-to operator-reviewed `web/*` branches, plus `git-restore` (discard/resync one
-problem dir from `master`) — the existing `git-status`/`git-commit` commands are
-reworked to dispatch terminal→raw / web→broker, not duplicated. `!` (`shell:execute`) is admin-only and `admin`
-is never web, so no web terminal has raw bash.
+rungs diverge: a `reader` shell registers only the read commands (`set`/`show`/`ls`,
+plus `git-status`/`git-sync` — `git:read`; no `eval`/`benchmark`, no `edit`);
+`contributor` adds edit + eval/benchmark and the **native** git write verbs
+(`git:execute`): `git-commit`/`git-push` on **their own** `user/<slug>` branch in
+their own clone, with `git-identity` the one-time gh sign-in — master lands only via
+the admin's `git-merge`; `maintainer` adds delete + the AI commands (credentials =
+the user's **own** Anthropic key from their vault, uploaded on the account page).
+`!` (`shell:execute`) tracks its grant (ships `maintainer`+), and `admin` over web
+is contained by its own uid + SRP (MT-10a/AR-4).
 
 ## 9 · Render & navigation contract
 
