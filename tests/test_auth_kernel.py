@@ -76,6 +76,7 @@ class ResolveSubjectTest(unittest.TestCase):
         with mock.patch.dict(os.environ, env, clear=False):
             os.environ.pop('SOLVER_TICKET', None)     # never inherit the caller's
             os.environ.pop('EULER_USER_SLUG', None)   # ditto the instance pin
+            os.environ.pop('EULER_USER_EMAIL', None)  # ditto the instance-identity handoff
             for k, v in env.items():
                 os.environ[k] = v
             return resolve_subject(self.root, self.authz)
@@ -109,6 +110,40 @@ class ResolveSubjectTest(unittest.TestCase):
              mock.patch('solver.auth.identity._owns_checkout', return_value=False):
             with self.assertRaises(SystemExit):
                 self._resolve()
+
+    def test_instance_identity_plane_resolves_a_ticketless_descendant(self) -> None:
+        """MT-4: a euler-user-<slug> uid whose ticket has been scrubbed resolves from
+        the handed-down e-mail; profile comes from policy (alice → maintainer)."""
+        slug = system_slug('alice@example.com')
+        with mock.patch('solver.auth.identity.getpass.getuser', return_value=f'euler-user-{slug}'):
+            subj = self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='alice@example.com')
+        self.assertEqual(subj.channel, 'web')
+        self.assertEqual(subj.auth_method, 'instance-identity')
+        self.assertEqual(subj.user, 'alice@example.com')
+        self.assertEqual(subj.slug, slug)
+        self.assertEqual(subj.profile, 'maintainer')
+
+    def test_instance_identity_unlisted_user_floors_to_the_weakest_rung(self) -> None:
+        slug = system_slug('nobody@example.com')
+        with mock.patch('solver.auth.identity.getpass.getuser', return_value=f'euler-user-{slug}'):
+            subj = self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='nobody@example.com')
+        self.assertEqual(subj.profile, 'reader')          # fail closed low, never admin
+
+    def test_instance_identity_rejects_a_forged_email(self) -> None:
+        """A child cannot swap in a different e-mail: its system_slug no longer matches the
+        uid's pin, so the plane declines and the service account aborts."""
+        pin = system_slug('alice@example.com')
+        with mock.patch('solver.auth.identity.getpass.getuser', return_value=f'euler-user-{pin}'):
+            with self.assertRaises(SystemExit):
+                self._resolve(EULER_USER_SLUG=pin, EULER_USER_EMAIL='attacker@evil.com')
+
+    def test_instance_identity_requires_the_per_user_prefix(self) -> None:
+        """A shared service uid (euler-ws) is not a per-user instance even with the env set."""
+        slug = system_slug('alice@example.com')
+        with mock.patch('solver.auth.identity.getpass.getuser', return_value='euler-ws'), \
+             mock.patch('solver.auth.identity._owns_checkout', return_value=False):
+            with self.assertRaises(SystemExit):
+                self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='alice@example.com')
 
     def test_ticket_plane_web_is_not_capped(self) -> None:
         """MT-10a: the per-user model drops the admin→maintainer web cap — an admin

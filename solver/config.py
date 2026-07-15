@@ -16,7 +16,7 @@ from typing import Any, ClassVar
 from prompt_toolkit.styles import Style
 from rich.theme import Theme
 
-from solver.auth import Subject, resolve_subject
+from solver.auth import INSTANCE_EMAIL_ENV, Subject, TICKET_ENV, resolve_subject
 
 
 class ExitCodes(enum.IntEnum):
@@ -194,6 +194,17 @@ class Config(AttributeDict):
         # inheritance-expanded permissions, from authorizations.json (deployed SoR →
         # built-in default). Drives per-user state and command/route authorization.
         subject: Subject = resolve_subject(root_dir)
+        # One-hop ticket + identity handoff to descendant solver processes (MT-4).
+        # The web shell's ticket is single-use and resolve_subject just consumed it;
+        # scrub it so a child solver (claude-solve's headless Claude, a nested
+        # `solver "…"`) does not inherit a dead ticket and abort at its own startup.
+        # Hand the resolved e-mail down in its place: under this per-user uid the
+        # child re-resolves via the instance-identity plane, which trusts the e-mail
+        # only because system_slug(email) matches the uid's EULER_USER_SLUG pin — an
+        # env value a child cannot forge past. Terminal subjects carry neither var.
+        if subject.channel == 'web':
+            os.environ.pop(TICKET_ENV, None)
+            os.environ[INSTANCE_EMAIL_ENV] = subject.user
         user_state_dir: Path = root_dir / '.state' / subject.slug
         user_state_dir.mkdir(parents=True, exist_ok=True)
         super().__init__(data={

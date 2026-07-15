@@ -17,12 +17,21 @@ anonymous fallback; a process that matches no plane exits.
    from a sibling process's ``/proc/<pid>/environ``. In the per-user model the web
    channel is **not capped** (MT-10a): an ``admin`` account is web-reachable, its
    authority contained by its own uid + SRP, not by the channel.
-2. **Local terminal** — the OS login's profile from the ``users`` map
+2. **Instance identity** — a ``euler-user-<slug>`` per-user service uid whose
+   ticketed shell has already redeemed and scrubbed the one-time ticket (MT-4):
+   the descendant ``solver`` processes it spawns (claude-solve's headless Claude,
+   a nested ``solver "…"``) carry no ticket and resolve from the instance itself.
+   The uid *is* the collaborator; the handed-down ``EULER_USER_EMAIL`` is trusted
+   only when :func:`system_slug` maps it back to the uid's own ``EULER_USER_SLUG``
+   pin, and the profile still comes from policy — so a child cannot forge either a
+   different identity or a higher rung. Any *other* ``euler-*`` uid still aborts.
+3. **Local terminal** — the OS login's profile from the ``users`` map
    (DD-12); the **checkout owner floors to ``admin``** when unlisted (you cannot
    lock yourself out), an explicit entry wins, and a real non-owner login without
-   an entry is ``contributor``. A ``euler-*`` service uid **without** a ticket
-   aborts, so a ``reader`` web shell cannot ``unset SOLVER_TICKET`` and re-exec
-   ``solver`` to escalate.
+   an entry is ``contributor``. A ``euler-*`` service uid that is neither a
+   ticketed web shell nor a properly-pinned per-user instance **aborts**, so a
+   ``reader`` web shell cannot ``unset SOLVER_TICKET`` and re-exec ``solver`` to
+   escalate — its uid pins the identity, and the profile follows from policy.
 
 Absorbs the former ``solver.utils.identity``. Stdlib-only and free of any
 ``solver.config`` dependency (config imports this during construction); ticket
@@ -30,7 +39,7 @@ redemption lazily imports the equally-stdlib ``solver.web.auth.client``.
 """
 from __future__ import annotations
 
-__all__ = ['resolve_subject', 'slugify', 'system_slug', 'TICKET_ENV']
+__all__ = ['resolve_subject', 'slugify', 'system_slug', 'TICKET_ENV', 'INSTANCE_EMAIL_ENV']
 
 import getpass
 import hashlib
@@ -39,7 +48,7 @@ import re
 from pathlib import Path
 
 from solver.auth.authorizations import Authorizations
-from solver.auth.subject import Subject
+from solver.auth.subject import LADDER, Subject
 
 #: Environment variable carrying the one-time shell ticket (set by the user service).
 TICKET_ENV: str = 'SOLVER_TICKET'
@@ -47,6 +56,13 @@ TICKET_ENV: str = 'SOLVER_TICKET'
 #: PTY child: the redeemed ticket's e-mail must map to it (:func:`system_slug`), else the
 #: shell aborts — the instance *is* that user's uid, so a mismatch is misrouting (MT-4/MT-7).
 SLUG_PIN_ENV: str = 'EULER_USER_SLUG'
+#: The bound e-mail of a per-user instance, handed *down* the process tree by a shell that
+#: has already redeemed its ticket (:func:`resolve_subject` scrubs the one-time ticket and
+#: exports this in its place). Descendant ``solver`` processes — claude-solve's headless
+#: Claude, a nested ``solver "…"`` — resolve identity from it via the **instance-identity
+#: plane**. Not a credential: it is trusted only when :func:`system_slug` maps it back to
+#: the uid's own :data:`SLUG_PIN_ENV`, so a child cannot forge a different user past it.
+INSTANCE_EMAIL_ENV: str = 'EULER_USER_EMAIL'
 #: Service accounts are named ``euler-*``; such a uid with no ticket must abort. (The
 #: per-user instances are ``euler-user-<slug>`` — they never resolve identity themselves;
 #: only the ticketed PTY children they fork do, and a ticket is present there.)
@@ -119,6 +135,34 @@ def _owns_checkout(root_dir: Path) -> bool:
         return False
 
 
+def _instance_identity(os_login: str, authz: Authorizations) -> Subject | None:
+    """Resolve a per-user service uid to its bound collaborator, ticket-free (MT-4).
+
+    The **instance-identity plane**: a ``euler-user-<slug>`` uid is provisioned for
+    exactly one collaborator, and its ticketed PTY shell scrubs the one-time ticket
+    once redeemed. The descendant ``solver`` processes that shell spawns —
+    claude-solve's headless Claude, a nested ``solver "…"`` — therefore have *no*
+    ticket; they re-resolve here instead of aborting.
+
+    Trust is the OS uid, cross-checked three ways: the account is
+    ``euler-user-<pin>``, the handed-down :data:`INSTANCE_EMAIL_ENV` maps back to
+    ``<pin>`` under :func:`system_slug`, and the pin is present. The e-mail is an
+    env value a child could rewrite — but only a value whose ``system_slug`` equals
+    this uid's own pin survives, i.e. the instance's own user, so it cannot forge a
+    different identity. The **profile** comes from the same policy the auth service
+    reads (``authorizations.json``), never from the environment, so a child cannot
+    forge a higher rung; an unlisted user floors to the weakest rung. Returns
+    ``None`` when this is not a properly-pinned per-user instance (any other
+    ``euler-*`` account), so the caller still aborts.
+    """
+    email = os.environ.get(INSTANCE_EMAIL_ENV, '').strip()
+    pin = os.environ.get(SLUG_PIN_ENV, '').strip()
+    if not email or not pin or os_login != f'euler-user-{pin}' or system_slug(email) != pin:
+        return None
+    profile = authz.profile_for(email) or LADDER[0]  # unlisted → least privilege (fail closed low)
+    return Subject(user=email, slug=pin, channel='web', auth_method='instance-identity', profile=profile)
+
+
 def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subject:
     """Resolve the current :class:`Subject` (identity + profile).
 
@@ -147,6 +191,9 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
     except OSError:
         raise SystemExit('identity: could not determine the OS login') from None
     if os_login.startswith(_SERVICE_PREFIX):
+        subject = _instance_identity(os_login, authz)
+        if subject is not None:
+            return subject
         raise SystemExit(f'identity: service account {os_login!r} has no shell ticket — refusing to start')
 
     is_owner = _owns_checkout(root_dir)
