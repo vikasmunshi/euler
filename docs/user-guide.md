@@ -222,7 +222,10 @@ command name below links to its full entry — usage and description — in the
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
+| [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
+| [`git-merge`](commands-index.md#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
+| [`git-push`](commands-index.md#command-git-push-push) | `push` | Push the current branch to origin (your own user/<slug> branch). » |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | Recover master key from shares. |

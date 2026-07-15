@@ -94,6 +94,7 @@ class Scripts(AttributeDict):
     # assign no value, so the lookup falls through to `__getattr__` at runtime). They give static
     # checkers the precise type of each `scripts.<name>` read.
     compile_c: str
+    configure_identity: str
     install_chrome: str
     install_dev_env: str
     install_upgrade_service: str
@@ -106,6 +107,7 @@ class Scripts(AttributeDict):
     def __init__(self) -> None:
         super().__init__(data={
             'compile_c': './scripts/c/compile.sh',
+            'configure_identity': './scripts/git/configure-identity.sh',
             'install_chrome': './scripts/setup/chrome.sh',
             'install_dev_env': './scripts/setup/dev_env.sh',
             'install_upgrade_service': './scripts/setup/upgrade_service.sh',

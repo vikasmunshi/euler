@@ -59,7 +59,10 @@ a parameter that accepts repetition.
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
+| [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
+| [`git-merge`](#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
+| [`git-push`](#command-git-push-push) | `push` | Push the current branch to origin (your own user/<slug> branch). » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares. |
@@ -463,7 +466,7 @@ verbose:            If True, prints error information during evaluation. Default
 #### Command: `git-commit` (`commit`)
 
 Commit everything, optionally resetting to origin/master.
-* profiles: admin
+* profiles: admin, maintainer, contributor
 * » supports `--silent`
 
 ```
@@ -497,7 +500,7 @@ Aliased as `commit`.
 #### Command: `git-hooks` (`hooks`)
 
 Run pre-commit hook and simulated pre-push hook.
-* profiles: admin
+* profiles: admin, maintainer, contributor
 * » supports `--silent`
 
 ```
@@ -514,6 +517,56 @@ verify your changes will pass before committing or pushing. Reports the
 combined pass/fail in the exit code.
 
 Aliased as `hooks`.
+```
+
+---
+
+#### Command: `git-identity` (`identity`)
+
+Sign in to GitHub (gh) and set this clone's git identity from it.
+* profiles: admin, maintainer, contributor
+
+```
+git-identity
+```
+
+```text
+Configure your git identity and push credential from your GitHub login (MT-2).
+
+The one-time setup before `git-push`: runs `gh auth login` when you are not yet
+signed in (interactive device flow — works in the web shell), makes gh the git
+credential helper (`gh auth setup-git`), and sets this clone's `user.name` /
+`user.email` from your GitHub profile, so your commits are authored and pushed
+as **you**, never as a service identity.
+
+Aliased as `identity`.
+```
+
+---
+
+#### Command: `git-merge` (`merge`)
+
+Merge a collaborator's user/<slug> branch into master and push.
+* profiles: admin
+* » supports `--silent`
+
+```
+git-merge <branch>
+[push=false|--no-push]
+[silent=true|--silent]
+```
+
+```text
+Merge a collaborator's branch into master — the one gate to master (MT-2).
+
+Fetches the branch from origin and merges it `--no-ff` into the checked-out
+master; a conflicted merge is aborted and reported (resolve it manually). On a
+clean merge, master is pushed (the collaborator's next `git-sync` then rebases
+their branch onto it).
+
+Args:
+    branch: The branch to merge; a bare `<slug>` means `user/<slug>`.
+    push:   Push master to origin after a clean merge. Defaults to True.
 ```
 
 ---
@@ -545,10 +598,37 @@ Raises:
 
 ---
 
+#### Command: `git-push` (`push`)
+
+Push the current branch to origin (your own user/<slug> branch).
+* profiles: admin, maintainer, contributor
+* » supports `--silent`
+
+```
+git-push
+[force=true|--force]
+[silent=true|--silent]
+```
+
+```text
+Push the current branch to origin as yourself (`git push -u origin <branch>`).
+
+In a per-user clone the current branch is `user/<slug>`, pushed with your own
+GitHub identity — `git-identity` is the one-time setup. Landing work on master
+is the admin's `git-merge`, never a direct push: pushing master requires
+`infra:execute`, and force-pushing it is always refused.
+
+Args:
+    force: Push with `--force-with-lease` — needed after `git-sync` rebased your
+           branch onto a moved origin/master. Refused on master.
+```
+
+---
+
 #### Command: `git-status` (`status`)
 
 Display sync state between local and origin/master.
-* profiles: admin
+* profiles: admin, maintainer, contributor, reader
 
 ```
 git-status
@@ -568,7 +648,7 @@ Args:
 #### Command: `git-sync` (`sync`)
 
 Bring the local repository in sync with origin/master.
-* profiles: admin
+* profiles: admin, maintainer, contributor, reader
 
 ```
 git-sync
@@ -577,6 +657,12 @@ git-sync
 
 ```text
 Bring the local repository in sync with origin/master.
+
+On a per-user clone (branch `user/<slug>`) this is the MT-2 pull flow: fetch
+origin/master and merge/rebase it into your branch — bringing in merged work
+and, notably, `keys/enc-key.json`. When that pull first delivers master-key
+access for your key, the git filter is wired automatically and the private
+solutions decrypt in place.
 
 Args:
     dry_run: Print the sync commands instead of running them. Defaults to False.

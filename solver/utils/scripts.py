@@ -1,14 +1,26 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-""" A set of utilities to manage Git repository workflows. """
+""" A set of utilities to manage Git repository workflows.
+
+Per-user native git (MT-2, docs/real-multi-tenant-web-access.md): a collaborator's
+shell runs in **their own clone** on branch ``user/<slug>`` as their own uid, so git
+needs no broker — the read verbs (`git-status`, `git-sync`) are ``git:read``
+(every rung) and the write verbs (`git-commit`, `git-push`, `git-hooks`) are
+``git:execute`` (contributor+); the blast radius is their own branch. ``master``
+stays admin-gated: `git-merge` (``infra:execute``) is the one gate through which a
+``user/<slug>`` branch lands on master.
+"""
 from __future__ import annotations
 
+import sys
 from datetime import datetime
 from subprocess import CalledProcessError, DEVNULL, run
 from tomllib import load
 from typing import Literal
 
 from solver.config import ExitCodes, config
+from solver.crypto.ciphers import read_master_key
+from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
 from solver.utils.shell_utils import confirm
 
@@ -29,7 +41,14 @@ def run_cmdline(cmdline: str) -> int:
     return result
 
 
-@register(requires=('infra:execute',),
+def _current_branch() -> str:
+    """The checked-out branch name ('' when detached or not a repo)."""
+    proc = run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    return proc.stdout.strip() if proc.returncode == 0 else ''
+
+
+@register(requires=('git:execute',),
           help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
 def git_commit(reset: bool = False, verify: bool = True, message: str = '') -> int:
     """Stage and commit the solutions and solver package as a timestamped checkpoint.
@@ -86,7 +105,7 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
     return result
 
 
-@register(requires=('infra:execute',),
+@register(requires=('git:read',),
           help_text='Display sync state between local and origin/master.', aliases=('status',),)
 def git_status(details: bool = False) -> int:
     """Display the sync state between the local branch and origin/master.
@@ -102,10 +121,43 @@ def git_status(details: bool = False) -> int:
     return result
 
 
-@register(requires=('infra:execute',),
+def _enc_key_pull_flow() -> None:
+    """The MT-2 self-service tail of a sync: wire the git filter once key access exists.
+
+    A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as ciphertext
+    (MT-13). When a pull delivers an ``keys/enc-key.json`` that wraps the master key to
+    this user's public key (an admin ran ``user-authorize`` and pushed), wire the
+    clean/smudge filter and re-checkout the private tree — ciphertext becomes plaintext
+    in place. A silent no-op while the filter is already wired or the user is not (yet)
+    key-authorized, so every sync may call it.
+    """
+    name: str = crypto_config['filter_name']
+    wired: bool = run(['git', 'config', '--local', '--get', f'filter.{name}.process'],
+                      cwd=config.root_dir, capture_output=True).returncode == 0
+    if wired:
+        return
+    read_master_key.cache_clear()               # this very pull may have delivered access
+    try:
+        read_master_key()
+    except (FileNotFoundError, KeyError, ValueError):
+        return                                  # no keypair / not authorized — nothing to do
+    console.print('[primary]Master-key access detected — wiring the git filter and '
+                  'decrypting private solutions...[/primary]')
+    if run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter install') == 0:
+        run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
+                    '&& git checkout -- solutions/private')
+
+
+@register(requires=('git:read',),
           help_text='Bring the local repository in sync with origin/master.', aliases=('sync',),)
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
+
+    On a per-user clone (branch `user/<slug>`) this is the MT-2 pull flow: fetch
+    origin/master and merge/rebase it into your branch — bringing in merged work
+    and, notably, `keys/enc-key.json`. When that pull first delivers master-key
+    access for your key, the git filter is wired automatically and the private
+    solutions decrypt in place.
 
     Args:
         dry_run: Print the sync commands instead of running them. Defaults to False.
@@ -114,7 +166,86 @@ def git_sync(dry_run: bool = False) -> int:
         result = run_cmdline(f'{config.scripts.sync} --dry-run')
     else:
         result = run_cmdline(config.scripts.sync)
+        if result == 0:
+            _enc_key_pull_flow()
     return result
+
+
+@register(requires=('git:execute',),
+          help_text='Sign in to GitHub (gh) and set this clone\'s git identity from it.',
+          aliases=('identity',),)
+def git_identity() -> int:
+    """Configure your git identity and push credential from your GitHub login (MT-2).
+
+    The one-time setup before `git-push`: runs `gh auth login` when you are not yet
+    signed in (interactive device flow — works in the web shell), makes gh the git
+    credential helper (`gh auth setup-git`), and sets this clone's `user.name` /
+    `user.email` from your GitHub profile, so your commits are authored and pushed
+    as **you**, never as a service identity.
+
+    Aliased as `identity`.
+    """
+    return run_cmdline(config.scripts.configure_identity)
+
+
+@register(requires=('git:execute',), quietable=True,
+          help_text='Push the current branch to origin (your own user/<slug> branch).', aliases=('push',),)
+def git_push(force: bool = False) -> int:
+    """Push the current branch to origin as yourself (`git push -u origin <branch>`).
+
+    In a per-user clone the current branch is `user/<slug>`, pushed with your own
+    GitHub identity — `git-identity` is the one-time setup. Landing work on master
+    is the admin's `git-merge`, never a direct push: pushing master requires
+    `infra:execute`, and force-pushing it is always refused.
+
+    Args:
+        force: Push with `--force-with-lease` — needed after `git-sync` rebased your
+               branch onto a moved origin/master. Refused on master.
+    """
+    branch: str = _current_branch()
+    if not branch or branch == 'HEAD':
+        console.print('[error]error:[/error] no branch checked out.')
+        return ExitCodes.EXIT_ERROR
+    if branch == 'master':
+        if force:
+            console.print('[error]error:[/error] force-pushing master is never allowed.')
+            return ExitCodes.EXIT_ERROR
+        if not config.subject.has('infra:execute'):
+            console.print('[error]error:[/error] pushing master needs [accent]infra:execute[/accent]; '
+                          'your work belongs on your own user/<slug> branch.')
+            return ExitCodes.EXIT_ERROR
+    lease: str = ' --force-with-lease' if force else ''
+    return run_cmdline(f'git push -u{lease} origin {branch}')
+
+
+@register(requires=('infra:execute',), quietable=True,
+          help_text="Merge a collaborator's user/<slug> branch into master and push.", aliases=('merge',),)
+def git_merge(branch: str, push: bool = True) -> int:
+    """Merge a collaborator's branch into master — the one gate to master (MT-2).
+
+    Fetches the branch from origin and merges it `--no-ff` into the checked-out
+    master; a conflicted merge is aborted and reported (resolve it manually). On a
+    clean merge, master is pushed (the collaborator's next `git-sync` then rebases
+    their branch onto it).
+
+    Args:
+        branch: The branch to merge; a bare `<slug>` means `user/<slug>`.
+        push:   Push master to origin after a clean merge. Defaults to True.
+    """
+    if '/' not in branch:
+        branch = f'user/{branch}'
+    if _current_branch() != 'master':
+        console.print('[error]error:[/error] merges land on master — check out master first.')
+        return ExitCodes.EXIT_ERROR
+    if run_cmdline(f'git fetch origin {branch}') != 0:
+        console.print(f'[error]error:[/error] cannot fetch [accent]origin/{branch}[/accent].')
+        return ExitCodes.EXIT_ERROR
+    if run_cmdline(f'git merge --no-ff -m "merge {branch}" origin/{branch}') != 0:
+        run_cmdline('git merge --abort')
+        console.print(f'[error]error:[/error] merging [accent]origin/{branch}[/accent] conflicts; '
+                      'aborted — merge and resolve manually.')
+        return ExitCodes.EXIT_ERROR
+    return run_cmdline('git push origin master') if push else int(ExitCodes.EXIT_OK)
 
 
 @register(
@@ -152,7 +283,7 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
 
 
 @register(
-    requires=('infra:execute',),
+    requires=('git:execute',),
     help_text='Run pre-commit hook and simulated pre-push hook.',
     aliases=('hooks',),
     quietable=True,

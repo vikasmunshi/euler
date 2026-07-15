@@ -415,8 +415,27 @@ changes:
    `user --regen` now persists the key **vault-encrypted** when a vault is unlocked
    (and refuses when locked), closing the step-1 follow-up. Logout locks the vault
    (the DD-14 push also removes the session key file). 197 tests.
-6. **Per-user git** (MT-2): native `git-commit`/`git-push` on `user/<slug>` as the
-   user; admin merges `user/*` → master (web or terminal); enc-key pull flow.
+6. **Per-user git** (MT-2) — **✅ built.** Git is **native** in the user's own clone —
+   no broker. Policy: a new path-less `git` object with **`git:read` at `reader`**
+   (every rung can fetch/pull) and **`git:execute` at `contributor`** (commit/push
+   their own work); `master` stays admin-gated. The verbs: `git-status`/`git-sync` →
+   `git:read`; `git-commit`/`git-push`/`git-hooks`/`git-identity` → `git:execute`;
+   `git-merge`/`git-publish` → `infra:execute`. **`git-sync` carries the enc-key pull
+   flow**: after the pull, if the filter is unwired and `read_master_key()` now
+   verifies (an admin `user-authorize`d this user's key and pushed), it wires the
+   clean/smudge filter and re-checks out `solutions/private` — ciphertext becomes
+   plaintext in place, silently a no-op otherwise. **`git-push`** pushes the current
+   branch as the user (`-u origin <branch>`; `--force-with-lease` only after a rebase,
+   never on master; pushing master needs `infra:execute`). **`git-merge <slug>`** is
+   the one gate to master: fetch + `--no-ff` merge of `origin/user/<slug>`, conflicts
+   abort cleanly, then push. **`git-identity`** (`scripts/git/configure-identity.sh`)
+   is the user's one-time self-service setup: `gh auth login` (device flow, works in
+   the web shell) + `gh auth setup-git` + `user.name`/`user.email` from their GitHub
+   profile — commits authored and pushed as **them**. Verified end-to-end with real
+   git (two clones + a bare origin, `EULER_REPO_ROOT`-scoped secrets): the unwired
+   clone lands `SLVR` ciphertext, an unauthorized `gitfilter install` is refused, and
+   after `user-authorize` + push the user's real `git-sync` pulled, auto-wired, and
+   decrypted the private tree. 213 tests (+16 guard/policy tests).
 7. **Docs & security-notes**: the three new ARs (§11); retire DD-13/DD-15 as superseded.
 
 **Clean-slate start (no migration).** The live per-profile deployment is removed with

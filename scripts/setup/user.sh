@@ -304,6 +304,9 @@ provision_clone() {
     # 'required', so solutions/private/** checks out as the ciphertext GitHub holds.
     sudo git clone --branch master "${url}" "${clone}"
     sudo git -C "${clone}" checkout -B "user/${slug}"
+    # Commit authorship + push credential are the user's own (MT-2), configured
+    # self-service in their shell: `git-identity` (scripts/git/configure-identity.sh)
+    # signs in to GitHub via gh and sets user.name/user.email from that profile.
     # Install the git hooks (pre-commit flake8+mypy, pre-push) into the clone: they render
     # into .git/hooks (not tracked, so a clone lands without them), pointed at the deployed
     # /opt/euler venv since a per-user clone has no .venv. Done before the chown so the
@@ -341,8 +344,9 @@ do_provision() {
         "${SCRIPT_DIR}/firewall.sh" reload || echo "warn: firewall reload failed — run 'make upgrade-firewall'"
     fi
     echo "Provisioned ${slug}${email:+ (}${email}${email:+)} → profile ${profile}."
-    echo "Next (self-service, in the user's web shell): generate a key (\`user\`), have an"
-    echo "admin \`user-authorize\` it + push, then \`git pull\` to smudge their private tree."
+    echo "Next (self-service, in the user's web shell): \`git-identity\` (GitHub sign-in +"
+    echo "commit authorship), generate a key (\`user\`), have an admin \`user-authorize\` it"
+    echo "+ push, then \`git-sync\` — the pull wires the filter and decrypts their private tree."
 }
 
 do_deprovision() {

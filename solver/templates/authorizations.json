@@ -5,6 +5,7 @@
       "grants": [
         "about:read",
         "docs:read",
+        "git:read",
         "solutions:read",
         "solver:execute",
         "users:read",
@@ -14,6 +15,7 @@
     "contributor": {
       "inherits": "reader",
       "grants": [
+        "git:execute",
         "solutions:execute",
         "solutions:write"
       ]
@@ -39,6 +41,7 @@
     "about": ["README.md", "LICENSE", "solver/web/content/vendor/README.md"],
     "ai": [],
     "docs": ["docs/", "topics/", "solver/templates/"],
+    "git": [],
     "infra": [],
     "shell": ["/bin/bash"],
     "solutions": ["solutions/"],
