@@ -32,9 +32,18 @@ REPO_ROOT_ENV: str = 'EULER_REPO_ROOT'
 
 
 def _enter_root(root: Path) -> Path:
-    """chdir into *root* and clean ``PATH`` (drop the WSL ``/mnt`` entries), then return it."""
+    """chdir into *root* and normalise ``PATH``, then return it.
+
+    PATH gains the interpreter's own bin dir (the venv) and ``~/.local/bin`` — where
+    the per-user Claude Code install drops the ``claude`` binary (MT-7): the web
+    shell's service unit starts from systemd's minimal PATH, which never includes
+    it, and without it ``claude-solve`` / the account page's status probe can't
+    find the CLI. The WSL ``/mnt`` entries are dropped, and duplicates collapsed.
+    """
     os.chdir(root)
-    env_path: list[str] = [Path(sys.executable).parent.as_posix()] + os.getenv('PATH', '').split(':')
+    env_path: list[str] = ([Path(sys.executable).parent.as_posix(),
+                            (Path.home() / '.local' / 'bin').as_posix()]
+                           + os.getenv('PATH', '').split(':'))
     env_path = [p for p in env_path if not p.startswith('/mnt')]
     env_path = list(dict.fromkeys(env_path))
     os.environ['PATH'] = ':'.join(env_path)
