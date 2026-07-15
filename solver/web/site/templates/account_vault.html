@@ -1,0 +1,69 @@
+{# The account page's credential panel (MT-8) — an htmx fragment served ONLY by the
+   per-user service (/account/vault, solver/web/user/vault_api.py). Swapped into
+   #vault-panel by account.html; every form re-renders this same fragment.
+   Write-only by design: secret VALUES are never rendered back. #}
+<section class="vault" id="vault-state"
+         data-vault="{{ 'yes' if vault_exists else 'no' }}"
+         data-unlocked="{{ 'yes' if unlocked else 'no' }}">
+  <h2>Credentials</h2>
+
+  {% if not vault_exists %}
+  <p class="vault-status vault-missing">No vault yet — it is created automatically at your
+    next sign-in. Secrets cannot be stored until then.</p>
+  {% elif not unlocked %}
+  <p class="vault-status vault-locked">Vault <strong>locked</strong>.
+    <span id="vault-recover-hint">If you signed in before your instance started (or changed
+    your password elsewhere), unlock it with your password:</span></p>
+  <form id="vault-recover" class="vault-form">
+    <input type="password" id="vault-recover-password" name="password"
+           placeholder="password" autocomplete="current-password" required>
+    <button type="submit">Unlock</button>
+    <span class="form-error" id="vault-recover-error" hidden></span>
+  </form>
+  {% else %}
+  <p class="vault-status vault-unlocked">Vault <strong>unlocked</strong> — your secrets are
+    encrypted at rest and readable only in this session.</p>
+  {% endif %}
+
+  <dl class="account">
+    <dt>Public key</dt>
+    <dd>
+      {% if pubkey_state == 'key' %}<code class="pubkey">{{ pubkey }}</code>
+      <span class="hint">hand this to the admin for <code>user-authorize</code> (private-solutions access)</span>
+      {% elif pubkey_state == 'locked' %}<em>encrypted — unlock the vault to view</em>
+      {% else %}<em>no keypair yet — run <code>user</code> in your shell</em>{% endif %}
+    </dd>
+
+    <dt>Secrets</dt>
+    <dd>
+      {% if unlocked %}
+      {% if secret_names %}
+      <ul class="secret-list">
+        {% for name in secret_names %}
+        <li><code>{{ name }}</code>
+          <form hx-post="/account/secret/delete" hx-target="#vault-panel" class="inline">
+            <input type="hidden" name="name" value="{{ name }}">
+            <button type="submit" class="danger" title="delete {{ name }}">delete</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}<em>none stored</em>{% endif %}
+      <form hx-post="/account/secret" hx-target="#vault-panel" class="vault-form">
+        <input type="text" name="name" placeholder="ANTHROPIC_API_KEY"
+               pattern="[A-Z][A-Z0-9_]*" required>
+        <input type="password" name="value" placeholder="value (write-only)"
+               autocomplete="off" required>
+        <button type="submit">Save</button>
+      </form>
+      <span class="hint">values are never shown back; saving an existing name replaces it</span>
+      {% else %}<em>unlock the vault to manage secrets</em>{% endif %}
+    </dd>
+
+    <dt>GitHub CLI</dt>
+    <dd>{{ gh_status }} <span class="hint">sign in with <code>! gh auth login</code> in your shell</span></dd>
+
+    <dt>Claude Code</dt>
+    <dd>{{ claude_status }} <span class="hint">sign in with <code>claude /login</code> in your shell</span></dd>
+  </dl>
+</section>

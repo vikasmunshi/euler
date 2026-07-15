@@ -166,12 +166,62 @@
 
   // A deliberate exit (logout) should not trip the terminal's beforeunload
   // guard: tell the /terminal iframe to disarm before the shell navigates.
+  // Also forget the vault password key — the session it unlocked is ending.
   document.addEventListener('submit', function (ev) {
     if (!ev.target.matches('form[action="/auth/logout"]')) { return; }
+    if (window.Vault) { window.Vault.clear(); }
     var terminal = document.getElementById('terminal');
     if (terminal && terminal.contentWindow) {
       terminal.contentWindow.postMessage({ euler: 'disarm' }, window.location.origin);
     }
+  });
+
+  // ── the vault (MT-6): auto-unlock + account-panel recovery ────────────────
+  // Sign-in stashed PK (vault.js); unlock the per-user service's session with it
+  // once per page load. Fire-and-forget: 'stale'/'error' just leave the vault
+  // locked, and the account panel shows the recovery form below.
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.Vault) { window.Vault.unlock(); }
+  });
+
+  // The recovery form (#vault-recover, in the /account/vault fragment): the user
+  // types a password; its PK is derived with the VAULT's own salt + iterations
+  // (/vault/status). If that password is simply the current one (the instance
+  // restarted since sign-in) the unlock succeeds directly; if it is the OLD
+  // password after a change made elsewhere, re-wrap VK across to the current
+  // sign-in's PK when we hold one. Delegated: the fragment is htmx-swapped.
+  document.addEventListener('submit', function (ev) {
+    var form = ev.target.closest && ev.target.closest('#vault-recover');
+    if (!form || !window.Vault) { return; }
+    ev.preventDefault();
+    var errorBox = form.querySelector('#vault-recover-error');
+    var fail = function (message) { errorBox.textContent = message; errorBox.hidden = false; };
+    var password = form.querySelector('#vault-recover-password').value;
+    (async function () {
+      try {
+        var status = await fetch('/vault/status', { credentials: 'same-origin' });
+        if (!status.ok) { return fail('vault status unavailable'); }
+        var info = await status.json();
+        if (!info.vault) { return fail('no vault to unlock'); }
+        var pk = await Vault.derivePk(password, info.salt, info.iterations);
+        var creds = Vault.stored();
+        var resp;
+        if (creds && creds.pk !== pk) {
+          // an old password: carry the vault forward to the current sign-in's PK
+          resp = await Vault.postJson('/vault/rewrap',
+            { old_pk: pk, new_pk: creds.pk, new_salt: creds.salt });
+        } else {
+          resp = await Vault.postJson('/vault/unlock', { pk: pk, salt: info.salt });
+        }
+        if (resp.status === 409) { return fail('that password does not unlock this vault'); }
+        if (!resp.ok) { return fail('unlock failed — try again'); }
+        if (window.htmx) {
+          window.htmx.ajax('GET', '/account/vault', { target: '#vault-panel' });
+        }
+      } catch (err) {
+        fail('unlock failed: ' + (err && err.message ? err.message : 'unexpected error'));
+      }
+    })();
   });
 
   // ── the terminal drives the left pane (Phase 6) ────────────────────────────

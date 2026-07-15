@@ -32,6 +32,7 @@ class CryptoConfig(TypedDict):
     enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
     private_key_backups: int  # rolling backups kept of the private key file
     # per-user vault (envelope encryption of the private key + env; MT-6)
+    env_file: Path  # the project env file (ANTHROPIC_API_KEY etc.) -- the vault's second secret
     vault_file: Path  # {salt, iterations, wrapped_vk}: the vault key wrapped under the password key
     user_pass_file: Path  # terminal-only: the password, to derive the password key off-line
     vault_magic: bytes  # header marking a file as vault-encrypted (vs. plaintext at rest)
@@ -97,6 +98,7 @@ config: CryptoConfig = {
     'private_key_backups': 5,  # rolling backups kept of the private key file
     # per-user vault (MT-6): both `id` and `env` live encrypted under a random vault key, itself
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.
+    'env_file': _SECRETS_DIR / 'env',  # same value as solver.config.env_file, kept import-free here
     'vault_file': _SECRETS_DIR / 'vault',  # {salt, iterations, wrapped_vk}
     'user_pass_file': _SECRETS_DIR / 'user_pass',  # terminal-only password, to derive the key off-line
     'vault_magic': _VAULT_MAGIC,

@@ -232,6 +232,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         service.sessions.revoke_email(record.email)     # a password change logs
         service.remember.revoke_email(record.email)     # every device out
         await service.push_shell_teardown(record.email)  # …and any live shell (DD-14)
+        await service.push_vault_reset(record.email)     # a reset destroys the vault (MT-6c)
         log.info('password reset completed for %s', record.email)
         raise web.HTTPSeeOther(location='/login?reset=1')
 

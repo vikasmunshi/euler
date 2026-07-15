@@ -37,8 +37,9 @@ class VaultTestCase(unittest.TestCase):
         self.env_file = self.secrets / 'env'
         # Rebind the crypto config to the temp secrets dir.
         self._saved_crypto = {k: crypto_config[k] for k in
-                              ('private_key_file', 'vault_file', 'user_pass_file')}
+                              ('private_key_file', 'env_file', 'vault_file', 'user_pass_file')}
         crypto_config['private_key_file'] = self.id_file
+        crypto_config['env_file'] = self.env_file
         crypto_config['vault_file'] = self.secrets / 'vault'
         crypto_config['user_pass_file'] = self.secrets / 'user_pass'
         # ai.models reads solver.config.env_file for the Anthropic key.
@@ -213,6 +214,98 @@ class GetApiKeyIntegrationTest(VaultTestCase):
         with self.assertRaises(ValueError) as ctx:
             models.get_api_key()
         self.assertIn('vault is locked', str(ctx.exception))
+
+
+class PkVaultTest(VaultTestCase):
+    """The web path (MT-6/MT-12): PK-taking twins of the password functions."""
+
+    _SALT = b'\x0a' * 16
+
+    def _pk(self, password: str, salt: bytes | None = None) -> bytes:
+        return vault.derive_password_key(password, salt or self._SALT, 1000)
+
+    def test_init_from_pk_then_unlock_with_pk(self) -> None:
+        pk = self._pk('pw')
+        vk = vault.init_vault_from_pk(pk, self._SALT)
+        self.assertTrue(vault.vault_exists())
+        self.assertEqual(vault.unlock_vault_with_pk(pk), vk)
+        # The recorded salt is the SRP salt, so the terminal path derives the same PK.
+        data = vault.read_vault()
+        assert data is not None
+        self.assertEqual(data['salt'], self._SALT.hex())
+        with self.assertRaises(InvalidTag):
+            vault.unlock_vault_with_pk(self._pk('wrong'))
+
+    def test_init_from_pk_encrypts_existing_plaintext_secrets(self) -> None:
+        self._write_plain_key()
+        self.env_file.write_text('ANTHROPIC_API_KEY=sk-plain\n')
+        vk = vault.init_vault_from_pk(self._pk('pw'), self._SALT)
+        for path in (self.id_file, self.env_file):
+            self.assertTrue(vault.is_vault_encrypted(path.read_bytes()))
+        self.assertIn(b'sk-plain', vault.decrypt_secret(vk, self.env_file.read_bytes()))
+
+    def test_rewrap_with_pk_survives_a_password_change(self) -> None:
+        new_salt = b'\x0b' * 16
+        old_pk, new_pk = self._pk('old-pw'), self._pk('new-pw', new_salt)
+        vk = vault.init_vault_from_pk(old_pk, self._SALT)
+        vault.rewrap_vault_with_pk(old_pk, new_pk, new_salt)
+        self.assertEqual(vault.unlock_vault_with_pk(new_pk), vk)   # same VK: secrets untouched
+        with self.assertRaises(InvalidTag):
+            vault.unlock_vault_with_pk(old_pk)
+        data = vault.read_vault()
+        assert data is not None
+        self.assertEqual(data['salt'], new_salt.hex())
+
+    def test_rewrap_with_wrong_old_pk_fails(self) -> None:
+        vault.init_vault_from_pk(self._pk('pw'), self._SALT)
+        with self.assertRaises(InvalidTag):
+            vault.rewrap_vault_with_pk(self._pk('wrong'), self._pk('new'), self._SALT)
+
+    def test_reset_removes_vault_and_ciphertext_only(self) -> None:
+        vk = vault.init_vault_from_pk(self._pk('pw'), self._SALT)
+        self.id_file.write_bytes(vault.encrypt_secret(vk, b'PEM'))
+        self.env_file.write_text('PLAIN=still-here\n')          # plaintext: never this vault's
+        vault.write_session_key(vk)
+        removed = vault.reset_vault()
+        self.assertEqual(sorted(removed), ['id', 'vault'])
+        self.assertFalse(vault.vault_exists())
+        self.assertFalse(self.id_file.exists())
+        self.assertEqual(self.env_file.read_text(), 'PLAIN=still-here\n')
+        self.assertIsNone(vault.session_vault_key())            # the session is locked too
+
+    def test_clear_session_key_removes_file_and_env(self) -> None:
+        path = vault.write_session_key(vault.new_vault_key())
+        self.assertTrue(path.exists())
+        vault.clear_session_key()
+        self.assertFalse(path.exists())
+        self.assertNotIn(crypto_config['vault_key_env'], os.environ)
+        self.assertIsNone(vault.session_vault_key())
+        vault.clear_session_key()                               # idempotent
+
+
+class PersistPrivateKeyTest(VaultTestCase):
+    """`user --regen` follow-up: a regenerated key is written vault-encrypted, never plain beside a vault."""
+
+    def test_persist_encrypts_under_the_session_vk(self) -> None:
+        from solver.crypto.keys import _persist_private_key
+        vk = vault.init_vault('pw')
+        vault.write_session_key(vk)
+        _persist_private_key(x25519.X25519PrivateKey.generate())
+        raw = self.id_file.read_bytes()
+        self.assertTrue(vault.is_vault_encrypted(raw))
+        self.assertTrue(vault.decrypt_secret(vk, raw).startswith(b'-----BEGIN PRIVATE KEY-----'))
+
+    def test_persist_refuses_when_the_vault_is_locked(self) -> None:
+        from solver.crypto.keys import _persist_private_key
+        vault.init_vault('pw')
+        vault.clear_session_key()
+        with self.assertRaises(PermissionError):
+            _persist_private_key(x25519.X25519PrivateKey.generate())
+
+    def test_persist_stays_plain_without_a_vault(self) -> None:
+        from solver.crypto.keys import _persist_private_key
+        _persist_private_key(x25519.X25519PrivateKey.generate())
+        self.assertTrue(self.id_file.read_bytes().startswith(b'-----BEGIN PRIVATE KEY-----'))
 
 
 if __name__ == '__main__':

@@ -36,16 +36,22 @@ interactive parts (password prompts, the ``vault`` command) live in :mod:`solver
 from __future__ import annotations
 
 __all__ = [
+    'clear_session_key',
     'decrypt_secret',
     'derive_password_key',
     'encrypt_secret',
+    'encrypt_secret_files',
     'ensure_session_key',
     'init_vault',
+    'init_vault_from_pk',
     'is_vault_encrypted',
     'new_vault_key',
     'read_vault',
+    'reset_vault',
     'rewrap_vault',
+    'rewrap_vault_with_pk',
     'session_vault_key',
+    'unlock_vault_with_pk',
     'unwrap_vault_key',
     'vault_exists',
     'wrap_vault_key',
@@ -207,6 +213,26 @@ def unlock_vault(password: str) -> bytes:
     return unwrap_vault_key(password_key, vault['wrapped_vk'])
 
 
+def encrypt_secret_files(vault_key: bytes) -> list[str]:
+    """Encrypt any still-plaintext secret files (`id`, `env`) in place under ``vault_key``.
+
+    Idempotent (already-encrypted files are left alone). Returns the names of the files rewritten.
+    Shared by the interactive ``vault init`` and the web first-login initialisation, so a vault is
+    never created with its secrets left plain beside it.
+    """
+    encrypted: list[str] = []
+    for path in (config['private_key_file'], config['env_file']):
+        if not path.exists():
+            continue
+        raw: bytes = path.read_bytes()
+        if is_vault_encrypted(raw):
+            continue
+        path.write_bytes(encrypt_secret(vault_key, raw))
+        path.chmod(0o600)
+        encrypted.append(path.name)
+    return encrypted
+
+
 def rewrap_vault(old_password: str, new_password: str) -> None:
     """Change the vault password: unwrap ``VK`` with the old password, re-wrap under the new one.
 
@@ -219,6 +245,80 @@ def rewrap_vault(old_password: str, new_password: str) -> None:
     salt: bytes = token_bytes(_SALT_LEN)
     iterations: int = config['vault_kdf_iterations']
     write_vault(salt, wrap_vault_key(derive_password_key(new_password, salt, iterations), vault_key), iterations)
+
+
+# ==================================================================================================================== #
+#                                       web path: PK-based vault operations (MT-6/MT-12)
+# ==================================================================================================================== #
+# The browser derives ``PK`` itself (WebCrypto PBKDF2 over the password it already holds and the SRP
+# salt) and sends only ``PK`` to the user's own service -- the password never reaches any server, and
+# the auth service never sees either. These are the ``PK``-taking twins of the password functions above.
+
+def unlock_vault_with_pk(password_key: bytes) -> bytes:
+    """Unwrap and return ``VK`` using a browser-derived ``PK``.
+
+    Raises:
+        FileNotFoundError:                  If no vault has been initialised.
+        cryptography.exceptions.InvalidTag: If ``PK`` does not match the vault's wrapping (a stale
+                                            vault after a password reset, or a wrong password).
+    """
+    vault: VaultData | None = read_vault()
+    if vault is None:
+        raise FileNotFoundError(f'no vault at {config["vault_file"]}')
+    return unwrap_vault_key(password_key, vault['wrapped_vk'])
+
+
+def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
+    """Create a fresh vault wrapped under a browser-derived ``PK`` (web first-login, MT-6).
+
+    ``salt`` is the account's SRP salt, recorded so the terminal path (and any later browser session)
+    derives the identical ``PK``. Any plaintext ``id``/``env`` already on disk is encrypted in place --
+    a vault must never coexist with plain secrets. Returns the plaintext ``VK``.
+    """
+    iterations: int = config['vault_kdf_iterations']
+    vault_key: bytes = new_vault_key()
+    write_vault(salt, wrap_vault_key(password_key, vault_key), iterations)
+    encrypt_secret_files(vault_key)
+    return vault_key
+
+
+def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_salt: bytes) -> None:
+    """Re-wrap ``VK`` under a new browser-derived ``PK`` (password change, MT-6c: the vault survives).
+
+    Only the small ``VK`` blob is rewritten; the ``VK``-encrypted secrets are untouched. ``new_salt``
+    is the account's new SRP salt (the browser derived ``new_password_key`` from it).
+
+    Raises:
+        FileNotFoundError:                  If no vault has been initialised.
+        cryptography.exceptions.InvalidTag: If ``old_password_key`` is wrong.
+    """
+    vault_key: bytes = unlock_vault_with_pk(old_password_key)
+    write_vault(new_salt, wrap_vault_key(new_password_key, vault_key), config['vault_kdf_iterations'])
+
+
+def reset_vault() -> list[str]:
+    """Destroy the vault after a password reset (MT-6c): the secrets are unrecoverable *by design*.
+
+    An SRP reset re-mints the login verifier but shares nothing with the vault, so the old ``VK`` can
+    never be unwrapped again -- leaving the blobs around would only misrepresent the state. Removes the
+    vault file and every **vault-encrypted** secret file (`id` + its rolling backups, `env`); plaintext
+    files are never touched (they were never under this vault). Also drops the session key. Returns the
+    names of the files removed; the user re-provisions (``user --regen`` + re-upload) afterwards.
+    """
+    removed: list[str] = []
+    vault_file: Path = config['vault_file']
+    if vault_file.exists():
+        vault_file.unlink()
+        removed.append(vault_file.name)
+    key_file: Path = config['private_key_file']
+    candidates: list[Path] = [key_file, config['env_file']]
+    candidates += [key_file.with_suffix(f'.{i}') for i in range(1, config['private_key_backups'] + 1)]
+    for path in candidates:
+        if path.exists() and is_vault_encrypted(path.read_bytes()):
+            path.unlink()
+            removed.append(path.name)
+    clear_session_key()
+    return removed
 
 
 # ==================================================================================================================== #
@@ -275,6 +375,18 @@ def session_vault_key() -> bytes | None:
     :func:`~solver.ai.models.get_api_key` to decrypt vault secrets. Never emits to stdout.
     """
     return _resolve_session_key()
+
+
+def clear_session_key() -> None:
+    """Lock the session: delete the tmpfs key file, drop the env var, and clear the cached ``VK``.
+
+    Called on logout (DD-14) and vault reset so a torn-down session leaves no reachable key material.
+    Idempotent.
+    """
+    key_path: str = os.environ.pop(config['vault_key_env'], '').strip()
+    if key_path:
+        Path(key_path).unlink(missing_ok=True)
+    _resolve_session_key.cache_clear()
 
 
 def ensure_session_key() -> bytes | None:

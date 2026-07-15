@@ -160,6 +160,11 @@ solver/
       content.py      — Config-free readers for the content trees the service renders (Phase 5b).
       render.py       — The full-page-vs-block render contract (DD-10, §4.5).
       validate.py     — The save gate (Phase 5c): the checks every 5d write passes (DD-10).
+    user/             — The per-user web service (MT-4): one collaborator's content **and** web shell.
+      __main__.py     — Per-user service entry point: ``python -m solver.web.user`` (DD-5/MT-4).
+      app.py          — The per-user aiohttp app: one collaborator's content **and** web shell (MT-4).
+      config.py       — Per-user service runtime configuration, read from the environment (DD-5/MT-4).
+      vault_api.py    — Vault + account routes for the per-user service (MT-6/MT-8).
     ws/               — The web-shell service: the solver PTY terminal over WebSocket (Phase 6, DD-13/DD-14).
       __main__.py     — Web-shell service entry point: ``python -m solver.web.ws`` (DD-5/DD-13).
       app.py          — The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.

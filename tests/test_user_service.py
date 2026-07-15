@@ -27,6 +27,7 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
 from solver.auth.authorizations import DEFAULT_POLICY_FILE
 from solver.auth.identity import system_slug
+from solver.crypto import vault
 from solver.web.auth.tickets import TicketStore
 from solver.web.user.app import PTY_MANAGER, build_app
 from solver.web.user.config import UserConfig
@@ -44,7 +45,8 @@ import os, sys
 print(f"BANNER ticket_len={len(os.environ.get('SOLVER_TICKET',''))} "
       f"slug={os.environ.get('EULER_USER_SLUG','')} "
       f"profile_env={os.environ.get('EULER_PROFILE','-none-')} "
-      f"auth_socket={os.environ.get('EULER_AUTH_SOCKET','')}", flush=True)
+      f"auth_socket={os.environ.get('EULER_AUTH_SOCKET','')} "
+      f"vk_file={os.environ.get('EULER_VAULT_KEY_FILE','-none-')}", flush=True)
 for line in sys.stdin:
     line = line.strip()
     if line == 'exit':
@@ -196,6 +198,146 @@ class ShellAttachTests(_UserServiceCase):
         self.assertTrue((await resp.json())['closed'])
         self.assertNotIn(_EMAIL, self.app[PTY_MANAGER]._shells)  # noqa: SLF001 — reaped
         await ws.close()
+
+
+class VaultRouteTests(_UserServiceCase):
+    """The vault + account surface (MT-6/MT-8): unlock/init, rewrap, secrets, reset."""
+
+    _SALT = bytes(range(16))
+
+    async def get_application(self) -> web.Application:
+        from solver.crypto.config import config as crypto_config
+        from solver.web.user import vault_api
+
+        secrets = Path(tempfile.mkdtemp(prefix='euler-vault-test-'))
+        self.addCleanup(lambda: __import__('shutil').rmtree(secrets, True))
+        self._saved = {k: crypto_config[k] for k in
+                       ('private_key_file', 'env_file', 'vault_file', 'user_pass_file',
+                        'vault_kdf_iterations')}
+        crypto_config['private_key_file'] = secrets / 'id'
+        crypto_config['env_file'] = secrets / 'env'
+        crypto_config['vault_file'] = secrets / 'vault'
+        crypto_config['user_pass_file'] = secrets / 'user_pass'
+        crypto_config['vault_kdf_iterations'] = 1000
+
+        def _restore() -> None:
+            crypto_config.update(self._saved)   # type: ignore[typeddict-item]
+            vault.clear_session_key()
+
+        self.addCleanup(_restore)
+        vault.clear_session_key()
+        # The gh / Claude Code probes shell out; keep the suite hermetic.
+        self._saved_probes = (vault_api._tool_status, vault_api._claude_status)  # noqa: SLF001
+        vault_api._tool_status = lambda *a, **k: 'not installed'  # type: ignore[assignment]
+        vault_api._claude_status = lambda: 'not installed'        # type: ignore[assignment]
+        self.addCleanup(lambda: (setattr(vault_api, '_tool_status', self._saved_probes[0]),
+                                 setattr(vault_api, '_claude_status', self._saved_probes[1])))
+        self.env_file = secrets / 'env'
+        return await super().get_application()
+
+    def _pk(self, password: str, salt: bytes | None = None) -> str:
+        return vault.derive_password_key(password, salt or self._SALT, 1000).hex()
+
+    async def _unlock(self, password: str = 'pw') -> aiohttp.ClientResponse:
+        return await self.client.post('/vault/unlock', headers=_OWN, json={
+            'pk': self._pk(password), 'salt': self._SALT.hex()})
+
+    @unittest_run_loop
+    async def test_vault_routes_require_identity(self) -> None:
+        for method, path in (('GET', '/vault/status'), ('POST', '/vault/unlock'),
+                             ('POST', '/vault/rewrap'), ('GET', '/account/vault'),
+                             ('POST', '/account/secret')):
+            resp = await self.client.request(method, path)
+            self.assertEqual(resp.status, 401, path)
+
+    @unittest_run_loop
+    async def test_first_login_initialises_and_unlocks(self) -> None:
+        status = await (await self.client.get('/vault/status', headers=_OWN)).json()
+        self.assertEqual(status, {'vault': False, 'unlocked': False})
+        resp = await self._unlock()
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(await resp.json(), {'unlocked': True, 'initialized': True})
+        status = await (await self.client.get('/vault/status', headers=_OWN)).json()
+        self.assertTrue(status['vault'] and status['unlocked'])
+        self.assertEqual(status['salt'], self._SALT.hex())
+        self.assertTrue(vault.vault_exists())
+
+    @unittest_run_loop
+    async def test_wrong_pk_is_stale_never_destructive(self) -> None:
+        vault.init_vault_from_pk(bytes.fromhex(self._pk('right')), self._SALT)
+        resp = await self._unlock('wrong')
+        self.assertEqual(resp.status, 409)
+        self.assertTrue((await resp.json())['stale'])
+        self.assertTrue(vault.vault_exists())               # untouched
+        self.assertEqual((await self._unlock('right')).status, 200)
+
+    @unittest_run_loop
+    async def test_rewrap_carries_the_vault_across_a_password_change(self) -> None:
+        vk = vault.init_vault_from_pk(bytes.fromhex(self._pk('old')), self._SALT)
+        new_salt = bytes(range(16, 32))
+        resp = await self.client.post('/vault/rewrap', headers=_OWN, json={
+            'old_pk': self._pk('old'), 'new_pk': self._pk('new', new_salt),
+            'new_salt': new_salt.hex()})
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(vault.unlock_vault_with_pk(bytes.fromhex(self._pk('new', new_salt))), vk)
+        with self.assertRaises(Exception):                  # the old wrap is gone
+            vault.unlock_vault_with_pk(bytes.fromhex(self._pk('old')))
+
+    @unittest_run_loop
+    async def test_secret_upsert_and_delete_are_write_only(self) -> None:
+        await self._unlock()
+        resp = await self.client.post('/account/secret', headers=_OWN, data={
+            'name': 'ANTHROPIC_API_KEY', 'value': 'sk-super-secret'})
+        self.assertEqual(resp.status, 200)
+        page = await resp.text()
+        self.assertIn('<code>ANTHROPIC_API_KEY</code>', page)   # the NAME is listed…
+        self.assertNotIn('sk-super-secret', page)               # …the VALUE is never rendered
+        self.assertTrue(vault.is_vault_encrypted(self.env_file.read_bytes()))
+        resp = await self.client.post('/account/secret/delete', headers=_OWN,
+                                      data={'name': 'ANTHROPIC_API_KEY'})
+        self.assertEqual(resp.status, 200)
+        self.assertNotIn('<code>ANTHROPIC_API_KEY</code>', await resp.text())
+
+    @unittest_run_loop
+    async def test_secret_upsert_locked_is_409_and_bad_name_400(self) -> None:
+        resp = await self.client.post('/account/secret', headers=_OWN,
+                                      data={'name': 'X_KEY', 'value': 'v'})
+        self.assertEqual(resp.status, 409)                  # no vault / locked
+        await self._unlock()
+        resp = await self.client.post('/account/secret', headers=_OWN,
+                                      data={'name': 'bad name!', 'value': 'v'})
+        self.assertEqual(resp.status, 400)
+
+    @unittest_run_loop
+    async def test_internal_vault_reset_destroys_the_vault(self) -> None:
+        await self._unlock()
+        await self.client.post('/account/secret', headers=_OWN,
+                               data={'name': 'A_KEY', 'value': 'v'})
+        resp = await self.client.post('/internal/vault-reset', json={'email': _EMAIL})
+        self.assertEqual(resp.status, 200)
+        removed = (await resp.json())['removed']
+        self.assertIn('vault', removed)
+        self.assertIn('env', removed)
+        self.assertFalse(vault.vault_exists())
+        self.assertIsNone(vault.session_vault_key())        # locked out too
+
+    @unittest_run_loop
+    async def test_shell_forked_after_unlock_inherits_the_session_key(self) -> None:
+        """The MT-12 delivery through the web path: unlock, then attach — the child
+        finds the uid-private key file by inherited environment and can read VK."""
+        await self._unlock()
+        ws = await self.client.ws_connect('/ws', headers=_OWN_WS)
+        banner = await _read_until(ws, b'vk_file=')
+        vk_path = banner.split(b'vk_file=')[1].split()[0].decode()
+        self.assertNotEqual(vk_path, '-none-')
+        self.assertEqual(len(Path(vk_path).read_bytes()), 32)   # the actual VK, 0600 tmpfs
+        await ws.close()
+
+    @unittest_run_loop
+    async def test_malformed_pk_is_400(self) -> None:
+        resp = await self.client.post('/vault/unlock', headers=_OWN,
+                                      json={'pk': 'zz', 'salt': self._SALT.hex()})
+        self.assertEqual(resp.status, 400)
 
 
 if __name__ == '__main__':

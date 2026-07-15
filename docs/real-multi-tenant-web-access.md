@@ -393,8 +393,28 @@ changes:
    adapts+validates on Caddy 2.11.4, and a live stub harness confirmed the four
    routing semantics (session → its own user socket with identity headers; forged
    client slug stripped; no session → `/login`; malformed slug → 503).
-5. **The account page + vault UX** (MT-8/MT-9): pubkey, write-only secret upload/delete,
-   gh + Claude-Code login status; `VK` delivery at attach.
+5. **The account page + vault UX** (MT-8/MT-9) — **✅ built.** The web half of the vault
+   (§7): `vault.py` gains the `PK`-taking twins (`unlock_vault_with_pk` /
+   `init_vault_from_pk` / `rewrap_vault_with_pk` / `reset_vault`), and the per-user
+   service (`solver/web/user/vault_api.py`) exposes them — `GET /vault/status`,
+   `POST /vault/unlock` (unlock, or **initialise on first login** with the SRP salt;
+   a mismatched `PK` → 409 `stale`, never destructive), `POST /vault/rewrap` (a
+   password *change* carries the vault forward, MT-6c), and the socket-peer
+   `POST /internal/vault-reset` (a password *reset* destroys it, pushed by the auth
+   service from the reset-complete flow — the stale blob and its ciphertext are
+   removed, the user re-provisions). The browser (`assets/vault.js`) derives `PK`
+   with WebCrypto PBKDF2 from the password it already holds and the SRP challenge
+   salt (**byte-parity with `derive_password_key` verified**, 1k and 600k rounds),
+   keeps it in `sessionStorage`, auto-unlocks on page load, and the terminal page
+   unlocks **before** the first `/ws` attach so the forked shell inherits the
+   uid-private key file (MT-12 — proven by a route-level test reading `VK` from the
+   child). The account page's credential panel (`/account/vault`, MT-8): pubkey for
+   the out-of-band `user-authorize`, **write-only** secret upload/replace/delete into
+   the `VK`-encrypted `~/.euler/env` (values never rendered back), gh + Claude Code
+   sign-in state, and a recovery form (old password → re-wrap to the current sign-in).
+   `user --regen` now persists the key **vault-encrypted** when a vault is unlocked
+   (and refuses when locked), closing the step-1 follow-up. Logout locks the vault
+   (the DD-14 push also removes the session key file). 197 tests.
 6. **Per-user git** (MT-2): native `git-commit`/`git-push` on `user/<slug>` as the
    user; admin merges `user/*` → master (web or terminal); enc-key pull flow.
 7. **Docs & security-notes**: the three new ARs (§11); retire DD-13/DD-15 as superseded.

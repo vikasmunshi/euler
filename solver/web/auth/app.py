@@ -188,6 +188,24 @@ class AuthService:
         (Caddy never routes it), and ``euler-auth`` reaches it as a fellow ``euler-web``
         member.
         """
+        await self._push_user_instance(email, '/internal/logout')
+
+    async def push_vault_reset(self, email: str) -> None:
+        """Destroy *email*'s vault on their per-user instance after a password reset (MT-6c).
+
+        An SRP reset re-mints the login verifier but shares nothing with the vault, so
+        the old vault key is unrecoverable **by design** — the auth service (which never
+        sees a password) could not preserve it if it wanted to, and that is exactly what
+        keeps the vault operator-opaque. This push has the instance remove the stale
+        blob and its ciphertext rather than leave secrets rotting under a dead key; the
+        next sign-in initialises a fresh vault and the user re-provisions. A password
+        *change* never comes here — the browser re-wraps and the vault survives.
+        Best-effort and socket-peer only, exactly like :meth:`push_shell_teardown`.
+        """
+        await self._push_user_instance(email, '/internal/vault-reset')
+
+    async def _push_user_instance(self, email: str, path: str) -> None:
+        """POST to *email*'s own instance socket (``user-<slug>.sock``); never raises."""
         base = self.config.user_socket_dir
         if not base:
             return
@@ -197,10 +215,10 @@ class AuthService:
             connector = aiohttp.UnixConnector(path=str(sock))
             timeout = aiohttp.ClientTimeout(total=3)
             async with aiohttp.ClientSession(connector=connector, timeout=timeout) as http:
-                async with http.post('http://user/internal/logout', json={'email': email}) as resp:
+                async with http.post(f'http://user{path}', json={'email': email}) as resp:
                     await resp.read()
         except (OSError, aiohttp.ClientError, asyncio.TimeoutError):
-            pass                         # absent / down / slow — the shell isn't reachable
+            pass                         # absent / down / slow — the instance isn't reachable
 
 
 # ── public app (auth.sock — via Caddy, plus the socket-peer ticket endpoints) ──────

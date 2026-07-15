@@ -78,6 +78,18 @@
         if (!change.ok) return fail('The change was refused. Try again.');
         const { M2 } = await change.json();
         if (!proof.check(M2)) return fail('Server failed mutual authentication — password unchanged? Sign in to verify.');
+        // 3 · the vault survives a password change (MT-6c): re-wrap VK under the
+        // new password's PK. Best-effort — 404 means no vault yet; 409 means the
+        // vault was wrapped under something else (the account panel can recover).
+        try {
+          if (window.Vault) {
+            const oldPk = await Vault.derivePk(current, salt);
+            const newPk = await Vault.derivePk(next, derived.salt);
+            const rewrap = await Vault.postJson('/vault/rewrap',
+              { old_pk: oldPk, new_pk: newPk, new_salt: derived.salt });
+            if (rewrap.ok || rewrap.status === 404) Vault.store(newPk, derived.salt);
+          }
+        } catch (err) { /* recovery stays available on the account panel */ }
         succeed();
       } catch (err) {
         fail('Change failed: ' + (err && err.message ? err.message : 'unexpected error'));

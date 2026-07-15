@@ -67,18 +67,32 @@ def _rotate_backups(key_file: Path) -> None:
 
 
 def _persist_private_key(private_key: X25519PrivateKey) -> None:
-    """Write the plain (unencrypted) private key to disk `0600` (rotating backups)."""
+    """Write the private key to disk `0600` (rotating backups) -- vault-encrypted when one is unlocked.
+
+    With a vault present and this session holding its ``VK``, the PEM is encrypted at rest like every
+    vault secret (MT-6) -- so `user --regen` never downgrades an encrypted `id` back to plaintext. With
+    no vault (the pre-vault operator setup) the key is written plain, protected by the `0600` secrets
+    dir as before.
+    """
     key_file: Path = config['private_key_file']
     key_file.parent.mkdir(parents=True, exist_ok=True)
     key_file.parent.chmod(0o700)
     _rotate_backups(key_file)
-    key_file.write_bytes(private_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8,
-                                                   NoEncryption()))
+    data: bytes = private_key.private_bytes(Encoding.PEM, PrivateFormat.PKCS8, NoEncryption())
+    at_rest: str = 'plain, machine-local `0600`'
+    if vault_mod.vault_exists():
+        vault_key: bytes | None = vault_mod.session_vault_key()
+        if vault_key is None:
+            console.print('[error]error:[/error] a vault exists but this session cannot unlock it; '
+                          'refusing to write the private key in plaintext beside it.')
+            raise PermissionError('vault locked')
+        data = vault_mod.encrypt_secret(vault_key, data)
+        at_rest = 'vault-encrypted'
+    key_file.write_bytes(data)
     key_file.chmod(0o600)
     load_private_key.cache_clear()
     read_master_key.cache_clear()
-    console.print(f'[success]Private key written to [accent]{key_file}[/accent] '
-                  f'(plain, machine-local `0600`)[/success]')
+    console.print(f'[success]Private key written to [accent]{key_file}[/accent] ({at_rest})[/success]')
 
 
 def _create_user_key() -> X25519PrivateKey:
@@ -218,18 +232,6 @@ def _prompt_new_password(prompt: str) -> str | None:
     return first
 
 
-def _encrypt_secret_file(path: Path, vault_key: bytes) -> bool:
-    """Encrypt `path` in place under `vault_key` if it exists and is still plaintext. Returns True if written."""
-    if not path.exists():
-        return False
-    raw: bytes = path.read_bytes()
-    if vault_mod.is_vault_encrypted(raw):
-        return False
-    path.write_bytes(vault_mod.encrypt_secret(vault_key, raw))
-    path.chmod(0o600)
-    return True
-
-
 def _vault_status() -> int:
     """Report whether the vault exists, which secrets are encrypted, and whether the session is unlocked."""
     id_file: Path = config['private_key_file']
@@ -279,11 +281,7 @@ def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> in
         vault_key: bytes = vault_mod.init_vault(password)
         _write_user_pass(password)
         vault_mod.write_session_key(vault_key)  # keep this shell working; exports EULER_VAULT_KEY_FILE
-        encrypted: list[str] = []
-        if _encrypt_secret_file(config['private_key_file'], vault_key):
-            encrypted.append('id')
-        if _encrypt_secret_file(app_config.env_file, vault_key):
-            encrypted.append('env')
+        encrypted: list[str] = vault_mod.encrypt_secret_files(vault_key)
         load_private_key.cache_clear()
         read_master_key.cache_clear()
         console.print(f'[success]Vault initialised.[/success] Encrypted: '

@@ -205,5 +205,14 @@
     if (socket) { socket.close(1000, 'leaving'); }
   });
 
-  connect();
+  // Unlock the vault BEFORE the first attach (MT-12): the shell is forked on
+  // attach and inherits the session key file's path by environment, so the
+  // unlock must land first for the shell (and the git filter under it) to
+  // decrypt the user's secrets. Best-effort — locked just means `claude-api`
+  // and the private solutions stay unavailable in this shell.
+  if (window.Vault) {
+    window.Vault.unlock().then(connect, connect);
+  } else {
+    connect();
+  }
 })();

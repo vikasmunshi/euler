@@ -33,11 +33,13 @@ from aiohttp import WSCloseCode, WSMsgType, web
 
 from solver.auth import Authorizations, Subject
 from solver.auth.identity import system_slug
+from solver.crypto import vault
 from solver.web.auth.client import request as auth_request
 from solver.web.csp import csp_middleware
 from solver.web.site.app import _MAX_BODY, install_content
 from solver.web.site.render import SUBJECT_KEY
 from solver.web.user.config import UserConfig
+from solver.web.user.vault_api import add_vault_routes
 from solver.web.ws.manager import PtyManager
 from solver.web.ws.pty import PtySession
 
@@ -106,6 +108,8 @@ def build_app(config: UserConfig) -> web.Application:
                           client_max_size=_MAX_BODY)
     # The content surface (routes + jinja + static + /healthz) — reused verbatim.
     install_content(app, config.site_config(), authz)
+    # The vault + account surface (MT-6/MT-8) — this instance IS the user's uid.
+    add_vault_routes(app)
     app[PTY_MANAGER] = manager
 
     async def _mint_ticket(cookie: str) -> str:
@@ -182,6 +186,7 @@ def build_app(config: UserConfig) -> web.Application:
         if not email:
             return web.Response(status=400, text='bad request')
         closed = await manager.close(email)
+        vault.clear_session_key()       # the session ended — leave no reachable key material (MT-12)
         log.info('logout push for %s (shell %s)', email, 'closed' if closed else 'absent')
         return web.json_response({'closed': closed})
 
@@ -212,6 +217,7 @@ def build_app(config: UserConfig) -> web.Application:
 
     async def _close_all(app_: web.Application) -> None:
         await app_[PTY_MANAGER].close_all()
+        vault.clear_session_key()       # service stop: drop the tmpfs key file too
 
     app.add_routes([
         web.get('/ws', websocket),
