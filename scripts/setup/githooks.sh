@@ -22,7 +22,10 @@ TEMPLATES_DIR="${REPO_ROOT}/scripts/setup/hooks"
 PRE_COMMIT="${HOOKS_DIR}/pre-commit"
 PRE_PUSH="${HOOKS_DIR}/pre-push"
 
-VENV="${REPO_ROOT}/.venv"
+# The venv whose flake8/mypy the rendered hooks call. Defaults to the checkout's own
+# ``.venv`` (the operator dev setup); a per-user provisioned clone (MT-7) has no ``.venv``,
+# so ``user.sh`` overrides this with the deployed ``/opt/euler/venv`` via ``EULER_VENV``.
+VENV="${EULER_VENV:-${REPO_ROOT}/.venv}"
 
 FORCE=0
 

@@ -302,6 +302,14 @@ provision_clone() {
     # 'required', so solutions/private/** checks out as the ciphertext GitHub holds.
     sudo git clone --branch master "${url}" "${clone}"
     sudo git -C "${clone}" checkout -B "user/${slug}"
+    # Install the git hooks (pre-commit flake8+mypy, pre-push) into the clone: they render
+    # into .git/hooks (not tracked, so a clone lands without them), pointed at the deployed
+    # /opt/euler venv since a per-user clone has no .venv. Done before the chown so the
+    # rendered hooks are swept into the user's ownership.
+    if [ -x "${clone}/scripts/setup/githooks.sh" ]; then
+        echo "Installing git hooks into ${clone} (venv ${VENV_DIR})..."
+        sudo env EULER_VENV="${VENV_DIR}" bash "${clone}/scripts/setup/githooks.sh" install --force
+    fi
     sudo chown -R "${user}:${user}" "${clone}"
 }
 
