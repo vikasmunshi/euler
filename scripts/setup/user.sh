@@ -84,8 +84,9 @@ Usage: $0 <action> [args]
   provision <slug> <email> <profile>
                                Provision one collaborator: uid + home (0700), a
                                filter-disabled clone of ~/euler from the public GitHub
-                               repo on branch user/<slug>, ~/.euler, and the instance
-                               socket. Idempotent.
+                               repo on branch user/<slug> (cloned AS the user, through
+                               Squid), git hooks, Claude Code (~/.local/bin, theirs),
+                               ~/.euler, and the instance socket. Idempotent.
   deprovision <slug>           Tear one collaborator down: stop/disable the instance,
                                then (prompted) userdel + remove the home. Reports the
                                required 'key-rekey' to drop master-key access.
@@ -287,10 +288,22 @@ ensure_user_identity() {
     sudo install -d -m 0700 -o "${user}" -g "${user}" "${home}/.euler"
 }
 
+# Run a provisioning step AS the collaborator's own uid (never root): a heredoc
+# script under `sudo -Hu`, so every file it creates is born with the right owner —
+# no chown sweep, and no window where root-owned files sit in a user's home. The
+# euler-user-* uids are inside the egress lock (firewall.sh), so the script first
+# sources /etc/euler/egress.env: outbound HTTP(S) goes through Squid or not at all
+# (root, by contrast, bypassed the lock — one more reason not to work as root).
+as_user() {
+    local user="$1"; shift
+    sudo -Hu "${user}" env "$@" EGRESS_ENV="${EGRESS_ENV}" bash -s
+}
+
 # Clone the repo into ~/euler on branch user/<slug>, filter DISABLED → ciphertext at
 # rest. Clone straight from the public GitHub repo: GitHub stores only the filter's
 # ciphertext (the clean output), anonymous read needs no credentials, and origin stays
-# the GitHub URL so the user can push user/<slug> as themselves later (MT-2).
+# the GitHub URL so the user can push user/<slug> as themselves later (MT-2). Runs AS
+# the user; github.com is in the Squid allowlist, so the clone rides the proxy.
 provision_clone() {
     local slug="$1" user home clone url
     user="$(user_of "${slug}")"
@@ -305,23 +318,49 @@ provision_clone() {
         echo "Error: could not read the origin URL from ${PROJECT_ROOT} — is it a checkout?" >&2
         return 1
     fi
-    echo "Cloning ${url} into ${clone} (filter disabled → ciphertext at rest)..."
+    echo "Cloning ${url} into ${clone} as ${user} (filter disabled → ciphertext at rest)..."
     # No filter is wired in the clone's local config, and .gitattributes' rule is not
     # 'required', so solutions/private/** checks out as the ciphertext GitHub holds.
-    sudo git clone --branch master "${url}" "${clone}"
-    sudo git -C "${clone}" checkout -B "user/${slug}"
     # Commit authorship + push credential are the user's own (MT-2), configured
-    # self-service in their shell: `git-identity` (scripts/git/configure-identity.sh)
-    # signs in to GitHub via gh and sets user.name/user.email from that profile.
-    # Install the git hooks (pre-commit flake8+mypy, pre-push) into the clone: they render
-    # into .git/hooks (not tracked, so a clone lands without them), pointed at the deployed
-    # /opt/euler venv since a per-user clone has no .venv. Done before the chown so the
-    # rendered hooks are swept into the user's ownership.
-    if [ -x "${clone}/scripts/setup/githooks.sh" ]; then
-        echo "Installing git hooks into ${clone} (venv ${VENV_DIR})..."
-        sudo env EULER_VENV="${VENV_DIR}" bash "${clone}/scripts/setup/githooks.sh" install --force
+    # self-service in their shell later (`git-identity`). The git hooks (pre-commit
+    # flake8+mypy + the gitfilter gate, pre-push) render into .git/hooks — not tracked,
+    # so a clone lands without them — pointed at the deployed /opt/euler venv since a
+    # per-user clone has no .venv.
+    as_user "${user}" URL="${url}" SLUG="${slug}" EULER_VENV="${VENV_DIR}" <<'CLONE'
+set -euo pipefail
+[ -f "${EGRESS_ENV}" ] && { set -a; . "${EGRESS_ENV}"; set +a; }
+git clone --branch master "${URL}" "${HOME}/euler"
+git -C "${HOME}/euler" checkout -B "user/${SLUG}"
+echo "Installing git hooks (venv ${EULER_VENV})..."
+bash "${HOME}/euler/scripts/setup/githooks.sh" install --force
+CLONE
+}
+
+# Install the Claude Code CLI into the user's own home (~/.local/bin) — their login,
+# their config, their spend (MT-6): the `claude` binary is per-user by design, exactly
+# like their vault. Runs the CLONE's own claude_code.sh AS the user, so its project
+# links land in their clone; best-effort — the download rides Squid, so downloads.claude.ai
+# (and claude.ai / code.claude.com) must be in the egress allowlist or this skips with
+# a warning and the user is told how to finish later.
+provision_claude() {
+    local slug="$1" user home
+    user="$(user_of "${slug}")"
+    home="$(home_of "${slug}")"
+    if [ ! -x "${home}/euler/scripts/setup/claude_code.sh" ]; then
+        echo "note: no claude_code.sh in the clone — skipping the Claude Code install."
+        return 0
     fi
-    sudo chown -R "${user}:${user}" "${clone}"
+    echo "Installing Claude Code for ${user} (via Squid)..."
+    if ! as_user "${user}" <<'CLAUDE'
+set -euo pipefail
+[ -f "${EGRESS_ENV}" ] && { set -a; . "${EGRESS_ENV}"; set +a; }
+bash "${HOME}/euler/scripts/setup/claude_code.sh" install
+CLAUDE
+    then
+        echo "warn: Claude Code install failed — likely the egress allowlist (needs .claude.ai,"
+        echo "      code.claude.com; edit /etc/euler-proxy/squid.allowlist + 'egress.sh reload')."
+        echo "      The user can finish later in their shell: ! bash scripts/setup/claude_code.sh install"
+    fi
 }
 
 enable_socket() {
@@ -342,6 +381,7 @@ do_provision() {
     ensure_shared_groups
     ensure_user_identity "${slug}"
     provision_clone "${slug}"
+    provision_claude "${slug}"
     enable_socket "${slug}"
     # The new uid must be inside the egress lock, or (chain policy accept) it would reach
     # the internet directly, bypassing Squid. firewall.sh enumerates euler-user-* by group.

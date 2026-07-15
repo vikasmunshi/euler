@@ -57,6 +57,9 @@ DEFAULT_ALLOWLIST=(
     ".projecteuler.net"          # problem scraper
     ".github.com"                # gh: repo, API, codeload
     ".githubusercontent.com"     # gh: raw / release objects
+    ".claude.ai"                 # Claude Code: installer + downloads.claude.ai
+    ".claude.com"                # Claude Code: code.claude.com (releases) + OAuth login
+    ".anthropic.com"             # Claude Code: version/telemetry endpoints
 )
 
 usage() {
