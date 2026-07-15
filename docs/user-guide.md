@@ -221,6 +221,7 @@ command name below links to its full entry — usage and description — in the
 | [`edit`](commands-index.md#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
+| [`git-filter`](commands-index.md#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
 | [`git-merge`](commands-index.md#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |

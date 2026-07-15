@@ -57,6 +57,7 @@ for the model and how identity resolves to a profile on each channel.
 | `solver.utils.misc` | `manage-config` | `admin` |
 | `solver.utils.misc` | `problems` | `reader` |
 | `solver.utils.scripts` | `git-commit` | `contributor` |
+| `solver.utils.scripts` | `git-filter` | `reader` |
 | `solver.utils.scripts` | `git-hooks` | `contributor` |
 | `solver.utils.scripts` | `git-identity` | `contributor` |
 | `solver.utils.scripts` | `git-merge` | `admin` |

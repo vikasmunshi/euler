@@ -58,6 +58,7 @@ a parameter that accepts repetition.
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
+| [`git-filter`](#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
 | [`git-merge`](#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |
@@ -493,6 +494,35 @@ Args:
              `checkpoint <timestamp>` message is used.
 
 Aliased as `commit`.
+```
+
+---
+
+#### Command: `git-filter` (`filter`)
+
+Wire the git encryption filter: status | install.
+* profiles: admin, maintainer, contributor, reader
+
+```
+git-filter
+[action=status|install] (default status)
+```
+
+```text
+Report or wire the transparent encryption filter for `solutions/private` (MT-2).
+
+`status` shows the filter wiring and whether this session can unwrap the
+master key. `install` verifies master-key access first (refusing cleanly
+without it — nothing is wired), registers the clean/smudge filter in this
+clone's git config, and re-checks out `solutions/private` so existing
+ciphertext decrypts in place. The explicit form of what `git-sync` runs
+automatically after a pull that delivers key access — use it when access
+arrived some other way, e.g. right after `key-reconstruct` from shares.
+
+Args:
+    action: 'status' (default) or 'install'.
+
+Aliased as `filter`.
 ```
 
 ---

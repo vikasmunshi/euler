@@ -33,7 +33,7 @@ class PolicyShapeTest(unittest.TestCase):
 
     def test_floors_of_the_git_commands(self) -> None:
         load_commands()
-        expected = {'git-status': 'reader', 'git-sync': 'reader',
+        expected = {'git-status': 'reader', 'git-sync': 'reader', 'git-filter': 'reader',
                     'git-commit': 'contributor', 'git-push': 'contributor',
                     'git-hooks': 'contributor', 'git-identity': 'contributor',
                     'git-merge': 'admin', 'git-publish': 'admin'}
@@ -139,6 +139,44 @@ class GitMergeTest(_GitCommandCase):
         self.assertEqual(scripts.git_merge('alice-3f9e97'), ExitCodes.EXIT_ERROR)
         self.assertIn('git merge --abort', self.cmdlines)
         self.assertNotIn('git push origin master', self.cmdlines)
+
+
+class GitFilterCommandTest(_GitCommandCase):
+    """The explicit wire-the-filter command (the key-reconstruct aftermath)."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self._saved_run_proc = scripts.run
+        self.dirty = ''
+
+        def fake_run(*_a: Any, **_k: Any) -> Any:
+            return MagicMock(returncode=0, stdout=self.dirty)
+        scripts.run = fake_run                      # type: ignore[assignment]
+
+    def tearDown(self) -> None:
+        scripts.run = self._saved_run_proc          # type: ignore[assignment]
+        super().tearDown()
+
+    def test_status_is_a_passthrough(self) -> None:
+        self.assertEqual(scripts.git_filter(), 0)
+        self.assertEqual(len(self.cmdlines), 1)
+        self.assertIn('gitfilter status', self.cmdlines[0])
+
+    def test_install_wires_then_rechecks_out(self) -> None:
+        self.assertEqual(scripts.git_filter('install'), 0)
+        self.assertEqual(len(self.cmdlines), 2)
+        self.assertIn('gitfilter install', self.cmdlines[0])
+        self.assertIn('git checkout -- solutions/private', self.cmdlines[1])
+
+    def test_refused_install_stops_before_the_recheckout(self) -> None:
+        self.rcs = [1]                              # not key-authorized: install refuses
+        self.assertEqual(scripts.git_filter('install'), 1)
+        self.assertEqual(len(self.cmdlines), 1)
+
+    def test_local_private_edits_skip_the_recheckout(self) -> None:
+        self.dirty = ' M solutions/private/p0101/x.py'
+        self.assertEqual(scripts.git_filter('install'), 0)
+        self.assertEqual(len(self.cmdlines), 1)     # wired, but nothing clobbered
 
 
 class EncKeyPullFlowTest(_GitCommandCase):

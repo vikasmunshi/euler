@@ -148,6 +148,44 @@ def _enc_key_pull_flow() -> None:
                     '&& git checkout -- solutions/private')
 
 
+@register(requires='reader', aliases=('filter',),
+          help_text='Wire the git encryption filter: [accent.dim]status[/accent.dim] | install.')
+def git_filter(action: Literal['status', 'install'] = 'status') -> int:
+    """Report or wire the transparent encryption filter for `solutions/private` (MT-2).
+
+    `status` shows the filter wiring and whether this session can unwrap the
+    master key. `install` verifies master-key access first (refusing cleanly
+    without it — nothing is wired), registers the clean/smudge filter in this
+    clone's git config, and re-checks out `solutions/private` so existing
+    ciphertext decrypts in place. The explicit form of what `git-sync` runs
+    automatically after a pull that delivers key access — use it when access
+    arrived some other way, e.g. right after `key-reconstruct` from shares.
+
+    Args:
+        action: 'status' (default) or 'install'.
+
+    Aliased as `filter`.
+    """
+    if action == 'status':
+        return run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter status')
+    result = run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter install')
+    if result != 0:
+        return result
+    # Re-smudge: existing ciphertext in the worktree only decrypts on a fresh
+    # checkout. Genuine local edits must not be clobbered — but a freshly wired
+    # clone is NOT dirty (clean() passes ciphertext through, matching the stored
+    # blob), so the guard only trips on real plaintext changes.
+    dirty: str = run(['git', 'status', '--porcelain', '--', 'solutions/private'],
+                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
+    if dirty:
+        console.print('[warning]solutions/private has local changes — skipping the re-checkout; '
+                      'commit or stash, then run [accent]git-filter install[/accent] again.[/warning]')
+        return int(ExitCodes.EXIT_OK)
+    console.print('[primary]Decrypting private solutions in place...[/primary]')
+    return run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
+                       '&& git checkout -- solutions/private')
+
+
 @register(requires='reader',
           help_text='Bring the local repository in sync with origin/master.', aliases=('sync',),)
 def git_sync(dry_run: bool = False) -> int:
