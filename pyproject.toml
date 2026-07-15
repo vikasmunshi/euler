@@ -55,12 +55,7 @@ solutions = [
     # cython / numpy / setuptools below are the build deps that script relies on.
     "cython",
     "mpmath",
-    # Floor at 2.5 so every venv converges forward, not drifts: unpinned, the operator
-    # resolved 2.4.6 while the deployed /opt/euler venv resolved 2.5.1, and 2.5's stubs
-    # type np.cumsum/np.frombuffer as an unbound generic — so the same numpy-typed
-    # solutions passed mypy on one venv and failed on the other. The solutions now carry
-    # explicit annotations for 2.5; the floor keeps every venv on that stub contract.
-    "numpy>=2.5",
+    "numpy",
     "primesieve",
     "setuptools",
 ]
