@@ -56,6 +56,11 @@
                hx-swap="innerHTML" hx-push-url="true">Account</a></li>
         <li><a href="/password" hx-get="/password" hx-target="#content"
                hx-swap="innerHTML" hx-push-url="true">Change password</a></li>
+        {# Terminal connection control (site.js → postMessage into the /terminal
+           iframe). Connect/disconnect is always the user's own act — the terminal
+           never reconnects on its own. #}
+        <li><button type="button" id="term-connect">Connect terminal</button></li>
+        <li><button type="button" id="term-disconnect">Disconnect terminal</button></li>
         <li><form method="post" action="/auth/logout"><button type="submit">Logout</button></form></li>
       </ul>
     </details>

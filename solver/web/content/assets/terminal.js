@@ -49,21 +49,25 @@
   fit.fit();
 
   // ── the socket ───────────────────────────────────────────────────────────
+  // Connect and disconnect are the USER'S acts (the ☰ user menu; the first
+  // connect rides the page load). There is deliberately no automatic reconnect:
+  // a dropped transport stays dropped, visibly, until the user asks — the
+  // server-side shell survives a disconnect and replays on the next attach.
   var socket = null;
   var closedByUs = false;
-  var retry = 0;
   //: False while the server's replay is still being parsed: the scrollback is
   //: drawn, but the commands in it already ran, so their control sequences must
   //: not fire again (§ the OSC handler below).
   var live = false;
 
   function connect() {
+    if (socket) { return; }             // already connected / connecting
+    closedByUs = false;
     var url = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
     socket = new WebSocket(url);
     socket.binaryType = 'arraybuffer';
 
     socket.onopen = function () {
-      retry = 0;
       live = false;                     // a fresh attach replays before it streams
       arm();
       sendSize();                       // the server's PTY starts at 80x24
@@ -89,16 +93,20 @@
     socket.onclose = function (ev) {
       disarm();
       socket = null;
-      if (closedByUs) { return; }
-      // 1008 = the service refused us (no ticket / not permitted): say so and
-      // stop — retrying cannot help. Anything else is a transport blip.
+      if (closedByUs) {
+        term.write('\r\n\x1b[33mdisconnected — your shell keeps running; '
+                   + 'reconnect from the user menu.\x1b[0m\r\n');
+        return;
+      }
+      // 1008 = the service refused us (no ticket / not permitted): say so.
       if (ev.code === 1008) {
         term.write('\r\n\x1b[31m' + (ev.reason || 'shell refused') + '\x1b[0m\r\n');
         return;
       }
-      term.write('\r\n\x1b[33mdisconnected — reconnecting…\x1b[0m\r\n');
-      retry = Math.min(retry + 1, 6);
-      setTimeout(connect, Math.min(500 * Math.pow(2, retry - 1), 15000));
+      // Anything else: the transport dropped. No automatic reconnect — say what
+      // happened and leave the next move to the user (☰ → Connect terminal).
+      term.write('\r\n\x1b[33mconnection lost — reconnect from the user menu '
+                 + '(your shell keeps running).\x1b[0m\r\n');
     };
   }
 
@@ -195,14 +203,27 @@
     if (guard) { window.removeEventListener('beforeunload', guard); guard = null; }
   }
 
-  // The shell posts {euler: 'disarm'} before a deliberate exit (logout): that is
-  // the user's own choice, so no dialog — and we close the socket ourselves so
-  // the reconnect loop does not fight the navigation.
+  // Parent → here (site.js): the user-menu terminal controls, plus 'disarm'
+  // before a deliberate exit (logout) so the beforeunload dialog stays quiet.
   window.addEventListener('message', function (ev) {
-    if (ev.origin !== location.origin || !ev.data || ev.data.euler !== 'disarm') { return; }
-    closedByUs = true;
-    disarm();
-    if (socket) { socket.close(1000, 'leaving'); }
+    if (ev.origin !== location.origin || !ev.data) { return; }
+    switch (ev.data.euler) {
+      case 'disarm':                    // logout: the user's own choice, no dialog
+        closedByUs = true;
+        disarm();
+        if (socket) { socket.close(1000, 'leaving'); }
+        break;
+      case 'disconnect':                // ☰ → Disconnect terminal
+        closedByUs = true;
+        if (socket) { socket.close(1000, 'user disconnect'); }
+        break;
+      case 'connect':                   // ☰ → Connect terminal (idempotent)
+        if (!socket) {
+          if (window.Vault) { window.Vault.unlock().then(connect, connect); }
+          else { connect(); }
+        }
+        break;
+    }
   });
 
   // Unlock the vault BEFORE the first attach (MT-12): the shell is forked on

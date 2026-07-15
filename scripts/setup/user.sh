@@ -213,7 +213,13 @@ Wants=euler-auth.service
 Requires=euler-user@%i.socket
 
 [Service]
-Type=notify
+# Type=simple, like every sibling kit: the app never sd_notify()s, so Type=notify
+# would leave systemd waiting for a READY=1 that never comes — it then declares the
+# start "timed out" at TimeoutStartSec (90s), SIGTERMs the WHOLE cgroup (killing the
+# user's live PTY shell), and Restart= respawns it: an endless ~95s reset loop. The
+# .socket unit is the real readiness gate anyway — it queues connections until the
+# listener is up.
+Type=simple
 # Born as the collaborator's own uid — no setuid, no root. The uid owns its home,
 # its clone, and its vault; the kernel (SO_PEERCRED) is the authoritative identity.
 User=euler-user-%i

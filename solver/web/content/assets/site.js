@@ -176,6 +176,23 @@
     }
   });
 
+  // ── the user menu's terminal controls ──────────────────────────────────────
+  // Connect/disconnect are always the USER'S acts: these two entries post into
+  // the /terminal iframe (which never reconnects on its own). Delegated, and the
+  // <details> menu is closed after the click like any other menu action.
+  document.addEventListener('click', function (ev) {
+    var button = ev.target.closest && ev.target.closest('#term-connect, #term-disconnect');
+    if (!button) { return; }
+    var terminal = document.getElementById('terminal');
+    if (terminal && terminal.contentWindow) {
+      terminal.contentWindow.postMessage(
+        { euler: button.id === 'term-connect' ? 'connect' : 'disconnect' },
+        window.location.origin);
+    }
+    var menu = button.closest('details');
+    if (menu) { menu.open = false; }
+  });
+
   // ── the vault (MT-6): auto-unlock + account-panel recovery ────────────────
   // Sign-in stashed PK (vault.js); unlock the per-user service's session with it
   // once per page load. Fire-and-forget: 'stale'/'error' just leave the vault
