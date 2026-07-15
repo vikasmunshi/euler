@@ -46,6 +46,18 @@ deploy_venv() {
     echo "Installing solver[${VENV_EXTRAS}] into ${VENV_DIR} (as root, from ${project_root})..."
     sudo "${VENV_PY}" -m pip install --quiet --upgrade pip
     sudo "${VENV_PY}" -m pip install --quiet "${project_root}[${VENV_EXTRAS}]"
+    # The `solutions` extra installs the base `primesieve` wheel, which SKIPS the
+    # numpy extension (its sdist ships NumPy-1.x-era C++ that won't build under 2.x).
+    # `pip install` alone therefore leaves `primesieve.numpy` importable-but-broken in
+    # the system venv — every numpy-backed solution fails at runtime in the web tier.
+    # Build it from source here so a deployed venv matches a developer's (idempotent:
+    # the script no-ops when the extension already imports). Best-effort — a build
+    # failure (missing libprimesieve-dev / toolchain) must not abort the whole deploy.
+    echo "Building the primesieve.numpy extension into ${VENV_DIR}..."
+    if ! sudo VENV="${VENV_DIR}" bash "${project_root}/scripts/setup/primesieve_numpy_extension.sh" install; then
+        echo "warn: primesieve.numpy build failed — numpy-backed solutions will break at runtime."
+        echo "      Fix the toolchain (dev_env.sh install primesieve c) then re-run 'venv.sh deploy'."
+    fi
     sudo chown -R root:"${web_group}" "${OPT_DIR}"
     clean_build_artifacts "${project_root}"
 }

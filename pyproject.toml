@@ -55,7 +55,13 @@ solutions = [
     # cython / numpy / setuptools below are the build deps that script relies on.
     "cython",
     "mpmath",
-    "numpy",
+    # Pinned below 2.5: the 2.5 stubs type np.cumsum/np.frombuffer as an unbound
+    # generic, forcing [var-annotated] on every `arr = np.cumsum(...)` and flagging
+    # existing [assignment] ignores as unused — mypy errors across the numpy-typed
+    # solutions. Unpinned, each venv drifted to a different numpy (operator 2.4.6 vs
+    # the deployed /opt/euler 2.5.1), so the pre-commit hook passed for one and failed
+    # for the other. The floor keeps the ABI-bound primesieve.numpy build reproducible.
+    "numpy>=2.4.6,<2.5",
     "primesieve",
     "setuptools",
 ]
