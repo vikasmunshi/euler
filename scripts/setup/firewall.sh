@@ -16,8 +16,8 @@
 #     inbound public connections on :443 while still being unable to *initiate*
 #     anything off-host (its NEW outbound is dropped).
 #   - Relay guard: of the app tier, only euler-auth may connect to the loopback
-#     mail relay (euler-smtp's listener) — a hostile euler-ws/euler-content cannot
-#     use it to send mail.
+#     mail relay (euler-smtp's listener) — a hostile euler-user-<slug> web shell
+#     cannot use it to send mail.
 #   - The ruleset is generated with *numeric* uids resolved at generation time and
 #     includes only the euler-* users that exist; rerun `reload` (or the installing
 #     kit runs it) after a new service user lands.
@@ -53,21 +53,17 @@ SMTP_RELAY_PORT="8025"
 
 # ── The euler service tier (DD-2/DD-4/DD-8) ───────────────────────────────────────
 # Every euler-* uid subject to the egress drop. Generated rules include only the
-# users that exist at generation time.
-# Both app services run as per-profile uids (DD-12/DD-13): euler-content-<profile> and
-# euler-ws-<profile>, one per web rung. resolve_uids skips names that don't exist yet,
-# so listing them ahead of content.sh / ws.sh is harmless.
+# users that exist at generation time. The web app tier runs as per-user uids
+# (euler-user-<slug>, MT-7), resolved dynamically by prefix (see euler_user_names);
+# only the fixed infra uids are listed statically here.
 ALL_USERS=(euler-caddy euler-auth
-           euler-content-reader euler-content-contributor euler-content-maintainer
-           euler-ws-reader euler-ws-contributor euler-ws-maintainer
            euler-proxy euler-acme euler-ddns euler-smtp)
 # Infra uids allowed direct DNS (the app tier resolves via loopback only).
 DNS_USERS=(euler-proxy euler-acme euler-ddns euler-smtp)
 # App-tier uids barred from the mail relay port (euler-auth is the one legit client).
-# The web shells are RCE by design (AR-1), so they are barred from it like the rest.
-RELAY_BARRED=(euler-caddy euler-proxy euler-acme euler-ddns
-              euler-content-reader euler-content-contributor euler-content-maintainer
-              euler-ws-reader euler-ws-contributor euler-ws-maintainer)
+# The per-user web shells are RCE by design (AR-1), so they are barred from it like the
+# rest — folded in dynamically via the euler-user-<slug> prefix (see per_user below).
+RELAY_BARRED=(euler-caddy euler-proxy euler-acme euler-ddns)
 
 usage() {
     cat <<USAGE
@@ -142,7 +138,7 @@ uid_of() { id -u "$1" 2>/dev/null || true; }
 # whatever exists now by the euler-user- prefix, so a reload after each provision folds
 # the new uid into the egress drop (chain policy is accept — an unlisted uid would reach
 # the internet directly, bypassing Squid). They are RCE-by-design (AR-1), so they are
-# also barred from the mail relay, exactly like the euler-ws-* rungs they replace.
+# also barred from the mail relay.
 euler_user_names() { getent passwd | awk -F: '/^euler-user-/{print $1}'; }
 
 # Generate the ruleset to stdout. Uses the declare-then-flush pattern so re-applying

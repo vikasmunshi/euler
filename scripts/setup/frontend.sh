@@ -29,7 +29,7 @@
 # Service identity (DD-2):
 #   - group  `euler-web` — the shared group whose members may reach the app sockets.
 #   - user   `euler-caddy` — runs the edge; member of `euler-web`; binds :443 via
-#     CAP_NET_BIND_SERVICE. (euler-auth / euler-content / euler-ws / euler-proxy are
+#     CAP_NET_BIND_SERVICE. (euler-auth / euler-user-<slug> / euler-proxy are
 #     created by their own phases.)
 #
 # Config + secrets live under /etc/euler, NOT in the repo: the dedicated service users
@@ -234,7 +234,7 @@ ensure_group_and_users() {
         echo "Creating group ${WEB_GROUP}..."
         sudo groupadd --system "${WEB_GROUP}"
     fi
-    # euler-caddy — the edge, in euler-web. (euler-auth / euler-content / euler-ws /
+    # euler-caddy — the edge, in euler-web. (euler-auth / euler-user-<slug> /
     # euler-proxy are created by their own phases.)
     if ! getent passwd "${CADDY_USER}" > /dev/null; then
         echo "Creating system user ${CADDY_USER} (group ${WEB_GROUP})..."

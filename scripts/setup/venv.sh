@@ -3,9 +3,9 @@
 # app service runs from
 # ==========================================================================================
 #
-# Sourced by the app-service kits (auth.sh / content.sh / ws.sh) so the venv location,
-# the installed dependency set, and the deploy/clean logic have **one** definition
-# instead of three drifting copies. Can also be run directly for a manual
+# Sourced by the app-service kits (auth.sh / user.sh) so the venv location, the
+# installed dependency set, and the deploy/clean logic have **one** definition
+# instead of drifting copies. Can also be run directly for a manual
 # `venv.sh deploy|clean|status`.
 #
 # The venv is deliberately **not** the operator's `.venv`: the services run as locked-down

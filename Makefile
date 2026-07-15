@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-content uninstall-content upgrade-content install-ws uninstall-ws upgrade-ws redeploy-ws install-user uninstall-user upgrade-user redeploy-user redeploy-auth redeploy-content redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-user uninstall-user upgrade-user redeploy-user redeploy-auth redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -155,40 +155,6 @@ upgrade-auth:
 	./scripts/setup/auth.sh upgrade
 	@printf "✓ upgrade-auth complete: auth service upgraded\n"
 
-## RETIRED (MT-4): the per-profile content service is superseded by the per-user
-## service (install-user); content.sh refuses install/upgrade/redeploy.
-install-content:
-	./scripts/setup/content.sh install
-
-## Remove a live per-profile content deployment (the pre-multi-tenant stack;
-## prompts before stripping ACLs and removing identities)
-uninstall-content:
-	./scripts/setup/content.sh uninstall
-	@printf "✓ uninstall-content complete: content service removed\n"
-
-## RETIRED (MT-4): see install-content
-upgrade-content:
-	./scripts/setup/content.sh upgrade
-
-## RETIRED (MT-4): the per-profile web shell is superseded by the per-user
-## service (install-user); ws.sh refuses install/upgrade/redeploy.
-install-ws:
-	./scripts/setup/ws.sh install
-
-## Remove a live per-profile web-shell deployment (the pre-multi-tenant stack;
-## prompts before stripping ACLs and removing identities)
-uninstall-ws:
-	./scripts/setup/ws.sh uninstall
-	@printf "✓ uninstall-ws complete: web shell removed\n"
-
-## RETIRED (MT-4): see install-ws
-upgrade-ws:
-	./scripts/setup/ws.sh upgrade
-
-## RETIRED (MT-4): see install-ws
-redeploy-ws:
-	./scripts/setup/ws.sh redeploy
-
 ## Install the per-user provisioning layer (MT-7): the euler-user group,
 ## /etc/euler/user.env, and the euler-user@.service/.socket template. Per-collaborator
 ## uids/homes/clones are created later by `users add <email>`
@@ -233,7 +199,7 @@ install-web: install-frontend install-egress install-ddns install-firewall insta
 	@printf "✓ install-web complete: full web stack installed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-uninstall-web: uninstall-user uninstall-ws uninstall-content uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
+uninstall-web: uninstall-user uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
 	@printf "✓ uninstall-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
@@ -247,10 +213,6 @@ upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-a
 redeploy-auth:
 	./scripts/setup/auth.sh redeploy
 	@printf "✓ redeploy-auth complete: venv + authorizations refreshed, auth restarted\n"
-
-## RETIRED (MT-4): see install-content
-redeploy-content:
-	./scripts/setup/content.sh redeploy
 
 ## Refresh the static web-content + Caddyfile and reload the edge
 redeploy-frontend:

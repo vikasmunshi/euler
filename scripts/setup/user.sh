@@ -4,8 +4,8 @@
 #
 # Installs / uninstalls the OS layer for the **per-user** web tier, and provisions
 # or tears down one collaborator at a time. This replaces the per-*profile*
-# shared-uid model (ws.sh / content.sh, DD-13): instead of three fixed rungs sharing
-# a uid, every collaborator gets their **own** uid, home, and repo clone, so their
+# shared-uid model (DD-13): instead of three fixed rungs sharing a uid, every
+# collaborator gets their **own** uid, home, and repo clone, so their
 # own keys can rest in their own uid-private home without leaking to anyone else.
 # Design of record: docs/real-multi-tenant-web-access.md (MT-3/MT-4/MT-7/MT-13).
 #
@@ -15,8 +15,7 @@
 #     - the euler-user parent group (egress + traversal);
 #     - /etc/euler/user.env (scoped runtime config, no secrets);
 #     - the socket-activated euler-user@.service + euler-user@.socket template,
-#       deferred until solver.web.user lands in the /opt/euler venv (step 4), exactly
-#       as ws.sh defers its unit until solver.web.ws exists.
+#       deferred until solver.web.user lands in the /opt/euler venv (step 4).
 #
 #   provision / deprovision <slug>  — ONE collaborator:
 #     provision   create euler-user-<slug> + home (0700), clone ~/euler DIRECTLY from
@@ -147,8 +146,8 @@ ensure_shared_groups() {
 }
 
 # Deploy the shared /opt/euler venv (venv.sh); the per-user service module (step 4)
-# imports from it. Same probe shape as ws.sh; solver.web.user is expected to be absent
-# until step 4, and the unit install is gated on it.
+# imports from it. solver.web.user is expected to be absent until step 4, and the
+# unit install is gated on it.
 deploy_user_venv() {
     deploy_venv "${PROJECT_ROOT}" "${WEB_GROUP}"
     if sudo "${VENV_PY}" -P -c 'import solver.web.user' 2>/dev/null; then
