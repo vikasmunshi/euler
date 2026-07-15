@@ -34,8 +34,7 @@
       "Skill(claude-api)",
       "Skill(claude-api:*)",
       "Skill(update-config)",
-      "WebFetch(domain:console.anthropic.com)",
-      "Write(solutions/**)"
+      "WebFetch(domain:console.anthropic.com)"
     ]
   }
 }
