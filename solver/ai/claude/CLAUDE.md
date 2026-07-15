@@ -82,7 +82,7 @@ solver/
     docs.py           — Module to generate notes for solver solutions, leveraging AI.
     facts.py          — Utility function for gathering problem inputs for AI
     models.py         — Available models and their pricing, plus a utility function to calculate costs.
-    skill.py          — The `euler-solve` command: run Claude Code in-shell against a problem's solution files.
+    skill.py          — The `claude-solve` command: run Claude Code in-shell against a problem's solution files.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   auth/               — The authorization kernel — identity, profiles, and permissions (DD-12).
     authorizations.py — The authorization policy — ``authorizations.json`` (DD-12, re-simplified).

@@ -32,7 +32,7 @@ for the model and how identity resolves to a profile on each channel.
 |--------|---------|-----------------|
 | `solver.ai.api` | `claude-api` | `contributor` |
 | `solver.ai.models` | `costs` | `contributor` |
-| `solver.ai.skill` | `euler-solve` | `contributor` |
+| `solver.ai.skill` | `claude-solve` | `contributor` |
 | `solver.ai.update_models` | `update-models` | `admin` |
 | `solver.core.evaluate` | `benchmark` | `contributor` |
 | `solver.core.evaluate` | `compile-c` | `contributor` |

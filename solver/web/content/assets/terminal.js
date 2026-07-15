@@ -180,6 +180,11 @@
       return false;
     }
     if (key === 'v') {
+      // preventDefault, or the paste runs TWICE: returning false only skips
+      // xterm's own key handling — the browser still performs its native paste
+      // into xterm's hidden textarea (a second term.paste of the same text).
+      // Cancelling the keydown suppresses that native paste; ours is the one.
+      ev.preventDefault();
       navigator.clipboard && navigator.clipboard.readText().then(function (text) {
         if (text) { term.paste(text); }
       });

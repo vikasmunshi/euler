@@ -84,7 +84,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
     def test_contributor_adds_the_ai_commands(self) -> None:
         """AI at contributor (the users-bring-their-own-key model: the spend is
         theirs); a reader still has none."""
-        self.assertLessEqual({'claude-api', 'euler-solve'}, self.web['contributor'])
+        self.assertLessEqual({'claude-api', 'claude-solve'}, self.web['contributor'])
         self.assertNotIn('claude-api', self.web['reader'])
 
     def test_reader_and_contributor_have_no_shell_escape(self) -> None:

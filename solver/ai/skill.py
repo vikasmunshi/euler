@@ -1,9 +1,9 @@
 #! /usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `euler-solve` command: run Claude Code in-shell against a problem's solution files."""
+"""The `claude-solve` command: run Claude Code in-shell against a problem's solution files."""
 from __future__ import annotations
 
-__all__ = ['euler_solve']
+__all__ = ['claude_solve']
 
 import json
 import shlex
@@ -22,7 +22,7 @@ from solver.shell.command import Context
 
 
 @register(requires='contributor', help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
-def euler_solve(
+def claude_solve(
         ctx: Context,
         problem: Problem,
         action: Literal['solve', 'review'],
