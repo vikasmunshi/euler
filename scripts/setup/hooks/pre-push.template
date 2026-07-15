@@ -91,6 +91,9 @@ else
     else
         note "tracked plaintext blobs under solutions/private:"
         for p in "${plaintext_files[@]}"; do note "  !! $p"; done
+        note "the encryption filter was not working when these were committed. Fix and re-commit:"
+        note "  solver shell:  git-filter install    (verifies key access first)"
+        note "  then:          git add --renormalize -- solutions/private && git commit"
         fail "tracked files under solutions/private are not all encrypted at rest"
     fi
 fi

@@ -99,6 +99,44 @@ else
     fail "gitignored files are staged — unstage them (or commit deliberately)"
 fi
 
+# ── encryption filter: staged private blobs must be ciphertext ───────────
+# The commit-side twin of pre-push's encryption-at-rest audit: every STAGED
+# blob under solutions/private must begin with the gitfilter MAGIC. With the
+# clean filter wired and working, staging plaintext produces ciphertext, so
+# this passes untouched; a blob lacking the magic means the filter is unwired
+# or broken in this clone — the exact state that would commit (and later push)
+# private plaintext to the public repo. Ciphertext staged with the filter
+# unwired (an unauthorized per-user clone moving files) is fine: the property
+# gated is the blob's content, not the wiring.
+section "encryption filter (solutions/private)"
+magic_hex=$("$VENV/bin/python" -c 'from solver.crypto.config import config; print(config["magic"].hex())' 2>/dev/null)
+if [[ -z "$magic_hex" ]]; then
+    fail "could not read the gitfilter magic (is the venv intact?)"
+else
+    mlen=$(( ${#magic_hex} / 2 ))
+    plain_private=()
+    staged_private=0
+    while IFS= read -r f; do
+        [[ -z "$f" ]] && continue
+        staged_private=$(( staged_private + 1 ))
+        head_hex=$(git cat-file -p ":$f" 2>/dev/null | head -c "$mlen" | xxd -p)
+        [[ "$head_hex" == "$magic_hex" ]] || plain_private+=("$f")
+    done < <(git diff --cached --name-only --diff-filter=d -- solutions/private)
+    if (( staged_private == 0 )); then
+        pass "no private files staged"
+    elif (( ${#plain_private[@]} == 0 )); then
+        pass "$staged_private staged private blob(s), all ciphertext (magic=0x$magic_hex)"
+    else
+        note "staged PLAINTEXT under solutions/private:"
+        for p in "${plain_private[@]}"; do note "  !! $p"; done
+        note "the encryption filter is not wired/working in this clone. Fix it, then re-stage:"
+        note "  solver shell:  git-filter install    (verifies key access first)"
+        note "  or directly:   $VENV/bin/python -m solver.crypto.gitfilter install"
+        note "  then:          git add --renormalize -- solutions/private"
+        fail "plaintext private files staged — the gitfilter is not working"
+    fi
+fi
+
 # ── flake8: solver + solutions ───────────────────────────────────────────
 # The whole solutions tree (public + decrypted private) is a proper package —
 # every directory carries an __init__.py — so module resolution is unambiguous
