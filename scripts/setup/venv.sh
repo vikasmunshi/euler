@@ -6,7 +6,7 @@
 # Sourced by the app-service kits (auth.sh / user.sh) so the venv location, the
 # installed dependency set, and the deploy/clean logic have **one** definition
 # instead of drifting copies. Can also be run directly for a manual
-# `venv.sh deploy|clean|status`.
+# `venv.sh deploy|remove|reinstall|clean|status`.
 #
 # The venv is deliberately **not** the operator's `.venv`: the services run as locked-down
 # euler-* uids that cannot read the operator's home (DD-5), so the code lives in a
@@ -80,6 +80,20 @@ venv_has_module() {
     [ -x "${VENV_PY}" ] && sudo "${VENV_PY}" -P -c "import $1" 2>/dev/null
 }
 
+# Tear the root-owned system venv back out — remove the whole /opt/euler tree (the venv
+# plus the primesieve.numpy build products under it). The app-service kits (auth.sh /
+# user.sh) manage their own identities, state, and units; this only drops the shared
+# venv, so run it when no euler-* service still needs it. Idempotent — a no-op when
+# /opt/euler is already gone.
+remove_venv() {
+    if [ -d "${OPT_DIR}" ]; then
+        echo "Removing the system venv at ${OPT_DIR}..."
+        sudo rm -rf "${OPT_DIR}"
+    else
+        echo "No system venv at ${OPT_DIR} — nothing to remove."
+    fi
+}
+
 # ── standalone use (venv.sh deploy|clean|status) ──────────────────────────────────
 # Only when executed directly, not when sourced. Derives the repo root from this
 # script's location (scripts/setup/venv.sh → up 2).
@@ -88,6 +102,8 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
     _repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
     case "${1:-status}" in
         deploy) deploy_venv "${_repo}" "euler-web" ;;
+        remove) remove_venv ;;
+        reinstall) remove_venv; deploy_venv "${_repo}" "euler-web" ;;
         clean)  clean_build_artifacts "${_repo}"; echo "Removed in-tree build/ and *.egg-info." ;;
         status)
             if venv_has_module solver; then
@@ -95,7 +111,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
             else
                 echo "venv: ✗ ${VENV_DIR} not deployed (run 'venv.sh deploy' or a kit's install)"
             fi ;;
-        -h | --help | help) echo "Usage: $0 [deploy|clean|status]  (deploy needs sudo)" ;;
-        *) echo "Unknown action: ${1}"; echo "Usage: $0 [deploy|clean|status]"; exit 1 ;;
+        -h | --help | help) echo "Usage: $0 [deploy|remove|reinstall|clean|status]  (deploy/remove/reinstall need sudo)" ;;
+        *) echo "Unknown action: ${1}"; echo "Usage: $0 [deploy|remove|reinstall|clean|status]"; exit 1 ;;
     esac
 fi

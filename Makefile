@@ -1,4 +1,4 @@
-.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-user uninstall-user upgrade-user redeploy-user redeploy-auth redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+.PHONY: install-all install-minimal install-system install-system-venv uninstall-system-venv reinstall-system-venv install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-user uninstall-user upgrade-user redeploy-user redeploy-auth redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -28,6 +28,21 @@ install-minimal: install-system install-chrome $(VENV)
 install-system:
 	./scripts/setup/dev_env.sh install python primesieve c
 	@printf "✓ install-system complete: apt packages installed\n"
+
+## Deploy the root-owned /opt/euler system venv the euler-* app services run from (sudo)
+install-system-venv:
+	./scripts/setup/venv.sh deploy
+	@printf "✓ install-system-venv complete: /opt/euler venv deployed\n"
+
+## Remove the /opt/euler system venv (leaves service identities, state, and units intact) (sudo)
+uninstall-system-venv:
+	./scripts/setup/venv.sh remove
+	@printf "✓ uninstall-system-venv complete: /opt/euler venv removed\n"
+
+## Rebuild the /opt/euler system venv from scratch: remove, then redeploy (sudo)
+reinstall-system-venv:
+	./scripts/setup/venv.sh reinstall
+	@printf "✓ reinstall-system-venv complete: /opt/euler venv rebuilt\n"
 
 ## Install Chrome browser
 install-chrome:
