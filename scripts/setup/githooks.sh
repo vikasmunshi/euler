@@ -31,10 +31,12 @@ FORCE=0
 
 usage() {
     cat <<EOF
-Usage: $0 [install|uninstall] [--force]
+Usage: $0 [install|uninstall|status|cleanup] [--force]
 
   install      Write git hooks into .git/hooks/ (default)
   uninstall    Remove the managed hooks from .git/hooks/
+  status       Show installed hooks: present, current vs stale, venv, backups
+  cleanup      Remove rotated hook backups (.bak.*) after confirmation
   --force      Overwrite existing hooks without creating a backup
 EOF
 }
@@ -99,12 +101,62 @@ uninstall_hooks() {
     fi
 }
 
+# One status line per hook: present or not, and — by comparing against a fresh
+# render of its template with the resolved VENV — whether the installed copy is
+# current or stale (template changed, or rendered against a different venv).
+status_hooks() {
+    local hook target installed_venv fresh
+    for hook in pre-commit pre-push; do
+        target="${HOOKS_DIR}/${hook}"
+        if [[ ! -f "${target}" ]]; then
+            echo "${hook}:  ✗ not installed (run '$0 install')"
+            continue
+        fi
+        installed_venv="$(sed -n 's/^VENV="\(.*\)"$/\1/p' "${target}" | head -n1)"
+        fresh="$(sed -e "s|__REPO_ROOT__|${REPO_ROOT}|g" -e "s|__VENV__|${VENV}|g" \
+                     "${TEMPLATES_DIR}/${hook}.template")"
+        if [[ "$(cat "${target}")" == "${fresh}" ]]; then
+            echo "${hook}:  ✓ installed, current (venv ${installed_venv:-?})"
+        else
+            echo "${hook}:  ⚠ installed but STALE (venv ${installed_venv:-?}; template or venv changed — re-run '$0 install')"
+        fi
+    done
+    local backups
+    backups=$(find "${HOOKS_DIR}" -maxdepth 1 -name '*.bak.*' 2>/dev/null | sort)
+    if [[ -n "${backups}" ]]; then
+        echo "backups:     $(wc -l <<< "${backups}") rotated hook backup(s) ('$0 cleanup' removes them):"
+        sed 's/^/  /' <<< "${backups}"
+    else
+        echo "backups:     none"
+    fi
+}
+
+# Remove the rotated .bak.* copies install leaves behind — with confirmation,
+# since a backup may hold the only copy of a locally-customised hook.
+cleanup_backups() {
+    local backups reply
+    backups=$(find "${HOOKS_DIR}" -maxdepth 1 -name '*.bak.*' 2>/dev/null | sort)
+    if [[ -z "${backups}" ]]; then
+        echo "No hook backups to remove."
+        return 0
+    fi
+    echo "Hook backups in ${HOOKS_DIR}:"
+    sed 's/^/  /' <<< "${backups}"
+    read -r -p "Remove these $(wc -l <<< "${backups}") backup(s)? [y/N] " reply
+    if [[ "${reply}" =~ ^[Yy]$ ]]; then
+        xargs -d '\n' rm -f -- <<< "${backups}"
+        echo "Hook backups removed."
+    else
+        echo "Keeping the backups."
+    fi
+}
+
 # Argument parsing — supports `install|uninstall` plus `--force` in any order.
 ACTION="install"
 ACTION_SET=0
 for arg in "$@"; do
     case "${arg}" in
-        install|uninstall)
+        install|uninstall|status|cleanup)
             ACTION="${arg}"
             ACTION_SET=1
             ;;
@@ -130,5 +182,11 @@ case "${ACTION}" in
         ;;
     uninstall)
         uninstall_hooks
+        ;;
+    status)
+        status_hooks
+        ;;
+    cleanup)
+        cleanup_backups
         ;;
 esac
