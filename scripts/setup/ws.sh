@@ -2,7 +2,15 @@
 # Web-shell service kit (euler-ws) — Phase 6 of the server redesign (DD-13/DD-14)
 # ==============================================================================
 #
-# Installs / uninstalls / upgrades the OS layer for the **web shell**: the
+# RETIRED as a deployment (multi-tenant redesign, MT-4): the per-profile ws
+# instances are superseded by the per-user service — one euler-user@<slug> instance
+# per collaborator serving content AND /ws (scripts/setup/user.sh; docs/
+# real-multi-tenant-web-access.md). install/upgrade/redeploy now refuse; uninstall
+# and status remain, to tear down / inspect a live per-profile deployment (the
+# no-migration clean slate, §14.5). solver/web/ws stays as the reusable library
+# whose PtyManager/PtySession the per-user service runs its terminal on.
+#
+# Installed / uninstalled / upgraded the OS layer for the **web shell**: the
 # per-profile service identities, the systemd template unit `euler-ws@<profile>`
 # (one instance per web profile), and the shell-state ACLs — all running from the
 # shared root-owned /opt/euler system venv (DD-5). Sibling to content.sh, whose
@@ -395,7 +403,7 @@ do_status() {
             echo "venv:        ✗ solver.web.ws not importable from the venv"
         fi
     else
-        echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh / ws.sh install)"
+        echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh install)"
     fi
     local profile user
     for profile in "${PROFILES[@]}"; do
@@ -428,12 +436,22 @@ do_status() {
     fi
 }
 
+# The per-profile deployment is retired (MT-4): refuse to lay it down afresh, keep
+# the teardown/inspection paths for a box still running it.
+retired() {
+    echo "Retired: the per-profile web-shell instances are superseded by the per-user" >&2
+    echo "         service (euler-user@<slug> serves content + /ws; user.sh, MT-4)." >&2
+    echo "         Use 'make install-user' / 'user.sh' for the multi-tenant stack;" >&2
+    echo "         '$0 uninstall' still removes an existing per-profile deployment." >&2
+    return 1
+}
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
-    upgrade)   do_install ;;
-    redeploy)  do_redeploy ;;
+    install)   retired ;;
+    upgrade)   retired ;;
+    redeploy)  retired ;;
     uninstall) do_uninstall ;;
     status)    do_status ;;
     -h | --help | help) usage ;;

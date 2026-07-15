@@ -155,49 +155,45 @@ upgrade-auth:
 	./scripts/setup/auth.sh upgrade
 	@printf "✓ upgrade-auth complete: auth service upgraded\n"
 
-## Install the content service: per-profile euler-content-<profile> uids + content-tree
-## ACLs + euler-content@.service template (needs the /opt/euler venv from install-auth) (DD-12)
+## RETIRED (MT-4): the per-profile content service is superseded by the per-user
+## service (install-user); content.sh refuses install/upgrade/redeploy.
 install-content:
 	./scripts/setup/content.sh install
-	@printf "✓ install-content complete: per-profile content service deployed\n"
 
-## Remove the content service (prompts before stripping ACLs and removing identities)
+## Remove a live per-profile content deployment (the pre-multi-tenant stack;
+## prompts before stripping ACLs and removing identities)
 uninstall-content:
 	./scripts/setup/content.sh uninstall
 	@printf "✓ uninstall-content complete: content service removed\n"
 
-## Upgrade the content service (re-assert identities + ACLs + units, restart instances)
+## RETIRED (MT-4): see install-content
 upgrade-content:
 	./scripts/setup/content.sh upgrade
-	@printf "✓ upgrade-content complete: content service upgraded\n"
 
-## Install the web shell: per-profile euler-ws-<profile> uids + .state ACLs +
-## euler-ws@.service template (needs install-auth's venv and install-content's ACL groups) (DD-13)
+## RETIRED (MT-4): the per-profile web shell is superseded by the per-user
+## service (install-user); ws.sh refuses install/upgrade/redeploy.
 install-ws:
 	./scripts/setup/ws.sh install
-	@printf "✓ install-ws complete: per-profile web shell deployed\n"
 
-## Remove the web shell (prompts before stripping ACLs and removing identities)
+## Remove a live per-profile web-shell deployment (the pre-multi-tenant stack;
+## prompts before stripping ACLs and removing identities)
 uninstall-ws:
 	./scripts/setup/ws.sh uninstall
 	@printf "✓ uninstall-ws complete: web shell removed\n"
 
-## Upgrade the web shell (re-assert identities + ACLs + units, restart instances)
+## RETIRED (MT-4): see install-ws
 upgrade-ws:
 	./scripts/setup/ws.sh upgrade
-	@printf "✓ upgrade-ws complete: web shell upgraded\n"
 
-## Restart the per-profile web-shell instances against the freshly rebuilt venv
-## (this drops every live web shell — the PTYs die with their service)
+## RETIRED (MT-4): see install-ws
 redeploy-ws:
 	./scripts/setup/ws.sh redeploy
-	@printf "✓ redeploy-ws complete: web-shell instances restarted\n"
 
 ## Install the per-user provisioning layer (MT-7): the euler-user group,
-## /etc/euler/user.env, and the euler-user@.service/.socket template (deferred until
-## solver.web.user lands in step 4). Per-collaborator uids/homes/clones are created later
-## by `users add <email>` (solver.web.auth.commands → user.sh provision), which clones
-## ~/euler straight from the public GitHub repo (ciphertext at rest, MT-13).
+## /etc/euler/user.env, and the euler-user@.service/.socket template. Per-collaborator
+## uids/homes/clones are created later by `users add <email>`
+## (solver.web.auth.commands → user.sh provision), which clones ~/euler straight
+## from the public GitHub repo (ciphertext at rest, MT-13).
 install-user:
 	./scripts/setup/user.sh install
 	@printf "✓ install-user complete: per-user provisioning layer deployed\n"
@@ -212,10 +208,11 @@ upgrade-user:
 	./scripts/setup/user.sh upgrade
 	@printf "✓ upgrade-user complete: per-user provisioning layer upgraded\n"
 
-## Fast path: refresh /etc/euler/user.env only
+## Fast path: refresh /etc/euler/user.env and bounce the running per-user instances
+## (their sockets re-activate them against the freshly rebuilt venv; drops live shells)
 redeploy-user:
 	./scripts/setup/user.sh redeploy
-	@printf "✓ redeploy-user complete: per-user config refreshed\n"
+	@printf "✓ redeploy-user complete: per-user config refreshed, instances bounced\n"
 
 ## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
 install-nodejs:
@@ -228,10 +225,11 @@ uninstall-nodejs:
 	@printf "✓ uninstall-nodejs complete\n"
 
 ## Install the full web stack, in dependency order: edge (Caddy+ACME+web-content),
-## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service.
-## Each kit stays independently operable; the later kits reload the firewall as
-## their service users appear. (sudo required; see docs/server-redesign.md)
-install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-content install-ws install-user
+## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service, and the
+## per-user provisioning layer (MT-4 — the retired per-profile content/ws kits are
+## no longer installed). Each kit stays independently operable; the later kits
+## reload the firewall as their service users appear. (sudo required)
+install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-user
 	@printf "✓ install-web complete: full web stack installed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
@@ -241,7 +239,7 @@ uninstall-web: uninstall-user uninstall-ws uninstall-content uninstall-auth unin
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
 ## ddns.sh install is its idempotent upgrade, and the firewall reload is the
 ## final consistency pass over the euler uids)
-upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth upgrade-content upgrade-ws
+upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth upgrade-user
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
@@ -250,10 +248,9 @@ redeploy-auth:
 	./scripts/setup/auth.sh redeploy
 	@printf "✓ redeploy-auth complete: venv + authorizations refreshed, auth restarted\n"
 
-## Restart the per-profile content instances against the freshly rebuilt venv
+## RETIRED (MT-4): see install-content
 redeploy-content:
 	./scripts/setup/content.sh redeploy
-	@printf "✓ redeploy-content complete: content instances restarted\n"
 
 ## Refresh the static web-content + Caddyfile and reload the edge
 redeploy-frontend:
@@ -261,11 +258,12 @@ redeploy-frontend:
 	@printf "✓ redeploy-frontend complete: web-content + Caddyfile reloaded\n"
 
 ## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
-## ACLs, units, certs, or the firewall: rebuild the shared venv (auth) → restart the
-## content + web-shell instances against it → refresh the edge's static content +
-## Caddyfile. Note the web shells are restarted, so live terminals are dropped. The
-## everyday "I changed Python/templates/CSS/JS, push it" turnaround.
-redeploy-web: redeploy-auth redeploy-content redeploy-ws redeploy-frontend
+## ACLs, units, certs, or the firewall: rebuild the shared venv (auth) → bounce the
+## per-user instances so their sockets re-activate them against it → refresh the
+## edge's static content + Caddyfile. Note the running instances are stopped, so
+## live terminals are dropped. The everyday "I changed Python/templates/CSS/JS,
+## push it" turnaround.
+redeploy-web: redeploy-auth redeploy-user redeploy-frontend
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
 
 # Standalone Node.js (no sudo):

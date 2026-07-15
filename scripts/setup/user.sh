@@ -78,7 +78,9 @@ Usage: $0 <action> [args]
   uninstall                    Remove the template + user.env (prompted). Provisioned
                                users must be deprovisioned first.
   upgrade                      Re-assert the shared layer.
-  redeploy                     Refresh /etc/euler/user.env only.
+  redeploy                     Refresh /etc/euler/user.env and stop the running
+                               instances so their sockets re-activate them against a
+                               freshly rebuilt venv (drops live shells).
   provision <slug> <email> <profile>
                                Provision one collaborator: uid + home (0700), a
                                filter-disabled clone of ~/euler from the public GitHub
@@ -405,6 +407,18 @@ do_redeploy() {
     check_can_sudo || return 1
     deploy_user_env
     echo "Refreshed ${USER_ENV}."
+    # Pick up a freshly rebuilt /opt/euler venv (redeploy-auth): stop each running
+    # instance — this drops that user's live shell — and leave its socket listening,
+    # so the next request re-activates the service against the new code.
+    local users u slug
+    users="$(getent passwd | awk -F: '/^euler-user-/{print $1}' || true)"
+    for u in ${users}; do
+        slug="${u#euler-user-}"
+        if systemctl is-active --quiet "euler-user@${slug}.service" 2>/dev/null; then
+            echo "Stopping euler-user@${slug}.service (its socket re-activates it on the next request)..."
+            sudo systemctl stop "euler-user@${slug}.service"
+        fi
+    done
     do_status
 }
 

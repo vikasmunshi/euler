@@ -368,8 +368,31 @@ changes:
    drop + relay bar (the chain is policy-accept, so an un-enumerated uid would reach the
    internet directly, bypassing Squid); `provision` reloads it. Makefile: `install-user`
    (folded into `install-web`), `uninstall-user`, `upgrade-user`, `redeploy-user`.
-4. **The per-user service** (MT-4): fold content + `/ws` into one `solver/web/user`
-   service; Caddy `X-User-Slug` routing; retire the per-profile instances.
+4. **The per-user service** (MT-4) — **✅ built.** The code half (`c7144a57`):
+   `solver/web/user` folds the content routes and the web shell onto **one** aiohttp
+   app born as one collaborator's own `euler-user-<slug>` uid — it reuses the `site`
+   content handlers verbatim (via the new `site.install_content`/`add_content_routes`)
+   and the `ws` `PtyManager`/`PtySession`, and adds a per-user identity middleware
+   that refuses any request whose `X-User` maps to a different `system_slug`
+   (the code-side backstop to Caddy's routing). Identity is per-user: `resolve_subject`'s
+   web plane pins on `EULER_USER_SLUG` (replacing the DD-13 `EULER_PROFILE` pin) and
+   drops the `_WEB_CAP` admin→maintainer cap (MT-10a — admin is web-reachable,
+   contained by its uid + SRP); the auth service emits `X-User-Slug` on
+   `/auth/check` and pushes the DD-14 logout teardown to the single deterministic
+   `user-<slug>.sock`. The deployment half: `frontend.sh` generates the per-user
+   Caddyfile — `forward_auth … copy_headers X-User X-Profile X-User-Slug`, all three
+   client copies stripped, one `@user`-matched
+   `reverse_proxy unix//run/euler/user-{header}.sock` serving content AND `/ws`, a
+   missing/malformed slug → the 503 holding page (also served when a deprovisioned
+   user's socket is down, via `handle_errors`). `content.sh`/`ws.sh` are **retired as
+   deployments** (install/upgrade/redeploy refuse; uninstall/status remain for the
+   §14.5 clean-slate teardown; the Python packages stay as the libraries the per-user
+   service imports); `make install-web`/`upgrade-web`/`redeploy-web` run the user kit
+   instead, and `user.sh redeploy` bounces running instances so their sockets
+   re-activate them against a rebuilt venv. Verified: the rendered Caddyfile
+   adapts+validates on Caddy 2.11.4, and a live stub harness confirmed the four
+   routing semantics (session → its own user socket with identity headers; forged
+   client slug stripped; no session → `/login`; malformed slug → 503).
 5. **The account page + vault UX** (MT-8/MT-9): pubkey, write-only secret upload/delete,
    gh + Claude-Code login status; `VK` delivery at attach.
 6. **Per-user git** (MT-2): native `git-commit`/`git-push` on `user/<slug>` as the
@@ -389,7 +412,9 @@ are recreated, not migrated (§14.5).
    (the deployed version): a session routes to *its* user's socket, the **WebSocket
    upgrade survives** the placeholder upstream, a **forged `X-User-Slug` is stripped**
    (a user cannot reach another's socket), and no session → 401. No dynamic-upstream
-   module needed — a request-header placeholder in the dial address suffices.
+   module needed — a request-header placeholder in the dial address suffices. **Now
+   deployed**: `frontend.sh` generates exactly this shape (§13 step 4), plus a
+   `header_regexp` guard admitting only a well-formed system slug.
 2. **`VK` delivery (MT-12) — resolved & verified.** Uid-private tmpfs file + inherited
    `EULER_VAULT_KEY_FILE` path (§7). Verified that a git clean/smudge **filter subprocess
    inherits** the delivery env from the shell → git → filter, so the filter can reach

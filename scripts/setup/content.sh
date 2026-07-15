@@ -2,7 +2,15 @@
 # Content service kit (euler-content) — Phase 5a-2 of the server redesign (DD-5/DD-12)
 # ====================================================================================
 #
-# Installs / uninstalls / upgrades the OS layer for the content service: the
+# RETIRED as a deployment (multi-tenant redesign, MT-4): the per-profile content
+# instances are superseded by the per-user service — one euler-user@<slug> instance
+# per collaborator serving content AND /ws (scripts/setup/user.sh; docs/
+# real-multi-tenant-web-access.md). install/upgrade/redeploy now refuse; uninstall
+# and status remain, to tear down / inspect a live per-profile deployment (the
+# no-migration clean slate, §14.5). solver/web/site stays as the reusable library
+# the per-user service imports its content routes from.
+#
+# Installed / uninstalled / upgraded the OS layer for the content service: the
 # **per-profile** service identities and the content-tree ACLs that back the app's
 # authorization at the filesystem, plus the systemd **template unit**
 # `euler-content@<profile>.service` (one instance per web profile), all running
@@ -470,7 +478,7 @@ do_status() {
             echo "venv:        ✗ solver.web.site (or nh3) not importable from the venv"
         fi
     else
-        echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh / content.sh install)"
+        echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh install)"
     fi
     local profile user
     for profile in "${PROFILES[@]}"; do
@@ -499,12 +507,22 @@ do_status() {
     fi
 }
 
+# The per-profile deployment is retired (MT-4): refuse to lay it down afresh, keep
+# the teardown/inspection paths for a box still running it.
+retired() {
+    echo "Retired: the per-profile content instances are superseded by the per-user" >&2
+    echo "         service (euler-user@<slug> serves content + /ws; user.sh, MT-4)." >&2
+    echo "         Use 'make install-user' / 'user.sh' for the multi-tenant stack;" >&2
+    echo "         '$0 uninstall' still removes an existing per-profile deployment." >&2
+    return 1
+}
+
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
-    upgrade)   do_install ;;
-    redeploy)  do_redeploy ;;
+    install)   retired ;;
+    upgrade)   retired ;;
+    redeploy)  retired ;;
     uninstall) do_uninstall ;;
     status)    do_status ;;
     -h | --help | help) usage ;;
