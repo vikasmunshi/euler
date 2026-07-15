@@ -41,7 +41,7 @@ from solver.web.ws.pty import PtySession
 log = logging.getLogger('euler-ws')
 
 #: The attach gate (DD-13): the reader-floor "may run the solver at all" grant.
-ATTACH_REQUIRES: str = 'solver:execute'
+ATTACH_REQUIRES: str = 'reader'
 
 #: Per-app PtyManager, for tests and the lifecycle hooks.
 PTY_MANAGER: web.AppKey[PtyManager] = web.AppKey('pty_manager', PtyManager)
@@ -66,8 +66,7 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
     if pin and profile != pin:
         return None
     return Subject(user=user, slug=slugify(user), channel='web',
-                   auth_method='forward-auth', profile=profile,
-                   permissions=authz.permissions_for(profile))
+                   auth_method='forward-auth', profile=profile)
 
 
 def _parse_resize(raw: str) -> tuple[int, int] | None:

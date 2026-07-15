@@ -114,7 +114,7 @@ class ContentServiceTests(AioHTTPTestCase):
         # htmx fetch of a footer/account route → the #content fragment + OOB chrome
         for path, marker in (('/about/license', 'MIT License'),
                              ('/about/acknowledgements', 'htmx'),
-                             ('/account', 'users:read')):
+                             ('/account', 'Account')):
             resp = await self.client.get(path, headers={**_ADMIN, **_HTMX})
             self.assertEqual(resp.status, 200, path)
             body = await resp.text()
@@ -302,8 +302,8 @@ class ContentServiceTests(AioHTTPTestCase):
         resp = await self.client.get('/docs/file/solver/templates/authorizations.json', headers=_READER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
-        self.assertIn('profiles', body)                      # the JSON (escaped) in a code block
-        self.assertIn('about:read', body)
+        self.assertIn('ladder', body)                        # the JSON (escaped) in a code block
+        self.assertIn('contributor', body)
         self.assertIn('solver/templates/authorizations.json', body)
         # …and a solution file (the solutions object tree — e.g. a topic linking
         # ../solutions/…) and an about file (README) view through the same route…
@@ -346,7 +346,7 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertEqual(resp.status, 200)
         body = await resp.text()
         self.assertIn('a@example.com', body)
-        self.assertIn('users:read', body)                   # the expanded grant set
+        self.assertIn('pill-admin', body)                   # the profile rung, the whole story now
 
 
 _PY_OK = 'def solve() -> str:\n    return str(42)\n'

@@ -18,7 +18,7 @@ def confirm(prompt: str) -> bool:
     return response.lower() == 'yes'
 
 
-@register(requires=('solver:execute',), help_text='Pause for user confirmation to continue.')
+@register(requires='reader', help_text='Pause for user confirmation to continue.')
 def pause() -> int:
     """Pause the program execution until the user presses Enter."""
     console.input('[muted]paused[/muted]\nPress enter to continue: ')

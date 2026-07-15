@@ -40,7 +40,7 @@ def _highlight(re_query: re.Pattern[str], text: str) -> str:
     return ''.join(parts)
 
 
-@register(requires=('solutions:read',), help_text='Find content in the stack.', aliases=('find',))
+@register(requires='reader', help_text='Find content in the stack.', aliases=('find',))
 def search(query: str,
            *files: Literal['*', 'py', 'c', 'html', 'json'],
            scope: Literal['problems', 'solved'] = 'solved') -> int:

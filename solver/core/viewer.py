@@ -94,7 +94,7 @@ def _solution_file_completions(ctx: Context, incomplete: str) -> Iterable[str | 
     )
 
 
-@register(requires=('solutions:write',),
+@register(requires='contributor',
           help_text='Open a solution file in the web code editor.',
           aliases=('ed',), quietable=True,
           completers={'filename': _solution_file_completions})
@@ -146,7 +146,7 @@ def edit(problem: Problem, filename: str) -> int:
 # show — open the rendered documentation page
 # ---------------------------------------------------------------------------
 
-@register(requires=('solutions:read',),
+@register(requires='reader',
           help_text='Open problem/file in a browser or the web viewer panel.',
           aliases=('open', 'view'), quietable=True,
           completers={'filename': _solution_file_completions})

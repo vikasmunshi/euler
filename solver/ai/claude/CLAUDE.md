@@ -85,7 +85,7 @@ solver/
     skill.py          — The `euler-solve` command: run Claude Code in-shell against a problem's solution files.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   auth/               — The authorization kernel — identity, profiles, and permissions (DD-12).
-    authorizations.py — The authorization policy — ``authorizations.json`` (DD-12).
+    authorizations.py — The authorization policy — ``authorizations.json`` (DD-12, re-simplified).
     identity.py       — Identity resolution → a :class:`~solver.auth.subject.Subject` (DD-9/DD-12).
     subject.py        — The authorization **subject** — the resolved security principal (DD-12).
   core/

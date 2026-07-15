@@ -655,7 +655,7 @@ def register[**P](
         pass_ctx: bool = False,
         quietable: bool = False,
         completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]] | None = None,
-        requires: tuple[str, ...] = (),
+        requires: str = '',
 ) -> Callable[[Callable[P, int]], Callable[P, int]]:
     """Decorator that registers *func* as a shell command **without modifying it**.
 

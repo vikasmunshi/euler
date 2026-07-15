@@ -46,7 +46,7 @@ _TEMPLATES = Path(__file__).resolve().parent / 'templates'
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 #: The capability every authenticated profile holds — "may view the site".
-VIEW = 'web-content:read'
+VIEW = 'reader'
 
 #: Request key under which build_app stores its SiteConfig for handlers.
 CONFIG_KEY = web.AppKey('site_config', SiteConfig)
@@ -129,8 +129,7 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
     if pin and profile != pin:
         return None
     return Subject(user=user, slug=slugify(user or profile), channel='web',
-                   auth_method='forward-auth', profile=profile,
-                   permissions=authz.permissions_for(profile))
+                   auth_method='forward-auth', profile=profile)
 
 
 def requires(capability: str) -> Callable[[_Handler], _Handler]:
@@ -217,7 +216,7 @@ def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]
     """The `/solutions/` view context: grids, counts, crumbs, and its actions."""
     problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
     actions: list[Action] = []
-    if _subject(request).has('solutions:execute'):
+    if _subject(request).has('contributor'):
         actions.append(Action(label='Upload progress', kind='get', path='/edit/solutions/'))
     return {
         'grids': content.centuries(problems),
@@ -229,7 +228,7 @@ def _solutions_context(request: web.Request, status: str = '') -> dict[str, Any]
     }
 
 
-@requires('solutions:read')
+@requires('reader')
 async def solutions_index(request: web.Request) -> web.StreamResponse:
     """``GET /solutions/`` — problems.json as 10×10 century grids, two per row."""
     return render(request, 'solutions.html', _solutions_context(request), block='content')
@@ -283,7 +282,7 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
     }
 
 
-@requires('solutions:read')
+@requires('reader')
 async def problem_page(request: web.Request) -> web.StreamResponse:
     """``GET /solutions/{n}/`` — the solution_dir rendered (§7 order)."""
     number = _problem_number(request)
@@ -291,7 +290,7 @@ async def problem_page(request: web.Request) -> web.StreamResponse:
                   block='content')
 
 
-@requires('solutions:read')
+@requires('reader')
 async def problem_file(request: web.Request) -> web.StreamResponse:
     """``GET /solutions/{n}/{filename}`` — one problem file: source rendered in the
     viewer, anything non-text (statement resources: images, data) as raw bytes."""
@@ -311,10 +310,10 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
     subject = _subject(request)
     bare = '/' not in filename
     actions: list[Action] = []
-    if bare and target.suffix in EDITABLE_SUFFIXES and subject.has('solutions:write'):
+    if bare and target.suffix in EDITABLE_SUFFIXES and subject.has('contributor'):
         actions.append(Action(label='Edit', kind='get',
                               path=f'/edit/solutions/{number:04d}/{filename}'))
-    if bare and target.suffix in _DELETABLE_SUFFIXES and subject.has('solutions:delete'):
+    if bare and target.suffix in _DELETABLE_SUFFIXES and subject.has('maintainer'):
         actions.append(Action(label='Delete', kind='delete',
                               path=f'/edit/solutions/{number:04d}/{filename}',
                               confirm=f'Delete {filename}?'))
@@ -329,7 +328,7 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('docs:read')
+@requires('reader')
 async def docs_index(request: web.Request) -> web.StreamResponse:
     """``GET /docs/`` — the guides index (card grid)."""
     return render(request, 'docs.html', {
@@ -338,7 +337,7 @@ async def docs_index(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('docs:read')
+@requires('reader')
 async def doc_file(request: web.Request) -> web.StreamResponse:
     """``GET /docs/file/{path}`` — view a doc-referenced repo file.
 
@@ -370,7 +369,7 @@ async def doc_file(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('docs:read')
+@requires('reader')
 async def doc_page(request: web.Request) -> web.StreamResponse:
     """``GET /docs/{name}`` — one rendered guide (the file may live outside docs/)."""
     name = request.match_info['name']
@@ -387,7 +386,7 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('docs:read')
+@requires('reader')
 async def topics_index(request: web.Request) -> web.StreamResponse:
     """``GET /topics/`` — the topics index (card grid)."""
     return render(request, 'topics.html', {
@@ -396,7 +395,7 @@ async def topics_index(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('docs:read')
+@requires('reader')
 async def topic_page(request: web.Request) -> web.StreamResponse:
     """``GET /topics/{name}`` — one rendered topic page."""
     name = request.match_info['name']
@@ -410,7 +409,7 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('users:read')
+@requires('reader')
 async def account(request: web.Request) -> web.StreamResponse:
     """``GET /account`` — the signed-in user + profile (from X-User / X-Profile)."""
     return render(request, 'account.html', {
@@ -418,7 +417,7 @@ async def account(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('about:read')
+@requires('reader')
 async def about_page(request: web.Request) -> web.StreamResponse:
     """``GET /about/{name}`` — a footer page: readme · license · acknowledgements."""
     name = request.match_info['name']
@@ -456,7 +455,7 @@ def _editor_context(request: web.Request, number: int, filename: str, text: str,
                     diagnostics: list[Any] | None = None) -> dict[str, Any]:
     """The file-editor view context, shared by GET / save-ok / save-refused."""
     actions: list[Action] = [Action(label='Save', kind='submit')]
-    if Path(filename).suffix in _DELETABLE_SUFFIXES and _subject(request).has('solutions:delete'):
+    if Path(filename).suffix in _DELETABLE_SUFFIXES and _subject(request).has('maintainer'):
         actions.append(Action(label='Delete', kind='delete',
                               path=f'/edit/solutions/{number:04d}/{filename}',
                               confirm=f'Delete {filename}?'))
@@ -471,7 +470,7 @@ def _editor_context(request: web.Request, number: int, filename: str, text: str,
     }
 
 
-@requires('solutions:write')
+@requires('contributor')
 async def file_editor(request: web.Request) -> web.StreamResponse:
     """``GET /edit/solutions/{n}/{filename}`` — the code editor for the file."""
     number, filename, target = _editor_target(request)
@@ -480,7 +479,7 @@ async def file_editor(request: web.Request) -> web.StreamResponse:
                   _editor_context(request, number, filename, text), block='content')
 
 
-@requires('solutions:write')
+@requires('contributor')
 async def file_save(request: web.Request) -> web.StreamResponse:
     """``POST /edit/solutions/{n}/{filename}`` — gate, write, editor block.
 
@@ -519,7 +518,7 @@ async def file_save(request: web.Request) -> web.StreamResponse:
                   block='content', fragment=True)
 
 
-@requires('solutions:delete')
+@requires('maintainer')
 async def file_delete(request: web.Request) -> web.StreamResponse:
     """``DELETE /edit/solutions/{n}/{filename}`` — delete → the problem fragment.
 
@@ -541,7 +540,7 @@ async def file_delete(request: web.Request) -> web.StreamResponse:
     return response
 
 
-@requires('solutions:execute')
+@requires('contributor')
 async def progress_editor(request: web.Request) -> web.StreamResponse:
     """``GET /edit/solutions/`` — the progress upload: an **empty** paste buffer.
 
@@ -556,7 +555,7 @@ async def progress_editor(request: web.Request) -> web.StreamResponse:
     }, block='content')
 
 
-@requires('solutions:execute')
+@requires('contributor')
 async def progress_save(request: web.Request) -> web.StreamResponse:
     """``POST /edit/solutions/`` — save progress → the grid block + status.
 
@@ -629,12 +628,12 @@ def install_content(app: web.Application, config: SiteConfig, authz: Authorizati
     between the per-profile and per-user tiers); this installs everything else.
     """
     app[CONFIG_KEY] = config
-    # The /docs/file/ view may serve only the declared-readable object trees (DD-12):
-    # docs + about + solutions — every one a reader-floor read, so serving them from a
-    # docs:read-gated route grants nothing a docs:read holder can't already read (in
-    # the ladder docs:read and solutions:read are always co-granted).
-    app[READABLE_KEY] = [p for obj in ('docs', 'about', 'solutions')
-                         for p in authz.paths_for(obj) if p and not p.startswith('/')]
+    # The /docs/file/ view may serve only these content trees — every one a
+    # reader-floor read. These used to come from the policy's objects→paths map;
+    # with the plain-profile re-simplification they are the service's own roots
+    # (structure, not policy).
+    app[READABLE_KEY] = ['docs/', 'topics/', 'solver/templates/', 'solutions/',
+                         'README.md', 'LICENSE', 'solver/web/content/vendor/README.md']
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(str(_TEMPLATES)),
                          autoescape=jinja2.select_autoescape(['html', 'xml']))
     add_content_routes(app)

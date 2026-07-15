@@ -240,34 +240,32 @@ profile), and `objects` (permission namespace → filesystem paths):
 
 ```json
 {
-  "profiles": {
-    "reader":      { "inherits": null,          "grants": ["about:read","docs:read","git:read","solutions:read","solver:execute","users:read","web-content:read"] },
-    "contributor": { "inherits": "reader",      "grants": ["git:execute","solutions:execute","solutions:write"] },
-    "maintainer":  { "inherits": "contributor", "grants": ["ai:execute","shell:execute","solutions:delete"] },
-    "admin":       { "inherits": "maintainer",  "grants": ["infra:execute","users:write"] }
-  },
-  "users":   { "vikas.munshi@gmail.com": "admin", "mercanther@gmail.com": "reader" },
-  "objects": { "solutions": ["solutions/"], "docs": ["docs/", "topics/"], "web-content": ["solver/web/content/"],
-               "solver": [], "shell": ["/bin/bash"], "ai": [], "git": [], "infra": [], "users": [] }
+  "ladder": ["reader", "contributor", "maintainer", "admin"],
+  "users":  { "vikas.munshi@gmail.com": "admin", "mercanther@gmail.com": "reader" }
 }
 ```
 
-A command/route declares `requires=[obj:perm]`; enforcement is `requires ⊆ perms(profile)`
-(inheritance-expanded). A command with **no `requires`** defaults fail-closed to
-`infra:execute` (admin-only), so a new command is never silently exposed. Example mapping:
-`show → solutions:read`; `new`/`edit` → `solutions:write`; `evaluate`/`benchmark` →
-`solutions:execute`; `!` → `shell:execute`; `claude-*` → `ai:execute`;
-`key-*`/`git-merge`/`git-publish` → `infra:execute`, while the **native** per-user
-git verbs (MT-2, [real-multi-tenant-web-access.md](real-multi-tenant-web-access.md))
-split by weight — `git-status`/`git-sync` → `git:read` (`reader`+: everyone can
-fetch/pull), `git-commit`/`git-push`/`git-identity` → `git:execute` (`contributor`+:
-commit and push **their own** `user/<slug>` branch; master lands only via the
-admin's `git-merge`); `users` splits (`list → users:read` for `reader`+, self-scoped;
-mutations → `users:write` for `admin`). The DD-11 content matrix is exactly these grants
-(view=read, edit=write, delete=delete, execute=execute). `update-docs` regenerates
-the audit table in **`docs/authorizations.md`** — module / command /
-requires / least-profile for every command, distinct from the authored
-`authorizations.json`.
+**Re-simplified (the multi-tenant model):** authorization is a **plain profile
+ladder**. A command/route declares its *minimum profile*
+(`@register(requires='contributor')`), and enforcement is a rank comparison
+(`reader < contributor < maintainer < admin`). A command with **no `requires`**
+defaults fail-closed to `admin`, so a new command is never silently exposed. The
+earlier `object:permission` grant sets and the `objects`→paths map existed to
+drive per-path filesystem ACLs on the shared operator tree — the per-user model
+(every collaborator in their own clone, as their own uid) retired that layer, so
+the policy file carries exactly one decision: **who has which profile**. The
+ladder itself is structural and lives in code
+(`solver/auth/subject.py::LADDER`); the file's `ladder` field documents it and is
+validated on load. Example floors: `show`/`ls`/`git-status`/`git-sync`/`user`/
+`vault` → `reader`; `new`/`edit`/`evaluate`/`benchmark`/`!`/`claude-*`/
+`git-commit`/`git-push`/`git-identity` → `contributor` (their own uid sandbox,
+their own Anthropic key, their own `user/<slug>` branch; master lands only via
+the admin's `git-merge`); web file-delete → `maintainer`; `users` mutations/
+`key-rekey`/`user-authorize`/`git-merge`/`git-publish`/`manage-config` → `admin`
+(`users list` registers at `reader` but self-scopes to the caller's own entry,
+MT-10b). `update-docs` regenerates the audit table in
+**`docs/authorizations.md`** — module / command / minimum profile for every
+command, distinct from the authored `authorizations.json`.
 
 ### Enforcement (shell + web)
 

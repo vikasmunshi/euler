@@ -37,10 +37,10 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
 from solver.config import config as app_config
+from solver.crypto import vault as vault_mod
 from solver.crypto.ciphers import (encrypt_blob, load_private_key, lock, public_key_hex, read_enc_key_file,
                                    read_master_key, verify_master_key)
 from solver.crypto.config import config
-from solver.crypto import vault as vault_mod
 from solver.shell import console, register
 from solver.utils.shell_utils import confirm
 
@@ -123,7 +123,7 @@ def _wrapped_for_all(master_key: bytes, public_keys: list[str]) -> dict[str, str
     return data
 
 
-@register(requires=('infra:execute',), help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
+@register(requires='admin', help_text='Rotate the enc key and re-wrap to users.', aliases=('rekey',))
 def key_rekey() -> int:
     """Rotate to a new master key (proof-of-possession), re-wrap to all users, and renormalise blobs.
 
@@ -147,7 +147,7 @@ def key_rekey() -> int:
     return 0
 
 
-@register(requires=('infra:execute',),
+@register(requires='admin',
           help_text='Authorise another public key (hex) to access the enc key.', aliases=('authorize',))
 def user_authorize(public_key: str) -> int:
     """Wrap the current master key to `public_key` and add it to enc-key.json (proof-of-possession)."""
@@ -171,7 +171,7 @@ def user_authorize(public_key: str) -> int:
 # ==================================================================================================================== #
 #                                               user identity
 # ==================================================================================================================== #
-@register(requires=('infra:execute',), help_text="Show public key & enc-key access; --regen for new key-pair.")
+@register(requires='reader', help_text="Show public key & enc-key access; --regen for new key-pair.")
 def user(regen: bool = False) -> int:
     """Show the current identity and whether it can decrypt; create a key pair on first run or --regen."""
     try:
@@ -255,7 +255,7 @@ def _vault_status() -> int:
     return 0
 
 
-@register(requires=('infra:execute',),
+@register(requires='reader',
           help_text='Manage the per-user secrets vault: status | init | change-password.')
 def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> int:
     """Encrypt this user's `id` + `env` at rest under a password-derived vault key (MT-6).
@@ -375,7 +375,7 @@ def _reconstruct_secret(shares: list[str]) -> bytes:
     return secret_int.to_bytes(_SECRET_BYTES, 'big')
 
 
-@register(requires=('infra:execute',), help_text='Split master key into shares (n-of-m secret sharing).')
+@register(requires='admin', help_text='Split master key into shares (n-of-m secret sharing).')
 def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     """Print `num_shares` Shamir shares of the current master key (threshold needed to reconstruct)."""
     if num_shares < threshold or threshold < 2:
@@ -396,7 +396,7 @@ def key_split(num_shares: int = 3, threshold: int = 2) -> int:
     return 0
 
 
-@register(requires=('infra:execute',), help_text='Recover master key from shares.')
+@register(requires='reader', help_text='Recover master key from shares.')
 def key_reconstruct(threshold: int = 2) -> int:
     """Prompt for `threshold` shares, reconstruct the master key, and store it wrapped to this user."""
     try:

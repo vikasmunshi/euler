@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Unit tests for the solver/auth RBAC kernel (DD-12): the Authorizations policy
-(inheritance expansion, user map, fail-closed) and resolve_subject's planes."""
+"""Unit tests for the solver/auth kernel (DD-12, re-simplified): the plain profile
+ladder (rank comparison, fail-closed), the users map, and resolve_subject's planes."""
 from __future__ import annotations
 
 import json
@@ -17,14 +17,8 @@ from solver.auth.authorizations import AUTHZ_FILE_ENV
 from solver.auth.identity import system_slug
 
 _POLICY = {
-    'profiles': {
-        'reader': {'inherits': None, 'grants': ['solutions:read', 'users:read']},
-        'contributor': {'inherits': 'reader', 'grants': ['solutions:write', 'solutions:execute']},
-        'maintainer': {'inherits': 'contributor', 'grants': ['solutions:delete', 'ai:execute']},
-        'admin': {'inherits': 'maintainer', 'grants': ['shell:execute', 'infra:execute', 'users:write']},
-    },
+    'ladder': ['reader', 'contributor', 'maintainer', 'admin'],
     'users': {'Alice@Example.com': 'maintainer', 'bob': 'contributor'},
-    'objects': {'solutions': ['solutions/'], 'shell': ['/bin/bash'], 'infra': []},
 }
 
 
@@ -32,32 +26,29 @@ class AuthorizationsTest(unittest.TestCase):
     def setUp(self) -> None:
         self.authz = Authorizations(_POLICY)
 
-    def test_inheritance_expands_up_the_chain(self) -> None:
-        perms = self.authz.permissions_for('maintainer')
-        # own + contributor + reader grants, all present
-        self.assertIn('solutions:delete', perms)   # own
-        self.assertIn('solutions:write', perms)     # contributor
-        self.assertIn('solutions:read', perms)      # reader
-        self.assertNotIn('infra:execute', perms)    # admin-only, not inherited downward
+    def test_the_ladder_is_a_rank_comparison(self) -> None:
+        maintainer = Subject(user='t', slug='t', channel='terminal',
+                             auth_method='test', profile='maintainer')
+        for floor, held in (('reader', True), ('contributor', True),
+                            ('maintainer', True), ('admin', False)):
+            self.assertEqual(maintainer.has(floor), held, floor)
 
-    def test_admin_has_everything(self) -> None:
-        perms = self.authz.permissions_for('admin')
-        for p in ('solutions:read', 'solutions:write', 'solutions:delete',
-                  'ai:execute', 'shell:execute', 'infra:execute', 'users:write'):
-            self.assertIn(p, perms)
+    def test_unknown_profile_and_floor_are_failclosed(self) -> None:
+        nobody = Subject(user='t', slug='t', channel='terminal',
+                         auth_method='test', profile='nobody')
+        self.assertFalse(nobody.has('reader'))      # unknown profile holds nothing
+        admin = Subject(user='t', slug='t', channel='terminal',
+                        auth_method='test', profile='admin')
+        self.assertFalse(admin.has('bogus'))        # unknown floor admits no one
 
-    def test_unknown_profile_is_empty_failclosed(self) -> None:
-        self.assertEqual(self.authz.permissions_for('nobody'), frozenset())
+    def test_mismatched_ladder_is_rejected(self) -> None:
+        with self.assertRaises(ValueError):
+            Authorizations({'ladder': ['admin', 'reader'], 'users': {}})
 
     def test_user_map_lookup_is_normalised(self) -> None:
         self.assertEqual(self.authz.profile_for('alice@example.com'), 'maintainer')  # lowercased
         self.assertEqual(self.authz.profile_for('  BOB '), 'contributor')            # trimmed
         self.assertIsNone(self.authz.profile_for('stranger'))
-
-    def test_objects_paths(self) -> None:
-        self.assertEqual(self.authz.paths_for('solutions'), ['solutions/'])
-        self.assertEqual(self.authz.paths_for('infra'), [])
-        self.assertEqual(self.authz.paths_for('missing'), [])
 
     def test_load_prefers_env_file(self) -> None:
         with tempfile.TemporaryDirectory() as d:
@@ -72,8 +63,8 @@ class AuthorizationsTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {}, clear=False):
             os.environ.pop(AUTHZ_FILE_ENV, None)
             loaded = Authorizations.load()
-        self.assertIn('solutions:read', loaded.permissions_for('reader'))
-        self.assertIn('infra:execute', loaded.permissions_for('admin'))
+        self.assertEqual(sorted(loaded.known_profiles()),
+                         ['admin', 'contributor', 'maintainer', 'reader'])
 
 
 class ResolveSubjectTest(unittest.TestCase):
@@ -96,7 +87,7 @@ class ResolveSubjectTest(unittest.TestCase):
         self.assertEqual(subj.profile, 'admin')
         self.assertEqual(subj.channel, 'terminal')
         self.assertEqual(subj.auth_method, 'checkout-owner')
-        self.assertTrue(subj.has('infra:execute'))
+        self.assertTrue(subj.has('admin'))
 
     def test_explicit_map_entry_wins_over_owner_floor(self) -> None:
         # bob owns the checkout but is mapped contributor → contributor, not admin.
@@ -104,7 +95,7 @@ class ResolveSubjectTest(unittest.TestCase):
              mock.patch('solver.auth.identity._owns_checkout', return_value=True):
             subj = self._resolve()
         self.assertEqual(subj.profile, 'contributor')
-        self.assertFalse(subj.has('infra:execute'))
+        self.assertFalse(subj.has('admin'))
 
     def test_non_owner_unlisted_login_is_contributor(self) -> None:
         with mock.patch('solver.auth.identity.getpass.getuser', return_value='carol'), \
@@ -126,7 +117,7 @@ class ResolveSubjectTest(unittest.TestCase):
             subj = self._resolve(SOLVER_TICKET='t')
         self.assertEqual(subj.channel, 'web')
         self.assertEqual(subj.profile, 'admin')           # NOT capped (MT-10a)
-        self.assertTrue(subj.has('infra:execute'))
+        self.assertTrue(subj.has('admin'))
         self.assertEqual(subj.auth_method, 'shell-ticket')
 
     def test_ticket_failure_aborts(self) -> None:

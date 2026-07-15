@@ -48,9 +48,11 @@ loopback-only with a kernel egress firewall (DD-8). A compromised session reache
 "their own" includes). Identity never rests on the uid (DD-9): Caddy strips client
 identity headers, shells prove identity by a single-use ticket, and the per-user
 instance refuses a mis-slugged request. **Standing controls:** grant `contributor`+
-deliberately, keep the invite list audited; keep `!`/`bash` gated no lower than
-`maintainer` (the shipped grant) and `claude-*` `maintainer`+ in the policy; do not
-widen the `euler-user@` unit's sandbox or the firewall's per-user egress lock.
+deliberately, keep the invite list audited; keep `reader` free of every
+code-execution command (`!`, `evaluate`, `claude-*` all sit at `contributor` — in
+the per-user model raw bash grants nothing that `evaluate`'s arbitrary Python did
+not already, and the AI spend is the user's own key); do not widen the
+`euler-user@` unit's sandbox or the firewall's per-user egress lock.
 
 ### AR-2 · A web session reads the private plaintext **its user** is authorized for
 

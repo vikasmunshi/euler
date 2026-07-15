@@ -4,16 +4,16 @@
 
 Two paths behind one command:
 
-- **`users list`** needs only ``users:read`` (a ``reader`` grant). A non-admin sees only
+- **`users list`** is a ``reader``-floor command. A non-admin sees only
   **their own** entry, read directly from the world-readable ``authorizations.json`` — no
-  sudo (``users:read`` is sight of your own account, not the roster; MT-10b, since the channel
-  axis that used to keep this off the web is gone). An operator holding ``users:write`` (admin)
+  sudo (the reader floor grants sight of your own account, not the roster; MT-10b, since the channel
+  axis that used to keep this off the web is gone). An ``admin``
   gets the **full** listing (every identity + registration state + pending invites) via the
   sudo admin plane.
 - **mutations** (`add` / `change` / `enable` / `disable` / `remove`) need
-  ``users:write`` (admin) and re-execute the admin CLI (:mod:`solver.web.auth.admin`)
+  ``admin`` and re-execute the admin CLI (:mod:`solver.web.auth.admin`)
   under ``sudo`` — which writes the root-owned SoR and reaches the euler-auth admin
-  socket. The command is registered for ``users:read``; the write verbs are gated at
+  socket. The command registers at the ``reader`` floor; the write verbs are gated at
   **runtime** against the subject's permissions.
 
 No longer channel-gated (MT-10 drops the channel axis): the write verbs' real containment is
@@ -44,11 +44,11 @@ from solver.shell import console, register
 
 
 def _print_roster(only: str | None = None) -> int:
-    """Non-sudo roster from the world-readable authorizations.json (``users:read``).
+    """Non-sudo roster from the world-readable authorizations.json (reader floor).
 
     When *only* is given (a non-admin caller), the listing is **scoped to that identity's own
-    entry** — ``users:read`` grants a member sight of their own account, not the whole roster
-    (MT-10b). The full roster is an admin (``users:write``) view.
+    entry** — the reader floor grants a member sight of their own account, not the whole roster
+    (MT-10b). The full roster is an ``admin`` view.
     """
     users = Authorizations.load().all_users()
     if only is not None:
@@ -95,14 +95,14 @@ def _provision_kit(action: str, slug: str, *rest: str) -> int:
         return 1
 
 
-@register(requires=('users:read',),
+@register(requires='reader',
           help_text='List / administer accounts (list is read-only; changes need admin + sudo).')
 def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'] = 'list',
           identity: str = '', profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service (DD-12).
 
-    `list` is read-only (``users:read``) and needs no sudo; every mutating verb needs
-    ``users:write`` (admin) and re-executes the admin CLI under ``sudo``.
+    `list` is read-only (every rung) and needs no sudo; every mutating verb needs
+    ``admin`` and re-executes the admin CLI under ``sudo``.
 
     Args:
         action:   list (roster), add (map entry — ``@email`` also mints an invite;
@@ -114,11 +114,11 @@ def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'
     """
     if action == 'list':
         # Admins get the full sudo listing (SRP state + pending); a non-admin sees only their
-        # own entry (users:read = read your own account, not the roster — MT-10b).
-        return _sudo_admin('list') if config.subject.has('users:write') else _print_roster(config.subject.user)
+        # own entry (the reader floor = read your own account, not the roster — MT-10b).
+        return _sudo_admin('list') if config.subject.has('admin') else _print_roster(config.subject.user)
 
-    if not config.subject.has('users:write'):
-        console.print('[error]error:[/error] this action needs the [accent]users:write[/accent] '
+    if not config.subject.has('admin'):
+        console.print('[error]error:[/error] this action needs the [accent]admin[/accent] '
                       'permission (admin) — run it from the checkout owner\'s local terminal')
         return 1
     if not identity:

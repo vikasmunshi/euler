@@ -236,15 +236,15 @@ deploy_state_dir() {
     sudo chmod 0700 "${STATE_DIR}"
 }
 
-# Deploy the authorization system of record (DD-12): /etc/euler/authorizations.json
-# (root:root 0644 — world-readable non-secret policy, root-write only). First deploy
-# copies the repo template; every run seeds the checkout owner as `admin`, migrates
-# any existing web accounts' profiles out of the euler-auth-private SRP DB into the map
-# (old admin/user/guest → new maintainer/contributor/reader), and unions any *new*
-# template objects/paths (e.g. a new content tree like topics/) and *new* profile
-# grants (e.g. about:read) into the deployed policy, so a template addition reaches
-# a live SoR on upgrade. Never clobbers an existing file's edits — it merges (a
-# grant deliberately removed from the template must also be removed here by hand).
+# Deploy the authorization system of record (DD-12, re-simplified): the policy is a
+# plain profile ladder, so /etc/euler/authorizations.json (root:root 0644 —
+# world-readable non-secret, root-write only) carries ONE decision: who has which
+# profile. First deploy copies the repo template; every run seeds the checkout owner
+# as `admin`, migrates any existing web accounts' profiles out of the
+# euler-auth-private SRP DB into the map (old admin/user/guest → new
+# maintainer/contributor/reader), and rewrites a legacy grants/objects-shaped file
+# to the new {ladder, users} shape (the users map is the only thing carried over —
+# the grant vocabulary is retired with the per-profile ACL layer).
 deploy_authz() {
     local owner
     owner="$(stat -c '%U' "${PROJECT_ROOT}")"
@@ -257,7 +257,7 @@ deploy_authz() {
 import json, pathlib, sys
 authz_path, owner, users_path, template_path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 authz = json.loads(pathlib.Path(authz_path).read_text())
-users = authz.setdefault('users', {})
+users = dict(authz.get('users', {}))
 users.setdefault(owner, 'admin')                         # local owner anchor (seeded for visibility)
 migrate = {'admin': 'maintainer', 'user': 'contributor', 'guest': 'reader'}
 try:                                                     # migrate existing web accounts from the SRP DB
@@ -268,22 +268,16 @@ for email, rec in srp.items():
     if email not in users:
         old = str(rec.get('profile', 'user'))
         users[email] = migrate.get(old, old)             # already-new names pass through
+# Re-simplified policy (plain profile floors): the file carries ONE decision — who
+# has which profile. A legacy grants/objects-shaped file is rewritten to the new
+# shape here, its users map carried over; the retired sections are dropped (they
+# only ever drove the per-profile content-tree ACLs, gone with the per-user model).
 template = json.loads(pathlib.Path(template_path).read_text())
-objects = authz.setdefault('objects', {})                # union new template objects/paths;
-for name, paths in template.get('objects', {}).items():  # local additions are kept as-is
-    merged = objects.setdefault(name, [])
-    merged.extend(p for p in paths if p not in merged)
-profiles = authz.setdefault('profiles', {})              # union new profiles/grants likewise
-for name, spec in template.get('profiles', {}).items():
-    if name not in profiles:
-        profiles[name] = spec
-        continue
-    grants = profiles[name].setdefault('grants', [])
-    added = [g for g in spec.get('grants', []) if g not in grants]
-    if added:
-        print(f'authorizations.json: profile {name} gains {", ".join(added)}')
-        profiles[name]['grants'] = sorted(grants + added)
-pathlib.Path(authz_path).write_text(json.dumps(authz, indent=2, sort_keys=True) + '\n')
+if 'profiles' in authz or 'objects' in authz:
+    print('authorizations.json: migrating the legacy grants/objects shape → plain profile ladder')
+new = {'ladder': template.get('ladder', ['reader', 'contributor', 'maintainer', 'admin']),
+       'users': dict(sorted(users.items()))}
+pathlib.Path(authz_path).write_text(json.dumps(new, indent=2) + '\n')
 print(f'authorizations.json: {len(users)} user(s) mapped (owner {owner}=admin)')
 PY
     sudo chown root:root "${AUTHZ_FILE}"

@@ -6,11 +6,9 @@
   {% if subject %}
   <dl class="account">
     <dt>Signed in as</dt><dd><strong>{{ subject.user or 'anon' }}</strong></dd>
-    <dt>Profile</dt><dd><span class="pill pill-{{ subject.profile }}">{{ subject.profile }}</span></dd>
-    <dt>Permissions</dt>
-    <dd class="perm-list">
-      {% for p in subject.permissions | sort %}<code>{{ p }}</code>{% endfor %}
-    </dd>
+    <dt>Profile</dt><dd><span class="pill pill-{{ subject.profile }}">{{ subject.profile }}</span>
+      <span class="hint">commands and pages are gated by this rung alone
+        (reader&nbsp;→ contributor&nbsp;→ maintainer&nbsp;→ admin)</span></dd>
   </dl>
   {% endif %}
 </section>

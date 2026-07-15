@@ -101,7 +101,7 @@ a parameter that accepts repetition.
 #### Command: `!` (`sh`, `bash`)
 
 Run a bash command.
-* profiles: admin, maintainer
+* profiles: admin, maintainer, contributor
 
 ```
 ! <command> [args]...
@@ -229,7 +229,7 @@ Args:
 #### Command: `claude-api`
 
 Generate specified target using Claude API.
-* profiles: admin, maintainer
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -306,7 +306,7 @@ Args:
 #### Command: `costs`
 
 Display total cost of AI API tokens consumed in session.
-* profiles: admin, maintainer, contributor, reader
+* profiles: admin, maintainer, contributor
 
 ```
 costs
@@ -386,7 +386,7 @@ Arguments:
 #### Command: `euler-solve`
 
 Launch the Claude Euler Solver skill.
-* profiles: admin, maintainer
+* profiles: admin, maintainer, contributor
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
@@ -673,7 +673,7 @@ Args:
 #### Command: `key-reconstruct`
 
 Recover master key from shares.
-* profiles: admin
+* profiles: admin, maintainer, contributor, reader
 
 ```
 key-reconstruct
@@ -1201,7 +1201,7 @@ Args:
 #### Command: `user`
 
 Show public key & enc-key access; --regen for new key-pair.
-* profiles: admin
+* profiles: admin, maintainer, contributor, reader
 
 ```
 user
@@ -1244,8 +1244,8 @@ users
 ```text
 Administer accounts on the authorization map + the auth service (DD-12).
 
-`list` is read-only (``users:read``) and needs no sudo; every mutating verb needs
-``users:write`` (admin) and re-executes the admin CLI under ``sudo``.
+`list` is read-only (every rung) and needs no sudo; every mutating verb needs
+``admin`` and re-executes the admin CLI under ``sudo``.
 
 Args:
     action:   list (roster), add (map entry — ``@email`` also mints an invite;
@@ -1261,7 +1261,7 @@ Args:
 #### Command: `vault`
 
 Manage the per-user secrets vault: status | init | change-password.
-* profiles: admin
+* profiles: admin, maintainer, contributor, reader
 
 ```
 vault

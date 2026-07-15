@@ -287,14 +287,14 @@ ticket-resolved subject. The shell runs on **the user's own `euler-user@<slug>`
 instance** (one per collaborator, serving their content *and* `/ws`), attach gated on
 `solver:execute` (a `reader`-floor grant — everyone gets a terminal). Inside it the
 rungs diverge: a `reader` shell registers only the read commands (`set`/`show`/`ls`,
-plus `git-status`/`git-sync` — `git:read`; no `eval`/`benchmark`, no `edit`);
-`contributor` adds edit + eval/benchmark and the **native** git write verbs
-(`git:execute`): `git-commit`/`git-push` on **their own** `user/<slug>` branch in
-their own clone, with `git-identity` the one-time gh sign-in — master lands only via
-the admin's `git-merge`; `maintainer` adds delete + the AI commands (credentials =
-the user's **own** Anthropic key from their vault, uploaded on the account page).
-`!` (`shell:execute`) tracks its grant (ships `maintainer`+), and `admin` over web
-is contained by its own uid + SRP (MT-10a/AR-4).
+`git-status`/`git-sync`; no `eval`/`benchmark`, no `edit`, no bash); `contributor`
+adds edit + eval/benchmark, raw bash (`!` — the shell is their OWN uid sandbox), the
+AI commands (credentials = their **own** Anthropic key from their vault, uploaded on
+the account page), and the native git write verbs: `git-commit`/`git-push` on
+**their own** `user/<slug>` branch in their own clone, with `git-identity` the
+one-time gh sign-in — master lands only via the admin's `git-merge`; `maintainer`
+adds the web delete routes, and `admin` over web is contained by its own uid + SRP
+(MT-10a/AR-4).
 
 ## 9 · Render & navigation contract
 

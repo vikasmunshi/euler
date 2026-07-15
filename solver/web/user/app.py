@@ -48,7 +48,7 @@ log = logging.getLogger('euler-user')
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
 #: The attach gate: the reader-floor "may run the solver at all" grant (DD-13).
-ATTACH_REQUIRES: str = 'solver:execute'
+ATTACH_REQUIRES: str = 'reader'
 
 #: Per-app PtyManager, for tests and the lifecycle hooks.
 PTY_MANAGER: web.AppKey[PtyManager] = web.AppKey('pty_manager', PtyManager)
@@ -74,8 +74,7 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
     if pin_slug and system_slug(user) != pin_slug:
         return None
     return Subject(user=user, slug=system_slug(user), channel='web',
-                   auth_method='forward-auth', profile=profile,
-                   permissions=authz.permissions_for(profile))
+                   auth_method='forward-auth', profile=profile)
 
 
 def _parse_resize(raw: str) -> tuple[int, int] | None:

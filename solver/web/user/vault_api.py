@@ -46,7 +46,7 @@ from solver.web.site.app import requires
 from solver.web.site.render import render
 
 #: The account floor: every rung may read (and here, act on) its *own* account (MT-10b).
-_VAULT_REQUIRES: str = 'users:read'
+_VAULT_REQUIRES: str = 'reader'
 
 #: Env entry names: dotenv-style upper-snake identifiers.
 _NAME_RE = re.compile(r'^[A-Z][A-Z0-9_]{0,63}$')

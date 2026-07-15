@@ -9,16 +9,14 @@ import contextlib
 import unittest
 from typing import Iterator
 
-from solver.auth import Authorizations, Subject
+from solver.auth import Subject
 from solver.config import config
 from solver.shell.command import Context, command, effective_requires, is_permitted, registry
-
-_AUTHZ = Authorizations.load()  # built-in default ladder
 
 
 def _subject(profile: str, channel: str = 'terminal') -> Subject:
     return Subject(user='t', slug='t-000000', channel=channel, auth_method='test',
-                   profile=profile, permissions=_AUTHZ.permissions_for(profile))
+                   profile=profile)
 
 
 @contextlib.contextmanager
@@ -34,26 +32,26 @@ def as_subject(profile: str, channel: str = 'terminal') -> Iterator[None]:
 
 class RequiresTests(unittest.TestCase):
     def test_empty_requires_is_failclosed_to_admin(self) -> None:
-        self.assertEqual(effective_requires(()), ('infra:execute',))
-        self.assertEqual(effective_requires(('solutions:read',)), ('solutions:read',))
+        self.assertEqual(effective_requires(''), 'admin')
+        self.assertEqual(effective_requires('reader'), 'reader')
 
-    def test_is_permitted_checks_permission(self) -> None:
+    def test_is_permitted_checks_the_floor(self) -> None:
         with as_subject('reader'):
-            self.assertTrue(is_permitted(('solutions:read',)))
-            self.assertFalse(is_permitted(('solutions:write',)))
-            self.assertFalse(is_permitted(()))     # fail-closed → admin-only
+            self.assertTrue(is_permitted('reader'))
+            self.assertFalse(is_permitted('contributor'))
+            self.assertFalse(is_permitted(''))     # fail-closed → admin-only
         with as_subject('contributor'):
-            self.assertTrue(is_permitted(('solutions:write',)))
+            self.assertTrue(is_permitted('contributor'))
         with as_subject('admin'):
-            self.assertTrue(is_permitted(()))      # admin has infra:execute
+            self.assertTrue(is_permitted(''))      # admin satisfies the fail-closed floor
 
     def test_permission_is_channel_agnostic(self) -> None:
         """The channel is not an authorization axis (MT-10): the same profile is permitted the
         same commands on terminal and web — only ``requires`` decides."""
         with as_subject('reader', channel='web'):
-            self.assertTrue(is_permitted(('solutions:read',)))
+            self.assertTrue(is_permitted('reader'))
         with as_subject('reader', channel='terminal'):
-            self.assertTrue(is_permitted(('solutions:read',)))
+            self.assertTrue(is_permitted('reader'))
 
 
 class DecoratorEnforcementTests(unittest.TestCase):
@@ -71,20 +69,20 @@ class DecoratorEnforcementTests(unittest.TestCase):
 
     def test_authorized_command_is_registered_with_requires(self) -> None:
         with as_subject('reader'):
-            @command(name='zz-test-reader', requires=('solutions:read',))
+            @command(name='zz-test-reader', requires='reader')
             def _f(ctx: Context) -> int:
                 return 0
         cmd = registry.resolve('zz-test-reader')
         self.assertIsNotNone(cmd)
         assert cmd is not None
-        self.assertEqual(cmd.requires, ('solutions:read',))
+        self.assertEqual(cmd.requires, 'reader')
 
     def test_registration_is_channel_agnostic(self) -> None:
         """A command registers on any channel when the subject holds its ``requires`` — the channel
         is no longer an axis (MT-10). An admin over web registers an ``infra:execute`` command that
         the old channel gate would have hidden."""
         with as_subject('admin', channel='web'):
-            @command(name='zz-test-web-only', requires=('infra:execute',))
+            @command(name='zz-test-web-only', requires='admin')
             def _f(ctx: Context) -> int:
                 return 0
         self.assertIsNotNone(registry.resolve('zz-test-web-only'))

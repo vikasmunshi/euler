@@ -20,7 +20,7 @@ _AUTHZ = Authorizations.load()
 
 def _admin_subject() -> Subject:
     return Subject(user='t', slug='t-000000', channel='terminal', auth_method='test',
-                   profile='admin', permissions=_AUTHZ.permissions_for('admin'))
+                   profile='admin')
 
 
 class AuthorizationTableTests(unittest.TestCase):

@@ -48,7 +48,7 @@ def _current_branch() -> str:
     return proc.stdout.strip() if proc.returncode == 0 else ''
 
 
-@register(requires=('git:execute',),
+@register(requires='contributor',
           help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
 def git_commit(reset: bool = False, verify: bool = True, message: str = '') -> int:
     """Stage and commit the solutions and solver package as a timestamped checkpoint.
@@ -77,7 +77,7 @@ def git_commit(reset: bool = False, verify: bool = True, message: str = '') -> i
 
 
 @register(
-    requires=('infra:execute',),
+    requires='admin',
     help_text='Push targets (keys|scripts|[accent]solutions[/accent]|solver) to remote.',
     aliases=('publish',),
     quietable=True,
@@ -105,7 +105,7 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
     return result
 
 
-@register(requires=('git:read',),
+@register(requires='reader',
           help_text='Display sync state between local and origin/master.', aliases=('status',),)
 def git_status(details: bool = False) -> int:
     """Display the sync state between the local branch and origin/master.
@@ -148,7 +148,7 @@ def _enc_key_pull_flow() -> None:
                     '&& git checkout -- solutions/private')
 
 
-@register(requires=('git:read',),
+@register(requires='reader',
           help_text='Bring the local repository in sync with origin/master.', aliases=('sync',),)
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
@@ -171,7 +171,7 @@ def git_sync(dry_run: bool = False) -> int:
     return result
 
 
-@register(requires=('git:execute',),
+@register(requires='contributor',
           help_text='Sign in to GitHub (gh) and set this clone\'s git identity from it.',
           aliases=('identity',),)
 def git_identity() -> int:
@@ -188,7 +188,7 @@ def git_identity() -> int:
     return run_cmdline(config.scripts.configure_identity)
 
 
-@register(requires=('git:execute',), quietable=True,
+@register(requires='contributor', quietable=True,
           help_text='Push the current branch to origin (your own user/<slug> branch).', aliases=('push',),)
 def git_push(force: bool = False) -> int:
     """Push the current branch to origin as yourself (`git push -u origin <branch>`).
@@ -210,15 +210,15 @@ def git_push(force: bool = False) -> int:
         if force:
             console.print('[error]error:[/error] force-pushing master is never allowed.')
             return ExitCodes.EXIT_ERROR
-        if not config.subject.has('infra:execute'):
-            console.print('[error]error:[/error] pushing master needs [accent]infra:execute[/accent]; '
+        if not config.subject.has('admin'):
+            console.print('[error]error:[/error] pushing master needs the [accent]admin[/accent] profile; '
                           'your work belongs on your own user/<slug> branch.')
             return ExitCodes.EXIT_ERROR
     lease: str = ' --force-with-lease' if force else ''
     return run_cmdline(f'git push -u{lease} origin {branch}')
 
 
-@register(requires=('infra:execute',), quietable=True,
+@register(requires='admin', quietable=True,
           help_text="Merge a collaborator's user/<slug> branch into master and push.", aliases=('merge',),)
 def git_merge(branch: str, push: bool = True) -> int:
     """Merge a collaborator's branch into master — the one gate to master (MT-2).
@@ -249,7 +249,7 @@ def git_merge(branch: str, push: bool = True) -> int:
 
 
 @register(
-    requires=('infra:execute',),
+    requires='admin',
     help_text="Upgrade dependency group ([accent.dim]all[/accent.dim]|ai|core|dev|solutions|show).",
     aliases=('upgrade',),
 )
@@ -283,7 +283,7 @@ def pip_upgrade(*groups: Literal['all', 'ai', 'core', 'dev', 'solutions', 'show'
 
 
 @register(
-    requires=('git:execute',),
+    requires='contributor',
     help_text='Run pre-commit hook and simulated pre-push hook.',
     aliases=('hooks',),
     quietable=True,
@@ -308,7 +308,7 @@ def git_hooks() -> int:
 
 
 @register(
-    requires=('infra:execute',),
+    requires='admin',
     help_text='Installs or uninstalls system resources.',
     aliases=('install',),
 )

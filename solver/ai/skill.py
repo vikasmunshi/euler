@@ -21,7 +21,7 @@ from solver.shell import console, register
 from solver.shell.command import Context
 
 
-@register(requires=('ai:execute',), help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
+@register(requires='contributor', help_text='Launch the Claude Euler Solver skill.', pass_ctx=True)
 def euler_solve(
         ctx: Context,
         problem: Problem,

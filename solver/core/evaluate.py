@@ -23,7 +23,7 @@ from solver.utils.path_utils import canonical_path
 _solution_file_prefix: re.Pattern[str] = re.compile(r'^p(\d{4})_s(\d+)(?:\.py|_c)$')
 
 
-@register(requires=('solutions:execute',),
+@register(requires='contributor',
           help_text='Build all C source files for given/current problem.', aliases=('compile',), quietable=True)
 def compile_c(problem: Problem, *, clean: bool = True) -> int:
     """Compile every C solution for the problem into a runnable binary.
@@ -229,7 +229,7 @@ def _evaluate(problem: Problem,
     return rc
 
 
-@register(requires=('solutions:execute',), help_text='Evaluate solutions to given/current problem.', aliases=('eval',))
+@register(requires='contributor', help_text='Evaluate solutions to given/current problem.', aliases=('eval',))
 def evaluate(problem: Problem,
              *categories: Literal['all', 'dev', 'main', 'extra'],
              clean: bool = True,
@@ -287,7 +287,7 @@ def evaluate(problem: Problem,
     return rc
 
 
-@register(requires=('solutions:execute',), help_text='Benchmark solutions to given/current problem.', quietable=True)
+@register(requires='contributor', help_text='Benchmark solutions to given/current problem.', quietable=True)
 def benchmark(problem: Problem,
               *categories: Literal['all', 'dev', 'main', 'extra'],
               clean: bool = True,

@@ -120,7 +120,7 @@ def _owns_checkout(root_dir: Path) -> bool:
 
 
 def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subject:
-    """Resolve the current :class:`Subject` (identity + profile + permissions).
+    """Resolve the current :class:`Subject` (identity + profile).
 
     *authz* is the loaded policy; if omitted it is loaded (deployed SoR → built-in
     default). Raises :class:`SystemExit` when no identity plane matches.
@@ -140,8 +140,7 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
             raise SystemExit(f'identity: ticket user {slug!r} does not match '
                              f'this instance ({pin!r}) — refusing to start')
         return Subject(user=email, slug=slug, channel='web',
-                       auth_method='shell-ticket', profile=profile,
-                       permissions=authz.permissions_for(profile))
+                       auth_method='shell-ticket', profile=profile)
 
     try:
         os_login = getpass.getuser()
@@ -154,5 +153,4 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
     mapped = authz.profile_for(os_login)             # unlisted → owner floors to admin, else contributor
     profile = mapped if mapped is not None else ('admin' if is_owner else 'contributor')
     return Subject(user=os_login, slug=slugify(os_login), channel='terminal',
-                   auth_method='checkout-owner' if is_owner else 'os-login', profile=profile,
-                   permissions=authz.permissions_for(profile))
+                   auth_method='checkout-owner' if is_owner else 'os-login', profile=profile)

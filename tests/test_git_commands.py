@@ -1,60 +1,52 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Per-user native git verbs (MT-2): grants, guards, and dispatch.
+"""Per-user native git verbs (MT-2): floors, guards, and dispatch.
 
 The per-user model makes git native — a collaborator works in their own clone on
 ``user/<slug>`` as their own uid — so what the commands must get right is the
-**policy shape** (read verbs at ``git:read``/reader, write verbs at
-``git:execute``/contributor, master admin-gated) and the **guards** (never a
-non-admin push of master, never a force-push of master, a conflicted merge always
-aborted). Everything that would touch a real remote is exercised with
-``run_cmdline`` recorded; the real two-clone flow is covered by the step-6
-runtime verification.
+**policy shape** (read verbs at ``reader``, write verbs at ``contributor``,
+master admin-gated) and the **guards** (never a non-admin push of master, never a
+force-push of master, a conflicted merge always aborted). Everything that would
+touch a real remote is exercised with ``run_cmdline`` recorded; the real
+two-clone flow is covered by the step-6 runtime verification.
 """
 from __future__ import annotations
 
-import json
 import unittest
 from typing import Any
 from unittest.mock import MagicMock
 
-from solver.auth import Authorizations, Subject
-from solver.auth.authorizations import DEFAULT_POLICY_FILE
+from solver.auth import Subject
 from solver.config import ExitCodes, config
 from solver.shell.command import effective_requires, registry
 from solver.utils import scripts
 from solver.utils.loader import load_commands
 
-_AUTHZ = Authorizations(json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8')))
-
 
 def _subject(profile: str) -> Subject:
     return Subject(user='t@example.com', slug='t-000000', channel='web', auth_method='test',
-                   profile=profile, permissions=_AUTHZ.permissions_for(profile))
+                   profile=profile)
 
 
 class PolicyShapeTest(unittest.TestCase):
-    """The template ships the MT-2 ladder: read for every rung, write for contributor+."""
+    """The MT-2 floors: read for every rung, write for contributor+, master at admin."""
 
-    def test_reader_has_git_read_not_execute(self) -> None:
-        reader = _AUTHZ.permissions_for('reader')
-        self.assertIn('git:read', reader)
-        self.assertNotIn('git:execute', reader)
-
-    def test_contributor_has_git_execute(self) -> None:
-        self.assertIn('git:execute', _AUTHZ.permissions_for('contributor'))
-
-    def test_requires_of_the_git_commands(self) -> None:
+    def test_floors_of_the_git_commands(self) -> None:
         load_commands()
-        expected = {'git-status': ('git:read',), 'git-sync': ('git:read',),
-                    'git-commit': ('git:execute',), 'git-push': ('git:execute',),
-                    'git-hooks': ('git:execute',), 'git-identity': ('git:execute',),
-                    'git-merge': ('infra:execute',), 'git-publish': ('infra:execute',)}
-        for name, requires in expected.items():
+        expected = {'git-status': 'reader', 'git-sync': 'reader',
+                    'git-commit': 'contributor', 'git-push': 'contributor',
+                    'git-hooks': 'contributor', 'git-identity': 'contributor',
+                    'git-merge': 'admin', 'git-publish': 'admin'}
+        for name, floor in expected.items():
             cmd = registry.resolve(name)
             self.assertIsNotNone(cmd, f'{name} not registered')
             assert cmd is not None
-            self.assertEqual(effective_requires(cmd.requires), requires, name)
+            self.assertEqual(effective_requires(cmd.requires), floor, name)
+
+    def test_reader_may_sync_but_not_push(self) -> None:
+        reader = _subject('reader')
+        self.assertTrue(reader.has('reader'))
+        self.assertFalse(reader.has('contributor'))
 
 
 class _GitCommandCase(unittest.TestCase):

@@ -25,38 +25,33 @@ from __future__ import annotations
 
 import ast
 import inspect
-import json
 import re
 from pathlib import Path
 from typing import Callable
 
-from solver.auth import Authorizations
-from solver.auth.authorizations import DEFAULT_POLICY_FILE
+from solver.auth import LADDER
+from solver.auth.subject import rank
 from solver.config import ExitCodes, config
 from solver.shell import console, register
 from solver.shell.command import Command, Context, registry
 from solver.utils.loader import load_commands, update_modules
 
-#: Authorization profiles, in descending order of privilege (for the audit report).
-_PROFILES: tuple[str, ...] = ('admin', 'maintainer', 'contributor', 'reader')
-#: The policy used only to *report* per-command availability (not enforcement).
-#: Deliberately the **repo's** template rather than ``Authorizations.load()``: the
-#: generated audit table documents the ladder this repo ships, so it must not vary
-#: with whatever an operator has deployed to ``/etc/euler`` on the machine that
-#: happens to run ``update-docs`` (which would make ``update-docs --check`` — a
-#: pre-push gate — pass or fail by host).
-_AUTHZ: Authorizations = Authorizations(
-    json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8')))
-
 
 def _allowed_profiles(cmd: Command) -> list[str]:
-    """Which profiles satisfy *cmd*'s ``requires`` under the reporting policy (audit)."""
-    return [p for p in _PROFILES if _AUTHZ.permissions_for(p).issuperset(cmd.requires)] or ['none']
+    """The rungs at or above *cmd*'s floor, strongest first (audit view).
+
+    ``requires`` **is** the least profile now (plain ladder floors) — this just
+    expands it to the full satisfying set for the availability note.
+    """
+    floor = rank(cmd.requires)
+    if floor < 0:
+        return ['none']
+    return [p for p in reversed(LADDER) if rank(p) >= floor]
 
 
 def _least_profile(cmd: Command) -> str:
-    """The least-privileged profile that may run *cmd* (last of the descending set)."""
-    return _allowed_profiles(cmd)[-1]
+    """The least-privileged profile that may run *cmd* (its declared floor)."""
+    return cmd.requires if rank(cmd.requires) >= 0 else 'none'
 
 
 def _module_of(cmd: Command) -> str:
@@ -192,17 +187,15 @@ def gen_command_index() -> str:
 
 
 def gen_authorization_table() -> str:
-    """The authorization audit table: one row per command with its module, required
-    ``object:permission`` grants, and the least-privileged profile that satisfies
-    them. Rows are grouped by module, then command (DD-12). Authorization is by
+    """The authorization audit table: one row per command with its module and its
+    **minimum profile** (the plain ladder floor the command declares). Rows are
+    grouped by module, then command (DD-12, re-simplified). Authorization is by
     profile only — the channel is not an axis (MT-10).
     """
-    rows = ['| Module | Command | Requires | Least profile |',
-            '|--------|---------|----------|---------------|']
+    rows = ['| Module | Command | Minimum profile |',
+            '|--------|---------|-----------------|']
     for cmd in sorted(registry.all(), key=lambda c: (_module_of(c), c.name)):
-        requires = ', '.join(f'`{r}`' for r in cmd.requires) or '—'
-        rows.append(f'| `{_module_of(cmd)}` | `{cmd.name}` | {requires} | '
-                    f'`{_least_profile(cmd)}` |')
+        rows.append(f'| `{_module_of(cmd)}` | `{cmd.name}` | `{_least_profile(cmd)}` |')
     return '\n'.join(rows)
 
 
@@ -328,7 +321,7 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
     return updated, stale
 
 
-@register(requires=('infra:execute',),
+@register(requires='admin',
           help_text='Regenerate the generated sections of the docs/ guides.', pass_ctx=True, quietable=True)
 def update_docs(ctx: Context, check: bool = False) -> int:
     """Rebuild the registry-generated blocks in the `docs/` guides and the README.

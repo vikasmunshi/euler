@@ -18,10 +18,10 @@ service (``solver.web.auth``: SRP, sessions, tickets) is a separate package that
 """
 from __future__ import annotations
 
-__all__ = ['Subject', 'Authorizations', 'resolve_subject', 'slugify',
-           'FAILCLOSED_PERMISSION', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE', 'TICKET_ENV']
+__all__ = ['Subject', 'Authorizations', 'resolve_subject', 'slugify', 'LADDER',
+           'FAILCLOSED_PROFILE', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE', 'TICKET_ENV']
 
 from solver.auth.authorizations import (AUTHZ_FILE_ENV, DEFAULT_AUTHZ_FILE,
-                                        FAILCLOSED_PERMISSION, Authorizations)
+                                        FAILCLOSED_PROFILE, Authorizations)
 from solver.auth.identity import TICKET_ENV, resolve_subject, slugify
-from solver.auth.subject import Subject
+from solver.auth.subject import LADDER, Subject

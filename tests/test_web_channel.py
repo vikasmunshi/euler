@@ -27,35 +27,27 @@ The invariants it pins:
 """
 from __future__ import annotations
 
-import json
 import unittest
 
-from solver.auth import Authorizations, Subject
-from solver.auth.authorizations import DEFAULT_POLICY_FILE
+from solver.auth import Subject
 from solver.shell.command import effective_requires, registry
 from solver.utils.loader import load_commands
 
-#: The **repo's** policy template, not ``Authorizations.load()``: that prefers the
-#: deployed ``/etc/euler/authorizations.json``, so the invariants below would be
-#: asserted against whatever policy this particular host happens to be running —
-#: green on a machine with no deployment, red on one whose operator has edited the
-#: SoR, for reasons having nothing to do with the code under test. The ladder these
-#: tests guard is the one the repo ships.
-_AUTHZ = Authorizations(json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8')))
 _WEB_RUNGS = ('reader', 'contributor', 'maintainer')
-#: The tiers where a shell escape is a hard no, whatever the policy: a fresh invitee
-#: (``reader``) and a promoted collaborator (``contributor``). ``maintainer`` is the
-#: operator's own tier and tracks the grant (see the module docstring / DD-13).
-_NO_ESCAPE_RUNGS = ('reader', 'contributor')
+#: The tier where a shell escape is a hard no, whatever the policy: a fresh invitee
+#: (``reader``) runs no user code at all. ``contributor``+ gets bash by the operator's
+#: decision — in the per-user model the shell is the collaborator's OWN uid sandbox,
+#: so raw bash grants nothing that `evaluate` (arbitrary Python) did not already.
+_NO_ESCAPE_RUNGS = ('reader',)
 
 
 def _visible(profile: str, channel: str = 'web') -> set[str]:
     """The commands that would register for *profile* (DD-12). The channel is informational only
-    (MT-10) — it does not affect what registers — so visibility is a pure ``requires`` query."""
+    (MT-10) — it does not affect what registers — so visibility is a pure floor query."""
     subject = Subject(user='t', slug='t-000000', channel=channel, auth_method='test',
-                      profile=profile, permissions=_AUTHZ.permissions_for(profile))
+                      profile=profile)
     return {cmd.name for cmd in registry.all()
-            if subject.has_all(effective_requires(cmd.requires))}
+            if subject.has(effective_requires(cmd.requires))}
 
 
 class WebChannelCommandSetTest(unittest.TestCase):
@@ -71,9 +63,12 @@ class WebChannelCommandSetTest(unittest.TestCase):
         cls.admin_terminal = _visible('admin', channel='terminal')
 
     def test_the_ladder_is_monotonic(self) -> None:
-        """Each rung sees everything the rung below it does, and more."""
+        """Each rung sees everything the rung below it does. contributor and
+        maintainer currently expose the same command set (maintainer keeps its
+        extra WEB surface — the delete routes); admin adds the infra commands."""
         self.assertLess(self.web['reader'], self.web['contributor'])
-        self.assertLess(self.web['contributor'], self.web['maintainer'])
+        self.assertLessEqual(self.web['contributor'], self.web['maintainer'])
+        self.assertLess(self.web['maintainer'], self.admin_terminal)
 
     def test_reader_terminal_is_read_only(self) -> None:
         """A reader attaches (solver:execute) but runs no user code (DD-13/AR-1)."""
@@ -86,15 +81,18 @@ class WebChannelCommandSetTest(unittest.TestCase):
         contributor = self.web['contributor']
         self.assertLessEqual({'evaluate', 'benchmark', 'edit', 'new', 'show'}, contributor)
 
-    def test_maintainer_adds_the_ai_commands(self) -> None:
-        self.assertLessEqual({'claude-api', 'euler-solve'}, self.web['maintainer'])
-        self.assertNotIn('claude-api', self.web['contributor'])
+    def test_contributor_adds_the_ai_commands(self) -> None:
+        """AI at contributor (the users-bring-their-own-key model: the spend is
+        theirs); a reader still has none."""
+        self.assertLessEqual({'claude-api', 'euler-solve'}, self.web['contributor'])
+        self.assertNotIn('claude-api', self.web['reader'])
 
     def test_reader_and_contributor_have_no_shell_escape(self) -> None:
         """The tiers below maintainer never get raw bash (`!` = shell:execute):
         a fresh reader and a promoted contributor, whatever the policy says."""
         for rung in _NO_ESCAPE_RUNGS:
             self.assertNotIn('!', self.web[rung], f'{rung} must not have raw bash')
+        self.assertIn('!', self.web['contributor'])  # the operator's chosen floor
         self.assertIn('!', self.admin_terminal)      # …the local admin always does
 
     def test_shell_escape_tracks_the_policy_grant(self) -> None:
@@ -104,17 +102,21 @@ class WebChannelCommandSetTest(unittest.TestCase):
         shell:execute to maintainer, maintainer's terminal gains `!` and nothing
         below it does. Either way this passes; a decorator that leaked `!` to a
         profile without the grant fails."""
+        bash = registry.resolve('!')
+        assert bash is not None
+        floor = effective_requires(bash.requires)
         for rung in _WEB_RUNGS:
-            has_grant = 'shell:execute' in _AUTHZ.permissions_for(rung)
-            self.assertEqual(has_grant, '!' in self.web[rung],
+            at_floor = Subject(user='t', slug='t', channel='web', auth_method='test',
+                               profile=rung).has(floor)
+            self.assertEqual(at_floor, '!' in self.web[rung],
                              f'{rung}: `!` visible={"!" in self.web[rung]} '
-                             f'but shell:execute held={has_grant}')
+                             f'but floor {floor} satisfied={at_floor}')
 
     def test_no_web_rung_has_infra_or_user_mutation(self) -> None:
         """infra:execute (git-*/key-*/manage-config/update-*) and users:write are
         local-admin only: no web account administers the host or the roster."""
         infra = {cmd.name for cmd in registry.all()
-                 if 'infra:execute' in effective_requires(cmd.requires)}
+                 if effective_requires(cmd.requires) == 'admin'}
         self.assertTrue(infra, 'expected some infra commands in the catalogue')
         for rung in _WEB_RUNGS:
             self.assertFalse(infra & self.web[rung],

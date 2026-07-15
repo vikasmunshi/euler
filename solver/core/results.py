@@ -187,7 +187,7 @@ def write_results(problem: Problem, results: list[Result], reset: bool = False) 
                'Updated results')
 
 
-@register(requires=('solutions:read',), help_text='list the results for the problem.')
+@register(requires='reader', help_text='list the results for the problem.')
 def results(problem: Problem, *categories: Literal['all', 'dev', 'main', 'extra']) -> int:
     """List the results for a given problem.
     Args:

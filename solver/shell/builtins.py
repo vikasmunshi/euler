@@ -21,7 +21,7 @@ from solver.shell.command import Context, command
 
 
 # ------------------------------------------------------- echo ------------------------------------------------------- #
-@command(requires=('solver:execute',), name='echo', help_text='Print text.', usage='\techo <text>')
+@command(requires='reader', name='echo', help_text='Print text.', usage='\techo <text>')
 def _echo(ctx: Context, *args: str) -> int:
     """Print the given text to the console, then succeed.
 
@@ -35,7 +35,7 @@ def _echo(ctx: Context, *args: str) -> int:
 
 
 # ------------------------------------------------------- clear ------------------------------------------------------ #
-@command(requires=('solver:execute',), name='clear', help_text='Clear the screen.', usage='\tclear', aliases=('cls',))
+@command(requires='reader', name='clear', help_text='Clear the screen.', usage='\tclear', aliases=('cls',))
 def _clear(ctx: Context, *_: str) -> int:
     """Clear the terminal screen and scrollback, then succeed.
 
@@ -59,7 +59,7 @@ def _help_completer(ctx: Context, incomplete: str) -> Iterable[str | Completion]
     return [name for name in ctx.shell.registry.names() if name.startswith(incomplete)]
 
 
-@command(requires=('solver:execute',), name='?',
+@command(requires='reader', name='?',
          help_text='List commands or show help for a specific command.',
          usage='\t? [command]',
          aliases=('help',),
