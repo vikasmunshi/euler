@@ -1,42 +1,7 @@
+{# The landing, signed in. The pane's markup is _home.html — the same partial the
+   auth service renders behind its sign-in dialogue, so the signed-out start page
+   is this page, not a lookalike. This template exists for the block contract:
+   render(block='content') swaps just the pane, a direct visit gets the shell. #}
 {% extends "base.html" %}
 {% block title %}euler{% endblock %}
-{% block content %}
-<header class="hero">
-  {# Derived from the opening of Blake's "Auguries of Innocence" ("To see a World
-     in a Grain of Sand") — the same quatrain the crypto master-key verify text
-     uses (solver/crypto/config.py). #}
-  <p class="kicker">to hold infinity in the folds of your mind, and eternity in an hour</p>
-  <h1>Project Euler workspace</h1>
-  <p class="lede">{{ solved }} of {{ total }} problems down.
-     The remaining {{ total - solved }} are not going to solve themselves —
-     though once you drop into the shell, what you solve is solving you.</p>
-</header>
-<nav class="cards cards-1" aria-label="Start here">
-  <a class="card" href="/solutions/" hx-get="/solutions/" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true">
-    <span class="card-ic">π</span>
-    <span><span class="card-title">Solutions</span>
-      <span class="card-desc">Every problem as a century grid — the orange ones are victories.</span></span>
-    <span class="card-go">&rarr;</span>
-  </a>
-  <a class="card" href="/docs/" hx-get="/docs/" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true">
-    <span class="card-ic">&sect;</span>
-    <span><span class="card-title">Docs</span>
-      <span class="card-desc">The guides. Read one, ignore the rest, feel briefly invincible.</span></span>
-    <span class="card-go">&rarr;</span>
-  </a>
-  <a class="card" href="/topics/" hx-get="/topics/" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true">
-    <span class="card-ic">&lambda;</span>
-    <span><span class="card-title">Topics</span>
-      <span class="card-desc">The mathematics behind the problems, written down before it was forgotten.</span></span>
-    <span class="card-go">&rarr;</span>
-  </a>
-  <span class="card">
-    <span class="card-ic">&#10095;</span>
-    <span><span class="card-title">Terminal</span>
-      <span class="card-desc">The solver shell, in the right pane — attaching in Phase&nbsp;6.</span></span>
-  </span>
-</nav>
-{% endblock %}
+{% block content %}{% include "_home.html" %}{% endblock %}

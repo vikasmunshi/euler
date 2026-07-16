@@ -1,12 +1,18 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% block title %}euler — forgot password{% endblock %}
-{% block content %}
-  <h1>Forgot your password?</h1>
-  <p class="lead">Enter your account email; if it exists, a reset link will be sent.</p>
+{% block dialogue %}
+  <h1>Reset your password</h1>
+  <p class="lead">Enter your account email and a reset link goes out to it.</p>
   <form class="auth-form" method="post" action="/forgot">
     <label for="email">Email</label>
     <input id="email" name="email" type="email" autocomplete="username" required autofocus>
-    <button type="submit">Send reset link</button>
+    <button class="btn btn-primary" type="submit">Send the link</button>
   </form>
-  <p class="muted"><a href="/login">Back to sign in</a></p>
+  <p class="auth-alt"><a href="/login">Back to sign in</a></p>
+  {# A reset re-keys the vault, and someone arriving here has usually forgotten
+     that they have one. Better said before the mail goes out than after. #}
+  <p class="auth-note"><b>Heads up.</b> Setting a new password this way destroys your
+    vault: any secrets stored in it are gone, and every signed-in device is logged
+    out. If you still know your current password, change it from your account page
+    instead — that carries the vault across.</p>
 {% endblock %}

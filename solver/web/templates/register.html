@@ -1,6 +1,6 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% block title %}euler — {{ 'reset password' if kind == 'reset' else 'register' }}{% endblock %}
-{% block content %}
+{% block dialogue %}
   <h1>{{ 'Reset your password' if kind == 'reset' else 'Create your account' }}</h1>
   <p class="lead">for <strong>{{ email }}</strong></p>
 
@@ -18,7 +18,7 @@
         <input id="accept-box" type="checkbox" name="accepted" value="yes" required disabled>
         I have read and accept these Terms of use
       </label>
-      <button type="submit">Email me a verification code</button>
+      <button class="btn btn-primary" type="submit">Email me a verification code</button>
     </form>
     <noscript><p class="flash flash-error">Registration requires JavaScript.</p></noscript>
 
@@ -27,7 +27,7 @@
     <form class="auth-form" method="post" action="{{ base }}/otp">
       <input type="hidden" name="token" value="{{ token }}">
       <p>To continue, verify that you control this mailbox.</p>
-      <button type="submit">Email me a verification code</button>
+      <button class="btn btn-primary" type="submit">Email me a verification code</button>
     </form>
 
   {% elif stage == 'otp' %}
@@ -38,12 +38,12 @@
       <label for="otp">Verification code</label>
       <input id="otp" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
              autocomplete="one-time-code" required autofocus>
-      <button type="submit">Verify</button>
+      <button class="btn btn-primary" type="submit">Verify</button>
     </form>
     <form class="auth-form inline" method="post" action="{{ base }}/otp">
       <input type="hidden" name="token" value="{{ token }}">
       {% if kind == 'register' %}<input type="hidden" name="accepted" value="yes">{% endif %}
-      <button class="link" type="submit">Send a fresh code</button>
+      <button class="linkish" type="submit">Send a fresh code</button>
     </form>
 
   {% elif stage == 'password' %}
@@ -61,7 +61,7 @@
         digits, and specials. It is turned into an SRP verifier in your browser and
         never sent anywhere.</p>
       <p id="form-error" class="flash flash-error" role="alert" hidden></p>
-      <button id="submit-btn" type="submit">Set password</button>
+      <button id="submit-btn" class="btn btn-primary" type="submit">Set password</button>
     </form>
     <noscript><p class="flash flash-error">Setting a password requires JavaScript
       (the SRP verifier is derived in your browser).</p></noscript>

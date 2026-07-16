@@ -1,0 +1,45 @@
+{# The signed-out shell (web-server-guide § The site). The auth service's pages are
+   standalone public documents on their own routes (/login, /register, /reset,
+   /forgot) — but they are not a separate *place*: they render the content
+   service's own base.html, so the header, the panes, the footer and the
+   stylesheet are the ones the signed-in visitor will keep seeing. That is the
+   whole of "one layout, pre and post auth".
+
+   The split: the left pane is the start page (_home.html, the same partial the
+   content service renders — inert, because `subject` is undefined here), and the
+   right pane holds the dialogue, standing exactly where the terminal will.
+
+   A page fills `dialogue`. `error` / `notice` are rendered here for all of them,
+   so no page repeats the flash markup.
+
+   Both templates resolve through the auth service's ChoiceLoader
+   (web/templates first, then web/site/templates) — see auth/app.py. #}
+{% extends "base.html" %}
+
+{# Signed out: no htmx, no MathJax. Nothing swaps and nothing carries TeX, and a
+   login box has no business pulling a megabyte of typesetter.
+   Signed in (a /terms or /password deep link): the full shell, because the header
+   above is then live — and a header whose links reload the document would tear
+   down the terminal beside it, which is the one thing the shell must not lose. #}
+{% block shell_assets %}{% if subject %}{{ super() }}{% endif %}{% endblock %}
+
+{% block content %}{% include "_home.html" %}{% endblock %}
+
+{% block ws_label %}{% if subject %}solver terminal{% else %}sign in{% endif %}{% endblock %}
+{% block ws %}
+{% if subject %}
+  {# Signed in and still on an auth route — /terms and /password are reachable that
+     way (deep links, no-JS). The right pane is theirs: the terminal, exactly as the
+     content shell would give it. The iframe's /terminal is routed by Caddy to their
+     own instance, so it attaches as usual. #}
+  {{ super() }}
+{% else %}
+<div class="auth-pane">
+  <div class="auth-card">
+    {% if error %}<p class="flash flash-error" role="alert">{{ error }}</p>{% endif %}
+    {% if notice %}<p class="flash flash-notice" role="status">{{ notice }}</p>{% endif %}
+    {% block dialogue %}{% endblock %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

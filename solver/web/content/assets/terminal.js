@@ -6,9 +6,12 @@
 
    - down (parent → here): {euler: 'disarm'} before a deliberate exit (logout),
      so the beforeunload guard does not fire on a navigation the user chose;
+     {euler: 'connect'|'disconnect'} from the user menu's terminal item;
    - up (here → parent): {euler: 'navigate', path} when the shell's `show`/`edit`
      emits its OSC 5379 sequence — the shell drives the left pane, and only ever
-     through the parent (this document never touches the parent's DOM).
+     through the parent (this document never touches the parent's DOM);
+     {euler: 'term-state', connected} whenever the socket opens or closes, so the
+     user menu's item can name the act it offers.
 
    Wire protocol (solver/web/ws/app.py): binary frames are raw PTY bytes both
    ways; a text frame {"resize": [cols, rows]} carries the geometry. */
@@ -18,15 +21,13 @@
   var host = document.getElementById('term');
   if (!host || typeof window.Terminal !== 'function') { return; }
 
-  // ── theme: the terminal is dark in both site themes ──────────────────────
-  // Deliberate, and the one surface that does not follow the slider. What renders
-  // here is the *shell's own* output, and the shell paints with absolute xterm-256
-  // indices chosen for a dark terminal (near-whites like 254/247 for body text,
-  // 238 for rules) — on a light background its banner and prompt wash out to
-  // illegible. Re-theming the surface without re-tuning the shell's palette would
-  // just break the contrast the shell already designed for. So: a dark terminal
-  // panel on a light page, the way an embedded console normally reads. The tokens
-  // are the site's own dark palette, so it is the same surface, not a foreign one.
+  // ── theme ────────────────────────────────────────────────────────────────
+  // Literal hex, not the site's CSS tokens: what renders here is the *shell's own*
+  // output, and the shell paints with absolute xterm-256 indices chosen for a dark
+  // terminal (near-whites like 254/247 for body text, 238 for rules). Its darkness
+  // is the shell's constraint, not the site's choice — the site being dark-only
+  // means the two agree today, but this must not start following a palette the
+  // shell's ANSI indices know nothing about. The values are the dark tokens.
   var term = new window.Terminal({
     cursorBlink: true,
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
@@ -55,6 +56,17 @@
   // server-side shell survives a disconnect and replays on the next attach.
   var socket = null;
   var closedByUs = false;
+
+  //: Tell the shell where we stand. The user menu's terminal item follows this and
+  //: never the other way round: a session that drops on its own (the shell exits,
+  //: the transport dies) must not leave the menu offering to disconnect something
+  //: that is already gone. Unframed (a direct visit to /terminal) there is no one
+  //: to tell.
+  function report(connected) {
+    if (window.parent !== window) {
+      window.parent.postMessage({ euler: 'term-state', connected: connected }, location.origin);
+    }
+  }
   //: False while the server's replay is still being parsed: the scrollback is
   //: drawn, but the commands in it already ran, so their control sequences must
   //: not fire again (§ the OSC handler below).
@@ -70,6 +82,7 @@
     socket.onopen = function () {
       live = false;                     // a fresh attach replays before it streams
       arm();
+      report(true);
       sendSize();                       // the server's PTY starts at 80x24
     };
     // Output is raw PTY bytes; the server replays recent scrollback on attach,
@@ -93,6 +106,7 @@
     socket.onclose = function (ev) {
       disarm();
       socket = null;
+      report(false);
       if (closedByUs) {
         term.write('\r\n\x1b[33mdisconnected — your shell keeps running; '
                    + 'reconnect from the user menu.\x1b[0m\r\n');

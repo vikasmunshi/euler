@@ -1,16 +1,26 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% block title %}euler — terms of use{% endblock %}
-{# These *are* the terms — the footer does not link a reader back to the page they
-   are already on; the notice alone stands. #}
-{% block footer_policy %}{% endblock %}
+{# The terms are a document, so they go in the left pane — where the shell's own
+   /terms fragment puts them for a signed-in reader (terms_fragment.html). This is
+   the full-page form: a direct visit, or no JS.
+   The right pane is auth_base's: their terminal when signed in, the invitation
+   below when not. #}
 {% block content %}
+<section class="panel">
   {# The way out: this page is reached from a footer and has no form of its own,
      so without it the reader is stranded. The caller named itself in ?back=. #}
   <p class="back-row">
     <a class="back-link" href="{{ back_url }}">&#8592;&nbsp;{{ back_label }}</a>
   </p>
   <h1>Terms of use</h1>
-  <div class="terms-text">
+  <div class="terms-text doc-body">
     {% include "_terms.html" %}
   </div>
+</section>
+{% endblock %}
+{% block dialogue %}
+  <h1>Sign in</h1>
+  <p class="lead">These terms are what you agree to by using this. The workspace
+    itself is through here.</p>
+  <p class="auth-alt"><a href="/login">Go to sign in</a></p>
 {% endblock %}

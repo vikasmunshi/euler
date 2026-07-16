@@ -1,6 +1,9 @@
-/* Content-service app shell (web-server-guide § The site, 5e). Same-origin, no @import,
-   no external fonts — CSP-clean. Dark-first: the dark palette is :root; light
-   comes via prefers-color-scheme and the header slider's explicit data-theme.
+/* The app shell — every page, both tiers (web-server-guide § The site). Same-origin,
+   no @import, no external fonts — CSP-clean. This is the site's only stylesheet:
+   the auth pages load it too, so the signed-out and signed-in layouts are the same
+   layout. Caddy serves it from /assets before forward_auth, so it needs no session.
+   Dark only: there is no light palette and no theme toggle — the dark ground is the
+   design, not a preference.
    The four regions fill the viewport exactly; only the panes scroll. */
 
 :root {
@@ -23,50 +26,16 @@
   --git-modified: #fbbf24;
   --git-staged: #34d399;
   --git-untracked: #a78bfa;
+  /* Semantic ink, separate from the accent: the auth flashes, the vault/tool
+     state pills, and the destructive verbs. --ok doubles as git-staged's green
+     because "good" is one idea, not two. */
+  --danger: #f87171;
+  --ok: var(--git-staged);
+  --error-bg: #3a1f22;
+  --error-fg: #fca5a5;
+  --notice-bg: color-mix(in srgb, var(--accent) 14%, transparent);
+  --notice-fg: var(--accent-ink);
 }
-/* The light palette, twice by necessity: once for the OS preference (only while
-   no explicit choice is stored) and once for the explicit data-theme choice. */
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]) {
-    --bg: #f7f7f8;
-    --surface: #ffffff;
-    --surface-hi: #f1f2f4;
-    --border: #e5e7eb;
-    --text: #1f2937;
-    --muted: #6b7280;
-    --accent: #f97316;
-    --accent-ink: #7c2d12;
-    --heat-1: color-mix(in srgb, var(--accent) 14%, #ffffff);
-    --heat-2: color-mix(in srgb, var(--accent) 30%, #ffffff);
-    --heat-3: color-mix(in srgb, var(--accent) 48%, #ffffff);
-    --heat-4: color-mix(in srgb, var(--accent) 68%, #ffffff);
-    --heat-5: color-mix(in srgb, var(--accent) 90%, #ffffff);
-    --heat-ink: #111827;
-    --git-modified: #b45309;
-    --git-staged: #047857;
-    --git-untracked: #6d28d9;
-  }
-}
-:root[data-theme="light"] {
-  --bg: #f7f7f8;
-  --surface: #ffffff;
-  --surface-hi: #f1f2f4;
-  --border: #e5e7eb;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --accent: #f97316;
-  --accent-ink: #7c2d12;
-  --heat-1: color-mix(in srgb, var(--accent) 14%, #ffffff);
-  --heat-2: color-mix(in srgb, var(--accent) 30%, #ffffff);
-  --heat-3: color-mix(in srgb, var(--accent) 48%, #ffffff);
-  --heat-4: color-mix(in srgb, var(--accent) 68%, #ffffff);
-  --heat-5: color-mix(in srgb, var(--accent) 90%, #ffffff);
-  --heat-ink: #111827;
-  --git-modified: #b45309;
-  --git-staged: #047857;
-  --git-untracked: #6d28d9;
-}
-
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; }
 /* Small-type baseline: 13px is the rem root, so every rem/em-sized rule —
@@ -110,7 +79,16 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
   color: var(--muted);
 }
 .app-nav a:hover { color: var(--text); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.app-nav span.is-locked { padding: 0.3rem 0.65rem; border-radius: 8px; color: var(--muted); }
 .app-who { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; }
+
+/* Signed out, the header is present and inert: the visitor sees the shape of the
+   place before being let into it. Colour alone would read as "low priority" —
+   the opacity reads as "not yours yet". Applies to the nav items, Actions, and
+   the start page's cards alike; it never applies to the brand or the user pill,
+   which are the two controls that DO work signed out. */
+.is-locked { opacity: 0.55; cursor: default; user-select: none; }
+.is-locked:hover { background: none; color: var(--muted); }
 
 /* The pane's back arrow (site.js): the page #content showed before this one — not
    the browser's history, which would reload the document and the terminal with it.
@@ -198,29 +176,17 @@ summary.user-glyph {
   color: var(--accent-ink);
 }
 summary.user-glyph svg { width: 1.15rem; height: 1.15rem; display: block; }
+/* Signed out the pill is the only live control in the header, so it must not
+   read as disabled — but it must read as empty: dashed ring, muted ink. */
+summary.user-glyph.is-anon { border-style: dashed; background: none; color: var(--muted); }
+summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--accent); }
 
-/* the theme slider: ◐ off = light, on = dark */
-.theme-switch { display: inline-flex; align-items: center; cursor: pointer; }
-.theme-switch input { position: absolute; opacity: 0; width: 0; height: 0; }
-.switch-track {
-  width: 2.6rem; height: 1.3rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  position: relative;
-  transition: background 0.15s ease;
-}
-.switch-knob {
-  position: absolute; top: 1px; left: 2px;
-  width: 1.1rem; height: 1.1rem;
-  border-radius: 50%;
-  background: #f7f7f8;                       /* sun side */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.4);
-  transition: left 0.15s ease, background 0.15s ease;
-}
-.theme-switch input:checked + .switch-track { background: color-mix(in srgb, var(--accent) 35%, var(--bg)); }
-.theme-switch input:checked + .switch-track .switch-knob { left: calc(100% - 1.2rem); background: #0f1115; }
-.theme-switch input:focus-visible + .switch-track { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Terminal state, read at a glance inside the user menu. The dot is the state;
+   the verb on the item is the act it offers (§ user pill). */
+.menu-state { display: inline-flex; align-items: center; gap: 0.35rem; float: right; }
+.dot { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--muted); }
+.dot.on { background: var(--ok); }
+.dot.off { background: var(--danger); }
 
 .pill {
   font-size: 0.72rem;
@@ -324,6 +290,27 @@ body.terminal-doc {
 .card-desc code { color: var(--accent); }
 .card-go { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--muted); transition: color 0.15s ease; }
 .card:hover .card-go { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  .card, .card:hover { transition: none; transform: none; }
+}
+/* A locked card keeps its box and its copy — the visitor should see exactly what
+   is behind the login — and trades the arrow for a padlock. It is a <span>, not
+   an <a>, so the element-typed hover rules above never reach it. */
+.card.is-locked .card-ic, .card.is-locked .card-title { color: var(--muted); }
+.card-lock { width: 0.9rem; height: 0.9rem; color: var(--muted); display: block; }
+
+/* ── The README, below the cards on the start page ───────────────────────── */
+.readme { margin-top: 0.8rem; }
+/* An eyebrow, not a heading: the README is the same page continuing, not a new
+   section competing with the hero. */
+.readme-eyebrow {
+  display: flex; align-items: center; gap: 0.7rem;
+  margin: 0 0 0.9rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--muted);
+}
+.readme-eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 
 /* ── Solutions century grids: square, as many per row as fit (§7) ────────── */
 /* auto-fill packs as many ~17rem tracks as the pane allows — ~3–4 on a normal
@@ -434,6 +421,13 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   border-left: 3px solid var(--accent);
   color: var(--muted);
 }
+/* The README's measure, scoped to the start page: it is read as prose, unlike
+   the reference docs, and the pane is only half the viewport wide. Left off
+   .doc-body itself so the docs/topics pages keep their current setting. */
+.readme .doc-body p, .readme .doc-body li { max-width: 68ch; }
+.readme .doc-body h2, .readme .doc-body h3 { margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
+.readme .doc-body > :first-child { margin-top: 0; }
+.readme .doc-body img { display: none; }   /* the badges: GitHub furniture, not site content */
 
 /* ── Editors ─────────────────────────────────────────────────────────────── */
 .editor-buffer {
@@ -485,11 +479,29 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #1f2937; font-weight: 600; }
 .btn-primary:hover { filter: brightness(1.08); }
 
-/* Auth forms rendered into the content pane (change password) — the auth pages'
-   own auth.css is not loaded in the shell, so mirror the input styling here. */
-.pane-form { display: flex; flex-direction: column; gap: 0.4rem; max-width: 26rem; }
-.pane-form label { font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem; }
-.pane-form input {
+/* ── The auth dialogue (right pane, signed out) ──────────────────────────── */
+/* Same surface, border and radius as the terminal it stands in for: the pane
+   does not change character when you sign in, only its occupant. The auth pages
+   are standalone public documents on their own routes — they render this shell
+   and fill this pane, which is the whole of "one layout, pre and post auth". */
+.auth-pane {
+  width: 100%; height: 100%;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+  overflow: auto;
+}
+.auth-card { width: 100%; max-width: 24rem; }
+.auth-card h1, .auth-card h2 { margin: 0 0 0.3rem; font-size: 1.25rem; }
+.auth-card .lead { margin: 0 0 1.1rem; color: var(--muted); font-size: 0.92rem; }
+
+/* The one form style, for the dialogue and the shell alike (change password
+   renders into the left pane). */
+.auth-form { display: flex; flex-direction: column; gap: 0.4rem; max-width: 26rem; }
+.auth-form label { font-size: 0.9rem; color: var(--muted); margin-top: 0.3rem; }
+.auth-form input:not([type="checkbox"]) {
   font: inherit;
   color: var(--text);
   background: var(--bg);
@@ -497,14 +509,58 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   border-radius: 8px;
   padding: 0.5rem 0.7rem;
 }
-.pane-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-.pane-form .btn { margin-top: 0.6rem; align-self: flex-start; }
+.auth-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.auth-form label.check {
+  display: flex; align-items: center; gap: 0.5rem;
+  color: var(--text); font-size: 0.95rem; margin: 0.5rem 0 0;
+}
+.auth-form .btn { margin-top: 0.7rem; align-self: flex-start; }
+.auth-form .btn-primary { padding: 0.6rem 1rem; }
+.auth-form button:disabled { opacity: 0.6; cursor: wait; }
+/* A form that is really just one more control under the form above it (the OTP
+   page's "send a fresh code"). */
+.auth-form.inline { margin-top: 0.75rem; }
+
+.auth-alt { margin: 0.9rem 0 0; font-size: 0.9rem; color: var(--muted); }
+/* A button that reads as a link: these switch the dialogue in place rather than
+   navigating, but the reader should not have to know that. */
+.linkish {
+  background: none; border: 0; padding: 0;
+  color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer;
+}
+/* The one thing worth saying on a login box (that the password never leaves the
+   browser) gets the mono utility face, below the form rather than above it. */
+.auth-note {
+  margin: 1.2rem 0 0; padding-top: 0.9rem;
+  border-top: 1px solid var(--border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem; line-height: 1.5; color: var(--muted);
+}
+.auth-note b { color: var(--accent-ink); font-weight: 600; }
+
+.flash { border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.92rem; margin: 0.5rem 0; }
+.flash-error { background: var(--error-bg); color: var(--error-fg); }
+.flash-notice { background: var(--notice-bg); color: var(--notice-fg); }
+
+/* The inline Terms of use on the registration page (strong acceptance: the text
+   is read on the page it is accepted on) and the standalone /terms rendering. */
+.terms-box {
+  max-height: 14rem; overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.25rem 0.9rem;
+  font-size: 0.9rem;
+}
+.terms-box a, .terms-text a { color: var(--accent); }
+.back-row { margin: 0 0 0.4rem; }
+.back-link { color: var(--muted); font-size: 0.9rem; text-decoration: none; }
+.back-link:hover { color: var(--accent); }
 
 .status { padding: 0.4rem 0.8rem; border-radius: 8px; border: 1px solid var(--border); }
 .status.ok  { border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); color: var(--accent-ink);
               background: color-mix(in srgb, var(--accent) 12%, transparent); }
-.status.err { border-color: #b91c1c; color: #fca5a5; background: color-mix(in srgb, #b91c1c 14%, transparent); }
-:root[data-theme="light"] .status.err { color: #b91c1c; }
+.status.err { border-color: #b91c1c; color: var(--error-fg); background: color-mix(in srgb, #b91c1c 14%, transparent); }
 
 .diagnostics { list-style: none; padding: 0; margin: 0 0 0.8rem; font-size: 0.86rem; }
 .diagnostics li { padding: 0.15rem 0; }
@@ -513,18 +569,99 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 .diag-warning .diag-sev { color: var(--accent); }
 
 /* ── Account ─────────────────────────────────────────────────────────────── */
-dl.account { display: grid; grid-template-columns: max-content 1fr; gap: 0.4rem 1.2rem; }
+dl.account { display: grid; grid-template-columns: max-content 1fr; gap: 0.55rem 1.2rem; align-items: baseline; }
 dl.account dt { color: var(--muted); }
-dl.account dd { margin: 0; }
-.perm-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+dl.account dd { margin: 0; min-width: 0; }
+.hint { display: block; margin-top: 0.15rem; font-size: 0.82rem; color: var(--muted); }
+
+/* The identity block: who you are, at the size the question deserves. */
+.acct-head { display: flex; align-items: center; gap: 1rem; }
+.acct-glyph {
+  width: 3.2rem; height: 3.2rem; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent-ink);
+}
+.acct-glyph svg { width: 1.8rem; height: 1.8rem; }
+.acct-id { min-width: 0; }
+.acct-id h1 { margin: 0; font-size: 1.25rem; overflow-wrap: anywhere; }
+.acct-sub { margin: 0.25rem 0 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+/* The ladder, as a ladder: four rungs, yours lit. This encodes the real shape of
+   the model — ordered, and you are at a point on it — which a bare pill does not.
+   Rungs below yours are filled because you hold them too: the ladder is
+   cumulative, and a reader who sees only their own rung lit would misread it. */
+.ladder { display: flex; gap: 2px; margin: 1rem 0 0; }
+.rung {
+  flex: 1; padding: 0.4rem 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--muted); text-align: center;
+}
+.rung:first-child { border-radius: 7px 0 0 7px; }
+.rung:last-child { border-radius: 0 7px 7px 0; }
+.rung.below { background: var(--heat-2); color: var(--text); border-color: transparent; }
+.rung.here { background: var(--heat-4); color: var(--heat-ink); font-weight: 700; border-color: transparent; }
+.ladder-note { margin: 0.5rem 0 0; font-size: 0.85rem; color: var(--muted); }
+
+/* State as a shape, not a sentence: scannable in one pass. */
+.state-row { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.9rem; }
+.state-pill {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.78rem; font-weight: 600;
+  padding: 0.15rem 0.55rem; border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.state-pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
+.state-pill.warn { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+
+.pubkey {
+  display: block; padding: 0.4rem 0.6rem;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+  font-size: 0.78rem; overflow-x: auto; white-space: nowrap;
+}
+.secret-list { list-style: none; padding: 0; margin: 0 0 0.6rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.secret-list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
+  padding: 0.3rem 0.6rem;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
+}
+.secret-list code { color: var(--accent-ink); }
+.btn-danger { color: var(--danger); border-color: transparent; background: none; font-size: 0.85rem; }
+.btn-danger:hover { border-color: var(--danger); }
+.vault-form { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.vault-form input {
+  flex: 1; min-width: 8rem;
+  font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+}
+.vault-form input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.vault-form.inline { display: inline-flex; }
+/* The vault-unlock failure (site.js fills #vault-recover-error). It sits inside
+   the form's flex row, so it reads as that form's answer rather than the panel's. */
+.form-error { align-self: center; font-size: 0.85rem; color: var(--danger); }
+
+.tool-row {
+  display: flex; align-items: center; gap: 0.7rem;
+  padding: 0.55rem 0; border-top: 1px solid var(--border);
+}
+.tool-row:first-of-type { border-top: 0; }
+.tool-name { font-weight: 600; }
+.tool-hint { margin-left: auto; font-size: 0.82rem; color: var(--muted); }
 
 /* ── The terminal (right pane) ───────────────────────────────────────────── */
-/* xterm renders into #term. The host is **dark in both site themes** — not an
-   oversight: it shows the shell's own output, and the shell paints with absolute
-   xterm-256 indices picked for a dark terminal (see terminal.js). The colour is
-   the site's dark --surface, literally, so it is the same surface even when the
-   page around it is light. The small pad keeps the first glyph column off the
-   pane border. */
+/* xterm renders into #term. The host is pinned to the literal dark --surface
+   rather than the token: it shows the shell's own output, and the shell paints
+   with absolute xterm-256 indices picked for a dark terminal (see terminal.js).
+   The site is dark-only now, so the two agree — but the terminal's darkness is
+   the shell's constraint, not the site's choice, and it must not drift if the
+   palette ever moves. The small pad keeps the first glyph column off the pane
+   border. */
 .term-host {
   height: 100%;
   padding: 0.35rem 0.2rem 0.2rem 0.45rem;

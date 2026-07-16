@@ -1,0 +1,88 @@
+{# The start page's left pane — the ONE source for both tiers (web-server-guide § The site).
+   The content service renders it for a signed-in visitor; the auth service renders
+   the very same partial behind its sign-in dialogue, which is what makes the
+   signed-out page the same page rather than a lookalike.
+
+   `subject` is the only switch. Signed in: live cards, and the count. Signed out:
+   the same boxes with the same copy, inert, and no count — the auth service has no
+   clone and no problems.json, so it cannot know it, and inventing a number that
+   drifts from the truth is worse than not saying it.
+
+   Context: `subject` (or undefined), `solved` + `total` (signed in only),
+   `readme_html` (content.readme_html(), pre-rendered and trusted — our own file). #}
+<header class="hero">
+  {# Derived from the opening of Blake's "Auguries of Innocence" ("To see a World
+     in a Grain of Sand") — the same quatrain the crypto master-key verify text
+     uses (solver/crypto/config.py). #}
+  <p class="kicker">to hold infinity in the folds of your mind, and eternity in an hour</p>
+  <h1>Project Euler workspace</h1>
+  {% if subject %}
+  <p class="lede">{{ solved }} of {{ total }} problems down.
+     The remaining {{ total - solved }} are not going to solve themselves —
+     though once you drop into the shell, what you solve is solving you.</p>
+  {% else %}
+  <p class="lede">Sign in on the right to open the shell, read the notes, and edit the
+     solutions — or read on, the story is public.</p>
+  {% endif %}
+</header>
+
+{% macro card(href, glyph, title, desc) %}
+  {% if subject %}
+  <a class="card" href="{{ href }}" hx-get="{{ href }}" hx-target="#content"
+     hx-swap="innerHTML" hx-push-url="true">
+    <span class="card-ic">{{ glyph }}</span>
+    <span><span class="card-title">{{ title }}</span>
+      <span class="card-desc">{{ desc }}</span></span>
+    <span class="card-go">&rarr;</span>
+  </a>
+  {% else %}
+  {# A <span>, not a disabled <a>: there is no link here to follow, and the
+     element-typed hover rules in site.css never reach it. The copy stays — the
+     visitor should see exactly what is behind the login. #}
+  <span class="card is-locked">
+    <span class="card-ic">{{ glyph }}</span>
+    <span><span class="card-title">{{ title }}</span>
+      <span class="card-desc">{{ desc }}</span></span>
+    <svg class="card-lock" viewBox="0 0 24 24" role="img" aria-label="sign in to open">
+      <path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0
+        0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5Zm-3 5a3 3 0 1
+        1 6 0v3H9V6Z"/></svg>
+  </span>
+  {% endif %}
+{% endmacro %}
+
+<nav class="cards cards-1" aria-label="Start here">
+  {{ card('/solutions/', 'π', 'Solutions',
+          'Every problem as a century grid — the orange ones are victories.') }}
+  {{ card('/docs/', '§', 'Docs',
+          'The guides. Read one, ignore the rest, feel briefly invincible.') }}
+  {{ card('/topics/', 'λ', 'Topics',
+          'The mathematics behind the problems, written down before it was forgotten.') }}
+  {% if subject %}
+  <span class="card">
+    <span class="card-ic">&#10095;</span>
+    <span><span class="card-title">Terminal</span>
+      <span class="card-desc">The solver shell, in the right pane — connected and waiting.</span></span>
+  </span>
+  {% else %}
+  <span class="card is-locked">
+    <span class="card-ic">&#10095;</span>
+    <span><span class="card-title">Terminal</span>
+      <span class="card-desc">A real solver shell, in the right pane. Yours once you sign in.</span></span>
+    <svg class="card-lock" viewBox="0 0 24 24" role="img" aria-label="sign in to open">
+      <path fill="currentColor" d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0
+        0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5Zm-3 5a3 3 0 1
+        1 6 0v3H9V6Z"/></svg>
+  </span>
+  {% endif %}
+</nav>
+
+{# The README, continuing the same page. `readme_html` is our own packaged file
+   rendered by content.render_markdown — not user input — so it is marked safe
+   deliberately, exactly as the docs/topics pages mark their rendered bodies. #}
+{% if readme_html %}
+<section class="readme">
+  <p class="readme-eyebrow">readme</p>
+  <div class="doc-body">{{ readme_html | safe }}</div>
+</section>
+{% endif %}

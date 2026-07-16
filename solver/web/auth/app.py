@@ -37,9 +37,10 @@ import aiohttp_jinja2
 import jinja2
 from aiohttp import web
 
-from solver.auth import Authorizations
+from solver.auth import Authorizations, Subject
 from solver.auth.identity import system_slug
 from solver.web.auth import policy
+from solver.web.site import content
 from solver.web.csp import csp_middleware
 from solver.web.auth.config import AuthConfig
 from solver.web.auth.mail import Mailer
@@ -378,15 +379,41 @@ def build_public_app(service: AuthService) -> web.Application:
         log.info('shell ticket redeemed for %s', email)
         return web.json_response({'email': email, 'profile': profile})
 
+    async def shell_context(request: web.Request) -> dict[str, Any]:
+        """The app shell's own context, for every page this service renders.
+
+        The auth pages are standalone public documents, but they are not a separate
+        place: they render the content service's ``base.html`` / ``_nav.html`` /
+        ``_home.html``, so this service must supply what those templates read.
+
+        - ``subject`` — the header's switch. ``None`` on the signed-out pages, which
+          is exactly what renders the header and the start page's cards inert. It is
+          **presentational only**: this service's own routes gate on
+          ``session_identity`` directly, never on this. It is built here so that the
+          two pages a *signed-in* visitor can still land on (``/terms``,
+          ``/password``, both deep-link fallbacks) show them their own header rather
+          than an invitation to sign in.
+        - ``readme_html`` — the start page's README, rendered from the packaged copy
+          (cached), since this uid has no clone to read one from.
+        """
+        identity = service.session_identity(request)
+        subject = None
+        if identity is not None:
+            email, profile = identity
+            subject = Subject(user=email, slug=system_slug(email), channel='web',
+                              auth_method='session-cookie', profile=profile)
+        return {'subject': subject, 'readme_html': content.readme_html()}
+
     app = web.Application(
         middlewares=[csp_middleware, aiohttp_jinja2.context_processors_middleware])
     # Templates ship as package data: solver/web/templates, autoescape on.
-    # The content service's partials come second: /terms is an auth route that the
-    # shell swaps into its own left pane, so its fragment must wear the shell's
-    # chrome — and the chrome has one source of truth (site/templates/_crumbs.html,
-    # _actions.html), not a copy here that silently drifts from it.
-    # request_processor puts the live request in every template's context — base.html's
-    # footer needs its own path (?back=) to send the terms page's reader back here.
+    # The content service's templates come second, and that ordering is the design:
+    # this service renders the *shell* (base.html, _nav.html, _home.html, the crumbs
+    # and actions partials) from site/templates, and overrides nothing — there is one
+    # source of truth for the chrome, not a copy here that silently drifts from it.
+    # Its own dir holds only what is genuinely auth's: the dialogues and auth_base.html.
+    # request_processor puts the live request in every template's context — the terms
+    # page's footer needs its own path (?back=) to send its reader back here.
     web_dir = Path(__file__).resolve().parent.parent
     aiohttp_jinja2.setup(
         app,
@@ -394,7 +421,7 @@ def build_public_app(service: AuthService) -> web.Application:
             jinja2.FileSystemLoader(str(web_dir / 'templates')),
             jinja2.FileSystemLoader(str(web_dir / 'site' / 'templates')),
         ]),
-        context_processors=[aiohttp_jinja2.request_processor])
+        context_processors=[aiohttp_jinja2.request_processor, shell_context])
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/auth/check', check),

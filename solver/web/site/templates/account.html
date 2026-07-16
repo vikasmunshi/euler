@@ -1,21 +1,55 @@
 {% extends "base.html" %}
-{% block title %}ς euler — account{% endblock %}
+{% block title %}euler — account{% endblock %}
 {% block content %}
+{# The account page: who you are, what you hold, and the two things only you can
+   change (your secrets, your password). Four panels, in the order the questions
+   get asked. #}
 <section class="panel">
-  <h1>Account</h1>
-  {% if subject %}
-  <dl class="account">
-    <dt>Signed in as</dt><dd><strong>{{ subject.user or 'anon' }}</strong></dd>
-    <dt>Profile</dt><dd><span class="pill pill-{{ subject.profile }}">{{ subject.profile }}</span>
-      <span class="hint">commands and pages are gated by this rung alone
-        (reader&nbsp;→ contributor&nbsp;→ maintainer&nbsp;→ admin)</span></dd>
-  </dl>
-  {% endif %}
+  <div class="acct-head">
+    <span class="acct-glyph">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
+        d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z"/></svg>
+    </span>
+    <div class="acct-id">
+      <h1>{{ subject.user or 'anon' }}</h1>
+      {# The slug is not trivia: it names the system user, home and clone that are
+         yours alone — the thing that makes your keys yours. #}
+      <p class="acct-sub muted">
+        <code>{{ subject.slug }}</code>
+        <span>— your system user, home, and clone</span>
+      </p>
+    </div>
+  </div>
+  {# The ladder as a ladder: it is ordered, cumulative, and you are at a point on
+     it — none of which a lone pill says. Rungs at or below yours are lit because
+     you hold them all; the rungs above are what you do not. LADDER is the kernel's
+     own tuple (solver/auth/subject.py), so this cannot drift from the real model. #}
+  <div class="ladder" role="img"
+       aria-label="profile: {{ subject.profile }} — rung {{ ladder.index(subject.profile) + 1 }} of {{ ladder | length }}">
+    {% for rung in ladder %}
+    {% if rung == subject.profile %}
+    <span class="rung here">{{ rung }}</span>
+    {% elif loop.index0 < ladder.index(subject.profile) %}
+    <span class="rung below">{{ rung }}</span>
+    {% else %}
+    <span class="rung">{{ rung }}</span>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <p class="ladder-note">Commands and pages are gated by this rung alone.</p>
 </section>
-{# The per-user credential panel: filled by the per-user service's
-   /account/vault fragment. On the dormant per-profile service that route does
-   not exist and the placeholder text simply stays. #}
+
+{# The per-user credential panel: filled by the per-user service's /account/vault
+   fragment. On a service without that route the placeholder simply stays. #}
 <section class="panel" id="vault-panel" hx-get="/account/vault" hx-trigger="load">
-  <p class="hint">credential panel unavailable</p>
+  <h2>Credentials</h2>
+  <p class="muted">Loading your vault…</p>
 </section>
+
+<section class="panel">
+  {# The same form as /password and its fragment — one partial, three renderings. #}
+  {% include "_password_form.html" %}
+</section>
+<script src="/assets/srp.js" defer></script>
+<script src="/assets/password.js" defer></script>
 {% endblock %}

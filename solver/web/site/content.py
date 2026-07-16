@@ -15,13 +15,14 @@ from __future__ import annotations
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'git_status',
-           'list_docs', 'read_doc', 'list_topics', 'read_topic', 'read_about',
+           'list_docs', 'read_doc', 'list_topics', 'read_topic', 'read_about', 'readme_html',
            'parse_progress', 'save_progress']
 
 import json
 import mimetypes
 import re
 import subprocess
+from functools import cache
 from pathlib import Path
 from typing import Any, NamedTuple
 
@@ -456,6 +457,40 @@ _README_MD = 'README.md'
 _README_VIEWABLE = frozenset({'docs', 'about', 'solutions'})
 #: Where a README link the viewer cannot serve goes instead — the source of truth.
 README_REPO_BASE = 'https://github.com/vikasmunshi/euler/blob/master/'
+
+#: The **packaged** README — setup.py's build_py hook copies the root README.md
+#: here at build time, so it ships inside the distribution (pyproject package-data).
+#:
+#: The start page renders THIS copy in both tiers, while `/docs/readme` and
+#: `/about/readme` keep reading the clone's. That is not an inconsistency, it is
+#: the two contracts: the docs viewer shows *this clone's* docs (a contributor
+#: editing them must see their own edit), whereas the start page is chrome — it is
+#: served by the auth tier too, which runs from /opt/euler with ProtectHome=true
+#: and has no clone to read, and it must say the same thing to everyone whatever
+#: branch they are on.
+_PACKAGED_README = Path(__file__).resolve().parent.parent / 'content' / 'README.md'
+
+
+@cache
+def readme_html() -> str:
+    """The packaged README rendered for the start page, or ``''`` if unbuilt.
+
+    Cached for the process's life: the file is package data, so it cannot change
+    without a reinstall, and a reinstall restarts the services. The start page is
+    the most-hit route in both tiers and this is the only markdown parse on it —
+    doing it once per process rather than once per request.
+
+    Empty is a deliberate degradation, not an error: an unbuilt tree (a developer
+    who has never run an install) still gets a working start page, just without
+    the README under its cards. setup.py raises if the *source* is missing, so a
+    real build can never silently ship without it.
+    """
+    try:
+        text = _PACKAGED_README.read_text(encoding='utf-8')
+    except OSError:
+        return ''
+    return render_markdown(text, repo_base=README_REPO_BASE)
+
 
 #: The AI reference sources composed into the `ai` doc. They live under `solver/`
 #: — outside the content ACLs — so each is read best-effort (see `_ai_section`).

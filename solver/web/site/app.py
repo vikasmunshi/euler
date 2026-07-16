@@ -33,7 +33,7 @@ import aiohttp_jinja2
 import jinja2
 from aiohttp import web
 
-from solver.auth import Authorizations, Subject, slugify
+from solver.auth import LADDER, Authorizations, Subject, slugify
 from solver.web.csp import csp_middleware
 from solver.web.site import content
 from solver.web.site.config import SiteConfig
@@ -203,11 +203,18 @@ async def terminal(request: web.Request) -> web.StreamResponse:
 
 @requires(VIEW)
 async def home(request: web.Request) -> web.StreamResponse:
-    """The landing — the default ``#content`` (full shell on a direct visit)."""
+    """The landing — the default ``#content`` (full shell on a direct visit).
+
+    The pane is ``_home.html``, the same partial the auth service renders behind
+    its sign-in dialogue: one start page, signed in or out. Its README comes from
+    the **packaged** copy rather than this clone's, so it reads the same on every
+    collaborator's branch (content.readme_html).
+    """
     problems = content.load_problems(request.app[CONFIG_KEY].repo_root)
     solved = sum(1 for p in problems.values() if p.solved)
     return render(request, 'home.html', {
         'solved': solved, 'total': len(problems),
+        'readme_html': content.readme_html(),
         'crumbs': [('home', None)],
     }, block='content')
 
@@ -410,8 +417,15 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def account(request: web.Request) -> web.StreamResponse:
-    """``GET /account`` — the signed-in user + profile (from X-User / X-Profile)."""
+    """``GET /account`` — identity, the ladder, credentials, and the password form.
+
+    ``ladder`` is the kernel's own tuple, so the rendered rungs cannot drift from
+    the model the checks actually use. ``email`` feeds the shared password partial
+    (the same one /password renders).
+    """
     return render(request, 'account.html', {
+        'ladder': LADDER,
+        'email': _subject(request).user,
         'crumbs': [_HOME, ('account', None)],
     }, block='content')
 

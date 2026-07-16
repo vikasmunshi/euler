@@ -101,5 +101,11 @@ include = ["solver*"]
 
 [tool.setuptools.package-data]
 solver = ["*.html"]
-"solver.web" = ["templates/*.html"]  # Jinja pages ship inside the deployed venv
+"solver.web" = [
+    "templates/*.html",      # Jinja pages ship inside the deployed venv
+    # The start page's README. A build artifact copied from the root README.md by
+    # setup.py's build_py hook — root stays the source of truth. It ships because
+    # euler-auth renders the start page from /opt/euler with no clone to read.
+    "content/README.md",
+]
 "solver.web.site" = ["templates/*.html"]  # content-service pages (Phase 5)

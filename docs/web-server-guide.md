@@ -702,7 +702,7 @@ pane scrolls its own overflow.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs… │ ◐ │ 🯅 │  fixed
+│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs…      │ 🯅 │  fixed
 ├──────────────────────────────────────┬───────────────────────────────────────┤
 │  LEFT PANE  (#content)                │  RIGHT PANE  (#ws)                    │
 │  navigable content, htmx-swapped;     │  the solver PTY terminal over /ws     │  equal
@@ -714,12 +714,18 @@ pane scrolls its own overflow.
 
 - **Header** — one control surface, identical on every page: the brand (→ `/`), primary
   nav, the **Actions** menu (page-specific verbs, always present even when empty), a
-  **back arrow**, **breadcrumbs**, the **theme slider**, and the **user glyph** (Account,
-  Change password, Logout).
+  **back arrow**, **breadcrumbs**, and the **user glyph** (Account, the terminal
+  connect/disconnect item, Logout).
 
   The back arrow is not redundant with the browser's. The browser's back navigates the
   *document* and would take the terminal with it, so the pane keeps a history of its own
   and performs a swap, not a navigation.
+
+  The terminal item is **one** entry, not two: it names the act it offers
+  ("Disconnect terminal") and the dot beside it carries the state. The iframe reports
+  `{euler: 'term-state', connected}` on every open and close, and the menu follows it —
+  so a session that drops on its own never leaves the menu offering to disconnect
+  something already gone.
 - **Left pane `#content`** — the navigable region. Links `hx-get` a route and swap it
   here; `hx-push-url` updates the URL, so every view is deep-linkable.
 - **Right pane `#ws`** — a same-origin **iframe** onto `/terminal`, its own document.
@@ -734,6 +740,42 @@ pane scrolls its own overflow.
 independent scroll containers (`min-height: 0`). Controls never move between pages; only
 pane content changes.
 
+**One layout, signed out and signed in.** The auth service's pages are standalone public
+documents on their own routes, but they are not a separate place: they render this same
+`base.html` (its own `base.html` is gone, and its ChoiceLoader takes `web/templates`
+first, then `site/templates`). The split is the two panes:
+
+- the **left pane** is the start page — `_home.html`, the one partial both tiers render;
+- the **right pane** holds the sign-in dialogue, standing exactly where the terminal will.
+
+`subject` is the only switch. Signed out the header is *present and inert* (55% opacity):
+the visitor sees the shape of the place before being let into it. The brand and the user
+pill stay live — they are the two controls that still do something (home, and the way in),
+and the pill reads as *empty*, a dashed ring, never as disabled. The start page's cards
+keep their boxes and their copy, as `<span>`s with a padlock where the arrow goes, because
+a visitor should see exactly what is behind the login. The solved count is **not** shown
+signed out: the auth service has no clone and no `problems.json`, so it cannot know it.
+
+The auth tier builds a `subject` from its session cookie (`shell_context` in `auth/app.py`)
+purely so the header renders correctly on the two pages a signed-in visitor can still land
+on — `/terms` and `/password`, both deep-link fallbacks. It is **presentational only**:
+that service's routes gate on `session_identity`, never on it.
+
+Signed out, `base.html`'s `shell_assets` block is overridden away: no htmx and no MathJax.
+Nothing swaps and nothing carries TeX, and a login box has no business pulling a megabyte
+of typesetter. `/about/license` and `/about/acknowledgements` sit behind `forward_auth`,
+so the footer dims them signed out rather than offering links that bounce to `/login`;
+`/terms` is an auth route and public, so it stays live.
+
+**The README** is rendered below the cards on the start page, in both tiers. It comes from
+the **packaged** copy — `setup.py`'s `build_py` hook copies the root `README.md` to
+`solver/web/content/README.md` at build time (gitignored; root stays the source of truth),
+and `pyproject.toml` ships it as package data. Both tiers read that copy, cached per
+process: `euler-auth` runs from `/opt/euler` with `ProtectHome=true` and has no clone to
+read, and the start page must say the same thing whatever branch a collaborator is on.
+`/docs/readme` and `/about/readme` still read the clone's — that is the docs viewer's
+contract (a contributor editing docs must see their own edit), not an inconsistency.
+
 ### 11.2 Visual identity
 
 **The brand is Euler's identity, `e^iπ + 1 = 0`.** The glyph and favicon are its
@@ -741,32 +783,43 @@ geometric reading on the unit circle: the upper semicircle from `1` to `−1` (t
 by `π`) plus the unit segment from `−1` back to `0`, a two-stroke SVG in accent orange.
 The wordmark is the formula itself, not the word "euler".
 
-**Dark-first, with a remembered slider.** Light is offered via `prefers-color-scheme` and
-a header switch; an explicit choice is stamped as `data-theme` on `<html>` and remembered
-in `localStorage` before first paint.
+**Dark only.** There is no light palette and no theme control: the dark ground is the
+design, not a preference. (There was a remembered slider; it was removed with the
+signed-out redesign, along with `auth.css`.)
 
-| token | dark (primary) | light |
-|---|---|---|
-| `--bg` | `#0f1115` | `#f7f7f8` |
-| `--surface` | `#171a21` | `#ffffff` |
-| `--border` | `#2a2f3a` | `#e5e7eb` |
-| `--text` | `#e5e7eb` | `#1f2937` |
-| `--muted` | `#9ca3af` | `#6b7280` |
-| `--accent` | `#f97316` | `#f97316` |
+| token | value |
+|---|---|
+| `--bg` | `#0f1115` |
+| `--surface` | `#171a21` |
+| `--surface-hi` | `#1f2430` |
+| `--border` | `#2a2f3a` |
+| `--text` | `#e5e7eb` |
+| `--muted` | `#9ca3af` |
+| `--accent` | `#f97316` |
+| `--accent-ink` | `#fed7aa` |
 
-Theme-sensitive detail colours (grid heat, file git status) are tokens too, with distinct
-values per theme — a light background needs stronger mixes than a dark one.
+Detail colours are tokens too: grid heat (`--heat-1…5`), file git status, and a semantic
+set kept separate from the accent — `--ok` / `--danger` for state pills and destructive
+verbs, `--error-*` / `--notice-*` for the auth flashes.
+
+**`site.css` is the site's only stylesheet**, loaded by both tiers, and Caddy serves it
+from `/assets` *ahead of* `forward_auth` (`frontend.sh`) — so a signed-out page needs no
+session to be styled. There is no app service in the path for static assets. (There were
+two stylesheets, `site.css` and `auth.css`, duplicating the same tokens; collapsing them
+is what makes one layout possible. The two form styles collapsed with them: `.auth-form`
+is the one, and `.pane-form` is gone.)
 
 Everything is self-contained and same-origin: no external fonts or CDNs, a system font
 stack, vendored htmx and MathJax from `/vendor`. Statements and notes carry math as TeX
 text (`$…$`); MathJax typesets on load and after every swap.
 
-**The terminal is dark in both themes** — the one surface that ignores the slider. It
-renders the *shell's own* output, and the shell paints with absolute xterm-256 indices
-chosen for a dark terminal (near-whites like 254/247, 238 for rules). On a light
-background its banner and prompt wash out to illegible. Re-theming the surface without
-re-tuning the shell's palette would only break the contrast the shell already designs
-for, so the pane keeps the dark `--surface` literally and reads as an embedded console.
+**The terminal pins its own dark**, in literal hex rather than the tokens. It renders the
+*shell's own* output, and the shell paints with absolute xterm-256 indices chosen for a
+dark terminal (near-whites like 254/247, 238 for rules). Its darkness is the shell's
+constraint, not the site's choice — the site being dark-only means the two agree today,
+but the pane must not start following a palette the shell's ANSI indices know nothing
+about. The values are the dark tokens, so it reads as an embedded console, not a foreign
+surface.
 
 ### 11.3 Writing style
 
@@ -789,6 +842,15 @@ rendered guides themselves:
 | **Auth service** | `/login`, `/register*`, `/reset*`, `/forgot`, `/password`, `/terms`, `/auth/*` |
 | **Per-user service** | everything else, including `/ws` |
 
+The static row is why one stylesheet is enough: `/assets/*` and `/vendor/*` are `handle`d
+by Caddy *above* the `forward_auth` block, so the signed-out pages load the same
+`site.css` as the shell with no session and no app service in the path.
+
+The auth service's pages render the **shell** (`base.html`, `_nav.html`, `_home.html`, the
+crumbs and actions partials) from `site/templates` and override none of it — the chrome
+has one source of truth, not a copy that drifts. Its own `templates/` dir holds only what
+is genuinely auth's: `auth_base.html` and the dialogues.
+
 ### 11.5 Routes
 
 A **fragment** is what an `hx-get`/`hx-post` renders into `#content`; a **direct** hit on
@@ -797,7 +859,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 
 | Method | Path | Renders | Floor |
 |---|---|---|---|
-| GET | `/` | the app shell; left pane = landing, right pane = the `/terminal` iframe | reader |
+| GET | `/` | the app shell; left pane = landing (`_home.html` + README), right pane = the `/terminal` iframe | reader |
 | GET | `/terminal` | the right pane's standalone document: xterm.js + the `/ws` client | reader |
 | GET | `/solutions/` | `problems.json` as 10×10 century grids + summary | reader |
 | GET | `/solutions/{n}/` | statement, then test cases · results · files · notes | reader |
@@ -806,7 +868,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/docs/file/{path}` | a doc-referenced repo file, from the readable roots only | reader |
 | GET | `/topics/` · `/topics/{name}` | topics index · a topic page | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
-| GET | `/account` | the signed-in user, profile, display name, and credential panel | reader |
+| GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
 | GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save | contributor |
 | GET/POST | `/edit/solutions/{n}/{filename}` | file editor → save | contributor |
 | DELETE | `/edit/solutions/{n}/{filename}` | delete a bare `.py`/`.c` → the problem-page fragment | maintainer |
@@ -828,12 +890,22 @@ floor is the boundary**.
 ### 11.6 Content pages
 
 - **Landing, docs index, topics index** — a short hero over a **card grid**. The landing
-  stacks its entry points one per row (Solutions · Docs · Topics · Terminal); the indexes
-  list two or three per row, showing the filename as the first line and the markdown `#`
-  title as the second, sorted by filename.
+  stacks its entry points one per row (Solutions · Docs · Topics · Terminal), then the
+  **README** below them under a mono eyebrow — an eyebrow rather than a heading, because
+  the README is the same page continuing, not a new section competing with the hero. The
+  indexes list two or three per row, showing the filename as the first line and the
+  markdown `#` title as the second, sorted by filename.
+- **Account** — identity (email, and the slug that names the system user, home and clone
+  that are theirs alone), then the **profile ladder**: the four rungs with theirs lit and
+  the ones below it filled, because the ladder is cumulative and a reader who saw only
+  their own rung lit would misread it. `LADDER` is the kernel's own tuple, so the rendered
+  rungs cannot drift from the model the checks use. Then the credential panel (the
+  per-user service's `/account/vault` fragment) and the password form. Changing a password
+  lives here rather than in the user menu: it is an account thing, and the menu is for
+  getting places.
 - **Solutions** — the 10×10 century grids: square cells (and so square grids, via
   `aspect-ratio`), packed as many per row as fit (`auto-fill`), shaded by difficulty with
-  per-theme heat tokens, title and pct on hover.
+  the heat tokens, title and pct on hover.
 - **Progress upload** — an **empty** paste buffer, because this is a *replace*, not an
   edit: the previous `.progress.html` is superseded wholesale, parse-or-reject before
   anything lands.

@@ -1,8 +1,8 @@
-{% extends "base.html" %}
+{% extends "auth_base.html" %}
 {% block title %}euler — sign in{% endblock %}
-{% block content %}
+{% block dialogue %}
   <h1>Sign in</h1>
-  <p class="lead">Zero-knowledge login (SRP): your password never leaves this browser.</p>
+  <p class="lead">The shell, the notes and the editor are on the other side of this form.</p>
   <form id="login-form" class="auth-form" method="post" action="#" novalidate>
     <label for="email">Email</label>
     <input id="email" name="email" type="email" autocomplete="username" required autofocus>
@@ -10,13 +10,18 @@
     <input id="password" name="password" type="password" autocomplete="current-password" required>
     <label class="check"><input id="remember" name="remember" type="checkbox"> Remember me on this device</label>
     <p id="form-error" class="flash flash-error" role="alert" hidden></p>
-    <button id="submit-btn" type="submit">Sign in</button>
+    <button id="submit-btn" class="btn btn-primary" type="submit">Sign in</button>
   </form>
-  <p class="muted"><a href="/forgot">Forgot your password?</a></p>
+  <p class="auth-alt"><a href="/forgot">Forgot your password?</a></p>
   <noscript><p class="flash flash-error">Signing in requires JavaScript (the SRP handshake runs in your browser).</p></noscript>
+  {# The one thing worth saying on a login box. #}
+  <p class="auth-note"><b>SRP-6a.</b> Your password is never sent — the browser proves it
+    knows the password without handing it over. The server has never seen it, and so
+    cannot leak it.</p>
 {% endblock %}
+{# vault.js is already in the shell's <head> (base.html) — only this page's own
+   SRP handshake is loaded here. #}
 {% block scripts %}
   <script src="/assets/srp.js" defer></script>
-  <script src="/assets/vault.js" defer></script>
   <script src="/assets/login.js" defer></script>
 {% endblock %}

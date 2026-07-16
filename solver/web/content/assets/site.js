@@ -1,12 +1,12 @@
 /* Shell chrome behaviour (web-server-guide § The site) — same-origin, CSP-clean, no deps.
-   Loaded without defer from <head> so a stored data-theme applies before first
-   paint; everything else is wired on DOMContentLoaded / delegated clicks. */
+   Loaded from <head> without defer so the MathJax config below is in place before
+   the deferred typesetter reads it; everything else is wired on DOMContentLoaded
+   or delegated clicks.
+
+   Loaded by both tiers: the signed-out pages render the same shell, where the
+   hooks below simply find nothing to bind (no editors, no terminal, no vault). */
 (function () {
   'use strict';
-  var root = document.documentElement;
-  var stored = null;
-  try { stored = localStorage.getItem('theme'); } catch (e) { /* private mode */ }
-  if (stored === 'light' || stored === 'dark') { root.dataset.theme = stored; }
 
   // MathJax v3 config — this file loads before the deferred /vendor/mathjax
   // bundle, so the loader reads it on init. Statements and notes carry TeX as
@@ -21,27 +21,6 @@
     // renders at exactly the surrounding font size, every client, every load.
     chtml: { scale: 1, matchFontHeight: false }
   };
-
-  function currentTheme() {
-    return root.dataset.theme ||
-      (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-  }
-
-  document.addEventListener('DOMContentLoaded', function () {
-    // The header slider: checked = dark (the primary design), remembered per user.
-    var toggle = document.getElementById('theme-toggle');
-    if (!toggle) { return; }
-    toggle.checked = currentTheme() === 'dark';
-    toggle.addEventListener('change', function () {
-      var next = toggle.checked ? 'dark' : 'light';
-      root.dataset.theme = next;
-      try { localStorage.setItem('theme', next); } catch (e) { /* private mode */ }
-      // The terminal deliberately does *not* follow the slider (terminal.js): it
-      // renders the shell's own dark-tuned ANSI palette, so it stays a dark panel
-      // in both themes. Nothing to mirror into the iframe — and nothing to reload,
-      // which is what would cost the session.
-    });
-  });
 
   // Every off-site link opens in a new tab: following one in-place would tear
   // down the shell — and with it the terminal in the right pane, which is the
@@ -176,21 +155,45 @@
     }
   });
 
-  // ── the user menu's terminal controls ──────────────────────────────────────
-  // Connect/disconnect are always the USER'S acts: these two entries post into
-  // the /terminal iframe (which never reconnects on its own). Delegated, and the
-  // <details> menu is closed after the click like any other menu action.
+  // ── the user menu's terminal control ───────────────────────────────────────
+  // One item, not two: it names the act it offers ("Disconnect terminal") and the
+  // dot beside it carries the state. Connecting and disconnecting are always the
+  // USER'S acts — the terminal never reconnects on its own — so this posts the act
+  // into the /terminal iframe and waits to be told what happened, rather than
+  // assuming it worked. The iframe reports its state back (terminal.js), which is
+  // what `termState` below listens for; until it does, the item keeps its label.
+  var termConnected = true;
+
+  function paintTerminalToggle() {
+    var button = document.getElementById('term-toggle');
+    var dot = document.getElementById('term-dot');
+    if (!button || !dot) { return; }             // no terminal in this shell (signed out)
+    // childNodes[0] is the label text node — the dot is an element after it, and
+    // textContent would take the dot with it.
+    button.childNodes[0].nodeValue = (termConnected ? 'Disconnect terminal' : 'Connect terminal') + ' ';
+    dot.className = 'dot ' + (termConnected ? 'on' : 'off');
+  }
+
   document.addEventListener('click', function (ev) {
-    var button = ev.target.closest && ev.target.closest('#term-connect, #term-disconnect');
+    var button = ev.target.closest && ev.target.closest('#term-toggle');
     if (!button) { return; }
     var terminal = document.getElementById('terminal');
     if (terminal && terminal.contentWindow) {
       terminal.contentWindow.postMessage(
-        { euler: button.id === 'term-connect' ? 'connect' : 'disconnect' },
-        window.location.origin);
+        { euler: termConnected ? 'disconnect' : 'connect' }, window.location.origin);
     }
     var menu = button.closest('details');
     if (menu) { menu.open = false; }
+  });
+
+  // The iframe's own report of where it stands: the toggle follows the terminal,
+  // never the other way round. A session that drops on its own (the shell exits,
+  // the socket dies) lands here too, so the menu never claims a live terminal
+  // that is not there.
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'term-state') { return; }
+    termConnected = !!ev.data.connected;
+    paintTerminalToggle();
   });
 
   // ── the vault: auto-unlock + account-panel recovery ────────────────
