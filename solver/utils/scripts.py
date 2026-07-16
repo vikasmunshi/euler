@@ -49,28 +49,26 @@ def _current_branch() -> str:
 
 @register(requires='contributor',
           help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
-def git_commit(reset: bool = False, verify: bool = True, message: str = '') -> int:
-    """Stage and commit the solutions and solver package as a timestamped checkpoint.
+def git_commit(message: str, *, reset: bool = False, verify: bool = True) -> int:
+    """Stage and commit the solutions dir.
 
-    Adds everything under `solutions/` and `solver/` and commits it with a
-    `checkpoint <timestamp>` message — the routine "save my progress" step.
+    Adds everything under `solutions/` and commits it
+        — the routine "save my progress" step.
 
     Args:
+        message: The commit message.
         reset:  When True, first soft-reset to `origin/master` so the new commit
                 squashes all local commits into a single checkpoint (working
                 tree untouched). Defaults to False.
         verify: When True (default), run the pre-commit hook (flake8 + mypy).
                 When False, commit with `--no-verify`, skipping the hook.
-        message: The commit message. When empty (default), a
-                 `checkpoint <timestamp>` message is used.
 
     Aliased as `commit`.
     """
-    text: str = message or f'checkpoint {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}'
     cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
-    cmdline += ['git', 'add', '-A', 'solutions', 'solver', '&&']
+    cmdline += ['git', 'add', '-A', 'solutions', '&&']
     cmdline += ['git', 'commit', '-a'] if verify else ['git', 'commit', '-a', '--no-verify']
-    cmdline += ['--message', f'"{text}"']
+    cmdline += ['--message', f'"{message}"']
     result = run_cmdline(' '.join(cmdline))
     return result
 
@@ -105,7 +103,7 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
 
 
 @register(requires='reader',
-          help_text='Display sync state between local and origin/master.', aliases=('status',),)
+          help_text='Display sync state between local and origin/master.', aliases=('status',), )
 def git_status(details: bool = False) -> int:
     """Display the sync state between the local branch and origin/master.
 
@@ -135,11 +133,11 @@ def _enc_key_pull_flow() -> None:
                       cwd=config.root_dir, capture_output=True).returncode == 0
     if wired:
         return
-    read_master_key.cache_clear()               # this very pull may have delivered access
+    read_master_key.cache_clear()  # this very pull may have delivered access
     try:
         read_master_key()
     except (FileNotFoundError, KeyError, ValueError):
-        return                                  # no keypair / not authorized — nothing to do
+        return  # no keypair / not authorized — nothing to do
     console.print('[primary]Master-key access detected — wiring the git filter and '
                   'decrypting private solutions...[/primary]')
     if run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter install') == 0:
@@ -186,7 +184,7 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
 
 
 @register(requires='reader',
-          help_text='Bring the local repository in sync with origin/master.', aliases=('sync',),)
+          help_text='Bring the local repository in sync with origin/master.', aliases=('sync',), )
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
 
@@ -210,7 +208,7 @@ def git_sync(dry_run: bool = False) -> int:
 
 @register(requires='contributor',
           help_text='Sign in to GitHub (gh) and set this clone\'s git identity from it.',
-          aliases=('identity',),)
+          aliases=('identity',), )
 def git_identity() -> int:
     """Configure your git identity and push credential from your GitHub login.
 
@@ -264,7 +262,7 @@ def _ensure_pull_request(branch: str) -> int:
 
 @register(requires='contributor', quietable=True,
           help_text='Push the current branch to origin and open a pull request onto master.',
-          aliases=('push',),)
+          aliases=('push',), )
 def git_push(force: bool = False, pr: bool = True) -> int:
     """Push the current branch to origin as yourself, then open its pull request.
 
@@ -303,7 +301,7 @@ def git_push(force: bool = False, pr: bool = True) -> int:
 
 
 @register(requires='admin', quietable=True,
-          help_text="Merge a collaborator's user/<slug> branch into master and push.", aliases=('merge',),)
+          help_text="Merge a collaborator's user/<slug> branch into master and push.", aliases=('merge',), )
 def git_merge(branch: str, push: bool = True) -> int:
     """Merge a collaborator's branch into master — the one gate to master.
 

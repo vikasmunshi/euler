@@ -471,27 +471,25 @@ Commit everything, optionally resetting to origin/master.
 * » supports `--silent`
 
 ```
-git-commit
+git-commit <message>
 [reset=true|--reset]
 [verify=false|--no-verify]
-[message=<str>] (default '')
 [silent=true|--silent]
 ```
 
 ```text
-Stage and commit the solutions and solver package as a timestamped checkpoint.
+Stage and commit the solutions dir.
 
-Adds everything under `solutions/` and `solver/` and commits it with a
-`checkpoint <timestamp>` message — the routine "save my progress" step.
+Adds everything under `solutions/` and commits it
+    — the routine "save my progress" step.
 
 Args:
+    message: The commit message.
     reset:  When True, first soft-reset to `origin/master` so the new commit
             squashes all local commits into a single checkpoint (working
             tree untouched). Defaults to False.
     verify: When True (default), run the pre-commit hook (flake8 + mypy).
             When False, commit with `--no-verify`, skipping the hook.
-    message: The commit message. When empty (default), a
-             `checkpoint <timestamp>` message is used.
 
 Aliased as `commit`.
 ```
