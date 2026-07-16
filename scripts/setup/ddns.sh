@@ -4,7 +4,7 @@
 #
 # Keeps the edge's A record (e.g. euler.vikasmunshi.com) pointed at the host's current
 # public IP, so the Caddy edge (scripts/setup/frontend.sh) stays reachable behind a
-# changing ISP address. Replaces the "external updater" hand-wave in docs/secure-web-server.md
+# changing ISP address. Replaces the "external updater" hand-wave in docs/web-server-guide.md
 # with a repo-scripted updater on a systemd timer.
 #
 # Model (DD-4 — runs as the non-root euler-ddns user):
@@ -236,7 +236,7 @@ do_install() {
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler dynamic DNS updater (name.com A record for ${FQDN})
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/secure-web-server.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 After=network-online.target
 Wants=network-online.target
 

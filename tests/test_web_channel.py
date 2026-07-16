@@ -30,7 +30,7 @@ from __future__ import annotations
 import unittest
 
 from solver.auth import Subject
-from solver.shell.command import effective_requires, registry
+from solver.shell.command import registry
 from solver.utils.loader import load_commands
 
 _WEB_RUNGS = ('reader', 'contributor', 'maintainer')
@@ -46,8 +46,7 @@ def _visible(profile: str, channel: str = 'web') -> set[str]:
     (MT-10) — it does not affect what registers — so visibility is a pure floor query."""
     subject = Subject(user='t', slug='t-000000', channel=channel, auth_method='test',
                       profile=profile)
-    return {cmd.name for cmd in registry.all()
-            if subject.has(effective_requires(cmd.requires))}
+    return {cmd.name for cmd in registry.all() if subject.has(cmd.requires)}
 
 
 class WebChannelCommandSetTest(unittest.TestCase):
@@ -104,7 +103,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
         profile without the grant fails."""
         bash = registry.resolve('!')
         assert bash is not None
-        floor = effective_requires(bash.requires)
+        floor = bash.requires
         for rung in _WEB_RUNGS:
             at_floor = Subject(user='t', slug='t', channel='web', auth_method='test',
                                profile=rung).has(floor)
@@ -115,8 +114,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
     def test_no_web_rung_has_infra_or_user_mutation(self) -> None:
         """infra:execute (git-*/key-*/manage-config/update-*) and users:write are
         local-admin only: no web account administers the host or the roster."""
-        infra = {cmd.name for cmd in registry.all()
-                 if effective_requires(cmd.requires) == 'admin'}
+        infra = {cmd.name for cmd in registry.all() if cmd.requires == 'admin'}
         self.assertTrue(infra, 'expected some infra commands in the catalogue')
         for rung in _WEB_RUNGS:
             self.assertFalse(infra & self.web[rung],

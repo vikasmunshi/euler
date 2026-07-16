@@ -1,4 +1,4 @@
-/* The right pane's terminal (site-design §1/decision 14, DD-13/DD-14).
+/* The right pane's terminal (web-server-guide § The site, DD-13/DD-14).
 
    Its own document, framed by the app shell at #ws, so htmx swaps, content-page
    JS, and history restores structurally cannot touch the session. It talks only
@@ -193,7 +193,7 @@
     return true;
   });
 
-  // ── the refresh guard (site-design §9) ───────────────────────────────────
+  // ── the refresh guard (web-server-guide § The site) ───────────────────────────────────
   // htmx navigation cannot reach this document, so only a *full* load — F5, the
   // address bar, closing the tab — can tear the terminal down. Ask first while a
   // session is live. The PTY itself survives server-side either way (one

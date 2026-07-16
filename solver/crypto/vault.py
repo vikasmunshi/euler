@@ -4,8 +4,8 @@
 The per-user vault: envelope encryption that makes a user's secrets opaque to the operator at rest.
 
 Both the X25519 private key (`~/.euler/id`) and the project env (`~/.euler/env`) are stored
-**encrypted** rather than plain. The scheme is standard envelope encryption (MT-6 of
-`docs/real-multi-tenant-web-access.md`):
+**encrypted** rather than plain. The scheme is standard envelope encryption (see
+`docs/web-server-guide.md` § The vault):
 
 - a random 32-byte **vault key** ``VK`` encrypts the secrets (AES-256-GCM, random nonce per blob);
 - ``VK`` is stored **wrapped** under ``PK = PBKDF2(password, salt)`` in ``~/.euler/vault`` -- so at
@@ -15,7 +15,7 @@ Both the X25519 private key (`~/.euler/id`) and the project env (`~/.euler/env`)
 
 ``PK`` is derived with **PBKDF2-HMAC-SHA256** (not scrypt) on purpose: WebCrypto exposes PBKDF2
 natively, so the browser can derive the identical ``PK`` from the password it already holds and the
-salt it gets in the SRP challenge (MT-12), with no bundled KDF and no extra round-trip.
+salt it gets in the SRP challenge, with no bundled KDF and no extra round-trip.
 
 **Key delivery.** The code that needs ``VK`` -- :func:`~solver.crypto.ciphers.load_private_key` and
 the git clean/smudge filter -- runs as *subprocesses*, so ``VK`` cannot live only in the interactive
@@ -24,7 +24,7 @@ shell. It lives in a **uid-private tmpfs file** whose path is exported as ``EULE
 terminal path bootstraps that file from ``~/.euler/user_pass`` (:func:`ensure_session_key`); the web
 path writes it from the ``PK`` the browser supplies at shell-attach.
 
-**The boundary, honestly (MT-6a):** this is at-rest opacity against a passive/honest operator only.
+**The boundary, honestly:** this is at-rest opacity against a passive/honest operator only.
 A malicious active root can read a live session's memory or alter the shared solver code -- no design
 protects a secret from the entity that controls the CPU. Do not over-claim "zero-knowledge".
 
@@ -248,7 +248,7 @@ def rewrap_vault(old_password: str, new_password: str) -> None:
 
 
 # ==================================================================================================================== #
-#                                       web path: PK-based vault operations (MT-6/MT-12)
+#                                       web path: PK-based vault operations
 # ==================================================================================================================== #
 # The browser derives ``PK`` itself (WebCrypto PBKDF2 over the password it already holds and the SRP
 # salt) and sends only ``PK`` to the user's own service -- the password never reaches any server, and
@@ -269,7 +269,7 @@ def unlock_vault_with_pk(password_key: bytes) -> bytes:
 
 
 def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
-    """Create a fresh vault wrapped under a browser-derived ``PK`` (web first-login, MT-6).
+    """Create a fresh vault wrapped under a browser-derived ``PK`` (web first-login).
 
     ``salt`` is the account's SRP salt, recorded so the terminal path (and any later browser session)
     derives the identical ``PK``. Any plaintext ``id``/``env`` already on disk is encrypted in place --
@@ -297,7 +297,7 @@ def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_s
 
 
 def reset_vault() -> list[str]:
-    """Destroy the vault after a password reset (MT-6c): the secrets are unrecoverable *by design*.
+    """Destroy the vault after a password reset: the secrets are unrecoverable *by design*.
 
     An SRP reset re-mints the login verifier but shares nothing with the vault, so the old ``VK`` can
     never be unwrapped again -- leaving the blobs around would only misrepresent the state. Removes the
@@ -380,7 +380,7 @@ def session_vault_key() -> bytes | None:
 def clear_session_key() -> None:
     """Lock the session: delete the tmpfs key file, drop the env var, and clear the cached ``VK``.
 
-    Called on logout (DD-14) and vault reset so a torn-down session leaves no reachable key material.
+    Called on logout and vault reset so a torn-down session leaves no reachable key material.
     Idempotent.
     """
     key_path: str = os.environ.pop(config['vault_key_env'], '').strip()

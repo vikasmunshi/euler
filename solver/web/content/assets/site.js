@@ -1,4 +1,4 @@
-/* Shell chrome behaviour (site-design §1/§6) — same-origin, CSP-clean, no deps.
+/* Shell chrome behaviour (web-server-guide § The site) — same-origin, CSP-clean, no deps.
    Loaded without defer from <head> so a stored data-theme applies before first
    paint; everything else is wired on DOMContentLoaded / delegated clicks. */
 (function () {
@@ -71,7 +71,7 @@
     externalize(document);
   });
 
-  // ── the pane's back arrow (site-design §6) ─────────────────────────────────
+  // ── the pane's back arrow (web-server-guide § The site) ─────────────────────────────────
   // The address bar's back button navigates the *document*, which tears down the
   // right pane's terminal — the session the shell promises never to lose. So the
   // header carries a back of its own over the pages #content has shown: a swap,

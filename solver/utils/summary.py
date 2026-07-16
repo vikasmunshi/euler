@@ -79,7 +79,7 @@ def _update_problems_state(_problems: dict[int, dict[str, str | int | bool]]) ->
     problems.clear_cache()
 
 
-@register(requires='admin', help_text='Parse .progress.html into problems.json.', quietable=True)
+@register(requires='maintainer', help_text='Parse .progress.html into problems.json.', quietable=True)
 def summary() -> int:
     """Refresh the solved/unsolved state from your Project Euler progress page.
 
@@ -118,6 +118,7 @@ def progress() -> int:
     lowest-numbered unsolved one). Reads the state maintained by `summary`; run
     `summary` first if your progress looks out of date.
     """
+    problems.clear_cache()
     total: int = len(problems.problems_list)
     solved: int = len(problems.solved_problems)
     next_to_solve: Problem = next((problem for problem in problems.problems_list

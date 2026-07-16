@@ -1,5 +1,5 @@
 /* Auth pages (login / register / reset / forgot / password) — the site design
- * (docs/site-design.md §2) applied to the auth tier: the same dark-first token
+ * (docs/web-server-guide.md § Visual identity) applied to the auth tier: the same dark-first token
  * palette, Euler-identity brand, and warm-orange accent as the app shell, with
  * the same CSP discipline: this file is the only style source, same-origin.
  * Dark is :root; light comes via prefers-color-scheme or the shell's
@@ -85,7 +85,7 @@ body {
   text-align: center;
 }
 
-/* The brand: the Euler-identity figure + formula wordmark (site-design §2). */
+/* The brand: the Euler-identity figure + formula wordmark (web-server-guide § The site). */
 .brand-row { display: inline-flex; align-items: center; gap: 0.6rem; color: var(--fg); }
 .brand-glyph { width: 2.6rem; height: 1.8rem; color: var(--accent); }
 .brand-name { font-weight: 700; letter-spacing: 0.02em; font-size: 1.15rem; }

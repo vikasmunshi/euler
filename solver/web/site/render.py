@@ -14,7 +14,7 @@ block; otherwise the full template. Either way the shared context (the request's
 CSP nonce and resolved subject) is injected, and the response is ``text/html``
 so the shared CSP middleware stamps its header.
 
-**Page chrome (site-design §6).** Breadcrumbs and the Actions menu live in the
+**Page chrome (web-server-guide § The site).** Breadcrumbs and the Actions menu live in the
 fixed header, which htmx never re-renders — so every *block* response appends
 the ``_crumbs.html`` / ``_actions.html`` partials with ``hx-swap-oob``, keeping
 the header in step with the pane. A full-page render places the same partials
@@ -81,7 +81,7 @@ def render(request: web.Request, template_name: str,
     """Render *template_name* — its *block* for an htmx fetch, else the full page.
 
     *fragment* forces the block regardless of ``HX-Request``: the write routes
-    (5d) always answer with a fragment (site-design §5), never the whole shell.
+    (5d) always answer with a fragment (web-server-guide § The site), never the whole shell.
     """
     env = aiohttp_jinja2.get_env(request.app)
     ctx = _context(request, context)

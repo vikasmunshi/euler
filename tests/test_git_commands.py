@@ -18,7 +18,7 @@ from unittest.mock import MagicMock
 
 from solver.auth import Subject
 from solver.config import ExitCodes, config
-from solver.shell.command import effective_requires, registry
+from solver.shell.command import registry
 from solver.utils import scripts
 from solver.utils.loader import load_commands
 
@@ -41,7 +41,7 @@ class PolicyShapeTest(unittest.TestCase):
             cmd = registry.resolve(name)
             self.assertIsNotNone(cmd, f'{name} not registered')
             assert cmd is not None
-            self.assertEqual(effective_requires(cmd.requires), floor, name)
+            self.assertEqual(cmd.requires, floor, name)
 
     def test_reader_may_sync_but_not_push(self) -> None:
         reader = _subject('reader')

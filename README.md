@@ -214,8 +214,8 @@ solver/
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
   auth/               — The authorization kernel — identity, profiles, and permissions (DD-12).
     authorizations.py — The authorization policy — ``authorizations.json`` (DD-12, re-simplified).
-    identity.py       — Identity resolution → a :class:`~solver.auth.subject.Subject` (DD-9/DD-12).
-    subject.py        — The authorization **subject** — the resolved security principal (DD-12).
+    identity.py       — Identity resolution → a :class:`~solver.auth.subject.Subject`.
+    subject.py        — The authorization **subject** — the resolved security principal.
   core/
     download.py       — Utility for downloading and caching files via HTTP.
     evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
@@ -261,8 +261,8 @@ solver/
     shell_utils.py    — Utility for running shell commands and capturing their output.
     summary.py        — Progress: parse .progress.html into problems.json and refresh in-memory state.
     update_doc.py     — Regenerate the machine-maintained sections of the guides under `docs/`.
-  web/                — The web app services (see docs/secure-web-server.md).
-    csp.py            — Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
+  web/                — The web app services (see docs/web-server-guide.md).
+    csp.py            — Content-Security-Policy middleware with a per-response nonce (shared).
     auth/             — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
       __main__.py     — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
       admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6/DD-12).

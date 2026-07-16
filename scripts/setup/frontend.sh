@@ -6,7 +6,7 @@
 # Caddy (TLS + reverse-proxy edge) and the acme.sh cert client, creates the
 # dedicated service identities, generates the Caddyfile router, deploys the static
 # maintenance page, and installs the root-owned systemd unit. Supersedes the old
-# scripts/setup/caddy.sh + scripts/setup/acme.sh. See docs/secure-web-server.md
+# scripts/setup/caddy.sh + scripts/setup/acme.sh. See docs/web-server-guide.md
 # (Design decisions DD-1..DD-4, DD-6/DD-9 routing; Phases 1, 3 and 4).
 #
 # Topology (multi-tenant, MT-4/MT-11):
@@ -459,10 +459,10 @@ generate_caddyfile() {
 # the maintenance/error responses. The CSP uses the '?' (set-if-absent) operator so it
 # is only a **fallback**: the app tier mints a per-response, nonce'd CSP with the
 # exceptions its pages need (style-src 'unsafe-inline' for MathJax/CodeMirror injected
-# styles; frame-ancestors 'self' for the terminal iframe — docs/secure-web-server.md
-# §4.7), and Caddy leaves that untouched. This strict policy applies only to
-# Caddy-native responses (maintenance / static / redirects) that carry no app CSP.
-# (docs/secure-web-server.md, docs/security-assessment.md SEC-04/SEC-05.)
+# styles; frame-ancestors 'self' for the terminal iframe — docs/web-server-guide.md
+# § Content-Security-Policy), and Caddy leaves that untouched. This strict policy applies
+# only to Caddy-native responses (maintenance / static / redirects) that carry no app CSP.
+# (docs/web-server-guide.md § The edge.)
 (security_headers) {
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
@@ -517,7 +517,7 @@ ${DOMAIN} {
 	}
 
 	# Vendored front-end libraries (htmx, MathJax + its fonts) — Caddy-native,
-	# same-origin, per the site-design path-ownership table.
+	# same-origin, per the web-server-guide path-ownership table.
 	handle /vendor/* {
 		root * ${WEB_CONTENT_DIR}
 		file_server
@@ -608,7 +608,7 @@ install_service() {
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler web edge (Caddy)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/secure-web-server.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 After=network-online.target
 Wants=network-online.target
 
@@ -675,7 +675,7 @@ install_acme_timer() {
     sudo tee "${ACME_SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler certificate renewal (acme.sh --cron)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/secure-web-server.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 After=network-online.target
 Wants=network-online.target
 

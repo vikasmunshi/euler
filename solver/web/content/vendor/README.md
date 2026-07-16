@@ -22,7 +22,7 @@ MathJax typesets the `$…$` TeX in statements/notes (config + re-typeset-on-swa
 in `/assets/site.js`); the woff fonts are loaded by the bundle relative to its
 own URL, so the whole tree ships together. Its full license text is at
 `mathjax/LICENSE`. Note: MathJax injects its stylesheet at runtime — the reason
-`style-src` carries `'unsafe-inline'` (docs/secure-web-server.md §4.7).
+`style-src` carries `'unsafe-inline'` (docs/web-server-guide.md § Content-Security-Policy).
 
 **CodeMirror 6** is the code editor on the edit page (`/assets/editor.js`,
 lazy-imported by `site.js` only when an editor appears, so the ~630 KB graph

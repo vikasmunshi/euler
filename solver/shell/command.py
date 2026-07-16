@@ -8,34 +8,27 @@ followed by its parsed argv tokens, and returning an `int` exit code.
 """
 from __future__ import annotations
 
-__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'effective_requires',
-           'is_permitted', 'registry']
+__all__ = ['Command', 'CommandRegistry', 'Context', 'command', 'is_permitted', 'registry']
 
 from dataclasses import dataclass, field
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Literal
 
 from prompt_toolkit.completion import Completion
 from rich.console import Console
 
-from solver.auth import FAILCLOSED_PROFILE
 from solver.config import config
 from solver.shell.tty import console
 from solver.shell.variables import Variables, variables
 
 
-def effective_requires(requires: str) -> str:
-    """Normalise a command's ``requires`` — empty is **fail-closed** to ``admin``,
-    so a command that declares nothing is never silently exposed (DD-12)."""
-    return requires or FAILCLOSED_PROFILE
-
-
 def is_permitted(requires: str) -> bool:
     """True if the current process's :class:`~solver.auth.Subject` may run a command whose
-    minimum profile is *requires* — a plain ladder-rank comparison (DD-12, re-simplified).
-    Authorization is by profile only; the channel (terminal vs web) is **not** an
-    authorization axis (MT-10) — a user's web shell is bash in their own per-user sandbox,
-    no different from their terminal. One process serves one subject."""
-    return config.subject.has(effective_requires(requires))
+    minimum profile is *requires* — a plain ladder-rank comparison. Every command must
+    declare its floor, so there is nothing to default. Authorization is by profile only;
+    the channel (terminal vs web) is **not** an authorization axis — a user's web shell is
+    bash in their own per-user sandbox, no different from their terminal. One process
+    serves one subject."""
+    return config.subject.has(requires)
 
 
 @dataclass
@@ -67,8 +60,8 @@ class Command:
     usage: str = ''
     aliases: tuple[str, ...] = ()
     completer: Callable[[Context, str], Iterable[str | Completion]] | None = None
-    #: The minimum profile this command needs (DD-12, re-simplified). Empty ⇒ the
-    #: fail-closed default (``admin``), so a new command is never silently exposed.
+    #: The minimum profile this command needs. Mandatory on the decorator, so a
+    #: command can never be silently exposed by omitting its floor.
     requires: str = ''
 
     def invoke(self, ctx: Context) -> int:
@@ -132,16 +125,17 @@ def command(
         usage: str = '',
         aliases: tuple[str, ...] = (),
         completer: Callable[[Context, str], Iterable[str | Completion]] | None = None,
-        requires: str = '',
+        requires: Literal['reader', 'contributor', 'maintainer', 'admin'],
 ) -> Callable[[CommandFn], CommandFn]:
     """Decorator that registers *func* as a shell command (returned unchanged).
 
-    ``requires`` is the **minimum profile** the command needs (DD-12, re-simplified —
-    ``'reader'``/``'contributor'``/``'maintainer'``/``'admin'``); empty is fail-closed to
-    ``admin``. The command registers only if the current subject's profile is at or above
-    that floor — otherwise it is left unregistered (invisible to help/completion, "unknown
-    command" if invoked), while the function is returned unchanged so it stays a plain
-    Python callable. Authorization is by profile only; the channel is not an axis (MT-10).
+    ``requires`` is the **minimum profile** the command needs
+    (``'reader'``/``'contributor'``/``'maintainer'``/``'admin'``) and is **mandatory**:
+    omitting it is a type error, so a command can never be exposed by forgetting to
+    declare its floor. The command registers only if the current subject's profile is at
+    or above that floor — otherwise it is left unregistered (invisible to help/completion,
+    "unknown command" if invoked), while the function is returned unchanged so it stays a
+    plain Python callable. Authorization is by profile only; the channel is not an axis.
     """
 
     def _decorate(func: CommandFn) -> CommandFn:
@@ -158,7 +152,7 @@ def command(
             usage=usage,
             aliases=tuple(aliases),
             completer=completer,
-            requires=effective_requires(requires),
+            requires=requires,
         ))
         return func
 

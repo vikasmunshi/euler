@@ -3,8 +3,7 @@
 """Auth policy constants (lifetimes, cookie names, password and OTP rules).
 
 Kept in one place so the server and (where relevant) the browser client agree.
-Values implement the locked design decisions DD-6/DD-7/DD-9 in
-docs/secure-web-server.md.
+The model these values implement is in docs/web-server-guide.md § Authentication.
 """
 from __future__ import annotations
 
@@ -14,14 +13,14 @@ __all__ = ['SESSION_COOKIE', 'SESSION_TTL_SECONDS', 'CHALLENGE_TTL_SECONDS', 'MI
            'REMEMBER_COOKIE', 'REMEMBER_TTL_SECONDS', 'AUTH_RATE_MAX', 'AUTH_RATE_WINDOW_SECONDS',
            'TICKET_TTL_SECONDS', 'PROFILES']
 
-#: Web-assignable profiles (DD-11/DD-12): `admin` is local-only. The authoritative
-#: policy is authorizations.json (see docs/access-control.md); this is the invite/
-#: validation set for the admin API.
+#: Web-assignable profiles: `admin` is assignable only to a local os-login. The
+#: authoritative policy is authorizations.json (see docs/web-server-guide.md
+#: § Authorization); this is the invite/validation set for the admin API.
 PROFILES: tuple[str, ...] = ('reader', 'contributor', 'maintainer')
 
 #: Name of the short-lived session cookie set on a successful SRP login.
 SESSION_COOKIE: str = 'solver_session'
-#: Session lifetime — 12 hours (in-memory; a service restart drops sessions, DD-6).
+#: Session lifetime — 12 hours (in-memory; a service restart drops sessions).
 SESSION_TTL_SECONDS: int = 12 * 3600
 #: How long a pending SRP challenge (server ephemeral B) is held between the
 #: challenge and verify steps.
@@ -34,12 +33,12 @@ MIN_PASSWORD_LENGTH: int = 16
 #: server never sees the password; documented here as the single source of truth.
 PASSWORD_REQUIRE_CLASSES: tuple[str, ...] = ('lower', 'upper', 'digit', 'special')
 
-#: How long the emailed invite / reset link remains valid — 7 days (DD-7).
+#: How long the emailed invite / reset link remains valid — 7 days.
 INVITE_TTL_SECONDS: int = 7 * 24 * 3600
 #: Entropy (bytes) of the secure invite / reset link token.
 LINK_TOKEN_BYTES: int = 32
 
-#: The emailed one-time code proving live mailbox control at completion time (DD-7).
+#: The emailed one-time code proving live mailbox control at completion time.
 OTP_DIGITS: int = 6
 #: OTP lifetime — 10 minutes.
 OTP_TTL_SECONDS: int = 10 * 60
@@ -57,6 +56,6 @@ REMEMBER_TTL_SECONDS: int = 30 * 24 * 3600
 AUTH_RATE_MAX: int = 30
 AUTH_RATE_WINDOW_SECONDS: int = 60
 
-#: One-time shell ticket lifetime (DD-9): minted against a live session at WS
+#: One-time shell ticket lifetime: minted against a live session at WS
 #: attach, redeemed by the PTY child at startup — 60 seconds covers the fork.
 TICKET_TTL_SECONDS: int = 60

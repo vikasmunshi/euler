@@ -32,7 +32,7 @@ imports the resolver during its own construction.
 """
 from __future__ import annotations
 
-__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE', 'DEFAULT_POLICY_FILE', 'FAILCLOSED_PROFILE']
+__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE', 'DEFAULT_POLICY_FILE']
 
 import json
 import os
@@ -44,14 +44,10 @@ from solver.auth.subject import LADDER
 
 #: Environment override for the policy file location (tests / dev / services).
 AUTHZ_FILE_ENV: str = 'EULER_AUTHZ_FILE'
-#: The deployed system-of-record location (DD-12).
+#: The deployed system-of-record location.
 DEFAULT_AUTHZ_FILE: str = '/etc/euler/authorizations.json'
 #: The built-in default policy — shipped inside the package (empty users map).
 DEFAULT_POLICY_FILE: Path = Path(__file__).resolve().parents[1] / 'templates' / 'authorizations.json'
-
-#: Profile a command/route falls back to when it declares no ``requires`` —
-#: fail-closed to admin-only, so a new command is never silently exposed.
-FAILCLOSED_PROFILE: str = 'admin'
 
 
 @lru_cache(maxsize=1)

@@ -2,13 +2,12 @@
 # -*- coding: utf-8 -*-
 """ A set of utilities to manage Git repository workflows.
 
-Per-user native git (MT-2, docs/real-multi-tenant-web-access.md): a collaborator's
-shell runs in **their own clone** on branch ``user/<slug>`` as their own uid, so git
-needs no broker — the read verbs (`git-status`, `git-sync`) are ``git:read``
-(every rung) and the write verbs (`git-commit`, `git-push`, `git-hooks`) are
-``git:execute`` (contributor+); the blast radius is their own branch. ``master``
-stays admin-gated: `git-merge` (``infra:execute``) is the one gate through which a
-``user/<slug>`` branch lands on master.
+Per-user native git (docs/web-server-guide.md § Git): a collaborator's shell runs in
+**their own clone** on branch ``user/<slug>`` as their own uid, so git needs no
+broker — the read verbs (`git-status`, `git-sync`) are ``reader``-floor and the
+write verbs (`git-commit`, `git-push`, `git-hooks`) are ``contributor``-floor; the
+blast radius is their own branch. ``master`` stays admin-gated: `git-merge` is the
+one gate through which a ``user/<slug>`` branch lands on master.
 """
 from __future__ import annotations
 
@@ -122,10 +121,10 @@ def git_status(details: bool = False) -> int:
 
 
 def _enc_key_pull_flow() -> None:
-    """The MT-2 self-service tail of a sync: wire the git filter once key access exists.
+    """The self-service tail of a sync: wire the git filter once key access exists.
 
-    A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as ciphertext
-    (MT-13). When a pull delivers an ``keys/enc-key.json`` that wraps the master key to
+    A provisioned clone starts filter-UNWIRED with ``solutions/private/**`` as
+    ciphertext. When a pull delivers a ``keys/enc-key.json`` that wraps the master key to
     this user's public key (an admin ran ``user-authorize`` and pushed), wire the
     clean/smudge filter and re-checkout the private tree — ciphertext becomes plaintext
     in place. A silent no-op while the filter is already wired or the user is not (yet)
@@ -151,7 +150,7 @@ def _enc_key_pull_flow() -> None:
 @register(requires='reader', aliases=('filter',),
           help_text='Wire the git encryption filter: [accent.dim]status[/accent.dim] | install.')
 def git_filter(action: Literal['status', 'install'] = 'status') -> int:
-    """Report or wire the transparent encryption filter for `solutions/private` (MT-2).
+    """Report or wire the transparent encryption filter for `solutions/private`.
 
     `status` shows the filter wiring and whether this session can unwrap the
     master key. `install` verifies master-key access first (refusing cleanly
@@ -191,7 +190,7 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
 def git_sync(dry_run: bool = False) -> int:
     """Bring the local repository in sync with origin/master.
 
-    On a per-user clone (branch `user/<slug>`) this is the MT-2 pull flow: fetch
+    On a per-user clone (branch `user/<slug>`) this is the pull flow: fetch
     origin/master and merge/rebase it into your branch — bringing in merged work
     and, notably, `keys/enc-key.json`. When that pull first delivers master-key
     access for your key, the git filter is wired automatically and the private
@@ -213,7 +212,7 @@ def git_sync(dry_run: bool = False) -> int:
           help_text='Sign in to GitHub (gh) and set this clone\'s git identity from it.',
           aliases=('identity',),)
 def git_identity() -> int:
-    """Configure your git identity and push credential from your GitHub login (MT-2).
+    """Configure your git identity and push credential from your GitHub login.
 
     The one-time setup before `git-push`: runs `gh auth login` when you are not yet
     signed in (interactive device flow — works in the web shell), makes gh the git
@@ -259,7 +258,7 @@ def git_push(force: bool = False) -> int:
 @register(requires='admin', quietable=True,
           help_text="Merge a collaborator's user/<slug> branch into master and push.", aliases=('merge',),)
 def git_merge(branch: str, push: bool = True) -> int:
-    """Merge a collaborator's branch into master — the one gate to master (MT-2).
+    """Merge a collaborator's branch into master — the one gate to master.
 
     Fetches the branch from origin and merges it `--no-ff` into the checked-out
     master; a conflicted merge is aborted and reported (resolve it manually). On a

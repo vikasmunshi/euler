@@ -7,7 +7,7 @@
 # shared-uid model (DD-13): instead of three fixed rungs sharing a uid, every
 # collaborator gets their **own** uid, home, and repo clone, so their
 # own keys can rest in their own uid-private home without leaking to anyone else.
-# Design of record: docs/real-multi-tenant-web-access.md (MT-3/MT-4/MT-7/MT-13).
+# Design of record: docs/web-server-guide.md § The per-user tier.
 #
 # Two planes:
 #
@@ -191,7 +191,7 @@ install_units() {
     sudo tee "${SOCKET_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler per-user instance socket (%i) — the collaborator's content + /ws (MT-4)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/real-multi-tenant-web-access.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 
 [Socket]
 ListenStream=/run/euler/user-%i.sock
@@ -207,7 +207,7 @@ EOF
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler per-user instance (%i) — one collaborator's content + web shell (MT-4/MT-7)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/real-multi-tenant-web-access.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 After=network.target euler-auth.service
 Wants=euler-auth.service
 Requires=euler-user@%i.socket

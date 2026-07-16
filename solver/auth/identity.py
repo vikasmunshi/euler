@@ -1,9 +1,9 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Identity resolution → a :class:`~solver.auth.subject.Subject` (DD-9/DD-12).
+"""Identity resolution → a :class:`~solver.auth.subject.Subject`.
 
 Resolves *who* this process runs as and *what* it may do, **once** at startup,
-across the identity planes (docs/secure-web-server.md, DD-9/DD-12). There is no
+across the identity planes (docs/web-server-guide.md § Identity). There is no
 anonymous fallback; a process that matches no plane exits.
 
 1. **Web shell** — ``SOLVER_TICKET`` in the environment: a **one-time shell
@@ -11,22 +11,22 @@ anonymous fallback; a process that matches no plane exits.
    redeemed here over the auth socket. Redemption consumes it and returns the
    authoritative ``(email, profile)``; a missing/expired/reused ticket aborts, and
    so does one whose e-mail's :func:`system_slug` differs from the forking
-   instance's ``EULER_USER_SLUG`` pin (MT-4/MT-7 — that instance *is* the user's
-   own uid, so a ticket for another user means misrouting or a bypass). Nothing
-   env-carried is the credential — a ticket is the only thing that survives replay
-   from a sibling process's ``/proc/<pid>/environ``. In the per-user model the web
-   channel is **not capped** (MT-10a): an ``admin`` account is web-reachable, its
-   authority contained by its own uid + SRP, not by the channel.
+   instance's ``EULER_USER_SLUG`` pin (that instance *is* the user's own uid, so a
+   ticket for another user means misrouting or a bypass). Nothing env-carried is
+   the credential — a ticket is the only thing that survives replay from a sibling
+   process's ``/proc/<pid>/environ``. In the per-user model the web channel is
+   **not capped**: an ``admin`` account is web-reachable, its authority contained
+   by its own uid + SRP, not by the channel.
 2. **Instance identity** — a ``euler-user-<slug>`` per-user service uid whose
-   ticketed shell has already redeemed and scrubbed the one-time ticket (MT-4):
+   ticketed shell has already redeemed and scrubbed the one-time ticket:
    the descendant ``solver`` processes it spawns (claude-solve's headless Claude,
    a nested ``solver "…"``) carry no ticket and resolve from the instance itself.
    The uid *is* the collaborator; the handed-down ``EULER_USER_EMAIL`` is trusted
    only when :func:`system_slug` maps it back to the uid's own ``EULER_USER_SLUG``
    pin, and the profile still comes from policy — so a child cannot forge either a
    different identity or a higher rung. Any *other* ``euler-*`` uid still aborts.
-3. **Local terminal** — the OS login's profile from the ``users`` map
-   (DD-12); the **checkout owner floors to ``admin``** when unlisted (you cannot
+3. **Local terminal** — the OS login's profile from the ``users`` map;
+   the **checkout owner floors to ``admin``** when unlisted (you cannot
    lock yourself out), an explicit entry wins, and a real non-owner login without
    an entry is ``contributor``. A ``euler-*`` service uid that is neither a
    ticketed web shell nor a properly-pinned per-user instance **aborts**, so a
@@ -54,7 +54,7 @@ from solver.auth.subject import LADDER, Subject
 TICKET_ENV: str = 'SOLVER_TICKET'
 #: The per-user instance's own system slug (``EULER_USER_SLUG=%i``), exported to the
 #: PTY child: the redeemed ticket's e-mail must map to it (:func:`system_slug`), else the
-#: shell aborts — the instance *is* that user's uid, so a mismatch is misrouting (MT-4/MT-7).
+#: shell aborts — the instance *is* that user's uid, so a mismatch is misrouting.
 SLUG_PIN_ENV: str = 'EULER_USER_SLUG'
 #: The bound e-mail of a per-user instance, handed *down* the process tree by a shell that
 #: has already redeemed its ticket (:func:`resolve_subject` scrubs the one-time ticket and
@@ -89,7 +89,7 @@ def slugify(identity: str) -> str:
 
 
 def system_slug(identity: str) -> str:
-    """Return a **system-account** slug for *identity* — the per-user uid/home/socket name (MT-14).
+    """Return a **system-account** slug for *identity* — the per-user uid/home/socket name.
 
     Stricter than :func:`slugify`: the result matches ``^[a-z][a-z0-9-]*$`` (no ``.`` or ``_``), so
     ``useradd``'s ``NAME_REGEX`` accepts ``euler-user-<slug>``. Built from the sanitised, truncated
@@ -136,7 +136,7 @@ def _owns_checkout(root_dir: Path) -> bool:
 
 
 def _instance_identity(os_login: str, authz: Authorizations) -> Subject | None:
-    """Resolve a per-user service uid to its bound collaborator, ticket-free (MT-4).
+    """Resolve a per-user service uid to its bound collaborator, ticket-free.
 
     The **instance-identity plane**: a ``euler-user-<slug>`` uid is provisioned for
     exactly one collaborator, and its ticketed PTY shell scrubs the one-time ticket
@@ -174,11 +174,11 @@ def resolve_subject(root_dir: Path, authz: Authorizations | None = None) -> Subj
 
     ticket = os.environ.get(TICKET_ENV, '').strip()
     if ticket:
-        email, profile = _redeem_ticket(ticket)     # authoritative (email, profile); admin uncapped (MT-10a)
+        email, profile = _redeem_ticket(ticket)     # authoritative (email, profile); admin uncapped
         slug = system_slug(email)
         pin = os.environ.get(SLUG_PIN_ENV, '').strip()
         if pin and slug != pin:
-            # The forking instance *is* this user's uid (euler-user-<pin>, MT-4/MT-7):
+            # The forking instance *is* this user's uid (euler-user-<pin>):
             # a ticket for another user means misrouting or a bypass attempt, and this
             # process — with that uid's home, keys, and clone — must not run as them.
             raise SystemExit(f'identity: ticket user {slug!r} does not match '

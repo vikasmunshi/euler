@@ -17,8 +17,8 @@ Each command entry opens with an **availability** line — `profiles: …`. *Pro
 are those whose permissions satisfy the command's `requires=` grants under
 `authorizations.json` — reported from the live registry (see the generated
 [`authorizations.md`](authorizations.md) audit table). Authorization is by profile
-only; the channel (terminal / web) is not an axis. A command that declares no
-`requires` is fail-closed to `admin`. See the
+only; the channel (terminal / web) is not an axis. `requires` is mandatory, so
+every command declares its floor. See the
 [web server guide](web-server-guide.md) for the authorization model.
 
 A command's *flags* line lists the behaviours marked by these glyphs (the same
@@ -509,7 +509,7 @@ git-filter
 ```
 
 ```text
-Report or wire the transparent encryption filter for `solutions/private` (MT-2).
+Report or wire the transparent encryption filter for `solutions/private`.
 
 `status` shows the filter wiring and whether this session can unwrap the
 master key. `install` verifies master-key access first (refusing cleanly
@@ -561,7 +561,7 @@ git-identity
 ```
 
 ```text
-Configure your git identity and push credential from your GitHub login (MT-2).
+Configure your git identity and push credential from your GitHub login.
 
 The one-time setup before `git-push`: runs `gh auth login` when you are not yet
 signed in (interactive device flow — works in the web shell), makes gh the git
@@ -587,7 +587,7 @@ git-merge <branch>
 ```
 
 ```text
-Merge a collaborator's branch into master — the one gate to master (MT-2).
+Merge a collaborator's branch into master — the one gate to master.
 
 Fetches the branch from origin and merges it `--no-ff` into the checked-out
 master; a conflicted merge is aborted and reported (resolve it manually). On a
@@ -688,7 +688,7 @@ git-sync
 ```text
 Bring the local repository in sync with origin/master.
 
-On a per-user clone (branch `user/<slug>`) this is the MT-2 pull flow: fetch
+On a per-user clone (branch `user/<slug>`) this is the pull flow: fetch
 origin/master and merge/rebase it into your branch — bringing in merged work
 and, notably, `keys/enc-key.json`. When that pull first delivers master-key
 access for your key, the git filter is wired automatically and the private
@@ -1093,7 +1093,7 @@ Arguments:
 #### Command: `summary`
 
 Parse .progress.html into problems.json.
-* profiles: admin
+* profiles: admin, maintainer
 * » supports `--silent`
 
 ```

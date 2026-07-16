@@ -66,7 +66,7 @@ class Century(NamedTuple):
 
 
 class DocEntry(NamedTuple):
-    """A docs/topics index row (site-design §7): the URL *name*, the *heading*
+    """A docs/topics index row (web-server-guide § The site): the URL *name*, the *heading*
     derived from the filename (title-cased, separators → spaces — the card's
     first line), and the *title* from the page's leading ``#`` heading (second
     line). Index lists are sorted by *name* (the filename)."""
@@ -135,7 +135,7 @@ def centuries(problems: dict[int, ProblemInfo]) -> list[Century]:
 def problem_files(sdir: Path) -> list[str]:
     """The problem's viewable files (mimetype-guessable, as ``ls`` lists them),
     as POSIX paths relative to the solution directory. **Zero-size files are
-    hidden** (site-design §7) — an empty stub says nothing worth a link."""
+    hidden** (web-server-guide § The site) — an empty stub says nothing worth a link."""
     if not sdir.is_dir():
         return []
     return sorted(
@@ -419,7 +419,7 @@ def _filename_heading(stem: str) -> str:
 
 
 def _list_pages(tree: Path) -> list[DocEntry]:
-    """Index the `*.md` pages of a content tree, sorted by filename (site-design §7)."""
+    """Index the `*.md` pages of a content tree, sorted by filename (web-server-guide § The site)."""
     if not tree.is_dir():
         return []
     entries = []
@@ -528,7 +528,7 @@ def _compose_ai_doc(repo_root: Path) -> str:
 
 def list_docs(repo_root: Path) -> list[DocEntry]:
     """The docs index: the README, then every `docs/*.md` guide plus the composed
-    `ai` reference, sorted by filename (site-design §7).
+    `ai` reference, sorted by filename (web-server-guide § The site).
 
     The README leads rather than taking its place in the sort: it is the page that
     introduces the rest, and a reader who wants the overview should not have to

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Content-Security-Policy middleware with a per-response nonce (shared, DD-5).
+"""Content-Security-Policy middleware with a per-response nonce (shared).
 
 Every page an app service renders carries the locked baseline CSP
-(docs/secure-web-server.md § Content-Security-Policy): same-origin everything,
+(docs/web-server-guide.md § Content-Security-Policy): same-origin everything,
 no ``unsafe-inline``, no ``unsafe-eval``, no framing. The middleware mints a
 fresh nonce per response and exposes it as ``request['csp_nonce']`` so a
 template *can* mark an unavoidable inline ``<script>``/``<style>`` — the auth
 pages don't need it (all their JS/CSS is served from ``/assets``), but the
-contract is established here once and the content service (Phase 5) imports
-the same middleware.
+contract is established here once and every rendering service imports the same
+middleware.
 
 Caddy adds the transport-level headers (HSTS, ``X-Content-Type-Options``, …)
 and a fallback CSP for purely static responses; this header wins on rendered
@@ -32,8 +32,8 @@ NONCE_KEY: str = 'csp_nonce'
 #: nonce hook — verified blocked under bare ``'self'`` (headless-Chrome CSP
 #: violations, garbled math). Scripts stay strict: ``'self'`` + nonce only.
 #: ``frame-ancestors 'self'`` (not ``'none'``): the app shell frames its own
-#: ``/terminal`` document (site-design §1/decision 14) — cross-origin embedding
-#: stays blocked. See docs/secure-web-server.md §4.7 for the recorded trade-offs.
+#: ``/terminal`` document — cross-origin embedding stays blocked. See
+#: docs/web-server-guide.md § Content-Security-Policy for the recorded trade-offs.
 _POLICY = ("default-src 'self'; "
            "script-src 'self' 'nonce-{nonce}'; "
            "style-src 'self' 'unsafe-inline'; "

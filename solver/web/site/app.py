@@ -9,7 +9,7 @@ into a :class:`~solver.auth.subject.Subject`. Routes gate on it with
 :func:`requires`, the web counterpart of the shell's ``@register(requires=…)``
 (DD-12): the same ``object:permission`` grants, checked against ``X-Profile``.
 
-The route surface is the contract in ``docs/site-design.md``: the app shell at
+The route surface is the contract in ``docs/web-server-guide.md`` § The site: the app shell at
 ``/`` (four fixed regions filling the viewport), read routes rendering into
 ``#content`` (full page on a direct visit, fragment + out-of-band header chrome
 on htmx — :mod:`solver.web.site.render`), canonical trailing-slash 301s, and the
@@ -156,7 +156,7 @@ def requires(capability: str) -> Callable[[_Handler], _Handler]:
 # ── path helpers ─────────────────────────────────────────────────────────────────────
 
 async def redirect_slash(request: web.Request) -> web.StreamResponse:
-    """301 a slashless GET to its canonical trailing-slash form (site-design §9)."""
+    """301 a slashless GET to its canonical trailing-slash form (web-server-guide § The site)."""
     location = request.rel_url.path + '/'
     if request.rel_url.query_string:
         location += '?' + request.rel_url.query_string
@@ -544,7 +544,7 @@ async def file_delete(request: web.Request) -> web.StreamResponse:
 async def progress_editor(request: web.Request) -> web.StreamResponse:
     """``GET /edit/solutions/`` — the progress upload: an **empty** paste buffer.
 
-    Upload-replace, not edit (site-design §7): the paste supersedes
+    Upload-replace, not edit (web-server-guide § The site): the paste supersedes
     ``solutions/.progress.html`` wholesale, so the current content is never
     shipped into the page.
     """
@@ -584,7 +584,7 @@ async def progress_save(request: web.Request) -> web.StreamResponse:
 # ── app wiring ────────────────────────────────────────────────────────────────────────
 
 def add_content_routes(app: web.Application) -> None:
-    """Register the content route surface (the site-design §route contract) on *app*.
+    """Register the content route surface (the web-server-guide § The site contract) on *app*.
 
     Shared by :func:`build_app` (the per-profile content service) and the per-user
     service (:mod:`solver.web.user`), which folds these routes together with ``/ws`` —
@@ -594,7 +594,7 @@ def add_content_routes(app: web.Application) -> None:
         web.get('/healthz', healthz),
         web.get('/', home),
         web.get('/terminal', terminal),
-        # solutions — canonical with the trailing slash (site-design §9)
+        # solutions — canonical with the trailing slash (web-server-guide § The site)
         web.get('/solutions', redirect_slash),
         web.get('/solutions/', solutions_index),
         web.get(r'/solutions/{n:\d+}', redirect_slash),

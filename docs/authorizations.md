@@ -23,7 +23,8 @@ for the model and how identity resolves to a profile on each channel.
 - **Module** — the Python module the command is defined in.
 - **Command** — the registered command name.
 - **Minimum profile** — the declared floor: any profile at or above it may run
-  the command. A command that declares nothing is fail-closed to `admin`.
+  the command. `requires` is mandatory on the decorator, so every command has
+  one — a command cannot be exposed by omitting its floor.
 
 ## Command authorization
 
@@ -71,7 +72,7 @@ for the model and how identity resolves to a profile on each channel.
 | `solver.utils.shell_utils` | `pause` | `reader` |
 | `solver.utils.summary` | `mark` | `contributor` |
 | `solver.utils.summary` | `progress` | `reader` |
-| `solver.utils.summary` | `summary` | `admin` |
+| `solver.utils.summary` | `summary` | `maintainer` |
 | `solver.utils.update_doc` | `update-docs` | `admin` |
 | `solver.web.auth.commands` | `users` | `reader` |
 <!-- /GEN:authorization-table -->

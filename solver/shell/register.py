@@ -28,7 +28,7 @@ import types
 import typing
 from dataclasses import dataclass
 from functools import wraps
-from typing import Any, Callable, Iterable
+from typing import Any, Callable, Iterable, Literal
 
 from prompt_toolkit.completion import Completion
 from rich.text import Text
@@ -655,7 +655,7 @@ def register[**P](
         pass_ctx: bool = False,
         quietable: bool = False,
         completers: dict[str, Callable[[Context, str], Iterable[str | Completion]]] | None = None,
-        requires: str = '',
+        requires: Literal['reader', 'contributor', 'maintainer', 'admin'],
 ) -> Callable[[Callable[P, int]], Callable[P, int]]:
     """Decorator that registers *func* as a shell command **without modifying it**.
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Unit tests for the decorator authorization layer (solver.shell.command, DD-12):
-the fail-closed ``requires`` default, ``is_permitted``, and decorator gating against
-the resolved :class:`~solver.auth.Subject`."""
+"""Unit tests for the decorator authorization layer (solver.shell.command):
+``is_permitted`` and decorator gating against the resolved
+:class:`~solver.auth.Subject`."""
 from __future__ import annotations
 
 import contextlib
@@ -11,7 +11,7 @@ from typing import Iterator
 
 from solver.auth import Subject
 from solver.config import config
-from solver.shell.command import Context, command, effective_requires, is_permitted, registry
+from solver.shell.command import Context, command, is_permitted, registry
 
 
 def _subject(profile: str, channel: str = 'terminal') -> Subject:
@@ -31,19 +31,24 @@ def as_subject(profile: str, channel: str = 'terminal') -> Iterator[None]:
 
 
 class RequiresTests(unittest.TestCase):
-    def test_empty_requires_is_failclosed_to_admin(self) -> None:
-        self.assertEqual(effective_requires(''), 'admin')
-        self.assertEqual(effective_requires('reader'), 'reader')
-
     def test_is_permitted_checks_the_floor(self) -> None:
         with as_subject('reader'):
             self.assertTrue(is_permitted('reader'))
             self.assertFalse(is_permitted('contributor'))
-            self.assertFalse(is_permitted(''))     # fail-closed → admin-only
         with as_subject('contributor'):
             self.assertTrue(is_permitted('contributor'))
+            self.assertTrue(is_permitted('reader'))
         with as_subject('admin'):
-            self.assertTrue(is_permitted(''))      # admin satisfies the fail-closed floor
+            self.assertTrue(is_permitted('admin'))
+
+    def test_an_unknown_floor_is_satisfied_by_nobody(self) -> None:
+        """`requires` is mandatory, so an empty/garbage floor cannot come from the
+        decorator — but the rank check stays fail-closed if one ever reaches it: an
+        unknown floor admits no profile, not even admin."""
+        for profile in ('reader', 'contributor', 'maintainer', 'admin'):
+            with as_subject(profile):
+                self.assertFalse(is_permitted(''))
+                self.assertFalse(is_permitted('root'))
 
     def test_permission_is_channel_agnostic(self) -> None:
         """The channel is not an authorization axis (MT-10): the same profile is permitted the
@@ -61,7 +66,7 @@ class DecoratorEnforcementTests(unittest.TestCase):
 
     def test_unauthorized_command_is_not_registered(self) -> None:
         with as_subject('reader'):
-            @command(name='zz-test-admin')                # no requires → admin-only → skipped for reader
+            @command(name='zz-test-admin', requires='admin')   # above the reader floor → skipped
             def _f(ctx: Context) -> int:
                 return 0
         self.assertIsNone(registry.resolve('zz-test-admin'))    # invisible to help/dispatch

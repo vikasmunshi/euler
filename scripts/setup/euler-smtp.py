@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""euler-smtp — loopback SMTP submission relay (DD-8, docs/secure-web-server.md).
+"""euler-smtp — loopback SMTP submission relay (docs/web-server-guide.md § Egress).
 
 A minimal, stdlib-only ESMTP listener on loopback that relays every accepted
 message upstream (Gmail submission, STARTTLS + app password). It exists so that

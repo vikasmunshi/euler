@@ -249,7 +249,7 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('/docs/readme', body)
         self.assertIn('>README<', body)                      # the card's first line
         self.assertLess(body.index('/docs/readme'),          # ahead of the sorted guides
-                        body.index('/docs/access-control'))
+                        body.index('/docs/authorizations'))
 
     @unittest_run_loop
     async def test_readme_page_links_resolve(self) -> None:
@@ -287,11 +287,11 @@ class ContentServiceTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_doc_body_links_rewired_and_boosted(self) -> None:
         # authorizations.md links ../solver/templates/authorizations.json and
-        # access-control.md; both must resolve in-app and swap the pane (hx-*).
+        # web-server-guide.md; both must resolve in-app and swap the pane (hx-*).
         resp = await self.client.get('/docs/authorizations', headers=_READER)
         page = await resp.text()
         self.assertIn('href="/docs/file/solver/templates/authorizations.json"', page)
-        self.assertIn('href="/docs/access-control"', page)   # .md rewrite
+        self.assertIn('href="/docs/web-server-guide"', page)  # .md rewrite
         self.assertNotIn('href="../solver', page)            # no dangling repo-relative link
         # internal links are boosted (swap #content), externals are left alone
         self.assertRegex(page, r'href="/docs/file/[^"]+" hx-get="/docs/file/')
@@ -362,7 +362,7 @@ _PROGRESS_OK = '''<table><tr>
 
 
 class EditRouteTests(AioHTTPTestCase):
-    """The 5d edit routes, against a scratch repo tree (site-design §5d):
+    """The 5d edit routes, against a scratch repo tree (web-server-guide § The site):
     every write passes the 5c gate and answers with a fragment."""
 
     async def get_application(self):

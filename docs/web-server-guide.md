@@ -357,8 +357,10 @@ kits all branch on these names — so it lives in code (`solver/auth/subject.py:
 `authorizations.json`'s optional `ladder` field documents it and is validated on load; a
 mismatch fails loudly rather than silently reordering trust.
 
-A command with **no declared floor is fail-closed to `admin`**, so a new command is
-never silently exposed.
+Declaring that floor is **mandatory** — `requires` is a required
+`Literal['reader', 'contributor', 'maintainer', 'admin']` on the decorator, so a command
+that omits it is a type error rather than a silently-exposed command. There is no default
+to get wrong.
 
 ### 6.1 The policy file
 
@@ -464,8 +466,8 @@ Every command's declared floor is generated from the live registry into
 |---|---|
 | `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
 | `contributor` | `new`, `edit`, `evaluate`, `benchmark`, `compile-c`, `lint`, `mark`, `!`, `claude-api`, `claude-solve`, `costs`, `git-commit`, `git-push`, `git-hooks`, `git-identity` |
-| `maintainer` | web file-delete |
-| `admin` | `users` mutations, `user-authorize`, `key-rekey`, `key-split`, `git-merge`, `git-publish`, `manage-config`, `summary`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
+| `maintainer` | `summary` (rewrites the shared progress state), web file-delete |
+| `admin` | `users` mutations, `user-authorize`, `key-rekey`, `key-split`, `git-merge`, `git-publish`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
 
 Two floors deserve their reasoning. **`!` (raw bash) sits at `contributor`**, not admin:
 in the per-user model a shell escape grants nothing that `evaluate`'s arbitrary Python

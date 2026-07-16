@@ -1,4 +1,4 @@
-/* Content-service app shell (site-design §1/§2, 5e). Same-origin, no @import,
+/* Content-service app shell (web-server-guide § The site, 5e). Same-origin, no @import,
    no external fonts — CSP-clean. Dark-first: the dark palette is :root; light
    comes via prefers-color-scheme and the header slider's explicit data-theme.
    The four regions fill the viewport exactly; only the panes scroll. */

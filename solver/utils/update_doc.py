@@ -132,9 +132,8 @@ def _docstring(cmd: Command) -> str:
 def _availability(cmd: Command) -> str:
     """A one-line `profiles: …` availability note for *cmd*.
 
-    The profiles whose permissions satisfy the command's ``requires`` (fail-closed
-    to admin when a command declares nothing). Authorization is by profile only —
-    the channel is not an axis (MT-10).
+    The profiles at or above the command's declared ``requires`` floor. Authorization is
+    by profile only — the channel is not an axis.
     """
     return f'* profiles: {", ".join(_allowed_profiles(cmd))}'
 
@@ -189,8 +188,8 @@ def gen_command_index() -> str:
 def gen_authorization_table() -> str:
     """The authorization audit table: one row per command with its module and its
     **minimum profile** (the plain ladder floor the command declares). Rows are
-    grouped by module, then command (DD-12, re-simplified). Authorization is by
-    profile only — the channel is not an axis (MT-10).
+    grouped by module, then command. Authorization is by profile only — the channel
+    is not an axis.
     """
     rows = ['| Module | Command | Minimum profile |',
             '|--------|---------|-----------------|']

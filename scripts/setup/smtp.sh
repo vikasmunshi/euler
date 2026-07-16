@@ -5,7 +5,7 @@
 # Installs / uninstalls the small loopback submission relay through which the app
 # tier (first euler-auth: OTP + invite mail) sends email — so no app service needs
 # a direct-internet exception or the Gmail credentials. Sibling to frontend.sh /
-# egress.sh / ddns.sh / firewall.sh; see docs/secure-web-server.md (DD-8).
+# egress.sh / ddns.sh / firewall.sh; see docs/web-server-guide.md § Egress.
 #
 # Model:
 #   - The relay (scripts/setup/euler-smtp.py, deployed to /usr/local/bin/euler-smtp)
@@ -157,7 +157,7 @@ do_install() {
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
 Description=euler loopback SMTP submission relay (DD-8)
-Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/secure-web-server.md
+Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 After=network-online.target
 Wants=network-online.target
 

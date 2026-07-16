@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The authorization **subject** — the resolved security principal (DD-12).
+"""The authorization **subject** — the resolved security principal.
 
 One immutable value describing *who* is running this process and *what* they may
 do, resolved once at startup by :func:`solver.auth.identity.resolve_subject`.
