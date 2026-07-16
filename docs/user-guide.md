@@ -330,9 +330,8 @@ you have solved a problem, or translate your Python into C for comparison.
   it starts, and records it as you switch.
 - **`-s` / `--save`** tees the interactive session (typed input + console output)
   to the session log.
-- **`manage-config`** shows or sets the managed settings (`server_port`,
-  timeouts, `usd_to_eur`); **`config`**-style values persist to
-  `solver/config.json`.
+- **`manage-config`** shows or sets the managed settings (the solution timeouts
+  and `ecb_usd_rate`); they persist to `solver/config.json`.
 - **`! <cmd>`** runs a bash command in the current problem's solution directory
   (`! sh` / `! py` drop into a shell / Python interpreter).
 

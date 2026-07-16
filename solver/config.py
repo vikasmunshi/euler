@@ -136,7 +136,7 @@ class Config(AttributeDict):
     managed_config_file: ClassVar[Path] = Path(__file__).parent / 'config.json'
     version: ClassVar[str] = '0.2'
     #: The subset of settings that `load`/`dump`/`repr` round-trip through `managed_config_file`.
-    managed: ClassVar[tuple[str, ...]] = ('server_port', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate')
+    managed: ClassVar[tuple[str, ...]] = ('timeout_multiple', 'timeout_single', 'ecb_usd_rate')
 
     # Annotation-only declarations of the settings served from `_data` via `__getattr__` (they assign no
     # value, so the lookup falls through to `__getattr__` at runtime). They give static checkers the
@@ -152,7 +152,6 @@ class Config(AttributeDict):
     resource_dirname: str
     results_filename: str
     screen_width: int
-    server_port: int
     statement_filename: str
     test_cases_filename: str
     timeout_multiple: float
@@ -172,7 +171,6 @@ class Config(AttributeDict):
     history_file: Path
     last_problem_file: Path
     modules_file: Path
-    server_lock_file: Path
     session_file: Path
     solutions_dir: Path
     static_file_dir: Path
@@ -220,7 +218,6 @@ class Config(AttributeDict):
             'resource_dirname': 'resources',
             'results_filename': 'results.json',
             'screen_width': 86,
-            'server_port': 8080,
             'statement_filename': 'statement.html',
             'test_cases_filename': 'test_cases.json',
             'timeout_multiple': 30.0,  # timeout in seconds per run when runs > 1
@@ -242,7 +239,6 @@ class Config(AttributeDict):
             'history_file': user_state_dir / 'history',
             'last_problem_file': user_state_dir / 'last_problem',
             'modules_file': root_dir / 'solver/modules.csv',
-            'server_lock_file': root_dir / '.server.lock',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
             'static_file_dir': root_dir / 'solver/web/content',
@@ -299,12 +295,24 @@ class Config(AttributeDict):
             json.dumps({param: self._data[param] for param in self.managed}, indent=2))
 
     def load_managed_config(self) -> None:
-        """Overlay any persisted managed settings onto the defaults, ignoring a missing/invalid file."""
+        """Overlay the persisted managed settings onto the defaults, ignoring a missing/invalid file.
+
+        Only keys in :data:`managed` are overlaid, and a bad value is skipped rather than
+        fatal: the file is data, not code, and must never be able to break startup or reach
+        a setting that is not managed. A **retired** setting left behind in an older file
+        (or a hand-edited stray) is therefore ignored, not a `KeyError` at import.
+        """
         try:
-            for param, value in json.loads(self.managed_config_file.read_text()).items():
-                self._data[param] = type(self._data[param])(value)
-        except (FileNotFoundError, json.JSONDecodeError, ValueError):
-            pass
+            persisted = json.loads(self.managed_config_file.read_text())
+        except (FileNotFoundError, json.JSONDecodeError):
+            return
+        for param in self.managed:
+            if param not in persisted:
+                continue
+            try:
+                self._data[param] = type(self._data[param])(persisted[param])
+            except (TypeError, ValueError):
+                continue
 
 
 config: Config = Config()

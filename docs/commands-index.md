@@ -813,7 +813,7 @@ Manage configuration settings.
 
 ```
 manage-config
-[param=all|server_port|timeout_multiple|timeout_single|ecb_usd_rate] (default all)
+[param=all|timeout_multiple|timeout_single|ecb_usd_rate] (default all)
 [value=<float>|none] (default None)
 ```
 
@@ -821,9 +821,9 @@ manage-config
 Show or update a managed configuration setting.
 
 The managed settings persist to `solver/config.json` and override the
-defaults in `config.py`: `server_port` (the web server's port),
-`timeout_single` / `timeout_multiple` (solution timeouts in seconds for a
-single run and for repeated runs), and `ecb_usd_rate` (the rate `costs` uses).
+defaults in `config.py`: `timeout_single` / `timeout_multiple` (solution
+timeouts in seconds for a single run and for repeated runs), and
+`ecb_usd_rate` (the rate `costs` uses).
 
 Args:
     param:  Which setting to act on; 'all' (default) prints every setting.

@@ -37,15 +37,15 @@ def problems(which: Literal['all', 'solved', 'unsolved'] = 'all') -> int:
 
 @register(requires='admin', help_text='Manage configuration settings.')
 def manage_config(
-        param: Literal['all', 'server_port', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate'] = 'all',
+        param: Literal['all', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate'] = 'all',
         value: float | int | None = None, /,
 ) -> int:
     """Show or update a managed configuration setting.
 
     The managed settings persist to `solver/config.json` and override the
-    defaults in `config.py`: `server_port` (the web server's port),
-    `timeout_single` / `timeout_multiple` (solution timeouts in seconds for a
-    single run and for repeated runs), and `ecb_usd_rate` (the rate `costs` uses).
+    defaults in `config.py`: `timeout_single` / `timeout_multiple` (solution
+    timeouts in seconds for a single run and for repeated runs), and
+    `ecb_usd_rate` (the rate `costs` uses).
 
     Args:
         param:  Which setting to act on; 'all' (default) prints every setting.
@@ -53,7 +53,7 @@ def manage_config(
                 setting's type and saved). When omitted, the current value of
                 `param` is printed instead.
     """
-    config_params: list[str] = ['server_port', 'timeout_multiple', 'timeout_single', 'ecb_usd_rate']
+    config_params: list[str] = ['timeout_multiple', 'timeout_single', 'ecb_usd_rate']
     if param == 'all':
         param_len: int = max(len(p) for p in config_params) + 1
         for config_param in config_params:
