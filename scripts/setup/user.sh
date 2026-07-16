@@ -2,7 +2,7 @@
 # Per-user provisioning kit (euler-user) — step 3 of the multi-tenant redesign
 # ==============================================================================
 #
-# Installs / uninstalls the OS layer for the **per-user** web tier, and provisions
+# Deploys / removes the OS layer for the **per-user** web tier, and provisions
 # or tears down one collaborator at a time. This replaces the per-*profile*
 # shared-uid model: instead of three fixed rungs sharing a uid, every
 # collaborator gets their **own** uid, home, and repo clone, so their
@@ -11,7 +11,7 @@
 #
 # Two planes:
 #
-#   install / uninstall / status  — the SHARED layer, once per host:
+#   deploy / remove / status  — the SHARED layer, once per host:
 #     - the euler-user parent group (egress + traversal);
 #     - /etc/euler/user.env (scoped runtime config, no secrets);
 #     - the socket-activated euler-user@.service + euler-user@.socket template,
@@ -39,7 +39,7 @@
 # Because the units live in root's systemd and run as locked-down users, lifecycle
 # requires sudo.
 #
-# Actions: install | uninstall | upgrade | redeploy | provision | deprovision | status | help
+# Actions: deploy | remove | upgrade | redeploy | provision | deprovision | status | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -71,12 +71,12 @@ usage() {
     cat <<USAGE
 Usage: $0 <action> [args]
 
-  install                      Create the euler-user group, /etc/euler/user.env, and —
+  deploy                       Create the euler-user group, /etc/euler/user.env, and —
                                when solver.web.user is in the /opt/euler venv — the
                                euler-user@.service/.socket template. Idempotent.
-  uninstall                    Remove the template + user.env (prompted). Provisioned
+  remove                       Remove the template + user.env (prompted). Provisioned
                                users must be deprovisioned first.
-  upgrade                      Re-assert the shared layer.
+  upgrade                      Alias of deploy: re-assert the shared layer.
   redeploy                     Refresh /etc/euler/user.env and stop the running
                                instances so their sockets re-activate them against a
                                freshly rebuilt venv (drops live shells).
@@ -421,7 +421,7 @@ do_provision() {
     # the internet directly, bypassing Squid. firewall.sh enumerates euler-user-* by group.
     if [ -f /etc/systemd/system/euler-firewall.service ]; then
         echo "Reloading the egress firewall to cover $(user_of "${slug}")..."
-        "${SCRIPT_DIR}/firewall.sh" reload || echo "warn: firewall reload failed — run 'make upgrade-firewall'"
+        "${SCRIPT_DIR}/firewall.sh" reload || echo "warn: firewall reload failed — run 'make deploy-firewall'"
     fi
     echo "Provisioned ${slug}${email:+ (}${email}${email:+)} → profile ${profile}."
     echo "Next (self-service, in the user's web shell): \`git-identity\` (GitHub sign-in +"
@@ -469,7 +469,7 @@ do_deprovision() {
 
 # ── install / uninstall / status ──────────────────────────────────────────────────────
 
-do_install() {
+do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
     require_python || return 1
@@ -506,7 +506,7 @@ do_redeploy() {
     do_status
 }
 
-do_uninstall() {
+do_remove() {
     check_can_sudo || return 1
     # Any provisioned users left? Refuse to strip the shared layer out from under them.
     local leftover
@@ -537,7 +537,7 @@ do_status() {
             echo "venv:        … solver.web.user not in the venv yet (step 4)"
         fi
     else
-        echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh / user.sh install)"
+        echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh / user.sh deploy)"
     fi
     getent group "${USER_GROUP}" > /dev/null \
         && echo "group:       ✓ ${USER_GROUP}" || echo "group:       ✗ ${USER_GROUP} missing"
@@ -586,10 +586,10 @@ status_one() {
 ACTION="${1:-status}"
 shift || true
 case "${ACTION}" in
-    install)     do_install ;;
-    upgrade)     do_install ;;
+    deploy)      do_deploy ;;
+    upgrade)     do_deploy ;;
     redeploy)    do_redeploy ;;
-    uninstall)   do_uninstall ;;
+    remove)      do_remove ;;
     provision)   do_provision "$@" ;;
     deprovision) do_deprovision "$@" ;;
     status)      do_status "$@" ;;

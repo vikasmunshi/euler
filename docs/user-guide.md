@@ -79,7 +79,7 @@ shell script or a `Makefile` target (`solver "eval 42 && benchmark 42" && echo o
 The same shell — plus a solution viewer and an in-browser editor — is served by
 the **deployed web stack**, not by a local process you start: a TLS edge, an SRP
 login, and one service per collaborator. Its architecture and deployment are in
-[web-server-guide.md](web-server-guide.md) (`make install-web`).
+[web-server-guide.md](web-server-guide.md) (`make deploy-web`).
 
 Signing in and browsing to `/` gives an `xterm.js` terminal attached to **your own
 persistent `solver` shell**: it is forked the first time you connect (as your

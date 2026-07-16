@@ -2,7 +2,7 @@
 # Auth service kit (euler-auth)
 # ====================================================================================
 #
-# Installs / uninstalls / upgrades the runtime for the auth service: the service
+# Deploys / removes / upgrades the runtime for the auth service: the service
 # identity (euler-auth) and wheel-gated admin plane, the root-owned /opt/euler
 # system venv the app services run from, the scoped /etc/euler/auth.env,
 # the /var/lib/euler-auth state dir, and — once the solver.web.auth module
@@ -13,7 +13,7 @@
 # Model:
 #   - The app services run from a root-owned system venv at /opt/euler, NOT the
 #     repo checkout: the service users cannot traverse the repo owner's 0750 home
-#     install/upgrade does `pip install <repo>[ai,dev,solutions,web]` into it
+#     deploy/upgrade does `pip install <repo>[ai,dev,solutions,web]` into it
 #     as root (the shared venv.sh helper — one definition for all app-service kits).
 #   - euler-auth: own primary group (state files are euler-auth:euler-auth 0600),
 #     supplementary member of euler-web (binds its public socket group euler-web
@@ -29,7 +29,7 @@
 #     directly into auth.env (never ~/.euler/env) and preserved across upgrades.
 #     euler-auth never reads the full ~/.euler/env.
 #   - The systemd unit is installed only when solver.web.auth is importable from
-#     the deployed venv (build-order step 4); until then install/upgrade report it
+#     the deployed venv (build-order step 4); until then deploy/upgrade report it
 #     as deferred. Unit carries the systemd egress filter (IPAddressDeny=any +
 #     IPAddressAllow=localhost): the auth service is loopback-only by design.
 #
@@ -44,7 +44,7 @@
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
 # (start/stop/restart) requires sudo.
 #
-# Actions: install | uninstall | upgrade | status | help
+# Actions: deploy | remove | upgrade | status | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -73,7 +73,7 @@ WEB_GROUP="euler-web"
 . "${SCRIPT_DIR}/venv.sh"
 AUTH_USER="euler-auth"
 AUTH_GROUP="euler-auth"
-LEGACY_ADM_GROUP="euler-adm"   # pre-wheel-gate admin group; removed on install/upgrade
+LEGACY_ADM_GROUP="euler-adm"   # pre-wheel-gate admin group; removed on deploy/upgrade
 
 # The loopback mail relay the auth service submits to (must match smtp.sh).
 SMTP_RELAY="127.0.0.1:8025"
@@ -88,16 +88,17 @@ TERMS_VERSION=""
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|upgrade|redeploy|status|help]
+Usage: $0 [deploy|remove|upgrade|redeploy|status|help]
 
-  install    Create euler-auth, build the /opt/euler system venv (pip install
+  deploy     Create euler-auth, build the /opt/euler system venv (pip install
              <repo>[web] as root), deploy /etc/euler/auth.env (with a generated
              root-only EULER_ADMIN_TOKEN) and /var/lib/euler-auth, and — when
              solver.web.auth exists in the venv — install the root-owned,
-             boot-enabled euler-auth.service.
-  uninstall  Remove the service + venv (prompts before removing auth.env, the
+             boot-enabled euler-auth.service. Idempotent.
+  remove     Remove the service + venv (prompts before removing auth.env, the
              state dir, and the users/groups).
-  upgrade    Re-deploy the venv from the repo, refresh auth.env + unit, restart.
+  upgrade    Alias of deploy: re-deploy the venv from the repo, refresh auth.env
+             + unit, restart.
   redeploy   Fast path: reinstall the repo into the /opt/euler venv (the shared
              code for auth AND content), re-merge the authorizations SoR, and
              restart the auth service — no identities, token, or unit changes.
@@ -352,7 +353,7 @@ EOF
 
 # ── install / uninstall ───────────────────────────────────────────────────────────
 
-do_install() {
+do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
     require_python || return 1
@@ -394,12 +395,12 @@ do_redeploy() {
         sudo systemctl restart "${SERVICE_NAME}"
         echo "Restarted ${SERVICE_NAME}"
     else
-        echo "note: ${SERVICE_NAME} not installed yet — run '$0 install'."
+        echo "note: ${SERVICE_NAME} not installed yet — run '$0 deploy'."
     fi
     do_status
 }
 
-do_uninstall() {
+do_remove() {
     check_can_sudo || return 1
     if [ -f "${SERVICE_DEST}" ]; then
         sudo systemctl disable --now "${SERVICE_NAME}" 2>/dev/null || true
@@ -472,10 +473,10 @@ do_status() {
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
-    upgrade)   do_install ;;
+    deploy)    do_deploy ;;
+    upgrade)   do_deploy ;;
     redeploy)  do_redeploy ;;
-    uninstall) do_uninstall ;;
+    remove)    do_remove ;;
     status)    do_status ;;
     -h | --help | help) usage ;;
     *) echo "Unknown action: ${ACTION}"; usage; exit 1 ;;

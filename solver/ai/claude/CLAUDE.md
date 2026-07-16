@@ -36,8 +36,17 @@ solver "eval 42; benchmark 42"
 
 # Deploy the web front end (systemd services behind a TLS edge — needs sudo).
 # There is no local server: see docs/web-server-guide.md.
-make install-web        # also: uninstall-web | upgrade-web | redeploy-web
+make deploy-web         # also: remove-web | redeploy-web | upgrade-web
 ```
+
+Make target verbs follow the two kinds of target, and always match the action the
+underlying script in `scripts/setup/` takes:
+
+- **local** (what the terminal solver needs — apt packages, `.venv`, hooks, completions,
+  Chrome, Claude Code, Node.js): `install` / `uninstall`.
+- **system** (what the solver web needs — root's systemd, the `euler-*` identities,
+  `/etc/euler`, `/opt/euler`): `deploy` / `remove` / `redeploy`, plus `upgrade` on the
+  kits where it differs from `deploy` (see docs/web-server-guide.md § 14.2).
 
 ## Git Hooks
 

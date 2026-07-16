@@ -2,7 +2,7 @@
 # Egress (forward proxy) Setup Script
 # ====================================================================
 #
-# Installs / uninstalls / upgrades the Squid forward proxy that is the *only* path
+# Deploys / removes / upgrades the Squid forward proxy that is the *only* path
 # out to the internet for the shell, AI features, the problem scraper, and `gh`. It
 # enforces a **domain allowlist** (default-deny), operationalising the "plaintext must
 # never leave the repo" rule at the network layer. Sibling to scripts/setup/frontend.sh
@@ -26,7 +26,7 @@
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
 # (start/stop/restart) requires sudo.
 #
-# Actions: install | uninstall | upgrade | status | reload | help
+# Actions: deploy | remove | upgrade | status | reload | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -64,14 +64,16 @@ DEFAULT_ALLOWLIST=(
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|upgrade|status|reload|help]
+Usage: $0 [deploy|remove|upgrade|status|reload|help]
 
-  install    Install Squid, create the euler-proxy user, generate the allowlist config
+  deploy     Install Squid, create the euler-proxy user, generate the allowlist config
              + egress.env, and install the root-owned ${SERVICE_NAME} (boot-enabled).
-  uninstall  Remove the unit and Squid; prompt before deleting ${PROXY_CONF_DIR},
+             Idempotent.
+  remove     Remove the unit and Squid; prompt before deleting ${PROXY_CONF_DIR},
              ${EGRESS_ENV}, and the euler-proxy user.
-  upgrade    Upgrade Squid and regenerate the config + unit.
-  status     Show install state, unit state, and an allow/deny probe through the proxy.
+  upgrade    Upgrade the Squid package itself and regenerate the config + unit —
+             unlike the other kits, this is NOT an alias of deploy.
+  status     Show deploy state, unit state, and an allow/deny probe through the proxy.
   reload     Reconfigure the running proxy (sudo systemctl reload).
 
   Listener: ${PROXY_ADDR}:${PROXY_PORT} (loopback). Allowlist: ${ALLOWLIST}.
@@ -322,7 +324,7 @@ _probe_allow() {
 
 # ── Actions ───────────────────────────────────────────────────────────────────────
 
-do_install() {
+do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
 
@@ -363,7 +365,7 @@ do_reload() {
     echo "Reloaded ${SERVICE_NAME}"
 }
 
-do_uninstall() {
+do_remove() {
     check_can_sudo || return 1
     remove_service
 
@@ -422,8 +424,8 @@ do_status() {
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
-    uninstall) do_uninstall ;;
+    deploy)    do_deploy ;;
+    remove)    do_remove ;;
     upgrade)   do_upgrade ;;
     reload)    do_reload ;;
     status)    do_status ;;

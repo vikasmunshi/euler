@@ -172,7 +172,7 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   concerns into one page: a browser **terminal** (xterm.js over a PTY running a real `solver` shell), a
   **viewer** that assembles each problem's page - statement, notes, and benchmark results - on the fly, and an
   in-browser **editor** that saves, evaluates, and deletes a problem's solution files. Each collaborator gets
-  their own system user, home, clone, and encrypted vault; `make install-web` deploys it and
+  their own system user, home, clone, and encrypted vault; `make deploy-web` deploys it and
   [`docs/web-server-guide.md`](docs/web-server-guide.md) documents it.
 - **Hosted over HTTPS** - the web front end is served publicly at
   [euler.vikasmunshi.com](https://euler.vikasmunshi.com). **Caddy** terminates TLS and reverse-proxies to the
@@ -181,7 +181,7 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   **SRP-6a** login (the password never crosses the wire), and each collaborator gets their own system user,
   home, repo clone, and encrypted vault, with a **profile** (reader / contributor / maintainer / admin)
   deciding which commands and routes they may use. See the
-  [web server guide](docs/web-server-guide.md) for the full design and `make install-web` to deploy it.
+  [web server guide](docs/web-server-guide.md) for the full design and `make deploy-web` to deploy it.
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
   any language that compiles or runs as a script.

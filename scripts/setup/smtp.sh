@@ -2,7 +2,7 @@
 # Loopback SMTP relay (euler-smtp)
 # ================================================================================
 #
-# Installs / uninstalls the small loopback submission relay through which the app
+# Deploys / removes the small loopback submission relay through which the app
 # tier (first euler-auth: OTP + invite mail) sends email — so no app service needs
 # a direct-internet exception or the Gmail credentials. Sibling to frontend.sh /
 # egress.sh / ddns.sh / firewall.sh; see docs/web-server-guide.md § Egress.
@@ -27,7 +27,7 @@
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
 # (start/stop/restart) requires sudo.
 #
-# Actions: install | uninstall | upgrade | status | test | help
+# Actions: deploy | remove | upgrade | status | test | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -63,17 +63,18 @@ SMTP_APP_PASSWORD=""
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|upgrade|status|test|help]
+Usage: $0 [deploy|remove|upgrade|status|test|help]
 
-  install    Create the euler-smtp user, deploy the relay + scoped smtp.env, and
-             install the root-owned, boot-enabled euler-smtp.service.
-  uninstall  Remove the service + relay (prompts before removing smtp.env + user).
-  upgrade    Redeploy the relay, regenerate smtp.env + unit, restart.
+  deploy     Create the euler-smtp user, deploy the relay + scoped smtp.env, and
+             install the root-owned, boot-enabled euler-smtp.service. Idempotent.
+  remove     Remove the service + relay (prompts before removing smtp.env + user).
+  upgrade    Alias of deploy: redeploy the relay, regenerate smtp.env + unit,
+             restart.
   status     Show the unit state and probe the loopback listener (EHLO).
   test       Send a real test mail to SMTP_ADDRESS through the relay.
 
   Authoring config in ~/.euler/env: SMTP_ADDRESS + SMTP_APP_PASSWORD (Gmail app
-  password). install deploys a scoped copy to ${SMTP_ENV} for ${SMTP_USER}.
+  password). deploy installs a scoped copy to ${SMTP_ENV} for ${SMTP_USER}.
 USAGE
 }
 
@@ -144,7 +145,7 @@ EOF
 
 # ── install / uninstall (root-owned unit) ─────────────────────────────────────────
 
-do_install() {
+do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
     load_config || return 1
@@ -198,7 +199,7 @@ EOF
     do_status
 }
 
-do_uninstall() {
+do_remove() {
     check_can_sudo || return 1
     if [ -f "${SERVICE_DEST}" ]; then
         sudo systemctl disable --now "${SERVICE_NAME}" 2>/dev/null || true
@@ -273,9 +274,9 @@ PY
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
-    upgrade)   do_install ;;
-    uninstall) do_uninstall ;;
+    deploy)    do_deploy ;;
+    upgrade)   do_deploy ;;
+    remove)    do_remove ;;
     status)    do_status ;;
     test)      do_test ;;
     -h | --help | help) usage ;;

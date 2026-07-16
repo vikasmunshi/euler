@@ -2,7 +2,7 @@
 # Kernel egress firewall (nftables)
 # =================================================================================
 #
-# Installs / uninstalls the host nftables ruleset that makes "egress only via Squid"
+# Deploys / removes the host nftables ruleset that makes "egress only via Squid"
 # a *kernel* property instead of an environment-variable convention: scoped to the
 # euler-* service uids, it permits loopback plus only the specific (uid, port) egress
 # each service genuinely needs, then drops the rest. Sibling to frontend.sh /
@@ -35,7 +35,7 @@
 #   (infra uids)  udp/tcp 53    — DNS, for resolvers off-loopback
 #   all euler-*   loopback      — /run/euler sockets, Squid :3128, the mail relay
 #
-# Actions: install | uninstall | reload | render | status | help
+# Actions: deploy | remove | reload | render | status | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -67,11 +67,12 @@ RELAY_BARRED=(euler-caddy euler-proxy euler-acme euler-ddns)
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|reload|render|status|help]
+Usage: $0 [deploy|remove|reload|render|status|help]
 
-  install    Install nftables, generate ${NFT_CONF} and install the root-owned,
+  deploy     Install nftables, generate ${NFT_CONF} and install the root-owned,
              boot-enabled ${SERVICE_NAME} (oneshot: loads the euler table).
-  uninstall  Flush the euler table and remove the ruleset + unit.
+             Idempotent — it is also its own upgrade path.
+  remove     Flush the euler table and remove the ruleset + unit.
   reload     Regenerate the ruleset (picking up newly created euler-* users) and
              re-apply it.
   render     Print the generated ruleset to stdout (no changes made).
@@ -254,7 +255,7 @@ deploy_conf() {
 
 # ── install / uninstall / reload ──────────────────────────────────────────────────
 
-do_install() {
+do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
     ensure_deps
@@ -290,11 +291,11 @@ do_reload() {
         sudo systemctl reload-or-restart "${SERVICE_NAME}"
         echo "Ruleset re-applied."
     else
-        echo "note: ${SERVICE_NAME} not installed — run '$0 install' to apply at boot."
+        echo "note: ${SERVICE_NAME} not installed — run '$0 deploy' to apply at boot."
     fi
 }
 
-do_uninstall() {
+do_remove() {
     check_can_sudo || return 1
     if [ -f "${SERVICE_DEST}" ]; then
         sudo systemctl disable --now "${SERVICE_NAME}" 2>/dev/null || true
@@ -354,8 +355,8 @@ do_status() {
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
-    uninstall) do_uninstall ;;
+    deploy)    do_deploy ;;
+    remove)    do_remove ;;
     reload)    do_reload ;;
     render)    render_conf ;;
     status)    do_status ;;

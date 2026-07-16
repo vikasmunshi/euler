@@ -82,11 +82,11 @@ def _provision_kit(action: str, slug: str, *rest: str) -> int:
     uid, home, the filter-disabled clone on ``user/<slug>``, and the socket. Best-effort:
     a host without the kit (a plain dev checkout without the web stack laid down) has
     nothing to provision, so a missing script is a note, not a failure — the account map
-    + invite still stand and the instance can be laid down later with ``make install-user``.
+    + invite still stand and the instance can be laid down later with ``make deploy-user``.
     """
     script = Path(config.root_dir) / 'scripts' / 'setup' / 'user.sh'
     if not script.exists():
-        console.print(f'[muted]note: {script} not present — skipping OS {action} (run make install-user)[/muted]')
+        console.print(f'[muted]note: {script} not present — skipping OS {action} (run make deploy-user)[/muted]')
         return 0
     try:
         return subprocess.run(['sudo', 'bash', str(script), action, slug, *rest], check=False).returncode

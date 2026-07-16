@@ -1,4 +1,21 @@
-.PHONY: install-all install-minimal install-system install-system-venv uninstall-system-venv reinstall-system-venv install-chrome install-primesieve-numpy install-hooks uninstall-hooks install-completions uninstall-completions install-credentials install-claude uninstall-claude install-frontend uninstall-frontend upgrade-frontend install-egress uninstall-egress upgrade-egress install-ddns uninstall-ddns install-firewall uninstall-firewall install-smtp uninstall-smtp upgrade-smtp install-auth uninstall-auth upgrade-auth install-user uninstall-user upgrade-user redeploy-user redeploy-auth redeploy-frontend redeploy-web install-nodejs uninstall-nodejs install-web uninstall-web upgrade-web test run uninstall
+# Target verbs, by kind:
+#   local  (terminal solver, incl. system packages) — install / uninstall
+#   system (the web stack, sudo + systemd)         — deploy / remove / redeploy [/ upgrade]
+# Each system target's verb matches the action its script in scripts/setup/ takes.
+
+.PHONY: install-all install-minimal install-system install-chrome install-primesieve-numpy \
+        install-hooks uninstall-hooks install-completions uninstall-completions \
+        install-credentials install-claude uninstall-claude install-nodejs uninstall-nodejs \
+        deploy-system-venv remove-system-venv redeploy-system-venv \
+        deploy-frontend remove-frontend upgrade-frontend redeploy-frontend \
+        deploy-egress remove-egress upgrade-egress \
+        deploy-ddns remove-ddns \
+        deploy-firewall remove-firewall \
+        deploy-smtp remove-smtp upgrade-smtp \
+        deploy-auth remove-auth upgrade-auth redeploy-auth \
+        deploy-user remove-user upgrade-user redeploy-user \
+        deploy-web remove-web upgrade-web redeploy-web \
+        test run uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -28,21 +45,6 @@ install-minimal: install-system install-chrome $(VENV)
 install-system:
 	./scripts/setup/dev_env.sh install python primesieve c
 	@printf "✓ install-system complete: apt packages installed\n"
-
-## Deploy the root-owned /opt/euler system venv the euler-* app services run from (sudo)
-install-system-venv:
-	./scripts/setup/venv.sh deploy
-	@printf "✓ install-system-venv complete: /opt/euler venv deployed\n"
-
-## Remove the /opt/euler system venv (leaves service identities, state, and units intact) (sudo)
-uninstall-system-venv:
-	./scripts/setup/venv.sh remove
-	@printf "✓ uninstall-system-venv complete: /opt/euler venv removed\n"
-
-## Rebuild the /opt/euler system venv from scratch: remove, then redeploy (sudo)
-reinstall-system-venv:
-	./scripts/setup/venv.sh reinstall
-	@printf "✓ reinstall-system-venv complete: /opt/euler venv rebuilt\n"
 
 ## Install Chrome browser
 install-chrome:
@@ -90,101 +92,149 @@ uninstall-claude:
 	./scripts/setup/claude_code.sh uninstall
 	@printf "✓ uninstall-claude complete: Claude Code CLI removed\n"
 
-## Install the web edge: Caddy + acme.sh + euler-caddy.service (see docs/server-redesign.md)
-install-frontend:
-	./scripts/setup/frontend.sh install
-	@printf "✓ install-frontend complete: web edge installed (sudo systemctl for lifecycle)\n"
+## Install a standalone Node.js under ~/.local (dev-only, no sudo; drives the SRP interop test)
+install-nodejs:
+	./scripts/setup/nodejs.sh install
+	@printf "✓ install-nodejs complete\n"
+
+## Remove the standalone Node.js installed by install-nodejs
+uninstall-nodejs:
+	./scripts/setup/nodejs.sh uninstall
+	@printf "✓ uninstall-nodejs complete\n"
+
+## Create venv if it doesn't exist
+$(VENV):
+	python3.14 -m venv $(VENV)
+	@printf "✓ venv created at $(VENV)\n"
+
+## Run the unit test suite (tests/)
+test: $(VENV)
+	$(PYTHON) -m unittest discover -s tests -t .
+
+## Run the interactive solver shell
+run: $(VENV)
+	$(VENV)/bin/solver
+
+## Remove the venv (system deps must be removed separately)
+uninstall: uninstall-hooks uninstall-completions
+	rm -rf $(VENV) solver.egg-info
+	@printf "✓ uninstall complete: venv removed\n"
+	@printf "To remove system dependencies run:\n\t./scripts/setup/dev_env.sh uninstall python primesieve c\n"
+	@printf "To remove the Claude Code CLI run:\n\tmake uninstall-claude\n"
+
+# ── The web stack: deploy / remove / redeploy (sudo + systemd) ─────────────────────
+
+## Deploy the root-owned /opt/euler system venv the euler-* app services run from (sudo)
+deploy-system-venv:
+	./scripts/setup/venv.sh deploy
+	@printf "✓ deploy-system-venv complete: /opt/euler venv deployed\n"
+
+## Remove the /opt/euler system venv (leaves service identities, state, and units intact) (sudo)
+remove-system-venv:
+	./scripts/setup/venv.sh remove
+	@printf "✓ remove-system-venv complete: /opt/euler venv removed\n"
+
+## Rebuild the /opt/euler system venv from scratch: remove, then deploy (sudo)
+redeploy-system-venv:
+	./scripts/setup/venv.sh redeploy
+	@printf "✓ redeploy-system-venv complete: /opt/euler venv rebuilt\n"
+
+## Deploy the web edge: Caddy + acme.sh + euler-caddy.service (see docs/web-server-guide.md)
+deploy-frontend:
+	./scripts/setup/frontend.sh deploy
+	@printf "✓ deploy-frontend complete: web edge deployed (sudo systemctl for lifecycle)\n"
 
 ## Remove the web edge (prompts before deleting /etc/euler, acme.sh, and the service users)
-uninstall-frontend:
-	./scripts/setup/frontend.sh uninstall
-	@printf "✓ uninstall-frontend complete: web edge removed\n"
+remove-frontend:
+	./scripts/setup/frontend.sh remove
+	@printf "✓ remove-frontend complete: web edge removed\n"
 
-## Upgrade the web edge (Caddy + acme.sh; regenerate the Caddyfile + unit)
+## Upgrade the web edge packages (Caddy + acme.sh; regenerate the Caddyfile + unit)
 upgrade-frontend:
 	./scripts/setup/frontend.sh upgrade
 	@printf "✓ upgrade-frontend complete: web edge upgraded\n"
 
-## Install the egress proxy: Squid domain-allowlist + euler-proxy.service (see docs/server-redesign.md)
-install-egress:
-	./scripts/setup/egress.sh install
-	@printf "✓ install-egress complete: egress proxy installed (sudo systemctl for lifecycle)\n"
+## Deploy the egress proxy: Squid domain-allowlist + euler-proxy.service (see docs/web-server-guide.md)
+deploy-egress:
+	./scripts/setup/egress.sh deploy
+	@printf "✓ deploy-egress complete: egress proxy deployed (sudo systemctl for lifecycle)\n"
 
 ## Remove the egress proxy (prompts before deleting /etc/euler-proxy and the euler-proxy user)
-uninstall-egress:
-	./scripts/setup/egress.sh uninstall
-	@printf "✓ uninstall-egress complete: egress proxy removed\n"
+remove-egress:
+	./scripts/setup/egress.sh remove
+	@printf "✓ remove-egress complete: egress proxy removed\n"
 
-## Upgrade the egress proxy (Squid; regenerate the config + unit)
+## Upgrade the egress proxy package (Squid; regenerate the config + unit)
 upgrade-egress:
 	./scripts/setup/egress.sh upgrade
 	@printf "✓ upgrade-egress complete: egress proxy upgraded\n"
 
-## Install the dynamic-DNS updater timer (public access only — keeps the A record current)
-install-ddns:
-	./scripts/setup/ddns.sh install
-	@printf "✓ install-ddns complete: DDNS timer installed\n"
+## Deploy the dynamic-DNS updater timer (public access only — keeps the A record current)
+deploy-ddns:
+	./scripts/setup/ddns.sh deploy
+	@printf "✓ deploy-ddns complete: DDNS timer deployed\n"
 
 ## Remove the dynamic-DNS updater timer (name.com records left untouched)
-uninstall-ddns:
-	./scripts/setup/ddns.sh uninstall
-	@printf "✓ uninstall-ddns complete: DDNS timer removed\n"
+remove-ddns:
+	./scripts/setup/ddns.sh remove
+	@printf "✓ remove-ddns complete: DDNS timer removed\n"
 
-## Install the kernel egress firewall: per-uid nftables ruleset + euler-firewall.service (DD-8)
-install-firewall:
-	./scripts/setup/firewall.sh install
-	@printf "✓ install-firewall complete: euler egress ruleset loaded (boot-enabled)\n"
+## Deploy the kernel egress firewall: per-uid nftables ruleset + euler-firewall.service (DD-8)
+deploy-firewall:
+	./scripts/setup/firewall.sh deploy
+	@printf "✓ deploy-firewall complete: euler egress ruleset loaded (boot-enabled)\n"
 
 ## Remove the kernel egress firewall (flushes the euler table; nothing else touched)
-uninstall-firewall:
-	./scripts/setup/firewall.sh uninstall
-	@printf "✓ uninstall-firewall complete: euler egress ruleset removed\n"
+remove-firewall:
+	./scripts/setup/firewall.sh remove
+	@printf "✓ remove-firewall complete: euler egress ruleset removed\n"
 
-## Install the loopback SMTP relay: euler-smtp user + service, scoped Gmail creds (DD-8)
-install-smtp:
-	./scripts/setup/smtp.sh install
-	@printf "✓ install-smtp complete: loopback mail relay installed (sudo systemctl for lifecycle)\n"
+## Deploy the loopback SMTP relay: euler-smtp user + service, scoped Gmail creds (DD-8)
+deploy-smtp:
+	./scripts/setup/smtp.sh deploy
+	@printf "✓ deploy-smtp complete: loopback mail relay deployed (sudo systemctl for lifecycle)\n"
 
 ## Remove the loopback SMTP relay (prompts before deleting smtp.env and the euler-smtp user)
-uninstall-smtp:
-	./scripts/setup/smtp.sh uninstall
-	@printf "✓ uninstall-smtp complete: loopback mail relay removed\n"
+remove-smtp:
+	./scripts/setup/smtp.sh remove
+	@printf "✓ remove-smtp complete: loopback mail relay removed\n"
 
-## Upgrade the loopback SMTP relay (redeploy the relay + config + unit, restart)
+## Upgrade the loopback SMTP relay (alias of deploy: relay + config + unit, restart)
 upgrade-smtp:
 	./scripts/setup/smtp.sh upgrade
 	@printf "✓ upgrade-smtp complete: loopback mail relay upgraded\n"
 
-## Install the auth-service runtime: euler-auth/euler-adm + /opt/euler venv + auth.env (DD-5/DD-6)
-install-auth:
-	./scripts/setup/auth.sh install
-	@printf "✓ install-auth complete: auth runtime deployed (unit deferred until solver.web.auth lands)\n"
+## Deploy the auth-service runtime: euler-auth/euler-adm + /opt/euler venv + auth.env (DD-5/DD-6)
+deploy-auth:
+	./scripts/setup/auth.sh deploy
+	@printf "✓ deploy-auth complete: auth runtime deployed\n"
 
 ## Remove the auth service (prompts before deleting the venv, state, and identities)
-uninstall-auth:
-	./scripts/setup/auth.sh uninstall
-	@printf "✓ uninstall-auth complete: auth service removed\n"
+remove-auth:
+	./scripts/setup/auth.sh remove
+	@printf "✓ remove-auth complete: auth service removed\n"
 
-## Upgrade the auth service (pip re-install the repo into /opt/euler, refresh config + unit)
+## Upgrade the auth service (alias of deploy: pip re-install the repo into /opt/euler,
+## refresh config + unit)
 upgrade-auth:
 	./scripts/setup/auth.sh upgrade
 	@printf "✓ upgrade-auth complete: auth service upgraded\n"
 
-## Install the per-user provisioning layer (MT-7): the euler-user group,
+## Deploy the per-user provisioning layer (MT-7): the euler-user group,
 ## /etc/euler/user.env, and the euler-user@.service/.socket template. Per-collaborator
 ## uids/homes/clones are created later by `users add <email>`
 ## (solver.web.auth.commands → user.sh provision), which clones ~/euler straight
 ## from the public GitHub repo (ciphertext at rest, MT-13).
-install-user:
-	./scripts/setup/user.sh install
-	@printf "✓ install-user complete: per-user provisioning layer deployed\n"
+deploy-user:
+	./scripts/setup/user.sh deploy
+	@printf "✓ deploy-user complete: per-user provisioning layer deployed\n"
 
 ## Remove the per-user layer (refuses while any euler-user-<slug> remains)
-uninstall-user:
-	./scripts/setup/user.sh uninstall
-	@printf "✓ uninstall-user complete: per-user provisioning layer removed\n"
+remove-user:
+	./scripts/setup/user.sh remove
+	@printf "✓ remove-user complete: per-user provisioning layer removed\n"
 
-## Re-assert the shared per-user layer (picks up step-4's unit template)
+## Re-assert the shared per-user layer (alias of deploy; re-lays the unit template)
 upgrade-user:
 	./scripts/setup/user.sh upgrade
 	@printf "✓ upgrade-user complete: per-user provisioning layer upgraded\n"
@@ -195,32 +245,22 @@ redeploy-user:
 	./scripts/setup/user.sh redeploy
 	@printf "✓ redeploy-user complete: per-user config refreshed, instances bounced\n"
 
-## Install a standalone Node.js under ~/.local (dev-only; drives the SRP interop test)
-install-nodejs:
-	./scripts/setup/nodejs.sh install
-	@printf "✓ install-nodejs complete\n"
-
-## Remove the standalone Node.js installed by install-nodejs
-uninstall-nodejs:
-	./scripts/setup/nodejs.sh uninstall
-	@printf "✓ uninstall-nodejs complete\n"
-
-## Install the full web stack, in dependency order: edge (Caddy+ACME+web-content),
+## Deploy the full web stack, in dependency order: edge (Caddy+ACME+web-content),
 ## egress (Squid), DDNS, kernel egress firewall, SMTP relay, auth service, and the
 ## per-user provisioning layer (MT-4 — the retired per-profile content/ws kits are
-## no longer installed). Each kit stays independently operable; the later kits
+## no longer deployed). Each kit stays independently operable; the later kits
 ## reload the firewall as their service users appear. (sudo required)
-install-web: install-frontend install-egress install-ddns install-firewall install-smtp install-auth install-user
-	@printf "✓ install-web complete: full web stack installed\n"
+deploy-web: deploy-frontend deploy-egress deploy-ddns deploy-firewall deploy-smtp deploy-auth deploy-user
+	@printf "✓ deploy-web complete: full web stack deployed\n"
 
 ## Remove the full web stack (reverse order; the kits prompt before deleting state)
-uninstall-web: uninstall-user uninstall-auth uninstall-smtp uninstall-firewall uninstall-ddns uninstall-egress uninstall-frontend
-	@printf "✓ uninstall-web complete: full web stack removed\n"
+remove-web: remove-user remove-auth remove-smtp remove-firewall remove-ddns remove-egress remove-frontend
+	@printf "✓ remove-web complete: full web stack removed\n"
 
 ## Upgrade the full web stack in place (regenerate configs, redeploy, restart;
-## ddns.sh install is its idempotent upgrade, and the firewall reload is the
-## final consistency pass over the euler uids)
-upgrade-web: upgrade-frontend upgrade-egress install-ddns upgrade-smtp upgrade-auth upgrade-user
+## ddns and firewall have no upgrade action — their deploy is idempotent and doubles
+## as one, and the firewall reload is the final consistency pass over the euler uids)
+upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-user
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
 
@@ -242,25 +282,3 @@ redeploy-frontend:
 ## push it" turnaround.
 redeploy-web: redeploy-auth redeploy-user redeploy-frontend
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
-
-# Standalone Node.js (no sudo):
-
-## Create venv if it doesn't exist
-$(VENV):
-	python3.14 -m venv $(VENV)
-	@printf "✓ venv created at $(VENV)\n"
-
-## Run the unit test suite (tests/)
-test: $(VENV)
-	$(PYTHON) -m unittest discover -s tests -t .
-
-## Run the interactive solver shell
-run: $(VENV)
-	$(VENV)/bin/solver
-
-## Remove the venv (system deps must be removed separately)
-uninstall: uninstall-hooks uninstall-completions
-	rm -rf $(VENV) solver.egg-info
-	@printf "✓ uninstall complete: venv removed\n"
-	@printf "To remove system dependencies run:\n\t./scripts/setup/dev_env.sh uninstall python primesieve c\n"
-	@printf "To remove the Claude Code CLI run:\n\tmake uninstall-claude\n"

@@ -8,9 +8,9 @@
 #   scripts/git/publish.sh            --dry-run, -h/--help, <dir>...
 #   scripts/git/status.sh             --summary
 #   scripts/git/sync.sh               --dry-run
-#   scripts/setup/frontend.sh         install, uninstall, upgrade, status, renew, reload, help
-#   scripts/setup/egress.sh           install, uninstall, upgrade, status, reload, help
-#   scripts/setup/ddns.sh             install, update, status, uninstall, help
+#   scripts/setup/frontend.sh         deploy, remove, upgrade, redeploy, status, renew, reload, help
+#   scripts/setup/egress.sh           deploy, remove, upgrade, status, reload, help
+#   scripts/setup/ddns.sh             deploy, update, status, remove, help
 #   scripts/setup/chrome.sh           install, install-script, uninstall, help
 #   scripts/setup/dev_env.sh          [--dry-run] [install|uninstall|status] [all|c|lua|primesieve|ruby|python]...
 #   scripts/setup/upgrade_service.sh  install, uninstall, --help
@@ -87,19 +87,19 @@ _euler_chrome_completions() {
 _euler_frontend_completions() {
   local cur
   cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "install uninstall upgrade status renew reload help --help -h" -- "${cur}"))
+  COMPREPLY=($(compgen -W "deploy remove upgrade redeploy status renew reload help --help -h" -- "${cur}"))
 }
 
 _euler_egress_completions() {
   local cur
   cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "install uninstall upgrade status reload help --help -h" -- "${cur}"))
+  COMPREPLY=($(compgen -W "deploy remove upgrade status reload help --help -h" -- "${cur}"))
 }
 
 _euler_ddns_completions() {
   local cur
   cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=($(compgen -W "install update status uninstall help --help -h" -- "${cur}"))
+  COMPREPLY=($(compgen -W "deploy update status remove help --help -h" -- "${cur}"))
 }
 
 _euler_dev_env_completions() {

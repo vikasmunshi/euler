@@ -2,7 +2,7 @@
 # Frontend (web edge) Setup Script — server redesign edge orchestrator
 # ====================================================================
 #
-# Single orchestrator for the solver web edge: installs / uninstalls / upgrades
+# Single orchestrator for the solver web edge: deploys / removes / upgrades
 # Caddy (TLS + reverse-proxy edge) and the acme.sh cert client, creates the
 # dedicated service identities, generates the Caddyfile router, deploys the static
 # maintenance page, and installs the root-owned systemd unit. Supersedes the old
@@ -55,7 +55,7 @@
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
 # (start/stop/restart) requires sudo.
 #
-# Actions: install [host] | uninstall | upgrade | status | renew | reload | help
+# Actions: deploy | remove | upgrade | redeploy | status | renew | reload | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -115,19 +115,21 @@ DNS_PROVIDER="${EULER_TLS_DNS_PROVIDER:-namecom}"
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|uninstall|upgrade|redeploy|status|renew|reload|help]
+Usage: $0 [deploy|remove|upgrade|redeploy|status|renew|reload|help]
 
-  install    Full edge setup: create euler-web group + euler-caddy user, install
+  deploy     Full edge setup: create euler-web group + euler-caddy user, install
              Caddy + acme.sh, generate /etc/euler/Caddyfile for the FQDN from ~/.euler/env
              (EULER_TLS_DOMAIN), issue+deploy the cert, and install the root-owned
-             ${SERVICE_NAME} (boot-enabled).
-  uninstall  Remove the unit and Caddy; prompt before deleting /etc/euler, acme.sh,
+             ${SERVICE_NAME} (boot-enabled). Idempotent.
+  remove     Remove the unit and Caddy; prompt before deleting /etc/euler, acme.sh,
              and the service users/group.
-  upgrade    Upgrade Caddy + acme.sh and regenerate the Caddyfile + unit.
+  upgrade    Upgrade the Caddy + acme.sh packages themselves and regenerate the
+             Caddyfile + unit (no cert issuance) — unlike the other kits, this is
+             NOT an alias of deploy.
   redeploy   Fast path: re-copy the static web-content (assets + vendor), regenerate
              the Caddyfile (picking up route changes), validate, and reload — no
              package upgrade, cert, or unit changes.
-  status     Show install state, cert expiry, unit state, and a /healthz ping.
+  status     Show deploy state, cert expiry, unit state, and a /healthz ping.
   renew      Force-renew the certificate now (as root; creds cached by acme.sh).
   reload     Reload the running edge (sudo systemctl reload).
 
@@ -726,7 +728,7 @@ remove_acme_units() {
 
 # ── Actions ───────────────────────────────────────────────────────────────────────
 
-do_install() {
+do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
     load_fqdn || return 1
@@ -777,7 +779,7 @@ do_renew() {
     check_can_sudo || return 1
     load_fqdn || return 1
     if ! acme_is_installed; then
-        echo "Error: acme.sh is not installed (root); run '$0 install' first." >&2
+        echo "Error: acme.sh is not installed (root); run '$0 deploy' first." >&2
         return 1
     fi
     echo "Renewing certificate for ${DOMAIN} (force)..."
@@ -798,7 +800,7 @@ do_redeploy() {
     check_can_sudo || return 1
     load_fqdn || return 1
     if ! sudo test -f "${CERT_FILE}"; then
-        echo "Error: edge not installed (no cert at ${CERT_FILE}); run '$0 install' first." >&2
+        echo "Error: edge not installed (no cert at ${CERT_FILE}); run '$0 deploy' first." >&2
         return 1
     fi
     deploy_web_content
@@ -811,7 +813,7 @@ do_redeploy() {
     echo "Frontend redeploy complete: web-content + Caddyfile refreshed and reloaded."
 }
 
-do_uninstall() {
+do_remove() {
     check_can_sudo || return 1
     remove_service
     remove_acme_units
@@ -864,7 +866,7 @@ do_status() {
             echo "Cert:       present (install openssl to show expiry)"
         fi
     else
-        echo "Cert:       ✗ not deployed (run '$0 install')"
+        echo "Cert:       ✗ not deployed (run '$0 deploy')"
     fi
     # Auto-renewal: euler-acme.timer runs `acme.sh --cron` as euler-acme daily;
     # show its state and the next scheduled renewal (ARI window before expiry).
@@ -891,8 +893,8 @@ do_status() {
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
-    uninstall) do_uninstall ;;
+    deploy)    do_deploy ;;
+    remove)    do_remove ;;
     upgrade)   do_upgrade ;;
     redeploy)  do_redeploy ;;
     renew)     do_renew ;;

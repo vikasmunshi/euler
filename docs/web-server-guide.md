@@ -1230,22 +1230,29 @@ decision recorded here.
 
 ## 14 · Operating it
 
-Every service ships the same kit — `install` / `uninstall` / `upgrade` / `status`, config
-generation, and a health probe that reports actually-serving rather than
-"process exists". Because the units live in **root's** systemd and run as locked-down
-`euler-*` users, lifecycle needs **`sudo`**.
+Every service ships the same kit — `deploy` / `remove` / `status` (plus `upgrade` and
+`redeploy` where they mean something), config generation, and a health probe that reports
+actually-serving rather than "process exists". Because the units live in **root's** systemd
+and run as locked-down `euler-*` users, lifecycle needs **`sudo`**.
 
-### 14.1 Install
+The verbs are deliberate, and the Makefile target's verb is always the action its script
+takes. **Local** things the terminal solver needs — apt packages, the `.venv`, git hooks,
+completions, Chrome, Claude Code — are `install` / `uninstall`. **System** things the web
+stack needs are `deploy` / `remove` / `redeploy`, because they touch root's systemd, the
+`euler-*` identities, and `/etc/euler` rather than your checkout.
+
+### 14.1 Deploy
 
 ```bash
 echo 'EULER_TLS_DOMAIN=euler.example.com' >> ~/.euler/env   # if not already set
-make install-web    # frontend → egress → ddns → firewall → smtp → auth → user
+make deploy-web    # frontend → egress → ddns → firewall → smtp → auth → user
 ```
 
-Or per kit: `make install-frontend | install-egress | install-ddns | install-firewall |
-install-smtp | install-auth | install-user`.
+Or per kit: `make deploy-frontend | deploy-egress | deploy-ddns | deploy-firewall |
+deploy-smtp | deploy-auth | deploy-user`. Every kit's `deploy` is idempotent, so
+re-running it is the safe way to re-assert a drifted host.
 
-`~/.euler/env` is the **install-time authoring source of truth**, read by the installer
+`~/.euler/env` is the **deploy-time authoring source of truth**, read by the deploy path
 (repo owner + sudo), which deploys **scoped** runtime config into `/etc/euler`. That
 scoping is the point: `euler-ddns` sees only the DNS credentials, `euler-smtp` only the
 Gmail ones, and no runtime service ever reads the full file. It carries
@@ -1269,7 +1276,16 @@ Reach for **`make upgrade-web`** only when identities, units, or the Caddy/acme 
 themselves change. Note that systemd units are re-laid by `user.sh upgrade`, **not** by
 `redeploy` — a unit change needs the upgrade path.
 
-`make uninstall-web` tears the stack down in reverse; the kits prompt before deleting
+`upgrade` is the one verb that is not uniform, because for most kits there is nothing for
+it to do that `deploy` does not already do:
+
+| kit | `upgrade` |
+|---|---|
+| `frontend.sh`, `egress.sh` | Genuinely distinct: upgrades the Caddy / acme.sh / Squid **packages** and regenerates config + unit, without issuing a cert. |
+| `auth.sh`, `smtp.sh`, `user.sh` | An alias of `deploy` — the deploy path is already the re-assert path. |
+| `ddns.sh`, `firewall.sh` | No `upgrade` action at all; their `deploy` is idempotent and doubles as one, which is why `upgrade-web` calls `deploy-ddns` and ends on a `firewall.sh reload`. |
+
+`make remove-web` tears the stack down in reverse; the kits prompt before deleting
 state.
 
 ### 14.3 Going public

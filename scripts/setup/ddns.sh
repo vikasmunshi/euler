@@ -19,7 +19,7 @@
 #
 # name.com v4 REST API, HTTP Basic auth (username : API token).
 #
-# Actions: install | update | status | uninstall | help
+# Actions: deploy | update | status | remove | help
 #
 # Author: Vikas Munshi <vikas.munshi@gmail.com>
 # Copyright (c) 2026. All rights reserved.
@@ -59,16 +59,17 @@ HOST=""              # subdomain prefix
 
 usage() {
     cat <<USAGE
-Usage: $0 [install|update|status|uninstall|help]
+Usage: $0 [deploy|update|status|remove|help]
 
-  install    Install the euler-ddns systemd timer (root) that periodically updates
-             the A record for the FQDN from ~/.euler/env.
+  deploy     Install the euler-ddns systemd timer (root) that periodically updates
+             the A record for the FQDN from ~/.euler/env. Idempotent — it is also
+             its own upgrade path.
   update     Update the name.com A record now if the public IP changed.
   status     Show the timer state, the host's public IP, and the live A record.
-  uninstall  Remove the timer + service (name.com records left untouched).
+  remove     Remove the timer + service (name.com records left untouched).
 
   Authoring config in ~/.euler/env: EULER_TLS_DOMAIN (the FQDN) and NAMEDOTCOM_USERNAME /
-  NAMEDOTCOM_TOKEN. install deploys a scoped copy to /etc/euler/ddns.env for euler-ddns;
+  NAMEDOTCOM_TOKEN. deploy installs a scoped copy to /etc/euler/ddns.env for euler-ddns;
   commands fail if the FQDN is unset.
 USAGE
 }
@@ -221,7 +222,7 @@ do_update() {
 
 # ── install / uninstall (root timer) ──────────────────────────────────────────────
 
-do_install() {
+do_deploy() {
     check_can_sudo || return 1
     require_systemd || return 1
     load_config || return 1
@@ -265,7 +266,7 @@ EOF
     do_status
 }
 
-do_uninstall() {
+do_remove() {
     check_can_sudo || return 1
     if [ -f "${TIMER_DEST}" ]; then
         sudo systemctl disable --now "${TIMER_NAME}" 2>/dev/null || true
@@ -318,10 +319,10 @@ do_status() {
 # ── Dispatch ──────────────────────────────────────────────────────────────────────
 ACTION="${1:-status}"
 case "${ACTION}" in
-    install)   do_install ;;
+    deploy)    do_deploy ;;
     update)    do_update ;;
     status)    do_status ;;
-    uninstall) do_uninstall ;;
+    remove)    do_remove ;;
     -h | --help | help) usage ;;
     *) echo "Unknown action: ${ACTION}"; usage; exit 1 ;;
 esac

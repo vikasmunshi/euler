@@ -6,7 +6,7 @@
 # Sourced by the app-service kits (auth.sh / user.sh) so the venv location, the
 # installed dependency set, and the deploy/clean logic have **one** definition
 # instead of drifting copies. Can also be run directly for a manual
-# `venv.sh deploy|remove|reinstall|clean|status`.
+# `venv.sh deploy|remove|redeploy|clean|status`.
 #
 # The venv is deliberately **not** the operator's `.venv`: the services run as locked-down
 # euler-* uids that cannot read the operator's home, so the code lives in a
@@ -103,15 +103,15 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
     case "${1:-status}" in
         deploy) deploy_venv "${_repo}" "euler-web" ;;
         remove) remove_venv ;;
-        reinstall) remove_venv; deploy_venv "${_repo}" "euler-web" ;;
+        redeploy) remove_venv; deploy_venv "${_repo}" "euler-web" ;;
         clean)  clean_build_artifacts "${_repo}"; echo "Removed in-tree build/ and *.egg-info." ;;
         status)
             if venv_has_module solver; then
                 echo "venv: ✓ solver importable from ${VENV_DIR} ([${VENV_EXTRAS}])"
             else
-                echo "venv: ✗ ${VENV_DIR} not deployed (run 'venv.sh deploy' or a kit's install)"
+                echo "venv: ✗ ${VENV_DIR} not deployed (run 'venv.sh deploy' or a kit's deploy)"
             fi ;;
-        -h | --help | help) echo "Usage: $0 [deploy|remove|reinstall|clean|status]  (deploy/remove/reinstall need sudo)" ;;
-        *) echo "Unknown action: ${1}"; echo "Usage: $0 [deploy|remove|reinstall|clean|status]"; exit 1 ;;
+        -h | --help | help) echo "Usage: $0 [deploy|remove|redeploy|clean|status]  (deploy/remove/redeploy need sudo)" ;;
+        *) echo "Unknown action: ${1}"; echo "Usage: $0 [deploy|remove|redeploy|clean|status]"; exit 1 ;;
     esac
 fi
