@@ -1487,8 +1487,8 @@
     "title": "Flea Circus",
     "level": 15,
     "pct": 39,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Thu, 16 Jul 2026, 15:15"
   },
   "214": {
     "title": "Totient Chains",
