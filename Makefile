@@ -154,6 +154,11 @@ upgrade-frontend:
 	./scripts/setup/frontend.sh upgrade
 	@printf "✓ upgrade-frontend complete: web edge upgraded\n"
 
+## Refresh the static web-content + Caddyfile and reload the edge
+redeploy-frontend:
+	./scripts/setup/frontend.sh redeploy
+	@printf "✓ redeploy-frontend complete: web-content + Caddyfile reloaded\n"
+
 ## Deploy the egress proxy: Squid domain-allowlist + euler-proxy.service (see docs/web-server-guide.md)
 deploy-egress:
 	./scripts/setup/egress.sh deploy
@@ -220,6 +225,11 @@ upgrade-auth:
 	./scripts/setup/auth.sh upgrade
 	@printf "✓ upgrade-auth complete: auth service upgraded\n"
 
+## Redeploy the shared /opt/euler venv (auth.sh owns it) + restart the auth service
+redeploy-auth:
+	./scripts/setup/auth.sh redeploy
+	@printf "✓ redeploy-auth complete: venv + authorizations refreshed, auth restarted\n"
+
 ## Deploy the per-user provisioning layer (MT-7): the euler-user group,
 ## /etc/euler/user.env, and the euler-user@.service/.socket template. Per-collaborator
 ## uids/homes/clones are created later by `users add <email>`
@@ -263,16 +273,6 @@ remove-web: remove-user remove-auth remove-smtp remove-firewall remove-ddns remo
 upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-auth upgrade-user
 	./scripts/setup/firewall.sh reload
 	@printf "✓ upgrade-web complete: full web stack upgraded\n"
-
-## Redeploy the shared /opt/euler venv (auth.sh owns it) + restart the auth service
-redeploy-auth:
-	./scripts/setup/auth.sh redeploy
-	@printf "✓ redeploy-auth complete: venv + authorizations refreshed, auth restarted\n"
-
-## Refresh the static web-content + Caddyfile and reload the edge
-redeploy-frontend:
-	./scripts/setup/frontend.sh redeploy
-	@printf "✓ redeploy-frontend complete: web-content + Caddyfile reloaded\n"
 
 ## Fast redeploy of code, templates, and static assets WITHOUT touching identities,
 ## ACLs, units, certs, or the firewall: rebuild the shared venv (auth) → bounce the
