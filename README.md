@@ -118,7 +118,7 @@ Dependencies are split into optional groups - install only what you need:
 | `show`      | `matplotlib`, `PyQt5`                                                                                                    | graphical output (`--show`)               |
 | `ai`        | `anthropic`, `python-dotenv`                                                                                             | only when running `claude-api`            |
 | `dev`       | `autoflake`, `autopep8`, `black`, `isort`                                                                                | `lint --auto-fix` and solution formatting |
-| `web`       | `aiohttp`                                                                                                                | for `solver-web`                          |
+| `web`       | `aiohttp`, `aiohttp-jinja2`, `jinja2`, `nh3`                                                                              | the web front end's services              |
 
 </details>
 
@@ -143,8 +143,9 @@ $ solver
 ▎ ·   }
 ```
 
-Launch the web-based solver shell with `solver-web` or launch the interactive terminal with `solver` (or
-`python -m solver`); Type `?` for the command list, `? <cmd>` for usage, and `exit` / Ctrl-D to quit. `solver` can also
+Launch the interactive terminal with `solver` (or `python -m solver`); the same shell is also served in the
+browser by the [web front end](docs/web-server-guide.md).
+Type `?` for the command list, `? <cmd>` for usage, and `exit` / Ctrl-D to quit. `solver` can also
 be driven non-interactively by passing a quoted command block (`solver "eval 42; benchmark 42"`), exiting with the
 block's status. The full workflow - `new`, `eval`, `benchmark`, `mark` - is in
 the [User Guide](docs/user-guide.md) and [Solver Guide](docs/solver-guide.md);
@@ -167,12 +168,12 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   [`docs/syntax.md`](docs/syntax.md).
 - **Rich UI** - `rich` panels, tables, and a themed colour palette throughout, so the terminal output is as
   readable as a rendered page.
-- **Web front end** - `solver-web` runs a single localhost `aiohttp` server (port 8080) with three concerns
-  in one place: a browser **terminal** (xterm.js over a PTY running a real `solver` shell), a read-only
+- **Web front end** - a deployed stack of isolated `aiohttp` services behind a TLS edge, bringing three
+  concerns into one page: a browser **terminal** (xterm.js over a PTY running a real `solver` shell), a
   **viewer** that assembles each problem's page - statement, notes, and benchmark results - on the fly, and an
-  in-browser **editor** that saves, evaluates, and deletes a problem's solution files. It runs detached
-  (survives the launching shell); `solver-web start|stop|status|restart` manages it, and `show N` auto-starts
-  it to open a problem (or the index) in the browser.
+  in-browser **editor** that saves, evaluates, and deletes a problem's solution files. Each collaborator gets
+  their own system user, home, clone, and encrypted vault; `make install-web` deploys it and
+  [`docs/web-server-guide.md`](docs/web-server-guide.md) documents it.
 - **Hosted over HTTPS** - the web front end is served publicly at
   [euler.vikasmunshi.com](https://euler.vikasmunshi.com). **Caddy** terminates TLS and reverse-proxies to the
   app tier over unix sockets, loading a Let's Encrypt certificate that **acme.sh** issues and auto-renews through a

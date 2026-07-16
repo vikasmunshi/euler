@@ -34,8 +34,9 @@ make run
 # Run shell commands non-interactively (a command block; exits with its status)
 solver "eval 42; benchmark 42"
 
-# Launch the PTY-backed web front end (aiohttp); serves the terminal + viewer/editor
-solver-web start        # also: stop | status | restart  (needs the `web` group: pip install -e ".[web]")
+# Deploy the web front end (systemd services behind a TLS edge — needs sudo).
+# There is no local server: see docs/web-server-guide.md.
+make install-web        # also: uninstall-web | upgrade-web | redeploy-web
 ```
 
 ## Git Hooks
@@ -176,7 +177,7 @@ solver/
 
 ### Command registration
 
-Every shell command is a plain Python function decorated with `@register(help_text=..., aliases=..., pass_ctx=..., quietable=...)` from `solver.shell`. The command name is derived from the function name (underscores → dashes; `usage` is synthesised from the signature). The decorator handles argument tokenisation (`shlex.split`), type coercion (Literal, bool, int, Optional, Enum), and tab-completion. Commands are collected at import time; `solver/modules.csv` (read by `shell/loader.py`) lists which modules to import on startup.
+Every shell command is a plain Python function decorated with `@register(help_text=..., aliases=..., pass_ctx=..., quietable=...)` from `solver.shell`. The command name is derived from the function name (underscores → dashes; `usage` is synthesised from the signature). The decorator handles argument tokenisation (`shlex.split`), type coercion (Literal, bool, int, Optional, Enum), and tab-completion. Commands are collected at import time; `solver/modules.csv` (read by `utils/loader.py`) lists which modules to import on startup.
 
 Functions still work as normal Python — they are not transformed, just registered. See `docs/developer-guide.md` for the full register contract.
 
@@ -245,16 +246,13 @@ Two AI entry points, both calling the Claude API. Install the optional deps with
 - **`claude-api`** (`solver/ai/api.py`) generates solution artifacts, dispatching to per-target generators — `code.py` (Python/C), `docs.py` (notes), `facts.py` (test cases) — with prompts in `solver/templates/prompt_*.txt`. Default models: Opus for code (Python + C) and notes, Sonnet for test cases. The `costs` command (`models.py`) reports accumulated token spend.
 - **`euler-solve`** (`solver/ai/skill.py`) launches Claude Code headless against a problem's solution files, via the `claude-euler-solver` skill (`solver/ai/claude/skills/claude-euler-solver/`). Invoked as `claude -p /claude-euler-solver <problem_number> <action>`, running at the repo root; its actions are `solve` and `review`. The skill's standards live in the `docs/convention_*.md` guides (also injected into the `claude-api` prompts via `templates/engine.py`).
 
-### Web front end (`solver-web`)
+### Web front end
 
-`solver-web` (`solver/web/cli.py`, console script + `python -m solver.web.cli`) runs a single localhost aiohttp server (default port `config.server_port` = 8080) as a **detached** child process, so it keeps serving after the launching shell exits. The detached child holds an exclusive `fcntl.flock` on a lock file (`.server.lock`) for its whole lifetime; that flock is the cross-process source of truth — any later `solver-web {status,stop,restart}` probes it (and reads the PID recorded in the file to signal it). The OS drops the lock on exit or crash, so there is no stale state and a recycled PID can never look "running". Actions: `start`, `stop`, `status` (default), `restart`; `--save` tees the shell's console output to the session log.
+There is **no local server and no `solver-web` script**. The front end is a deployed stack of isolated systemd services behind a Caddy TLS edge, each on its own unix socket under `/run/euler/`, run from the root-owned `/opt/euler` venv. The design of record is **`docs/web-server-guide.md`** — read it before changing anything under `solver/web/`.
 
-`build_app` (`solver/web/app.py`) wires three concerns into one server:
-- **Terminal** — `GET /` serves an xterm.js page and `GET /ws` attaches to the signed-in user's **persistent** `solver` shell over a PTY. `PtyManager` (`solver/web/pty_manager.py`) keeps at most one long-lived shell per user (forked via `pty_bridge.py` with `SOLVER_USER` set to their email): a single background drainer reads the PTY continuously into a bounded replay buffer and fans output out to every attached socket, so the shell survives disconnect and reconnecting replays recent output. Extra tabs for the same user share the one shell. It is torn down only on in-shell `exit`, logout (`_close_user_sockets` → `manager.close`), or server stop (`on_cleanup` → `close_all`).
-- **Read-only viewer** — the summary/problem pages and problem files, read directly from each problem's `solution_dir`.
-- **Edits** — `POST/DELETE /<n>/<file>` saves/deletes a solution file and `POST /<n>/cmd` evaluates or benchmarks the problem; the write helpers return `(status, message)`.
+The shape in one paragraph: Caddy terminates TLS, strips client identity headers, authenticates every request through the auth service's `forward_auth`, and routes by the returned `X-User-Slug` to **one service per collaborator** (`euler-user@<slug>`, `User=euler-user-<slug>`), which serves that user's content routes **and** their `/ws` terminal from their own `~/euler` clone. Authentication is browser-side SRP-6a (`solver/web/auth`); authorization is the profile ladder (`solver/auth`). Each collaborator has their own uid, home, clone, branch, and encrypted vault (`solver/crypto/vault.py`), so their keys are exposed only to their own code.
 
-The detached server holds only the instance flock (`.server.lock`); each PTY child it forks is a plain `solver` shell on the shared solution tree, running as the user who attached it (`SOLVER_USER`) so it reads and writes that user's per-user state — command history, session log, and last active problem under `.state/<slug>/` (the identity/slug resolved by `solver/auth`, wired into `config`). The `show` command (`solver/utils/show.py`) calls `ensure_running()` to auto-start the server before opening a page.
+The `show`/`edit` commands (`solver/core/viewer.py`) drive the browser over a channel-aware bridge: from a **web** shell an `OSC 5379` sequence rides the PTY → WebSocket pipe and swaps the app shell's left pane; from a **terminal** they open `config.base_url` (`$EULER_BASE_URL`) in a named browser tab (`solver-doc`). Per-user shell state — history, session log, last active problem — lives under `.state/<slug>/`, the slug resolved by `solver/auth` and wired into `config`.
 
 ## Solution Code Conventions
 

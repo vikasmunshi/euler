@@ -76,37 +76,32 @@ shell script or a `Makefile` target (`solver "eval 42 && benchmark 42" && echo o
 
 ### The web front end
 
-`solver-web` serves the same shell — plus a read-only solution viewer and an
-in-browser editor — over a single localhost `aiohttp` server (port `server_port`,
-default 8080). It needs the `web` dependency group (`pip install -e ".[web]"`).
+The same shell — plus a solution viewer and an in-browser editor — is served by
+the **deployed web stack**, not by a local process you start: a TLS edge, an SRP
+login, and one service per collaborator. Its architecture and deployment are in
+[web-server-guide.md](web-server-guide.md) (`make install-web`).
 
-```bash
-solver-web start        # launch the server (detached) and open the terminal in your browser
-solver-web status       # report whether it is running (the default action)
-solver-web stop         # stop it
-solver-web restart      # stop then start
-solver-web start --save # also tee the shell's console output to the session log
-```
+Signing in and browsing to `/` gives an `xterm.js` terminal attached to **your own
+persistent `solver` shell**: it is forked the first time you connect (as your
+signed-in identity, see §6) and **survives disconnect** — closing the tab or
+dropping the connection leaves it running, and reconnecting reattaches to it with
+its recent output replayed. There is at most one shell per user, so a second
+browser tab attaches to the *same* shell (a shared terminal). The shell is torn
+down when you type `exit`, log out, or the service stops. `/solutions/` and
+`/solutions/NNNN/` are the viewer pages, and they render in the left pane while
+the terminal keeps its session in the right one.
 
-The server runs **detached**, so it keeps serving after the shell that launched
-it exits; an `flock` it holds for its lifetime makes any later `solver-web`
-invocation able to query or stop it (and is released automatically if it crashes). Browsing to `/` gives an `xterm.js` terminal attached to **your own persistent
-`solver` shell**: it is forked the first time you connect (as your logged-in
-identity, see §6) and **survives disconnect** — closing the tab or dropping the
-connection leaves it running, and reconnecting reattaches to it with its recent
-output replayed. There is at most one shell per user, so a second browser tab
-attaches to the *same* shell (a shared terminal). The shell is torn down only
-when you type `exit`, log out, or the server stops. `/summary` and `/<n>/` are the
-read-only viewer pages; `show N` (below) auto-starts this server and opens the
-problem's page in a dedicated browser tab named `solver-doc`, which every later
-`show` reuses (refreshing it for the same problem, navigating it for another).
+`show N` (below) opens a problem's page over the same bridge. From a web shell it
+swaps the left pane in place; from a local terminal it opens `$EULER_BASE_URL`
+(default `https://euler.vikasmunshi.com`) in a dedicated browser tab named
+`solver-doc`, which every later `show` reuses — refreshing it for the same
+problem, navigating it for another.
 
 The code editor (and the read-only file viewer) is CodeMirror 6, with a
-line-number gutter, syntax highlighting, and inline lint diagnostics. Its toolbar
-carries a **`wrap`** toggle: word-wrap is **on** by default (long lines soft-wrap
-so nothing runs off-screen); switch it off to fall back to horizontal scrolling
-with column alignment preserved. The choice is remembered in your browser across
-files and pages.
+line-number gutter, syntax highlighting for Python/C/JSON, and word-wrap always
+on, so long lines soft-wrap rather than running off-screen. It is progressive
+enhancement over a plain `<textarea>`: with JavaScript off, the form still edits
+and submits through the same save gate.
 
 ---
 
@@ -395,7 +390,7 @@ Commit and push `keys/enc-key.json`; pull it, and `solver "user"` will now repor
 
 Once you have master-key access the private files are plaintext in your working tree —
 just open them. Or use `show N` to view any problem's statement, notes, and results in
-the browser via the `solver-web` server; every `show` reuses one dedicated browser tab
-(`solver-doc`), so browsing through problems never piles up tabs.
+the browser (the web front end at `$EULER_BASE_URL`); every `show` reuses one dedicated
+browser tab (`solver-doc`), so browsing through problems never piles up tabs.
 
 ---

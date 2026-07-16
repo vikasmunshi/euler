@@ -68,8 +68,8 @@ once and keep warm between runs is mistimed.** Build sieves, tables, and caches
 *inside* `solve()` (or in helpers it calls fresh each time), sized to the inputs
 — not at module level with a fixed bound. A module-level `@lru_cache` or a
 precomputed global is excluded from the first run and free thereafter,
-understating the real cost. See `solutions/0/0/0/7/p0007_s0.py` (a sieve sized to
-`n·ln n`) for the pattern.
+understating the real cost. See `solutions/public/p0007/p0007_s0.py` (a sieve sized
+to `n·ln n`) for the pattern.
 
 ### Argument helpers
 
