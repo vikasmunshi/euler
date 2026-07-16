@@ -1,4 +1,4 @@
-/* The right pane's terminal (web-server-guide § The site, DD-13/DD-14).
+/* The right pane's terminal (web-server-guide § The site).
 
    Its own document, framed by the app shell at #ws, so htmx swaps, content-page
    JS, and history restores structurally cannot touch the session. It talks only
@@ -231,7 +231,7 @@
     }
   });
 
-  // Unlock the vault BEFORE the first attach (MT-12): the shell is forked on
+  // Unlock the vault BEFORE the first attach: the shell is forked on
   // attach and inherits the session key file's path by environment, so the
   // unlock must land first for the shell (and the git filter under it) to
   // decrypt the user's secrets. Best-effort — locked just means `claude-api`

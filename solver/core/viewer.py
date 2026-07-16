@@ -5,7 +5,7 @@
 Both drive the same channel-aware bridge to the browser — the app shell's left pane
 (web channel, over the terminal's OSC pipe) or a named browser tab (terminal
 channel) — differing only in the URL. The channel is the resolved subject's
-(``config.subject.channel``, DD-13), never a CLI flag:
+(``config.subject.channel``), never a CLI flag:
 
 - `show` opens a problem's rendered documentation page (`<base_url>/solutions/NNNN/`).
 - `edit` opens a solution file in the code editor (`<base_url>/edit/solutions/NNNN/<file>`).
@@ -104,7 +104,7 @@ def edit(problem: Problem, filename: str) -> int:
     The counterpart to `show` (which opens the rendered problem): *problem* defaults
     to the current problem, and *filename* completes to the files `ls` lists. The
     file must already exist — run `new` to create a solution first. Channel-aware,
-    like `show` (the channel is the resolved subject's, DD-13):
+    like `show` (the channel is the resolved subject's):
 
     - **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
       that the xterm.js page rides over the PTY → WebSocket pipe to point the app
@@ -154,7 +154,7 @@ def show(problem: Problem, filename: str | None = None) -> int:
     """Open a problem's documentation page, in a browser or the web viewer panel.
 
     When *problem* is omitted, opens the current problem. The path depends on the
-    shell's channel (from the resolved subject, DD-13):
+    shell's channel (from the resolved subject):
 
     - **terminal** — opens the problem's page (`<base_url>/solutions/NNNN/`) in the named
       browser tab "solver-doc" (via

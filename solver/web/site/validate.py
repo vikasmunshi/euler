@@ -1,10 +1,10 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The save gate (Phase 5c): the checks every 5d write passes (DD-10).
+"""The save gate: the checks every write passes.
 
 One entry point — :func:`validate` — dispatches on the file's suffix and returns
 the **canonical bytes to store** (which may differ from the submission) or the
-failure diagnostics; the 5d edit routes wire it in front of every write:
+failure diagnostics; the edit routes wire it in front of every write:
 
 - ``.py``   — auto-fix (autoflake → autopep8 → isort, best-effort: the ``dev``
   extras may be absent in the deployed venv) then **flake8 over stdin**;
@@ -15,14 +15,14 @@ failure diagnostics; the 5d edit routes wire it in front of every write:
   the gate only proves compilability; the real build happens at evaluation.
 - ``.json`` — parse; reject when malformed. The two-space re-indent is the
   canonical content.
-- ``.html`` — **sanitize-and-store-clean via nh3** (DD-10): the tailored
+- ``.html`` — **sanitize-and-store-clean via nh3**: the tailored
   allowlist below, MathJax ``$…$`` surviving as text, ``rel`` rewritten on every
   link. nh3's output is *always* the canonical content (it normalises even clean
   input — adds ``<tbody>``, rewrites ``rel`` — which is why this is store-clean,
   not reject-and-restore); the editor shows the submitted-vs-stored diff. nh3
   gates what is *stored*; the CSP (§4.7) blocks what would *execute*.
 
-Like the rest of the service (DD-12) this module never touches
+Like the rest of the service this module never touches
 :mod:`solver.config`: the repo root arrives explicitly and the only paths read
 are the runner header and the submitted content.
 """
@@ -49,7 +49,7 @@ _CHECK_TIMEOUT = 60.0
 #: The suffixes the editor may save; anything else is rejected outright.
 EDITABLE_SUFFIXES: frozenset[str] = frozenset({'.py', '.c', '.json', '.html'})
 
-#: The nh3 allowlist (DD-10): the `convention_documentation.md` semantic-HTML5 set
+#: The nh3 allowlist: the `convention_documentation.md` semantic-HTML5 set
 #: as the notes corpus actually uses it, plus the table internals nh3 itself
 #: normalises in (`thead`/`tbody`) and `ol`/`pre` as their semantic companions.
 _HTML_TAGS: frozenset[str] = frozenset({
@@ -211,7 +211,7 @@ def _validate_json(filename: str, content: bytes) -> Validated:
 
 
 def _sanitize_html(filename: str, content: bytes) -> Validated:
-    """nh3 sanitize-and-store-clean (DD-10): the sanitised output is canonical."""
+    """nh3 sanitize-and-store-clean: the sanitised output is canonical."""
     try:
         text = content.decode('utf-8')
     except UnicodeDecodeError as exc:

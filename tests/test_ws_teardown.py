@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The DD-14 teardown push: the auth service tears down a user's live web shell on
+"""The teardown push: the auth service tears down a user's live web shell on
 logout and on every revocation path, so a *running* shell's baked-in permissions die
 at the event, not at the next login.
 
@@ -64,7 +64,7 @@ class TeardownPushTests(unittest.IsolatedAsyncioTestCase):
         self.addCleanup(shutil.rmtree, self.scratch, True)
 
         # The fake instance on the user's own socket (user-<slug>.sock), where the real
-        # per-user instance would be (MT-4).
+        # per-user instance would be.
         self.ws = _FakeWsInstance()
         self.ws_socket = self.scratch / f'user-{system_slug(_EMAIL)}.sock'
         self._ws_runner = web.AppRunner(self.ws.build())
@@ -116,7 +116,7 @@ class TeardownPushTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_users_change_revoke_pushes_teardown(self) -> None:
         """The `users change` path: the admin CLI rewrites the map then calls
-        /admin/users/{email}/revoke, which must also reap the live shell (DD-14)."""
+        /admin/users/{email}/revoke, which must also reap the live shell."""
         resp = await self.admin.post(f'/admin/users/{_EMAIL}/revoke',
                                      headers={'X-Admin-Token': _TOKEN})
         self.assertEqual(resp.status, 200)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Per-user native git verbs (MT-2): floors, guards, and dispatch.
+"""Per-user native git verbs: floors, guards, and dispatch.
 
 The per-user model makes git native — a collaborator works in their own clone on
 ``user/<slug>`` as their own uid — so what the commands must get right is the
@@ -29,7 +29,7 @@ def _subject(profile: str) -> Subject:
 
 
 class PolicyShapeTest(unittest.TestCase):
-    """The MT-2 floors: read for every rung, write for contributor+, master at admin."""
+    """The git floors: read for every rung, write for contributor+, master at admin."""
 
     def test_floors_of_the_git_commands(self) -> None:
         load_commands()
@@ -180,7 +180,7 @@ class GitFilterCommandTest(_GitCommandCase):
 
 
 class EncKeyPullFlowTest(_GitCommandCase):
-    """The MT-2 sync tail: wire the filter exactly when unwired AND key-authorized."""
+    """The sync tail: wire the filter exactly when unwired AND key-authorized."""
 
     def setUp(self) -> None:
         super().setUp()

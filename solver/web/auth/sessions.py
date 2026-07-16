@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""In-memory web session table (DD-6).
+"""In-memory web session table.
 
 A logged-in browser holds an opaque random token in a cookie; this maps that
 token to ``(email, profile)`` and an expiry. State is per-process by design: a

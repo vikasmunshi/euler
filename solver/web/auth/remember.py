@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Persistent "remember me" tokens at ``<state>/remember.json`` (DD-6).
+"""Persistent "remember me" tokens at ``<state>/remember.json``.
 
 A remember-me cookie is ``<selector>:<validator>``. Per selector the store
 keeps the user's email, an HMAC of the validator (keyed by the persistent

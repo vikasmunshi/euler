@@ -1,10 +1,10 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Pending invite / reset store at ``<state>/pending.json`` (DD-7).
+"""Pending invite / reset store at ``<state>/pending.json``.
 
 One record per in-flight registration or password reset, keyed by the **hash**
 of the emailed link token (the token itself is never stored or logged). The
-record walks the DD-7 state machine::
+record walks the registration state machine::
 
     invited ──(Terms accepted, OTP mailed)──▶ otp_sent ──(OTP matches)──▶ verified
                                                                               │

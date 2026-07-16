@@ -1,12 +1,12 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The ``users`` shell command: account administration, split by permission (DD-12).
+"""The ``users`` shell command: account administration, split by permission.
 
 Two paths behind one command:
 
 - **`users list`** is a ``reader``-floor command. A non-admin sees only
   **their own** entry, read directly from the world-readable ``authorizations.json`` — no
-  sudo (the reader floor grants sight of your own account, not the roster; MT-10b, since the channel
+  sudo (the reader floor grants sight of your own account, not the roster — the channel
   axis that used to keep this off the web is gone). An ``admin``
   gets the **full** listing (every identity + registration state + pending invites) via the
   sudo admin plane.
@@ -16,17 +16,17 @@ Two paths behind one command:
   socket. The command registers at the ``reader`` floor; the write verbs are gated at
   **runtime** against the subject's permissions.
 
-No longer channel-gated (MT-10 drops the channel axis): the write verbs' real containment is
+No longer channel-gated (the channel is not an authorization axis): the write verbs' real containment is
 that they reach the root-owned SoR and the euler-auth **admin socket** only under ``sudo``, which
 a web shell (a per-user, non-privileged uid) cannot obtain — so `list` may run anywhere but a
 mutation attempted over the web fails at the socket, not at a channel check.
 
 `add` is two-path: an ``@``-address provisions the collaborator's **own OS instance**
 (uid, home, a filter-disabled clone on ``user/<slug>``, the socket — via
-:mod:`scripts/setup/user.sh`, MT-7) and then mints a web invite (the account record
+:mod:`scripts/setup/user.sh`) and then mints a web invite (the account record
 appears when the invitee registers); a bare os-login is a direct map entry (no instance,
 no invite). ``remove`` reverses both: it drops the account, then deprovisions the
-instance. Password reset is self-service (DD-7) — there is deliberately no reset verb.
+instance. Password reset is self-service — there is deliberately no reset verb.
 """
 from __future__ import annotations
 
@@ -47,8 +47,8 @@ def _print_roster(only: str | None = None) -> int:
     """Non-sudo roster from the world-readable authorizations.json (reader floor).
 
     When *only* is given (a non-admin caller), the listing is **scoped to that identity's own
-    entry** — the reader floor grants a member sight of their own account, not the whole roster
-    (MT-10b). The full roster is an ``admin`` view.
+    entry** — the reader floor grants a member sight of their own account, not the whole
+    roster. The full roster is an ``admin`` view.
     """
     users = Authorizations.load().all_users()
     if only is not None:
@@ -76,7 +76,7 @@ def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
 
 
 def _provision_kit(action: str, slug: str, *rest: str) -> int:
-    """Drive the per-user provisioning kit (``scripts/setup/user.sh``) under sudo (MT-7).
+    """Drive the per-user provisioning kit (``scripts/setup/user.sh``) under sudo.
 
     ``provision``/``deprovision`` create or tear down the collaborator's OS instance —
     uid, home, the filter-disabled clone on ``user/<slug>``, and the socket. Best-effort:
@@ -99,7 +99,7 @@ def _provision_kit(action: str, slug: str, *rest: str) -> int:
           help_text='List / administer accounts (list is read-only; changes need admin + sudo).')
 def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'] = 'list',
           identity: str = '', profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
-    """Administer accounts on the authorization map + the auth service (DD-12).
+    """Administer accounts on the authorization map + the auth service.
 
     `list` is read-only (every rung) and needs no sudo; every mutating verb needs
     ``admin`` and re-executes the admin CLI under ``sudo``.
@@ -114,7 +114,7 @@ def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'
     """
     if action == 'list':
         # Admins get the full sudo listing (SRP state + pending); a non-admin sees only their
-        # own entry (the reader floor = read your own account, not the roster — MT-10b).
+        # own entry (the reader floor = read your own account, not the roster).
         return _sudo_admin('list') if config.subject.has('admin') else _print_roster(config.subject.user)
 
     if not config.subject.has('admin'):
@@ -125,7 +125,7 @@ def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'
         console.print(f'[error]error:[/error] users {action} requires an email or os-login')
         return 2
 
-    # A web account (an @-address) gets its own OS instance (MT-7); a bare os-login is the
+    # A web account (an @-address) gets its own OS instance; a bare os-login is the
     # operator's own terminal identity — an existing uid — so it is a map entry only.
     is_web = '@' in identity
     slug = system_slug(identity) if is_web else ''

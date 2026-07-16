@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The per-user vault (`solver.crypto.vault`, MT-6): envelope encryption of `id` + `env`.
+"""The per-user vault (`solver.crypto.vault`): envelope encryption of `id` + `env`.
 
 Covers the primitives (PBKDF2 password key, wrap/unwrap the vault key, secret encrypt/decrypt),
 the vault file lifecycle (init / unlock / change-password), session-key delivery (tmpfs key file
@@ -217,7 +217,7 @@ class GetApiKeyIntegrationTest(VaultTestCase):
 
 
 class PkVaultTest(VaultTestCase):
-    """The web path (MT-6/MT-12): PK-taking twins of the password functions."""
+    """The web path: PK-taking twins of the password functions."""
 
     _SALT = b'\x0a' * 16
 

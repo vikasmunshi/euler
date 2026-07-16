@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Shared system-venv helpers (DD-5) — the root-owned /opt/euler venv every euler-*
+# Shared system-venv helpers — the root-owned /opt/euler venv every euler-*
 # app service runs from
 # ==========================================================================================
 #
@@ -9,7 +9,7 @@
 # `venv.sh deploy|remove|reinstall|clean|status`.
 #
 # The venv is deliberately **not** the operator's `.venv`: the services run as locked-down
-# euler-* uids that cannot read the operator's home (DD-5), so the code lives in a
+# euler-* uids that cannot read the operator's home, so the code lives in a
 # root-owned tree at /opt/euler, group-readable by euler-web, and the units run
 # `/opt/euler/venv/bin/python -m solver.web.<svc>`.
 #
@@ -17,7 +17,7 @@
 # Copyright (c) 2026. All rights reserved.
 # Licensed under the MIT License.
 
-# The system venv (DD-5): root-owned, at /opt/euler; the services run its python.
+# The system venv: root-owned, at /opt/euler; the services run its python.
 OPT_DIR="/opt/euler"
 VENV_DIR="${OPT_DIR}/venv"
 VENV_PY="${VENV_DIR}/bin/python"

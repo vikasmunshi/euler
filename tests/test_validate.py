@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the Phase 5c save gate (solver/web/site/validate.py, DD-10):
+"""Tests for the save gate (solver/web/site/validate.py):
 the per-suffix checks every 5d write passes — .py (auto-fix + flake8),
 .c (compile against the runner header), .json (reject-and-restore semantics),
 and the .html sanitize-and-store-clean via nh3."""

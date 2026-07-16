@@ -70,7 +70,7 @@ def _persist_private_key(private_key: X25519PrivateKey) -> None:
     """Write the private key to disk `0600` (rotating backups) -- vault-encrypted when one is unlocked.
 
     With a vault present and this session holding its ``VK``, the PEM is encrypted at rest like every
-    vault secret (MT-6) -- so `user --regen` never downgrades an encrypted `id` back to plaintext. With
+    vault secret -- so `user --regen` never downgrades an encrypted `id` back to plaintext. With
     no vault (the pre-vault operator setup) the key is written plain, protected by the `0600` secrets
     dir as before.
     """
@@ -311,7 +311,7 @@ def _vault_status() -> int:
 @register(requires='reader',
           help_text='Manage the per-user secrets vault: status | init | change-password.')
 def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> int:
-    """Encrypt this user's `id` + `env` at rest under a password-derived vault key (MT-6).
+    """Encrypt this user's `id` + `env` at rest under a password-derived vault key.
 
     - `status` (default): show whether the vault exists, which secret files are encrypted, and
       whether this session can decrypt them.

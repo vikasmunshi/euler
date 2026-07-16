@@ -233,7 +233,7 @@ def git_push(force: bool = False) -> int:
     In a per-user clone the current branch is `user/<slug>`, pushed with your own
     GitHub identity — `git-identity` is the one-time setup. Landing work on master
     is the admin's `git-merge`, never a direct push: pushing master requires
-    `infra:execute`, and force-pushing it is always refused.
+    the `admin` floor, and force-pushing it is always refused.
 
     Args:
         force: Push with `--force-with-lease` — needed after `git-sync` rebased your

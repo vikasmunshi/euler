@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Persistent per-user PTY shells: one long-lived solver shell per web user (DD-14).
+"""Persistent per-user PTY shells: one long-lived solver shell per web user.
 
 A browser terminal (``GET /ws``) attaches to the signed-in user's shell rather
 than forking a throwaway one. The PTY's lifetime is decoupled from any single
@@ -57,7 +57,7 @@ class PersistentPty:
         self._cap = buffer_cap
         self._reader: asyncio.Task[None] | None = None
         self._closed = False
-        self._detached_since: float = time.monotonic()  # zero subscribers since (DD-14 reaper)
+        self._detached_since: float = time.monotonic()  # zero subscribers since (the reaper)
 
     def start(self) -> None:
         """Launch the background drainer task (call once, right after construction)."""
@@ -182,7 +182,7 @@ class PtyManager:
         """Return the user's live shell, forking a fresh one via *spawn* if none is.
 
         *spawn* is awaited only when a new shell is actually needed — it mints the
-        single-use ticket and forks (DD-9), so an attach to an existing shell
+        single-use ticket and forks, so an attach to an existing shell
         consumes no ticket. The per-email lock serialises concurrent first
         attaches (two tabs opened together fork exactly one shell).
         """
@@ -206,7 +206,7 @@ class PtyManager:
 
     async def reap_detached(self, ttl_seconds: int) -> list[str]:
         """Close and forget shells with **zero attached sockets** for longer than
-        *ttl_seconds*; return the reaped emails (DD-14 hygiene, not security).
+        *ttl_seconds*; return the reaped emails (hygiene, not security).
 
         A shell keeps running while detached so a long benchmark survives a closed
         laptop and a reconnect replays — but a shell nobody has reattached to in a

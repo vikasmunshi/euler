@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Per-user service entry point: ``python -m solver.web.user`` (DD-5/MT-4).
+"""Per-user service entry point: ``python -m solver.web.user``.
 
 Run by ``euler-user@<slug>.service`` as that collaborator's own
 ``euler-user-<slug>`` uid from the ``/opt/euler`` system venv, configured entirely by
@@ -14,7 +14,7 @@ Three ways to get a listener, in order:
 2. **dev TCP** — ``EULER_USER_TCP=127.0.0.1:8084`` (the harness path).
 3. **plain unix bind** — ``EULER_USER_SOCKET`` (an always-on run without a .socket unit).
 
-Serves until SIGTERM; cleanup reaps every PTY child (DD-14)::
+Serves until SIGTERM; cleanup reaps every PTY child::
 
     EULER_USER_TCP=127.0.0.1:8084 EULER_USER_SLUG=me-abc123 \\
     EULER_AUTH_SOCKET=/tmp/dev-auth.sock python -m solver.web.user
@@ -83,7 +83,7 @@ async def serve() -> None:
     log.info('per-user service up (user %s)', config.slug or '<unpinned dev>')
     await stop.wait()
     log.info('shutting down')
-    await runner.cleanup()               # on_cleanup reaps every shell (DD-14)
+    await runner.cleanup()               # on_cleanup reaps every shell
 
 
 def main() -> None:

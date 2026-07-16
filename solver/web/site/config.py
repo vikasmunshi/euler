@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Content-service runtime configuration, read from the environment (DD-5/DD-12).
+"""Content-service runtime configuration, read from the environment.
 
 Like :class:`~solver.web.auth.config.AuthConfig`, every value has an env override
 so the service runs unprivileged in a scratch dir for local testing, and it never
@@ -47,13 +47,13 @@ class SiteConfig(NamedTuple):
     tcp_bind: str
     #: Serve /assets and /vendor from the app (dev only; Caddy serves them in prod).
     serve_static: bool
-    #: The profile this instance is *born* as (``EULER_PROFILE=%i``, DD-12). When set,
+    #: The profile this instance is *born* as (``EULER_PROFILE=%i``). When set,
     #: the app refuses a request whose ``X-Profile`` differs — the code-side backstop
     #: to Caddy's per-profile routing. Empty (dev) accepts any known profile.
     profile: str
     #: Base URL of the repo on GitHub, for the problem page's source link. It cannot
     #: be derived from ``.git/config`` — the service uid has no read access to ``.git``
-    #: (DD-12) — so it is configuration. Empty drops the link rather than guessing.
+    #: — so it is configuration. Empty drops the link rather than guessing.
     github_url: str = _GITHUB_URL
     #: The branch those source links point at.
     github_branch: str = _GITHUB_BRANCH

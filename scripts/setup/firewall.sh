@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Kernel egress firewall (nftables) — Phase 4, step 1 of the server redesign (DD-8)
+# Kernel egress firewall (nftables)
 # =================================================================================
 #
 # Installs / uninstalls the host nftables ruleset that makes "egress only via Squid"
@@ -21,7 +21,7 @@
 #   - The ruleset is generated with *numeric* uids resolved at generation time and
 #     includes only the euler-* users that exist; rerun `reload` (or the installing
 #     kit runs it) after a new service user lands.
-#   - This is layer 2 of DD-8; layer 1 (per-unit IPAddressDeny=any +
+#   - This is egress layer 2; layer 1 (per-unit IPAddressDeny=any +
 #     IPAddressAllow=localhost) travels with each app service's own unit.
 #
 #   /etc/euler/nftables.conf                   root:root 0644  (generated here)
@@ -51,10 +51,10 @@ SERVICE_DEST="/etc/systemd/system/${SERVICE_NAME}"
 # The mail relay's loopback port (must match smtp.sh LISTEN_ADDR).
 SMTP_RELAY_PORT="8025"
 
-# ── The euler service tier (DD-2/DD-4/DD-8) ───────────────────────────────────────
+# ── The euler service tier ───────────────────────────────────────
 # Every euler-* uid subject to the egress drop. Generated rules include only the
 # users that exist at generation time. The web app tier runs as per-user uids
-# (euler-user-<slug>, MT-7), resolved dynamically by prefix (see euler_user_names);
+# (euler-user-<slug>), resolved dynamically by prefix (see euler_user_names);
 # only the fixed infra uids are listed statically here.
 ALL_USERS=(euler-caddy euler-auth
            euler-proxy euler-acme euler-ddns euler-smtp)
@@ -133,7 +133,7 @@ describe_uids() {
 
 uid_of() { id -u "$1" 2>/dev/null || true; }
 
-# The per-user web tier (MT-7) creates euler-user-<slug> uids dynamically at provision
+# The per-user web tier creates euler-user-<slug> uids dynamically at provision
 # time, so they cannot be listed ahead of time like the fixed service uids. Enumerate
 # whatever exists now by the euler-user- prefix, so a reload after each provision folds
 # the new uid into the egress drop (chain policy is accept — an unlisted uid would reach
@@ -263,7 +263,7 @@ do_install() {
     echo "Installing ${SERVICE_NAME} (boot-enabled, oneshot)..."
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
-Description=euler kernel egress firewall (nftables, per-uid — DD-8)
+Description=euler kernel egress firewall (nftables, per-uid)
 Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 Wants=network-pre.target
 Before=network-pre.target

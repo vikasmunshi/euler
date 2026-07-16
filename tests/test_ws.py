@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the web-shell service (Phase 6 step 1, DD-13/DD-14).
+"""Tests for the web-shell service.
 
 Covers the attach path end-to-end against a **fake auth service** on a unix
 socket (real :class:`~solver.web.auth.tickets.TicketStore` semantics — mint
@@ -65,7 +65,7 @@ _AUTHZ_FIXTURE = Path(__file__).parent / 'fixtures' / 'authorizations.json'
 
 
 class _FakeAuth:
-    """The auth service's shell-ticket surface, on a unix socket (DD-9 shape)."""
+    """The auth service's shell-ticket surface, on a unix socket."""
 
     def __init__(self) -> None:
         self.store = TicketStore()
@@ -186,7 +186,7 @@ class WsAttachTests(_WsServiceCase):
         ws = await self.client.ws_connect('/ws', headers=_HEADERS)
         banner = await _read_until(ws, b'solver_user=')
         self.assertIn(b'ticket_len=43', banner)          # token_urlsafe(32) → 43 chars
-        self.assertIn(b'profile=contributor', banner)    # the instance pin (DD-13)
+        self.assertIn(b'profile=contributor', banner)    # the instance pin
         # The child must redeem against the socket the service minted from — not a
         # compiled-in default that is right only by accident of how it was configured.
         self.assertIn(f'auth_socket={self.auth_socket}'.encode(), banner)
@@ -270,7 +270,7 @@ class WsAttachTests(_WsServiceCase):
 
 
 class ReaderAttachTests(_WsServiceCase):
-    """The reader floor (DD-13): solver:execute is a reader grant — attach works."""
+    """The reader floor: every rung may attach a terminal — attach works."""
 
     profile = 'reader'
 
@@ -319,7 +319,7 @@ class PtySignalTest(unittest.TestCase):
 
 
 class ReaperTests(_WsServiceCase):
-    """The detached-TTL reaper (DD-14 hygiene): a shell nobody has reattached to for
+    """The detached-TTL reaper (hygiene, not security): a shell nobody has reattached to for
     longer than the TTL is closed; an attached one never is."""
 
     detached_ttl = 1                          # reaper checks every ~1s (max(1, min(ttl, 60)))

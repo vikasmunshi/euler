@@ -31,7 +31,7 @@ class CryptoConfig(TypedDict):
     private_key_file: Path  # plain (unencrypted) X25519 private key (PKCS8 PEM)
     enc_key_file: Path  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
     private_key_backups: int  # rolling backups kept of the private key file
-    # per-user vault (envelope encryption of the private key + env; MT-6)
+    # per-user vault (envelope encryption of the private key + env)
     env_file: Path  # the project env file (ANTHROPIC_API_KEY etc.) -- the vault's second secret
     vault_file: Path  # {salt, iterations, wrapped_vk}: the vault key wrapped under the password key
     user_pass_file: Path  # terminal-only: the password, to derive the password key off-line
@@ -56,7 +56,7 @@ def _root_dir() -> Path:
     the git filter must agree with the shell on where the tree is. Otherwise ask git
     (authoritative for a checkout), and finally fall back to this file's own location
     (``solver/crypto/config.py`` → up 2). The fallbacks matter: the **web shells run
-    as ``euler-ws-*`` uids that do not own the checkout** (DD-12/DD-13), so git refuses
+    as ``euler-ws-*`` uids that do not own the checkout**, so git refuses
     with *detected dubious ownership*, and git may not be installed at all in a deployed
     tier that does no git operations by design. This module is imported at shell startup
     (the crypto commands register from it), so a hard failure here would take the whole
@@ -103,7 +103,7 @@ config: CryptoConfig = {
     'private_key_file': _SECRETS_DIR / 'id',  # plain (unencrypted) X25519 private key (PKCS8 PEM)
     'enc_key_file': _ROOT / 'keys' / 'enc-key.json',  # {<public-key-hex>: <locked-master-key-hex>} + 'verify'
     'private_key_backups': 5,  # rolling backups kept of the private key file
-    # per-user vault (MT-6): both `id` and `env` live encrypted under a random vault key, itself
+    # per-user vault: both `id` and `env` live encrypted under a random vault key, itself
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.
     'env_file': _SECRETS_DIR / 'env',  # same value as solver.config.env_file, kept import-free here
     'vault_file': _SECRETS_DIR / 'vault',  # {salt, iterations, wrapped_vk}

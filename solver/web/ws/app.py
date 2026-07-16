@@ -2,17 +2,17 @@
 # -*- coding: utf-8 -*-
 """The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.
 
-Three routes, per DD-13/DD-14:
+Three routes:
 
 - ``GET /healthz`` — the kit's socket probe.
 - ``GET /ws`` — attach the browser terminal to the caller's persistent shell.
   Identity is the trusted ``X-User``/``X-Profile`` pair (Caddy strips
-  client-supplied copies and stamps the ``forward_auth`` response, DD-9); the
+  client-supplied copies and stamps the ``forward_auth`` response); the
   instance refuses a profile that differs from its ``EULER_PROFILE`` pin and
-  gates attach on **`solver:execute`** (DD-13). On fork it forwards the caller's
+  gates attach on the **reader floor**. On fork it forwards the caller's
   session cookie to the auth service's ``POST /shell-ticket`` and passes only
   the minted single-use ticket to the child.
-- ``POST /internal/logout`` — the auth service's teardown push (DD-14):
+- ``POST /internal/logout`` — the auth service's teardown push:
   ``{"email": …}`` closes that user's shell. Socket-peer only — Caddy routes
   ``/ws`` and nothing else to this service, so no browser can reach it.
 
@@ -40,12 +40,12 @@ from solver.web.ws.pty import PtySession
 
 log = logging.getLogger('euler-ws')
 
-#: The attach gate (DD-13): the reader-floor "may run the solver at all" grant.
+#: The attach gate: the reader-floor "may run the solver at all" grant.
 ATTACH_REQUIRES: str = 'reader'
 
 #: Per-app PtyManager, for tests and the lifecycle hooks.
 PTY_MANAGER: web.AppKey[PtyManager] = web.AppKey('pty_manager', PtyManager)
-#: The detached-TTL reaper task (DD-14), stored so cleanup can cancel it.
+#: The detached-TTL reaper task, stored so cleanup can cancel it.
 _REAPER_TASK: web.AppKey[asyncio.Task[None]] = web.AppKey('reaper_task', asyncio.Task)
 
 
@@ -54,10 +54,10 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
     """Build the request's Subject from the forward_auth headers, or None.
 
     Caddy guarantees these headers on every routed request (and strips any
-    client-supplied copies, DD-9). A missing/unknown profile yields None; so
+    client-supplied copies). A missing/unknown profile yields None; so
     does a profile differing from this instance's *pin* — Caddy routes each
     profile to its own per-profile uid's socket, so a mismatch means misrouting
-    or a bypass (the code-side backstop to the OS boundary, DD-12/DD-13).
+    or a bypass (the code-side backstop to the OS boundary).
     """
     user = request.headers.get('X-User', '').strip()
     profile = request.headers.get('X-Profile', '').strip()
@@ -90,7 +90,7 @@ def build_app(config: WsConfig) -> web.Application:
     manager = PtyManager()
 
     async def _mint_ticket(cookie: str) -> str:
-        """Mint a one-time shell ticket against the caller's live session (DD-9).
+        """Mint a one-time shell ticket against the caller's live session.
 
         The auth client is blocking stdlib; run it off-loop. Any refusal —
         session died between forward_auth and here, service down — aborts the
@@ -115,7 +115,7 @@ def build_app(config: WsConfig) -> web.Application:
 
         The shell is forked on first attach (minting the ticket then), replayed
         on reattach; binary frames are keystrokes, a `resize` text frame drives
-        the shared PTY geometry. Detach leaves the shell running (DD-14).
+        the shared PTY geometry. Detach leaves the shell running.
         """
         subject = _subject_from_headers(request, authz, config.profile)
         if subject is None:
@@ -158,7 +158,7 @@ def build_app(config: WsConfig) -> web.Application:
         return ws
 
     async def internal_logout(request: web.Request) -> web.Response:
-        """Tear down a user's shell on the auth service's push (DD-14).
+        """Tear down a user's shell on the auth service's push.
 
         Reachable only by socket peers (`euler-web` members) — Caddy never
         routes here. Idempotent: closing an absent shell reports closed=False.
@@ -178,7 +178,7 @@ def build_app(config: WsConfig) -> web.Application:
         await app[PTY_MANAGER].close_all()
 
     async def _reaper() -> None:
-        """Periodically reap shells detached longer than the TTL (DD-14 hygiene).
+        """Periodically reap shells detached longer than the TTL (hygiene, not security).
 
         The cadence tracks the TTL (a short test TTL is checked often; the 24 h
         production default every 60 s), so a shell is reaped within one interval of

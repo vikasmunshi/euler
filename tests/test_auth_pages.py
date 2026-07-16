@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Every auth-tier page renders (DD-7), and the terms page's way back out.
+"""Every auth-tier page renders, and the terms page's way back out.
 
 The plain "does it render" half is the point: these pages all extend base.html,
 so a mistake in the shared template breaks the whole signed-out tier at once —

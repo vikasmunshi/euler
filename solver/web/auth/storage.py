@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Shared JSON persistence for the auth stores (DD-6).
+"""Shared JSON persistence for the auth stores.
 
 Every store file lives in the service's private state dir
 (``/var/lib/euler-auth``), is owned by ``euler-auth`` alone, and is written

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Auth-service runtime configuration, read from the environment (DD-5/DD-6).
+"""Auth-service runtime configuration, read from the environment.
 
 The service runs as ``euler-auth`` from the ``/opt/euler`` system venv and reads
 its scoped ``/etc/euler/auth.env`` (via the unit's ``EnvironmentFile=``) — never
@@ -21,7 +21,7 @@ from typing import NamedTuple
 class AuthConfig(NamedTuple):
     """Resolved runtime configuration for one auth-service process."""
 
-    #: DD-6 state dir: users.json / pending.json / remember.json / session-secret.
+    #: The euler-auth-private state dir: users.json / pending.json / remember.json / session-secret.
     state_dir: Path
     #: The public unix socket (Caddy upstream + shell-ticket redemption).
     socket_path: Path
@@ -30,18 +30,18 @@ class AuthConfig(NamedTuple):
     #: Group given connect() on the public socket (Caddy + the app tier).
     socket_group: str
     #: Group for the admin socket — empty means **private** (0600, euler-auth
-    #: only): the admin plane is wheel-gated, root connects via sudo (DD-6).
+    #: only): the admin plane is wheel-gated, root connects via sudo.
     admin_socket_group: str
     #: Shared secret for the admin API (second factor beside the socket's group gate).
     admin_token: str
     #: Public base URL (https://<FQDN>) used in invite / reset links.
     base_url: str
-    #: host:port of the loopback mail relay (DD-8) — the only mail path out.
+    #: host:port of the loopback mail relay — the only mail path out.
     smtp_relay: str
-    #: Version tag of the Terms of use the registration flow records (DD-7).
+    #: Version tag of the Terms of use the registration flow records.
     terms_version: str
     #: The directory holding the per-user instance sockets (``user-<slug>.sock``): the
-    #: DD-14 teardown push targets the one socket for the affected user (MT-4). Empty
+    #: teardown push targets the one socket for the affected user. Empty
     #: disables the push (a deploy with no web tier, or a test that does not exercise it)
     #: — the default, so ``from_env`` is the only place the real directory is set.
     user_socket_dir: str = ''

@@ -51,7 +51,7 @@ class RequiresTests(unittest.TestCase):
                 self.assertFalse(is_permitted('root'))
 
     def test_permission_is_channel_agnostic(self) -> None:
-        """The channel is not an authorization axis (MT-10): the same profile is permitted the
+        """The channel is not an authorization axis: the same profile is permitted the
         same commands on terminal and web — only ``requires`` decides."""
         with as_subject('reader', channel='web'):
             self.assertTrue(is_permitted('reader'))
@@ -84,7 +84,7 @@ class DecoratorEnforcementTests(unittest.TestCase):
 
     def test_registration_is_channel_agnostic(self) -> None:
         """A command registers on any channel when the subject holds its ``requires`` — the channel
-        is no longer an axis (MT-10). An admin over web registers an ``infra:execute`` command that
+        is no longer an axis. An admin over web registers an admin-floored command that
         the old channel gate would have hidden."""
         with as_subject('admin', channel='web'):
             @command(name='zz-test-web-only', requires='admin')

@@ -84,8 +84,8 @@ solver/
     models.py         — Available models and their pricing, plus a utility function to calculate costs.
     skill.py          — The `claude-solve` command: run Claude Code in-shell against a problem's solution files.
     update_models.py  — The `update-models` command: refresh the `Model` enum, pricing, and FX rate.
-  auth/               — The authorization kernel — identity, profiles, and permissions (DD-12).
-    authorizations.py — The authorization policy — ``authorizations.json`` (DD-12, re-simplified).
+  auth/               — The authorization kernel — identity, profiles, and the ladder.
+    authorizations.py — The authorization policy — ``authorizations.json``.
     identity.py       — Identity resolution → a :class:`~solver.auth.subject.Subject`.
     subject.py        — The authorization **subject** — the resolved security principal.
   core/
@@ -135,42 +135,42 @@ solver/
     update_doc.py     — Regenerate the machine-maintained sections of the guides under `docs/`.
   web/                — The web app services (see docs/web-server-guide.md).
     csp.py            — Content-Security-Policy middleware with a per-response nonce (shared).
-    auth/             — Web authentication: the auth service and its clients (DD-6/DD-7/DD-9).
-      __main__.py     — Auth service entry point: ``python -m solver.web.auth`` (DD-5).
-      admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6/DD-12).
-      app.py          — The auth service: public + admin aiohttp apps over unix sockets (DD-6/DD-9).
+    auth/             — Web authentication: the auth service and its clients.
+      __main__.py     — Auth service entry point: ``python -m solver.web.auth``.
+      admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command.
+      app.py          — The auth service: public + admin aiohttp apps over unix sockets.
       client.py       — Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
-      commands.py     — The ``users`` shell command: account administration, split by permission (DD-12).
-      config.py       — Auth-service runtime configuration, read from the environment (DD-5/DD-6).
-      mail.py         — Outbound mail via the loopback relay (DD-8).
-      pages.py        — The auth service's HTML pages: login, registration, reset, forgot (DD-7).
-      pending.py      — Pending invite / reset store at ``<state>/pending.json`` (DD-7).
+      commands.py     — The ``users`` shell command: account administration, split by permission.
+      config.py       — Auth-service runtime configuration, read from the environment.
+      mail.py         — Outbound mail via the loopback relay.
+      pages.py        — The auth service's HTML pages: login, registration, reset, forgot.
+      pending.py      — Pending invite / reset store at ``<state>/pending.json``.
       policy.py       — Auth policy constants (lifetimes, cookie names, password and OTP rules).
       ratelimit.py    — A small in-memory sliding-window rate limiter for the auth endpoints.
-      remember.py     — Persistent "remember me" tokens at ``<state>/remember.json`` (DD-6).
-      sessions.py     — In-memory web session table (DD-6).
+      remember.py     — Persistent "remember me" tokens at ``<state>/remember.json``.
+      sessions.py     — In-memory web session table.
       srp.py          — Secure Remote Password (SRP-6a) primitives for web authentication.
-      storage.py      — Shared JSON persistence for the auth stores (DD-6).
-      tickets.py      — One-time shell tickets: web identity for PTY children (DD-9).
-      users.py        — User store: the SRP verifier database at ``<state>/users.json`` (DD-6).
-    site/             — The content service — server-rendered pages + htmx fragments (Phase 5).
-      __main__.py     — Content service entry point: ``python -m solver.web.site`` (DD-5/DD-12).
+      storage.py      — Shared JSON persistence for the auth stores.
+      tickets.py      — One-time shell tickets: web identity for PTY children.
+      users.py        — User store: the SRP verifier database at ``<state>/users.json``.
+    site/             — The content service — server-rendered pages + htmx fragments.
+      __main__.py     — Content service entry point: ``python -m solver.web.site``.
       app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.
-      config.py       — Content-service runtime configuration, read from the environment (DD-5/DD-12).
-      content.py      — Config-free readers for the content trees the service renders (Phase 5b).
-      render.py       — The full-page-vs-block render contract (DD-10, §4.5).
-      validate.py     — The save gate (Phase 5c): the checks every 5d write passes (DD-10).
-    user/             — The per-user web service (MT-4): one collaborator's content **and** web shell.
-      __main__.py     — Per-user service entry point: ``python -m solver.web.user`` (DD-5/MT-4).
-      app.py          — The per-user aiohttp app: one collaborator's content **and** web shell (MT-4).
-      config.py       — Per-user service runtime configuration, read from the environment (DD-5/MT-4).
-      vault_api.py    — Vault + account routes for the per-user service (MT-6/MT-8).
-    ws/               — The web-shell service: the solver PTY terminal over WebSocket (Phase 6, DD-13/DD-14).
-      __main__.py     — Web-shell service entry point: ``python -m solver.web.ws`` (DD-5/DD-13).
+      config.py       — Content-service runtime configuration, read from the environment.
+      content.py      — Config-free readers for the content trees the service renders.
+      render.py       — The full-page-vs-block render contract (§4.5).
+      validate.py     — The save gate: the checks every write passes.
+    user/             — The per-user web service: one collaborator's content **and** web shell.
+      __main__.py     — Per-user service entry point: ``python -m solver.web.user``.
+      app.py          — The per-user aiohttp app: one collaborator's content **and** web shell.
+      config.py       — Per-user service runtime configuration, read from the environment.
+      vault_api.py    — Vault + account routes for the per-user service.
+    ws/               — The web-shell service: the solver PTY terminal over WebSocket.
+      __main__.py     — Web-shell service entry point: ``python -m solver.web.ws``.
       app.py          — The web-shell aiohttp app: identity from forward_auth, the /ws attach, teardown.
-      config.py       — Web-shell service runtime configuration, read from the environment (DD-5/DD-13).
-      manager.py      — Persistent per-user PTY shells: one long-lived solver shell per web user (DD-14).
-      pty.py          — PTY bridge: run an interactive ``solver`` shell on a pseudo-terminal (DD-13).
+      config.py       — Web-shell service runtime configuration, read from the environment.
+      manager.py      — Persistent per-user PTY shells: one long-lived solver shell per web user.
+      pty.py          — PTY bridge: run an interactive ``solver`` shell on a pseudo-terminal.
 ```
 <!-- /GEN:package-layout -->
 

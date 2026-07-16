@@ -1,24 +1,24 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Vault + account routes for the per-user service (MT-6/MT-8).
+"""Vault + account routes for the per-user service.
 
 These routes only exist on the per-user instance — the process runs as the collaborator's
 own uid, so ``~/.euler`` *is* their vault and acting on it needs no privilege dance.
 
-**The web unlock path (MT-12).** The browser derives ``PK`` itself (WebCrypto PBKDF2 over
+**The web unlock path.** The browser derives ``PK`` itself (WebCrypto PBKDF2 over
 the password it already holds and the SRP salt) and sends only ``PK`` here over TLS; the
 service unwraps ``VK`` and materialises the uid-private tmpfs key file
 (:func:`solver.crypto.vault.write_session_key`), which every later-forked shell — and the
 git filter under it — inherits by path. The password never reaches any server, and the
 auth service (which could never derive ``PK``: it never sees the password) is not
-involved at all. That is precisely what keeps the vault operator-opaque at rest (MT-6a).
+involved at all. That is precisely what keeps the vault operator-opaque at rest.
 
-**The account fragment (MT-8).** A credential dashboard: the public key (for the
+**The account fragment.** A credential dashboard: the public key (for the
 out-of-band ``user-authorize`` step), **write-only** secret upload/replace/delete into
 the vault-encrypted ``~/.euler/env`` (values are never rendered back), and the gh /
 Claude Code sign-in state (the actual logins run in the web shell).
 
-**Reset (MT-6c).** ``POST /internal/vault-reset`` — socket-peer only, pushed by the auth
+**Reset.** ``POST /internal/vault-reset`` — socket-peer only, pushed by the auth
 service when a password *reset* completes — destroys the vault: an SRP reset shares
 nothing with the vault, so the old ``VK`` is unrecoverable *by design* and leaving the
 blobs around would only misrepresent the state. A password *change* instead rides
@@ -45,7 +45,7 @@ from solver.crypto.config import config as crypto_config
 from solver.web.site.app import requires
 from solver.web.site.render import render
 
-#: The account floor: every rung may read (and here, act on) its *own* account (MT-10b).
+#: The account floor: every rung may read (and here, act on) its *own* account.
 _VAULT_REQUIRES: str = 'reader'
 
 #: Env entry names: dotenv-style upper-snake identifiers.
@@ -114,7 +114,7 @@ def _write_env_lines(vault_key: bytes, lines: list[str]) -> None:
 
 
 def _secret_names(vault_key: bytes) -> list[str]:
-    """The NAMES stored in the env file — never the values (write-only surface, MT-8)."""
+    """The NAMES stored in the env file — never the values (write-only surface)."""
     names = [line.split('=', 1)[0].strip() for line in _env_lines(vault_key)
              if '=' in line and not line.lstrip().startswith('#')]
     return sorted(set(filter(None, names)))
@@ -141,7 +141,7 @@ def _claude_status() -> str:
 
 
 def reset_vault_and_lock() -> list[str]:
-    """Destroy the vault + its secrets and drop every in-process key cache (MT-6c)."""
+    """Destroy the vault + its secrets and drop every in-process key cache."""
     removed = vault.reset_vault()
     _drop_key_caches()
     return removed
@@ -169,7 +169,7 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def vault_unlock(request: web.Request) -> web.Response:
-        """``POST /vault/unlock`` ``{pk, salt}`` — unlock, or initialise on first login (MT-6).
+        """``POST /vault/unlock`` ``{pk, salt}`` — unlock, or initialise on first login.
 
         No vault yet → mint one wrapped under this ``PK`` (recording the SRP ``salt`` so
         every future session derives the same key) and encrypt any plaintext secrets.
@@ -203,7 +203,7 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def vault_rewrap(request: web.Request) -> web.Response:
-        """``POST /vault/rewrap`` ``{old_pk, new_pk, new_salt}`` — the vault survives a password change (MT-6c).
+        """``POST /vault/rewrap`` ``{old_pk, new_pk, new_salt}`` — the vault survives a password change.
 
         Re-wraps only the small ``VK`` blob under the new ``PK``; the secrets are never
         re-encrypted. Also serves the stale-vault recovery: the browser derives the old
@@ -251,12 +251,12 @@ def add_vault_routes(app: web.Application) -> None:
 
     @requires(_VAULT_REQUIRES)
     async def account_vault(request: web.Request) -> web.Response:
-        """``GET /account/vault`` — the account page's credential panel (MT-8)."""
+        """``GET /account/vault`` — the account page's credential panel."""
         return await _account_fragment(request)
 
     @requires(_VAULT_REQUIRES)
     async def secret_upsert(request: web.Request) -> web.Response:
-        """``POST /account/secret`` — add/replace one env entry, write-only (MT-8)."""
+        """``POST /account/secret`` — add/replace one env entry, write-only."""
         form = await request.post()
         name = str(form.get('name', '')).strip().upper()
         value = str(form.get('value', '')).strip()
@@ -287,7 +287,7 @@ def add_vault_routes(app: web.Application) -> None:
         return await _account_fragment(request)
 
     async def internal_vault_reset(request: web.Request) -> web.Response:
-        """``POST /internal/vault-reset`` — the auth service's reset push (MT-6c).
+        """``POST /internal/vault-reset`` — the auth service's reset push.
 
         Socket-peer only (Caddy never routes ``/internal/*``): a completed password
         *reset* means the old ``VK`` is unrecoverable by design, so remove the vault and

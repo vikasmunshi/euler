@@ -518,7 +518,7 @@ dl.account dt { color: var(--muted); }
 dl.account dd { margin: 0; }
 .perm-list { display: flex; flex-wrap: wrap; gap: 0.35rem; }
 
-/* ── The terminal (right pane, Phase 6) ──────────────────────────────────── */
+/* ── The terminal (right pane) ───────────────────────────────────────────── */
 /* xterm renders into #term. The host is **dark in both site themes** — not an
    oversight: it shows the shell's own output, and the shell paints with absolute
    xterm-256 indices picked for a dark terminal (see terminal.js). The colour is

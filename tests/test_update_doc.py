@@ -62,8 +62,8 @@ class AuthorizationTableTests(unittest.TestCase):
             self.assertEqual(ticked, expected, cmd.name)
 
     def test_least_profile_is_the_lowest_privilege_that_satisfies(self) -> None:
-        # A read-only command (solutions:read) is reachable by the base reader; an
-        # admin-only command (infra:execute) only by admin.
+        # A read-only command is reachable by the base reader; an admin-floored
+        # command only by admin.
         ls = registry.resolve('ls')
         assert ls is not None
         self.assertEqual(_least_profile(ls), 'reader')

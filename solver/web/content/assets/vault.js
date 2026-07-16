@@ -1,4 +1,4 @@
-/* Vault client (MT-6/MT-12): derive the password key PK in the browser and drive
+/* Vault client: derive the password key PK in the browser and drive
  * the per-user service's vault endpoints. The password never leaves the browser —
  * PK = PBKDF2-HMAC-SHA256(password, SRP salt) is derived with WebCrypto and sent
  * only to the signed-in user's OWN service (same origin, TLS), which unwraps the

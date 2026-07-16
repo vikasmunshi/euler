@@ -1,16 +1,16 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The auth service: public + admin aiohttp apps over unix sockets (DD-6/DD-9).
+"""The auth service: public + admin aiohttp apps over unix sockets.
 
 Two listeners, one process, one owner of all auth state:
 
 - **Public** (``/run/euler/auth.sock``, group ``euler-web``) — reached through
   Caddy: SRP login (challenge/verify), session resume/logout, and the
   ``forward_auth`` endpoint (``200 + X-User + X-Profile`` or ``401``). The
-  shell-ticket endpoints (DD-9) also live here but are **not routed by Caddy**
+  shell-ticket endpoints also live here but are **not routed by Caddy**
   — only socket peers (the ws service, the PTY shells) can reach them.
 - **Admin** (``/run/euler-adm/auth-admin.sock``, ``0600`` euler-auth-private)
-  — the local admin plane (DD-6), never routed through Caddy and **wheel-gated**:
+  — the local admin plane, never routed through Caddy and **wheel-gated**:
   only root (the operator, via sudo) can connect, and ``X-Admin-Token`` (kept
   solely in root-readable ``/etc/euler/auth.env``) is a second check. ``users``
   add / list / enable / disable / remove.
@@ -147,19 +147,19 @@ class AuthService:
         return proof.hex(), self.profile_for(key)
 
     def profile_for(self, email: str) -> str:
-        """The web profile for *email* from ``authorizations.json`` (DD-12), defaulting to
+        """The web profile for *email* from ``authorizations.json``, defaulting to
         ``reader`` when unmapped. **Not capped** — in the per-user model an ``admin``
-        account is web-reachable (MT-10a), contained by its own uid + SRP, not the channel.
+        account is web-reachable, contained by its own uid + SRP, not the channel.
 
         Loaded **fresh** so a ``users change`` takes effect on the next login (sessions
-        bake the profile in at login, and a change revokes them — DD-11 staleness rule).
+        bake the profile in at login, and a change revokes them — the staleness rule).
         """
         return Authorizations.load().profile_for(email) or 'reader'
 
     # ── account lifecycle (admin plane) ───────────────────────────────────────────
 
     def invite(self, email: str, profile: str) -> str:
-        """Mint a registration invite and email the link; return the invite URL (DD-7)."""
+        """Mint a registration invite and email the link; return the invite URL."""
         token = self.pending.mint(email, profile, 'register')
         url = f'{self.config.base_url}/register?token={token}'
         self.mailer.send_invite(email, token, 'register')
@@ -172,7 +172,7 @@ class AuthService:
         self.pending.revoke_email(email)
 
     async def push_shell_teardown(self, email: str) -> None:
-        """Tear down *email*'s live web shell on their per-user instance (DD-14/MT-4).
+        """Tear down *email*'s live web shell on their per-user instance.
 
         The auth service is the only party that sees a logout or a revocation, and
         a *running* shell baked its permissions in at startup — so a demoted or
@@ -191,7 +191,7 @@ class AuthService:
         await self._push_user_instance(email, '/internal/logout')
 
     async def push_vault_reset(self, email: str) -> None:
-        """Destroy *email*'s vault on their per-user instance after a password reset (MT-6c).
+        """Destroy *email*'s vault on their per-user instance after a password reset.
 
         An SRP reset re-mints the login verifier but shares nothing with the vault, so
         the old vault key is unrecoverable **by design** — the auth service (which never
@@ -234,7 +234,7 @@ def build_public_app(service: AuthService) -> web.Application:
 
         ``X-User-Slug`` (the e-mail's :func:`system_slug`) is what Caddy routes on in
         the per-user model — every request goes to that user's own instance socket
-        (MT-4/MT-11). ``X-User``/``X-Profile`` still ride along for the app tier.
+        ``X-User``/``X-Profile`` still ride along for the app tier.
         """
         identity = service.session_identity(request)
         if identity is None:
@@ -331,7 +331,7 @@ def build_public_app(service: AuthService) -> web.Application:
         current = request.cookies.get(policy.SESSION_COOKIE)
         service.sessions.revoke_email(email, keep=current)   # other devices out;
         service.remember.revoke_email(email)                 # persistent tokens die
-        await service.push_shell_teardown(email)             # …and any live shell (DD-14)
+        await service.push_shell_teardown(email)             # …and any live shell
         log.info('password changed for %s', email)
         return web.json_response({'M2': result[0]})
 
@@ -342,7 +342,7 @@ def build_public_app(service: AuthService) -> web.Application:
         if remember_cookie:
             service.remember.revoke(remember_cookie)
         if identity is not None:
-            await service.push_shell_teardown(identity[0])   # the user left — reap the shell (DD-14)
+            await service.push_shell_teardown(identity[0])   # the user left — reap the shell
         # A browser form post (the site's user menu) lands on home — 303 turns
         # the POST into GET /, where the now-absent session bounces to /login.
         # A programmatic caller (no text/html Accept) keeps the JSON contract.
@@ -355,7 +355,7 @@ def build_public_app(service: AuthService) -> web.Application:
         return response
 
     async def ticket_mint(request: web.Request) -> web.Response:
-        """Mint a one-time shell ticket against the caller's live session (DD-9).
+        """Mint a one-time shell ticket against the caller's live session.
 
         Not routed by Caddy: only socket peers (the ws service, forwarding the
         user's cookie) reach this. A shell user cannot mint — no cookie.
@@ -369,7 +369,7 @@ def build_public_app(service: AuthService) -> web.Application:
         return web.json_response({'ticket': ticket})
 
     async def ticket_redeem(request: web.Request) -> web.Response:
-        """Consume a shell ticket, returning the authoritative identity (DD-9)."""
+        """Consume a shell ticket, returning the authoritative identity."""
         body = await _json_body(request)
         redeemed = service.tickets.redeem(str(body.get('ticket', '')))
         if redeemed is None:
@@ -380,7 +380,7 @@ def build_public_app(service: AuthService) -> web.Application:
 
     app = web.Application(
         middlewares=[csp_middleware, aiohttp_jinja2.context_processors_middleware])
-    # Templates ship as package data (DD-5): solver/web/templates, autoescape on.
+    # Templates ship as package data: solver/web/templates, autoescape on.
     # The content service's partials come second: /terms is an auth route that the
     # shell swaps into its own left pane, so its fragment must wear the shell's
     # chrome — and the chrome has one source of truth (site/templates/_crumbs.html,
@@ -415,7 +415,7 @@ def build_public_app(service: AuthService) -> web.Application:
 # ── admin app (auth-admin.sock — local only, never via Caddy) ──────────────────────
 
 def build_admin_app(service: AuthService) -> web.Application:
-    """The admin plane (DD-6): account lifecycle behind the euler-adm socket + token."""
+    """The admin plane: account lifecycle behind the euler-adm socket + token."""
 
     @web.middleware
     async def require_token(request: web.Request,
@@ -430,7 +430,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         return web.Response(text='ok')
 
     async def list_users(_request: web.Request) -> web.Response:
-        """The roster (DD-12): every identity in ``authorizations.json`` — web emails
+        """The roster: every identity in ``authorizations.json`` — web emails
         **and** OS logins — with its profile, joined with SRP registration state for the
         web ones (and any registered web account not yet in the map)."""
         authz_users = Authorizations.load().all_users()          # identity → profile (web + local)
@@ -455,7 +455,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         })
 
     async def add_user(request: web.Request) -> web.Response:
-        """Mint + mail an invite (DD-7 step 1). No user record exists until completion."""
+        """Mint + mail an invite (the first registration step). No user record exists until completion."""
         body = await _json_body(request)
         email = normalize_email(str(body.get('email', '')))
         profile = str(body.get('profile', 'reader'))
@@ -484,7 +484,7 @@ def build_admin_app(service: AuthService) -> web.Application:
             return web.Response(status=404, text='no such user')
         if not enable:
             service.revoke_access(email)
-            await service.push_shell_teardown(email)         # DD-14: disable ends the shell now
+            await service.push_shell_teardown(email)         # disable ends the shell now
         log.info('%s %s', 'enabled' if enable else 'disabled', email)
         return web.json_response({'email': email, 'disabled': not enable})
 
@@ -493,7 +493,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         existed = service.users.remove(email)
         revoked = service.pending.revoke_email(email)
         service.revoke_access(email)
-        await service.push_shell_teardown(email)             # DD-14: remove ends the shell now
+        await service.push_shell_teardown(email)             # remove ends the shell now
         if not existed and not revoked:
             return web.Response(status=404, text='no such user or invite')
         log.info('removed %s', email)
@@ -503,7 +503,7 @@ def build_admin_app(service: AuthService) -> web.Application:
         """Drop a web account's live sessions + remember tokens so a profile change
         (written to authorizations.json by the sudo CLI) takes effect on next login —
         and tear down the live shell so the *running* PTY's baked-in permissions die
-        with them, not at next login (DD-14; this is the `users change` path)."""
+        with them, not at next login (this is the `users change` path)."""
         email = normalize_email(request.match_info['email'])
         n = service.sessions.revoke_email(email) + service.remember.revoke_email(email)
         await service.push_shell_teardown(email)
@@ -523,5 +523,5 @@ def build_admin_app(service: AuthService) -> web.Application:
 
 
 def utcnow_iso() -> str:
-    """Current UTC time in ISO-8601 (shared by the DD-7 flow handlers, step 4)."""
+    """Current UTC time in ISO-8601 (shared by the registration/reset flow handlers)."""
     return datetime.now(timezone.utc).isoformat(timespec='seconds')

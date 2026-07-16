@@ -1,21 +1,21 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The web-shell service: the solver PTY terminal over WebSocket (Phase 6, DD-13/DD-14).
+"""The web-shell service: the solver PTY terminal over WebSocket.
 
 One aiohttp app per profile instance (``euler-ws@<profile>``, uid
 ``euler-ws-<profile>``, socket ``/run/euler/ws-<profile>.sock``), behind Caddy's
 ``forward_auth`` + per-profile routing. ``GET /ws`` attaches the browser terminal
 to the signed-in user's **persistent** solver shell:
 
-- identity arrives as the trusted ``X-User``/``X-Profile`` headers (DD-9); the
+- identity arrives as the trusted ``X-User``/``X-Profile`` headers; the
   instance refuses a profile that differs from its ``EULER_PROFILE`` pin;
-- attach is gated on ``solver:execute`` (the reader-floor "may run the solver"
-  grant, DD-13) via the :mod:`solver.auth` kernel;
+- attach is gated on the reader floor (the "may run the solver at all"
+  grant) via the :mod:`solver.auth` kernel;
 - on first attach the service forwards the caller's session cookie to the auth
   service's ``POST /shell-ticket`` and forks ``python -m solver`` with only
   ``SOLVER_TICKET`` (+ ``TERM``) added to the child environment — the child
-  redeems the ticket and becomes the web-channel Subject (DD-9/DD-12);
-- the shell survives disconnects (DD-14): a background drainer buffers output
+  redeems the ticket and becomes the web-channel Subject;
+- the shell survives disconnects: a background drainer buffers output
   for replay, reconnects redraw, extra tabs share the one shell; teardown is
   in-shell ``exit``, the auth service's ``POST /internal/logout`` push
   (logout/revocation), or service stop.

@@ -193,7 +193,7 @@
     if (menu) { menu.open = false; }
   });
 
-  // ── the vault (MT-6): auto-unlock + account-panel recovery ────────────────
+  // ── the vault: auto-unlock + account-panel recovery ────────────────
   // Sign-in stashed PK (vault.js); unlock the per-user service's session with it
   // once per page load. Fire-and-forget: 'stale'/'error' just leave the vault
   // locked, and the account panel shows the recovery form below.
@@ -241,7 +241,7 @@
     })();
   });
 
-  // ── the terminal drives the left pane (Phase 6) ────────────────────────────
+  // ── the terminal drives the left pane ──────────────────────────────────────
   // `show` / `edit` in a web shell emit an OSC 5379 sequence on the PTY; the
   // terminal document turns it into {euler: 'navigate', path} and posts it here
   // (it never touches this DOM itself). We swap the pane exactly as a link would

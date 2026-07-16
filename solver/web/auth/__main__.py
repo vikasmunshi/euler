@@ -1,11 +1,11 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Auth service entry point: ``python -m solver.web.auth`` (DD-5).
+"""Auth service entry point: ``python -m solver.web.auth``.
 
 Run by the root-owned ``euler-auth.service`` as the ``euler-auth`` user from
 the ``/opt/euler`` system venv, configured entirely by the environment (the
 unit's ``EnvironmentFile=/etc/euler/auth.env``). Binds the public and admin
-unix sockets, sets their group/mode (DD-1/DD-6), and serves until SIGTERM.
+unix sockets, sets their group/mode, and serves until SIGTERM.
 
 For local testing every path is overridable::
 
@@ -36,7 +36,7 @@ async def _bind(app: web.Application, path: Path, group: str) -> web.AppRunner:
     With a *group*, the socket is ``0660`` + chgrp'd (the public socket: Caddy
     and the app tier connect via ``euler-web``). With an **empty** *group* it is
     ``0600`` — private to the service user; only root reaches it via sudo (the
-    admin plane, DD-6). Access logging is disabled (tokens travel in query
+    admin plane). Access logging is disabled (tokens travel in query
     strings). No permission to chgrp (a dev run outside the deployed
     identities) is logged and tolerated.
     """

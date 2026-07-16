@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""One-time shell tickets: web identity for PTY children (DD-9).
+"""One-time shell tickets: web identity for PTY children.
 
 Every web shell runs as the shared ``euler-ws`` uid and ``/proc/<pid>/environ``
 is same-uid-readable, so nothing carried in the environment can be a reusable

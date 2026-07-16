@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Outbound mail via the loopback relay (DD-8).
+"""Outbound mail via the loopback relay.
 
 The auth service holds **no** SMTP credentials: it submits over plain loopback
 SMTP to the ``euler-smtp`` relay (``EULER_SMTP_RELAY``), which is the sole
@@ -44,7 +44,7 @@ class Mailer:
         log.info('sent %r to %s', subject, rcpt)
 
     def send_invite(self, rcpt: str, token: str, kind: str) -> None:
-        """Email the registration (or reset) link for a freshly minted invite (DD-7)."""
+        """Email the registration (or reset) link for a freshly minted invite."""
         page = 'register' if kind == 'register' else 'reset'
         url = f'{self._base_url}/{page}?token={token}'
         if kind == 'register':
@@ -60,7 +60,7 @@ class Mailer:
         self._send(rcpt, subject, body)
 
     def send_otp(self, rcpt: str, otp: str) -> None:
-        """Email the one-time code proving live mailbox control (DD-7)."""
+        """Email the one-time code proving live mailbox control."""
         self._send(rcpt, 'Your euler verification code',
                    f'Your verification code is:\n\n    {otp}\n\n'
                    'It is valid for 10 minutes and allows 5 attempts.\n')

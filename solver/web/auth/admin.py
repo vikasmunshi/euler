@@ -1,13 +1,13 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The admin-plane CLI: run **under sudo** by the ``users`` shell command (DD-6/DD-12).
+"""The admin-plane CLI: run **under sudo** by the ``users`` shell command.
 
 The admin plane is gated by **wheel/sudo**, not a bespoke group. Running as root
 (via ``sudo``) this CLI does two things the operator's ordinary uid cannot:
 
 - **writes the authorization system of record** — ``/etc/euler/authorizations.json``
   (``root:root 0644``) — for profile assignment (``add`` / ``change`` / the map side
-  of ``remove``), the DD-12 write path;
+  of ``remove``);
 - **reaches the euler-auth admin socket** (``0600``, token in root-readable
   ``/etc/euler/auth.env``) for SRP operations — minting invites, enable / disable /
   remove, session revocation, and the full roster listing.
@@ -35,7 +35,7 @@ from solver.web.auth import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET
 from solver.web.auth.client import request
 
 _ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove')
-_WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only (DD-11)
+_WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only
 _ALL_PROFILES = _WEB_PROFILES + ('admin',)
 _AUTHZ_PATH = os.environ.get('EULER_AUTHZ_FILE', '/etc/euler/authorizations.json')
 
@@ -182,7 +182,7 @@ def main(argv: list[str]) -> int:
 
 def _print_listing(data: dict[str, Any]) -> None:
     """Render the roster — every identity in authorizations.json (web + local) with its
-    profile and registration state — plus in-flight invites (DD-12)."""
+    profile and registration state — plus in-flight invites."""
     roster = data.get('roster', [])
     for entry in roster:
         print(f'  {entry.get("user"):40} {entry.get("profile"):18} '

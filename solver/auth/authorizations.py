@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The authorization policy — ``authorizations.json`` (DD-12, re-simplified).
+"""The authorization policy — ``authorizations.json``.
 
 Authorization is a **plain profile ladder** (:data:`solver.auth.subject.LADDER`):
 a command or route declares its minimum profile, and enforcement is a rank

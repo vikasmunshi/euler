@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Utility for loading command modules.
 
-``modules.csv`` is a pure **loader manifest** (DD-12): two columns
+``modules.csv`` is a pure **loader manifest**: two columns
 ``(module, registers_commands)``. Every command-registering module is imported;
 which of its commands actually **register** is decided per-command by the
 ``@register``/``@command`` decorator against the current subject's channel and

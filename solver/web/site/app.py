@@ -6,8 +6,8 @@
 **identity middleware** that turns Caddy's trusted ``X-User`` / ``X-Profile``
 (set by ``forward_auth``; client-supplied copies are stripped at the edge, §4.1)
 into a :class:`~solver.auth.subject.Subject`. Routes gate on it with
-:func:`requires`, the web counterpart of the shell's ``@register(requires=…)``
-(DD-12): the same ``object:permission`` grants, checked against ``X-Profile``.
+:func:`requires`, the web counterpart of the shell's ``@register(requires=…)``:
+the same profile floor, checked against ``X-Profile``.
 
 The route surface is the contract in ``docs/web-server-guide.md`` § The site: the app shell at
 ``/`` (four fixed regions filling the viewport), read routes rendering into
@@ -16,7 +16,7 @@ on htmx — :mod:`solver.web.site.render`), canonical trailing-slash 301s, and t
 edit routes — file editor, collection-level progress upload, delete, notes
 regenerate — each write passing the save gate (:mod:`solver.web.site.validate`)
 and always answering with a fragment. Every handler supplies its breadcrumbs and
-Actions (§6); the live terminal (Phase 6) lands on the same spine.
+Actions; the live terminal lands on the same spine.
 """
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ VIEW = 'reader'
 CONFIG_KEY = web.AppKey('site_config', SiteConfig)
 
 #: Repo-relative roots the ``/docs/file/`` view may serve — the ``docs`` + ``about``
-#: object trees (declared-readable, DD-12). Computed once from the policy in build_app.
+#: object trees (declared-readable). Computed once from the policy in build_app.
 READABLE_KEY = web.AppKey('readable_roots', list)
 
 #: Ceiling on a request body: the progress-page source (~600 KB today) + headroom;
@@ -117,7 +117,7 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
     client-supplied copies). A missing/unknown profile yields None — the
     identity middleware then answers 401, since only Caddy should reach us.
 
-    *pin* is this instance's own profile (``EULER_PROFILE``, DD-12): when set, a
+    *pin* is this instance's own profile (``EULER_PROFILE``): when set, a
     request whose ``X-Profile`` differs is refused (None). Caddy routes each
     profile to its own per-profile uid's socket, so a mismatch means misrouting
     or a bypass — the code-side backstop to the OS per-profile boundary.
@@ -133,7 +133,7 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
 
 
 def requires(capability: str) -> Callable[[_Handler], _Handler]:
-    """Gate a handler on *capability* against the request's Subject (DD-12).
+    """Gate a handler on *capability* against the request's Subject.
 
     401 when there is no subject (an unauthenticated caller that bypassed Caddy);
     403 when the subject lacks the grant. Mirrors the shell decorator's contract.
@@ -192,10 +192,10 @@ async def terminal(request: web.Request) -> web.StreamResponse:
     ``#ws``: xterm.js + the ``/ws`` client (``/assets/terminal.js``), whose
     ``beforeunload`` guard owns the refresh/close confirmation, and which
     forwards the shell's OSC 5379 ``show``/``edit`` sequences to the shell
-    document so *it* swaps the left pane (Phase 6).
+    document so *it* swaps the left pane.
 
     Note the socket is **not** this service's: Caddy routes ``/ws`` to the
-    per-profile ``euler-ws`` instance (DD-13). Same origin, so the CSP's
+    per-profile ``euler-ws`` instance. Same origin, so the CSP's
     ``connect-src 'self'`` covers the ``wss:`` upgrade.
     """
     return render(request, 'terminal.html')

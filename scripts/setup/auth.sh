@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Auth service kit (euler-auth) — Phase 4, steps 2+ of the server redesign (DD-5/DD-6)
+# Auth service kit (euler-auth)
 # ====================================================================================
 #
 # Installs / uninstalls / upgrades the runtime for the auth service: the service
 # identity (euler-auth) and wheel-gated admin plane, the root-owned /opt/euler
-# system venv the app services run from (DD-5), the scoped /etc/euler/auth.env,
-# the /var/lib/euler-auth state dir (DD-6), and — once the solver.web.auth module
+# system venv the app services run from, the scoped /etc/euler/auth.env,
+# the /var/lib/euler-auth state dir, and — once the solver.web.auth module
 # exists in the deployed venv — the root-owned euler-auth.service. Sibling to
 # frontend.sh / egress.sh / ddns.sh / firewall.sh / smtp.sh; see
 # docs/web-server-guide.md § Authentication.
@@ -13,12 +13,12 @@
 # Model:
 #   - The app services run from a root-owned system venv at /opt/euler, NOT the
 #     repo checkout: the service users cannot traverse the repo owner's 0750 home
-#     (DD-5). install/upgrade does `pip install <repo>[ai,dev,solutions,web]` into it
+#     install/upgrade does `pip install <repo>[ai,dev,solutions,web]` into it
 #     as root (the shared venv.sh helper — one definition for all app-service kits).
 #   - euler-auth: own primary group (state files are euler-auth:euler-auth 0600),
 #     supplementary member of euler-web (binds its public socket group euler-web
 #     in /run/euler).
-#   - The admin plane is WHEEL-GATED (DD-6): the admin socket is euler-auth-private
+#   - The admin plane is WHEEL-GATED: the admin socket is euler-auth-private
 #     (0600, in /run/euler-adm) and EULER_ADMIN_TOKEN lives only in the
 #     root-readable auth.env — the `users` command re-executes the admin CLI under
 #     sudo. No admin group, no operator-held credentials.
@@ -30,19 +30,19 @@
 #     euler-auth never reads the full ~/.euler/env.
 #   - The systemd unit is installed only when solver.web.auth is importable from
 #     the deployed venv (build-order step 4); until then install/upgrade report it
-#     as deferred. Unit carries the DD-8 layer-1 filter (IPAddressDeny=any +
+#     as deferred. Unit carries the systemd egress filter (IPAddressDeny=any +
 #     IPAddressAllow=localhost): the auth service is loopback-only by design.
 #
 #   /opt/euler/venv                        root:euler-web 0755  (deployed venv)
 #   /etc/euler/auth.env                    root:euler-auth 0640 (generated here)
-#   /etc/euler/authorizations.json         root:root 0644       (DD-12 SoR; seeded + migrated)
-#   /var/lib/euler-auth                    euler-auth:euler-auth 0700 (state, DD-6)
+#   /etc/euler/authorizations.json         root:root 0644       (authorization SoR; seeded + migrated)
+#   /var/lib/euler-auth                    euler-auth:euler-auth 0700 (state)
 #   /etc/tmpfiles.d/euler.conf             root:root 0644       (/run/euler socket dir)
 #   /etc/systemd/system/euler-auth.service (root-owned, boot-enabled; deferred until
 #                                           solver.web.auth exists in the venv)
 #
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
-# (start/stop/restart) requires sudo (DD-3).
+# (start/stop/restart) requires sudo.
 #
 # Actions: install | uninstall | upgrade | status | help
 #
@@ -58,13 +58,13 @@ ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"      
 
 SYS_DIR="/etc/euler"
 AUTH_ENV="${SYS_DIR}/auth.env"                  # scoped runtime config (root:euler-auth 0640)
-AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # DD-12 authorization SoR (root:root 0644)
-STATE_DIR="/var/lib/euler-auth"                 # DD-6: euler-auth-only state
-TMPFILES_CONF="/etc/tmpfiles.d/euler.conf"      # /run/euler socket dir (DD-1/DD-5)
+AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # authorization SoR (root:root 0644)
+STATE_DIR="/var/lib/euler-auth"                 # euler-auth-only state
+TMPFILES_CONF="/etc/tmpfiles.d/euler.conf"      # /run/euler socket dir
 
 WEB_GROUP="euler-web"
 
-# The system venv (DD-5) — OPT_DIR / VENV_DIR / VENV_PY / PYTHON / deploy_venv, shared
+# The system venv — OPT_DIR / VENV_DIR / VENV_PY / PYTHON / deploy_venv, shared
 # by every app-service kit so the location + dependency set have one definition.
 # shellcheck source=scripts/setup/venv.sh
 . "${SCRIPT_DIR}/venv.sh"
@@ -133,7 +133,7 @@ require_python() {
 
 # Source ~/.euler/env (or the deployed auth.env) and resolve the FQDN + admin token.
 # On install, a missing EULER_ADMIN_TOKEN is generated and appended to ~/.euler/env so
-# the authoring source and the deployed copy stay in sync (DD-6).
+# the authoring source and the deployed copy stay in sync.
 load_config() {
     local src=""
     if [ -r "${ENV_FILE}" ]; then
@@ -155,7 +155,7 @@ load_config() {
     fi
 }
 
-# Resolve the admin token (root-only material, DD-6): preserve the one already
+# Resolve the admin token (root-only material): preserve the one already
 # deployed in auth.env, else generate afresh. Also scrub any legacy copy out of
 # ~/.euler/env — the operator's uid must hold no admin credential.
 ensure_admin_token() {
@@ -166,7 +166,7 @@ ensure_admin_token() {
     fi
     if [ -w "${ENV_FILE}" ] && grep -q '^EULER_ADMIN_TOKEN=' "${ENV_FILE}" 2>/dev/null; then
         echo "Scrubbing legacy EULER_ADMIN_TOKEN from ~/.euler/env (root-only material now)..."
-        sed -i '/^# Admin-plane shared secret for the auth service (X-Admin-Token, DD-6)\.$/d;/^EULER_ADMIN_TOKEN=/d' \
+        sed -i '/^# Admin-plane shared secret for the auth service (X-Admin-Token)\.$/d;/^EULER_ADMIN_TOKEN=/d' \
             "${ENV_FILE}"
     fi
 }
@@ -198,10 +198,10 @@ ensure_identities() {
 }
 
 # /run/euler — the shared socket dir (root:euler-web 0770), via tmpfiles.d so it
-# exists at boot before any service and no service owns it (DD-1/DD-5).
+# exists at boot before any service and no service owns it.
 deploy_tmpfiles() {
     sudo tee "${TMPFILES_CONF}" > /dev/null <<EOF
-# GENERATED by scripts/setup/auth.sh — runtime socket dirs (DD-1/DD-5/DD-6).
+# GENERATED by scripts/setup/auth.sh — runtime socket dirs.
 # /run/euler: the shared app-service fabric; each service creates its own *.sock
 #   (0660 euler-<svc>:euler-web). Operators are deliberately NOT in euler-web.
 # /run/euler-adm: the local admin plane — euler-auth binds auth-admin.sock here
@@ -212,12 +212,12 @@ EOF
     sudo systemd-tmpfiles --create "${TMPFILES_CONF}"
 }
 
-# Deploy the scoped runtime config euler-auth reads (DD-6) — never the full ~/.euler/env.
+# Deploy the scoped runtime config euler-auth reads — never the full ~/.euler/env.
 deploy_auth_env() {
     sudo mkdir -p "${SYS_DIR}"
     sudo tee "${AUTH_ENV}" > /dev/null <<EOF
-# GENERATED by scripts/setup/auth.sh — scoped runtime config for euler-auth (DD-6).
-# Authoring source: ~/.euler/env. No Anthropic key, no SMTP creds (DD-8: mail goes to
+# GENERATED by scripts/setup/auth.sh — scoped runtime config for euler-auth.
+# Authoring source: ~/.euler/env. No Anthropic key, no SMTP creds (mail goes to
 # the loopback relay, which holds them).
 EULER_BASE_URL=https://${FQDN}
 EULER_ADMIN_TOKEN=${ADMIN_TOKEN}
@@ -228,14 +228,14 @@ EOF
     sudo chmod 0640 "${AUTH_ENV}"
 }
 
-# The euler-auth-only state dir (DD-6). The unit's StateDirectory= re-asserts this.
+# The euler-auth-only state dir. The unit's StateDirectory= re-asserts this.
 deploy_state_dir() {
     sudo mkdir -p "${STATE_DIR}"
     sudo chown "${AUTH_USER}:${AUTH_GROUP}" "${STATE_DIR}"
     sudo chmod 0700 "${STATE_DIR}"
 }
 
-# Deploy the authorization system of record (DD-12, re-simplified): the policy is a
+# Deploy the authorization system of record (re-simplified): the policy is a
 # plain profile ladder, so /etc/euler/authorizations.json (root:root 0644 —
 # world-readable non-secret, root-write only) carries ONE decision: who has which
 # profile. First deploy copies the repo template; every run seeds the checkout owner
@@ -295,7 +295,7 @@ install_unit() {
     echo "Installing ${SERVICE_NAME} (loopback-only, as ${AUTH_USER})..."
     sudo tee "${SERVICE_DEST}" > /dev/null <<EOF
 [Unit]
-Description=euler auth service (SRP login, sessions, forward_auth — DD-5..DD-9)
+Description=euler auth service (SRP login, sessions, forward_auth)
 Documentation=https://github.com/vikasmunshi/euler/blob/master/docs/web-server-guide.md
 After=network.target euler-smtp.service
 Wants=euler-smtp.service
@@ -310,11 +310,11 @@ ExecStart=${VENV_PY} -m solver.web.auth
 Restart=on-failure
 RestartSec=5s
 
-# State (DD-6) — euler-auth-only.
+# State — euler-auth-only.
 StateDirectory=euler-auth
 StateDirectoryMode=0700
 
-# DD-8 layer 1: the auth service is loopback-only (sockets, Squid, the mail relay).
+# Egress layer 1: the auth service is loopback-only (sockets, Squid, the mail relay).
 IPAddressDeny=any
 IPAddressAllow=localhost
 

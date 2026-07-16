@@ -38,7 +38,7 @@ rule). Like MathJax it injects its stylesheet at runtime (`style-src
 'unsafe-inline'`). Dynamic-imported same-origin modules, so no SRI. License at
 `codemirror/LICENSE`.
 
-**xterm.js** is the terminal in the right pane (`/terminal`, Phase 6): the UMD
+**xterm.js** is the terminal in the right pane (`/terminal`): the UMD
 `xterm.js` plus the **fit** addon (it sizes the terminal to its container; the
 resulting `cols`×`rows` is what `terminal.js` sends over the socket as the PTY's
 geometry) and the stock stylesheet. Classic scripts with SRI — unlike CodeMirror

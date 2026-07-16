@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The full-page-vs-block render contract (DD-10, §4.5).
+"""The full-page-vs-block render contract (§4.5).
 
 A content route renders either the **whole page** or a **named block** of the
 *same* template, so a full navigation and an htmx fragment-swap share one source
@@ -81,7 +81,7 @@ def render(request: web.Request, template_name: str,
     """Render *template_name* — its *block* for an htmx fetch, else the full page.
 
     *fragment* forces the block regardless of ``HX-Request``: the write routes
-    (5d) always answer with a fragment (web-server-guide § The site), never the whole shell.
+    always answer with a fragment (web-server-guide § The site), never the whole shell.
     """
     env = aiohttp_jinja2.get_env(request.app)
     ctx = _context(request, context)

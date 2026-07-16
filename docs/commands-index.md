@@ -401,7 +401,7 @@ Open *filename* from *problem*'s solution directory in the web code editor.
 The counterpart to `show` (which opens the rendered problem): *problem* defaults
 to the current problem, and *filename* completes to the files `ls` lists. The
 file must already exist — run `new` to create a solution first. Channel-aware,
-like `show` (the channel is the resolved subject's, DD-13):
+like `show` (the channel is the resolved subject's):
 
 - **web** — emits an `OSC 5379` `edit` sequence (`edit;<NNNN>;<token>;<relpath>`)
   that the xterm.js page rides over the PTY → WebSocket pipe to point the app
@@ -646,7 +646,7 @@ Push the current branch to origin as yourself (`git push -u origin <branch>`).
 In a per-user clone the current branch is `user/<slug>`, pushed with your own
 GitHub identity — `git-identity` is the one-time setup. Landing work on master
 is the admin's `git-merge`, never a direct push: pushing master requires
-`infra:execute`, and force-pushing it is always refused.
+the `admin` floor, and force-pushing it is always refused.
 
 Args:
     force: Push with `--force-with-lease` — needed after `git-sync` rebased your
@@ -1062,7 +1062,7 @@ show
 Open a problem's documentation page, in a browser or the web viewer panel.
 
 When *problem* is omitted, opens the current problem. The path depends on the
-shell's channel (from the resolved subject, DD-13):
+shell's channel (from the resolved subject):
 
 - **terminal** — opens the problem's page (`<base_url>/solutions/NNNN/`) in the named
   browser tab "solver-doc" (via
@@ -1278,7 +1278,7 @@ users
 ```
 
 ```text
-Administer accounts on the authorization map + the auth service (DD-12).
+Administer accounts on the authorization map + the auth service.
 
 `list` is read-only (every rung) and needs no sudo; every mutating verb needs
 ``admin`` and re-executes the admin CLI under ``sudo``.
@@ -1305,7 +1305,7 @@ vault
 ```
 
 ```text
-Encrypt this user's `id` + `env` at rest under a password-derived vault key (MT-6).
+Encrypt this user's `id` + `env` at rest under a password-derived vault key.
 
 - `status` (default): show whether the vault exists, which secret files are encrypted, and
   whether this session can decrypt them.

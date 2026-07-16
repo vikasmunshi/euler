@@ -7,7 +7,7 @@ so these tests exercise only the argument handling: that ``main`` honours the
 ``argv`` it is given, falls back to ``sys.argv`` when given ``None``, chooses the
 command-block vs. interactive path from the positional ``cmdline``, and derives
 the ``--save`` flag correctly. There is no channel flag: the terminal/web channel
-comes from the resolved subject (DD-13), never from ``argv``.
+comes from the resolved subject, never from ``argv``.
 """
 from __future__ import annotations
 
@@ -79,7 +79,7 @@ class MainArgvTests(unittest.TestCase):
         self.assertEqual(main(['ls 1']), 3)
 
     def test_no_channel_flag(self) -> None:
-        """The channel is not selectable from argv (DD-13): the retired ``--web`` /
+        """The channel is not selectable from argv: the retired ``--web`` /
         ``--terminal`` flags are usage errors, so no caller can pick its command set —
         it follows from the resolved subject (ticket / checkout-owner uid)."""
         for flag in ('--web', '--terminal'):

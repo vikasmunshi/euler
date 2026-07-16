@@ -1,14 +1,14 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Config-free readers for the content trees the service renders (Phase 5b).
+"""Config-free readers for the content trees the service renders.
 
 Every function takes the repo working tree (``SiteConfig.repo_root``) explicitly
 and imports nothing from :mod:`solver.config` (which resolves the shell's
-identity + per-user state — paths the service uid cannot use, DD-12). The
-service reads exactly the DD-12 content-ACL trees — ``solutions/`` · ``docs/`` ·
-``topics/`` · ``solver/web/content/`` — plus, best-effort, the AI reference
-sources under ``solver/`` for the composed ``ai`` doc, which degrade to a note
-when the uid may not read them.
+identity + per-user state — paths the service uid cannot use). The service reads
+exactly the declared content trees — ``solutions/`` · ``docs/`` · ``topics/`` ·
+``solver/web/content/`` — plus, best-effort, the AI reference sources under
+``solver/`` for the composed ``ai`` doc, which degrade to a note when the uid may
+not read them.
 """
 from __future__ import annotations
 
@@ -148,7 +148,7 @@ def problem_files(sdir: Path) -> list[str]:
 def git_status(repo_root: Path, sdir: Path) -> dict[str, tuple[str, str]]:
     """Best-effort git status for *sdir*: relative name → (css class, hover title).
 
-    Read-only, and the *only* git the web tier runs (DD-12: no commits, no
+    Read-only, and the *only* git the web tier runs (no commits, no
     checkouts, no key). It works from the deployed per-profile uids because
     ``.git`` is world-readable and the query carries its own
     ``safe.directory`` exception: git otherwise **refuses a repository owned by
@@ -208,10 +208,10 @@ def resolve_file(sdir: Path, filename: str) -> Path | None:
 def resolve_repo_file(repo_root: Path, roots: list[str], rel: str) -> Path | None:
     """Resolve a repo-relative path to a file under one of *roots*, or None.
 
-    *roots* are the **declared-readable** content-object paths (the ``docs`` /
-    ``about`` object trees — dirs or single files); the returned file must sit
-    under one of them, keeping the ``/docs/file/`` view DD-12-honest (it can only
-    serve what the policy declares readable). Rejects traversal + symlink escape.
+    *roots* are the **declared-readable** content paths (the ``docs`` / ``about``
+    trees — dirs or single files); the returned file must sit under one of them, so
+    the ``/docs/file/`` view can only ever serve what the service declares readable.
+    Rejects traversal + symlink escape.
     """
     relative = Path(rel)
     if not rel or relative.is_absolute() or '..' in relative.parts:
@@ -322,8 +322,8 @@ def save_progress(repo_root: Path, content: bytes) -> tuple[bool, str]:
 # ── about (the footer pages, 5e) ────────────────────────────────────────────────────
 
 #: ``/about/{name}`` → (repo-relative source file, page title, render as markdown?).
-#: These are the paths behind the ``about`` object in ``authorizations.json`` —
-#: keep the two lists in step so the DD-12 ACL derivation covers exactly them.
+#: These are the files behind the footer pages — keep them in step with the service's
+#: declared-readable roots (``install_content``), which is what admits them.
 ABOUT_PAGES: dict[str, tuple[str, str, bool]] = {
     'readme': ('README.md', 'README', True),
     'license': ('LICENSE', 'MIT license', False),
@@ -452,7 +452,7 @@ def _read_page(tree: Path, name: str) -> str | None:
 #: (it lives at the repo root, not under `docs/`, hence the special case).
 _README_MD = 'README.md'
 #: Repo trees the README's relative links may resolve to in the file viewer: the
-#: declared-readable ones (DD-12). Anything else leaves for GitHub (`_repo_link`).
+#: declared-readable ones. Anything else leaves for GitHub (`_repo_link`).
 _README_VIEWABLE = frozenset({'docs', 'about', 'solutions'})
 #: Where a README link the viewer cannot serve goes instead — the source of truth.
 README_REPO_BASE = 'https://github.com/vikasmunshi/euler/blob/master/'
@@ -489,9 +489,9 @@ def _fence(content: str) -> str:
 def _ai_section(heading: str, path: Path, body: str) -> str:
     """One composed section, or a muted note when the source is unreadable.
 
-    The sources live under ``solver/`` — outside the DD-12 content ACLs — so a
-    deployed per-profile uid may lack read on them; the page degrades rather
-    than 500s (in a dev run as the owner it renders in full).
+    The sources live under ``solver/`` — outside the declared content trees — so a
+    deployed service uid may lack read on them; the page degrades rather than 500s
+    (in a dev run as the owner it renders in full).
     """
     if body:
         return f'{heading}\n\n{body}'

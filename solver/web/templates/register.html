@@ -5,7 +5,7 @@
   <p class="lead">for <strong>{{ email }}</strong></p>
 
   {% if stage == 'terms' %}
-    {# DD-7 step 2/3: Terms acceptance gates the OTP (registration only). The full
+    {# Terms acceptance gates the OTP (registration only). The full
        text is shown inline — acceptance happens on the page that displays it. #}
     <form class="auth-form" method="post" action="{{ base }}/otp">
       <input type="hidden" name="token" value="{{ token }}">
@@ -31,7 +31,7 @@
     </form>
 
   {% elif stage == 'otp' %}
-    {# DD-7 step 4: 6 digits, 10 minutes, 5 tries. #}
+    {# Verify the OTP: 6 digits, 10 minutes, 5 tries. #}
     <form class="auth-form" method="post" action="{{ base }}/verify">
       <input type="hidden" name="token" value="{{ token }}">
       <p>A 6-digit code was sent to your mailbox. It is valid for 10 minutes.</p>
@@ -47,7 +47,7 @@
     </form>
 
   {% elif stage == 'password' %}
-    {# DD-7 step 5: the browser derives {salt, verifier}; the password never leaves it. #}
+    {# Set the password: the browser derives {salt, verifier}; the password never leaves it. #}
     <form id="password-form" class="auth-form" method="post" action="{{ base }}/complete"
           data-email="{{ email }}">
       <input type="hidden" name="token" value="{{ token }}">

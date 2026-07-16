@@ -283,7 +283,7 @@ def init_vault_from_pk(password_key: bytes, salt: bytes) -> bytes:
 
 
 def rewrap_vault_with_pk(old_password_key: bytes, new_password_key: bytes, new_salt: bytes) -> None:
-    """Re-wrap ``VK`` under a new browser-derived ``PK`` (password change, MT-6c: the vault survives).
+    """Re-wrap ``VK`` under a new browser-derived ``PK`` (a password change: the vault survives).
 
     Only the small ``VK`` blob is rewritten; the ``VK``-encrypted secrets are untouched. ``new_salt``
     is the account's new SRP salt (the browser derived ``new_password_key`` from it).

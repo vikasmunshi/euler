@@ -78,7 +78,7 @@
         if (!change.ok) return fail('The change was refused. Try again.');
         const { M2 } = await change.json();
         if (!proof.check(M2)) return fail('Server failed mutual authentication — password unchanged? Sign in to verify.');
-        // 3 · the vault survives a password change (MT-6c): re-wrap VK under the
+        // 3 · the vault survives a password change: re-wrap VK under the
         // new password's PK. Best-effort — 404 means no vault yet; 409 means the
         // vault was wrapped under something else (the account panel can recover).
         try {

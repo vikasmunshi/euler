@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Unit tests for the solver/auth kernel (DD-12, re-simplified): the plain profile
+"""Unit tests for the solver/auth kernel (re-simplified): the plain profile
 ladder (rank comparison, fail-closed), the users map, and resolve_subject's planes."""
 from __future__ import annotations
 
@@ -112,7 +112,7 @@ class ResolveSubjectTest(unittest.TestCase):
                 self._resolve()
 
     def test_instance_identity_plane_resolves_a_ticketless_descendant(self) -> None:
-        """MT-4: a euler-user-<slug> uid whose ticket has been scrubbed resolves from
+        """A euler-user-<slug> uid whose ticket has been scrubbed resolves from
         the handed-down e-mail; profile comes from policy (alice → maintainer)."""
         slug = system_slug('alice@example.com')
         with mock.patch('solver.auth.identity.getpass.getuser', return_value=f'euler-user-{slug}'):
@@ -146,12 +146,12 @@ class ResolveSubjectTest(unittest.TestCase):
                 self._resolve(EULER_USER_SLUG=slug, EULER_USER_EMAIL='alice@example.com')
 
     def test_ticket_plane_web_is_not_capped(self) -> None:
-        """MT-10a: the per-user model drops the admin→maintainer web cap — an admin
+        """The per-user model drops the admin→maintainer web cap — an admin
         account keeps full authority over the web, contained by its own uid + SRP."""
         with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'admin')):
             subj = self._resolve(SOLVER_TICKET='t')
         self.assertEqual(subj.channel, 'web')
-        self.assertEqual(subj.profile, 'admin')           # NOT capped (MT-10a)
+        self.assertEqual(subj.profile, 'admin')           # NOT capped
         self.assertTrue(subj.has('admin'))
         self.assertEqual(subj.auth_method, 'shell-ticket')
 
@@ -161,7 +161,7 @@ class ResolveSubjectTest(unittest.TestCase):
                 self._resolve(SOLVER_TICKET='bad')
 
     def test_ticket_user_must_match_the_instance_slug_pin(self) -> None:
-        """MT-4/MT-7: the forking instance *is* the user's uid, so a ticket whose e-mail
+        """The forking instance *is* the user's uid, so a ticket whose e-mail
         maps to a different system slug means misrouting or a bypass — the child aborts."""
         with mock.patch('solver.auth.identity._redeem_ticket', return_value=('x@y.z', 'maintainer')):
             with self.assertRaises(SystemExit):
@@ -181,7 +181,7 @@ class ResolveSubjectTest(unittest.TestCase):
 
 
 class SystemSlugTest(unittest.TestCase):
-    """The MT-14 system slug: a ``useradd``-safe name derived from an e-mail identity."""
+    """The system slug: a ``useradd``-safe name derived from an e-mail identity."""
 
     #: ``useradd`` NAME_REGEX: start with a letter/underscore, then [a-z0-9_-]; we emit no '_'.
     _USERADD_SAFE = re.compile(r'^[a-z][a-z0-9-]*$')
@@ -194,7 +194,7 @@ class SystemSlugTest(unittest.TestCase):
             self.assertLess(len(f'euler-user-{slug}'), 32, f'{slug!r} too long for a system name')
 
     def test_slug_has_no_dot(self) -> None:
-        # The bug that motivated MT-14: slugify emitted '.', which useradd rejects.
+        # The bug that motivated the system slug: slugify emitted '.', which useradd rejects.
         self.assertNotIn('.', system_slug('merc.anther@gmail.com'))
 
     def test_slug_is_stable_and_case_insensitive(self) -> None:

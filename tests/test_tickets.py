@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The one-time shell ticket (DD-9) — the masquerade guard for the web shell.
+"""The one-time shell ticket — the masquerade guard for the web shell.
 
 Every web shell runs as the shared ``euler-ws-<profile>`` uid and
 ``/proc/<pid>/environ`` is same-uid-readable, so nothing carried in the
@@ -27,7 +27,7 @@ class TicketStoreTests(unittest.TestCase):
 
     def test_ticket_is_single_use(self) -> None:
         """The replay guard: a second redeem of the same ticket fails — so a sibling
-        shell replaying it from /proc/<pid>/environ gets nothing (DD-9)."""
+        shell replaying it from /proc/<pid>/environ gets nothing."""
         store = TicketStore()
         ticket = store.mint('u@example.com', 'reader')
         self.assertIsNotNone(store.redeem(ticket))       # the victim's own startup

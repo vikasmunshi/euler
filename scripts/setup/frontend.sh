@@ -7,26 +7,26 @@
 # dedicated service identities, generates the Caddyfile router, deploys the static
 # maintenance page, and installs the root-owned systemd unit. Supersedes the old
 # scripts/setup/caddy.sh + scripts/setup/acme.sh. See docs/web-server-guide.md
-# (Design decisions DD-1..DD-4, DD-6/DD-9 routing; Phases 1, 3 and 4).
+# (Unix-socket upstreams, dedicated non-root service users, forward_auth routing).
 #
-# Topology (multi-tenant, MT-4/MT-11):
+# Topology (multi-tenant):
 #   - Caddy terminates TLS on :443, serves a Caddy-native health endpoint
 #     (`/healthz` -> 200) and the shared static assets (`/assets/*`), routes the
 #     public auth surface (/login, /register*, /reset*, /forgot, /auth/*) to the
 #     auth service's unix socket, and gates every other request through the auth
 #     service's forward_auth endpoint (200 + X-User/X-Profile/X-User-Slug continues;
 #     401 redirects to /login). Client-supplied copies of all three identity headers
-#     are stripped (DD-9). Authenticated requests are then routed **by X-User-Slug**
-#     to that collaborator's own per-user instance (MT-4): content pages AND /ws (the
+#     are stripped. Authenticated requests are then routed **by X-User-Slug**
+#     to that collaborator's own per-user instance: content pages AND /ws (the
 #     terminal's WebSocket) both go to euler-user-<slug>'s /run/euler/user-<slug>.sock —
 #     the slug in the dial address is a request-header placeholder, so one static
-#     Caddyfile covers every provisioned user (MT-11, verified on Caddy 2.11.4). A
+#     Caddyfile covers every provisioned user (verified on Caddy 2.11.4). A
 #     missing slug falls through to the static "under maintenance" holding page
 #     (HTTP 503), which a handle_errors block also serves when an upstream is down
 #     (e.g. a deprovisioned or not-yet-provisioned user's socket).
 #   - The cert is issued out-of-band by acme.sh via DNS-01 (Caddy performs no ACME).
 #
-# Service identity (DD-2):
+# Service identity:
 #   - group  `euler-web` — the shared group whose members may reach the app sockets.
 #   - user   `euler-caddy` — runs the edge; member of `euler-web`; binds :443 via
 #     CAP_NET_BIND_SERVICE. (euler-auth / euler-user-<slug> / euler-proxy are
@@ -34,7 +34,7 @@
 #
 # Config + secrets live under /etc/euler, NOT in the repo: the dedicated service users
 # cannot traverse the repo owner's 0750 home dir, so the edge is decoupled from the
-# checkout. No service runs as root (DD-4): Caddy runs as euler-caddy, and acme.sh runs as
+# checkout. No service runs as root: Caddy runs as euler-caddy, and acme.sh runs as
 # euler-acme (home /usr/local/share/euler-acme), deploying the cert into a setgid
 # /etc/euler/tls and reloading Caddy via its admin API (`caddy reload`). Renewal runs on
 # euler-acme.timer. ~/.euler/env is the authoring source; the installer deploys scoped runtime
@@ -53,7 +53,7 @@
 # and fail if it is unset. The Caddyfile is regenerated from it on install/upgrade.
 #
 # Because the unit lives in root's systemd and runs as a locked-down user, lifecycle
-# (start/stop/restart) requires sudo (DD-3).
+# (start/stop/restart) requires sudo.
 #
 # Actions: install [host] | uninstall | upgrade | status | renew | reload | help
 #
@@ -74,13 +74,13 @@ TLS_DIR="${SYS_DIR}/tls"
 CERT_FILE="${TLS_DIR}/server.crt"          # full chain
 KEY_FILE="${TLS_DIR}/server.key"           # private key (readable by euler-web)
 
-# ── Static web content (Phase 3 maintenance page + assets) ────────────────────────
+# ── Static web content (maintenance page + assets) ────────────────────────────────
 # Authored in the repo, deployed under /etc/euler because euler-caddy cannot read the
-# repo owner's 0750 home dir (DD-3 config-location rationale).
+# repo owner's 0750 home dir (the config-location rationale).
 WEB_CONTENT_SRC="${PROJECT_ROOT}/solver/web/content"   # repo source of truth
 WEB_CONTENT_DIR="${SYS_DIR}/web-content"               # deployed, readable by euler-caddy
 
-# ── Service identity (DD-2) ───────────────────────────────────────────────────────
+# ── Service identity ───────────────────────────────────────────────────────
 WEB_GROUP="euler-web"
 CADDY_USER="euler-caddy"
 SERVICE_NAME="euler-caddy.service"
@@ -92,7 +92,7 @@ CADDY_REPO_URL="https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt"
 CADDY_KEYRING="/usr/share/keyrings/caddy-stable-archive-keyring.gpg"
 CADDY_SOURCES_LIST="/etc/apt/sources.list.d/caddy-stable.list"
 
-# ── acme.sh, installed and run as the dedicated euler-acme user (DD-4) ─────────────
+# ── acme.sh, installed and run as the dedicated euler-acme user ─────────────
 ACME_USER="euler-acme"
 ACME_GROUP="euler-acme"
 ACME_HOME="/usr/local/share/euler-acme"    # acme.sh working/config dir, owned by euler-acme
@@ -227,7 +227,7 @@ install_caddy_pkg() {
     disable_conflicting_services
 }
 
-# ── Service identity + system dirs (DD-2) ─────────────────────────────────────────
+# ── Service identity + system dirs ─────────────────────────────────────────
 
 ensure_group_and_users() {
     if ! getent group "${WEB_GROUP}" > /dev/null; then
@@ -243,7 +243,7 @@ ensure_group_and_users() {
     else
         sudo usermod -g "${WEB_GROUP}" "${CADDY_USER}" || true
     fi
-    # euler-acme — runs acme.sh, own group, home in /usr/local/share (DD-4, not root).
+    # euler-acme — runs acme.sh, own group, home in /usr/local/share (not root).
     if ! getent group "${ACME_GROUP}" > /dev/null; then
         sudo groupadd --system "${ACME_GROUP}"
     fi
@@ -263,7 +263,7 @@ ensure_sys_dirs() {
     sudo install -d -o "${ACME_USER}" -g "${ACME_GROUP}" -m 0750 "${ACME_HOME}"
 }
 
-# Deploy the non-secret runtime config the services read instead of the repo (DD-4).
+# Deploy the non-secret runtime config the services read instead of the repo.
 deploy_edge_env() {
     sudo tee "${EDGE_ENV}" > /dev/null <<EOF
 # GENERATED by scripts/setup/frontend.sh — deployed runtime config (non-secret).
@@ -275,7 +275,7 @@ EOF
     sudo chmod 0644 "${EDGE_ENV}"
 }
 
-# Deploy the static web content (Phase 3 maintenance page + assets) from the repo into
+# Deploy the static web content (maintenance page + assets) from the repo into
 # /etc/euler/web-content, where euler-caddy can read it. Fully replaced each run so the
 # deployed tree mirrors the repo source; non-secret, so root:euler-web 0644/0755.
 deploy_web_content() {
@@ -295,7 +295,7 @@ deploy_web_content() {
 
 acme_is_installed() { sudo test -x "${ACME_BIN}"; }
 
-# Run acme.sh as the euler-acme user (DD-4). acme.sh refuses to run under a bare `sudo`
+# Run acme.sh as the euler-acme user. acme.sh refuses to run under a bare `sudo`
 # (it detects the SUDO_* env vars), so strip those markers and pin HOME to its working
 # dir. For calls needing extra environment (the DNS credentials at issue time) use
 # acme_run_with_creds, which prepends the $cred_env `VAR=val` pairs before the binary.
@@ -430,22 +430,22 @@ issue_cert() {
     echo "Deployed key  -> ${KEY_FILE} (${ACME_USER}:${WEB_GROUP} 0640)"
 }
 
-# ── Caddyfile router (Phase 1) ────────────────────────────────────────────────────
+# ── Caddyfile router ──────────────────────────────────────────────────────────────
 
 generate_caddyfile() {
     echo "Writing ${CADDYFILE} for ${DOMAIN}..."
     sudo tee "${CADDYFILE}" > /dev/null <<EOF
-# Caddy configuration for the solver web edge (multi-tenant, MT-4/MT-11).
+# Caddy configuration for the solver web edge (multi-tenant).
 #
 # GENERATED by scripts/setup/frontend.sh — edits are overwritten on install/upgrade.
 # Caddy terminates TLS, serves the health endpoint + static assets, routes the
 # public auth surface to the auth service (unix //run/euler/auth.sock), and gates
-# every other request through the auth service's forward_auth endpoint (DD-6/DD-9):
+# every other request through the auth service's forward_auth endpoint:
 # 200 + X-User/X-Profile/X-User-Slug continues downstream, 401 redirects to /login.
 # Authenticated requests — content pages and the /ws terminal alike — are routed by
 # X-User-Slug to that collaborator's own per-user instance socket
-# /run/euler/user-<slug>.sock (MT-4): the slug in the dial address is a request-header
-# placeholder, so this one static file covers every provisioned user (MT-11). A
+# /run/euler/user-<slug>.sock: the slug in the dial address is a request-header
+# placeholder, so this one static file covers every provisioned user. A
 # missing slug falls through to the static maintenance holding page (from
 # ${WEB_CONTENT_DIR}), which also serves whenever an upstream is down. The cert is
 # issued out-of-band by acme.sh (DNS-01) into ${TLS_DIR}; Caddy loads it via \`tls\`
@@ -490,15 +490,15 @@ ${DOMAIN} {
 	tls ${CERT_FILE} ${KEY_FILE}
 	import security_headers
 
-	# DD-9: identity headers reach the app tier ONLY as copies of the forward_auth
+	# Identity headers reach the app tier ONLY as copies of the forward_auth
 	# response — anything a client sends is stripped before any routing happens.
-	# X-User-Slug is the routing key (MT-11): a forged copy would otherwise dial
+	# X-User-Slug is the routing key: a forged copy would otherwise dial
 	# another user's socket.
 	request_header -X-User
 	request_header -X-Profile
 	request_header -X-User-Slug
 
-	# Per-user routing (MT-4/MT-11): the matcher admits only a well-formed system
+	# Per-user routing: the matcher admits only a well-formed system
 	# slug (solver/auth system_slug emits ^[a-z][a-z0-9-]*$) set by forward_auth —
 	# defined at site scope, evaluated where referenced (after forward_auth has set
 	# the header). Content and /ws share the one per-user instance, so no path split.
@@ -523,9 +523,9 @@ ${DOMAIN} {
 		file_server
 	}
 
-	# Public auth surface (DD-7): the login/registration/reset/forgot pages and
+	# Public auth surface: the login/registration/reset/forgot pages and
 	# the JSON auth API, straight to the auth service. The shell-ticket and admin
-	# endpoints are deliberately NOT routed (socket-peer / local-only, DD-6/DD-9).
+	# endpoints are deliberately NOT routed (socket-peer / local-only).
 	handle /login {
 		reverse_proxy unix//run/euler/auth.sock
 	}
@@ -548,7 +548,7 @@ ${DOMAIN} {
 		reverse_proxy unix//run/euler/auth.sock
 	}
 
-	# Everything else requires an authenticated session (DD-6): the auth service
+	# Everything else requires an authenticated session: the auth service
 	# answers 200 + X-User/X-Profile/X-User-Slug (copied onto the proxied request)
 	# or 401, which becomes a redirect to the login page. route{} preserves written
 	# order — forward_auth runs first (setting the identity headers or 401→redirect),
@@ -564,9 +564,9 @@ ${DOMAIN} {
 				}
 			}
 
-			# MT-4: one per-user instance serves this collaborator's content pages
+			# One per-user instance serves this collaborator's content pages
 			# AND their /ws terminal — dial the socket named by the slug forward_auth
-			# returned. Caddy proxies the WebSocket upgrade natively (MT-11). The
+			# returned. Caddy proxies the WebSocket upgrade natively. The
 			# instance re-checks the slug against X-User itself, so a routing bug
 			# here is refused at the service too.
 			reverse_proxy @user unix//run/euler/user-{http.request.header.X-User-Slug}.sock
@@ -593,7 +593,7 @@ validate_caddyfile() {
     sudo "$(caddy_bin)" validate --config "${CADDYFILE}" &> /dev/null
 }
 
-# ── systemd unit (root-owned, boot-enabled; DD-3) ─────────────────────────────────
+# ── systemd unit (root-owned, boot-enabled) ─────────────────────────────────
 
 install_service() {
     require_systemd || return 1
@@ -667,7 +667,7 @@ remove_service() {
     fi
 }
 
-# Root-owned systemd timer that runs `acme.sh --cron` as euler-acme (DD-4) — replaces
+# Root-owned systemd timer that runs `acme.sh --cron` as euler-acme — replaces
 # acme.sh's own user crontab (installed with --nocron).
 install_acme_timer() {
     require_systemd || return 1
@@ -856,7 +856,7 @@ do_status() {
     else
         echo "Cert:       ✗ not deployed (run '$0 install')"
     fi
-    # Auto-renewal (DD-4): euler-acme.timer runs `acme.sh --cron` as euler-acme daily;
+    # Auto-renewal: euler-acme.timer runs `acme.sh --cron` as euler-acme daily;
     # show its state and the next scheduled renewal (ARI window before expiry).
     if [ -f "${ACME_TIMER_DEST}" ] && command -v systemctl &> /dev/null; then
         local next

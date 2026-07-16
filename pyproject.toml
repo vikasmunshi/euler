@@ -36,14 +36,14 @@ show = [
     "PyQt5",
 ]
 web = [
-    # The app-service stack (DD-5): aiohttp is the one framework across the app
+    # The app-service stack: aiohttp is the one framework across the app
     # services; Jinja2 (via aiohttp-jinja2, autoescape on) replaces homegrown
     # string templating. Deployed by scripts/setup/auth.sh into the root-owned
     # /opt/euler system venv the euler-* services run from.
     "aiohttp",
     "aiohttp-jinja2",
     "jinja2",
-    # The `.html` save gate (DD-10, Phase 5c): sanitize-and-store-clean. The
+    # The `.html` save gate (Phase 5c): sanitize-and-store-clean. The
     # cp38-abi3 stable-ABI wheel installs on 3.14 with no Rust toolchain;
     # content.sh's deploy/status checks verify the import in the system venv.
     "nh3",
@@ -90,7 +90,7 @@ actions = ["install", "check", "uninstall"]
 
 [project.scripts]
 # NOTE: no solver-web script — the web services are systemd units run from the
-# /opt/euler system venv (python -m solver.web.<svc>, DD-3/DD-5), not a
+# /opt/euler system venv (python -m solver.web.<svc>), not a
 # detached-process CLI.
 solver = "solver.main:main"
 solver-gitfilter = "solver.crypto.gitfilter:main"
@@ -101,5 +101,5 @@ include = ["solver*"]
 
 [tool.setuptools.package-data]
 solver = ["*.html"]
-"solver.web" = ["templates/*.html"]  # Jinja pages ship inside the deployed venv (DD-5)
+"solver.web" = ["templates/*.html"]  # Jinja pages ship inside the deployed venv
 "solver.web.site" = ["templates/*.html"]  # content-service pages (Phase 5)

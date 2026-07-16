@@ -33,7 +33,7 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
 
     args = parser.parse_args(argv)
 
-    # The channel (terminal / web) is **not** a CLI flag (DD-13): it comes from the
+    # The channel (terminal / web) is **not** a CLI flag: it comes from the
     # resolved subject — the checkout-owner uid or a redeemed shell ticket — so no
     # caller can choose the command set it gets by passing an argument.
     load_commands()

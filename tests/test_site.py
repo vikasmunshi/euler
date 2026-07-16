@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the content service (Phase 5a/5b/5d): identity from forward_auth
+"""Tests for the content service: identity from forward_auth
 headers, the requires-gate, the full-page-vs-block render contract, the baseline
 CSP, the 5b read routes (solutions grid, problem pages/files, docs, topics,
 account) with their canonical trailing-slash redirects, and the 5d edit routes
@@ -526,7 +526,7 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertNotIn('hx-delete', page)
         page = await (await self.client.get('/solutions/0009/p0009_s0.py', headers=_MAINTAINER)).text()
         self.assertIn('hx-delete', page)
-        # solutions index: Upload progress is contributor+ (solutions:execute)
+        # solutions index: Upload progress is contributor+
         page = await (await self.client.get('/solutions/', headers=_READER)).text()
         self.assertNotIn('Upload progress', page)
         page = await (await self.client.get('/solutions/', headers=_CONTRIBUTOR)).text()
@@ -544,7 +544,7 @@ class EditRouteTests(AioHTTPTestCase):
 
 class GitStatusTests(unittest.TestCase):
     """content.git_status: the three porcelain states, and graceful degradation
-    outside a git checkout (the deployed posture — .git unreadable, DD-12)."""
+    outside a git checkout (the deployed posture — .git unreadable)."""
 
     def test_states_and_degradation(self) -> None:
         import subprocess
@@ -572,7 +572,7 @@ class GitStatusTests(unittest.TestCase):
 
 class PinnedInstanceTests(AioHTTPTestCase):
     """A per-profile instance (EULER_PROFILE set) serves only its own profile —
-    the code-side backstop to Caddy's per-profile routing (DD-12)."""
+    the code-side backstop to Caddy's per-profile routing."""
 
     async def get_application(self):
         os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)

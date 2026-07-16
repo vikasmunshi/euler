@@ -1,10 +1,10 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""User store: the SRP verifier database at ``<state>/users.json`` (DD-6).
+"""User store: the SRP verifier database at ``<state>/users.json``.
 
 One entry per registered user, keyed by normalised email, recording only the
 SRP ``{salt, verifier}`` (never a password or password-equivalent) plus the
-authorization profile, the recorded Terms acceptance (DD-7), and bookkeeping.
+authorization profile, the recorded Terms acceptance, and bookkeeping.
 A user record exists only once registration **completes** — an outstanding
 invite lives in :mod:`solver.web.auth.pending`, not here.
 
@@ -65,7 +65,7 @@ class UserRecord(NamedTuple):
 
     def summary(self) -> dict[str, Any]:
         """A secret-free view for listings (no salt/verifier). The **profile** is not
-        here — it lives in ``authorizations.json`` (DD-12), joined in by the caller."""
+        here — it lives in ``authorizations.json``, joined in by the caller."""
         return {'email': self.email, 'created': self.created,
                 'disabled': self.disabled, 'terms_version': self.terms_version}
 
@@ -97,8 +97,8 @@ class UserStore:
 
     def create(self, email: str, salt: str, verifier: str,
                terms_version: str, terms_accepted_at: str) -> UserRecord:
-        """Create the record at registration completion (DD-7 step 5); enabled. The
-        **profile is not stored here** — it lives in ``authorizations.json`` (DD-12)."""
+        """Create the record at registration completion (the set-password step); enabled. The
+        **profile is not stored here** — it lives in ``authorizations.json``."""
         users = self._load()
         key = normalize_email(email)
         users[key] = {'salt': salt, 'verifier': verifier,

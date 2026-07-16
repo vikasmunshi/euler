@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The auth service's HTML pages: login, registration, reset, forgot (DD-7).
+"""The auth service's HTML pages: login, registration, reset, forgot.
 
 First Jinja-rendered pages of the redesign. Server-rendered throughout, with
 POST → redirect → GET after every state change so reloads are safe. The two
@@ -15,7 +15,7 @@ Flow endpoints (all on the public socket; Caddy exposes them in step 5):
     POST /register/otp /reset/otp        accept Terms (register) + mail an OTP
     POST /register/verify /reset/verify  check the OTP
     POST /register/complete /reset/complete   store {salt, verifier}, single-use
-    GET+POST /forgot               request a reset link (generic response, DD-7)
+    GET+POST /forgot               request a reset link (generic response)
 
 Every invalid/expired/foreign token renders the same generic message — no
 account enumeration; responses never echo the token except in the redirect the
@@ -151,7 +151,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
             context['notice'] = 'Password updated — sign in with your new password.'
         return aiohttp_jinja2.render_template('login.html', request, context)
 
-    # ── the shared invite/reset pipeline (DD-7) ───────────────────────────────────
+    # ── the shared invite/reset pipeline ───────────────────────────────────
 
     async def flow_page(request: web.Request) -> web.Response:
         kind = 'register' if request.path.startswith('/register') else 'reset'
@@ -203,7 +203,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         raise redirect(kind, token, flag)
 
     async def flow_complete(request: web.Request) -> web.Response:
-        """Store the browser-derived {salt, verifier}; single-use (DD-7 step 5)."""
+        """Store the browser-derived {salt, verifier}; single-use (the set-password step)."""
         kind = 'register' if request.path.startswith('/register') else 'reset'
         if not service.rate.allow(_client_key(request)):
             return web.Response(status=429, text='rate limited')
@@ -221,7 +221,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         if record is None or record.kind != kind:
             return _bad_link(request)
         if kind == 'register':
-            # The profile is not stored on the SRP record (DD-12) — it lives in
+            # The profile is not stored on the SRP record — it lives in
             # authorizations.json, assigned by the admin `users add/change` path.
             service.users.create(record.email, salt, verifier,
                                  record.terms_version, record.terms_accepted_at)
@@ -231,8 +231,8 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
             return _bad_link(request)          # account vanished mid-flow
         service.sessions.revoke_email(record.email)     # a password change logs
         service.remember.revoke_email(record.email)     # every device out
-        await service.push_shell_teardown(record.email)  # …and any live shell (DD-14)
-        await service.push_vault_reset(record.email)     # a reset destroys the vault (MT-6c)
+        await service.push_shell_teardown(record.email)  # …and any live shell
+        await service.push_vault_reset(record.email)     # a reset destroys the vault
         log.info('password reset completed for %s', record.email)
         raise web.HTTPSeeOther(location='/login?reset=1')
 
@@ -255,7 +255,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         template = 'password_fragment.html' if _is_htmx(request) else 'password.html'
         return aiohttp_jinja2.render_template(template, request, {'email': identity[0]})
 
-    # ── forgot (self-service reset entry, DD-7) ───────────────────────────────────
+    # ── forgot (self-service reset entry) ───────────────────────────────────
 
     async def forgot_page(request: web.Request) -> web.Response:
         return aiohttp_jinja2.render_template('forgot.html', request, {})
@@ -289,7 +289,7 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
             try:
                 await asyncio.to_thread(service.mailer.send_invite, email, token, 'reset')
                 log.info('reset link sent for %s', email)
-            except OSError as exc:             # generic response regardless (DD-7)
+            except OSError as exc:             # generic response regardless
                 log.warning('reset mail to %s failed: %s', email, exc)
         return aiohttp_jinja2.render_template('message.html', request, {
             'heading': 'Check your mailbox',

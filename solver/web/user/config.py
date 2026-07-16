@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Per-user service runtime configuration, read from the environment (DD-5/MT-4).
+"""Per-user service runtime configuration, read from the environment.
 
 Union of what the content tier needs (:class:`~solver.web.site.config.SiteConfig`)
 and the web shell needs (:class:`~solver.web.ws.config.WsConfig`), plus the one field
@@ -54,12 +54,12 @@ class UserConfig(NamedTuple):
     #: ``X-User`` maps to a different slug (misrouting/bypass), and it is the PTY child's
     #: pin. Empty (dev) accepts any authenticated user.
     slug: str
-    #: The auth service's public socket — shell-ticket minting + teardown (DD-9).
+    #: The auth service's public socket — shell-ticket minting + teardown.
     auth_socket: str
     #: The command a PTY child execs (the interactive solver shell).
     shell_argv: tuple[str, ...]
     #: Seconds a shell may sit with zero attached sockets before the reaper closes it
-    #: (DD-14 hygiene; 0 disables).
+    #: (hygiene, not security; 0 disables).
     detached_ttl: int
     #: Base URL of the repo on GitHub, for the problem page's source link.
     github_url: str = _GITHUB_URL

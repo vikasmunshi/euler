@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The per-user aiohttp app: one collaborator's content **and** web shell (MT-4).
+"""The per-user aiohttp app: one collaborator's content **and** web shell.
 
 ``build_app`` folds two surfaces onto one application:
 
@@ -10,14 +10,14 @@
   the request's :class:`~solver.auth.subject.Subject` and gate on it.
 - **shell** — ``GET /ws`` attaches the browser terminal to *this user's* persistent
   PTY shell (:mod:`solver.web.ws` machinery), and ``POST /internal/logout`` is the
-  auth service's DD-14 teardown push (socket-peer only; Caddy never routes it).
+  auth service's teardown push (socket-peer only; Caddy never routes it).
 
 The difference from the retired per-profile services is **identity**: this process
 *is* one user's uid (``EULER_USER_SLUG``), so the identity middleware refuses any
 request whose ``X-User`` maps to a different slug — misrouting or a bypass — and it
 resolves the profile from the trusted ``X-Profile`` uncapped (an ``admin`` account is
-web-reachable now, MT-10a). Caddy routes every request to the right user's socket by
-``X-User-Slug`` (MT-11), so in production the pin only ever agrees; the check is the
+web-reachable now). Caddy routes every request to the right user's socket by
+``X-User-Slug``, so in production the pin only ever agrees; the check is the
 code-side backstop to that OS boundary.
 """
 from __future__ import annotations
@@ -47,12 +47,12 @@ log = logging.getLogger('euler-user')
 
 _Handler = Callable[[web.Request], Awaitable[web.StreamResponse]]
 
-#: The attach gate: the reader-floor "may run the solver at all" grant (DD-13).
+#: The attach gate: the reader-floor "may run the solver at all" grant.
 ATTACH_REQUIRES: str = 'reader'
 
 #: Per-app PtyManager, for tests and the lifecycle hooks.
 PTY_MANAGER: web.AppKey[PtyManager] = web.AppKey('pty_manager', PtyManager)
-#: The detached-TTL reaper task (DD-14), stored so cleanup can cancel it.
+#: The detached-TTL reaper task, stored so cleanup can cancel it.
 _REAPER_TASK: web.AppKey[asyncio.Task[None]] = web.AppKey('reaper_task', asyncio.Task)
 
 
@@ -61,11 +61,11 @@ def _subject_from_headers(request: web.Request, authz: Authorizations,
     """Build the request's Subject from the forward_auth headers, or None.
 
     Caddy guarantees ``X-User``/``X-Profile`` on every routed request and strips any
-    client copy (DD-9). A missing/unknown profile yields None. *pin_slug* is this
+    client copy. A missing/unknown profile yields None. *pin_slug* is this
     instance's own user (``EULER_USER_SLUG``): a request whose ``X-User`` maps to a
     different :func:`system_slug` is refused (None) — Caddy routes each user to their
     own socket, so a mismatch means misrouting or a bypass. The profile is **not**
-    capped (MT-10a): an ``admin`` account is web-reachable.
+    capped: an ``admin`` account is web-reachable.
     """
     user = request.headers.get('X-User', '').strip()
     profile = request.headers.get('X-Profile', '').strip()
@@ -107,12 +107,12 @@ def build_app(config: UserConfig) -> web.Application:
                           client_max_size=_MAX_BODY)
     # The content surface (routes + jinja + static + /healthz) — reused verbatim.
     install_content(app, config.site_config(), authz)
-    # The vault + account surface (MT-6/MT-8) — this instance IS the user's uid.
+    # The vault + account surface — this instance IS the user's uid.
     add_vault_routes(app)
     app[PTY_MANAGER] = manager
 
     async def _mint_ticket(cookie: str) -> str:
-        """Mint a one-time shell ticket against the caller's live session (DD-9).
+        """Mint a one-time shell ticket against the caller's live session.
 
         The auth client is blocking stdlib; run it off-loop. Any refusal aborts the
         fork — an unvouched shell must not start.
@@ -129,7 +129,7 @@ def build_app(config: UserConfig) -> web.Application:
         return str(data['ticket'])
 
     async def websocket(request: web.Request) -> web.StreamResponse:
-        """Attach a browser terminal to this user's persistent shell (Phase 6/MT-4)."""
+        """Attach a browser terminal to this user's persistent shell."""
         subject: Subject | None = request.get(SUBJECT_KEY)
         if subject is None:
             return web.Response(status=401, text='unauthenticated')
@@ -143,7 +143,7 @@ def build_app(config: UserConfig) -> web.Application:
         async def spawn() -> PtySession:
             ticket = await _mint_ticket(cookie)
             # The child pins on this instance's slug (EULER_USER_SLUG); its profile comes
-            # from redeeming the ticket, not from us (MT-4/MT-7).
+            # from redeeming the ticket, not from us.
             return PtySession(ticket=ticket, argv=config.shell_argv,
                               auth_socket=config.auth_socket, slug=config.slug)
 
@@ -172,7 +172,7 @@ def build_app(config: UserConfig) -> web.Application:
         return ws
 
     async def internal_logout(request: web.Request) -> web.Response:
-        """Tear down this user's shell on the auth service's push (DD-14).
+        """Tear down this user's shell on the auth service's push.
 
         Reachable only by socket peers (``euler-web`` members) — Caddy never routes
         here. Idempotent: closing an absent shell reports closed=False.
@@ -185,12 +185,12 @@ def build_app(config: UserConfig) -> web.Application:
         if not email:
             return web.Response(status=400, text='bad request')
         closed = await manager.close(email)
-        vault.clear_session_key()       # the session ended — leave no reachable key material (MT-12)
+        vault.clear_session_key()       # the session ended — leave no reachable key material
         log.info('logout push for %s (shell %s)', email, 'closed' if closed else 'absent')
         return web.json_response({'closed': closed})
 
     async def _reaper() -> None:
-        """Reap shells detached longer than the TTL (DD-14 hygiene). Never dies."""
+        """Reap shells detached longer than the TTL (hygiene, not security). Never dies."""
         ttl = config.detached_ttl
         interval = max(1, min(ttl, 60))
         while True:

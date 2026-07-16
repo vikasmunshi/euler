@@ -35,7 +35,7 @@ def _enter_root(root: Path) -> Path:
     """chdir into *root* and normalise ``PATH``, then return it.
 
     PATH gains the interpreter's own bin dir (the venv) and ``~/.local/bin`` — where
-    the per-user Claude Code install drops the ``claude`` binary (MT-7): the web
+    the per-user Claude Code install drops the ``claude`` binary: the web
     shell's service unit starts from systemd's minimal PATH, which never includes
     it, and without it ``claude-solve`` / the account page's status probe can't
     find the CLI. The WSL ``/mnt`` entries are dropped, and duplicates collapsed.
@@ -184,17 +184,17 @@ class Config(AttributeDict):
 
     def __init__(self) -> None:
         root_dir: Path = _root_dir()
-        # Ambient identity + profile (DD-9): a one-time shell ticket (web PTY) or the
+        # Ambient identity + profile: a one-time shell ticket (web PTY) or the
         # checkout-owner uid (local terminal); anything else aborts. Keys per-user
         # shell state (history, last problem) and command authorization.
         # Project dotenv: API key, SMTP + DNS credentials. Machine-local, in the
         # sibling secrets dir outside the checkout (repo `~/euler` -> `~/.euler/env`).
         env_file: Path = root_dir.parent / f'.{root_dir.name}' / 'env'
-        # Resolve the security subject once (DD-12): identity + channel + profile +
+        # Resolve the security subject once: identity + channel + profile +
         # inheritance-expanded permissions, from authorizations.json (deployed SoR →
         # built-in default). Drives per-user state and command/route authorization.
         subject: Subject = resolve_subject(root_dir)
-        # One-hop ticket + identity handoff to descendant solver processes (MT-4).
+        # One-hop ticket + identity handoff to descendant solver processes.
         # The web shell's ticket is single-use and resolve_subject just consumed it;
         # scrub it so a child solver (claude-solve's headless Claude, a nested
         # `solver "…"`) does not inherit a dead ticket and abort at its own startup.

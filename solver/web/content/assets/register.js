@@ -1,6 +1,6 @@
 /* Set-password stage (registration and reset): enforce the password policy,
  * derive the SRP {salt, verifier} in the browser, and submit only those —
- * the password itself never leaves this page (DD-7 step 5). */
+ * the password itself never leaves this page. */
 'use strict';
 
 (() => {

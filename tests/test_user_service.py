@@ -1,13 +1,13 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Tests for the per-user web service (MT-4): content + ``/ws`` folded onto one app.
+"""Tests for the per-user web service: content + ``/ws`` folded onto one app.
 
 Two surfaces on one application, sharing one per-user identity:
 
 - **content** — the reused site routes gate on the request's Subject exactly as the
   standalone content service does; the new behaviour is the **per-user identity**: a
   request whose ``X-User`` maps to a slug other than this instance's ``EULER_USER_SLUG``
-  is refused (misrouting/bypass), and an ``admin`` profile is served **uncapped** (MT-10a).
+  is refused (misrouting/bypass), and an ``admin`` profile is served **uncapped**.
 - **shell** — ``/ws`` attaches the browser terminal to this user's PTY shell against a
   **fake auth service** (real :class:`~solver.web.auth.tickets.TicketStore` semantics),
   with a stub echo shell so the suite stays fast; the child is pinned on the slug.
@@ -63,7 +63,7 @@ _AUTHZ_FIXTURE = Path(__file__).parent / 'fixtures' / 'authorizations.json'
 
 
 class _FakeAuth:
-    """The auth service's shell-ticket surface on a unix socket (DD-9 shape)."""
+    """The auth service's shell-ticket surface on a unix socket."""
 
     def __init__(self, email: str, profile: str) -> None:
         self.store = TicketStore()
@@ -153,7 +153,7 @@ class ContentIdentityTests(_UserServiceCase):
 
     @unittest_run_loop
     async def test_admin_profile_is_not_capped(self) -> None:
-        """MT-10a: admin is web-reachable — the account page (users:read) is served."""
+        """Admin is web-reachable — the account page is served."""
         resp = await self.client.get('/account', headers={'X-User': _EMAIL, 'X-Profile': 'admin'})
         self.assertEqual(resp.status, 200)
 
@@ -185,7 +185,7 @@ class ShellAttachTests(_UserServiceCase):
         ws = await self.client.ws_connect('/ws', headers=_OWN_WS)
         banner = await _read_until(ws, b'auth_socket=')
         self.assertIn(b'ticket_len=43', banner)                 # token_urlsafe(32) → 43 chars
-        self.assertIn(f'slug={_SLUG}'.encode(), banner)         # the per-user pin (MT-4/MT-7)
+        self.assertIn(f'slug={_SLUG}'.encode(), banner)         # the per-user pin
         self.assertIn(b'profile_env=-none-', banner)            # no EULER_PROFILE in the per-user model
         self.assertIn(f'auth_socket={self.auth_socket}'.encode(), banner)
         self.assertEqual(self.auth.mints, 1)
@@ -206,7 +206,7 @@ class ShellAttachTests(_UserServiceCase):
 
 
 class VaultRouteTests(_UserServiceCase):
-    """The vault + account surface (MT-6/MT-8): unlock/init, rewrap, secrets, reset."""
+    """The vault + account surface: unlock/init, rewrap, secrets, reset."""
 
     _SALT = bytes(range(16))
 
@@ -328,7 +328,7 @@ class VaultRouteTests(_UserServiceCase):
 
     @unittest_run_loop
     async def test_shell_forked_after_unlock_inherits_the_session_key(self) -> None:
-        """The MT-12 delivery through the web path: unlock, then attach — the child
+        """Vault-key delivery through the web path: unlock, then attach — the child
         finds the uid-private key file by inherited environment and can read VK."""
         await self._unlock()
         ws = await self.client.ws_connect('/ws', headers=_OWN_WS)

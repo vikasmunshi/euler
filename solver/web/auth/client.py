@@ -5,8 +5,8 @@
 Used by the two *callers* of the service that must not depend on aiohttp:
 
 - the ``users`` shell command (:mod:`solver.web.auth.commands`), talking to the
-  admin socket (DD-6);
-- shell-ticket redemption in :mod:`solver.auth.identity` (DD-9), talking to
+  admin socket;
+- shell-ticket redemption in :mod:`solver.auth.identity`, talking to
   the public socket.
 
 Deliberately tiny: JSON in/out, one request per connection, no retries — both

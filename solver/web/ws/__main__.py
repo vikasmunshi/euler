@@ -1,6 +1,6 @@
 #!/usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""Web-shell service entry point: ``python -m solver.web.ws`` (DD-5/DD-13).
+"""Web-shell service entry point: ``python -m solver.web.ws``.
 
 Run by ``euler-ws@<profile>.service`` as the per-profile ``euler-ws-<profile>``
 uid from the ``/opt/euler`` system venv, configured entirely by the environment.
@@ -59,7 +59,7 @@ async def serve() -> None:
     log.info('web-shell service up (profile %s)', config.profile or '<unpinned dev>')
     await stop.wait()
     log.info('shutting down')
-    await runner.cleanup()               # on_cleanup reaps every shell (DD-14)
+    await runner.cleanup()               # on_cleanup reaps every shell
 
 
 def main() -> None:
