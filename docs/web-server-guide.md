@@ -110,7 +110,15 @@ The generated `/etc/euler/Caddyfile` (`0644`, non-secret) does four things:
    before any routing. These are identity, and identity may only ever reach the app tier
    as a copy of the `forward_auth` response.
 2. Serves `/healthz` natively and `/assets/*` + `/vendor/*` statically from
-   `/etc/euler/web-content`, so pages reference `'self'` assets and the CSP holds.
+   `/etc/euler/web-content`, so pages reference `'self'` assets and the CSP holds. Both
+   are served **`Cache-Control: no-cache`** — "keep it, but ask before using it". These
+   paths are unversioned and their contents change on every redeploy, while the pages
+   referencing them are rendered fresh on every load; with only Caddy's `ETag` /
+   `Last-Modified`, browsers fall back to *heuristic* freshness and a deploy silently
+   leaves new HTML being driven by old JS, for whichever users happen to hold a cached
+   copy. That is not a theoretical failure — it is what made a reworked user menu's
+   terminal toggle inert against the previous `site.js`. Revalidation costs one
+   conditional request that the ETag answers with a 304.
 3. Proxies the **public auth surface** — `/login`, `/register*`, `/reset*`, `/forgot`,
    `/password`, `/terms`, `/auth/*` — straight to `auth.sock`. The shell-ticket and
    admin endpoints are deliberately absent from this list; they are socket-peer only.
@@ -501,9 +509,12 @@ home  /home/euler-user-<slug>/                     (0700, uid-private)
   └─ .euler/         their vault (§8)
        ├─ id         their X25519 private key, encrypted under the vault key
        ├─ env        their ANTHROPIC_API_KEY etc., encrypted
-       ├─ vault      {salt, iterations, wrapped_vk}
-       └─ user_pass  (terminal path only) the password, to derive the key off-line
+       └─ vault      {salt, iterations, wrapped_vk}
 ```
+
+Nothing in that directory is a password. A password at rest beside the ciphertext it
+unlocks hands it to exactly the reader the encryption exists to stop, leaving the 0700
+home as the only real protection — which is the thing the vault is meant to improve on.
 
 **The application is shared and read-only; the content is per-user.** One `/opt/euler`
 venv everyone runs, pointed at each user's own tree with `EULER_REPO_ROOT=~/euler`.
@@ -585,9 +596,24 @@ Where `VK` comes from:
   touch server disk. The terminal page unlocks *before* the first `/ws` attach, so the
   forked shell inherits the key file. Note that the auth service **cannot** derive `PK` —
   it never sees the password — which is precisely what keeps the vault opaque.
-- **Terminal** — `~/.euler/user_pass` (uid-private) holds the password and the shell
-  derives `PK` at start. Weaker, and knowingly so: it is the terminal-convenience path,
-  and that user is typically the operator on their own box.
+- **Terminal** — `$EULER_VAULT_PASSWORD` if the operator exported one (a script, CI, an
+  unattended run), otherwise the shell **asks**, once, at startup
+  (`solver.crypto.keys.unlock_session`) and writes the tmpfs file its children inherit.
+  There is deliberately **no password file**: the earlier `~/.euler/user_pass` made the
+  terminal vault ceremony — anyone who could read the ciphertext could read the password
+  next to it, so encrypting bought nothing over the 0700 dir that was already there.
+
+  The asking has to happen in the shell, at startup, because the readers that need `VK`
+  are *subprocesses* — the git clean/smudge filter above all — with no terminal and a
+  stdout that belongs to git. `solver.crypto.vault` is on that path and therefore never
+  prompts; every interactive part lives in `solver.crypto.keys`. A declined or wrong
+  password is not fatal: the shell runs locked, and the private solutions and `claude-api`
+  are what stay unavailable.
+
+  The installers (`scripts/setup/*.sh`) read the same encrypted `~/.euler/env` for the
+  deployment's authoring config, through `scripts/setup/authoring_env.sh` →
+  `python -m solver.crypto.readenv`, which returns the same dotenv lines whether the file
+  rests as plaintext or ciphertext — so a kit works on both sides of `vault init`.
 
 The routes are on the user's own service: `GET /vault/status`, `POST /vault/unlock`
 (unlock, or initialise on first login with the SRP salt; a mismatched `PK` returns 409
@@ -668,6 +694,14 @@ master key, smudge and clean. (See [gitfilter-guide.md](gitfilter-guide.md).)
 interferes with enrollment or rotation. A user can have a working vault and no master-key
 access at all — their pubkey simply is not in `enc-key.json`.
 
+The account page's public-key row states exactly that, because "am I authorized?" is the
+only question the row exists to answer: it reports **can / cannot decrypt** from an actual
+`read_master_key()` — the unwrap *and* the verify, not the presence of a file — and shows
+the hand-it-to-an-admin instruction **only** when the answer is *cannot*. An authorized
+user has already done it, and being told again reads as though it had not worked. Every
+failure mode collapses to one answer here (no keypair, a locked vault, no entry in
+`enc-key.json`, a key that no longer unwraps after a `key-rekey`): not yet.
+
 ## 10 · Git
 
 Git is **native** in the user's own clone — there is no broker, and nothing proxies it.
@@ -684,7 +718,13 @@ at `contributor`; `git-merge`/`git-publish` at `admin`.
   Ciphertext becomes plaintext in place. Silently a no-op otherwise.
 - **`git-push`** pushes the current branch as the user (`-u origin <branch>`);
   `--force-with-lease` only after a rebase, and **never on master**. Pushing master needs
-  `admin`.
+  `admin`. It then **opens the branch's pull request** onto master (`gh pr create`, the
+  same shape as `scripts/git/publish.sh`): `git-merge` is admin-gated, so the PR is how a
+  collaborator actually asks for their work to land, and a branch sitting on origin that
+  nobody has been asked to review is not delivered work. Idempotent — a branch already
+  under review has its URL reported rather than a second PR opened, so re-pushing as the
+  branch grows keeps working and the open PR picks up the new commits. Skipped on master
+  and with `--no-pr`.
 - **`git-merge <slug>`** is the one gate to master: fetch, `--no-ff` merge of
   `origin/user/<slug>`, clean abort on conflict, then push.
 
@@ -726,6 +766,13 @@ pane scrolls its own overflow.
   `{euler: 'term-state', connected}` on every open and close, and the menu follows it —
   so a session that drops on its own never leaves the menu offering to disconnect
   something already gone.
+
+  A terminal **control** is any `[data-term-toggle]` carrying a `[data-term-label]` and a
+  `[data-term-dot]`; `site.js` paints every one of them from the single state the iframe
+  reports, so the menu's item and the start page's Terminal card cannot disagree. They
+  render **disconnected** and are painted on load: markup is served before the socket has
+  said anything, and a control that claims a live session it has not been told about is a
+  claim nothing can correct.
 - **Left pane `#content`** — the navigable region. Links `hx-get` a route and swap it
   here; `hx-push-url` updates the URL, so every view is deep-linkable.
 - **Right pane `#ws`** — a same-origin **iframe** onto `/terminal`, its own document.
@@ -895,6 +942,11 @@ floor is the boundary**.
   the README is the same page continuing, not a new section competing with the hero. The
   indexes list two or three per row, showing the filename as the first line and the
   markdown `#` title as the second, sorted by filename.
+
+  The **Terminal** card is the one card that is not a place to go — the terminal is
+  already here, in the right pane — so it is a `<button>` rather than a link and does the
+  only thing the page usefully can: connect or disconnect, with the dot as its indicator.
+  It is a terminal control like the user menu's item (§ Header) and shares its state.
 - **Account** — identity (email, and the slug that names the system user, home and clone
   that are theirs alone), then the **profile ladder**: the four rungs with theirs lit and
   the ones below it filled, because the ladder is cumulative and a reader who saw only
@@ -1027,7 +1079,22 @@ stale authority *inside an already-running process*. The revocation push removes
 that, at its source, rather than having the shell tier poll for something it cannot
 observe.
 
-### 12.2 Two client-side subtleties
+### 12.2 Three client-side subtleties
+
+**The shell is the front door for interactive logins.** The account page's tool rows
+(GitHub CLI, Claude Code) make the *status* the button: clicking posts
+`{euler: 'run', command}` to the iframe, which types the command and a return into the
+PTY — `git-identity` and `! claude /login` respectively. Nothing there is privileged: it
+is the same PTY the keyboard writes to, the command is echoed, and it is the user's to
+edit or interrupt. These logins are interactive device flows that belong in a terminal,
+and a web form that "did it for you" would have to handle a credential it has no business
+touching. With no session attached there is nothing to type into, so the iframe says so in
+the terminal rather than dropping the click silently.
+
+Reporting on those tools means finding them the way the *shell* does: the service's PATH
+is systemd's, not a login PATH, so `vault_api._which` also looks in `~/.local/bin` — where
+per-user installs land (`claude` does). A tool the user can run in their web shell must
+not read as `not installed` on their account page.
 
 **The refresh guard.** A *full* page load (F5, address-bar entry, tab close) is the only
 thing that can reach the terminal, and the iframe guards it with a `beforeunload`

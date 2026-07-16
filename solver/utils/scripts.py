@@ -225,19 +225,63 @@ def git_identity() -> int:
     return run_cmdline(config.scripts.configure_identity)
 
 
+def _open_pr_url(branch: str) -> str:
+    """The URL of the open pull request for *branch*, or '' when there is none."""
+    proc = run(['gh', 'pr', 'view', branch, '--json', 'url,state',
+                '--jq', 'select(.state == "OPEN") | .url'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    return proc.stdout.strip() if proc.returncode == 0 else ''
+
+
+def _ensure_pull_request(branch: str) -> int:
+    """Open a pull request for *branch* onto master, or report the one already open.
+
+    A pushed branch is not delivered work: `git-merge` is admin-gated, so the PR is
+    how a collaborator actually asks for their branch to land (scripts/git/publish.sh
+    § publish, the same `gh pr create` shape). Idempotent — a branch already under
+    review gets its URL reported, not a second PR — so re-pushing a branch as it
+    grows keeps working, and the one open PR simply picks up the new commits.
+    """
+    existing: str = _open_pr_url(branch)
+    if existing:
+        console.print(f'pull request already open: [accent]{existing}[/accent]')
+        return int(ExitCodes.EXIT_OK)
+    proc = run(['gh', 'pr', 'create', '--head', branch, '--base', 'master',
+                '--title', f'Publish {branch}',
+                '--body', f'Publishes the work on `{branch}`.\n\n'
+                          f'Opened by `git-push` on {datetime.now():%Y-%m-%d}.'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    if proc.returncode != 0:
+        detail: list[str] = (proc.stderr or proc.stdout).strip().splitlines()
+        console.print('[error]error:[/error] could not open a pull request'
+                      + (f': {detail[-1]}' if detail else '.'))
+        console.print('your branch [accent]is[/accent] pushed — run [accent]git-identity[/accent] if gh is '
+                      'not signed in, or open the PR on GitHub yourself.')
+        return int(ExitCodes.EXIT_ERROR)
+    console.print(f'pull request opened: [accent]{proc.stdout.strip()}[/accent]')
+    return int(ExitCodes.EXIT_OK)
+
+
 @register(requires='contributor', quietable=True,
-          help_text='Push the current branch to origin (your own user/<slug> branch).', aliases=('push',),)
-def git_push(force: bool = False) -> int:
-    """Push the current branch to origin as yourself (`git push -u origin <branch>`).
+          help_text='Push the current branch to origin and open a pull request onto master.',
+          aliases=('push',),)
+def git_push(force: bool = False, pr: bool = True) -> int:
+    """Push the current branch to origin as yourself, then open its pull request.
 
     In a per-user clone the current branch is `user/<slug>`, pushed with your own
     GitHub identity — `git-identity` is the one-time setup. Landing work on master
     is the admin's `git-merge`, never a direct push: pushing master requires
     the `admin` floor, and force-pushing it is always refused.
 
+    The PR is the second half of the push: an unreviewed branch on origin is not
+    work anyone has been asked for. It is skipped on master (nothing to merge into
+    itself), and a branch that already has one open keeps it.
+
     Args:
         force: Push with `--force-with-lease` — needed after `git-sync` rebased your
                branch onto a moved origin/master. Refused on master.
+        pr:    Open a pull request onto master after a successful push. Defaults to
+               True; `--no-pr` pushes and stops there.
     """
     branch: str = _current_branch()
     if not branch or branch == 'HEAD':
@@ -252,7 +296,10 @@ def git_push(force: bool = False) -> int:
                           'your work belongs on your own user/<slug> branch.')
             return ExitCodes.EXIT_ERROR
     lease: str = ' --force-with-lease' if force else ''
-    return run_cmdline(f'git push -u{lease} origin {branch}')
+    result: int = run_cmdline(f'git push -u{lease} origin {branch}')
+    if result != 0 or not pr or branch == 'master':
+        return result
+    return _ensure_pull_request(branch)
 
 
 @register(requires='admin', quietable=True,

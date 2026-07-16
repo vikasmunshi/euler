@@ -221,7 +221,7 @@ command name below links to its full entry — usage and description — in the
 | [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
 | [`git-merge`](commands-index.md#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
-| [`git-push`](commands-index.md#command-git-push-push) | `push` | Push the current branch to origin (your own user/<slug> branch). » |
+| [`git-push`](commands-index.md#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | Recover master key from shares. |
@@ -247,7 +247,7 @@ command name below links to its full entry — usage and description — in the
 | [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](commands-index.md#command-users) | — | List / administer accounts (list is read-only; changes need admin + sudo). |
-| [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | change-password. |
+| [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-table -->

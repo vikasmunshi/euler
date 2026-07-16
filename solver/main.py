@@ -8,6 +8,7 @@ __all__ = ['main']
 import argparse
 
 from solver.config import config
+from solver.crypto.keys import unlock_session
 from solver.shell import SolverShell
 from solver.utils.loader import load_commands
 
@@ -37,6 +38,17 @@ def main(argv: list[str] | None = None) -> int:  # pragma: no cover — manual e
     # resolved subject — the checkout-owner uid or a redeemed shell ticket — so no
     # caller can choose the command set it gets by passing an argument.
     load_commands()
+
+    # The vault gate, before any command runs. `id` and `env` rest encrypted, and the
+    # readers that need them — the git clean/smudge filter above all — are
+    # subprocesses with no terminal to be asked anything: the key must reach them as
+    # the inherited key file this call materialises. So the asking happens here, once,
+    # at the one moment there is still a person to ask.
+    # It is a no-op when there is no vault, when $EULER_VAULT_PASSWORD answers, and on
+    # the web path (the service already wrote the key file from the browser's PK). A
+    # declined or wrong password is not fatal — the shell runs locked, and the private
+    # solutions and `claude-api` are what stay unavailable.
+    unlock_session()
     shell = SolverShell(save=args.save and not args.cmdline)
     if args.cmdline:
         return shell.run_command(args.cmdline)

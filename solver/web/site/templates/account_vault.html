@@ -38,9 +38,29 @@
   <dl class="account">
     <dt>Public key</dt>
     <dd>
-      {% if pubkey_state == 'key' %}<code class="pubkey">{{ pubkey }}</code>
-      <span class="hint">Hand this to the admin for <code>user-authorize</code> — it is what
-        opens the private solutions.</span>
+      {% if pubkey_state == 'key' %}
+      <div class="pubkey-row">
+        <code class="pubkey">{{ pubkey }}</code>
+        {# The key exists to be handed to someone else, and it is 64 characters of
+           hex — selecting that out of a scrolling box by hand is how transcription
+           errors get made. #}
+        <button type="button" class="btn" data-copy="{{ pubkey }}"
+                aria-label="copy public key">Copy</button>
+      </div>
+      {# What the key is FOR is the question this row actually answers: authorized
+         or not. The instruction is only shown when it is the thing to do — an
+         authorized user has already done it, and telling them again would read as
+         though it had not worked. #}
+      <div class="state-row">
+        {% if can_decrypt %}
+        <span class="state-pill ok"><span class="dot on"></span> Can decrypt</span>
+        <span class="muted">Authorized — the private solutions open in your shell.</span>
+        {% else %}
+        <span class="state-pill warn"><span class="dot off"></span> Cannot decrypt</span>
+        <span class="hint">Hand the key above to the admin for <code>user-authorize</code> —
+          it is what opens the private solutions.</span>
+        {% endif %}
+      </div>
       {% elif pubkey_state == 'locked' %}<em class="muted">encrypted — unlock the vault to view</em>
       {% else %}<em class="muted">no keypair yet — run <code>user</code> in your shell</em>{% endif %}
     </dd>
@@ -61,7 +81,9 @@
       </ul>
       {% else %}<p class="muted">None stored.</p>{% endif %}
       <form hx-post="/account/secret" hx-target="#vault-panel" class="vault-form">
-        <input type="text" name="name" placeholder="ANTHROPIC_API_KEY"
+        {# "name", not a real key's name: an example in a placeholder reads as a
+           default, and this form's whole point is that what you type is yours. #}
+        <input type="text" name="name" placeholder="name"
                pattern="[A-Z][A-Z0-9_]*" aria-label="secret name" required>
         <input type="password" name="value" placeholder="value (write-only)"
                autocomplete="off" aria-label="secret value" required>
@@ -72,20 +94,24 @@
     </dd>
   </dl>
 
-  {# Status as a shape, same as the vault's: what a reader wants from these rows is
-     "am I signed in to that or not", answerable at a glance.
+  {# The tool is the label; its status is a BUTTON, because the status is also the
+     thing you want to act on. Clicking types `command` into the web shell
+     (site.js → the /terminal iframe): these logins are interactive and belong in a
+     terminal, so the row carries you there rather than telling you what to type.
      Three states, not two (vault_api._tool_status): `not installed` is neither good
      nor bad — the binary is simply absent from this instance — so it gets a plain
-     pill and no hint, because signing in is not the thing to do about it. #}
-  {% macro tool(name, status, fix) %}
+     pill, and the button is disabled because no command here would install it. #}
+  {% macro tool(name, status, command) %}
   <div class="tool-row">
-    <span class="state-pill{% if status == 'signed in' %} ok{% elif status == 'not signed in' %} warn{% endif %}">
-      <span class="dot{% if status == 'signed in' %} on{% elif status == 'not signed in' %} off{% endif %}"></span>
-      {{ status }}</span>
     <span class="tool-name">{{ name }}</span>
-    <span class="tool-hint">{% if status == 'not signed in' %}run <code>{{ fix }}</code> in your shell{% endif %}</span>
+    <button type="button" data-term-cmd="{{ command }}"
+            class="state-pill state-action{% if status == 'signed in' %} ok{% elif status == 'not signed in' %} warn{% endif %}"
+            {% if status == 'not installed' %}disabled{% endif %}
+            title="{% if status == 'not installed' %}{{ name }} is not installed on this instance{% else %}run `{{ command }}` in your terminal{% endif %}">
+      <span class="dot{% if status == 'signed in' %} on{% elif status == 'not signed in' %} off{% endif %}"></span>
+      {{ status }}</button>
   </div>
   {% endmacro %}
-  {{ tool('GitHub CLI', gh_status, '! gh auth login') }}
-  {{ tool('Claude Code', claude_status, 'claude /login') }}
+  {{ tool('GitHub CLI', gh_status, 'git-identity') }}
+  {{ tool('Claude Code', claude_status, '! claude /login') }}
 </section>

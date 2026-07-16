@@ -48,6 +48,10 @@
     }
     enhanceEditors();
     externalize(document);
+    // A swapped-in pane may carry terminal controls of its own (the start page's
+    // Terminal card): they arrive with the server's static markup and know nothing
+    // of the live socket, so paint them from the state we hold.
+    paintTerminalControls();
   });
 
   // ── the pane's back arrow (web-server-guide § The site) ─────────────────────────────────
@@ -155,45 +159,81 @@
     }
   });
 
-  // ── the user menu's terminal control ───────────────────────────────────────
-  // One item, not two: it names the act it offers ("Disconnect terminal") and the
-  // dot beside it carries the state. Connecting and disconnecting are always the
-  // USER'S acts — the terminal never reconnects on its own — so this posts the act
-  // into the /terminal iframe and waits to be told what happened, rather than
-  // assuming it worked. The iframe reports its state back (terminal.js), which is
-  // what `termState` below listens for; until it does, the item keeps its label.
-  var termConnected = true;
+  // ── the terminal controls ──────────────────────────────────────────────────
+  // Any number of controls, one state. A control is [data-term-toggle]: it names
+  // the act it offers on its [data-term-label] and carries the state on its
+  // [data-term-dot]. Two exist today — the user menu's item (always there, in the
+  // header) and the start page's Terminal card (in the swappable pane) — and both
+  // are painted from the one `termConnected` below, so they can never disagree.
+  //
+  // Connecting and disconnecting are always the USER'S acts (the terminal never
+  // reconnects on its own), so a click posts the act into the /terminal iframe and
+  // waits to be TOLD what happened rather than assuming it worked.
+  //
+  // The state starts false and is painted immediately: the shell may not have a
+  // terminal at all (signed out), the socket may fail to open, and a control that
+  // claims a live session before the iframe has reported one is a lie we would
+  // have no way to correct. The first report (the page-load connect) flips it.
+  var termConnected = false;
 
-  function paintTerminalToggle() {
-    var button = document.getElementById('term-toggle');
-    var dot = document.getElementById('term-dot');
-    if (!button || !dot) { return; }             // no terminal in this shell (signed out)
-    // childNodes[0] is the label text node — the dot is an element after it, and
-    // textContent would take the dot with it.
-    button.childNodes[0].nodeValue = (termConnected ? 'Disconnect terminal' : 'Connect terminal') + ' ';
-    dot.className = 'dot ' + (termConnected ? 'on' : 'off');
+  function paintTerminalControls() {
+    document.querySelectorAll('[data-term-label]').forEach(function (label) {
+      label.textContent = termConnected ? 'Disconnect terminal' : 'Connect terminal';
+    });
+    document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
+      dot.className = 'dot ' + (termConnected ? 'on' : 'off');
+    });
+  }
+  document.addEventListener('DOMContentLoaded', paintTerminalControls);
+
+  //: Post an act into the terminal iframe. Unframed (or signed out) there is none.
+  function postToTerminal(message) {
+    var terminal = document.getElementById('terminal');
+    if (terminal && terminal.contentWindow) {
+      terminal.contentWindow.postMessage(message, window.location.origin);
+    }
   }
 
   document.addEventListener('click', function (ev) {
-    var button = ev.target.closest && ev.target.closest('#term-toggle');
+    var button = ev.target.closest && ev.target.closest('[data-term-toggle]');
     if (!button) { return; }
-    var terminal = document.getElementById('terminal');
-    if (terminal && terminal.contentWindow) {
-      terminal.contentWindow.postMessage(
-        { euler: termConnected ? 'disconnect' : 'connect' }, window.location.origin);
-    }
+    postToTerminal({ euler: termConnected ? 'disconnect' : 'connect' });
     var menu = button.closest('details');
     if (menu) { menu.open = false; }
   });
 
-  // The iframe's own report of where it stands: the toggle follows the terminal,
+  // The account page's tool rows: a click types the command that fixes the row into
+  // the shell (`git-identity`, `! claude /login`). The web shell is the front door
+  // for these — the logins are interactive and belong in a terminal, not in a form
+  // that would have to handle a credential — so the button carries the user there
+  // rather than pretending to do it for them.
+  document.addEventListener('click', function (ev) {
+    var button = ev.target.closest && ev.target.closest('[data-term-cmd]');
+    if (!button) { return; }
+    postToTerminal({ euler: 'run', command: button.getAttribute('data-term-cmd') });
+  });
+
+  // The iframe's own report of where it stands: the controls follow the terminal,
   // never the other way round. A session that drops on its own (the shell exits,
-  // the socket dies) lands here too, so the menu never claims a live terminal
-  // that is not there.
+  // the socket dies) lands here too, so nothing claims a live terminal that is not
+  // there.
   window.addEventListener('message', function (ev) {
     if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'term-state') { return; }
     termConnected = !!ev.data.connected;
-    paintTerminalToggle();
+    paintTerminalControls();
+  });
+
+  // ── copy buttons ───────────────────────────────────────────────────────────
+  // [data-copy] holds the text (the public key today). The label's flip to
+  // "Copied" is the only feedback that the clipboard actually took it.
+  document.addEventListener('click', function (ev) {
+    var button = ev.target.closest && ev.target.closest('[data-copy]');
+    if (!button || !navigator.clipboard) { return; }
+    navigator.clipboard.writeText(button.getAttribute('data-copy')).then(function () {
+      var was = button.textContent;
+      button.textContent = 'Copied';
+      setTimeout(function () { button.textContent = was; }, 1200);
+    }, function () { button.textContent = 'Copy failed'; });
   });
 
   // ── the vault: auto-unlock + account-panel recovery ────────────────

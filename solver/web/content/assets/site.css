@@ -298,6 +298,17 @@ body.terminal-doc {
    an <a>, so the element-typed hover rules above never reach it. */
 .card.is-locked .card-ic, .card.is-locked .card-title { color: var(--muted); }
 .card-lock { width: 0.9rem; height: 0.9rem; color: var(--muted); display: block; }
+/* The Terminal card is a <button> (it acts, it does not navigate) — the only one.
+   A button brings its own font, background and centring, none of which the grid
+   above expects, so reset it back to the card the <a>s already are. */
+button.card {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.card-term .card-title { display: inline-flex; align-items: center; gap: 0.45rem; }
+.card-term .card-go { font-size: 0.82rem; }
 
 /* ── The README, below the cards on the start page ───────────────────────── */
 .readme { margin-top: 0.8rem; }
@@ -618,12 +629,23 @@ dl.account dd { margin: 0; min-width: 0; }
 }
 .state-pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
 .state-pill.warn { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
+/* A pill that is also the verb (the tool rows): same shape, but it must invite the
+   click that a plain status pill must not. Disabled = the tool is not installed,
+   and no command in this panel would change that. */
+.state-pill.state-action { background: none; font: inherit; font-size: 0.78rem;
+                           font-weight: 600; cursor: pointer; }
+.state-pill.state-action:hover:not(:disabled) { border-color: var(--accent); background: var(--surface-hi); }
+.state-pill.state-action:disabled { cursor: default; color: var(--muted); }
 
 .pubkey {
   display: block; padding: 0.4rem 0.6rem;
   background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
   font-size: 0.78rem; overflow-x: auto; white-space: nowrap;
 }
+/* The key scrolls; the Copy button beside it must not scroll away with it. */
+.pubkey-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+.pubkey-row .pubkey { flex: 1; min-width: 0; }
+.pubkey-row .btn { flex: none; font-size: 0.78rem; padding: 0.25rem 0.6rem; }
 .secret-list { list-style: none; padding: 0; margin: 0 0 0.6rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .secret-list li {
   display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
@@ -652,7 +674,8 @@ dl.account dd { margin: 0; min-width: 0; }
 }
 .tool-row:first-of-type { border-top: 0; }
 .tool-name { font-weight: 600; }
-.tool-hint { margin-left: auto; font-size: 0.82rem; color: var(--muted); }
+/* The tool names the row; its state — and the act that changes it — sits opposite. */
+.tool-row .state-action { margin-left: auto; }
 
 /* ── The terminal (right pane) ───────────────────────────────────────────── */
 /* xterm renders into #term. The host is pinned to the literal dark --surface

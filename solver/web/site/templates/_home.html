@@ -59,11 +59,19 @@
   {{ card('/topics/', 'λ', 'Topics',
           'The mathematics behind the problems, written down before it was forgotten.') }}
   {% if subject %}
-  <span class="card">
+  {# The one card that is not a place to go: the terminal is already here, in the
+     right pane. So it does the only thing this page can usefully do about it —
+     connect or disconnect it — and the dot says which. Same [data-term-*] contract
+     as the user menu's item; site.js paints both from the iframe's reports, so a
+     card served (like all markup) before the socket has spoken cannot claim a
+     session that is not there. #}
+  <button type="button" class="card card-term" data-term-toggle>
     <span class="card-ic">&#10095;</span>
-    <span><span class="card-title">Terminal</span>
-      <span class="card-desc">The solver shell, in the right pane — connected and waiting.</span></span>
-  </span>
+    <span><span class="card-title">Terminal
+        <span class="dot off" data-term-dot></span></span>
+      <span class="card-desc">A real solver shell, in the right pane. Yours to hang up on.</span></span>
+    <span class="card-go" data-term-label>Connect terminal</span>
+  </button>
   {% else %}
   <span class="card is-locked">
     <span class="card-ic">&#10095;</span>

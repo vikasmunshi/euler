@@ -72,9 +72,13 @@
         {# One terminal item, not two: it names the act it offers and the dot
            carries the state. Connect/disconnect is always the user's own act —
            the terminal never reconnects on its own. site.js swaps the label and
-           the dot from the iframe's reports, and posts the act into it. #}
-        <li><button type="button" id="term-toggle">Disconnect terminal
-              <span class="menu-state"><span class="dot on" id="term-dot"></span></span>
+           the dot from the iframe's reports, and posts the act into it.
+           It renders DISCONNECTED: the markup is served before the terminal has
+           said anything, and the start page's card (_home.html) says the same
+           thing — site.js paints both from the one state the iframe reports. #}
+        <li><button type="button" data-term-toggle>
+              <span data-term-label>Connect terminal</span>
+              <span class="menu-state"><span class="dot off" data-term-dot></span></span>
             </button></li>
         <li><form method="post" action="/auth/logout"><button type="submit">Logout</button></form></li>
       </ul>

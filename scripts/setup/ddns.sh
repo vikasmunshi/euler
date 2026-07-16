@@ -30,7 +30,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 SELF="${SCRIPT_DIR}/ddns.sh"                    # this script in the repo (for deploy)
-ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"            # authoring source (operator-readable)
+# The authoring env (~/.euler/env, possibly vault-encrypted): ENV_FILE +
+# load_authoring_env, shared so every kit reads it one way.
+# shellcheck source=scripts/setup/authoring_env.sh
+. "${SCRIPT_DIR}/authoring_env.sh"
 
 SYS_DIR="/etc/euler"
 DDNS_ENV="${SYS_DIR}/ddns.env"                  # scoped runtime config (root:euler-ddns 0640)
@@ -106,10 +109,7 @@ load_config() {
         src="${ENV_FILE}"
     fi
     if [ -n "${src}" ]; then
-        set -a
-        # shellcheck disable=SC1090
-        . "${src}"
-        set +a
+        load_authoring_env "${src}" || return 1
     fi
     FQDN="${EULER_TLS_DOMAIN:-}"
     NAMECOM_USER="${Namecom_Username:-${NAMEDOTCOM_USERNAME:-}}"

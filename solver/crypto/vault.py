@@ -20,9 +20,15 @@ salt it gets in the SRP challenge, with no bundled KDF and no extra round-trip.
 **Key delivery.** The code that needs ``VK`` -- :func:`~solver.crypto.ciphers.load_private_key` and
 the git clean/smudge filter -- runs as *subprocesses*, so ``VK`` cannot live only in the interactive
 shell. It lives in a **uid-private tmpfs file** whose path is exported as ``EULER_VAULT_KEY_FILE``
-(:func:`session_vault_key` reads it); the key itself is never in any process's environment. The
-terminal path bootstraps that file from ``~/.euler/user_pass`` (:func:`ensure_session_key`); the web
-path writes it from the ``PK`` the browser supplies at shell-attach.
+(:func:`session_vault_key` reads it); the key itself is never in any process's environment. The web
+path writes that file from the ``PK`` the browser supplies at shell-attach.
+
+**Where the terminal's password comes from**, in order: ``$EULER_VAULT_PASSWORD`` if set (a script,
+CI, an automated run -- no prompt, no tty needed), otherwise the operator is **asked**, once, by the
+shell (:func:`solver.crypto.keys.unlock_session`), which then materialises the key file for the
+process tree. There is no password file: one stored next to the ciphertext it unlocks would hand the
+password to exactly the reader the encryption is meant to stop, leaving the 0600 secrets dir as the
+only real protection -- which is what the vault exists to improve on.
 
 **The boundary, honestly:** this is at-rest opacity against a passive/honest operator only.
 A malicious active root can read a live session's memory or alter the shared solver code -- no design
@@ -351,19 +357,28 @@ def write_session_key(vault_key: bytes) -> Path:
 
 @lru_cache(maxsize=1)
 def _resolve_session_key() -> bytes | None:
-    """Resolve the session ``VK`` once per process: tmpfs key file first, else the terminal password."""
+    """Resolve the session ``VK`` once per process: tmpfs key file first, else ``$EULER_VAULT_PASSWORD``.
+
+    Both sources are non-interactive by construction. This function is on the git-filter path, in a
+    subprocess with no terminal and a stdout that belongs to git — it must never prompt. When neither
+    source answers, the session is simply **locked**, and the interactive recovery is the shell's job
+    (:func:`solver.crypto.keys.unlock_session`), which materialises the key file the fast path above
+    then finds. There is deliberately no password *file*: a password at rest beside the ciphertext it
+    unlocks protects nothing that the secrets dir's own 0600 does not already protect.
+    """
     key_path: str = os.environ.get(config['vault_key_env'], '').strip()
     if key_path and (path := Path(key_path)).exists():
         data: bytes = path.read_bytes()
         if len(data) == _KEY_LEN:
             return data
-    # Terminal bootstrap: derive VK from the at-rest password. Expensive (PBKDF2), so a shell should
-    # call ensure_session_key() at startup to materialise the tmpfs file and take the fast path above.
-    pass_file: Path = config['user_pass_file']
-    if not (pass_file.exists() and vault_exists()):
+    # The env password: a non-interactive unlock for a script or an automated run. Expensive (PBKDF2)
+    # per process, so a shell calls ensure_session_key() once at startup to materialise the tmpfs file
+    # and let its children take the fast path above.
+    password: str = os.environ.get(config['vault_password_env'], '')
+    if not (password and vault_exists()):
         return None
     try:
-        return unlock_vault(pass_file.read_text().rstrip('\n'))
+        return unlock_vault(password)
     except (InvalidTag, ValueError, OSError):
         return None
 
@@ -392,9 +407,11 @@ def clear_session_key() -> None:
 def ensure_session_key() -> bytes | None:
     """Establish the session key file for this process tree; return the ``VK`` (or None if locked).
 
-    Idempotent: if ``EULER_VAULT_KEY_FILE`` already points at a valid key file, reuse it; otherwise, on
-    the terminal path, derive ``VK`` from ``~/.euler/user_pass`` and materialise the tmpfs file so
-    subprocesses (the git filter) skip the PBKDF2 cost. A shell calls this once at startup.
+    Idempotent: if ``EULER_VAULT_KEY_FILE`` already points at a valid key file, reuse it; otherwise
+    derive ``VK`` from ``$EULER_VAULT_PASSWORD`` and materialise the tmpfs file so subprocesses (the
+    git filter) skip the PBKDF2 cost. Non-interactive: a locked vault stays locked here and returns
+    None -- asking the operator is :func:`solver.crypto.keys.unlock_session`, which is what a shell
+    calls at startup.
     """
     key_path: str = os.environ.get(config['vault_key_env'], '').strip()
     if key_path and Path(key_path).exists():

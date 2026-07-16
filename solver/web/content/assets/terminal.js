@@ -242,6 +242,20 @@
           else { connect(); }
         }
         break;
+      case 'run':                       // the account page's tool rows
+        // Type the command and press return, exactly as the user would: it lands in
+        // the shell's own readline, is echoed, and is theirs to edit or interrupt.
+        // Nothing here is privileged — this is the same PTY the keyboard writes to.
+        // With no session there is nothing to type into, and silently dropping it
+        // would read as a dead button, so say so where the answer would have gone.
+        if (typeof ev.data.command !== 'string' || !ev.data.command) { break; }
+        if (socket && socket.readyState === WebSocket.OPEN) {
+          term.focus();
+          send(new TextEncoder().encode(ev.data.command + '\r'));
+        } else {
+          term.write('\r\n\x1b[33mconnect the terminal first, then try again.\x1b[0m\r\n');
+        }
+        break;
     }
   });
 

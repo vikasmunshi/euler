@@ -23,8 +23,9 @@ Shell commands registered here: `user`, `rekey`, `authorize`, `key-split`, `key-
 """
 from __future__ import annotations
 
-__all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'user', 'user_authorize', 'vault']
+__all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'unlock_session', 'user', 'user_authorize', 'vault']
 
+import os
 from json import dumps
 from pathlib import Path
 from secrets import randbelow, token_bytes
@@ -236,13 +237,38 @@ def user(regen: bool = False) -> int:
 # ==================================================================================================================== #
 #                                       per-user vault (envelope encryption of id + env)
 # ==================================================================================================================== #
-def _write_user_pass(password: str) -> None:
-    """Persist the terminal password to `~/.euler/user_pass` (0600), the off-line unlock source."""
-    pass_file: Path = config['user_pass_file']
-    pass_file.parent.mkdir(parents=True, exist_ok=True)
-    pass_file.parent.chmod(0o700)
-    pass_file.write_text(password)
-    pass_file.chmod(0o600)
+def unlock_session(interactive: bool = True) -> bytes | None:
+    """Establish this process tree's vault key, asking the operator only if nothing else can.
+
+    The terminal's whole unlock path, and the one place a password is ever *prompted for*. The
+    order is: an existing session key file, then ``$EULER_VAULT_PASSWORD`` (both handled by
+    :func:`~solver.crypto.vault.ensure_session_key`, non-interactively), and only then the
+    operator. A shell calls this once at startup; children -- notably the git filter, which has
+    no terminal and cannot be asked anything -- inherit the key file it materialises.
+
+    Returns the ``VK``, or None when there is no vault, when the vault stays locked, or when
+    *interactive* is False and no env password answered. A locked session is not an error: it
+    means the private solutions and `claude-api` are unavailable, and everything else works.
+    """
+    if not vault_mod.vault_exists():
+        return None
+    if (vault_key := vault_mod.ensure_session_key()) is not None:
+        return vault_key
+    if not (interactive and console.is_interactive):
+        return None
+    password: str = console.input('[accent]Vault password:[/accent] ', password=True)
+    if not password:
+        return None
+    try:
+        vault_key = vault_mod.unlock_vault(password)
+    except InvalidTag:
+        console.print('[error]error:[/error] wrong password — the vault stays locked '
+                      '(private solutions and `claude-api` are unavailable this session).')
+        return None
+    vault_mod.write_session_key(vault_key)
+    load_private_key.cache_clear()
+    read_master_key.cache_clear()
+    return vault_key
 
 
 def _prompt_new_password(prompt: str) -> str | None:
@@ -309,19 +335,33 @@ def _vault_status() -> int:
 
 
 @register(requires='reader',
-          help_text='Manage the per-user secrets vault: status | init | change-password.')
-def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> int:
+          help_text='Manage the per-user secrets vault: status | init | unlock | change-password.')
+def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'status') -> int:
     """Encrypt this user's `id` + `env` at rest under a password-derived vault key.
 
     - `status` (default): show whether the vault exists, which secret files are encrypted, and
       whether this session can decrypt them.
     - `init`: create the vault and migrate the existing plaintext `id`/`env` into it in place, then
-      unlock the current session. Prompts for a new password (stored in `~/.euler/user_pass` for the
-      terminal off-line unlock path).
+      unlock the current session. Prompts for a new password.
+    - `unlock`: unlock a locked session (the shell asks at startup; this is the retry — after a
+      typo, or once you have the password to hand).
     - `change-password`: re-wrap the vault key under a new password (the secrets are not re-encrypted).
+
+    The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock (a script,
+    CI), otherwise you are asked once per shell.
     """
     if action == 'status':
         return _vault_status()
+
+    if action == 'unlock':
+        if not vault_mod.vault_exists():
+            console.print('[warning]No vault.[/warning] Nothing to unlock; run '
+                          '[accent]vault init[/accent] to encrypt `id` and `env`.')
+            return 1
+        if vault_mod.session_vault_key() is not None:
+            console.print('[success]Already unlocked.[/success]')
+            return 0
+        return 0 if unlock_session() is not None else 1
 
     if action == 'init':
         if vault_mod.vault_exists():
@@ -340,7 +380,6 @@ def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> in
         if password is None:
             return 1
         vault_key: bytes = vault_mod.init_vault(password)
-        _write_user_pass(password)
         vault_mod.write_session_key(vault_key)  # keep this shell working; exports EULER_VAULT_KEY_FILE
         encrypted: list[str] = vault_mod.encrypt_secret_files(vault_key)
         load_private_key.cache_clear()
@@ -363,9 +402,11 @@ def vault(action: Literal['status', 'init', 'change-password'] = 'status') -> in
     if new_password is None:
         return 1
     vault_mod.rewrap_vault(current, new_password)
-    if config['user_pass_file'].exists():
-        _write_user_pass(new_password)
     console.print('[success]Vault password changed.[/success]')
+    if os.environ.get(config['vault_password_env']):
+        console.print('[warning]note:[/warning] [accent]$'
+                      f'{config["vault_password_env"]}[/accent] still holds the OLD password — '
+                      'update it wherever it is set, or the next non-interactive unlock fails.')
     return 0
 
 

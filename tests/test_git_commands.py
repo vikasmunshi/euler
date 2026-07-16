@@ -57,20 +57,31 @@ class _GitCommandCase(unittest.TestCase):
     def setUp(self) -> None:
         self.cmdlines: list[str] = []
         self.rcs: list[int] = []                    # queued rcs; default 0
+        self.prs: list[str] = []                    # branches a PR was opened for
+        self.pr_rc: int = 0
 
         def fake_run_cmdline(cmdline: str) -> int:
             self.cmdlines.append(cmdline)
             return self.rcs.pop(0) if self.rcs else 0
 
+        def fake_ensure_pr(branch: str) -> int:
+            self.prs.append(branch)
+            return self.pr_rc
+
         self._saved_run = scripts.run_cmdline
         self._saved_branch = scripts._current_branch
+        self._saved_pr = scripts._ensure_pull_request
         self._saved_subject = config.subject
         scripts.run_cmdline = fake_run_cmdline      # type: ignore[assignment]
         scripts._current_branch = lambda: self.branch  # type: ignore[assignment]
+        # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
+        # like run_cmdline, so no test can touch a real remote (module docstring).
+        scripts._ensure_pull_request = fake_ensure_pr  # type: ignore[assignment]
 
     def tearDown(self) -> None:
         scripts.run_cmdline = self._saved_run       # type: ignore[assignment]
         scripts._current_branch = self._saved_branch  # type: ignore[assignment]
+        scripts._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
         config.subject = self._saved_subject
 
     def as_profile(self, profile: str) -> None:
@@ -78,15 +89,35 @@ class _GitCommandCase(unittest.TestCase):
 
 
 class GitPushGuardTest(_GitCommandCase):
-    def test_contributor_pushes_their_own_branch(self) -> None:
+    def test_contributor_pushes_their_own_branch_and_opens_its_pr(self) -> None:
         self.as_profile('contributor')
         self.assertEqual(scripts.git_push(), 0)
         self.assertEqual(self.cmdlines, ['git push -u origin user/t-000000'])
+        self.assertEqual(self.prs, ['user/t-000000'])
 
     def test_force_uses_force_with_lease(self) -> None:
         self.as_profile('contributor')
         self.assertEqual(scripts.git_push(force=True), 0)
         self.assertEqual(self.cmdlines, ['git push -u --force-with-lease origin user/t-000000'])
+
+    def test_no_pr_pushes_and_stops(self) -> None:
+        self.as_profile('contributor')
+        self.assertEqual(scripts.git_push(pr=False), 0)
+        self.assertEqual(self.cmdlines, ['git push -u origin user/t-000000'])
+        self.assertEqual(self.prs, [])
+
+    def test_a_failed_push_never_opens_a_pr(self) -> None:
+        self.as_profile('contributor')
+        self.rcs = [1]
+        self.assertNotEqual(scripts.git_push(), 0)
+        self.assertEqual(self.prs, [])              # nothing to review — the branch never landed
+
+    def test_a_failed_pr_fails_the_command(self) -> None:
+        # The push succeeded, but git-push promises a PR: reporting success would leave
+        # the user believing their work is under review when it is not.
+        self.as_profile('contributor')
+        self.pr_rc = 1
+        self.assertNotEqual(scripts.git_push(), 0)
 
     def test_non_admin_cannot_push_master(self) -> None:
         self.branch = 'master'
@@ -99,6 +130,7 @@ class GitPushGuardTest(_GitCommandCase):
         self.as_profile('admin')
         self.assertEqual(scripts.git_push(), 0)
         self.assertEqual(self.cmdlines, ['git push -u origin master'])
+        self.assertEqual(self.prs, [])              # master has nothing to merge into itself
         self.cmdlines.clear()
         self.assertEqual(scripts.git_push(force=True), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
@@ -108,6 +140,50 @@ class GitPushGuardTest(_GitCommandCase):
         self.as_profile('admin')
         self.assertEqual(scripts.git_push(), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
+
+
+class PullRequestTest(unittest.TestCase):
+    """`_ensure_pull_request`: idempotent, and never a second PR for one branch.
+
+    `gh` is stubbed at the `run` boundary — the real GitHub API is never reached (module
+    docstring), which is exactly the invariant a PR-opening command could quietly break.
+    """
+
+    def setUp(self) -> None:
+        self.calls: list[list[str]] = []
+        self._saved_run = scripts.run
+
+        def fake_run(argv: list[str], **kwargs: Any) -> Any:
+            self.calls.append(argv)
+            return self.responses.pop(0)
+
+        scripts.run = fake_run                      # type: ignore[assignment]
+        self.responses: list[Any] = []
+        self.addCleanup(lambda: setattr(scripts, 'run', self._saved_run))
+
+    @staticmethod
+    def _result(returncode: int = 0, stdout: str = '', stderr: str = '') -> Any:
+        return MagicMock(returncode=returncode, stdout=stdout, stderr=stderr)
+
+    def test_an_open_pr_is_reported_not_duplicated(self) -> None:
+        self.responses = [self._result(stdout='https://github.com/o/r/pull/7\n')]
+        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertEqual(len(self.calls), 1)                    # the lookup only
+        self.assertEqual(self.calls[0][:3], ['gh', 'pr', 'view'])
+
+    def test_no_open_pr_opens_one_onto_master(self) -> None:
+        self.responses = [self._result(stdout=''),              # lookup: none open
+                          self._result(stdout='https://github.com/o/r/pull/8\n')]
+        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        created = self.calls[1]
+        self.assertEqual(created[:3], ['gh', 'pr', 'create'])
+        self.assertEqual(created[created.index('--head') + 1], 'user/t-000000')
+        self.assertEqual(created[created.index('--base') + 1], 'master')
+
+    def test_a_refused_create_is_an_error(self) -> None:
+        self.responses = [self._result(stdout=''),
+                          self._result(returncode=1, stderr='gh: not authenticated')]
+        self.assertNotEqual(scripts._ensure_pull_request('user/t-000000'), 0)
 
 
 class GitMergeTest(_GitCommandCase):

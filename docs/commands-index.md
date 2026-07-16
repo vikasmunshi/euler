@@ -63,7 +63,7 @@ a parameter that accepts repetition.
 | [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
 | [`git-merge`](#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
-| [`git-push`](#command-git-push-push) | `push` | Push the current branch to origin (your own user/<slug> branch). » |
+| [`git-push`](#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares. |
@@ -89,7 +89,7 @@ a parameter that accepts repetition.
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](#command-users) | — | List / administer accounts (list is read-only; changes need admin + sudo). |
-| [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | change-password. |
+| [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -630,27 +630,34 @@ Raises:
 
 #### Command: `git-push` (`push`)
 
-Push the current branch to origin (your own user/<slug> branch).
+Push the current branch to origin and open a pull request onto master.
 * profiles: admin, maintainer, contributor
 * » supports `--silent`
 
 ```
 git-push
 [force=true|--force]
+[pr=false|--no-pr]
 [silent=true|--silent]
 ```
 
 ```text
-Push the current branch to origin as yourself (`git push -u origin <branch>`).
+Push the current branch to origin as yourself, then open its pull request.
 
 In a per-user clone the current branch is `user/<slug>`, pushed with your own
 GitHub identity — `git-identity` is the one-time setup. Landing work on master
 is the admin's `git-merge`, never a direct push: pushing master requires
 the `admin` floor, and force-pushing it is always refused.
 
+The PR is the second half of the push: an unreviewed branch on origin is not
+work anyone has been asked for. It is skipped on master (nothing to merge into
+itself), and a branch that already has one open keeps it.
+
 Args:
     force: Push with `--force-with-lease` — needed after `git-sync` rebased your
            branch onto a moved origin/master. Refused on master.
+    pr:    Open a pull request onto master after a successful push. Defaults to
+           True; `--no-pr` pushes and stops there.
 ```
 
 ---
@@ -1296,12 +1303,12 @@ Args:
 
 #### Command: `vault`
 
-Manage the per-user secrets vault: status | init | change-password.
+Manage the per-user secrets vault: status | init | unlock | change-password.
 * profiles: admin, maintainer, contributor, reader
 
 ```
 vault
-[action=status|init|change-password] (default status)
+[action=status|init|unlock|change-password] (default status)
 ```
 
 ```text
@@ -1310,8 +1317,12 @@ Encrypt this user's `id` + `env` at rest under a password-derived vault key.
 - `status` (default): show whether the vault exists, which secret files are encrypted, and
   whether this session can decrypt them.
 - `init`: create the vault and migrate the existing plaintext `id`/`env` into it in place, then
-  unlock the current session. Prompts for a new password (stored in `~/.euler/user_pass` for the
-  terminal off-line unlock path).
+  unlock the current session. Prompts for a new password.
+- `unlock`: unlock a locked session (the shell asks at startup; this is the retry — after a
+  typo, or once you have the password to hand).
 - `change-password`: re-wrap the vault key under a new password (the secrets are not re-encrypted).
+
+The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock (a script,
+CI), otherwise you are asked once per shell.
 ```
 <!-- /GEN:command-index -->

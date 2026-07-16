@@ -120,9 +120,30 @@ def _secret_names(vault_key: bytes) -> list[str]:
     return sorted(set(filter(None, names)))
 
 
+def _home() -> Path:
+    """This process's home — it runs as the collaborator's own uid."""
+    return Path(os.environ.get('HOME', str(Path.home())))
+
+
+def _which(binary: str) -> str | None:
+    """*binary* on PATH, or in this user's ``~/.local/bin``.
+
+    ``shutil.which`` searches the PATH this **service** was started with, which is
+    systemd's (``/usr/bin:/bin``, per the unit) — not the login PATH the user's shell
+    builds. Per-user installs land in ``~/.local/bin`` (``claude`` does), so a tool the
+    user has, and can run in their web shell, reads as ``not installed`` here. The
+    shell's PATH is the truth this panel is reporting on, so look where it looks.
+    """
+    found = shutil.which(binary)
+    if found is not None:
+        return found
+    local = _home() / '.local' / 'bin' / binary
+    return str(local) if os.access(local, os.X_OK) else None
+
+
 def _tool_status(binary: str, args: list[str], timeout: float = 8.0) -> str:
     """``signed in`` / ``not signed in`` / ``not installed`` for a CLI credential check."""
-    path = shutil.which(binary)
+    path = _which(binary)
     if path is None:
         return 'not installed'
     try:
@@ -134,10 +155,23 @@ def _tool_status(binary: str, args: list[str], timeout: float = 8.0) -> str:
 
 def _claude_status() -> str:
     """Claude Code sign-in state: the CLI plus its stored credentials (the login runs in the shell)."""
-    if shutil.which('claude') is None:
+    if _which('claude') is None:
         return 'not installed'
-    creds = Path(os.environ.get('HOME', str(Path.home()))) / '.claude' / '.credentials.json'
-    return 'signed in' if creds.exists() else 'not signed in'
+    return 'signed in' if (_home() / '.claude' / '.credentials.json').exists() else 'not signed in'
+
+
+def _can_decrypt() -> bool:
+    """Whether this user's key actually opens the private solutions.
+
+    The pubkey line's real question. True only when the master key unwraps under this
+    user's private key **and** verifies — i.e. the admin has run ``user-authorize`` on
+    it. Every failure mode (no keypair, no vault to decrypt the key, no entry in
+    ``enc-key.json``, a key that no longer unwraps) is the same answer here: not yet.
+    """
+    try:
+        return bool(read_master_key())
+    except (OSError, ValueError, KeyError):
+        return False
 
 
 def reset_vault_and_lock() -> list[str]:
@@ -238,12 +272,16 @@ def add_vault_routes(app: web.Application) -> None:
         loop = asyncio.get_running_loop()
         gh = await loop.run_in_executor(None, _tool_status, 'gh', ['auth', 'status'])
         claude = await loop.run_in_executor(None, _claude_status)
+        # An X25519 unwrap over two small files, but it is filesystem work on the
+        # event loop's thread — off it, like the tool probes beside it.
+        can_decrypt = (pubkey_state == 'key') and await loop.run_in_executor(None, _can_decrypt)
         vault_key = vault.session_vault_key()
         return render(request, 'account_vault.html', {
             'vault_exists': vault.vault_exists(),
             'unlocked': unlocked,
             'pubkey_state': pubkey_state,
             'pubkey': pubkey,
+            'can_decrypt': can_decrypt,
             'secret_names': _secret_names(vault_key) if vault_key is not None else [],
             'gh_status': gh,
             'claude_status': claude,

@@ -217,12 +217,11 @@ class VaultRouteTests(_UserServiceCase):
         secrets = Path(tempfile.mkdtemp(prefix='euler-vault-test-'))
         self.addCleanup(lambda: __import__('shutil').rmtree(secrets, True))
         self._saved = {k: crypto_config[k] for k in
-                       ('private_key_file', 'env_file', 'vault_file', 'user_pass_file',
+                       ('private_key_file', 'env_file', 'vault_file',
                         'vault_kdf_iterations')}
         crypto_config['private_key_file'] = secrets / 'id'
         crypto_config['env_file'] = secrets / 'env'
         crypto_config['vault_file'] = secrets / 'vault'
-        crypto_config['user_pass_file'] = secrets / 'user_pass'
         crypto_config['vault_kdf_iterations'] = 1000
 
         def _restore() -> None:

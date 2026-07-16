@@ -104,7 +104,10 @@ ACME_SERVICE_DEST="/etc/systemd/system/${ACME_SERVICE}"
 ACME_TIMER_DEST="/etc/systemd/system/${ACME_TIMER}"
 
 # ── Config ────────────────────────────────────────────────────────────────────────
-ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"       # authoring source of truth: FQDN + DNS creds
+# The authoring env (~/.euler/env, possibly vault-encrypted): ENV_FILE +
+# load_authoring_env, shared so every kit reads it one way.
+# shellcheck source=scripts/setup/authoring_env.sh
+. "${SCRIPT_DIR}/authoring_env.sh"
 EDGE_ENV="${SYS_DIR}/edge.env"             # deployed runtime config (FQDN + email), non-secret
 DOMAIN=""                                  # the deployment FQDN (load_fqdn)
 ACME_EMAIL="${EULER_TLS_EMAIL:-vikas.munshi@gmail.com}"
@@ -166,10 +169,7 @@ load_fqdn() {
         src="${ENV_FILE}"
     fi
     if [ -n "${src}" ]; then
-        set -a
-        # shellcheck disable=SC1090
-        . "${src}"
-        set +a
+        load_authoring_env "${src}" || return 1
     fi
     DOMAIN="${EULER_TLS_DOMAIN:-}"
     ACME_EMAIL="${EULER_TLS_EMAIL:-${ACME_EMAIL}}"
@@ -350,10 +350,7 @@ DNS_HOOK=""
 REQUIRED=()
 load_dns_creds() {
     if [ -f "${ENV_FILE}" ]; then
-        set -a
-        # shellcheck disable=SC1090
-        . "${ENV_FILE}"
-        set +a
+        load_authoring_env "${ENV_FILE}" || return 1
     fi
     case "${DNS_PROVIDER}" in
         namecom)
@@ -511,15 +508,28 @@ ${DOMAIN} {
 
 	# Static assets (the auth pages' CSS/JS, srp.js, terms, maintenance styling),
 	# served same-origin so the CSP 'self' policy covers them.
+	#
+	# Cache-Control: no-cache — "you may keep it, but ask before you use it".
+	# These paths are UNVERSIONED and their contents change on every redeploy, while
+	# the pages that reference them are rendered fresh every load. Without this,
+	# Caddy sends only ETag/Last-Modified, browsers fall back to *heuristic*
+	# freshness, and a deploy leaves new HTML being driven by old JS — silently, and
+	# only for the users who happened to have it cached. Revalidation costs one
+	# conditional request answered by the ETag with a 304.
 	handle /assets/* {
 		root * ${WEB_CONTENT_DIR}
+		header Cache-Control "no-cache"
 		file_server
 	}
 
 	# Vendored front-end libraries (htmx, MathJax + its fonts) — Caddy-native,
-	# same-origin, per the web-server-guide path-ownership table.
+	# same-origin, per the web-server-guide path-ownership table. Same unversioned
+	# paths, same rule: revalidate rather than guess (an upgrade must not need every
+	# user to hard-refresh). The SRI hashes in the templates pin the *content*, so a
+	# stale vendor file is a blocked script rather than a subtle bug.
 	handle /vendor/* {
 		root * ${WEB_CONTENT_DIR}
+		header Cache-Control "no-cache"
 		file_server
 	}
 

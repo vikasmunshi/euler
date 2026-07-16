@@ -54,7 +54,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"            # authoring source (operator-readable)
+# The authoring env (~/.euler/env, possibly vault-encrypted): ENV_FILE +
+# load_authoring_env, shared so every kit reads it one way.
+# shellcheck source=scripts/setup/authoring_env.sh
+. "${SCRIPT_DIR}/authoring_env.sh"
 
 SYS_DIR="/etc/euler"
 AUTH_ENV="${SYS_DIR}/auth.env"                  # scoped runtime config (root:euler-auth 0640)
@@ -142,10 +145,7 @@ load_config() {
         src="${AUTH_ENV}"
     fi
     if [ -n "${src}" ]; then
-        set -a
-        # shellcheck disable=SC1090
-        . "${src}"
-        set +a
+        load_authoring_env "${src}" || return 1
     fi
     FQDN="${EULER_TLS_DOMAIN:-}"
     TERMS_VERSION="${TERMS_VERSION:-1}"
@@ -168,6 +168,13 @@ ensure_admin_token() {
         echo "Scrubbing legacy EULER_ADMIN_TOKEN from ~/.euler/env (root-only material now)..."
         sed -i '/^# Admin-plane shared secret for the auth service (X-Admin-Token)\.$/d;/^EULER_ADMIN_TOKEN=/d' \
             "${ENV_FILE}"
+    elif [ -n "${EULER_ADMIN_TOKEN:-}" ]; then
+        # A vault-encrypted env: load_config surfaced the legacy token, but the grep above
+        # cannot see it and sed cannot edit ciphertext in place. Say so rather than no-op
+        # silently — a scrub that quietly does nothing is worse than one that never ran.
+        echo "Warning: a legacy EULER_ADMIN_TOKEN is still in your vault-encrypted ~/.euler/env." >&2
+        echo "         It is root-only material now: remove that line from the env yourself" >&2
+        echo "         (the account page's secrets, or your editor with the vault unlocked)." >&2
     fi
 }
 

@@ -7,10 +7,11 @@
    there (the brand is the way home), rather than an UndefinedError. #}
 {%- macro crumb_body(label) -%}
   {%- if label == 'home' -%}
-    <svg class="brand-glyph" viewBox="-1.3 -1.35 2.6 1.75" aria-hidden="true">
-      <path d="M 1 0 A 1 1 0 0 0 -1 0 M -1 0 H 0" fill="none"
-            stroke="currentColor" stroke-width="0.14" stroke-linecap="round"/>
-      <circle cx="0" cy="0" r="0.09" fill="currentColor" stroke="none"/>
+    {# A house, not the brand figure: the brand is already in the header two
+       controls to the left, and a trail that starts with a second copy of it reads
+       as decoration rather than as the first step of a path. #}
+    <svg class="crumb-home" viewBox="0 0 24 24" role="img" aria-label="home">
+      <path fill="currentColor" d="M12 3 2 12h3v8h6v-5h2v5h6v-8h3L12 3z"/>
     </svg>
   {%- else -%}{{ label }}{%- endif -%}
 {%- endmacro -%}

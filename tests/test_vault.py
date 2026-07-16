@@ -4,7 +4,7 @@
 
 Covers the primitives (PBKDF2 password key, wrap/unwrap the vault key, secret encrypt/decrypt),
 the vault file lifecycle (init / unlock / change-password), session-key delivery (tmpfs key file
-and the terminal `user_pass` fallback), and the two integration points that must transparently
+and the terminal `$EULER_VAULT_PASSWORD` fallback), and the two integration points that must transparently
 decrypt the vault form: `load_private_key` (crypto) and `get_api_key` (ai).
 
 Everything is redirected onto a temp directory by rebinding the paths in the crypto/app config dicts,
@@ -37,11 +37,10 @@ class VaultTestCase(unittest.TestCase):
         self.env_file = self.secrets / 'env'
         # Rebind the crypto config to the temp secrets dir.
         self._saved_crypto = {k: crypto_config[k] for k in
-                              ('private_key_file', 'env_file', 'vault_file', 'user_pass_file')}
+                              ('private_key_file', 'env_file', 'vault_file')}
         crypto_config['private_key_file'] = self.id_file
         crypto_config['env_file'] = self.env_file
         crypto_config['vault_file'] = self.secrets / 'vault'
-        crypto_config['user_pass_file'] = self.secrets / 'user_pass'
         # ai.models reads solver.config.env_file for the Anthropic key.
         self._saved_env_file = app_config.env_file
         app_config.env_file = self.env_file
@@ -143,20 +142,28 @@ class SessionKeyTest(VaultTestCase):
         self.assertEqual(os.environ[crypto_config['vault_key_env']], str(path))
         self.assertEqual(vault.session_vault_key(), vk)
 
-    def test_session_key_from_user_pass_fallback(self) -> None:
+    def test_session_key_from_env_password_fallback(self) -> None:
         vk = vault.init_vault('terminal-pw')
-        crypto_config['user_pass_file'].write_text('terminal-pw')
-        # No key file set: must derive VK from user_pass.
+        os.environ[crypto_config['vault_password_env']] = 'terminal-pw'
+        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
+        # No key file set: must derive VK from the env password.
         self.assertNotIn(crypto_config['vault_key_env'], os.environ)
         self.assertEqual(vault.session_vault_key(), vk)
 
-    def test_locked_when_no_key_and_no_user_pass(self) -> None:
-        vault.init_vault('pw')  # vault exists, but neither key file nor user_pass present
+    def test_wrong_env_password_leaves_session_locked(self) -> None:
+        vault.init_vault('right-pw')
+        os.environ[crypto_config['vault_password_env']] = 'wrong-pw'
+        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
         self.assertIsNone(vault.session_vault_key())
 
-    def test_ensure_session_key_materialises_file_from_user_pass(self) -> None:
+    def test_locked_when_no_key_and_no_env_password(self) -> None:
+        vault.init_vault('pw')  # vault exists, but neither key file nor env password present
+        self.assertIsNone(vault.session_vault_key())
+
+    def test_ensure_session_key_materialises_file_from_env_password(self) -> None:
         vk = vault.init_vault('pw')
-        crypto_config['user_pass_file'].write_text('pw')
+        os.environ[crypto_config['vault_password_env']] = 'pw'
+        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
         got = vault.ensure_session_key()
         self.assertEqual(got, vk)
         key_path = Path(os.environ[crypto_config['vault_key_env']])

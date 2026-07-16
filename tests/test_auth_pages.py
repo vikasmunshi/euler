@@ -147,14 +147,16 @@ class AuthPageTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_htmx_terms_wears_the_shells_chrome(self) -> None:
         """The pane's chrome comes from the content service's own partials — the
-        crumbs (euler-glyph home → leaf) and an Actions menu that is empty, not
+        crumbs (house-glyph home → leaf) and an Actions menu that is empty, not
         absent. Rendering them here is what keeps /terms from drifting: an auth
         route, but a page in the shell's pane like any other."""
         _, body = await self._get('/terms', headers={'HX-Request': 'true'})
         self.assertIn('<nav id="crumbs" class="crumbs" aria-label="Breadcrumb" '
                       'hx-swap-oob="true">', body)
-        self.assertIn('class="brand-glyph"', body)           # the euler figure, not a house
-        self.assertNotIn('crumb-home', body)
+        # A house, not the brand figure: the brand already sits in the header, and a
+        # trail opening with a second copy of it reads as decoration, not as a step.
+        self.assertIn('class="crumb-home"', body)
+        self.assertNotIn('brand-glyph', body)
         self.assertIn('<span class="crumb-leaf">terms</span>', body)
         self.assertIn('<div id="actions" class="actions" hx-swap-oob="true">', body)
         self.assertIn('<summary>Actions</summary>', body)

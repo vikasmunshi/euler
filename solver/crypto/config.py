@@ -34,10 +34,10 @@ class CryptoConfig(TypedDict):
     # per-user vault (envelope encryption of the private key + env)
     env_file: Path  # the project env file (ANTHROPIC_API_KEY etc.) -- the vault's second secret
     vault_file: Path  # {salt, iterations, wrapped_vk}: the vault key wrapped under the password key
-    user_pass_file: Path  # terminal-only: the password, to derive the password key off-line
     vault_magic: bytes  # header marking a file as vault-encrypted (vs. plaintext at rest)
     vault_kdf_iterations: int  # PBKDF2-HMAC-SHA256 rounds deriving the password key from the password
     vault_key_env: str  # env var naming the uid-private tmpfs file that holds the session vault key
+    vault_password_env: str  # env var carrying the vault password itself (non-interactive unlock)
     # git-filter wire format
     magic: bytes
     nonce_len: int
@@ -107,10 +107,13 @@ config: CryptoConfig = {
     # wrapped under a password-derived key; the plaintext key only ever exists in a tmpfs file.
     'env_file': _SECRETS_DIR / 'env',  # same value as solver.config.env_file, kept import-free here
     'vault_file': _SECRETS_DIR / 'vault',  # {salt, iterations, wrapped_vk}
-    'user_pass_file': _SECRETS_DIR / 'user_pass',  # terminal-only password, to derive the key off-line
     'vault_magic': _VAULT_MAGIC,
     'vault_kdf_iterations': 600_000,  # PBKDF2-HMAC-SHA256; WebCrypto-native so a browser can derive the same key
     'vault_key_env': 'EULER_VAULT_KEY_FILE',
+    # The password itself, for a non-interactive unlock (CI, a setup script, an automated
+    # run). Deliberately an env var and NOT a file in the secrets dir: a password stored
+    # beside the ciphertext it unlocks is not a second factor, it is a decoration.
+    'vault_password_env': 'EULER_VAULT_PASSWORD',
     # git-filter wire format
     'magic': _MAGIC,
     'nonce_len': _NONCE_LEN,
