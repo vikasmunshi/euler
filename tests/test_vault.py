@@ -48,6 +48,12 @@ class VaultTestCase(unittest.TestCase):
         self._saved_iters = crypto_config['vault_kdf_iterations']
         crypto_config['vault_kdf_iterations'] = 1000
         self._saved_key_env = os.environ.pop(crypto_config['vault_key_env'], None)
+        # write_session_key() writes into $XDG_RUNTIME_DIR — an environment variable, not
+        # a config path, so rebinding the config above does NOT contain it. Point it at the
+        # temp dir too, or every run drops live-looking key files in the developer's own
+        # /run/user/<uid>/euler and they pile up there forever.
+        self._saved_runtime = os.environ.get('XDG_RUNTIME_DIR')
+        os.environ['XDG_RUNTIME_DIR'] = str(self.secrets)
         self._clear_caches()
 
     def tearDown(self) -> None:
@@ -58,6 +64,9 @@ class VaultTestCase(unittest.TestCase):
         os.environ.pop(crypto_config['vault_key_env'], None)
         if self._saved_key_env is not None:
             os.environ[crypto_config['vault_key_env']] = self._saved_key_env
+        os.environ.pop('XDG_RUNTIME_DIR', None)
+        if self._saved_runtime is not None:
+            os.environ['XDG_RUNTIME_DIR'] = self._saved_runtime
         self._clear_caches()
         self._tmp.cleanup()
 
@@ -169,6 +178,34 @@ class SessionKeyTest(VaultTestCase):
         key_path = Path(os.environ[crypto_config['vault_key_env']])
         self.addCleanup(lambda: key_path.exists() and key_path.unlink())
         self.assertEqual(key_path.read_bytes(), vk)
+
+
+class UnlockSessionTest(VaultTestCase):
+    """`keys.unlock_session`: the one place that may ask, and the one that must not hang."""
+
+    def test_non_interactive_never_asks(self) -> None:
+        # The web path (main.py passes interactive=False off the subject's channel) and any
+        # scripted run. A locked vault must return None *immediately*: a prompt here has no
+        # one to answer it, and stalls every shell attach behind an invisible question.
+        from solver.crypto import keys
+        vault.init_vault('pw')                  # a vault exists, but nothing can unlock it
+        vault.clear_session_key()
+        self._clear_caches()
+        self.assertIsNone(keys.unlock_session(interactive=False))
+
+    def test_env_password_answers_without_asking(self) -> None:
+        from solver.crypto import keys
+        vk = vault.init_vault('pw')
+        vault.clear_session_key()
+        self._clear_caches()
+        os.environ[crypto_config['vault_password_env']] = 'pw'
+        self.addCleanup(os.environ.pop, crypto_config['vault_password_env'], None)
+        # interactive=False proves the env password alone carried it — no prompt involved.
+        self.assertEqual(keys.unlock_session(interactive=False), vk)
+
+    def test_no_vault_is_not_an_unlock(self) -> None:
+        from solver.crypto import keys
+        self.assertIsNone(keys.unlock_session(interactive=False))
 
 
 class LoadPrivateKeyIntegrationTest(VaultTestCase):

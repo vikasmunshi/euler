@@ -25,6 +25,7 @@ from __future__ import annotations
 
 __all__ = ['key_reconstruct', 'key_rekey', 'key_split', 'unlock_session', 'user', 'user_authorize', 'vault']
 
+import atexit
 import os
 from json import dumps
 from pathlib import Path
@@ -237,6 +238,23 @@ def user(regen: bool = False) -> int:
 # ==================================================================================================================== #
 #                                       per-user vault (envelope encryption of id + env)
 # ==================================================================================================================== #
+def _own_key_file(path: Path) -> None:
+    """Take ownership of a session key file WE created: remove it when this process ends.
+
+    Only ever called for a file this process wrote. A key file we **inherited** must never be
+    removed: on the web path the per-user service writes it and shares it across every shell
+    that user has open, so cleaning it up on one shell's exit would lock the others (and the
+    service's own session) out mid-flow. Ownership is the whole distinction, and it is why
+    this cannot live in :func:`~solver.crypto.vault.write_session_key`, which cannot know who
+    is calling it.
+
+    Best-effort: a SIGKILL runs no handler, so a crashed shell still leaves its file behind
+    until logout clears the tmpfs. This bounds the pile to live shells rather than to every
+    shell that ever ran.
+    """
+    atexit.register(lambda: path.unlink(missing_ok=True))
+
+
 def unlock_session(interactive: bool = True) -> bytes | None:
     """Establish this process tree's vault key, asking the operator only if nothing else can.
 
@@ -246,13 +264,22 @@ def unlock_session(interactive: bool = True) -> bytes | None:
     operator. A shell calls this once at startup; children -- notably the git filter, which has
     no terminal and cannot be asked anything -- inherit the key file it materialises.
 
+    Any key file this call *creates* is removed at process exit (:func:`_own_key_file`); one it
+    merely found is left alone, because it belongs to whoever wrote it.
+
     Returns the ``VK``, or None when there is no vault, when the vault stays locked, or when
     *interactive* is False and no env password answered. A locked session is not an error: it
     means the private solutions and `claude-api` are unavailable, and everything else works.
     """
     if not vault_mod.vault_exists():
         return None
+    # ensure_session_key() writes a key file itself when the env password answers, so compare
+    # the exported path across the call: a change means the file is new, and ours.
+    before: str = os.environ.get(config['vault_key_env'], '')
     if (vault_key := vault_mod.ensure_session_key()) is not None:
+        after: str = os.environ.get(config['vault_key_env'], '')
+        if after and after != before:
+            _own_key_file(Path(after))
         return vault_key
     if not (interactive and console.is_interactive):
         return None
@@ -265,7 +292,7 @@ def unlock_session(interactive: bool = True) -> bytes | None:
         console.print('[error]error:[/error] wrong password — the vault stays locked '
                       '(private solutions and `claude-api` are unavailable this session).')
         return None
-    vault_mod.write_session_key(vault_key)
+    _own_key_file(vault_mod.write_session_key(vault_key))
     load_private_key.cache_clear()
     read_master_key.cache_clear()
     return vault_key
@@ -380,7 +407,8 @@ def vault(action: Literal['status', 'init', 'unlock', 'change-password'] = 'stat
         if password is None:
             return 1
         vault_key: bytes = vault_mod.init_vault(password)
-        vault_mod.write_session_key(vault_key)  # keep this shell working; exports EULER_VAULT_KEY_FILE
+        # Keeps this shell working (exports EULER_VAULT_KEY_FILE); ours, so it goes at exit.
+        _own_key_file(vault_mod.write_session_key(vault_key))
         encrypted: list[str] = vault_mod.encrypt_secret_files(vault_key)
         load_private_key.cache_clear()
         read_master_key.cache_clear()

@@ -610,6 +610,29 @@ Where `VK` comes from:
   password is not fatal: the shell runs locked, and the private solutions and `claude-api`
   are what stay unavailable.
 
+  **Only the terminal is ever asked** — `main.py` gates the startup unlock on
+  `subject.channel`. On the web the vault is the browser's job by design (it derives `PK`
+  and the service writes the key file *before* forking the shell), so a web shell that
+  stopped to ask would be routing through the server the one secret that deliberately
+  never goes there — and, on a locked vault, would stall every attach behind a prompt the
+  user cannot see. The explicit `vault unlock` command still prompts on any channel: that
+  one the user asked for.
+
+  **A session removes the key file it created, and only that one.** `write_session_key`
+  mkstemps one file per unlock, so without cleanup they accumulate for the life of the
+  tmpfs and a `VK` outlives the shell that made it — "locked" then means nothing until
+  logout, since anything running as that uid can lift a working key off disk without the
+  password. `keys.unlock_session` therefore unlinks its own file at exit. The distinction
+  is **ownership**, and it is the whole point: on the web path the per-user service writes
+  the key file and *shares* it across every shell that user has open, so a shell that
+  cleaned up an inherited file would lock the others — and the service's own session — out
+  mid-flow. A file we merely found is never ours to remove. (Best-effort: SIGKILL runs no
+  handler. This bounds the pile to live shells, not to every shell that ever ran.)
+
+  One `mkstemp` per session is deliberate, not an oversight to "fix" with a single stable
+  path: concurrent shells would then share one filename, and the first to exit would unlink
+  it out from under the rest.
+
   The installers (`scripts/setup/*.sh`) read the same encrypted `~/.euler/env` for the
   deployment's authoring config, through `scripts/setup/authoring_env.sh` →
   `python -m solver.crypto.readenv`, which returns the same dotenv lines whether the file

@@ -223,9 +223,17 @@ class VaultRouteTests(_UserServiceCase):
         crypto_config['env_file'] = secrets / 'env'
         crypto_config['vault_file'] = secrets / 'vault'
         crypto_config['vault_kdf_iterations'] = 1000
+        # The unlock routes below write a session key, and write_session_key() takes its
+        # directory from $XDG_RUNTIME_DIR — an env var the config rebinding above cannot
+        # reach. Contain it here too, or these tests litter the developer's own runtime dir.
+        saved_runtime = os.environ.get('XDG_RUNTIME_DIR')
+        os.environ['XDG_RUNTIME_DIR'] = str(secrets)
 
         def _restore() -> None:
             crypto_config.update(self._saved)   # type: ignore[typeddict-item]
+            os.environ.pop('XDG_RUNTIME_DIR', None)
+            if saved_runtime is not None:
+                os.environ['XDG_RUNTIME_DIR'] = saved_runtime
             vault.clear_session_key()
 
         self.addCleanup(_restore)
