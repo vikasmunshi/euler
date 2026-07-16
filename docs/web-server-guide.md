@@ -140,7 +140,7 @@ compromised process can simply ignore. Two layers.
 
 **Squid** runs on loopback `127.0.0.1:3128` as `euler-proxy` with a default-deny domain
 allowlist (`api.anthropic.com`, `.projecteuler.net`, `.github.com`,
-`.githubusercontent.com`, `.claude.com`, `.anthropic.com`). Client-side
+`.githubusercontent.com`, `.claude.ai`, `.claude.com`, `.anthropic.com`). Client-side
 `HTTPS_PROXY`/`HTTP_PROXY` is written to `/etc/euler/egress.env` and loaded by the
 service units, so AI features, the problem scraper, and `gh` egress only through it. The
 allowlist lives in `/etc/euler-proxy/squid.allowlist` — edit and reload.
@@ -340,7 +340,7 @@ The slug scheme is worth one note. `slugify` emits a `.`-bearing form
 slug used for uids, homes, sockets, and `X-User-Slug` is a stricter derivation:
 `[a-z][a-z0-9-]*`, a sanitized and truncated local-part plus a short hash suffix,
 bounded so `euler-user-<slug>` stays well under the name limit (e.g.
-`euler-user-mercanther-3f9e97`, 27 chars). The email remains the login identity; the
+`euler-user-vikas-munshi-0a68e0`, 30 chars). The email remains the login identity; the
 slug is the derived system identity.
 
 ## 6 · Authorization
@@ -370,15 +370,19 @@ carries exactly one decision — **who has which profile**:
 ```json
 {
   "ladder": ["reader", "contributor", "maintainer", "admin"],
-  "users":  { "vikas": "admin", "mercanther@gmail.com": "reader" }
+  "users": {
+    "vikas": "admin",
+    "vikas.munshi@gmail.com": "maintainer"
+  }
 }
 ```
 
 The `users` map is keyed by **web email or OS-login name**, one map for both channels.
 It is world-readable because it is not secret, and **root-write only** because every
 mutation goes through the sudo-gated `users` path. It lives outside the repo so that a
-repo write cannot change policy. The package ships a template with an empty map
-(the checkout owner floors to `admin` by uid), and the installer seeds the real file.
+repo write cannot change policy. There is **no policy file in the repo**: absent a
+deployed one the built-in default maps nobody, so the checkout owner floors to `admin`
+by uid and everyone else is `contributor`. The installer seeds the real file.
 
 This file used to carry `profiles`/`grants`/`objects` — an `object:permission` grant
 vocabulary whose real job was deriving per-path filesystem ACLs on a *shared* operator
@@ -491,7 +495,7 @@ them would separate two things that already share a sandbox — one service kind
 socket per user.
 
 ```
-home  /home/euler-users/<slug>/                    (0700, uid-private)
+home  /home/euler-user-<slug>/                     (0700, uid-private)
   ├─ euler/          their repo clone — content, branch user/<slug>
   │    └─ solutions/private/**   ciphertext until enc-key authorized (§9)
   └─ .euler/         their vault (§8)
@@ -877,9 +881,9 @@ by every rendering service) because a strict policy needs a **per-response nonce
 app that renders the page mints it and stamps it into both header and template.
 
 ```
-default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';
-img-src 'self' data:; connect-src 'self'; frame-ancestors 'self';
-base-uri 'none'; object-src 'none'
+default-src 'self'; script-src 'self' 'nonce-<per-response>';
+style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self';
+frame-ancestors 'self'; base-uri 'none'; object-src 'none'
 ```
 
 **Scripts allow no `unsafe-inline` and no `unsafe-eval`, ever.**
@@ -1144,7 +1148,7 @@ expiry and `/healthz`.
 | Firewall + relay | `/etc/euler/nftables.conf`; `/etc/euler/smtp.env` (`root:euler-smtp 0640`) |
 | Auth | `/opt/euler/venv`; `/etc/euler/auth.env` (`root:euler-auth 0640`); `/var/lib/euler-auth` (`0600`) |
 | Policy | `/etc/euler/authorizations.json` (`root:root 0644`) |
-| Per-user tier | `/etc/euler/user.env` (no secrets); `/home/euler-users/<slug>/` (`0700`) |
+| Per-user tier | `/etc/euler/user.env` (no secrets); `/home/euler-user-<slug>/` (`0700`) |
 | Sockets | `/run/euler/*.sock` (`0660 euler-<svc>:euler-web`); `/run/euler-adm/auth-admin.sock` (`0600`) |
 
 ### 14.6 Verify
