@@ -360,8 +360,8 @@ def render_markdown(text: str, route_base: str = '/docs/', *, repo_base: str = '
     - a relative ``foo.md`` (or ``docs/foo.md``) link → the *route_base* route;
     - a repo-relative ``../<path>`` link (docs/topics sit one level under the
       repo root, so ``../`` reaches it) → the ``/docs/file/<path>`` view route,
-      so a link like ``../solver/templates/authorizations.json`` — which
-      resolves natively on GitHub — also resolves in the app viewer;
+      so a link like ``../solver/crypto/gitfilter.py`` — which resolves natively
+      on GitHub — also resolves in the app viewer;
     - with *repo_base* set (the README, which sits **at** the repo root and so
       links its neighbours with no ``../`` to give them away): every remaining
       relative link and image → the ``/docs/file/`` viewer when it names a

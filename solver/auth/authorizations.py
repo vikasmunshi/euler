@@ -21,22 +21,22 @@ map is all that is read.
 
 **System of record** is ``/etc/euler/authorizations.json`` (root-owned, outside
 the repo; mutated only through the sudo-gated ``users`` path). This module reads
-it — or the ``EULER_AUTHZ_FILE`` override — and falls back to the built-in
-default shipped with the package (``solver/templates/authorizations.json``) so a
-fresh checkout works before the file is deployed. The template's ``users`` map is
-empty; the checkout owner floors to ``admin`` by uid, and real deployments seed
-the map at install.
+it — or the ``EULER_AUTHZ_FILE`` override — and falls back to :data:`_DEFAULT_POLICY`
+(an empty users map) so a fresh checkout works before the file is deployed: the
+checkout owner floors to ``admin`` by uid, and real deployments seed the map at
+install. The default is a literal rather than a shipped file because it carries no
+information — the ladder is code (:data:`~solver.auth.subject.LADDER`) and the map
+starts empty.
 
 Stdlib-only and free of any ``solver.config`` dependency: :mod:`solver.config`
 imports the resolver during its own construction.
 """
 from __future__ import annotations
 
-__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE', 'DEFAULT_POLICY_FILE']
+__all__ = ['Authorizations', 'AUTHZ_FILE_ENV', 'DEFAULT_AUTHZ_FILE']
 
 import json
 import os
-from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -46,24 +46,8 @@ from solver.auth.subject import LADDER
 AUTHZ_FILE_ENV: str = 'EULER_AUTHZ_FILE'
 #: The deployed system-of-record location.
 DEFAULT_AUTHZ_FILE: str = '/etc/euler/authorizations.json'
-#: The built-in default policy — shipped inside the package (empty users map).
-DEFAULT_POLICY_FILE: Path = Path(__file__).resolve().parents[1] / 'templates' / 'authorizations.json'
-
-
-@lru_cache(maxsize=1)
-def _default_policy() -> dict[str, Any]:
-    """The built-in default policy, read once from the packaged template.
-
-    Raised loudly if the bundled file is missing or malformed — it is the single
-    source of the ladder, so a broken install must not be papered over.
-    """
-    try:
-        data = json.loads(DEFAULT_POLICY_FILE.read_text(encoding='utf-8'))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f'bundled authorization policy unreadable: {DEFAULT_POLICY_FILE}: {exc}') from exc
-    if not isinstance(data, dict):
-        raise RuntimeError(f'bundled authorization policy is not an object: {DEFAULT_POLICY_FILE}')
-    return data
+#: The built-in default: nobody is mapped, so only the checkout-owner uid floor applies.
+_DEFAULT_POLICY: dict[str, Any] = {'users': {}}
 
 
 def _normalise(identity: str) -> str:
@@ -86,7 +70,7 @@ class Authorizations:
     @classmethod
     def load(cls) -> Authorizations:
         """Load the policy from the first of: ``$EULER_AUTHZ_FILE``, the deployed SoR,
-        else the built-in default (the packaged ``authorizations.json`` template).
+        else the built-in default (an empty users map).
         """
         for candidate in (os.environ.get(AUTHZ_FILE_ENV), DEFAULT_AUTHZ_FILE):
             if not candidate:
@@ -97,7 +81,7 @@ class Authorizations:
                 continue
             if isinstance(data, dict):
                 return cls(data)
-        return cls(_default_policy())
+        return cls(dict(_DEFAULT_POLICY))
 
     # ── queries ────────────────────────────────────────────────────────────────────
 

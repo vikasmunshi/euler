@@ -8,7 +8,7 @@ account) with their canonical trailing-slash redirects, and the 5d edit routes
 the writes run against a scratch repo tree, never this checkout.
 
 Uses aiohttp's stdlib test utilities (no extra dep). The authorization policy is
-pinned to the packaged template so profiles/permissions are deterministic."""
+pinned to the local fixture so profiles are deterministic."""
 from __future__ import annotations
 
 import json
@@ -21,7 +21,6 @@ from pathlib import Path
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.auth.authorizations import DEFAULT_POLICY_FILE
 from solver.web.site.app import build_app
 from solver.web.site.config import SiteConfig
 
@@ -30,6 +29,12 @@ _CONTRIBUTOR = {'X-User': 'c@example.com', 'X-Profile': 'contributor'}
 _MAINTAINER = {'X-User': 'm@example.com', 'X-Profile': 'maintainer'}
 _ADMIN = {'X-User': 'a@example.com', 'X-Profile': 'admin'}
 _HTMX = {'HX-Request': 'true'}
+
+
+#: A deterministic policy for tests: the ladder plus an empty users map. Tests must
+#: point EULER_AUTHZ_FILE at this — a host with the real /etc/euler SoR deployed would
+#: otherwise leak its own user map into the run.
+_AUTHZ_FIXTURE = Path(__file__).parent / 'fixtures' / 'authorizations.json'
 
 
 def _config(profile: str = '') -> SiteConfig:
@@ -41,8 +46,8 @@ def _config(profile: str = '') -> SiteConfig:
 
 class ContentServiceTests(AioHTTPTestCase):
     async def get_application(self):
-        # Deterministic policy: the bundled ladder (reader/contributor/maintainer/admin).
-        os.environ['EULER_AUTHZ_FILE'] = str(DEFAULT_POLICY_FILE)
+        # Deterministic policy: the ladder + an empty users map (never the host's SoR).
+        os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
         return build_app(_config())
 
@@ -286,12 +291,15 @@ class ContentServiceTests(AioHTTPTestCase):
 
     @unittest_run_loop
     async def test_doc_body_links_rewired_and_boosted(self) -> None:
-        # authorizations.md links ../solver/templates/authorizations.json and
-        # web-server-guide.md; both must resolve in-app and swap the pane (hx-*).
+        # authorizations.md links web-server-guide.md — the .md → route rewrite.
         resp = await self.client.get('/docs/authorizations', headers=_READER)
         page = await resp.text()
-        self.assertIn('href="/docs/file/solver/templates/authorizations.json"', page)
-        self.assertIn('href="/docs/web-server-guide"', page)  # .md rewrite
+        self.assertIn('href="/docs/web-server-guide"', page)
+        # gitfilter-guide.md links ../solver/crypto/gitfilter.py — the repo-relative
+        # rewrite, which resolves natively on GitHub and via /docs/file/ in the app.
+        resp = await self.client.get('/docs/gitfilter-guide', headers=_READER)
+        page = await resp.text()
+        self.assertIn('href="/docs/file/solver/crypto/gitfilter.py"', page)
         self.assertNotIn('href="../solver', page)            # no dangling repo-relative link
         # internal links are boosted (swap #content), externals are left alone
         self.assertRegex(page, r'href="/docs/file/[^"]+" hx-get="/docs/file/')
@@ -299,12 +307,12 @@ class ContentServiceTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_doc_file_view_and_scope(self) -> None:
         # a doc-referenced template file renders in the viewer…
-        resp = await self.client.get('/docs/file/solver/templates/authorizations.json', headers=_READER)
+        resp = await self.client.get('/docs/file/solver/templates/new.py', headers=_READER)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
-        self.assertIn('ladder', body)                        # the JSON (escaped) in a code block
-        self.assertIn('contributor', body)
-        self.assertIn('solver/templates/authorizations.json', body)
+        self.assertIn('runner', body)                        # the source (escaped) in a code block
+        self.assertIn('solve', body)
+        self.assertIn('solver/templates/new.py', body)
         # …and a solution file (the solutions object tree — e.g. a topic linking
         # ../solutions/…) and an about file (README) view through the same route…
         for path in ('/docs/file/solutions/public/p0042/p0042_s0.py',
@@ -366,7 +374,7 @@ class EditRouteTests(AioHTTPTestCase):
     every write passes the 5c gate and answers with a fragment."""
 
     async def get_application(self):
-        os.environ['EULER_AUTHZ_FILE'] = str(DEFAULT_POLICY_FILE)
+        os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
         scratch = Path(tempfile.mkdtemp(prefix='euler-site-test-'))
         self.addCleanup(shutil.rmtree, scratch, True)
@@ -567,7 +575,7 @@ class PinnedInstanceTests(AioHTTPTestCase):
     the code-side backstop to Caddy's per-profile routing (DD-12)."""
 
     async def get_application(self):
-        os.environ['EULER_AUTHZ_FILE'] = str(DEFAULT_POLICY_FILE)
+        os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
         return build_app(_config(profile='reader'))
 

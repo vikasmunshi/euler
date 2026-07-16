@@ -342,9 +342,8 @@ async def doc_file(request: web.Request) -> web.StreamResponse:
     """``GET /docs/file/{path}`` — view a doc-referenced repo file.
 
     Serves a file under the declared-readable content trees (the ``docs`` +
-    ``about`` + ``solutions`` object paths, DD-12) — e.g.
-    ``solver/templates/authorizations.json`` linked from a guide, or a
-    ``../solutions/…`` file linked from a topic. Text renders in the viewer;
+    ``about`` + ``solutions`` roots) — e.g. ``solver/templates/new.py`` linked
+    from a guide, or a ``../solutions/…`` file linked from a topic. Text renders in the viewer;
     other bytes are served raw. Anything outside those trees (or a traversal
     attempt) is 404, so the route can never read the wider ``solver/`` source
     or the key material.

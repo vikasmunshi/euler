@@ -59,7 +59,6 @@ ENV_FILE="$(dirname "${PROJECT_ROOT}")/.$(basename "${PROJECT_ROOT}")/env"      
 SYS_DIR="/etc/euler"
 AUTH_ENV="${SYS_DIR}/auth.env"                  # scoped runtime config (root:euler-auth 0640)
 AUTHZ_FILE="${SYS_DIR}/authorizations.json"     # DD-12 authorization SoR (root:root 0644)
-AUTHZ_TEMPLATE="${PROJECT_ROOT}/solver/templates/authorizations.json"  # packaged bootstrap template (DD-12)
 STATE_DIR="/var/lib/euler-auth"                 # DD-6: euler-auth-only state
 TMPFILES_CONF="/etc/tmpfiles.d/euler.conf"      # /run/euler socket dir (DD-1/DD-5)
 
@@ -250,12 +249,16 @@ deploy_authz() {
     owner="$(stat -c '%U' "${PROJECT_ROOT}")"
     sudo mkdir -p "${SYS_DIR}"
     if [ ! -f "${AUTHZ_FILE}" ]; then
-        echo "Deploying authorizations.json SoR from the repo template..."
-        sudo install -m 0644 -o root -g root "${AUTHZ_TEMPLATE}" "${AUTHZ_FILE}"
+        echo "Seeding the authorizations.json SoR (empty users map)..."
+        echo '{}' | sudo tee "${AUTHZ_FILE}" >/dev/null
     fi
-    sudo "${PYTHON}" - "${AUTHZ_FILE}" "${owner}" "${STATE_DIR}/users.json" "${AUTHZ_TEMPLATE}" <<'PY'
+    # Run from the system venv: the ladder is code (solver.auth.subject.LADDER), so the
+    # seed imports it rather than duplicating the rung order here. deploy_venv precedes
+    # every deploy_authz call site, so the import resolves.
+    sudo "${VENV_PY}" - "${AUTHZ_FILE}" "${owner}" "${STATE_DIR}/users.json" <<'PY'
 import json, pathlib, sys
-authz_path, owner, users_path, template_path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+from solver.auth.subject import LADDER
+authz_path, owner, users_path = sys.argv[1], sys.argv[2], sys.argv[3]
 authz = json.loads(pathlib.Path(authz_path).read_text())
 users = dict(authz.get('users', {}))
 users.setdefault(owner, 'admin')                         # local owner anchor (seeded for visibility)
@@ -272,11 +275,9 @@ for email, rec in srp.items():
 # has which profile. A legacy grants/objects-shaped file is rewritten to the new
 # shape here, its users map carried over; the retired sections are dropped (they
 # only ever drove the per-profile content-tree ACLs, gone with the per-user model).
-template = json.loads(pathlib.Path(template_path).read_text())
 if 'profiles' in authz or 'objects' in authz:
     print('authorizations.json: migrating the legacy grants/objects shape → plain profile ladder')
-new = {'ladder': template.get('ladder', ['reader', 'contributor', 'maintainer', 'admin']),
-       'users': dict(sorted(users.items()))}
+new = {'ladder': list(LADDER), 'users': dict(sorted(users.items()))}
 pathlib.Path(authz_path).write_text(json.dumps(new, indent=2) + '\n')
 print(f'authorizations.json: {len(users)} user(s) mapped (owner {owner}=admin)')
 PY

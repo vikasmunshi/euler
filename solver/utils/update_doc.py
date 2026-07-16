@@ -186,15 +186,20 @@ def gen_command_index() -> str:
 
 
 def gen_authorization_table() -> str:
-    """The authorization audit table: one row per command with its module and its
-    **minimum profile** (the plain ladder floor the command declares). Rows are
-    grouped by module, then command. Authorization is by profile only — the channel
-    is not an axis.
+    """The authorization audit table: one row per command, one column per rung, with a
+    tick on every rung that may run it.
+
+    A rung is ticked when it sits at or above the command's declared ``requires`` floor,
+    so each row reads as a run of ticks from its floor rightwards — the shape of the
+    ladder is visible at a glance, and a gap would be a bug. Rows are grouped by module,
+    then command. Authorization is by profile only — the channel is not an axis.
     """
-    rows = ['| Module | Command | Minimum profile |',
-            '|--------|---------|-----------------|']
+    rows = ['| Module | Command | ' + ' | '.join(p.capitalize() for p in LADDER) + ' |',
+            '|--------|---------|' + '|'.join(':' + '-' * len(p) + ':' for p in LADDER) + '|']
     for cmd in sorted(registry.all(), key=lambda c: (_module_of(c), c.name)):
-        rows.append(f'| `{_module_of(cmd)}` | `{cmd.name}` | `{_least_profile(cmd)}` |')
+        allowed = _allowed_profiles(cmd)
+        ticks = ' | '.join('✓' if p in allowed else '' for p in LADDER)
+        rows.append(f'| `{_module_of(cmd)}` | `{cmd.name}` | {ticks} |')
     return '\n'.join(rows)
 
 

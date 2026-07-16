@@ -27,7 +27,6 @@ import aiohttp
 from aiohttp import WSMsgType, web
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.auth.authorizations import DEFAULT_POLICY_FILE
 from solver.web.auth.tickets import TicketStore
 from solver.web.ws.app import PTY_MANAGER, build_app
 from solver.web.ws.config import WsConfig
@@ -57,6 +56,12 @@ for line in sys.stdin:
         print('GOT:' + line, flush=True)
 """
 _STUB_ARGV = (sys.executable, '-u', '-c', _STUB_CODE)
+
+
+#: A deterministic policy for tests: the ladder plus an empty users map. Tests must
+#: point EULER_AUTHZ_FILE at this — a host with the real /etc/euler SoR deployed would
+#: otherwise leak its own user map into the run.
+_AUTHZ_FIXTURE = Path(__file__).parent / 'fixtures' / 'authorizations.json'
 
 
 class _FakeAuth:
@@ -130,7 +135,7 @@ class _WsServiceCase(AioHTTPTestCase):
 
     async def get_application(self) -> web.Application:
         # Deterministic policy: the bundled ladder (reader/contributor/maintainer/admin).
-        os.environ['EULER_AUTHZ_FILE'] = str(DEFAULT_POLICY_FILE)
+        os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
 
         scratch = Path(tempfile.mkdtemp(prefix='euler-ws-test-'))

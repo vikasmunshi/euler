@@ -20,7 +20,6 @@ from pathlib import Path
 from aiohttp import web
 from aiohttp.test_utils import TestClient, TestServer
 
-from solver.auth.authorizations import DEFAULT_POLICY_FILE
 from solver.auth.identity import system_slug
 from solver.web.auth.app import AuthService, build_admin_app, build_public_app
 from solver.web.auth.config import AuthConfig
@@ -29,6 +28,12 @@ from solver.web.auth.srp import compute_verifier
 
 _EMAIL = 'shell-user@example.com'
 _TOKEN = 'admin-token'
+
+
+#: A deterministic policy for tests: the ladder plus an empty users map. Tests must
+#: point EULER_AUTHZ_FILE at this — a host with the real /etc/euler SoR deployed would
+#: otherwise leak its own user map into the run.
+_AUTHZ_FIXTURE = Path(__file__).parent / 'fixtures' / 'authorizations.json'
 
 
 class _FakeWsInstance:
@@ -52,7 +57,7 @@ class TeardownPushTests(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
         import os
-        os.environ['EULER_AUTHZ_FILE'] = str(DEFAULT_POLICY_FILE)
+        os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
 
         self.scratch = Path(tempfile.mkdtemp(prefix='euler-teardown-'))

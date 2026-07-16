@@ -103,4 +103,3 @@ include = ["solver*"]
 solver = ["*.html"]
 "solver.web" = ["templates/*.html"]  # Jinja pages ship inside the deployed venv (DD-5)
 "solver.web.site" = ["templates/*.html"]  # content-service pages (Phase 5)
-"solver.templates" = ["authorizations.json"]  # the default RBAC policy ladder (DD-12)
