@@ -70,7 +70,8 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('e<sup>iπ</sup>', body)               # the identity wordmark
         self.assertIn('id="crumbs"', body)                  # chrome placed in the header
         self.assertIn('id="actions"', body)
-        self.assertIn('id="theme-toggle"', body)            # the slider
+        self.assertNotIn('theme-toggle', body)              # dark-only: there is no slider
+        self.assertIn('data-term-toggle', body)             # the terminal control, in the user menu
         self.assertIn('/auth/logout', body)                 # the user menu
         self.assertIn('hx-get="/about/license"', body)      # footer → left pane…
         self.assertNotIn('/about/readme', body)             # …without readme
@@ -78,7 +79,9 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertNotIn('data-popup', body)
         self.assertIn('>license</a>', body)                 # label, not "MIT license"
         self.assertIn('hx-get="/account"', body)            # account swaps the pane
-        self.assertIn('hx-get="/password"', body)           # change password too
+        # No "Change password" in the menu: it lives on the account page now (an account
+        # thing; the menu is for getting places). The route itself still exists.
+        self.assertNotIn('hx-get="/password"', body)
         self.assertIn('/vendor/htmx.min.js', body)          # htmx wired
         self.assertIn('integrity="sha384-', body)           # with SRI
 
@@ -117,9 +120,11 @@ class ContentServiceTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_footer_and_account_swap_into_the_pane(self) -> None:
         # htmx fetch of a footer/account route → the #content fragment + OOB chrome
+        # The account marker is the ladder, not the word "Account": the page's own
+        # heading is the reader's email, and its subject is where they stand on the rungs.
         for path, marker in (('/about/license', 'MIT License'),
                              ('/about/acknowledgements', 'htmx'),
-                             ('/account', 'Account')):
+                             ('/account', 'class="ladder"')):
             resp = await self.client.get(path, headers={**_ADMIN, **_HTMX})
             self.assertEqual(resp.status, 200, path)
             body = await resp.text()

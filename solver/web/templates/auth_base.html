@@ -23,6 +23,16 @@
    down the terminal beside it, which is the one thing the shell must not lose. #}
 {% block shell_assets %}{% if subject %}{{ super() }}{% endif %}{% endblock %}
 
+{# The terms link carries the page it was followed from (?back=, query and all).
+   This tier has no htmx: the footer NAVIGATES, so /terms replaces the document and
+   there is no pane history to come back through — and no Referer to read either.
+   Being told is the only way the terms page can know where to return the reader,
+   and the query matters: a half-finished registration would otherwise lose the
+   token in its URL and have to be re-invited (pages.py § back). #}
+{% block footer_terms %}
+<a href="/terms?back={{ request.path_qs|urlencode }}">terms of use</a>
+{% endblock %}
+
 {% block content %}{% include "_home.html" %}{% endblock %}
 
 {% block ws_label %}{% if subject %}solver terminal{% else %}sign in{% endif %}{% endblock %}

@@ -79,8 +79,14 @@
     <span class="is-locked">license</span>
     {% endif %}
     <span class="fsep" aria-hidden="true">·</span>
+    {# The content tier swaps /terms into the pane, so the reader's way back is the
+       pane's own back arrow. The auth tier has neither — it navigates — so it
+       overrides this to name the page it came from (auth_base.html), and the terms
+       page itself overrides it again to stop linking to where you already are. #}
+    {% block footer_terms %}
     <a href="/terms" hx-get="/terms" hx-target="#content"
        hx-swap="innerHTML" hx-push-url="true">terms of use</a>
+    {% endblock %}
     <span class="fsep" aria-hidden="true">·</span>
     {% if subject %}
     <a href="/about/acknowledgements" hx-get="/about/acknowledgements" hx-target="#content"

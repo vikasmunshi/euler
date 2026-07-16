@@ -1,5 +1,9 @@
 {% extends "auth_base.html" %}
 {% block title %}euler — terms of use{% endblock %}
+{# No self-link: you are here. It stays as text rather than vanishing, so the
+   footer's separators still read as three items and the page does not appear to be
+   missing one. #}
+{% block footer_terms %}<span class="is-locked">terms of use</span>{% endblock %}
 {# The terms are a document, so they go in the left pane — where the shell's own
    /terms fragment puts them for a signed-in reader (terms_fragment.html). This is
    the full-page form: a direct visit, or no JS.
