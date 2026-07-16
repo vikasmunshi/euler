@@ -15,7 +15,7 @@ audit is never truncated to a lesser profile.
 This is the **audit view** — who holds which profile is decided in
 [`solver/templates/authorizations.json`](../solver/templates/authorizations.json)
 (the bundled default: an empty users map) and its deployed system of record at
-`/etc/euler/authorizations.json`. See the [access-control guide](access-control.md)
+`/etc/euler/authorizations.json`. See the [web server guide](web-server-guide.md)
 for the model and how identity resolves to a profile on each channel.
 
 ## Columns

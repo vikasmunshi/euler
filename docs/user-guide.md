@@ -327,7 +327,7 @@ you have solved a problem, or translate your Python into C for comparison.
   problem). On a local terminal the identity is your OS login name (granted only
   to the checkout's owner); in the web front end it is your signed-in account,
   vouched by a one-time shell ticket the server redeems with the auth service at
-  startup (see docs/secure-web-server.md, DD-9). Each user gets their own history
+  startup (see docs/web-server-guide.md). Each user gets their own history
   and last problem.
 - **History** persists across sessions, per user; auto-suggest offers your past lines.
 - **Last problem** is remembered per user: every shell — interactive, a

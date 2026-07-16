@@ -50,7 +50,7 @@ design notes.
 > **Prefer not to install?** A live instance of the web front end runs at
 > **[euler.vikasmunshi.com](https://euler.vikasmunshi.com)** - the same `solver` shell,
 > documentation viewer, and editor, all in the browser and served over HTTPS. Access is gated by a
-> login (see [Access control](docs/access-control.md)); if you'd like an account to explore
+> login (see the [web server guide](docs/web-server-guide.md)); if you'd like an account to explore
 > or collaborate, [reach out](mailto:vikas.munshi@gmail.com). To run your own copy, see the
 > installation steps below.
 
@@ -175,13 +175,12 @@ the `ai` dependency group and an `ANTHROPIC_API_KEY`; see the
   it to open a problem (or the index) in the browser.
 - **Hosted over HTTPS** - the web front end is served publicly at
   [euler.vikasmunshi.com](https://euler.vikasmunshi.com). **Caddy** terminates TLS and reverse-proxies to the
-  loopback aiohttp server, loading a Let's Encrypt certificate that **acme.sh** issues and auto-renews through a
-  name.com **DNS-01** challenge (no inbound port 80). Access is gated in the app - not Caddy - by browser-side
-  **SRP-6a** login (the password never crosses the wire), with per-identity **profiles** (admin / user / guest)
-  deciding which commands and routes each caller may use. The setup script
-  (`scripts/setup/frontend.sh`) installs Caddy + acme.sh and issues the cert; the front end is being
-  rebuilt as isolated services per the [secure web server](docs/secure-web-server.md) design (see
-  also [access control](docs/access-control.md)).
+  app tier over unix sockets, loading a Let's Encrypt certificate that **acme.sh** issues and auto-renews through a
+  name.com **DNS-01** challenge (no inbound port 80). Every request is gated at the edge by browser-side
+  **SRP-6a** login (the password never crosses the wire), and each collaborator gets their own system user,
+  home, repo clone, and encrypted vault, with a **profile** (reader / contributor / maintainer / admin)
+  deciding which commands and routes they may use. See the
+  [web server guide](docs/web-server-guide.md) for the full design and `make install-web` to deploy it.
 - **Problem scraping** - fetches and caches problem statements directly from projecteuler.net; no manual copy-paste.
 - **Solution evaluation** - subprocess-based test harness with configurable timeouts, result recording, and support for
   any language that compiles or runs as a script.

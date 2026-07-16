@@ -17,9 +17,9 @@ Each command entry opens with an **availability** line — `profiles: …`. *Pro
 are those whose permissions satisfy the command's `requires=` grants under
 `authorizations.json` — reported from the live registry (see the generated
 [`authorizations.md`](authorizations.md) audit table). Authorization is by profile
-only; the channel (terminal / web) is not an axis (MT-10). A command that declares no
+only; the channel (terminal / web) is not an axis. A command that declares no
 `requires` is fail-closed to `admin`. See the
-[access-control guide](access-control.md) for the RBAC model (DD-12).
+[web server guide](web-server-guide.md) for the authorization model.
 
 A command's *flags* line lists the behaviours marked by these glyphs (the same
 ones shown after a command's help by `?`):
