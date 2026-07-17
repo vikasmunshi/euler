@@ -55,6 +55,8 @@ sync_onto_master() {
     # Usage: sync_onto_master <has_changes> <verb> [arg ...]
     #   verb is the git subcommand ('merge', 'rebase') — named, not baked into the
     #   command words, because the rollback below has to invoke `git <verb> --abort`.
+    #   has_changes only decides whether to ATTEMPT a stash; whether one exists to pop
+    #   afterwards is read back from refs/stash, never assumed from it.
     #
     # NEVER leaves the repository half-synced. A merge/rebase that fails usually stops
     # MID-WAY, on a conflicted index, so any failure is rolled back with `--abort`: the
@@ -74,10 +76,15 @@ sync_onto_master() {
     #   thing that failed, since a completed sync whose stash will not pop is still a
     #   failure the caller must hear about.
     local has_changes="$1" verb="$2"; shift 2
-    local rc
+    local rc stashed=0 stash_before
 
+    stash_before=$(git rev-parse -q --verify refs/stash)
     if [[ ${has_changes} -eq 1 ]]; then
         eval_with_dry_run git stash push -m "refresh: stash before ${verb}" || return $?
+        # What was stashed, not what looked dirty: `git stash push` exits 0 whether or
+        # not it created an entry ('No local changes to save'), so popping on the
+        # strength of has_changes alone failed a sync that had already succeeded.
+        [[ "$(git rev-parse -q --verify refs/stash)" != "${stash_before}" ]] && stashed=1
     fi
 
     eval_with_dry_run git "${verb}" "$@"
@@ -92,7 +99,7 @@ sync_onto_master() {
         fi
     fi
 
-    if [[ ${has_changes} -eq 1 ]]; then
+    if [[ ${stashed} -eq 1 ]]; then
         if ! eval_with_dry_run git stash pop; then
             echo "Error: your changes are safe but still STASHED — recover with 'git stash pop'." >&2
             [[ ${rc} -eq 0 ]] && rc=1
@@ -134,7 +141,15 @@ main() {
         return 1
     fi
 
-    if git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null; then
+    # `git status`, not `git diff --quiet`: on the filtered tree (solutions/private/**,
+    # filter=solver-crypt) `git diff` calls every one of those files changed — 'Binary
+    # files differ' — on a tree that `git status` calls clean, that `git add -A` stages
+    # nothing from, and that `git diff --cached` agrees is identical. Only git diff's
+    # worktree comparison disagrees, and a preceding `git status` does not settle it.
+    # Reading that as "uncommitted changes present" stashed a clean tree before every
+    # sync. `git status` is both the correct answer and the one `git-status` prints,
+    # so the two commands can no longer contradict each other.
+    if [[ -z "$(git status --porcelain --untracked-files=no 2>/dev/null)" ]]; then
         has_changes=0
     else
         has_changes=1
