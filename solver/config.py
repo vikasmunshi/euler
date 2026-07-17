@@ -106,6 +106,7 @@ class Scripts(AttributeDict):
     # Annotation-only declarations of the script paths served from `_data` via `__getattr__` (they
     # assign no value, so the lookup falls through to `__getattr__` at runtime). They give static
     # checkers the precise type of each `scripts.<name>` read.
+    audit: str
     compile_c: str
     configure_identity: str
     install_chrome: str
@@ -119,6 +120,7 @@ class Scripts(AttributeDict):
 
     def __init__(self) -> None:
         super().__init__(data={
+            'audit': './scripts/git/audit.sh',
             'compile_c': './scripts/c/compile.sh',
             'configure_identity': './scripts/git/configure-identity.sh',
             'install_chrome': './scripts/setup/chrome.sh',

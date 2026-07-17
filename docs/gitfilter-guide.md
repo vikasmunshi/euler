@@ -206,20 +206,38 @@ git cat-file -p HEAD:solutions/private/p0999_s0.py | xxd | head    # magic + noi
 ciphertext). Anything that touches the **working tree** — `cat`, a checkout, or
 `git cat-file --filters` — re-applies the smudge filter and hands you plaintext.
 
-### `scripts/git/audit-private.sh`
+### `scripts/git/audit.sh`
 
-Audits **every** tracked file under `solutions/private/` by reading its stored
-blob and checking for the `MAGIC` header:
+Audits what git actually stores across the **whole tracked tree**, in two
+independent checks:
+
+- **encryption at rest** — every tracked file under `solutions/private/` has the
+  `MAGIC` header, read straight from its stored blob;
+- **compiled binaries** — no tracked file *anywhere* begins with the ELF magic
+  (the `p<NNNN>_s<K>_c` runner executables are gitignored build artifacts and must
+  never enter git).
 
 ```bash
-scripts/git/audit-private.sh             # per-file report + summary
-scripts/git/audit-private.sh --summary   # counts only
+make audit                       # counts only — the periodic full sweep
+scripts/git/audit.sh             # per-file report + summary
+scripts/git/audit.sh --summary   # counts only
 ```
 
-It exits non-zero if any tracked private file is stored as plaintext (a file that
-slipped past the filter), which makes it a gate. It is **wired into the pre-push
-hook** (`scripts/setup/hooks/pre-push.template`, check 3): a push is blocked if
-any private file would be pushed in the clear.
+Both checks run even if the first fails, and the script exits non-zero if either
+found something, which makes it a gate. Offenders are always listed by path;
+`--summary` only suppresses the per-file lines for the files that pass (there are
+thousands, and the sweep takes ~25s).
+
+This whole-tree sweep **complements** the git hooks rather than being called by
+them. Both hooks carry their own inlined equivalents of these checks —
+self-contained, so the gates survive this script being changed or removed — and
+both scope them to the blobs at hand: pre-commit audits the **staged** blobs
+(`scripts/setup/hooks/pre-commit.template`), pre-push audits the blobs **the push
+would add to the remote** (`scripts/setup/hooks/pre-push.template`, checks 1 and
+2). That keeps every commit and push fast, but it means neither hook re-examines
+history that is already on the remote. `make audit` is what covers that: run it
+periodically to catch a blob committed before the hooks (or the `.gitattributes`
+filter wiring) were in place.
 
 ---
 

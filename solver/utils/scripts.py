@@ -5,9 +5,10 @@
 Per-user native git (docs/web-server-guide.md § Git): a collaborator's shell runs in
 **their own clone** on branch ``user/<slug>`` as their own uid, so git needs no
 broker — the read verbs (`git-status`, `git-sync`) are ``reader``-floor and the
-write verbs (`git-commit`, `git-push`, `git-hooks`) are ``contributor``-floor; the
-blast radius is their own branch. ``master`` stays admin-gated: `git-merge` is the
-one gate through which a ``user/<slug>`` branch lands on master.
+write verbs (`git-commit`, `git-push`, `git-hooks`) plus the tree audit
+(`git-audit`) are ``contributor``-floor; the blast radius is their own branch.
+``master`` stays admin-gated: `git-merge` is the one gate through which a
+``user/<slug>`` branch lands on master.
 """
 from __future__ import annotations
 
@@ -387,6 +388,40 @@ def git_hooks() -> int:
                 f'{config.root_dir.joinpath(".git/hooks/pre-push").as_posix()}')
     result = run_cmdline(cmd_line)
     return result
+
+
+@register(
+    requires='contributor',
+    help_text='Audit the whole tracked tree: private encrypted, no compiled binaries.',
+    aliases=('audit',),
+    quietable=True,
+)
+def git_audit(details: bool = False) -> int:
+    """Audit what git actually stores, across the whole tracked tree.
+
+    Two checks, each reading every tracked blob straight from the object store (so
+    no smudge filter runs): every file under `solutions/private` is stored as
+    ciphertext, and no file anywhere is a compiled binary. Both run even when the
+    first fails; a non-zero exit means one of them found something.
+
+    This is the periodic full sweep, and it takes ~25s. The git hooks run the same
+    two checks scoped to the blobs at hand — `git-hooks` (pre-commit) audits what
+    you staged, pre-push audits what the push would add — so committing and pushing
+    stay fast. The cost of that scoping is that neither hook re-examines history
+    already on origin; this is the command that does.
+
+    Args:
+        details: When True, lists every file audited. When False (default), reports
+                 counts only. Offenders are listed by path either way.
+
+    Aliased as `audit`.
+    """
+    # Name the interpreter rather than let the script resolve `python` off PATH: the
+    # web shell inherits the euler-user unit's PATH, which has no venv on it (the unit
+    # execs the venv python by absolute path), and this host has no /usr/bin/python at
+    # all. `sys.executable` is the venv either way — the same idiom as `git-filter`.
+    flag: str = '' if details else ' --summary'
+    return run_cmdline(f'PYTHON={sys.executable} {config.scripts.audit}{flag}')
 
 
 @register(

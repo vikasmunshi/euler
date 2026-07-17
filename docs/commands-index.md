@@ -57,6 +57,7 @@ a parameter that accepts repetition.
 | [`echo`](#command-echo) | — | Print text. |
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
+| [`git-audit`](#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
 | [`git-filter`](#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
@@ -345,7 +346,7 @@ Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1415)
+[ecb_usd_rate=<float>] (default 1.1467)
 ```
 
 ```text
@@ -460,6 +461,41 @@ solution_index:     Specific solution index to evaluate.
                     If provided, only this solution index will be evaluated.
                     If None, all solutions will be evaluated. Defaults to None.
 verbose:            If True, prints error information during evaluation. Defaults to False.
+```
+
+---
+
+#### Command: `git-audit` (`audit`)
+
+Audit the whole tracked tree: private encrypted, no compiled binaries.
+* profiles: admin, maintainer, contributor
+* » supports `--silent`
+
+```
+git-audit
+[details=true|--details]
+[silent=true|--silent]
+```
+
+```text
+Audit what git actually stores, across the whole tracked tree.
+
+Two checks, each reading every tracked blob straight from the object store (so
+no smudge filter runs): every file under `solutions/private` is stored as
+ciphertext, and no file anywhere is a compiled binary. Both run even when the
+first fails; a non-zero exit means one of them found something.
+
+This is the periodic full sweep, and it takes ~25s. The git hooks run the same
+two checks scoped to the blobs at hand — `git-hooks` (pre-commit) audits what
+you staged, pre-push audits what the push would add — so committing and pushing
+stay fast. The cost of that scoping is that neither hook re-examines history
+already on origin; this is the command that does.
+
+Args:
+    details: When True, lists every file audited. When False (default), reports
+             counts only. Offenders are listed by path either way.
+
+Aliased as `audit`.
 ```
 
 ---

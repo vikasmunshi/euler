@@ -15,7 +15,7 @@
         deploy-auth remove-auth upgrade-auth redeploy-auth \
         deploy-user remove-user upgrade-user redeploy-user \
         deploy-web remove-web upgrade-web redeploy-web \
-        test run uninstall
+        test run audit uninstall
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -114,6 +114,14 @@ test: $(VENV)
 ## Run the interactive solver shell
 run: $(VENV)
 	$(VENV)/bin/solver
+
+## Audit what git stores across the WHOLE tracked tree (~25s): every file under
+## solutions/private is encrypted at rest, and no file anywhere is a compiled binary.
+## The git hooks only audit what you actually stage or push, so this is the periodic
+## sweep that also covers blobs committed before the hooks were in place.
+## Counts only; offenders are always listed. Per-file detail: scripts/git/audit.sh
+audit: $(VENV)
+	@PYTHON=$(PYTHON) ./scripts/git/audit.sh --summary
 
 ## Remove the venv (system deps must be removed separately)
 uninstall: uninstall-hooks uninstall-completions

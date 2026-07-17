@@ -31,6 +31,10 @@ flake8 solver                     # max-line-length 120
 # Run the shell interactively
 make run
 
+# Full-tree audit (~25s): solutions/private encrypted at rest, no compiled binaries tracked.
+# The git hooks run the same checks scoped to what you stage/push; this sweeps settled history.
+make audit                        # also: the `git-audit` shell command
+
 # Run shell commands non-interactively (a command block; exits with its status)
 solver "eval 42; benchmark 42"
 

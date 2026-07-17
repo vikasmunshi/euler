@@ -3,10 +3,11 @@
 # Source of truth: scripts/setup/hooks/pre-push.template
 #
 # Native pre-push hook. Runs once per push:
-#   1. Encryption-at-rest audit: every tracked file under solutions/private is
-#      stored as gitfilter ciphertext, read straight from the object store so a
-#      plaintext leak can never be pushed. Inlined below (not sourced from a
-#      helper script) so the push gate stays self-contained.
+#   1. Encryption-at-rest audit: every file under solutions/private that this
+#      push would add to the remote is stored as gitfilter ciphertext, read
+#      straight from the object store so a plaintext leak can never be pushed.
+#      Inlined below (not sourced from a helper script) so the push gate stays
+#      self-contained.
 #   2. No compiled binaries (ELF blobs) anywhere in the tracked tree.
 #   3. flake8 on solver + solutions.
 #   4. mypy on solver + solutions.
@@ -50,19 +51,75 @@ print_verdict() {
     return 1
 }
 
-# Git passes one line per ref on stdin; this hook checks the whole tree state,
-# not a commit range, so the stdin payload is drained but unused.
-cat >/dev/null
+# ── The refs being pushed ────────────────────────────────────────────────
+# Git passes one line per ref on stdin:
+#   <local ref> <local sha> <remote ref> <remote sha>
+# Read it up front so the audit below can scope itself to the blobs this push
+# would actually add to the remote. An all-zero local sha is a ref deletion
+# (nothing to audit); an all-zero remote sha is a new remote ref, for which
+# "new" means every commit not already reachable from some other ref on this
+# remote.
+REMOTE="${1:-origin}"
+PUSH_REFS=()
+while read -r _local_ref local_sha _remote_ref remote_sha; do
+    [[ -z "${local_sha}" ]] && continue
+    [[ "${local_sha}" =~ ^0+$ ]] && continue
+    PUSH_REFS+=("${local_sha} ${remote_sha}")
+done
+
+# Emit the blobs added or modified by this push under the given pathspec (all
+# paths when none is given), as a NUL-separated stream of alternating
+# "<raw meta>" and "<path>" records (the `git diff-tree -z` raw format). `-m`
+# diffs merges against each parent so an evil merge cannot smuggle a blob past
+# the audit; duplicates across refs and parents are deduplicated by the caller.
+pushed_blobs() {
+    local entry local_sha remote_sha
+    for entry in "${PUSH_REFS[@]}"; do
+        read -r local_sha remote_sha <<<"${entry}"
+        if [[ "${remote_sha}" =~ ^0+$ ]]; then
+            git rev-list "${local_sha}" --not --remotes="${REMOTE}" \
+                | git diff-tree -r -m --stdin --root --no-commit-id -z \
+                      --diff-filter=AM -- "$@"
+        else
+            git diff-tree -r -m --no-commit-id -z --diff-filter=AM \
+                "${remote_sha}" "${local_sha}" -- "$@"
+        fi
+    done
+}
+
+# Populate the associative array named by $1 with "<blob sha>" → "<path>" for
+# every blob this push adds or modifies under the pathspec in the remaining
+# args. Keying by sha deduplicates the same object arriving via several refs or
+# merge parents. Gitlinks (mode 160000) are skipped: a submodule entry is a
+# commit, not a blob, and its object need not even be present here.
+collect_pushed_blobs() {
+    local -n _cpb_out="$1"; shift
+    local meta path mode sha
+    while IFS= read -r -d '' meta && IFS= read -r -d '' path; do
+        # 'git diff-tree -r -z' raw meta: ":<src mode> <dst mode> <src sha> <dst sha> <status>"
+        read -r _ mode _ sha _ <<<"${meta}"
+        [[ "${mode}" == 160000 ]] && continue
+        [[ "${sha}" =~ ^0+$ ]] && continue
+        _cpb_out["${sha}"]="${path}"
+    done < <(pushed_blobs "$@")
+}
+
+# Print the first $2 bytes of blob $1 as hex, read straight from the object
+# store so no smudge filter runs. head closes the pipe early (SIGPIPE on
+# cat-file); that's expected and harmless here — the hook runs without `set -e`.
+blob_head_hex() {
+    git cat-file -p "$1" | head -c "$2" | xxd -p
+}
 
 # ── 1. Encryption-at-rest audit (solutions/private) ──────────────────────
 # Inlined (rather than sourced from a helper script) so the push gate is
 # self-contained and survives that helper being changed or removed. Reads each
-# tracked blob under solutions/private straight from the object store (so NO
-# smudge filter runs) and checks it begins with the gitfilter MAGIC. The magic
+# blob this push adds under solutions/private straight from the object store (so
+# NO smudge filter runs) and checks it begins with the gitfilter MAGIC. The magic
 # is read from config.gitfilter_magic, keeping it in lockstep with
 # solver/crypto/gitfilter.py; a blob lacking it is plaintext that slipped past
 # the clean filter — block the push.
-section "Encryption-at-rest audit (solutions/private)"
+section "Encryption-at-rest audit (solutions/private, blobs in this push)"
 magic_hex=$("$VENV/bin/python" -c 'from solver.crypto.config import config; print(config["magic"].hex())')
 if [[ -z "$magic_hex" ]]; then
     fail "could not read config.gitfilter_magic (is the venv intact?)"
@@ -71,73 +128,50 @@ else
     total=0
     encrypted=0
     plaintext_files=()
-    while IFS= read -r -d '' entry; do
-        # 'git ls-files -s' entry format: "<mode> <sha> <stage>\t<path>"
-        meta=${entry%%$'\t'*}
-        path=${entry#*$'\t'}
-        sha=$(awk '{print $2}' <<<"$meta")
-        # head closes the pipe early (SIGPIPE on cat-file); that's expected and
-        # harmless here — the hook runs without `set -e`.
-        head_hex=$(git cat-file -p "$sha" | head -c "$mlen" | xxd -p)
+    declare -A private_blobs=()
+    collect_pushed_blobs private_blobs solutions/private
+    for sha in "${!private_blobs[@]}"; do
+        head_hex=$(blob_head_hex "$sha" "$mlen")
         total=$(( total + 1 ))
         if [[ "$head_hex" == "$magic_hex" ]]; then
             encrypted=$(( encrypted + 1 ))
         else
-            plaintext_files+=("$path")
+            plaintext_files+=("${private_blobs[$sha]}")
         fi
-    done < <(git ls-files -sz -- solutions/private)
+    done
     if (( ${#plaintext_files[@]} == 0 )); then
         pass "$encrypted encrypted, 0 plaintext, $total total (magic=0x$magic_hex)"
     else
-        note "tracked plaintext blobs under solutions/private:"
+        note "plaintext blobs under solutions/private in this push:"
         for p in "${plaintext_files[@]}"; do note "  !! $p"; done
         note "the encryption filter was not working when these were committed. Fix and re-commit:"
         note "  solver shell:  git-filter install    (verifies key access first)"
         note "  then:          git add --renormalize -- solutions/private && git commit"
-        fail "tracked files under solutions/private are not all encrypted at rest"
+        fail "files under solutions/private in this push are not all encrypted at rest"
     fi
 fi
 
-# ── 2. Compiled binaries in the tracked tree ─────────────────────────────
-# Backstop to the pre-commit check: read every tracked blob from the object
-# store through a single `git cat-file --batch` process and flag any that
-# begins with the ELF magic. Build artifacts (e.g. the p<NNNN>_s<K>_c runner
-# executables) are gitignored and must never reach the remote; one batch
-# process keeps this fast across the whole tree.
-section "compiled binaries (tracked tree)"
-tracked_bins=$("$VENV/bin/python" - <<'PY'
-import subprocess
-out = subprocess.run(['git', 'ls-files', '-sz'], capture_output=True).stdout
-items = []
-for e in out.split(b'\x00'):
-    if not e:
-        continue
-    meta, path = e.split(b'\t', 1)
-    items.append((meta.split()[1].decode(), path.decode()))
-proc = subprocess.Popen(['git', 'cat-file', '--batch'],
-                        stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-assert proc.stdin and proc.stdout
-for sha, path in items:
-    proc.stdin.write((sha + '\n').encode())
-    proc.stdin.flush()
-    parts = proc.stdout.readline().split()
-    if len(parts) < 3 or parts[1] != b'blob':
-        continue                       # missing object or gitlink: skip
-    size = int(parts[2])
-    content = proc.stdout.read(size)
-    proc.stdout.read(1)                # trailing newline after content
-    if content[:4] == b'\x7fELF':
-        print(path)
-proc.stdin.close()
-proc.wait()
-PY
-)
-if [[ -z "$tracked_bins" ]]; then
-    pass "no compiled binaries tracked"
+# ── 2. Compiled binaries in this push ────────────────────────────────────
+# Backstop to the pre-commit check: read every blob this push adds — any path,
+# not just solutions/private — from the object store and flag any that begins
+# with the ELF magic. Build artifacts (e.g. the p<NNNN>_s<K>_c runner
+# executables) are gitignored and must never reach the remote.
+section "compiled binaries (blobs in this push)"
+ELF_MAGIC_HEX='7f454c46'
+pushed_bins=()
+declare -A all_blobs=()
+collect_pushed_blobs all_blobs
+for sha in "${!all_blobs[@]}"; do
+    if [[ "$(blob_head_hex "$sha" 4)" == "$ELF_MAGIC_HEX" ]]; then
+        pushed_bins+=("${all_blobs[$sha]}")
+    fi
+done
+if (( ${#pushed_bins[@]} == 0 )); then
+    pass "no compiled binaries in this push (${#all_blobs[@]} blob(s) checked)"
 else
-    note "tracked compiled binaries (ELF):"
-    while IFS= read -r b; do note "  !! $b"; done <<< "$tracked_bins"
-    fail "compiled binaries are tracked — run 'git rm --cached' on them before pushing"
+    note "compiled binaries (ELF) in this push:"
+    for b in "${pushed_bins[@]}"; do note "  !! $b"; done
+    fail "compiled binaries are in this push — run 'git rm --cached' on them before pushing"
 fi
 
 # ── 3. flake8 on solver + solutions ──────────────────────────────────────

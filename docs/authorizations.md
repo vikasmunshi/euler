@@ -61,6 +61,7 @@ a profile on each channel.
 | `solver.utils.linter` | `lint` |  | ✓ | ✓ | ✓ |
 | `solver.utils.misc` | `manage-config` |  |  |  | ✓ |
 | `solver.utils.misc` | `problems` | ✓ | ✓ | ✓ | ✓ |
+| `solver.utils.scripts` | `git-audit` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-commit` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-hooks` |  | ✓ | ✓ | ✓ |
