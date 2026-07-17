@@ -785,7 +785,7 @@ pane scrolls its own overflow.
   and performs a swap, not a navigation.
 
   The terminal item is **one** entry, not two: it names the act it offers
-  ("Disconnect terminal") and the dot beside it carries the state. The iframe reports
+  ("Disconnect") and the dot beside it carries the state. The iframe reports
   `{euler: 'term-state', connected}` on every open and close, and the menu follows it —
   so a session that drops on its own never leaves the menu offering to disconnect
   something already gone.

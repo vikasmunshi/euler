@@ -260,7 +260,7 @@ body.terminal-doc {
   color: var(--accent);
 }
 .hero h1 { margin: 0 0 0.4rem; font-size: 1.6rem; letter-spacing: -0.01em; }
-.hero .lede { margin: 0; max-width: 58ch; color: var(--muted); }
+.hero .lede { margin: 0; color: var(--muted); }
 .cards {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -432,10 +432,6 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
   border-left: 3px solid var(--accent);
   color: var(--muted);
 }
-/* The README's measure, scoped to the start page: it is read as prose, unlike
-   the reference docs, and the pane is only half the viewport wide. Left off
-   .doc-body itself so the docs/topics pages keep their current setting. */
-.readme .doc-body p, .readme .doc-body li { max-width: 68ch; }
 .readme .doc-body h2, .readme .doc-body h3 { margin: 1.4rem 0 0.5rem; font-size: 1.05rem; }
 .readme .doc-body > :first-child { margin-top: 0; }
 .readme .doc-body img { display: none; }   /* the badges: GitHub furniture, not site content */

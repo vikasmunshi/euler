@@ -178,7 +178,7 @@
 
   function paintTerminalControls() {
     document.querySelectorAll('[data-term-label]').forEach(function (label) {
-      label.textContent = termConnected ? 'Disconnect terminal' : 'Connect terminal';
+      label.textContent = termConnected ? 'Disconnect' : 'Connect';
     });
     document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
       dot.className = 'dot ' + (termConnected ? 'on' : 'off');
