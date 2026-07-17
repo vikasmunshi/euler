@@ -1501,8 +1501,8 @@
     "title": "Crack-free Walls",
     "level": 9,
     "pct": 23,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Fri, 17 Jul 2026, 11:15"
   },
   "216": {
     "title": "The Primality of $2n^2 - 1$",
