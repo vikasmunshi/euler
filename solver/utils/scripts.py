@@ -232,6 +232,23 @@ def _open_pr_url(branch: str) -> str:
     return proc.stdout.strip() if proc.returncode == 0 else ''
 
 
+def _commits_ahead(branch: str) -> int | None:
+    """How many commits ``origin/<branch>`` carries that origin/master does not.
+
+    None when that cannot be determined here — no origin/master ref, or the branch
+    never reached origin — in which case the caller must not infer "nothing to
+    review" from a number it does not have.
+    """
+    proc = run(['git', 'rev-list', '--count', f'origin/master..origin/{branch}'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    if proc.returncode != 0:
+        return None
+    try:
+        return int(proc.stdout.strip())
+    except ValueError:
+        return None
+
+
 def _ensure_pull_request(branch: str) -> int:
     """Open a pull request for *branch* onto master, or report the one already open.
 
@@ -240,7 +257,18 @@ def _ensure_pull_request(branch: str) -> int:
     § publish, the same `gh pr create` shape). Idempotent — a branch already under
     review gets its URL reported, not a second PR — so re-pushing a branch as it
     grows keeps working, and the one open PR simply picks up the new commits.
+
+    A branch level with origin/master is left alone: there is nothing to review, and
+    GitHub rejects such a PR outright ("No commits between ..."). Reporting that as an
+    error made a `git-push` with nothing new to say fail — the push had succeeded and
+    an empty PR was never wanted, so this is a no-op, not a failure (the same reading
+    as publish.sh's "Nothing to publish").
     """
+    ahead: int | None = _commits_ahead(branch)
+    if ahead == 0:
+        console.print(f'no pull request needed: [accent]{branch}[/accent] has no commits '
+                      'beyond origin/master.')
+        return int(ExitCodes.EXIT_OK)
     existing: str = _open_pr_url(branch)
     if existing:
         console.print(f'pull request already open: [accent]{existing}[/accent]')
@@ -274,7 +302,8 @@ def git_push(force: bool = False, pr: bool = True) -> int:
 
     The PR is the second half of the push: an unreviewed branch on origin is not
     work anyone has been asked for. It is skipped on master (nothing to merge into
-    itself), and a branch that already has one open keeps it.
+    itself) and on a branch level with origin/master (nothing to review), and a
+    branch that already has one open keeps it.
 
     Args:
         force: Push with `--force-with-lease` — needed after `git-sync` rebased your
