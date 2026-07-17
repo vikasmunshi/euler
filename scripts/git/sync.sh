@@ -112,7 +112,7 @@ main() {
     #
     # Sync strategy by state:
     #   up_to_date   — nothing to do
-    #   local_ahead  — warn; no auto-sync (use 'solver publish <target>')
+    #   local_ahead  — warn; no auto-sync (use 'solver git-push')
     #   local_behind — git merge --ff-only origin/master
     #                  (stash/unstash uncommitted changes if present)
     #   diverged     — git rebase origin/master
@@ -159,7 +159,7 @@ main() {
             echo "Action: nothing to do."
             ;;
         local_ahead)
-            echo "Action: no sync — use 'solver publish <target>' to publish to origin."
+            echo "Action: no sync — use 'solver git-push' to publish to origin."
             echo "Warning: local has ${ahead} commit(s) ahead of origin/master. No sync performed."
             echo "  Use 'solver git-push' to push file changes to origin."
             ;;
