@@ -34,9 +34,10 @@ class PolicyShapeTest(unittest.TestCase):
     def test_floors_of_the_git_commands(self) -> None:
         load_commands()
         expected = {'git-status': 'reader', 'git-sync': 'reader', 'git-filter': 'reader',
-                    'git-commit': 'contributor', 'git-push': 'contributor',
-                    'git-hooks': 'contributor', 'git-identity': 'contributor',
-                    'git-merge': 'admin', 'git-publish': 'admin'}
+                    'git-commit': 'contributor', 'git-commit-amend': 'contributor',
+                    'git-push': 'contributor', 'git-hooks': 'contributor',
+                    'git-identity': 'contributor', 'gh-pr': 'maintainer',
+                    'git-publish': 'admin'}
         for name, floor in expected.items():
             cmd = registry.resolve(name)
             self.assertIsNotNone(cmd, f'{name} not registered')
@@ -165,56 +166,104 @@ class PullRequestTest(unittest.TestCase):
     def _result(returncode: int = 0, stdout: str = '', stderr: str = '') -> Any:
         return MagicMock(returncode=returncode, stdout=stdout, stderr=stderr)
 
+    # Every response queue starts with the `git rev-list --count` that `_commits_ahead`
+    # runs first: a branch level with origin/master gets no pull request at all.
     def test_an_open_pr_is_reported_not_duplicated(self) -> None:
-        self.responses = [self._result(stdout='https://github.com/o/r/pull/7\n')]
+        self.responses = [self._result(stdout='2\n'),           # 2 commits beyond master
+                          self._result(stdout='https://github.com/o/r/pull/7\n')]
         self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
-        self.assertEqual(len(self.calls), 1)                    # the lookup only
-        self.assertEqual(self.calls[0][:3], ['gh', 'pr', 'view'])
+        self.assertEqual(len(self.calls), 2)                    # the count and the lookup
+        self.assertEqual(self.calls[1][:3], ['gh', 'pr', 'view'])
 
     def test_no_open_pr_opens_one_onto_master(self) -> None:
-        self.responses = [self._result(stdout=''),              # lookup: none open
+        self.responses = [self._result(stdout='1\n'),           # 1 commit beyond master
+                          self._result(stdout=''),              # lookup: none open
                           self._result(stdout='https://github.com/o/r/pull/8\n')]
         self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
-        created = self.calls[1]
+        created = self.calls[2]
         self.assertEqual(created[:3], ['gh', 'pr', 'create'])
         self.assertEqual(created[created.index('--head') + 1], 'user/t-000000')
         self.assertEqual(created[created.index('--base') + 1], 'master')
 
     def test_a_refused_create_is_an_error(self) -> None:
-        self.responses = [self._result(stdout=''),
+        self.responses = [self._result(stdout='1\n'),
+                          self._result(stdout=''),
                           self._result(returncode=1, stderr='gh: not authenticated')]
         self.assertNotEqual(scripts._ensure_pull_request('user/t-000000'), 0)
 
+    def test_a_branch_level_with_master_is_never_asked_to_be_reviewed(self) -> None:
+        # Nothing to review, and GitHub refuses such a PR outright ("No commits
+        # between ..."): a no-op, not a failure — and gh is never reached.
+        self.responses = [self._result(stdout='0\n')]
+        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertEqual(len(self.calls), 1)
 
-class GitMergeTest(_GitCommandCase):
-    branch = 'master'
+    def test_an_unknown_ahead_count_still_tries_the_pr(self) -> None:
+        # `_commits_ahead` returns None when it cannot compare (no origin/master, or
+        # the branch never reached origin). That is not "nothing to review": refusing
+        # here would silently drop the PR for a branch that has work on it.
+        self.responses = [self._result(returncode=1),           # rev-list: cannot tell
+                          self._result(stdout=''),              # lookup: none open
+                          self._result(stdout='https://github.com/o/r/pull/9\n')]
+        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertEqual(self.calls[2][:3], ['gh', 'pr', 'create'])
 
-    def test_bare_slug_means_user_branch(self) -> None:
-        self.as_profile('admin')
-        self.assertEqual(scripts.git_merge('alice-3f9e97'), 0)
-        self.assertEqual(self.cmdlines, [
-            'git fetch origin user/alice-3f9e97',
-            'git merge --no-ff -m "merge user/alice-3f9e97" origin/user/alice-3f9e97',
-            'git push origin master',
-        ])
 
-    def test_no_push_flag_skips_the_push(self) -> None:
-        self.as_profile('admin')
-        self.assertEqual(scripts.git_merge('alice-3f9e97', push=False), 0)
-        self.assertNotIn('git push origin master', self.cmdlines)
+class GhPrTest(_GitCommandCase):
+    """The gate to master: a maintainer merges a pull request, and only a
+    solutions-only one. The file list is what is judged, so it is what is faked."""
 
-    def test_off_master_is_refused(self) -> None:
-        self.branch = 'user/t-000000'
-        self.as_profile('admin')
-        self.assertEqual(scripts.git_merge('alice-3f9e97'), ExitCodes.EXIT_ERROR)
+    def setUp(self) -> None:
+        super().setUp()
+        self.files: list[str] | None = ['solutions/private/p0200_0299/p0217/p0217_s0.py',
+                                        'solutions/problems.json']
+        self._saved_pr_files = scripts._pr_files
+        scripts._pr_files = lambda number: self.files  # type: ignore[assignment]
+
+    def tearDown(self) -> None:
+        scripts._pr_files = self._saved_pr_files    # type: ignore[assignment]
+        super().tearDown()
+
+    def test_list_is_the_default_action(self) -> None:
+        self.as_profile('maintainer')
+        self.assertEqual(scripts.gh_pr(), 0)
+        self.assertEqual(self.cmdlines, ['gh pr list'])
+
+    def test_a_solutions_only_pr_is_squash_merged(self) -> None:
+        self.as_profile('maintainer')
+        self.assertEqual(scripts.gh_pr('merge', 12), 0)
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash'])
+
+    def test_a_pr_touching_anything_else_is_refused(self) -> None:
+        self.as_profile('maintainer')
+        self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
+        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])         # refused before gh ran
+
+    def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
+        # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/.
+        self.as_profile('maintainer')
+        self.files = ['solutions-of-mine/x.py']
+        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
-    def test_conflicted_merge_is_aborted(self) -> None:
-        self.as_profile('admin')
-        self.rcs = [0, 1]                           # fetch ok, merge conflicts
-        self.assertEqual(scripts.git_merge('alice-3f9e97'), ExitCodes.EXIT_ERROR)
-        self.assertIn('git merge --abort', self.cmdlines)
-        self.assertNotIn('git push origin master', self.cmdlines)
+    def test_an_unreadable_file_list_is_never_read_as_empty(self) -> None:
+        # None is 'gh could not tell us', not 'touches nothing outside solutions/'.
+        self.as_profile('maintainer')
+        self.files = None
+        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_an_empty_file_list_is_refused(self) -> None:
+        self.as_profile('maintainer')
+        self.files = []
+        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_merge_without_a_number_is_refused(self) -> None:
+        self.as_profile('maintainer')
+        self.assertEqual(scripts.gh_pr('merge'), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
 
 
 class GitFilterCommandTest(_GitCommandCase):

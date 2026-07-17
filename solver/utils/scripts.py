@@ -7,8 +7,9 @@ Per-user native git (docs/web-server-guide.md § Git): a collaborator's shell ru
 broker — the read verbs (`git-status`, `git-sync`) are ``reader``-floor and the
 write verbs (`git-commit`, `git-push`, `git-hooks`) plus the tree audit
 (`git-audit`) are ``contributor``-floor; the blast radius is their own branch.
-``master`` stays admin-gated: `git-merge` is the one gate through which a
-``user/<slug>`` branch lands on master.
+``master`` stays gated: `gh-pr merge` (``maintainer``) is the one gate through which
+a ``user/<slug>`` branch lands on master, and it opens only for a pull request that
+touches nothing outside ``solutions/``.
 """
 from __future__ import annotations
 
@@ -323,9 +324,11 @@ def _commits_ahead(branch: str) -> int | None:
 def _ensure_pull_request(branch: str) -> int:
     """Open a pull request for *branch* onto master, or report the one already open.
 
-    A pushed branch is not delivered work: `git-merge` is admin-gated, so the PR is
-    how a collaborator actually asks for their branch to land (scripts/git/publish.sh
-    § publish, the same `gh pr create` shape). Idempotent — a branch already under
+    A pushed branch is not delivered work: landing on master needs `gh-pr merge`, so
+    the PR is how a collaborator actually asks for their branch to land
+    (scripts/git/publish.sh § publish, the same `gh pr create` shape). It is also what
+    the merge gate reads — the pull request, not the branch, is what a maintainer
+    approves. Idempotent — a branch already under
     review gets its URL reported, not a second PR — so re-pushing a branch as it
     grows keeps working, and the one open PR simply picks up the new commits.
 
@@ -368,7 +371,7 @@ def git_push(force: bool = False, pr: bool = True) -> int:
 
     In a per-user clone the current branch is `user/<slug>`, pushed with your own
     GitHub identity — `git-identity` is the one-time setup. Landing work on master
-    is the admin's `git-merge`, never a direct push: pushing master requires
+    is a maintainer's `gh-pr merge`, never a direct push: pushing master requires
     the `admin` floor, and force-pushing it is always refused.
 
     The PR is the second half of the push: an unreviewed branch on origin is not
@@ -401,34 +404,78 @@ def git_push(force: bool = False, pr: bool = True) -> int:
     return _ensure_pull_request(branch)
 
 
-@register(requires='admin', quietable=True,
-          help_text="Merge a collaborator's user/<slug> branch into master and push.", aliases=('merge',), )
-def git_merge(branch: str, push: bool = True) -> int:
-    """Merge a collaborator's branch into master — the one gate to master.
+#: What a collaborator's pull request is allowed to touch. Their branch carries
+#: solutions and the progress file; framework code, scripts, keys and docs reach
+#: master another way, and `gh-pr merge` is not the review for those.
+PR_SCOPE: str = 'solutions/'
 
-    Fetches the branch from origin and merges it `--no-ff` into the checked-out
-    master; a conflicted merge is aborted and reported (resolve it manually). On a
-    clean merge, master is pushed (the collaborator's next `git-sync` then rebases
-    their branch onto it).
+
+def _pr_files(number: int) -> list[str] | None:
+    """Every path pull request *number* touches, or None when that cannot be read.
+
+    None is NOT "no files": a `gh` that is unauthenticated or offline, and a pull
+    request that does not exist, all fail here. The merge gate must refuse on a file
+    list it could not read rather than read an empty one as "touches nothing outside
+    solutions/" and merge.
+    """
+    proc = run(['gh', 'pr', 'view', str(number), '--json', 'files', '--jq', '.files[].path'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    if proc.returncode != 0:
+        return None
+    return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+
+
+@register(requires='maintainer', quietable=True,
+          help_text='Pull requests: [accent.dim]list[/accent.dim] | merge <number>.',
+          aliases=('pr',), )
+def gh_pr(action: Literal['list', 'merge'] = 'list', number: int | None = None) -> int:
+    """List the open pull requests, or squash-merge one onto master.
+
+    `list` (the default) shows what is waiting: number, title, branch. `merge
+    <number>` takes a number straight from that list and squash-merges it, which is
+    how a collaborator's `user/<slug>` branch lands on master — their next `git-sync`
+    then rebases the squashed commit away and prunes the merged branch.
+
+    A pull request touching anything outside `solutions/` is refused, and that gate
+    is what makes this a maintainer's command rather than an admin's: merging a
+    branch that carries solutions is reviewing solutions, but a branch that also
+    edits the framework, the scripts, or the keys is asking for something else
+    entirely. Merge those on GitHub, as an admin who has read them.
 
     Args:
-        branch: The branch to merge; a bare `<slug>` means `user/<slug>`.
-        push:   Push master to origin after a clean merge. Defaults to True.
+        action: 'list' (default) or 'merge'.
+        number: The pull request to merge, as shown by `list`. Required by 'merge'.
+
+    Aliased as `pr`.
     """
-    if '/' not in branch:
-        branch = f'user/{branch}'
-    if _current_branch() != 'master':
-        console.print('[error]error:[/error] merges land on master — check out master first.')
+    if action == 'list':
+        return run_cmdline('gh pr list')
+    if number is None:
+        console.print('[error]error:[/error] merge needs a pull request number — '
+                      'run [accent]gh-pr list[/accent] to see them.')
         return ExitCodes.EXIT_ERROR
-    if run_cmdline(f'git fetch origin {branch}') != 0:
-        console.print(f'[error]error:[/error] cannot fetch [accent]origin/{branch}[/accent].')
+    files: list[str] | None = _pr_files(number)
+    if files is None:
+        console.print(f'[error]error:[/error] cannot read the files of pull request [accent]#{number}'
+                      '[/accent] — does it exist, and is [accent]gh[/accent] signed in '
+                      '([accent]git-identity[/accent])?')
         return ExitCodes.EXIT_ERROR
-    if run_cmdline(f'git merge --no-ff -m "merge {branch}" origin/{branch}') != 0:
-        run_cmdline('git merge --abort')
-        console.print(f'[error]error:[/error] merging [accent]origin/{branch}[/accent] conflicts; '
-                      'aborted — merge and resolve manually.')
+    if not files:
+        console.print(f'[error]error:[/error] pull request [accent]#{number}[/accent] touches no files.')
         return ExitCodes.EXIT_ERROR
-    return run_cmdline('git push origin master') if push else int(ExitCodes.EXIT_OK)
+    outside: list[str] = [path for path in files if not path.startswith(PR_SCOPE)]
+    if outside:
+        console.print(f'[error]error:[/error] pull request [accent]#{number}[/accent] touches '
+                      f'{len(outside)} file(s) outside [accent]{PR_SCOPE}[/accent]:')
+        for path in outside[:10]:
+            console.print(f'  !! {path}')
+        if len(outside) > 10:
+            console.print(f'  … and {len(outside) - 10} more')
+        console.print('this is not a solutions review — merge it on GitHub if it is genuinely wanted.')
+        return ExitCodes.EXIT_ERROR
+    console.print(f'pull request [accent]#{number}[/accent]: {len(files)} file(s), all under '
+                  f'[accent]{PR_SCOPE}[/accent] — merging.')
+    return run_cmdline(f'gh pr merge {number} --squash')
 
 
 @register(

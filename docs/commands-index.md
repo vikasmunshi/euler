@@ -57,13 +57,13 @@ a parameter that accepts repetition.
 | [`echo`](#command-echo) | — | Print text. |
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
+| [`gh-pr`](#command-gh-pr-pr) | `pr` | Pull requests: list | merge <number>. » |
 | [`git-audit`](#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
 | [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
 | [`git-filter`](#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
-| [`git-merge`](#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-push`](#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
@@ -466,6 +466,42 @@ verbose:            If True, prints error information during evaluation. Default
 
 ---
 
+#### Command: `gh-pr` (`pr`)
+
+Pull requests: list | merge <number>.
+* profiles: admin, maintainer
+* » supports `--silent`
+
+```
+gh-pr
+[action=list|merge] (default list)
+[number=<int>|none] (default None)
+[silent=true|--silent]
+```
+
+```text
+List the open pull requests, or squash-merge one onto master.
+
+`list` (the default) shows what is waiting: number, title, branch. `merge
+<number>` takes a number straight from that list and squash-merges it, which is
+how a collaborator's `user/<slug>` branch lands on master — their next `git-sync`
+then rebases the squashed commit away and prunes the merged branch.
+
+A pull request touching anything outside `solutions/` is refused, and that gate
+is what makes this a maintainer's command rather than an admin's: merging a
+branch that carries solutions is reviewing solutions, but a branch that also
+edits the framework, the scripts, or the keys is asking for something else
+entirely. Merge those on GitHub, as an admin who has read them.
+
+Args:
+    action: 'list' (default) or 'merge'.
+    number: The pull request to merge, as shown by `list`. Required by 'merge'.
+
+Aliased as `pr`.
+```
+
+---
+
 #### Command: `git-audit` (`audit`)
 
 Audit the whole tracked tree: private encrypted, no compiled binaries.
@@ -643,33 +679,6 @@ Aliased as `identity`.
 
 ---
 
-#### Command: `git-merge` (`merge`)
-
-Merge a collaborator's user/<slug> branch into master and push.
-* profiles: admin
-* » supports `--silent`
-
-```
-git-merge <branch>
-[push=false|--no-push]
-[silent=true|--silent]
-```
-
-```text
-Merge a collaborator's branch into master — the one gate to master.
-
-Fetches the branch from origin and merges it `--no-ff` into the checked-out
-master; a conflicted merge is aborted and reported (resolve it manually). On a
-clean merge, master is pushed (the collaborator's next `git-sync` then rebases
-their branch onto it).
-
-Args:
-    branch: The branch to merge; a bare `<slug>` means `user/<slug>`.
-    push:   Push master to origin after a clean merge. Defaults to True.
-```
-
----
-
 #### Command: `git-publish` (`publish`)
 
 Push targets (keys|scripts|solutions|solver) to remote.
@@ -715,7 +724,7 @@ Push the current branch to origin as yourself, then open its pull request.
 
 In a per-user clone the current branch is `user/<slug>`, pushed with your own
 GitHub identity — `git-identity` is the one-time setup. Landing work on master
-is the admin's `git-merge`, never a direct push: pushing master requires
+is a maintainer's `gh-pr merge`, never a direct push: pushing master requires
 the `admin` floor, and force-pushing it is always refused.
 
 The PR is the second half of the push: an unreviewed branch on origin is not

@@ -478,8 +478,8 @@ Every command's declared floor is generated from the live registry into
 |---|---|
 | `reader` | `ls`, `show`, `results`, `test-cases`, `problems`, `progress`, `search`, `git-status`, `git-sync`, `git-filter`, `user`, `vault`, `users` (self-scoped list), `?`/`echo`/`clear`/`pause`, `key-reconstruct` |
 | `contributor` | `new`, `edit`, `evaluate`, `benchmark`, `compile-c`, `lint`, `mark`, `!`, `claude-api`, `claude-solve`, `costs`, `git-commit`, `git-push`, `git-hooks`, `git-identity` |
-| `maintainer` | `summary` (rewrites the shared progress state), web file-delete |
-| `admin` | `users` mutations, `user-authorize`, `key-rekey`, `key-split`, `git-merge`, `git-publish`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
+| `maintainer` | `summary` (rewrites the shared progress state), `gh-pr` (merges a solutions-only pull request), web file-delete |
+| `admin` | `users` mutations, `user-authorize`, `key-rekey`, `key-split`, `git-publish`, `manage-config`, `update-docs`, `update-models`, `pip-upgrade`, `sys-setup` |
 
 Two floors deserve their reasoning. **`!` (raw bash) sits at `contributor`**, not admin:
 in the per-user model a shell escape grants nothing that `evaluate`'s arbitrary Python
@@ -728,8 +728,9 @@ failure mode collapses to one answer here (no keypair, a locked vault, no entry 
 ## 10 · Git
 
 Git is **native** in the user's own clone — there is no broker, and nothing proxies it.
-`git-status`/`git-sync` sit at `reader`; `git-commit`/`git-push`/`git-hooks`/`git-identity`
-at `contributor`; `git-merge`/`git-publish` at `admin`.
+`git-status`/`git-sync` sit at `reader`; `git-commit`/`git-commit-amend`/`git-push`/
+`git-hooks`/`git-identity` at `contributor`; `gh-pr` at `maintainer`; `git-publish` at
+`admin`.
 
 - **`git-identity`** (`scripts/git/configure-identity.sh`) is the user's one-time
   self-service setup: `gh auth login` (device flow, which works in a web shell), `gh auth
@@ -742,18 +743,31 @@ at `contributor`; `git-merge`/`git-publish` at `admin`.
 - **`git-push`** pushes the current branch as the user (`-u origin <branch>`);
   `--force-with-lease` only after a rebase, and **never on master**. Pushing master needs
   `admin`. It then **opens the branch's pull request** onto master (`gh pr create`, the
-  same shape as `scripts/git/publish.sh`): `git-merge` is admin-gated, so the PR is how a
-  collaborator actually asks for their work to land, and a branch sitting on origin that
-  nobody has been asked to review is not delivered work. Idempotent — a branch already
-  under review has its URL reported rather than a second PR opened, so re-pushing as the
-  branch grows keeps working and the open PR picks up the new commits. Skipped on master
-  and with `--no-pr`.
-- **`git-merge <slug>`** is the one gate to master: fetch, `--no-ff` merge of
-  `origin/user/<slug>`, clean abort on conflict, then push.
+  same shape as `scripts/git/publish.sh`): landing on master needs `gh-pr merge`, so the
+  PR is how a collaborator actually asks for their work to land, and a branch sitting on
+  origin that nobody has been asked to review is not delivered work. Idempotent — a
+  branch already under review has its URL reported rather than a second PR opened, so
+  re-pushing as the branch grows keeps working and the open PR picks up the new commits.
+  Skipped on master, on a branch level with origin/master (nothing to review), and with
+  `--no-pr`.
+- **`gh-pr`** is the one gate to master: `list` shows what is waiting, `merge <number>`
+  squash-merges it. **A pull request touching anything outside `solutions/` is refused**,
+  and that gate is what puts the command at `maintainer` rather than `admin`: merging a
+  branch of solutions is reviewing solutions, but a branch that also edits the framework,
+  the scripts, or the keys is asking for something else, and belongs to an admin reading
+  it on GitHub. The file list is read from the pull request (`gh pr view --json files`);
+  a list that cannot be read refuses the merge rather than passing for an empty one.
 
-So a collaborator's work lands on master only through an admin's review. That is the
-review gate the web must not bypass, and it is enforced by the floor rather than by
-convention.
+So a collaborator's work lands on master only through a maintainer's review, and only
+when it is solutions. That is the review gate the web must not bypass, and it is enforced
+by the floor plus the scope check rather than by convention.
+
+The merge is a **squash**, which rewrites the branch's commits into one on master. The
+collaborator's next `git-sync` absorbs that: the rebase drops the now-duplicate commits
+(git matches them by patch-id) and the prune drops the merged branch, provided the repo
+deletes head branches on merge. Both halves are needed — without the prune, the deleted
+branch lingers as a stale `origin/user/<slug>`; without auto-delete, there is nothing to
+prune and the old branch shadows the next push.
 
 ## 11 · The site
 
@@ -1222,7 +1236,8 @@ decision recorded here.
   `solutions/private/**` rests as ciphertext until the deliberate `user-authorize`;
   `gitfilter install` verifies key access **before** wiring anything.
 - **Master-key gate to master**: pushing `master` needs `admin`; force-pushing it is
-  refused unconditionally; a collaborator's work lands only via the admin's `git-merge`.
+  refused unconditionally; a collaborator's work lands only via `gh-pr merge`, which a
+  maintainer may run but only for a pull request confined to `solutions/`.
 - **Network posture**: only Caddy is network-bound; the app tier is loopback-only
   (systemd `IPAddressDeny` + host nftables); all egress — including every dynamic
   `euler-user-*` uid, enumerated by prefix — via the Squid allowlist.

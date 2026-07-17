@@ -61,13 +61,13 @@ a profile on each channel.
 | `solver.utils.linter` | `lint` |  | ✓ | ✓ | ✓ |
 | `solver.utils.misc` | `manage-config` |  |  |  | ✓ |
 | `solver.utils.misc` | `problems` | ✓ | ✓ | ✓ | ✓ |
+| `solver.utils.scripts` | `gh-pr` |  |  | ✓ | ✓ |
 | `solver.utils.scripts` | `git-audit` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-commit` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-commit-amend` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-hooks` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-identity` |  | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-merge` |  |  |  | ✓ |
 | `solver.utils.scripts` | `git-publish` |  |  |  | ✓ |
 | `solver.utils.scripts` | `git-push` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-status` | ✓ | ✓ | ✓ | ✓ |

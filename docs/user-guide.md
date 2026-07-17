@@ -215,13 +215,13 @@ command name below links to its full entry — usage and description — in the
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
 | [`edit`](commands-index.md#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
+| [`gh-pr`](commands-index.md#command-gh-pr-pr) | `pr` | Pull requests: list | merge <number>. » |
 | [`git-audit`](commands-index.md#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
 | [`git-commit-amend`](commands-index.md#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
 | [`git-filter`](commands-index.md#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
-| [`git-merge`](commands-index.md#command-git-merge-merge) | `merge` | Merge a collaborator's user/<slug> branch into master and push. » |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-push`](commands-index.md#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |

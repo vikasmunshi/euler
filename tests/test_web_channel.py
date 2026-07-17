@@ -16,7 +16,7 @@ The invariants it pins:
   policy**: the test reads the floor off the registry and asserts a rung sees ``!`` iff its
   profile satisfies that floor, so it holds wherever the operator sets it rather than
   hardcoding a rung.
-- the admin-floored commands (``git-merge``/``key-*``/``manage-config``/``update-*`` and
+- the admin-floored commands (``key-*``/``manage-config``/``update-*``/``git-publish`` and
   the roster mutations) reach **no** web rung — guarded by the ladder floor alone, the
   channel gate having been the redundant backstop that is now gone.
 """
@@ -105,7 +105,7 @@ class WebChannelCommandSetTest(unittest.TestCase):
                              f'but floor {floor} satisfied={at_floor}')
 
     def test_no_web_rung_has_infra_or_user_mutation(self) -> None:
-        """The admin-floored commands (git-merge/key-*/manage-config/update-*) and the
+        """The admin-floored commands (key-*/manage-config/update-*/git-publish) and the
         roster mutations: no web account administers the host or the roster."""
         infra = {cmd.name for cmd in registry.all() if cmd.requires == 'admin'}
         self.assertTrue(infra, 'expected some infra commands in the catalogue')
