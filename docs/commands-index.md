@@ -545,8 +545,9 @@ Commit a problem's solution directory and progress, optionally resetting to orig
 * » supports `--silent`
 
 ```
-git-commit <message>
+git-commit
 [problem=<n>] (default current)
+[message=<str>] (default '')
 [reset=true|--reset]
 [silent=true|--silent]
 ```
@@ -560,10 +561,14 @@ Adds everything under `problem.solution_dir`, plus `solutions/problems.json`
 
 Args:
     problem:        The problem to commit.
-    message:        The commit message.
+    message:        The commit message. When empty (the default) and `reset` is not
+                    set, folds into the last unpushed commit if there is one to amend
+                    (see `git-commit-amend`); otherwise commits fresh under the
+                    default message "solution for pNNNN".
     reset:          When True, first soft-reset to `origin/master` so the new commit
                     squashes all local commits into a single checkpoint (working
-                    tree untouched). Defaults to False.
+                    tree untouched). Defaults to False. Suppresses the empty-message
+                    amend, since squashing to one checkpoint is the opposite intent.
 Aliased as `commit`.
 ```
 

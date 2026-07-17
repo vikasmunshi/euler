@@ -352,5 +352,121 @@ class EncKeyPullFlowTest(_GitCommandCase):
         self.assertEqual(len(self.cmdlines), 1)
 
 
+class CanAmendTest(unittest.TestCase):
+    """`_can_amend`: True only for an unpushed HEAD with dirty paths — decided quietly.
+
+    The three preconditions are read at the `run`/`_remotes_containing_head` boundary,
+    each stubbed so no real git runs. What matters is that every reason amend must be
+    refused (no HEAD, a pushed HEAD, an undecidable push state, a clean tree) comes back
+    False — that is what keeps the loud `git-commit-amend` off an empty-message commit's
+    recovery path.
+    """
+
+    def setUp(self) -> None:
+        self.head_rc: int = 0                       # rev-parse HEAD: 0 = a commit exists
+        self.pushed: list[str] | None = []          # _remotes_containing_head: [] = unpushed
+        self.status: str = ' M solutions/public/p0218/p0218_s0.py'
+
+        def fake_run(argv: list[str], **_k: Any) -> Any:
+            if 'rev-parse' in argv:
+                return MagicMock(returncode=self.head_rc)
+            if 'status' in argv:
+                return MagicMock(returncode=0, stdout=self.status)
+            raise AssertionError(f'unexpected run: {argv}')
+
+        self._saved_run = scripts.run
+        self._saved_remotes = scripts._remotes_containing_head
+        self._saved_paths = scripts._commit_paths
+        scripts.run = fake_run                       # type: ignore[assignment]
+        scripts._remotes_containing_head = lambda: self.pushed  # type: ignore[assignment]
+        scripts._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
+        self.problem: Any = MagicMock(number=218)
+
+    def tearDown(self) -> None:
+        scripts.run = self._saved_run                # type: ignore[assignment]
+        scripts._remotes_containing_head = self._saved_remotes  # type: ignore[assignment]
+        scripts._commit_paths = self._saved_paths    # type: ignore[assignment]
+
+    def test_unpushed_head_with_dirty_paths_can_amend(self) -> None:
+        self.assertTrue(scripts._can_amend(self.problem))
+
+    def test_no_head_cannot_amend(self) -> None:
+        self.head_rc = 1                             # no commit to amend yet
+        self.assertFalse(scripts._can_amend(self.problem))
+
+    def test_a_pushed_head_cannot_amend(self) -> None:
+        self.pushed = ['origin/user/t-000000']       # on origin — amending would force-push
+        self.assertFalse(scripts._can_amend(self.problem))
+
+    def test_an_undecidable_push_state_cannot_amend(self) -> None:
+        self.pushed = None                           # cannot tell — never assume unpushed
+        self.assertFalse(scripts._can_amend(self.problem))
+
+    def test_clean_paths_cannot_amend(self) -> None:
+        self.status = ''                             # nothing under this problem changed
+        self.assertFalse(scripts._can_amend(self.problem))
+
+
+class GitCommitDispatchTest(_GitCommandCase):
+    """git-commit's empty-message dispatch: amend when it can, `--reset` suppresses it,
+    an explicit message never amends. `_can_amend` and `git-commit-amend` are stubbed —
+    the predicate has its own test; this pins which branch git-commit takes."""
+
+    _FRESH = 'git add -A solutions/public/p0218 && git commit --message "solution for p0218"'
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.amendable: bool = True
+        self.amend_rc: int = 0
+        self.amend_calls: int = 0
+
+        def fake_amend(problem: Any) -> int:
+            self.amend_calls += 1
+            return self.amend_rc
+
+        self._saved_can_amend = scripts._can_amend
+        self._saved_amend = scripts.git_commit_amend
+        self._saved_paths = scripts._commit_paths
+        scripts._can_amend = lambda problem: self.amendable  # type: ignore[assignment]
+        scripts.git_commit_amend = fake_amend        # type: ignore[assignment]
+        scripts._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
+        self.as_profile('contributor')
+        self.problem: Any = MagicMock(number=218)
+
+    def tearDown(self) -> None:
+        scripts._can_amend = self._saved_can_amend   # type: ignore[assignment]
+        scripts.git_commit_amend = self._saved_amend  # type: ignore[assignment]
+        scripts._commit_paths = self._saved_paths    # type: ignore[assignment]
+        super().tearDown()
+
+    def test_empty_message_amends_when_it_can(self) -> None:
+        self.assertEqual(scripts.git_commit(self.problem), 0)
+        self.assertEqual(self.amend_calls, 1)
+        self.assertEqual(self.cmdlines, [])          # folded into HEAD; no fresh commit ran
+
+    def test_a_failing_amend_is_returned_not_retried_as_fresh(self) -> None:
+        self.amend_rc = ExitCodes.EXIT_ERROR         # _can_amend said yes, so trust the amend
+        self.assertEqual(scripts.git_commit(self.problem), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])          # never a second, fresh commit
+
+    def test_empty_message_commits_fresh_when_it_cannot_amend(self) -> None:
+        self.amendable = False
+        self.assertEqual(scripts.git_commit(self.problem), 0)
+        self.assertEqual(self.amend_calls, 0)
+        self.assertEqual(self.cmdlines, [self._FRESH])
+
+    def test_reset_suppresses_the_amend_even_when_it_could(self) -> None:
+        self.amendable = True                        # amendable — but --reset must win
+        self.assertEqual(scripts.git_commit(self.problem, reset=True), 0)
+        self.assertEqual(self.amend_calls, 0)
+        self.assertEqual(self.cmdlines, ['git reset --soft origin/master && ' + self._FRESH])
+
+    def test_an_explicit_message_never_amends(self) -> None:
+        self.assertEqual(scripts.git_commit(self.problem, 'hand-written'), 0)
+        self.assertEqual(self.amend_calls, 0)
+        self.assertEqual(self.cmdlines,
+                         ['git add -A solutions/public/p0218 && git commit --message "hand-written"'])
+
+
 if __name__ == '__main__':
     unittest.main()

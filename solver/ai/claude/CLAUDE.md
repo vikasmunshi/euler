@@ -174,7 +174,7 @@ solver/
       app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.
       config.py       — Content-service runtime configuration, read from the environment.
       content.py      — Config-free readers for the content trees the service renders.
-      gitstate.py     — The header chip's git state: one read of this user's clone.
+      gitstate.py     — The header chip's git state: three reads of this user's clone, by need.
       render.py       — The full-page-vs-block render contract (§4.5).
       validate.py     — The save gate: the checks every write passes.
     user/             — The per-user web service: one collaborator's content **and** web shell.
