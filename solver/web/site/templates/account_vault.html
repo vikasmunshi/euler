@@ -145,6 +145,13 @@
           'ok' if filter_wired else 'warn') }}
   {{ tool('GitHub CLI', gh_status, 'git-identity',
           'ok' if gh_status == 'signed in' else ('warn' if gh_status == 'not signed in' else '')) }}
-  {{ tool('Claude Code', claude_status, '! claude /login',
+  {# `! claude /login` is a bash passthrough — it cannot emit the account nudge the
+     Python commands do. But the shell's `&&` gives us "on success" for free: chain a
+     command that DOES nudge, and it runs the moment the interactive login completes
+     (and only then — a cancelled login returns non-zero and short-circuits). git-sync
+     is that command: it emits git-changed, which #vault-panel also refreshes on, and
+     it is safe to chain (it stashes a dirty tree and rolls back on failure, never
+     leaving a half-synced repo). #}
+  {{ tool('Claude Code', claude_status, '! claude /login && git-sync',
           'ok' if claude_status == 'signed in' else ('warn' if claude_status == 'not signed in' else '')) }}
 </section>

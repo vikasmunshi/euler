@@ -1243,8 +1243,11 @@ which `site.js` turns into an `euler:account-changed` body event; `#vault-panel`
 decrypt access too — so those emit only `git;` and the panel picks it up, rather than any
 command emitting both. The refresh is **scoped by presence**: `#vault-panel` is in the DOM
 only while `/account` is the visible pane, so the body events reach a listener — and cost a
-fetch — only then, and are inert otherwise. (`! claude /login` is a bash passthrough, not
-our code, so it cannot emit the nudge; the Claude row settles on the next navigation.)
+fetch — only then, and are inert otherwise. `! claude /login` is a bash passthrough and
+cannot emit the nudge itself, so its row chains `&& git-sync`: the shell's `&&` runs the
+nudging command the instant the interactive login succeeds (and skips it if the login is
+cancelled), and `git-sync`'s `git;` refresh reaches the panel too. It is safe to chain —
+`git-sync` stashes a dirty tree and rolls back on failure, never leaving a half-synced repo.
 
 Reporting on those tools means finding them the way the *shell* does: the service's PATH
 is systemd's, not a login PATH, so `vault_api._which` also looks in `~/.local/bin` — where
