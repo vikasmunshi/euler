@@ -1087,13 +1087,34 @@ the user pill: one menu idiom in the header, not three.
 `--git-modified` **ring** for a dirty worktree — a ring, not a disc, so it cannot be read
 as the terminal's connect dot two controls to its right.
 
-**One read per navigation, no polling.** `solver/web/site/gitstate.py` answers the whole
-chip with a single `git status --porcelain=v2 --branch`; a middleware in `install_content`
-stashes it on the request (`render` is sync and cannot await), and `render._context` picks
-it up. The read is **local-only** — git touches no network — so ahead/behind are measured
-against `origin/master` *as of the last fetch*, i.e. the freshness of a `git-sync`. That is
-the honest reading for a status light: it reports the clone, and the clone is what the
-user's commands act on.
+**One read per navigation, no polling.** `solver/web/site/gitstate.py` reads the chip on
+each navigation; a middleware in `install_content` stashes it on the request (`render` is
+sync and cannot await), and `render._context` picks it up. Two commands, because they
+answer two different questions:
+
+- `git status --porcelain=v2 --branch` — the branch and a line per changed file.
+- `git rev-list --left-right --count origin/master...HEAD` — the divergence.
+
+**Always `origin/master`.** Not the branch's tracking branch, and so *not* the status
+command's own `# branch.ab` — that field counts against `origin/user/<slug>` and answers
+"have I pushed?". The question this workspace turns on is "how far am I from **master**?",
+because master is where work lands and `git-sync` is what closes the gap. The chip measures
+what `scripts/git/status.sh` measures, against the same ref; the two must not drift.
+`rev-list` walks refs only — no worktree scan, no filter — so it is cheap beside the status.
+
+The reads are **local-ref only** — neither touches the network (`status.sh` fetches first;
+a page render must not) — so the divergence is *as of the last fetch*, i.e. the freshness of
+a `git-sync`, and the panel says so. That is the honest reading for a status light: it
+reports the clone, and the clone is what the user's commands act on.
+
+**`--no-optional-locks`.** `git status` normally takes `.git/index.lock` to write back its
+refreshed stat cache. The chip is a *reader on a page render*, and the user is typing real
+git commands into their terminal one pane away: a status read that grabs the index lock can
+make their `git-commit` fail, and concurrent renders collide with each other (the symptom
+was a chip that read `unknown` on the busy first load after login and fine on every quiet
+navigation after). This is git's own answer for status displays — a little repeated hashing,
+no lock. **A failed read logs git's stderr**: on a clone no other uid can open, that message
+is the whole diagnosis, and 128 alone names none of the three things it could be.
 
 **The verbs type into the terminal.** Each is a `[data-term-cmd]` button (`site.js` → the
 `/terminal` iframe), exactly like the account page's tool rows: the web shell is the front
