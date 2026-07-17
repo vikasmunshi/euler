@@ -11,6 +11,7 @@
 #   2. No compiled binaries (ELF blobs) anywhere in the tracked tree.
 #   3. flake8 on solver + solutions.
 #   4. mypy on solver + solutions.
+#   5. the unit tests — only when the push changes solver/, scripts/ or tests/.
 #
 # Output contract: every check announces itself, prints its own detail on
 # failure, and the hook always ends with a single PASS/FAIL verdict that
@@ -97,6 +98,27 @@ pushed_blobs() {
                       --diff-filter=AM -- "$@"
         else
             git diff-tree -r -m --no-commit-id -z --diff-filter=AM \
+                "${remote_sha}" "${local_sha}" -- "$@"
+        fi
+    done
+}
+
+# Emit the paths this push changes under the given pathspec, one per line.
+#
+# Sibling of pushed_blobs, and deliberately not a --name-only mode of it: this asks a
+# different question. pushed_blobs audits blob CONTENT, so it wants added/modified
+# blobs only (--diff-filter=AM); this asks whether a push touches an area at all, and
+# a deletion touches it — a module removed out from under an import is exactly the
+# change whose tests must run.
+pushed_paths() {
+    local entry local_sha remote_sha
+    for entry in "${PUSH_REFS[@]}"; do
+        read -r local_sha remote_sha <<<"${entry}"
+        if [[ "${remote_sha}" =~ ^0+$ ]]; then
+            git rev-list "${local_sha}" --not --remotes="${REMOTE}" \
+                | git diff-tree -r -m --stdin --root --no-commit-id --name-only -- "$@"
+        else
+            git diff-tree -r -m --no-commit-id --name-only \
                 "${remote_sha}" "${local_sha}" -- "$@"
         fi
     done
@@ -209,6 +231,30 @@ if "$VENV/bin/mypy" solutions solver; then
     pass "mypy clean"
 else
     fail "mypy reported type errors"
+fi
+
+# ── 5. unit tests, when this push touches the code they cover ────────────
+# The suite takes ~10s and covers solver/ + scripts/. A solutions-only push cannot
+# break it, and the collaborator pushing their problem should not wait on it — so the
+# trigger is scoped to what this push changes, like the audits above.
+#
+# tests/ is in the trigger with the code it covers: a push editing only a test is the
+# case most certain to want the suite run, and skipping it would let a test be pushed
+# without ever having been run.
+#
+# This is the gate that was missing: nothing in the commit or push path ran the tests,
+# so `PullRequestTest` sat red from 18f5da8b until a human happened to run them. flake8
+# and mypy could not have caught it — the code type-checked perfectly and simply did
+# something the tests said it should not.
+section "unit tests (only when solver/, scripts/ or tests/ change)"
+if (( ${#PUSH_REFS[@]} == 0 )); then
+    skip "no refs offered by git — nothing to test"
+elif [[ -z "$(pushed_paths solver scripts tests)" ]]; then
+    skip "this push changes nothing under solver/, scripts/ or tests/"
+elif "$VENV/bin/python" -m unittest discover -s tests -q; then
+    pass "unit tests pass"
+else
+    fail "unit tests failed"
 fi
 
 # ── Verdict ──────────────────────────────────────────────────────────────
