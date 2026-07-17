@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
-set -e  # Exit on error
+# Bring the local repository in sync with origin/master.
+#
+# Every failure is REPORTED, not fatal: this script returns a non-zero code and
+# leaves the decision to its caller — `git-sync` (solver/utils/scripts.py), which
+# gates the enc-key pull flow on it, and scripts/setup/user.sh, which treats a
+# refused sync as a note and carries on provisioning. `set -e` could not serve
+# either: it exited on the first failed git command, so the caller learned only
+# "something failed", and — worse — the stash restore below never ran.
+set -uo pipefail
 
 declare dry_run=0
 eval_with_dry_run() {
@@ -24,6 +32,75 @@ eval_with_dry_run() {
     fi
 }
 
+verb_in_progress() {
+    # verb_in_progress — True when a `git <verb>` stopped part-way and still owns the tree.
+    #
+    # Usage: verb_in_progress <verb>
+    #   Reads the state files git itself writes, so it answers for a merge/rebase this
+    #   script started OR one it inherited. An atomic failure (a refused --ff-only, say)
+    #   leaves none of them and is correctly reported as 'not in progress' — nothing to
+    #   roll back, and no spurious `--abort` to fail noisily.
+    local verb="$1" gitdir
+    gitdir=$(git rev-parse --git-dir 2>/dev/null) || return 1
+    case "${verb}" in
+        rebase) [[ -d "${gitdir}/rebase-merge" || -d "${gitdir}/rebase-apply" ]] ;;
+        merge)  [[ -f "${gitdir}/MERGE_HEAD" ]] ;;
+        *)      return 1 ;;
+    esac
+}
+
+sync_onto_master() {
+    # sync_onto_master — Run `git <verb> [arg ...]`, stashing a dirty tree around it.
+    #
+    # Usage: sync_onto_master <has_changes> <verb> [arg ...]
+    #   verb is the git subcommand ('merge', 'rebase') — named, not baked into the
+    #   command words, because the rollback below has to invoke `git <verb> --abort`.
+    #
+    # NEVER leaves the repository half-synced. A merge/rebase that fails usually stops
+    # MID-WAY, on a conflicted index, so any failure is rolled back with `--abort`: the
+    # tree ends up as it was found, always, whether or not it was dirty. This is a
+    # deliberate trade against git's interactive habit of leaving a conflicted rebase in
+    # progress to resolve — nothing here is interactive. `git-sync` is one step of a
+    # shell command, and scripts/setup/user.sh runs it unattended while provisioning,
+    # where the vault is locked and the smudge filter makes failure the expected case.
+    # A caller that must resolve conflicts by hand can still drive git directly.
+    #
+    # The rollback also has to come FIRST, before the stash is restored: `git stash pop`
+    # refuses to write over unmerged entries, so popping onto a conflicted index fails
+    # and strands the changes in a stash nothing told the user about.
+    #
+    # Returns:
+    #   The exit code of the sync command — the pop's code only when the pop is the
+    #   thing that failed, since a completed sync whose stash will not pop is still a
+    #   failure the caller must hear about.
+    local has_changes="$1" verb="$2"; shift 2
+    local rc
+
+    if [[ ${has_changes} -eq 1 ]]; then
+        eval_with_dry_run git stash push -m "refresh: stash before ${verb}" || return $?
+    fi
+
+    eval_with_dry_run git "${verb}" "$@"
+    rc=$?
+
+    if [[ ${rc} -ne 0 ]] && verb_in_progress "${verb}"; then
+        echo "Error: 'git ${verb} $*' stopped part-way (${rc}) — rolling it back." >&2
+        if ! eval_with_dry_run git "${verb}" --abort; then
+            echo "Error: 'git ${verb} --abort' FAILED — the repository is still mid-${verb}." >&2
+            echo "  Resolve it by hand: 'git ${verb} --abort', then 'git stash pop' if you had changes." >&2
+            return ${rc}
+        fi
+    fi
+
+    if [[ ${has_changes} -eq 1 ]]; then
+        if ! eval_with_dry_run git stash pop; then
+            echo "Error: your changes are safe but still STASHED — recover with 'git stash pop'." >&2
+            [[ ${rc} -eq 0 ]] && rc=1
+        fi
+    fi
+    return ${rc}
+}
+
 main() {
     # main — Fetch origin/master, determine sync state, and bring local in sync.
     #
@@ -40,11 +117,22 @@ main() {
     #                  (stash/unstash uncommitted changes if present)
     #   diverged     — git rebase origin/master
     #                  (stash/unstash uncommitted changes if present)
+    #
+    # Returns:
+    #   0 when the repository is in sync, or was deliberately left alone
+    #     (up_to_date, local_ahead — declining to sync is not a failure)
+    #   1 when the state could not be determined, or the sync itself failed
     local ahead behind has_changes state
 
-    git fetch origin master 1>/dev/null 2>&1
-    ahead=$(git rev-list --count origin/master..HEAD)
-    behind=$(git rev-list --count HEAD..origin/master)
+    if ! git fetch origin master 1>/dev/null 2>&1; then
+        echo "Error: could not fetch origin/master." >&2
+        return 1
+    fi
+    if ! ahead=$(git rev-list --count origin/master..HEAD 2>/dev/null) ||
+        ! behind=$(git rev-list --count HEAD..origin/master 2>/dev/null); then
+        echo "Error: could not compare HEAD with origin/master." >&2
+        return 1
+    fi
 
     if git diff --quiet 2>/dev/null && git diff --cached --quiet 2>/dev/null; then
         has_changes=0
@@ -73,29 +161,17 @@ main() {
         local_ahead)
             echo "Action: no sync — use 'solver publish <target>' to publish to origin."
             echo "Warning: local has ${ahead} commit(s) ahead of origin/master. No sync performed."
-            echo "  Use 'solver publish <target>' to publish file changes to origin."
+            echo "  Use 'solver git-push' to push file changes to origin."
             ;;
         local_behind)
             echo "Action: fast-forward merge from origin/master${has_changes:+; stash/unstash around merge}."
-            if [[ ${has_changes} -eq 1 ]]; then
-                eval_with_dry_run git stash push -m "refresh: stash before sync"
-                eval_with_dry_run git merge --ff-only origin/master
-                eval_with_dry_run git stash pop
-            else
-                eval_with_dry_run git merge --ff-only origin/master
-            fi
+            sync_onto_master "${has_changes}" merge --ff-only origin/master || return $?
             ;;
         diverged)
             echo "Action: rebase local commits onto origin/master${has_changes:+; stash/unstash around rebase}."
             echo "Warning: local has diverged (${ahead} ahead, ${behind} behind)."
             echo "  Replaying local commits on top of origin/master via rebase."
-            if [[ ${has_changes} -eq 1 ]]; then
-                eval_with_dry_run git stash push -m "refresh: stash before rebase"
-                eval_with_dry_run git rebase origin/master
-                eval_with_dry_run git stash pop
-            else
-                eval_with_dry_run git rebase origin/master
-            fi
+            sync_onto_master "${has_changes}" rebase origin/master || return $?
             ;;
     esac
 }
@@ -103,4 +179,5 @@ main() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     [[ " $* " == *" --dry-run "* ]] && dry_run=1
     main
+    exit $?
 fi

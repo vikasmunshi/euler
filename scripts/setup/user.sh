@@ -314,35 +314,33 @@ provision_clone() {
         # refreshes them. githooks.sh install is idempotent and --force skips the
         # backup rotation (the rendered copies carry no local edits by contract).
         #
-        # Refresh the clone FIRST, because the hooks are rendered from the templates in
+        # Sync the clone FIRST, because the hooks are rendered from the templates in
         # the clone itself (scripts/setup/hooks/*.template): re-rendering a stale clone
         # faithfully reproduces stale hooks, which is the one thing this repair exists to
-        # stop. Refreshing is best-effort and never destructive — this branch is the
-        # collaborator's own work, and losing it would be far worse than an old hook:
-        #   - fetch is always safe (it writes no working-tree file, so it needs neither
-        #     the crypt filter nor an unlocked vault, which this root plane never has);
-        #   - the fast-forward is taken ONLY on a clean tree with no local commits. Any
-        #     divergence is theirs to merge, with `git-sync`, in their own shell.
-        # Every failure falls through to rendering from the clone as it stands: an admin
-        # repair must not be the thing that fails provisioning.
-        echo "Clone ${clone} already present — refreshing it, then re-rendering the git hooks (venv ${VENV_DIR})..."
+        # stop. The sync is scripts/git/sync.sh — the same script `git-sync` runs in the
+        # user's own shell, so this plane follows the one sync policy rather than keeping
+        # a second copy of it that can drift.
+        #
+        # It is called ungated: sync.sh decides the state (up_to_date / local_ahead /
+        # local_behind / diverged) and handles each itself, so a second opinion here would
+        # only be the drift this reuse exists to remove. It is also safe to be wrong from
+        # this plane — it reports failure with a return code rather than dying on the
+        # first failed git command, and it never leaves the clone half-synced: a
+        # merge/rebase that stops part-way is rolled back and any stash it took is put
+        # back. That matters here: every write path runs the smudge filter, and a
+        # key-authorized user's vault is always locked from the root plane, so a refused
+        # merge is the expected case, not the exceptional one.
+        #
+        # Its failure is not provisioning's failure — fall through to rendering the hooks
+        # from the clone as it stands. An admin repair must not be the thing that fails
+        # provisioning.
+        echo "Clone ${clone} already present — syncing it, then re-rendering the git hooks (venv ${VENV_DIR})..."
         as_user "${user}" EULER_VENV="${VENV_DIR}" <<'HOOKS'
 set -euo pipefail
 [ -f "${EGRESS_ENV}" ] && { set -a; . "${EGRESS_ENV}"; set +a; }
 cd "${HOME}/euler"
-if ! git fetch --quiet origin master 2>/dev/null; then
-    echo "warn: could not fetch origin/master — rendering hooks from the clone as it stands." >&2
-elif [ -n "$(git status --porcelain 2>/dev/null)" ]; then
-    echo "note: working tree has local changes — branch left alone (theirs to 'git-sync')."
-elif [ -n "$(git log --oneline FETCH_HEAD..HEAD 2>/dev/null)" ]; then
-    echo "note: branch carries local commits — left alone (theirs to 'git-sync')."
-elif git merge --ff-only --quiet FETCH_HEAD 2>/dev/null; then
-    echo "Refreshed $(git rev-parse --abbrev-ref HEAD) to origin/master ($(git rev-parse --short HEAD))."
-else
-    # A checkout DOES run the smudge filter, so a key-authorized user whose vault is
-    # locked (always, from here) cannot be fast-forwarded. Expected, not an error.
-    echo "note: fast-forward skipped — rendering hooks from the clone as it stands."
-fi
+bash scripts/git/sync.sh \
+    || echo "warn: sync failed — rendering hooks from the clone as it stands." >&2
 bash "${HOME}/euler/scripts/setup/githooks.sh" install --force
 HOOKS
         return 0
