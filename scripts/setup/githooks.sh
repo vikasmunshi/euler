@@ -22,15 +22,57 @@ TEMPLATES_DIR="${REPO_ROOT}/scripts/setup/hooks"
 PRE_COMMIT="${HOOKS_DIR}/pre-commit"
 PRE_PUSH="${HOOKS_DIR}/pre-push"
 
-# The venv whose flake8/mypy the rendered hooks call. Defaults to the checkout's own
-# ``.venv`` — the operator dev setup, and the only caller this script serves.
-# ``EULER_VENV`` overrides it for a checkout whose venv lives elsewhere.
+# The venv whose flake8/mypy the rendered hooks call — identified from the ambient
+# ``python``, i.e. the shell's answer to ``sys.executable``, rather than guessed from a
+# path.
 #
-# A per-user provisioned clone is NOT such a caller: it has no ``.venv``, and its hooks
-# are rendered from the OPERATOR's templates by ``user.sh`` (§ provision_hooks), never by
-# running this script inside the clone — a clone can sit behind master indefinitely, so
-# rendering there would faithfully reproduce stale hooks.
-VENV="${EULER_VENV:-${REPO_ROOT}/.venv}"
+# That is what makes one render correct everywhere. The operator's terminal answers with
+# this checkout's ``.venv``; a collaborator's web shell answers with ``/opt/euler/venv``,
+# which is right — a provisioned clone has no ``.venv`` of its own, and its hooks must
+# call the deployed venv, exactly as ``user.sh`` § provision_hooks renders them. Both
+# answers come from ``solver.config._enter_root``, which puts the running interpreter's
+# bin dir at the head of ``PATH``, so any shell descended from a solver shell names its
+# own venv. Assuming ``${REPO_ROOT}/.venv`` instead is what gave a clone hooks pointing at
+# a venv that was never there: every commit and push then died on "No such file or
+# directory" — the checks did not pass or fail, they could not run at all.
+#
+# Probed in order:
+#   EULER_VENV        — an explicit override, taken strictly: set means use it or fail.
+#   command -v python — the ambient venv, whenever this runs inside one.
+#   REPO_ROOT/.venv   — the fresh-install case: `make install-all` builds the venv and
+#                       installs the hooks in one breath, from a shell whose PATH predates
+#                       that venv and so cannot name it.
+# A candidate counts only if it is really a venv: a bin/python AND a pyvenv.cfg.
+is_venv() {
+    local dir="$1"
+    [[ -n "${dir}" && -x "${dir}/bin/python" && -f "${dir}/pyvenv.cfg" ]]
+}
+
+# The venv root of the ambient ``python``, or empty. Deliberately NOT symlink-resolved:
+# a venv's bin/python points at the system interpreter it was built from, so following it
+# would report /usr and lose the venv we were asked to find.
+ambient_venv() {
+    local py
+    py="$(command -v python 2>/dev/null)" || return 0
+    (cd "$(dirname "${py}")/.." 2>/dev/null && pwd) || return 0
+}
+
+resolve_venv() {
+    local candidate
+    for candidate in "${EULER_VENV:-}" "$(ambient_venv)" "${REPO_ROOT}/.venv"; do
+        if is_venv "${candidate}"; then
+            echo "${candidate}"
+            return 0
+        fi
+    done
+    return 0  # nothing usable; the caller reports it (install fatal, status descriptive)
+}
+
+if [[ -n "${EULER_VENV:-}" ]] && ! is_venv "${EULER_VENV}"; then
+    echo "ERROR: EULER_VENV=${EULER_VENV} is not a venv (needs bin/python and pyvenv.cfg)." >&2
+    exit 1
+fi
+VENV="$(resolve_venv)"
 
 FORCE=0
 
@@ -73,6 +115,14 @@ render_hook() {
 }
 
 install_hooks() {
+    if [[ -z "${VENV}" ]]; then
+        echo "ERROR: no venv found — '$(command -v python || echo python)' is not one, and there is" >&2
+        echo "       no ${REPO_ROOT}/.venv. The hooks run a venv's flake8/mypy, so there is" >&2
+        echo "       nothing to install against. Run this from a solver shell or an activated venv," >&2
+        echo "       build the dev venv ('make install-all'), or set EULER_VENV to one that exists." >&2
+        exit 1
+    fi
+
     if (( FORCE == 0 )); then
         backup_if_exists "${PRE_COMMIT}"
         backup_if_exists "${PRE_PUSH}"
@@ -118,6 +168,12 @@ status_hooks() {
             continue
         fi
         installed_venv="$(sed -n 's/^VENV="\(.*\)"$/\1/p' "${target}" | head -n1)"
+        # A hook whose venv is gone cannot run its checks at all — a louder problem than
+        # staleness, and the one the reader must act on, so it is reported first.
+        if [[ -n "${installed_venv}" && ! -x "${installed_venv}/bin/python" ]]; then
+            echo "${hook}:  ✗ installed but BROKEN (venv ${installed_venv} is missing — re-run '$0 install')"
+            continue
+        fi
         fresh="$(sed -e "s|__REPO_ROOT__|${REPO_ROOT}|g" -e "s|__VENV__|${VENV}|g" \
                      "${TEMPLATES_DIR}/${hook}.template")"
         if [[ "$(cat "${target}")" == "${fresh}" ]]; then
