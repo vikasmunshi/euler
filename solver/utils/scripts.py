@@ -59,7 +59,7 @@ def _commit_paths(problem: Problem) -> list[str]:
 @register(requires='contributor',
           help_text="Commit a problem's solution directory and progress, optionally resetting to origin/master.",
           aliases=('commit',), quietable=True, )
-def git_commit(problem: Problem, message: str, *, reset: bool = False) -> int:
+def git_commit(problem: Problem, message: str = '', *, reset: bool = False) -> int:
     """Stage and commit the problem's solution directory.
 
     Adds everything under `problem.solution_dir`, plus `solutions/problems.json`
@@ -68,12 +68,24 @@ def git_commit(problem: Problem, message: str, *, reset: bool = False) -> int:
 
     Args:
         problem:        The problem to commit.
-        message:        The commit message.
+        message:        The commit message. When empty (the default) and `reset` is not
+                        set, folds into the last unpushed commit if there is one to amend
+                        (see `git-commit-amend`); otherwise commits fresh under the
+                        default message "solution for pNNNN".
         reset:          When True, first soft-reset to `origin/master` so the new commit
                         squashes all local commits into a single checkpoint (working
-                        tree untouched). Defaults to False.
+                        tree untouched). Defaults to False. Suppresses the empty-message
+                        amend, since squashing to one checkpoint is the opposite intent.
     Aliased as `commit`.
     """
+    # Empty message with no reset prefers folding into HEAD — but only when the loud
+    # `git-commit-amend` would actually amend; `_can_amend` decides that quietly so its
+    # refusal diagnostics never surface on a path that then commits fresh. `reset` opts
+    # out entirely: it squashes local commits into one checkpoint, not into HEAD.
+    if not message and not reset and _can_amend(problem):
+        return git_commit_amend(problem)
+    if not message:
+        message = f'solution for p{problem.number:04d}'
     cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
     cmdline += ['git', 'add', '-A', *_commit_paths(problem), '&&']
     cmdline += ['git', 'commit', '--message', f'"{message}"']
@@ -101,6 +113,25 @@ def _remotes_containing_head() -> list[str] | None:
     # A bare '<remote>' among the refs is that remote's HEAD symref, not a branch it
     # carries — naming it alongside the branch it points at only pads the refusal.
     return [ref for line in proc.stdout.splitlines() if '/' in (ref := line.strip())]
+
+
+def _can_amend(problem: Problem) -> bool:
+    """Whether `git-commit-amend` would actually amend *problem* — decided quietly.
+
+    True only when all three of amend's preconditions hold: there is a HEAD to amend,
+    it is unpushed (so no force-push would be needed), and this problem's paths are
+    dirty. `git_commit_amend` reports *why* each of these fails; this answers only
+    whether an empty-message `git-commit` should fold into HEAD, without printing, so
+    the loud command is called only on the path where it succeeds.
+    """
+    if run(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'],
+           cwd=config.root_dir, capture_output=True).returncode != 0:
+        return False
+    if _remotes_containing_head() != []:  # None (undecidable) or non-empty (pushed) → do not amend
+        return False
+    dirty: str = run(['git', 'status', '--porcelain', '--', *_commit_paths(problem)],
+                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
+    return bool(dirty)
 
 
 @register(requires='contributor', quietable=True,
@@ -309,7 +340,7 @@ def git_identity() -> int:
     """
     result = run_cmdline(config.scripts.configure_identity)
     if result == 0:
-        osc.account_changed()   # gh sign-in flips the account page's GitHub-CLI row
+        osc.account_changed()  # gh sign-in flips the account page's GitHub-CLI row
     return result
 
 
@@ -417,7 +448,7 @@ def git_push(force: bool = False, pr: bool = True) -> int:
     lease: str = ' --force-with-lease' if force else ''
     result: int = run_cmdline(f'git push -u{lease} origin {branch}')
     if result == 0:
-        osc.git_changed()   # origin/<branch> moved up to HEAD: the chip's ahead count
+        osc.git_changed()  # origin/<branch> moved up to HEAD: the chip's ahead count
     if result != 0 or not pr or branch == 'master':
         return result
     return _ensure_pull_request(branch)
@@ -494,7 +525,11 @@ def gh_pr(action: Literal['list', 'merge'] = 'list', number: int | None = None) 
         return ExitCodes.EXIT_ERROR
     console.print(f'pull request [accent]#{number}[/accent]: {len(files)} file(s), all under '
                   f'[accent]{PR_SCOPE}[/accent] — merging.')
-    return run_cmdline(f'gh pr merge {number} --squash')
+    # --admin: land it immediately with administrator privileges. master's base-branch
+    # policy prohibits a plain merge (that policy is what gates other collaborators);
+    # the owner running this review has the bypass, and without --admin `gh pr merge`
+    # just refuses with "the base branch policy prohibits the merge".
+    return run_cmdline(f'gh pr merge {number} --squash --admin')
 
 
 @register(

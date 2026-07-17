@@ -232,7 +232,7 @@ class GhPrTest(_GitCommandCase):
     def test_a_solutions_only_pr_is_squash_merged(self) -> None:
         self.as_profile('maintainer')
         self.assertEqual(scripts.gh_pr('merge', 12), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')

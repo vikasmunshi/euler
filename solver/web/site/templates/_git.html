@@ -98,7 +98,8 @@
     {% endmacro %}
     {{ verb('Review changes', 'git-status --details', 'reader') }}
     {{ verb('Sync with master', 'git-sync', 'reader') }}
-    {# No problem argument: the shell supplies the one it is on. #}
+    {# No problem argument: the shell supplies the one it is on. `git-commit`'s message
+       is optional now — it defaults to "solution for pNNNN" — so a one-click commit works. #}
     {{ verb('Commit', 'git-commit', 'contributor') }}
     {{ verb('Push & open pull request', 'git-push', 'contributor') }}
     {{ verb('Pull requests', 'gh-pr list', 'maintainer') }}
