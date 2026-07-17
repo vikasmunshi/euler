@@ -258,6 +258,19 @@
     document.body.dispatchEvent(new CustomEvent('euler:git-changed'));
   });
 
+  // ── the account panel's refresh (OSC 5379 `account`) ───────────────────────
+  // A command that changes what /account shows about you — `user` (a new identity),
+  // `git-identity` (a GitHub sign-in) — runs in the terminal, not via a navigation,
+  // so it nudges the page the same way a git command does. The listener that acts on
+  // it (`euler:account-changed from:body`) lives INSIDE the account fragment, on
+  // #vault-panel — so this reaches nothing, and costs nothing, unless /account is the
+  // visible pane. (git-sync / git-filter change decrypt access too, but they already
+  // fire git-changed, which #vault-panel also listens for — so no command emits both.)
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'account-changed') { return; }
+    document.body.dispatchEvent(new CustomEvent('euler:account-changed'));
+  });
+
   // ── copy buttons ───────────────────────────────────────────────────────────
   // [data-copy] holds the text (the public key today). The label's flip to
   // "Copied" is the only feedback that the clipboard actually took it.

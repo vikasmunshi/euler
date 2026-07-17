@@ -39,6 +39,7 @@ from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X
 from cryptography.hazmat.primitives.serialization import Encoding, NoEncryption, PrivateFormat
 
 from solver.config import config as app_config
+from solver.core import osc
 from solver.crypto import vault as vault_mod
 from solver.crypto.ciphers import (encrypt_blob, load_private_key, lock, public_key_hex, read_enc_key_file,
                                    read_master_key, verify_master_key)
@@ -224,6 +225,10 @@ def user(regen: bool = False) -> int:
             data.pop(old_pub, None)  # revoke the replaced key's access
             data[public_key_hex(private_key.public_key())] = lock(private_key.public_key(), master_key)
             _write_enc_key_file(data)
+        # A new identity is exactly what the account page's public-key panel shows —
+        # nudge it to re-read (a no-op unless it is the visible pane). Only when a key
+        # was actually minted: a bare `user` status view changed nothing.
+        osc.account_changed()
     pub: str = public_key_hex(private_key.public_key())
     try:
         read_master_key()

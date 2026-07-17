@@ -1234,6 +1234,18 @@ and a web form that "did it for you" would have to handle a credential it has no
 touching. With no session attached there is nothing to type into, so the iframe says so in
 the terminal rather than dropping the click silently.
 
+Because those commands run in the terminal and not through a navigation, the panel they
+change would otherwise go stale — so they nudge it the way a git command nudges the chip.
+`user` (a new identity) and `git-identity` (a GitHub sign-in) emit `OSC 5379` `account;`,
+which `site.js` turns into an `euler:account-changed` body event; `#vault-panel` carries
+`hx-trigger="… euler:account-changed from:body, euler:git-changed from:body"` and refetches
+`/account/vault`. The git event is on the list because `git-sync` / `git-filter` change
+decrypt access too — so those emit only `git;` and the panel picks it up, rather than any
+command emitting both. The refresh is **scoped by presence**: `#vault-panel` is in the DOM
+only while `/account` is the visible pane, so the body events reach a listener — and cost a
+fetch — only then, and are inert otherwise. (`! claude /login` is a bash passthrough, not
+our code, so it cannot emit the nudge; the Claude row settles on the next navigation.)
+
 Reporting on those tools means finding them the way the *shell* does: the service's PATH
 is systemd's, not a login PATH, so `vault_api._which` also looks in `~/.local/bin` — where
 per-user installs land (`claude` does). A tool the user can run in their web shell must

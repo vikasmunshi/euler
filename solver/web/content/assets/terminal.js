@@ -174,6 +174,9 @@
     if (action === 'git') {
       return { euler: 'git-changed' };
     }
+    if (action === 'account') {
+      return { euler: 'account-changed' };
+    }
     var number = parts[1];
     if (!/^\d+$/.test(number || '')) { return null; }
     if (action === 'open') {
@@ -186,9 +189,10 @@
     return null;
   }
 
-  //: Where the token sits: last for `git`, third for the pane actions (§ above).
+  //: Where the token sits: second field for the fieldless nudges (`git`, `account`),
+  //: third for the pane actions that carry a problem number first (§ above).
   function oscToken(parts) {
-    return Number(parts[0] === 'git' ? parts[1] : parts[2]) || 0;
+    return Number(parts[0] === 'git' || parts[0] === 'account' ? parts[1] : parts[2]) || 0;
   }
 
   term.parser.registerOscHandler(5379, function (payload) {

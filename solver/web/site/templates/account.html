@@ -41,8 +41,14 @@
 </section>
 
 {# The per-user credential panel: filled by the per-user service's /account/vault
-   fragment. On a service without that route the placeholder simply stays. #}
-<section class="panel" id="vault-panel" hx-get="/account/vault" hx-trigger="load">
+   fragment. On a service without that route the placeholder simply stays.
+   Refreshed on load, and again whenever a terminal command reports it changed
+   account state (`user`, `git-identity` → account-changed; `git-sync`, `git-filter`
+   → git-changed, which also moves decrypt access here). This element exists only
+   while /account is the visible pane, so the events reach it only then — the refresh
+   costs nothing when the page is not shown (web-server-guide § The site). #}
+<section class="panel" id="vault-panel" hx-get="/account/vault"
+         hx-trigger="load, euler:account-changed from:body, euler:git-changed from:body">
   <h2>Credentials</h2>
   <p class="muted">Loading your vault…</p>
 </section>

@@ -17,6 +17,8 @@ payload carries a *token* (:func:`token`):
   token sits *before* the path because a relpath may itself contain ``;``: it is
   the one field that must stay last and be rejoined by the reader.
 - ``git;<token>`` — this clone's git state changed; re-read the header's chip.
+- ``account;<token>`` — this user's account state changed (a new identity, a GitHub
+  sign-in); re-read the account page — *if it is the visible pane*.
 
 The token is a server-side millisecond clock, strictly increasing per command. On
 attach the service replays the scrollback, which redraws the sequences of commands
@@ -30,7 +32,7 @@ other.
 """
 from __future__ import annotations
 
-__all__ = ['OSC_CODE', 'emit', 'git_changed', 'token']
+__all__ = ['OSC_CODE', 'account_changed', 'emit', 'git_changed', 'token']
 
 import sys
 import time
@@ -80,3 +82,18 @@ def git_changed() -> None:
     so there is one path, not two.
     """
     emit('git', str(token()))
+
+
+def account_changed() -> None:
+    """Tell the page this user's account state moved: refresh the account panel.
+
+    Emitted by the commands that change what the account page shows about *you* — a
+    new key pair (``user``), a GitHub sign-in (``git-identity``). The nudge reaches
+    the page the same way ``git;`` does; the difference is on the browser side, where
+    the listening element lives **inside** the account fragment, so it re-reads only
+    when the account page is the visible pane and is a no-op otherwise (web-server-guide
+    § The site). The chip's own git state is a separate concern: `git-sync` /
+    `git-filter` change decrypt access too, but they emit :func:`git_changed`, and the
+    account panel listens for that event as well — so those need not emit both.
+    """
+    emit('account', str(token()))

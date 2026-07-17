@@ -724,10 +724,6 @@ dl.account dd { margin: 0; min-width: 0; }
 
 /* State as a shape, not a sentence: scannable in one pass. */
 .state-row { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.9rem; }
-/* Guidance that ends in its own action: the button rides the end of the sentence,
-   baseline-aligned, so "…then pull your access: [Sync]" reads as one instruction. */
-.hint-action { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; margin: -0.4rem 0 0.9rem; }
-.hint-action .state-action { align-self: center; }
 .state-pill {
   display: inline-flex; align-items: center; gap: 0.4rem;
   font-size: 0.78rem; font-weight: 600;

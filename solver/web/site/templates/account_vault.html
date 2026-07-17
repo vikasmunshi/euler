@@ -49,9 +49,10 @@
                 aria-label="copy public key">Copy</button>
       </div>
       {# What the key is FOR is the question this row actually answers: authorized
-         or not. When it is not, the two acts that get you there live right here as
-         terminal actions (site.js → the shell), so the page is where you do it, not
-         just where you read that it needs doing. #}
+         or not. When it is not, the fix is two acts — copy the key here (green,
+         above), and Sync — but Sync already IS the Private solutions tool row below,
+         which runs git-sync; a second button for the same command would be one
+         control too many. So this states the path and points at that row. #}
       <div class="state-row">
         {% if can_decrypt %}
         <span class="state-pill ok"><span class="dot on"></span> Can decrypt</span>
@@ -61,14 +62,9 @@
         {% endif %}
       </div>
       {% if not can_decrypt %}
-      {# The path to access as one line ending in the act that advances it: copy the
-         key to the admin (user-authorize), then Sync. git-sync auto-wires the filter
-         the moment the grant arrives (scripts._enc_key_pull_flow); before it, a
-         harmless no-op pull — so it never errors, whatever state the access is in. #}
-      <p class="hint hint-action">Send the key above to the admin for
-        <code>user-authorize</code>, then pull your access:
-        <button type="button" class="state-pill state-action" data-term-cmd="git-sync"
-                title="run `git-sync` in your terminal">Sync</button></p>
+      <p class="hint">Copy the key above to the admin for <code>user-authorize</code>;
+        once granted, <b>Sync</b> (under Tools) pulls your access and opens the
+        private solutions.</p>
       {% endif %}
       {% elif pubkey_state == 'locked' %}<em class="muted">encrypted — unlock the vault to view</em>
       {% else %}

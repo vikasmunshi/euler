@@ -307,7 +307,10 @@ def git_identity() -> int:
 
     Aliased as `identity`.
     """
-    return run_cmdline(config.scripts.configure_identity)
+    result = run_cmdline(config.scripts.configure_identity)
+    if result == 0:
+        osc.account_changed()   # gh sign-in flips the account page's GitHub-CLI row
+    return result
 
 
 def _open_pr_url(branch: str) -> str:
