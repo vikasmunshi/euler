@@ -263,6 +263,9 @@ def git_sync(dry_run: bool = False) -> int:
     access for your key, the git filter is wired automatically and the private
     solutions decrypt in place.
 
+    Stale remote-tracking refs are pruned as part of the fetch, so a branch deleted
+    when its pull request merged stops shadowing the branch you push next.
+
     Args:
         dry_run: Print the sync commands instead of running them. Defaults to False.
     """

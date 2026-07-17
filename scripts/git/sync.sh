@@ -109,7 +109,7 @@ sync_onto_master() {
 }
 
 main() {
-    # main — Fetch origin/master, determine sync state, and bring local in sync.
+    # main — Fetch origin/master, prune dead remote branches, and bring local in sync.
     #
     # State detection:
     #   up_to_date   — local HEAD == origin/master
@@ -129,11 +129,30 @@ main() {
     #   0 when the repository is in sync, or was deliberately left alone
     #     (up_to_date, local_ahead — declining to sync is not a failure)
     #   1 when the state could not be determined, or the sync itself failed
-    local ahead behind has_changes state
+    local ahead behind has_changes state prune_out
 
     if ! git fetch origin master 1>/dev/null 2>&1; then
         echo "Error: could not fetch origin/master." >&2
         return 1
+    fi
+
+    # Drop remote-tracking refs for branches the remote no longer has — typically a
+    # user/<slug> branch deleted when its pull request merged, which otherwise lingers
+    # as a stale origin/<branch> and a '[gone]' upstream for as long as the clone lives.
+    #
+    # `git remote prune`, NOT `--prune` on the fetch above: prune only considers the
+    # refs its refspec covers, and 'master' covers no user branch, so that fetch prunes
+    # nothing. Widening the refspec to prune would drag every other collaborator's
+    # branch into this clone just to notice one of its own is gone; pruning separately
+    # removes the dead ref and adds none.
+    #
+    # Housekeeping, not sync: a prune that fails is noted, and the sync carries on.
+    if [[ ${dry_run} -eq 1 ]]; then
+        echo "[dry-run] git remote prune origin"
+    elif prune_out=$(git remote prune origin 2>&1); then
+        grep -F '[pruned]' <<<"${prune_out}" || true  # the 'URL:' heading is noise
+    else
+        echo "Note: could not prune stale remote-tracking refs — carrying on." >&2
     fi
     if ! ahead=$(git rev-list --count origin/master..HEAD 2>/dev/null) ||
         ! behind=$(git rev-list --count HEAD..origin/master 2>/dev/null); then
