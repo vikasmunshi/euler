@@ -779,7 +779,7 @@ pane scrolls its own overflow.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs…      │ 🯅 │  fixed
+│ HEADER  eiπ+1=0 │ Solutions · Docs · Topics │ Actions │ ⌂ crumbs…  │ ⑂ main │ 🯅 │  fixed
 ├──────────────────────────────────────┬───────────────────────────────────────┤
 │  LEFT PANE  (#content)                │  RIGHT PANE  (#ws)                    │
 │  navigable content, htmx-swapped;     │  the solver PTY terminal over /ws     │  equal
@@ -791,12 +791,16 @@ pane scrolls its own overflow.
 
 - **Header** — one control surface, identical on every page: the brand (→ `/`), primary
   nav, the **Actions** menu (page-specific verbs, always present even when empty), a
-  **back arrow**, **breadcrumbs**, and the **user glyph** (Account, the terminal
-  connect/disconnect item, Logout).
+  **back arrow**, **breadcrumbs**, the **git chip** (§11.9), and the **user glyph**
+  (Account, the terminal connect/disconnect item, Logout).
 
   The back arrow is not redundant with the browser's. The browser's back navigates the
   *document* and would take the terminal with it, so the pane keeps a history of its own
   and performs a swap, not a navigation.
+
+  Git sits inside `.app-who`, before the user glyph: `margin-left: auto` pushes that
+  group right, and the chip belongs on the *identity* side of the gap — it is state about
+  **your clone**, not about the page in the pane.
 
   The terminal item is **one** entry, not two: it names the act it offers
   ("Disconnect") and the dot beside it carries the state. The iframe reports
@@ -953,6 +957,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/topics/` · `/topics/{name}` | topics index · a topic page | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
+| GET | `/git` | the header's git chip alone — the refresh the shell asks for (§11.9) | reader |
 | GET/POST | `/edit/solutions/` | progress upload (empty buffer) → save | contributor |
 | GET/POST | `/edit/solutions/{n}/{filename}` | file editor → save | contributor |
 | DELETE | `/edit/solutions/{n}/{filename}` | delete a bare `.py`/`.c` → the problem-page fragment | maintainer |
@@ -964,12 +969,12 @@ GET returns a **301**, so each view has exactly one URL.
 The `/docs/file/` view may serve only the service's readable roots — `docs/`, `topics/`,
 `solver/templates/`, `solutions/`, `README.md`, `LICENSE`, and the vendor README.
 
-**Page chrome via out-of-band swaps.** Breadcrumbs and Actions are page-specific but live
-in the fixed header, which htmx never re-renders — so every fragment response carries
-them as `hx-swap-oob` alongside the pane content, and a full-page render places the same
-partials directly. One source of truth per page: the handler supplies `crumbs` and
-`actions`. Actions is filtered by the subject's profile, but **hiding is UX; the route's
-floor is the boundary**.
+**Page chrome via out-of-band swaps.** Breadcrumbs, Actions and the git chip live in the
+fixed header, which htmx never re-renders — so every fragment response carries them as
+`hx-swap-oob` alongside the pane content, and a full-page render places the same partials
+directly. One source of truth per page: the handler supplies `crumbs` and `actions`, and
+the git middleware supplies `git`. Actions is filtered by the subject's profile, but
+**hiding is UX; the route's floor is the boundary**.
 
 ### 11.6 Content pages
 
@@ -1068,6 +1073,57 @@ listing the `wss:` origin.)
 
 Since htmx uses `hx-*` attributes rather than inline script, it coexists with a strict
 policy — but **avoid `hx-on:` handlers**, which do not.
+
+### 11.9 The git chip
+
+The header's chip (`_git.html`) reports **this collaborator's clone** — branch, divergence
+from `origin/master`, worktree counts, and whether the private solutions are readable —
+and offers the verbs that move it. Same `<details class="menu">` chassis as Actions and
+the user pill: one menu idiom in the header, not three.
+
+**Quiet when clean.** An in-sync branch with nothing uncommitted is a glyph and a name in
+`--muted` — no counts, no tick. Every mark that appears is something to act on: ahead in
+`--git-staged` (yours, ready to go), behind in the accent ink (the pull you owe), and a
+`--git-modified` **ring** for a dirty worktree — a ring, not a disc, so it cannot be read
+as the terminal's connect dot two controls to its right.
+
+**One read per navigation, no polling.** `solver/web/site/gitstate.py` answers the whole
+chip with a single `git status --porcelain=v2 --branch`; a middleware in `install_content`
+stashes it on the request (`render` is sync and cannot await), and `render._context` picks
+it up. The read is **local-only** — git touches no network — so ahead/behind are measured
+against `origin/master` *as of the last fetch*, i.e. the freshness of a `git-sync`. That is
+the honest reading for a status light: it reports the clone, and the clone is what the
+user's commands act on.
+
+**The verbs type into the terminal.** Each is a `[data-term-cmd]` button (`site.js` → the
+`/terminal` iframe), exactly like the account page's tool rows: the web shell is the front
+door, so there is one execution path and one audit trail. Hence every verb *names the
+command it types* — the menu is a way into the shell, not around it. The floors come free:
+the command lands in a shell that already resolved this subject, and `requires()` there is
+the boundary whatever the menu shows. `git-commit` needs no argument, because the shell
+supplies the problem it is on.
+
+**A disconnected terminal is a designed state.** `terminal.js`'s `send()` drops the frame
+on a closed socket, so a click would silently do nothing — the one outcome a control must
+never have. `site.js` paints `.git-offline` from the same single `termConnected` every
+other `[data-term-*]` control reads; the panel then says so and offers Connect.
+
+**The refresh: the shell says when it moved.** A git command runs in the terminal, which is
+*not* a navigation — so without a nudge the chip would be most wrong exactly after the user
+acted. The git commands emit `OSC 5379` `git;<token>` on their success paths
+(`solver/core/osc.py`, the one definition of that wire); `terminal.js` posts
+`{euler: 'git-changed'}`; `site.js` dispatches `euler:git-changed` on `<body>`; the chip's
+own `hx-get="/git"` (`hx-trigger="… from:body"`, `hx-swap="outerHTML"`) replaces itself.
+One read, at the one moment the state changed. It fires for a **hand-typed** `git-sync`
+exactly as for the menu's item — the menu types the same command, so there is one path.
+A lost or replayed sequence costs a stale chip until the next navigation, never a wrong one.
+
+**Two states that are not "clean".** With no readable `.git` — the shared content tier runs
+as a uid with no access to it — `read()` returns `None` and the chip is inert ("no clone");
+that is also what the auth tier's pages render, since they build their own contexts and
+never set `git`. When the clone *is* there but git will not answer — a locked vault stalls
+the clean filter, or the read times out — the chip is `unknown`: it says it does not know
+rather than painting "clean" over data it could not read.
 
 ## 12 · The web shell
 

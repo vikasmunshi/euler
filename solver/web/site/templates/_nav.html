@@ -1,5 +1,5 @@
 {# The fixed header (web-server-guide § The site): brand · nav · Actions · back · breadcrumbs
-   · user menu, grouped by separators — one control surface, identical on every
+   · git · user menu, grouped by separators — one control surface, identical on every
    page and in both tiers. Links swap only #content (plus hx-push-url); logout is
    the only full-page exit. No hx-on / inline JS (CSP).
 
@@ -55,6 +55,10 @@
   <span class="hsep" aria-hidden="true"></span>
   {% include "_crumbs.html" %}
   <div class="app-who">
+    {# Git sits inside `.app-who`, before the pill: `margin-left: auto` pushes this
+       group right, and the chip belongs on the identity side of that gap — it is
+       state about *your clone*, not about the page in the pane. #}
+    {% include "_git.html" %}
     {# The user pill is live in both tiers — signed out it is the way in, so it
        reads as *empty* (dashed ring, muted ink), never as disabled. #}
     <details class="menu user-menu">

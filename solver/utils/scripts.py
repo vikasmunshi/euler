@@ -20,6 +20,7 @@ from tomllib import load
 from typing import Literal
 
 from solver.config import ExitCodes, config
+from solver.core import osc
 from solver.core.problems import Problem
 from solver.crypto.ciphers import read_master_key
 from solver.crypto.config import config as crypto_config
@@ -77,6 +78,8 @@ def git_commit(problem: Problem, message: str, *, reset: bool = False) -> int:
     cmdline += ['git', 'add', '-A', *_commit_paths(problem), '&&']
     cmdline += ['git', 'commit', '--message', f'"{message}"']
     result = run_cmdline(' '.join(cmdline))
+    if result == 0:
+        osc.git_changed()
     return result
 
 
@@ -140,7 +143,10 @@ def git_commit_amend(problem: Problem) -> int:
         console.print(f'nothing to amend: [accent]p{problem.number:04d}[/accent] and the progress file '
                       'are unchanged.')
         return int(ExitCodes.EXIT_OK)
-    return run_cmdline(f'git add -A {" ".join(paths)} && git commit --amend --no-edit')
+    result = run_cmdline(f'git add -A {" ".join(paths)} && git commit --amend --no-edit')
+    if result == 0:
+        osc.git_changed()
+    return result
 
 
 @register(
@@ -238,6 +244,8 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     result = run_cmdline(f'{sys.executable} -m solver.crypto.gitfilter install')
     if result != 0:
         return result
+    # The filter is wired from here on, whatever the re-checkout below does — so both
+    # tails nudge the header's chip (its private-solutions row just changed).
     # Re-smudge: existing ciphertext in the worktree only decrypts on a fresh
     # checkout. Genuine local edits must not be clobbered — but a freshly wired
     # clone is NOT dirty (clean() passes ciphertext through, matching the stored
@@ -247,10 +255,13 @@ def git_filter(action: Literal['status', 'install'] = 'status') -> int:
     if dirty:
         console.print('[warning]solutions/private has local changes — skipping the re-checkout; '
                       'commit or stash, then run [accent]git-filter install[/accent] again.[/warning]')
+        osc.git_changed()
         return int(ExitCodes.EXIT_OK)
     console.print('[primary]Decrypting private solutions in place...[/primary]')
-    return run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
-                       '&& git checkout -- solutions/private')
+    result = run_cmdline('git ls-files -z -- solutions/private | xargs -0 -r rm -f -- '
+                         '&& git checkout -- solutions/private')
+    osc.git_changed()
+    return result
 
 
 @register(requires='reader',
@@ -276,6 +287,9 @@ def git_sync(dry_run: bool = False) -> int:
         result = run_cmdline(config.scripts.sync)
         if result == 0:
             _enc_key_pull_flow()
+            # The fetch moved origin/master, the merge moved the branch, and the flow
+            # above may have wired the filter: everything the chip shows.
+            osc.git_changed()
     return result
 
 
@@ -399,6 +413,8 @@ def git_push(force: bool = False, pr: bool = True) -> int:
             return ExitCodes.EXIT_ERROR
     lease: str = ' --force-with-lease' if force else ''
     result: int = run_cmdline(f'git push -u{lease} origin {branch}')
+    if result == 0:
+        osc.git_changed()   # origin/<branch> moved up to HEAD: the chip's ahead count
     if result != 0 or not pr or branch == 'master':
         return result
     return _ensure_pull_request(branch)

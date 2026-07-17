@@ -98,20 +98,34 @@
      thing you want to act on. Clicking types `command` into the web shell
      (site.js → the /terminal iframe): these logins are interactive and belong in a
      terminal, so the row carries you there rather than telling you what to type.
-     Three states, not two (vault_api._tool_status): `not installed` is neither good
-     nor bad — the binary is simply absent from this instance — so it gets a plain
-     pill, and the button is disabled because no command here would install it. #}
-  {% macro tool(name, status, command) %}
+     Three tones, not two: `ok` and `warn` are good and not-yet, and a plain pill is
+     neither — the state is simply not a verdict (a binary absent from this
+     instance), so it gets no dot and the button is disabled, because no command
+     here would change it.
+     The tone is passed rather than derived from the status text: the rows do not
+     share one vocabulary (a CLI is `signed in`, a clone is `decrypted`), and a macro
+     that pattern-matched every row's words would have to learn each new one. #}
+  {% macro tool(name, status, command, tone) %}
   <div class="tool-row">
     <span class="tool-name">{{ name }}</span>
     <button type="button" data-term-cmd="{{ command }}"
-            class="state-pill state-action{% if status == 'signed in' %} ok{% elif status == 'not signed in' %} warn{% endif %}"
-            {% if status == 'not installed' %}disabled{% endif %}
-            title="{% if status == 'not installed' %}{{ name }} is not installed on this instance{% else %}run `{{ command }}` in your terminal{% endif %}">
-      <span class="dot{% if status == 'signed in' %} on{% elif status == 'not signed in' %} off{% endif %}"></span>
+            class="state-pill state-action{% if tone %} {{ tone }}{% endif %}"
+            {% if not tone %}disabled{% endif %}
+            title="{% if not tone %}{{ name }} is not installed on this instance{% else %}run `{{ command }}` in your terminal{% endif %}">
+      <span class="dot{% if tone == 'ok' %} on{% elif tone == 'warn' %} off{% endif %}"></span>
       {{ status }}</button>
   </div>
   {% endmacro %}
-  {{ tool('GitHub CLI', gh_status, 'git-identity') }}
-  {{ tool('Claude Code', claude_status, '! claude /login') }}
+  {# First, because it is the one that decides whether there is anything to read:
+     with the filter unwired, `solutions/private` is ciphertext in the working tree
+     and every private problem is a wall of base64. The header's chip reports the
+     same fact (gitstate.filter_wired) — this is where it is fixed. #}
+  {{ tool('Private solutions',
+          'decrypted' if filter_wired else 'locked',
+          'git-filter status' if filter_wired else 'git-filter install',
+          'ok' if filter_wired else 'warn') }}
+  {{ tool('GitHub CLI', gh_status, 'git-identity',
+          'ok' if gh_status == 'signed in' else ('warn' if gh_status == 'not signed in' else '')) }}
+  {{ tool('Claude Code', claude_status, '! claude /login',
+          'ok' if claude_status == 'signed in' else ('warn' if claude_status == 'not signed in' else '')) }}
 </section>

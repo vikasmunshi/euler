@@ -1,0 +1,132 @@
+{# The git chip (web-server-guide § The site): this clone's branch state, and the verbs that
+   move it. Lives in the fixed header just before the user pill — git is state about
+   *your clone*, not about the page in the pane, so it belongs on the identity side
+   of `.app-who`'s gap.
+
+   Same <details class="menu"> chassis as Actions and the user pill: one menu idiom
+   in the header, not three.
+
+   Two ways in, one partial:
+   · every block response re-sends it `hx-swap-oob` (like `_crumbs.html`), so the
+     fixed header tracks the pane — one `git status` per navigation, no polling;
+   · `GET /git` renders it plain, for the refresh the shell asks for after a git
+     command (OSC 5379 `git` → terminal.js → site.js → this element's hx-get).
+
+   `git` (a solver.web.site.gitstate.GitState) is the switch, and defaults to None
+   in render._context — so the auth tier's pages, and any tier that cannot read a
+   clone, render the inert chip instead of failing. #}
+{% if git and not git.unknown %}
+<details id="git" class="menu git-menu {{ 'is-dirty' if git.dirty else 'is-clean' }}"
+         {% if oob %}hx-swap-oob="true"{% endif %}
+         hx-get="/git" hx-trigger="euler:git-changed from:body" hx-swap="outerHTML">
+  {# The title carries the whole state in words: the chip is small, and it is the
+     one control here whose glyphs are counts rather than labels. #}
+  <summary title="{{ git.branch or 'detached HEAD' }}{% if git.upstream %} — {% if git.ahead %}{{ git.ahead }} ahead{% endif %}{% if git.ahead and git.behind %}, {% endif %}{% if git.behind %}{{ git.behind }} behind{% endif %}{% if not git.ahead and not git.behind %}in sync with {{ git.upstream }}{% endif %}{% endif %}{% if git.dirty %}, uncommitted changes{% endif %}">
+    {# A branch: one commit line, one fork, three nodes. Not a cloud or an arrow —
+       the chip is about *this clone's* shape, and none of the state below it is
+       about the network. #}
+    <svg class="git-glyph" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 8v8"/>
+      <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M17 9v1a4 4 0 0 1-4 4H7"/>
+      <circle cx="7" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="7" cy="18.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="17" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <span class="git-branch">{{ git.branch or 'detached' }}</span>
+    {# Counts appear only when non-zero: a clean, in-sync branch is a glyph and a
+       name, and any digit in the header is therefore something you could act on. #}
+    {% if git.ahead or git.behind %}
+    <span class="git-counts" aria-label="{% if git.ahead %}{{ git.ahead }} ahead{% endif %}{% if git.ahead and git.behind %}, {% endif %}{% if git.behind %}{{ git.behind }} behind{% endif %}">
+      {% if git.ahead %}
+      <span class="git-count ahead"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4l6 8h-4v8h-4v-8H6z"/></svg>{{ git.ahead }}</span>
+      {% endif %}
+      {% if git.behind %}
+      <span class="git-count behind"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 20l-6-8h4V4h4v8h4z"/></svg>{{ git.behind }}</span>
+      {% endif %}
+    </span>
+    {% endif %}
+    {% if git.dirty %}<span class="git-dirty" aria-label="uncommitted changes"></span>{% endif %}
+  </summary>
+  <ul class="menu-list menu-right git-panel">
+    <li class="menu-info">
+      <span class="git-track"><b>{{ git.branch or 'detached HEAD' }}</b>{% if git.upstream %} → {{ git.upstream }}{% endif %}</span>
+    </li>
+    {% if git.dirty %}
+    {# A zero is dropped, not greyed: the line lists what IS, so it stays short. #}
+    <li class="git-stat">
+      {% if git.modified %}<span class="modified"><span class="n">{{ git.modified }}</span><span class="k">modified</span></span>{% endif %}
+      {% if git.staged %}<span class="staged"><span class="n">{{ git.staged }}</span><span class="k">staged</span></span>{% endif %}
+      {% if git.untracked %}<span class="untracked"><span class="n">{{ git.untracked }}</span><span class="k">untracked</span></span>{% endif %}
+    </li>
+    {% else %}
+    {# "As of your last sync", not "as of now": `git status` reads local refs and
+       never touches the network, so this is the clone's own account of itself. #}
+    <li class="menu-info">No local changes{% if git.upstream and not git.ahead and not git.behind %} · in sync as of your last <code>git-sync</code>{% endif %}</li>
+    {% endif %}
+    <li class="menu-sep" aria-hidden="true"></li>
+    {# Terminal down = the verbs have nowhere to land (terminal.js's send() drops the
+       frame on a closed socket), so site.js paints .git-offline on this panel from
+       the same `termConnected` every other [data-term-*] control reads. Without it a
+       click would silently do nothing. #}
+    <li class="git-need-term">
+      These run in the terminal, and it is disconnected.<br>
+      <button type="button" data-term-toggle>Connect the terminal</button>
+    </li>
+    {# Every verb types a real command into the shell and lets it answer there — the
+       same move the account page's tool rows make, for the same reason: the web shell
+       is the front door, so there is one execution path and one audit trail. So every
+       verb names the command it types. The floors are the shell's: the command lands
+       in a shell that already resolved this subject, and `requires()` there is the
+       boundary whatever this menu shows. #}
+    {% macro verb(label, command, floor) %}
+    {% if subject and subject.has(floor) %}
+    <li class="verb"><button type="button" data-term-cmd="{{ command }}"
+        title="run `{{ command }}` in your terminal">{{ label }}<span class="cmd">{{ command }}</span></button></li>
+    {% else %}
+    {# Shown, not hidden: the ladder is part of what the page teaches, and a verb that
+       vanishes makes two collaborators' screens differ silently. #}
+    <li class="verb is-locked"><button type="button" aria-disabled="true"
+        title="{{ label }} needs the {{ floor }} profile">{{ label }}<span class="cmd">{{ floor }}</span></button></li>
+    {% endif %}
+    {% endmacro %}
+    {{ verb('Review changes', 'git-status --details', 'reader') }}
+    {{ verb('Sync with master', 'git-sync', 'reader') }}
+    {# No problem argument: the shell supplies the one it is on. #}
+    {{ verb('Commit', 'git-commit', 'contributor') }}
+    {{ verb('Push & open pull request', 'git-push', 'contributor') }}
+    {{ verb('Pull requests', 'gh-pr list', 'maintainer') }}
+    <li class="menu-sep" aria-hidden="true"></li>
+    {# The one piece of clone health that silently decides whether solutions/private
+       is readable at all. The account page owns the full story (the vault, the key,
+       whether it can decrypt); this reports, and offers the one-line fix. #}
+    <li class="menu-info">Private solutions
+      <span class="menu-state">{{ 'decrypted' if git.filter_wired else 'locked' }}<span class="dot {{ 'on' if git.filter_wired else 'off' }}"></span></span></li>
+    {% if not git.filter_wired %}
+    {{ verb('Unlock them', 'git-filter install', 'reader') }}
+    {% endif %}
+  </ul>
+</details>
+{% else %}
+{# Inert, never absent. Signed out there is no clone (the header is present and
+   shows the shape of the place); signed in with `unknown`, the read failed — a
+   locked vault, a timeout — and the chip says it does not know rather than
+   painting "clean" over data it could not read.
+
+   Only the `unknown` chip listens for the refresh: it is the one with somewhere to
+   go (unlock the vault and the next nudge resolves it to a real chip). The
+   no-clone chip renders on the auth tier too, which has no /git route and no htmx —
+   dead attributes there would be a promise nothing can keep. #}
+<span id="git" class="menu git-menu is-locked git-inert{% if git %} is-unknown{% endif %}" aria-disabled="true"
+      {% if oob %}hx-swap-oob="true"{% endif %}
+      {% if git %}hx-get="/git" hx-trigger="euler:git-changed from:body" hx-swap="outerHTML"{% endif %}
+      title="{% if git %}branch state could not be read{% else %}no clone{% endif %}">
+  <svg class="git-glyph" viewBox="0 0 24 24" aria-hidden="true">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M7 8v8"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M17 9v1a4 4 0 0 1-4 4H7"/>
+    <circle cx="7" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="7" cy="18.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="17" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+  </svg>
+  <span class="git-branch">{% if git %}&#8212;&#8202;&#8212;&#8202;&#8212;{% else %}no clone{% endif %}</span>
+</span>
+{% endif %}

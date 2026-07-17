@@ -14,6 +14,7 @@ solver.core.download,
 solver.core.evaluate,True
 solver.core.list,True
 solver.core.new,True
+solver.core.osc,
 solver.core.problems,
 solver.core.results,True
 solver.core.test_cases,True
@@ -69,6 +70,7 @@ solver.web.csp,
 solver.web.site.app,
 solver.web.site.config,
 solver.web.site.content,
+solver.web.site.gitstate,
 solver.web.site.render,
 solver.web.site.validate,
 solver.web.user.app,

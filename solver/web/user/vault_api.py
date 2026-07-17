@@ -42,6 +42,7 @@ from cryptography.exceptions import InvalidTag
 from solver.crypto import vault
 from solver.crypto.ciphers import load_private_key, public_key_hex, read_master_key
 from solver.crypto.config import config as crypto_config
+from solver.web.site import gitstate
 from solver.web.site.app import requires
 from solver.web.site.render import render
 
@@ -272,6 +273,9 @@ def add_vault_routes(app: web.Application) -> None:
         loop = asyncio.get_running_loop()
         gh = await loop.run_in_executor(None, _tool_status, 'gh', ['auth', 'status'])
         claude = await loop.run_in_executor(None, _claude_status)
+        # The same reader the header's chip uses (one small file read), so the row
+        # and the chip cannot disagree about the same clone.
+        wired = gitstate.filter_wired(crypto_config['root_dir'])
         # An X25519 unwrap over two small files, but it is filesystem work on the
         # event loop's thread — off it, like the tool probes beside it.
         can_decrypt = (pubkey_state == 'key') and await loop.run_in_executor(None, _can_decrypt)
@@ -285,6 +289,7 @@ def add_vault_routes(app: web.Application) -> None:
             'secret_names': _secret_names(vault_key) if vault_key is not None else [],
             'gh_status': gh,
             'claude_status': claude,
+            'filter_wired': wired,
         }, status=status)
 
     @requires(_VAULT_REQUIRES)

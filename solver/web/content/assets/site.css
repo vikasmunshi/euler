@@ -181,6 +181,99 @@ summary.user-glyph svg { width: 1.15rem; height: 1.15rem; display: block; }
 summary.user-glyph.is-anon { border-style: dashed; background: none; color: var(--muted); }
 summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--accent); }
 
+/* ── the git chip (_git.html) ────────────────────────────────────────────────
+   Inside `.app-who`, before the user pill: state about YOUR CLONE, so it sits on
+   the identity side of the header's gap, not with the page's own controls. Same
+   <details class="menu"> chassis as Actions and the pill — one menu idiom here,
+   not three — with a summary that carries state instead of a label.
+
+   The chip is QUIET WHEN CLEAN: an in-sync branch with nothing uncommitted is a
+   glyph and a name in --muted, no counts and no tick. Every mark that appears is
+   something you could act on, which is what makes it worth a glance rather than
+   wallpaper. */
+.git-menu > summary { display: inline-flex; align-items: center; gap: 0.4rem; padding-inline: 0.5rem; }
+.git-glyph { width: 1rem; height: 1rem; display: block; flex: none; }
+.git-branch {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.git-menu.is-clean > summary { color: var(--muted); }
+.git-menu.is-dirty > summary { color: var(--text); }
+/* Ahead/behind are the SHAPE of the divergence, so they stay two glyphs with
+   tabular digits, never one blended number. Ahead is --git-staged: work that is
+   yours and ready to go. Behind is the accent ink: the pull you owe — attention,
+   not alarm. */
+.git-counts { display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.git-count { display: inline-flex; align-items: center; gap: 0.1rem; }
+.git-count.ahead { color: var(--git-staged); }
+.git-count.behind { color: var(--accent-ink); }
+.git-count svg { width: 0.7rem; height: 0.7rem; }
+/* The dirty mark, in the same --git-modified amber the file tree already means
+   "modified" with, so the colour says one thing site-wide. A RING, not a disc: a
+   filled dot two controls from the user menu's terminal dot would read as the
+   same kind of state, and it is not. */
+.git-dirty { width: 0.5rem; height: 0.5rem; border-radius: 50%;
+  border: 1.5px solid var(--git-modified); flex: none; }
+/* Signed out (no clone), or a read that failed: inert, never absent — the header
+   shows the shape of the place either way, and a chip that says nothing is honest
+   where one that says "clean" would not be. */
+.git-inert { display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.3rem 0.5rem; color: var(--muted); }
+.git-menu.is-unknown .git-branch { color: var(--border); }
+.git-panel { min-width: 20rem; }
+/* The file counts in their own inks. A zero is dropped by the template, not greyed
+   here: the line lists what IS, so it stays short. */
+.git-stat { display: flex; gap: 0.9rem; padding: 0.15rem 0.7rem 0.55rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+.git-stat span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.git-stat .n { color: var(--text); }
+.git-stat .modified .n { color: var(--git-modified); }
+.git-stat .staged .n { color: var(--git-staged); }
+.git-stat .untracked .n { color: var(--git-untracked); }
+.git-stat .k { color: var(--muted); }
+.git-track { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.78rem; color: var(--muted); }
+.git-track b { color: var(--text); font-weight: 500; }
+/* Every verb types its command into the shell, so every verb names it — in the
+   terminal's own mono, one pane to the right. The menu is a way INTO the shell,
+   not around it: click Sync today, type `git-sync` next week.
+   The row is a flex pair, not a float: a floated command drops to its own line as
+   soon as label + command outgrow the panel, and rows of two different heights read
+   as a rendering accident rather than a list. Flex keeps one row per verb and lets
+   the label take the slack. */
+.git-panel .verb button {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1.25rem;
+}
+.menu-list .cmd { color: var(--muted); flex: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.75rem; }
+/* A verb above your floor is shown, not hidden (the ladder is part of what the page
+   teaches, and a verb that vanishes makes two collaborators' screens differ
+   silently). The margin names the profile it wants. */
+.menu-list li.is-locked button { color: var(--muted); cursor: default; }
+.menu-list li.is-locked button:hover { background: none; }
+/* The margin still names the profile the verb wants, so it has to be READ: the
+   dimmed label already says "not yours", and a hint at --border on --surface-hi is
+   not a subtle hint, it is an invisible one. The row reads locked because both
+   halves are muted, not because half of it is unreadable. */
+.menu-list li.is-locked .cmd { color: var(--muted); }
+/* Terminal down: the verbs have nowhere to land (terminal.js's send() drops the
+   frame on a closed socket), so site.js paints .git-offline from the same
+   `termConnected` every other control reads. Without this a click would silently
+   do nothing — the one outcome a control must never have. */
+.git-need-term { display: none; margin: 0.25rem 0.35rem 0.1rem; padding: 0.45rem 0.55rem;
+  border: 1px dashed var(--border); border-radius: 6px; color: var(--muted); font-size: 0.82rem; }
+.git-offline .git-need-term { display: block; }
+.git-need-term button { display: inline; width: auto; padding: 0; margin-top: 0.15rem;
+  border: 0; background: none; color: var(--accent); font: inherit; cursor: pointer;
+  text-decoration: underline; }
+.git-need-term button:hover { background: none; color: var(--accent-ink); }
+.git-offline .verb button { color: var(--muted); cursor: default; }
+.git-offline .verb button:hover { background: none; }
+
 /* Terminal state, read at a glance inside the user menu. The dot is the state;
    the verb on the item is the act it offers (§ user pill). */
 .menu-state { display: inline-flex; align-items: center; gap: 0.35rem; float: right; }

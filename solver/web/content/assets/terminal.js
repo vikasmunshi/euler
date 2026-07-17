@@ -10,6 +10,8 @@
    - up (here → parent): {euler: 'navigate', path} when the shell's `show`/`edit`
      emits its OSC 5379 sequence — the shell drives the left pane, and only ever
      through the parent (this document never touches the parent's DOM);
+     {euler: 'git-changed'} when a git command reports it moved this clone, so the
+     header's chip re-reads itself;
      {euler: 'term-state', connected} whenever the socket opens or closes, so the
      user menu's item can name the act it offers.
 
@@ -148,35 +150,58 @@
   window.addEventListener('resize', refit);
   new ResizeObserver(refit).observe(host);
 
-  // ── OSC 5379: the shell drives the left pane (solver/core/viewer.py) ──────
-  // `show` / `edit` in a web shell emit ESC ] 5379 ; <payload> BEL on the PTY:
-  //   open;<NNNN>;<token>              → /solutions/NNNN/
-  //   edit;<NNNN>;<token>;<relpath>    → /edit/solutions/NNNN/<relpath>
+  // ── OSC 5379: the shell drives the chrome (solver/core/osc.py) ────────────
+  // A web shell emits ESC ] 5379 ; <payload> BEL on the PTY. The action is always
+  // the first field; the token's position is per-action, because `edit` must keep
+  // its relpath last (a path may contain ';', so only the last field can absorb it):
+  //   open;<NNNN>;<token>              → swap the pane to /solutions/NNNN/
+  //   edit;<NNNN>;<token>;<relpath>    → swap the pane to /edit/solutions/NNNN/<relpath>
+  //   git;<token>                      → the header's git chip re-reads itself
   //
   // Two guards, for two different re-runs of the same sequence:
   //   · `live` — the attach replay redraws commands that already ran. Acting on
   //     those would hijack the pane on every page load (a deep link to one problem
   //     would bounce to whatever the shell last showed). Drawn, never obeyed.
   //   · `lastToken` — the token is a server-side ms clock, strictly increasing per
-  //     command, so a sequence we have already passed cannot navigate again.
+  //     command, so a sequence we have already passed cannot fire again.
   var lastToken = 0;
+
+  //: The message an OSC payload asks the parent to send, or null if it asks nothing.
+  //: Pure: the guards and the postMessage live in the handler, so this stays a
+  //: statement about the wire alone.
+  function oscMessage(parts) {
+    var action = parts[0];
+    if (action === 'git') {
+      return { euler: 'git-changed' };
+    }
+    var number = parts[1];
+    if (!/^\d+$/.test(number || '')) { return null; }
+    if (action === 'open') {
+      return { euler: 'navigate', path: '/solutions/' + number + '/' };
+    }
+    if (action === 'edit') {
+      var file = parts.slice(3).join(';');    // rejoin: a relpath may contain ';'
+      return file ? { euler: 'navigate', path: '/edit/solutions/' + number + '/' + file } : null;
+    }
+    return null;
+  }
+
+  //: Where the token sits: last for `git`, third for the pane actions (§ above).
+  function oscToken(parts) {
+    return Number(parts[0] === 'git' ? parts[1] : parts[2]) || 0;
+  }
+
   term.parser.registerOscHandler(5379, function (payload) {
     var parts = payload.split(';');
-    var action = parts[0], number = parts[1], token = Number(parts[2]) || 0;
-    if (!live || !/^\d+$/.test(number || '') || token <= lastToken) { return true; }
-    var path = null;
-    if (action === 'open') {
-      path = '/solutions/' + number + '/';
-    } else if (action === 'edit') {
-      var file = parts.slice(3).join(';');    // rejoin: a relpath may contain ';'
-      if (file) { path = '/edit/solutions/' + number + '/' + file; }
-    }
-    if (path && window.parent !== window) {
+    var token = oscToken(parts);
+    if (!live || token <= lastToken) { return true; }
+    var message = oscMessage(parts);
+    if (message && window.parent !== window) {
       lastToken = token;
-      // Framed (the normal case): the parent owns the left pane, and we ask it to
-      // swap — never reaching into its DOM. Unframed (a direct visit to /terminal)
-      // there is no pane to drive, so the sequence is simply consumed.
-      window.parent.postMessage({ euler: 'navigate', path: path }, location.origin);
+      // Framed (the normal case): the parent owns the pane and the header, and we
+      // ask it to act — never reaching into its DOM. Unframed (a direct visit to
+      // /terminal) there is no chrome to drive, so the sequence is simply consumed.
+      window.parent.postMessage(message, location.origin);
     }
     return true;                              // handled — not printable text
   });

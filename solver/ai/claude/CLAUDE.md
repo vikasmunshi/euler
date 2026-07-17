@@ -107,6 +107,7 @@ solver/
     evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
     list.py           — List solution directory contents.
     new.py            — The `new` command and solution-file formatting (black / isort / autoflake).
+    osc.py            — The shell → browser control channel: `OSC 5379`.
     problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
     results.py        — Results: save and retrieve problem results.
     test_cases.py     — Load test cases for evaluation
@@ -173,6 +174,7 @@ solver/
       app.py          — The content service aiohttp app: identity from forward_auth, routes, gating.
       config.py       — Content-service runtime configuration, read from the environment.
       content.py      — Config-free readers for the content trees the service renders.
+      gitstate.py     — The header chip's git state: one read of this user's clone.
       render.py       — The full-page-vs-block render contract (§4.5).
       validate.py     — The save gate: the checks every write passes.
     user/             — The per-user web service: one collaborator's content **and** web shell.

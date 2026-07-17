@@ -35,9 +35,9 @@ from aiohttp import web
 
 from solver.auth import LADDER, Authorizations, Subject, slugify
 from solver.web.csp import csp_middleware
-from solver.web.site import content
+from solver.web.site import content, gitstate
 from solver.web.site.config import SiteConfig
-from solver.web.site.render import SUBJECT_KEY, render
+from solver.web.site.render import GIT_KEY, SUBJECT_KEY, render
 from solver.web.site.validate import EDITABLE_SUFFIXES, validate
 
 log = logging.getLogger('euler-content')
@@ -182,6 +182,22 @@ def _problem_number(request: web.Request) -> int:
 async def healthz(request: web.Request) -> web.Response:
     """Liveness probe (unauthenticated) — Caddy/monitoring only."""
     return web.Response(text='ok')
+
+
+@requires(VIEW)
+async def git_chip(request: web.Request) -> web.StreamResponse:
+    """``GET /git`` — the header's git chip on its own.
+
+    The refresh half of the chip's contract. Every navigation already re-sends the
+    chip out-of-band with the pane (:mod:`solver.web.site.render`), but a git command
+    runs in the *terminal*, which is not a navigation — so the shell nudges the page
+    over OSC 5379 (``git;<token>``), ``site.js`` turns that into an
+    ``euler:git-changed`` event, and the chip's own ``hx-get`` lands here. One read,
+    at the one moment the state actually changed. Nothing polls.
+
+    The middleware has already done the read; this only renders it.
+    """
+    return render(request, '_git.html')
 
 
 @requires(VIEW)
@@ -606,6 +622,7 @@ def add_content_routes(app: web.Application) -> None:
     app.add_routes([
         web.get('/healthz', healthz),
         web.get('/', home),
+        web.get('/git', git_chip),
         web.get('/terminal', terminal),
         # solutions — canonical with the trailing slash (web-server-guide § The site)
         web.get('/solutions', redirect_slash),
@@ -634,13 +651,41 @@ def add_content_routes(app: web.Application) -> None:
     ])
 
 
+def git_middleware(repo_root: Path) -> Any:
+    """The chip's read: one ``git status`` per request that renders page chrome.
+
+    A middleware rather than per-handler work, because the chip is *chrome* — every
+    content response carries it (out-of-band beside the crumbs), so every content
+    handler would otherwise repeat the same three lines. :func:`render` is sync and
+    cannot await the read itself, so the state is stashed on the request here and
+    picked up by ``render._context``.
+
+    Skipped for anyone without a subject (nothing to show a chip to) and for the
+    routes that render no chrome — the health probe, the static trees, and the
+    fragment-only write routes are not navigations. That keeps the promise the design
+    makes: one read per navigation, and no polling.
+    """
+
+    @web.middleware
+    async def _middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
+        if request.get(SUBJECT_KEY) is not None and request.method == 'GET' \
+                and not request.path.startswith(('/healthz', '/assets/', '/vendor/', '/ws')):
+            request[GIT_KEY] = await gitstate.read(repo_root)
+        return await handler(request)
+
+    return _middleware
+
+
 def install_content(app: web.Application, config: SiteConfig, authz: Authorizations) -> None:
     """Wire the content surface (config, readable roots, jinja, routes, static) onto *app*.
 
-    The caller owns app creation + the middleware chain (the identity middleware differs
-    between the per-profile and per-user tiers); this installs everything else.
+    The caller owns app creation + the identity middleware (which differs between the
+    per-profile and per-user tiers); this installs everything else — including the git
+    middleware, which is appended *after* the caller's identity middleware so it can
+    read the subject that one resolved.
     """
     app[CONFIG_KEY] = config
+    app.middlewares.append(git_middleware(config.repo_root))
     # The /docs/file/ view may serve only these content trees — every one a
     # reader-floor read. These used to come from the policy's objects→paths map;
     # with the plain-profile re-simplification they are the service's own roots

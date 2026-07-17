@@ -15,8 +15,6 @@ from __future__ import annotations
 __all__ = ['show', 'edit']
 
 import mimetypes
-import sys
-import time
 from functools import lru_cache
 from pathlib import Path
 from subprocess import CalledProcessError, DEVNULL, run
@@ -25,15 +23,12 @@ from typing import Iterable
 from prompt_toolkit.completion import Completion
 
 from solver.config import ExitCodes, config
+from solver.core import osc
 from solver.core.problems import Problem
 from solver.shell import console, register
 from solver.shell.command import Context
 from solver.shell.variables import variables
 from solver.utils.path_utils import iterdir_recursive
-
-#: OSC identifier shared with solver.js's `registerOscHandler`: `ESC ] 5379 ; <payload> BEL`.
-#: `open;<NNNN>;<token>` (show) or `edit;<NNNN>;<token>;<relpath>` (edit).
-_OSC_CODE: int = 5379
 
 
 # ---------------------------------------------------------------------------
@@ -127,9 +122,7 @@ def edit(problem: Problem, filename: str) -> int:
     rel: str = Path(filename).as_posix()
 
     if config.subject.channel == 'web':
-        token = time.time_ns() // 1_000_000
-        sys.stdout.write(f'\x1b]{_OSC_CODE};edit;{problem.number:04d};{token};{rel}\x07')
-        sys.stdout.flush()
+        osc.emit('edit', f'{problem.number:04d}', str(osc.token()), rel)
         console.print(f'[muted]editing[/muted] [accent]{rel}[/accent] '
                       '[muted]in the viewer panel[/muted]')
         return ExitCodes.EXIT_OK
@@ -183,9 +176,7 @@ def show(problem: Problem, filename: str | None = None) -> int:
         return edit(problem, filename)
 
     if config.subject.channel == 'web':
-        token = time.time_ns() // 1_000_000
-        sys.stdout.write(f'\x1b]{_OSC_CODE};open;{problem.number:04d};{token}\x07')
-        sys.stdout.flush()
+        osc.emit('open', f'{problem.number:04d}', str(osc.token()))
         console.print(f'[muted]opening[/muted] [accent]{problem.number:04d}[/accent] '
                       '[muted]in the viewer panel[/muted]')
         return ExitCodes.EXIT_OK

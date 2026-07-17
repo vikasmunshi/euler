@@ -183,6 +183,13 @@
     document.querySelectorAll('[data-term-dot]').forEach(function (dot) {
       dot.className = 'dot ' + (termConnected ? 'on' : 'off');
     });
+    // The git menu's verbs type into the shell, so they need one to be there. This
+    // is the same single state, not a second reading of the socket: the panel joins
+    // the set above rather than tracking the terminal on its own. The chip's branch
+    // state is untouched — that is read server-side and owes the socket nothing.
+    document.querySelectorAll('.git-menu').forEach(function (menu) {
+      menu.classList.toggle('git-offline', !termConnected);
+    });
   }
   document.addEventListener('DOMContentLoaded', paintTerminalControls);
 
@@ -210,7 +217,16 @@
   document.addEventListener('click', function (ev) {
     var button = ev.target.closest && ev.target.closest('[data-term-cmd]');
     if (!button) { return; }
+    // A disconnected terminal drops the frame (terminal.js's send()), so the git
+    // menu paints itself offline and says so rather than letting a click do nothing
+    // silently. Honour that here: the panel's own note is the answer, not a command
+    // shouted into a closed socket.
+    if (button.closest('.git-offline')) { return; }
     postToTerminal({ euler: 'run', command: button.getAttribute('data-term-cmd') });
+    // The verb's answer belongs in the terminal, so close the menu that is now
+    // covering it. The chip itself refreshes when the shell says so (§ git-changed).
+    var menu = button.closest('details');
+    if (menu) { menu.open = false; }
   });
 
   // The iframe's own report of where it stands: the controls follow the terminal,
@@ -221,6 +237,25 @@
     if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'term-state') { return; }
     termConnected = !!ev.data.connected;
     paintTerminalControls();
+  });
+
+  // ── the git chip's refresh (OSC 5379 `git`) ────────────────────────────────
+  // The header reads its git state once per navigation and never polls — but the
+  // git commands run in the TERMINAL, and that is not a navigation. So the shell
+  // says when it moved (solver/core/osc.py → terminal.js → here) and the chip
+  // re-reads itself: one `git status`, at the one moment the state changed.
+  //
+  // The event is dispatched on <body> because the chip listens for it `from:body`
+  // and swaps ITSELF (hx-swap="outerHTML") — a fresh #git replaces the stale one
+  // without touching the pane or the terminal. Firing an event rather than calling
+  // htmx.ajax keeps the fetch declarative, in the markup, next to the element it
+  // replaces.
+  //
+  // It fires for a hand-typed `git-sync` exactly as for the menu's item: the menu
+  // types the same command, so there is one path here, not two.
+  window.addEventListener('message', function (ev) {
+    if (ev.origin !== window.location.origin || !ev.data || ev.data.euler !== 'git-changed') { return; }
+    document.body.dispatchEvent(new CustomEvent('euler:git-changed'));
   });
 
   // ── copy buttons ───────────────────────────────────────────────────────────
