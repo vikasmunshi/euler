@@ -63,6 +63,7 @@ a profile on each channel.
 | `solver.utils.misc` | `problems` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-audit` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-commit` |  | ✓ | ✓ | ✓ |
+| `solver.utils.scripts` | `git-commit-amend` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-hooks` |  | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `git-identity` |  | ✓ | ✓ | ✓ |

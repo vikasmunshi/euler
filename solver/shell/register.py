@@ -569,7 +569,7 @@ def _complete(spec: _CommandSpec, ctx: Context, incomplete: str) -> Iterable[str
 
 
 def _strip_positional_problem(spec: _CommandSpec, args: tuple[str, ...]) -> tuple[tuple[str, ...], Problem | None]:
-    """Consume a leading positional problem number from *args* for the `problem` special.
+    """Consume a leading positional problem from *args* for the `problem` special.
 
     Only the **first** positional token is a candidate, and only when it names a known
     problem (so `eval 42 dev` reads 42 as the problem while `eval dev` does not). The

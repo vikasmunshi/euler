@@ -58,7 +58,8 @@ a parameter that accepts repetition.
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
 | [`git-audit`](#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
-| [`git-commit`](#command-git-commit-commit) | `commit` | Commit everything, optionally resetting to origin/master. » |
+| [`git-commit`](#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
+| [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
 | [`git-filter`](#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
@@ -502,32 +503,66 @@ Aliased as `audit`.
 
 #### Command: `git-commit` (`commit`)
 
-Commit everything, optionally resetting to origin/master.
+Commit a problem's solution directory and progress, optionally resetting to origin/master.
 * profiles: admin, maintainer, contributor
+* ❏ takes an optional problem number (defaults to the current problem)
 * » supports `--silent`
 
 ```
 git-commit <message>
+[problem=<n>] (default current)
 [reset=true|--reset]
-[verify=false|--no-verify]
 [silent=true|--silent]
 ```
 
 ```text
-Stage and commit the solutions dir.
+Stage and commit the problem's solution directory.
 
-Adds everything under `solutions/` and commits it
+Adds everything under `problem.solution_dir`, plus `solutions/problems.json`
+    (the progress file `mark` rewrites), and commits just those
     — the routine "save my progress" step.
 
 Args:
-    message: The commit message.
-    reset:  When True, first soft-reset to `origin/master` so the new commit
-            squashes all local commits into a single checkpoint (working
-            tree untouched). Defaults to False.
-    verify: When True (default), run the pre-commit hook (flake8 + mypy).
-            When False, commit with `--no-verify`, skipping the hook.
-
+    problem:        The problem to commit.
+    message:        The commit message.
+    reset:          When True, first soft-reset to `origin/master` so the new commit
+                    squashes all local commits into a single checkpoint (working
+                    tree untouched). Defaults to False.
 Aliased as `commit`.
+```
+
+---
+
+#### Command: `git-commit-amend` (`amend`)
+
+Amend the last unpushed commit with a problem's current changes.
+* profiles: admin, maintainer, contributor
+* ❏ takes an optional problem number (defaults to the current problem)
+* » supports `--silent`
+
+```
+git-commit-amend
+[problem=<n>] (default current)
+[silent=true|--silent]
+```
+
+```text
+Fold this problem's current changes into the last commit, message unchanged.
+
+The "I forgot something" step after `git-commit`: stages everything under
+    `problem.solution_dir` plus `solutions/problems.json` and amends HEAD with
+    `--no-edit`, so the checkpoint absorbs the fix instead of growing a
+    "fix typo" commit behind it.
+
+Refused once HEAD is on origin — amending rewrites the commit, and a rewritten
+    commit that is already pushed only lands again through a force-push, so
+    `git-commit` is the honest step there. A no-op, not a failure, when nothing
+    under those paths has changed.
+
+Args:
+    problem:        The problem whose changes are folded into HEAD.
+
+Aliased as `amend`.
 ```
 
 ---
@@ -685,7 +720,8 @@ the `admin` floor, and force-pushing it is always refused.
 
 The PR is the second half of the push: an unreviewed branch on origin is not
 work anyone has been asked for. It is skipped on master (nothing to merge into
-itself), and a branch that already has one open keeps it.
+itself) and on a branch level with origin/master (nothing to review), and a
+branch that already has one open keeps it.
 
 Args:
     force: Push with `--force-with-lease` — needed after `git-sync` rebased your

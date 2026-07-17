@@ -19,6 +19,7 @@ from tomllib import load
 from typing import Literal
 
 from solver.config import ExitCodes, config
+from solver.core.problems import Problem
 from solver.crypto.ciphers import read_master_key
 from solver.crypto.config import config as crypto_config
 from solver.shell import console, register
@@ -48,30 +49,97 @@ def _current_branch() -> str:
     return proc.stdout.strip() if proc.returncode == 0 else ''
 
 
-@register(requires='contributor',
-          help_text='Commit everything, optionally resetting to origin/master.', aliases=('commit',), quietable=True, )
-def git_commit(message: str, *, reset: bool = False, verify: bool = True) -> int:
-    """Stage and commit the solutions dir.
+def _commit_paths(problem: Problem) -> list[str]:
+    """The paths a commit stages for *problem* — its directory and the progress file."""
+    return [problem.solution_dir.as_posix(), config.static_file_problems.as_posix()]
 
-    Adds everything under `solutions/` and commits it
+
+@register(requires='contributor',
+          help_text="Commit a problem's solution directory and progress, optionally resetting to origin/master.",
+          aliases=('commit',), quietable=True, )
+def git_commit(problem: Problem, message: str, *, reset: bool = False) -> int:
+    """Stage and commit the problem's solution directory.
+
+    Adds everything under `problem.solution_dir`, plus `solutions/problems.json`
+        (the progress file `mark` rewrites), and commits just those
         — the routine "save my progress" step.
 
     Args:
-        message: The commit message.
-        reset:  When True, first soft-reset to `origin/master` so the new commit
-                squashes all local commits into a single checkpoint (working
-                tree untouched). Defaults to False.
-        verify: When True (default), run the pre-commit hook (flake8 + mypy).
-                When False, commit with `--no-verify`, skipping the hook.
-
+        problem:        The problem to commit.
+        message:        The commit message.
+        reset:          When True, first soft-reset to `origin/master` so the new commit
+                        squashes all local commits into a single checkpoint (working
+                        tree untouched). Defaults to False.
     Aliased as `commit`.
     """
     cmdline: list[str] = ['git', 'reset', '--soft', 'origin/master', '&&'] if reset else []
-    cmdline += ['git', 'add', '-A', 'solutions', '&&']
-    cmdline += ['git', 'commit', '-a'] if verify else ['git', 'commit', '-a', '--no-verify']
-    cmdline += ['--message', f'"{message}"']
+    cmdline += ['git', 'add', '-A', *_commit_paths(problem), '&&']
+    cmdline += ['git', 'commit', '--message', f'"{message}"']
     result = run_cmdline(' '.join(cmdline))
     return result
+
+
+def _remotes_containing_head() -> list[str] | None:
+    """The remote-tracking branches that contain HEAD — empty when it is local-only.
+
+    Read from this clone's `origin/*` refs, which answer "have I pushed this?" — the one
+    question an amend must ask. They are as fresh as the last fetch (`git-sync`); a commit
+    pushed from *another* clone since then reads as local here, which is the residual risk
+    the remote's own non-fast-forward rejection still catches.
+
+    None when the question could not be answered at all (not a repo, no HEAD): the caller
+    must refuse rather than read that as "not pushed".
+    """
+    proc = run(['git', 'branch', '--remotes', '--contains', 'HEAD', '--format', '%(refname:short)'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    if proc.returncode != 0:
+        return None
+    # A bare '<remote>' among the refs is that remote's HEAD symref, not a branch it
+    # carries — naming it alongside the branch it points at only pads the refusal.
+    return [ref for line in proc.stdout.splitlines() if '/' in (ref := line.strip())]
+
+
+@register(requires='contributor', quietable=True,
+          help_text="Amend the last unpushed commit with a problem's current changes.",
+          aliases=('amend',), )
+def git_commit_amend(problem: Problem) -> int:
+    """Fold this problem's current changes into the last commit, message unchanged.
+
+    The "I forgot something" step after `git-commit`: stages everything under
+        `problem.solution_dir` plus `solutions/problems.json` and amends HEAD with
+        `--no-edit`, so the checkpoint absorbs the fix instead of growing a
+        "fix typo" commit behind it.
+
+    Refused once HEAD is on origin — amending rewrites the commit, and a rewritten
+        commit that is already pushed only lands again through a force-push, so
+        `git-commit` is the honest step there. A no-op, not a failure, when nothing
+        under those paths has changed.
+
+    Args:
+        problem:        The problem whose changes are folded into HEAD.
+
+    Aliased as `amend`.
+    """
+    if run(['git', 'rev-parse', '--verify', '--quiet', 'HEAD'],
+           cwd=config.root_dir, capture_output=True).returncode != 0:
+        console.print('[error]error:[/error] no commit to amend.')
+        return ExitCodes.EXIT_ERROR
+    pushed: list[str] | None = _remotes_containing_head()
+    if pushed is None:
+        console.print('[error]error:[/error] cannot tell whether HEAD is pushed — not amending.')
+        return ExitCodes.EXIT_ERROR
+    if pushed:
+        console.print(f'[error]error:[/error] HEAD is already pushed to [accent]{", ".join(pushed)}[/accent]; '
+                      'amending it would need a force-push — use [accent]git-commit[/accent] instead.')
+        return ExitCodes.EXIT_ERROR
+    paths: list[str] = _commit_paths(problem)
+    dirty: str = run(['git', 'status', '--porcelain', '--', *paths],
+                     cwd=config.root_dir, capture_output=True, text=True).stdout.strip()
+    if not dirty:
+        console.print(f'nothing to amend: [accent]p{problem.number:04d}[/accent] and the progress file '
+                      'are unchanged.')
+        return int(ExitCodes.EXIT_OK)
+    return run_cmdline(f'git add -A {" ".join(paths)} && git commit --amend --no-edit')
 
 
 @register(
