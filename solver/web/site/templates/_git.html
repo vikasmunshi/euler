@@ -106,12 +106,21 @@
     {{ verb('Pull requests', 'gh-pr list', 'maintainer') }}
     <li class="menu-sep" aria-hidden="true"></li>
     {# The one piece of clone health that silently decides whether solutions/private
-       is readable at all. The account page owns the full story (the vault, the key,
-       whether it can decrypt); this reports, and offers the one-line fix. #}
+       is readable at all. This reports; the account page owns the full story — the
+       key, whether it is authorised, the terminal actions that advance it — so the
+       chip does not offer a self-service "unlock". `git-filter install` would just
+       error for the common locked case (a reader not yet granted enc-key access, who
+       needs an admin to authorise their key first, not a local command), and the chip
+       cannot cheaply tell that apart from a key that merely has not been wired. So it
+       points at Account, where the state is known and the right action is offered. #}
     <li class="menu-info">Private solutions
       <span class="menu-state">{{ 'decrypted' if git.filter_wired else 'locked' }}<span class="dot {{ 'on' if git.filter_wired else 'off' }}"></span></span></li>
     {% if not git.filter_wired %}
-    {{ verb('Unlock them', 'git-filter install', 'reader') }}
+    <li class="git-locked-hint">
+      Awaiting key access.
+      <a href="/account" hx-get="/account" hx-target="#content" hx-swap="innerHTML"
+         hx-push-url="true">Set it up on your account&nbsp;&rsaquo;</a>
+    </li>
     {% endif %}
   </ul>
 </details>

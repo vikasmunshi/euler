@@ -1142,6 +1142,20 @@ on a closed socket, so a click would silently do nothing — the one outcome a c
 never have. `site.js` paints `.git-offline` from the same single `termConnected` every
 other `[data-term-*]` control reads; the panel then says so and offers Connect.
 
+**Locked private solutions point at Account, not at a self-service unlock.** The private
+row reports `decrypted`/`locked` (`gitstate.filter_wired`), but when locked it offers *no*
+`git-filter install` verb: the common locked cause is a reader **not yet granted enc-key
+access**, for whom install just errors ("gain key access before installing") — they need an
+admin to authorise their key first, and the chip cannot cheaply tell that apart from a key
+that merely has not been wired. So the row links to `/account`, where the state *is* known
+(`can_decrypt`, an X25519 unwrap too costly per-navigation) and the right action is offered:
+the public-key panel gives **Create identity** (`user`) when there is no keypair, and **Copy
++ Sync** when there is a key that cannot decrypt yet — copy it to the admin for
+`user-authorize`, then `git-sync` pulls the grant and auto-wires the filter. `git-sync` is
+the one command that advances every case and never errors, so it is what every locked path
+(the account tool row included) runs; the manual `git-filter install` stays a shell command
+for the rare has-access-but-unwired case, unsurfaced where it would mislead.
+
 **The refresh: the shell says when it moved.** A git command runs in the terminal, which is
 *not* a navigation — so without a nudge the chip would be most wrong exactly after the user
 acted. The git commands emit `OSC 5379` `git;<token>` on their success paths

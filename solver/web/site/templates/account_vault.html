@@ -43,26 +43,43 @@
         <code class="pubkey">{{ pubkey }}</code>
         {# The key exists to be handed to someone else, and it is 64 characters of
            hex — selecting that out of a scrolling box by hand is how transcription
-           errors get made. #}
-        <button type="button" class="btn" data-copy="{{ pubkey }}"
+           errors get made. Green: a public key is nothing to guard, and sharing it
+           is the whole point — the copy is always the safe, right move. #}
+        <button type="button" class="btn btn-ok" data-copy="{{ pubkey }}"
                 aria-label="copy public key">Copy</button>
       </div>
       {# What the key is FOR is the question this row actually answers: authorized
-         or not. The instruction is only shown when it is the thing to do — an
-         authorized user has already done it, and telling them again would read as
-         though it had not worked. #}
+         or not. When it is not, the two acts that get you there live right here as
+         terminal actions (site.js → the shell), so the page is where you do it, not
+         just where you read that it needs doing. #}
       <div class="state-row">
         {% if can_decrypt %}
         <span class="state-pill ok"><span class="dot on"></span> Can decrypt</span>
         <span class="muted">Authorized — the private solutions open in your shell.</span>
         {% else %}
         <span class="state-pill warn"><span class="dot off"></span> Cannot decrypt</span>
-        <span class="hint">Hand the key above to the admin for <code>user-authorize</code> —
-          it is what opens the private solutions.</span>
         {% endif %}
       </div>
+      {% if not can_decrypt %}
+      {# The path to access as one line ending in the act that advances it: copy the
+         key to the admin (user-authorize), then Sync. git-sync auto-wires the filter
+         the moment the grant arrives (scripts._enc_key_pull_flow); before it, a
+         harmless no-op pull — so it never errors, whatever state the access is in. #}
+      <p class="hint hint-action">Send the key above to the admin for
+        <code>user-authorize</code>, then pull your access:
+        <button type="button" class="state-pill state-action" data-term-cmd="git-sync"
+                title="run `git-sync` in your terminal">Sync</button></p>
+      {% endif %}
       {% elif pubkey_state == 'locked' %}<em class="muted">encrypted — unlock the vault to view</em>
-      {% else %}<em class="muted">no keypair yet — run <code>user</code> in your shell</em>{% endif %}
+      {% else %}
+      {# No keypair yet — the one act that mints one, run in the shell because it
+         writes the private key into ~/.euler, which only the shell's own uid can do. #}
+      <div class="state-row">
+        <span class="muted">No keypair yet.</span>
+        <button type="button" class="state-pill state-action" data-term-cmd="user"
+                title="run `user` in your terminal">Create identity</button>
+      </div>
+      {% endif %}
     </dd>
 
     <dt>Secrets</dt>
@@ -119,10 +136,16 @@
   {# First, because it is the one that decides whether there is anything to read:
      with the filter unwired, `solutions/private` is ciphertext in the working tree
      and every private problem is a wall of base64. The header's chip reports the
-     same fact (gitstate.filter_wired) — this is where it is fixed. #}
+     same fact (gitstate.filter_wired) and points here to fix it.
+     Locked runs `git-sync`, NOT `git-filter install`: the common locked cause is a
+     reader not yet granted enc-key access, for whom install just errors — sync is the
+     one command that advances every case (auto-wires when the grant lands, harmless
+     no-op before it), and it matches the pubkey row's Sync above. The manual install
+     stays a shell command for the rare has-access-but-unwired case; it is not
+     surfaced where it would mislead. #}
   {{ tool('Private solutions',
           'decrypted' if filter_wired else 'locked',
-          'git-filter status' if filter_wired else 'git-filter install',
+          'git-filter status' if filter_wired else 'git-sync',
           'ok' if filter_wired else 'warn') }}
   {{ tool('GitHub CLI', gh_status, 'git-identity',
           'ok' if gh_status == 'signed in' else ('warn' if gh_status == 'not signed in' else '')) }}

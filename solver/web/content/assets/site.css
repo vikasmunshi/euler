@@ -240,6 +240,11 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
 .git-stat .staged .n { color: var(--git-staged); }
 .git-stat .untracked .n { color: var(--git-untracked); }
 .git-stat .k { color: var(--muted); }
+/* Locked private solutions: not a verb (the chip has no self-service unlock — access
+   is granted on /account, § _git.html), a guiding line that leads there. */
+.git-locked-hint { padding: 0.15rem 0.7rem 0.5rem; color: var(--muted); font-size: 0.82rem; }
+.git-locked-hint a { color: var(--accent); text-decoration: none; white-space: nowrap; }
+.git-locked-hint a:hover { text-decoration: underline; }
 .git-track { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.78rem; color: var(--muted); }
 .git-track b { color: var(--text); font-weight: 500; }
@@ -583,6 +588,10 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 .btn:hover { border-color: var(--accent); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: #1f2937; font-weight: 600; }
 .btn-primary:hover { filter: brightness(1.08); }
+/* A public key is nothing to guard — copying it is always the safe, right act — so
+   the Copy button wears the ok green, not the neutral border. */
+.btn-ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
+.btn-ok:hover { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
 
 /* ── The auth dialogue (right pane, signed out) ──────────────────────────── */
 /* Same surface, border and radius as the terminal it stands in for: the pane
@@ -715,6 +724,10 @@ dl.account dd { margin: 0; min-width: 0; }
 
 /* State as a shape, not a sentence: scannable in one pass. */
 .state-row { display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.9rem; }
+/* Guidance that ends in its own action: the button rides the end of the sentence,
+   baseline-aligned, so "…then pull your access: [Sync]" reads as one instruction. */
+.hint-action { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem; margin: -0.4rem 0 0.9rem; }
+.hint-action .state-action { align-self: center; }
 .state-pill {
   display: inline-flex; align-items: center; gap: 0.4rem;
   font-size: 0.78rem; font-weight: 600;
