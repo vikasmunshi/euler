@@ -90,7 +90,7 @@ a parameter that accepts repetition.
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
 | [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
-| [`users`](#command-users) | — | List / administer accounts (list is read-only; changes need admin + sudo). |
+| [`users`](#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
 | [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
@@ -1361,12 +1361,12 @@ Wrap the current master key to `public_key` and add it to enc-key.json (proof-of
 
 #### Command: `users`
 
-List / administer accounts (list is read-only; changes need admin + sudo).
-* profiles: admin, maintainer, contributor, reader
+Administer accounts + invite requests (re-executes the admin CLI under sudo).
+* profiles: admin
 
 ```
 users
-[action=list|add|change|enable|disable|remove|redeploy] (default list)
+[action=list|process-requests|add|change|enable|disable|remove|redeploy] (default list)
 [identity=<str>] (default '')
 [profile=reader|contributor|maintainer|admin] (default reader)
 ```
@@ -1374,17 +1374,20 @@ users
 ```text
 Administer accounts on the authorization map + the auth service.
 
-`list` is read-only (every rung) and needs no sudo; every mutating verb needs
-``admin`` and re-executes the admin CLI under ``sudo``.
+The whole command is ``admin``-floored and every verb re-executes the admin CLI
+under ``sudo`` (the SoR + admin socket are root-only). There is no reader/maintainer
+tier here — a web shell cannot get sudo, so nothing runs over the web.
 
 Args:
-    action:   list (roster), add (map entry — ``@email`` also mints an invite;
-              a bare os-login is local-only), change (reassign a profile),
-              enable / disable (web SRP state), remove (drop the account/entry),
-              redeploy (re-assert the per-user host layer and re-lay every
-              collaborator's git hooks — takes no identity, and drops live shells).
-    identity: a web email (``@``) or a local OS login (required except for list
-              and redeploy).
+    action:   list (roster + pending + the invite-request queue), process-requests
+              (walk the queue interactively — accept / ignore / dismiss each),
+              add (map entry — ``@email`` also provisions + mints an invite; a bare
+              os-login is local-only), change (reassign a profile), enable / disable
+              (web SRP state), remove (drop the account/entry), redeploy (re-assert
+              the per-user host layer and re-lay every collaborator's git hooks —
+              takes no identity, and drops live shells).
+    identity: a web email (``@``) or a local OS login (required for the account
+              verbs; not for list / process-requests / redeploy).
     profile:  the profile to assign (add / change). ``admin`` is valid only for a
               local os-login, never a web account.
 ```

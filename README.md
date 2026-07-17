@@ -271,7 +271,7 @@ solver/
       admin.py        — The admin-plane CLI: run **under sudo** by the ``users`` shell command.
       app.py          — The auth service: public + admin aiohttp apps over unix sockets.
       client.py       — Minimal HTTP-over-unix-socket client for the auth service (stdlib only).
-      commands.py     — The ``users`` shell command: account administration, split by permission.
+      commands.py     — The ``users`` shell command: account administration for the operator.
       config.py       — Auth-service runtime configuration, read from the environment.
       mail.py         — Outbound mail via the loopback relay.
       pages.py        — The auth service's HTML pages: login, registration, reset, forgot.
@@ -279,6 +279,7 @@ solver/
       policy.py       — Auth policy constants (lifetimes, cookie names, password and OTP rules).
       ratelimit.py    — A small in-memory sliding-window rate limiter for the auth endpoints.
       remember.py     — Persistent "remember me" tokens at ``<state>/remember.json``.
+      requests.py     — Prospective-collaborator invite requests at ``<state>/requests.json``.
       sessions.py     — In-memory web session table.
       srp.py          — Secure Remote Password (SRP-6a) primitives for web authentication.
       storage.py      — Shared JSON persistence for the auth stores.

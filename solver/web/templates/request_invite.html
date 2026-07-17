@@ -1,0 +1,22 @@
+{% extends "auth_base.html" %}
+{% block title %}euler — request an invite{% endblock %}
+{% block dialogue %}
+  <h1>Request an invite</h1>
+  <p class="lead">No account yet? Tell the operator who you are and they decide.</p>
+  <form class="auth-form" method="post" action="/request-invite">
+    <label for="name">Your name</label>
+    <input id="name" name="name" type="text" autocomplete="name" required autofocus maxlength="100">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" autocomplete="email" required maxlength="254">
+    <label for="remarks">Anything to add (optional)</label>
+    <textarea id="remarks" name="remarks" rows="4" maxlength="1000"
+              placeholder="How you found us, what you'd like to work on…"></textarea>
+    <button class="btn btn-primary" type="submit">Send request</button>
+  </form>
+  <p class="auth-alt"><a href="/login">Back to sign in</a></p>
+  {# Plain POST form — no JS, no SRP: nothing secret is entered here, so this page
+     needs none of the login handshake. #}
+  <p class="auth-note"><b>No account is created yet.</b> This only sends your details to the
+    operator. If they approve, an invitation link is emailed to the address you gave — that
+    link is where you choose a password.</p>
+{% endblock %}

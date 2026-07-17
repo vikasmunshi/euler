@@ -59,6 +59,21 @@ class Mailer:
                     'If you did not request it, ignore this mail — nothing changes.\n')
         self._send(rcpt, subject, body)
 
+    def send_invite_request(self, rcpt: str, name: str, email: str, remarks: str) -> None:
+        """Nudge the operator that a prospective collaborator asked for an invite.
+
+        The requester's name/email/remarks ride in the **body** only (never a header),
+        and reach here already control-char-stripped, so there is no header-injection
+        surface — *rcpt* is the trusted operator address from config.
+        """
+        self._send(rcpt, 'euler account request',
+                   f'Someone requested an account at {self._base_url}.\n\n'
+                   f'Name:    {name or "(none)"}\n'
+                   f'Email:   {email}\n'
+                   f'Remarks: {remarks or "(none)"}\n\n'
+                   f'Review with `users requests`; invite with `users add {email} <profile>`,\n'
+                   'or drop it with `users dismiss <email>`.\n')
+
     def send_otp(self, rcpt: str, otp: str) -> None:
         """Email the one-time code proving live mailbox control."""
         self._send(rcpt, 'Your euler verification code',

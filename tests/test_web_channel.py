@@ -123,13 +123,13 @@ class WebChannelCommandSetTest(unittest.TestCase):
 
     def test_formerly_terminal_only_commands_are_now_profile_gated(self) -> None:
         """The commands that were ``channels=('terminal',)`` are gated purely by
-        ``requires`` now. The infra ones (``update-models``/``update-docs``, admin-floored)
-        reach no web rung; ``users`` does register for members at the reader floor, but its
-        listing is self-scoped in the command, so it discloses no roster."""
-        for infra_cmd in ('update-models', 'update-docs'):
+        ``requires`` now. The infra ones (``update-models``/``update-docs``) and ``users``
+        are all admin-floored, so none of them reach any web rung: ``users`` administers
+        accounts + the invite-request queue only from the admin's local terminal (every
+        verb re-execs the admin CLI under sudo, which a web uid cannot obtain)."""
+        for infra_cmd in ('update-models', 'update-docs', 'users'):
             for rung in _WEB_RUNGS:
                 self.assertNotIn(infra_cmd, self.web[rung], f'{infra_cmd} must not reach {rung}')
-        self.assertIn('users', self.web['reader'])          # visible at the reader floor, but self-scoped
 
 
 if __name__ == '__main__':

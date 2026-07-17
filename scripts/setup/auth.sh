@@ -85,6 +85,7 @@ SERVICE_DEST="/etc/systemd/system/${SERVICE_NAME}"
 FQDN=""
 ADMIN_TOKEN=""
 TERMS_VERSION=""
+OWNER_EMAIL=""
 
 usage() {
     cat <<USAGE
@@ -150,6 +151,10 @@ load_config() {
     fi
     FQDN="${EULER_TLS_DOMAIN:-}"
     TERMS_VERSION="${TERMS_VERSION:-1}"
+    # Where invite-request notices go: the authoring env's EULER_OWNER_EMAIL, else the
+    # checkout owner's git email. Empty is fine — the notice is best-effort and the
+    # request queue is the system of record regardless.
+    OWNER_EMAIL="${EULER_OWNER_EMAIL:-$(git -C "${PROJECT_ROOT}" config user.email 2>/dev/null || true)}"
     if [ -z "${FQDN}" ]; then
         echo "Error: EULER_TLS_DOMAIN not set in ${ENV_FILE}" >&2
         return 1
@@ -231,6 +236,7 @@ EULER_BASE_URL=https://${FQDN}
 EULER_ADMIN_TOKEN=${ADMIN_TOKEN}
 TERMS_VERSION=${TERMS_VERSION}
 EULER_SMTP_RELAY=${SMTP_RELAY}
+EULER_OWNER_EMAIL=${OWNER_EMAIL}
 EOF
     sudo chown root:"${AUTH_GROUP}" "${AUTH_ENV}"
     sudo chmod 0640 "${AUTH_ENV}"

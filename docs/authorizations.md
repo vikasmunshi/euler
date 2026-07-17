@@ -80,5 +80,5 @@ a profile on each channel.
 | `solver.utils.summary` | `progress` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.summary` | `summary` |  |  | ✓ | ✓ |
 | `solver.utils.update_doc` | `update-docs` |  |  |  | ✓ |
-| `solver.web.auth.commands` | `users` | ✓ | ✓ | ✓ | ✓ |
+| `solver.web.auth.commands` | `users` |  |  |  | ✓ |
 <!-- /GEN:authorization-table -->

@@ -535,9 +535,9 @@ ${DOMAIN} {
 		file_server
 	}
 
-	# Public auth surface: the login/registration/reset/forgot pages and
-	# the JSON auth API, straight to the auth service. The shell-ticket and admin
-	# endpoints are deliberately NOT routed (socket-peer / local-only).
+	# Public auth surface: the login/registration/reset/forgot/request-invite
+	# pages and the JSON auth API, straight to the auth service. The shell-ticket
+	# and admin endpoints are deliberately NOT routed (socket-peer / local-only).
 	handle /login {
 		reverse_proxy unix//run/euler/auth.sock
 	}
@@ -548,6 +548,9 @@ ${DOMAIN} {
 		reverse_proxy unix//run/euler/auth.sock
 	}
 	handle /forgot {
+		reverse_proxy unix//run/euler/auth.sock
+	}
+	handle /request-invite {
 		reverse_proxy unix//run/euler/auth.sock
 	}
 	handle /password {

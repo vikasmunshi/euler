@@ -46,6 +46,7 @@ from solver.web.auth.config import AuthConfig
 from solver.web.auth.mail import Mailer
 from solver.web.auth.pending import PendingStore
 from solver.web.auth.ratelimit import RateLimiter
+from solver.web.auth.requests import RequestStore
 from solver.web.auth.remember import RememberStore, load_or_create_secret
 from solver.web.auth.sessions import SessionStore
 from solver.web.auth.srp import SrpServer, decoy_token
@@ -80,6 +81,8 @@ class AuthService:
         state = config.state_dir
         self.users = UserStore(state / 'users.json')
         self.pending = PendingStore(state / 'pending.json')
+        self.requests = RequestStore(state / 'requests.json',
+                                     load_or_create_secret(state / 'requests-secret'))
         self.remember = RememberStore(state / 'remember.json',
                                       load_or_create_secret(state / 'session-secret'))
         self.sessions = SessionStore(policy.SESSION_TTL_SECONDS)
@@ -165,6 +168,22 @@ class AuthService:
         url = f'{self.config.base_url}/register?token={token}'
         self.mailer.send_invite(email, token, 'register')
         return url
+
+    def notify_invite_request(self, name: str, email: str, remarks: str) -> None:
+        """Best-effort: email the operator that an invite request landed. Never raises.
+
+        The queue (``requests.json``) is the system of record; this is only a nudge.
+        Skipped when no owner address is configured (``EULER_OWNER_EMAIL``). Runs the
+        blocking submit under :func:`asyncio.to_thread` at the call site — never on the
+        event loop.
+        """
+        owner = self.config.owner_email
+        if not owner:
+            return
+        try:
+            self.mailer.send_invite_request(owner, name, email, remarks)
+        except OSError as exc:
+            log.warning('invite-request notice mail failed: %s', exc)
 
     def revoke_access(self, email: str) -> None:
         """Kill live access for *email* everywhere (disable/remove)."""
@@ -537,6 +556,17 @@ def build_admin_app(service: AuthService) -> web.Application:
         log.info('revoked %d session/remember token(s) for %s', n, email)
         return web.json_response({'email': email, 'revoked': n})
 
+    async def list_requests(_request: web.Request) -> web.Response:
+        """The invite-request queue — prospective collaborators from the public form."""
+        return web.json_response({'requests': [r.summary() for r in service.requests.all()]})
+
+    async def dismiss_request(request: web.Request) -> web.Response:
+        email = normalize_email(request.match_info['email'])
+        if not service.requests.dismiss(email):
+            return web.Response(status=404, text='no such request')
+        log.info('dismissed invite request from %s', email)
+        return web.json_response({'email': email, 'dismissed': True})
+
     app = web.Application(middlewares=[require_token])
     app.add_routes([
         web.get('/healthz', healthz),
@@ -545,6 +575,8 @@ def build_admin_app(service: AuthService) -> web.Application:
         web.post('/admin/users/{email}/{action:enable|disable}', set_enabled),
         web.post('/admin/users/{email}/revoke', revoke_sessions),
         web.delete('/admin/users/{email}', remove_user),
+        web.get('/admin/requests', list_requests),
+        web.delete('/admin/requests/{email}', dismiss_request),
     ])
     return app
 

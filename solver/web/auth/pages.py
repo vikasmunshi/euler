@@ -35,6 +35,7 @@ from aiohttp import web
 
 from solver.web.auth.app import AuthService, _client_key, utcnow_iso
 from solver.web.auth.pending import PendingRecord
+from solver.web.auth.requests import NAME_MAX, REMARKS_MAX, sanitize
 from solver.web.auth.users import normalize_email
 
 log = logging.getLogger('euler-auth')
@@ -260,6 +261,36 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
     async def forgot_page(request: web.Request) -> web.Response:
         return aiohttp_jinja2.render_template('forgot.html', request, {})
 
+    # ── request an invite (unauthenticated intake) ────────────────────────────────
+
+    async def request_invite_page(request: web.Request) -> web.Response:
+        return aiohttp_jinja2.render_template('request_invite.html', request, {})
+
+    async def request_invite_submit(request: web.Request) -> web.Response:
+        """Queue a prospective collaborator's request; answer generically either way.
+
+        This creates **no** authorization state — only the sudo ``users add`` path
+        does. The response is the same whether the request stored, deduped, or was
+        dropped (a full queue / bad email), so it leaks neither membership nor
+        capacity. The owner notice is best-effort and off the event loop.
+        """
+        if not service.rate.allow(_client_key(request)):
+            return web.Response(status=429, text='rate limited')
+        form = await request.post()
+        name = sanitize(str(form.get('name', '')), NAME_MAX)
+        email = normalize_email(str(form.get('email', '')))
+        remarks = sanitize(str(form.get('remarks', '')), REMARKS_MAX, allow_newlines=True)
+        if '@' in email and service.requests.submit(name, email, remarks, _client_key(request)):
+            await asyncio.to_thread(service.notify_invite_request, name, email, remarks)
+            log.info('invite request queued for %s', email)
+        else:
+            log.warning('invite request not queued (bad email or full queue)')
+        return aiohttp_jinja2.render_template('message.html', request, {
+            'heading': 'Request received',
+            'message': 'Thanks. If the operator approves it, an invitation link will be '
+                       'emailed to the address you gave.',
+            'show_login': True})
+
     async def terms_page(request: web.Request) -> web.Response:
         """Standalone view of the Terms of use (the same _terms.html partial the
         registration page embeds).
@@ -308,6 +339,8 @@ def add_page_routes(app: web.Application, service: AuthService) -> None:
         web.post('/reset/complete', flow_complete),
         web.get('/forgot', forgot_page),
         web.post('/forgot', forgot_submit),
+        web.get('/request-invite', request_invite_page),
+        web.post('/request-invite', request_invite_submit),
         web.get('/password', password_page),
         web.get('/terms', terms_page),
     ])

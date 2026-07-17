@@ -18,7 +18,14 @@ that OS user); an email additionally mints an emailed invite / drives SRP state.
 
 Invocation (see :mod:`solver.web.auth.commands` for the shell wrapper)::
 
-    sudo <venv-python> -m solver.web.auth.admin <list|add|change|enable|disable|remove> [identity] [profile]
+    sudo <venv-python> -m solver.web.auth.admin \
+        <list|add|change|enable|disable|remove|requests-json|dismiss> [identity] [profile]
+
+``list`` now folds in the invite-request queue (the login page's "Request an
+invite" form). ``requests-json`` dumps that queue as JSON for the interactive
+``users process-requests`` orchestrator, and ``dismiss <email>`` drops one — both
+reach the same admin socket; the queue itself is a euler-auth-private store, never
+the SoR.
 """
 from __future__ import annotations
 
@@ -34,7 +41,8 @@ from typing import Any
 from solver.web.auth import ADMIN_SOCKET_ENV, DEFAULT_ADMIN_SOCKET
 from solver.web.auth.client import request
 
-_ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove')
+_ACTIONS = ('list', 'add', 'change', 'enable', 'disable', 'remove', 'requests-json', 'dismiss')
+_NO_IDENTITY = ('list', 'requests-json')                          # roster/queue views take no identity
 _WEB_PROFILES = ('reader', 'contributor', 'maintainer')          # admin is local-only
 _ALL_PROFILES = _WEB_PROFILES + ('admin',)
 _AUTHZ_PATH = os.environ.get('EULER_AUTHZ_FILE', '/etc/euler/authorizations.json')
@@ -118,7 +126,7 @@ def main(argv: list[str]) -> int:
     profile = argv[2] if len(argv) > 2 else 'reader'
     is_web = '@' in identity
 
-    if action != 'list' and not identity:
+    if action not in _NO_IDENTITY and not identity:
         return _fail(f'users {action} requires an email or os-login')
     if action in ('enable', 'disable') and not is_web:
         return _fail(f'users {action} applies to web accounts only (SRP state)')
@@ -134,7 +142,25 @@ def main(argv: list[str]) -> int:
             if status != 200 or not isinstance(data, dict):
                 return _fail(f'admin API: {status} {data}')
             _print_listing(data)
+            status, queue = _api('GET', '/admin/requests')          # the invite-request queue, folded in
+            if status != 200 or not isinstance(queue, dict):
+                return _fail(f'admin API: {status} {queue}')
+            _print_requests(queue)
             return 0
+
+        if action == 'requests-json':
+            status, data = _api('GET', '/admin/requests')
+            if status != 200 or not isinstance(data, dict):
+                return _fail(f'admin API: {status} {data}')
+            print(json.dumps(data.get('requests', [])))             # machine-readable, for `users process-requests`
+            return 0
+
+        if action == 'dismiss':
+            status, data = _api('DELETE', f'/admin/requests/{identity}')
+            if status == 200:
+                print(f'dismissed request from {identity}')
+                return 0
+            return _fail(f'{status} {data}')
 
         if action == 'add':
             _authz_set(identity, profile)                        # SoR write (both paths)
@@ -193,6 +219,25 @@ def _print_listing(data: dict[str, Any]) -> None:
               f'expires in {record.get("expires_in_h")}h')
     if not roster and not data.get('pending'):
         print('no accounts or pending invites')
+
+
+def _print_requests(data: dict[str, Any]) -> None:
+    """Render the invite-request queue — prospective collaborators from the public form.
+
+    Printed as its own section under ``users list``; work through it with
+    ``users process-requests``.
+    """
+    requests = data.get('requests', [])
+    print(f'\ninvite requests ({len(requests)}) — process with `users process-requests`:')
+    for record in requests:
+        submissions = int(record.get('submissions', 1))
+        seen = f'  (×{submissions})' if submissions > 1 else ''
+        print(f'  {record.get("email"):40} {(record.get("name") or "")[:28]:28} '
+              f'{record.get("created", "")}{seen}')
+        for line in str(record.get('remarks') or '').splitlines():
+            print(f'        {line}')
+    if not requests:
+        print('  (none)')
 
 
 if __name__ == '__main__':

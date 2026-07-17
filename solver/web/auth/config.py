@@ -40,6 +40,10 @@ class AuthConfig(NamedTuple):
     smtp_relay: str
     #: Version tag of the Terms of use the registration flow records.
     terms_version: str
+    #: Where invite-request notices go (the login page's "Request an invite" form).
+    #: Empty disables the notice — the ``requests.json`` queue is the system of record,
+    #: so a missing address costs a nudge, not a request.
+    owner_email: str = ''
     #: The directory holding the per-user instance sockets (``user-<slug>.sock``): the
     #: teardown push targets the one socket for the affected user. Empty
     #: disables the push (a deploy with no web tier, or a test that does not exercise it)
@@ -67,5 +71,6 @@ class AuthConfig(NamedTuple):
             base_url=base_url,
             smtp_relay=os.environ.get('EULER_SMTP_RELAY', '127.0.0.1:8025'),
             terms_version=os.environ.get('TERMS_VERSION', '1'),
+            owner_email=os.environ.get('EULER_OWNER_EMAIL', '').strip().lower(),
             user_socket_dir=os.environ.get('EULER_USER_SOCKET_DIR', '/run/euler').strip(),
         )
