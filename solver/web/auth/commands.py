@@ -15,6 +15,9 @@ Two paths behind one command:
   under ``sudo`` — which writes the root-owned SoR and reaches the euler-auth admin
   socket. The command registers at the ``reader`` floor; the write verbs are gated at
   **runtime** against the subject's permissions.
+- **`users redeploy`** is ``admin`` + ``sudo`` too, but it is the host plane rather than an
+  account verb: it drives the provisioning kit, never the admin CLI, and touches no
+  account — so, like `list`, it takes no identity.
 
 No longer channel-gated (the channel is not an authorization axis): the write verbs' real containment is
 that they reach the root-owned SoR and the euler-auth **admin socket** only under ``sudo``, which
@@ -26,7 +29,11 @@ mutation attempted over the web fails at the socket, not at a channel check.
 :mod:`scripts/setup/user.sh`) and then mints a web invite (the account record
 appears when the invitee registers); a bare os-login is a direct map entry (no instance,
 no invite). ``remove`` reverses both: it drops the account, then deprovisions the
-instance. Password reset is self-service — there is deliberately no reset verb.
+instance. ``redeploy`` re-asserts the shared layer across **every** provisioned
+collaborator — notably re-laying their git hooks from this checkout, the only plane that
+can (their clone cannot be synced from here: the smudge filter needs a master key that
+lives in the user's own vault). Password reset is self-service — there is deliberately no
+reset verb.
 """
 from __future__ import annotations
 
@@ -75,11 +82,12 @@ def _sudo_admin(action: str, identity: str = '', profile: str = '') -> int:
         return 1
 
 
-def _provision_kit(action: str, slug: str, *rest: str) -> int:
+def _provision_kit(action: str, *args: str) -> int:
     """Drive the per-user provisioning kit (``scripts/setup/user.sh``) under sudo.
 
-    ``provision``/``deprovision`` create or tear down the collaborator's OS instance —
-    uid, home, the filter-disabled clone on ``user/<slug>``, and the socket. Best-effort:
+    ``provision``/``deprovision`` create or tear down one collaborator's OS instance —
+    uid, home, the filter-disabled clone on ``user/<slug>``, and the socket — and take a
+    slug; ``redeploy`` sweeps every provisioned user and takes none. Best-effort:
     a host without the kit (a plain dev checkout without the web stack laid down) has
     nothing to provision, so a missing script is a note, not a failure — the account map
     + invite still stand and the instance can be laid down later with ``make deploy-user``.
@@ -89,7 +97,7 @@ def _provision_kit(action: str, slug: str, *rest: str) -> int:
         console.print(f'[muted]note: {script} not present — skipping OS {action} (run make deploy-user)[/muted]')
         return 0
     try:
-        return subprocess.run(['sudo', 'bash', str(script), action, slug, *rest], check=False).returncode
+        return subprocess.run(['sudo', 'bash', str(script), action, *args], check=False).returncode
     except (OSError, KeyboardInterrupt) as exc:
         console.print(f'[error]error:[/error] could not run the provisioning kit ({exc})')
         return 1
@@ -97,7 +105,7 @@ def _provision_kit(action: str, slug: str, *rest: str) -> int:
 
 @register(requires='reader',
           help_text='List / administer accounts (list is read-only; changes need admin + sudo).')
-def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'] = 'list',
+def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove', 'redeploy'] = 'list',
           identity: str = '', profile: Literal['reader', 'contributor', 'maintainer', 'admin'] = 'reader') -> int:
     """Administer accounts on the authorization map + the auth service.
 
@@ -107,8 +115,11 @@ def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'
     Args:
         action:   list (roster), add (map entry — ``@email`` also mints an invite;
                   a bare os-login is local-only), change (reassign a profile),
-                  enable / disable (web SRP state), remove (drop the account/entry).
-        identity: a web email (``@``) or a local OS login (required except for list).
+                  enable / disable (web SRP state), remove (drop the account/entry),
+                  redeploy (re-assert the per-user host layer and re-lay every
+                  collaborator's git hooks — takes no identity, and drops live shells).
+        identity: a web email (``@``) or a local OS login (required except for list
+                  and redeploy).
         profile:  the profile to assign (add / change). ``admin`` is valid only for a
                   local os-login, never a web account.
     """
@@ -121,6 +132,19 @@ def users(action: Literal['list', 'add', 'change', 'enable', 'disable', 'remove'
         console.print('[error]error:[/error] this action needs the [accent]admin[/accent] '
                       'permission (admin) — run it from the checkout owner\'s local terminal')
         return 1
+
+    if action == 'redeploy':
+        # The host plane, not an account verb — so it takes no identity and writes no SoR.
+        # `user.sh redeploy` refreshes /etc/euler/user.env, re-lays EVERY provisioned
+        # collaborator's git hooks from this checkout, and stops each running instance so
+        # its socket re-activates it against the current venv.
+        #
+        # Sweeping every user is the point: a hook template only reaches collaborators from
+        # here, so this is how a new gate lands for all of them rather than only for whoever
+        # is next provisioned. The cost is that it drops live web shells — an attached
+        # collaborator's PTY dies with their service, and their next request starts a new one.
+        return _provision_kit('redeploy')
+
     if not identity:
         console.print(f'[error]error:[/error] users {action} requires an email or os-login')
         return 2

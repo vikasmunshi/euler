@@ -77,15 +77,19 @@ Usage: $0 <action> [args]
   remove                       Remove the template + user.env (prompted). Provisioned
                                users must be deprovisioned first.
   upgrade                      Alias of deploy: re-assert the shared layer.
-  redeploy                     Refresh /etc/euler/user.env and stop the running
+  redeploy                     Refresh /etc/euler/user.env, re-lay every provisioned
+                               user's git hooks from this repo, and stop the running
                                instances so their sockets re-activate them against a
                                freshly rebuilt venv (drops live shells).
   provision <slug> <email> <profile>
                                Provision one collaborator: uid + home (0700), a
                                filter-disabled clone of ~/euler from the public GitHub
                                repo on branch user/<slug> (cloned AS the user, through
-                               Squid), git hooks, Claude Code (~/.local/bin, theirs),
-                               ~/.euler, and the instance socket. Idempotent.
+                               Squid), git hooks rendered from THIS repo's templates,
+                               Claude Code (~/.local/bin, theirs), ~/.euler, and the
+                               instance socket. Idempotent — re-run it to repair an
+                               instance and re-lay its hooks; the clone is left as it
+                               stands (this plane cannot sync it).
   deprovision <slug>           Tear one collaborator down: stop/disable the instance,
                                then (prompted) userdel + remove the home. Reports the
                                required 'key-rekey' to drop master-key access.
@@ -298,6 +302,47 @@ as_user() {
     sudo -Hu "${user}" env "$@" EGRESS_ENV="${EGRESS_ENV}" bash -s
 }
 
+# Lay the git hooks into a provisioned clone, rendered from THIS repo's templates.
+#
+# The operator checkout is the source: the hooks a collaborator runs must be the ones this
+# repo ships, never whatever their clone happens to hold. A clone can sit behind master
+# indefinitely and nothing on this plane can move it forward — a sync would check out
+# solutions/private through the smudge filter, whose master key lives in the user's own
+# vault, locked to their session and deliberately unreachable from root. So the clone's own
+# templates are not a source this plane can trust, and the hooks are copied in from here.
+#
+# Rendered by substituting the deployed venv for __VENV__: a per-user clone has no .venv, so
+# its hooks' flake8/mypy must call /opt/euler/venv. That is the only substitution the
+# templates take — they resolve REPO_ROOT at runtime (git rev-parse), so one rendered file
+# is correct in any checkout, which is what makes copying them in sound at all.
+#
+# Rendered as the operator and installed by root, because this is the one provisioning step
+# whose source sits in the operator's 0750 home: the euler-user uids cannot read it, so
+# as_user has nothing to read and root must place the file. `install` sets the owner as it
+# copies, so the hook is never a root-owned file in the user's home, not even briefly.
+provision_hooks() {
+    local slug="$1" user clone hook src rendered
+    user="$(user_of "${slug}")"
+    clone="$(home_of "${slug}")/euler"
+    if ! sudo test -d "${clone}/.git"; then
+        echo "note: no clone at ${clone} — skipping the git hooks."
+        return 0
+    fi
+    echo "Installing the git hooks from ${PROJECT_ROOT} into ${clone} (venv ${VENV_DIR})..."
+    for hook in pre-commit pre-push; do
+        src="${PROJECT_ROOT}/scripts/setup/hooks/${hook}.template"
+        if [ ! -f "${src}" ]; then
+            echo "warn: ${src} not found — skipping the ${hook} hook." >&2
+            continue
+        fi
+        rendered="$(mktemp)"
+        sed -e "s|__VENV__|${VENV_DIR}|g" -e "s|__REPO_ROOT__|${clone}|g" "${src}" > "${rendered}"
+        sudo install -o "${user}" -g "${user}" -m 0755 "${rendered}" "${clone}/.git/hooks/${hook}"
+        rm -f "${rendered}"
+        echo "Installed hook: ${hook}"
+    done
+}
+
 # Clone the repo into ~/euler on branch user/<slug>, filter DISABLED → ciphertext at
 # rest. Clone straight from the public GitHub repo: GitHub stores only the filter's
 # ciphertext (the clean output), anonymous read needs no credentials, and origin stays
@@ -308,41 +353,11 @@ provision_clone() {
     user="$(user_of "${slug}")"
     home="$(home_of "${slug}")"
     clone="${home}/euler"
-    if [ -d "${clone}/.git" ]; then
-        # A repair-run keeps the clone but re-renders the hooks: the templates evolve
-        # (new gates), and the hooks live in .git/hooks — untracked, so nothing else
-        # refreshes them. githooks.sh install is idempotent and --force skips the
-        # backup rotation (the rendered copies carry no local edits by contract).
-        #
-        # Sync the clone FIRST, because the hooks are rendered from the templates in
-        # the clone itself (scripts/setup/hooks/*.template): re-rendering a stale clone
-        # faithfully reproduces stale hooks, which is the one thing this repair exists to
-        # stop. The sync is scripts/git/sync.sh — the same script `git-sync` runs in the
-        # user's own shell, so this plane follows the one sync policy rather than keeping
-        # a second copy of it that can drift.
-        #
-        # It is called ungated: sync.sh decides the state (up_to_date / local_ahead /
-        # local_behind / diverged) and handles each itself, so a second opinion here would
-        # only be the drift this reuse exists to remove. It is also safe to be wrong from
-        # this plane — it reports failure with a return code rather than dying on the
-        # first failed git command, and it never leaves the clone half-synced: a
-        # merge/rebase that stops part-way is rolled back and any stash it took is put
-        # back. That matters here: every write path runs the smudge filter, and a
-        # key-authorized user's vault is always locked from the root plane, so a refused
-        # merge is the expected case, not the exceptional one.
-        #
-        # Its failure is not provisioning's failure — fall through to rendering the hooks
-        # from the clone as it stands. An admin repair must not be the thing that fails
-        # provisioning.
-        echo "Clone ${clone} already present — syncing it, then re-rendering the git hooks (venv ${VENV_DIR})..."
-        as_user "${user}" EULER_VENV="${VENV_DIR}" <<'HOOKS'
-set -euo pipefail
-[ -f "${EGRESS_ENV}" ] && { set -a; . "${EGRESS_ENV}"; set +a; }
-cd "${HOME}/euler"
-bash scripts/git/sync.sh \
-    || echo "warn: sync failed — rendering hooks from the clone as it stands." >&2
-bash "${HOME}/euler/scripts/setup/githooks.sh" install --force
-HOOKS
+    # A repair-run keeps the clone exactly as it stands: this plane cannot move it forward
+    # (see provision_hooks), so there is nothing to do here but leave it be. do_provision
+    # re-lays the hooks either way — that, not the clone, is what a repair refreshes.
+    if sudo test -d "${clone}/.git"; then
+        echo "Clone ${clone} already present — leaving it as it stands."
         return 0
     fi
     url="$(origin_url)"
@@ -354,17 +369,14 @@ HOOKS
     # No filter is wired in the clone's local config, and .gitattributes' rule is not
     # 'required', so solutions/private/** checks out as the ciphertext GitHub holds.
     # Commit authorship + push credential are the user's own, configured
-    # self-service in their shell later (`git-identity`). The git hooks (pre-commit
-    # flake8+mypy + the gitfilter gate, pre-push) render into .git/hooks — not tracked,
-    # so a clone lands without them — pointed at the deployed /opt/euler venv since a
-    # per-user clone has no .venv.
-    as_user "${user}" URL="${url}" SLUG="${slug}" EULER_VENV="${VENV_DIR}" <<'CLONE'
+    # self-service in their shell later (`git-identity`). The hooks are not laid here:
+    # they come from the operator checkout, in provision_hooks, for a fresh clone and a
+    # repair alike — one source, so a clone can never render its own.
+    as_user "${user}" URL="${url}" SLUG="${slug}" <<'CLONE'
 set -euo pipefail
 [ -f "${EGRESS_ENV}" ] && { set -a; . "${EGRESS_ENV}"; set +a; }
 git clone --branch master "${URL}" "${HOME}/euler"
 git -C "${HOME}/euler" checkout -B "user/${SLUG}"
-echo "Installing git hooks (venv ${EULER_VENV})..."
-bash "${HOME}/euler/scripts/setup/githooks.sh" install --force
 CLONE
 }
 
@@ -378,7 +390,7 @@ provision_claude() {
     local slug="$1" user home
     user="$(user_of "${slug}")"
     home="$(home_of "${slug}")"
-    if [ ! -x "${home}/euler/scripts/setup/claude_code.sh" ]; then
+    if ! sudo test -x "${home}/euler/scripts/setup/claude_code.sh"; then
         echo "note: no claude_code.sh in the clone — skipping the Claude Code install."
         return 0
     fi
@@ -413,6 +425,7 @@ do_provision() {
     ensure_shared_groups
     ensure_user_identity "${slug}"
     provision_clone "${slug}"
+    provision_hooks "${slug}"
     provision_claude "${slug}"
     enable_socket "${slug}"
     # The new uid must be inside the egress lock, or (chain policy accept) it would reach
@@ -489,13 +502,22 @@ do_redeploy() {
     check_can_sudo || return 1
     deploy_user_env
     echo "Refreshed ${USER_ENV}."
-    # Pick up a freshly rebuilt /opt/euler venv (redeploy-auth): stop each running
-    # instance — this drops that user's live shell — and leave its socket listening,
-    # so the next request re-activates the service against the new code.
+    # Pick up a freshly rebuilt /opt/euler venv (redeploy-auth): re-lay each user's hooks
+    # from this repo, then stop each running instance — this drops that user's live shell —
+    # and leave its socket listening, so the next request re-activates the service against
+    # the new code.
+    #
+    # The hooks belong in redeploy for the same reason the venv does: they are the
+    # operator's code running in the user's clone, they bake the deployed venv's path, and
+    # a clone cannot refresh them itself. This is the one sweep that reaches every
+    # provisioned user, so it is where a template change (a new gate) actually lands for
+    # everyone — otherwise a hook fix would only reach a user who happened to be
+    # reprovisioned.
     local users u slug
     users="$(getent passwd | awk -F: '/^euler-user-/{print $1}' || true)"
     for u in ${users}; do
         slug="${u#euler-user-}"
+        provision_hooks "${slug}"
         if systemctl is-active --quiet "euler-user@${slug}.service" 2>/dev/null; then
             echo "Stopping euler-user@${slug}.service (its socket re-activates it on the next request)..."
             sudo systemctl stop "euler-user@${slug}.service"
@@ -527,57 +549,90 @@ do_remove() {
     echo "Per-user provisioning uninstall complete."
 }
 
+# One marker vocabulary for every status line, shared layer and per-user alike:
+#
+#   ✓ present / healthy
+#   ✗ missing / broken        — always a fault, always worth acting on
+#   … deferred                — a legitimate not-yet (a later step lays it down), not a fault
+#
+# Every field leads with its marker, so a fault reads the same way wherever it appears.
+# The per-user line used to spell its faults in prose ("no-clone") between two ✓s, where
+# they went unread for weeks — hence: no word carries a verdict that a marker doesn't.
+OK='✓'
+BAD='✗'
+DEFER='…'
+
+# "label:       <mark> <detail>" — the shared-layer column.
+status_line() { printf '%-12s %s %s\n' "$1:" "$2" "$3"; }
+
+# Echo ✓ if the check succeeds, ✗ if it fails. Written as if/else rather than
+# `cmd && echo ✓ || echo ✗` so `set -e` never sees a bare failing command, and so a
+# check that fails cannot be mistaken for one that printed nothing.
+check_mark() {
+    if "$@" > /dev/null 2>&1; then printf '%s' "${OK}"; else printf '%s' "${BAD}"; fi
+}
+
 do_status() {
-    if [ -x "${VENV_PY}" ]; then
-        if "${VENV_PY}" -P -c 'import solver.web.user' 2>/dev/null; then
-            echo "venv:        ✓ solver.web.user importable from ${VENV_DIR}"
-        else
-            echo "venv:        … solver.web.user not in the venv yet (step 4)"
-        fi
+    if [ ! -x "${VENV_PY}" ]; then
+        status_line "venv" "${BAD}" "${VENV_DIR} not deployed (run auth.sh / user.sh deploy)"
+    elif "${VENV_PY}" -P -c 'import solver.web.user' 2>/dev/null; then
+        status_line "venv" "${OK}" "solver.web.user importable from ${VENV_DIR}"
     else
-        echo "venv:        ✗ ${VENV_DIR} not deployed (run auth.sh / user.sh deploy)"
+        status_line "venv" "${DEFER}" "solver.web.user not in the venv yet (step 4)"
     fi
-    getent group "${USER_GROUP}" > /dev/null \
-        && echo "group:       ✓ ${USER_GROUP}" || echo "group:       ✗ ${USER_GROUP} missing"
-    [ -f "${USER_ENV}" ] && echo "config:      ✓ ${USER_ENV}" || echo "config:      ✗ ${USER_ENV} missing"
+    status_line "group" "$(check_mark getent group "${USER_GROUP}")" "${USER_GROUP}"
+    status_line "config" "$(check_mark test -f "${USER_ENV}")" "${USER_ENV}"
     if [ -f "${SOCKET_DEST}" ]; then
-        echo "template:    ✓ ${SOCKET_TEMPLATE} + ${SERVICE_TEMPLATE}"
+        status_line "template" "${OK}" "${SOCKET_TEMPLATE} + ${SERVICE_TEMPLATE}"
     else
-        echo "template:    deferred (solver.web.user not yet deployed)"
+        status_line "template" "${DEFER}" "deferred (solver.web.user not yet deployed)"
     fi
 
     # Per-user roster (or one slug's instance).
     local slug="${1:-}"
     if [ -n "${slug}" ]; then
+        status_line "users" "${OK}" "1 requested"
         status_one "${slug}"
         return 0
     fi
     local users u
     users="$(getent passwd | awk -F: '/^euler-user-/{print $1}' || true)"
     if [ -z "${users}" ]; then
-        echo "users:       (none provisioned)"
+        status_line "users" "${DEFER}" "none provisioned"
         return 0
     fi
+    status_line "users" "${OK}" "$(wc -l <<< "${users}") provisioned"
     for u in ${users}; do
         status_one "${u#euler-user-}"
     done
 }
 
+# One indented line per collaborator, every field marked. The slug column is fixed at 20 —
+# valid_slug's own ceiling — so the fields line up and a ✗ sits in a column you can scan.
 status_one() {
-    local slug="$1" user home sock health="—"
+    local slug="$1" user home clone socket
     user="$(user_of "${slug}")"
     home="$(home_of "${slug}")"
-    sock="$(sock_of "${slug}")"
-    if ! getent passwd "${user}" > /dev/null; then
-        echo "user ${slug}: ✗ ${user} missing"
+    clone="${home}/euler"
+    if ! getent passwd "${user}" > /dev/null 2>&1; then
+        printf '  %-20s %s %s missing\n' "${slug}" "${BAD}" "${user}"
         return 0
     fi
-    if [ -f "${SOCKET_DEST}" ]; then
-        health="$(systemctl is-active "euler-user@${slug}.socket" 2>/dev/null || echo inactive)"
+    if [ ! -f "${SOCKET_DEST}" ]; then
+        socket="${DEFER} deferred"
+    elif systemctl is-active --quiet "euler-user@${slug}.socket" 2>/dev/null; then
+        socket="${OK} active"
+    else
+        socket="${BAD} inactive"
     fi
-    local clone_state="no-clone"
-    [ -d "${home}/euler/.git" ] && clone_state="clone✓"
-    echo "user ${slug}: ✓ ${user} · ${clone_state} · socket ${health}"
+    # The clone and its hooks live under a 0700 home — only root can see them (as vikas the
+    # test silently reads "absent", which is exactly how "no-clone" got misreported).
+    printf '  %-20s uid %s · clone %s · hooks %s · socket %s\n' \
+        "${slug}" \
+        "${OK}" \
+        "$(check_mark sudo test -d "${clone}/.git")" \
+        "$(check_mark sudo test -x "${clone}/.git/hooks/pre-commit" -a -x "${clone}/.git/hooks/pre-push")" \
+        "${socket}"
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────────────

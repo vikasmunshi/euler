@@ -1313,7 +1313,7 @@ List / administer accounts (list is read-only; changes need admin + sudo).
 
 ```
 users
-[action=list|add|change|enable|disable|remove] (default list)
+[action=list|add|change|enable|disable|remove|redeploy] (default list)
 [identity=<str>] (default '')
 [profile=reader|contributor|maintainer|admin] (default reader)
 ```
@@ -1327,8 +1327,11 @@ Administer accounts on the authorization map + the auth service.
 Args:
     action:   list (roster), add (map entry — ``@email`` also mints an invite;
               a bare os-login is local-only), change (reassign a profile),
-              enable / disable (web SRP state), remove (drop the account/entry).
-    identity: a web email (``@``) or a local OS login (required except for list).
+              enable / disable (web SRP state), remove (drop the account/entry),
+              redeploy (re-assert the per-user host layer and re-lay every
+              collaborator's git hooks — takes no identity, and drops live shells).
+    identity: a web email (``@``) or a local OS login (required except for list
+              and redeploy).
     profile:  the profile to assign (add / change). ``admin`` is valid only for a
               local os-login, never a web account.
 ```

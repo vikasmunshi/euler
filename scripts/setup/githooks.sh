@@ -23,8 +23,13 @@ PRE_COMMIT="${HOOKS_DIR}/pre-commit"
 PRE_PUSH="${HOOKS_DIR}/pre-push"
 
 # The venv whose flake8/mypy the rendered hooks call. Defaults to the checkout's own
-# ``.venv`` (the operator dev setup); a per-user provisioned clone has no ``.venv``,
-# so ``user.sh`` overrides this with the deployed ``/opt/euler/venv`` via ``EULER_VENV``.
+# ``.venv`` — the operator dev setup, and the only caller this script serves.
+# ``EULER_VENV`` overrides it for a checkout whose venv lives elsewhere.
+#
+# A per-user provisioned clone is NOT such a caller: it has no ``.venv``, and its hooks
+# are rendered from the OPERATOR's templates by ``user.sh`` (§ provision_hooks), never by
+# running this script inside the clone — a clone can sit behind master indefinitely, so
+# rendering there would faithfully reproduce stale hooks.
 VENV="${EULER_VENV:-${REPO_ROOT}/.venv}"
 
 FORCE=0
