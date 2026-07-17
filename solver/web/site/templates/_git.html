@@ -21,7 +21,7 @@
          hx-get="/git" hx-trigger="euler:git-changed from:body" hx-swap="outerHTML">
   {# The title carries the whole state in words: the chip is small, and it is the
      one control here whose glyphs are counts rather than labels. #}
-  <summary title="{{ git.branch or 'detached HEAD' }}{% if git.upstream %} — {% if git.ahead %}{{ git.ahead }} ahead{% endif %}{% if git.ahead and git.behind %}, {% endif %}{% if git.behind %}{{ git.behind }} behind{% endif %}{% if not git.ahead and not git.behind %}in sync with {{ git.upstream }}{% endif %}{% endif %}{% if git.dirty %}, uncommitted changes{% endif %}">
+  <summary title="{{ git.branch or 'detached HEAD' }}{% if git.upstream %} — {% if git.ahead %}{{ git.ahead }} ahead{% endif %}{% if git.ahead and git.behind %}, {% endif %}{% if git.behind %}{{ git.behind }} behind{% endif %}{% if not git.ahead and not git.behind %}in sync with {{ git.upstream }}{% endif %}{% endif %}{% if git.worktree_unknown %}, worktree state pending vault unlock{% elif git.dirty %}, uncommitted changes{% endif %}">
     {# A branch: one commit line, one fork, three nodes. Not a cloud or an arrow —
        the chip is about *this clone's* shape, and none of the state below it is
        about the network. #}
@@ -45,13 +45,22 @@
       {% endif %}
     </span>
     {% endif %}
-    {% if git.dirty %}<span class="git-dirty" aria-label="uncommitted changes"></span>{% endif %}
+    {# The ring means "uncommitted changes" — so it must not appear on a worktree we
+       could not scan (a locked vault); that would read as a definite dirty state we
+       do not actually know. A hollow dot marks "pending" instead. #}
+    {% if git.worktree_unknown %}<span class="git-pending" aria-label="worktree state pending"></span>
+    {% elif git.dirty %}<span class="git-dirty" aria-label="uncommitted changes"></span>{% endif %}
   </summary>
   <ul class="menu-list menu-right git-panel">
     <li class="menu-info">
       <span class="git-track"><b>{{ git.branch or 'detached HEAD' }}</b>{% if git.upstream %} → {{ git.upstream }}{% endif %}</span>
     </li>
-    {% if git.dirty %}
+    {% if git.worktree_unknown %}
+    {# The branch and divergence above are real (ref reads, no filter); only the
+       worktree scan hit the locked vault. Say exactly that, and name the fix — the
+       auto-unlock (site.js) usually resolves it a beat after this first paint. #}
+    <li class="menu-info">Worktree state pending — unlock the vault to read local changes</li>
+    {% elif git.dirty %}
     {# A zero is dropped, not greyed: the line lists what IS, so it stays short. #}
     <li class="git-stat">
       {% if git.modified %}<span class="modified"><span class="n">{{ git.modified }}</span><span class="k">modified</span></span>{% endif %}

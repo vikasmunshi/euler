@@ -217,6 +217,11 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
    same kind of state, and it is not. */
 .git-dirty { width: 0.5rem; height: 0.5rem; border-radius: 50%;
   border: 1.5px solid var(--git-modified); flex: none; }
+/* Worktree not yet readable (a just-logged-in vault still locked): a muted hollow
+   dot, not the amber ring — "don't know yet", not "dirty". The auto-unlock refreshes
+   it away a beat later. */
+.git-pending { width: 0.5rem; height: 0.5rem; border-radius: 50%;
+  border: 1.5px solid var(--muted); flex: none; }
 /* Signed out (no clone), or a read that failed: inert, never absent — the header
    shows the shape of the place either way, and a chip that says nothing is honest
    where one that says "clean" would not be. */

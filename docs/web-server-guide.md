@@ -1089,32 +1089,45 @@ as the terminal's connect dot two controls to its right.
 
 **One read per navigation, no polling.** `solver/web/site/gitstate.py` reads the chip on
 each navigation; a middleware in `install_content` stashes it on the request (`render` is
-sync and cannot await), and `render._context` picks it up. Two commands, because they
-answer two different questions:
+sync and cannot await), and `render._context` picks it up. Three commands, **staged by what
+each one needs**, so a partial failure costs only the part that failed:
 
-- `git status --porcelain=v2 --branch` — the branch and a line per changed file.
-- `git rev-list --left-right --count origin/master...HEAD` — the divergence.
+1. `git rev-parse --abbrev-ref HEAD` — the branch. A pure ref read: no worktree scan, no
+   filter, works with the vault locked. The spine; if even this fails the clone is
+   genuinely unreadable (`unknown`, "state not read").
+2. `git rev-list --left-right --count origin/master...HEAD` — the divergence. Also refs
+   only, no filter.
+3. `git status --porcelain=v2` — the worktree file counts. The one read that scans files.
 
-**Always `origin/master`.** Not the branch's tracking branch, and so *not* the status
-command's own `# branch.ab` — that field counts against `origin/user/<slug>` and answers
-"have I pushed?". The question this workspace turns on is "how far am I from **master**?",
-because master is where work lands and `git-sync` is what closes the gap. The chip measures
-what `scripts/git/status.sh` measures, against the same ref; the two must not drift.
-`rev-list` walks refs only — no worktree scan, no filter — so it is cheap beside the status.
+**Always `origin/master`.** Not the branch's tracking branch, and so *not* `git status`'s
+own `# branch.ab` — that field counts against `origin/user/<slug>` and answers "have I
+pushed?". The question this workspace turns on is "how far am I from **master**?", because
+master is where work lands and `git-sync` closes the gap. The chip measures what
+`scripts/git/status.sh` measures, against the same ref; the two must not drift.
 
-The reads are **local-ref only** — neither touches the network (`status.sh` fetches first;
-a page render must not) — so the divergence is *as of the last fetch*, i.e. the freshness of
-a `git-sync`, and the panel says so. That is the honest reading for a status light: it
-reports the clone, and the clone is what the user's commands act on.
+**The worktree read needs the vault; branch and divergence do not.** With the filter wired,
+`git status` hashes `solutions/private/**` through the clean filter, which needs the master
+key, which needs the vault unlocked. Right after login the vault is still locked — the
+browser posts `/vault/unlock` only *after* the first render — so this read fails on the
+first paint. Because it is staged last and on its own, the chip is then `worktree_unknown`,
+**not** blanked: branch and divergence show, the panel says "worktree state pending — unlock
+the vault", and a hollow dot (not the amber dirty ring) marks it, because three zero counts
+we could not read must never render as "clean". `site.js`'s auto-unlock fires
+`euler:git-changed` the moment it lands, so the worktree fills in a beat later without a
+navigation. (Before this staging the whole chip read "state not read" on every first load —
+and its cause was invisible, because the read discarded git's stderr; it now logs it, since
+128 alone names none of a locked vault, a dead filter, or a missing ref.)
+
+The reads are **local-ref only** — none touches the network (`status.sh` fetches first; a
+page render must not) — so the divergence is *as of the last fetch*, i.e. the freshness of a
+`git-sync`, and the panel says so. That is the honest reading for a status light: it reports
+the clone, and the clone is what the user's commands act on.
 
 **`--no-optional-locks`.** `git status` normally takes `.git/index.lock` to write back its
 refreshed stat cache. The chip is a *reader on a page render*, and the user is typing real
 git commands into their terminal one pane away: a status read that grabs the index lock can
-make their `git-commit` fail, and concurrent renders collide with each other (the symptom
-was a chip that read `unknown` on the busy first load after login and fine on every quiet
-navigation after). This is git's own answer for status displays — a little repeated hashing,
-no lock. **A failed read logs git's stderr**: on a clone no other uid can open, that message
-is the whole diagnosis, and 128 alone names none of the three things it could be.
+make their `git-commit` fail. This is git's own answer for status displays — a little
+repeated hashing, no lock.
 
 **The verbs type into the terminal.** Each is a `[data-term-cmd]` button (`site.js` → the
 `/terminal` iframe), exactly like the account page's tool rows: the web shell is the front
@@ -1139,12 +1152,14 @@ One read, at the one moment the state changed. It fires for a **hand-typed** `gi
 exactly as for the menu's item — the menu types the same command, so there is one path.
 A lost or replayed sequence costs a stale chip until the next navigation, never a wrong one.
 
-**Two states that are not "clean".** With no readable `.git` — the shared content tier runs
-as a uid with no access to it — `read()` returns `None` and the chip is inert ("no clone");
-that is also what the auth tier's pages render, since they build their own contexts and
-never set `git`. When the clone *is* there but git will not answer — a locked vault stalls
-the clean filter, or the read times out — the chip is `unknown`: it says it does not know
-rather than painting "clean" over data it could not read.
+**Three states that are not "clean".** With no readable `.git` — the shared content tier
+runs as a uid with no access to it — `read()` returns `None` and the chip is inert
+("no clone"); that is also what the auth tier's pages render, since they build their own
+contexts and never set `git`. When even the branch will not read — the clone is there but
+git answers nothing — the chip is `unknown` ("state not read"). And when the branch and
+divergence read but the worktree scan is blocked (the locked-vault case above), it is
+`worktree_unknown`: most of the answer, honestly labelled pending. None of the three ever
+paints "clean" over data it could not read.
 
 ## 12 · The web shell
 

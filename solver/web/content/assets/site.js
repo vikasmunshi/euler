@@ -276,7 +276,18 @@
   // once per page load. Fire-and-forget: 'stale'/'error' just leave the vault
   // locked, and the account panel shows the recovery form below.
   document.addEventListener('DOMContentLoaded', function () {
-    if (window.Vault) { window.Vault.unlock(); }
+    if (!window.Vault) { return; }
+    window.Vault.unlock().then(function (result) {
+      // The chip renders server-side on this load, BEFORE this unlock runs — so its
+      // worktree scan (git status over solutions/private, which needs the master key)
+      // may have failed against a still-locked vault. A successful unlock means that
+      // scan can now succeed: nudge the chip to re-read, over the same git-changed
+      // path the shell's git commands use. Only on a real unlock, so a page whose
+      // vault was already open pays nothing.
+      if (result === 'unlocked') {
+        document.body.dispatchEvent(new CustomEvent('euler:git-changed'));
+      }
+    });
   });
 
   // The recovery form (#vault-recover, in the /account/vault fragment): the user
