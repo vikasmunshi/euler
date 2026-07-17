@@ -1087,10 +1087,10 @@ the user pill: one menu idiom in the header, not three.
 `--git-modified` **ring** for a dirty worktree — a ring, not a disc, so it cannot be read
 as the terminal's connect dot two controls to its right.
 
-**One read per navigation, no polling.** `solver/web/site/gitstate.py` reads the chip on
-each navigation; a middleware in `install_content` stashes it on the request (`render` is
-sync and cannot await), and `render._context` picks it up. Three commands, **staged by what
-each one needs**, so a partial failure costs only the part that failed:
+**One read per navigation.** `solver/web/site/gitstate.py` reads the chip on each
+navigation; a middleware in `install_content` stashes it on the request (`render` is sync
+and cannot await), and `render._context` picks it up. Three commands, **staged by what each
+one needs**, so a partial failure costs only the part that failed:
 
 1. `git rev-parse --abbrev-ref HEAD` — the branch. A pure ref read: no worktree scan, no
    filter, works with the vault locked. The spine; if even this fails the clone is
@@ -1118,10 +1118,28 @@ navigation. (Before this staging the whole chip read "state not read" on every f
 and its cause was invisible, because the read discarded git's stderr; it now logs it, since
 128 alone names none of a locked vault, a dead filter, or a missing ref.)
 
-The reads are **local-ref only** — none touches the network (`status.sh` fetches first; a
-page render must not) — so the divergence is *as of the last fetch*, i.e. the freshness of a
-`git-sync`, and the panel says so. That is the honest reading for a status light: it reports
-the clone, and the clone is what the user's commands act on.
+**Freshness against the remote — fetch where it is worth blocking, not on every swap.** The
+divergence answers "how far am I from origin/master?", and the honest answer is against the
+remote *as it is now*: a clone that never fetches reads "level" while the remote moved ahead
+(the bug that surfaced this). So `gitstate.read` takes `fetch`, and runs a `git fetch origin
+master` — like `status.sh` — before the count when it is set. A fetch is a network round
+trip that blocks the render it runs on, so the caller spends it only where the user expects
+freshness and not on every pane swap:
+
+- **full page loads** (login, reload — `not HX-Request`) and the **chip's own `/git`
+  endpoint** (its `git-changed` refresh and the 10-minute poll) → `fetch=True`;
+- **content navigations** → the local ref, never blocking on the network.
+
+`git-sync` fetches on its own, so after one the ref is already current. Every fetch is
+throttled on `.git/FETCH_HEAD`'s mtime (which any fetch resets, `git-sync` included), so
+rapid reloads — and a load right after a sync — do not re-hit the remote; a slow or offline
+remote falls back to the local ref within a short timeout rather than hanging the load.
+
+**The 10-minute poll** is a lone `<span class="git-poll" hx-trigger="every 600s">` in the
+header that refreshes `#git` via `/git`, so an external push shows without the user
+reloading or running a git command. It is **separate from the chip** deliberately: `#git` is
+oob-swapped on every navigation, which would reset an `every` timer placed on it, but the
+header htmx never re-renders — so the poller's interval runs uninterrupted.
 
 **`--no-optional-locks`.** `git status` normally takes `.git/index.lock` to write back its
 refreshed stat cache. The chip is a *reader on a page render*, and the user is typing real

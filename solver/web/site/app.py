@@ -37,7 +37,7 @@ from solver.auth import LADDER, Authorizations, Subject, slugify
 from solver.web.csp import csp_middleware
 from solver.web.site import content, gitstate
 from solver.web.site.config import SiteConfig
-from solver.web.site.render import GIT_KEY, SUBJECT_KEY, render
+from solver.web.site.render import GIT_KEY, SUBJECT_KEY, is_htmx, render
 from solver.web.site.validate import EDITABLE_SUFFIXES, validate
 
 log = logging.getLogger('euler-content')
@@ -652,25 +652,33 @@ def add_content_routes(app: web.Application) -> None:
 
 
 def git_middleware(repo_root: Path) -> Any:
-    """The chip's read: one ``git status`` per request that renders page chrome.
+    """The chip's read: the clone's git state per request that renders page chrome.
 
     A middleware rather than per-handler work, because the chip is *chrome* — every
     content response carries it (out-of-band beside the crumbs), so every content
-    handler would otherwise repeat the same three lines. :func:`render` is sync and
-    cannot await the read itself, so the state is stashed on the request here and
-    picked up by ``render._context``.
+    handler would otherwise repeat the same lines. :func:`render` is sync and cannot
+    await the read itself, so the state is stashed on the request here and picked up by
+    ``render._context``.
 
     Skipped for anyone without a subject (nothing to show a chip to) and for the
-    routes that render no chrome — the health probe, the static trees, and the
-    fragment-only write routes are not navigations. That keeps the promise the design
-    makes: one read per navigation, and no polling.
+    routes that render no chrome — the health probe, the static trees, the ``/ws``
+    attach.
+
+    **When it fetches.** The divergence is measured against origin/master as the
+    *remote* has it, which needs a network fetch (:func:`gitstate.read`'s *fetch*).
+    That is worth blocking on only at the moments the user expects a fresh reading and
+    not on every pane swap: a **full page load** (login, reload — ``not is_htmx``) and
+    the **chip's own** ``/git`` endpoint (its git-changed refresh and the 10-minute
+    poller). A content navigation reads the local ref and never waits on the network;
+    ``git-sync`` keeps that ref current by fetching itself.
     """
 
     @web.middleware
     async def _middleware(request: web.Request, handler: _Handler) -> web.StreamResponse:
         if request.get(SUBJECT_KEY) is not None and request.method == 'GET' \
                 and not request.path.startswith(('/healthz', '/assets/', '/vendor/', '/ws')):
-            request[GIT_KEY] = await gitstate.read(repo_root)
+            fetch = (not is_htmx(request)) or request.path == '/git'
+            request[GIT_KEY] = await gitstate.read(repo_root, fetch=fetch)
         return await handler(request)
 
     return _middleware

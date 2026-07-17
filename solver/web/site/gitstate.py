@@ -25,11 +25,16 @@ that failed:
    line says "pending", and ``site.js`` refreshes it the moment the auto-unlock lands.
    (Before this staging the whole chip read "state not read" on every first load.)
 
-**Local refs only.** No command touches the network, so the divergence is measured
-against ``origin/master`` *as this clone last fetched it* — the freshness of a
-``git-sync``, not of the remote (``status.sh`` fetches first; a page render must not).
-That is the honest reading for a status light: it reports the clone, and the clone is
-what the user's commands act on. The panel says so in as many words.
+**Freshness against the remote.** The divergence answers "how far am I from
+origin/master?", and the honest answer is against the remote *as it is now*, not as
+this clone last happened to fetch it — a clone that never fetches would read "level"
+while the remote moved ahead (the reported bug). So :func:`read` takes *fetch*: when
+set, it runs a throttled ``git fetch origin master`` before the count, exactly as
+``scripts/git/status.sh`` does. The cost is a network round trip, so the caller spends
+it only where it is worth blocking on — a full page load, the periodic poll, the chip's
+own refresh — and not on content navigations, which read the local ref. ``git-sync``
+fetches on its own, so after one the ref is already current (and the throttle skips a
+redundant re-fetch). The branch and worktree reads never touch the network.
 
 **No optional locks.** ``git status`` normally takes ``.git/index.lock`` to write
 back the refreshed stat cache. This module is a *reader* on a page render, and the
@@ -55,6 +60,7 @@ __all__ = ['GitState', 'filter_wired', 'read']
 
 import asyncio
 import logging
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -62,10 +68,20 @@ from solver.crypto.config import config as crypto_config
 
 log = logging.getLogger('euler-content')
 
-#: Ceiling on each read. They are local commands, but they run on the event loop's
-#: watch and a wedged git (a locked vault, a stale index.lock) must not hold a page
-#: render. Overrunning it reads as `unknown`, like any other failure.
+#: Ceiling on a local read. They run on the event loop's watch, and a wedged git (a
+#: locked vault, a stale index.lock) must not hold a page render. Overrunning it reads
+#: as `unknown`, like any other failure.
 _TIMEOUT: float = 5.0
+
+#: Tighter cap on the network fetch: it *blocks the render it runs on*, so a slow or
+#: unreachable remote must fall back to the local ref rather than hang the load.
+_FETCH_TIMEOUT: float = 4.0
+
+#: A throttle floor on the fetch, keyed on `.git/FETCH_HEAD`'s mtime (which *any* fetch
+#: resets — the chip's own, or the user's `git-sync`). It bounds fetch-spam from rapid
+#: reloads, and means a full page load right after a `git-sync` does not re-fetch what
+#: the sync just pulled. Well under the 10-minute poll, so a poll always fetches.
+_FETCH_THROTTLE: float = 30.0
 
 #: The ref the chip measures against — **always**, whatever the branch's own tracking
 #: branch says. Master is where work lands and `git-sync` is what closes the gap, so
@@ -189,7 +205,21 @@ def filter_wired(repo_root: Path) -> bool:
     return f'[filter "{crypto_config["filter_name"]}"]' in text
 
 
-async def _git(repo_root: Path, *args: str) -> tuple[int, str]:
+def _fetch_due(repo_root: Path) -> bool:
+    """Whether origin/master is stale enough to re-fetch, by ``.git/FETCH_HEAD``'s mtime.
+
+    Any fetch writes FETCH_HEAD — the chip's own *and* the user's ``git-sync`` — so this
+    one mtime throttles them together: a load right after a sync does not re-fetch what
+    the sync just pulled. A never-fetched clone (no FETCH_HEAD) is always due.
+    """
+    try:
+        age = time.time() - (repo_root / '.git' / 'FETCH_HEAD').stat().st_mtime
+    except OSError:
+        return True
+    return age > _FETCH_THROTTLE
+
+
+async def _git(repo_root: Path, *args: str, timeout: float = _TIMEOUT) -> tuple[int, str]:
     """Run ``git *args`` in *repo_root* → (returncode, stdout). Never raises.
 
     A non-zero exit **logs git's own stderr**. That message is the whole diagnosis
@@ -208,7 +238,7 @@ async def _git(repo_root: Path, *args: str) -> tuple[int, str]:
         log.warning('git state: cannot run git in %s: %s', repo_root, exc)
         return 1, ''
     try:
-        raw_out, raw_err = await asyncio.wait_for(proc.communicate(), timeout=_TIMEOUT)
+        raw_out, raw_err = await asyncio.wait_for(proc.communicate(), timeout=timeout)
     except asyncio.TimeoutError:
         # The read outlived its welcome (a locked vault stalls the clean filter): kill
         # it, or it outlives the response too.
@@ -224,7 +254,7 @@ async def _git(repo_root: Path, *args: str) -> tuple[int, str]:
     return 0, raw_out.decode('utf-8', errors='replace')
 
 
-async def read(repo_root: Path) -> GitState | None:
+async def read(repo_root: Path, *, fetch: bool = False) -> GitState | None:
     """This clone's state, or None when *repo_root* is not a git clone we can read.
 
     None is the "no chip" answer — no ``.git`` at all, or a uid without access to it
@@ -240,6 +270,12 @@ async def read(repo_root: Path) -> GitState | None:
     3. **worktree counts** — the one read that scans files, so the one the clean
        filter (a locked vault) can block → ``worktree_unknown``, branch + divergence
        kept.
+
+    *fetch* asks for the divergence to be measured against the remote as it is *now*,
+    not as this clone last saw it — a throttled ``git fetch origin master`` first, like
+    ``scripts/git/status.sh``. The caller sets it for the moments worth a network round
+    trip (a full page load, the periodic poll, the chip's own refresh) and leaves it off
+    for content navigations, which read the local ref and never block on the network.
     """
     if not (repo_root / '.git').exists():
         return None
@@ -249,6 +285,13 @@ async def read(repo_root: Path) -> GitState | None:
     head = out.strip()
     branch = '' if head == 'HEAD' else head       # bare 'HEAD' == detached
     wired = filter_wired(repo_root)
+
+    if fetch and _fetch_due(repo_root):
+        # Best-effort and bounded: a failure or timeout (offline, slow remote) simply
+        # leaves the local ref, which the rev-list below still reads — a stale count
+        # beats a hung page. `origin master` with the default refspec updates
+        # refs/remotes/origin/master, which is what the divergence is measured against.
+        await _git(repo_root, 'fetch', '--quiet', 'origin', 'master', timeout=_FETCH_TIMEOUT)
 
     rc, out = await _git(repo_root, 'rev-list', '--left-right', '--count', f'{_UPSTREAM}...HEAD')
     if rc == 0:

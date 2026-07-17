@@ -68,9 +68,7 @@
       {% if git.untracked %}<span class="untracked"><span class="n">{{ git.untracked }}</span><span class="k">untracked</span></span>{% endif %}
     </li>
     {% else %}
-    {# "As of your last sync", not "as of now": the reads are local-ref only and never
-       touch the network, so this is the clone's own account of itself. #}
-    <li class="menu-info">No local changes{% if git.upstream and not git.ahead and not git.behind %} · level with <code>{{ git.upstream }}</code> as of your last <code>git-sync</code>{% endif %}</li>
+    <li class="menu-info">No local changes{% if git.upstream and not git.ahead and not git.behind %} · level with <code>{{ git.upstream }}</code>{% endif %}</li>
     {% endif %}
     <li class="menu-sep" aria-hidden="true"></li>
     {# Terminal down = the verbs have nowhere to land (terminal.js's send() drops the

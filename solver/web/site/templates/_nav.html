@@ -59,6 +59,16 @@
        group right, and the chip belongs on the identity side of that gap — it is
        state about *your clone*, not about the page in the pane. #}
     {% include "_git.html" %}
+    {% if subject %}
+    {# The chip's 10-minute remote refresh, so an external push shows without the user
+       having to reload or run a git command. It is a SEPARATE element, not a trigger on
+       #git: the chip is oob-swapped on every navigation (which would reset an `every`
+       timer on it), but this poller lives in the header htmx never re-renders, so its
+       interval runs uninterrupted. It refreshes #git via /git, where the read fetches
+       origin/master. Signed-in only — /git needs the reader floor. #}
+    <span class="git-poll" hidden aria-hidden="true"
+          hx-get="/git" hx-trigger="every 600s" hx-target="#git" hx-swap="outerHTML"></span>
+    {% endif %}
     {# The user pill is live in both tiers — signed out it is the way in, so it
        reads as *empty* (dashed ring, muted ink), never as disabled. #}
     <details class="menu user-menu">
