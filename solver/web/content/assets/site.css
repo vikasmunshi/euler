@@ -733,6 +733,11 @@ dl.account dd { margin: 0; min-width: 0; }
   font-size: 0.78rem; font-weight: 600;
   padding: 0.15rem 0.55rem; border-radius: 999px;
   border: 1px solid var(--border);
+  /* A <button> defaults to the UA's black `color`, and `font: inherit` below does
+     not touch color — so an UNTONED action pill (Create identity, Sync) would sit
+     black on the dark card. This readable default is overridden by .ok / .warn where
+     a tone applies. */
+  color: var(--text);
 }
 .state-pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
 .state-pill.warn { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
