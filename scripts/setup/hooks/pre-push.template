@@ -33,11 +33,20 @@ section() { printf '\n── %s ──\n' "$1" >&2; }
 note()    { printf '   %s\n' "$1" >&2; }
 fail()    { FAILURES+=("$1"); printf '   ✗ %s\n' "$1" >&2; }
 pass()    { printf '   ✓ %s\n' "$1" >&2; }
+skip()    { printf '   – %s\n' "$1" >&2; }
 
 print_verdict() {
     printf '\n' >&2
     if (( ${#FAILURES[@]} == 0 )); then
-        printf '✓ pre-push: all checks passed — pushing.\n' >&2
+        # "pushing" only when there is something to push. Git runs this hook with an
+        # EMPTY stdin when it has already settled the push itself — a non-fast-forward
+        # is decided before the hook runs — so claiming a push is about to happen
+        # printed a cheerful verdict directly above git's rejection.
+        if (( ${#PUSH_REFS[@]} == 0 )); then
+            printf '✓ pre-push: checks passed, but git offered no refs — this push delivers nothing.\n' >&2
+        else
+            printf '✓ pre-push: all checks passed — pushing.\n' >&2
+        fi
         return 0
     fi
     printf '════════════════════════════════════════════════════════════\n' >&2
@@ -59,6 +68,12 @@ print_verdict() {
 # (nothing to audit); an all-zero remote sha is a new remote ref, for which
 # "new" means every commit not already reachable from some other ref on this
 # remote.
+#
+# NO lines at all is its own case: git offers none when it has already settled the
+# push without the hook's help — a non-fast-forward, which git decides up front and
+# rejects on its own. Nothing then reaches the remote, so the blob audits below have
+# nothing to read and say so; reporting '0 blobs checked ✓' invited the reader to
+# think a push had been audited and cleared when it had not been audited at all.
 REMOTE="${1:-origin}"
 PUSH_REFS=()
 while read -r _local_ref local_sha _remote_ref remote_sha; do
@@ -121,7 +136,9 @@ blob_head_hex() {
 # the clean filter — block the push.
 section "Encryption-at-rest audit (solutions/private, blobs in this push)"
 magic_hex=$("$VENV/bin/python" -c 'from solver.crypto.config import config; print(config["magic"].hex())')
-if [[ -z "$magic_hex" ]]; then
+if (( ${#PUSH_REFS[@]} == 0 )); then
+    skip "no refs offered by git — this push adds no blobs to audit"
+elif [[ -z "$magic_hex" ]]; then
     fail "could not read config.gitfilter_magic (is the venv intact?)"
 else
     mlen=$(( ${#magic_hex} / 2 ))
@@ -160,18 +177,22 @@ section "compiled binaries (blobs in this push)"
 ELF_MAGIC_HEX='7f454c46'
 pushed_bins=()
 declare -A all_blobs=()
-collect_pushed_blobs all_blobs
-for sha in "${!all_blobs[@]}"; do
-    if [[ "$(blob_head_hex "$sha" 4)" == "$ELF_MAGIC_HEX" ]]; then
-        pushed_bins+=("${all_blobs[$sha]}")
-    fi
-done
-if (( ${#pushed_bins[@]} == 0 )); then
-    pass "no compiled binaries in this push (${#all_blobs[@]} blob(s) checked)"
+if (( ${#PUSH_REFS[@]} == 0 )); then
+    skip "no refs offered by git — this push adds no blobs to audit"
 else
-    note "compiled binaries (ELF) in this push:"
-    for b in "${pushed_bins[@]}"; do note "  !! $b"; done
-    fail "compiled binaries are in this push — run 'git rm --cached' on them before pushing"
+    collect_pushed_blobs all_blobs
+    for sha in "${!all_blobs[@]}"; do
+        if [[ "$(blob_head_hex "$sha" 4)" == "$ELF_MAGIC_HEX" ]]; then
+            pushed_bins+=("${all_blobs[$sha]}")
+        fi
+    done
+    if (( ${#pushed_bins[@]} == 0 )); then
+        pass "no compiled binaries in this push (${#all_blobs[@]} blob(s) checked)"
+    else
+        note "compiled binaries (ELF) in this push:"
+        for b in "${pushed_bins[@]}"; do note "  !! $b"; done
+        fail "compiled binaries are in this push — run 'git rm --cached' on them before pushing"
+    fi
 fi
 
 # ── 3. flake8 on solver + solutions ──────────────────────────────────────
