@@ -1536,8 +1536,8 @@
     "title": "Heighway Dragon",
     "level": 16,
     "pct": 41,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sat, 18 Jul 2026, 14:27"
   },
   "221": {
     "title": "Alexandrian Integers",
