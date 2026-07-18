@@ -15,7 +15,7 @@
         deploy-auth remove-auth upgrade-auth redeploy-auth \
         deploy-user remove-user upgrade-user redeploy-user \
         deploy-web remove-web upgrade-web redeploy-web \
-        test run audit uninstall version version-bump
+        test run audit uninstall version bump-version check-version
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -119,9 +119,29 @@ run: $(VENV)
 version: $(VENV)
 	@$(VENV)/bin/solver version
 
-## Preview the next release tag from Conventional Commits (append ARGS= to drop --dry-run)
-version-bump:
-	@./scripts/version/bump.sh $(if $(ARGS),$(ARGS),--dry-run)
+## Cut a release: bump solver/version.py from Conventional Commits, commit, tag,
+## and push the commit + tag to origin. ARGS=--dry-run previews; ARGS=--no-push
+## stops before publishing.
+bump-version:
+	@./scripts/version/bump.sh $(ARGS)
+
+## Guard: the version redeploy-web would ship (solver/version.py) must have its
+## vX.Y.Z tag on origin, so a redeploy never runs a release collaborator clones
+## cannot reach (a locally-tagged-but-unpushed release runs the venv ahead of every
+## clone). Queries origin — needs network. A prerequisite of redeploy-web.
+check-version:
+	@ver=$$(sed -nE "s/^__version__ = '([^']*)'.*/\1/p" solver/version.py); \
+	if [ -z "$$ver" ]; then \
+		printf "✗ check-version: could not read the version from solver/version.py\n" >&2; exit 1; \
+	fi; \
+	tag="v$$ver"; \
+	if git ls-remote --tags origin "$$tag" 2>/dev/null | grep -q "refs/tags/$$tag"; then \
+		printf "✓ check-version: %s is published on origin\n" "$$tag"; \
+	else \
+		printf "✗ check-version: %s is NOT on origin — publish the release before deploying.\n" "$$tag" >&2; \
+		printf "  run 'make bump-version' (bump + push) or 'git push origin HEAD %s'\n" "$$tag" >&2; \
+		exit 1; \
+	fi
 
 ## Audit what git stores across the WHOLE tracked tree (~25s): every file under
 ## solutions/private is encrypted at rest, and no file anywhere is a compiled binary.
@@ -295,6 +315,7 @@ upgrade-web: upgrade-frontend upgrade-egress deploy-ddns upgrade-smtp upgrade-au
 ## per-user instances so their sockets re-activate them against it → refresh the
 ## edge's static content + Caddyfile. Note the running instances are stopped, so
 ## live terminals are dropped. The everyday "I changed Python/templates/CSS/JS,
-## push it" turnaround.
-redeploy-web: redeploy-auth redeploy-user redeploy-frontend
+## push it" turnaround. Gated on check-version so the deployed build's tag is on
+## origin (run serially — the default — so the guard runs before any deploy step).
+redeploy-web: check-version redeploy-auth redeploy-user redeploy-frontend
 	@printf "✓ redeploy-web complete: code, templates, and static assets redeployed\n"
