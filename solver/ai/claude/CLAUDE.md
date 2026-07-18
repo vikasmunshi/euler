@@ -41,7 +41,30 @@ solver "eval 42; benchmark 42"
 # Deploy the web front end (systemd services behind a TLS edge — needs sudo).
 # There is no local server: see docs/web-server-guide.md.
 make deploy-web         # also: remove-web | redeploy-web | upgrade-web
+
+# Cut a release, then ship it (see "Versioning" below):
+make bump-version       # bump solver/version.py → commit → tag vX.Y.Z → push (ARGS=--dry-run|--no-push)
+make redeploy-web       # gated on check-version: refuses if the tag isn't on origin
 ```
+
+## Versioning
+
+The version is a single tracked file, `solver/version.py` (`__version__ = 'X.Y.Z'`) — the
+sole source of truth. `pyproject.toml` reads it at build time via
+`[tool.setuptools.dynamic]` `attr:` (no setuptools-scm, no build-time git), and
+`config.version` imports it at runtime, so the number in the file, the wheel, and the
+`version` shell command always agree. It holds the last **released** number; between
+releases it stays put while the `version` command's live `git describe` line shows how far
+past the tag HEAD is.
+
+**Never hand-edit the number.** `scripts/version/bump.sh` (`make bump-version`) is the only
+writer: it derives the next SemVer bump from Conventional Commits, rewrites `version.py`,
+commits `chore(release): vX.Y.Z`, tags the commit, and **pushes the commit + tag to origin**
+(`--no-push` opts out; `--dry-run` previews). `make check-version` fails unless the version
+`version.py` names has its `vX.Y.Z` tag on origin, and is a prerequisite of `redeploy-web` —
+so a locally-tagged-but-unpushed release can't be deployed ahead of collaborator clones.
+The deployed venv is only as current as the last release baked into it: **re-run
+`make redeploy-web` after `make bump-version`.** Full release flow: `make bump-version` → `make redeploy-web`.
 
 Make target verbs follow the two kinds of target, and always match the action the
 underlying script in `scripts/setup/` takes:

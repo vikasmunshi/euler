@@ -1424,7 +1424,21 @@ code, templates, and static assets without touching identities, units, certs, or
 firewall. `auth.sh redeploy` reinstalls the repo into the shared `/opt/euler` venv,
 `user.sh redeploy` bounces running instances so their sockets re-activate them against
 the rebuilt venv, and `frontend.sh redeploy` refreshes `/etc/euler/web-content` plus the
-Caddyfile and reloads the edge.
+Caddyfile and reloads the edge. It is **gated on `make check-version`** (its first
+prerequisite): the version `solver/version.py` names — the number this build bakes into
+the venv — must have its `vX.Y.Z` tag on origin, or the redeploy refuses. That stops a
+release that was bumped and tagged locally but never pushed from running the deployed venv
+ahead of what any collaborator clone can `git-sync` to.
+
+**Cutting a release.** The version is one tracked file, `solver/version.py`, written only
+by `scripts/version/bump.sh` (`make bump-version`): it derives the SemVer bump from
+Conventional Commits, rewrites the file, commits, tags `vX.Y.Z`, and **pushes the commit +
+tag to origin** (`ARGS=--dry-run` previews, `ARGS=--no-push` stops before publishing). The
+deployed venv is only as current as the last release baked into it, so the full flow is
+**`make bump-version` → `make redeploy-web`** — the push in the first step is exactly what
+lets `check-version` pass in the second. A new web-shell *command* additionally needs each
+per-user clone to `git-sync` and the terminal to reconnect before it appears (the
+persistent PTY builds its command registry at spawn; see § 12).
 
 Reach for **`make upgrade-web`** only when identities, units, or the Caddy/acme packages
 themselves change. Note that systemd units are re-laid by `user.sh upgrade`, **not** by
