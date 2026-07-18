@@ -1543,8 +1543,8 @@
     "title": "Alexandrian Integers",
     "level": 19,
     "pct": 49,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sat, 18 Jul 2026, 19:43"
   },
   "222": {
     "title": "Sphere Packing",
