@@ -36,6 +36,7 @@ configure_identity() {
     gh auth setup-git
     git config user.name "${name}"
     git config user.email "${email}"
+    git config set advice.skippedCherryPicks false
 
     printf "Git identity configured from gh user '%s':\n" "${login}"
     printf "  user.name:  %s\n" "${name}"
