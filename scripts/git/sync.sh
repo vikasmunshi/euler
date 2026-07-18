@@ -109,7 +109,7 @@ sync_onto_master() {
 }
 
 main() {
-    # main — Fetch origin/master, prune dead remote branches, and bring local in sync.
+    # main — Fetch origin/master and tags, prune dead remote branches, and bring local in sync.
     #
     # State detection:
     #   up_to_date   — local HEAD == origin/master
@@ -131,8 +131,14 @@ main() {
     #   1 when the state could not be determined, or the sync itself failed
     local ahead behind has_changes state prune_out
 
-    if ! git fetch origin master 1>/dev/null 2>&1; then
-        echo "Error: could not fetch origin/master." >&2
+    # Fetch master AND all tags. The version mechanism reads release tags — the
+    # `version` command's `git describe` and bump.sh's last-tag anchor — but normal
+    # fetch only auto-follows tags pointing at objects downloaded THIS fetch, so a
+    # clone that already has the tagged commit never picks up the `vX.Y.Z` tag and
+    # `git describe` falls back to a bare sha. `--tags` pulls every tag ref; it adds
+    # new tags without clobbering existing (immutable) release tags — no --force.
+    if ! git fetch --tags origin master 1>/dev/null 2>&1; then
+        echo "Error: could not fetch origin/master (with tags)." >&2
         return 1
     fi
 
