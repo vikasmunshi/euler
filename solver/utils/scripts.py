@@ -13,6 +13,7 @@ touches nothing outside ``solutions/``.
 """
 from __future__ import annotations
 
+import json
 import sys
 from datetime import datetime
 from subprocess import CalledProcessError, DEVNULL, run
@@ -475,35 +476,33 @@ def _pr_files(number: int) -> list[str] | None:
     return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
 
 
-@register(requires='maintainer', quietable=True,
-          help_text='Pull requests: [accent.dim]list[/accent.dim] | merge <number>.',
-          aliases=('pr',), )
-def gh_pr(action: Literal['list', 'merge'] = 'list', number: int | None = None) -> int:
-    """List the open pull requests, or squash-merge one onto master.
+def _open_prs() -> list[dict[str, object]] | None:
+    """The open pull requests as ``{number, title, branch}`` records, or None on failure.
 
-    `list` (the default) shows what is waiting: number, title, branch. `merge
-    <number>` takes a number straight from that list and squash-merges it, which is
-    how a collaborator's `user/<slug>` branch lands on master — their next `git-sync`
-    then rebases the squashed commit away and prunes the merged branch.
-
-    A pull request touching anything outside `solutions/` is refused, and that gate
-    is what makes this a maintainer's command rather than an admin's: merging a
-    branch that carries solutions is reviewing solutions, but a branch that also
-    edits the framework, the scripts, or the keys is asking for something else
-    entirely. Merge those on GitHub, as an admin who has read them.
-
-    Args:
-        action: 'list' (default) or 'merge'.
-        number: The pull request to merge, as shown by `list`. Required by 'merge'.
-
-    Aliased as `pr`.
+    None is NOT "no open PRs": an unauthenticated or offline `gh` fails here, and the
+    caller must not read that as an empty queue. `gh pr list` defaults to open PRs; the
+    JSON fields are the three a reviewer needs to decide (number, title, branch).
     """
-    if action == 'list':
-        return run_cmdline('gh pr list')
-    if number is None:
-        console.print('[error]error:[/error] merge needs a pull request number — '
-                      'run [accent]gh-pr list[/accent] to see them.')
-        return ExitCodes.EXIT_ERROR
+    proc = run(['gh', 'pr', 'list', '--json', 'number,title,headRefName'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    if proc.returncode != 0:
+        return None
+    try:
+        data = json.loads(proc.stdout or '[]')
+    except json.JSONDecodeError:
+        return None
+    return data if isinstance(data, list) else None
+
+
+def _merge_pr(number: int) -> int:
+    """Squash-merge pull request *number* onto master, refusing anything beyond `solutions/`.
+
+    The gate that makes this a maintainer's command rather than an admin's: merging a
+    branch that carries solutions is reviewing solutions, but a branch that also edits
+    the framework, the scripts, or the keys is asking for something else entirely —
+    merge those on GitHub, as an admin who has read them. On a clean merge the header
+    chip is nudged (:func:`osc.git_changed`), since master moved.
+    """
     files: list[str] | None = _pr_files(number)
     if files is None:
         console.print(f'[error]error:[/error] cannot read the files of pull request [accent]#{number}'
@@ -529,7 +528,75 @@ def gh_pr(action: Literal['list', 'merge'] = 'list', number: int | None = None) 
     # policy prohibits a plain merge (that policy is what gates other collaborators);
     # the owner running this review has the bypass, and without --admin `gh pr merge`
     # just refuses with "the base branch policy prohibits the merge".
-    return run_cmdline(f'gh pr merge {number} --squash --admin')
+    result: int = run_cmdline(f'gh pr merge {number} --squash --admin')
+    if result == 0:
+        osc.git_changed()  # master moved: the chip's ahead/behind counts changed
+    return result
+
+
+def _merge_walk() -> int:
+    """Walk the open pull requests interactively — merge / skip / quit each.
+
+    The interactive counterpart of `users process-requests`: read the open PRs once,
+    then per request show its number, title and branch and offer **merge** (the
+    `solutions/`-gated squash), **skip** (leave it open), or **quit**. Merging is
+    :func:`_merge_pr`, so the same file gate and the same git-changed nudge apply as a
+    numbered merge once did.
+    """
+    prs: list[dict[str, object]] | None = _open_prs()
+    if prs is None:
+        console.print('[error]error:[/error] cannot read the open pull requests — is [accent]gh[/accent] '
+                      'signed in ([accent]git-identity[/accent])?')
+        return ExitCodes.EXIT_ERROR
+    if not prs:
+        console.print('[muted]no open pull requests[/muted]')
+        return int(ExitCodes.EXIT_OK)
+    console.print(f'[accent]{len(prs)}[/accent] open pull request(s) — per request: '
+                  '[accent]m[/accent]erge · [accent]s[/accent]kip · [accent]q[/accent]uit')
+    for pr in prs:
+        number = pr.get('number')
+        if not isinstance(number, int):
+            continue
+        title = str(pr.get('title', ''))
+        branch = str(pr.get('headRefName', ''))
+        console.print()
+        console.print(f'  [accent]#{number}[/accent]  {title}  [muted]{branch}[/muted]')
+        choice = console.input('  [accent]m/s/q[/accent] > ').strip().lower()[:1]
+        if choice == 'q':
+            break
+        if choice != 'm':
+            console.print('  [muted]skipped[/muted]')
+            continue
+        _merge_pr(number)
+    return int(ExitCodes.EXIT_OK)
+
+
+@register(requires='maintainer', quietable=True,
+          help_text='Pull requests: [accent.dim]list[/accent.dim] | merge (walk the queue).',
+          aliases=('pr',), )
+def gh_pr(action: Literal['list', 'merge'] = 'list') -> int:
+    """List the open pull requests, or walk them one at a time to squash-merge.
+
+    `list` (the default) shows what is waiting: number, title, branch. `merge` walks
+    the open pull requests interactively — per request **merge** (squash onto master),
+    **skip**, or **quit** — the same shape as `users process-requests`. Merging one is
+    how a collaborator's `user/<slug>` branch lands on master; their next `git-sync`
+    then rebases the squashed commit away and prunes the merged branch.
+
+    A pull request touching anything outside `solutions/` is refused, and that gate
+    is what makes this a maintainer's command rather than an admin's: merging a
+    branch that carries solutions is reviewing solutions, but a branch that also
+    edits the framework, the scripts, or the keys is asking for something else
+    entirely. Merge those on GitHub, as an admin who has read them.
+
+    Args:
+        action: 'list' (default) or 'merge' (walk the open queue interactively).
+
+    Aliased as `pr`.
+    """
+    if action == 'list':
+        return run_cmdline('gh pr list')
+    return _merge_walk()
 
 
 @register(

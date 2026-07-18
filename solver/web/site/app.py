@@ -26,6 +26,7 @@ __all__ = ['build_app', 'add_content_routes', 'install_content',
 import asyncio
 import html
 import logging
+import mimetypes
 from pathlib import Path
 from typing import Any, Awaitable, Callable, TypedDict
 
@@ -295,7 +296,9 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         'info': info,
         'euler_url': f'https://projecteuler.net/problem={number}',
         'github_url': github,
-        'statement': read_html('statement.html'),
+        # Relative resource links (images, the data file) rooted at this problem's
+        # canonical path, so they resolve after an htmx swap, not just a full load.
+        'statement': content.rewrite_statement_links(read_html('statement.html'), number),
         'notes': read_html('notes.html'),
         'files': _file_entries(repo_root, sdir),
         'test_cases': test_cases,
@@ -313,10 +316,38 @@ async def problem_page(request: web.Request) -> web.StreamResponse:
                   block='content')
 
 
+def _is_pane_view(request: web.Request) -> bool:
+    """Whether this file request is an in-pane view rather than a sub-resource embed.
+
+    One URL serves two masters: a statement's ``<img src="resources/…">`` embed, and
+    the Files-panel link (or a pasted URL) that opens the same file *in the pane*. The
+    two are told apart by how the browser asks:
+
+    - a **view** — the Files-panel htmx swap (``HX-Request``) or a direct page
+      navigation (``Sec-Fetch-Dest: document``, a pasted URL / opened-in-new-tab) —
+      wants the file rendered in the viewer;
+    - an **embed** — an ``<img>`` sub-resource fetch (``Sec-Fetch-Dest: image`` and
+      friends) — wants the raw bytes.
+
+    Bytes are the safe default when neither signal is present (an old client, a direct
+    image fetch), so an ``<img>`` never accidentally renders the viewer into itself.
+    """
+    if is_htmx(request):
+        return True
+    return request.headers.get('Sec-Fetch-Dest', '') == 'document'
+
+
 @requires('reader')
 async def problem_file(request: web.Request) -> web.StreamResponse:
-    """``GET /solutions/{n}/{filename}`` — one problem file: source rendered in the
-    viewer, anything non-text (statement resources: images, data) as raw bytes."""
+    """``GET /solutions/{n}/{filename}`` — one problem file, three shapes for one URL.
+
+    Source text renders in the viewer. A non-text file (a statement's images, its data
+    file) is served as **raw bytes** to an ``<img>`` embed, but rendered **in the
+    viewer** — an ``<img>`` for an image, a download link otherwise — when a person
+    opens it in the pane (a Files-panel click, or a direct page view); see
+    :func:`_is_pane_view`. Without that split, clicking an image in the Files panel
+    swapped raw PNG bytes into the content pane instead of showing the picture.
+    """
     number = _problem_number(request)
     filename = request.match_info['filename']
     sdir = content.solution_dir(request.app[CONFIG_KEY].repo_root, number)
@@ -324,7 +355,19 @@ async def problem_file(request: web.Request) -> web.StreamResponse:
     if target is None:
         raise web.HTTPNotFound(text=f'{filename} not found for problem {number}')
     if target.suffix not in content.TEXT_SUFFIXES:
-        return web.FileResponse(target)
+        if not _is_pane_view(request):
+            return web.FileResponse(target)
+        mime = mimetypes.guess_type(target.name)[0] or 'application/octet-stream'
+        return render(request, 'media.html', {
+            'number': number,
+            'filename': filename,
+            'url': f'/solutions/{number:04d}/{filename}',
+            'is_image': mime.startswith('image/'),
+            'mime': mime,
+            'crumbs': [_HOME, ('solutions', '/solutions/'),
+                       (f'{number:04d}', f'/solutions/{number:04d}/'), (filename, None)],
+            'actions': [],
+        }, block='content')
     try:
         text = target.read_text(encoding='utf-8')
     except UnicodeDecodeError:

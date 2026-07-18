@@ -54,8 +54,19 @@
 </section>
 
 <section class="panel">
-  {# The same form as /password and its fragment — one partial, three renderings. #}
-  {% include "_password_form.html" %}
+  {# Folded here, and only here: /password's own page and the shell fragment want the
+     form open, but on the account page a password change is a rare, deliberate act, so
+     it sits closed behind a summary and expands in place. The shared partial's own
+     <h2> is suppressed (password_heading=false) so the summary is the one heading. #}
+  {% set password_heading = false %}
+  <details class="fold">
+    <summary class="fold-summary">
+      <span class="fold-title">Password</span>
+      <span class="muted">change your password</span>
+    </summary>
+    {# The same form as /password and its fragment — one partial, three renderings. #}
+    {% include "_password_form.html" %}
+  </details>
 </section>
 <script src="/assets/srp.js" defer></script>
 <script src="/assets/password.js" defer></script>

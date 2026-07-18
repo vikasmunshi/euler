@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ filename }} · euler{% endblock %}
+{% block content %}
+{# A non-text problem resource opened in the pane (a Files-panel click, or a direct
+   page view). The image's own <img> re-requests this same URL as a sub-resource, which
+   problem_file then answers with the raw bytes (§ _is_pane_view). Anything not an image
+   has no inline form, so it is offered as a download. #}
+<section class="panel">
+  <h1><code>{{ filename }}</code></h1>
+  <p class="meta"><span class="muted">problem {{ number }} · {{ mime }}</span></p>
+  {% if is_image %}
+  <img class="resource-img" src="{{ url }}" alt="{{ filename }}">
+  {% else %}
+  <p><a class="btn" href="{{ url }}" download>Download <code>{{ filename }}</code></a></p>
+  {% endif %}
+</section>
+{% endblock %}

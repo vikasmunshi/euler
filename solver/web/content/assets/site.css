@@ -340,6 +340,28 @@ body.terminal-doc {
 }
 .panel h1 { margin: 0 0 0.5rem; font-size: 1.35rem; }
 .panel h2 { margin: 0 0 0.6rem; font-size: 1.12rem; }
+
+/* Fold: a panel section that opens in place (the account page's Password form). The
+   summary carries the heading, so it reads as a panel title until clicked; the ▸
+   marker rotates on open. Closed by default (no [open] on the <details>). */
+.fold > summary.fold-summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.fold > summary.fold-summary::-webkit-details-marker { display: none; }
+.fold > summary.fold-summary::before {
+  content: "\203A";  /* › — rotates to ⌄ when open */
+  color: var(--muted);
+  transition: transform 0.12s ease;
+  transform: translateY(-0.05em);
+}
+.fold[open] > summary.fold-summary::before { transform: rotate(90deg) translateX(-0.05em); }
+.fold .fold-title { font-size: 1.12rem; font-weight: 600; color: var(--text); }
+.fold[open] > summary.fold-summary { margin-bottom: 0.8rem; }
 .lead { font-size: 1rem; }
 .meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 .pill-solved { color: var(--accent-ink); }
@@ -486,6 +508,8 @@ a.cell:hover { border-color: var(--accent); color: var(--text); }
 /* ── Problem page ────────────────────────────────────────────────────────── */
 .statement, .notes, .doc-body { overflow-wrap: break-word; }
 .statement img, .notes img, .doc-body img { max-width: 100%; }
+/* A problem resource opened in the pane (media.html): fit the pane, keep aspect. */
+.resource-img { max-width: 100%; height: auto; display: block; }
 
 /* files flow horizontally, plain names, coloured by git status (§7) */
 .file-flow { display: flex; flex-wrap: wrap; gap: 0.35rem 1.3rem; padding: 0; margin: 0; list-style: none; }

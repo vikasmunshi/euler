@@ -95,9 +95,15 @@
       {% else %}<p class="muted">None stored.</p>{% endif %}
       <form hx-post="/account/secret" hx-target="#vault-panel" class="vault-form">
         {# "name", not a real key's name: an example in a placeholder reads as a
-           default, and this form's whole point is that what you type is yours. #}
-        <input type="text" name="name" placeholder="name"
+           default, and this form's whole point is that what you type is yours. The
+           datalist is opt-in, not a default: ANTHROPIC_API_KEY is the one secret the
+           shell's AI features read (claude-api), so it is worth offering by name
+           without pre-filling the field. #}
+        <input type="text" name="name" placeholder="name" list="secret-name-options"
                pattern="[A-Z][A-Z0-9_]*" aria-label="secret name" required>
+        <datalist id="secret-name-options">
+          <option value="ANTHROPIC_API_KEY"></option>
+        </datalist>
         <input type="password" name="value" placeholder="value (write-only)"
                autocomplete="off" aria-label="secret value" required>
         <button class="btn" type="submit">Save secret</button>
@@ -118,13 +124,20 @@
      The tone is passed rather than derived from the status text: the rows do not
      share one vocabulary (a CLI is `signed in`, a clone is `decrypted`), and a macro
      that pattern-matched every row's words would have to learn each new one. #}
-  {% macro tool(name, status, command, tone) %}
+  {% macro tool(name, status, command, tone, floor) %}
+  {# Two reasons the button is dead, each with its own title: the tool is not on this
+     instance (no tone), or this profile may not run the command the row would type
+     (`floor`). The shell that receives the command already resolved this subject and
+     `requires(floor)` there is the real boundary — a button that types a command only
+     to earn a refusal is worse than one plainly disabled, so the row reads the same
+     floor here and does not offer it. #}
+  {% set permitted = subject and subject.has(floor) %}
   <div class="tool-row">
     <span class="tool-name">{{ name }}</span>
     <button type="button" data-term-cmd="{{ command }}"
             class="state-pill state-action{% if tone %} {{ tone }}{% endif %}"
-            {% if not tone %}disabled{% endif %}
-            title="{% if not tone %}{{ name }} is not installed on this instance{% else %}run `{{ command }}` in your terminal{% endif %}">
+            {% if not tone or not permitted %}disabled{% endif %}
+            title="{% if not permitted %}{{ name }} needs the {{ floor }} profile{% elif not tone %}{{ name }} is not installed on this instance{% else %}run `{{ command }}` in your terminal{% endif %}">
       <span class="dot{% if tone == 'ok' %} on{% elif tone == 'warn' %} off{% endif %}"></span>
       {{ status }}</button>
   </div>
@@ -142,9 +155,10 @@
   {{ tool('Private solutions',
           'decrypted' if filter_wired else 'locked',
           'git-filter status' if filter_wired else 'git-sync',
-          'ok' if filter_wired else 'warn') }}
+          'ok' if filter_wired else 'warn', 'reader') }}
   {{ tool('GitHub CLI', gh_status, 'git-identity',
-          'ok' if gh_status == 'signed in' else ('warn' if gh_status == 'not signed in' else '')) }}
+          'ok' if gh_status == 'signed in' else ('warn' if gh_status == 'not signed in' else ''),
+          'contributor') }}
   {# `! claude /login` is a bash passthrough — it cannot emit the account nudge the
      Python commands do. But the shell's `&&` gives us "on success" for free: chain a
      command that DOES nudge, and it runs the moment the interactive login completes
@@ -153,5 +167,6 @@
      it is safe to chain (it stashes a dirty tree and rolls back on failure, never
      leaving a half-synced repo). #}
   {{ tool('Claude Code', claude_status, '! claude /login && git-sync',
-          'ok' if claude_status == 'signed in' else ('warn' if claude_status == 'not signed in' else '')) }}
+          'ok' if claude_status == 'signed in' else ('warn' if claude_status == 'not signed in' else ''),
+          'contributor') }}
 </section>

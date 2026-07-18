@@ -14,7 +14,8 @@ from __future__ import annotations
 
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
-           'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'git_status',
+           'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown',
+           'rewrite_statement_links', 'git_status',
            'list_docs', 'read_doc', 'list_topics', 'read_topic', 'read_about', 'readme_html',
            'parse_progress', 'save_progress']
 
@@ -342,6 +343,24 @@ def read_about(repo_root: Path, name: str) -> tuple[str, str, bool] | None:
         return title, (repo_root / path).read_text(encoding='utf-8'), is_markdown
     except OSError:
         return None
+
+
+def rewrite_statement_links(html: str, number: int) -> str:
+    """Root a cached statement's relative resource links at the problem's canonical path.
+
+    projecteuler.net markup links its images and data files relatively
+    (``src="resources/0096_1.png"``). On a full page load those resolve under the
+    page's own ``/solutions/NNNN/`` URL and work — but the pane is normally reached by
+    an htmx swap, where the relative URL is resolved against the *previous* page's URL
+    (still ``/solutions/`` at swap time), so ``resources/…`` becomes
+    ``/solutions/resources/…`` and 404s — the images silently break. Rewriting them to
+    the absolute ``/solutions/NNNN/…`` path (the same route :func:`resolve_file` serves)
+    makes them resolve identically however the page was reached. Scheme (``http:``),
+    already-absolute (``/…``) and anchor (``#``) URLs are left untouched.
+    """
+    base = f'/solutions/{number:04d}/'
+    return re.sub(r'(<(?:a|img)\b[^>]*?\b(?:href|src)=")(?!\w+:|/|#)([^"]+)"',
+                  lambda m: f'{m.group(1)}{base}{m.group(2)}"', html)
 
 
 # ── markdown (docs + topics) ────────────────────────────────────────────────────────

@@ -19,8 +19,9 @@
   </p>
 
   {% if statement %}
-  {# statement.html is the cached projecteuler.net markup; its relative
-     resources/… links resolve under this page's canonical URL. #}
+  {# statement.html is the cached projecteuler.net markup; its resources/… links are
+     rooted at /solutions/NNNN/ (content.rewrite_statement_links) so images resolve
+     after an htmx swap, not only on a full page load. #}
   <div class="statement">{{ statement | safe }}</div>
   {% else %}
   <p class="muted">No cached statement for this problem.</p>

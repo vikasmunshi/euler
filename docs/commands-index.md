@@ -57,7 +57,7 @@ a parameter that accepts repetition.
 | [`echo`](#command-echo) | — | Print text. |
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
-| [`gh-pr`](#command-gh-pr-pr) | `pr` | Pull requests: list | merge <number>. » |
+| [`gh-pr`](#command-gh-pr-pr) | `pr` | Pull requests: list | merge (walk the queue). » |
 | [`git-audit`](#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
 | [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
@@ -468,23 +468,23 @@ verbose:            If True, prints error information during evaluation. Default
 
 #### Command: `gh-pr` (`pr`)
 
-Pull requests: list | merge <number>.
+Pull requests: list | merge (walk the queue).
 * profiles: admin, maintainer
 * » supports `--silent`
 
 ```
 gh-pr
 [action=list|merge] (default list)
-[number=<int>|none] (default None)
 [silent=true|--silent]
 ```
 
 ```text
-List the open pull requests, or squash-merge one onto master.
+List the open pull requests, or walk them one at a time to squash-merge.
 
-`list` (the default) shows what is waiting: number, title, branch. `merge
-<number>` takes a number straight from that list and squash-merges it, which is
-how a collaborator's `user/<slug>` branch lands on master — their next `git-sync`
+`list` (the default) shows what is waiting: number, title, branch. `merge` walks
+the open pull requests interactively — per request **merge** (squash onto master),
+**skip**, or **quit** — the same shape as `users process-requests`. Merging one is
+how a collaborator's `user/<slug>` branch lands on master; their next `git-sync`
 then rebases the squashed commit away and prunes the merged branch.
 
 A pull request touching anything outside `solutions/` is refused, and that gate
@@ -494,8 +494,7 @@ edits the framework, the scripts, or the keys is asking for something else
 entirely. Merge those on GitHub, as an admin who has read them.
 
 Args:
-    action: 'list' (default) or 'merge'.
-    number: The pull request to merge, as shown by `list`. Required by 'merge'.
+    action: 'list' (default) or 'merge' (walk the open queue interactively).
 
 Aliased as `pr`.
 ```

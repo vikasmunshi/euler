@@ -139,6 +139,17 @@ class GitState:
         """
         return bool(self.modified or self.staged or self.untracked)
 
+    @property
+    def uncommitted(self) -> int:
+        """Files carrying an uncommitted change — modified + staged + untracked.
+
+        The chip's status line and tooltip report this single count rather than the
+        three-way breakdown; a file staged *and* modified counts in both columns, as
+        git itself reports it (:func:`_parse_counts`). Meaningless when
+        :attr:`worktree_unknown` — the template gates on that before showing it.
+        """
+        return self.modified + self.staged + self.untracked
+
 
 def _parse_counts(text: str) -> tuple[int, int, int]:
     """``git status --porcelain=v2`` → (modified, staged, untracked).

@@ -19,9 +19,10 @@
 <details id="git" class="menu git-menu {{ 'is-dirty' if git.dirty else 'is-clean' }}"
          {% if oob %}hx-swap-oob="true"{% endif %}
          hx-get="/git" hx-trigger="euler:git-changed from:body" hx-swap="outerHTML">
-  {# The title carries the whole state in words: the chip is small, and it is the
-     one control here whose glyphs are counts rather than labels. #}
-  <summary title="{{ git.branch or 'detached HEAD' }}{% if git.upstream %} — {% if git.ahead %}{{ git.ahead }} ahead{% endif %}{% if git.ahead and git.behind %}, {% endif %}{% if git.behind %}{{ git.behind }} behind{% endif %}{% if not git.ahead and not git.behind %}in sync with {{ git.upstream }}{% endif %}{% endif %}{% if git.worktree_unknown %}, worktree state pending vault unlock{% elif git.dirty %}, uncommitted changes{% endif %}">
+  {# The title carries the whole state in three counts: the chip is small, and it is
+     the one control here whose glyphs are counts rather than labels. Same wording as
+     the status line inside the menu, so the tooltip and the open panel agree. #}
+  <summary title="{{ git.branch or 'detached HEAD' }} — {% if git.worktree_unknown %}uncommitted pending vault unlock{% else %}{{ git.uncommitted }} uncommitted{% endif %}, {{ git.ahead }} ahead, {{ git.behind }} behind">
     {# A branch: one commit line, one fork, three nodes. Not a cloud or an arrow —
        the chip is about *this clone's* shape, and none of the state below it is
        about the network. #}
@@ -33,18 +34,13 @@
       <circle cx="17" cy="5.5" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
     </svg>
     <span class="git-branch">{{ git.branch or 'detached' }}</span>
-    {# Counts appear only when non-zero: a clean, in-sync branch is a glyph and a
-       name, and any digit in the header is therefore something you could act on. #}
-    {% if git.ahead or git.behind %}
-    <span class="git-counts" aria-label="{% if git.ahead %}{{ git.ahead }} ahead{% endif %}{% if git.ahead and git.behind %}, {% endif %}{% if git.behind %}{{ git.behind }} behind{% endif %}">
-      {% if git.ahead %}
+    {# Both counts always show, zero included: a fixed pair of glyphs is read at a
+       glance, where a digit that vanishes at zero makes the reader wonder whether the
+       branch is in sync or the glyph simply went away. #}
+    <span class="git-counts" aria-label="{{ git.ahead }} ahead, {{ git.behind }} behind">
       <span class="git-count ahead"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4l6 8h-4v8h-4v-8H6z"/></svg>{{ git.ahead }}</span>
-      {% endif %}
-      {% if git.behind %}
       <span class="git-count behind"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 20l-6-8h4V4h4v8h4z"/></svg>{{ git.behind }}</span>
-      {% endif %}
     </span>
-    {% endif %}
     {# The ring means "uncommitted changes" — so it must not appear on a worktree we
        could not scan (a locked vault); that would read as a definite dirty state we
        do not actually know. A hollow dot marks "pending" instead. #}
@@ -57,18 +53,16 @@
     </li>
     {% if git.worktree_unknown %}
     {# The branch and divergence above are real (ref reads, no filter); only the
-       worktree scan hit the locked vault. Say exactly that, and name the fix — the
-       auto-unlock (site.js) usually resolves it a beat after this first paint. #}
+       worktree scan hit the locked vault, so the uncommitted count is unknown. Say
+       exactly that, and name the fix — the auto-unlock (site.js) usually resolves it a
+       beat after this first paint. #}
     <li class="menu-info">Worktree state pending — unlock the vault to read local changes</li>
-    {% elif git.dirty %}
-    {# A zero is dropped, not greyed: the line lists what IS, so it stays short. #}
-    <li class="git-stat">
-      {% if git.modified %}<span class="modified"><span class="n">{{ git.modified }}</span><span class="k">modified</span></span>{% endif %}
-      {% if git.staged %}<span class="staged"><span class="n">{{ git.staged }}</span><span class="k">staged</span></span>{% endif %}
-      {% if git.untracked %}<span class="untracked"><span class="n">{{ git.untracked }}</span><span class="k">untracked</span></span>{% endif %}
-    </li>
     {% else %}
-    <li class="menu-info">No local changes{% if git.upstream and not git.ahead and not git.behind %} · level with <code>{{ git.upstream }}</code>{% endif %}</li>
+    {# The whole state in three counts — the same wording as the summary's tooltip, so
+       the chip and its open panel never disagree. Shown even at all-zero: a status
+       readout that always names its three axes is read at a glance, where a
+       disappearing line makes the reader wonder what it dropped. #}
+    <li class="menu-info git-summary">{{ git.uncommitted }} uncommitted, {{ git.ahead }} ahead, {{ git.behind }} behind</li>
     {% endif %}
     <li class="menu-sep" aria-hidden="true"></li>
     {# Terminal down = the verbs have nowhere to land (terminal.js's send() drops the
@@ -102,7 +96,7 @@
        is optional now — it defaults to "solution for pNNNN" — so a one-click commit works. #}
     {{ verb('Commit', 'git-commit', 'contributor') }}
     {{ verb('Push & open pull request', 'git-push', 'contributor') }}
-    {{ verb('Pull requests', 'gh-pr list', 'maintainer') }}
+    {{ verb('Pull requests', 'gh-pr merge', 'maintainer') }}
     <li class="menu-sep" aria-hidden="true"></li>
     {# The one piece of clone health that silently decides whether solutions/private
        is readable at all. This reports; the account page owns the full story — the

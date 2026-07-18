@@ -211,17 +211,29 @@ class PullRequestTest(unittest.TestCase):
 
 class GhPrTest(_GitCommandCase):
     """The gate to master: a maintainer merges a pull request, and only a
-    solutions-only one. The file list is what is judged, so it is what is faked."""
+    solutions-only one. The file list is what is judged, so it is what is faked.
+    `merge` itself walks the open PRs interactively (like `users process-requests`):
+    the queue and the keypresses are faked so no test touches a real remote or stdin."""
 
     def setUp(self) -> None:
         super().setUp()
         self.files: list[str] | None = ['solutions/private/p0200_0299/p0217/p0217_s0.py',
                                         'solutions/problems.json']
+        self.open_prs: list[dict[str, object]] | None = [
+            {'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'}]
+        self.answers: list[str] = []
         self._saved_pr_files = scripts._pr_files
+        self._saved_open_prs = scripts._open_prs
+        self._saved_input = scripts.console.input
         scripts._pr_files = lambda number: self.files  # type: ignore[assignment]
+        scripts._open_prs = lambda: self.open_prs      # type: ignore[assignment]
+        # Each prompt consumes the next queued keypress; an empty queue quits the walk.
+        scripts.console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[assignment]
 
     def tearDown(self) -> None:
         scripts._pr_files = self._saved_pr_files    # type: ignore[assignment]
+        scripts._open_prs = self._saved_open_prs    # type: ignore[assignment]
+        scripts.console.input = self._saved_input   # type: ignore[assignment]
         super().tearDown()
 
     def test_list_is_the_default_action(self) -> None:
@@ -229,39 +241,69 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(scripts.gh_pr(), 0)
         self.assertEqual(self.cmdlines, ['gh pr list'])
 
+    # ── the file gate (_merge_pr), judged on the PR's file list ──
     def test_a_solutions_only_pr_is_squash_merged(self) -> None:
         self.as_profile('maintainer')
-        self.assertEqual(scripts.gh_pr('merge', 12), 0)
+        self.assertEqual(scripts._merge_pr(12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
-        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])         # refused before gh ran
 
     def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
         # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/.
         self.as_profile('maintainer')
         self.files = ['solutions-of-mine/x.py']
-        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
     def test_an_unreadable_file_list_is_never_read_as_empty(self) -> None:
         # None is 'gh could not tell us', not 'touches nothing outside solutions/'.
         self.as_profile('maintainer')
         self.files = None
-        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
     def test_an_empty_file_list_is_refused(self) -> None:
         self.as_profile('maintainer')
         self.files = []
-        self.assertEqual(scripts.gh_pr('merge', 12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
-    def test_merge_without_a_number_is_refused(self) -> None:
+    # ── the interactive walk (gh-pr merge → _merge_walk) ──
+    def test_merge_walks_and_merges_on_m(self) -> None:
         self.as_profile('maintainer')
+        self.answers = ['m']
+        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+
+    def test_skip_leaves_the_pr_untouched(self) -> None:
+        self.as_profile('maintainer')
+        self.answers = ['s']
+        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_quit_stops_the_walk_before_later_prs(self) -> None:
+        self.as_profile('maintainer')
+        self.open_prs = [{'number': 12, 'title': 'a', 'headRefName': 'user/x'},
+                         {'number': 13, 'title': 'b', 'headRefName': 'user/y'}]
+        self.answers = ['q']
+        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_no_open_prs_is_a_clean_noop(self) -> None:
+        self.as_profile('maintainer')
+        self.open_prs = []
+        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(self.cmdlines, [])
+
+    def test_an_unreadable_pr_list_errors(self) -> None:
+        # None is 'gh could not tell us', not 'the queue is empty' — never a silent 0.
+        self.as_profile('maintainer')
+        self.open_prs = None
         self.assertEqual(scripts.gh_pr('merge'), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
