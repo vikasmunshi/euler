@@ -1431,12 +1431,16 @@ version
 ```
 
 ```text
-Print the installed package version, plus live git detail in a checkout.
+Print the installed build version, plus live git detail of the clone.
 
-The version comes from the wheel metadata frozen at build time
-(`config.version` → `importlib.metadata`), so it is correct in the detached
-deployed venv where there is no git. In an editable dev checkout the live
-`git describe` detail is appended for the exact commit and dirty state.
+The first line is the running build: the number recorded in the tracked
+`solver/version.py` (`config.version`), written only by the release script and
+correct even in the deployed venv where there is no git. The second line is the
+live `git describe`
+of `config.root_dir` — the developer's checkout in a terminal, or the
+collaborator's own `~/euler` clone in the web shell — reporting its exact
+commit and dirty state. The two answer different questions (what build is
+installed vs. what commit this clone sits on) and can legitimately differ.
 
 Reader-floor and read-only: no writes, no network, no vault access — safe to
 run in every collaborator's long-lived web shell.

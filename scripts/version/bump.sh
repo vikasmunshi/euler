@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# Derive the next SemVer release tag from Conventional Commits and create it.
+# Derive the next SemVer release from Conventional Commits, then bump and tag it.
 #
-# The tag is the project's single source of truth for its version: setuptools-scm
-# reads it at build time and freezes the number into the wheel (see
-# [tool.setuptools_scm] in pyproject.toml), which `config.version` and the
-# `version` shell command then report at runtime. There is no hand-edited number.
+# This script is the SINGLE writer of the version. `solver/version.py` (tracked)
+# is the source of truth: pyproject.toml stamps it into the wheel at build time
+# and `config.version` / the `version` shell command report it at runtime. A
+# release rewrites that file, commits it, and tags the commit `vX.Y.Z` — so the
+# file, the tag, and the wheel metadata always agree. There is no hand-edited
+# number and no build-time git.
 #
 # Bump rule — scan `<last-tag>..HEAD` subjects/bodies for Conventional-Commit
 # markers and take the highest present:
@@ -53,16 +55,29 @@ else
     patch=$((patch + 1))
 fi
 new="v${major}.${minor}.${patch}"
+number="${new#v}"
+version_file="$(git rev-parse --show-toplevel)/solver/version.py"
 
 if (( dry_run )); then
-    echo "[dry-run] $last -> $new"
+    echo "[dry-run] $last -> $new (writes $number to solver/version.py, commits, then tags)"
     exit 0
 fi
 
 if ! git diff --quiet || ! git diff --cached --quiet; then
-    echo "bump: working tree is dirty — commit or stash before tagging $new" >&2
+    echo "bump: working tree is dirty — commit or stash before releasing $new" >&2
     exit 1
 fi
 
+# Rewrite ONLY the number in the source of truth (leaving the docstring and the
+# `version = __version__` alias intact), commit it, then tag THAT commit — so the
+# tag, solver/version.py, and the wheel built from it all name $number.
+if ! grep -qE "^__version__ = '[^']*'" "$version_file"; then
+    echo "bump: cannot find the __version__ line in $version_file" >&2
+    exit 1
+fi
+sed -i -E "s/^__version__ = '[^']*'/__version__ = '${number}'/" "$version_file"
+git add "$version_file"
+git commit -q -m "chore(release): $new"
 git tag -a "$new" -m "release $new"
-echo "tagged $new (push with: git push origin $new)"
+echo "released $new — solver/version.py bumped, committed, and tagged"
+echo "push with: git push origin HEAD $new"

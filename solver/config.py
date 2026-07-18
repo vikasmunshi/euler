@@ -10,7 +10,6 @@ import json
 import os
 import subprocess
 import sys
-from importlib.metadata import PackageNotFoundError, version as _dist_version
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -136,17 +135,16 @@ class Scripts(AttributeDict):
 
 
 def _package_version() -> str:
-    """The running build's version, frozen into the wheel metadata at build time.
+    """The running build's version, read from the tracked ``solver/version.py``.
 
-    Read from installed-distribution metadata (setuptools-scm derives it from git
-    tags when the wheel is built) — **not** from git at runtime, so it is correct
-    in the detached deployed venv (``/opt/euler/venv``), which has no ``.git``. The
-    fallback covers a bare source tree that was never installed as a distribution.
+    That module is the single source of truth (written only by
+    ``scripts/version/bump.sh``); importing it needs no git and no install, so this
+    is correct everywhere — an editable dev checkout, the detached deployed venv
+    (``/opt/euler/venv``), and a bare source tree alike. It equals the wheel
+    metadata too: ``pyproject.toml`` stamps the wheel from the same ``__version__``.
     """
-    try:
-        return _dist_version('solver')
-    except PackageNotFoundError:
-        return '0+unknown'
+    from solver.version import __version__
+    return __version__
 
 
 class Config(AttributeDict):

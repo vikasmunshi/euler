@@ -51,6 +51,7 @@ solver.utils.shell_utils,True
 solver.utils.summary,True
 solver.utils.update_doc,True
 solver.utils.version,True
+solver.version,
 solver.web.auth.admin,
 solver.web.auth.app,
 solver.web.auth.client,

@@ -45,33 +45,11 @@ deploy_venv() {
     fi
     echo "Installing solver[${VENV_EXTRAS}] into ${VENV_DIR} (as root, from ${project_root})..."
     sudo "${VENV_PY}" -m pip install --quiet --upgrade pip
-    # setuptools-scm derives the version from `git describe` at build time, but the
-    # build runs as ROOT against the operator-OWNED checkout: root's git does not
-    # resolve the checkout's tags the way the owner's does (no safe.directory for the
-    # foreign repo), so the wheel froze a tag-less `0.0.1.devN+g<sha>` instead of the
-    # release number. Compute the version HERE as the checkout owner — who resolves
-    # the tag correctly — and hand it to the root build via setuptools-scm's PRETEND
-    # override. Only when HEAD is exactly on a `vX.Y.Z` tag (a release); off-tag dev
-    # deploys leave it unset and take setuptools-scm's normal dev string.
-    # `--long --dirty` always prints `v<X.Y.Z>-<distance>-g<sha>[-dirty]` (or fails,
-    # `|| :`, when there is no tag yet — leaving scm_version empty so the build takes
-    # setuptools-scm's own dev string). Exactly on a clean tag → the release number
-    # `X.Y.Z`; otherwise a PEP 440 local version `X.Y.Z+<distance>.g<sha>[.dirty]` that
-    # is clean, correct, and clearly post-release. Computed here as the checkout owner
-    # because the root build's git does not resolve the owner's tag.
-    local scm_version="" desc
-    desc="$(git -C "${project_root}" describe --tags --long --dirty --match 'v*' 2>/dev/null)" || :
-    if [[ "${desc}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-([0-9]+)-g([0-9a-f]+)(-dirty)?$ ]]; then
-        local base="${BASH_REMATCH[1]}" dist="${BASH_REMATCH[2]}" sha="${BASH_REMATCH[3]}"
-        local dirty="${BASH_REMATCH[4]:+.dirty}"
-        if [[ "${dist}" == 0 && -z "${dirty}" ]]; then
-            scm_version="${base}"
-        else
-            scm_version="${base}+${dist}.g${sha}${dirty}"
-        fi
-    fi
-    sudo env ${scm_version:+SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SOLVER="${scm_version}"} \
-        "${VENV_PY}" -m pip install --quiet "${project_root}[${VENV_EXTRAS}]"
+    # The version is read straight from the tracked `solver/version.py` at build time
+    # (setuptools `attr:`, see [tool.setuptools.dynamic] in pyproject.toml) — no git,
+    # so this root build against the operator-owned checkout produces the SAME number
+    # a developer's `pip install -e` does, with nothing to special-case here.
+    sudo "${VENV_PY}" -m pip install --quiet "${project_root}[${VENV_EXTRAS}]"
     # The `solutions` extra installs the base `primesieve` wheel, which SKIPS the
     # numpy extension (its sdist ships NumPy-1.x-era C++ that won't build under 2.x).
     # `pip install` alone therefore leaves `primesieve.numpy` importable-but-broken in

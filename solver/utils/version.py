@@ -7,28 +7,25 @@ __all__ = ['version']
 
 import subprocess
 from functools import cache
-from pathlib import Path
 
-import solver
 from solver.config import config
 from solver.shell import console, register
 
 
 @cache
 def _git_detail() -> str | None:
-    """Live ``git describe`` for an editable checkout, or ``None`` when detached.
+    """Live ``git describe`` of ``config.root_dir``, or ``None`` when it has no git.
 
-    Keyed on the **package** location (``solver.__file__``), not the shell's cwd:
-    the deployed web shell runs from ``/opt/euler/venv`` — a plain install with no
-    ``.git`` — so this returns ``None`` there and the frozen wheel version stands
-    alone (it deliberately does *not* describe the user's ``~/euler`` clone that
-    happens to be the cwd). In an editable dev checkout it adds the live
-    ``-<n>-g<sha>[-dirty]`` suffix. Cached: computed once per process.
+    Describes the clone the shell operates on (``config.root_dir``), which is the
+    useful provenance in every context: the developer's checkout in a terminal, and
+    each collaborator's own ``~/euler`` clone in the deployed per-user web shell —
+    there the line answers "what commit is *my* clone on" alongside the frozen build
+    number that ``config.version`` reports. Returns ``None`` only when ``root_dir``
+    is not a git repo (or git is unavailable). Cached: computed once per process.
     """
-    tree = Path(solver.__file__).resolve().parent.parent
     try:
         proc = subprocess.run(
-            ['git', '-C', str(tree), 'describe', '--tags', '--always', '--dirty', '--match', 'v*'],
+            ['git', '-C', str(config.root_dir), 'describe', '--tags', '--always', '--dirty', '--match', 'v*'],
             capture_output=True, text=True, timeout=2, check=False,
         )
     except (OSError, subprocess.SubprocessError):
@@ -40,12 +37,16 @@ def _git_detail() -> str | None:
 
 @register(requires='reader', help_text='Show the running solver build version.')
 def version() -> int:
-    """Print the installed package version, plus live git detail in a checkout.
+    """Print the installed build version, plus live git detail of the clone.
 
-    The version comes from the wheel metadata frozen at build time
-    (`config.version` → `importlib.metadata`), so it is correct in the detached
-    deployed venv where there is no git. In an editable dev checkout the live
-    `git describe` detail is appended for the exact commit and dirty state.
+    The first line is the running build: the number recorded in the tracked
+    `solver/version.py` (`config.version`), written only by the release script and
+    correct even in the deployed venv where there is no git. The second line is the
+    live `git describe`
+    of `config.root_dir` — the developer's checkout in a terminal, or the
+    collaborator's own `~/euler` clone in the web shell — reporting its exact
+    commit and dirty state. The two answer different questions (what build is
+    installed vs. what commit this clone sits on) and can legitimately differ.
 
     Reader-floor and read-only: no writes, no network, no vault access — safe to
     run in every collaborator's long-lived web shell.

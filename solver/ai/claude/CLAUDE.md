@@ -88,9 +88,9 @@ they are current).
 ```
 solver/
   __main__.py         — Module entry point.
-  _version.py
   config.py           — Singleton Config: all paths, constants, command modules, and managed settings.
   main.py             — Entry point for the "solver shell" CLI.
+  version.py          — The solver build version — the single source of truth.
   ai/
     api.py            — The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
     code.py           — Generate and re-document Project Euler solutions (Python and C) via the Claude API.
