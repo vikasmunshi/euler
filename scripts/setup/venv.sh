@@ -53,8 +53,23 @@ deploy_venv() {
     # the tag correctly — and hand it to the root build via setuptools-scm's PRETEND
     # override. Only when HEAD is exactly on a `vX.Y.Z` tag (a release); off-tag dev
     # deploys leave it unset and take setuptools-scm's normal dev string.
-    local scm_version
-    scm_version="$(git -C "${project_root}" describe --tags --exact-match --match 'v*' 2>/dev/null | sed 's/^v//')"
+    # `--long --dirty` always prints `v<X.Y.Z>-<distance>-g<sha>[-dirty]` (or fails,
+    # `|| :`, when there is no tag yet — leaving scm_version empty so the build takes
+    # setuptools-scm's own dev string). Exactly on a clean tag → the release number
+    # `X.Y.Z`; otherwise a PEP 440 local version `X.Y.Z+<distance>.g<sha>[.dirty]` that
+    # is clean, correct, and clearly post-release. Computed here as the checkout owner
+    # because the root build's git does not resolve the owner's tag.
+    local scm_version="" desc
+    desc="$(git -C "${project_root}" describe --tags --long --dirty --match 'v*' 2>/dev/null)" || :
+    if [[ "${desc}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-([0-9]+)-g([0-9a-f]+)(-dirty)?$ ]]; then
+        local base="${BASH_REMATCH[1]}" dist="${BASH_REMATCH[2]}" sha="${BASH_REMATCH[3]}"
+        local dirty="${BASH_REMATCH[4]:+.dirty}"
+        if [[ "${dist}" == 0 && -z "${dirty}" ]]; then
+            scm_version="${base}"
+        else
+            scm_version="${base}+${dist}.g${sha}${dirty}"
+        fi
+    fi
     sudo env ${scm_version:+SETUPTOOLS_SCM_PRETEND_VERSION_FOR_SOLVER="${scm_version}"} \
         "${VENV_PY}" -m pip install --quiet "${project_root}[${VENV_EXTRAS}]"
     # The `solutions` extra installs the base `primesieve` wheel, which SKIPS the
