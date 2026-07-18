@@ -6,13 +6,11 @@ from __future__ import annotations
 __all__ = ['version']
 
 import subprocess
-from functools import cache
 
 from solver.config import config
 from solver.shell import console, register
 
 
-@cache
 def _git_detail() -> str | None:
     """Live ``git describe`` of ``config.root_dir``, or ``None`` when it has no git.
 
@@ -21,7 +19,9 @@ def _git_detail() -> str | None:
     each collaborator's own ``~/euler`` clone in the deployed per-user web shell —
     there the line answers "what commit is *my* clone on" alongside the frozen build
     number that ``config.version`` reports. Returns ``None`` only when ``root_dir``
-    is not a git repo (or git is unavailable). Cached: computed once per process.
+    is not a git repo (or git is unavailable). Run live on every call — the clone's
+    commit moves under a long-lived web shell (a git-sync, a commit), so a cached
+    value would go stale.
     """
     try:
         proc = subprocess.run(
