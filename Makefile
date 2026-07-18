@@ -15,7 +15,7 @@
         deploy-auth remove-auth upgrade-auth redeploy-auth \
         deploy-user remove-user upgrade-user redeploy-user \
         deploy-web remove-web upgrade-web redeploy-web \
-        test run audit uninstall
+        test run audit uninstall version version-bump
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -114,6 +114,14 @@ test: $(VENV)
 ## Run the interactive solver shell
 run: $(VENV)
 	$(VENV)/bin/solver
+
+## Show the running build's version (git-derived, frozen into the wheel at build time)
+version: $(VENV)
+	@$(VENV)/bin/solver version
+
+## Preview the next release tag from Conventional Commits (append ARGS= to drop --dry-run)
+version-bump:
+	@./scripts/version/bump.sh $(if $(ARGS),$(ARGS),--dry-run)
 
 ## Audit what git stores across the WHOLE tracked tree (~25s): every file under
 ## solutions/private is encrypted at rest, and no file anywhere is a compiled binary.

@@ -88,6 +88,7 @@ they are current).
 ```
 solver/
   __main__.py         — Module entry point.
+  _version.py
   config.py           — Singleton Config: all paths, constants, command modules, and managed settings.
   main.py             — Entry point for the "solver shell" CLI.
   ai/
@@ -149,6 +150,7 @@ solver/
     shell_utils.py    — Utility for running shell commands and capturing their output.
     summary.py        — Progress: parse .progress.html into problems.json and refresh in-memory state.
     update_doc.py     — Regenerate the machine-maintained sections of the guides under `docs/`.
+    version.py        — The `version` command: report the running solver build's version.
   web/                — The web app services (see docs/web-server-guide.md).
     csp.py            — Content-Security-Policy middleware with a per-response nonce (shared).
     auth/             — Web authentication: the auth service and its clients.

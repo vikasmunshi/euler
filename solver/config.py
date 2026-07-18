@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+from importlib.metadata import PackageNotFoundError, version as _dist_version
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -134,9 +135,23 @@ class Scripts(AttributeDict):
         })
 
 
+def _package_version() -> str:
+    """The running build's version, frozen into the wheel metadata at build time.
+
+    Read from installed-distribution metadata (setuptools-scm derives it from git
+    tags when the wheel is built) — **not** from git at runtime, so it is correct
+    in the detached deployed venv (``/opt/euler/venv``), which has no ``.git``. The
+    fallback covers a bare source tree that was never installed as a distribution.
+    """
+    try:
+        return _dist_version('solver')
+    except PackageNotFoundError:
+        return '0+unknown'
+
+
 class Config(AttributeDict):
     managed_config_file: ClassVar[Path] = Path(__file__).parent / 'config.json'
-    version: ClassVar[str] = '0.2'
+    version: ClassVar[str] = _package_version()
     #: The subset of settings that `load`/`dump`/`repr` round-trip through `managed_config_file`.
     managed: ClassVar[tuple[str, ...]] = ('timeout_multiple', 'timeout_single', 'ecb_usd_rate')
 

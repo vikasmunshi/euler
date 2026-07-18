@@ -250,6 +250,7 @@ command name below links to its full entry — usage and description — in the
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](commands-index.md#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
 | [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
+| [`version`](commands-index.md#command-version) | — | Show the running solver build version. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-table -->

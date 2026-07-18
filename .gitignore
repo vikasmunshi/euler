@@ -48,6 +48,10 @@ target/
 var/
 venv/
 wheels/
+# Build artifact: setuptools-scm writes the git-derived version here at build
+# time so it ships in the wheel (see [tool.setuptools_scm]). Never edit or commit.
+solver/_version.py
+
 # Overrides: re-include these tracked dotfiles. The negations must come after
 # the broad **/.* rule above, since the last matching pattern wins.
 !.gitattributes

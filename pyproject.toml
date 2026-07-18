@@ -1,10 +1,13 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=68", "setuptools-scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "solver"
-version = "0.1.0"
+# Version is derived from git tags at build time by setuptools-scm and frozen
+# into the wheel metadata (see [tool.setuptools_scm] below and `config.version`).
+# Never hand-edit a number here — tag `vX.Y.Z` instead (scripts/version/bump.sh).
+dynamic = ["version"]
 description = "Interactive shell for solving and managing Project Euler problems"
 authors = [{ name = "Vikas Munshi", email = "vikas.munshi@gmail.com" }]
 license = { text = "MIT" }
@@ -94,6 +97,16 @@ actions = ["install", "check", "uninstall"]
 # detached-process CLI.
 solver = "solver.main:main"
 solver-gitfilter = "solver.crypto.gitfilter:main"
+
+[tool.setuptools_scm]
+# The version is git-derived at build time and written here, inside the package,
+# so it ships in the wheel and `importlib.metadata.version("solver")` returns it
+# at runtime — with no git needed in the detached deployed venv (/opt/euler/venv).
+version_file = "solver/_version.py"
+# With no `vX.Y.Z` tag yet the version is a dev string (e.g. 0.1.dev297+g<sha>);
+# it snaps to a clean X.Y.Z on the first tag. The build must run inside the git
+# checkout (make install*, scripts/setup/venv.sh) for the tag to be reachable.
+fallback_version = "0.0.0"
 
 [tool.setuptools.packages.find]
 where = ["."]

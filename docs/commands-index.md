@@ -92,6 +92,7 @@ a parameter that accepts repetition.
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
 | [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
+| [`version`](#command-version) | — | Show the running solver build version. |
 
 *Legend: ❏ takes an optional problem number (defaults to the current problem) · » supports `--silent`.*
 <!-- /GEN:command-summary -->
@@ -1416,5 +1417,28 @@ Encrypt this user's `id` + `env` at rest under a password-derived vault key.
 
 The password is never stored: set `$EULER_VAULT_PASSWORD` for a non-interactive unlock (a script,
 CI), otherwise you are asked once per shell.
+```
+
+---
+
+#### Command: `version`
+
+Show the running solver build version.
+* profiles: admin, maintainer, contributor, reader
+
+```
+version
+```
+
+```text
+Print the installed package version, plus live git detail in a checkout.
+
+The version comes from the wheel metadata frozen at build time
+(`config.version` → `importlib.metadata`), so it is correct in the detached
+deployed venv where there is no git. In an editable dev checkout the live
+`git describe` detail is appended for the exact commit and dirty state.
+
+Reader-floor and read-only: no writes, no network, no vault access — safe to
+run in every collaborator's long-lived web shell.
 ```
 <!-- /GEN:command-index -->
