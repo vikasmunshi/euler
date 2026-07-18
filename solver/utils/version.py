@@ -26,7 +26,7 @@ def _git_detail() -> str | None:
     try:
         proc = subprocess.run(
             ['git', '-C', str(config.root_dir), 'describe', '--tags', '--always', '--dirty', '--match', 'v*'],
-            capture_output=True, text=True, timeout=2, check=False,
+            capture_output=True, text=True, timeout=2, check=False, cwd=config.root_dir,
         )
     except (OSError, subprocess.SubprocessError):
         return None
