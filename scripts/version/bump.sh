@@ -63,7 +63,11 @@ if (( dry_run )); then
     exit 0
 fi
 
-if ! git diff --quiet || ! git diff --cached --quiet; then
+# Cleanliness via `git status --porcelain`, NOT `git diff`: the transparent
+# encryption filter (solutions/private/**) re-encrypts to fresh ciphertext on
+# every read, so `git diff --quiet` reports phantom churn on an otherwise clean
+# tree. `git status` refreshes the index and ignores that noise.
+if [[ -n "$(git status --porcelain)" ]]; then
     echo "bump: working tree is dirty — commit or stash before releasing $new" >&2
     exit 1
 fi
