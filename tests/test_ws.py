@@ -32,6 +32,9 @@ from solver.web.ws.app import PTY_MANAGER, build_app
 from solver.web.ws.config import WsConfig
 from solver.web.ws.manager import REPLAY_END
 from solver.web.ws.pty import PtySession
+from tests import silence
+
+silence()   # quiet the attach-refused logging + filter aiohttp's request-key warning
 
 _EMAIL = 'user@example.com'
 _GOOD_COOKIE = 'solver_session=GOOD'

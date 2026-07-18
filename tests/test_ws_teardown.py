@@ -26,6 +26,10 @@ from solver.web.auth.config import AuthConfig
 from solver.web.auth.policy import SESSION_COOKIE
 from solver.web.auth.srp import compute_verifier
 
+from tests import silence
+
+silence()   # quiet console + filter aiohttp's request-key warning (isolated-run cleanliness)
+
 _EMAIL = 'shell-user@example.com'
 _TOKEN = 'admin-token'
 
@@ -56,6 +60,7 @@ class _FakeWsInstance:
 class TeardownPushTests(unittest.IsolatedAsyncioTestCase):
 
     async def asyncSetUp(self) -> None:
+        silence()   # re-assert the warning filter inside the run (this case is not an AioHTTPTestCase)
         import os
         os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)

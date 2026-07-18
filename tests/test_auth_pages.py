@@ -26,6 +26,10 @@ from solver.web.auth import policy
 from solver.web.auth.app import AuthService, build_public_app
 from solver.web.auth.config import AuthConfig
 
+from tests import silence
+
+silence()   # quiet console + filter aiohttp's request-key warning (isolated-run cleanliness)
+
 _EMAIL = 'user@example.com'
 
 #: (path, a string the rendered page must contain) — every GET a signed-out

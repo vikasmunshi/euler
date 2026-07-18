@@ -367,7 +367,10 @@ def build_public_app(service: AuthService) -> web.Application:
         # the POST into GET /, where the now-absent session bounces to /login.
         # A programmatic caller (no text/html Accept) keeps the JSON contract.
         if 'text/html' in request.headers.get('Accept', ''):
-            response: web.Response = web.HTTPSeeOther('/')
+            # A plain 303, not web.HTTPSeeOther: a handler *returning* an HTTPException
+            # is deprecated in aiohttp (it is meant to be raised), and this one must be
+            # returned so the cookie deletions below land on it.
+            response: web.Response = web.Response(status=303, headers={'Location': '/'})
         else:
             response = web.json_response({'ok': True})
         response.del_cookie(policy.SESSION_COOKIE, path='/')

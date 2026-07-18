@@ -19,6 +19,10 @@ from solver.web.auth.app import AuthService, build_public_app
 from solver.web.auth.config import AuthConfig
 from solver.web.auth.srp import SrpClient, compute_verifier
 
+from tests import silence
+
+silence()   # quiet console + filter aiohttp's request-key warning (isolated-run cleanliness)
+
 _EMAIL = 'user@example.com'
 _OLD = 'Correct-Horse-Battery-1!'
 _NEW = 'Staple-Gun-Overdrive-2?'

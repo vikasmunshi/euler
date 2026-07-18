@@ -21,6 +21,9 @@ from solver.config import ExitCodes, config
 from solver.shell.command import registry
 from solver.utils import scripts
 from solver.utils.loader import load_commands
+from tests import silence
+
+silence()   # the command tests drive console error/progress paths on purpose
 
 
 def _subject(profile: str) -> Subject:
@@ -73,16 +76,22 @@ class _GitCommandCase(unittest.TestCase):
         self._saved_branch = scripts._current_branch
         self._saved_pr = scripts._ensure_pull_request
         self._saved_subject = config.subject
+        self._saved_emit = scripts.osc.emit
         scripts.run_cmdline = fake_run_cmdline      # type: ignore[assignment]
         scripts._current_branch = lambda: self.branch  # type: ignore[assignment]
         # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
         # like run_cmdline, so no test can touch a real remote (module docstring).
         scripts._ensure_pull_request = fake_ensure_pr  # type: ignore[assignment]
+        # The subject is web-channel, so the commands' osc.git_changed() nudges would
+        # write raw OSC 5379 escape sequences to the test's stdout. This suite is not
+        # the OSC wire's test (that is test_web_channel) — swallow the emit.
+        scripts.osc.emit = lambda *a, **k: None     # type: ignore[assignment]
 
     def tearDown(self) -> None:
         scripts.run_cmdline = self._saved_run       # type: ignore[assignment]
         scripts._current_branch = self._saved_branch  # type: ignore[assignment]
         scripts._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
+        scripts.osc.emit = self._saved_emit         # type: ignore[assignment]
         config.subject = self._saved_subject
 
     def as_profile(self, profile: str) -> None:

@@ -21,8 +21,12 @@ from pathlib import Path
 
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
+from solver.web.site import gitstate
 from solver.web.site.app import build_app
 from solver.web.site.config import SiteConfig
+from tests import silence
+
+silence()   # filter aiohttp's request-key warning the handlers trip
 
 _READER = {'X-User': 'r@example.com', 'X-Profile': 'reader'}
 _CONTRIBUTOR = {'X-User': 'c@example.com', 'X-Profile': 'contributor'}
@@ -44,11 +48,30 @@ def _config(profile: str = '') -> SiteConfig:
                       tcp_bind='', serve_static=False, profile=profile)
 
 
+async def _no_git_read(_repo_root, *, fetch: bool = False):
+    """A gitstate.read stand-in: no chip, and — crucially — no I/O.
+
+    The read routes use this checkout as their content library, but the header's git
+    chip is not under test and its real read would fetch origin/master over the network
+    and unwrap the operator's ~/.euler vault — both forbidden in a unit run. Return the
+    no-clone state so the middleware stays entirely local.
+    """
+    return None
+
+
+def _stub_gitstate(testcase: unittest.TestCase) -> None:
+    """Swap gitstate.read for the no-I/O stand-in for the life of *testcase*."""
+    saved = gitstate.read
+    gitstate.read = _no_git_read                # type: ignore[assignment]
+    testcase.addCleanup(setattr, gitstate, 'read', saved)
+
+
 class ContentServiceTests(AioHTTPTestCase):
     async def get_application(self):
         # Deterministic policy: the ladder + an empty users map (never the host's SoR).
         os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
+        _stub_gitstate(self)                    # the chip's read must not fetch or touch the vault
         return build_app(_config())
 
     @unittest_run_loop
@@ -582,6 +605,7 @@ class PinnedInstanceTests(AioHTTPTestCase):
     async def get_application(self):
         os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
+        _stub_gitstate(self)                    # the chip's read must not fetch or touch the vault
         return build_app(_config(profile='reader'))
 
     @unittest_run_loop

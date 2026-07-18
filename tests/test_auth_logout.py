@@ -15,6 +15,10 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from solver.web.auth.app import AuthService, build_public_app
 from solver.web.auth.config import AuthConfig
 
+from tests import silence
+
+silence()   # quiet console + filter aiohttp's request-key warning (isolated-run cleanliness)
+
 
 class LogoutTests(AioHTTPTestCase):
     async def get_application(self):

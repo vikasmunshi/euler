@@ -28,8 +28,18 @@ from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 from solver.auth.identity import system_slug
 from solver.crypto import vault
 from solver.web.auth.tickets import TicketStore
+from solver.web.site import gitstate
 from solver.web.user.app import PTY_MANAGER, build_app
 from solver.web.user.config import UserConfig
+from tests import silence
+
+silence()   # filter aiohttp's request-key warning + quiet attach-refused logging
+
+
+async def _no_git_read(_repo_root, *, fetch: bool = False):
+    """gitstate.read stand-in with no I/O — the chip is not under test, and its real
+    read would fetch origin/master and unwrap the operator's ~/.euler vault."""
+    return None
 
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 _EMAIL = 'me@example.com'
@@ -113,6 +123,9 @@ class _UserServiceCase(AioHTTPTestCase):
     async def get_application(self) -> web.Application:
         os.environ['EULER_AUTHZ_FILE'] = str(_AUTHZ_FIXTURE)
         self.addCleanup(os.environ.pop, 'EULER_AUTHZ_FILE', None)
+        saved_read = gitstate.read             # the chip's read must not fetch or touch the vault
+        gitstate.read = _no_git_read           # type: ignore[assignment]
+        self.addCleanup(setattr, gitstate, 'read', saved_read)
 
         scratch = Path(tempfile.mkdtemp(prefix='euler-user-test-'))
         self.addCleanup(lambda: __import__('shutil').rmtree(scratch, True))

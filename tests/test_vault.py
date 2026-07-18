@@ -25,6 +25,9 @@ from solver.ai import models
 from solver.config import config as app_config
 from solver.crypto import ciphers, vault
 from solver.crypto.config import config as crypto_config
+from tests import silence
+
+silence()   # the key/vault tests drive console error paths on purpose
 
 
 class VaultTestCase(unittest.TestCase):
