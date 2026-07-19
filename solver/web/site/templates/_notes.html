@@ -1,8 +1,0 @@
-{# The Notes panel: included by problem.html. notes.html is stored sanitised
-   (the nh3 gate); math stays TeX text (MathJax typesets it). #}
-{% if notes %}
-<section class="panel" id="notes">
-  <h2>Notes</h2>
-  <div class="notes">{{ notes | safe }}</div>
-</section>
-{% endif %}

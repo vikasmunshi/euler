@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{{ '%04d' % number }} · euler{% endblock %}
 {% block content %}
+{# The reading document: the problem, then the thinking. The notes flow straight
+   under the statement (a hairline apart) — they carry their own headings, so the
+   old "Notes" title was a redundant label. Everything below is the workbench. #}
 <section class="panel">
   <h1>Problem {{ number }}{% if info and info.title %} — {{ info.title }}{% endif %}</h1>
   {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
@@ -26,55 +29,67 @@
   {% else %}
   <p class="muted">No cached statement for this problem.</p>
   {% endif %}
+
+  {% if notes %}
+  {# notes.html is stored sanitised (the nh3 gate); math stays TeX text (MathJax
+     typesets it). It has its own headings, so it needs no title of its own —
+     just a rule marking where the problem ends and the analysis begins. #}
+  <hr class="doc-rule">
+  <div class="notes doc-body">{{ notes | safe }}</div>
+  {% endif %}
 </section>
 
-{% if test_cases %}
-<section class="panel">
-  <h2>Test cases</h2>
-  <div class="table-scroll">
-  <table class="test-cases">
-    <thead><tr><th>category</th><th>input</th><th>answer</th></tr></thead>
-    <tbody>
-    {% for tc in test_cases %}
-      <tr>
-        <td>{{ tc.category }}</td>
-        <td><code class="pre-line">{{ tc.input }}</code></td>
-        <td><code>{{ tc.answer }}</code></td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  </div>
-</section>
-{% endif %}
+{% if test_cases or results or files %}
+<div class="workbench">
+  <p class="workbench-eyebrow">workbench</p>
 
-{% if results %}
-<section class="panel">
-  <h2>Results</h2>
-  <div class="table-scroll">
-  <table class="results">
-    <thead><tr><th>solution</th><th>category</th><th>answer</th><th>verdict</th>
-               <th>avg&nbsp;seconds</th><th>runs</th></tr></thead>
-    <tbody>
-    {% for r in results %}
-      <tr class="verdict-{{ r.get('verdict', '') }}">
-        <td><code>{{ r.get('solution', '') }}</code></td>
-        <td>{{ r.get('category', '') }}</td>
-        <td><code>{{ r.get('answer', '') }}</code></td>
-        <td>{{ r.get('verdict', '') }}</td>
-        <td>{{ '%.6f' % r['average'] if r.get('average') is not none else '' }}</td>
-        <td>{{ r.get('number_runs', '') }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  </div>
-</section>
-{% endif %}
+  {% if test_cases %}
+  <section class="panel">
+    <h2>Test cases</h2>
+    <div class="table-scroll">
+    <table class="test-cases">
+      <thead><tr><th>category</th><th>input</th><th>answer</th></tr></thead>
+      <tbody>
+      {% for tc in test_cases %}
+        <tr>
+          <td>{{ tc.category }}</td>
+          <td><code class="pre-line">{{ tc.input }}</code></td>
+          <td><code>{{ tc.answer }}</code></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+  {% endif %}
 
-{% if files %}
-{% include "_files.html" %}
-{% endif %}
+  {% if results %}
+  <section class="panel">
+    <h2>Results</h2>
+    <div class="table-scroll">
+    <table class="results">
+      <thead><tr><th>solution</th><th>category</th><th>answer</th><th>verdict</th>
+                 <th>avg&nbsp;seconds</th><th>runs</th></tr></thead>
+      <tbody>
+      {% for r in results %}
+        <tr class="verdict-{{ r.get('verdict', '') }}">
+          <td><code>{{ r.get('solution', '') }}</code></td>
+          <td>{{ r.get('category', '') }}</td>
+          <td><code>{{ r.get('answer', '') }}</code></td>
+          <td>{{ r.get('verdict', '') }}</td>
+          <td>{{ '%.6f' % r['average'] if r.get('average') is not none else '' }}</td>
+          <td>{{ r.get('number_runs', '') }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
+  {% endif %}
 
-{% include "_notes.html" %}
+  {% if files %}
+  {% include "_files.html" %}
+  {% endif %}
+</div>
+{% endif %}
 {% endblock %}

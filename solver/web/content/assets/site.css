@@ -439,14 +439,16 @@ button.card {
 .readme { margin-top: 0.8rem; }
 /* An eyebrow, not a heading: the README is the same page continuing, not a new
    section competing with the hero. */
-.readme-eyebrow {
+.readme-eyebrow, .workbench-eyebrow {
   display: flex; align-items: center; gap: 0.7rem;
   margin: 0 0 0.9rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--muted);
 }
-.readme-eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.readme-eyebrow::after, .workbench-eyebrow::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
 
 /* ── Solutions century grids: square, as many per row as fit (§7) ────────── */
 /* auto-fill packs as many ~17rem tracks as the pane allows — ~3–4 on a normal
@@ -508,6 +510,20 @@ a.cell:hover { border-color: var(--accent); color: var(--text); }
 /* ── Problem page ────────────────────────────────────────────────────────── */
 .statement, .notes, .doc-body { overflow-wrap: break-word; }
 .statement img, .notes img, .doc-body img { max-width: 100%; }
+
+/* The reading document: statement, then notes, as one flow. The rule marks where
+   the problem ends and the analysis begins — the notes carry their own headings,
+   so no "Notes" label is needed. */
+.doc-rule { border: 0; height: 1px; background: var(--border); margin: 1.6rem 0; }
+.notes h2, .notes h3, .notes h4 { margin: 1.5rem 0 0.5rem; font-size: 1.05rem; }
+.notes > :first-child { margin-top: 0; }
+
+/* The workbench: the solving artifacts (test cases, results, files) grouped under
+   one eyebrow, set denser than the reading panel above so the page reads as two
+   zones — the read, then the work. */
+.workbench { margin-top: 1.4rem; }
+.workbench .panel { padding: 1rem 1.25rem; }
+.workbench .panel h2 { font-size: 1rem; }
 /* A problem resource opened in the pane (media.html): fit the pane, keep aspect. */
 .resource-img { max-width: 100%; height: auto; display: block; }
 
@@ -527,6 +543,15 @@ table.test-cases th, table.test-cases td {
   border: 1px solid var(--border);
   padding: 0.3rem 0.6rem;
   text-align: left;
+}
+/* Column headers read as a data readout: mono, quiet, on a faint band. */
+table.results th, table.test-cases th {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.76rem; font-weight: 600; letter-spacing: 0.02em; color: var(--muted);
+  background: color-mix(in srgb, var(--surface-hi) 55%, transparent);
+}
+table.results tbody tr:hover, table.test-cases tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
 }
 table.results td { white-space: nowrap; }
 tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
