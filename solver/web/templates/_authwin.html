@@ -1,0 +1,31 @@
+{# The auth-tier window: the card dressed as the solver shell it stands in for.
+   Terminal chrome (a title bar + an optional status bar) wrapping whatever form
+   the page needs. Shared by every signed-out dialogue — sign in, register/reset,
+   forgot, request an invite — so they are one place with one character.
+
+   Usage (the body is the caller block):
+
+     {% from "_authwin.html" import authwin %}
+     {% set note %}<b>SRP-6a</b> · …{% endset %}
+     {% call authwin('sign in', 'a one-line prompt.', note) %}
+       <form …>…</form>
+     {% endcall %}
+
+   `title`  — trailing half of "solver — <title>" in the bar.
+   `intro`  — optional mono prompt line above the body (plain text).
+   `status` — optional status-bar markup (trusted; rendered with |safe). #}
+{% macro authwin(title, intro='', status='') %}
+<div class="authwin">
+  <div class="authwin-bar">
+    <span class="authwin-dots" aria-hidden="true"><span class="authwin-dot r"></span><span class="authwin-dot y"></span><span class="authwin-dot g"></span></span>
+    {# The brand mark: Euler's identity on the unit circle, same figure as the favicon. #}
+    <svg class="authwin-glyph" viewBox="-1.3 -1.35 2.6 1.75" aria-hidden="true"><path d="M 1 0 A 1 1 0 0 0 -1 0 M -1 0 H 0" fill="none" stroke="currentColor" stroke-width="0.16" stroke-linecap="round"/><circle cx="0" cy="0" r="0.1" fill="currentColor"/></svg>
+    <span class="authwin-title"><b>solver</b>&nbsp;— {{ title }}</span>
+  </div>
+  <div class="authwin-body">
+    {% if intro %}<p class="authwin-intro"><span class="arrow">&rarr;</span> {{ intro }}</p>{% endif %}
+    {{ caller() }}
+  </div>
+  {% if status %}<div class="authwin-status"><span class="authwin-led" aria-hidden="true"></span><span>{{ status | safe }}</span></div>{% endif %}
+</div>
+{% endmacro %}

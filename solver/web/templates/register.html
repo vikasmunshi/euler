@@ -1,13 +1,16 @@
 {% extends "auth_base.html" %}
+{% from "_authwin.html" import authwin %}
 {% block title %}euler — {{ 'reset password' if kind == 'reset' else 'register' }}{% endblock %}
 {% block dialogue %}
-  <h1>{{ 'Reset your password' if kind == 'reset' else 'Create your account' }}</h1>
-  <p class="lead">for <strong>{{ email }}</strong></p>
+  {% set title = 'reset password' if kind == 'reset' else 'register' %}
+  {% set intro = ('set a new password for ' ~ email) if kind == 'reset' else ('create your account for ' ~ email) %}
+  {% set note %}<b>SRP-6a</b> · your password becomes a verifier in your browser — it never leaves this page.{% endset %}
+  {% call authwin(title, intro, note) %}
 
   {% if stage == 'terms' %}
     {# Terms acceptance gates the OTP (registration only). The full
        text is shown inline — acceptance happens on the page that displays it. #}
-    <form class="auth-form" method="post" action="{{ base }}/otp">
+    <form class="auth-form authwin-form" method="post" action="{{ base }}/otp">
       <input type="hidden" name="token" value="{{ token }}">
       <p class="muted">Terms of use</p>
       <div id="terms-box" class="terms-box" tabindex="0">
@@ -18,60 +21,72 @@
         <input id="accept-box" type="checkbox" name="accepted" value="yes" required disabled>
         I have read and accept these Terms of use
       </label>
-      <button class="btn btn-primary" type="submit">Email me a verification code</button>
+      <button class="btn btn-primary" type="submit">email me a code</button>
     </form>
     <noscript><p class="flash flash-error">Registration requires JavaScript.</p></noscript>
 
   {% elif stage == 'request' %}
     {# Reset flow: no Terms, just prove mailbox control. #}
-    <form class="auth-form" method="post" action="{{ base }}/otp">
+    <form class="auth-form authwin-form" method="post" action="{{ base }}/otp">
       <input type="hidden" name="token" value="{{ token }}">
       <p>To continue, verify that you control this mailbox.</p>
-      <button class="btn btn-primary" type="submit">Email me a verification code</button>
+      <button class="btn btn-primary" type="submit">email me a code</button>
     </form>
 
   {% elif stage == 'otp' %}
     {# Verify the OTP: 6 digits, 10 minutes, 5 tries. #}
-    <form class="auth-form" method="post" action="{{ base }}/verify">
+    <form class="auth-form authwin-form" method="post" action="{{ base }}/verify">
       <input type="hidden" name="token" value="{{ token }}">
       <p>A 6-digit code was sent to your mailbox. It is valid for 10 minutes.</p>
-      <label for="otp">Verification code</label>
+      <label for="otp">verification code</label>
       <input id="otp" name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6"
              autocomplete="one-time-code" required autofocus>
-      <button class="btn btn-primary" type="submit">Verify</button>
+      <button class="btn btn-primary" type="submit">verify</button>
     </form>
-    <form class="auth-form inline" method="post" action="{{ base }}/otp">
+    <form class="auth-links" method="post" action="{{ base }}/otp">
       <input type="hidden" name="token" value="{{ token }}">
       {% if kind == 'register' %}<input type="hidden" name="accepted" value="yes">{% endif %}
-      <button class="linkish" type="submit">Send a fresh code</button>
+      <button class="auth-link" type="submit">send a fresh code</button>
     </form>
 
   {% elif stage == 'password' %}
     {# Set the password: the browser derives {salt, verifier}; the password never leaves it. #}
-    <form id="password-form" class="auth-form" method="post" action="{{ base }}/complete"
+    <form id="password-form" class="auth-form authwin-form" method="post" action="{{ base }}/complete"
           data-email="{{ email }}">
       <input type="hidden" name="token" value="{{ token }}">
       <input type="hidden" name="salt" value="">
       <input type="hidden" name="verifier" value="">
-      <label for="password">New password</label>
-      <input id="password" type="password" autocomplete="new-password" required autofocus>
-      <label for="confirm">Repeat password</label>
-      <input id="confirm" type="password" autocomplete="new-password" required>
+      <label for="password">new password</label>
+      <div class="pw-wrap">
+        <input id="password" type="password" autocomplete="new-password" required autofocus>
+        <button type="button" class="pw-toggle" data-pw-toggle aria-controls="password"
+                aria-pressed="false">show</button>
+      </div>
+      <label for="confirm">repeat password</label>
+      <div class="pw-wrap">
+        <input id="confirm" type="password" autocomplete="new-password" required>
+        <button type="button" class="pw-toggle" data-pw-toggle aria-controls="confirm"
+                aria-pressed="false">show</button>
+      </div>
+      <p id="caps-warn" class="caps-warn" role="status" hidden>Caps Lock is on</p>
       <p class="muted">At least 16 characters, using all four of: lowercase, uppercase,
         digits, and specials. It is turned into an SRP verifier in your browser and
         never sent anywhere.</p>
       <p id="form-error" class="flash flash-error" role="alert" hidden></p>
-      <button id="submit-btn" class="btn btn-primary" type="submit">Set password</button>
+      <button id="submit-btn" class="btn btn-primary" type="submit">set password</button>
     </form>
     <noscript><p class="flash flash-error">Setting a password requires JavaScript
       (the SRP verifier is derived in your browser).</p></noscript>
   {% endif %}
+
+  {% endcall %}
 {% endblock %}
 {% block scripts %}
   {% if stage == 'terms' %}
     <script src="/assets/terms.js" defer></script>
   {% elif stage == 'password' %}
     <script src="/assets/srp.js" defer></script>
+    <script src="/assets/authform.js" defer></script>
     <script src="/assets/register.js" defer></script>
   {% endif %}
 {% endblock %}

@@ -655,26 +655,145 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
 .auth-form .btn { margin-top: 0.7rem; align-self: flex-start; }
 .auth-form .btn-primary { padding: 0.6rem 1rem; }
 .auth-form button:disabled { opacity: 0.6; cursor: wait; }
-/* A form that is really just one more control under the form above it (the OTP
-   page's "send a fresh code"). */
-.auth-form.inline { margin-top: 0.75rem; }
-
-.auth-alt { margin: 0.9rem 0 0; font-size: 0.9rem; color: var(--muted); }
-/* A button that reads as a link: these switch the dialogue in place rather than
-   navigating, but the reader should not have to know that. */
-.linkish {
-  background: none; border: 0; padding: 0;
-  color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer;
+/* Shared auth-tier links — one style for every signed-out page (forgot, request
+   invite, back / go to sign in, the OTP "send a fresh code"). Keycap chips: no
+   underline, mono, a button feel that twins with the "show" toggle and the ↵
+   keycap on the same cards. Works on <a> and <button> alike. */
+.auth-links {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem;
+  margin: 1rem 0 0;
 }
-/* The one thing worth saying on a login box (that the password never leaves the
-   browser) gets the mono utility face, below the form rather than above it. */
-.auth-note {
-  margin: 1.2rem 0 0; padding-top: 0.9rem;
-  border-top: 1px solid var(--border);
+.auth-links.spread { justify-content: space-between; }
+.auth-link {
+  display: inline-flex; align-items: center; gap: 0.3rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.72rem; line-height: 1.5; color: var(--muted);
+  font-size: 0.72rem; line-height: 1; letter-spacing: 0.02em;
+  color: var(--accent); text-decoration: none; cursor: pointer;
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 0.34rem 0.6rem;
 }
-.auth-note b { color: var(--accent-ink); font-weight: 600; }
+.auth-link:hover {
+  color: var(--accent-ink); border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+/* ── The auth window (_authwin.html) ─────────────────────────────────────── */
+/* Every signed-out card dressed as the solver shell it stands in for: terminal
+   chrome (a title bar + an optional status bar) wrapping the page's form. Shared
+   by sign in, register/reset, forgot and request-invite. It sits in the same
+   --surface pane the terminal will, one shade lighter (--surface-hi) with its
+   own border, so it reads as the window about to become the shell.
+   The mono utility face is a repeated literal here, matching the rest of the
+   file (no --mono token exists). */
+.authwin {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-hi);
+  box-shadow: 0 22px 60px -26px rgba(0, 0, 0, 0.8);
+}
+.authwin-bar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.55rem 0.8rem;
+  background: color-mix(in srgb, var(--surface) 70%, #000);
+  border-bottom: 1px solid var(--border);
+}
+.authwin-dots { display: flex; gap: 0.35rem; }
+.authwin-dot { width: 0.6rem; height: 0.6rem; border-radius: 50%; flex: none; }
+.authwin-dot.r { background: #f87171; }
+.authwin-dot.y { background: #fbbf24; }
+.authwin-dot.g { background: #34d399; }
+.authwin-glyph { width: 1.2rem; height: 0.82rem; color: var(--accent); margin-left: 0.4rem; flex: none; }
+.authwin-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.74rem; color: var(--muted); letter-spacing: 0.02em;
+}
+.authwin-title b { color: var(--accent-ink); font-weight: 600; }
+
+.authwin-body { padding: 1.15rem; }
+.authwin-intro {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.76rem; color: var(--muted); line-height: 1.55; margin: 0 0 1.1rem;
+}
+.authwin-intro .arrow { color: var(--accent); }
+
+/* The forms, terminal-styled: mono labels/inputs, source-ordered after .auth-form
+   so these overrides win at equal specificity. */
+.authwin-form label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted); margin-top: 0.5rem;
+}
+.authwin-form input:not([type="checkbox"]),
+.authwin-form textarea {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+}
+.authwin-form textarea {
+  color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.5rem 0.7rem; resize: vertical;
+}
+.authwin-form textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.authwin-form label.check {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem; color: var(--text); margin: 0.6rem 0 0;
+}
+
+/* Full-width mono submit, with the ↵ hint and the in-flight "proving…" state. */
+.authwin-form .btn {
+  align-self: stretch; margin-top: 0.85rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 600; letter-spacing: 0.02em; padding: 0.68rem 1rem;
+}
+.authwin-form .kbd {
+  font-size: 0.82em; opacity: 0.7; line-height: 1.3;
+  border: 1px solid rgba(31, 18, 6, 0.4); border-radius: 4px; padding: 0 0.28rem;
+}
+.authwin-form .btn.busy {
+  background: color-mix(in srgb, var(--accent) 55%, var(--surface));
+  color: var(--accent-ink); cursor: progress;
+}
+
+/* The status bar: the page's one standing note, full-bleed under the body like a
+   shell footer. */
+.authwin-status {
+  padding: 0.6rem 1.15rem;
+  border-top: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.66rem; color: var(--muted); line-height: 1.5;
+  display: flex; align-items: baseline; gap: 0.5rem;
+}
+.authwin-led {
+  width: 0.5rem; height: 0.5rem; border-radius: 50%; flex: none;
+  align-self: center;
+  background: var(--accent-ink); box-shadow: 0 0 6px var(--accent);
+}
+.authwin-status b { color: var(--accent-ink); font-weight: 600; }
+
+/* Password field + show/hide toggle (the toggle rides inside the input's edge). */
+.pw-wrap { position: relative; display: flex; }
+.pw-wrap input { flex: 1; padding-right: 3.4rem; }
+.pw-toggle {
+  position: absolute; right: 0.4rem; top: 50%; transform: translateY(-50%);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.68rem; letter-spacing: 0.04em; color: var(--muted);
+  background: none; border: 1px solid var(--border); border-radius: 5px;
+  padding: 0.12rem 0.4rem; cursor: pointer;
+}
+.pw-toggle:hover { color: var(--accent-ink); border-color: var(--accent); }
+
+/* Caps-lock warning — hidden until authform.js sees Caps Lock while a field has
+   focus. The [hidden] guard beats the display:flex so the attribute still hides it. */
+.caps-warn {
+  display: flex; align-items: center; gap: 0.35rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.66rem; color: var(--accent-ink); margin: 0.35rem 0 0;
+}
+.caps-warn::before { content: "\21EA"; }
+.caps-warn[hidden] { display: none; }
 
 .flash { border-radius: 8px; padding: 0.6rem 0.8rem; font-size: 0.92rem; margin: 0.5rem 0; }
 .flash-error { background: var(--error-bg); color: var(--error-fg); }

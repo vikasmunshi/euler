@@ -35,7 +35,7 @@ _EMAIL = 'user@example.com'
 #: (path, a string the rendered page must contain) — every GET a signed-out
 #: visitor can reach, each one an extension of base.html.
 _PAGES = [
-    ('/login', 'Sign in'),
+    ('/login', 'SRP-6a'),                                    # the sign-in window's status bar
     ('/login?reset=1', 'Password updated'),                  # the flash banners
     ('/login?registered=1', 'Registration complete'),
     ('/forgot', 'email'),

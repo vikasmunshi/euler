@@ -3,5 +3,5 @@
 {% block dialogue %}
   <h1>{{ heading }}</h1>
   <p class="lead">{{ message }}</p>
-  {% if show_login %}<p class="auth-alt"><a href="/login">Go to sign in</a></p>{% endif %}
+  {% if show_login %}<div class="auth-links"><a class="auth-link" href="/login">&#8592; back to sign in</a></div>{% endif %}
 {% endblock %}
