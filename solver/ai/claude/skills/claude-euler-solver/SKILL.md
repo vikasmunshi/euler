@@ -194,7 +194,7 @@ report that this is a `solve` job, not a `review`. Then, in order:
    missing approach-and-complexity note.
 3. **`notes.html`.** Ensure `results.json` is present and newer than every solution
    source (`solver "ls <n>"` shows the mtimes); if it is missing or stale, run
-   `solver "benchmark <n>"` to refresh it. Then bring the solution directory's
+   `solver "benchmark <n>"` twice to refresh it. Then bring the solution directory's
    `notes.html` to [convention_documentation.md](docs/convention_documentation.md),
    using the recorded `results.json` values for every timing or comparison claim —
    never invent numbers.
@@ -210,14 +210,12 @@ then summarise:
    `flake8` issues automatically; fix any remaining `mypy`/`flake8` errors by hand
    and re-run until `lint(...) → 0`. If you cannot make it pass, **stop and report**;
    do not paper over it.
-2. **(solve only) Confirm the verdict.** Re-run `solver "eval <n>"` and make sure
-   every solution's verdict is `correct` and `results.json` reflects the latest
-   sources.
-3. **Commit:** `solver "commit <message>"`. Keep `<message>` short — a single line
-   that does **not** reveal the solution approach. Make it generic but with a bit of
-   personality, e.g. `"solved problem 0042 with a smile"` or
-   `"problem 0042 cracked — another one bites the dust"`. Never mention the
-   algorithm, formula, or any hint of how it was solved.
+2. **Commit:** `solver "commit <message>"`. Keep `<message>` short — a single line
+   that does **not** reveal the solution approach. Use a word or two from the problem
+   title and make it unique with a bit of personality, e.g.
+   `"p0042 de-coded triangles with a smile"`,
+   `"p0042 coded triangles bites the dust"`, etc.
+   Never mention the algorithm, formula, or any hint of how it was solved.
 
 Then **summarise the session** in one or two sentences (the action, and what was
 found or done) and end the turn.

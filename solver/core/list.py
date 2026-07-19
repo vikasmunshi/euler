@@ -3,6 +3,7 @@
 """List solution directory contents."""
 from __future__ import annotations
 
+import datetime
 import mimetypes
 
 from solver.config import ExitCodes
@@ -21,16 +22,18 @@ def ls(problem: Problem) -> int:
         problem (Problem): The problem instance containing the solution directory.
     """
     solution_prefix: str = f'p{problem.number:04d}_s'
-    files: list[tuple[str, int, str, bool]] = [
-        (canonical_path(file), file.stat().st_size, mimetype, file.name.startswith(solution_prefix))
+    files: list[tuple[str, int, float, str, bool]] = [
+        (canonical_path(file), f_stat.st_size, f_stat.st_ctime, mimetype, file.name.startswith(solution_prefix))
         for file in sorted(iterdir_recursive(problem.solution_dir, rt='path'))
-        if (mimetype := mimetypes.guess_type(file.name)[0]) is not None
+        if (mimetype := mimetypes.guess_type(file.name)[0]) is not None  # hides files without an extension
+        if (f_stat := file.stat())
     ]
     if not files:
         console.print('[error]error:[/error] no files found in the solution directory')
         return ExitCodes.EXIT_ERROR
     max_filename_length: int = max(len(fileinfo[0]) for fileinfo in files)
-    for filename, size, mimetype, is_a_solution in files:
+    for filename, size, mtime, mimetype, is_a_solution in files:
         mark = ' [accent]*[/accent]' if is_a_solution else ''
-        console.print(f'{filename:<{max_filename_length}} {size:6d} bytes {mimetype}{mark}', highlight=True)
+        modified: str = datetime.datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+        console.print(f'{filename:<{max_filename_length}} {size:6d} bytes {modified} {mimetype}{mark}', highlight=True)
     return ExitCodes.EXIT_OK
