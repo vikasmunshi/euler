@@ -1585,8 +1585,8 @@
     "title": "The Chase",
     "level": 19,
     "pct": 49,
-    "solved": false,
-    "date": ""
+    "solved": true,
+    "date": "Sun, 19 Jul 2026, 21:15"
   },
   "228": {
     "title": "Minkowski Sums",
