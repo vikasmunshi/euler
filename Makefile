@@ -15,7 +15,7 @@
         deploy-auth remove-auth upgrade-auth redeploy-auth \
         deploy-user remove-user upgrade-user redeploy-user \
         deploy-web remove-web upgrade-web redeploy-web \
-        test run audit uninstall version bump-version check-version
+        test run audit uninstall version release check-version
 
 VENV   := .venv
 PYTHON := $(VENV)/bin/python
@@ -122,8 +122,8 @@ version: $(VENV)
 ## Cut a release: bump solver/version.py from Conventional Commits, commit, tag,
 ## and push the commit + tag to origin. ARGS=--dry-run previews; ARGS=--no-push
 ## stops before publishing.
-bump-version:
-	@./scripts/version/bump.sh $(ARGS)
+release:
+	@./scripts/version/release.sh $(ARGS)
 
 ## Guard: the version redeploy-web would ship (solver/version.py) must have its
 ## vX.Y.Z tag on origin, so a redeploy never runs a release collaborator clones
@@ -139,7 +139,7 @@ check-version:
 		printf "✓ check-version: %s is published on origin\n" "$$tag"; \
 	else \
 		printf "✗ check-version: %s is NOT on origin — publish the release before deploying.\n" "$$tag" >&2; \
-		printf "  run 'make bump-version' (bump + push) or 'git push origin HEAD %s'\n" "$$tag" >&2; \
+		printf "  run 'make release' (bump + push) or 'git push origin HEAD %s'\n" "$$tag" >&2; \
 		exit 1; \
 	fi
 

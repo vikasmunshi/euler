@@ -3,7 +3,7 @@
 """The solver build version — the single source of truth.
 
 This file is the *one* place the version number lives. It is rewritten **only**
-by ``scripts/version/bump.sh``, which bumps this number and creates the matching
+by ``scripts/version/release.sh``, which bumps this number and creates the matching
 ``vX.Y.Z`` git tag in one release step — never hand-edit it. ``pyproject.toml``
 reads ``__version__`` from here at build time (setuptools ``attr:``) to stamp the
 wheel, and ``solver.config`` imports it for the running build's version, so the

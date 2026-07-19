@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "solver"
 # The version is read at build time from `solver/version.py` (see
 # [tool.setuptools.dynamic] below) and frozen into the wheel metadata. That file
-# is the single source of truth and is written only by scripts/version/bump.sh,
+# is the single source of truth and is written only by scripts/version/release.sh,
 # which bumps it and tags `vX.Y.Z` together — never hand-edit a number here.
 dynamic = ["version"]
 description = "Interactive shell for solving and managing Project Euler problems"

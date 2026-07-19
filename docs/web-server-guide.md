@@ -1431,11 +1431,11 @@ release that was bumped and tagged locally but never pushed from running the dep
 ahead of what any collaborator clone can `git-sync` to.
 
 **Cutting a release.** The version is one tracked file, `solver/version.py`, written only
-by `scripts/version/bump.sh` (`make bump-version`): it derives the SemVer bump from
+by `scripts/version/release.sh` (`make release`): it derives the SemVer bump from
 Conventional Commits, rewrites the file, commits, tags `vX.Y.Z`, and **pushes the commit +
 tag to origin** (`ARGS=--dry-run` previews, `ARGS=--no-push` stops before publishing). The
 deployed venv is only as current as the last release baked into it, so the full flow is
-**`make bump-version` → `make redeploy-web`** — the push in the first step is exactly what
+**`make release` → `make redeploy-web`** — the push in the first step is exactly what
 lets `check-version` pass in the second. A new web-shell *command* additionally needs each
 per-user clone to `git-sync` and the terminal to reconnect before it appears (the
 persistent PTY builds its command registry at spawn; see § 12).

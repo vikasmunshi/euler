@@ -132,7 +132,7 @@ main() {
     local ahead behind has_changes state prune_out
 
     # Fetch master AND all tags. The version mechanism reads release tags — the
-    # `version` command's `git describe` and bump.sh's last-tag anchor — but normal
+    # `version` command's `git describe` and release.sh's last-tag anchor — but normal
     # fetch only auto-follows tags pointing at objects downloaded THIS fetch, so a
     # clone that already has the tagged commit never picks up the `vX.Y.Z` tag and
     # `git describe` falls back to a bare sha. `--tags` pulls every tag ref; it adds

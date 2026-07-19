@@ -138,7 +138,7 @@ def _package_version() -> str:
     """The running build's version, read from the tracked ``solver/version.py``.
 
     That module is the single source of truth (written only by
-    ``scripts/version/bump.sh``); importing it needs no git and no install, so this
+    ``scripts/version/release.sh``); importing it needs no git and no install, so this
     is correct everywhere — an editable dev checkout, the detached deployed venv
     (``/opt/euler/venv``), and a bare source tree alike. It equals the wheel
     metadata too: ``pyproject.toml`` stamps the wheel from the same ``__version__``.

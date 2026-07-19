@@ -22,7 +22,7 @@
 # to bump/commit/tag locally but stop before publishing to origin.
 #
 # Usage:
-#   scripts/version/bump.sh [--dry-run] [--no-push]
+#   scripts/version/release.sh [--dry-run] [--no-push]
 set -uo pipefail
 
 declare dry_run=0 no_push=0
@@ -30,7 +30,7 @@ for arg in "$@"; do
     case "${arg}" in
         --dry-run) dry_run=1 ;;
         --no-push) no_push=1 ;;
-        *) echo "bump: unknown argument '${arg}'" >&2; exit 1 ;;
+        *) echo "release: unknown argument '${arg}'" >&2; exit 1 ;;
     esac
 done
 
@@ -39,7 +39,7 @@ last=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || echo v0.0.0)
 
 IFS=. read -r major minor patch <<<"${last#v}"
 if [[ -z "${major:-}" || -z "${minor:-}" || -z "${patch:-}" ]]; then
-    echo "bump: cannot parse last tag '$last' as vMAJOR.MINOR.PATCH" >&2
+    echo "release: cannot parse last tag '$last' as vMAJOR.MINOR.PATCH" >&2
     exit 1
 fi
 
@@ -53,7 +53,7 @@ fi
 log=$(git log --format='%s%n%b' "$range")
 
 if [[ -z "$log" ]]; then
-    echo "bump: no commits since $last — nothing to release" >&2
+    echo "release: no commits since $last — nothing to release" >&2
     exit 1
 fi
 
@@ -80,7 +80,7 @@ fi
 # every read, so `git diff --quiet` reports phantom churn on an otherwise clean
 # tree. `git status` refreshes the index and ignores that noise.
 if [[ -n "$(git status --porcelain)" ]]; then
-    echo "bump: working tree is dirty — commit or stash before releasing $new" >&2
+    echo "release: working tree is dirty — commit or stash before releasing $new" >&2
     exit 1
 fi
 
@@ -88,7 +88,7 @@ fi
 # `version = __version__` alias intact), commit it, then tag THAT commit — so the
 # tag, solver/version.py, and the wheel built from it all name $number.
 if ! grep -qE "^__version__ = '[^']*'" "$version_file"; then
-    echo "bump: cannot find the __version__ line in $version_file" >&2
+    echo "release: cannot find the __version__ line in $version_file" >&2
     exit 1
 fi
 sed -i -E "s/^__version__ = '[^']*'/__version__ = '${number}'/" "$version_file"
@@ -109,7 +109,7 @@ fi
 # retry, since the tree is already the release state.
 echo "pushing $new (commit + tag) to origin..."
 if ! git push origin HEAD "$new"; then
-    echo "bump: push FAILED — $new is committed and tagged locally but NOT on origin." >&2
+    echo "release: push FAILED — $new is committed and tagged locally but NOT on origin." >&2
     echo "  retry with: git push origin HEAD $new" >&2
     exit 1
 fi
