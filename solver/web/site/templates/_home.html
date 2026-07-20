@@ -85,12 +85,23 @@
   {% endif %}
 </nav>
 
-{# The README, continuing the same page. `readme_html` is our own packaged file
-   rendered by content.render_markdown — not user input — so it is marked safe
-   deliberately, exactly as the docs/topics pages mark their rendered bodies. #}
+{# The README *summary*, continuing the same page — the slice setup.py vendors
+   between the README's HOME markers, not the whole file. `readme_html` is our own
+   packaged file rendered by content.render_markdown — not user input — so it is
+   marked safe deliberately, exactly as the docs/topics pages mark their rendered
+   bodies. The "full README" link routes by tier: signed in it swaps the pane to
+   the docs viewer (this clone's README); signed out the auth service has no clone
+   and /docs is behind the login, so it leaves for the canonical copy on GitHub. #}
 {% if readme_html %}
 <section class="readme">
   <p class="readme-eyebrow">readme</p>
   <div class="doc-body">{{ readme_html | safe }}</div>
+  {% if subject %}
+  <p class="readme-more"><a href="/docs/readme" hx-get="/docs/readme" hx-target="#content"
+     hx-swap="innerHTML" hx-push-url="true">Read the full README &rarr;</a></p>
+  {% else %}
+  <p class="readme-more"><a href="https://github.com/vikasmunshi/euler/blob/master/README.md"
+     target="_blank" rel="noopener">Read the full README on GitHub &rarr;</a></p>
+  {% endif %}
 </section>
 {% endif %}

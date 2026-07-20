@@ -1280,8 +1280,11 @@ the in-index summary, the per-command reference, the authorization audit table
 in `docs/authorizations.md` (module / command / channels / requires / least
 profile), and the README package-layout tree (built from each module's
 docstring) — from the live command registry and the source tree, leaving all
-hand-written prose untouched. Run it after changing any command's name, alias,
-help text, signature, `requires`/`channels`, or a module's first docstring line.
+hand-written prose untouched. Also regenerates the web start page's summary
+(`solver/web/content/home-summary.md`) from the README's HOME slice. Run it
+after changing any command's name, alias, help text, signature,
+`requires`/`channels`, a module's first docstring line, or the README's HOME
+region.
 
 Args:
     ctx:    The command context.

@@ -449,6 +449,10 @@ button.card {
 .readme-eyebrow::after, .workbench-eyebrow::after {
   content: ""; flex: 1; height: 1px; background: var(--border);
 }
+/* The "full README →" link closing the summary — a quiet footer, not a button. */
+.readme-more { margin: 1rem 0 0; font-size: 0.9rem; }
+.readme-more a { color: var(--accent); text-decoration: none; font-weight: 500; }
+.readme-more a:hover { text-decoration: underline; }
 
 /* ── Solutions century grids: square, as many per row as fit (§7) ────────── */
 /* auto-fill packs as many ~17rem tracks as the pane allows — ~3–4 on a normal

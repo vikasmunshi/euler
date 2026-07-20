@@ -855,14 +855,17 @@ of typesetter. `/about/license` and `/about/acknowledgements` sit behind `forwar
 so the footer dims them signed out rather than offering links that bounce to `/login`;
 `/terms` is an auth route and public, so it stays live.
 
-**The README** is rendered below the cards on the start page, in both tiers. It comes from
-the **packaged** copy — `setup.py`'s `build_py` hook copies the root `README.md` to
-`solver/web/content/README.md` at build time (gitignored; root stays the source of truth),
-and `pyproject.toml` ships it as package data. Both tiers read that copy, cached per
-process: `euler-auth` runs from `/opt/euler` with `ProtectHome=true` and has no clone to
-read, and the start page must say the same thing whatever branch a collaborator is on.
-`/docs/readme` and `/about/readme` still read the clone's — that is the docs viewer's
-contract (a contributor editing docs must see their own edit), not an inconsistency.
+**A README summary** is rendered below the cards on the start page, in both tiers — an
+*extract*, not the whole README, closed by a "read the full README" link (in-app to
+`/docs/readme` signed in, out to GitHub signed out). It comes from the **packaged** copy
+`solver/web/content/home-summary.md`: a tracked, generated file that the `update-docs`
+command rebuilds from the slice of the root `README.md` between its `<!-- HOME:START -->` /
+`<!-- HOME:END -->` markers (root stays the source of truth), shipped as package data via
+`pyproject.toml`. Both tiers read that copy, cached per process: `euler-auth` runs from
+`/opt/euler` with `ProtectHome=true` and has no clone to read, and the start page must say
+the same thing whatever branch a collaborator is on. `/docs/readme` and `/about/readme`
+still read the clone's full README — that is the docs viewer's contract (a contributor
+editing docs must see their own edit), not an inconsistency.
 
 ### 11.2 Visual identity
 

@@ -66,6 +66,31 @@ def _module_of(cmd: Command) -> str:
 ROOT: Path = config.root_dir
 DOCS_DIR: Path = config.docs_dir
 
+#: The web start page renders a *summary* of the README, not the whole file: the
+#: slice between these markers (HTML comments, invisible on GitHub). euler-auth
+#: serves that page from /opt/euler with no clone to read, so the summary has to
+#: ship inside the distribution — a tracked, generated file (declared as package
+#: data in pyproject.toml). This command regenerates it from the README's HOME
+#: slice, so `update-docs` is the single place every generated doc is rebuilt.
+_HOME_START = '<!-- HOME:START'
+_HOME_END = '<!-- HOME:END'
+HOME_SUMMARY: Path = ROOT / 'solver' / 'web' / 'content' / 'home-summary.md'
+
+
+def _home_summary(readme: str) -> str:
+    """The README slice between the HOME markers — the web start page's summary.
+
+    Absent or out-of-order markers are a broken README, not a silently whole-file
+    summary: raise, so the mistake surfaces at `update-docs` time.
+    """
+    start = readme.find(_HOME_START)
+    end = readme.find(_HOME_END)
+    if start == -1 or end == -1 or end < start:
+        raise ValueError('README.md: HOME:START/HOME:END markers missing or out of order')
+    body = readme[readme.index('-->', start) + len('-->'):end]
+    return body.strip() + '\n'
+
+
 #: Strips rich console markup (`[accent]`, `[/warning]`, …) from help strings.
 _MARKUP = re.compile(r'\[/?[\w.]+\]')
 
@@ -322,6 +347,20 @@ def _apply(check: bool) -> tuple[list[str], list[str]]:
         else:
             doc.write_text(rendered)
             updated.append(entry)
+
+    # The web start page's summary — a whole-file artifact derived from the
+    # README's HOME slice (not a GEN block). Read the README from disk after the
+    # loop above: the HOME region carries no GEN markers, so its on-disk text is
+    # already what the slice should be, in both write and --check runs.
+    desired = _home_summary((ROOT / 'README.md').read_text())
+    current = HOME_SUMMARY.read_text() if HOME_SUMMARY.exists() else None
+    if desired != current:
+        entry = f'{HOME_SUMMARY.relative_to(ROOT)}: home-summary'
+        if check:
+            stale.append(entry)
+        else:
+            HOME_SUMMARY.write_text(desired)
+            updated.append(entry)
     return updated, stale
 
 
@@ -335,8 +374,11 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     in `docs/authorizations.md` (module / command / channels / requires / least
     profile), and the README package-layout tree (built from each module's
     docstring) — from the live command registry and the source tree, leaving all
-    hand-written prose untouched. Run it after changing any command's name, alias,
-    help text, signature, `requires`/`channels`, or a module's first docstring line.
+    hand-written prose untouched. Also regenerates the web start page's summary
+    (`solver/web/content/home-summary.md`) from the README's HOME slice. Run it
+    after changing any command's name, alias, help text, signature,
+    `requires`/`channels`, a module's first docstring line, or the README's HOME
+    region.
 
     Args:
         ctx:    The command context.

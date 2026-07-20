@@ -40,10 +40,6 @@ pip-wheel-metadata/
 profile_default/
 sdist/
 solver.egg-info/
-# Build artifact: setup.py's build_py hook copies the root README.md here so it
-# ships in the deployed venv (the auth tier has no clone to read it from).
-# Root README.md is the source of truth — never edit this copy.
-solver/web/content/README.md
 target/
 var/
 venv/
