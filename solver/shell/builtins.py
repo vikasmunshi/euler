@@ -17,7 +17,7 @@ from rich.table import Table
 from rich.text import Text
 
 from solver.config import ExitCodes
-from solver.shell.command import Context, command
+from solver.shell.command import Command, Context, command
 
 
 # ------------------------------------------------------- echo ------------------------------------------------------- #
@@ -73,14 +73,15 @@ def _help(ctx: Context, *args: str) -> int:
 
     With a command name or alias, prints a panel for just that command: its
     description (with a trailing `»` glyph expanded to a full sentence about
-    --silent), its aliases, and its usage. Returns non-zero if the named command
-    is unknown.
+    --silent), its aliases, and its usage, with the command's fully-qualified
+    `module.function` name in the panel subtitle. Returns non-zero if the named
+    command is unknown.
 
     Aliased as `help`.
     """
     reg = ctx.shell.registry
     if args:
-        cmd = reg.resolve(args[0])
+        cmd: Command | None = reg.resolve(args[0])
         if cmd is None:
             ctx.console.print(f'[error]unknown command:[/error] {args[0]}')
             return ExitCodes.EXIT_NOTFOUND
@@ -97,9 +98,15 @@ def _help(ctx: Context, *args: str) -> int:
         if cmd.usage:
             body.append('\n\nusage: ', style='muted')
             body.append(cmd.usage, style='accent.dim')
-        ctx.console.print(Panel(body, border_style='panel.border',
+        cmd_fqn: str = f'{cmd.func.__module__}.{cmd.func.__name__}'
+        ctx.console.print(Panel(body,
+                                border_style='panel.border',
                                 title=f'[accent]▎[/accent] [cmd.name]{cmd.name}[/cmd.name]',
-                                title_align='left', padding=(1, 2)))
+                                title_align='left',
+                                subtitle=f'[accent][[/accent][cmd.name]{cmd_fqn}[/cmd.name][accent]][/accent]',
+                                subtitle_align='right',
+                                padding=(1, 2)),
+                          )
         return ExitCodes.EXIT_OK
     table = Table(show_header=True, header_style='muted', box=None, padding=(0, 2))
     table.add_column('command', style='accent.dim', no_wrap=True)

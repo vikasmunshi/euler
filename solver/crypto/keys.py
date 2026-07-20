@@ -47,7 +47,7 @@ from solver.crypto.config import config
 from solver.shell import console, register
 from solver.utils.shell_utils import confirm
 
-#: Reserved (non-public-key) entry in enc-key.json holding the verify-by-decrypt ciphertext.
+#: Reserved (not a public-key) entry in enc-key.json holding the verify-by-decrypt ciphertext.
 _VERIFY: str = 'verify'
 
 
@@ -176,9 +176,9 @@ def user_authorize(public_key: str) -> int:
 # ==================================================================================================================== #
 #                                               user identity
 # ==================================================================================================================== #
-@register(requires='reader', help_text="Show public key & enc-key access; --regen for new key-pair.")
+@register(requires='reader', help_text="Show euler user, public key & enc-key access; --regen for new key-pair.")
 def user(regen: bool = False) -> int:
-    """Show the current identity and whether it can decrypt; create a key pair on first run or --regen.
+    """Show the solver user, the current identity and whether it can decrypt; create a key pair on first run or --regen.
 
     A key pair is created only when the identity file is **truly absent** (first run) or on
     an explicitly confirmed ``--regen``. An id file that *exists but cannot be read* — the
@@ -186,6 +186,8 @@ def user(regen: bool = False) -> int:
     failure to fix, never a reason to mint a new identity**: replacing the key would
     silently orphan the real one (and with it any enc-key authorization it carries).
     """
+    app_user = app_config['subject']
+    console.print(f'[primary]solver user:[/primary] {app_user.user} [muted]({app_user.profile})[/muted]')
     id_file: Path = config['private_key_file']
     private_key: X25519PrivateKey | None = None
     if id_file.exists():

@@ -88,7 +88,7 @@ a parameter that accepts repetition.
 | [`test-cases`](#command-test-cases) | — | list the test cases for the problem. ❏ |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
-| [`user`](#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
+| [`user`](#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
 | [`vault`](#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
@@ -151,8 +151,9 @@ a command that supports --silent, as noted in the panel subtitle.
 
 With a command name or alias, prints a panel for just that command: its
 description (with a trailing `»` glyph expanded to a full sentence about
---silent), its aliases, and its usage. Returns non-zero if the named command
-is unknown.
+--silent), its aliases, and its usage, with the command's fully-qualified
+`module.function` name in the panel subtitle. Returns non-zero if the named
+command is unknown.
 
 Aliased as `help`.
 ```
@@ -1327,7 +1328,7 @@ Args:
 
 #### Command: `user`
 
-Show public key & enc-key access; --regen for new key-pair.
+Show euler user, public key & enc-key access; --regen for new key-pair.
 * profiles: admin, maintainer, contributor, reader
 
 ```
@@ -1336,7 +1337,7 @@ user
 ```
 
 ```text
-Show the current identity and whether it can decrypt; create a key pair on first run or --regen.
+Show the solver user, the current identity and whether it can decrypt; create a key pair on first run or --regen.
 
 A key pair is created only when the identity file is **truly absent** (first run) or on
 an explicitly confirmed ``--regen``. An id file that *exists but cannot be read* — the

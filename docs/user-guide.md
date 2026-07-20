@@ -246,7 +246,7 @@ command name below links to its full entry — usage and description — in the
 | [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. ❏ |
 | [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
-| [`user`](commands-index.md#command-user) | — | Show public key & enc-key access; --regen for new key-pair. |
+| [`user`](commands-index.md#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](commands-index.md#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
 | [`vault`](commands-index.md#command-vault) | — | Manage the per-user secrets vault: status | init | unlock | change-password. |
