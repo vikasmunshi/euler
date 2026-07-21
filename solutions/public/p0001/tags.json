@@ -1,0 +1,44 @@
+{
+  "domain": [
+    "triangular-number"
+  ],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "algorithm-beats-language",
+    "decompose-overlap",
+    "parity-across-languages"
+  ],
+  "techniques": {
+    "s0": [
+      "inclusion-exclusion-principle",
+      "closed-form-expression",
+      "least-common-multiple",
+      "arbitrary-precision-arithmetic"
+    ],
+    "s1": [],
+    "s2": [
+      "arithmetic-progression",
+      "inclusion-exclusion-principle"
+    ],
+    "s3": [
+      "generator",
+      "lazy-evaluation",
+      "inclusion-exclusion-principle"
+    ],
+    "s4": [
+      "generator",
+      "lazy-evaluation",
+      "inclusion-exclusion-principle"
+    ]
+  },
+  "new-tags": [
+    {
+      "slug": "gauss-summation",
+      "facet": "technique",
+      "name": "Gauss summation trick",
+      "reference": "https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF",
+      "summary": "Pairing the ends of an arithmetic run to sum it in closed form.",
+      "applies-to": ["s0"]
+    }
+  ]
+}
