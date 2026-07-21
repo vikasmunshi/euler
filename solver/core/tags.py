@@ -290,15 +290,36 @@ def _apply_membership(ptags: dict[int, dict[str, Any]], slug: str, facet: str, r
         bucket.remove(slug)
 
 
+def _delete_slug_everywhere(ptags: dict[int, dict[str, Any]], slug: str) -> int:
+    """Strip *slug* from every per-problem file's facet buckets. Returns how many were removed."""
+    removed = 0
+    for data in ptags.values():
+        for key in ('domain', 'takeaways'):
+            if slug in data.get(key, []):
+                data[key].remove(slug)
+                removed += 1
+        for slugs in data.get('techniques', {}).values():
+            if slug in slugs:
+                slugs.remove(slug)
+                removed += 1
+    return removed
+
+
 def _maintainer_diff(current: dict[str, Any], ptags: dict[int, dict[str, Any]]) -> int:
-    """Apply maintainer edits to the central refs (vs HEAD) into the per-problem files first,
-    so the maintainer wins over solver/contributor on the subsequent reconcile."""
+    """Apply maintainer edits to the central vocabulary (vs HEAD) into the per-problem files first,
+    so the maintainer wins over solver/contributor on the subsequent reconcile. Two edits: a tag
+    deleted from the vocabulary cascades to remove that slug everywhere; a ref added to / removed
+    from a surviving tag's `refs` adds / removes that tag on the implied problem's file."""
     head = _head_central()
     if head is None:
         return 0
     facet = _facet_of(current)
-    head_refs = {t['slug']: set(t.get('refs', [])) for t in head['tags']}
+    current_slugs = {t['slug'] for t in current['tags']}
     changes = 0
+    for tag in head['tags']:                       # tags deleted from the vocabulary → cascade-delete
+        if tag['slug'] not in current_slugs:
+            changes += _delete_slug_everywhere(ptags, tag['slug'])
+    head_refs = {t['slug']: set(t.get('refs', [])) for t in head['tags']}
     for tag in current['tags']:
         slug, cur = tag['slug'], set(tag.get('refs', []))
         was = head_refs.get(slug)
