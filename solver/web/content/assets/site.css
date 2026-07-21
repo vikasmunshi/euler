@@ -26,6 +26,10 @@
   --git-modified: #fbbf24;
   --git-staged: #34d399;
   --git-untracked: #a78bfa;
+  /* tag facets (problem page): brand orange · a sky · the untracked violet. */
+  --f-domain: var(--accent);
+  --f-technique: #56c7f5;
+  --f-takeaway: var(--git-untracked);
   /* Semantic ink, separate from the accent: the auth flashes, the vault/tool
      state pills, and the destructive verbs. --ok doubles as git-staged's green
      because "good" is one idea, not two. */
@@ -993,3 +997,59 @@ dl.account dd { margin: 0; min-width: 0; }
 .app-footer a { color: var(--muted); text-decoration: none; }
 .app-footer a:hover { color: var(--accent); }
 .fsep { color: var(--border); }
+
+/* ── problem-page tags & topics (A: header chip row · B: workbench panel) ─────────── */
+.tagbar { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+
+.tag-chip {
+  --fc: var(--muted);
+  display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; line-height: 1;
+  padding: 0.26rem 0.6rem; border-radius: 999px; text-decoration: none;
+  color: color-mix(in srgb, var(--fc) 75%, var(--text));
+  background: color-mix(in srgb, var(--fc) 12%, var(--bg));
+  border: 1px solid color-mix(in srgb, var(--fc) 26%, transparent);
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(--fc) 18%, var(--bg)); }
+.tag-chip .tc-dot { width: 0.42rem; height: 0.42rem; border-radius: 50%; background: var(--fc); flex: none; }
+.tag-chip.domain { --fc: var(--f-domain); }
+.tag-chip.technique { --fc: var(--f-technique); }
+.tag-chip.takeaway { --fc: var(--f-takeaway); }
+
+.tag-panel .facet-row { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.4rem 0; }
+.tag-panel .facet-row + .facet-row { border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent); }
+.facet-label {
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.68rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); min-width: 5.6rem; padding-top: 0.28rem; flex: none;
+}
+.facet-label .idx { color: var(--f-technique); }
+.taglist { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.tag-panel .subrule { display: flex; align-items: center; gap: 0.6rem; margin: 0.95rem 0 0.6rem; }
+.tag-panel .subrule h3 {
+  font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.7rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); margin: 0;
+}
+.tag-panel .subrule::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+.topic-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+@media (max-width: 700px) { .topic-cards { grid-template-columns: 1fr; } }
+.tcard {
+  display: flex; align-items: center; gap: 0.6rem; text-decoration: none; padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--bg);
+  transition: border-color 0.14s ease, transform 0.14s ease;
+}
+.tcard:hover { border-color: var(--accent); background: var(--surface-hi); transform: translateX(2px); }
+.tcard .lam { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--accent); font-size: 1rem; flex: none; }
+.tcard .tc-body { min-width: 0; }
+.tcard .tc-name { display: block; color: var(--text); font-size: 0.86rem; }
+.tcard .tc-facet {
+  display: block; font-size: 0.7rem; color: var(--muted);
+  font-family: ui-monospace, Menlo, Consolas, monospace; overflow: hidden; text-overflow: ellipsis;
+}
+.tcard .go { margin-left: auto; color: var(--muted); font-family: ui-monospace, Menlo, Consolas, monospace; }
+.tcard:hover .go { color: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  .tag-chip, .tcard { transition: none; }
+  .tcard:hover { transform: none; }
+}

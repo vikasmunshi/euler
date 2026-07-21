@@ -216,6 +216,22 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertLess(body.index('class="results"'), body.index('file-flow'))
 
     @unittest_run_loop
+    async def test_problem_page_tags_and_topics(self) -> None:
+        """A: the header chip row, facet-classed, each chip linking to its tag page.
+        B: the workbench panel with per-index techniques and a curated topic card."""
+        body = await (await self.client.get('/solutions/0007/', headers=_READER)).text()
+        # A — header chips
+        self.assertIn('class="tagbar"', body)
+        self.assertIn('tag-chip domain', body)
+        self.assertIn('tag-chip takeaway', body)
+        self.assertIn('href="/topics/technique/sieve-of-eratosthenes"', body)
+        # B — workbench panel: per-index technique row + curated topic (not a per-tag skeleton)
+        self.assertIn('Tags &amp; topics', body)
+        self.assertIn('<span class="idx">s0</span>', body)
+        self.assertIn('/topics/number-theory/primes', body)
+        self.assertIn('Generating and testing primes', body)
+
+    @unittest_run_loop
     async def test_problem_page_off_site_links(self) -> None:
         """The meta line links out to the problem and to its directory on GitHub.
 

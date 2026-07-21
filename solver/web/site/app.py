@@ -259,8 +259,9 @@ async def solutions_index(request: web.Request) -> web.StreamResponse:
 
 
 def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
-    """The problem-page context (§7 order): statement · test-cases · results ·
-    files · notes — shared by the GET view and the post-delete fragment."""
+    """The problem-page context: statement · notes, a tag chip row, then the workbench
+    (tags & topics · test-cases · results · files) — shared by the GET view and the
+    post-delete fragment. `tags` is the facet-grouped view model (content.problem_tag_view)."""
     config = request.app[CONFIG_KEY]
     repo_root = config.repo_root
     info = content.load_problems(repo_root).get(number)
@@ -300,6 +301,7 @@ def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
         # canonical path, so they resolve after an htmx swap, not just a full load.
         'statement': content.rewrite_statement_links(read_html('statement.html'), number),
         'notes': read_html('notes.html'),
+        'tags': content.problem_tag_view(repo_root, number),
         'files': _file_entries(repo_root, sdir),
         'test_cases': test_cases,
         'results': content.load_json(sdir / 'results.json') or [],

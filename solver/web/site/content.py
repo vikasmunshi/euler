@@ -16,7 +16,8 @@ __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown',
            'rewrite_statement_links', 'git_status',
-           'list_docs', 'read_doc', 'list_topics', 'read_topic', 'read_about', 'readme_html',
+           'list_docs', 'read_doc', 'list_topics', 'read_topic', 'problem_tag_view',
+           'read_about', 'readme_html',
            'parse_progress', 'save_progress']
 
 import json
@@ -668,3 +669,65 @@ def _read_nested_page(tree: Path, name: str) -> str | None:
         return target.read_text(encoding='utf-8')
     except OSError:
         return None
+
+
+#: The per-tag skeleton pages live under these folders (one page per tag, reached by its
+#: chip). The problem page's "Topics" list shows curated topics — everything *else*.
+_FACET_FOLDERS = ('domain', 'technique', 'takeaway')
+_ARTICLE_TAGS_RE = re.compile(r'<!--\s*tags:\s*\[(.*?)\]\s*-->', re.DOTALL)
+
+
+def _declared_tags(text: str) -> set[str]:
+    """The tag slugs an article declares in its ``<!-- tags: [...] -->`` comment."""
+    m = _ARTICLE_TAGS_RE.search(text)
+    return {s.strip() for s in m.group(1).split(',') if s.strip()} if m else set()
+
+
+def problem_tag_view(repo_root: Path, number: int) -> dict[str, Any]:
+    """The tag/topic view model for a problem page.
+
+    Reads the problem's ``tags.json`` and the central vocabulary, and returns the tags grouped
+    by facet (techniques keyed to each solution index) as chips — each with the ``/topics`` URL
+    of its per-tag page when one exists — plus ``flat`` for the header row and ``topics``, the
+    curated topic pages (outside the per-tag facet folders) that cover any of the problem's tags.
+    """
+    tags = load_json(solution_dir(repo_root, number) / 'tags.json')
+    if not isinstance(tags, dict):
+        return {'has_tags': False}
+    vocab = {t['slug']: t for t in (load_json(repo_root / 'topics' / 'tags.json') or {}).get('tags', [])}
+    topics_root = repo_root / 'topics'
+
+    def chip(slug: str, facet: str) -> dict[str, Any]:
+        page = topics_root / facet / f'{slug}.md'
+        return {'slug': slug, 'name': vocab.get(slug, {}).get('name', slug),
+                'facet': facet, 'url': f'/topics/{facet}/{slug}' if page.is_file() else None}
+
+    domain = [chip(s, 'domain') for s in tags.get('domain', [])]
+    takeaways = [chip(s, 'takeaway') for s in tags.get('takeaways', [])]
+    techniques = [{'index': idx, 'tags': [chip(s, 'technique') for s in slugs]}
+                  for idx, slugs in sorted(tags.get('techniques', {}).items()) if slugs]
+    # `flat` (the header row) is the distinct tag set; a technique shared across indices
+    # appears once. The per-index repetition lives only in `techniques` (the workbench).
+    seen: set[str] = set()
+    flat: list[dict[str, Any]] = []
+    for c in domain + [t for grp in techniques for t in grp['tags']] + takeaways:
+        if c['slug'] not in seen:
+            seen.add(c['slug'])
+            flat.append(c)
+    own = seen
+
+    topics: list[DocEntry] = []
+    if own:
+        for path in sorted(topics_root.rglob('*.md')):
+            rel = path.relative_to(topics_root)
+            if rel.parts[0] in _FACET_FOLDERS:            # a per-tag skeleton — reached via its chip
+                continue
+            try:
+                text = path.read_text(encoding='utf-8')
+            except OSError:
+                continue
+            if own & _declared_tags(text):
+                name = rel.with_suffix('').as_posix()
+                topics.append(DocEntry(name=name, heading=name, title=_page_title(text, path.stem)))
+    return {'has_tags': bool(flat), 'flat': flat, 'domain': domain,
+            'techniques': techniques, 'takeaways': takeaways, 'topics': topics}

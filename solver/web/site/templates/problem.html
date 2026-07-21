@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{{ '%04d' % number }} · euler{% endblock %}
+{# One tag chip: a link to its /topics/<facet>/<slug> page when that page exists, else a plain
+   chip. Facet class colours it (domain / technique / takeaway). #}
+{% macro chip(c) %}{% if c.url %}<a class="tag-chip {{ c.facet }}" href="{{ c.url }}" hx-get="{{ c.url }}" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><i class="tc-dot"></i>{{ c.name }}</a>{% else %}<span class="tag-chip {{ c.facet }}"><i class="tc-dot"></i>{{ c.name }}</span>{% endif %}{% endmacro %}
 {% block content %}
 {# The reading document: the problem, then the thinking. The notes flow straight
    under the statement (a hairline apart) — they carry their own headings, so the
@@ -21,6 +24,11 @@
     {% if github_url %}<a class="ext" href="{{ github_url }}">github</a>{% endif %}
   </p>
 
+  {# A — tags as page metadata: the whole set at a glance, each chip linking to its tag page. #}
+  {% if tags and tags.has_tags %}
+  <div class="tagbar">{% for c in tags.flat %}{{ chip(c) }}{% endfor %}</div>
+  {% endif %}
+
   {% if statement %}
   {# statement.html is the cached projecteuler.net markup; its resources/… links are
      rooted at /solutions/NNNN/ (content.rewrite_statement_links) so images resolve
@@ -39,9 +47,42 @@
   {% endif %}
 </section>
 
-{% if test_cases or results or files %}
+{% if test_cases or results or files or (tags and tags.has_tags) %}
 <div class="workbench">
   <p class="workbench-eyebrow">workbench</p>
+
+  {# B — the full structure: techniques keyed to each solution index, and the curated topic
+     pages that cover this problem's tags. #}
+  {% if tags and tags.has_tags %}
+  <section class="panel tag-panel">
+    <h2>Tags &amp; topics</h2>
+    {% if tags.domain %}
+    <div class="facet-row"><span class="facet-label">domain</span>
+      <span class="taglist">{% for c in tags.domain %}{{ chip(c) }}{% endfor %}</span></div>
+    {% endif %}
+    {% for grp in tags.techniques %}
+    <div class="facet-row"><span class="facet-label">technique <span class="idx">{{ grp.index }}</span></span>
+      <span class="taglist">{% for c in grp.tags %}{{ chip(c) }}{% endfor %}</span></div>
+    {% endfor %}
+    {% if tags.takeaways %}
+    <div class="facet-row"><span class="facet-label">takeaway</span>
+      <span class="taglist">{% for c in tags.takeaways %}{{ chip(c) }}{% endfor %}</span></div>
+    {% endif %}
+    {% if tags.topics %}
+    <div class="subrule"><h3>Topics</h3></div>
+    <div class="topic-cards">
+      {% for t in tags.topics %}
+      <a class="tcard" href="/topics/{{ t.name }}" hx-get="/topics/{{ t.name }}"
+         hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+        <span class="lam">λ</span>
+        <span class="tc-body"><span class="tc-name">{{ t.title }}</span>
+          <span class="tc-facet">{{ t.name }}</span></span>
+        <span class="go">→</span></a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
+  {% endif %}
 
   {% if test_cases %}
   <section class="panel">
