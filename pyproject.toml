@@ -111,7 +111,10 @@ where = ["."]
 include = ["solver*"]
 
 [tool.setuptools.package-data]
-solver = ["*.html"]
+# modules.csv is the loader's startup manifest (config.modules_file, read by
+# utils/loader.py); it must ship in the wheel so the deployed venv can import
+# the command modules.
+solver = ["*.html", "modules.csv"]
 "solver.web" = [
     "templates/*.html",      # Jinja pages ship inside the deployed venv
     # The start page's summary — a tracked, generated file (the `update-docs`
