@@ -680,7 +680,7 @@ def add_content_routes(app: web.Application) -> None:
         web.get(r'/docs/{name}', doc_page),
         web.get('/topics', redirect_slash),
         web.get('/topics/', topics_index),
-        web.get(r'/topics/{name}', topic_page),
+        web.get(r'/topics/{name:.+}', topic_page),  # {name} may be a nested folder/page path
         web.get(r'/about/{name}', about_page),
         # account
         web.get('/account', account),

@@ -623,10 +623,48 @@ def read_doc(repo_root: Path, name: str) -> str | None:
 # ── topics ──────────────────────────────────────────────────────────────────────────
 
 def list_topics(repo_root: Path) -> list[DocEntry]:
-    """The topics index: every `topics/*.md` writeup."""
-    return _list_pages(repo_root / 'topics')
+    """The topics index: every `topics/**/*.md` writeup, nested folders included.
+
+    A nested page's ``name`` is its folder-qualified path (``number-theory/primes``)
+    and its ``heading`` shows the folder trail (``Number Theory / Primes``); sorting by
+    the full path keeps same-folder pages together in the card grid.
+    """
+    tree = repo_root / 'topics'
+    if not tree.is_dir():
+        return []
+    entries: list[DocEntry] = []
+    for path in sorted(tree.rglob('*.md')):
+        try:
+            text = path.read_text(encoding='utf-8')
+        except OSError:
+            continue
+        rel = path.relative_to(tree).with_suffix('')
+        entries.append(DocEntry(name=rel.as_posix(),
+                                heading=' / '.join(_filename_heading(part) for part in rel.parts),
+                                title=_page_title(text, path.stem)))
+    return entries
 
 
 def read_topic(repo_root: Path, name: str) -> str | None:
-    """The raw Markdown of `/topics/{name}`."""
-    return _read_page(repo_root / 'topics', name)
+    """The raw Markdown of `/topics/{name}`, where *name* may be a nested `folder/page` path."""
+    return _read_nested_page(repo_root / 'topics', name)
+
+
+def _read_nested_page(tree: Path, name: str) -> str | None:
+    """One page of a content tree, addressed by a `/`-separated path, or None.
+
+    Each path segment must match ``_NAME_RE`` (word characters and hyphens only), so `..`
+    and absolute segments are rejected before any filesystem access; the resolved target is
+    then confirmed to stay within *tree* as defence in depth against symlink escapes."""
+    if name.endswith('.md'):                       # a rewritten cross-link that kept its suffix
+        name = name[:-3]
+    parts = name.split('/')
+    if not parts or any(not _NAME_RE.fullmatch(part) for part in parts):
+        return None
+    target = tree.joinpath(*parts).with_suffix('.md')
+    try:
+        if not target.resolve().is_relative_to(tree.resolve()):
+            return None
+        return target.read_text(encoding='utf-8')
+    except OSError:
+        return None

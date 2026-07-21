@@ -957,7 +957,7 @@ shareable and reload-safe. **Writes always return a fragment**, never the shell.
 | GET | `/solutions/{n}/{filename}` | one problem file | reader |
 | GET | `/docs/` · `/docs/{name}` | docs index (card grid) · a rendered doc | reader |
 | GET | `/docs/file/{path}` | a doc-referenced repo file, from the readable roots only | reader |
-| GET | `/topics/` · `/topics/{name}` | topics index · a topic page | reader |
+| GET | `/topics/` · `/topics/{name}` | topics index · a topic page (`{name}` may be a nested `folder/page` path) | reader |
 | GET | `/about/{name}` | footer pages: `readme` · `license` · `acknowledgements` | reader |
 | GET | `/account` | identity + the profile ladder, the credential panel, the password form | reader |
 | GET | `/git` | the header's git chip alone — the refresh the shell asks for (§11.9) | reader |

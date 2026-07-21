@@ -377,6 +377,20 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('Eratosthenes', await resp.text())
 
     @unittest_run_loop
+    async def test_topics_nested_folder(self) -> None:
+        """A `topics/<folder>/<page>.md` is listed with its folder-qualified name and
+        served at the nested route; the folder trail is the card heading."""
+        index = await (await self.client.get('/topics/', headers=_READER)).text()
+        self.assertIn('/topics/number-theory/primes', index)
+        self.assertIn('Number Theory / Primes', index)             # folder-trail heading
+        resp = await self.client.get('/topics/number-theory/primes', headers=_READER)
+        self.assertEqual(resp.status, 200)
+        self.assertIn('Generating and testing primes', await resp.text())
+        # a missing nested page is a 404, not a stray match
+        missing = await self.client.get('/topics/number-theory/no-such-page', headers=_READER)
+        self.assertEqual(missing.status, 404)
+
+    @unittest_run_loop
     async def test_account_page(self) -> None:
         resp = await self.client.get('/account', headers=_ADMIN)
         self.assertEqual(resp.status, 200)
