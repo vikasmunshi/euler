@@ -70,6 +70,10 @@ def render_block(env: jinja2.Environment, template_name: str, block_name: str,
                  context: dict[str, Any]) -> str:
     """Render a single named ``{% block %}`` of *template_name* to a string.
 
+    Only the block's own code runs — the template root does not. So anything a
+    block needs must live *inside* it: a ``{% macro %}`` (or ``{% set %}``) at
+    template top level exists on the full-page path and is undefined here.
+
     Raises :class:`KeyError` if the template has no block called *block_name* —
     a programming error (route/template mismatch), surfaced loudly.
     """

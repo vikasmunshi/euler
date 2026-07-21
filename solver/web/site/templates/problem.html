@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ '%04d' % number }} · euler{% endblock %}
-{# One tag chip: a link to its /topics/<facet>/<slug> page when that page exists, else a plain
-   chip. Facet class colours it (domain / technique / takeaway). #}
-{% macro chip(c) %}{% if c.url %}<a class="tag-chip {{ c.facet }}" href="{{ c.url }}" hx-get="{{ c.url }}" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><i class="tc-dot"></i>{{ c.name }}</a>{% else %}<span class="tag-chip {{ c.facet }}"><i class="tc-dot"></i>{{ c.name }}</span>{% endif %}{% endmacro %}
 {% block content %}
+{# One tag chip: a link to its /topics/<facet>/<slug> page when that page exists, else a plain
+   chip. Facet class colours it (domain / technique / takeaway). Defined *inside* the block:
+   the htmx path renders this block alone, so a macro at template top level never exists there. #}
+{% macro chip(c) %}{% if c.url %}<a class="tag-chip {{ c.facet }}" href="{{ c.url }}" hx-get="{{ c.url }}" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"><i class="tc-dot"></i>{{ c.name }}</a>{% else %}<span class="tag-chip {{ c.facet }}"><i class="tc-dot"></i>{{ c.name }}</span>{% endif %}{% endmacro %}
 {# The reading document: the problem, then the thinking. The notes flow straight
    under the statement (a hairline apart) — they carry their own headings, so the
    old "Notes" title was a redundant label. Everything below is the workbench. #}

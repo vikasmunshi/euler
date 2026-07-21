@@ -232,6 +232,21 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('Generating and testing primes', body)
 
     @unittest_run_loop
+    async def test_problem_block_renders_tag_chips(self) -> None:
+        """The htmx path renders the content block alone — chips and all.
+
+        Block rendering never runs the template root, so anything the block uses
+        (here the ``chip`` macro) has to be defined inside it; a top-level macro
+        blew up with ``'chip' is undefined`` on every htmx navigation.
+        """
+        resp = await self.client.get('/solutions/0007/', headers={**_READER, **_HTMX})
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('class="tagbar"', body)
+        self.assertIn('tag-chip domain', body)
+        self.assertIn('href="/topics/technique/sieve-of-eratosthenes"', body)
+
+    @unittest_run_loop
     async def test_problem_page_off_site_links(self) -> None:
         """The meta line links out to the problem and to its directory on GitHub.
 
