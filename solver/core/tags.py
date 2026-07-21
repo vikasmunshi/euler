@@ -22,17 +22,12 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from bs4 import BeautifulSoup
-
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem, solution_dir
 from solver.shell import console, register
 
 TAGS_FILENAME = 'tags.json'
 FACETS = ('domain', 'technique', 'takeaway')
-#: reference-source URLs that are pedagogical framing, not a tag (mirrors the vocabulary build).
-_STOPLIST = ('Big_O_notation', 'Time_complexity', 'Computational_complexity', 'Space_complexity',
-             'Analysis_of_algorithms', 'Best,_worst_and_average_case', 'Order_of_magnitude')
 _TAGS_RE = re.compile(r'<!--\s*tags:\s*\[(.*?)\]\s*-->', re.DOTALL)
 _GEN_RE = re.compile(r'(<!--\s*BEGIN problems.*?-->)(.*?)(<!--\s*END problems\s*-->)', re.DOTALL)
 
@@ -83,15 +78,6 @@ def _write_problem_tags(path: Path, obj: Any) -> None:
 def _load_central() -> dict[str, Any]:
     data: dict[str, Any] = json.loads(_central_path().read_text())
     return data
-
-
-def _url_index(central: dict[str, Any]) -> dict[str, tuple[str, str]]:
-    """Map every reference/additional-reference URL to its (slug, facet)."""
-    index: dict[str, tuple[str, str]] = {}
-    for tag in central['tags']:
-        for url in filter(None, [tag.get('reference'), *tag.get('additional-references', [])]):
-            index[url] = (tag['slug'], tag['facet'])
-    return index
 
 
 def _facet_of(central: dict[str, Any]) -> dict[str, str]:
@@ -149,38 +135,6 @@ def _all_problem_numbers() -> list[int]:
             if m := re.search(r'p(\d+)', f.parent.name):
                 nums.append(int(m.group(1)))
     return sorted(nums)
-
-
-def _harvest(num: int, url_index: dict[str, tuple[str, str]]) -> tuple[list[str], list[str]]:
-    """Read a problem's notes.html and return (domain slugs, technique slugs) via the
-    central URL index. Takeaways are not harvestable (no canonical URL)."""
-    notes = solution_dir(num) / config.notes_filename
-    domain: set[str] = set()
-    technique: set[str] = set()
-    if not notes.exists():
-        return [], []
-    soup = BeautifulSoup(notes.read_text(), 'html.parser')
-    for a in soup.find_all('a'):
-        if 'reference-source' not in (a.get('class') or []):
-            continue
-        url = a.get('href')
-        if not isinstance(url, str) or not url or any(s in url for s in _STOPLIST):
-            continue
-        hit = url_index.get(url)
-        if hit is None:
-            continue
-        slug, facet = hit
-        (domain if facet == 'domain' else technique).add(slug)
-    return sorted(domain), sorted(technique)
-
-
-def _bootstrap_problem(num: int, url_index: dict[str, tuple[str, str]]) -> dict[str, Any]:
-    """Create a per-problem tags.json from the notes: domain, and techniques expanded to
-    every solution index on disk (approximate; narrowed later per index). Takeaways empty."""
-    domain, technique = _harvest(num, url_index)
-    indices = _solution_indices(num)
-    techniques = {f's{k}': list(technique) for k in indices} if indices else {}
-    return {'domain': domain, 'takeaways': [], 'techniques': techniques, 'new-tags': []}
 
 
 # ── topic articles ──────────────────────────────────────────────────────────────────────
@@ -446,22 +400,20 @@ def update_tags(check: bool = False) -> int:
     """The glue for the double-entry tag graph.
 
     Order (maintainer beats solver/contributor): apply maintainer edits to the central
-    ``refs`` (vs HEAD) into the per-problem files first; bootstrap a ``tags.json`` for any
-    problem missing one (harvested from notes); promote ``new-tags`` proposals into the
-    vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
-    topic articles' problem lists.
+    vocabulary (vs HEAD) into the per-problem files first; promote ``new-tags`` proposals into
+    the vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
+    topic articles' problem lists. A problem with notes but no ``tags.json`` is reported, not
+    created here — the ``claude-api tags`` target (or the skill) authors it.
 
-    With ``--check`` nothing is written: report unknown slugs, facet violations and unpromoted
-    proposals, and exit non-zero if the graph is inconsistent.
+    With ``--check`` nothing is written: report unknown slugs, facet violations, unpromoted
+    proposals and missing files, and exit non-zero if the graph is inconsistent.
     """
     central = _load_central()
-    url_index = _url_index(central)
-    nums = _all_problem_numbers()
 
-    # Load every per-problem file; note which need bootstrapping.
+    # Load every per-problem file; note which problems have notes but no tags.json.
     ptags: dict[int, dict[str, Any]] = {}
     missing: list[int] = []
-    for num in nums:
+    for num in _all_problem_numbers():
         data = _load_problem_tags(num)
         if data is None:
             missing.append(num)
@@ -484,8 +436,6 @@ def update_tags(check: bool = False) -> int:
         return ExitCodes.EXIT_ERROR if issues else ExitCodes.EXIT_OK
 
     diff_changes = _maintainer_diff(central, ptags)
-    for num in missing:
-        ptags[num] = _bootstrap_problem(num, url_index)
     promoted, warnings = _promote_new_tags(central, ptags)
     _rebuild_refs(central, ptags)
     art_issues = _regen_articles(central, write=True)
@@ -497,9 +447,11 @@ def update_tags(check: bool = False) -> int:
     for num, data in ptags.items():
         _write_problem_tags(_problem_tags_path(num), data)
 
+    if missing:
+        warnings.append(f'{len(missing)} problem(s) have no {TAGS_FILENAME} '
+                        f'(author with [accent]claude-api tags[/accent] or the skill)')
     for msg in warnings + art_issues:
         console.print(f'  [warning]•[/warning] {msg}')
     console.print(f'[accent]update-tags:[/accent] {len(ptags)} problem file(s), '
-                  f'{len(missing)} bootstrapped, {promoted} tag(s) promoted, '
-                  f'{diff_changes} maintainer edit(s) applied')
+                  f'{promoted} tag(s) promoted, {diff_changes} maintainer edit(s) applied')
     return ExitCodes.EXIT_OK
