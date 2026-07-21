@@ -243,6 +243,7 @@ command name below links to its full entry — usage and description — in the
 | [`show`](commands-index.md#command-show-open-view) | `open`, `view` | Open problem/file in a browser or the web viewer panel. ❏ » |
 | [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
+| [`tags`](commands-index.md#command-tags) | — | Summary (tags per facet) or a problems-per-tag histogram of the vocabulary. |
 | [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. ❏ |
 | [`topic`](commands-index.md#command-topic) | — | Show a topic article's tags and the problems/solutions they map to. |
 | [`topics`](commands-index.md#command-topics) | — | Show the tags on a problem and the topics that cover them. ❏ |

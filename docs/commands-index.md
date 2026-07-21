@@ -85,6 +85,7 @@ a parameter that accepts repetition.
 | [`show`](#command-show-open-view) | `open`, `view` | Open problem/file in a browser or the web viewer panel. ❏ » |
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
+| [`tags`](#command-tags) | — | Summary (tags per facet) or a problems-per-tag histogram of the vocabulary. |
 | [`test-cases`](#command-test-cases) | — | list the test cases for the problem. ❏ |
 | [`topic`](#command-topic) | — | Show a topic article's tags and the problems/solutions they map to. |
 | [`topics`](#command-topics) | — | Show the tags on a problem and the topics that cover them. ❏ |
@@ -1238,6 +1239,25 @@ Parameters:
 
 ---
 
+#### Command: `tags`
+
+Summary (tags per facet) or a problems-per-tag histogram of the vocabulary.
+* profiles: admin, maintainer, contributor, reader
+
+```
+tags
+[view=summary|details] (default summary)
+```
+
+```text
+Report over the central tag vocabulary (`topics/tags.json`).
+
+`summary` (default) prints the number of tags in each facet; `details` adds, per facet, a
+histogram of how many problems each tag maps to (min / median / max, then binned counts).
+```
+
+---
+
 #### Command: `test-cases`
 
 list the test cases for the problem.
@@ -1375,13 +1395,13 @@ update-tags
 The glue for the double-entry tag graph.
 
 Order (maintainer beats solver/contributor): apply maintainer edits to the central
-``refs`` (vs HEAD) into the per-problem files first; bootstrap a ``tags.json`` for any
-problem missing one (harvested from notes); promote ``new-tags`` proposals into the
-vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
-topic articles' problem lists.
+vocabulary (vs HEAD) into the per-problem files first; promote ``new-tags`` proposals into
+the vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
+topic articles' problem lists. A problem with notes but no ``tags.json`` is reported, not
+created here — the ``claude-api tags`` target (or the skill) authors it.
 
-With ``--check`` nothing is written: report unknown slugs, facet violations and unpromoted
-proposals, and exit non-zero if the graph is inconsistent.
+With ``--check`` nothing is written: report unknown slugs, facet violations, unpromoted
+proposals and missing files, and exit non-zero if the graph is inconsistent.
 ```
 
 ---

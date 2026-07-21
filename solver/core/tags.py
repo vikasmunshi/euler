@@ -13,14 +13,14 @@ articles under ``topics/``.
 """
 from __future__ import annotations
 
-__all__ = ['topics', 'topic', 'update_tags', 'format_vocabulary']
+__all__ = ['tags', 'topics', 'topic', 'update_tags', 'format_vocabulary']
 
 import json
 import re
 import subprocess
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem, solution_dir
@@ -160,6 +160,53 @@ def _find_article(name: str) -> Path | None:
 
 
 # ══ commands ════════════════════════════════════════════════════════════════════════════
+
+#: Histogram bins for problems-per-tag: (upper bound inclusive, label). Last bin is open-ended.
+_BINS: tuple[tuple[int, str], ...] = (
+    (0, '0'), (1, '1'), (2, '2'), (3, '3'), (4, '4'), (5, '5'),
+    (9, '6-9'), (19, '10-19'), (49, '20-49'), (10 ** 9, '50+'))
+
+
+def _problem_count(tag: dict[str, Any]) -> int:
+    """Distinct problems a tag maps to (collapse pNNNN_sN solution refs to pNNNN)."""
+    return len({r.split('_')[0] for r in tag.get('refs', [])})
+
+
+@register(requires='reader',
+          help_text='Summary (tags per facet) or a problems-per-tag histogram of the vocabulary.')
+def tags(view: Literal['summary', 'details'] = 'summary') -> int:
+    """Report over the central tag vocabulary (`topics/tags.json`).
+
+    `summary` (default) prints the number of tags in each facet; `details` adds, per facet, a
+    histogram of how many problems each tag maps to (min / median / max, then binned counts).
+    """
+    facet_tags = {f: [t for t in _load_central()['tags'] if t['facet'] == f] for f in FACETS}
+    total = sum(len(v) for v in facet_tags.values())
+    console.print(f'[accent]Tag vocabulary[/accent] — {total} tags')
+    for facet in FACETS:
+        entries = facet_tags[facet]
+        console.print(f'  [muted]{facet:9}[/muted] {len(entries):4d}')
+    if view == 'summary':
+        return ExitCodes.EXIT_OK
+
+    console.print('\n[accent]Problems per tag[/accent]')
+    for facet in FACETS:
+        entries = facet_tags[facet]
+        console.print(f'\n[primary]{facet}[/primary] [muted]({len(entries)} tags)[/muted]')
+        if not entries:
+            continue
+        counts = sorted(_problem_count(t) for t in entries)
+        median = counts[len(counts) // 2]
+        console.print(f'  [muted]problems/tag: min {counts[0]} · median {median} · max {counts[-1]}[/muted]')
+        bins = [0] * len(_BINS)
+        for c in counts:
+            bins[next(i for i, (hi, _) in enumerate(_BINS) if c <= hi)] += 1
+        scale = max(bins) or 1
+        for (_, label), n in zip(_BINS, bins):
+            bar = '█' * round(n / scale * 32)
+            console.print(f'  [muted]{label:>6}[/muted] [accent.dim]{bar}[/accent.dim] {n}')
+    return ExitCodes.EXIT_OK
+
 
 @register(requires='reader', help_text='Show the tags on a problem and the topics that cover them.')
 def topics(problem: Problem) -> int:
