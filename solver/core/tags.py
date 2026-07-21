@@ -20,7 +20,7 @@ import re
 import subprocess
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any
 
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem, solution_dir
@@ -174,7 +174,7 @@ def _problem_count(tag: dict[str, Any]) -> int:
 
 @register(requires='reader',
           help_text='Summary (tags per facet) or a problems-per-tag histogram of the vocabulary.')
-def tags(view: Literal['summary', 'details'] = 'summary') -> int:
+def tags(details: bool = False) -> int:
     """Report over the central tag vocabulary (`topics/tags.json`).
 
     `summary` (default) prints the number of tags in each facet; `details` adds, per facet, a
@@ -186,7 +186,7 @@ def tags(view: Literal['summary', 'details'] = 'summary') -> int:
     for facet in FACETS:
         entries = facet_tags[facet]
         console.print(f'  [muted]{facet:9}[/muted] {len(entries):4d}')
-    if view == 'summary':
+    if not details:
         return ExitCodes.EXIT_OK
 
     console.print('\n[accent]Problems per tag[/accent]')
@@ -317,7 +317,7 @@ def _maintainer_diff(current: dict[str, Any], ptags: dict[int, dict[str, Any]]) 
     facet = _facet_of(current)
     current_slugs = {t['slug'] for t in current['tags']}
     changes = 0
-    for tag in head['tags']:                       # tags deleted from the vocabulary → cascade-delete
+    for tag in head['tags']:  # tags deleted from the vocabulary → cascade-delete
         if tag['slug'] not in current_slugs:
             changes += _delete_slug_everywhere(ptags, tag['slug'])
     head_refs = {t['slug']: set(t.get('refs', [])) for t in head['tags']}

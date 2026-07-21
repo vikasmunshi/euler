@@ -1246,7 +1246,7 @@ Summary (tags per facet) or a problems-per-tag histogram of the vocabulary.
 
 ```
 tags
-[view=summary|details] (default summary)
+[details=true|--details]
 ```
 
 ```text
