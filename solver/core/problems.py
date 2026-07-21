@@ -3,7 +3,7 @@
 """The Problem model plus the projecteuler.net problem scraper and on-disk cache."""
 from __future__ import annotations
 
-__all__ = ['Problem', 'problems']
+__all__ = ['Problem', 'problems', 'solution_dir']
 
 from datetime import datetime
 from functools import lru_cache
