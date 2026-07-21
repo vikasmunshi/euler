@@ -199,6 +199,7 @@ class Config(AttributeDict):
     style: Style
 
     def __init__(self) -> None:
+        package_dir = Path(__file__).parent.resolve()
         root_dir: Path = _root_dir()
         # Ambient identity + profile: a one-time shell ticket (web PTY) or the
         # checkout-owner uid (local terminal); anything else aborts. Keys per-user
@@ -257,7 +258,7 @@ class Config(AttributeDict):
             # Per-user shell state, keyed by the resolved identity's slug.
             'history_file': user_state_dir / 'history',
             'last_problem_file': user_state_dir / 'last_problem',
-            'modules_file': root_dir / 'solver/modules.csv',
+            'modules_file': package_dir / 'modules.csv',
             'session_file': user_state_dir / 'session',
             'solutions_dir': root_dir / 'solutions',
             'static_file_dir': root_dir / 'solver/web/content',
