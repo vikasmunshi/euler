@@ -29,6 +29,7 @@
       "Bash(solutions/* *)",
       "Bash(solutions/*)",
       "Edit(solutions/**)",
+      "Write(solutions/**)",
       "Edit(topics/**)",
       "Write(topics/**)",
       "Read(./**)",
