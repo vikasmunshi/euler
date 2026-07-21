@@ -387,10 +387,10 @@ class ContentServiceTests(AioHTTPTestCase):
     async def test_topics_index_and_page(self) -> None:
         resp = await self.client.get('/topics/', headers=_READER)
         self.assertEqual(resp.status, 200)
-        self.assertIn('/topics/prime-numbers', await resp.text())
-        resp = await self.client.get('/topics/prime-numbers', headers=_READER)
+        self.assertIn('/topics/technique/sieve-of-eratosthenes', await resp.text())
+        resp = await self.client.get('/topics/technique/sieve-of-eratosthenes', headers=_READER)
         self.assertEqual(resp.status, 200)
-        self.assertIn('Eratosthenes', await resp.text())
+        self.assertIn('Sieve of Eratosthenes', await resp.text())
 
     @unittest_run_loop
     async def test_topics_nested_folder(self) -> None:
