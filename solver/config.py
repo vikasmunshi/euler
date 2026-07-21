@@ -168,6 +168,7 @@ class Config(AttributeDict):
     results_filename: str
     screen_width: int
     statement_filename: str
+    tags_filename: str
     test_cases_filename: str
     timeout_multiple: float
     timeout_single: float
@@ -192,6 +193,8 @@ class Config(AttributeDict):
     static_file_problems: Path
     static_file_progress: Path
     templates_dir: Path
+    topics_dir: Path
+    central_tags_file: Path
     theme: Theme
     style: Style
 
@@ -234,6 +237,7 @@ class Config(AttributeDict):
             'results_filename': 'results.json',
             'screen_width': 86,
             'statement_filename': 'statement.html',
+            'tags_filename': 'tags.json',
             'test_cases_filename': 'test_cases.json',
             'timeout_multiple': 30.0,  # timeout in seconds per run when runs > 1
             'timeout_single': 90.0,  # timeout in seconds for single run
@@ -260,6 +264,8 @@ class Config(AttributeDict):
             'static_file_problems': root_dir / 'solutions/problems.json',
             'static_file_progress': root_dir / 'solutions/.progress.html',
             'templates_dir': root_dir / 'solver/templates',
+            'topics_dir': root_dir / 'topics',
+            'central_tags_file': root_dir / 'topics' / 'tags.json',
 
             'theme': Theme({
                 'accent': 'bold #f97316',  # warm orange accent (Junie highlight)

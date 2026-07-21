@@ -14,7 +14,7 @@ from solver.ai.facts import Facts, gather_facts, prepare_anthropic_request
 from solver.ai.models import Model, record_usage
 from solver.config import config
 from solver.core.problems import Problem, problems
-from solver.core.tags import TAGS_FILENAME, format_vocabulary
+from solver.core.tags import format_vocabulary
 from solver.shell import console
 from solver.templates.engine import Templates, filled_template
 from solver.utils.path_utils import write_file
@@ -145,7 +145,7 @@ def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -
     if major:
         console.print('[muted]Run [accent]update-tags[/accent] to reconcile after a vocabulary change.[/muted]')
         return None
-    tags_path = problem.solution_dir / TAGS_FILENAME
+    tags_path = problem.solution_dir / config.tags_filename
     if not (force or not tags_path.exists()):
         console.print('[muted]tags.json exists; use [accent]--force[/accent] to regenerate.[/muted]')
         return None
@@ -170,7 +170,7 @@ def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -
         if raw is not None:
             console.print(f'Generated tags: {raw}', markup=False, highlight=False)
         return False
-    write_file(tags_path, parsed.encode(), f'Updated {TAGS_FILENAME}')
+    write_file(tags_path, parsed.encode(), f'Updated {config.tags_filename}')
     console.print('[muted]Run [accent]update-tags[/accent] to reconcile the central vocabulary and articles.[/muted]')
     return True
 

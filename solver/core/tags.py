@@ -26,20 +26,9 @@ from solver.config import ExitCodes, config
 from solver.core.problems import Problem, solution_dir
 from solver.shell import console, register
 
-TAGS_FILENAME = 'tags.json'
 FACETS = ('domain', 'technique', 'takeaway')
 _TAGS_RE = re.compile(r'<!--\s*tags:\s*\[(.*?)\]\s*-->', re.DOTALL)
 _GEN_RE = re.compile(r'(<!--\s*BEGIN problems.*?-->)(.*?)(<!--\s*END problems\s*-->)', re.DOTALL)
-
-
-# ── paths ─────────────────────────────────────────────────────────────────────────────
-
-def _topics_dir() -> Path:
-    return config.root_dir / 'topics'
-
-
-def _central_path() -> Path:
-    return _topics_dir() / TAGS_FILENAME
 
 
 # ── compact JSON (scalar lists inline, object lists multi-line) ─────────────────────────
@@ -65,7 +54,7 @@ def dumps_compact(obj: Any, level: int = 0) -> str:
 
 def _write_central(obj: Any) -> None:
     """The central vocabulary: compact (scalar lists inline) so big refs legs stay one line."""
-    _central_path().write_text(dumps_compact(obj) + '\n')
+    config.central_tags_file.write_text(dumps_compact(obj) + '\n')
 
 
 def _write_problem_tags(path: Path, obj: Any) -> None:
@@ -76,7 +65,7 @@ def _write_problem_tags(path: Path, obj: Any) -> None:
 # ── central vocabulary ──────────────────────────────────────────────────────────────────
 
 def _load_central() -> dict[str, Any]:
-    data: dict[str, Any] = json.loads(_central_path().read_text())
+    data: dict[str, Any] = json.loads(config.central_tags_file.read_text())
     return data
 
 
@@ -109,7 +98,7 @@ def _ref_key(ref: str) -> tuple[int, int]:
 # ── per-problem tags.json (Layer 2) ─────────────────────────────────────────────────────
 
 def _problem_tags_path(num: int) -> Path:
-    return solution_dir(num) / TAGS_FILENAME
+    return solution_dir(num) / config.tags_filename
 
 
 def _load_problem_tags(num: int) -> dict[str, Any] | None:
@@ -140,7 +129,7 @@ def _all_problem_numbers() -> list[int]:
 # ── topic articles ──────────────────────────────────────────────────────────────────────
 
 def _iter_articles() -> list[Path]:
-    return sorted(p for p in _topics_dir().rglob('*.md'))
+    return sorted(p for p in config.topics_dir.rglob('*.md'))
 
 
 def _article_tags(text: str) -> list[str]:
@@ -153,7 +142,7 @@ def _article_tags(text: str) -> list[str]:
 def _find_article(name: str) -> Path | None:
     name = name.removesuffix('.md')
     for path in _iter_articles():
-        rel = path.relative_to(_topics_dir()).with_suffix('')
+        rel = path.relative_to(config.topics_dir).with_suffix('')
         if str(rel) == name or path.stem == name:
             return path
     return None
@@ -213,7 +202,7 @@ def topics(problem: Problem) -> int:
     """List a problem's tags (grouped by facet) and the topic articles that cover any of them."""
     data = _load_problem_tags(problem.number)
     if data is None:
-        console.print(f'[error]error:[/error] no {TAGS_FILENAME} for problem {problem.number} '
+        console.print(f'[error]error:[/error] no {config.tags_filename} for problem {problem.number} '
                       f'(run [accent]update-tags[/accent])')
         return ExitCodes.EXIT_ERROR
     console.print(f'[accent]Problem {problem.number}[/accent] — {problem.title}')
@@ -226,7 +215,7 @@ def topics(problem: Problem) -> int:
             console.print(f'  [muted]technique[/muted] [accent.dim]{sidx}[/accent.dim] {", ".join(slugs)}')
     if data.get('takeaways'):
         console.print(f'  [muted]takeaway [/muted] {", ".join(data["takeaways"])}')
-    covering = [str(p.relative_to(_topics_dir()).with_suffix(''))
+    covering = [str(p.relative_to(config.topics_dir).with_suffix(''))
                 for p in _iter_articles() if own & set(_article_tags(p.read_text()))]
     console.print(f'  [muted]topics   [/muted] {", ".join(covering) if covering else "(none)"}')
     return ExitCodes.EXIT_OK
@@ -244,7 +233,7 @@ def topic(name: str) -> int:
         console.print(f'[warning]{path.name}[/warning] declares no tags (add a <!-- tags: [...] --> comment)')
         return ExitCodes.EXIT_OK
     central = {t['slug']: t for t in _load_central()['tags']}
-    console.print(f'[accent]{path.relative_to(_topics_dir()).with_suffix("")}[/accent] — tags: {", ".join(tags)}')
+    console.print(f'[accent]{path.relative_to(config.topics_dir).with_suffix("")}[/accent] — tags: {", ".join(tags)}')
     seen: set[str] = set()
     for slug in tags:
         tag = central.get(slug)
@@ -265,7 +254,7 @@ def topic(name: str) -> int:
 def _head_central() -> dict[str, Any] | None:
     """The committed ``topics/tags.json`` at HEAD, for the maintainer-intent diff."""
     try:
-        proc = subprocess.run(['git', '-C', str(config.root_dir), 'show', f'HEAD:topics/{TAGS_FILENAME}'],
+        proc = subprocess.run(['git', '-C', str(config.root_dir), 'show', f'HEAD:topics/{config.tags_filename}'],
                               capture_output=True, text=True, timeout=5, check=False)
     except (OSError, subprocess.SubprocessError):
         return None
@@ -475,7 +464,7 @@ def update_tags(check: bool = False) -> int:
         issues = _validate(central, ptags)
         issues += _regen_articles(central, write=False)
         if missing:
-            issues.append(f'{len(missing)} problem(s) have no {TAGS_FILENAME} (run update-tags)')
+            issues.append(f'{len(missing)} problem(s) have no {config.tags_filename} (run update-tags)')
         for msg in issues:
             console.print(f'  [error]•[/error] {msg}')
         console.print(f'[{"error" if issues else "accent"}]update-tags --check: '
@@ -495,7 +484,7 @@ def update_tags(check: bool = False) -> int:
         _write_problem_tags(_problem_tags_path(num), data)
 
     if missing:
-        warnings.append(f'{len(missing)} problem(s) have no {TAGS_FILENAME} '
+        warnings.append(f'{len(missing)} problem(s) have no {config.tags_filename} '
                         f'(author with [accent]claude-api tags[/accent] or the skill)')
     for msg in warnings + art_issues:
         console.print(f'  [warning]•[/warning] {msg}')
