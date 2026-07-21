@@ -1,15 +1,16 @@
 #! /usr/bin/env python3.14
 # -*- coding: utf-8 -*-
-"""The `claude-solve` command: run Claude Code in-shell against a problem's solution files."""
+"""The `claude-solve` / `claude-blog` commands: run Claude Code in-shell via a skill."""
 from __future__ import annotations
 
-__all__ = ['claude_solve']
+__all__ = ['claude_solve', 'claude_blog']
 
 import json
 import shlex
 import subprocess
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Iterable, Literal
 
+from prompt_toolkit.completion import Completion
 from rich.live import Live
 from rich.markdown import Markdown
 from rich.panel import Panel
@@ -46,11 +47,55 @@ def claude_solve(
         additional_prompt:  Extra free-text instructions appended to the skill
                             invocation. Defaults to empty.
     """
-    problem_number = problem.number
+    invocation = f'/claude-euler-solver {problem.number} {action} {additional_prompt}'.strip()
+    return _run_skill(ctx, invocation, f'[accent]claude · {action}[/accent]')
+
+
+def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
+    """`claude-blog` targets: every tag as its ``<facet>/<slug>`` topic path, **most-referenced
+    first**, each shown with its facet and distinct-problem count."""
+    try:
+        central = json.loads(config.central_tags_file.read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+
+    def refs(tag: dict[str, Any]) -> int:
+        return len({r.split('_')[0] for r in tag.get('refs', [])})
+
+    out: list[str | Completion] = []
+    for tag in sorted(central.get('tags', []), key=lambda t: (-refs(t), t['slug'])):
+        path = f"{tag['facet']}/{tag['slug']}"
+        if path.startswith(incomplete) or incomplete in tag['slug']:
+            out.append(Completion(path, start_position=-len(incomplete),
+                                  display=tag['slug'], display_meta=f"{tag['facet']} · {refs(tag)}"))
+    return out
+
+
+@register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions},
+          help_text='Launch the Claude Euler Blogger skill to write a topic article for a tag/topic.')
+def claude_blog(ctx: Context, topic: str, additional_prompt: str = '') -> int:
+    """Write (or flesh out) a topic article via the claude-euler-blogger skill.
+
+    *topic* names what to write about: a tag's ``<facet>/<slug>`` path (e.g.
+    ``technique/sieve-of-eratosthenes``), a bare tag slug, or a curated topic path
+    (``number-theory/primes``). Tab-completion offers the tags, most-referenced first.
+    Launches Claude Code headless to research the covering problems and write the article
+    under ``topics/``, then streams a live Markdown summary. Needs the `claude` CLI and an
+    `ANTHROPIC_API_KEY`.
+
+    Args:
+        topic:              The tag or topic to write about (completed most-referenced first).
+        additional_prompt:  Extra free-text guidance for the writer. Defaults to empty.
+    """
+    invocation = f'/claude-euler-blogger {topic} {additional_prompt}'.strip()
+    return _run_skill(ctx, invocation, '[accent]claude · blog[/accent]')
+
+
+def _run_skill(ctx: Context, invocation: str, title: str) -> int:
+    """Run ``claude -p <invocation>`` headless, stream its output into a transient live panel,
+    then print the final Markdown result with a turns / duration / cost footer."""
     cmdline = ('claude -p --output-format stream-json --verbose '
-               '--include-partial-messages '
-               f'{shlex.quote(f'/claude-euler-solver {problem_number} {action} {additional_prompt}')}'.strip())
-    title = f'[accent]claude · {action}[/accent]'
+               f'--include-partial-messages {shlex.quote(invocation)}').strip()
     parts: list[str] = []  # streamed text_delta chunks
     meta: dict[str, Any] = {}  # the final `result` event payload
     noise: list[str] = []  # non-JSON lines (e.g. error output)

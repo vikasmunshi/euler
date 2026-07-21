@@ -50,6 +50,7 @@ a parameter that accepts repetition.
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
 | [`benchmark`](#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
 | [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. ❏ |
+| [`claude-blog`](#command-claude-blog) | — | Launch the Claude Euler Blogger skill to write a topic article for a tag/topic. |
 | [`claude-solve`](#command-claude-solve) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
@@ -261,6 +262,33 @@ Args:
     model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
 
 Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
+```
+
+---
+
+#### Command: `claude-blog`
+
+Launch the Claude Euler Blogger skill to write a topic article for a tag/topic.
+* profiles: admin, maintainer
+
+```
+claude-blog <topic>
+[additional_prompt=<str>] (default '')
+```
+
+```text
+Write (or flesh out) a topic article via the claude-euler-blogger skill.
+
+*topic* names what to write about: a tag's ``<facet>/<slug>`` path (e.g.
+``technique/sieve-of-eratosthenes``), a bare tag slug, or a curated topic path
+(``number-theory/primes``). Tab-completion offers the tags, most-referenced first.
+Launches Claude Code headless to research the covering problems and write the article
+under ``topics/``, then streams a live Markdown summary. Needs the `claude` CLI and an
+`ANTHROPIC_API_KEY`.
+
+Args:
+    topic:              The tag or topic to write about (completed most-referenced first).
+    additional_prompt:  Extra free-text guidance for the writer. Defaults to empty.
 ```
 
 ---

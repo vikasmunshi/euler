@@ -1,0 +1,141 @@
+---
+name: claude-euler-blogger
+description: Use when Claude is launched by the `claude-blog` command via
+  `claude -p /claude-euler-blogger <tag-or-topic> [additional_prompt]` to write (or flesh out)
+  one topic article under `topics/`. Claude runs headless at the repository root, researches the
+  problems that carry the tag(s), and edits the article's Markdown directly. The `<tag-or-topic>`
+  is a tag's `<facet>/<slug>` path (e.g. `technique/sieve-of-eratosthenes`), a bare tag slug, or a
+  curated topic path (e.g. `number-theory/primes`). Do NOT activate for a generic "write a blog
+  post" or for solving problems.
+version: 0.1.0
+model: opus
+---
+
+# Claude Euler Blogger (headless)
+
+A skill that runs **headless** to write one topic page under `topics/`. The `claude-blog` shell
+command launches Claude with:
+
+```
+claude -p /claude-euler-blogger <tag-or-topic> [additional_prompt]
+```
+
+A **topic** collects the problems that share a tag and explains the idea behind them. Each tag has
+a page at `topics/<facet>/<slug>.md`; curated cross-cutting topics live elsewhere under `topics/`
+(e.g. `topics/number-theory/primes.md`). Claude researches the covered problems, writes the page,
+refreshes its problem list, commits, and **ends the turn**.
+
+## Read first — the conventions
+
+The tag graph and the house voice are the two things to honour:
+
+- **[docs/convention_tags.md](docs/convention_tags.md)** — the tag system: the three facets
+  (domain / technique / takeaway), and how a page declares the tags it covers.
+- **[docs/convention_documentation.md](docs/convention_documentation.md)** — the writing voice
+  used in `notes.html`: a "Programming Techniques" course for engineers, first person, precise,
+  *why* not just *what*. A topic page carries that same voice, one level up: it explains the idea
+  across many problems, not one.
+
+The central vocabulary is `topics/tags.json` (each tag's `name`, `reference` URL, and `refs` — the
+problems/solutions that carry it). Read the exact `solver` command usage in
+**[docs/commands-index.md](docs/commands-index.md)** — especially
+[`topic`](docs/commands-index.md#command-topic), [`topics`](docs/commands-index.md#command-topics),
+and [`update-tags`](docs/commands-index.md#command-update-tags).
+
+## Hard rule — private solution plaintext stays in the repo, and out of the article
+
+Problems **> 100** live under `solutions/private/` and are encrypted at rest. Topic pages under
+`topics/` are **plaintext and unencrypted**. Therefore: **never quote a private problem's solution
+code or notes into a topic page.** You may name a private problem by number and describe the shared
+idea in your own words, but every **code snippet or verbatim excerpt must come from a public
+problem** (`solutions/public/pNNNN/`). When in doubt, reference by number and paraphrase.
+
+## Execution model
+
+Runs at the repository root and edits the one target page in place. `solver` is on `PATH`; run
+subcommands directly (`solver "topic technique/sieve-of-eratosthenes"`). These Bash commands run
+without confirmation; the skill also relies on `Edit`/`Write` under `topics/**` and `Read` on the
+project tree — keep `.claude/settings.local.json` in sync:
+
+    - bash solver *
+    - bash git add:* / git commit:*
+    - edit/write topics/**      # the article
+    - read ./**
+
+Do **not** change `cwd`; every command runs from the project root, no `./` prefix.
+
+---
+
+## Phase 1 — Resolve the target
+
+The argument is one of: a `<facet>/<slug>` path, a bare tag slug, or a curated topic path.
+
+1. Resolve it to a file:
+   - a `<facet>/<slug>` path → `topics/<facet>/<slug>.md`;
+   - a bare slug → look it up in `topics/tags.json`, take its `facet`, target `topics/<facet>/<slug>.md`;
+   - any other path → `topics/<path>.md`.
+2. Run `solver "topic <path-without-.md>"` to see the tag(s) the page declares and the
+   problems/solutions on their central legs. (For a page that does not exist yet, the tag(s) are
+   the target itself; you will create the file in Phase 3.)
+3. Read the target file if it exists — it is usually a **skeleton**: a `<!-- tags: [...] -->`
+   comment on line 1, an `# H1` title, a `_TODO: …_` stub, and a generated
+   `<!-- BEGIN problems … -->…<!-- END problems -->` block. You are replacing the stub with real
+   prose; **keep the tags comment and the problems block untouched**.
+
+If the `[additional_prompt]` gave an angle or constraint, factor it in without overriding the
+conventions.
+
+## Phase 2 — Research the idea
+
+1. Read the tag's `reference` URL and `name` from `topics/tags.json` to pin the concept.
+2. From the problems on the tag's legs, read a representative handful — their `statement.html` and
+   `notes.html` (Problem Analysis + Solution Approach), and, for **public** problems, the solution
+   code — to see how the idea is actually used and where it varies. Favour public problems for any
+   concrete example (see the hard rule above).
+3. Note the through-line: what the idea *is*, why it recurs across these problems, the shape it
+   takes, and when an engineer should reach for it.
+
+## Phase 3 — Write the page
+
+Replace the `_TODO_` stub (or, for a new curated topic, create the file) with a focused article:
+
+- **Lead** — one short paragraph: what this domain / technique / takeaway is, and why it keeps
+  coming back across the problems below.
+- **The idea** — the shared structure or method, explained once, well. Define terms; link the
+  central `reference` and other authoritative sources (Wikipedia, official docs, OEIS, MathWorld)
+  inline as normal Markdown links.
+- **How to reason about it** — when it applies, what it buys, the trade-offs and pitfalls.
+- **In the wild** — 2–4 representative problems, linked as `/solutions/NNNN/`, each with a
+  one-line note on how it uses the idea. Prefer public problems for anything you quote.
+
+Keep it tight — a topic page, not an essay. Preserve line 1's `<!-- tags: [...] -->` comment and
+the `<!-- BEGIN problems -->…<!-- END problems -->` block exactly (leave the block's contents
+alone; `update-tags` fills it). Use GitHub-flavoured Markdown (`##` headings, tables, code fences).
+A new curated page must open with its own `<!-- tags: [slug, …] -->` comment and include an empty
+problems block.
+
+## Phase 4 — Refresh, then finalize (always last)
+
+1. **Refresh the problem list:** `solver "update-tags"` — it refills every article's generated
+   problems block and reconciles the graph. Then `solver "update-tags --check"` must exit `0`; fix
+   any issue it names (an unknown tag in your `<!-- tags: -->` comment, most likely) and re-run.
+2. **Sanity-check:** `solver "topic <path>"` lists the tags and problems the page now resolves to.
+3. **Commit:** `solver "commit <message>"` — a short, descriptive line, e.g.
+   `"topic: sieve of Eratosthenes"`. Topic pages carry no solutions, so the message needs no
+   secrecy; just say what was written.
+
+Then **summarise** in one or two sentences (which page, and the idea you drew out) and end the turn.
+
+---
+
+## Notes & failure modes to avoid
+
+- Write about the **idea across the problems**, not a recap of any single solution — that is what
+  `notes.html` is for.
+- Never paste private (`> 100`) solution code or notes into the page; reference by number and
+  paraphrase, and take code examples from public problems.
+- Do not hand-edit the `<!-- BEGIN problems -->` block or the `<!-- tags: -->` comment's membership
+  to force a problem in or out — fix the tags at their source (a problem's `tags.json`) if the
+  mapping is wrong, then `update-tags`.
+- A non-zero `update-tags --check`, or a lint/commit failure, is a stop-and-report, not a reason to
+  push on.

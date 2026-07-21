@@ -37,6 +37,7 @@ a profile on each channel.
 |--------|---------|:------:|:-----------:|:----------:|:-----:|
 | `solver.ai.api` | `claude-api` |  | ✓ | ✓ | ✓ |
 | `solver.ai.models` | `costs` |  | ✓ | ✓ | ✓ |
+| `solver.ai.skill` | `claude-blog` |  |  | ✓ | ✓ |
 | `solver.ai.skill` | `claude-solve` |  | ✓ | ✓ | ✓ |
 | `solver.ai.update_models` | `update-models` |  |  |  | ✓ |
 | `solver.core.evaluate` | `benchmark` |  | ✓ | ✓ | ✓ |
