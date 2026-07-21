@@ -45,6 +45,9 @@ a profile on each channel.
 | `solver.core.list` | `ls` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.new` | `new` |  | ✓ | ✓ | ✓ |
 | `solver.core.results` | `results` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.tags` | `topic` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.tags` | `topics` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.tags` | `update-tags` |  |  | ✓ | ✓ |
 | `solver.core.test_cases` | `test-cases` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `edit` |  | ✓ | ✓ | ✓ |
 | `solver.core.viewer` | `show` | ✓ | ✓ | ✓ | ✓ |

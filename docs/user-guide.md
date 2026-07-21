@@ -244,8 +244,11 @@ command name below links to its full entry — usage and description — in the
 | [`summary`](commands-index.md#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](commands-index.md#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`test-cases`](commands-index.md#command-test-cases) | — | list the test cases for the problem. ❏ |
+| [`topic`](commands-index.md#command-topic) | — | Show a topic article's tags and the problems/solutions they map to. |
+| [`topics`](commands-index.md#command-topics) | — | Show the tags on a problem and the topics that cover them. ❏ |
 | [`update-docs`](commands-index.md#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](commands-index.md#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
+| [`update-tags`](commands-index.md#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
 | [`user`](commands-index.md#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](commands-index.md#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](commands-index.md#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |

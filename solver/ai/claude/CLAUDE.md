@@ -134,6 +134,7 @@ solver/
     osc.py            — The shell → browser control channel: `OSC 5379`.
     problems.py       — The Problem model plus the projecteuler.net problem scraper and on-disk cache.
     results.py        — Results: save and retrieve problem results.
+    tags.py           — Tag/topic glue: the `topics`, `topic` and `update-tags` commands.
     test_cases.py     — Load test cases for evaluation
     viewer.py         — Open a problem or its files in the web front end: the `show` and `edit` commands.
   crypto/

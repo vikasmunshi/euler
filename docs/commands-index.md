@@ -86,8 +86,11 @@ a parameter that accepts repetition.
 | [`summary`](#command-summary) | — | Parse .progress.html into problems.json. » |
 | [`sys-setup`](#command-sys-setup-install) | `install` | Installs or uninstalls system resources. |
 | [`test-cases`](#command-test-cases) | — | list the test cases for the problem. ❏ |
+| [`topic`](#command-topic) | — | Show a topic article's tags and the problems/solutions they map to. |
+| [`topics`](#command-topics) | — | Show the tags on a problem and the topics that cover them. ❏ |
 | [`update-docs`](#command-update-docs) | — | Regenerate the generated sections of the docs/ guides. » |
 | [`update-models`](#command-update-models) | — | Update Model enum, pricing, and USD→EUR rate. » |
+| [`update-tags`](#command-update-tags) | — | Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles. |
 | [`user`](#command-user) | — | Show euler user, public key & enc-key access; --regen for new key-pair. |
 | [`user-authorize`](#command-user-authorize-authorize) | `authorize` | Authorise another public key (hex) to access the enc key. |
 | [`users`](#command-users) | — | Administer accounts + invite requests (re-executes the admin CLI under sudo). |
@@ -1261,6 +1264,38 @@ Returns:
 
 ---
 
+#### Command: `topic`
+
+Show a topic article's tags and the problems/solutions they map to.
+* profiles: admin, maintainer, contributor, reader
+
+```
+topic <name>
+```
+
+```text
+List a topic article's declared tags and, per tag, the problems/solutions on its central leg.
+```
+
+---
+
+#### Command: `topics`
+
+Show the tags on a problem and the topics that cover them.
+* profiles: admin, maintainer, contributor, reader
+* ❏ takes an optional problem number (defaults to the current problem)
+
+```
+topics
+[problem=<n>] (default current)
+```
+
+```text
+List a problem's tags (grouped by facet) and the topic articles that cover any of them.
+```
+
+---
+
 #### Command: `update-docs`
 
 Regenerate the generated sections of the docs/ guides.
@@ -1322,6 +1357,31 @@ Args:
     check:  When True, write nothing and fail (non-zero) if either the model block or the
             FX rate is out of date. When False (default), rewrite both in place. The FX rate
             drifts daily, so `--check` will usually report it as stale.
+```
+
+---
+
+#### Command: `update-tags`
+
+Reconcile the tag graph: per-problem tags.json <-> central topics/tags.json -> articles.
+* profiles: admin, maintainer
+
+```
+update-tags
+[check=true|--check]
+```
+
+```text
+The glue for the double-entry tag graph.
+
+Order (maintainer beats solver/contributor): apply maintainer edits to the central
+``refs`` (vs HEAD) into the per-problem files first; bootstrap a ``tags.json`` for any
+problem missing one (harvested from notes); promote ``new-tags`` proposals into the
+vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
+topic articles' problem lists.
+
+With ``--check`` nothing is written: report unknown slugs, facet violations and unpromoted
+proposals, and exit non-zero if the graph is inconsistent.
 ```
 
 ---
