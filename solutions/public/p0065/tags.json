@@ -1,8 +1,14 @@
 {
-  "domain": ["continued-fraction", "e-mathematical-constant", "fibonacci-sequence"],
+  "domain": [
+    "continued-fraction",
+    "e-mathematical-constant",
+    "fibonacci-sequence"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["fractions-fraction"]
+    "s0": [
+      "fractions-fraction"
+    ]
   },
   "new-tags": []
 }

@@ -1,8 +1,13 @@
 {
-  "domain": ["palindromic-number"],
+  "domain": [
+    "palindromic-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["generate-and-test", "generator"]
+    "s0": [
+      "generate-and-test",
+      "generator"
+    ]
   },
   "new-tags": []
 }

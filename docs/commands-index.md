@@ -241,7 +241,7 @@ Generate specified target using Claude API.
 * ❏ takes an optional problem number (defaults to the current problem)
 
 ```
-claude-api <c|py|doc|notes|test-cases>
+claude-api <c|py|doc|notes|tags|test-cases>
 [problem=<n>] (default current)
 [force=true|--force]
 [major=true|--major]
@@ -254,7 +254,7 @@ Generate AI-based content for the specified target.
 Args:
     problem: The `problem` to generate for; defaults to the current problem.
     target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
-            docs, 'notes' for documentation, 'test-cases' for test cases).
+            docs, 'notes' for documentation, 'tags' for tags.json, 'test-cases' for test cases).
     major:  Whether this is after a major change (e.g. template or instruction change).
     force:  Whether to force generation even if the target already exists.
     model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.

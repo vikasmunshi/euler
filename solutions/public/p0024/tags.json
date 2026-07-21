@@ -1,8 +1,14 @@
 {
-  "domain": ["factorial-number-system", "permutation"],
+  "domain": [
+    "factorial-number-system",
+    "permutation"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["factorial", "lexicographic-order"]
+    "s0": [
+      "factorial",
+      "lexicographic-order"
+    ]
   },
   "new-tags": []
 }

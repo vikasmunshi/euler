@@ -1,8 +1,14 @@
 {
-  "domain": ["markov-chain", "stationary-distribution"],
+  "domain": [
+    "markov-chain",
+    "stationary-distribution"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["monte-carlo-method", "power-iteration"]
+    "s0": [
+      "monte-carlo-method",
+      "power-iteration"
+    ]
   },
   "new-tags": []
 }

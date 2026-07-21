@@ -1,8 +1,20 @@
 {
-  "domain": ["exclusive-or", "frequency-analysis", "stream-cipher", "vigen-re-cipher"],
+  "domain": [
+    "exclusive-or",
+    "frequency-analysis",
+    "stream-cipher",
+    "vigen-re-cipher"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["aos-and-soa", "chi-squared-test", "dynamic-array", "extended-slice", "generator", "walrus-operator"]
+    "s0": [
+      "aos-and-soa",
+      "chi-squared-test",
+      "dynamic-array",
+      "extended-slice",
+      "generator",
+      "walrus-operator"
+    ]
   },
   "new-tags": []
 }

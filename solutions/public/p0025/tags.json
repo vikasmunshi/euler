@@ -1,8 +1,15 @@
 {
-  "domain": ["fibonacci-sequence", "golden-ratio"],
+  "domain": [
+    "fibonacci-sequence",
+    "golden-ratio"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "assignment-computer-science", "recurrence-relation"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "assignment-computer-science",
+      "recurrence-relation"
+    ]
   },
   "new-tags": []
 }

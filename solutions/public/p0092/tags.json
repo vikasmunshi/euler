@@ -1,8 +1,21 @@
 {
-  "domain": ["combinatorics", "generating-function"],
+  "domain": [
+    "combinatorics",
+    "generating-function"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["c-dynamic-memory-allocation", "convolution", "conways-game-of-life", "dynamic-programming", "memcpy", "memoization", "multiple-buffering", "sparse-matrix", "tuple"]
+    "s0": [
+      "c-dynamic-memory-allocation",
+      "convolution",
+      "conways-game-of-life",
+      "dynamic-programming",
+      "memcpy",
+      "memoization",
+      "multiple-buffering",
+      "sparse-matrix",
+      "tuple"
+    ]
   },
   "new-tags": []
 }

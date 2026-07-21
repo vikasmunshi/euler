@@ -1,8 +1,22 @@
 {
-  "domain": ["directed-acyclic-graph", "optimal-substructure"],
+  "domain": [
+    "directed-acyclic-graph",
+    "optimal-substructure"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["atoi", "binomial-coefficient", "c-dynamic-memory-allocation", "diagonal", "dynamic-programming", "generator", "sentinel-value", "strtok", "topological-sorting", "walrus-operator"]
+    "s0": [
+      "atoi",
+      "binomial-coefficient",
+      "c-dynamic-memory-allocation",
+      "diagonal",
+      "dynamic-programming",
+      "generator",
+      "sentinel-value",
+      "strtok",
+      "topological-sorting",
+      "walrus-operator"
+    ]
   },
   "new-tags": []
 }

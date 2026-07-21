@@ -27,7 +27,7 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
     """Lazily import the claude_api function."""
     try:  # the generators pull in `anthropic`; imported on demand so the shell starts without the `ai` group
         from solver.ai.code import document_code, generate_c_code, generate_py_code
-        from solver.ai.docs import generate_notes, generate_test_cases
+        from solver.ai.docs import generate_notes, generate_tags, generate_test_cases
     except ImportError as exc:
         console.print(f'[error]claude-api needs the [accent]ai[/accent] dependency group '
                       f'({exc.name} is not installed) — run [accent]pip install -e ".\\[ai]"[/accent].[/error]')
@@ -37,13 +37,14 @@ def _get_generate_funcs() -> dict[str, GeneratorFunc] | None:
         'py': generate_py_code,
         'doc': document_code,
         'notes': generate_notes,
+        'tags': generate_tags,
         'test-cases': generate_test_cases,
     }
 
 
 @register(requires='contributor', help_text='Generate specified target using Claude API.')
 def claude_api(problem: Problem,
-               target: Literal['c', 'py', 'doc', 'notes', 'test-cases'], *,
+               target: Literal['c', 'py', 'doc', 'notes', 'tags', 'test-cases'], *,
                force: bool = False,
                major: bool = False,
                model: Model | None = None,
@@ -53,7 +54,7 @@ def claude_api(problem: Problem,
     Args:
         problem: The `problem` to generate for; defaults to the current problem.
         target: The type of content to generate ('c' or 'py' for code, 'doc' to refresh in-source
-                docs, 'notes' for documentation, 'test-cases' for test cases).
+                docs, 'notes' for documentation, 'tags' for tags.json, 'test-cases' for test cases).
         major:  Whether this is after a major change (e.g. template or instruction change).
         force:  Whether to force generation even if the target already exists.
         model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
@@ -69,6 +70,7 @@ def claude_api(problem: Problem,
         'py': Model.CLAUDE_OPUS_4_8,
         'doc': Model.CLAUDE_OPUS_4_8,
         'notes': Model.CLAUDE_OPUS_4_8,
+        'tags': Model.CLAUDE_SONNET_4_6,
         'test-cases': Model.CLAUDE_SONNET_4_6,
     }
 

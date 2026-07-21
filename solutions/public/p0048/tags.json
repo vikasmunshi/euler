@@ -2,7 +2,12 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["exponentiation-by-squaring", "modular-arithmetic", "modular-exponentiation", "pow"]
+    "s0": [
+      "exponentiation-by-squaring",
+      "modular-arithmetic",
+      "modular-exponentiation",
+      "pow"
+    ]
   },
   "new-tags": []
 }

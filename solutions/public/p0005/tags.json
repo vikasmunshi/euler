@@ -2,7 +2,17 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "endianness", "euclidean-algorithm", "fold-higher-order-function", "greatest-common-divisor", "integer-factorization", "least-common-multiple", "modular-arithmetic", "prime-power"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "endianness",
+      "euclidean-algorithm",
+      "fold-higher-order-function",
+      "greatest-common-divisor",
+      "integer-factorization",
+      "least-common-multiple",
+      "modular-arithmetic",
+      "prime-power"
+    ]
   },
   "new-tags": []
 }

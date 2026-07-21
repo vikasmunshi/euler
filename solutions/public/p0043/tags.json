@@ -1,8 +1,16 @@
 {
-  "domain": ["pandigital-number", "permutation"],
+  "domain": [
+    "pandigital-number",
+    "permutation"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["backtracking", "constraint-propagation", "finite-state-machine", "generator"]
+    "s0": [
+      "backtracking",
+      "constraint-propagation",
+      "finite-state-machine",
+      "generator"
+    ]
   },
   "new-tags": []
 }

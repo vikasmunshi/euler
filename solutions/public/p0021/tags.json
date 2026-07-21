@@ -1,8 +1,19 @@
 {
-  "domain": ["amicable-numbers", "divisor", "divisor-function", "perfect-number"],
+  "domain": [
+    "amicable-numbers",
+    "divisor",
+    "divisor-function",
+    "perfect-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["functools-lru-cache", "generator", "memoization", "short-circuit-evaluation", "walrus-operator"]
+    "s0": [
+      "functools-lru-cache",
+      "generator",
+      "memoization",
+      "short-circuit-evaluation",
+      "walrus-operator"
+    ]
   },
   "new-tags": []
 }

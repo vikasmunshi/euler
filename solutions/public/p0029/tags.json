@@ -1,9 +1,25 @@
 {
-  "domain": ["fundamental-theorem-of-arithmetic"],
+  "domain": [
+    "fundamental-theorem-of-arithmetic"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "hash-function", "hash-table", "primesieve", "set", "trial-division"],
-    "s1": ["arbitrary-precision-arithmetic", "hash-function", "hash-table", "primesieve", "set", "trial-division"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "hash-function",
+      "hash-table",
+      "primesieve",
+      "set",
+      "trial-division"
+    ],
+    "s1": [
+      "arbitrary-precision-arithmetic",
+      "hash-function",
+      "hash-table",
+      "primesieve",
+      "set",
+      "trial-division"
+    ]
   },
   "new-tags": []
 }

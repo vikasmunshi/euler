@@ -1,8 +1,21 @@
 {
-  "domain": ["total-order"],
+  "domain": [
+    "total-order"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["canonical-form", "frequency-statistics", "functools-cached-property", "generator", "insertion-sort", "intenum", "lexicographic-order", "qsort", "strtok", "walrus-operator"]
+    "s0": [
+      "canonical-form",
+      "frequency-statistics",
+      "functools-cached-property",
+      "generator",
+      "insertion-sort",
+      "intenum",
+      "lexicographic-order",
+      "qsort",
+      "strtok",
+      "walrus-operator"
+    ]
   },
   "new-tags": []
 }

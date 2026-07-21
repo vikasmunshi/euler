@@ -1,8 +1,14 @@
 {
-  "domain": ["prime-number", "prime-number-theorem"],
+  "domain": [
+    "prime-number",
+    "prime-number-theorem"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["sieve-of-eratosthenes", "sieve-of-sundaram"]
+    "s0": [
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram"
+    ]
   },
   "new-tags": []
 }

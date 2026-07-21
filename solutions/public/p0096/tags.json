@@ -1,10 +1,48 @@
 {
-  "domain": ["np-completeness"],
+  "domain": [
+    "np-completeness"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["backtracking", "constraint-propagation", "constraint-satisfaction-problem", "dancing-links", "depth-first-search", "doubly-linked-list", "exact-cover", "generator", "knuths-algorithm-x", "look-ahead-backtracking", "peter-norvigs-well-known-essay"],
-    "s1": ["backtracking", "constraint-propagation", "constraint-satisfaction-problem", "dancing-links", "depth-first-search", "doubly-linked-list", "exact-cover", "generator", "knuths-algorithm-x", "look-ahead-backtracking", "peter-norvigs-well-known-essay"],
-    "s2": ["backtracking", "constraint-propagation", "constraint-satisfaction-problem", "dancing-links", "depth-first-search", "doubly-linked-list", "exact-cover", "generator", "knuths-algorithm-x", "look-ahead-backtracking", "peter-norvigs-well-known-essay"]
+    "s0": [
+      "backtracking",
+      "constraint-propagation",
+      "constraint-satisfaction-problem",
+      "dancing-links",
+      "depth-first-search",
+      "doubly-linked-list",
+      "exact-cover",
+      "generator",
+      "knuths-algorithm-x",
+      "look-ahead-backtracking",
+      "peter-norvigs-well-known-essay"
+    ],
+    "s1": [
+      "backtracking",
+      "constraint-propagation",
+      "constraint-satisfaction-problem",
+      "dancing-links",
+      "depth-first-search",
+      "doubly-linked-list",
+      "exact-cover",
+      "generator",
+      "knuths-algorithm-x",
+      "look-ahead-backtracking",
+      "peter-norvigs-well-known-essay"
+    ],
+    "s2": [
+      "backtracking",
+      "constraint-propagation",
+      "constraint-satisfaction-problem",
+      "dancing-links",
+      "depth-first-search",
+      "doubly-linked-list",
+      "exact-cover",
+      "generator",
+      "knuths-algorithm-x",
+      "look-ahead-backtracking",
+      "peter-norvigs-well-known-essay"
+    ]
   },
   "new-tags": []
 }

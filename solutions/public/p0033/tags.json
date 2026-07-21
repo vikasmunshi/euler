@@ -2,7 +2,20 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["brute-force-search", "chained-comparison", "cross-multiplication", "euclidean-algorithm", "floating-point-arithmetic", "fold-higher-order-function", "fractions-fraction", "functools-reduce", "generator", "greatest-common-divisor", "identity-element", "rational-number"]
+    "s0": [
+      "brute-force-search",
+      "chained-comparison",
+      "cross-multiplication",
+      "euclidean-algorithm",
+      "floating-point-arithmetic",
+      "fold-higher-order-function",
+      "fractions-fraction",
+      "functools-reduce",
+      "generator",
+      "greatest-common-divisor",
+      "identity-element",
+      "rational-number"
+    ]
   },
   "new-tags": []
 }

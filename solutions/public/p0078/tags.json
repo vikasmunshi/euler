@@ -1,8 +1,19 @@
 {
-  "domain": ["partition-number-theory", "pentagonal-number-theorem"],
+  "domain": [
+    "partition-number-theory",
+    "pentagonal-number-theorem"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["dynamic-array", "dynamic-programming", "functools-lru-cache", "generalized-pentagonal-numbers", "itertools", "memoization", "modular-arithmetic"]
+    "s0": [
+      "dynamic-array",
+      "dynamic-programming",
+      "functools-lru-cache",
+      "generalized-pentagonal-numbers",
+      "itertools",
+      "memoization",
+      "modular-arithmetic"
+    ]
   },
   "new-tags": []
 }

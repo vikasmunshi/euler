@@ -1,8 +1,13 @@
 {
-  "domain": ["combinatorics"],
+  "domain": [
+    "combinatorics"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["binomial-coefficient", "pascals-triangle"]
+    "s0": [
+      "binomial-coefficient",
+      "pascals-triangle"
+    ]
   },
   "new-tags": []
 }

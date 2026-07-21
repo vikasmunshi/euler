@@ -1,8 +1,24 @@
 {
-  "domain": ["parity-mathematics", "prime-number", "quadratic-function", "sieve-theory"],
+  "domain": [
+    "parity-mathematics",
+    "prime-number",
+    "quadratic-function",
+    "sieve-theory"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["bytearray", "cpython", "integer-overflow", "lexicographic-order", "pure-function", "sieve-of-eratosthenes", "sieve-of-sundaram", "symmetry", "trial-division", "tuple"]
+    "s0": [
+      "bytearray",
+      "cpython",
+      "integer-overflow",
+      "lexicographic-order",
+      "pure-function",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "symmetry",
+      "trial-division",
+      "tuple"
+    ]
   },
   "new-tags": []
 }

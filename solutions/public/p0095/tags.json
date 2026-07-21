@@ -1,8 +1,15 @@
 {
-  "domain": ["amicable-numbers", "divisor", "functional-graph", "perfect-number"],
+  "domain": [
+    "amicable-numbers",
+    "divisor",
+    "functional-graph",
+    "perfect-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["sieve-of-eratosthenes"]
+    "s0": [
+      "sieve-of-eratosthenes"
+    ]
   },
   "new-tags": []
 }

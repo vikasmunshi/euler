@@ -1,8 +1,14 @@
 {
-  "domain": ["coprime-integers", "eulers-totient-function", "multiplicative-function"],
+  "domain": [
+    "coprime-integers",
+    "eulers-totient-function",
+    "multiplicative-function"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["sieve-of-eratosthenes"]
+    "s0": [
+      "sieve-of-eratosthenes"
+    ]
   },
   "new-tags": []
 }

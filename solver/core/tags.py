@@ -13,7 +13,7 @@ articles under ``topics/``.
 """
 from __future__ import annotations
 
-__all__ = ['topics', 'topic', 'update_tags']
+__all__ = ['topics', 'topic', 'update_tags', 'format_vocabulary']
 
 import json
 import re
@@ -68,8 +68,14 @@ def dumps_compact(obj: Any, level: int = 0) -> str:
     return json.dumps(obj)
 
 
-def _write_json(path: Path, obj: Any) -> None:
-    path.write_text(dumps_compact(obj) + '\n')
+def _write_central(obj: Any) -> None:
+    """The central vocabulary: compact (scalar lists inline) so big refs legs stay one line."""
+    _central_path().write_text(dumps_compact(obj) + '\n')
+
+
+def _write_problem_tags(path: Path, obj: Any) -> None:
+    """A per-problem tags.json: plain, human-diffable json.dumps(indent=2)."""
+    path.write_text(json.dumps(obj, indent=2) + '\n')
 
 
 # ── central vocabulary ──────────────────────────────────────────────────────────────────
@@ -90,6 +96,20 @@ def _url_index(central: dict[str, Any]) -> dict[str, tuple[str, str]]:
 
 def _facet_of(central: dict[str, Any]) -> dict[str, str]:
     return {tag['slug']: tag['facet'] for tag in central['tags']}
+
+
+def format_vocabulary() -> str:
+    """The current tag vocabulary as compact markdown, grouped by facet, for a generation prompt.
+    Lists each tag as ``- slug — name`` (takeaways append the summary)."""
+    tags = _load_central()['tags']
+    lines: list[str] = []
+    for facet in FACETS:
+        entries = sorted((t for t in tags if t['facet'] == facet), key=lambda t: t['slug'])
+        lines.append(f'\n### {facet} ({len(entries)})')
+        for t in entries:
+            extra = f": {t['summary']}" if facet == 'takeaway' and t.get('summary') else ''
+            lines.append(f"- {t['slug']} — {t['name']}{extra}")
+    return '\n'.join(lines)
 
 
 def _ref_key(ref: str) -> tuple[int, int]:
@@ -452,9 +472,9 @@ def update_tags(check: bool = False) -> int:
     # Re-sort vocabulary (domain, technique, takeaway; by slug) and persist everything.
     order = {'domain': 0, 'technique': 1, 'takeaway': 2}
     central['tags'].sort(key=lambda t: (order.get(t['facet'], 9), t['slug']))
-    _write_json(_central_path(), central)
+    _write_central(central)
     for num, data in ptags.items():
-        _write_json(_problem_tags_path(num), data)
+        _write_problem_tags(_problem_tags_path(num), data)
 
     for msg in warnings + art_issues:
         console.print(f'  [warning]•[/warning] {msg}')

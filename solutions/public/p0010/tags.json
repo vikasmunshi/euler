@@ -1,12 +1,54 @@
 {
-  "domain": ["prime-number-theorem"],
+  "domain": [
+    "prime-number-theorem"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["generator", "open-addressing", "primesieve", "sieve-of-eratosthenes", "sieve-of-sundaram", "trial-division", "wheel-factorization"],
-    "s1": ["generator", "open-addressing", "primesieve", "sieve-of-eratosthenes", "sieve-of-sundaram", "trial-division", "wheel-factorization"],
-    "s2": ["generator", "open-addressing", "primesieve", "sieve-of-eratosthenes", "sieve-of-sundaram", "trial-division", "wheel-factorization"],
-    "s3": ["generator", "open-addressing", "primesieve", "sieve-of-eratosthenes", "sieve-of-sundaram", "trial-division", "wheel-factorization"],
-    "s4": ["generator", "open-addressing", "primesieve", "sieve-of-eratosthenes", "sieve-of-sundaram", "trial-division", "wheel-factorization"]
+    "s0": [
+      "generator",
+      "open-addressing",
+      "primesieve",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "trial-division",
+      "wheel-factorization"
+    ],
+    "s1": [
+      "generator",
+      "open-addressing",
+      "primesieve",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "trial-division",
+      "wheel-factorization"
+    ],
+    "s2": [
+      "generator",
+      "open-addressing",
+      "primesieve",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "trial-division",
+      "wheel-factorization"
+    ],
+    "s3": [
+      "generator",
+      "open-addressing",
+      "primesieve",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "trial-division",
+      "wheel-factorization"
+    ],
+    "s4": [
+      "generator",
+      "open-addressing",
+      "primesieve",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "trial-division",
+      "wheel-factorization"
+    ]
   },
   "new-tags": []
 }

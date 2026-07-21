@@ -1,10 +1,34 @@
 {
-  "domain": ["functional-graph", "pigeonhole-principle"],
+  "domain": [
+    "functional-graph",
+    "pigeonhole-principle"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["c-dynamic-memory-allocation", "disjoint-set-data-structure", "enum-strenum", "factorial", "hash-table", "memoization"],
-    "s1": ["c-dynamic-memory-allocation", "disjoint-set-data-structure", "enum-strenum", "factorial", "hash-table", "memoization"],
-    "s2": ["c-dynamic-memory-allocation", "disjoint-set-data-structure", "enum-strenum", "factorial", "hash-table", "memoization"]
+    "s0": [
+      "c-dynamic-memory-allocation",
+      "disjoint-set-data-structure",
+      "enum-strenum",
+      "factorial",
+      "hash-table",
+      "memoization"
+    ],
+    "s1": [
+      "c-dynamic-memory-allocation",
+      "disjoint-set-data-structure",
+      "enum-strenum",
+      "factorial",
+      "hash-table",
+      "memoization"
+    ],
+    "s2": [
+      "c-dynamic-memory-allocation",
+      "disjoint-set-data-structure",
+      "enum-strenum",
+      "factorial",
+      "hash-table",
+      "memoization"
+    ]
   },
   "new-tags": []
 }

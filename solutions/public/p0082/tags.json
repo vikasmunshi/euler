@@ -2,7 +2,13 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["bss", "dynamic-programming", "generator", "jacobi-method", "prefix-sum"]
+    "s0": [
+      "bss",
+      "dynamic-programming",
+      "generator",
+      "jacobi-method",
+      "prefix-sum"
+    ]
   },
   "new-tags": []
 }

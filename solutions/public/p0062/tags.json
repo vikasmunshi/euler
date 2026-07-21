@@ -1,8 +1,19 @@
 {
-  "domain": ["permutation"],
+  "domain": [
+    "permutation"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["c-dynamic-memory-allocation", "collections-defaultdict-list", "daniel-j-bernstein", "dynamic-array", "floating-point-arithmetic", "generator", "hash-table", "multiset"]
+    "s0": [
+      "c-dynamic-memory-allocation",
+      "collections-defaultdict-list",
+      "daniel-j-bernstein",
+      "dynamic-array",
+      "floating-point-arithmetic",
+      "generator",
+      "hash-table",
+      "multiset"
+    ]
   },
   "new-tags": []
 }

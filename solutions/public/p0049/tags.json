@@ -1,8 +1,19 @@
 {
-  "domain": ["prime-number-theorem"],
+  "domain": [
+    "prime-number-theorem"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["arithmetic-progression", "binary-search-algorithm", "collections-defaultdict-list", "heaps-algorithm", "itertools", "set", "sieve-of-eratosthenes", "sieve-of-sundaram"]
+    "s0": [
+      "arithmetic-progression",
+      "binary-search-algorithm",
+      "collections-defaultdict-list",
+      "heaps-algorithm",
+      "itertools",
+      "set",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram"
+    ]
   },
   "new-tags": []
 }

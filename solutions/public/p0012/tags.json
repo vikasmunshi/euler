@@ -1,9 +1,20 @@
 {
-  "domain": ["coprime-integers", "divisor-function", "multiplicative-function", "triangular-number"],
+  "domain": [
+    "coprime-integers",
+    "divisor-function",
+    "multiplicative-function",
+    "triangular-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["integer-factorization", "trial-division"],
-    "s1": ["integer-factorization", "trial-division"]
+    "s0": [
+      "integer-factorization",
+      "trial-division"
+    ],
+    "s1": [
+      "integer-factorization",
+      "trial-division"
+    ]
   },
   "new-tags": []
 }

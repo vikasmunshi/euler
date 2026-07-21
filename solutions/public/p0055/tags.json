@@ -1,8 +1,14 @@
 {
-  "domain": ["lychrel-number", "palindromic-number"],
+  "domain": [
+    "lychrel-number",
+    "palindromic-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "endianness"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "endianness"
+    ]
   },
   "new-tags": []
 }

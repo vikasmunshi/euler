@@ -1,5 +1,9 @@
 {
-  "domain": ["mathematical-induction", "square-pyramidal-number", "triangular-number"],
+  "domain": [
+    "mathematical-induction",
+    "square-pyramidal-number",
+    "triangular-number"
+  ],
   "takeaways": [],
   "techniques": {
     "s0": []

@@ -1,10 +1,37 @@
 {
-  "domain": ["partition-number-theory", "pentagonal-number-theorem"],
+  "domain": [
+    "partition-number-theory",
+    "pentagonal-number-theorem"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "dynamic-programming", "functools-lru-cache", "keyword-only", "locality-of-reference", "memoization", "pentagonal-number"],
-    "s1": ["arbitrary-precision-arithmetic", "dynamic-programming", "functools-lru-cache", "keyword-only", "locality-of-reference", "memoization", "pentagonal-number"],
-    "s2": ["arbitrary-precision-arithmetic", "dynamic-programming", "functools-lru-cache", "keyword-only", "locality-of-reference", "memoization", "pentagonal-number"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "dynamic-programming",
+      "functools-lru-cache",
+      "keyword-only",
+      "locality-of-reference",
+      "memoization",
+      "pentagonal-number"
+    ],
+    "s1": [
+      "arbitrary-precision-arithmetic",
+      "dynamic-programming",
+      "functools-lru-cache",
+      "keyword-only",
+      "locality-of-reference",
+      "memoization",
+      "pentagonal-number"
+    ],
+    "s2": [
+      "arbitrary-precision-arithmetic",
+      "dynamic-programming",
+      "functools-lru-cache",
+      "keyword-only",
+      "locality-of-reference",
+      "memoization",
+      "pentagonal-number"
+    ]
   },
   "new-tags": []
 }

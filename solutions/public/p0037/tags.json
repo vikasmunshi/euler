@@ -1,8 +1,21 @@
 {
-  "domain": ["prime-counting-function", "prime-number", "truncatable-prime"],
+  "domain": [
+    "prime-counting-function",
+    "prime-number",
+    "truncatable-prime"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["any", "generator", "hash-function", "hash-table", "linear-probing", "open-addressing", "short-circuit-evaluation", "sieve-of-eratosthenes"]
+    "s0": [
+      "any",
+      "generator",
+      "hash-function",
+      "hash-table",
+      "linear-probing",
+      "open-addressing",
+      "short-circuit-evaluation",
+      "sieve-of-eratosthenes"
+    ]
   },
   "new-tags": []
 }

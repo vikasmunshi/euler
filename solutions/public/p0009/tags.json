@@ -1,8 +1,13 @@
 {
-  "domain": ["diophantine-equation", "pythagorean-triple"],
+  "domain": [
+    "diophantine-equation",
+    "pythagorean-triple"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["generator"]
+    "s0": [
+      "generator"
+    ]
   },
   "new-tags": []
 }

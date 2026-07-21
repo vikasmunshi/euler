@@ -2,7 +2,13 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["combination", "combinations-with-replacement", "factorial", "generator", "multiset"]
+    "s0": [
+      "combination",
+      "combinations-with-replacement",
+      "factorial",
+      "generator",
+      "multiset"
+    ]
   },
   "new-tags": []
 }

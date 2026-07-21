@@ -1,8 +1,25 @@
 {
-  "domain": ["clique-graph-theory", "clique-problem", "graph-discrete-mathematics", "primality-test"],
+  "domain": [
+    "clique-graph-theory",
+    "clique-problem",
+    "graph-discrete-mathematics",
+    "primality-test"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["combination", "depth-first-search", "deterministic-algorithm", "functools-lru-cache", "generator", "hash-table", "memoization", "next", "sieve-of-eratosthenes", "sieve-of-sundaram", "trial-division"]
+    "s0": [
+      "combination",
+      "depth-first-search",
+      "deterministic-algorithm",
+      "functools-lru-cache",
+      "generator",
+      "hash-table",
+      "memoization",
+      "next",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "trial-division"
+    ]
   },
   "new-tags": []
 }

@@ -1,8 +1,14 @@
 {
-  "domain": ["commutative-property"],
+  "domain": [
+    "commutative-property"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["brute-force-search", "generator", "instruction-level-parallelism"]
+    "s0": [
+      "brute-force-search",
+      "generator",
+      "instruction-level-parallelism"
+    ]
   },
   "new-tags": []
 }

@@ -1,8 +1,20 @@
 {
-  "domain": ["combinatorics", "geometry", "pythagorean-theorem", "square-number"],
+  "domain": [
+    "combinatorics",
+    "geometry",
+    "pythagorean-theorem",
+    "square-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["double-precision-floating-point-format", "generator", "integer-square-root", "itertools", "monotonic-function", "net-polyhedron"]
+    "s0": [
+      "double-precision-floating-point-format",
+      "generator",
+      "integer-square-root",
+      "itertools",
+      "monotonic-function",
+      "net-polyhedron"
+    ]
   },
   "new-tags": []
 }

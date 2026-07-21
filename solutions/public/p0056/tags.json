@@ -2,7 +2,18 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "brute-force-search", "c-dynamic-memory-allocation", "dynamic-array", "endianness", "generator", "integer-overflow", "matplotlib-heatmaps", "numpy", "radix"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "brute-force-search",
+      "c-dynamic-memory-allocation",
+      "dynamic-array",
+      "endianness",
+      "generator",
+      "integer-overflow",
+      "matplotlib-heatmaps",
+      "numpy",
+      "radix"
+    ]
   },
   "new-tags": []
 }

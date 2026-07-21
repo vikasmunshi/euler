@@ -2,7 +2,15 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["c-string-handling", "generator", "mapreduce", "memoization", "qsort", "sorting-algorithm", "timsort"]
+    "s0": [
+      "c-string-handling",
+      "generator",
+      "mapreduce",
+      "memoization",
+      "qsort",
+      "sorting-algorithm",
+      "timsort"
+    ]
   },
   "new-tags": []
 }

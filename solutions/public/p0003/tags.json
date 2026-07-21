@@ -1,8 +1,19 @@
 {
-  "domain": ["coprime-integers", "primality-test", "prime-number"],
+  "domain": [
+    "coprime-integers",
+    "primality-test",
+    "prime-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["ieee-754", "integer-square-root", "loop-unrolling", "sentinel-value", "significand", "trial-division"]
+    "s0": [
+      "ieee-754",
+      "integer-square-root",
+      "loop-unrolling",
+      "sentinel-value",
+      "significand",
+      "trial-division"
+    ]
   },
   "new-tags": []
 }

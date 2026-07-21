@@ -3,7 +3,7 @@
 """ Module to generate notes for solver solutions, leveraging AI. """
 from __future__ import annotations
 
-__all__ = ['generate_notes', 'generate_test_cases']
+__all__ = ['generate_notes', 'generate_tags', 'generate_test_cases']
 
 from json import JSONDecodeError, dumps, loads
 
@@ -14,6 +14,7 @@ from solver.ai.facts import Facts, gather_facts, prepare_anthropic_request
 from solver.ai.models import Model, record_usage
 from solver.config import config
 from solver.core.problems import Problem, problems
+from solver.core.tags import TAGS_FILENAME, format_vocabulary
 from solver.shell import console
 from solver.templates.engine import Templates, filled_template
 from solver.utils.path_utils import write_file
@@ -110,6 +111,67 @@ def generate_notes(model: Model, *, problem: Problem, force: bool, major: bool) 
         return False
     write_file(problem.solution_dir / config.notes_filename, notes.encode(),
                f'Updated {config.notes_filename}')
+    return True
+
+
+def _parse_tags_json(raw: str) -> str | None:
+    """Strip optional code fences and return the tags.json string (indent=2) if it is a well-formed
+    object with the four required keys, else None."""
+    stripped = raw.strip()
+    if stripped.startswith('```'):
+        stripped = stripped.split('\n', 1)[1].rsplit('```', 1)[0]
+    try:
+        data = loads(stripped)
+    except JSONDecodeError:
+        return None
+    if not isinstance(data, dict) or not {'domain', 'takeaways', 'techniques', 'new-tags'} <= data.keys():
+        return None
+    return dumps(data, indent=2)
+
+
+def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
+    """Generate a problem's tags.json (domain / per-index techniques / takeaways / new-tags).
+
+    The model chooses from the current vocabulary (`topics/tags.json`) and proposes new tags only
+    via `new-tags`; the maintainer's `update-tags` promotes those and reconciles the central legs.
+    Retries once with a strict-JSON reminder if the first response cannot be parsed.
+
+    Args:
+        model (Model)     : The AI model used to generate tags.
+        problem (Problem) : The problem to tag.
+        force (bool)      : Overwrite an existing tags.json.
+        major (bool)      : No-op for tags; preserved for the common make() signature.
+    """
+    if major:
+        console.print('[muted]Run [accent]update-tags[/accent] to reconcile after a vocabulary change.[/muted]')
+        return None
+    tags_path = problem.solution_dir / TAGS_FILENAME
+    if not (force or not tags_path.exists()):
+        console.print('[muted]tags.json exists; use [accent]--force[/accent] to regenerate.[/muted]')
+        return None
+    facts: Facts = gather_facts(problem, strict=False)
+    prompt = filled_template(Templates.PROMPT_TAGS, facts=facts, vocabulary=format_vocabulary())
+    console.print('[primary]Generating tags...[/primary]')
+    raw: str | None = _generate_doc(prompt=prompt, model=model, images=facts.images)
+    parsed: str | None = _parse_tags_json(raw) if raw is not None else None
+    if parsed is None:
+        for attempt in range(1, test_cases_retries + 1):
+            console.print(f'[muted]Retrying tag generation (attempt {attempt}/{test_cases_retries})'
+                          f' with strict JSON reminder...[/muted]')
+            follow_up = ('Your previous response could not be parsed. Re-emit the entire tags.json '
+                         'object only - no markdown, no code fences, no prose. It must start with `{`, '
+                         'end with `}`, and contain the keys domain, takeaways, techniques, new-tags.')
+            raw = _generate_doc(prompt=prompt, model=model, images=facts.images, follow_up=follow_up)
+            parsed = _parse_tags_json(raw) if raw is not None else None
+            if parsed is not None:
+                break
+    if parsed is None:
+        console.print('[error]error:[/error] failed to parse generated tags JSON')
+        if raw is not None:
+            console.print(f'Generated tags: {raw}', markup=False, highlight=False)
+        return False
+    write_file(tags_path, parsed.encode(), f'Updated {TAGS_FILENAME}')
+    console.print('[muted]Run [accent]update-tags[/accent] to reconcile the central vocabulary and articles.[/muted]')
     return True
 
 

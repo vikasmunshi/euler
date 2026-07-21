@@ -1,8 +1,19 @@
 {
-  "domain": ["catalan-number", "central-binomial-coefficient", "lattice-path"],
+  "domain": [
+    "catalan-number",
+    "central-binomial-coefficient",
+    "lattice-path"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "binomial-coefficient", "dynamic-programming", "endianness", "gmp", "long-division"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "binomial-coefficient",
+      "dynamic-programming",
+      "endianness",
+      "gmp",
+      "long-division"
+    ]
   },
   "new-tags": []
 }

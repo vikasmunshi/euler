@@ -20,6 +20,7 @@ class Templates(StrEnum):
     PROMPT_DOC = 'prompt_doc.txt'
     PROMPT_PY = 'prompt_py.txt'
     PROMPT_NOTES = 'prompt_notes.txt'
+    PROMPT_TAGS = 'prompt_tags.txt'
     PROMPT_TEST_CASES = 'prompt_test_cases.txt'
 
 
@@ -51,6 +52,7 @@ _CONVENTION_DOC_FILES: dict[str, str] = {
     'c_translation_conventions': 'convention_c_translation.md',
     'source_documentation_conventions': 'convention_source_documentation.md',
     'documentation_conventions': 'convention_documentation.md',
+    'tag_conventions': 'convention_tags.md',
     'test_case_conventions': 'convention_test_cases.md',
 }
 

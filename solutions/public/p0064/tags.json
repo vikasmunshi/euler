@@ -1,8 +1,16 @@
 {
-  "domain": ["continued-fraction", "periodic-continued-fraction", "pigeonhole-principle"],
+  "domain": [
+    "continued-fraction",
+    "periodic-continued-fraction",
+    "pigeonhole-principle"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["cycle-detection", "generator", "quadratic-irrational-number"]
+    "s0": [
+      "cycle-detection",
+      "generator",
+      "quadratic-irrational-number"
+    ]
   },
   "new-tags": []
 }

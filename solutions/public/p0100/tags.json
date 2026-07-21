@@ -1,8 +1,14 @@
 {
-  "domain": ["completing-the-square", "diophantine-equation"],
+  "domain": [
+    "completing-the-square",
+    "diophantine-equation"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["pells-equation", "recurrence-relation"]
+    "s0": [
+      "pells-equation",
+      "recurrence-relation"
+    ]
   },
   "new-tags": []
 }

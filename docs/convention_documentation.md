@@ -26,7 +26,7 @@ treats a `<math>` element as MathML and renders a red "Math input error", and en
 math are not interpreted. Reserve `<code>` for literal code identifiers and snippets, not for
 mathematical notation. Escape a literal dollar sign that is not a math delimiter as `\$`.
 
-Four sections:
+Exactly two sections:
 
 1. **`<h3>Problem Analysis</h3>`** — one or two paragraphs on the mathematical ideas (number
    theory, combinatorics, dynamic programming, …), the key observations that make the problem
@@ -36,16 +36,15 @@ Four sections:
    solution index). If a Python and a C file share an index, cover them together and note any
    language-specific differences. Name the approach from the *code*, not the filename. Explain the
    algorithm step by step, justify each significant design choice, and map the code to the
-   algorithm.
-3. **`<h3>Programming Techniques</h3>`** — an `<h4>` per distinct technique (generator functions,
-   tuple/parallel assignment, state-variable patterns, standard-library use, C memory-layout
-   choices, …). For each, give what it is, why it was used here, and when an engineer might reach
-   for it again.
-4. **`<h3>Key Takeaways</h3>`** — the core insight(s) that unlock the solution. If more than one
-   solution file exists, compare the approaches using the recorded `average` times (which is
-   fastest or most elegant, and why); if only one exists, omit any comparison and do not mention
-   the absence of others. End with a `<ul>` of concise, reusable principles (transferable advice,
-   not facts specific to this problem).
+   algorithm. When more than one solution exists, compare them using the recorded `average` times
+   (which is fastest or most elegant, and why), basing every timing claim on the benchmark results;
+   with a single solution, omit any comparison and do not mention the absence of others.
+
+**Scope — analysis and approach only.** `notes.html` covers *what the problem is* and *how each
+solution works*. It does **not** enumerate programming techniques or list transferable takeaways:
+those are captured as **tags** (`tags.json`, see [Tag conventions](convention_tags.md)) and
+discussed in the topic articles under `topics/`. Do not add a `Programming Techniques` or
+`Key Takeaways` section, and do not end with a bulleted list of general principles.
 
 **Hyperlinking technical terms:** **every** occurrence of each non-trivial technical term (e.g.
 "Sieve of Eratosthenes", "dynamic programming", "modular exponentiation", "memoization",

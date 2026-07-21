@@ -1,8 +1,17 @@
 {
-  "domain": ["coprime-integers", "eulers-totient-function"],
+  "domain": [
+    "coprime-integers",
+    "eulers-totient-function"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["generator", "primorial", "sieve-of-eratosthenes", "trial-division", "walrus-operator"]
+    "s0": [
+      "generator",
+      "primorial",
+      "sieve-of-eratosthenes",
+      "trial-division",
+      "walrus-operator"
+    ]
   },
   "new-tags": []
 }

@@ -1,9 +1,25 @@
 {
-  "domain": ["divisibility-rule"],
+  "domain": [
+    "divisibility-rule"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["c-dynamic-memory-allocation", "hash-table", "primesieve", "set", "sieve-of-eratosthenes", "sieve-of-sundaram"],
-    "s1": ["c-dynamic-memory-allocation", "hash-table", "primesieve", "set", "sieve-of-eratosthenes", "sieve-of-sundaram"]
+    "s0": [
+      "c-dynamic-memory-allocation",
+      "hash-table",
+      "primesieve",
+      "set",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram"
+    ],
+    "s1": [
+      "c-dynamic-memory-allocation",
+      "hash-table",
+      "primesieve",
+      "set",
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram"
+    ]
   },
   "new-tags": []
 }

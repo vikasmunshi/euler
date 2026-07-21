@@ -1,8 +1,15 @@
 {
-  "domain": ["prime-number"],
+  "domain": [
+    "prime-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["sieve-of-eratosthenes", "sieve-of-sundaram", "trial-division", "walrus-operator"]
+    "s0": [
+      "sieve-of-eratosthenes",
+      "sieve-of-sundaram",
+      "trial-division",
+      "walrus-operator"
+    ]
   },
   "new-tags": []
 }

@@ -2,7 +2,16 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["absorbing-element", "arbitrary-precision-arithmetic", "ascii", "brute-force-search", "c-data-types", "generator", "math-prod", "sliding-window-protocol"]
+    "s0": [
+      "absorbing-element",
+      "arbitrary-precision-arithmetic",
+      "ascii",
+      "brute-force-search",
+      "c-data-types",
+      "generator",
+      "math-prod",
+      "sliding-window-protocol"
+    ]
   },
   "new-tags": []
 }

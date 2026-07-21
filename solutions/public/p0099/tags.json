@@ -2,7 +2,14 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["arg-max", "double-precision-floating-point-format", "logarithm", "monotonic-function", "newline", "strtok"]
+    "s0": [
+      "arg-max",
+      "double-precision-floating-point-format",
+      "logarithm",
+      "monotonic-function",
+      "newline",
+      "strtok"
+    ]
   },
   "new-tags": []
 }

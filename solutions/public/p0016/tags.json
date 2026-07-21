@@ -2,7 +2,14 @@
   "domain": [],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "endianness", "generator", "karatsuba-algorithm", "list-comprehension", "multiplication-algorithm"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "endianness",
+      "generator",
+      "karatsuba-algorithm",
+      "list-comprehension",
+      "multiplication-algorithm"
+    ]
   },
   "new-tags": []
 }

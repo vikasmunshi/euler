@@ -1,12 +1,36 @@
 {
-  "domain": ["triangular-number"],
-  "takeaways": ["closed-form-over-iteration", "algorithm-beats-language", "decompose-overlap", "parity-across-languages"],
+  "domain": [
+    "triangular-number"
+  ],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "algorithm-beats-language",
+    "decompose-overlap",
+    "parity-across-languages"
+  ],
   "techniques": {
-    "s0": ["inclusion-exclusion-principle", "closed-form-expression", "least-common-multiple", "arbitrary-precision-arithmetic", "gauss-summation"],
+    "s0": [
+      "inclusion-exclusion-principle",
+      "closed-form-expression",
+      "least-common-multiple",
+      "arbitrary-precision-arithmetic",
+      "gauss-summation"
+    ],
     "s1": [],
-    "s2": ["arithmetic-progression", "inclusion-exclusion-principle"],
-    "s3": ["generator", "lazy-evaluation", "inclusion-exclusion-principle"],
-    "s4": ["generator", "lazy-evaluation", "inclusion-exclusion-principle"]
+    "s2": [
+      "arithmetic-progression",
+      "inclusion-exclusion-principle"
+    ],
+    "s3": [
+      "generator",
+      "lazy-evaluation",
+      "inclusion-exclusion-principle"
+    ],
+    "s4": [
+      "generator",
+      "lazy-evaluation",
+      "inclusion-exclusion-principle"
+    ]
   },
   "new-tags": []
 }

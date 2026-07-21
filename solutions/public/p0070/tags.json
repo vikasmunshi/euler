@@ -1,8 +1,19 @@
 {
-  "domain": ["coprime-integers", "eulers-totient-function", "multiplicative-function", "permutation", "prime-counting-function", "prime-number", "semiprime"],
+  "domain": [
+    "coprime-integers",
+    "eulers-totient-function",
+    "multiplicative-function",
+    "permutation",
+    "prime-counting-function",
+    "prime-number",
+    "semiprime"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["sieve-of-eratosthenes", "walrus-operator"]
+    "s0": [
+      "sieve-of-eratosthenes",
+      "walrus-operator"
+    ]
   },
   "new-tags": []
 }

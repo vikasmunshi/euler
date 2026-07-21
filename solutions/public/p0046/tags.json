@@ -1,8 +1,18 @@
 {
-  "domain": ["composite-number", "prime-number", "prime-number-theorem", "square-number"],
+  "domain": [
+    "composite-number",
+    "prime-number",
+    "prime-number-theorem",
+    "square-number"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["collections-defaultdict-list", "generator", "sieve-of-eratosthenes", "trial-division"]
+    "s0": [
+      "collections-defaultdict-list",
+      "generator",
+      "sieve-of-eratosthenes",
+      "trial-division"
+    ]
   },
   "new-tags": []
 }

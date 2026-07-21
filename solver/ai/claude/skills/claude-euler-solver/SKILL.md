@@ -38,6 +38,7 @@ working directory.
 - **[convention_c_translation.md](docs/convention_c_translation.md)** — the C port.
 - **[convention_source_documentation.md](docs/convention_source_documentation.md)** — in-source docstrings/comments.
 - **[convention_documentation.md](docs/convention_documentation.md)** — `notes.html`.
+- **[convention_tags.md](docs/convention_tags.md)** — `tags.json` (problem/technique/takeaway tags).
 - **[convention_test_cases.md](docs/convention_test_cases.md)** — `test_cases.json`.
 
 For exact `solver` command usage (aliases, flags, arguments), see
@@ -168,7 +169,13 @@ Write and verify a Python solution, translate it to C, then document and summari
 7. **Summarise.** Run `solver "benchmark <n>"` to record fresh timings, then
    write/refresh the solution directory's `notes.html` per
    [convention_documentation.md](docs/convention_documentation.md), using the recorded
-   `results.json` values for every timing claim.
+   `results.json` values for every timing claim. `notes.html` is *Problem Analysis* and
+   *Solution Approach* only — no techniques or takeaways sections.
+8. **Tag.** Write/refresh the solution directory's `tags.json` per
+   [convention_tags.md](docs/convention_tags.md): the problem's `domain`, each solution index's
+   `techniques`, and any `takeaways` — choosing slugs from the vocabulary in `topics/tags.json`
+   and proposing anything genuinely new under `new-tags`. Then run `solver "update-tags"` to
+   reconcile the central vocabulary and topic articles.
 
 ### `review`
 
@@ -197,7 +204,14 @@ report that this is a `solve` job, not a `review`. Then, in order:
    `solver "benchmark <n>"` twice to refresh it. Then bring the solution directory's
    `notes.html` to [convention_documentation.md](docs/convention_documentation.md),
    using the recorded `results.json` values for every timing or comparison claim —
-   never invent numbers.
+   never invent numbers. It must be *Problem Analysis* and *Solution Approach* only; if the
+   notes still carry `Programming Techniques` or `Key Takeaways` sections, remove them (that
+   content is now carried by tags).
+4. **`tags.json`.** Bring the solution directory's `tags.json` to
+   [convention_tags.md](docs/convention_tags.md): confirm the `domain` fits the problem, each
+   solution index's `techniques` reflect *that index's* code, and `takeaways` are genuinely
+   transferable — choosing slugs from `topics/tags.json` and proposing new ones only under
+   `new-tags`. Then run `solver "update-tags"` to reconcile.
 
 ---
 

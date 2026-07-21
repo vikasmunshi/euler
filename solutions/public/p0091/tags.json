@@ -1,8 +1,16 @@
 {
-  "domain": ["dot-product", "stern-brocot-tree"],
+  "domain": [
+    "dot-product",
+    "stern-brocot-tree"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["dont-repeat-yourself", "euclidean-algorithm", "greatest-common-divisor", "integer-overflow"]
+    "s0": [
+      "dont-repeat-yourself",
+      "euclidean-algorithm",
+      "greatest-common-divisor",
+      "integer-overflow"
+    ]
   },
   "new-tags": []
 }

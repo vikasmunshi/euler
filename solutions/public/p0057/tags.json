@@ -1,8 +1,14 @@
 {
-  "domain": ["continued-fraction", "convergent-continued-fraction"],
+  "domain": [
+    "continued-fraction",
+    "convergent-continued-fraction"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["arbitrary-precision-arithmetic", "recurrence-relation"]
+    "s0": [
+      "arbitrary-precision-arithmetic",
+      "recurrence-relation"
+    ]
   },
   "new-tags": []
 }

@@ -1,8 +1,20 @@
 {
-  "domain": ["collatz-conjecture"],
+  "domain": [
+    "collatz-conjecture"
+  ],
   "takeaways": [],
   "techniques": {
-    "s0": ["c-dynamic-memory-allocation", "dynamic-programming", "functools-lru-cache", "hash-table", "locality-of-reference", "memoization", "overlapping-subproblems", "sentinel-value", "tuple-assignment"]
+    "s0": [
+      "c-dynamic-memory-allocation",
+      "dynamic-programming",
+      "functools-lru-cache",
+      "hash-table",
+      "locality-of-reference",
+      "memoization",
+      "overlapping-subproblems",
+      "sentinel-value",
+      "tuple-assignment"
+    ]
   },
   "new-tags": []
 }
