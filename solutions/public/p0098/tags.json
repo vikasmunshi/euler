@@ -3,7 +3,9 @@
     "bijection",
     "square-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "anagram",

@@ -4,7 +4,11 @@
     "quadratic-function",
     "square-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "parity-across-languages",
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
       "discriminant",

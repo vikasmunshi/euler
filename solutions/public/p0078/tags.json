@@ -3,7 +3,12 @@
     "partition-number-theory",
     "pentagonal-number-theorem"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "exploit-symmetry",
+    "parity-across-languages",
+    "precompute-once-reuse",
+    "right-tool-per-cost"
+  ],
   "techniques": {
     "s0": [
       "dynamic-array",

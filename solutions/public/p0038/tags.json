@@ -2,7 +2,9 @@
   "domain": [
     "pandigital-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
       "brute-force-search",

@@ -2,7 +2,10 @@
   "domain": [
     "commutative-property"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "exploit-symmetry",
+    "watch-integer-width"
+  ],
   "techniques": {
     "s0": [
       "brute-force-search",

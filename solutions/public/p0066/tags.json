@@ -4,7 +4,9 @@
     "diophantine-equation",
     "square-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",

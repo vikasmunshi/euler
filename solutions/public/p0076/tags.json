@@ -3,7 +3,9 @@
     "partition-number-theory",
     "pentagonal-number-theorem"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "algorithm-beats-language"
+  ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",

@@ -2,7 +2,10 @@
   "domain": [
     "combinatorics"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "exploit-symmetry",
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "binomial-coefficient",

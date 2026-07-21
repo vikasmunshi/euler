@@ -2,7 +2,10 @@
   "domain": [
     "common-logarithm"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "combination",

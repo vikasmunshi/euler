@@ -2,7 +2,9 @@
   "domain": [
     "summation"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration"
+  ],
   "techniques": {
     "s0": [
       "ansi-escape-code",

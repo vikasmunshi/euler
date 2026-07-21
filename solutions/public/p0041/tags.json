@@ -6,7 +6,9 @@
     "prime-number",
     "triangular-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "itertools",

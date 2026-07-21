@@ -3,7 +3,10 @@
     "directed-acyclic-graph",
     "optimal-substructure"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "algorithm-beats-language",
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "atoi",

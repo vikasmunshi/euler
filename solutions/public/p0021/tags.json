@@ -5,7 +5,9 @@
     "divisor-function",
     "perfect-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "decompose-overlap"
+  ],
   "techniques": {
     "s0": [
       "functools-lru-cache",

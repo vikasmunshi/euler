@@ -4,7 +4,9 @@
     "graph-discrete-mathematics",
     "permutation"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "exploit-symmetry"
+  ],
   "techniques": {
     "s0": [
       "backtracking",

@@ -3,7 +3,10 @@
     "pandigital-number",
     "permutation"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "parity-across-languages",
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "backtracking",

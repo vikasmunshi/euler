@@ -5,7 +5,9 @@
     "functional-graph",
     "perfect-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "sieve-of-eratosthenes"

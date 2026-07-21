@@ -3,7 +3,11 @@
     "combinatorics",
     "generating-function"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "algorithm-beats-language",
+    "parity-across-languages",
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "c-dynamic-memory-allocation",

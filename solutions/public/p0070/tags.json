@@ -8,7 +8,9 @@
     "prime-number",
     "semiprime"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "sieve-of-eratosthenes",

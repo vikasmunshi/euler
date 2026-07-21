@@ -1,6 +1,8 @@
 {
   "domain": [],
-  "takeaways": [],
+  "takeaways": [
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "integer-factorization",

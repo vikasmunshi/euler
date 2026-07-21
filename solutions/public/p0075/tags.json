@@ -2,7 +2,11 @@
   "domain": [
     "pythagorean-triple"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "algorithm-beats-language",
+    "parity-across-languages",
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
       "c-dynamic-memory-allocation",

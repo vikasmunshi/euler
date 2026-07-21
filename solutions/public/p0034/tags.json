@@ -1,6 +1,10 @@
 {
   "domain": [],
-  "takeaways": [],
+  "takeaways": [
+    "exploit-symmetry",
+    "parity-across-languages",
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "combination",

@@ -3,7 +3,9 @@
     "continued-fraction",
     "convergent-continued-fraction"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",

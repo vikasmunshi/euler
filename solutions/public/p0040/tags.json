@@ -2,7 +2,9 @@
   "domain": [
     "champernowne-constant"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration"
+  ],
   "techniques": {
     "s0": [
       "c-mathematical-functions",

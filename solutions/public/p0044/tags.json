@@ -1,6 +1,10 @@
 {
   "domain": [],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "parity-across-languages",
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "floating-point-arithmetic",

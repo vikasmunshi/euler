@@ -5,7 +5,10 @@
     "pythagorean-theorem",
     "square-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "double-precision-floating-point-format",

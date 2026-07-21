@@ -2,7 +2,9 @@
   "domain": [
     "collatz-conjecture"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "c-dynamic-memory-allocation",

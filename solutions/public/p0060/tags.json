@@ -5,7 +5,9 @@
     "graph-discrete-mathematics",
     "primality-test"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "combination",

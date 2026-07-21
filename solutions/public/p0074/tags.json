@@ -3,7 +3,9 @@
     "functional-graph",
     "pigeonhole-principle"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "c-dynamic-memory-allocation",
