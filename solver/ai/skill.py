@@ -51,9 +51,19 @@ def claude_solve(
     return _run_skill(ctx, invocation, f'[accent]claude · {action}[/accent]')
 
 
+def _blog_written(facet: str, slug: str) -> bool:
+    """A tag's article counts as *written* once its page exists and is no longer the TODO skeleton."""
+    page = config.topics_dir / facet / f'{slug}.md'
+    try:
+        return page.is_file() and '_TODO:' not in page.read_text(encoding='utf-8')
+    except OSError:
+        return False
+
+
 def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
-    """`claude-blog` targets: every tag as its ``<facet>/<slug>`` topic path, **most-referenced
-    first**, each shown with its facet and distinct-problem count."""
+    """`claude-blog` targets: every tag as its ``<facet>/<slug>`` topic path. **Unwritten tags come
+    first, most-referenced at the top**; already-written blogs sink to the end (flagged `written`).
+    Each shows its facet and distinct-problem count."""
     try:
         central = json.loads(config.central_tags_file.read_text())
     except (OSError, json.JSONDecodeError):
@@ -62,13 +72,15 @@ def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Complet
     def refs(tag: dict[str, Any]) -> int:
         return len({r.split('_')[0] for r in tag.get('refs', [])})
 
-    out: list[str | Completion] = []
-    for tag in sorted(central.get('tags', []), key=lambda t: (-refs(t), t['slug'])):
+    rows: list[tuple[bool, int, dict[str, Any]]] = []
+    for tag in central.get('tags', []):
         path = f"{tag['facet']}/{tag['slug']}"
         if path.startswith(incomplete) or incomplete in tag['slug']:
-            out.append(Completion(path, start_position=-len(incomplete),
-                                  display=tag['slug'], display_meta=f"{tag['facet']} · {refs(tag)}"))
-    return out
+            rows.append((_blog_written(tag['facet'], tag['slug']), refs(tag), tag))
+    rows.sort(key=lambda r: (r[0], -r[1], r[2]['slug']))    # unwritten first, then by refs desc
+    return [Completion(f"{t['facet']}/{t['slug']}", start_position=-len(incomplete), display=t['slug'],
+                       display_meta=f"{t['facet']} · {n}{' · written' if w else ''}")
+            for w, n, t in rows]
 
 
 @register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions},
