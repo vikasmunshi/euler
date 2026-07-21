@@ -1,0 +1,8 @@
+{
+  "domain": ["permutation"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["brute-force-search", "qsort", "set", "sorting-algorithm", "strcmp"]
+  },
+  "new-tags": []
+}

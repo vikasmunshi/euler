@@ -1,0 +1,8 @@
+{
+  "domain": [],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["arbitrary-precision-arithmetic", "endianness", "factorial", "generator", "karatsuba-algorithm", "multiplication-algorithm", "stirlings-approximation"]
+  },
+  "new-tags": []
+}

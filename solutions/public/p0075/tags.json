@@ -1,0 +1,8 @@
+{
+  "domain": ["pythagorean-triple"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["c-dynamic-memory-allocation", "dict", "euclidean-algorithm", "generator", "harmonic-series-mathematics", "integer-overflow", "sieve-of-eratosthenes"]
+  },
+  "new-tags": []
+}

@@ -1,0 +1,8 @@
+{
+  "domain": ["partition-number-theory"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["arbitrary-precision-arithmetic", "dynamic-programming", "knapsack-problem"]
+  },
+  "new-tags": []
+}

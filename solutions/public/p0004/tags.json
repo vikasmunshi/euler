@@ -1,0 +1,8 @@
+{
+  "domain": ["divisibility-rule", "number-theory", "palindromic-number", "prime-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["keyword-only", "loop-invariant-code-motion", "memory-management", "modular-arithmetic", "monotonic-function", "stack-based-memory-allocation", "two-pointers-technique"]
+  },
+  "new-tags": []
+}

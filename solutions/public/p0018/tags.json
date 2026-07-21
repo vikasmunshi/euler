@@ -1,0 +1,8 @@
+{
+  "domain": ["optimal-substructure"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["c-string-handling", "dynamic-programming", "list-comprehension", "object-copying"]
+  },
+  "new-tags": []
+}

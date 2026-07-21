@@ -1,0 +1,8 @@
+{
+  "domain": ["counting", "graph-discrete-mathematics", "permutation"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["backtracking", "cycle-graph-theory", "direct-addressing", "eafp", "for-else", "int", "itertools", "named-tuples", "set", "strcmp", "walrus-operator"]
+  },
+  "new-tags": []
+}

@@ -1,0 +1,9 @@
+{
+  "domain": [],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["abundant-number", "aliquot-sum", "harmonic-series-mathematics", "numpy", "sieve-of-eratosthenes", "trial-division"],
+    "s1": ["abundant-number", "aliquot-sum", "harmonic-series-mathematics", "numpy", "sieve-of-eratosthenes", "trial-division"]
+  },
+  "new-tags": []
+}

@@ -1,0 +1,8 @@
+{
+  "domain": ["common-logarithm"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["combination", "combinations-with-replacement", "exponentiation", "floating-point-arithmetic", "lexicographic-order", "narcissistic-number", "short-circuit-evaluation", "walrus-operator"]
+  },
+  "new-tags": []
+}

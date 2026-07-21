@@ -1,0 +1,9 @@
+{
+  "domain": ["triangular-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["binary-search-algorithm", "binomial-coefficient", "bisect", "functools-partial", "goto", "walrus-operator"],
+    "s1": ["binary-search-algorithm", "binomial-coefficient", "bisect", "functools-partial", "goto", "walrus-operator"]
+  },
+  "new-tags": []
+}

@@ -1,0 +1,8 @@
+{
+  "domain": ["herons-formula"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["integer-overflow", "pells-equation", "recurrence-relation", "tuple-assignment"]
+  },
+  "new-tags": []
+}

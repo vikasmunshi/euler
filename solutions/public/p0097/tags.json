@@ -1,0 +1,8 @@
+{
+  "domain": [],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["exponentiation-by-squaring", "modular-arithmetic", "modular-exponentiation"]
+  },
+  "new-tags": []
+}

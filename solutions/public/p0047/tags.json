@@ -1,0 +1,8 @@
+{
+  "domain": [],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["integer-factorization", "itertools", "next", "sieve-of-eratosthenes", "trial-division"]
+  },
+  "new-tags": []
+}

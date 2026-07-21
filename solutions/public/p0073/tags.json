@@ -1,0 +1,10 @@
+{
+  "domain": ["farey-sequence", "stern-brocot-tree"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["euclidean-algorithm", "harmonic-series-mathematics", "m-bius-function", "mediant-mathematics", "sieve-of-eratosthenes", "walrus-operator"],
+    "s1": ["euclidean-algorithm", "harmonic-series-mathematics", "m-bius-function", "mediant-mathematics", "sieve-of-eratosthenes", "walrus-operator"],
+    "s2": ["euclidean-algorithm", "harmonic-series-mathematics", "m-bius-function", "mediant-mathematics", "sieve-of-eratosthenes", "walrus-operator"]
+  },
+  "new-tags": []
+}

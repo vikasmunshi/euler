@@ -1,0 +1,8 @@
+{
+  "domain": ["figurate-number", "quadratic-function", "square-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["discriminant", "double-precision-floating-point-format", "integer-square-root", "modular-arithmetic", "quadratic-formula", "walrus-operator"]
+  },
+  "new-tags": []
+}

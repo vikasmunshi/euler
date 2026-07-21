@@ -1,0 +1,8 @@
+{
+  "domain": ["continued-fraction", "diophantine-equation", "square-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["arbitrary-precision-arithmetic", "finite-state-machine", "fractions-fraction", "generator", "gmp", "greatest-common-divisor", "horners-method", "max", "operator-itemgetter", "pells-equation"]
+  },
+  "new-tags": []
+}

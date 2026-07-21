@@ -1,0 +1,8 @@
+{
+  "domain": ["common-logarithm"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["arbitrary-precision-arithmetic", "undefined-behavior", "walrus-operator"]
+  },
+  "new-tags": []
+}

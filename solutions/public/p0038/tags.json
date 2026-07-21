@@ -1,0 +1,8 @@
+{
+  "domain": ["pandigital-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["brute-force-search", "frequency-statistics"]
+  },
+  "new-tags": []
+}

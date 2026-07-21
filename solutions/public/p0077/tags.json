@@ -1,0 +1,9 @@
+{
+  "domain": ["partition-number-theory", "prime-counting-function", "prime-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["dynamic-array", "dynamic-programming", "functools-lru-cache", "memoization", "open-addressing", "sieve-of-eratosthenes", "sieve-of-sundaram"],
+    "s1": ["dynamic-array", "dynamic-programming", "functools-lru-cache", "memoization", "open-addressing", "sieve-of-eratosthenes", "sieve-of-sundaram"]
+  },
+  "new-tags": []
+}

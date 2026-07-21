@@ -1,0 +1,8 @@
+{
+  "domain": ["quadratic-equation", "square-number", "triangular-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["floating-point-arithmetic", "functools-lru-cache", "memoization", "polygonal-number", "quadratic-formula", "strtok"]
+  },
+  "new-tags": []
+}

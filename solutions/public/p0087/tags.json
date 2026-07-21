@@ -1,0 +1,8 @@
+{
+  "domain": ["prime-number", "prime-number-theorem"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["c-dynamic-memory-allocation", "generator", "hash-table", "integer-overflow", "set", "sieve-of-eratosthenes", "sieve-of-sundaram", "walrus-operator"]
+  },
+  "new-tags": []
+}

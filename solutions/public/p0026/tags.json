@@ -1,0 +1,8 @@
+{
+  "domain": ["coprime-integers", "multiplicative-order"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["euclidean-algorithm", "fermats-little-theorem", "greatest-common-divisor", "walrus-operator"]
+  },
+  "new-tags": []
+}

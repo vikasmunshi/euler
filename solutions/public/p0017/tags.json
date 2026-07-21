@@ -1,0 +1,8 @@
+{
+  "domain": [],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["functools-lru-cache", "memoization"]
+  },
+  "new-tags": []
+}

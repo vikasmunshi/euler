@@ -1,0 +1,8 @@
+{
+  "domain": [],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["floating-point-arithmetic", "loop-invariant-code-motion", "pentagonal-number", "quadratic-formula", "square-root", "walrus-operator"]
+  },
+  "new-tags": []
+}

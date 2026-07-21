@@ -1,0 +1,8 @@
+{
+  "domain": [],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["branch-and-bound", "closure-computer-programming", "direct-addressing", "global-variable", "hash-table", "integer-factorization", "recursion-computer-science"]
+  },
+  "new-tags": []
+}

@@ -1,0 +1,8 @@
+{
+  "domain": ["prime-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["branch-and-bound", "dynamic-programming", "hash-table", "integer-overflow", "itertools-accumulate", "prefix-sum", "sieve-of-eratosthenes", "sieve-of-sundaram"]
+  },
+  "new-tags": []
+}

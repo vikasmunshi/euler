@@ -1,0 +1,8 @@
+{
+  "domain": ["directed-acyclic-graph", "optimal-substructure"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["dynamic-programming", "list-comprehension"]
+  },
+  "new-tags": []
+}

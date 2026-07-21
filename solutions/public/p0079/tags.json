@@ -1,0 +1,8 @@
+{
+  "domain": ["directed-acyclic-graph"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["adjacency-matrix", "bit-array", "bitwise-operation", "for-else", "partially-ordered-set", "set", "topological-sorting"]
+  },
+  "new-tags": []
+}

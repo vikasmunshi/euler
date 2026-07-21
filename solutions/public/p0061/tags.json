@@ -1,0 +1,8 @@
+{
+  "domain": ["graph-theory", "hexagonal-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["adjacency-list", "backtracking", "canonical-form", "cycle-graph-theory", "decorator", "depth-first-search", "dict", "directed-graph", "enum", "floor-and-ceiling-functions", "function-pointer", "generator", "insertion-sort", "monotonic-function", "polygonal-number", "set"]
+  },
+  "new-tags": []
+}

@@ -1,0 +1,8 @@
+{
+  "domain": ["summation"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["ansi-escape-code", "c-dynamic-memory-allocation", "closed-form-expression", "dict", "generator", "horners-method"]
+  },
+  "new-tags": []
+}

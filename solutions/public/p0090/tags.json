@@ -1,0 +1,8 @@
+{
+  "domain": ["combinatorics"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["binomial-coefficient", "brute-force-search", "combination", "itertools", "locality-of-reference", "walrus-operator"]
+  },
+  "new-tags": []
+}

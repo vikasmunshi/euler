@@ -17,6 +17,7 @@ solver.core.new,True
 solver.core.osc,
 solver.core.problems,
 solver.core.results,True
+solver.core.tags,True
 solver.core.test_cases,True
 solver.core.viewer,True
 solver.crypto.ciphers,

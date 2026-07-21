@@ -1,0 +1,8 @@
+{
+  "domain": ["farey-sequence", "stern-brocot-tree"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["euclidean-algorithm", "fractions-fraction", "greatest-common-divisor", "integer-overflow"]
+  },
+  "new-tags": []
+}

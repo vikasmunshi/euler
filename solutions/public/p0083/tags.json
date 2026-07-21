@@ -1,0 +1,8 @@
+{
+  "domain": ["directed-acyclic-graph", "shortest-path-problem"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["binary-heap", "c-dynamic-memory-allocation", "dict", "dijkstras-algorithm", "dynamic-programming", "integer-overflow", "row-and-column-major-order", "set"]
+  },
+  "new-tags": []
+}

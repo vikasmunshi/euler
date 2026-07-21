@@ -1,2 +1,6 @@
 # Transparent encryption for private solutions (solver.crypto.gitfilter).
-solutions/private/** filter=solver-crypt -text
+# -diff marks the staged ciphertext binary: git skips it in `diff --check` (the
+# pre-commit whitespace scan) and shows "Binary files differ" instead of ciphertext
+# churn. Small encrypted blobs can lack an early NUL, so content heuristics alone
+# would misclassify them as text.
+solutions/private/** filter=solver-crypt -text -diff

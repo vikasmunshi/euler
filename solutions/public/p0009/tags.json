@@ -1,0 +1,8 @@
+{
+  "domain": ["diophantine-equation", "pythagorean-triple"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["generator"]
+  },
+  "new-tags": []
+}

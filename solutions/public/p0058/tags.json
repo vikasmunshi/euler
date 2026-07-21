@@ -1,0 +1,8 @@
+{
+  "domain": ["prime-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["generator", "sieve-of-eratosthenes", "trial-division", "walrus-operator"]
+  },
+  "new-tags": []
+}

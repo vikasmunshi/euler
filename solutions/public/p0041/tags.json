@@ -1,0 +1,8 @@
+{
+  "domain": ["divisibility-rule", "pandigital-number", "permutation", "prime-number", "triangular-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["itertools", "trial-division"]
+  },
+  "new-tags": []
+}

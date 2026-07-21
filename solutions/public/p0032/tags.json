@@ -1,0 +1,8 @@
+{
+  "domain": ["combinatorics", "pandigital-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["backtracking", "hash-table", "itertools", "logarithm", "walrus-operator"]
+  },
+  "new-tags": []
+}

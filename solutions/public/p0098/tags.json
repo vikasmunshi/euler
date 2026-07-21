@@ -1,0 +1,8 @@
+{
+  "domain": ["bijection", "square-number"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["anagram", "branch-and-bound", "dataclass", "equivalence-class", "invariant-mathematics", "itertools-product", "lexical-analysis", "parallel-array"]
+  },
+  "new-tags": []
+}

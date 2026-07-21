@@ -1,0 +1,8 @@
+{
+  "domain": ["pythagorean-triple"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["collections-counter", "counting-sort", "euclidean-algorithm", "generator", "greatest-common-divisor", "harmonic-series-mathematics", "hash-table", "quadratic-formula", "walrus-operator"]
+  },
+  "new-tags": []
+}

@@ -1,0 +1,8 @@
+{
+  "domain": ["roman-numerals"],
+  "takeaways": [],
+  "techniques": {
+    "s0": ["aos-and-soa", "generator", "greedy-algorithm"]
+  },
+  "new-tags": []
+}
