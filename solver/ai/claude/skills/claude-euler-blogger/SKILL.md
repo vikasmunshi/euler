@@ -7,7 +7,7 @@ description: Use when Claude is launched by the `claude-blog` command via
   is a tag's `<facet>/<slug>` path (e.g. `technique/sieve-of-eratosthenes`), a bare tag slug, or a
   curated topic path (e.g. `number-theory/primes`). Do NOT activate for a generic "write a blog
   post" or for solving problems.
-version: 0.1.0
+version: 0.1.1
 model: opus
 ---
 
@@ -122,9 +122,17 @@ page must open with its own `<!-- tags: [slug, …] -->` comment and end with an
    problems block and reconciles the graph. Then `solver "update-tags --check"` must exit `0`; fix
    any issue it names (an unknown tag in your `<!-- tags: -->` comment, most likely) and re-run.
 2. **Sanity-check:** `solver "topic <path>"` lists the tags and problems the page now resolves to.
-3. **Commit:** `solver "commit <message>"` — a short, descriptive line, e.g.
-   `"topic: sieve of Eratosthenes"`. Topic pages carry no solutions, so the message needs no
-   secrecy; just say what was written.
+3. **Commit the page with plain git.** Do **not** use `solver "commit"` — that command is
+   problem-scoped: it stages a `solutions/pNNNN` directory plus `problems.json`, *not* a topic
+   page, so it would not commit your work. Stage the file you wrote and commit it directly (both
+   verbs are on the allowlist):
+
+       git add topics/<facet>/<slug>.md
+       git commit -m "topic: <name>"
+
+   If `git status` shows other files that `update-tags` touched (e.g. `topics/tags.json`), stage
+   and include them in the same commit. Topic pages carry no solutions, so the message needs no
+   secrecy — just say what was written.
 
 Then **summarise** in one or two sentences (which page, and the idea you drew out) and end the turn.
 
