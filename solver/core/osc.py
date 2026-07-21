@@ -27,7 +27,7 @@ only the latter (`terminal.js`, § the OSC handler).
 
 This module is the one definition of that wire. It holds no state and imports only
 :mod:`solver.config` (for the channel), so both the viewer (:mod:`solver.core.viewer`)
-and the git commands (:mod:`solver.utils.scripts`) can emit without depending on each
+and the git commands (:mod:`solver.core.git`) can emit without depending on each
 other.
 """
 from __future__ import annotations
@@ -70,7 +70,7 @@ def emit(action: str, *fields: str) -> None:
 def git_changed() -> None:
     """Tell the page this clone's git state moved: the header re-reads its chip.
 
-    Emitted by the git commands (:mod:`solver.utils.scripts`) on the success paths
+    Emitted by the git commands (:mod:`solver.core.git`) on the success paths
     that can change what the chip shows — a commit, a sync, a push, a wired filter.
     The header reads its state once per navigation and never polls, so without this
     the chip would be at its most wrong exactly after the user acted. It is only a

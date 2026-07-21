@@ -3,13 +3,31 @@
 """ Utility for running shell commands and capturing their output. """
 from __future__ import annotations
 
-__all__ = ['confirm', 'pause', 'run_command']
+__all__ = ['confirm', 'pause', 'run_cmdline', 'run_command']
 
 from pathlib import Path
-from subprocess import run
+from subprocess import CalledProcessError, DEVNULL, run
 
 from solver.config import config
 from solver.shell import console, register
+
+
+def run_cmdline(cmdline: str) -> int:
+    """Run a shell command in the repository root and return its exit code.
+
+    Output is suppressed while the shared console is quiet (a `--silent` command).
+
+    Args:
+        cmdline: The shell command string to execute.
+    """
+    pipe = DEVNULL if console.quiet else None
+    try:
+        process = run(cmdline, shell=True, check=True, cwd=config.root_dir, stdout=pipe, stderr=pipe, )
+    except CalledProcessError as e:
+        result: int = e.returncode
+    else:
+        result = process.returncode
+    return result
 
 
 def confirm(prompt: str) -> bool:

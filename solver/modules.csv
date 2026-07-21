@@ -12,6 +12,7 @@ solver.auth.subject,
 solver.config,
 solver.core.download,
 solver.core.evaluate,True
+solver.core.git,True
 solver.core.list,True
 solver.core.new,True
 solver.core.osc,
@@ -41,7 +42,6 @@ solver.shell.tty,
 solver.shell.variables,
 solver.templates.engine,
 solver.templates.new,
-solver.utils.gh,
 solver.utils.linter,True
 solver.utils.loader,
 solver.utils.misc,True

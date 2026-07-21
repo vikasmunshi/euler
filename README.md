@@ -237,6 +237,7 @@ solver/
   core/
     download.py       — Utility for downloading and caching files via HTTP.
     evaluate.py       — Solution evaluation: runs standalone scripts against test cases and reports results.
+    git.py            — Git and GitHub (gh) commands and helpers — the repository workflow.
     list.py           — List solution directory contents.
     new.py            — The `new` command and solution-file formatting (black / isort / autoflake).
     osc.py            — The shell → browser control channel: `OSC 5379`.
@@ -272,12 +273,11 @@ solver/
     new.c             — Solution to Euler $problem.
     new.py            — Solution to Euler $problem.
   utils/
-    gh.py             — Utility to retrieve authenticated GitHub user's email and repository owner's email.
     linter.py         — Utilities for linting code.
     loader.py         — Utility for loading command modules.
     misc.py           — The `problems` and `manage-config` commands.
     path_utils.py     — Utility functions for file and directory operations.
-    scripts.py        — A set of utilities to manage Git repository workflows.
+    scripts.py        — Dependency and system-resource setup commands.
     search.py         — 'find' command: grep the solution stack for a regular expression.
     shell_utils.py    — Utility for running shell commands and capturing their output.
     summary.py        — Progress: parse .progress.html into problems.json and refresh in-memory state.

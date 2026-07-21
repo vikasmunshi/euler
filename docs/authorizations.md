@@ -43,6 +43,17 @@ a profile on each channel.
 | `solver.core.evaluate` | `benchmark` |  | ✓ | ✓ | ✓ |
 | `solver.core.evaluate` | `compile-c` |  | ✓ | ✓ | ✓ |
 | `solver.core.evaluate` | `evaluate` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `gh-pr` |  |  | ✓ | ✓ |
+| `solver.core.git` | `git-audit` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-commit` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-commit-amend` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-hooks` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-identity` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-publish` |  |  |  | ✓ |
+| `solver.core.git` | `git-push` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-status` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-sync` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.list` | `ls` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.new` | `new` |  | ✓ | ✓ | ✓ |
 | `solver.core.results` | `results` | ✓ | ✓ | ✓ | ✓ |
@@ -66,17 +77,6 @@ a profile on each channel.
 | `solver.utils.linter` | `lint` |  | ✓ | ✓ | ✓ |
 | `solver.utils.misc` | `manage-config` |  |  |  | ✓ |
 | `solver.utils.misc` | `problems` | ✓ | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `gh-pr` |  |  | ✓ | ✓ |
-| `solver.utils.scripts` | `git-audit` |  | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-commit` |  | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-commit-amend` |  | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-hooks` |  | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-identity` |  | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-publish` |  |  |  | ✓ |
-| `solver.utils.scripts` | `git-push` |  | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-status` | ✓ | ✓ | ✓ | ✓ |
-| `solver.utils.scripts` | `git-sync` | ✓ | ✓ | ✓ | ✓ |
 | `solver.utils.scripts` | `pip-upgrade` |  |  |  | ✓ |
 | `solver.utils.scripts` | `sys-setup` |  |  |  | ✓ |
 | `solver.utils.search` | `search` | ✓ | ✓ | ✓ | ✓ |

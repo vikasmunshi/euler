@@ -19,7 +19,7 @@ from unittest.mock import MagicMock
 from solver.auth import Subject
 from solver.config import ExitCodes, config
 from solver.shell.command import registry
-from solver.utils import scripts
+from solver.core import git
 from solver.utils.loader import load_commands
 from tests import silence
 
@@ -72,26 +72,26 @@ class _GitCommandCase(unittest.TestCase):
             self.prs.append(branch)
             return self.pr_rc
 
-        self._saved_run = scripts.run_cmdline
-        self._saved_branch = scripts._current_branch
-        self._saved_pr = scripts._ensure_pull_request
+        self._saved_run = git.run_cmdline
+        self._saved_branch = git._current_branch
+        self._saved_pr = git._ensure_pull_request
         self._saved_subject = config.subject
-        self._saved_emit = scripts.osc.emit
-        scripts.run_cmdline = fake_run_cmdline      # type: ignore[assignment]
-        scripts._current_branch = lambda: self.branch  # type: ignore[assignment]
+        self._saved_emit = git.osc.emit
+        git.run_cmdline = fake_run_cmdline      # type: ignore[assignment]
+        git._current_branch = lambda: self.branch  # type: ignore[assignment]
         # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
         # like run_cmdline, so no test can touch a real remote (module docstring).
-        scripts._ensure_pull_request = fake_ensure_pr  # type: ignore[assignment]
+        git._ensure_pull_request = fake_ensure_pr  # type: ignore[assignment]
         # The subject is web-channel, so the commands' osc.git_changed() nudges would
         # write raw OSC 5379 escape sequences to the test's stdout. This suite is not
         # the OSC wire's test (that is test_web_channel) — swallow the emit.
-        scripts.osc.emit = lambda *a, **k: None     # type: ignore[assignment]
+        git.osc.emit = lambda *a, **k: None     # type: ignore[assignment]
 
     def tearDown(self) -> None:
-        scripts.run_cmdline = self._saved_run       # type: ignore[assignment]
-        scripts._current_branch = self._saved_branch  # type: ignore[assignment]
-        scripts._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
-        scripts.osc.emit = self._saved_emit         # type: ignore[assignment]
+        git.run_cmdline = self._saved_run       # type: ignore[assignment]
+        git._current_branch = self._saved_branch  # type: ignore[assignment]
+        git._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
+        git.osc.emit = self._saved_emit         # type: ignore[assignment]
         config.subject = self._saved_subject
 
     def as_profile(self, profile: str) -> None:
@@ -101,25 +101,25 @@ class _GitCommandCase(unittest.TestCase):
 class GitPushGuardTest(_GitCommandCase):
     def test_contributor_pushes_their_own_branch_and_opens_its_pr(self) -> None:
         self.as_profile('contributor')
-        self.assertEqual(scripts.git_push(), 0)
+        self.assertEqual(git.git_push(), 0)
         self.assertEqual(self.cmdlines, ['git push -u origin user/t-000000'])
         self.assertEqual(self.prs, ['user/t-000000'])
 
     def test_force_uses_force_with_lease(self) -> None:
         self.as_profile('contributor')
-        self.assertEqual(scripts.git_push(force=True), 0)
+        self.assertEqual(git.git_push(force=True), 0)
         self.assertEqual(self.cmdlines, ['git push -u --force-with-lease origin user/t-000000'])
 
     def test_no_pr_pushes_and_stops(self) -> None:
         self.as_profile('contributor')
-        self.assertEqual(scripts.git_push(pr=False), 0)
+        self.assertEqual(git.git_push(pr=False), 0)
         self.assertEqual(self.cmdlines, ['git push -u origin user/t-000000'])
         self.assertEqual(self.prs, [])
 
     def test_a_failed_push_never_opens_a_pr(self) -> None:
         self.as_profile('contributor')
         self.rcs = [1]
-        self.assertNotEqual(scripts.git_push(), 0)
+        self.assertNotEqual(git.git_push(), 0)
         self.assertEqual(self.prs, [])              # nothing to review — the branch never landed
 
     def test_a_failed_pr_fails_the_command(self) -> None:
@@ -127,28 +127,28 @@ class GitPushGuardTest(_GitCommandCase):
         # the user believing their work is under review when it is not.
         self.as_profile('contributor')
         self.pr_rc = 1
-        self.assertNotEqual(scripts.git_push(), 0)
+        self.assertNotEqual(git.git_push(), 0)
 
     def test_non_admin_cannot_push_master(self) -> None:
         self.branch = 'master'
         self.as_profile('contributor')
-        self.assertEqual(scripts.git_push(), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git.git_push(), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])         # refused before any git ran
 
     def test_admin_may_push_master_but_never_forced(self) -> None:
         self.branch = 'master'
         self.as_profile('admin')
-        self.assertEqual(scripts.git_push(), 0)
+        self.assertEqual(git.git_push(), 0)
         self.assertEqual(self.cmdlines, ['git push -u origin master'])
         self.assertEqual(self.prs, [])              # master has nothing to merge into itself
         self.cmdlines.clear()
-        self.assertEqual(scripts.git_push(force=True), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git.git_push(force=True), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
     def test_detached_head_is_refused(self) -> None:
         self.branch = 'HEAD'
         self.as_profile('admin')
-        self.assertEqual(scripts.git_push(), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git.git_push(), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
 
@@ -161,15 +161,15 @@ class PullRequestTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.calls: list[list[str]] = []
-        self._saved_run = scripts.run
+        self._saved_run = git.run
 
         def fake_run(argv: list[str], **kwargs: Any) -> Any:
             self.calls.append(argv)
             return self.responses.pop(0)
 
-        scripts.run = fake_run                      # type: ignore[assignment]
+        git.run = fake_run                      # type: ignore[assignment]
         self.responses: list[Any] = []
-        self.addCleanup(lambda: setattr(scripts, 'run', self._saved_run))
+        self.addCleanup(lambda: setattr(git, 'run', self._saved_run))
 
     @staticmethod
     def _result(returncode: int = 0, stdout: str = '', stderr: str = '') -> Any:
@@ -180,7 +180,7 @@ class PullRequestTest(unittest.TestCase):
     def test_an_open_pr_is_reported_not_duplicated(self) -> None:
         self.responses = [self._result(stdout='2\n'),           # 2 commits beyond master
                           self._result(stdout='https://github.com/o/r/pull/7\n')]
-        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertEqual(git._ensure_pull_request('user/t-000000'), 0)
         self.assertEqual(len(self.calls), 2)                    # the count and the lookup
         self.assertEqual(self.calls[1][:3], ['gh', 'pr', 'view'])
 
@@ -188,7 +188,7 @@ class PullRequestTest(unittest.TestCase):
         self.responses = [self._result(stdout='1\n'),           # 1 commit beyond master
                           self._result(stdout=''),              # lookup: none open
                           self._result(stdout='https://github.com/o/r/pull/8\n')]
-        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertEqual(git._ensure_pull_request('user/t-000000'), 0)
         created = self.calls[2]
         self.assertEqual(created[:3], ['gh', 'pr', 'create'])
         self.assertEqual(created[created.index('--head') + 1], 'user/t-000000')
@@ -198,13 +198,13 @@ class PullRequestTest(unittest.TestCase):
         self.responses = [self._result(stdout='1\n'),
                           self._result(stdout=''),
                           self._result(returncode=1, stderr='gh: not authenticated')]
-        self.assertNotEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertNotEqual(git._ensure_pull_request('user/t-000000'), 0)
 
     def test_a_branch_level_with_master_is_never_asked_to_be_reviewed(self) -> None:
         # Nothing to review, and GitHub refuses such a PR outright ("No commits
         # between ..."): a no-op, not a failure — and gh is never reached.
         self.responses = [self._result(stdout='0\n')]
-        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertEqual(git._ensure_pull_request('user/t-000000'), 0)
         self.assertEqual(len(self.calls), 1)
 
     def test_an_unknown_ahead_count_still_tries_the_pr(self) -> None:
@@ -214,7 +214,7 @@ class PullRequestTest(unittest.TestCase):
         self.responses = [self._result(returncode=1),           # rev-list: cannot tell
                           self._result(stdout=''),              # lookup: none open
                           self._result(stdout='https://github.com/o/r/pull/9\n')]
-        self.assertEqual(scripts._ensure_pull_request('user/t-000000'), 0)
+        self.assertEqual(git._ensure_pull_request('user/t-000000'), 0)
         self.assertEqual(self.calls[2][:3], ['gh', 'pr', 'create'])
 
 
@@ -231,68 +231,68 @@ class GhPrTest(_GitCommandCase):
         self.open_prs: list[dict[str, object]] | None = [
             {'number': 12, 'title': 'Publish user/x', 'headRefName': 'user/x'}]
         self.answers: list[str] = []
-        self._saved_pr_files = scripts._pr_files
-        self._saved_open_prs = scripts._open_prs
-        self._saved_input = scripts.console.input
-        scripts._pr_files = lambda number: self.files  # type: ignore[assignment]
-        scripts._open_prs = lambda: self.open_prs      # type: ignore[assignment]
+        self._saved_pr_files = git._pr_files
+        self._saved_open_prs = git._open_prs
+        self._saved_input = git.console.input
+        git._pr_files = lambda number: self.files  # type: ignore[assignment]
+        git._open_prs = lambda: self.open_prs      # type: ignore[assignment]
         # Each prompt consumes the next queued keypress; an empty queue quits the walk.
-        scripts.console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[assignment]
+        git.console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[assignment]
 
     def tearDown(self) -> None:
-        scripts._pr_files = self._saved_pr_files    # type: ignore[assignment]
-        scripts._open_prs = self._saved_open_prs    # type: ignore[assignment]
-        scripts.console.input = self._saved_input   # type: ignore[assignment]
+        git._pr_files = self._saved_pr_files    # type: ignore[assignment]
+        git._open_prs = self._saved_open_prs    # type: ignore[assignment]
+        git.console.input = self._saved_input   # type: ignore[assignment]
         super().tearDown()
 
     def test_list_is_the_default_action(self) -> None:
         self.as_profile('maintainer')
-        self.assertEqual(scripts.gh_pr(), 0)
+        self.assertEqual(git.gh_pr(), 0)
         self.assertEqual(self.cmdlines, ['gh pr list'])
 
     # ── the file gate (_merge_pr), judged on the PR's file list ──
     def test_a_solutions_only_pr_is_squash_merged(self) -> None:
         self.as_profile('maintainer')
-        self.assertEqual(scripts._merge_pr(12), 0)
+        self.assertEqual(git._merge_pr(12), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
-        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])         # refused before gh ran
 
     def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
         # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/.
         self.as_profile('maintainer')
         self.files = ['solutions-of-mine/x.py']
-        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
     def test_an_unreadable_file_list_is_never_read_as_empty(self) -> None:
         # None is 'gh could not tell us', not 'touches nothing outside solutions/'.
         self.as_profile('maintainer')
         self.files = None
-        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
     def test_an_empty_file_list_is_refused(self) -> None:
         self.as_profile('maintainer')
         self.files = []
-        self.assertEqual(scripts._merge_pr(12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
     # ── the interactive walk (gh-pr merge → _merge_walk) ──
     def test_merge_walks_and_merges_on_m(self) -> None:
         self.as_profile('maintainer')
         self.answers = ['m']
-        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(git.gh_pr('merge'), 0)
         self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
 
     def test_skip_leaves_the_pr_untouched(self) -> None:
         self.as_profile('maintainer')
         self.answers = ['s']
-        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(git.gh_pr('merge'), 0)
         self.assertEqual(self.cmdlines, [])
 
     def test_quit_stops_the_walk_before_later_prs(self) -> None:
@@ -300,20 +300,20 @@ class GhPrTest(_GitCommandCase):
         self.open_prs = [{'number': 12, 'title': 'a', 'headRefName': 'user/x'},
                          {'number': 13, 'title': 'b', 'headRefName': 'user/y'}]
         self.answers = ['q']
-        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(git.gh_pr('merge'), 0)
         self.assertEqual(self.cmdlines, [])
 
     def test_no_open_prs_is_a_clean_noop(self) -> None:
         self.as_profile('maintainer')
         self.open_prs = []
-        self.assertEqual(scripts.gh_pr('merge'), 0)
+        self.assertEqual(git.gh_pr('merge'), 0)
         self.assertEqual(self.cmdlines, [])
 
     def test_an_unreadable_pr_list_errors(self) -> None:
         # None is 'gh could not tell us', not 'the queue is empty' — never a silent 0.
         self.as_profile('maintainer')
         self.open_prs = None
-        self.assertEqual(scripts.gh_pr('merge'), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git.gh_pr('merge'), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 
 
@@ -322,36 +322,36 @@ class GitFilterCommandTest(_GitCommandCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self._saved_run_proc = scripts.run
+        self._saved_run_proc = git.run
         self.dirty = ''
 
         def fake_run(*_a: Any, **_k: Any) -> Any:
             return MagicMock(returncode=0, stdout=self.dirty)
-        scripts.run = fake_run                      # type: ignore[assignment]
+        git.run = fake_run                      # type: ignore[assignment]
 
     def tearDown(self) -> None:
-        scripts.run = self._saved_run_proc          # type: ignore[assignment]
+        git.run = self._saved_run_proc          # type: ignore[assignment]
         super().tearDown()
 
     def test_status_is_a_passthrough(self) -> None:
-        self.assertEqual(scripts.git_filter(), 0)
+        self.assertEqual(git.git_filter(), 0)
         self.assertEqual(len(self.cmdlines), 1)
         self.assertIn('gitfilter status', self.cmdlines[0])
 
     def test_install_wires_then_rechecks_out(self) -> None:
-        self.assertEqual(scripts.git_filter('install'), 0)
+        self.assertEqual(git.git_filter('install'), 0)
         self.assertEqual(len(self.cmdlines), 2)
         self.assertIn('gitfilter install', self.cmdlines[0])
         self.assertIn('git checkout -- solutions/private', self.cmdlines[1])
 
     def test_refused_install_stops_before_the_recheckout(self) -> None:
         self.rcs = [1]                              # not key-authorized: install refuses
-        self.assertEqual(scripts.git_filter('install'), 1)
+        self.assertEqual(git.git_filter('install'), 1)
         self.assertEqual(len(self.cmdlines), 1)
 
     def test_local_private_edits_skip_the_recheckout(self) -> None:
         self.dirty = ' M solutions/private/p0101/x.py'
-        self.assertEqual(scripts.git_filter('install'), 0)
+        self.assertEqual(git.git_filter('install'), 0)
         self.assertEqual(len(self.cmdlines), 1)     # wired, but nothing clobbered
 
 
@@ -360,37 +360,37 @@ class EncKeyPullFlowTest(_GitCommandCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self._saved_master = scripts.read_master_key
-        self._saved_run_proc = scripts.run
+        self._saved_master = git.read_master_key
+        self._saved_run_proc = git.run
         self.master = MagicMock(return_value=b'\x00' * 32)
         self.master.cache_clear = MagicMock()
-        scripts.read_master_key = self.master       # type: ignore[assignment]
+        git.read_master_key = self.master       # type: ignore[assignment]
 
     def tearDown(self) -> None:
-        scripts.read_master_key = self._saved_master  # type: ignore[assignment]
-        scripts.run = self._saved_run_proc          # type: ignore[assignment]
+        git.read_master_key = self._saved_master  # type: ignore[assignment]
+        git.run = self._saved_run_proc          # type: ignore[assignment]
         super().tearDown()
 
     def _wire_state(self, wired: bool) -> None:
         def fake_run(*_a: Any, **_k: Any) -> Any:
             return MagicMock(returncode=0 if wired else 1)
-        scripts.run = fake_run                      # type: ignore[assignment]
+        git.run = fake_run                      # type: ignore[assignment]
 
     def test_already_wired_is_a_silent_noop(self) -> None:
         self._wire_state(wired=True)
-        scripts._enc_key_pull_flow()
+        git._enc_key_pull_flow()
         self.assertEqual(self.cmdlines, [])
         self.master.assert_not_called()
 
     def test_unauthorized_is_a_silent_noop(self) -> None:
         self._wire_state(wired=False)
         self.master.side_effect = KeyError('no entry for this public key')
-        scripts._enc_key_pull_flow()
+        git._enc_key_pull_flow()
         self.assertEqual(self.cmdlines, [])
 
     def test_newly_authorized_wires_and_rechecks_out(self) -> None:
         self._wire_state(wired=False)
-        scripts._enc_key_pull_flow()
+        git._enc_key_pull_flow()
         self.master.cache_clear.assert_called_once()    # the pull may have delivered access
         self.assertEqual(len(self.cmdlines), 2)
         self.assertIn('solver.crypto.gitfilter install', self.cmdlines[0])
@@ -399,7 +399,7 @@ class EncKeyPullFlowTest(_GitCommandCase):
     def test_failed_install_skips_the_recheckout(self) -> None:
         self._wire_state(wired=False)
         self.rcs = [1]                              # install refused (key check failed late)
-        scripts._enc_key_pull_flow()
+        git._enc_key_pull_flow()
         self.assertEqual(len(self.cmdlines), 1)
 
 
@@ -425,37 +425,37 @@ class CanAmendTest(unittest.TestCase):
                 return MagicMock(returncode=0, stdout=self.status)
             raise AssertionError(f'unexpected run: {argv}')
 
-        self._saved_run = scripts.run
-        self._saved_remotes = scripts._remotes_containing_head
-        self._saved_paths = scripts._commit_paths
-        scripts.run = fake_run                       # type: ignore[assignment]
-        scripts._remotes_containing_head = lambda: self.pushed  # type: ignore[assignment]
-        scripts._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
+        self._saved_run = git.run
+        self._saved_remotes = git._remotes_containing_head
+        self._saved_paths = git._commit_paths
+        git.run = fake_run                       # type: ignore[assignment]
+        git._remotes_containing_head = lambda: self.pushed  # type: ignore[assignment]
+        git._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
         self.problem: Any = MagicMock(number=218)
 
     def tearDown(self) -> None:
-        scripts.run = self._saved_run                # type: ignore[assignment]
-        scripts._remotes_containing_head = self._saved_remotes  # type: ignore[assignment]
-        scripts._commit_paths = self._saved_paths    # type: ignore[assignment]
+        git.run = self._saved_run                # type: ignore[assignment]
+        git._remotes_containing_head = self._saved_remotes  # type: ignore[assignment]
+        git._commit_paths = self._saved_paths    # type: ignore[assignment]
 
     def test_unpushed_head_with_dirty_paths_can_amend(self) -> None:
-        self.assertTrue(scripts._can_amend(self.problem))
+        self.assertTrue(git._can_amend(self.problem))
 
     def test_no_head_cannot_amend(self) -> None:
         self.head_rc = 1                             # no commit to amend yet
-        self.assertFalse(scripts._can_amend(self.problem))
+        self.assertFalse(git._can_amend(self.problem))
 
     def test_a_pushed_head_cannot_amend(self) -> None:
         self.pushed = ['origin/user/t-000000']       # on origin — amending would force-push
-        self.assertFalse(scripts._can_amend(self.problem))
+        self.assertFalse(git._can_amend(self.problem))
 
     def test_an_undecidable_push_state_cannot_amend(self) -> None:
         self.pushed = None                           # cannot tell — never assume unpushed
-        self.assertFalse(scripts._can_amend(self.problem))
+        self.assertFalse(git._can_amend(self.problem))
 
     def test_clean_paths_cannot_amend(self) -> None:
         self.status = ''                             # nothing under this problem changed
-        self.assertFalse(scripts._can_amend(self.problem))
+        self.assertFalse(git._can_amend(self.problem))
 
 
 class GitCommitDispatchTest(_GitCommandCase):
@@ -475,45 +475,45 @@ class GitCommitDispatchTest(_GitCommandCase):
             self.amend_calls += 1
             return self.amend_rc
 
-        self._saved_can_amend = scripts._can_amend
-        self._saved_amend = scripts.git_commit_amend
-        self._saved_paths = scripts._commit_paths
-        scripts._can_amend = lambda problem: self.amendable  # type: ignore[assignment]
-        scripts.git_commit_amend = fake_amend        # type: ignore[assignment]
-        scripts._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
+        self._saved_can_amend = git._can_amend
+        self._saved_amend = git.git_commit_amend
+        self._saved_paths = git._commit_paths
+        git._can_amend = lambda problem: self.amendable  # type: ignore[assignment]
+        git.git_commit_amend = fake_amend        # type: ignore[assignment]
+        git._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
         self.as_profile('contributor')
         self.problem: Any = MagicMock(number=218)
 
     def tearDown(self) -> None:
-        scripts._can_amend = self._saved_can_amend   # type: ignore[assignment]
-        scripts.git_commit_amend = self._saved_amend  # type: ignore[assignment]
-        scripts._commit_paths = self._saved_paths    # type: ignore[assignment]
+        git._can_amend = self._saved_can_amend   # type: ignore[assignment]
+        git.git_commit_amend = self._saved_amend  # type: ignore[assignment]
+        git._commit_paths = self._saved_paths    # type: ignore[assignment]
         super().tearDown()
 
     def test_empty_message_amends_when_it_can(self) -> None:
-        self.assertEqual(scripts.git_commit(self.problem), 0)
+        self.assertEqual(git.git_commit(self.problem), 0)
         self.assertEqual(self.amend_calls, 1)
         self.assertEqual(self.cmdlines, [])          # folded into HEAD; no fresh commit ran
 
     def test_a_failing_amend_is_returned_not_retried_as_fresh(self) -> None:
         self.amend_rc = ExitCodes.EXIT_ERROR         # _can_amend said yes, so trust the amend
-        self.assertEqual(scripts.git_commit(self.problem), ExitCodes.EXIT_ERROR)
+        self.assertEqual(git.git_commit(self.problem), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])          # never a second, fresh commit
 
     def test_empty_message_commits_fresh_when_it_cannot_amend(self) -> None:
         self.amendable = False
-        self.assertEqual(scripts.git_commit(self.problem), 0)
+        self.assertEqual(git.git_commit(self.problem), 0)
         self.assertEqual(self.amend_calls, 0)
         self.assertEqual(self.cmdlines, [self._FRESH])
 
     def test_reset_suppresses_the_amend_even_when_it_could(self) -> None:
         self.amendable = True                        # amendable — but --reset must win
-        self.assertEqual(scripts.git_commit(self.problem, reset=True), 0)
+        self.assertEqual(git.git_commit(self.problem, reset=True), 0)
         self.assertEqual(self.amend_calls, 0)
         self.assertEqual(self.cmdlines, ['git reset --soft origin/master && ' + self._FRESH])
 
     def test_an_explicit_message_never_amends(self) -> None:
-        self.assertEqual(scripts.git_commit(self.problem, 'hand-written'), 0)
+        self.assertEqual(git.git_commit(self.problem, 'hand-written'), 0)
         self.assertEqual(self.amend_calls, 0)
         self.assertEqual(self.cmdlines,
                          ['git add -A solutions/public/p0218 && git commit --message "hand-written"'])
