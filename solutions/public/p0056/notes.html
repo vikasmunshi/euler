@@ -1,76 +1,23 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
-    This problem asks for the maximum <em>digit sum</em> - the sum of the decimal digits of a number - over all values of the form a<sup>b</sup> with a and b both below 100. The digit sum of 1234, for instance, is 1+2+3+4 = 10. There is no closed-form shortcut here: the digit sum is a property of the decimal representation, and the decimal representation of a power has no simple analytic structure. The problem is therefore inherently computational. Its one genuine obstacle is size: a<sup>b</sup> for a and b near 99 has roughly b * log<sub>10</sub>(a) ~= 99 * 2 ~= 196 decimal digits, far beyond what a 64-bit integer can hold. We need <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a> (commonly called "bignum" arithmetic) to compute these numbers exactly, because a single rounding error anywhere in the high digits would corrupt the digit sum.
+<h3>Problem Analysis</h3>
+<p>
+    This problem asks for the maximum <em>digit sum</em> - the sum of the decimal digits of a number - over all values of the form a<sup>b</sup> with a and b both below 100. The digit sum of 1234, for instance, is 1+2+3+4 = 10. There is no closed-form shortcut here: the digit sum is a property of the decimal representation, and the decimal representation of a power has no simple analytic structure. The problem is therefore inherently computational. Its one genuine obstacle is size: a<sup>b</sup> for a and b near 99 has roughly b * log<sub>10</sub>(a) ~= 99 * 2 ~= 196 decimal digits, far beyond what a 64-bit integer can hold. We need <a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision arithmetic</a> (commonly called "bignum" arithmetic) to compute these numbers exactly, because a single rounding error anywhere in the high digits would corrupt the digit sum.
   </p>
-  <p>
-    The observation that makes the problem tractable is that the search space is minuscule. There are at most 99 * 99 = 9801 pairs (a, b), and even after generalising the bound to 10<sup>num_digits</sup> the count stays modest. So a <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a> suffices: enumerate every pair, compute a<sup>b</sup> exactly, sum its digits, keep a running maximum. Letting N be the range limit and D ~= N * log<sub>10</sub>(N) the digit count of the largest value, computing one power by repeated multiplication costs O(N * D) digit-operations and summing its digits costs O(D), so the whole search is roughly O(N<sup>3</sup> log N) in the worst case. For the canonical N = 99 this is trivially fast.
+<p>
+    The observation that makes the problem tractable is that the search space is minuscule. There are at most 99 * 99 = 9801 pairs (a, b), and even after generalising the bound to 10<sup>num_digits</sup> the count stays modest. So a <a class="reference-source" href="https://en.wikipedia.org/wiki/Brute-force_search" rel="noopener noreferrer" target="_blank">brute-force search</a> suffices: enumerate every pair, compute a<sup>b</sup> exactly, sum its digits, keep a running maximum. Letting N be the range limit and D ~= N * log<sub>10</sub>(N) the digit count of the largest value, computing one power by repeated multiplication costs O(N * D) digit-operations and summing its digits costs O(D), so the whole search is roughly O(N<sup>3</sup> log N) in the worst case. For the canonical N = 99 this is trivially fast.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Brute-force big-integer digit-sum search (Solution 0)</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Brute-force big-integer digit-sum search (Solution 0)</h4>
+<p>
     Both the Python and C files implement the same algorithm: iterate over every (base, exp) pair in the search range, compute <code>base**exp</code> exactly, sum its digits, and track the maximum. The search is parameterised by <code>num_digits</code>, with <code>stop_at = 10**num_digits</code> as the exclusive upper bound, so <code>num_digits=2</code> reproduces the original Project Euler range 1..99.
   </p>
-  <p>
+<p>
     A deliberate, pragmatic choice in both files is that they do not scan the full range. They restrict the base to the top 100 values and the exponent to the top 10 values below <code>stop_at</code> (for <code>num_digits=2</code>: bases 1..99, exponents 90..99). The reasoning is empirical. A digit sum tends to be largest when a number has many large digits, and the most promising candidates are large bases raised to high exponents - small bases or small exponents produce shorter numbers with fewer digits to sum. This pruning yields the correct answer for every test case here, but it is a heuristic shortcut rather than a proven bound; a fully rigorous solution would scan all pairs. The Python <code>--show</code> mode exists partly to sanity-check exactly this kind of assumption by visualising where the maximum actually lands in the grid.
   </p>
-  <p>
-    In the <strong>Python solution</strong>, the built-in <code>int</code> is already <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision</a>, so <code>base**exp</code> directly produces the exact value with no library and no overflow. I extract the digit sum with the idiom <code>sum(int(d) for d in str(base**exp))</code>: convert the number to its decimal string and sum the integer value of each character. The entire search collapses into a single comprehension passed to <code>max()</code>. The optional <code>--show</code> branch builds <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a> matrices of digit sums, digit lengths, and average digit values across the grid and renders three <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html" class="reference-source" target="_blank" rel="noopener noreferrer">Matplotlib heatmaps</a> - a diagnostic aid entirely separate from the answer computation.
+<p>
+    In the <strong>Python solution</strong>, the built-in <code>int</code> is already <a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision</a>, so <code>base**exp</code> directly produces the exact value with no library and no overflow. I extract the digit sum with the idiom <code>sum(int(d) for d in str(base**exp))</code>: convert the number to its decimal string and sum the integer value of each character. The entire search collapses into a single comprehension passed to <code>max()</code>. The optional <code>--show</code> branch builds <a class="reference-source" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html" rel="noopener noreferrer" target="_blank">NumPy</a> matrices of digit sums, digit lengths, and average digit values across the grid and renders three <a class="reference-source" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html" rel="noopener noreferrer" target="_blank">Matplotlib heatmaps</a> - a diagnostic aid entirely separate from the answer computation.
   </p>
-  <p>
+<p>
     In the <strong>C solution</strong>, there is no native bignum, so I implement a minimal one. A <code>BigInt</code> is a heap-allocated struct holding a little-endian array of single decimal digits (index 0 = units place), a length, and a capacity. I chose base-10, one-digit-per-element storage on purpose: it makes the digit sum a trivial loop over the array with no extraction at all - exactly the operation this problem performs constantly. The only multiplication I need is <code>bigint_mul_int</code> (multiply by a scalar), a left-to-right carry-propagation loop. To compute the powers efficiently, for each base I build base<sup>exp_start</sup> once via repeated scalar multiplies, then for each later exponent I multiply by the base just once. This incremental scheme means every exponent step after the first costs exactly one scalar multiply instead of recomputing the power from scratch. I pre-allocate the digit buffer to a conservative upper bound (<code>max_exp * (num_digits+1) + 100</code>) and keep a doubling-<code>realloc</code> fallback in the multiply routine as a safety net.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>Python arbitrary-precision integers</h4>
-  <p>
-    Python's <code>int</code> grows automatically to any size, so <code>base**exp</code> produces an exact ~200-digit result with no library and no overflow risk. When numbers exceed 64 bits but raw speed is not the deciding factor, reaching for Python's native <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a> is the right first instinct: it eliminates an entire class of overflow bugs and keeps the code short. Keep this in mind for any problem involving factorials, large exponentials, or combinatorial counts.
-  </p>
-  <h4>String-based digit extraction</h4>
-  <p>
-    The idiom <code>sum(int(d) for d in str(n))</code> - convert to a decimal string, map each character back to an integer, and sum - is the cleanest way to compute a digit sum in Python. It uses a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> so no intermediate list is materialised. The alternative of repeated <code>n % 10</code> / <code>n //= 10</code> is more verbose and more error-prone. This pattern is worth memorising for any digit-manipulation task.
-  </p>
-  <h4>Little-endian base-10 big integer in C</h4>
-  <p>
-    Storing a big integer as an array of single decimal digits in <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a> order is a design choice tuned to this problem. Scalar multiplication becomes a simple forward loop - multiply, add carry, store, propagate - with no index reversal. More importantly, the digit sum is free: it is just a sum over the array, because we are already in base 10. When you build a custom bignum for a digit-sum problem, prefer base-10 storage for exactly this reason; for general arithmetic-heavy work a higher <a href="https://en.wikipedia.org/wiki/Radix" class="reference-source" target="_blank" rel="noopener noreferrer">radix</a> would be faster but would force you to extract digits afterward.
-  </p>
-  <h4>Incremental exponentiation (multiply-and-accumulate)</h4>
-  <p>
-    Rather than recomputing base<sup>exp</sup> from scratch for each exponent, I compute base<sup>exp_start</sup> once and then multiply by the base a single time per subsequent exponent. This is the incremental-update pattern: if you consume f(x), f(x+1), f(x+2), ... in order and f(x+1) is a cheap function of f(x), compute them in sequence. Here the cheap function is "multiply by base." It cuts the per-base multiplication count from O(exp_range * exp_max) down to O(exp_range + exp_start), and it generalises to running products, recurrences, and any sequence of powers.
-  </p>
-  <h4>Overflow-safe carry arithmetic in C</h4>
-  <p>
-    Inside <code>bigint_mul_int</code> I widen each digit to <code>long long</code> before forming <code>digit * m + carry</code>. A single base-10 digit times a multiplier up to ~999 plus a carry cannot overflow a 32-bit <code>int</code> in this problem, but widening first is the disciplined habit: it costs nothing and makes the routine correct for any multiplier the caller might pass. <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">Integer overflow</a> is silent and corrupting in C, so promote operands before the multiply, not after.
-  </p>
-  <h4>Capacity pre-allocation with realloc fallback in C</h4>
-  <p>
-    I compute a conservative upper bound on the digit count, allocate that much up front, and still keep a doubling-<a href="https://en.cppreference.com/w/c/memory/realloc" class="reference-source" target="_blank" rel="noopener noreferrer">realloc</a> guard inside the multiply routine. This is the canonical C <a href="https://en.wikipedia.org/wiki/Dynamic_array" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic array</a> discipline: allocate generously to avoid reallocation in the hot loop, but keep a growth path so an underestimate can never corrupt memory.
-  </p>
-  <h4>Command-line parameterisation and timing harness</h4>
-  <p>
-    Both files accept a <code>num_digits</code> argument and run through a shared runner that times the solver and verifies the result. Separating this harness from the algorithmic core makes benchmarking and regression-checking effortless - a habit worth adopting in any performance-sensitive code.
-  </p>
-  <h4>Optional visualisation mode</h4>
-  <p>
-    The Python <code>--show</code> branch builds <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a> matrices and renders <a href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html" class="reference-source" target="_blank" rel="noopener noreferrer">Matplotlib heatmaps</a> of the digit sums, digit lengths, and average digit values across the (base, exponent) grid. Gating an expensive, dependency-heavy diagnostic behind a flag keeps the default path lean while giving an on-demand window into the structure of the search space - exactly what you want when validating a pruning heuristic like the top-100-bases / top-10-exponents shortcut used here.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is that the whole problem reduces to "have exact big-integer arithmetic, then brute force a small grid." Python gives you that arithmetic for free; in C you write a minimal bignum tailored to the only two operations you need - multiply by a scalar and sum the digits.
-  </p>
-  <p>
-    The benchmarks reveal an instructive crossover. For the small and medium cases the C solution wins comfortably (0.0000 s vs 0.0001 s on dev, 0.0014 s vs 0.0069 s on main) because the work is tiny and CPython's interpreter overhead dominates. But on the large <code>num_digits=3</code> case Python edges ahead (0.1941 s vs 0.2595 s): CPython's internal bignum uses well-optimised, high-radix C routines, whereas my hand-written single-digit base-10 representation pays a per-digit cost on every multiply. For large operands the quality of the underlying arithmetic outweighs the raw language advantage. This is a healthy reminder that "rewrite it in C" does not automatically mean "faster" - data representation and algorithm quality matter at least as much as the language.
-  </p>
-  <ul>
-    <li>When a problem involves large powers, factorials, or combinatorial numbers, reach for <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a> before writing your own - native bignums are correct, overflow-free, and often fast.</li>
-    <li>If you need digit sums often, store your big integer in base 10, one digit per element; the digit sum then becomes a trivial loop with no extraction.</li>
-    <li>The incremental-update pattern - derive f(x+1) cheaply from f(x) instead of recomputing - is a powerful, broadly applicable optimisation whenever values are consumed in sequence.</li>
-    <li>In Python, <code>sum(int(d) for d in str(n))</code> is the idiomatic, readable way to extract decimal digits; avoid hand-rolled division/modulo loops unless performance demands them.</li>
-    <li>Pre-allocate to a safe upper bound and keep a doubling-<a href="https://en.cppreference.com/w/c/memory/realloc" class="reference-source" target="_blank" rel="noopener noreferrer">realloc</a> fallback - the standard C dynamic-array discipline that avoids hot-loop allocation without risking overruns.</li>
-    <li>Widen operands before multiplying in C to keep <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">integer overflow</a> from silently corrupting results.</li>
-    <li>A faster language is not automatically a faster program: a naive single-digit C bignum can lose to a mature high-radix runtime on large inputs.</li>
-    <li>Gate expensive diagnostics and visualisations behind a flag so the default path stays lean while insight remains one command away.</li>
-  </ul>
 </article>

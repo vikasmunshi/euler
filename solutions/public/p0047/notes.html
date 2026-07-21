@@ -1,21 +1,18 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
-This problem rests on <a href="https://en.wikipedia.org/wiki/Integer_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">prime factorization</a> - decomposing an integer into the primes whose product equals it. The decisive subtlety is the word <em>distinct</em>: we count only how many <em>different</em> primes divide a number, ignoring multiplicity. Thus 644 = 2<sup>2</sup> x 7 x 23 has three distinct prime factors (2, 7, 23) even though the prime 2 appears squared. The task is to find the first integer that begins a run of four consecutive integers, each having exactly four distinct prime factors.
+This problem rests on <a class="reference-source" href="https://en.wikipedia.org/wiki/Integer_factorization" rel="noopener noreferrer" target="_blank">prime factorization</a> - decomposing an integer into the primes whose product equals it. The decisive subtlety is the word <em>distinct</em>: we count only how many <em>different</em> primes divide a number, ignoring multiplicity. Thus 644 = 2<sup>2</sup> x 7 x 23 has three distinct prime factors (2, 7, 23) even though the prime 2 appears squared. The task is to find the first integer that begins a run of four consecutive integers, each having exactly four distinct prime factors.
 </p>
 <p>
-The workhorse here is <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>: to factor n, I test candidate divisors d from 2 upward, and each time d divides n I record it and strip out every copy. The first efficiency observation is that I only need to test divisors up to the square root of n - if n had a factor larger than its square root, the cofactor would be smaller than the square root and would already have been found, so whatever survives the loop above 1 is itself a prime factor. The second, equally important observation is that no <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">sieve</a> or precomputed table is needed: the answer (134,043) is small, so a plain linear scan suffices. Counting distinct prime factors of n costs O(sqrt(n)), and scanning candidates up to the answer A while testing windows of length n gives an overall cost of about O(A * sqrt(A)) - a few million operations, which is trivial at this scale.
+The workhorse here is <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a>: to factor n, I test candidate divisors d from 2 upward, and each time d divides n I record it and strip out every copy. The first efficiency observation is that I only need to test divisors up to the square root of n - if n had a factor larger than its square root, the cofactor would be smaller than the square root and would already have been found, so whatever survives the loop above 1 is itself a prime factor. The second, equally important observation is that no <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">sieve</a> or precomputed table is needed: the answer (134,043) is small, so a plain linear scan suffices. Counting distinct prime factors of n costs O(sqrt(n)), and scanning candidates up to the answer A while testing windows of length n gives an overall cost of about O(A * sqrt(A)) - a few million operations, which is trivial at this scale.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Linear Scan with Trial Division (Python and C)</h4>
 <p>
 Both files implement the same algorithm, so I describe them together. There are two parts: a function that counts the distinct prime factors of one integer, and a search loop that finds the first window of n consecutive qualifying integers.
 </p>
 <p>
-The counter uses <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> with in-place reduction. I begin at d = 2 and loop while d*d &lt;= n. When d divides n, I increment the count once, then drain out every copy of that factor with an inner loop (<code>while n % d == 0: n //= d</code>). Draining all copies is precisely what makes a separate primality test unnecessary: by the time d reaches a composite value such as 4, the factor 2 has already been fully stripped, so 4 can never divide the reduced n. Every d that successfully divides is therefore guaranteed prime. After the loop, if n still exceeds 1, that remainder is a prime larger than the square root of the original, so I count it as well. The result is exactly the number of distinct prime factors.
+The counter uses <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a> with in-place reduction. I begin at d = 2 and loop while d*d &lt;= n. When d divides n, I increment the count once, then drain out every copy of that factor with an inner loop (<code>while n % d == 0: n //= d</code>). Draining all copies is precisely what makes a separate primality test unnecessary: by the time d reaches a composite value such as 4, the factor 2 has already been fully stripped, so 4 can never divide the reduced n. Every d that successfully divides is therefore guaranteed prime. After the loop, if n still exceeds 1, that remainder is a prime larger than the square root of the original, so I count it as well. The result is exactly the number of distinct prime factors.
 </p>
 <p>
 The search loop starts at number = 2 and increments by 1. For each starting position it checks whether number, number+1, ..., number+(n-1) all have exactly n distinct prime factors, using early exit: the instant one element fails, the window is abandoned. In C this is a flag (<code>all_match</code>) plus a <code>break</code>; in Python it is <code>not any(prime_factor_count(number + i) != n for i in range(0, n))</code>, where <code>any</code> short-circuits identically.
@@ -23,46 +20,4 @@ The search loop starts at number = 2 and increments by 1. For each starting posi
 <p>
 Both programs take n as a command-line argument, so a single executable solves all three test cases (n=2, n=3, n=4) without modification. The Python version adds one layer of structure: <code>prime_factorization</code> returns a tuple of (prime, exponent) pairs and <code>prime_factor_count</code> simply returns its length. That is slightly more than this problem needs, but it leaves a reusable building block. The C version counts inline and omits the tuple machinery that C does not express naturally, which is marginally simpler and faster.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Trial Division with In-Place Reduction</h4>
-<p>
-The inner loop that exhaustively divides out each factor is the load-bearing technique of this solution. By shrinking n as factors are removed, I guarantee that subsequent successful divisions occur only for primes - composites are skipped automatically because their prime constituents were already stripped. This eliminates any need to keep a prime list or run a primality check, keeping the function entirely self-contained. Reach for this whenever you need a <a href="https://en.wikipedia.org/wiki/Integer_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">factorization</a> or a factor count for numbers in a modest range.
-</p>
-
-<h4>Short-Circuit Window Evaluation</h4>
-<p>
-Most candidate windows fail on their very first element, so testing all n elements every time would waste work. The C code sets a flag and breaks; the Python code uses <code>any</code> over a generator, which stops at the first truthy value. Short-circuiting reduces the expected per-candidate cost from n factor counts to roughly one. This bail-out-as-soon-as-the-answer-is-known pattern applies any time a test is a conjunction or disjunction of sub-tests.
-</p>
-
-<h4>Declarative Search with itertools.count and next</h4>
-<p>
-The Python <code>solve</code> expresses the search as <code>next(number for number in itertools.count(2) if ...)</code>. <a href="https://docs.python.org/3/library/itertools.html#itertools.count" class="reference-source" target="_blank" rel="noopener noreferrer">itertools.count</a> yields an unbounded stream of integers, and <a href="https://docs.python.org/3/library/functions.html#next" class="reference-source" target="_blank" rel="noopener noreferrer">next</a> pulls the first that satisfies the predicate. This reads as "the first number such that the condition holds," directly mirroring the problem statement and avoiding manual counters and termination logic - a common source of off-by-one bugs. Use it whenever you are searching for the first element of a possibly infinite sequence meeting a condition.
-</p>
-
-<h4>Separation of Factorization and Counting</h4>
-<p>
-The Python code splits <code>prime_factorization</code> (which yields primes with exponents) from <code>prime_factor_count</code> (which discards the exponents). This honors the single-responsibility principle and leaves a reusable component for future problems needing multiplicities. The C code collapses the two because C lacks convenient variable-length tuples and the generality is not required here. Both choices are deliberate: favor reusability where it is cheap, favor simplicity where the abstraction would only add boilerplate.
-</p>
-
-<h4>Parameterization via Command-Line Arguments</h4>
-<p>
-Passing n at runtime rather than hard-coding 4 lets one executable cover every test case. This is good engineering hygiene: it supports automated regression testing across inputs and lets me validate correctness on small, hand-checkable cases (n=2 yields 14, n=3 yields 644) before trusting the program on the large one.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The unlocking insight is that counting distinct prime factors by <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> with in-place reduction is both simple and entirely sufficient: no <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">sieve</a> is needed because the search range is small and contiguous and the per-number cost of O(sqrt(n)) is tiny. The two implementations share an algorithm; the difference is purely language overhead. On the main case the C binary runs in about 0.0210 s while Python takes about 0.4726 s, roughly a 22x gap that is typical of compiled versus interpreted tight numeric loops. At this scale Python is perfectly acceptable; for a far larger search range, C or a sieve-based factor-count table would become the better choice.
-</p>
-<ul>
-<li>Trial division with exhaustive in-place factor removal counts distinct primes correctly without any separate primality test or precomputed prime list.</li>
-<li>Only test divisors up to the square root; whatever remains above 1 afterward is itself a prime factor.</li>
-<li>Short-circuit a conjunction of checks - bail out on the first failure to slash the average cost when most cases fail early.</li>
-<li>Separate "compute the full structure" from "extract the summary" when the language makes reuse cheap; collapse them when the abstraction only adds noise.</li>
-<li>Express "find the first element satisfying a predicate" with an unbounded stream plus a first-match pull to avoid manual loop bookkeeping.</li>
-<li>Parameterize on input instead of hard-coding constants so one program serves all test cases and supports automated testing.</li>
-<li>Before building a complex data structure, estimate answer size times per-step cost - if it fits your time budget, a plain linear scan is the simplest correct choice.</li>
-</ul>
-
 </article>

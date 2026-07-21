@@ -1,24 +1,21 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
 This problem asks me to find the smallest perfect cube whose digits can be rearranged into exactly
 five distinct cubes (counting the cube itself). The mathematical core is the notion of a
-<a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutation</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Permutation" rel="noopener noreferrer" target="_blank">permutation</a>
 of digits: two numbers are digit-permutations of one another precisely when they contain the same
 digits in the same counts - that is, they share the same
-<a href="https://en.wikipedia.org/wiki/Multiset" class="reference-source" target="_blank" rel="noopener noreferrer">multiset</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Multiset" rel="noopener noreferrer" target="_blank">multiset</a>
 of digits. The observation that makes this tractable is that I can convert this "equal up to
 reordering" relation into an exact equality test by computing a canonical form. If I sort the digits
 of a number into ascending order and join them back into a string, then two numbers are
 digit-permutations of each other if and only if their sorted-digit strings are identical. That sorted
 string becomes a shared key for every member of a permutation class, collapsing an exponential
 equivalence relation into a single
-<a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Hash_table" rel="noopener noreferrer" target="_blank">hash table</a>
 lookup.
 </p>
-
 <p>
 The second key insight is that permutations of a number always have the same number of digits.
 Therefore all cubes that could possibly be permutations of one another live in the same digit-length
@@ -30,159 +27,46 @@ d-digit number has about d/3 digits), and each cube costs O(d log d) to sort its
 work is therefore O(10^(d/3) * d log d) up to the answer's length, which is small enough that every
 test case finishes in well under 100 ms.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Digit-canonical grouping by digit-length band</h4>
-
 <p>
 Both the Python and C files implement the identical algorithm; they differ only in how the grouping
 map is realised.
 </p>
-
 <p>
 <strong>Step 1 - Bound the range of d-digit cubes.</strong> For a target digit-length d, the smallest
 d-digit number is 10^(d-1) and the largest is 10^d - 1. I need the integers whose cubes fall in this
 band, so I take the cube root of each bound. I use <code>ceil(cbrt(...))</code> on the lower bound as
 the inclusive start, and <code>ceil(cbrt(...)) + 1</code> on the upper bound as the exclusive stop.
 Using the ceiling rather than a floor or a bare cast guards against a slightly-under
-<a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" rel="noopener noreferrer" target="_blank">floating-point</a>
 representation of an exact root pulling in a cube from the wrong digit band.
 </p>
-
 <p>
 <strong>Step 2 - Build the canonical-key map.</strong> For each integer i in the range I compute i^3,
 convert it to a decimal string, sort the characters, and use that sorted string as a key into a map
 whose values are lists of cubes sharing that key. In Python this is
-<a href="https://docs.python.org/3/library/collections.html#collections.defaultdict" class="reference-source" target="_blank" rel="noopener noreferrer">collections.defaultdict(list)</a>
+<a class="reference-source" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" rel="noopener noreferrer" target="_blank">collections.defaultdict(list)</a>
 with <code>permuted_cubes[key].append(cube)</code>. In C it is a custom hash table with 65536 buckets,
 each chaining entries that hold a dynamically growing <code>long long</code> array.
 </p>
-
 <p>
 <strong>Step 3 - Scan for groups of the target size.</strong> Once the batch is fully grouped, I
 examine every entry whose list has exactly <code>num_permutations</code> members. Each such group is a
 candidate, and its answer is the minimum cube in the group. I take the minimum over all qualifying
 groups at this digit-length.
 </p>
-
 <p>
 <strong>Step 4 - Advance.</strong> If no group qualified, I increment the digit-length and repeat. The
 first digit-length that yields a result holds the globally smallest answer, since all shorter cubes
 were already exhausted.
 </p>
-
 <p>
 <strong>Language-specific differences.</strong> Python leans entirely on the built-in dictionary,
 which handles hashing and resizing transparently. The C version replicates these semantics by hand: a
 power-of-two bucket array, a
-<a href="https://en.wikipedia.org/wiki/Daniel_J._Bernstein" class="reference-source" target="_blank" rel="noopener noreferrer">djb2</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Daniel_J._Bernstein" rel="noopener noreferrer" target="_blank">djb2</a>
 string hash, and amortised-doubling value arrays. The extra effort buys roughly a 2x speedup, but both
 stay comfortably fast.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Canonical sorted-digit keys for multiset equality</h4>
-<p>
-Sorting the digits of a number into a string produces a representative that is identical for all its
-<a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutations</a>.
-This is the universal trick for testing "equal up to reordering": compute a canonical form and use it
-as a key. It applies to anagram grouping, fingerprinting collections by their element
-<a href="https://en.wikipedia.org/wiki/Multiset" class="reference-source" target="_blank" rel="noopener noreferrer">multiset</a>,
-and many combinatorial bucketing problems. Sorting costs O(d log d) per item but reduces the
-equivalence test to an O(1) lookup.
-</p>
-
-<h4>Batching by a structural property to bound an unbounded search</h4>
-<p>
-Instead of searching all integers up to some arbitrary limit, I partition the space by digit-length -
-a property that permutations preserve. Each batch is finite, and the monotone ordering of
-digit-lengths gives a clean correctness argument for early termination: the first batch that produces
-a hit also contains the smallest valid answer. Reach for this whenever a problem has a natural
-partition that respects the ordering you care about.
-</p>
-
-<h4>defaultdict for accumulator maps (Python)</h4>
-<p>
-<a href="https://docs.python.org/3/library/collections.html#collections.defaultdict" class="reference-source" target="_blank" rel="noopener noreferrer">collections.defaultdict(list)</a>
-lets me write <code>permuted_cubes[key].append(cube)</code> unconditionally - a missing key
-auto-creates an empty list. This removes the noisy "check then insert" boilerplate that grouping code
-otherwise needs and is the idiomatic Python choice for any bucketing task.
-</p>
-
-<h4>Generator expressions fed straight into a constructor (Python)</h4>
-<p>
-The line <code>tuple((i**3 for i in range(start_range, stop_range)))</code> passes a lazy
-<a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a>
-into <code>tuple()</code>, which materialises it without building an intermediate list. The same idiom
-works with <code>set()</code>, <code>list()</code>, and <code>min()</code>, saving an allocation when
-the sequence is large. The qualifying-group scan reuses it: <code>set((min(v) for ... if len(v) == n))</code>.
-</p>
-
-<h4>djb2 hashing with a power-of-two table size (C)</h4>
-<p>
-The C hash uses
-<a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">djb2</a>:
-seed 5381, then <code>h = (h &lt;&lt; 5) + h + c</code> per character (that is, h*33 + c). It
-distributes short strings well with no library dependency. Because the table has 65536 buckets - a
-power of two - the final reduction is a bitwise <code>&amp; (HASH_SIZE - 1)</code> instead of a costly
-modulo, which matters when the hash runs millions of times.
-</p>
-
-<h4>Amortised-doubling dynamic arrays (C)</h4>
-<p>
-Each entry's <code>values</code> array starts at capacity 4 and doubles when full via
-<a href="https://en.cppreference.com/w/c/memory/realloc" class="reference-source" target="_blank" rel="noopener noreferrer">realloc</a>.
-<a href="https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost" class="reference-source" target="_blank" rel="noopener noreferrer">Geometric (doubling) expansion</a>
-makes the total copying cost across n insertions O(n), giving O(1) amortised cost per append - the same
-strategy used internally by C++ <code>std::vector</code> and Python's <code>list</code>. It is worth
-implementing by hand in C whenever you need a variable-length list without a standard container.
-</p>
-
-<h4>Ceiling arithmetic for floating-point root boundaries</h4>
-<p>
-When converting a real-valued cube root back into an integer index, I use <code>ceil</code> on the
-lower bound rather than <code>floor</code> or a bare cast. If the exact root is an integer, a
-slightly-under
-<a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a>
-representation would make <code>floor</code> return one too few and pull in cubes from the wrong digit
-band. Ceiling on the lower bound, plus a small margin on the upper bound, is the safe default for this
-kind of conversion.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is reducing a permutation-equivalence test to a canonical-key comparison: sort
-the digits and the whole equivalence class collapses to a single hashable string. The second insight
-is the batch-by-digit-length strategy, which both bounds each iteration and supplies a sound
-termination proof.
-</p>
-
-<p>
-Comparing the two implementations, the C solution is consistently about 1.7x to 2x faster than Python -
-for example 0.0040 s versus 0.0078 s on the main case (five permutations), and roughly 0.0217 s versus
-0.0439 s on the heaviest extra case (seven permutations). The gap is modest because most of the Python
-work happens inside built-in, C-implemented operations: string sorting and dictionary insertion. For
-problems at this scale Python's expressiveness makes it the pragmatic first choice; the hand-written C
-hash map is worthwhile only when the constant factor genuinely matters or the routine runs repeatedly.
-</p>
-
-<ul>
-  <li>To test whether two collections are equal up to reordering, compute a canonical sorted form and
-      compare those - O(d log d) to build, O(1) to look up.</li>
-  <li>When the search space is unbounded, find a structural property (digit count, bit length,
-      magnitude band) that partitions it into finite batches with a monotone ordering, then stop at the
-      first hit.</li>
-  <li>A defaultdict (or an equivalent auto-initialising map) removes the check-then-insert pattern and
-      makes grouping code cleaner.</li>
-  <li>Amortised-doubling arrays give O(1) amortised append and are the right manual choice for
-      variable-length lists in C.</li>
-  <li>Use ceiling, not floor, when turning a real-valued lower bound into an integer index;
-      floating-point underestimation of roots is a classic source of silent off-by-one errors.</li>
-  <li>Size hash tables as powers of two so the index reduction becomes a single bitwise AND instead of
-      a division.</li>
-</ul>
-
 </article>

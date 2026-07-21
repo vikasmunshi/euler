@@ -1,59 +1,20 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
-    This problem has two layers. The outer layer is a small <a href="https://en.wikipedia.org/wiki/Combination" class="reference-source" target="_blank" rel="noopener noreferrer">combinatorial</a> search: I must consider every set of four distinct digits chosen from 1 to 9, of which there are C(9, 4) = 126. For each set I determine which positive integers are expressible, then measure the length of the unbroken run 1, 2, 3, ..., n. The set that maximises that run wins, and the answer is its digits written as a string.
+<h3>Problem Analysis</h3>
+<p>
+    This problem has two layers. The outer layer is a small <a class="reference-source" href="https://en.wikipedia.org/wiki/Combination" rel="noopener noreferrer" target="_blank">combinatorial</a> search: I must consider every set of four distinct digits chosen from 1 to 9, of which there are C(9, 4) = 126. For each set I determine which positive integers are expressible, then measure the length of the unbroken run 1, 2, 3, ..., n. The set that maximises that run wins, and the answer is its digits written as a string.
   </p>
-  <p>
-    The interesting layer is the inner enumeration. Given four numbers, I must explore every parenthesisation and every assignment of the four arithmetic operators to the gaps between them. The naive route is to enumerate all binary <a href="https://en.wikipedia.org/wiki/Binary_expression_tree" class="reference-source" target="_blank" rel="noopener noreferrer">expression trees</a> over four leaves and try each operator at each internal node - a fiddly counting exercise. The unlocking observation is that <em>any</em> arithmetic expression over a pool of k numbers can be built by repeatedly picking two numbers, combining them with one operation, and replacing both with the result. Each step shrinks the pool by one, so after k - 1 steps a single value remains. By iterating over every unordered pair and every applicable operation at each step, I visit every distinct expression tree exactly once - I never have to reason about tree shapes at all. Because subtraction and division are non-commutative, I consider both orderings: for a pair (a, b) I try the absolute difference |a - b| and both quotients a / b and b / a. The recursion is shallow (6 pairs, then 3, then 1), the input size is fixed at four, and the outer loop is just 126 iterations, so the whole program runs in effectively constant time. The only arithmetic subtlety is that division produces non-integers, so I carry all values as <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a> numbers and test for integrality only at the boundary.
+<p>
+    The interesting layer is the inner enumeration. Given four numbers, I must explore every parenthesisation and every assignment of the four arithmetic operators to the gaps between them. The naive route is to enumerate all binary <a class="reference-source" href="https://en.wikipedia.org/wiki/Binary_expression_tree" rel="noopener noreferrer" target="_blank">expression trees</a> over four leaves and try each operator at each internal node - a fiddly counting exercise. The unlocking observation is that <em>any</em> arithmetic expression over a pool of k numbers can be built by repeatedly picking two numbers, combining them with one operation, and replacing both with the result. Each step shrinks the pool by one, so after k - 1 steps a single value remains. By iterating over every unordered pair and every applicable operation at each step, I visit every distinct expression tree exactly once - I never have to reason about tree shapes at all. Because subtraction and division are non-commutative, I consider both orderings: for a pair (a, b) I try the absolute difference |a - b| and both quotients a / b and b / a. The recursion is shallow (6 pairs, then 3, then 1), the input size is fixed at four, and the outer loop is just 126 iterations, so the whole program runs in effectively constant time. The only arithmetic subtlety is that division produces non-integers, so I carry all values as <a class="reference-source" href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" rel="noopener noreferrer" target="_blank">floating-point</a> numbers and test for integrality only at the boundary.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Recursive pool reduction (Python and C)</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Recursive pool reduction (Python and C)</h4>
+<p>
     Both files implement the same algorithm. The core is a recursive routine that receives the current pool of values. If the pool holds a single element, that element is a reachable result and is returned. Otherwise the routine iterates over every unordered pair (i, j), removes those two elements to form a "rest" pool, and for each of the up to five operation results appends that result to the rest pool and recurses. The union of everything the recursive calls return is the full set of reachable values.
   </p>
-  <p>
-    In Python (<code>eval_all_operations</code>) the pool is a tuple and the result is a <code>set</code>. The reduced pool is built with a comprehension that skips the two chosen indices, then I append each operation result and recurse. The guards <code>if b &gt; 0</code> and <code>if a &gt; 0</code> before the divisions avoid division by zero (a zero can arise from a subtraction) and also serve as light pruning. The caller <code>solve</code> loops over the 126 digit sets with four nested ranges enforcing <code>a &lt; b &lt; c &lt; d</code>, filters the returned values for integers via <code>x.is_integer()</code>, then counts the consecutive run from 1 with a simple <code>while length + 1 in results</code> loop. I decorate the recursive function with <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer">functools.lru_cache</a>: because the pool is an unordered multiset, the same intermediate state recurs across different call paths and different digit sets, and caching on the tuple of values lets me reuse that work.
+<p>
+    In Python (<code>eval_all_operations</code>) the pool is a tuple and the result is a <code>set</code>. The reduced pool is built with a comprehension that skips the two chosen indices, then I append each operation result and recurse. The guards <code>if b &gt; 0</code> and <code>if a &gt; 0</code> before the divisions avoid division by zero (a zero can arise from a subtraction) and also serve as light pruning. The caller <code>solve</code> loops over the 126 digit sets with four nested ranges enforcing <code>a &lt; b &lt; c &lt; d</code>, filters the returned values for integers via <code>x.is_integer()</code>, then counts the consecutive run from 1 with a simple <code>while length + 1 in results</code> loop. I decorate the recursive function with <a class="reference-source" href="https://docs.python.org/3/library/functools.html#functools.lru_cache" rel="noopener noreferrer" target="_blank">functools.lru_cache</a>: because the pool is an unordered multiset, the same intermediate state recurs across different call paths and different digit sets, and caching on the tuple of values lets me reuse that work.
   </p>
-  <p>
+<p>
     The C version (<code>eval_all</code>) mirrors the algorithm without memoisation - the problem is small enough that plain recursion is fast. It uses a hand-rolled <code>DoubleSet</code>: a dynamically grown array of doubles with a linear-scan duplicate check before each insertion, plus an <code>isfinite</code> guard that discards any NaN or infinity. After collecting the reachable doubles for a digit set, the code marks each positive near-integer into a fixed boolean array <code>found[2048]</code> (rounding with <code>floor(v + 0.5)</code> and confirming with a <code>1e-9</code> tolerance), then scans forward from index 1 to measure the run. The outer loop structure matches the Python version exactly.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>Pool reduction as an expression-tree enumeration idiom</h4>
-  <p>
-    Rather than enumerating <a href="https://en.wikipedia.org/wiki/Binary_expression_tree" class="reference-source" target="_blank" rel="noopener noreferrer">expression-tree</a> shapes and operator assignments separately, both solutions model the search as "pick any two pool elements, combine, recurse on the smaller pool." This is a reusable idiom for any problem that enumerates all outcomes of sequentially combining items from a collection - the classic "24 game", for instance. It is attractive because it covers every distinct grouping automatically and the code is short and obviously correct.
-  </p>
-  <h4>Memoisation with a canonical key (Python)</h4>
-  <p>
-    The Python solution applies <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a> by decorating the recursive function with <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer">functools.lru_cache</a>. The argument is a tuple, which is hashable and so usable as a cache key. The general principle for memoising a function whose argument is an unordered collection: convert that collection to a canonical ordered form so logically identical inputs map to the same cache entry. Here the pools that recur naturally share values, so the cache pays off across the 126 outer iterations.
-  </p>
-  <h4>Floating-point computation with integer detection at the boundary</h4>
-  <p>
-    Division forces non-integer intermediates, so all values flow through the recursion as <a href="https://en.wikipedia.org/wiki/Floating-point_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">floating-point</a> numbers, and integrality is tested only at output. Python uses <code>float.is_integer()</code>; C rounds with <code>floor(v + 0.5)</code> and checks <code>fabs(v - rounded) &lt; 1e-9</code>. Carrying floats and testing at the boundary is far simpler than exact rational arithmetic, and for single-digit inputs the magnitudes are small enough that the epsilon comfortably absorbs any rounding error. Reach for this when exactness matters only at the final answer and the computation chain is short.
-  </p>
-  <h4>Flat array as a small set in C</h4>
-  <p>
-    C has no built-in set, so the <code>DoubleSet</code> struct is a growable array with linear-scan deduplication. This is quadratic in the set size, but with at most a few hundred distinct reachable values the simplicity beats the overhead of a hash table. This "flat array as a small set" pattern is a sensible default whenever you control the data, the set is small, and clarity matters more than asymptotics.
-  </p>
-  <h4>Boolean presence array for consecutive-run detection</h4>
-  <p>
-    To find the longest prefix 1, 2, ..., n present in the results, the C code marks integers into a boolean array and scans forward until it hits a gap. This linear scan over the bounded range is simpler and faster than sorting. The Python version achieves the same with set membership in a <code>while</code> loop. A presence array (or bitset) is the natural tool when you need to test membership of bounded integers and then walk a contiguous range.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is that "all parenthesisations and all operator assignments" over k numbers is fully captured by recursive pairwise pool reduction. Once you see that, the implementation is almost mechanical and you never reason about tree shapes. The outer search of 126 sets is trivially small, so no pruning is needed there.
-  </p>
-  <p>
-    Both solutions produce the correct answer 1258. Here the Python version is the faster of the two at 0.0053 s against the C version's 0.0210 s. The <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer">lru_cache</a> on the recursive function is decisive: it eliminates a large amount of repeated work that the unmemoised C version redoes from scratch for every digit set, and that algorithmic saving more than offsets C's per-operation speed advantage on this small workload. It is a clean illustration that a better algorithm beats a faster language.
-  </p>
-  <ul>
-    <li>To enumerate all ways of combining items from a set, model it as repeated pairwise combination with recursion on the reduced collection - this covers every grouping without explicit tree enumeration.</li>
-    <li>Handle non-commutative operations by trying both orderings explicitly, and track only the quantities the final answer needs (here, absolute differences and both quotients).</li>
-    <li>To memoise over an unordered collection, canonicalise it so equivalent states share a cache entry - and remember that memoisation can let an interpreted language outrun compiled code.</li>
-    <li>Carry floating-point values through a short computation and test for integrality at the boundary with a small epsilon, rather than committing to exact rational arithmetic.</li>
-    <li>When membership tests are over bounded integers, a boolean presence array makes consecutive-run detection a trivial forward scan.</li>
-    <li>For small, fixed search spaces, brute force is the correct first choice; benchmark before assuming you need optimisation.</li>
-  </ul>
 </article>

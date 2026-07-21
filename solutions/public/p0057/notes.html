@@ -1,84 +1,23 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-The number sqrt(2) admits a representation as an infinite <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> - an expression formed by repeatedly nesting a term of the shape 1/(2 + 1/(2 + ...)). Truncating that infinite nesting after a finite number of levels yields a rational approximation called a <a href="https://en.wikipedia.org/wiki/Convergent_(continued_fraction)" class="reference-source" target="_blank" rel="noopener noreferrer">convergent</a>. The task is to count, among the first thousand convergents, how many have a numerator whose number of decimal digits strictly exceeds that of the denominator.
+The number sqrt(2) admits a representation as an infinite <a class="reference-source" href="https://en.wikipedia.org/wiki/Continued_fraction" rel="noopener noreferrer" target="_blank">continued fraction</a> - an expression formed by repeatedly nesting a term of the shape 1/(2 + 1/(2 + ...)). Truncating that infinite nesting after a finite number of levels yields a rational approximation called a <a class="reference-source" href="https://en.wikipedia.org/wiki/Convergent_(continued_fraction)" rel="noopener noreferrer" target="_blank">convergent</a>. The task is to count, among the first thousand convergents, how many have a numerator whose number of decimal digits strictly exceeds that of the denominator.
 </p>
-
 <p>
-The observation that makes this tractable is that consecutive convergents are linked by a clean two-variable <a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a>. If the current convergent is p/q, the next one is (p + 2q)/(p + q). This follows directly from the structure of the expansion: adding one more level wraps the previous fraction as 1 + 1/(1 + p/q), and that algebraic substitution sends the pair (p, q) to (p + 2q, p + q). The fractions in the problem - 3/2, 7/5, 17/12, 41/29, 99/70, ... - all satisfy this map exactly. Because the recurrence is built from nothing but addition, I can generate every convergent with exact integer arithmetic, never touching division or floating point. The price is growth: p and q grow by roughly a factor of 1 + sqrt(2) per step, so after n steps they carry on the order of n digits and require <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a> ("bignums"). Each step is dominated by adding two D-digit numbers where D grows linearly with the index, so the total cost is the sum 1 + 2 + ... + n, giving overall complexity of O(n^2).
+The observation that makes this tractable is that consecutive convergents are linked by a clean two-variable <a class="reference-source" href="https://en.wikipedia.org/wiki/Recurrence_relation" rel="noopener noreferrer" target="_blank">recurrence relation</a>. If the current convergent is p/q, the next one is (p + 2q)/(p + q). This follows directly from the structure of the expansion: adding one more level wraps the previous fraction as 1 + 1/(1 + p/q), and that algebraic substitution sends the pair (p, q) to (p + 2q, p + q). The fractions in the problem - 3/2, 7/5, 17/12, 41/29, 99/70, ... - all satisfy this map exactly. Because the recurrence is built from nothing but addition, I can generate every convergent with exact integer arithmetic, never touching division or floating point. The price is growth: p and q grow by roughly a factor of 1 + sqrt(2) per step, so after n steps they carry on the order of n digits and require <a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision integers</a> ("bignums"). Each step is dominated by adding two D-digit numbers where D grows linearly with the index, so the total cost is the sum 1 + 2 + ... + n, giving overall complexity of O(n^2).
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Iterative Convergent Recurrence with Big Integers</h4>
-
 <p>
-Both the Python and C solutions implement the same algorithm: hold the current numerator and denominator as arbitrary-precision integers, apply the map (p, q) -> (p + 2q, p + q) once per expansion, and increment a counter on every step where p has more decimal digits than q.
+Both the Python and C solutions implement the same algorithm: hold the current numerator and denominator as arbitrary-precision integers, apply the map (p, q) -&gt; (p + 2q, p + q) once per expansion, and increment a counter on every step where p has more decimal digits than q.
 </p>
-
 <p>
-I seed both variables at 1. This represents the state just before the first expansion: applying the <a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a> once gives numerator 1 + 2*1 = 3 and denominator 1 + 1 = 2, that is, the fraction 3/2 - exactly the problem's first expansion. The critical subtlety is that the two updates must be simultaneous: the new numerator depends on the *old* denominator, and the new denominator depends on the *old* numerator. I must compute both new values before overwriting either, or I corrupt the second update with the first.
+I seed both variables at 1. This represents the state just before the first expansion: applying the <a class="reference-source" href="https://en.wikipedia.org/wiki/Recurrence_relation" rel="noopener noreferrer" target="_blank">recurrence relation</a> once gives numerator 1 + 2*1 = 3 and denominator 1 + 1 = 2, that is, the fraction 3/2 - exactly the problem's first expansion. The critical subtlety is that the two updates must be simultaneous: the new numerator depends on the *old* denominator, and the new denominator depends on the *old* numerator. I must compute both new values before overwriting either, or I corrupt the second update with the first.
 </p>
-
 <p>
-In Python, <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a> are built into the language, so the loop body is a single tuple assignment <code>numerator, denominator = (numerator + 2 * denominator, numerator + denominator)</code>. To compare magnitudes I convert each integer to its decimal string and compare lengths. That is O(D) per comparison but trivially correct. I also guard the comparison against Python 3.11+'s cap on int-to-string conversion, lifting the limit with <code>sys.set_int_max_str_digits(0)</code> only if the <code>ValueError</code> actually fires.
+In Python, <a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision integers</a> are built into the language, so the loop body is a single tuple assignment <code>numerator, denominator = (numerator + 2 * denominator, numerator + denominator)</code>. To compare magnitudes I convert each integer to its decimal string and compare lengths. That is O(D) per comparison but trivially correct. I also guard the comparison against Python 3.11+'s cap on int-to-string conversion, lifting the limit with <code>sys.set_int_max_str_digits(0)</code> only if the <code>ValueError</code> actually fires.
 </p>
-
 <p>
 In C there is no native bignum, so I built a small base-10^9 big-integer type: a fixed-size array of 32-bit limbs stored little-endian (least-significant limb at index 0), each limb holding up to nine decimal digits. Two helpers do the arithmetic - <code>bi_add_twice</code> computes b + 2c (the numerator update) and <code>bi_add</code> computes b + c (the denominator update), both propagating carries across limbs. The choice of base 10^9 pays off in <code>bi_decimal_digits</code>: every limb except the topmost contributes exactly nine digits, so the digit count is 9*(size - 1) plus a short loop over the most-significant limb. I preallocated <code>MAX_LIMBS = 512</code> slots - far more than the roughly 50 limbs needed even at 10000 expansions - so the hot loop performs no heap allocation.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Simultaneous (Parallel) Assignment for Recurrences</h4>
-
-<p>
-The Python line <code>numerator, denominator = (numerator + 2 * denominator, numerator + denominator)</code> relies on tuple-unpacking semantics: the entire right-hand side is evaluated before any name is rebound. This makes a two-variable <a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a> correct by construction, with no temporary. Whenever the new value of A depends on the old value of B and vice versa, reach for parallel assignment. The C code achieves the same effect manually by writing into separate <code>new_num</code> and <code>new_den</code> before copying them back - a deliberate mirror of the Python idiom where the language offers no such shortcut.
-</p>
-
-<h4>Comparing a Coarse Property Instead of the Full Value</h4>
-
-<p>
-The question asks only whether p has more digits than q - never their exact values, nor their ratio against sqrt(2). So I compare digit counts directly (string length in Python, a dedicated counting function in C) rather than performing a full-precision division. This is a general discipline: identify the minimal property the problem actually needs - magnitude, parity, last digit, sign - and compute that property directly instead of the entire quantity.
-</p>
-
-<h4>Base-10^9 Limb Arithmetic in C</h4>
-
-<p>
-For the C bignum I chose base 10^9 rather than the conventional base 2^32. The trade-off is deliberate: binary limbs are marginally faster for raw addition, but converting them to a decimal digit count requires a base conversion or a logarithm. With decimal limbs the digit count falls out almost for free. The lesson generalises: pick the representation that makes your *most frequent or most awkward* operation cheapest. Here, digit counting is conceptually central, so a decimal radix keeps the code both simple and fast.
-</p>
-
-<h4>Static Preallocation in C Hot Paths</h4>
-
-<p>
-The <code>BigInt</code> struct embeds a fixed 512-limb array, so each value lives on the stack with no <code>malloc</code> calls inside the loop. Because the maximum size is known and small at compile time, static allocation removes allocation overhead and fragmentation entirely. Whenever an upper bound on a structure's size is known and modest, prefer stack or static storage over dynamic allocation in performance-critical code.
-</p>
-
-<h4>Defensive Handling of Python's Integer-to-String Limit</h4>
-
-<p>
-Python 3.11 introduced a security cap on converting very large <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a> to decimal strings. The solution catches the resulting <code>ValueError</code>, disables the cap with <code>sys.set_int_max_str_digits(0)</code>, and retries - but only when the limit actually trips. This is cleaner than unconditionally disabling the limit at startup: the safer default stays in place for the common case and is relaxed only under the precise condition that requires it.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is that the convergents to sqrt(2) obey a clean linear <a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a> (p, q) -> (p + 2q, p + q), so there is no need to symbolically simulate the <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> at all - I just iterate the map. The second insight is that the problem reduces to comparing digit counts, a coarse magnitude property far cheaper to compute than the values themselves suggest.
-</p>
-
-<p>
-Both solutions implement the identical algorithm, so the benchmark measures language and representation overhead rather than algorithmic difference. At the contest-sized 1000 expansions the C version runs in about 0.0001 s versus 0.0014 s for Python - both effectively instant. The gap only becomes visible at 10000 expansions, where C takes about 0.0095 s against Python's 0.9770 s, roughly a 100x difference. That reflects Python's interpreter overhead and its general-purpose <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integer</a> representation set against a purpose-built C type that allocates nothing and uses the radix best suited to digit counting. For the stated input, either is more than fast enough; the C version matters only when scaling well beyond the problem.
-</p>
-
-<ul>
-  <li>When a sequence is defined by a generative process, derive its recurrence and iterate that directly instead of re-simulating the process at every step.</li>
-  <li>Determine the minimal property the question requires - magnitude, parity, a single digit - and compute it directly rather than the full value.</li>
-  <li>Use parallel assignment for two-variable recurrences; evaluating both right-hand sides before binding eliminates an entire class of dependency bugs.</li>
-  <li>When writing a special-purpose big-integer type, choose the radix that makes your most frequent or most awkward operation simplest, even at a small cost to the others.</li>
-  <li>Prefer static or stack allocation over dynamic allocation in tight loops whenever the maximum size is bounded and known at compile time.</li>
-  <li>Guard against platform- or version-specific restrictions defensively: catch the exception, adjust the environment, and retry, rather than weakening defaults globally up front.</li>
-</ul>
-
 </article>

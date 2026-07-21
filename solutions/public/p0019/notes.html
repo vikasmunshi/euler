@@ -1,9 +1,9 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
+<h3>Problem Analysis</h3>
+<p>
     This problem asks us to count how many times the first day of a month landed on a Sunday over a
     100-year window. The essential mathematical tool is
-    <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular arithmetic</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modular arithmetic</a>
     applied to the day-of-week cycle. The days of the week form a cycle of length 7: if today is a
     Monday, then 365 days later is whatever day you get by computing 365 mod 7 = 1 step forward.
     Because the day of week is inherently cyclic with period 7, we never need to track absolute date
@@ -11,111 +11,51 @@
     Monday), we can compute the day of week for any future date by accumulating the number of
     intervening days and reducing modulo 7.
   </p>
-  <p>
+<p>
     The only subtlety is the
-    <a href="https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar" class="reference-source" target="_blank" rel="noopener noreferrer">Gregorian leap-year rule</a>:
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar" rel="noopener noreferrer" target="_blank">Gregorian leap-year rule</a>:
     a year is a leap year if divisible by 4, except for century years, which must additionally be
     divisible by 400. This rule decides whether February contributes 28 or 29 days and therefore how
     many days separate consecutive month boundaries. The problem is tractable because the search
     space is tiny: the 20th century spans only 1200 months. A simple linear scan over months
     suffices, giving complexity O(Y x 12) = O(Y) where Y is the number of years in the range - in
     practice an instantaneous constant-time computation. No combinatorics or
-    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Dynamic_programming" rel="noopener noreferrer" target="_blank">dynamic programming</a>
     is required.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Day-of-week Simulation (C and Python)</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Day-of-week Simulation (C and Python)</h4>
+<p>
     Both files implement the same conceptual algorithm - anchor to a known date and advance month by
     month - but the C version computes the day-of-week from first principles while the Python version
     delegates to the standard library.
   </p>
-  <p>
-    <strong>Step 1 - Establish a reference point.</strong> The problem states that 1 January 1900 was
+<p>
+<strong>Step 1 - Establish a reference point.</strong> The problem states that 1 January 1900 was
     a Monday. In the C solution I encode Monday as 0, Tuesday as 1, ..., Sunday as 6. This zero-based
     scheme makes the modulo-7 arithmetic clean, since the residue is exactly the day index.
   </p>
-  <p>
-    <strong>Step 2 - Advance to the start year.</strong> The count begins in 1901, not 1900. Rather
+<p>
+<strong>Step 2 - Advance to the start year.</strong> The count begins in 1901, not 1900. Rather
     than hard-code the day of week for 1 January 1901, I advance the counter from the known anchor by
     adding 366 for each leap year and 365 otherwise, reducing modulo 7 at each step. This keeps the
     code general: it accepts any start year as input.
   </p>
-  <p>
-    <strong>Step 3 - Iterate over every first-of-month.</strong> For each year from
+<p>
+<strong>Step 3 - Iterate over every first-of-month.</strong> For each year from
     <code>start_year</code> to <code>end_year</code>, and for each month 1 through 12, I first check
     whether the current day-of-week is 6 (Sunday) and increment the count if so, then advance the
     counter by the number of days in that month. The <code>days_in_month</code> helper encodes the
-    standard month-length table and applies the <a href="https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar" class="reference-source" target="_blank" rel="noopener noreferrer">leap-year</a> correction to February. Crucially, I check
+    standard month-length table and applies the <a class="reference-source" href="https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar" rel="noopener noreferrer" target="_blank">leap-year</a> correction to February. Crucially, I check
     before advancing, so <code>dow</code> always represents "the day of week on the 1st of the
     current month."
   </p>
-  <p>
-    <strong>Language differences.</strong> The C solution does everything manually with loops and a
+<p>
+<strong>Language differences.</strong> The C solution does everything manually with loops and a
     static array. The Python solution lets <code>datetime.date(y, m, 1).isoweekday()</code> do the
-    work - it returns 7 for Sunday, so Python never tracks the day-of-week or the <a href="https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar" class="reference-source" target="_blank" rel="noopener noreferrer">leap-year</a> rule
+    work - it returns 7 for Sunday, so Python never tracks the day-of-week or the <a class="reference-source" href="https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar" rel="noopener noreferrer" target="_blank">leap-year</a> rule
     itself. This is more concise and less error-prone, at the cost of a function call per date, which
-    is negligible at this scale. The Python solution sums a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>, idiomatically
+    is negligible at this scale. The Python solution sums a <a class="reference-source" href="https://docs.python.org/3/reference/expressions.html#generator-expressions" rel="noopener noreferrer" target="_blank">generator expression</a>, idiomatically
     counting matches without building an intermediate list.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>State-variable pattern (rolling day-of-week counter)</h4>
-  <p>
-    The C solution maintains a single integer <code>dow</code> and updates it with
-    <code>dow = (dow + days_in_month(y, m)) % 7</code> after each month. This is the state-variable
-    pattern: one variable carries forward all the information needed to take the next step, so we
-    never recompute from scratch. Reach for this pattern whenever a quantity changes by a known delta
-    at each step - it underlies rolling windows, running totals, and incremental hashing.
-  </p>
-  <h4><a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">Modular arithmetic</a> for cyclic quantities</h4>
-  <p>
-    The day of week wraps with period 7, so applying <code>% 7</code> after each addition keeps the
-    counter in [0, 6] automatically and eliminates any conditional resets. Any time a quantity wraps
-    around - days of week, clock positions, indices in a circular buffer - <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular arithmetic</a> is the
-    natural representation.
-  </p>
-  <h4>Delegating to the standard library (Python)</h4>
-  <p>
-    Python's <code>datetime.date</code> already encodes the full Gregorian calendar, including the
-    <a href="https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar" class="reference-source" target="_blank" rel="noopener noreferrer">leap-year</a> rule and day-of-week computation. By calling <code>isoweekday()</code> I avoid
-    reimplementing tested logic. The principle: check whether the standard library already solves a
-    sub-problem before writing custom code. The trade-off is per-call overhead; for a hot path, a
-    hand-rolled approach (as in C) may be preferable.
-  </p>
-  <h4><a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">Generator expression</a> with sum()</h4>
-  <p>
-    The Python solution writes <code>sum(predicate for ... for ...)</code>. A <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> is
-    a lazy sequence that yields values one at a time without materialising a list, keeping memory
-    usage O(1). Summing booleans exploits the fact that Python treats <code>True</code> as 1 and
-    <code>False</code> as 0, so <code>sum(predicate(x) for x in iterable)</code> is the idiomatic way
-    to count items satisfying a condition.
-  </p>
-  <h4>Command-line parameterisation</h4>
-  <p>
-    Both solutions read <code>end_year</code> and <code>start_year</code> as arguments rather than
-    hard-coding the range. This separates logic from data, making the solutions testable across
-    arbitrary ranges without recompilation - a small, free engineering win.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The core insight is that tracking the day of week requires nothing more than incrementing a
-    counter modulo 7 - no date conversions or calendrical formulas are needed. Anchoring to a known
-    reference date and advancing from there is simple, general, and correct. Both solutions produce
-    171 and run effectively instantly: the C version at about 0.0000039 s and the Python version at
-    about 0.00023 s. In relative terms the C version is roughly 60x faster because it avoids
-    constructing a date object per month, but the absolute difference is well under a millisecond and
-    irrelevant at 1200 iterations; the Python version is the more elegant of the two, leaning on a
-    well-tested standard library to express the same idea in a single statement.
-  </p>
-  <ul>
-    <li>For cyclic quantities, represent them modulo their period - it removes conditionals and keeps arithmetic clean.</li>
-    <li>The state-variable (rolling counter) pattern avoids redundant recomputation: carry just enough state to take the next step.</li>
-    <li>Check the standard library before writing custom calendar, math, or string logic - it is tested, correct, and expressive.</li>
-    <li>Counting items that satisfy a predicate is cleanly expressed as <code>sum(predicate(x) for x in iterable)</code> in Python.</li>
-    <li>Anchor-and-advance is a general technique: find one position you know, then walk forward incrementally rather than recomputing absolute positions.</li>
-    <li>Parameterise inputs through arguments rather than hard-coding them; it costs nothing and makes testing and reuse trivial.</li>
-  </ul>
 </article>

@@ -1,54 +1,11 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
-<p>The n-th <a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank" rel="noopener noreferrer">triangular number</a> is T(n) = n(n+1)/2, the sum of the first n natural numbers. We want the first such number with more than 500 divisors. The key tool is the <a href="https://en.wikipedia.org/wiki/Divisor_function" class="reference-source" target="_blank" rel="noopener noreferrer">divisor-counting function</a> d(m): if m has the <a href="https://en.wikipedia.org/wiki/Integer_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">prime factorization</a> m = p1^a1 * p2^a2 * ... * pk^ak, then d(m) = (a1+1)(a2+1)...(ak+1). The reasoning is combinatorial: every divisor is built by choosing, independently, an exponent from 0 to ai for each prime, so the product of the (ai+1) choice-counts gives the total number of divisors. This is far cheaper than enumerating divisors directly.</p>
-
-<p>To factor an individual number we use <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> up to the square root: any composite m has a factor no larger than sqrt(m), so testing divisors d while d*d <= m suffices, with any residue greater than 1 being a prime that occurs once. This costs O(sqrt(m)) per number. The structural observation that makes the search fast is that n and n+1 are <a href="https://en.wikipedia.org/wiki/Coprime_integers" class="reference-source" target="_blank" rel="noopener noreferrer">coprime</a> (consecutive integers share no common factor), and the divisor function is <a href="https://en.wikipedia.org/wiki/Multiplicative_function" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative</a>: d(a*b) = d(a)*d(b) when gcd(a,b)=1. Since exactly one of n, n+1 is even, T(n) splits into two coprime halves, and we can count divisors on numbers roughly half the magnitude of T(n) itself.</p>
-
+<p>The n-th <a class="reference-source" href="https://en.wikipedia.org/wiki/Triangular_number" rel="noopener noreferrer" target="_blank">triangular number</a> is T(n) = n(n+1)/2, the sum of the first n natural numbers. We want the first such number with more than 500 divisors. The key tool is the <a class="reference-source" href="https://en.wikipedia.org/wiki/Divisor_function" rel="noopener noreferrer" target="_blank">divisor-counting function</a> d(m): if m has the <a class="reference-source" href="https://en.wikipedia.org/wiki/Integer_factorization" rel="noopener noreferrer" target="_blank">prime factorization</a> m = p1^a1 * p2^a2 * ... * pk^ak, then d(m) = (a1+1)(a2+1)...(ak+1). The reasoning is combinatorial: every divisor is built by choosing, independently, an exponent from 0 to ai for each prime, so the product of the (ai+1) choice-counts gives the total number of divisors. This is far cheaper than enumerating divisors directly.</p>
+<p>To factor an individual number we use <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a> up to the square root: any composite m has a factor no larger than sqrt(m), so testing divisors d while d*d &lt;= m suffices, with any residue greater than 1 being a prime that occurs once. This costs O(sqrt(m)) per number. The structural observation that makes the search fast is that n and n+1 are <a class="reference-source" href="https://en.wikipedia.org/wiki/Coprime_integers" rel="noopener noreferrer" target="_blank">coprime</a> (consecutive integers share no common factor), and the divisor function is <a class="reference-source" href="https://en.wikipedia.org/wiki/Multiplicative_function" rel="noopener noreferrer" target="_blank">multiplicative</a>: d(a*b) = d(a)*d(b) when gcd(a,b)=1. Since exactly one of n, n+1 is even, T(n) splits into two coprime halves, and we can count divisors on numbers roughly half the magnitude of T(n) itself.</p>
 <h3>Solution Approach</h3>
-
 <h4>Algorithm 0: Multiplicative split into coprime halves (p0012_s0.py, p0012_s0_c)</h4>
-
 <p>This approach exploits multiplicativity directly. At each step I look at the parity of <code>i</code>. If <code>i</code> is even, T(i) = (i/2)*(i+1); if <code>i</code> is odd, T(i) = i*((i+1)/2). In both cases the two factors are coprime, so <code>d(T(i)) = num_factors(first) * num_factors(second)</code>. The dividing-by-two folds the /2 of the triangular formula into whichever factor is even, keeping both operands exact integers and roughly half the size of T(i). The loop advances <code>i</code> and recomputes <code>triangle_number = i*(i+1)/2</code> at the bottom, so the value returned when the divisor count first exceeds the target is correct. Factoring two smaller numbers instead of one large one is the entire payoff: trial division cost scales with the square root, so two halves are cheaper than the whole.</p>
-
 <p>The Python and C versions are logically identical. C uses <code>long long</code> for the triangle number as a defensive choice against overflow, and folds the leftover-prime case into <code>result *= 2</code> (an unconsumed residue is a prime with exponent 1, contributing a factor of 2). Python's <code>prime_factorization</code> returns explicit (prime, exponent) tuples, which <code>num_factors</code> then reduces to the product of (exp+1).</p>
-
 <h4>Algorithm 1: Direct trial division per triangular number (p0012_s1.py, p0012_s1_c)</h4>
-
-<p>This is the straightforward baseline. For each T(i) I factor the whole number by trial division and compute d(T(i)) from the exponents, advancing through triangular numbers until the count exceeds the target. There is no coprime split; each triangular number is treated as an independent factorization problem. The code is simpler - the loop condition is just <code>num_factors(triangle_number) < num_divisors</code> - but it factors a number twice as large as either half in Algorithm 0, doing more work per step.</p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Multiplicativity of arithmetic functions</h4>
-<p>A function f is multiplicative when f(a*b) = f(a)*f(b) for coprime a, b. The divisor count is such a function. Whenever you must evaluate a multiplicative function on a product, check whether the factors are coprime; if so, split the work into smaller pieces. This is a reusable lever throughout number theory.</p>
-
-<h4>Coprimality of consecutive integers</h4>
-<p>gcd(n, n+1) = 1 always, because any common divisor would divide their difference, 1. This elementary fact lets us factor T(n) into coprime halves and unlock multiplicativity. When you see products of consecutive or near-consecutive integers, ask whether coprimality simplifies the computation.</p>
-
-<h4>Trial division bounded by the square root</h4>
-<p>Both solutions share a factorization helper that iterates <code>d</code> while <code>d*d <= n</code>, peeling off each prime's full exponent in an inner loop, then treating any residue above 1 as a final prime. The sqrt bound turns an O(n) scan into O(sqrt(n)) and is the default tool for factoring individual integers in this range.</p>
-
-<h4>Separating the factorization helper from the search loop</h4>
-<p>The Python solutions expose <code>prime_factorization</code> and <code>num_factors</code> as standalone functions. This keeps the search loop readable - it reads almost like a specification - and makes the helpers independently testable. Clean separation of concerns pays off in any language.</p>
-
-<h4>Parallel assignment in Python</h4>
-<p>Both Python solutions initialize <code>i, triangle_number = (1, 1)</code> in one statement. Python evaluates the right side fully before binding names, so paired state is set atomically and clearly. Reach for this when two variables conceptually belong together.</p>
-
-<h4>long long as a defensive default in C</h4>
-<p>The C solutions declare the triangle number as <code>long long</code> even though the answer fits in 32 bits. Integer overflow in C is silent, and a wider type costs nothing here, so defaulting to it for any accumulating or multiplied quantity is a cheap safety habit.</p>
-
-<h3>Key Takeaways</h3>
-
-<p>The core insight is that T(n) = n(n+1)/2 factors into two coprime numbers, and the divisor function being multiplicative means d(T(n)) is the product of the two halves' divisor counts - each computed on a number half the size. The benchmark confirms the gain: on the 500-divisor case the split solution s0 runs in about 2.1 ms in C versus 8.3 ms for the naive s1, and 31 ms versus 132 ms in Python - roughly a 4x speedup in both languages. The simpler s1 is still fast enough here, but s0 is the principled, scalable choice.</p>
-
-<ul>
-  <li>When a value is a product of coprime factors, a multiplicative function over it factors too - always check coprimality before factoring a composite.</li>
-  <li>Consecutive integers are always coprime; this small fact frequently unlocks larger simplifications.</li>
-  <li>Trial division up to sqrt(n) is the workhorse for factoring single integers; memorize the exponent-peeling inner loop and the leftover-prime check.</li>
-  <li>Extract reusable helpers (factorization, divisor count) so the main loop reads like a specification.</li>
-  <li>In C, default to <code>long long</code> for anything multiplied or accumulated - overflow is silent and the cost is negligible.</li>
-  <li>Recognizing multiplicative functions (divisor count, Euler's totient) lets you decompose large problems into smaller coprime subproblems.</li>
-</ul>
-
+<p>This is the straightforward baseline. For each T(i) I factor the whole number by trial division and compute d(T(i)) from the exponents, advancing through triangular numbers until the count exceeds the target. There is no coprime split; each triangular number is treated as an independent factorization problem. The code is simpler - the loop condition is just <code>num_factors(triangle_number) &lt; num_divisors</code> - but it factors a number twice as large as either half in Algorithm 0, doing more work per step.</p>
 </article>

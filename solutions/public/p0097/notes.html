@@ -1,64 +1,21 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
-    We are asked for the last ten digits of the integer 28433 × 2^7830457 + 1. The single observation that makes this tractable is recognizing that "the last ten digits" of any integer is precisely that integer reduced <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a> 10^10. The full number has over two million digits, far too large to write out directly, but we never need it - we only need its residue modulo 10^10. This reframing converts an intractable big-integer computation into a sequence of operations on numbers below 10^10.
+<h3>Problem Analysis</h3>
+<p>
+    We are asked for the last ten digits of the integer 28433 × 2^7830457 + 1. The single observation that makes this tractable is recognizing that "the last ten digits" of any integer is precisely that integer reduced <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modulo</a> 10^10. The full number has over two million digits, far too large to write out directly, but we never need it - we only need its residue modulo 10^10. This reframing converts an intractable big-integer computation into a sequence of operations on numbers below 10^10.
   </p>
-  <p>
-    The reason the reframing works is that <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular arithmetic</a> is closed under addition and multiplication: (a × b) mod m = ((a mod m) × (b mod m)) mod m, and likewise for sums. This lets us reduce after every step so that no intermediate value ever escapes its residue. The one remaining hurdle is the exponent 7830457. Multiplying by 2 that many times would be O(exp) - around 7.8 million operations. The standard cure is <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a> via <a href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" class="reference-source" target="_blank" rel="noopener noreferrer">exponentiation by squaring</a>, which decomposes the exponent into its binary digits and squares the base repeatedly, computing a^b mod m in O(log b) multiplications - about 23 here instead of millions. The overall complexity is O(log exp), effectively instantaneous.
+<p>
+    The reason the reframing works is that <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modular arithmetic</a> is closed under addition and multiplication: (a × b) mod m = ((a mod m) × (b mod m)) mod m, and likewise for sums. This lets us reduce after every step so that no intermediate value ever escapes its residue. The one remaining hurdle is the exponent 7830457. Multiplying by 2 that many times would be O(exp) - around 7.8 million operations. The standard cure is <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_exponentiation" rel="noopener noreferrer" target="_blank">modular exponentiation</a> via <a class="reference-source" href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" rel="noopener noreferrer" target="_blank">exponentiation by squaring</a>, which decomposes the exponent into its binary digits and squares the base repeatedly, computing a^b mod m in O(log b) multiplications - about 23 here instead of millions. The overall complexity is O(log exp), effectively instantaneous.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Doubling Loop (Python)</h4>
-  <p>
-    The Python solution reframes the problem correctly - it computes <code>divisor = 10^num_digits</code>, parses the coefficient and exponent out of the expression string, and reduces modulo <code>divisor</code> after each operation - but it computes the power the slow way. Its loop runs <code>exponent</code> times (7,830,457 iterations), each time doubling the running value and reducing modulo <code>divisor</code>. This is mathematically valid because <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular arithmetic</a> is closed under multiplication, but it is O(exp) rather than O(log exp). Because Python integers have arbitrary precision, there is no overflow concern, so the reduction is purely to keep the numbers small and the per-iteration cost constant. After the loop it adds 1 and reduces once more. The natural improvement would be to replace the loop with Python's built-in three-argument <code>pow(2, exponent, divisor)</code>, which performs fast <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a> in C internally; correctness would be identical and the speed would collapse to the C version's.
+<h3>Solution Approach</h3>
+<h4>Doubling Loop (Python)</h4>
+<p>
+    The Python solution reframes the problem correctly - it computes <code>divisor = 10^num_digits</code>, parses the coefficient and exponent out of the expression string, and reduces modulo <code>divisor</code> after each operation - but it computes the power the slow way. Its loop runs <code>exponent</code> times (7,830,457 iterations), each time doubling the running value and reducing modulo <code>divisor</code>. This is mathematically valid because <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modular arithmetic</a> is closed under multiplication, but it is O(exp) rather than O(log exp). Because Python integers have arbitrary precision, there is no overflow concern, so the reduction is purely to keep the numbers small and the per-iteration cost constant. After the loop it adds 1 and reduces once more. The natural improvement would be to replace the loop with Python's built-in three-argument <code>pow(2, exponent, divisor)</code>, which performs fast <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_exponentiation" rel="noopener noreferrer" target="_blank">modular exponentiation</a> in C internally; correctness would be identical and the speed would collapse to the C version's.
   </p>
-  <h4>Square-and-Multiply Modular Exponentiation (C)</h4>
-  <p>
-    The C solution implements the asymptotically efficient route. The heart of it is <code>mod_pow</code>, the classic <a href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" class="reference-source" target="_blank" rel="noopener noreferrer">exponentiation by squaring</a> loop. While the exponent is nonzero, if its lowest bit is set we multiply the running result by the current base (reducing mod m), then we square the base and shift the exponent right by one bit. Each iteration consumes exactly one bit of the exponent, so the loop runs about log2(7830457) ≈ 23 times instead of 7.8 million. After computing <code>power = 2^exponent mod divisor</code>, it forms <code>result = (coefficient × power + 1) mod divisor</code>, reducing the coefficient first to keep operands small.
+<h4>Square-and-Multiply Modular Exponentiation (C)</h4>
+<p>
+    The C solution implements the asymptotically efficient route. The heart of it is <code>mod_pow</code>, the classic <a class="reference-source" href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" rel="noopener noreferrer" target="_blank">exponentiation by squaring</a> loop. While the exponent is nonzero, if its lowest bit is set we multiply the running result by the current base (reducing mod m), then we square the base and shift the exponent right by one bit. Each iteration consumes exactly one bit of the exponent, so the loop runs about log2(7830457) ≈ 23 times instead of 7.8 million. After computing <code>power = 2^exponent mod divisor</code>, it forms <code>result = (coefficient × power + 1) mod divisor</code>, reducing the coefficient first to keep operands small.
   </p>
-  <p>
+<p>
     A subtle correctness point lurks in the multiplications. When two values each approach 10^10 are multiplied, the product can reach nearly 10^20, beyond the roughly 9.2 × 10^18 range of a signed 64-bit integer. To avoid this overflow I cast both operands to <code>__int128</code> before multiplying, reduce modulo <code>mod</code>, then cast back to <code>long long</code>. The expression itself is parsed by concatenating the argv tokens back into one string (the shell splits "28433 × 2^7830457 + 1" into separate arguments), reading the leading coefficient with <code>atoll</code>, and locating the exponent after the <code>^</code> with <code>strchr</code>.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>Binary (Square-and-Multiply) Modular Exponentiation</h4>
-  <p>
-    This is the standard technique for computing a^b mod m when b is large. It rests on the identities a^b = (a^(b/2))^2 when b is even and a^b = a × a^(b-1) when b is odd, which translate directly into the bit-by-bit loop in <code>mod_pow</code>. Reach for <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a> any time you see "last N digits of a^b", "a^b mod m", or any large power that only needs its residue. It reduces millions of multiplications to a couple of dozen.
-  </p>
-  <h4>Using __int128 to Prevent Overflow in C</h4>
-  <p>
-    When multiplying two near-10^10 values before reduction, the intermediate product overflows a 64-bit integer. GCC and Clang on 64-bit platforms offer the <code>__int128</code> extension, a 128-bit integer type that comfortably holds the product. I cast to <code>(__int128)</code>, multiply, take the modulus, then cast the result back to <code>long long</code>. This is the idiomatic way to do modular multiplication with a large modulus in C without pulling in a big-integer library.
-  </p>
-  <h4>Reducing After Every Operation</h4>
-  <p>
-    Rather than building a giant value and reducing once, both solutions reduce modulo <code>divisor</code> after every multiplication and after the final +1. This is valid by the closure properties of <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular arithmetic</a> and practically essential: it keeps every value bounded below 10^10 so each hardware operation stays O(1) and (in C) so no product overflows. Apply this whenever a chain of arithmetic only needs its residue modulo a fixed number.
-  </p>
-  <h4>Preferring Language-Provided Primitives</h4>
-  <p>
-    The Python solution's hand-written doubling loop is the textbook case for reaching instead for a built-in. Python's three-argument <code>pow</code> performs <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a> in optimized C, giving both correctness and O(log exp) speed for free. When a standard library already exposes the operation you need, use it - it is faster, less error-prone, and clearer to readers.
-  </p>
-  <h4>Lightweight Command-Line Expression Parsing in C</h4>
-  <p>
-    The shell splits "28433 × 2^7830457 + 1" into separate argv tokens. The C code concatenates them back into one string, parses the leading coefficient with <code>atoll</code>, and finds the exponent by locating the <code>^</code> with <code>strchr</code> and parsing what follows. This ad hoc parsing is appropriate when the input format is fixed and known; for an arbitrary grammar you would instead write a real tokenizer and parser.
-  </p>
-  <h4>Separating solve() from main() for Benchmarking</h4>
-  <p>
-    Both files isolate the computation in a <code>solve</code> function invoked by a timing harness, so the measurement reflects only the algorithm and excludes startup and I/O. This produces stable, comparable numbers and is a good habit for any code you intend to benchmark.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is that "last N digits" is a <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular arithmetic</a> question in disguise: compute the expression modulo 10^N. Once reframed, the only real work is raising 2 to a large power modulo 10^10.
-  </p>
-  <p>
-    Both solutions are correct, but the benchmarks reveal a sharp gap driven entirely by how each computes that power. The C solution runs in unmeasurable time (0.0000 s) using true O(log exp) <a href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" class="reference-source" target="_blank" rel="noopener noreferrer">square-and-multiply</a>, while the Python solution takes about 0.538 s because its O(exp) doubling loop performs 7.8 million iterations. The C approach is the clearly faster and more elegant choice; the Python solution would close the gap entirely by switching its loop to the built-in three-argument <code>pow</code>.
-  </p>
-  <ul>
-    <li>Translate "last N digits" into "compute modulo 10^N" and apply <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a>.</li>
-    <li>Modular arithmetic is closed under addition and multiplication - reduce after every operation to keep values small and avoid overflow.</li>
-    <li>Square-and-multiply turns O(exp) multiplications into O(log exp); it is one of the most broadly useful number-theory speedups.</li>
-    <li>In C, use <code>__int128</code> for intermediate products when the result might exceed 64 bits before reduction.</li>
-    <li>Prefer language-provided fast primitives (like Python's three-argument <code>pow</code>) over hand-rolled linear loops for large exponents.</li>
-    <li>Isolate the timed computation in its own function so benchmarks reflect the algorithm, not I/O or startup.</li>
-  </ul>
 </article>

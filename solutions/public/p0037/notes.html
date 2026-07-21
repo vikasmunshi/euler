@@ -1,77 +1,26 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
-    A <a href="https://en.wikipedia.org/wiki/Truncatable_prime" class="reference-source" target="_blank" rel="noopener noreferrer">truncatable prime</a> is a <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime number</a> that stays prime as you repeatedly strip digits from one end. Take 3797: it is prime, and so are 797, 97, and 7 (stripping from the left), as well as 379, 37, and 3 (stripping from the right). A number qualifies only if <em>every</em> prefix and <em>every</em> suffix of its decimal representation is also prime. The single-digit primes 2, 3, 5, and 7 are explicitly excluded, so every truncatable prime has at least two digits. The problem guarantees exactly eleven exist, which gives me a clean stopping condition for an open-ended search.
+<h3>Problem Analysis</h3>
+<p>
+    A <a class="reference-source" href="https://en.wikipedia.org/wiki/Truncatable_prime" rel="noopener noreferrer" target="_blank">truncatable prime</a> is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number" rel="noopener noreferrer" target="_blank">prime number</a> that stays prime as you repeatedly strip digits from one end. Take 3797: it is prime, and so are 797, 97, and 7 (stripping from the left), as well as 379, 37, and 3 (stripping from the right). A number qualifies only if <em>every</em> prefix and <em>every</em> suffix of its decimal representation is also prime. The single-digit primes 2, 3, 5, and 7 are explicitly excluded, so every truncatable prime has at least two digits. The problem guarantees exactly eleven exist, which gives me a clean stopping condition for an open-ended search.
   </p>
-  <p>
-    The observation that unlocks an efficient solution is that truncation is a <em>structural property of the digit string</em>, not an arithmetic relationship. If I keep a running set of every prime I have generated, stored as decimal strings, then testing a candidate reduces to slicing its string at each cut point and asking whether both pieces are already in the set. That converts an apparently expensive recursive primality check into a handful of average-O(1) set lookups. Because truncatable primes are sparse (all eleven lie below one million), a generate-and-test strategy works: stream primes in increasing order, store each one, and test each multi-digit prime until eleven qualify. Generating primes incrementally is a <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> variant that runs in roughly O(n log log n) over the range scanned, while holding only about pi(sqrt(n)) entries in memory - where pi is the <a href="https://en.wikipedia.org/wiki/Prime-counting_function" class="reference-source" target="_blank" rel="noopener noreferrer">prime-counting function</a> - rather than allocating a full boolean array up to an unknown bound.
+<p>
+    The observation that unlocks an efficient solution is that truncation is a <em>structural property of the digit string</em>, not an arithmetic relationship. If I keep a running set of every prime I have generated, stored as decimal strings, then testing a candidate reduces to slicing its string at each cut point and asking whether both pieces are already in the set. That converts an apparently expensive recursive primality check into a handful of average-O(1) set lookups. Because truncatable primes are sparse (all eleven lie below one million), a generate-and-test strategy works: stream primes in increasing order, store each one, and test each multi-digit prime until eleven qualify. Generating primes incrementally is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a> variant that runs in roughly O(n log log n) over the range scanned, while holding only about pi(sqrt(n)) entries in memory - where pi is the <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime-counting_function" rel="noopener noreferrer" target="_blank">prime-counting function</a> - rather than allocating a full boolean array up to an unknown bound.
   </p>
-
-  <h3>Solution Approach</h3>
-
-  <h4>Incremental Sieve with String-Set Membership Test (Python and C)</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Incremental Sieve with String-Set Membership Test (Python and C)</h4>
+<p>
     Both files implement the same algorithm. I describe it once, then note the language-specific differences.
   </p>
-  <p>
-    <strong>Step 1 - Incremental prime generation.</strong> I cannot pre-size a classical <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> because I do not know in advance how large the eleventh truncatable prime is. Instead I use the dict-based incremental sieve attributed to David Eppstein. A map called <code>composites</code> associates each upcoming composite number with one of its prime factors. The invariant is: by the time I examine candidate <code>n</code>, every composite below <code>n</code> already has an entry. If <code>n</code> is absent from the map, it is prime; I yield it and schedule its first crossing by recording <code>n*n -> n</code>. If <code>n</code> is present, it is composite; I remove its entry, take its prime factor <code>p</code>, and advance to the next odd multiple of <code>p</code> not yet claimed by stepping in increments of <code>2*p</code>. Stepping by <code>2*p</code> keeps the stream on odd multiples and skips all even numbers, which after the initial <code>yield 2</code> can never be prime.
+<p>
+<strong>Step 1 - Incremental prime generation.</strong> I cannot pre-size a classical <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a> because I do not know in advance how large the eleventh truncatable prime is. Instead I use the dict-based incremental sieve attributed to David Eppstein. A map called <code>composites</code> associates each upcoming composite number with one of its prime factors. The invariant is: by the time I examine candidate <code>n</code>, every composite below <code>n</code> already has an entry. If <code>n</code> is absent from the map, it is prime; I yield it and schedule its first crossing by recording <code>n*n -&gt; n</code>. If <code>n</code> is present, it is composite; I remove its entry, take its prime factor <code>p</code>, and advance to the next odd multiple of <code>p</code> not yet claimed by stepping in increments of <code>2*p</code>. Stepping by <code>2*p</code> keeps the stream on odd multiples and skips all even numbers, which after the initial <code>yield 2</code> can never be prime.
   </p>
-  <p>
-    <strong>Step 2 - Maintain the set of prime strings.</strong> The instant a prime is discovered, I convert it to its decimal string and insert it into a set. This is the data-representation decision that makes the whole approach fast: truncation is naturally a string operation, so I pay the integer-to-string conversion exactly once per prime and then work entirely in string space.
+<p>
+<strong>Step 2 - Maintain the set of prime strings.</strong> The instant a prime is discovered, I convert it to its decimal string and insert it into a set. This is the data-representation decision that makes the whole approach fast: truncation is naturally a string operation, so I pay the integer-to-string conversion exactly once per prime and then work entirely in string space.
   </p>
-  <p>
-    <strong>Step 3 - Truncation test.</strong> For a prime string <code>s</code> of length <code>L</code>, I scan cut positions <code>i = 1 .. L-1</code>. At each cut, <code>s[:i]</code> is what remains after right-truncation and <code>s[i:]</code> is what remains after left-truncation. Both must already be in the prime-string set. Because primes are generated in increasing numerical order, and every prefix and suffix of a number is strictly smaller than the number itself, those smaller primes are guaranteed to have been seen and stored already - this ordering guarantee is what makes the membership test sound. The first failing cut rejects the candidate immediately. Single-digit primes are skipped with an explicit guard. Once eleven candidates pass, the loop stops and I return their sum.
+<p>
+<strong>Step 3 - Truncation test.</strong> For a prime string <code>s</code> of length <code>L</code>, I scan cut positions <code>i = 1 .. L-1</code>. At each cut, <code>s[:i]</code> is what remains after right-truncation and <code>s[i:]</code> is what remains after left-truncation. Both must already be in the prime-string set. Because primes are generated in increasing numerical order, and every prefix and suffix of a number is strictly smaller than the number itself, those smaller primes are guaranteed to have been seen and stored already - this ordering guarantee is what makes the membership test sound. The first failing cut rejects the candidate immediately. Single-digit primes are skipped with an explicit guard. Once eleven candidates pass, the loop stops and I return their sum.
   </p>
-  <p>
-    <strong>Language differences.</strong> The Python solution expresses the prime stream as a <a href="https://docs.python.org/3/reference/expressions.html#yield-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">yield</a>-based generator and uses Python's built-in <code>dict</code> and <code>set</code>. Its truncation test uses a <code>not any(...)</code> idiom over a comprehension - readable and short-circuiting, though slightly heavier than a hand-written early-exit loop. The C solution re-implements both data structures from scratch: an <a href="https://en.wikipedia.org/wiki/Open_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">open-addressing</a> hash table with linear probing for the integer composites map, and a second hash table of fixed-length character arrays for the prime-string set, hashed with the <a href="http://www.cse.yorku.ca/~oz/hash.html" class="reference-source" target="_blank" rel="noopener noreferrer">djb2</a> function. The C code also guards against integer overflow when computing <code>n*n</code> and handles hash deletion by re-inserting the displaced probe chain. These manual structures are the entire reason for the speed difference; the algorithm is byte-for-byte identical.
+<p>
+<strong>Language differences.</strong> The Python solution expresses the prime stream as a <a class="reference-source" href="https://docs.python.org/3/reference/expressions.html#yield-expressions" rel="noopener noreferrer" target="_blank">yield</a>-based generator and uses Python's built-in <code>dict</code> and <code>set</code>. Its truncation test uses a <code>not any(...)</code> idiom over a comprehension - readable and short-circuiting, though slightly heavier than a hand-written early-exit loop. The C solution re-implements both data structures from scratch: an <a class="reference-source" href="https://en.wikipedia.org/wiki/Open_addressing" rel="noopener noreferrer" target="_blank">open-addressing</a> hash table with linear probing for the integer composites map, and a second hash table of fixed-length character arrays for the prime-string set, hashed with the <a class="reference-source" href="http://www.cse.yorku.ca/~oz/hash.html" rel="noopener noreferrer" target="_blank">djb2</a> function. The C code also guards against integer overflow when computing <code>n*n</code> and handles hash deletion by re-inserting the displaced probe chain. These manual structures are the entire reason for the speed difference; the algorithm is byte-for-byte identical.
   </p>
-
-  <h3>Programming Techniques</h3>
-
-  <h4>Generator Functions for Lazy Sequences</h4>
-  <p>
-    In Python, <code>primes_generator</code> uses <a href="https://docs.python.org/3/reference/expressions.html#yield-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">yield</a> to produce one prime at a time on demand. The caller iterates with a <code>for</code> loop and calls <code>break</code> when eleven primes are found; no further primes are ever computed. A <a href="https://docs.python.org/3/howto/functional.html#generators" class="reference-source" target="_blank" rel="noopener noreferrer">generator function</a> suspends its own execution between yields, automatically preserving all local state. Reach for this pattern whenever a sequence is potentially infinite or its length is unknown ahead of time - it avoids materialising the whole sequence and keeps the producer cleanly separated from the consumer.
-  </p>
-
-  <h4>Dictionary as a Sparse Sieve</h4>
-  <p>
-    The incremental sieve replaces a pre-allocated boolean array with a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash map</a> that holds only the "next scheduled crossing" of each prime. At any moment this map contains roughly pi(sqrt(n)) entries - far fewer than n. I chose it precisely because the upper search bound is unknown: I cannot size a classical <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>, but the incremental version simply runs until the stopping condition is met. Any time you need primes up to an unknown limit, this is the natural choice.
-  </p>
-
-  <h4>String Representation for Structural Tests</h4>
-  <p>
-    Truncation is fundamentally a digit-sequence operation. Storing primes as strings turns each truncation check into a set membership test rather than a sequence of divisions and primality checks. The general principle: when an operation is natural in one representation, convert once and work in that representation. Picking the right representation often eliminates whole categories of code complexity.
-  </p>
-
-  <h4>Short-Circuit Evaluation</h4>
-  <p>
-    Both solutions abandon the truncation test the moment a single cut fails. Python's <a href="https://docs.python.org/3/library/functions.html#any" class="reference-source" target="_blank" rel="noopener noreferrer">any</a> stops at the first truthy element; the C inner loop carries an <code>&amp;&amp; ok</code> guard. Most candidates fail on the first or second cut, so <a href="https://en.wikipedia.org/wiki/Short-circuit_evaluation" class="reference-source" target="_blank" rel="noopener noreferrer">short-circuit evaluation</a> keeps the average cost per rejected candidate tiny. Validation loops should always exit on first failure rather than checking every condition unconditionally.
-  </p>
-
-  <h4>Open-Addressing Hash Table with Deletion in C</h4>
-  <p>
-    C has no built-in map, so I implemented <a href="https://en.wikipedia.org/wiki/Open_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">open addressing</a> with <a href="https://en.wikipedia.org/wiki/Linear_probing" class="reference-source" target="_blank" rel="noopener noreferrer">linear probing</a>. Deletion in such tables is subtle: zeroing a slot breaks the probe chains of keys that hashed earlier but landed later. The correct fix, used in <code>hash_remove</code>, is to clear the slot and then re-insert every key in the contiguous run that follows, so each finds its proper position again. Sizing the table as a power of two lets the modulo reduce to a bitwise AND. This is the go-to technique whenever you need a fast, allocation-free map in C.
-  </p>
-
-  <h4>Separation of Concerns via Two Independent Hash Tables</h4>
-  <p>
-    The C solution keeps two entirely separate tables: integer-keyed for the composites map and string-keyed for the prime set. This avoids coupling the sieve logic to the truncation logic, mirrors the clean split in the Python version, and lets each table be typed and sized exactly for its job. Keeping unrelated state in unrelated structures keeps each piece simple to reason about.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is recognising that truncation is a string-structural property, not an arithmetic one, and that maintaining a running set of prime strings makes every check average-O(1). Pairing this with a lazy incremental sieve lets the search stop exactly when the eleven-prime condition is satisfied, with no wasted work and no need to guess an upper bound.
-  </p>
-  <p>
-    Both solutions implement the identical algorithm, so the benchmark is a clean measure of language overhead. The C solution runs in about 0.0091 s and the Python solution in about 0.1370 s - roughly a 15x speedup, achieved purely by replacing Python's built-in <code>dict</code> and <code>set</code> with hand-written open-addressing hash tables. The Python version is the more elegant and far shorter expression of the idea; the C version is the one to choose when raw throughput matters.
-  </p>
-  <ul>
-    <li>When a problem concerns the structure of digit sequences, convert numbers to strings first - the operations become clearer and often faster.</li>
-    <li>Use an incremental sieve whenever you need primes up to an unknown limit; it avoids pre-allocating a large array and stops the instant your goal is met.</li>
-    <li>Keep a set of "things seen so far" alongside your generator so membership tests stay average-O(1) instead of recomputing from scratch.</li>
-    <li>Generating candidates in sorted order can guarantee that everything you need to test against has already been recorded - lean on that ordering.</li>
-    <li>Short-circuit validation loops: reject a candidate the moment the first check fails.</li>
-    <li>In C, power-of-two open-addressing hash tables are fast and allocation-free, but remember that correct deletion requires re-inserting the displaced probe chain.</li>
-    <li>An identical algorithm in C versus Python typically yields a large speedup from removing interpreter overhead alone - profile before reaching for a more complex algorithm.</li>
-  </ul>
 </article>

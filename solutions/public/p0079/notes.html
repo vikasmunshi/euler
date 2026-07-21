@@ -1,83 +1,26 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-Each successful login reveals three characters from the passcode in the exact order they occur. A login like "abc" therefore encodes two ordering facts: <em>a</em> appears before <em>b</em>, and <em>b</em> appears before <em>c</em>. Gathering every such "X before Y" fact across all fifty logins yields a <a href="https://en.wikipedia.org/wiki/Partially_ordered_set" class="reference-source" target="_blank" rel="noopener noreferrer">partial order</a> over the distinct observed digits. The shortest passcode consistent with every observation is one that lists each observed digit exactly once, arranged so that no ordering fact is violated. (I assume each digit occurs only once in the passcode; if any digit repeated, the constraints could force a longer answer, but this keylog is consistent with a single occurrence of each digit.)
+Each successful login reveals three characters from the passcode in the exact order they occur. A login like "abc" therefore encodes two ordering facts: <em>a</em> appears before <em>b</em>, and <em>b</em> appears before <em>c</em>. Gathering every such "X before Y" fact across all fifty logins yields a <a class="reference-source" href="https://en.wikipedia.org/wiki/Partially_ordered_set" rel="noopener noreferrer" target="_blank">partial order</a> over the distinct observed digits. The shortest passcode consistent with every observation is one that lists each observed digit exactly once, arranged so that no ordering fact is violated. (I assume each digit occurs only once in the passcode; if any digit repeated, the constraints could force a longer answer, but this keylog is consistent with a single occurrence of each digit.)
 </p>
-
 <p>
-This is the canonical setting for <a href="https://en.wikipedia.org/wiki/Topological_sorting" class="reference-source" target="_blank" rel="noopener noreferrer">topological sorting</a>. I model the constraints as a <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" class="reference-source" target="_blank" rel="noopener noreferrer">directed acyclic graph</a> (DAG): each distinct digit becomes a node, and an edge from X to Y means "X must precede Y". A <a href="https://en.wikipedia.org/wiki/Topological_sorting" class="reference-source" target="_blank" rel="noopener noreferrer">topological sort</a> linearises the nodes so that every edge points forward, which is exactly the passcode I want. Because every login succeeded, the facts cannot contradict each other - the graph has no cycles - so a valid ordering is guaranteed to exist. With at most ten distinct decimal digits and fifty logins of length three, the <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" class="reference-source" target="_blank" rel="noopener noreferrer">DAG</a> has at most ten nodes and a handful of distinct edges. The work is <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank" rel="noopener noreferrer">O(D^2)</a> in the number of distinct digits D, which is effectively constant here.
+This is the canonical setting for <a class="reference-source" href="https://en.wikipedia.org/wiki/Topological_sorting" rel="noopener noreferrer" target="_blank">topological sorting</a>. I model the constraints as a <a class="reference-source" href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" rel="noopener noreferrer" target="_blank">directed acyclic graph</a> (DAG): each distinct digit becomes a node, and an edge from X to Y means "X must precede Y". A <a class="reference-source" href="https://en.wikipedia.org/wiki/Topological_sorting" rel="noopener noreferrer" target="_blank">topological sort</a> linearises the nodes so that every edge points forward, which is exactly the passcode I want. Because every login succeeded, the facts cannot contradict each other - the graph has no cycles - so a valid ordering is guaranteed to exist. With at most ten distinct decimal digits and fifty logins of length three, the <a class="reference-source" href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" rel="noopener noreferrer" target="_blank">DAG</a> has at most ten nodes and a handful of distinct edges. The work is <a class="reference-source" href="https://en.wikipedia.org/wiki/Time_complexity" rel="noopener noreferrer" target="_blank">O(D^2)</a> in the number of distinct digits D, which is effectively constant here.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Reverse Topological Sort by Repeated Sink Removal</h4>
-
 <p>
 Both the Python and C solutions implement the same algorithm. I chose repeated sink removal because it maps cleanly onto the constraint structure and is straightforward to reason about and verify.
 </p>
-
 <p>
 <strong>Step 1 - Parse and deduplicate.</strong> I read the keylog, split it into lines, and discard duplicates. Seeing the same login twice contributes no new ordering information, so removing duplicates early keeps the inner loops lean. Python uses a <code>set</code> of strings, which deduplicates for free. The C version scans the lines already seen with <code>strcmp</code> - linear, but acceptable because the line count is bounded by a small constant (<code>MAX_LINES = 200</code>).
 </p>
-
 <p>
-<strong>Step 2 - Build the successor graph.</strong> For each login and each consecutive pair at positions <code>(i, i+1)</code>, I record that the character at <code>i</code> must precede the character at <code>i+1</code>. I store this as a <em>successor set</em>: for each digit, the set of digits that must follow it. Python uses a <code>dict</code> mapping each character to a <code>set</code> of successors. C uses a <a href="https://en.wikipedia.org/wiki/Bit_array" class="reference-source" target="_blank" rel="noopener noreferrer">bitmask</a> array: <code>successor[i]</code> is an unsigned integer whose bit <em>j</em> is set when digit <em>j</em> must follow digit <em>i</em>. Both versions derive the number of consecutive pairs from <code>asked_characters - 1</code>, so the same code generalises beyond exactly three characters per login.
+<strong>Step 2 - Build the successor graph.</strong> For each login and each consecutive pair at positions <code>(i, i+1)</code>, I record that the character at <code>i</code> must precede the character at <code>i+1</code>. I store this as a <em>successor set</em>: for each digit, the set of digits that must follow it. Python uses a <code>dict</code> mapping each character to a <code>set</code> of successors. C uses a <a class="reference-source" href="https://en.wikipedia.org/wiki/Bit_array" rel="noopener noreferrer" target="_blank">bitmask</a> array: <code>successor[i]</code> is an unsigned integer whose bit <em>j</em> is set when digit <em>j</em> must follow digit <em>i</em>. Both versions derive the number of consecutive pairs from <code>asked_characters - 1</code>, so the same code generalises beyond exactly three characters per login.
 </p>
-
 <p>
-<strong>Step 3 - Repeatedly remove a sink.</strong> A <em>sink</em> is a node with no remaining successors among the digits not yet placed. Such a node can safely sit furthest to the right of whatever ordering I build, because nothing still active must come after it. I find a sink, prepend it to the result string, then deactivate it and strip it from every other node's successor set. This is <a href="https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Kahn's algorithm</a> run sink-first rather than source-first; prepending each removed sink naturally yields the passcode in left-to-right order. In Python, the loop scans the dictionary for a key whose successor set is empty and uses a <a href="https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements-and-else-clauses-on-loops" class="reference-source" target="_blank" rel="noopener noreferrer">for/else</a> to detect the impossible cycle case. In C, I build an <code>active_mask</code> of all still-active nodes and look for an <code>i</code> where <code>successor[i] &amp; active_mask</code> is zero - a single <a href="https://en.wikipedia.org/wiki/Bitwise_operation" class="reference-source" target="_blank" rel="noopener noreferrer">bitwise AND</a> tells me whether any active successor remains.
+<strong>Step 3 - Repeatedly remove a sink.</strong> A <em>sink</em> is a node with no remaining successors among the digits not yet placed. Such a node can safely sit furthest to the right of whatever ordering I build, because nothing still active must come after it. I find a sink, prepend it to the result string, then deactivate it and strip it from every other node's successor set. This is <a class="reference-source" href="https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm" rel="noopener noreferrer" target="_blank">Kahn's algorithm</a> run sink-first rather than source-first; prepending each removed sink naturally yields the passcode in left-to-right order. In Python, the loop scans the dictionary for a key whose successor set is empty and uses a <a class="reference-source" href="https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements-and-else-clauses-on-loops" rel="noopener noreferrer" target="_blank">for/else</a> to detect the impossible cycle case. In C, I build an <code>active_mask</code> of all still-active nodes and look for an <code>i</code> where <code>successor[i] &amp; active_mask</code> is zero - a single <a class="reference-source" href="https://en.wikipedia.org/wiki/Bitwise_operation" rel="noopener noreferrer" target="_blank">bitwise AND</a> tells me whether any active successor remains.
 </p>
-
 <p>
-<strong>Language differences.</strong> The Python solution is concise and reads almost like the algorithm description, thanks to <code>dict</code> and <code>set</code>. The C solution is more verbose but turns the "any active successor?" test into one <a href="https://en.wikipedia.org/wiki/Bitwise_operation" class="reference-source" target="_blank" rel="noopener noreferrer">bitwise</a> operation and avoids dynamic allocation entirely. Both finish in negligible time and return the same answer, <code>73162890</code>.
+<strong>Language differences.</strong> The Python solution is concise and reads almost like the algorithm description, thanks to <code>dict</code> and <code>set</code>. The C solution is more verbose but turns the "any active successor?" test into one <a class="reference-source" href="https://en.wikipedia.org/wiki/Bitwise_operation" rel="noopener noreferrer" target="_blank">bitwise</a> operation and avoids dynamic allocation entirely. Both finish in negligible time and return the same answer, <code>73162890</code>.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Representing a DAG as a Successor Set</h4>
-<p>
-Instead of an explicit edge list or a full <a href="https://en.wikipedia.org/wiki/Adjacency_matrix" class="reference-source" target="_blank" rel="noopener noreferrer">adjacency matrix</a>, I store for each node only the set of nodes that must follow it. This makes the sink test trivial - just check emptiness - and cleanup easy: when a node is removed, strip it from every other node's successor set. Maintaining a live successor set and checking it for emptiness is the standard idiom for an online <a href="https://en.wikipedia.org/wiki/Topological_sorting" class="reference-source" target="_blank" rel="noopener noreferrer">topological sort</a>, and it is worth reaching for whenever you process a <a href="https://en.wikipedia.org/wiki/Partially_ordered_set" class="reference-source" target="_blank" rel="noopener noreferrer">partial order</a> incrementally.
-</p>
-
-<h4>Bitmask Graphs in C</h4>
-<p>
-When the number of nodes fits in a machine word, a graph's adjacency can be packed into integers: <code>successor[i]</code> holds one bit per possible successor. The test "does node <em>i</em> have any active successor?" becomes <code>successor[i] &amp; active_mask</code>, replacing a nested loop with a single <a href="https://en.wikipedia.org/wiki/Bitwise_operation" class="reference-source" target="_blank" rel="noopener noreferrer">bitwise AND</a>. This is both faster and more compact, and it generalises to any graph with up to 32 or 64 nodes - exactly the kind of <a href="https://en.wikipedia.org/wiki/Bit_array" class="reference-source" target="_blank" rel="noopener noreferrer">bit array</a> representation worth keeping in your toolkit.
-</p>
-
-<h4>Deduplication Before Processing</h4>
-<p>
-I collapse repeated logins before building the graph. In Python this is automatic via <a href="https://docs.python.org/3/library/stdtypes.html#set" class="reference-source" target="_blank" rel="noopener noreferrer">set</a>; in C it is an explicit scan with <code>strcmp</code>. The general principle: before running an algorithm, ask whether duplicate inputs add information. If they do not, remove them early to shrink every subsequent step and avoid letting repetition obscure the underlying structure.
-</p>
-
-<h4>Reverse Construction by Prepending</h4>
-<p>
-Because removing sinks yields the rightmost elements first, I prepend each one to the result. This avoids the alternative of collecting elements in a list and reversing at the end. Python does this with <code>char + passcode</code>; C shifts the existing characters one slot right and writes the new character at index 0. For short strings this is perfectly efficient; for long outputs, collect-then-reverse or a circular buffer would be preferable.
-</p>
-
-<h4>The Python for/else Construct</h4>
-<p>
-The Python loop uses <a href="https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements-and-else-clauses-on-loops" class="reference-source" target="_blank" rel="noopener noreferrer">for/else</a>: the <code>else</code> branch runs only if the loop completes without hitting <code>break</code>. Here, finding a sink triggers <code>break</code>; failing to find one falls through to the <code>else</code> and raises an error signalling a cycle. This is a clean, idiomatic way to express "search, and act if the search fails" without an extra flag variable.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is recognising "X appears before Y" as a directed ordering constraint, which turns a collection of partial observations into a <a href="https://en.wikipedia.org/wiki/Directed_acyclic_graph" class="reference-source" target="_blank" rel="noopener noreferrer">DAG</a>. Once the problem is seen as a <a href="https://en.wikipedia.org/wiki/Topological_sorting" class="reference-source" target="_blank" rel="noopener noreferrer">topological sort</a>, a well-known algorithm drops straight in, and the tiny data size makes runtime a non-issue.
-</p>
-
-<p>
-Both solutions are correct and effectively instantaneous: both the C and Python versions measure at 0.0000 s in the benchmark, so the difference is noise at this scale. I slightly prefer the Python version for clarity - the dictionary-of-sets representation and the <a href="https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements-and-else-clauses-on-loops" class="reference-source" target="_blank" rel="noopener noreferrer">for/else</a> pattern make the algorithm's intent immediately legible - while the C version showcases the <a href="https://en.wikipedia.org/wiki/Bit_array" class="reference-source" target="_blank" rel="noopener noreferrer">bitmask</a> trick that would matter on a much larger graph.
-</p>
-
-<ul>
-  <li>When a problem gives "X must come before Y" constraints, model it as a directed graph and apply <a href="https://en.wikipedia.org/wiki/Topological_sorting" class="reference-source" target="_blank" rel="noopener noreferrer">topological sort</a> - the structure maps directly onto a classical algorithm.</li>
-  <li>Deduplicate input before processing: repeated data rarely adds information and always adds noise.</li>
-  <li>Removing a sink and prepending it is equivalent to removing a source and appending - pick the direction that matches your output format.</li>
-  <li>For graphs whose nodes fit in a machine word, <a href="https://en.wikipedia.org/wiki/Bit_array" class="reference-source" target="_blank" rel="noopener noreferrer">bitmask</a> adjacency makes neighbour queries a single <a href="https://en.wikipedia.org/wiki/Bitwise_operation" class="reference-source" target="_blank" rel="noopener noreferrer">bitwise AND</a>.</li>
-  <li>A dictionary mapping each node to a set of successors is the idiomatic Python adjacency structure: it deduplicates edges and gives constant-time lookups.</li>
-  <li>When an algorithm produces output in reverse, prepend-as-you-go is cleaner than collect-then-reverse for short results.</li>
-</ul>
-
 </article>

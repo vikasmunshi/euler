@@ -1,89 +1,23 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-The spiral writes the integers <code>1, 2, 3, ...</code> outward from the centre in a clockwise direction, and we are asked only for the sum of the numbers lying on the two diagonals of the final square. The naive route is to construct the entire grid and add up the diagonal cells - but building an <code>N</code> by <code>N</code> grid is an <a href="https://en.wikipedia.org/wiki/Time_complexity#Polynomial_time" class="reference-source" target="_blank" rel="noopener noreferrer">O(N^2)</a> operation (quadratic in the side length, since the grid has <code>N^2</code> cells). A little arithmetic on the structure of the spiral collapses the problem to a single formula evaluated in <a href="https://en.wikipedia.org/wiki/Time_complexity#Constant_time" class="reference-source" target="_blank" rel="noopener noreferrer">O(1)</a> - constant time, independent of <code>N</code>.
+The spiral writes the integers <code>1, 2, 3, ...</code> outward from the centre in a clockwise direction, and we are asked only for the sum of the numbers lying on the two diagonals of the final square. The naive route is to construct the entire grid and add up the diagonal cells - but building an <code>N</code> by <code>N</code> grid is an <a class="reference-source" href="https://en.wikipedia.org/wiki/Time_complexity#Polynomial_time" rel="noopener noreferrer" target="_blank">O(N^2)</a> operation (quadratic in the side length, since the grid has <code>N^2</code> cells). A little arithmetic on the structure of the spiral collapses the problem to a single formula evaluated in <a class="reference-source" href="https://en.wikipedia.org/wiki/Time_complexity#Constant_time" rel="noopener noreferrer" target="_blank">O(1)</a> - constant time, independent of <code>N</code>.
 </p>
-
 <p>
-The key observation is that the diagonal entries form a regular pattern, ring by ring. The centre holds <code>1</code>. Each subsequent "ring" is a square frame whose side length <code>s</code> grows by 2 each step: <code>s = 3, 5, 7, ...</code> up to <code>N</code>. A ring of side <code>s</code> ends exactly at the perfect square <code>s^2</code>, because the spiral fills outward and that ring's last and largest value sits at its bottom-right corner. The four corners of a ring are its only contributions to the diagonals, and travelling counter-clockwise from the bottom-right corner each step decreases the value by <code>s - 1</code> (the number of cells along one side minus the shared corner). So the four corners are <code>s^2</code>, <code>s^2 - (s-1)</code>, <code>s^2 - 2(s-1)</code>, and <code>s^2 - 3(s-1)</code>, summing to <code>4s^2 - 6(s-1)</code>. Summing this over every odd <code>s</code> from 3 to <code>N</code> and adding the central 1 reduces, via standard <a href="https://en.wikipedia.org/wiki/Summation" class="reference-source" target="_blank" rel="noopener noreferrer">summation</a> identities, to the single <a href="https://en.wikipedia.org/wiki/Closed-form_expression" class="reference-source" target="_blank" rel="noopener noreferrer">closed-form expression</a> <code>(N * (N * (4*N + 3) + 8) - 9) / 6</code>. The numerator is always divisible by 6 for odd <code>N</code>, so integer arithmetic is exact throughout - no floating point, no rounding concerns.
+The key observation is that the diagonal entries form a regular pattern, ring by ring. The centre holds <code>1</code>. Each subsequent "ring" is a square frame whose side length <code>s</code> grows by 2 each step: <code>s = 3, 5, 7, ...</code> up to <code>N</code>. A ring of side <code>s</code> ends exactly at the perfect square <code>s^2</code>, because the spiral fills outward and that ring's last and largest value sits at its bottom-right corner. The four corners of a ring are its only contributions to the diagonals, and travelling counter-clockwise from the bottom-right corner each step decreases the value by <code>s - 1</code> (the number of cells along one side minus the shared corner). So the four corners are <code>s^2</code>, <code>s^2 - (s-1)</code>, <code>s^2 - 2(s-1)</code>, and <code>s^2 - 3(s-1)</code>, summing to <code>4s^2 - 6(s-1)</code>. Summing this over every odd <code>s</code> from 3 to <code>N</code> and adding the central 1 reduces, via standard <a class="reference-source" href="https://en.wikipedia.org/wiki/Summation" rel="noopener noreferrer" target="_blank">summation</a> identities, to the single <a class="reference-source" href="https://en.wikipedia.org/wiki/Closed-form_expression" rel="noopener noreferrer" target="_blank">closed-form expression</a> <code>(N * (N * (4*N + 3) + 8) - 9) / 6</code>. The numerator is always divisible by 6 for odd <code>N</code>, so integer arithmetic is exact throughout - no floating point, no rounding concerns.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Closed-Form Formula with Optional Spiral Simulation</h4>
-
 <p>
-Both <code>p0028_s0.py</code> and <code>p0028_s0.c</code> implement one design with two paths. The production path is a single <a href="https://en.wikipedia.org/wiki/Closed-form_expression" class="reference-source" target="_blank" rel="noopener noreferrer">closed-form</a> evaluation; the diagnostic path is an O(N^2) spiral simulation that runs only when <code>--show</code> is passed and the grid is small (<code>size &lt;= 10</code>). The simulation exists purely as an independent correctness check and a way to visualise the spiral - it never runs in normal use.
+Both <code>p0028_s0.py</code> and <code>p0028_s0.c</code> implement one design with two paths. The production path is a single <a class="reference-source" href="https://en.wikipedia.org/wiki/Closed-form_expression" rel="noopener noreferrer" target="_blank">closed-form</a> evaluation; the diagnostic path is an O(N^2) spiral simulation that runs only when <code>--show</code> is passed and the grid is small (<code>size &lt;= 10</code>). The simulation exists purely as an independent correctness check and a way to visualise the spiral - it never runs in normal use.
 </p>
-
 <p>
-The fast path evaluates the polynomial using nested multiplication: compute <code>4*N + 3</code>, then <code>N * (...) + 8</code>, then <code>N * (...) - 9</code>, then divide by 6. This is <a href="https://en.wikipedia.org/wiki/Horner%27s_method" class="reference-source" target="_blank" rel="noopener noreferrer">Horner's method</a> - it evaluates a degree-3 polynomial with exactly three multiplications and never forms large intermediate powers like <code>N**3</code>. Before returning, both solutions also validate that the formula equals the value the simulation produced, printing a coloured pass/fail marker.
+The fast path evaluates the polynomial using nested multiplication: compute <code>4*N + 3</code>, then <code>N * (...) + 8</code>, then <code>N * (...) - 9</code>, then divide by 6. This is <a class="reference-source" href="https://en.wikipedia.org/wiki/Horner%27s_method" rel="noopener noreferrer" target="_blank">Horner's method</a> - it evaluates a degree-3 polynomial with exactly three multiplications and never forms large intermediate powers like <code>N**3</code>. Before returning, both solutions also validate that the formula equals the value the simulation produced, printing a coloured pass/fail marker.
 </p>
-
 <p>
 The simulation reproduces the spiral without tracking a heading or turn rules. Starting at the origin with value 1, for each successive number it inspects the four neighbours (right, down, left, up), discards any already occupied, and moves to the unoccupied neighbour with the smallest squared distance from the origin (<code>x*x + y*y</code>). This "nearest free neighbour" rule reproduces the clockwise outward walk because the spiral's geometry guarantees the next correct cell is always the nearest empty one. After filling the grid, the diagonal sum is the total over every cell where <code>col == row</code> (main diagonal) or <code>col == -row</code> (anti-diagonal).
 </p>
-
 <p>
-The two languages differ only in storage. Python uses a <a href="https://docs.python.org/3/library/stdtypes.html#dict" class="reference-source" target="_blank" rel="noopener noreferrer">dict</a> keyed by <code>(col, row)</code> tuples, so occupancy is a simple <code>in</code> test and the origin-centred coordinate system needs no offset. C uses a flat 1-D array of <code>dim * dim</code> ints allocated with <a href="https://en.cppreference.com/w/c/memory/calloc" class="reference-source" target="_blank" rel="noopener noreferrer">calloc</a> (so every cell starts at 0, meaning "empty"), mapping signed coordinate <code>(col, row)</code> to index <code>(row + half) * dim + (col + half)</code>. The C layout is compact and cache-friendly; the Python dict is more convenient but heavier per cell - an acceptable trade, since the simulation only ever runs on tiny grids.
+The two languages differ only in storage. Python uses a <a class="reference-source" href="https://docs.python.org/3/library/stdtypes.html#dict" rel="noopener noreferrer" target="_blank">dict</a> keyed by <code>(col, row)</code> tuples, so occupancy is a simple <code>in</code> test and the origin-centred coordinate system needs no offset. C uses a flat 1-D array of <code>dim * dim</code> ints allocated with <a class="reference-source" href="https://en.cppreference.com/w/c/memory/calloc" rel="noopener noreferrer" target="_blank">calloc</a> (so every cell starts at 0, meaning "empty"), mapping signed coordinate <code>(col, row)</code> to index <code>(row + half) * dim + (col + half)</code>. The C layout is compact and cache-friendly; the Python dict is more convenient but heavier per cell - an acceptable trade, since the simulation only ever runs on tiny grids.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Horner's Method for Polynomial Evaluation</h4>
-<p>
-Rather than write the polynomial as a sum of explicit powers, both solutions nest the multiplications: <code>N * (N * (4*N + 3) + 8) - 9</code>. This is <a href="https://en.wikipedia.org/wiki/Horner%27s_method" class="reference-source" target="_blank" rel="noopener noreferrer">Horner's method</a>. It minimises the multiplication count, avoids large intermediate powers, and reads cleanly. Reach for it whenever you evaluate any single-variable polynomial.
-</p>
-
-<h4>Dictionary as a Sparse, Origin-Centred Grid (Python)</h4>
-<p>
-Keying a <a href="https://docs.python.org/3/library/stdtypes.html#dict" class="reference-source" target="_blank" rel="noopener noreferrer">dict</a> on <code>(col, row)</code> tuples lets the coordinate system stay centred on the origin with no offset arithmetic, and turns occupancy checks into <code>in</code> tests. This is ideal when geometric coordinates map directly to keys and the grid is small or sparse.
-</p>
-
-<h4>Flat Array with Coordinate Offsetting (C)</h4>
-<p>
-The C version maps signed coordinates ranging from <code>-half</code> to <code>+half</code> onto non-negative array indices by adding <code>half</code> to each axis. Combined with <a href="https://en.cppreference.com/w/c/memory/calloc" class="reference-source" target="_blank" rel="noopener noreferrer">calloc</a> zero-initialisation, this converts a centre-relative coordinate system into a contiguous, branch-free index calculation - a standard pattern any time you need a fixed grid whose logical origin is not at index zero.
-</p>
-
-<h4>Direction-Free Spiral Walk via Nearest Free Neighbour</h4>
-<p>
-Instead of tracking a heading and turn rules, the simulation picks the unoccupied neighbour closest to the origin at each step. The spiral's geometry makes this equivalent to the clockwise outward walk. Letting a geometric invariant drive movement eliminates a whole class of state-tracking bugs; consider it whenever a construction has such an invariant.
-</p>
-
-<h4>Generator Expressions for Lazy Filtering (Python)</h4>
-<p>
-The Python code uses <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expressions</a> to yield only the free neighbours and to extract diagonal values without building intermediate lists. Generators produce values on demand, keeping memory low and intent clear: "give me the items satisfying this condition," consumed directly by <code>min</code> or <code>sum</code>.
-</p>
-
-<h4>Independent Cross-Check Behind a Flag</h4>
-<p>
-Both files keep the O(N^2) simulation and the O(1) formula alive and compare their outputs under <code>--show</code>, printing a coloured pass/fail marker. This is verification by independent computation: if two unrelated methods agree across several cases, confidence in the formula is high. Gating it behind a flag means the diagnostic costs nothing in normal runs yet is always available.
-</p>
-
-<h4>ANSI Escape Codes for Inline Visualisation</h4>
-<p>
-Both diagnostic paths colour the diagonal entries and the status marker with <a href="https://en.wikipedia.org/wiki/ANSI_escape_code" class="reference-source" target="_blank" rel="noopener noreferrer">ANSI escape codes</a> (<code>\x1b[34m</code> for blue, green/red for pass/fail). This is a zero-dependency way to make structural properties of printed output visible on any Unix-like terminal during development.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is that the four diagonal corners of each spiral ring form a simple arithmetic pattern, and summing that pattern analytically reduces an <a href="https://en.wikipedia.org/wiki/Time_complexity#Polynomial_time" class="reference-source" target="_blank" rel="noopener noreferrer">O(N^2)</a> simulation to an <a href="https://en.wikipedia.org/wiki/Time_complexity#Constant_time" class="reference-source" target="_blank" rel="noopener noreferrer">O(1)</a> formula. Recognising regular algebraic structure inside a geometric construction is the skill that turns slow brute force into an instant answer.
-</p>
-
-<p>
-Both implementations solve every test case correctly, and because the production path is a single polynomial evaluation, both report 0.0000 seconds even at <code>size = 1001</code>. At O(1) the difference between C and Python is irrelevant, so the choice between them is one of convenience rather than performance: the Python dict-based simulation is the more elegant for visual inspection, while the C flat-array version is the more disciplined about memory.
-</p>
-
-<ul>
-  <li>Before simulating, study the first few cases and look for a closed-form pattern - an O(1) formula always beats an O(N^2) simulation at scale.</li>
-  <li>Use <a href="https://en.wikipedia.org/wiki/Horner%27s_method" class="reference-source" target="_blank" rel="noopener noreferrer">Horner's method</a> to evaluate polynomials: nest the multiplications to cut operations and avoid explicit powers.</li>
-  <li>Keep a slow but obviously-correct reference implementation alongside a fast formula, and compare them on small inputs to build confidence.</li>
-  <li>Map signed, centre-relative coordinates to non-negative array indices with a fixed offset to keep indexing branch-free and readable.</li>
-  <li>Let geometric invariants drive control flow (e.g. "nearest free neighbour") to remove fragile manual state tracking.</li>
-  <li>Gate diagnostic and visualisation code behind a command-line flag so it adds no cost to normal runs while remaining available for debugging.</li>
-</ul>
-
 </article>

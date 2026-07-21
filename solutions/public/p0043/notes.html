@@ -1,18 +1,15 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
-A <a href="https://en.wikipedia.org/wiki/Pandigital_number" class="reference-source" target="_blank" rel="noopener noreferrer">pandigital number</a> over the digits 0 to 9 is a ten-digit arrangement that uses each digit exactly once. There are 10! = 3,628,800 such arrangements, since each is a <a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutation</a> of the ten digits. The brute-force route would generate every permutation and test each against the seven divisibility rules. That is computationally feasible but profoundly wasteful: nearly every permutation fails the first constraint, so almost all of the work is discarded immediately.
+A <a class="reference-source" href="https://en.wikipedia.org/wiki/Pandigital_number" rel="noopener noreferrer" target="_blank">pandigital number</a> over the digits 0 to 9 is a ten-digit arrangement that uses each digit exactly once. There are 10! = 3,628,800 such arrangements, since each is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Permutation" rel="noopener noreferrer" target="_blank">permutation</a> of the ten digits. The brute-force route would generate every permutation and test each against the seven divisibility rules. That is computationally feasible but profoundly wasteful: nearly every permutation fails the first constraint, so almost all of the work is discarded immediately.
 </p>
 <p>
-The structural insight that makes this problem genuinely easy is that the seven three-digit windows <em>overlap by two digits</em>. The window <code>d2 d3 d4</code> shares <code>d3 d4</code> with <code>d3 d4 d5</code>, which shares <code>d4 d5</code> with <code>d4 d5 d6</code>, and so on down to <code>d8 d9 d10</code>. Whenever constraints share variables, they can be propagated: once I fix one window, the adjacent window is almost completely determined - only one new digit is free, and it must simultaneously satisfy a divisibility rule and avoid repeating any digit already placed. This reduces the search from an exhaustive scan of permutations to a narrow <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> walk with aggressive <a href="https://en.wikipedia.org/wiki/Constraint_propagation" class="reference-source" target="_blank" rel="noopener noreferrer">constraint propagation</a>. The worst-case asymptotic bound is still O(10!), but the real cost collapses to a few thousand node visits, completing in microseconds. The first digit <code>d1</code> carries no divisibility constraint at all, so it is simply whichever digit remains unused once the other nine positions are settled.
+The structural insight that makes this problem genuinely easy is that the seven three-digit windows <em>overlap by two digits</em>. The window <code>d2 d3 d4</code> shares <code>d3 d4</code> with <code>d3 d4 d5</code>, which shares <code>d4 d5</code> with <code>d4 d5 d6</code>, and so on down to <code>d8 d9 d10</code>. Whenever constraints share variables, they can be propagated: once I fix one window, the adjacent window is almost completely determined - only one new digit is free, and it must simultaneously satisfy a divisibility rule and avoid repeating any digit already placed. This reduces the search from an exhaustive scan of permutations to a narrow <a class="reference-source" href="https://en.wikipedia.org/wiki/Backtracking" rel="noopener noreferrer" target="_blank">backtracking</a> walk with aggressive <a class="reference-source" href="https://en.wikipedia.org/wiki/Constraint_propagation" rel="noopener noreferrer" target="_blank">constraint propagation</a>. The worst-case asymptotic bound is still O(10!), but the real cost collapses to a few thousand node visits, completing in microseconds. The first digit <code>d1</code> carries no divisibility constraint at all, so it is simply whichever digit remains unused once the other nine positions are settled.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Right-to-left Constrained Backtracking over the Divisor Chain</h4>
 <p>
-Both the C file and the Python file implement the same algorithm and differ only in language idiom. The core is a recursive descent over the divisor chain 17 -> 13 -> 11 -> 7 -> 5 -> 3 -> 2, building the number from right to left one digit at a time.
+Both the C file and the Python file implement the same algorithm and differ only in language idiom. The core is a recursive descent over the divisor chain 17 -&gt; 13 -&gt; 11 -&gt; 7 -&gt; 5 -&gt; 3 -&gt; 2, building the number from right to left one digit at a time.
 </p>
 <p>
 I seed the search with a precomputed constant table of the 44 valid three-digit multiples of 17 that have no repeated digit (such as <code>"017"</code>, <code>"289"</code>, <code>"986"</code>). These are exactly the legal values for the rightmost window <code>d8 d9 d10</code>. Starting from this table eliminates one full recursion level and makes the entry conditions explicit: I have already discharged the divisibility-by-17 constraint before recursion even begins.
@@ -23,48 +20,4 @@ From each seed I call the recursive generator with the current partial string an
 <p>
 I chose to build right to left rather than left to right because the divisibility window always sits at the first three characters of the partial string. Prepending keeps the validation at a fixed offset, so the index arithmetic never changes as the string grows - this removes a whole class of off-by-one errors. The C version encodes the divisor transition in a <code>switch</code> statement (<code>next_divisor</code>) and accumulates into a global <code>total_sum</code> using a fixed-size character buffer and <code>memcpy</code>, so it never touches the heap. The Python version expresses the same transition as a dictionary lookup and uses <code>yield from</code> recursion, so the top-level aggregation consumes results lazily. Functionally they are identical; the C avoids allocation entirely, while the Python reads more declaratively.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Precomputed Seed Table for the Deepest Recursion Level</h4>
-<p>
-Rather than rediscovering the valid <code>d8 d9 d10</code> triples at runtime by scanning all multiples of 17, I hard-coded the 44 valid strings as a constant array. This is a broadly useful pattern whenever the base level of a recursive search has a small, fixed, enumerable structure: precomputing it removes a recursion level, makes the starting conditions auditable, and shaves a redundant scan off every run. The cost is a few dozen lines of data, which is cheap relative to the clarity gained.
-</p>
-
-<h4>Prepend-and-check Incremental Construction</h4>
-<p>
-Each recursive step grows the candidate by adding one digit to the left and immediately validating the leading three-digit window. Constructing the object in the direction that keeps every new check at a fixed position - here, the front of the string - simplifies the code and eliminates index drift. When building combinatorial objects under sliding-window constraints, choose the build direction that makes each new choice immediately testable.
-</p>
-
-<h4>Generator Functions for Lazy Enumeration (Python)</h4>
-<p>
-The Python solution uses a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> with <code>yield from</code> to stream valid numbers one at a time. The caller aggregates with <code>sum()</code>, so no intermediate list is ever built. This keeps memory usage minimal and cleanly separates concerns: the generator's job is "produce valid numbers", the caller's job is "add them up". I reach for <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generators</a> whenever a recursive enumeration yields results that can be consumed incrementally.
-</p>
-
-<h4>Switch-based State Machine for the Divisor Chain (C)</h4>
-<p>
-In C, the sequence of divisors is encoded as a small <a href="https://en.wikipedia.org/wiki/Finite-state_machine" class="reference-source" target="_blank" rel="noopener noreferrer">finite-state machine</a>: <code>next_divisor</code> maps each divisor to its successor via a <code>switch</code>, returning 0 to signal the end of the chain. This is self-documenting and avoids pointer indirection. The Python equivalent is a dictionary <code>.get()</code> call. Both are appropriate; the choice follows the natural idiom of each language.
-</p>
-
-<h4>Digit-presence Check by Linear Scan</h4>
-<p>
-To test whether a candidate digit is already used, I scan the partial string linearly - a loop in C, a substring membership test in Python. With at most nine characters, this is effectively O(1) and far simpler than a bitmask or hash set. For small, fixed-size alphabets, a linear scan often beats more sophisticated structures in both speed and clarity. Asymptotic complexity only matters at scale; at tiny fixed sizes, the simplest correct code wins.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The unlocking insight is that the seven divisibility windows overlap by two digits each, forming a dependency chain. Fixing the rightmost window constrains the digit to its left, which constrains the next, and so on. Recognising this turns an exhaustive search over 3.6 million permutations into a narrow <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> walk that completes effectively instantly.
-</p>
-<p>
-Both files implement the identical algorithm and both are essentially instantaneous in the benchmarks: the C version records 0.0000 s and the Python version 0.0002 s. The C build is marginally faster, attributable to lower runtime overhead and zero heap allocation, but the search is so heavily pruned that the difference is negligible. The Python version is arguably more elegant, since its lazy <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> composes directly with <code>sum()</code>. With a search this aggressively pruned, algorithmic choice dwarfs language choice.
-</p>
-<ul>
-  <li>When constraints share variables, propagate them eagerly: fix one end and grow incrementally, pruning the instant any constraint is violated.</li>
-  <li>Precomputing a small seed set for the deepest level of a recursive search can eliminate a whole recursion level without affecting correctness.</li>
-  <li>Build combinatorial objects in the direction that keeps each new check at a fixed offset - this removes off-by-one risk entirely.</li>
-  <li>For small, fixed-size alphabets, a linear membership scan is usually faster and simpler than any hash-based structure; do not over-engineer at small scale.</li>
-  <li>Generator functions let recursive enumerations compose naturally with aggregation functions, keeping concerns separated and memory usage minimal.</li>
-  <li>Once a search is heavily pruned, clarity and correctness should dominate design choices, since constant-factor and asymptotic differences become irrelevant.</li>
-</ul>
-
 </article>

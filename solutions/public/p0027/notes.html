@@ -1,98 +1,29 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-This problem asks me to search a family of <a href="https://en.wikipedia.org/wiki/Quadratic_function" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic</a> expressions of the form <code>n^2 + an + b</code>, with integer coefficients bounded by <code>|a| &lt; 1000</code> and <code>|b| &lt;= 1000</code>. For each pair <code>(a, b)</code> I feed in consecutive non-negative integers <code>n = 0, 1, 2, ...</code> and count the longest unbroken run of <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime numbers</a> the formula produces before the first non-prime value. The answer is the product <code>a * b</code> for the pair with the longest run.
+This problem asks me to search a family of <a class="reference-source" href="https://en.wikipedia.org/wiki/Quadratic_function" rel="noopener noreferrer" target="_blank">quadratic</a> expressions of the form <code>n^2 + an + b</code>, with integer coefficients bounded by <code>|a| &lt; 1000</code> and <code>|b| &lt;= 1000</code>. For each pair <code>(a, b)</code> I feed in consecutive non-negative integers <code>n = 0, 1, 2, ...</code> and count the longest unbroken run of <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number" rel="noopener noreferrer" target="_blank">prime numbers</a> the formula produces before the first non-prime value. The answer is the product <code>a * b</code> for the pair with the longest run.
 </p>
-
 <p>
-The single observation that makes this tractable is a boundary condition. At <code>n = 0</code> the formula collapses to just <code>b</code>, so if <code>b</code> is not prime the run has length zero. Only prime values of <code>b</code> can ever begin a meaningful run. Since there are only 168 primes below 1000, this insight shrinks the candidate set for <code>b</code> from 2001 integers to roughly 168 magnitudes (each usable with either sign). The remaining work is a brute-force scan over the ~1000 values of <code>a</code>. Each primality test is done by <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> at <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(sqrt(V))</a> cost per value. With <code>P</code> primes, <code>A</code> values of <code>a</code>, runs of length at most <code>R</code> (~80), and values up to <code>V_max</code> (~2 * 10^6), the overall cost is roughly <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(P * A * R * sqrt(V_max))</a> - large in the abstract, but fast in practice because almost all runs collapse after a handful of steps.
+The single observation that makes this tractable is a boundary condition. At <code>n = 0</code> the formula collapses to just <code>b</code>, so if <code>b</code> is not prime the run has length zero. Only prime values of <code>b</code> can ever begin a meaningful run. Since there are only 168 primes below 1000, this insight shrinks the candidate set for <code>b</code> from 2001 integers to roughly 168 magnitudes (each usable with either sign). The remaining work is a brute-force scan over the ~1000 values of <code>a</code>. Each primality test is done by <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a> at <a class="reference-source" href="https://en.wikipedia.org/wiki/Big_O_notation" rel="noopener noreferrer" target="_blank">O(sqrt(V))</a> cost per value. With <code>P</code> primes, <code>A</code> values of <code>a</code>, runs of length at most <code>R</code> (~80), and values up to <code>V_max</code> (~2 * 10^6), the overall cost is roughly <a class="reference-source" href="https://en.wikipedia.org/wiki/Big_O_notation" rel="noopener noreferrer" target="_blank">O(P * A * R * sqrt(V_max))</a> - large in the abstract, but fast in practice because almost all runs collapse after a handful of steps.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Sieve-constrained brute-force search</h4>
-
 <p>
 The Python and C files share index 0: they implement the same algorithm, with the C version being a direct translation that benefits from compiled arithmetic in the hot inner loop. I describe the algorithm once and note the language-specific differences as they arise.
 </p>
-
 <p>
-<strong>Step 1 - Generate prime candidates for b.</strong> I generate all primes up to the limit (1000) using the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>. This sieve operates entirely on odd numbers: it marks every integer of the form <code>i + j + 2ij</code> (for positive integers <code>i, j</code>) as composite within an array of size <code>(N-1)/2</code>; each surviving index <code>i</code> corresponds to the odd prime <code>2i + 1</code>, and the prime 2 is added explicitly. I chose <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sundaram</a> over the more familiar <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> mainly for variety; at this problem size both have equivalent cost, and the Sundaram array is half the size since it skips even numbers.
+<strong>Step 1 - Generate prime candidates for b.</strong> I generate all primes up to the limit (1000) using the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a>. This sieve operates entirely on odd numbers: it marks every integer of the form <code>i + j + 2ij</code> (for positive integers <code>i, j</code>) as composite within an array of size <code>(N-1)/2</code>; each surviving index <code>i</code> corresponds to the odd prime <code>2i + 1</code>, and the prime 2 is added explicitly. I chose <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sundaram</a> over the more familiar <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a> mainly for variety; at this problem size both have equivalent cost, and the Sundaram array is half the size since it skips even numbers.
 </p>
-
 <p>
-<strong>Step 2 - Restrict the parity of a.</strong> For every odd prime <code>b</code> the code steps <code>a</code> in increments of 2 starting from 1; only <code>b = 2</code> uses step 1 from 0. The reasoning is a <a href="https://en.wikipedia.org/wiki/Parity_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">parity</a> argument. With odd <code>b</code>, consider <code>n = 1</code>: the value is <code>1 + a + b</code>. For this to be prime (and not 2, which would force a very short run for these magnitudes) it must be odd, so <code>a</code> must be odd. Exploring only odd magnitudes of <code>a</code> therefore covers all coefficient pairs that can produce a long run while halving the iteration count - a cheap arithmetic filter applied before the expensive primality tests.
+<strong>Step 2 - Restrict the parity of a.</strong> For every odd prime <code>b</code> the code steps <code>a</code> in increments of 2 starting from 1; only <code>b = 2</code> uses step 1 from 0. The reasoning is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Parity_(mathematics)" rel="noopener noreferrer" target="_blank">parity</a> argument. With odd <code>b</code>, consider <code>n = 1</code>: the value is <code>1 + a + b</code>. For this to be prime (and not 2, which would force a very short run for these magnitudes) it must be odd, so <code>a</code> must be odd. Exploring only odd magnitudes of <code>a</code> therefore covers all coefficient pairs that can produce a long run while halving the iteration count - a cheap arithmetic filter applied before the expensive primality tests.
 </p>
-
 <p>
 <strong>Step 3 - Enumerate sign combinations.</strong> Rather than looping <code>a</code> from -999 to 999 and <code>b</code> over both signs, I loop <code>a</code> from 0 upward and <code>b</code> over positive primes only, then evaluate all four signed pairs explicitly: <code>(+a, +b)</code>, <code>(+a, -b)</code>, <code>(-a, -b)</code>, <code>(-a, +b)</code>. Their products are <code>+ab</code>, <code>-ab</code>, <code>+ab</code>, <code>-ab</code> respectively, computed inline so no extra multiplication is needed. These four cover every distinct signed combination for a given pair of magnitudes.
 </p>
-
 <p>
-<strong>Step 4 - Measure the prime run.</strong> The helper <code>prime_run(a, b)</code> increments <code>x</code> from 0 and tests whether <code>|x^2 + ax + b|</code> is prime, stopping at the first failure and returning the count. I take the absolute value before the test because negative integers are never prime, and a negative output simply ends the run - taking the magnitude lets me detect both signs uniformly. In C the value is held in a <code>long long</code> to avoid <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">integer overflow</a>, since the quadratic can reach roughly 2 * 10^6.
+<strong>Step 4 - Measure the prime run.</strong> The helper <code>prime_run(a, b)</code> increments <code>x</code> from 0 and tests whether <code>|x^2 + ax + b|</code> is prime, stopping at the first failure and returning the count. I take the absolute value before the test because negative integers are never prime, and a negative output simply ends the run - taking the magnitude lets me detect both signs uniformly. In C the value is held in a <code>long long</code> to avoid <a class="reference-source" href="https://en.wikipedia.org/wiki/Integer_overflow" rel="noopener noreferrer" target="_blank">integer overflow</a>, since the quadratic can reach roughly 2 * 10^6.
 </p>
-
 <p>
-<strong>Step 5 - Track the best result.</strong> In Python I build a list of <code>(run_length, product)</code> <a href="https://en.wikipedia.org/wiki/Tuple" class="reference-source" target="_blank" rel="noopener noreferrer">tuples</a> and call <code>max()</code>, which compares lexicographically: the longest run wins, and ties break on the larger product. The C version replicates this exactly with explicit comparisons (<code>run &gt; best_run</code>, then <code>products[c] &gt; best_product</code> on a tie).
+<strong>Step 5 - Track the best result.</strong> In Python I build a list of <code>(run_length, product)</code> <a class="reference-source" href="https://en.wikipedia.org/wiki/Tuple" rel="noopener noreferrer" target="_blank">tuples</a> and call <code>max()</code>, which compares lexicographically: the longest run wins, and ties break on the larger product. The C version replicates this exactly with explicit comparisons (<code>run &gt; best_run</code>, then <code>products[c] &gt; best_product</code> on a tie).
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Boundary-condition pruning</h4>
-<p>
-Before writing any loop, I asked what the formula must satisfy at its first input. Since <code>n = 0</code> yields <code>b</code>, only prime <code>b</code> can begin a run. This cut the search space for <code>b</code> by roughly a factor of six. Whenever you face an exhaustive search, inspect the constraints at a fixed boundary point first - they often eliminate most candidates for free.
-</p>
-
-<h4>Sieve as a one-time preprocessing step</h4>
-<p>
-I generate the prime candidate set once with the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a> rather than testing each <code>b</code> for primality individually. A <a href="https://en.wikipedia.org/wiki/Sieve_theory" class="reference-source" target="_blank" rel="noopener noreferrer">sieve</a> amortizes the cost of producing a dense set of primes up to a known bound. Reach for a sieve whenever you need the complete set of primes below a fixed limit; the <a href="https://docs.python.org/3/library/stdtypes.html#bytearray" class="reference-source" target="_blank" rel="noopener noreferrer">bytearray</a> (Python) or <code>unsigned char</code> array (C) keeps it cache-friendly.
-</p>
-
-<h4>Trial division for sparse, large-value primality queries</h4>
-<p>
-I deliberately did not sieve up to <code>V_max</code> (~2 * 10^6) for the run-length checks. The values produced are sparse relative to that range, and each run is at most ~80 steps, so per-call <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> at <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(sqrt(V))</a> is cheaper than building and storing a giant membership table. The general rule: sieve when queries are dense within the range, use trial division when they are sparse or the range is large relative to the query count.
-</p>
-
-<h4>Sign-combination enumeration instead of negative loops</h4>
-<p>
-By iterating non-negative magnitudes and applying the four sign variants at the call site, I keep loop variables simple and halve the iteration count for <code>a</code>. The trade-off is four cheap function calls per magnitude pair. This decompose-into-magnitude-plus-signs pattern is broadly useful whenever a problem has sign <a href="https://en.wikipedia.org/wiki/Symmetry" class="reference-source" target="_blank" rel="noopener noreferrer">symmetry</a>.
-</p>
-
-<h4>Parity pruning as early rejection</h4>
-<p>
-Stepping <code>a</code> by 2 for odd <code>b</code> is an early-rejection filter: a trivial <a href="https://en.wikipedia.org/wiki/Parity_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">parity</a> test removes half the candidates before any primality work. Applying cheap arithmetic filters ahead of an expensive dominant test is a recurring optimization technique.
-</p>
-
-<h4>Tuple comparison for lexicographic maximization</h4>
-<p>
-Python compares <a href="https://en.wikipedia.org/wiki/Tuple" class="reference-source" target="_blank" rel="noopener noreferrer">tuples</a> element by element, so <code>max()</code> over <code>(run_length, product)</code> pairs selects the best run and breaks ties on the product in a single expression - no manual if/else chain. Encoding primary and secondary sort keys as a tuple is the idiomatic way to do ranked selection with tie-breaking in Python; the C code makes the same <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic</a> logic explicit because the language has no built-in tuple ordering.
-</p>
-
-<h4>Separating the pure solver from the timing harness</h4>
-<p>
-Both files isolate <code>solve()</code> from a <code>main()</code> that parses arguments and times runs. Keeping the solver a <a href="https://en.wikipedia.org/wiki/Pure_function" class="reference-source" target="_blank" rel="noopener noreferrer">pure function</a> makes it testable and reusable in isolation, at zero algorithmic cost.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is boundary-condition pruning: because <code>n = 0</code> forces the value to equal <code>b</code>, the search for <code>b</code> reduces to primes only. Combined with <a href="https://en.wikipedia.org/wiki/Parity_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">parity</a> pruning and sign-combination enumeration, this makes brute force fast enough that no cleverer algorithm is needed.
-</p>
-
-<p>
-Both solutions implement the same algorithm and produce the same answer (-59231). The C version runs in about 0.0177 s versus roughly 0.3293 s for Python - a speedup of about 19x. The difference is entirely the cost of the tight primality inner loop: compiled integer arithmetic dwarfs <a href="https://en.wikipedia.org/wiki/CPython" class="reference-source" target="_blank" rel="noopener noreferrer">CPython</a>'s interpreted bytecode. When the algorithm is fixed and the work is compute-bound, translating the hot path to C is the most direct route to lower runtime.
-</p>
-
-<ul>
-  <li>Inspect the constraints at a fixed boundary point before writing any search loop - they often eliminate most candidates immediately.</li>
-  <li>Use a sieve to build a fixed set of primes once, then choose trial division for sparse primality queries over a large value range.</li>
-  <li>Apply cheap arithmetic filters (parity, modular checks) before expensive tests to reject candidates early.</li>
-  <li>Decompose signed search ranges into non-negative magnitudes plus explicit sign variants to keep loops simple and cut iteration counts.</li>
-  <li>Encode multi-key selection as tuples and use <code>max()</code> / <code>min()</code> for clean, correct tie-breaking in Python.</li>
-  <li>Keep the solver a pure function separate from the timing harness so it stays testable and reusable.</li>
-  <li>When the algorithm is fixed and work is compute-bound, a compiled language can deliver an order-of-magnitude speedup over an interpreted one.</li>
-</ul>
-
 </article>

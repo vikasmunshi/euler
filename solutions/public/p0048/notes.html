@@ -1,70 +1,23 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
-The task is to find the last ten decimal digits of the self-power sum 1<sup>1</sup> + 2<sup>2</sup> + ... + 1000<sup>1000</sup>. The pivotal observation is that "the last ten digits" of an integer is precisely that integer reduced <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a> 10<sup>10</sup>. <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">Modular arithmetic</a> is the arithmetic of remainders: rather than tracking a full value, I track only its remainder after division by a fixed modulus m. The crucial property is that the modulus distributes over both addition and multiplication, so (a + b) mod m = ((a mod m) + (b mod m)) mod m, and the same holds for products. This means I never need the true sum at all - the largest term, 1000<sup>1000</sup>, has roughly 3000 decimal digits - because I can keep every intermediate value below 10<sup>10</sup>.
+The task is to find the last ten decimal digits of the self-power sum 1<sup>1</sup> + 2<sup>2</sup> + ... + 1000<sup>1000</sup>. The pivotal observation is that "the last ten digits" of an integer is precisely that integer reduced <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modulo</a> 10<sup>10</sup>. <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">Modular arithmetic</a> is the arithmetic of remainders: rather than tracking a full value, I track only its remainder after division by a fixed modulus m. The crucial property is that the modulus distributes over both addition and multiplication, so (a + b) mod m = ((a mod m) + (b mod m)) mod m, and the same holds for products. This means I never need the true sum at all - the largest term, 1000<sup>1000</sup>, has roughly 3000 decimal digits - because I can keep every intermediate value below 10<sup>10</sup>.
 </p>
 <p>
-The problem then reduces to computing i<sup>i</sup> mod 10<sup>10</sup> for each i from 1 to 1000. Multiplying i by itself i times would cost O(i) multiplications per term. The standard speedup is <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a> via <a href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" class="reference-source" target="_blank" rel="noopener noreferrer">exponentiation by squaring</a>, which decomposes the exponent into its binary digits and computes the power in O(log i) multiplications by repeatedly squaring the base. Across all 1000 terms the total work is O(N log N) - effectively instantaneous - and every reduced value fits comfortably in a machine integer.
+The problem then reduces to computing i<sup>i</sup> mod 10<sup>10</sup> for each i from 1 to 1000. Multiplying i by itself i times would cost O(i) multiplications per term. The standard speedup is <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_exponentiation" rel="noopener noreferrer" target="_blank">modular exponentiation</a> via <a class="reference-source" href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" rel="noopener noreferrer" target="_blank">exponentiation by squaring</a>, which decomposes the exponent into its binary digits and computes the power in O(log i) multiplications by repeatedly squaring the base. Across all 1000 terms the total work is O(N log N) - effectively instantaneous - and every reduced value fits comfortably in a machine integer.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Modular Exponentiation with a Reduced Running Sum</h4>
 <p>
-Both the Python and C files implement the same algorithm. I iterate i from 1 to the limit inclusive, compute the term i<sup>i</sup> mod 10<sup>10</sup> by fast <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a>, add it to a running total, and reduce that total modulo 10<sup>10</sup> after every addition. The final running total is the answer.
+Both the Python and C files implement the same algorithm. I iterate i from 1 to the limit inclusive, compute the term i<sup>i</sup> mod 10<sup>10</sup> by fast <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_exponentiation" rel="noopener noreferrer" target="_blank">modular exponentiation</a>, add it to a running total, and reduce that total modulo 10<sup>10</sup> after every addition. The final running total is the answer.
 </p>
 <p>
-In Python I rely on the built-in three-argument <code>pow(i, i, modulo)</code>. This is not the same as <code>pow(i, i) % modulo</code>; the three-argument form performs the <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular</a> reduction inside the squaring loop, so the full multi-thousand-digit power is never materialised. Python integers are arbitrary precision, so there is no overflow to consider, and the routine runs in optimised C under the hood.
+In Python I rely on the built-in three-argument <code>pow(i, i, modulo)</code>. This is not the same as <code>pow(i, i) % modulo</code>; the three-argument form performs the <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modular</a> reduction inside the squaring loop, so the full multi-thousand-digit power is never materialised. Python integers are arbitrary precision, so there is no overflow to consider, and the routine runs in optimised C under the hood.
 </p>
 <p>
-In C I wrote <code>mod_pow</code> by hand as a classic binary <a href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" class="reference-source" target="_blank" rel="noopener noreferrer">exponentiation by squaring</a> loop: while the exponent is positive, I test its lowest bit with <code>exp &amp; 1</code> to decide whether to fold the current base into the result, then square the base and right-shift the exponent. The subtlety is overflow. With a modulus of 10<sup>10</sup>, two reduced operands can each approach 10<sup>10</sup>, so their product can reach about 10<sup>20</sup> - well beyond the roughly 9.2x10<sup>18</sup> ceiling of a signed 64-bit <code>long long</code>. I avoid this by casting one operand to <code>__int128</code> before each multiply, computing the product at 128-bit precision, and immediately reducing modulo <code>mod</code> back into 64-bit range. The 128-bit value is purely transient and never stored across iterations.
+In C I wrote <code>mod_pow</code> by hand as a classic binary <a class="reference-source" href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" rel="noopener noreferrer" target="_blank">exponentiation by squaring</a> loop: while the exponent is positive, I test its lowest bit with <code>exp &amp; 1</code> to decide whether to fold the current base into the result, then square the base and right-shift the exponent. The subtlety is overflow. With a modulus of 10<sup>10</sup>, two reduced operands can each approach 10<sup>10</sup>, so their product can reach about 10<sup>20</sup> - well beyond the roughly 9.2x10<sup>18</sup> ceiling of a signed 64-bit <code>long long</code>. I avoid this by casting one operand to <code>__int128</code> before each multiply, computing the product at 128-bit precision, and immediately reducing modulo <code>mod</code> back into 64-bit range. The 128-bit value is purely transient and never stored across iterations.
 </p>
 <p>
 Both versions accept the limit as a runtime argument rather than hard-coding 1000, so the same binary or script handles the small development case (limit 10, answer 405071317) and the full case (limit 1000, answer 9110846700) through the identical code path.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Three-argument pow() in Python</h4>
-<p>
-Python's <a href="https://docs.python.org/3/library/functions.html#pow" class="reference-source" target="_blank" rel="noopener noreferrer">built-in <code>pow(base, exp, mod)</code></a> is a single call that performs <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a> directly and never builds the full power. I always prefer it over <code>pow(base, exp) % mod</code> when the exponent is large: the former runs in O(log exp) multiplications on already-small numbers, whereas the latter first constructs an enormous integer. This is the canonical Python idiom for any number-theory task involving large modular powers.
-</p>
-
-<h4>Using __int128 as a transient widening cast in C</h4>
-<p>
-When two values near 10<sup>10</sup> are multiplied, the exact product needs more than 64 bits, and a plain <code>long long</code> multiply wraps silently to a wrong answer. The GCC/Clang <code>__int128</code> extension supplies a 128-bit integer type large enough to hold the product exactly. The pattern <code>(__int128)a * b % mod</code> widens one operand so the multiply happens at 128 bits, then the modulo reduces the result straight back into 64-bit range. No 128-bit value persists - it exists only for the duration of one expression. I reach for this whenever I do <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular arithmetic</a> in C with a modulus above roughly 3x10<sup>9</sup>; it is far simpler than pulling in a big-integer library.
-</p>
-
-<h4>Modular accumulation with a reduced invariant</h4>
-<p>
-Rather than summing every term and reducing once at the end, I reduce after each addition with <code>result = (result + term) % modulo</code>. Since both <code>term</code> and <code>result</code> are always below the modulus, their sum is at most <code>2 * modulo - 2</code>, which fits easily in a 64-bit integer. Maintaining the invariant "every accumulator is already fully reduced" is a general safeguard that guarantees no intermediate value can overflow.
-</p>
-
-<h4>Binary exponentiation loop</h4>
-<p>
-The <a href="https://en.wikipedia.org/wiki/Exponentiation_by_squaring" class="reference-source" target="_blank" rel="noopener noreferrer">exponentiation by squaring</a> loop is a pattern worth memorising. Its invariant is that the product of the accumulated <code>result</code> and <code>base</code> raised to the remaining <code>exp</code> always equals the original power. Each iteration optionally folds in the base when the low exponent bit is set, then squares the base and halves the exponent, terminating after O(log exp) steps. Because it relies only on an associative operation, the same skeleton extends to matrix exponentiation, polynomial powers, and other domains.
-</p>
-
-<h4>Parameterising the problem size</h4>
-<p>
-Both solutions accept the limit as a command-line argument. This lets me validate the code on the small, hand-checkable case (limit 10) using the exact same code path as the full run, and it lets the benchmark harness exercise both cases without editing source. Parameterising sizes instead of hard-coding constants is a low-cost habit that pays off in testability.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The unlocking insight is that any "last N digits" question is really a request for a value modulo 10<sup>N</sup>, which immediately bounds every intermediate quantity and removes the need for big-integer arithmetic. The only remaining work is computing large powers efficiently, and the answer is always <a href="https://en.wikipedia.org/wiki/Modular_exponentiation" class="reference-source" target="_blank" rel="noopener noreferrer">modular exponentiation</a>.
-</p>
-<p>
-The Python and C versions implement the identical algorithm. On the main case the C build registers 0.0000 s against roughly 0.0007 s for Python - the C version is faster thanks to compiled arithmetic and the native <code>__int128</code> multiply, while Python's three-argument <code>pow</code> keeps it close and far more concise. Both are effectively instant at this scale, so the choice here is about clarity; the C technique remains valuable practice for larger moduli where it genuinely matters.
-</p>
-<ul>
-  <li>Restate "last N digits" as "modulo 10<sup>N</sup>" immediately - it bounds every intermediate value.</li>
-  <li>Use Python's three-argument <code>pow(base, exp, mod)</code> for modular powers; never raise to the full power and reduce afterward.</li>
-  <li>In C, apply <code>(__int128)</code> as a transient widening cast before any multiply whose product could exceed 2<sup>63</sup>-1.</li>
-  <li>Keep every accumulator already reduced modulo m so intermediate sums never overflow.</li>
-  <li>Memorise the binary exponentiation loop - it turns O(N) multiplications into O(log N) and generalises to any associative operation.</li>
-  <li>Parameterise problem sizes so small, verifiable cases run through the exact same code path as the full problem.</li>
-</ul>
-
 </article>

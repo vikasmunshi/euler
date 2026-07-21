@@ -1,8 +1,8 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
+<h3>Problem Analysis</h3>
+<p>
     We are asked to count the distinct integers below N = 50,000,000 that can be written as p<sup>2</sup> + q<sup>3</sup> + r<sup>4</sup>,
-    where p, q, and r are each <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime numbers</a>.
+    where p, q, and r are each <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number" rel="noopener noreferrer" target="_blank">prime numbers</a>.
     The word "distinct" is the crux of the problem: many different triples (p, q, r) can produce the same sum, so we cannot
     simply multiply together the counts of valid bases - we must deduplicate. The fact that makes this tractable is that
     the upper bound N tightly constrains how large each prime can be in each role. Since p<sup>2</sup> alone must be below
@@ -11,142 +11,50 @@
     q<sup>3</sup> &lt; N means q is at most the cube root (about 368). The single most demanding constraint is the square
     term, so one prime list up to sqrt(N) is a superset of every prime we need for all three roles.
   </p>
-  <p>
+<p>
     The algorithm is a triple nested loop over (fourth-power prime, cube prime, square prime), computing each sum and
-    inserting it into a deduplication structure. Naively this is O(P<sub>4</sub> &middot; P<sub>3</sub> &middot; P<sub>2</sub>),
+    inserting it into a deduplication structure. Naively this is O(P<sub>4</sub> · P<sub>3</sub> · P<sub>2</sub>),
     where P<sub>k</sub> is the number of primes whose k-th power fits under N; by the
-    <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number_theorem" rel="noopener noreferrer" target="_blank">prime number theorem</a>
     each P<sub>k</sub> is approximately N<sup>1/k</sup> / ln N. Because the prime lists are sorted in ascending order, we
     can break out of each inner loop the moment a partial sum exceeds the budget, which prunes the vast majority of
     iterations. Empirically the number of valid triples is only a few million, so the dominant costs end up being sieve
     construction and the deduplication structure, both linear in their respective sizes.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Triple-loop enumeration with sieve-based prime generation (Python and C)</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Triple-loop enumeration with sieve-based prime generation (Python and C)</h4>
+<p>
     Both files implement the identical algorithm in two languages, so I describe them together and note the
     language-specific differences where they matter.
   </p>
-  <p>
-    <strong>Step 1 - Generate primes with the Sieve of Sundaram.</strong> I generate all primes up to sqrt(N) using the
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>.
-    This sieve marks integers of the form i + j + 2ij (for positive integers i, j &ge; 1) in a half-sized array; any
+<p>
+<strong>Step 1 - Generate primes with the Sieve of Sundaram.</strong> I generate all primes up to sqrt(N) using the
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a>.
+    This sieve marks integers of the form i + j + 2ij (for positive integers i, j ≥ 1) in a half-sized array; any
     position k that remains unmarked corresponds to the odd prime 2k+1, and I prepend 2 by hand. I chose it over the more
-    familiar <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
+    familiar <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>
     largely as a variation - both run in similar time and produce the same primes. The single sqrt(N) bound serves all
     three roles, as argued above.
   </p>
-  <p>
-    <strong>Step 2 - Pre-compute early-exit thresholds.</strong> Before looping I compute
+<p>
+<strong>Step 2 - Pre-compute early-exit thresholds.</strong> Before looping I compute
     <code>max_quadruple_cube = max_num - 4</code> (reserving room for the smallest square 2<sup>2</sup> = 4) and
     <code>max_quadruple = max_quadruple_cube - 8</code> (reserving room additionally for the smallest cube
     2<sup>3</sup> = 8). These constants become the break conditions at the outer two loop levels, so I exit as soon as
     further iterations could not possibly yield a valid sum.
   </p>
-  <p>
-    <strong>Step 3 - Triple nested loop.</strong> The outermost loop iterates over fourth powers, the middle over cubes,
+<p>
+<strong>Step 3 - Triple nested loop.</strong> The outermost loop iterates over fourth powers, the middle over cubes,
     and the innermost over squares. At each level I test the running partial sum against its threshold and <code>break</code>
     (not <code>continue</code>) when it is exceeded. This is correct precisely because the prime lists are ascending: once
     a partial sum overshoots, every later term in that loop overshoots too.
   </p>
-  <p>
-    <strong>Step 4 - Deduplication.</strong> In Python I add each valid sum to a <code>set</code> and return its length.
-    In C I allocate a <a href="https://en.wikipedia.org/wiki/C_dynamic_memory_allocation" class="reference-source" target="_blank" rel="noopener noreferrer"><code>calloc</code></a>-zeroed
+<p>
+<strong>Step 4 - Deduplication.</strong> In Python I add each valid sum to a <code>set</code> and return its length.
+    In C I allocate a <a class="reference-source" href="https://en.wikipedia.org/wiki/C_dynamic_memory_allocation" rel="noopener noreferrer" target="_blank"><code>calloc</code></a>-zeroed
     <code>unsigned char</code> array of length <code>max_num</code> used as a presence table, incrementing a counter only
     the first time a given index is set. The C array gives guaranteed O(1) lookup with no hashing overhead at the cost of
     about 50 MB of memory; the Python set uses memory proportional only to the number of distinct sums (~1 million) but
     pays hash-table overhead per insertion.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>Generator functions for lazy prime-power sequences</h4>
-  <p>
-    In Python, <code>prime_powers</code> is a <a href="https://docs.python.org/3/howto/functional.html#generators" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a>
-    using <code>yield</code> - a function that produces values one at a time on demand rather than building a full list up
-    front. Because every loop breaks early, a list would pre-compute powers we never consume. Whenever an inner loop exits
-    on a threshold, making the source lazy avoids that wasted work and states the intent clearly. The C equivalent is a
-    plain <code>for</code> loop over the primes array computing the power inline.
-  </p>
-  <h4>Early-exit break versus continue in sorted loops</h4>
-  <p>
-    The decision to use <code>break</code> rather than <code>continue</code> when a partial sum exceeds a threshold is
-    subtle but decisive. It is valid only because the prime lists are sorted ascending: once
-    <code>quadruple + cube &gt; max_quadruple_cube</code>, every subsequent cube is at least as large and equally doomed,
-    so visiting them is pointless. Using <code>continue</code> would scan the entire list each time, restoring the full
-    O(P<sub>3</sub>) cost per outer iteration. Any iteration over a monotonically increasing sequence with an upper bound
-    should prefer <code>break</code> to prune the tail.
-  </p>
-  <h4>Boolean flag array for deduplication in C</h4>
-  <p>
-    The <a href="https://en.wikipedia.org/wiki/C_dynamic_memory_allocation" class="reference-source" target="_blank" rel="noopener noreferrer"><code>calloc</code></a>-ed
-    byte array in C is a direct-addressed presence table: index <code>number</code> holds 0 if unseen and 1 once counted.
-    Compared to a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a>
-    it offers guaranteed O(1) reads and writes, no collision resolution, and excellent cache locality. The trade-off is
-    memory proportional to the value range (50 MB), not to the number of distinct results. This is the right call when the
-    range is known, fixed, and not astronomically large.
-  </p>
-  <h4>Python set for deduplication</h4>
-  <p>
-    Python's built-in <a href="https://docs.python.org/3/library/stdtypes.html#set" class="reference-source" target="_blank" rel="noopener noreferrer"><code>set</code></a>
-    stores only the values actually inserted, so its memory cost scales with the number of distinct sums rather than the
-    range. For an unknown or enormous range this is the idiomatic choice; here it costs hash overhead per insert, which is
-    the main reason the Python version is slower.
-  </p>
-  <h4>Single sieve covering all exponent roles</h4>
-  <p>
-    I compute one <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>
-    up to sqrt(N) and reuse the resulting prime list for the square, cube, and fourth-power roles. The square term imposes
-    the weakest bound on the prime base (the largest primes appear there), so its prime list is a superset of what the cube
-    and fourth-power roles require. Reusing a single data structure rather than running three sieves at different limits
-    cuts both code complexity and computation time.
-  </p>
-  <h4>Walrus operator for compute-once subexpressions in Python</h4>
-  <p>
-    The expressions <code>quadruple_cube := (quadruple + cube)</code> and <code>number := (quadruple_cube + square)</code>
-    use the <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a>
-    (<code>:=</code>, assignment expressions, Python 3.8+). This computes a value inside the loop condition, binds it to a
-    name for the threshold test, and reuses that name in the loop body - avoiding both a separate assignment statement and
-    a recomputation.
-  </p>
-  <h4>Incremental partial sums across loop levels</h4>
-  <p>
-    Rather than recomputing the full triple sum at the innermost level, I carry <code>quadruple</code> into the cube loop,
-    form <code>quadruple_cube</code> there, and add only the square at the bottom. Building results incrementally keeps
-    each loop's threshold test to a single addition and comparison, which matters when the inner body executes millions of
-    times.
-  </p>
-  <h4>Widening casts to avoid integer overflow in C</h4>
-  <p>
-    In the C version I cast each prime to <code>long long</code> before multiplying, as in
-    <code>(long long)primes[i4] * primes[i4] * primes[i4] * primes[i4]</code>. A prime near sqrt(N) raised to the fourth
-    power would vastly exceed the range of a 32-bit <code>int</code>; forcing the first factor wide promotes the entire
-    expression, so the multiplication is carried out in 64-bit arithmetic and cannot
-    <a href="https://en.wikipedia.org/wiki/Integer_overflow" class="reference-source" target="_blank" rel="noopener noreferrer">overflow</a>.
-    This is a habit worth keeping whenever a product of small values can grow large.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is that bounding the partial sum at each loop level - and breaking, not continuing, when the
-    bound is exceeded - turns a nominally cubic search into one that visits only a few million productive triples. The
-    sorted order of the primes is exactly what makes early breaking correct. Counting distinct results then reduces to
-    pushing each sum into a deduplication structure and returning its size.
-  </p>
-  <p>
-    Both solutions share the algorithm; the difference is purely in deduplication mechanics. On the main input the C
-    version runs in about 0.041 s and the Python version in about 0.303 s - roughly a 7x speedup. That gap comes entirely
-    from the C boolean array's collision-free O(1) writes and direct integer arithmetic versus Python's hash-set overhead
-    and interpreter cost, not from any algorithmic difference. The C approach is the fastest; the Python approach is the
-    more memory-frugal and arguably the more readable.
-  </p>
-  <ul>
-    <li>When iterating over a sorted sequence under an upper bound, use <code>break</code> rather than <code>continue</code> to prune the entire tail.</li>
-    <li>One sieve sized to the weakest constraint can serve every role; avoid running multiple sieves at different limits.</li>
-    <li>When the range of output values is fixed and manageable, a direct-addressed boolean array beats a hash set for deduplication on both speed and cache behaviour.</li>
-    <li>Compute partial sums incrementally across loop levels and test them against pre-computed thresholds so early-exit checks stay cheap.</li>
-    <li>Reach for generator functions when an inner loop may exit early - they avoid materialising values you will never consume.</li>
-    <li>Widen integer operands before a product that can grow large, so the arithmetic happens in a type that cannot overflow.</li>
-    <li>For "how many distinct values satisfy a combinatorial condition" problems, the pattern is: enumerate combinations, insert each result into a dedup structure, return its size.</li>
-  </ul>
 </article>

@@ -1,97 +1,27 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-The problem hinges on the notion of an <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>: a positive integer whose proper divisors (every divisor except the number itself) sum to more than the number. That sum of proper divisors is called the <a href="https://en.wikipedia.org/wiki/Aliquot_sum" class="reference-source" target="_blank" rel="noopener noreferrer">aliquot sum</a>, and it is the central quantity I have to compute. The problem hands me a crucial mathematical fact: every integer greater than 28123 can be expressed as the sum of two <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>s. This bounds an otherwise infinite search into the finite range [1, 28123], which is what makes the problem tractable at all. Without that bound there would be no terminating computation.
+The problem hinges on the notion of an <a class="reference-source" href="https://en.wikipedia.org/wiki/Abundant_number" rel="noopener noreferrer" target="_blank">abundant number</a>: a positive integer whose proper divisors (every divisor except the number itself) sum to more than the number. That sum of proper divisors is called the <a class="reference-source" href="https://en.wikipedia.org/wiki/Aliquot_sum" rel="noopener noreferrer" target="_blank">aliquot sum</a>, and it is the central quantity I have to compute. The problem hands me a crucial mathematical fact: every integer greater than 28123 can be expressed as the sum of two <a class="reference-source" href="https://en.wikipedia.org/wiki/Abundant_number" rel="noopener noreferrer" target="_blank">abundant number</a>s. This bounds an otherwise infinite search into the finite range [1, 28123], which is what makes the problem tractable at all. Without that bound there would be no terminating computation.
 </p>
-
 <p>
-With the range fixed, the problem decomposes into two clean phases. Phase one classifies every number up to the limit as abundant or not by computing its <a href="https://en.wikipedia.org/wiki/Aliquot_sum" class="reference-source" target="_blank" rel="noopener noreferrer">aliquot sum</a>. Phase two enumerates all sums of two <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>s and marks which targets in the range are reachable; the answer is the sum of the unmarked targets. The classification phase can be done either by per-number <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> in O(N&radic;N) total time, or by a sieve in O(N log N) time. The pairwise-sum phase costs O(A&sup2;) where A is the number of <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>s below the limit - roughly 6965, giving about 24 million pair checks, which a modern machine dispatches in milliseconds. Recognising the two-phase structure is the key to optimising each part independently.
+With the range fixed, the problem decomposes into two clean phases. Phase one classifies every number up to the limit as abundant or not by computing its <a class="reference-source" href="https://en.wikipedia.org/wiki/Aliquot_sum" rel="noopener noreferrer" target="_blank">aliquot sum</a>. Phase two enumerates all sums of two <a class="reference-source" href="https://en.wikipedia.org/wiki/Abundant_number" rel="noopener noreferrer" target="_blank">abundant number</a>s and marks which targets in the range are reachable; the answer is the sum of the unmarked targets. The classification phase can be done either by per-number <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a> in O(N√N) total time, or by a sieve in O(N log N) time. The pairwise-sum phase costs O(A²) where A is the number of <a class="reference-source" href="https://en.wikipedia.org/wiki/Abundant_number" rel="noopener noreferrer" target="_blank">abundant number</a>s below the limit - roughly 6965, giving about 24 million pair checks, which a modern machine dispatches in milliseconds. Recognising the two-phase structure is the key to optimising each part independently.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Algorithm 0: Sieve-Based Aliquot-Sum Construction (s0.py and s0.c)</h4>
-
 <p>
-My first approach computes the <a href="https://en.wikipedia.org/wiki/Aliquot_sum" class="reference-source" target="_blank" rel="noopener noreferrer">aliquot sum</a> for the entire range in a single sieve pass, inspired by the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>. Instead of asking "what are the divisors of n?" for each n, I invert the question: for each divisor <code>i</code> from 1 to limit/2, I add <code>i</code> to every multiple of <code>i</code> starting at <code>2*i</code>. Each divisor value is processed exactly once and contributes to all the numbers it divides. After the pass, <code>div_sums[n]</code> holds the sum of all proper divisors of <code>n</code>. The outer loop runs limit/2 times, the inner loop runs about limit/(2i) times per step, and the total work is proportional to the <a href="https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">harmonic series</a>, giving O(N log N).
+My first approach computes the <a class="reference-source" href="https://en.wikipedia.org/wiki/Aliquot_sum" rel="noopener noreferrer" target="_blank">aliquot sum</a> for the entire range in a single sieve pass, inspired by the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>. Instead of asking "what are the divisors of n?" for each n, I invert the question: for each divisor <code>i</code> from 1 to limit/2, I add <code>i</code> to every multiple of <code>i</code> starting at <code>2*i</code>. Each divisor value is processed exactly once and contributes to all the numbers it divides. After the pass, <code>div_sums[n]</code> holds the sum of all proper divisors of <code>n</code>. The outer loop runs limit/2 times, the inner loop runs about limit/(2i) times per step, and the total work is proportional to the <a class="reference-source" href="https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)" rel="noopener noreferrer" target="_blank">harmonic series</a>, giving O(N log N).
 </p>
-
 <p>
-Once the sieve completes, I collect <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>s with a single comparison <code>div_sums[i] &gt; i</code>, naturally producing them in ascending order. The pairwise-sum phase iterates over all pairs <code>(i, j)</code> with <code>j &gt;= i</code>, marking each sum that lands within the limit in a flat boolean array, and finally sums the integers whose mark was never set.
+Once the sieve completes, I collect <a class="reference-source" href="https://en.wikipedia.org/wiki/Abundant_number" rel="noopener noreferrer" target="_blank">abundant number</a>s with a single comparison <code>div_sums[i] &gt; i</code>, naturally producing them in ascending order. The pairwise-sum phase iterates over all pairs <code>(i, j)</code> with <code>j &gt;= i</code>, marking each sum that lands within the limit in a flat boolean array, and finally sums the integers whose mark was never set.
 </p>
-
 <p>
-The two language versions differ in how the inner loops are expressed. In C I use plain nested loops with direct array indexing - cache-friendly and idiomatic. In Python I lean on <a href="https://numpy.org/" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a>: the entire inner sieve loop becomes a single vectorised slice assignment <code>div_sums[2*i::i] += i</code>, <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>s are extracted with <code>np.flatnonzero(div_sums &gt; np.arange(limit + 1))</code>, and even the sum-marking loop uses vectorised slicing and boolean indexing. The Python interpreter only drives the outer loops; the heavy lifting runs in compiled <a href="https://numpy.org/" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a> code.
+The two language versions differ in how the inner loops are expressed. In C I use plain nested loops with direct array indexing - cache-friendly and idiomatic. In Python I lean on <a class="reference-source" href="https://numpy.org/" rel="noopener noreferrer" target="_blank">NumPy</a>: the entire inner sieve loop becomes a single vectorised slice assignment <code>div_sums[2*i::i] += i</code>, <a class="reference-source" href="https://en.wikipedia.org/wiki/Abundant_number" rel="noopener noreferrer" target="_blank">abundant number</a>s are extracted with <code>np.flatnonzero(div_sums &gt; np.arange(limit + 1))</code>, and even the sum-marking loop uses vectorised slicing and boolean indexing. The Python interpreter only drives the outer loops; the heavy lifting runs in compiled <a class="reference-source" href="https://numpy.org/" rel="noopener noreferrer" target="_blank">NumPy</a> code.
 </p>
-
 <h4>Algorithm 1: Trial Division per Number (s1.py and s1.c)</h4>
-
 <p>
-My second approach computes each number's <a href="https://en.wikipedia.org/wiki/Aliquot_sum" class="reference-source" target="_blank" rel="noopener noreferrer">aliquot sum</a> independently by <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>. For a given <code>n</code>, I start the accumulator at 1 (every n &gt; 1 has 1 as a proper divisor) and iterate <code>i</code> from 2 up to &radic;n. Whenever <code>i</code> divides <code>n</code> I add both <code>i</code> and its cofactor <code>n/i</code>, taking care not to double-count when <code>i == n/i</code> (the case of a perfect square). This costs O(&radic;n) per number and O(N&radic;N) overall. The divisor-pairing trick - that divisors come in pairs straddling the square root - is what keeps the per-number cost at &radic;n rather than n.
+My second approach computes each number's <a class="reference-source" href="https://en.wikipedia.org/wiki/Aliquot_sum" rel="noopener noreferrer" target="_blank">aliquot sum</a> independently by <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a>. For a given <code>n</code>, I start the accumulator at 1 (every n &gt; 1 has 1 as a proper divisor) and iterate <code>i</code> from 2 up to √n. Whenever <code>i</code> divides <code>n</code> I add both <code>i</code> and its cofactor <code>n/i</code>, taking care not to double-count when <code>i == n/i</code> (the case of a perfect square). This costs O(√n) per number and O(N√N) overall. The divisor-pairing trick - that divisors come in pairs straddling the square root - is what keeps the per-number cost at √n rather than n.
 </p>
-
 <p>
-The pairwise-sum phase is identical to algorithm 0: a sorted list of <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>s, symmetric pair iteration, a boolean marking array, and a linear final scan. Only the classification phase differs. The C version outperforms the Python version dramatically because the tight square-root loop runs in native code; even so, it is slower than the sieve-based C solution because <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> repeats divisibility work that the sieve shares across multiples.
+The pairwise-sum phase is identical to algorithm 0: a sorted list of <a class="reference-source" href="https://en.wikipedia.org/wiki/Abundant_number" rel="noopener noreferrer" target="_blank">abundant number</a>s, symmetric pair iteration, a boolean marking array, and a linear final scan. Only the classification phase differs. The C version outperforms the Python version dramatically because the tight square-root loop runs in native code; even so, it is slower than the sieve-based C solution because <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a> repeats divisibility work that the sieve shares across multiples.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Sieve-Style Divisor Accumulation</h4>
-<p>
-The decisive performance idea in algorithm 0 is inverting the divisor question. Rather than factoring each number, I let each divisor <code>i</code> push a contribution onto all its multiples. This is the same structural trick as the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>, and it reduces the classification phase from O(N&radic;N) to O(N log N). Whenever you need a multiplicative or additive property for every number in a contiguous range, ask whether a sieve formulation exists before reaching for per-number computation.
-</p>
-
-<h4>Divisor Pairing Around the Square Root</h4>
-<p>
-In the <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> solutions I only loop up to &radic;n because divisors come in pairs: if <code>i</code> divides <code>n</code>, so does <code>n/i</code>, and one of each pair is always at or below the square root. Adding both at once collapses the search space. The single guard <code>i != n/i</code> handles the perfect-square case where the two cofactors coincide. This is the standard way to enumerate divisors efficiently for a single number.
-</p>
-
-<h4>NumPy Vectorised Slice Assignment</h4>
-<p>
-In s0.py the inner sieve loop becomes <code>div_sums[2*i::i] += i</code>. The extended slice <code>2*i::i</code> selects every i-th element starting at 2i, and the addition runs entirely inside compiled <a href="https://numpy.org/" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a>. The interpreter only runs the outer loop over <code>i</code> (at most 14061 iterations). Pushing the hot inner loop into vectorised array operations is the canonical way to write fast numerical Python with <a href="https://numpy.org/" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a> without dropping to C.
-</p>
-
-<h4>Direct-Address Boolean Flag Array</h4>
-<p>
-Rather than store pairwise sums in a hash set, I allocate a flat boolean array indexed directly by value. Marking is an O(1) random write, testing is an O(1) read, and the final summation is one linear scan. Total memory is about 28 KB - negligible. When the value domain is known and densely packed, a direct-address table beats a hash set because it eliminates hashing, comparison, and pointer indirection.
-</p>
-
-<h4>Early Loop Termination on Sorted Input</h4>
-<p>
-Because the list of <a href="https://en.wikipedia.org/wiki/Abundant_number" class="reference-source" target="_blank" rel="noopener noreferrer">abundant number</a>s is ascending, once <code>abundant[i] + abundant[j]</code> exceeds the limit, every later <code>j</code> will too, so the inner loop breaks immediately. Exploiting monotonicity to short-circuit a scan is a reusable technique any time your data is sorted and you are accumulating up to a threshold.
-</p>
-
-<h4>Symmetric Pair Iteration (j &gt;= i)</h4>
-<p>
-Since <code>a + b == b + a</code>, I start the inner index at <code>i</code> rather than 0, enumerating each unordered pair exactly once and halving the work. Starting at <code>i</code> rather than <code>i+1</code> correctly includes the <code>a + a</code> case. Always check whether order matters before writing a nested enumeration.
-</p>
-
-<h4>calloc for Zero-Initialised Arrays in C</h4>
-<p>
-For arrays that must start at zero - the sieve accumulator and the boolean marking array - I use <code>calloc</code> instead of <code>malloc</code> plus <code>memset</code>. <code>calloc</code> allocates and zeroes in one call and may use OS-level zero pages without physically writing them, so it is at least as fast. I reserve <code>malloc</code> for the abundant array, which I overwrite entirely.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The core insight is the two-phase decomposition: compute the <a href="https://en.wikipedia.org/wiki/Aliquot_sum" class="reference-source" target="_blank" rel="noopener noreferrer">aliquot sum</a> for the whole range, then enumerate pairwise sums against a bounded marking table. The provided upper bound of 28123 is what makes the search finite, and the sieve formulation of the classification phase is the decisive algorithmic win.
-</p>
-
-<p>
-The benchmarks make the trade-offs concrete. The sieve-based C solution (p0023_s0_c) at 5.7 ms is fastest, with the <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> C solution (p0023_s1_c) at 10.4 ms - roughly 1.8x slower, exactly the gap you expect from O(N log N) versus O(N&radic;N) in the classification phase. On the Python side, the <a href="https://numpy.org/" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a> sieve (p0023_s0.py) at 55 ms is about 9.7x faster than the pure-Python <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> version (p0023_s1.py) at 536 ms, a vivid demonstration that keeping the inner loop in compiled <a href="https://numpy.org/" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a> code rather than the interpreter recovers nearly an order of magnitude.
-</p>
-
-<ul>
-  <li>When you need a property for every number in a range, prefer a sieve (O(N log N)) over per-number <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a> (O(N&radic;N)).</li>
-  <li>To enumerate divisors of a single number, loop only to its square root and add both members of each divisor pair.</li>
-  <li>A direct-address boolean array indexed by value is the fastest set-membership structure for dense, bounded integer ranges.</li>
-  <li>Exploit sorted order to break out of loops early once a running sum passes the target.</li>
-  <li>For unordered pairs, start the inner index at the outer index to enumerate each pair exactly once.</li>
-  <li>In Python, move hot inner loops into <a href="https://numpy.org/" class="reference-source" target="_blank" rel="noopener noreferrer">NumPy</a> vectorised operations to gain one to two orders of magnitude.</li>
-  <li>Use <code>calloc</code> in C whenever you need a zeroed block; reserve <code>malloc</code> for memory you will fully overwrite.</li>
-  <li>Decompose a problem into independent phases and optimise each one separately.</li>
-</ul>
-
 </article>

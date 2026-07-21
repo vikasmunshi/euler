@@ -1,73 +1,29 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
-    Every <a href="https://en.wikipedia.org/wiki/Quadratic_irrational_number" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic irrational</a> - including the square root of any non-square integer - has a <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> expansion that is eventually periodic. A continued fraction writes a number as an integer part plus the reciprocal of another such expansion, nested indefinitely; for square roots this nesting settles into a repeating block. My task is to count how many N up to 10,000 have an odd-length repeating block. Perfect squares are excluded outright: their roots are rational, the expansion terminates, and worse, the recurrence below would divide by zero on the first step.
+<h3>Problem Analysis</h3>
+<p>
+    Every <a class="reference-source" href="https://en.wikipedia.org/wiki/Quadratic_irrational_number" rel="noopener noreferrer" target="_blank">quadratic irrational</a> - including the square root of any non-square integer - has a <a class="reference-source" href="https://en.wikipedia.org/wiki/Continued_fraction" rel="noopener noreferrer" target="_blank">continued fraction</a> expansion that is eventually periodic. A continued fraction writes a number as an integer part plus the reciprocal of another such expansion, nested indefinitely; for square roots this nesting settles into a repeating block. My task is to count how many N up to 10,000 have an odd-length repeating block. Perfect squares are excluded outright: their roots are rational, the expansion terminates, and worse, the recurrence below would divide by zero on the first step.
   </p>
-  <p>
-    The key observation that makes the problem tractable is that the algorithm for extracting the coefficients - the standard square-root <a href="https://en.wikipedia.org/wiki/Periodic_continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">periodic continued fraction</a> recurrence - keeps the entire state in three small integers. At each step the current remainder has the form (sqrt(N) + m) / d, and from (m, d) I read off the next coefficient a. Crucially m is bounded by sqrt(N) and d divides N - m^2 exactly, so the triple (m, d, a) ranges over a finite set. By the <a href="https://en.wikipedia.org/wiki/Pigeonhole_principle" class="reference-source" target="_blank" rel="noopener noreferrer">pigeonhole principle</a>, the sequence of triples must eventually repeat, and the first repeat closes the cycle: the number of distinct triples seen is the period. Since the period for N up to 10,000 is at most a few hundred, each inner loop runs in roughly O(sqrt(N)) steps, and the overall cost is about O(N_max * sqrt(N_max)) - on the order of 10^6 integer operations, trivially fast.
+<p>
+    The key observation that makes the problem tractable is that the algorithm for extracting the coefficients - the standard square-root <a class="reference-source" href="https://en.wikipedia.org/wiki/Periodic_continued_fraction" rel="noopener noreferrer" target="_blank">periodic continued fraction</a> recurrence - keeps the entire state in three small integers. At each step the current remainder has the form (sqrt(N) + m) / d, and from (m, d) I read off the next coefficient a. Crucially m is bounded by sqrt(N) and d divides N - m^2 exactly, so the triple (m, d, a) ranges over a finite set. By the <a class="reference-source" href="https://en.wikipedia.org/wiki/Pigeonhole_principle" rel="noopener noreferrer" target="_blank">pigeonhole principle</a>, the sequence of triples must eventually repeat, and the first repeat closes the cycle: the number of distinct triples seen is the period. Since the period for N up to 10,000 is at most a few hundred, each inner loop runs in roughly O(sqrt(N)) steps, and the overall cost is about O(N_max * sqrt(N_max)) - on the order of 10^6 integer operations, trivially fast.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Continued-Fraction Period Detection via State-Triple Cycle</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Continued-Fraction Period Detection via State-Triple Cycle</h4>
+<p>
     Both the Python (<code>p0064_s0.py</code>) and C (<code>p0064_s0.c</code>) files implement the identical algorithm; I describe it once and note the language differences afterward.
   </p>
-  <p>
-    <strong>Step 1 - Compute a0.</strong> For each candidate N I compute a0 = floor(sqrt(N)). If a0^2 == N then N is a perfect square and I skip it. Filtering these at the call site keeps the period routine's precondition - its input is irrational - explicit, and avoids the division-by-zero the recurrence would otherwise hit.
+<p>
+<strong>Step 1 - Compute a0.</strong> For each candidate N I compute a0 = floor(sqrt(N)). If a0^2 == N then N is a perfect square and I skip it. Filtering these at the call site keeps the period routine's precondition - its input is irrational - explicit, and avoids the division-by-zero the recurrence would otherwise hit.
   </p>
-  <p>
-    <strong>Step 2 - Iterate the recurrence.</strong> Starting from m = 0, d = 1, a = a0, I repeatedly apply three integer updates: <code>m = d*a - m</code>, then <code>d = (N - m*m) / d</code>, then <code>a = (a0 + m) / d</code>. It is a provable fact about this <a href="https://en.wikipedia.org/wiki/Periodic_continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">periodic continued fraction</a> recurrence that d always divides N - m^2 exactly, so every quantity stays an integer - no floating point appears inside the loop, and there is no rounding error to reason about.
+<p>
+<strong>Step 2 - Iterate the recurrence.</strong> Starting from m = 0, d = 1, a = a0, I repeatedly apply three integer updates: <code>m = d*a - m</code>, then <code>d = (N - m*m) / d</code>, then <code>a = (a0 + m) / d</code>. It is a provable fact about this <a class="reference-source" href="https://en.wikipedia.org/wiki/Periodic_continued_fraction" rel="noopener noreferrer" target="_blank">periodic continued fraction</a> recurrence that d always divides N - m^2 exactly, so every quantity stays an integer - no floating point appears inside the loop, and there is no rounding error to reason about.
   </p>
-  <p>
-    <strong>Step 3 - Detect the period.</strong> I accumulate the visited triples. When a freshly computed triple already appears in the collection, the cycle has closed, and the period is the count of triples gathered before that repeat. I test against every stored triple rather than only the initial state. In practice the cycle here always begins immediately at the first generated triple, but the general membership check costs nothing in clarity and is the robust, correct cycle-detection condition.
+<p>
+<strong>Step 3 - Detect the period.</strong> I accumulate the visited triples. When a freshly computed triple already appears in the collection, the cycle has closed, and the period is the count of triples gathered before that repeat. I test against every stored triple rather than only the initial state. In practice the cycle here always begins immediately at the first generated triple, but the general membership check costs nothing in clarity and is the robust, correct cycle-detection condition.
   </p>
-  <p>
-    <strong>Step 4 - Count odd periods.</strong> The outer loop runs over every non-square N from 2 to the limit, calls the period routine, and tallies each odd result.
+<p>
+<strong>Step 4 - Count odd periods.</strong> The outer loop runs over every non-square N from 2 to the limit, calls the period routine, and tallies each odd result.
   </p>
-  <p>
-    <strong>Language differences.</strong> The Python version stores triples in a <code>list</code> of tuples and tests membership with the <code>in</code> operator - O(period) per check, which is negligible because periods are tiny. It uses <code>math.isqrt</code> for an exact integer square root inside the routine, and filters squares with <code>not math.sqrt(n).is_integer()</code>. The C version stores triples in a dynamically allocated array of <code>int[3]</code>, starting at capacity 64 and doubling via <code>realloc</code>. Because C's <code>sqrt</code> operates on <code>double</code>, I wrap each call in two corrective <code>while</code> loops to guarantee an exact integer floor. Both produce 1322 for N up to 10,000; the C build runs in about 0.0062 s against 0.0940 s for Python, roughly a 15x speedup.
+<p>
+<strong>Language differences.</strong> The Python version stores triples in a <code>list</code> of tuples and tests membership with the <code>in</code> operator - O(period) per check, which is negligible because periods are tiny. It uses <code>math.isqrt</code> for an exact integer square root inside the routine, and filters squares with <code>not math.sqrt(n).is_integer()</code>. The C version stores triples in a dynamically allocated array of <code>int[3]</code>, starting at capacity 64 and doubling via <code>realloc</code>. Because C's <code>sqrt</code> operates on <code>double</code>, I wrap each call in two corrective <code>while</code> loops to guarantee an exact integer floor. Both produce 1322 for N up to 10,000; the C build runs in about 0.0062 s against 0.0940 s for Python, roughly a 15x speedup.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>State-Triple Representation of a Discrete Dynamical System</h4>
-  <p>
-    The mathematical object at each step is the <a href="https://en.wikipedia.org/wiki/Quadratic_irrational_number" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic irrational</a> (sqrt(N) + m) / d. Rather than manipulating irrational numbers, I encode the whole state as the comparable integer triple (m, d, a) - a tuple in Python, an <code>int[3]</code> in C. Reducing a state to a single comparable value turns "have I been here before?" into a plain equality test. This "state as a value" pattern is reusable whenever you need to detect cycles in a discrete dynamical system: Collatz-style iterations, finite automata, or visited-board detection in puzzle search.
-  </p>
-  <h4>Cycle Detection by Membership Test</h4>
-  <p>
-    Both solutions detect the period by checking each new state against all previously seen states. Because the period is small, the linear scan per step is negligible. When the state space is small and bounded, a plain list-and-membership cycle detector is simpler than - and just as fast as - more elaborate schemes such as <a href="https://en.wikipedia.org/wiki/Cycle_detection#Floyd's_tortoise_and_hare" class="reference-source" target="_blank" rel="noopener noreferrer">Floyd's tortoise-and-hare</a>, and it directly yields the period length as the size of the accumulated collection.
-  </p>
-  <h4>Defensive Integer Square Root in C</h4>
-  <p>
-    C's <code>sqrt</code> returns a <code>double</code> with only a 53-bit mantissa, so for large N it can land just below the true integer root. After casting, I run one loop that increments the candidate while (a0+1)^2 <= N and another that decrements while a0^2 > N, using <code>long long</code> in the comparisons to avoid overflow. This two-loop correction is the standard defensive idiom whenever you need an exact integer square root in a language lacking a built-in like Python's <code>math.isqrt</code>.
-  </p>
-  <h4>Dynamic Array with Doubling (C)</h4>
-  <p>
-    The visited-triples buffer starts at capacity 64 and doubles via <code>realloc</code> on overflow, giving amortized O(1) appends - each element is copied a constant number of times on average over the buffer's life. I always assign the <code>realloc</code> result to a temporary pointer and check it before overwriting the original, so a failed reallocation does not leak the existing buffer. This is the canonical safe growable-array idiom in C, and 64 is a deliberate starting size: periods here rarely exceed a couple hundred, so growth happens at most once or twice.
-  </p>
-  <h4>Generator Expression Fed to sum (Python)</h4>
-  <p>
-    The Python <code>solve</code> collapses the entire outer loop into a single <code>sum</code> over a <a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a> that lazily yields <code>True</code>/<code>False</code> (counted as 1/0) for each qualifying N. It is concise, builds no intermediate list, and reads almost as the problem is stated: count the N with odd period. Whenever you need "how many items satisfy a predicate", a generator expression passed to <code>sum</code> is the idiomatic, memory-efficient Python choice.
-  </p>
-  <h4>Filtering Degenerate Inputs at the Call Site</h4>
-  <p>
-    Skipping perfect squares before entering the period routine serves two purposes: correctness (the recurrence would divide by zero on a square) and clarity (the routine may assume its input is irrational). Placing the guard at the call site rather than inside the core routine keeps both pieces of code clean and makes the precondition explicit - a separation-of-concerns discipline worth applying broadly.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is that the <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> expansion of sqrt(N) is fully captured by a small integer triple (m, d, a), that the recurrence on this triple stays entirely in integer arithmetic, and that the bounded state space guarantees an eventually <a href="https://en.wikipedia.org/wiki/Periodic_continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">periodic</a> sequence. Once you see this, finding the period reduces to plain cycle detection on a finite state set - a pattern that recurs across number-theory problems.
-  </p>
-  <p>
-    Both implementations are correct and fast. On the main input (N up to 10,000) the C version runs in about 0.0062 s versus 0.0940 s for Python - roughly a 15x speedup, typical for a tight integer loop where interpreter overhead dominates. For a problem this size Python is more than fast enough and arguably more elegant, thanks to <code>math.isqrt</code> and the generator-and-sum idiom; the C version demonstrates how to reproduce the same algorithm while carefully handling floating-point square roots and manual memory growth.
-  </p>
-  <ul>
-    <li>When a process generates a sequence of integer states, represent each state as a single comparable value so cycle detection becomes an equality check; the period ends at the first repeat.</li>
-    <li>For quadratic irrationals, the triple (m, d, a) encoding (sqrt(N)+m)/d with its standard recurrence is a ready-made tool - recognizing it lets you skip rediscovering the math.</li>
-    <li>Keep loops in exact integer arithmetic when the math permits; it eliminates an entire class of floating-point bugs.</li>
-    <li>In C, always wrap <code>sqrt</code> with correction loops (and use wider types in the comparisons) when you need an exact integer square root.</li>
-    <li>Use the doubling-<code>realloc</code> pattern for growable arrays in C, and save the <code>realloc</code> result to a temporary before overwriting the original to stay leak-safe.</li>
-    <li>Filter degenerate inputs at the call site so your core routines can state clean preconditions.</li>
-    <li>In Python, count predicate matches with a generator expression passed to <code>sum</code> - concise and allocation-free.</li>
-  </ul>
 </article>

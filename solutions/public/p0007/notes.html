@@ -1,77 +1,29 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
-The task is to compute the 10,001st <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">prime number</a> - an integer greater than 1 whose only positive divisors are 1 and itself. Naively, I could test each candidate integer for primality by trial division, but that scales poorly. The efficient route is to generate primes in bulk with a sieve. The most familiar is the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>, but here I use its odd-only cousin, the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>, which enumerates the odd primes directly by marking, for every pair <code>i, j</code>, the index <code>i + j + 2ij</code>. The surviving indices <code>k</code> then decode to the odd primes <code>2k+1</code>. Its marking cost is <code>O(M log M)</code> over a range of size <code>M</code> - far better than per-candidate trial division.
+The task is to compute the 10,001st <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number" rel="noopener noreferrer" target="_blank">prime number</a> - an integer greater than 1 whose only positive divisors are 1 and itself. Naively, I could test each candidate integer for primality by trial division, but that scales poorly. The efficient route is to generate primes in bulk with a sieve. The most familiar is the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>, but here I use its odd-only cousin, the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a>, which enumerates the odd primes directly by marking, for every pair <code>i, j</code>, the index <code>i + j + 2ij</code>. The surviving indices <code>k</code> then decode to the odd primes <code>2k+1</code>. Its marking cost is <code>O(M log M)</code> over a range of size <code>M</code> - far better than per-candidate trial division.
 </p>
 <p>
-A sieve needs to know how large <code>M</code> must be to contain the n-th prime. This is where the <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a> helps: it states that the n-th prime <code>p(n)</code> is asymptotically <code>n * ln(n)</code>, where <code>ln</code> is the natural logarithm. For <code>n = 10001</code>, that estimate is about 92,000, and the true answer is 104,743 - so the raw <code>n * ln(n)</code> heuristic is a little tight, but in this solution it works because the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a> indexes only odd numbers (each array index <code>k</code> stands for the much larger odd number <code>2k+1</code>), so the effective covered range is roughly doubled. The key observation that makes this fast is that we never need to consider even numbers beyond 2: every other even number is composite, so we sieve only odd numbers and halve both memory and work.
+A sieve needs to know how large <code>M</code> must be to contain the n-th prime. This is where the <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number_theorem" rel="noopener noreferrer" target="_blank">prime number theorem</a> helps: it states that the n-th prime <code>p(n)</code> is asymptotically <code>n * ln(n)</code>, where <code>ln</code> is the natural logarithm. For <code>n = 10001</code>, that estimate is about 92,000, and the true answer is 104,743 - so the raw <code>n * ln(n)</code> heuristic is a little tight, but in this solution it works because the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a> indexes only odd numbers (each array index <code>k</code> stands for the much larger odd number <code>2k+1</code>), so the effective covered range is roughly doubled. The key observation that makes this fast is that we never need to consider even numbers beyond 2: every other even number is composite, so we sieve only odd numbers and halve both memory and work.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Sieve of Sundaram (Solution 0 - Python and C)</h4>
 <p>
-Both the Python and C files implement the same <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>, so I describe them together and note language differences as they arise.
+Both the Python and C files implement the same <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a>, so I describe them together and note language differences as they arise.
 </p>
 <p>
 <strong>Step 1 - Special-case the only even prime.</strong> 2 is the sole even prime. If <code>n == 1</code> I return 2 immediately; from then on I work only with odd numbers.
 </p>
 <p>
-<strong>Step 2 - Size the sieve.</strong> I set <code>max_expected_value = int(n * log(n))</code>, the <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a> estimate, and allocate an array of that length. Because each index <code>k</code> represents the odd number <code>2k+1</code>, the actual numeric range covered is about <code>2 * max_expected_value</code>, which comfortably contains the 10,001st prime.
+<strong>Step 2 - Size the sieve.</strong> I set <code>max_expected_value = int(n * log(n))</code>, the <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number_theorem" rel="noopener noreferrer" target="_blank">prime number theorem</a> estimate, and allocate an array of that length. Because each index <code>k</code> represents the odd number <code>2k+1</code>, the actual numeric range covered is about <code>2 * max_expected_value</code>, which comfortably contains the 10,001st prime.
 </p>
 <p>
-<strong>Step 3 - Sieve over odd numbers.</strong> I map odd number <code>2k+1</code> to index <code>k</code>, initialising <code>numbers[k] = k</code> so a non-zero value means "still a candidate." The crucial algebra behind the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>: multiplying two odd numbers gives <code>(2i+1)(2j+1) = 2(i + j + 2ij) + 1</code>, so their product corresponds to index <code>i + j + 2*i*j</code>. For each surviving index <code>i</code>, I set <code>numbers[i + j + 2*i*j] = 0</code> for <code>j</code> running from <code>i</code> upward, marking those composites. Starting <code>j</code> at <code>i</code> rather than 1 avoids re-marking products whose smaller factor was already processed.
+<strong>Step 3 - Sieve over odd numbers.</strong> I map odd number <code>2k+1</code> to index <code>k</code>, initialising <code>numbers[k] = k</code> so a non-zero value means "still a candidate." The crucial algebra behind the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a>: multiplying two odd numbers gives <code>(2i+1)(2j+1) = 2(i + j + 2ij) + 1</code>, so their product corresponds to index <code>i + j + 2*i*j</code>. For each surviving index <code>i</code>, I set <code>numbers[i + j + 2*i*j] = 0</code> for <code>j</code> running from <code>i</code> upward, marking those composites. Starting <code>j</code> at <code>i</code> rather than 1 avoids re-marking products whose smaller factor was already processed.
 </p>
 <p>
 <strong>Step 4 - Extract the answer.</strong> The surviving (non-zero) entries are the odd primes in order. I take the <code>(n-2)</code>-th surviving entry: the offset of -2 accounts for index 0 decoding to the non-prime 1, and for 2 already being counted as the 1st prime. I decode it back with <code>2*k + 1</code>.
 </p>
 <p>
-<strong>Language differences.</strong> In Python the sieve is a list, and the inner loop relies on <code>try/except IndexError</code> to detect when the computed index runs past the end of the list, breaking out. In C, out-of-bounds writes are undefined behaviour, so I instead compute the index as a <code>long long</code> and explicitly compare <code>idx > max_expected_value</code> before writing; the C version also skips already-marked entries and frees the heap array at the end. Neither <code>solve()</code> parses arguments or times itself - that is the runner's job (see below).
+<strong>Language differences.</strong> In Python the sieve is a list, and the inner loop relies on <code>try/except IndexError</code> to detect when the computed index runs past the end of the list, breaking out. In C, out-of-bounds writes are undefined behaviour, so I instead compute the index as a <code>long long</code> and explicitly compare <code>idx &gt; max_expected_value</code> before writing; the C version also skips already-marked entries and frees the heap array at the end. Neither <code>solve()</code> parses arguments or times itself - that is the runner's job (see below).
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Coordinate mapping to compact an implicit structure</h4>
-<p>
-Rather than storing every integer, I store only odd integers via the bijection <code>odd = 2k+1 &lt;=&gt; index = k</code> - the essence of the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>. This halves memory and halves the number of cells the sieve touches. Whenever your candidate set has known structure that lets you discard a fixed fraction of the space, baking that structure into the index arithmetic is a strong lever. The cost is that the "mark composite" formula becomes <code>i + j + 2*i*j</code> instead of a plain product - a small algebraic price for a real performance gain.
-</p>
-
-<h4>Using a closed-form bound to pre-size a fixed array</h4>
-<p>
-Instead of growing a dynamic list or re-running the sieve when it falls short, I pre-allocate exactly using <code>n * ln(n)</code>, the bound supplied by the <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a>. Replacing a dynamic data structure with a fixed-size array (justified by a mathematical bound) makes allocation and access faster and the code simpler. The engineering skill is recognising when a reliable bound exists and being willing to lean on it - here, the odd-number indexing provides the extra headroom that keeps the tight estimate safe.
-</p>
-
-<h4>Exception-based termination in Python vs explicit bounds checks in C</h4>
-<p>
-Python's "easier to ask forgiveness than permission" style lets me catch <code>IndexError</code> to detect overrun and break. C has no such safety net - an out-of-bounds write is undefined behaviour - so I compute the index in a wider type and check it before writing. The same logical guard manifests differently depending on each language's error-handling philosophy.
-</p>
-
-<h4>Widening to long long before multiplication in C</h4>
-<p>
-I compute <code>2LL * i * j</code> as a <code>long long</code> even though the final index fits in an <code>int</code>. With both factors near the sieve limit, their product can exceed <code>2^31</code> and silently overflow a 32-bit <code>int</code>. Casting the first operand to a wider type propagates that width through the expression. Make this a habit in any C code that multiplies two loop variables.
-</p>
-
-<h4>Delegating the benchmark harness to a shared runner</h4>
-<p>
-Each file implements only a pure <code>solve()</code>; argument parsing, the repeat-timing loop (<code>--runs=N</code>), the result-consistency check, and the single output line all live in a shared runner - <code>@runner.main</code> in Python and <code>#include "runner.h"</code> in C. Concentrating the harness in one place keeps every solution free of boilerplate, guarantees identical timing and output semantics across problems, and leaves the algorithm trivial to read and test in isolation. Factoring cross-cutting scaffolding into one reusable component is good structure for any program that must be both correct and uniformly measured.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The solution combines two ideas: the <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a> to fix the array size in advance, and the odd-number coordinate mapping of the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>, which halves memory and work while doubling the effective range covered. Together they turn prime enumeration into an about-36-ms computation even in interpreted Python.
-</p>
-<p>
-Comparing the two implementations on the main case (<code>n = 10001</code>): the C build runs in about 0.33 ms while the Python version takes about 36 ms - roughly a 110x speedup for the identical algorithm. This is the expected outcome when the work is a tight inner loop over a large array: the Python interpreter's per-operation overhead dominates, whereas C compiles each iteration to a handful of native instructions. The algorithm is the same; only the constant factor differs.
-</p>
-<ul>
-  <li>When you need a batch of primes up to a limit, reach for a sieve - the <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a> is a compact, odd-only option that costs <code>O(M log M)</code>.</li>
-  <li>If a number-theoretic bound exists for your target value (like <code>n * ln(n)</code> for the n-th prime), use it to pre-size arrays instead of growing them dynamically.</li>
-  <li>Encode known structure (e.g. "all candidates are odd") into your index mapping to cut memory and iterations.</li>
-  <li>In C, widen operands to a larger integer type at the first multiplication that could overflow.</li>
-  <li>Match your bounds-checking idiom to the language: exceptions in Python, explicit comparisons in C.</li>
-  <li>Push argument parsing, timing, and output into a shared runner so each solution is just a pure function - easy to read, test, and benchmark uniformly.</li>
-  <li>The same algorithm ported from Python to C typically yields a large constant-factor speedup with no change in asymptotic behaviour.</li>
-</ul>
-
 </article>

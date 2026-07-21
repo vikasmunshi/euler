@@ -1,5 +1,4 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
 This problem has essentially no number theory in it - it is a search problem over a small, fixed
@@ -7,7 +6,7 @@ two-dimensional array. The task is to find the largest product of four consecuti
 of the eight compass directions in a 20x20 grid. The first key observation is that of those eight
 directions, only four are genuinely distinct: a run going left is the same set of numbers as the
 matching run going right, just multiplied in the opposite order, and multiplication is
-<a href="https://en.wikipedia.org/wiki/Commutative_property" class="reference-source" target="_blank" rel="noopener noreferrer">commutative</a>.
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Commutative_property" rel="noopener noreferrer" target="_blank">commutative</a>.
 So I only need to examine horizontal, vertical, and the two diagonal orientations. This immediately
 halves the work.
 </p>
@@ -16,16 +15,14 @@ The second observation is what keeps the code clean: every one of those four ori
 anchored at a single cell and walked in a single forward direction. If I pick an anchor cell and
 restrict it to positions where a run of <code>num_adjacent</code> cells fits both rightward and
 downward, then all four runs stay inside the grid. This turns the whole problem into a
-<a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a>:
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Brute-force_search" rel="noopener noreferrer" target="_blank">brute-force search</a>:
 enumerate every valid anchor, compute four products, take the maximum. For a grid of side N and a
 run length k there are (N - k + 1)^2 valid anchors, and at each anchor I do O(k) multiplications,
 giving an overall complexity of O((N - k + 1)^2 * k), which simplifies to roughly O(N^2 * k). For
 N = 20 and k = 4 that is only a few thousand operations - trivially fast, so there is no incentive
 to look for anything cleverer.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Single-Pass Anchor Scan (Python and C)</h4>
 <p>
 Both files implement the identical algorithm; only the language differs. I iterate over every valid
@@ -49,100 +46,18 @@ bounds precisely because x itself was capped at <code>dim - num_adjacent</code>.
 finishes, I compare all four products against the running best and keep the largest. The C version
 does this with explicit <code>if (... &gt; best)</code> comparisons and four <code>long long</code>
 accumulators; the Python version expresses the same logic as a
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
+<a class="reference-source" href="https://docs.python.org/3/reference/expressions.html#generator-expressions" rel="noopener noreferrer" target="_blank">generator expression</a>
 fed to the built-in <code>max()</code>.
 </p>
 <p>
 The most interesting language-specific difference is how Python handles the four accumulators inside a
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>.
+<a class="reference-source" href="https://docs.python.org/3/reference/expressions.html#generator-expressions" rel="noopener noreferrer" target="_blank">generator expression</a>.
 Because a
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
+<a class="reference-source" href="https://docs.python.org/3/reference/expressions.html#generator-expressions" rel="noopener noreferrer" target="_blank">generator expression</a>
 cannot contain assignment statements, I "reset" the four products by iterating once over a
 single-element tuple <code>for horizontal, vertical, diagonal_1, diagonal_2 in ((1, 1, 1, 1),)</code>,
 and then re-bind those same names on each step of <code>i</code> by iterating over another
 single-element tuple holding the updated products. The C version simply declares four local variables
 and multiplies them in place - the more natural form in an imperative language.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Parallel Accumulation in a Single Inner Loop</h4>
-<p>
-Rather than writing four separate loops - one per direction - I update all four products inside one
-loop over <code>i</code>. This keeps the four closely related computations side by side, so a reader
-can verify all of them at a glance, and it avoids re-traversing the same index range four times. In
-the C version this also helps the compiler: the four accumulators have no data dependency on one
-another, so the CPU can compute them in parallel via
-<a href="https://en.wikipedia.org/wiki/Instruction-level_parallelism" class="reference-source" target="_blank" rel="noopener noreferrer">instruction-level parallelism</a>.
-Reach for this pattern whenever several independent quantities are derived from the same iteration.
-</p>
-
-<h4>Simulating Local Variables in a Generator Expression</h4>
-<p>
-Python
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expressions</a>
-are pure expressions and forbid assignment statements. To introduce mutable named intermediates I
-iterate over a single-element tuple: <code>for a, b, c, d in ((expr_a, expr_b, expr_c, expr_d),)</code>.
-The loop runs exactly once, binding the four names. This is a niche idiom, but it lets you keep an
-entirely expression-based
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
-when you genuinely need named local state - useful when splitting into a helper function would
-obscure the logic more than it clarifies it.
-</p>
-
-<h4>Bounding Loop Ranges Instead of Guarding Array Accesses</h4>
-<p>
-Both loops range only over valid anchors (<code>0 .. dim - num_adjacent</code>), so no index inside
-the inner loop can ever go out of bounds. This concentrates all correctness reasoning at the loop
-headers rather than scattering <code>if</code> checks across every array access. The result is both
-faster (no per-access branch) and easier to audit. As a general rule, prefer tightening loop limits
-over branching inside the hot path.
-</p>
-
-<h4>Hardcoding Fixed Input as a Compile-Time Constant</h4>
-<p>
-The grid never changes, so both solutions embed it directly in source - a Python tuple-of-tuples and
-a C <code>static</code> array. This removes all file I/O from the critical path. In C the
-<code>static</code> array is placed in read-only data and stays cache-warm, giving the compiler full
-freedom over memory layout. When a problem's input is small and known ahead of time, hardcoding it
-is a legitimate and practical choice.
-</p>
-
-<h4>Choosing an Integer Type by Worst-Case Magnitude</h4>
-<p>
-For k = 4 the largest possible product is 99^4 = 96,059,601, which fits comfortably in a 32-bit int.
-I still declared the C accumulators as <code>long long</code> because the run length is a runtime
-parameter, and a larger k would overflow a 32-bit type silently and produce a wrong answer with no
-error. The principle generalises: before accumulating products, compute the worst-case magnitude and
-pick an integer width that can hold it.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The unlocking insight is recognising that the eight named directions collapse to four distinct ones
-(thanks to
-<a href="https://en.wikipedia.org/wiki/Commutative_property" class="reference-source" target="_blank" rel="noopener noreferrer">commutativity</a>),
-and that all four can be anchored at one cell and walked forward if the anchor range is bounded so
-runs never leave the grid. Once you see that, the problem is a tiny, fully enumerable
-<a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a>.
-</p>
-<p>
-Both solutions compute the same answer of 70600674. The benchmark shows the C version at roughly
-0.0000016 s versus about 0.00024 s for Python - the C build is on the order of 150 times faster,
-which is unsurprising given that the work is a few thousand integer multiplications dominated by
-interpreter overhead in Python. The Python version is the more elegant expression of the idea (a
-single <code>max()</code> over a
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>),
-while the C version is the one to reach for if raw speed ever mattered; here, both are effectively
-instant.
-</p>
-<ul>
-<li>When the search space is small and bounded, full enumeration is usually the clearest and most maintainable solution - add cleverness only when profiling demands it.</li>
-<li>Use symmetry to eliminate redundant work: commutative operations mean opposite directions need not be searched twice.</li>
-<li>Accumulate independent quantities in a single loop pass to keep related logic together and to expose parallelism to the compiler.</li>
-<li>Move bounds-checking into loop limits rather than guarding each access; it is faster and centralises correctness reasoning.</li>
-<li>Hardcode small fixed inputs as compile-time constants to keep I/O off the critical path.</li>
-<li>Always size integer types against the worst-case magnitude of any product; overflow in C is silent and corrupts results.</li>
-</ul>
-
 </article>

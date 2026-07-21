@@ -1,228 +1,104 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
+<h3>Problem Analysis</h3>
+<p>
     A number "evenly divisible by all of the numbers from 1 to N" is exactly the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
     of the set {1, 2, ..., N}: the smallest positive integer that has every member of the set as a
     divisor. So the smallest positive number divisible by all of 1..N is precisely the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
     of 1..N, and by definition nothing smaller can work.
   </p>
-  <p>
-    The tool that makes this tractable is the identity lcm(a, b) = a &times; b / gcd(a, b), in which
+<p>
+    The tool that makes this tractable is the identity lcm(a, b) = a × b / gcd(a, b), in which
     the
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>
     is the largest integer dividing both a and b. This identity lets me build the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
     of a whole set as a sequence of pairwise combinations, threading a running accumulator through the
     range. Each pairwise step needs only one
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>,
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>,
     which the
-    <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Euclidean_algorithm" rel="noopener noreferrer" target="_blank">Euclidean algorithm</a>
     computes in O(log(min(a, b))) steps, so the overall cost is O(N log N) bit operations - negligible
     here.
   </p>
-  <p>
+<p>
     One subtlety matters for scale. By the
-    <a href="https://en.wikipedia.org/wiki/Integer_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">prime factorisation</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Integer_factorization" rel="noopener noreferrer" target="_blank">prime factorisation</a>
     view, the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
     of 1..N is the product, over every prime p up to N, of the highest
-    <a href="https://en.wikipedia.org/wiki/Prime_power" class="reference-source" target="_blank" rel="noopener noreferrer">prime power</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_power" rel="noopener noreferrer" target="_blank">prime power</a>
     of p not exceeding N, so the result grows rapidly. For N = 20 it fits in 32 bits, but for the
     extra cases (N up to 100) it reaches 40+ decimal digits, far beyond any native integer type - so I
     need
-    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>.
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision arithmetic</a>.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>
+<h3>Solution Approach</h3>
+<h4>
     Iterative
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
     via the
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>
     (Python and C, index 0)
   </h4>
-  <p>
+<p>
     Both files implement the same algorithm: start with a running result of 1 (the identity element
     for the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>),
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>),
     then for each y from 2 to N replace result with the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
     of result and y. After the loop, result equals the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
     of 1..N.
   </p>
-  <p>
+<p>
     In the <strong>Python solution</strong> the entire computation is a single
     <code>functools.reduce</code> over <code>range(2, n + 1)</code> with initial accumulator 1 and the
     lambda <code>x * y // math.gcd(x, y)</code> - a direct transcription of the identity. I rely on
     Python's built-in
-    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a>,
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision integers</a>,
     so multiplying and floor-dividing huge numbers just works with no special handling. I chose
     <code>math.gcd</code> over a hand-written loop because the standard-library
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>
     is implemented in C and is faster. I also write <code>x * y // gcd</code> (multiply first, then
     divide) rather than <code>x // gcd * y</code>; both are exact because the
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>
     divides x, but the chosen form mirrors the textbook identity directly.
   </p>
-  <p>
+<p>
     In the <strong>C solution</strong> I have no native big integer, so I implemented a minimal
     <code>BigInt</code>: an array of 32-bit limbs in
-    <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Endianness" rel="noopener noreferrer" target="_blank">little-endian</a>
     order (least-significant limb first), base 2^32. Three primitives drive everything:
   </p>
-  <ul>
-    <li><code>bi_div_small</code> divides the <code>BigInt</code> by a small value and returns the
+<ul>
+<li><code>bi_div_small</code> divides the <code>BigInt</code> by a small value and returns the
       remainder, walking limbs from most significant to least and carrying the remainder forward in a
       64-bit intermediate (<code>(rem &lt;&lt; 32) | limb</code>).</li>
-    <li><code>bi_mul_small</code> multiplies the <code>BigInt</code> by a small value, walking limbs
+<li><code>bi_mul_small</code> multiplies the <code>BigInt</code> by a small value, walking limbs
       from least to most significant and propagating carry - which is why
-      <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+      <a class="reference-source" href="https://en.wikipedia.org/wiki/Endianness" rel="noopener noreferrer" target="_blank">little-endian</a>
       order is convenient.</li>
-    <li><code>bi_lcm_small</code> computes the
-      <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
+<li><code>bi_lcm_small</code> computes the
+      <a class="reference-source" href="https://en.wikipedia.org/wiki/Least_common_multiple" rel="noopener noreferrer" target="_blank">least common multiple</a>
       of result and y in place: it copies result, reduces the copy
-      <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a>
+      <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modulo</a>
       y with <code>bi_div_small</code> to get a small remainder, finds the
-      <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
+      <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>
       of that remainder and y with the native <code>gcd_ll</code>, then divides result by that
-      <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
+      <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>
       and multiplies by y.</li>
-  </ul>
-  <p>
+</ul>
+<p>
     The crucial design choice in C is that I never implement a big-integer
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>.
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>.
     Because gcd(a, b) = gcd(a mod b, b) and y is small, one
-    <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Modular_arithmetic" rel="noopener noreferrer" target="_blank">modular</a>
     reduction step turns the big operand into a small one, after which the whole
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Greatest_common_divisor" rel="noopener noreferrer" target="_blank">greatest common divisor</a>
     runs in native <code>long long</code> arithmetic. Finally <code>bi_to_str</code> converts the
     result to decimal by repeated division by 10, collecting digits least-significant-first into a
     stack buffer and reversing them into a heap-allocated string.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>
-    <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">Fold</a>
-    over a sequence of pairwise operations
-  </h4>
-  <p>
-    When the answer is a single value built by repeatedly combining elements with one associative
-    binary operation, a
-    <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a>
-    is the natural expression. In Python I express the
-    <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a>
-    as <code>functools.reduce(op, iterable, identity)</code>, supplying 1 as the identity for the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>.
-    This makes the intent obvious: a running
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
-    threaded through the range. Whenever you find yourself writing "combine all elements of a list with
-    some operator", reach for a
-    <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a>
-    in Python or an explicit accumulator loop in C, as the C solution does.
-  </p>
-  <h4>Reducing a hard big-number operation to a small-number one</h4>
-  <p>
-    The most reusable trick here is using gcd(BigInt, small) = gcd(BigInt mod small, small). Because
-    the
-    <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular</a>
-    reduction yields a value smaller than the small operand, the rest of the
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
-    collapses to native arithmetic. This pattern - reduce
-    <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a>
-    a small value first, then work in machine integers - recurs throughout number-theory code and
-    saves writing a second, harder big-integer routine.
-  </p>
-  <h4>
-    <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">Little-endian</a>
-    limb-array big integers in C
-  </h4>
-  <p>
-    For
-    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>
-    without a library, I store the number as an array of word-sized limbs, index 0 being least
-    significant.
-    <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">Little-endian</a>
-    order means carry-propagating loops iterate i = 0, 1, 2, ... in their natural direction. I chose
-    32-bit limbs so that a limb-times-limb product plus carry always fits in a 64-bit
-    <code>unsigned long long</code> with no overflow, and a 64-limb array covers numbers up to 2^2048 -
-    far more than this problem needs.
-  </p>
-  <h4>Stack buffer for statically bounded string conversion</h4>
-  <p>
-    Decimal conversion divides repeatedly by 10, emitting digits in reverse. I gather them in a local
-    <code>char buf[256]</code> and copy them in the correct order into a heap string only at the end.
-    Because the maximum digit count is statically bounded (well under 256 even for the largest
-    <code>BigInt</code> the array can hold), a fixed stack buffer is safe and avoids heap churn inside
-    the loop.
-  </p>
-  <h4>Separating solve() from a shared benchmarking runner</h4>
-  <p>
-    Both files implement only a <code>solve()</code> function and delegate everything else to a shared
-    runner - <code>@runner.main</code> in Python (from <code>solver.runners</code>) and
-    <code>#include "runner.h"</code> in C. The runner parses the input arguments, calls
-    <code>solve()</code> repeatedly under <code>--runs=N</code>, times the repetitions, verifies the
-    result is identical across runs, and prints the single benchmark line. Keeping the algorithm free
-    of all timing and I/O concerns lets one harness drive every solution uniformly and keeps the core
-    logic independently testable - a good default structure for any code you intend to benchmark.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is recognising that "divisible by all of 1..N" is the definition of the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
-    of 1..N, and that the
-    <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
-    of a set is a left
-    <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a>
-    of pairwise steps using lcm(a, b) = a &times; b / gcd(a, b). The
-    <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a>
-    makes each
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
-    cheap, and one
-    <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular</a>
-    reduction step lets a big-integer
-    <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
-    be done in native arithmetic.
-  </p>
-  <p>
-    Both solutions implement the identical algorithm and both finish in effectively zero time across
-    every test case up to N = 100. The recorded timings bear this out: at the main case (N = 20) the C
-    solution averages 6.5e-07 s against the Python solution's 2.6e-06 s, and at the largest extra case
-    (N = 100) 4.9e-06 s against 1.2e-05 s - the C build is a few times faster in absolute terms, but
-    both are far below any threshold that matters, since the work is O(N log N) and N is tiny. The Python solution is the more elegant and pragmatic choice:
-    <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision integers</a>
-    and a single
-    <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a>
-    reduce the whole program to one line of logic. The C solution is more instructive, showing how to
-    build just enough big-integer machinery to handle output that overflows 64 bits.
-  </p>
-  <ul>
-    <li>"Divisible by every element of a set" is the
-      <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
-      of that set.</li>
-    <li>Compute the
-      <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank" rel="noopener noreferrer">least common multiple</a>
-      of many numbers as a left
-      <a href="https://en.wikipedia.org/wiki/Fold_(higher-order_function)" class="reference-source" target="_blank" rel="noopener noreferrer">fold</a>
-      of pairwise steps with identity 1.</li>
-    <li>lcm(a, b) = a &times; b / gcd(a, b); compute the
-      <a href="https://en.wikipedia.org/wiki/Greatest_common_divisor" class="reference-source" target="_blank" rel="noopener noreferrer">greatest common divisor</a>
-      with the
-      <a href="https://en.wikipedia.org/wiki/Euclidean_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Euclidean algorithm</a>.</li>
-    <li>gcd(a, b) = gcd(a mod b, b) - reduce
-      <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modulo</a>
-      a small operand to drop into native arithmetic.</li>
-    <li>Estimate output magnitude before coding: if it can exceed 64 bits, use
-      <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>
-      (free in Python, hand-rolled in C).</li>
-    <li>Represent C big integers as
-      <a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
-      limb arrays with 64-bit intermediates to avoid overflow.</li>
-    <li>Use a stack buffer for conversions whose output size is statically bounded.</li>
-    <li>Separate the compute function from the timing/IO harness to enable clean benchmarking and
-      testing.</li>
-  </ul>
 </article>

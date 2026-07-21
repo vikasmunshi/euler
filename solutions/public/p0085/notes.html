@@ -1,5 +1,4 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
 The heart of this problem is a counting question: how many distinct sub-rectangles fit inside an
@@ -13,25 +12,23 @@ the structural insight that turns a two-dimensional search into something far sm
 </p>
 <p>
 The number of ways to choose 2 items from <code>n</code> is the
-<a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Binomial_coefficient" rel="noopener noreferrer" target="_blank">binomial coefficient</a>
 <code>C(n, 2) = n*(n-1)/2</code>. Choosing 2 lines from <code>H + 1</code> lines therefore gives
 <code>(H+1)*H/2</code>, which is exactly the
-<a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank" rel="noopener noreferrer">triangular number</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Triangular_number" rel="noopener noreferrer" target="_blank">triangular number</a>
 <code>T(H) = H*(H+1)/2</code> - the running sum <code>1 + 2 + ... + H</code>. So the total rectangle
 count for an <code>H x W</code> grid is <code>T(H) * T(W)</code>. With <code>3 x 2</code> this gives
 <code>T(3) * T(2) = 6 * 3 = 18</code>, matching the worked example. This factored form is the key
 observation: instead of enumerating all rectangles, we only need to find the pair of triangular
 numbers whose product is closest to two million. Since the triangular numbers form a strictly
 increasing sequence, we can iterate over one axis and use a
-<a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary search</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Binary_search_algorithm" rel="noopener noreferrer" target="_blank">binary search</a>
 on the other, giving an <code>O(max_side * log(max_side))</code> algorithm. The brute-force
 alternative that literally sums over every sub-rectangle position is <code>O(max_side^2)</code>
 in the outer loop with an additional <code>O(H*W)</code> inner cost per pair - correct, but far
 slower, and useful mainly for illustrating the definition.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Algorithm 0 - Brute-Force Position Counting (s0)</h4>
 <p>
 This approach counts rectangles exactly as the definition suggests. In
@@ -51,15 +48,14 @@ early once a count falls within <code>max_error</code> of the target; in C this 
 <code>goto done</code> to escape both loops cleanly. This algorithm is instructive but expensive -
 the inner double loop recomputes the count from scratch for every grid shape.
 </p>
-
 <h4>Algorithm 1 - Triangular-Number Binary Search (s1)</h4>
 <p>
 This approach exploits the factored formula <code>count(H, W) = T(H) * T(W)</code>. I precompute
 an array <code>numbers</code> where <code>numbers[i] = T(i+1)</code> for lengths from 1 up to
 <code>max_side - 1</code>. Because
-<a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank" rel="noopener noreferrer">triangular numbers</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Triangular_number" rel="noopener noreferrer" target="_blank">triangular numbers</a>
 increase monotonically, this array is sorted and supports
-<a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary search</a>.
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Binary_search_algorithm" rel="noopener noreferrer" target="_blank">binary search</a>.
 In the Python version <code>num_rectangles_along_axis</code> computes <code>T(length)</code> by the
 explicit running sum, while the C version uses the closed form <code>length*(length+1)/2</code>;
 both yield the same sequence.
@@ -77,106 +73,4 @@ than a linear scan. The C version frees its allocated array before returning, an
 division for <code>target / num_width</code> - acceptable here because the array neighbours bracket
 the true closest value regardless of the small rounding from truncation.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Closed-Form Counting via Separable Axes</h4>
-<p>
-Rather than simulate placements, I recognised that the count factors into independent per-axis
-contributions: <code>T(H) * T(W)</code>. Whenever a counting problem on a grid or lattice separates
-into independent choices along each dimension, you can compute each dimension once and combine the
-results. This collapses a two-dimensional search into one precomputed list plus a one-dimensional
-scan, and it is almost always the first structural simplification worth looking for.
-</p>
-
-<h4>Binary Search for the Nearest Value</h4>
-<p>
-Because the
-<a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank" rel="noopener noreferrer">triangular numbers</a>
-are sorted, I use a
-<a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary search</a>
-(<code>bisect_left</code>) to find where <code>target / num_width</code> would be inserted in
-<code>O(log n)</code> time. The standard idiom for finding the nearest value (not an exact match)
-is to check both neighbours around the insertion point: the closest element is guaranteed to be one
-of <code>numbers[j-1]</code> or <code>numbers[j]</code>. The Python solution leans on the
-standard-library
-<a href="https://docs.python.org/3/library/bisect.html" class="reference-source" target="_blank" rel="noopener noreferrer">bisect</a>
-module; the C solution implements the same lower-bound search by hand. Reach for this pattern any
-time you need the closest entry in a sorted sequence.
-</p>
-
-<h4>functools.partial for Reusable Key Functions</h4>
-<p>
-I defined a standalone <code>delta_func(kv, *, target_num)</code> and bound the target with
-<a href="https://docs.python.org/3/library/functools.html#functools.partial" class="reference-source" target="_blank" rel="noopener noreferrer">functools.partial</a>,
-producing a single-argument callable suitable for use as <code>min(..., key=delta)</code>. This is
-cleaner than a lambda capturing a variable by reference, since the bound value is fixed at
-partial-creation time and the intent is explicit. Use this whenever a scoring or comparison function
-depends on a runtime parameter.
-</p>
-
-<h4>Walrus Assignment Inside an Expression</h4>
-<p>
-In both Python solutions I write <code>results[(num := ...)] = (...)</code>, using the
-<a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">assignment expression</a>
-(the walrus operator <code>:=</code>) to capture the computed count into <code>num</code> while
-simultaneously using it as a dictionary key. This avoids a redundant separate statement and keeps
-the freshly computed value available for the immediate <code>max_error</code> check. It is a tidy
-idiom when a value is needed in two places within one logical step.
-</p>
-
-<h4>goto for Multi-Level Loop Exit in C</h4>
-<p>
-The C s0 solution uses
-<a href="https://en.wikipedia.org/wiki/Goto" class="reference-source" target="_blank" rel="noopener noreferrer">goto</a>
-to break out of both loops the moment the error threshold is met. A boolean flag would require an
-extra check on every outer iteration, and factoring into a helper would obscure what is conceptually
-one search. A forward
-<a href="https://en.wikipedia.org/wiki/Goto" class="reference-source" target="_blank" rel="noopener noreferrer">goto</a>
-to a label in the same function is the canonical, readable C idiom for escaping nested loops.
-</p>
-
-<h4>Running Best vs. Result Registry</h4>
-<p>
-The two s0 implementations illustrate a deliberate trade-off. The Python version builds a
-dictionary of every result and computes the minimum afterwards - readable, but it costs memory.
-The C version tracks only <code>best_area</code> and <code>best_delta</code> as it goes. When the
-search space is small and clarity matters, a registry is fine; when memory or performance is the
-concern, maintain a running best inside the loop.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The decisive insight is that the rectangle count factors as a product of two
-<a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank" rel="noopener noreferrer">triangular numbers</a>,
-one per axis. Once that is recognised, the problem reduces to finding the pair of triangular numbers
-whose product is closest to two million, and the
-<a href="https://en.wikipedia.org/wiki/Binary_search_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">binary-search</a>
-optimisation follows naturally from the sequence being sorted.
-</p>
-<p>
-The benchmarks make the payoff vivid. On the main case, brute-force Python (<code>p0085_s0.py</code>)
-runs in about 0.1499 s, while the binary-search Python (<code>p0085_s1.py</code>) finishes in
-roughly 0.0002 s - a speedup of several hundred times purely from algorithmic insight. The C
-brute-force (<code>p0085_s0_c</code>) takes about 0.0008 s and the C binary-search
-(<code>p0085_s1_c</code>) registers as effectively instantaneous at 0.0000 s. Strikingly, the right
-algorithm in Python (0.0002 s) beats the wrong algorithm in C (0.0008 s): mathematical structure
-matters more than the language. The s1 binary-search approach is both the fastest and the most
-elegant.
-</p>
-<ul>
-  <li>When counting objects in a 2-D grid, look for separability - if the count factors along each
-      axis independently, handle each axis separately and combine.</li>
-  <li>Triangular numbers <code>T(n) = n*(n+1)/2</code> appear whenever you count ways to choose 2
-      items from an ordered set; learn to recognise them in line-selection problems.</li>
-  <li>To find the closest value in a sorted sequence, binary-search for the target and inspect the
-      two neighbours of the insertion point.</li>
-  <li>Bind fixed parameters into key functions with <code>functools.partial</code> rather than
-      relying on closures over mutable variables.</li>
-  <li>In C, a forward <code>goto</code> to a label is the clean way to exit nested loops on an
-      early-termination condition.</li>
-  <li>Invest in understanding the underlying formula before optimising code - algorithmic insight
-      usually beats language-level micro-optimisation by a wide margin.</li>
-</ul>
-
 </article>

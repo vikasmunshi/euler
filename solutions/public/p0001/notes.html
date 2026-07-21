@@ -1,56 +1,46 @@
 <article>
-    <h3>Problem Analysis</h3>
-    <p>
+<h3>Problem Analysis</h3>
+<p>
         The task is to sum every natural number below a limit <code>N</code> that is a multiple of 3 or of 5.
         The naive reading — "test each number" — hides the structure that makes the problem tractable. The
         multiples of 3 below <code>N</code> form an
-        <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">arithmetic progression</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Arithmetic_progression" rel="noopener noreferrer" target="_blank">arithmetic progression</a>
         (3, 6, 9, …), as do the multiples of 5. Their union is not a disjoint set: a multiple of 15 is a
         multiple of both, so summing the two progressions independently double-counts those terms. Correcting
         for the overlap is the
-        <a href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" class="reference-source"
-           target="_blank" rel="noopener noreferrer">inclusion–exclusion principle</a>:
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" rel="noopener noreferrer" target="_blank">inclusion–exclusion principle</a>:
         <code>S = S(3) + S(5) − S(15)</code>, subtracting the multiples of 15 once to undo the double count.
     </p>
-    <p>
+<p>
         Each of those three sums is itself an
-        <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">arithmetic progression</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Arithmetic_progression" rel="noopener noreferrer" target="_blank">arithmetic progression</a>
         that admits a
-        <a href="https://en.wikipedia.org/wiki/Closed-form_expression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">closed-form expression</a>:
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Closed-form_expression" rel="noopener noreferrer" target="_blank">closed-form expression</a>:
         the sum of the first <code>n</code> multiples of <code>d</code> below <code>N</code> is
         <code>d · n(n+1)/2</code>, where <code>n = ⌊(N−1)/d⌋</code>. The factor <code>n(n+1)/2</code> is the
         <code>n</code>-th
-        <a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank"
-           rel="noopener noreferrer">triangular number</a>,
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Triangular_number" rel="noopener noreferrer" target="_blank">triangular number</a>,
         the same identity Gauss is said to have found as a schoolboy. This collapses the whole computation to a
         handful of multiplications: <code>O(1)</code> in
-        <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank"
-           rel="noopener noreferrer">time complexity</a>.
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Time_complexity" rel="noopener noreferrer" target="_blank">time complexity</a>.
         The alternative — iterating over candidate terms — is <code>O(N)</code>, which only matters once
         <code>N</code> is large (here the largest case uses <code>N = 10⁹</code>). For that case the answer,
         233 333 333 166 666 668, exceeds a 32-bit range but fits comfortably in a signed 64-bit integer
         (max ≈ 9.2 × 10¹⁸), a detail that shapes the C translations.
     </p>
-
-    <h3>Solution Approach</h3>
-    <p>
+<h3>Solution Approach</h3>
+<p>
         I wrote five solutions that share one answer but span the spectrum from an <code>O(1)</code> formula to
         an <code>O(N)</code> scan, each in both Python and C. Comparing them is the whole point: it shows how the
         same mathematics, expressed differently, costs wildly different amounts of time.
     </p>
-
-    <h4>Index 0 — Closed-form inclusion–exclusion (<code>O(1)</code>)</h4>
-    <p>
+<h4>Index 0 — Closed-form inclusion–exclusion (<code>O(1)</code>)</h4>
+<p>
         The fastest approach applies the
-        <a href="https://en.wikipedia.org/wiki/Closed-form_expression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">closed-form expression</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Closed-form_expression" rel="noopener noreferrer" target="_blank">closed-form expression</a>
         directly. A helper <code>sum_arithmetic_series(d, N)</code> computes <code>d · n(n+1)/2</code> with
         <code>n = ⌊(N−1)/d⌋</code>, and <code>solve</code> combines the three calls by
-        <a href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" class="reference-source"
-           target="_blank" rel="noopener noreferrer">inclusion–exclusion</a>:
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" rel="noopener noreferrer" target="_blank">inclusion–exclusion</a>:
         <code>sum(3) + sum(5) − sum(15)</code>. No loop touches the input size, so the runtime is constant
         regardless of <code>N</code> — measured at 9.3 × 10⁻⁶ s in C and 6.9 × 10⁻⁶ s in Python on the
         <code>N = 10⁹</code> case, the two within measurement noise of each other since at this scale the timing
@@ -58,9 +48,8 @@
         mirrors the Python line for line, casting one operand of the
         <code>n(n+1)</code> product to <code>long long</code> so the intermediate never overflows 32 bits.
     </p>
-
-    <h4>Index 1 — Brute-force scan (<code>O(N)</code>)</h4>
-    <p>
+<h4>Index 1 — Brute-force scan (<code>O(N)</code>)</h4>
+<p>
         The most direct reading of the problem: walk every integer from 0 up to <code>N</code> and add it when
         it is divisible by 3 or 5 (<code>term % 3 == 0 or term % 5 == 0</code>). This is the reference against
         which the smarter solutions are judged — correct by construction, but linear in <code>N</code>. At
@@ -68,15 +57,12 @@
         two languages here is the cost of CPython's per-iteration interpreter overhead on a tight loop, which
         the compiled C avoids entirely.
     </p>
-
-    <h4>Index 2 — Summing range slices (<code>O(N)</code>)</h4>
-    <p>
+<h4>Index 2 — Summing range slices (<code>O(N)</code>)</h4>
+<p>
         Rather than scan every integer, this approach iterates only the terms that matter: it sums each
-        <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">arithmetic progression</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Arithmetic_progression" rel="noopener noreferrer" target="_blank">arithmetic progression</a>
         separately via <code>sum(range(0, N, d))</code> for <code>d ∈ {3, 5, 15}</code> and combines them by
-        <a href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" class="reference-source"
-           target="_blank" rel="noopener noreferrer">inclusion–exclusion</a>.
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" rel="noopener noreferrer" target="_blank">inclusion–exclusion</a>.
         It is still <code>O(N)</code> — <code>sum</code> over a <code>range</code> object visits every element —
         but it touches roughly a third as many numbers as the brute-force scan and skips the divisibility test,
         making it the fastest of the linear Python variants at 4.8 s. The C translation is a faithful port:
@@ -85,144 +71,29 @@
         Keeping the C iterative is what makes its 0.18 s timing honestly reflect the same <code>O(N)</code> work
         its Python sibling does.
     </p>
-
-    <h4>Index 3 — Generator over <code>range</code> (<code>O(N)</code>)</h4>
-    <p>
+<h4>Index 3 — Generator over <code>range</code> (<code>O(N)</code>)</h4>
+<p>
         The same linear idea expressed as a
-        <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-           target="_blank" rel="noopener noreferrer">generator</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" rel="noopener noreferrer" target="_blank">generator</a>
         function: <code>generate_arithmetic_series_range</code> yields each term of <code>range(0, N, d)</code>,
         and <code>solve</code> sums three such streams with
-        <a href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" class="reference-source"
-           target="_blank" rel="noopener noreferrer">inclusion–exclusion</a>.
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" rel="noopener noreferrer" target="_blank">inclusion–exclusion</a>.
         Functionally identical to index 2, but routing each value through a Python-level
-        <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-           target="_blank" rel="noopener noreferrer">generator</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" rel="noopener noreferrer" target="_blank">generator</a>
         frame costs far more per element than letting <code>sum</code> consume a native <code>range</code>: 12.8 s
         versus index 2's 4.8 s in Python. The C port collapses the
-        <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-           target="_blank" rel="noopener noreferrer">generator</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" rel="noopener noreferrer" target="_blank">generator</a>
         to a plain accumulating <code>for</code> loop (C has no equivalent abstraction here), landing at 0.17 s —
         indistinguishable from index 2's C, as it should be.
     </p>
-
-    <h4>Index 4 — Generator with explicit <code>while</code> (<code>O(N)</code>)</h4>
-    <p>
+<h4>Index 4 — Generator with explicit <code>while</code> (<code>O(N)</code>)</h4>
+<p>
         A variant of index 3 that drives the
-        <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-           target="_blank" rel="noopener noreferrer">generator</a>
+        <a class="reference-source" href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" rel="noopener noreferrer" target="_blank">generator</a>
         with a hand-written <code>while</code> loop (<code>term += d</code>) instead of delegating to
         <code>range</code>. This exposes the cost of doing arithmetic in Python on every step: at 16.5 s it is the
         slowest of the linear Python variants, because each iteration now performs an explicit add and comparison
         in the interpreter rather than inside <code>range</code>'s optimised C internals. The C port is again a
         straight <code>while</code>-loop accumulator at 0.18 s, on par with indices 2 and 3.
     </p>
-
-    <h3>Programming Techniques</h3>
-
-    <h4>Inclusion–exclusion over arithmetic progressions</h4>
-    <p>
-        Every solution here decomposes "multiples of 3 or 5" into "multiples of 3, plus multiples of 5, minus
-        multiples of 15" via the
-        <a href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" class="reference-source"
-           target="_blank" rel="noopener noreferrer">inclusion–exclusion principle</a>.
-        Recognising the overlap (the
-        <a href="https://en.wikipedia.org/wiki/Least_common_multiple" class="reference-source" target="_blank"
-           rel="noopener noreferrer">least common multiple</a>
-        of 3 and 5 is 15) and subtracting it once is a pattern that recurs whenever you count a union of
-        overlapping sets — it lets you reduce a messy combined condition to independent, easily-summed pieces.
-    </p>
-
-    <h4>Closed-form summation via triangular numbers</h4>
-    <p>
-        Index 0 replaces a loop with a
-        <a href="https://en.wikipedia.org/wiki/Closed-form_expression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">closed-form expression</a>
-        built on the
-        <a href="https://en.wikipedia.org/wiki/Triangular_number" class="reference-source" target="_blank"
-           rel="noopener noreferrer">triangular number</a>
-        identity <code>n(n+1)/2</code>. Whenever a quantity you are accumulating follows an
-        <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">arithmetic progression</a>,
-        look for the algebraic shortcut: trading <code>O(N)</code> iteration for an <code>O(1)</code> formula is
-        the single largest win available here, and it scales to any <code>N</code> for free.
-    </p>
-
-    <h4>Generator functions and lazy iteration</h4>
-    <p>
-        Indices 3 and 4 use
-        <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-           target="_blank" rel="noopener noreferrer">generator</a>
-        functions — functions that <code>yield</code> values one at a time rather than building a list — to stream
-        terms into <code>sum</code>. The appeal is
-        <a href="https://en.wikipedia.org/wiki/Lazy_evaluation" class="reference-source" target="_blank"
-           rel="noopener noreferrer">lazy evaluation</a>:
-        constant memory regardless of how many terms flow through. The lesson, though, is the cost: a
-        <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-           target="_blank" rel="noopener noreferrer">generator</a>
-        is the right tool when memory dominates or the stream is consumed lazily, but for a hot numeric loop the
-        per-item Python overhead (13–17 s) far exceeds delegating to a native <code>range</code> (4.8 s).
-    </p>
-
-    <h4>Faithful cross-language translation</h4>
-    <p>
-        Each Python solution has a C sibling that implements the <em>same</em> algorithm with the same
-        <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank"
-           rel="noopener noreferrer">time complexity</a>.
-        Preserving algorithmic complexity across the port is what makes the timings comparable: it lets
-        the C numbers measure the language's constant-factor advantage on the <em>same</em> work, not a different
-        algorithm. The C also guards against 32-bit overflow by computing in <code>long long</code>,
-        where Python's
-        <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank"
-           rel="noopener noreferrer">arbitrary-precision arithmetic</a>
-        needs no such care.
-    </p>
-
-    <h3>Key Takeaways</h3>
-    <p>
-        The recorded averages on the <code>N = 10⁹</code> case tell the story cleanly. The
-        <a href="https://en.wikipedia.org/wiki/Closed-form_expression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">closed-form</a>
-        index 0 is the decisive winner — 6.9 × 10⁻⁶ s in Python, essentially free, because it never iterates.
-        Every <code>O(N)</code> approach is millions of times slower: the brute-force scan (index 1) is worst at
-        40.6 s, while summing
-        <a href="https://en.wikipedia.org/wiki/Arithmetic_progression" class="reference-source" target="_blank"
-           rel="noopener noreferrer">arithmetic progression</a>
-        slices through a native <code>range</code> (index 2, 4.8 s) beats both
-        <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-           target="_blank" rel="noopener noreferrer">generator</a>
-        variants (12.8 s and 16.5 s). In C the same ranking holds but compressed into under a fifth of a second for
-        the linear methods and a few microseconds for the formula, with the brute-force scan (0.85 s) the only
-        conspicuous laggard. The clearest insight: algorithmic complexity dominates language choice — a better
-        algorithm in slow Python (index 0) crushes a worse algorithm in fast C (index 1) by five orders of magnitude.
-    </p>
-    <ul>
-        <li>Reach for a <a href="https://en.wikipedia.org/wiki/Closed-form_expression" class="reference-source"
-                           target="_blank" rel="noopener noreferrer">closed-form expression</a> before a loop whenever
-            the data is structured (an <a href="https://en.wikipedia.org/wiki/Arithmetic_progression"
-                                          class="reference-source" target="_blank" rel="noopener noreferrer">arithmetic
-                progression</a>, a known series): the algorithm beats the language.
-        </li>
-        <li>Decompose a union of overlapping conditions with the <a
-                href="https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle" class="reference-source"
-                target="_blank" rel="noopener noreferrer">inclusion–exclusion principle</a> to turn one tangled test
-            into independent, summable parts.
-        </li>
-        <li>Choose a <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source"
-                        target="_blank" rel="noopener noreferrer">generator</a> for memory or <a
-                href="https://en.wikipedia.org/wiki/Lazy_evaluation" class="reference-source" target="_blank"
-                rel="noopener noreferrer">lazy evaluation</a> — not for raw speed in a tight numeric loop, where
-            built-in iterables win.
-        </li>
-        <li>When porting across languages, hold the <a href="https://en.wikipedia.org/wiki/Time_complexity"
-                                                       class="reference-source" target="_blank"
-                                                       rel="noopener noreferrer">time complexity</a> fixed so benchmarks
-            compare constant factors, not different algorithms.
-        </li>
-        <li>Size your integer types to the result: anticipate when a value outgrows 32 bits, since C will silently
-            overflow where Python's <a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic"
-                                       class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision
-                arithmetic</a> will not.
-        </li>
-    </ul>
 </article>

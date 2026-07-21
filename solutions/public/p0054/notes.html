@@ -1,15 +1,12 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
-At its core, this problem asks me to impose a <a href="https://en.wikipedia.org/wiki/Total_order" class="reference-source" target="_blank" rel="noopener noreferrer">total order</a> on poker hands - a rule that, given any two hands, decides unambiguously which one is greater. A <a href="https://en.wikipedia.org/wiki/Total_order" class="reference-source" target="_blank" rel="noopener noreferrer">total order</a> is a comparison relation under which every pair of elements can be ranked relative to each other with no ties (the problem guarantees a clear winner). The technique is to map each hand to a comparison key that captures both its category (pair, flush, full house, and so on) and the cascading tie-breaker data (which pair first, then which kicker, then the next). Once each hand is reduced to such a key, choosing the winner is a single comparison.
+At its core, this problem asks me to impose a <a class="reference-source" href="https://en.wikipedia.org/wiki/Total_order" rel="noopener noreferrer" target="_blank">total order</a> on poker hands - a rule that, given any two hands, decides unambiguously which one is greater. A <a class="reference-source" href="https://en.wikipedia.org/wiki/Total_order" rel="noopener noreferrer" target="_blank">total order</a> is a comparison relation under which every pair of elements can be ranked relative to each other with no ties (the problem guarantees a clear winner). The technique is to map each hand to a comparison key that captures both its category (pair, flush, full house, and so on) and the cascading tie-breaker data (which pair first, then which kicker, then the next). Once each hand is reduced to such a key, choosing the winner is a single comparison.
 </p>
 <p>
-The key observation is that every poker category can be detected with two cheap pieces of derived data: a <a href="https://en.wikipedia.org/wiki/Frequency_(statistics)" class="reference-source" target="_blank" rel="noopener noreferrer">frequency count</a> of how often each card value appears, plus two boolean flags - whether all five suits match (a flush) and whether the five distinct values form a consecutive run (a straight). Four-of-a-kind, full house, three-of-a-kind, two pairs, and one pair are distinguished purely by the shape of the frequency counts; flush and straight come from the two flags; straight flush and royal flush are their combination. Because a hand is always exactly five cards, every per-hand operation - counting, sorting, flag checks - is <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(1)</a>. Processing N lines from the file is therefore <a href="https://en.wikipedia.org/wiki/Big_O_notation" class="reference-source" target="_blank" rel="noopener noreferrer">O(N)</a> overall, and here N is just 1000.
+The key observation is that every poker category can be detected with two cheap pieces of derived data: a <a class="reference-source" href="https://en.wikipedia.org/wiki/Frequency_(statistics)" rel="noopener noreferrer" target="_blank">frequency count</a> of how often each card value appears, plus two boolean flags - whether all five suits match (a flush) and whether the five distinct values form a consecutive run (a straight). Four-of-a-kind, full house, three-of-a-kind, two pairs, and one pair are distinguished purely by the shape of the frequency counts; flush and straight come from the two flags; straight flush and royal flush are their combination. Because a hand is always exactly five cards, every per-hand operation - counting, sorting, flag checks - is <a class="reference-source" href="https://en.wikipedia.org/wiki/Big_O_notation" rel="noopener noreferrer" target="_blank">O(1)</a>. Processing N lines from the file is therefore <a class="reference-source" href="https://en.wikipedia.org/wiki/Big_O_notation" rel="noopener noreferrer" target="_blank">O(N)</a> overall, and here N is just 1000.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Canonical Hand Evaluation with a Sorted Frequency Table</h4>
 <p>
 Both the Python (<code>p0054_s0.py</code>) and C (<code>p0054_s0.c</code>) solutions implement the same algorithm and differ only in language idioms. For each line, the ten whitespace-separated tokens are split into Player 1's first five cards and Player 2's last five. Each hand is evaluated independently into a (rank, tie-breakers) structure, and the two structures are then compared.
@@ -21,64 +18,9 @@ My first design decision is how to turn a card character into a number. I encode
 Next I compute the two flags. <code>is_flush</code> is true when all five suits are identical. <code>is_straight</code> is true when the five values are all distinct and <code>max - min == 4</code> - a compact test for "five consecutive values" that avoids explicitly sorting and walking the run. If both flags hold, the hand is a straight flush; if additionally the lowest value is 8 (the run T-J-Q-K-A), it is a royal flush. Settling these top categories first keeps the high-end cases short.
 </p>
 <p>
-For everything else, I build a frequency table of (count, value) pairs and sort it by count descending, then value descending. This single sort into <a href="https://en.wikipedia.org/wiki/Canonical_form" class="reference-source" target="_blank" rel="noopener noreferrer">canonical form</a> is the heart of the classification: the dominant group always lands first, so I only need to inspect the first one or two entries. A leading count of 4 is four-of-a-kind; 3 followed by 2 is a full house; a lone 3 is three-of-a-kind; two consecutive 2s is two pairs; a single 2 is one pair; otherwise high card. Crucially, I build the tie-breaker sequence in priority order at the same time - the dominant value first, then kickers in descending order - so that comparing two hands of equal rank becomes a plain <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic comparison</a> of the tie-breaker tuples with no extra branching.
+For everything else, I build a frequency table of (count, value) pairs and sort it by count descending, then value descending. This single sort into <a class="reference-source" href="https://en.wikipedia.org/wiki/Canonical_form" rel="noopener noreferrer" target="_blank">canonical form</a> is the heart of the classification: the dominant group always lands first, so I only need to inspect the first one or two entries. A leading count of 4 is four-of-a-kind; 3 followed by 2 is a full house; a lone 3 is three-of-a-kind; two consecutive 2s is two pairs; a single 2 is one pair; otherwise high card. Crucially, I build the tie-breaker sequence in priority order at the same time - the dominant value first, then kickers in descending order - so that comparing two hands of equal rank becomes a plain <a class="reference-source" href="https://en.wikipedia.org/wiki/Lexicographic_order" rel="noopener noreferrer" target="_blank">lexicographic comparison</a> of the tie-breaker tuples with no extra branching.
 </p>
 <p>
-In Python the result is a <code>HandRank</code> dataclass with a custom <code>__gt__</code>; the hand itself is a <code>PokerHand</code> dataclass whose <code>hand_rank</code> is a <a href="https://docs.python.org/3/library/functools.html#functools.cached_property" class="reference-source" target="_blank" rel="noopener noreferrer">functools.cached_property</a>, and the categories are an <a href="https://docs.python.org/3/library/enum.html#enum.IntEnum" class="reference-source" target="_blank" rel="noopener noreferrer">IntEnum</a> so they compare as integers. The C version mirrors this with a <code>HandRank</code> struct holding the rank enum plus a fixed five-element tie-breaker array and a count, and a <code>hand_rank_gt</code> function that returns on the first differing element. The C code also defends against blank and short lines, using <a href="https://en.cppreference.com/w/c/string/byte/strtok" class="reference-source" target="_blank" rel="noopener noreferrer">strtok_r</a> for reentrant tokenisation.
+In Python the result is a <code>HandRank</code> dataclass with a custom <code>__gt__</code>; the hand itself is a <code>PokerHand</code> dataclass whose <code>hand_rank</code> is a <a class="reference-source" href="https://docs.python.org/3/library/functools.html#functools.cached_property" rel="noopener noreferrer" target="_blank">functools.cached_property</a>, and the categories are an <a class="reference-source" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" rel="noopener noreferrer" target="_blank">IntEnum</a> so they compare as integers. The C version mirrors this with a <code>HandRank</code> struct holding the rank enum plus a fixed five-element tie-breaker array and a count, and a <code>hand_rank_gt</code> function that returns on the first differing element. The C code also defends against blank and short lines, using <a class="reference-source" href="https://en.cppreference.com/w/c/string/byte/strtok" rel="noopener noreferrer" target="_blank">strtok_r</a> for reentrant tokenisation.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Encoding an ordered domain as a string index</h4>
-<p>
-Representing the card ranks as positions in <code>"23456789TJQKA"</code> turns a mapping problem into a search-and-subtract. This works whenever you have a small, fixed, ordered alphabet of symbols and want a consistent numeric ordering without maintaining a separate lookup table. It keeps the data in one place and makes the ordering self-evident. Reach for it any time you would otherwise write a tiny dictionary mapping characters to consecutive integers.
-</p>
-
-<h4>Sorting into canonical form to simplify classification</h4>
-<p>
-By sorting the frequency table once (count descending, then value descending) into <a href="https://en.wikipedia.org/wiki/Canonical_form" class="reference-source" target="_blank" rel="noopener noreferrer">canonical form</a>, I replace a tangle of "search the counts for a 3, then search for a 2" logic with a simple cascade of leading-entry checks. The general principle - normalise data into a canonical shape so downstream code can read it sequentially - recurs in anagram detection, histogram problems, and interval scheduling. Pay a small one-time sorting cost to make every later inspection trivial.
-</p>
-
-<h4>Comparison keys with most-significant-field-first ordering</h4>
-<p>
-I build the tie-breaker tuple so that the most discriminating value comes first. Python tuples already compare lexicographically, so the tuple comparison does exactly the right thing; in C, <code>hand_rank_gt</code> walks the arrays and returns at the first difference. The insight is that if the key is constructed correctly, the comparison itself needs no logic. This <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic</a> approach applies to any multi-level ranking: encode all priority information into the key, then compare keys.
-</p>
-
-<h4>Separating classification from comparison</h4>
-<p>
-Evaluating a hand (what category and key is it?) is kept entirely separate from comparing two hands (which is greater?). This keeps each piece small and independently testable, and it means the comparison code is identical for every category. When a problem has a "compute a property" phase and a "use the property" phase, splitting them almost always pays off.
-</p>
-
-<h4>Lazy, cached derived attributes (Python)</h4>
-<p>
-The <code>hand_rank</code> is a <a href="https://docs.python.org/3/library/functools.html#functools.cached_property" class="reference-source" target="_blank" rel="noopener noreferrer">functools.cached_property</a>: it is computed on first access and then stored on the instance. This documents that the value is a pure function of the hand and avoids recomputation if accessed more than once. Use a <a href="https://docs.python.org/3/library/functools.html#functools.cached_property" class="reference-source" target="_blank" rel="noopener noreferrer">cached_property</a> for any derived attribute that is side-effect-free and potentially costly.
-</p>
-
-<h4>Generator pipeline for streaming line processing (Python)</h4>
-<p>
-The <code>solve</code> function builds a <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> of (player1, player2) pairs, using the <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> to bind the split tokens inside the comprehension's filter, and feeds it straight into <code>sum</code>. Nothing is materialised in memory all at once. For 1000 lines this is negligible, but the habit scales gracefully to far larger files.
-</p>
-
-<h4>Fixed-size stack arrays and inline sorts (C)</h4>
-<p>
-Because a hand is exactly five cards, every intermediate buffer in the C code is a stack-allocated fixed-size array, and the small sorts use inline nested loops rather than <a href="https://en.cppreference.com/w/c/algorithm/qsort" class="reference-source" target="_blank" rel="noopener noreferrer">qsort</a>. For arrays of five elements, the per-comparison function-pointer overhead of <a href="https://en.cppreference.com/w/c/algorithm/qsort" class="reference-source" target="_blank" rel="noopener noreferrer">qsort</a> would dominate, so a hand-rolled <a href="https://en.wikipedia.org/wiki/Insertion_sort" class="reference-source" target="_blank" rel="noopener noreferrer">insertion-style sort</a> is both faster and clearer. For small fixed-size collections, an inline sort usually beats a library sort.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The unlocking insight is that a complex-looking ranking problem collapses once you reduce each hand to a single ordered comparison key. Two cheap derivations - a sorted <a href="https://en.wikipedia.org/wiki/Frequency_(statistics)" class="reference-source" target="_blank" rel="noopener noreferrer">frequency table</a> plus two boolean flags - classify any hand, and building the tie-breakers in priority order makes the final comparison a one-line <a href="https://en.wikipedia.org/wiki/Lexicographic_order" class="reference-source" target="_blank" rel="noopener noreferrer">lexicographic</a> check with no special cases.
-</p>
-<p>
-Both solutions return the correct answer of 376. The C implementation runs in about 0.0004 s and the Python in about 0.0079 s - roughly a 20x difference. The gap is the usual per-object Python overhead (dataclass construction, property access, <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> stepping) accumulating across thousands of iterations, while C keeps everything on the stack with minimal indirection. For 1000 hands either is instant; the comparison simply illustrates the constant-factor cost of high-level abstractions.
-</p>
-<ul>
-  <li>Reduce a comparison problem to a single ordered key, then let lexicographic comparison do the work.</li>
-  <li>Encode small, fixed, ordered domains as string or array positions instead of dictionaries.</li>
-  <li>Sort data into canonical form once so all later inspection is cheap and sequential.</li>
-  <li>Put the most significant discriminator first in any comparison key.</li>
-  <li>Separate "compute the property" from "use the property" to keep code small and testable.</li>
-  <li>Use lazy cached attributes for pure, potentially-costly derived values.</li>
-  <li>For tiny fixed-size collections, prefer inline sorts over general-purpose library sorts.</li>
-</ul>
-
 </article>

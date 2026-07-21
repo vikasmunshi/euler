@@ -1,64 +1,12 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
-<p>At heart this problem asks me to find the longest cycle in a <a href="https://en.wikipedia.org/wiki/Functional_graph" class="reference-source" target="_blank" rel="noopener noreferrer">functional graph</a> - a directed graph in which every node has exactly one outgoing edge. Here the edge from <code>n</code> points to <code>s(n)</code>, the sum of <code>n</code>'s <a href="https://en.wikipedia.org/wiki/Divisor#Definition" class="reference-source" target="_blank" rel="noopener noreferrer">proper divisors</a> (every divisor of <code>n</code> except <code>n</code> itself). An "amicable chain" is precisely a cycle in this graph: a run of distinct numbers each mapping to the next, with the last looping back to the first. A <a href="https://en.wikipedia.org/wiki/Perfect_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect number</a> is a cycle of length 1, an <a href="https://en.wikipedia.org/wiki/Amicable_numbers" class="reference-source" target="_blank" rel="noopener noreferrer">amicable pair</a> is a cycle of length 2, and the problem hunts longer ones. I want the smallest member of the longest cycle whose elements all stay at or below one million.</p>
-
-<p>Two observations make this tractable. First, instead of factoring each of the million numbers separately (which costs roughly O(N&#8730;N)), I can compute every divisor sum in one pass with an <strong>additive sieve</strong> - a generalisation of the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a> - in O(N log N) time. Second, a <a href="https://en.wikipedia.org/wiki/Functional_graph" class="reference-source" target="_blank" rel="noopener noreferrer">functional graph</a> always decomposes into "rho"-shaped pieces: a tail of nodes leading into a single cycle. That structure lets me classify every node with a linear scan that walks each chain once, marking nodes as I go so I never reprocess them. The total cost is O(N log N), dominated by the sieve, with O(N) space.</p>
-
+<p>At heart this problem asks me to find the longest cycle in a <a class="reference-source" href="https://en.wikipedia.org/wiki/Functional_graph" rel="noopener noreferrer" target="_blank">functional graph</a> - a directed graph in which every node has exactly one outgoing edge. Here the edge from <code>n</code> points to <code>s(n)</code>, the sum of <code>n</code>'s <a class="reference-source" href="https://en.wikipedia.org/wiki/Divisor#Definition" rel="noopener noreferrer" target="_blank">proper divisors</a> (every divisor of <code>n</code> except <code>n</code> itself). An "amicable chain" is precisely a cycle in this graph: a run of distinct numbers each mapping to the next, with the last looping back to the first. A <a class="reference-source" href="https://en.wikipedia.org/wiki/Perfect_number" rel="noopener noreferrer" target="_blank">perfect number</a> is a cycle of length 1, an <a class="reference-source" href="https://en.wikipedia.org/wiki/Amicable_numbers" rel="noopener noreferrer" target="_blank">amicable pair</a> is a cycle of length 2, and the problem hunts longer ones. I want the smallest member of the longest cycle whose elements all stay at or below one million.</p>
+<p>Two observations make this tractable. First, instead of factoring each of the million numbers separately (which costs roughly O(N√N)), I can compute every divisor sum in one pass with an <strong>additive sieve</strong> - a generalisation of the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a> - in O(N log N) time. Second, a <a class="reference-source" href="https://en.wikipedia.org/wiki/Functional_graph" rel="noopener noreferrer" target="_blank">functional graph</a> always decomposes into "rho"-shaped pieces: a tail of nodes leading into a single cycle. That structure lets me classify every node with a linear scan that walks each chain once, marking nodes as I go so I never reprocess them. The total cost is O(N log N), dominated by the sieve, with O(N) space.</p>
 <h3>Solution Approach</h3>
-
 <h4>Additive Sieve plus Path-Tracking Cycle Detection (Python and C)</h4>
-
 <p>Both files implement the same two-phase algorithm, so I describe them together and flag where they diverge.</p>
-
 <p><strong>Phase 1 - build the divisor-sum array.</strong> I allocate <code>divisor_sum[0..N]</code> initialised to zero. For each integer <code>i</code> from 1 to N/2 I add <code>i</code> to every multiple of <code>i</code> in the range [2i, N]. This is the additive sieve pattern: rather than asking "what are the divisors of <code>n</code>?", I iterate over each candidate divisor <code>i</code> and push its contribution outward to all its multiples. The inner loop runs N/i times for each <code>i</code>, so the total work is the harmonic sum N/2 + N/3 + ... = O(N log N). When the sieve finishes, <code>divisor_sum[n]</code> holds <code>s(n)</code> - exactly the edge function of our graph.</p>
-
 <p><strong>Phase 2 - cycle detection by walking the graph.</strong> I scan every number from 1 to N. If a number is already classified, I skip it. Otherwise I follow the edges - repeatedly applying <code>divisor_sum</code> - until one of three things happens: the next value leaves the valid range [1, N] (no cycle can survive because chain members must not exceed one million), I land on a node classified in a prior walk, or I revisit a node in the current walk (a cycle has closed).</p>
-
 <p>In the Python solution I track the current walk with a list <code>path</code> (for ordered traversal) and a set <code>ch</code> (for O(1) membership testing). The walk halts when <code>c</code> falls out of range or is already in <code>ch</code>. If the terminating node <code>c</code> equals the start <code>i</code>, the whole path is a cycle. I then store every node in the <code>seen</code> dictionary with that cycle's length and update the answer if this is the longest chain yet. The Python code only records cycles whose closing node equals <code>i</code>. This is safe precisely because I iterate <code>i</code> upward: any cycle reachable through a tail will eventually have its own smallest member visited directly as <code>i</code>, at which point the condition <code>c == i</code> fires and the smallest member is simply <code>i</code> itself.</p>
-
 <p>The C solution is more general. I use an <code>in_path</code> array that stores the 1-indexed position of each node in the current walk (0 means "not in this walk"), which lets me detect <em>mid-path</em> cycles. If the walk terminates at a node <code>c</code> already in the path but not equal to <code>i</code>, the cycle begins at <code>in_path[c] - 1</code> and has length <code>path_len - cycle_start_pos</code>. Nodes before that position are tail nodes, which I mark with <code>seen = -1</code> ("visited but not a cycle member") so they are never reprocessed; cycle nodes get the cycle length. When a cycle is the new longest, I scan its members to find the minimum, the safe and general way to report the smallest element. After every walk I reset <code>in_path</code> only for the nodes actually touched, keeping cleanup proportional to the walk length rather than O(N).</p>
-
-<h3>Programming Techniques</h3>
-
-<h4>The Additive Sieve Pattern</h4>
-
-<p>The additive sieve generalises the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>: to compute a function aggregated over the divisors of every number up to N, iterate over each candidate divisor and push its contribution to all multiples. This avoids per-number factorisation and is cache-friendly because the inner loop accesses memory at a fixed stride. I reach for it whenever the per-number quantity is a sum, product, or max over divisors and N is large enough that factoring each value individually would be too slow.</p>
-
-<h4>Functional Graph Walking with Early Exit</h4>
-
-<p>A <a href="https://en.wikipedia.org/wiki/Functional_graph" class="reference-source" target="_blank" rel="noopener noreferrer">functional graph</a> always consists of tails leading into cycles. When walking it I maintain a marker of the nodes seen in the current walk and exit the moment I revisit one or leave the valid range. Combined with a global "already classified" marker, each node is touched at most twice across all walks, so phase 2 is O(N) total despite its nested-looking structure.</p>
-
-<h4>Separate "Seen" and "In-Path" State Arrays (C)</h4>
-
-<p>The C solution keeps two distinct arrays: <code>seen[v]</code> persists across all walks and records the final classification, while <code>in_path[v]</code> is ephemeral and reset after each walk. Separating permanent state from transient state keeps the logic clear and avoids conflating "visited globally" with "visited in this walk." This permanent-plus-transient state pattern recurs throughout graph algorithms and is worth internalising.</p>
-
-<h4>1-Indexed Position Array for O(1) Cycle-Start Recovery (C)</h4>
-
-<p>By storing <code>in_path[v] = position + 1</code>, I reserve 0 to mean "absent" and use any positive value to recover where a node sits in the current walk. When the walk revisits a node, I recover the cycle start in O(1) instead of scanning the path. This trades a little memory for constant-time lookup - a common and worthwhile bargain.</p>
-
-<h4>Python List plus Set for Ordered, Fast-Lookup Paths</h4>
-
-<p>In Python I maintain both a list (for ordered traversal and reporting) and a set (for O(1) membership). A list alone would make each membership test O(path length), risking O(N&#178;) behaviour. The set costs a constant factor in memory but keeps lookups fast. Use a list when you need order, a set when you need fast lookup, and both when you need both.</p>
-
-<h4>Targeted Cleanup over Full Zeroing</h4>
-
-<p>Both solutions reset scratch state only for the nodes actually touched in the current walk, never with a full clear over the million-element array. A full zeroing per iteration would dominate runtime; iterating over the recorded path keeps cleanup proportional to real work. This applies whenever a reusable scratch array must be reset between iterations.</p>
-
-<h3>Key Takeaways</h3>
-
-<p>The unlocking insight is decomposition: "find the longest bounded cycle in a functional graph" splits cleanly into computing the function (additive sieve) and detecting cycles (a single linear scan with path-tracking). Recognising this turns an apparent search problem into a straightforward two-phase algorithm.</p>
-
-<p>The two implementations run identical algorithms. The C solution finishes in about 0.039 s; the Python solution takes about 1.87 s - roughly a 48x difference, driven entirely by interpreter overhead on the tight sieve loops. The Python version is more compact and readable; the C version is faster and handles mid-path cycles in full generality. For an O(N log N) algorithm at N = 10^6, Python is workable but C delivers production-speed results.</p>
-
-<ul>
-<li>When you need a function aggregated over the divisors of every number up to N, use an additive sieve rather than factoring each number - it turns O(N&#8730;N) into O(N log N).</li>
-<li>Functional graphs always decompose into tails and cycles; a single linear scan with path-tracking classifies every node in O(N) total.</li>
-<li>Pair a global "classified" marker with a per-walk "in-path" marker, and reset only the touched entries to keep cleanup proportional to work done.</li>
-<li>Maintain both a list and a set when you need ordered traversal and fast membership at once - small memory cost, large algorithmic gain.</li>
-<li>A 1-indexed position array (0 = absent) recovers a cycle start in O(1) without scanning the path.</li>
-<li>For O(N log N) work at N = 10^6, expect Python to be usable but C to be roughly an order of magnitude faster - choose by whether you need 2-second or 40-millisecond performance.</li>
-</ul>
-
 </article>

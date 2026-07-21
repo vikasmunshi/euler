@@ -1,18 +1,15 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
-A "magic" n-gon ring is a small <a href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)" class="reference-source" target="_blank" rel="noopener noreferrer">graph</a> built from two layers of nodes. The inner layer is a <a href="https://en.wikipedia.org/wiki/Cycle_(graph_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">cycle</a> of n nodes, each connected to its two neighbours; the outer layer attaches one external node to each inner node. A "line" of the ring is a triple - an outer node, the inner node it hangs off, and the next inner node clockwise. I fill the 2n positions with the integers 1 to 2n and require that all n lines share a common sum S, the magic total. For n = 5 the goal is the lexicographically largest 16-digit string formed by concatenating the lines, starting from the line whose outer node is smallest (a canonical start that removes rotational ambiguity).
+A "magic" n-gon ring is a small <a class="reference-source" href="https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)" rel="noopener noreferrer" target="_blank">graph</a> built from two layers of nodes. The inner layer is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Cycle_(graph_theory)" rel="noopener noreferrer" target="_blank">cycle</a> of n nodes, each connected to its two neighbours; the outer layer attaches one external node to each inner node. A "line" of the ring is a triple - an outer node, the inner node it hangs off, and the next inner node clockwise. I fill the 2n positions with the integers 1 to 2n and require that all n lines share a common sum S, the magic total. For n = 5 the goal is the lexicographically largest 16-digit string formed by concatenating the lines, starting from the line whose outer node is smallest (a canonical start that removes rotational ambiguity).
 </p>
 <p>
-The first key observation is a <a href="https://en.wikipedia.org/wiki/Counting" class="reference-source" target="_blank" rel="noopener noreferrer">counting</a> identity. Each outer node belongs to exactly one line, while each inner node is shared between two lines (it is the second node of one line and the first node of the next). Summing all n lines gives n*S = (sum of outer nodes) + 2*(sum of inner nodes). Since 1 + 2 + ... + 2n is fixed, choosing which n numbers form the inner ring already fixes S. The second observation is more powerful still: once the inner ring <a href="https://en.wikipedia.org/wiki/Permutation" class="reference-source" target="_blank" rel="noopener noreferrer">permutation</a> is fixed and I pin the smallest outer node at the first position, every other outer value is forced by outer[i] = S - inner[i] - inner[i+1]. I never search the outer positions at all - I compute them. This collapses an exponential search over all 2n positions into a permutation enumeration over only the n inner positions, with a cheap O(n) check per candidate. A final structural insight specific to the 16-digit requirement: 10 is the only two-digit value in 1..10, and an inner node contributes to two lines (so a 10 inside would add two digits twice), whereas an outer node contributes once. To get exactly 16 digits rather than 17, 10 must sit on an outer node, so the inner ring is drawn only from {1, ..., 9}. The resulting complexity is O(P(min(9, 2n), n) * n), which for n = 5 is at most P(9, 5) = 15120 candidates - trivially fast.
+The first key observation is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Counting" rel="noopener noreferrer" target="_blank">counting</a> identity. Each outer node belongs to exactly one line, while each inner node is shared between two lines (it is the second node of one line and the first node of the next). Summing all n lines gives n*S = (sum of outer nodes) + 2*(sum of inner nodes). Since 1 + 2 + ... + 2n is fixed, choosing which n numbers form the inner ring already fixes S. The second observation is more powerful still: once the inner ring <a class="reference-source" href="https://en.wikipedia.org/wiki/Permutation" rel="noopener noreferrer" target="_blank">permutation</a> is fixed and I pin the smallest outer node at the first position, every other outer value is forced by outer[i] = S - inner[i] - inner[i+1]. I never search the outer positions at all - I compute them. This collapses an exponential search over all 2n positions into a permutation enumeration over only the n inner positions, with a cheap O(n) check per candidate. A final structural insight specific to the 16-digit requirement: 10 is the only two-digit value in 1..10, and an inner node contributes to two lines (so a 10 inside would add two digits twice), whereas an outer node contributes once. To get exactly 16 digits rather than 17, 10 must sit on an outer node, so the inner ring is drawn only from {1, ..., 9}. The resulting complexity is O(P(min(9, 2n), n) * n), which for n = 5 is at most P(9, 5) = 15120 candidates - trivially fast.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Inner-ring Enumeration with Forced Outer Values</h4>
 <p>
-Both files implement the same algorithm. The Python version is iterative, driven by <a href="https://docs.python.org/3/library/itertools.html#itertools.permutations" class="reference-source" target="_blank" rel="noopener noreferrer">itertools.permutations</a>; the C version is a recursive <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> search. The four logical steps are identical.
+Both files implement the same algorithm. The Python version is iterative, driven by <a class="reference-source" href="https://docs.python.org/3/library/itertools.html#itertools.permutations" rel="noopener noreferrer" target="_blank">itertools.permutations</a>; the C version is a recursive <a class="reference-source" href="https://en.wikipedia.org/wiki/Backtracking" rel="noopener noreferrer" target="_blank">backtracking</a> search. The four logical steps are identical.
 </p>
 <p>
 <strong>Step 1 - Enumerate inner ring permutations.</strong> I generate all ordered arrangements of n values chosen from {1, ..., min(9, 2n)}. The cap of 9 encodes the "10 belongs on the outside" constraint that yields a 16-digit result for n = 5; using <code>min(9, 2n)</code> keeps the code correct for the smaller dev cases (n = 3, 4), where the cap is irrelevant, and for the larger extra cases. In C, <code>solve_recursive</code> fills <code>inner_choice[depth]</code> with each unused value, marks it in the <code>used</code> direct-address array, recurses, and unmarks on the way back out.
@@ -24,66 +21,6 @@ Both files implement the same algorithm. The Python version is iterative, driven
 <strong>Step 3 - Force the outer values.</strong> I place the smallest still-available number at outer position 0, canonicalising the clockwise start exactly as the problem requires. The magic total becomes S = outer[0] + s[0]. Every remaining outer value is then forced: outer[i] = S - s[i]. I check each forced value is in range and still available; the first failure aborts the candidate. This is the heart of the algorithm - the outer ring is computed, never searched.
 </p>
 <p>
-<strong>Step 4 - Build and compare the string.</strong> A valid arrangement is concatenated line by line into a digit string and compared with the running best. Python converts the string to an arbitrary-precision <a href="https://docs.python.org/3/library/functions.html#int" class="reference-source" target="_blank" rel="noopener noreferrer">int</a> and compares numerically. C compares with a custom <code>cmp_magic</code> that ranks by length first, then lexicographically - equivalent to numeric comparison for equal-length non-negative integers, and free of overflow concerns.
+<strong>Step 4 - Build and compare the string.</strong> A valid arrangement is concatenated line by line into a digit string and compared with the running best. Python converts the string to an arbitrary-precision <a class="reference-source" href="https://docs.python.org/3/library/functions.html#int" rel="noopener noreferrer" target="_blank">int</a> and compares numerically. C compares with a custom <code>cmp_magic</code> that ranks by length first, then lexicographically - equivalent to numeric comparison for equal-length non-negative integers, and free of overflow concerns.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Forcing Determined Values Instead of Searching</h4>
-<p>
-The central technique is recognising that a subset of the unknowns is fully determined by the rest. Once the inner ring is fixed and the first outer node pinned, the linear line-sum constraints pin down every other outer value. Computing these rather than enumerating them collapses the search from O((2n)!) to O(P(9, n)). Whenever a combinatorial structure has a "free" part and a "determined" part, solve for the determined part - it is the single biggest lever for cutting search cost.
-</p>
-
-<h4>Canonicalisation to Eliminate Rotational Symmetry</h4>
-<p>
-A valid ring has n rotations that all describe the same magic configuration. Rather than generating all of them and deduplicating, I fix one degree of freedom at construction time: the smallest outer node always sits at index 0. This eliminates the entire rotation class for free, with no bookkeeping. "Pin one symmetric coordinate" is a broadly reusable trick in combinatorial enumeration.
-</p>
-
-<h4>Direct-address Array for Availability (C)</h4>
-<p>
-The C code tracks which integers are used with <code>used[25]</code>, an array indexed directly by value. For a small contiguous integer domain this is a perfect <a href="https://en.wikipedia.org/wiki/Direct_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">direct-address table</a>: O(1) lookup and update, no hashing, excellent cache locality, and trivial reset with <code>memset</code>. When your keys are small dense integers, this beats a hash set on both simplicity and speed.
-</p>
-
-<h4>Set-based Availability and EAFP (Python)</h4>
-<p>
-Python tracks available outer values in a <a href="https://docs.python.org/3/tutorial/datastructures.html#sets" class="reference-source" target="_blank" rel="noopener noreferrer">set</a> and removes forced values inside a <code>try/except KeyError</code>. This follows the <a href="https://docs.python.org/3/glossary.html#term-EAFP" class="reference-source" target="_blank" rel="noopener noreferrer">EAFP</a> ("easier to ask forgiveness than permission") idiom - attempt the removal and catch failure rather than testing membership first and then removing. It avoids a redundant hash lookup in the inner loop.
-</p>
-
-<h4>Python's for...else Construct</h4>
-<p>
-The loop assigning outer values uses a <a href="https://docs.python.org/3/tutorial/controlflow.html#break-and-continue-statements-and-else-clauses-on-loops" class="reference-source" target="_blank" rel="noopener noreferrer">for...else</a> clause: the <code>else</code> body runs only if the loop completed without a <code>break</code>. This expresses "all n-1 outer values were assigned successfully" without a separate Boolean flag, making the success path explicit.
-</p>
-
-<h4>Walrus Operator for Inline Assignment (Python)</h4>
-<p>
-The expression <code>outer_candidates.remove((required := (line_sum - inner_sums[i])))</code> uses the <a href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> to compute the value, bind it to <code>required</code>, and pass it to <code>remove</code> in one expression - avoiding a duplicated computation and keeping the logic on a single readable line.
-</p>
-
-<h4>Length-then-Lexicographic String Comparison (C)</h4>
-<p>
-Because the digit strings vary in length across ring sizes, <code>cmp_magic</code> ranks longer strings as larger and falls back to <a href="https://en.cppreference.com/w/c/string/byte/strcmp" class="reference-source" target="_blank" rel="noopener noreferrer">strcmp</a> for equal lengths. This reproduces numeric comparison for non-negative integers without big-integer arithmetic, which C lacks natively. Python sidesteps the issue entirely by comparing arbitrary-precision <a href="https://docs.python.org/3/library/functions.html#int" class="reference-source" target="_blank" rel="noopener noreferrer">int</a> values.
-</p>
-
-<h4>Named Tuples for Self-documenting Records (Python)</h4>
-<p>
-The <code>Ring</code> and <code>Line</code> <a href="https://docs.python.org/3/library/collections.html#collections.namedtuple" class="reference-source" target="_blank" rel="noopener noreferrer">named tuples</a> give field access by name in the optional <code>--show</code> debug path while keeping the speed and layout of plain tuples. For read-only structured data, a named tuple documents intent without the weight of a class.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The insight that unlocks this problem is splitting positions into inner (shared, two lines) and outer (unique, one line), then using the line-sum constraints to force the outer values once the inner permutation is chosen. The 16-versus-17-digit requirement is a problem-level filter that pins 10 to the outer ring and shrinks the candidate domain before any enumeration starts.
-</p>
-<p>
-Both files share one algorithm, so the comparison is purely about language. The C <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a> version is consistently faster across all sizes - 0.0006s versus 0.0209s on the main n = 5 case, and 0.0179s versus 0.3766s on the largest n = 9 case, roughly a 20-35x gap. This is typical for tight permutation loops where Python's per-iteration overhead dominates. Both are comfortably fast enough here; the C advantage only becomes practically relevant on the larger extra cases.
-</p>
-<ul>
-<li>When part of a combinatorial structure is determined by the rest, compute it rather than search for it - this is the single largest reduction in search space available.</li>
-<li>Eliminate symmetry by fixing one coordinate at construction time instead of generating duplicates and filtering them afterwards.</li>
-<li>For small contiguous integer keys, a direct-address array is the simplest and fastest availability structure in C.</li>
-<li>Prefer EAFP (try/except) over check-then-act in Python hot loops to avoid redundant lookups.</li>
-<li>Comparing digit strings by length-then-lexicographic order reproduces numeric comparison without big-integer support.</li>
-<li>Use problem-level constraints (like a required digit count) to prune the domain before enumeration even begins.</li>
-<li>Reject invalid candidates as early as possible (here, duplicate inner sums) to keep both correctness and speed under control as inputs grow.</li>
-</ul>
-
 </article>

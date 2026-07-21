@@ -1,146 +1,61 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
+<h3>Problem Analysis</h3>
+<p>
     The task is to find, among all top-to-bottom paths through a number triangle, the one whose sum
     of visited values is largest. At each step we descend from a cell to one of the two cells
     immediately below it. A triangle with N rows therefore has 2^(N-1) distinct paths - 16,384 for
     the 15-row triangle here, and an astronomical 2^99 for the 100-row variant in Problem 67. A
     brute-force enumeration of every path quickly becomes intractable, so I needed a smarter method.
   </p>
-  <p>
+<p>
     The unlocking observation is that this problem has
-    <a href="https://en.wikipedia.org/wiki/Optimal_substructure" class="reference-source" target="_blank" rel="noopener noreferrer">optimal substructure</a>:
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Optimal_substructure" rel="noopener noreferrer" target="_blank">optimal substructure</a>:
     the best path from any cell down to the base is that cell's value plus the better of the two best
     paths starting from its two children. Because the best overall path must also be the best path
     through every sub-triangle it crosses, I can solve the problem with
-    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a> -
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Dynamic_programming" rel="noopener noreferrer" target="_blank">dynamic programming</a> -
     a technique that builds up an answer from solutions to smaller, overlapping sub-problems instead
     of recomputing them. By computing "the maximum sum reachable from this cell down to the base" for
     every cell, starting at the bottom and working upward, the apex eventually holds the global
     answer. Each cell is visited exactly once, so the algorithm runs in
-    <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank" rel="noopener noreferrer">O(N^2)</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Time_complexity" rel="noopener noreferrer" target="_blank">O(N^2)</a>
     time (proportional to the number of cells) - a dramatic improvement over the exponential
     enumeration, and one that scales effortlessly to the 100-row case.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Bottom-Up Reduction of the Triangle (Python and C)</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Bottom-Up Reduction of the Triangle (Python and C)</h4>
+<p>
     Both <code>p0018_s0.py</code> and <code>p0018_s0.c</code> implement the same algorithm. I first
     parse the triangle from a multiline string into a two-dimensional array of integers, then
     collapse it row by row from the bottom up.
   </p>
-  <p>
+<p>
     The collapse works as follows. I look at the last two rows. For each position <code>i</code> in
     the second-to-last row, I add the larger of its two children - the cells at indices
     <code>i</code> and <code>i+1</code> in the last row - to the value already stored there. After
     this, every cell in the second-to-last row holds "the maximum sum reachable from here to the
     base". I then discard the last row and repeat. When only the single apex cell remains, it holds
     the global maximum. This is the direct expression of the
-    <a href="https://en.wikipedia.org/wiki/Optimal_substructure" class="reference-source" target="_blank" rel="noopener noreferrer">optimal-substructure</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Optimal_substructure" rel="noopener noreferrer" target="_blank">optimal-substructure</a>
     recurrence: <code>best(cell) = value(cell) + max(best(left child), best(right child))</code>,
     evaluated bottom-up so that each child's answer is already known when its parent is processed.
     The whole reduction touches each of the N(N+1)/2 cells once, which is why it runs in
-    <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank" rel="noopener noreferrer">O(N^2)</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Time_complexity" rel="noopener noreferrer" target="_blank">O(N^2)</a>
     time.
   </p>
-  <p>
+<p>
     In Python the inner step is a single
-    <a href="https://en.wikipedia.org/wiki/List_comprehension" class="reference-source" target="_blank" rel="noopener noreferrer">list comprehension</a>:
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/List_comprehension" rel="noopener noreferrer" target="_blank">list comprehension</a>:
     <code>triangle[-2] = [v + max(triangle[-1][i], triangle[-1][i + 1]) for i, v in enumerate(triangle[-2])]</code>,
     followed by <code>del triangle[-1]</code> to shrink the structure. I call
-    <a href="https://en.wikipedia.org/wiki/Object_copying#Deep_copy" class="reference-source" target="_blank" rel="noopener noreferrer">deep copy</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Object_copying#Deep_copy" rel="noopener noreferrer" target="_blank">deep copy</a>
     (<code>copy.deepcopy</code>) first so that the caller's triangle is never mutated - important
     because the benchmark harness calls <code>solve</code> repeatedly with the same data. In C I
     perform the update in place on <code>triangle[current_rows - 2]</code> and simply decrement
     <code>current_rows</code> rather than freeing rows mid-loop; this is cache-friendly and avoids
     repeated allocation. The C parser counts rows by scanning for newlines, makes a mutable copy of
-    the input (<a href="https://en.wikipedia.org/wiki/C_string_handling#strtok" class="reference-source" target="_blank" rel="noopener noreferrer">strtok</a>
+    the input (<a class="reference-source" href="https://en.wikipedia.org/wiki/C_string_handling#strtok" rel="noopener noreferrer" target="_blank">strtok</a>
     modifies its argument), and allocates each row to its exact length via a count-then-fill pass.
     All allocations are freed after the result is computed.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>In-Place Layer-by-Layer Reduction</h4>
-  <p>
-    Rather than building a separate
-    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
-    table, I overwrite the triangle itself, folding each row into the one above it. Each cell is
-    written exactly once and the consumed row is discarded immediately. This keeps memory use to the
-    O(N^2) storage already needed for the input with no extra table, and the pattern - reduce a
-    layered structure one layer at a time until a single value remains - recurs in prefix sums,
-    tournament brackets, and tree-collapse problems. Reach for it whenever each layer's answer
-    depends only on the adjacent layer.
-  </p>
-  <h4>Whole-Row Replacement via Comprehension (Python)</h4>
-  <p>
-    Building the new row as a
-    <a href="https://en.wikipedia.org/wiki/List_comprehension" class="reference-source" target="_blank" rel="noopener noreferrer">list comprehension</a>
-    and assigning it back in one statement is both safer and clearer than an element-by-element loop
-    that reads from the row it is writing. Using <code>enumerate</code> yields the index (needed to
-    address the two children) and the value together, eliminating a manual counter. The intent - "the
-    new row is the old row with its children folded in" - reads directly off the line.
-  </p>
-  <h4>Defensive Copy Before Mutation (Python)</h4>
-  <p>
-    Because Python lists of lists are reference types, mutating the input in place would corrupt the
-    caller's data. A
-    <a href="https://en.wikipedia.org/wiki/Object_copying#Deep_copy" class="reference-source" target="_blank" rel="noopener noreferrer">deep copy</a>
-    duplicates the outer list and every inner list, so the original survives intact across repeated
-    benchmark runs. A shallow copy would not suffice here - it would share the inner row lists. Use a
-    <a href="https://en.wikipedia.org/wiki/Object_copying#Deep_copy" class="reference-source" target="_blank" rel="noopener noreferrer">deep copy</a>
-    whenever you must mutate a nested mutable structure but preserve the original.
-  </p>
-  <h4>Data-as-String with a Dedicated Parser</h4>
-  <p>
-    Both solutions store the triangle as a human-readable multiline string and parse it with a
-    <code>text2triangle</code> function. This mirrors the problem's natural format, keeps input
-    handling separate from the algorithm, and makes it trivial to swap in the 100-row triangle for
-    Problem 67. Separating parsing from computation is a clean separation of concerns that pays off
-    whenever test data may change.
-  </p>
-  <h4>Two-Pass Allocation in C</h4>
-  <p>
-    For each row the C parser first counts the tokens, then allocates an array of exactly that size,
-    then fills it. This avoids the complexity of growing arrays with <code>realloc</code> and
-    guarantees no wasted space. It is a sound idiom for token sequences of unknown length, and it
-    keeps the memory layout tight - each row is a contiguous block, which the bottom-up loop then
-    walks linearly for good cache behaviour.
-  </p>
-  <h4>Safe Tokenisation on a Mutable Copy (C)</h4>
-  <p>
-    Functions like
-    <a href="https://en.wikipedia.org/wiki/C_string_handling#strtok" class="reference-source" target="_blank" rel="noopener noreferrer">strtok</a>
-    write null bytes into their input, so passing a string literal would be undefined behaviour. The
-    parser first <code>memcpy</code>s the text into a heap buffer and tokenises that copy. This is a
-    general rule: never hand a read-only string to a routine that mutates its argument.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The core insight is to reframe "find the best path" as "propagate the best reachable sum upward
-    one layer at a time". Once that reframing is made, a single
-    <a href="https://en.wikipedia.org/wiki/Time_complexity" class="reference-source" target="_blank" rel="noopener noreferrer">O(N^2)</a>
-    pass replaces an exponential search. Both implementations finish effectively instantaneously on
-    the 15-row triangle. On the main case the C solution averages about 4.8 microseconds
-    (0.0000048 s) against the Python solution's 32 microseconds (0.0000324 s) - roughly a sevenfold
-    gap from in-place updates and lower interpreter overhead, but utterly negligible in absolute
-    terms at this problem size. It is a clear demonstration that algorithmic efficiency, not language
-    choice, dominates here.
-  </p>
-  <ul>
-    <li>When the optimal solution to a problem contains optimal solutions to its sub-problems, look
-        to <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
-        before reaching for brute force.</li>
-    <li>Bottom-up evaluation often eliminates recursion and explicit memoisation entirely, and tends
-        to be more cache-friendly than top-down evaluation.</li>
-    <li>Collapsing a layered structure in place, one layer at a time, avoids a separate result table
-        whenever each layer depends only on the adjacent one.</li>
-    <li>Deep-copy nested mutable structures before modifying them if the caller may reuse the
-        original.</li>
-    <li>Keep input as readable data and parse it through a dedicated function so test cases are easy
-        to swap and the algorithm stays uncluttered.</li>
-    <li>In C, never pass read-only strings to routines that mutate their input - always operate on a
-        heap copy.</li>
-  </ul>
 </article>

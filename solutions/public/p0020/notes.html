@@ -1,13 +1,12 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
 The task is to compute the sum of the decimal digits of <code>100!</code>. The
-<a href="https://en.wikipedia.org/wiki/Factorial" class="reference-source" target="_blank" rel="noopener noreferrer">factorial</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Factorial" rel="noopener noreferrer" target="_blank">factorial</a>
 of <code>n</code> is the product of all positive integers up to <code>n</code>, and the wrinkle is
 purely one of scale: <code>100!</code> has 158 decimal digits, which vastly exceeds the roughly 19
 digits a 64-bit integer can hold. The problem is therefore an exercise in
-<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a> —
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision arithmetic</a> —
 computation on numbers larger than a native machine word, where the value is spread across many
 storage cells rather than held in a single register.
 </p>
@@ -16,17 +15,15 @@ The observation that makes this tractable is that we never need <code>n!</code> 
 number — we only ever need its decimal digits. That reframes the work as two routine sub-tasks:
 repeatedly multiply a large number by a small integer (at most 100), then add up the resulting
 digits. Multiplying a <code>D</code>-digit number by a small scalar is ordinary
-<a href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">long multiplication</a> —
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" rel="noopener noreferrer" target="_blank">long multiplication</a> —
 walk each digit, multiply, propagate a carry — an <code>O(D)</code> pass. Doing this for every
 factor from 2 to <code>n</code> gives <code>O(n · D(n))</code>, where <code>D(n)</code> is the digit
 count of <code>n!</code>. By
-<a href="https://en.wikipedia.org/wiki/Stirling%27s_approximation" class="reference-source" target="_blank" rel="noopener noreferrer">Stirling's approximation</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Stirling%27s_approximation" rel="noopener noreferrer" target="_blank">Stirling's approximation</a>
 <code>D(n)</code> grows as <code>O(n log n)</code>, so the whole algorithm is about
 <code>O(n² log n)</code> — utterly negligible at <code>n = 100</code>.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Big-Integer Digit Array (C) and Built-in Arbitrary Precision (Python)</h4>
 <p>
 Both solutions (index 0) implement the same logical algorithm — form <code>n!</code>, then sum its
@@ -34,14 +31,14 @@ decimal digits — but they diverge entirely in how they represent the large num
 </p>
 <p>
 The C solution builds the big integer by hand. I store <code>n!</code> as a
-<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Endianness" rel="noopener noreferrer" target="_blank">little-endian</a>
 array of single decimal digits: <code>digits[0]</code> is the least significant digit,
 <code>digits[1]</code> the next, and so on. I chose
-<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Endianness" rel="noopener noreferrer" target="_blank">little-endian</a>
 ordering deliberately, because carry propagation runs from least significant to most significant —
 the same direction as increasing array index — so the inner loop always walks forward. Starting
 from 1, I multiply by each <code>i</code> from 2 to <code>n</code> using
-<a href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">long multiplication</a>:
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" rel="noopener noreferrer" target="_blank">long multiplication</a>:
 for each <code>i</code> I walk every occupied digit, compute <code>digits[j] * i + carry</code>,
 store the result modulo 10, and carry the quotient forward; any carry remaining past the top digit
 appends new positions one digit at a time. A final pass sums every digit. I sized the buffer at 512
@@ -50,95 +47,10 @@ digits, which comfortably covers the 158 digits of <code>100!</code>.
 <p>
 The Python solution is a single expression:
 <code>sum(int(d) for d in str(math.factorial(n)))</code>. Python's <code>int</code> is
-<a href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">arbitrary-precision arithmetic</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic" rel="noopener noreferrer" target="_blank">arbitrary-precision arithmetic</a>
 natively, so <code>math.factorial</code> returns the exact value with no manual digit handling; I
 convert it to a string and sum the integer value of each character. The representations differ
 fundamentally: the C code works in base 10 throughout, whereas CPython stores the integer in a
 binary internal form and converts to a decimal string only at the end.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Little-Endian Digit Arrays for Manual Big Integers</h4>
-<p>
-When you write big-integer arithmetic in C without a library, digit ordering has real consequences.
-I stored digits
-<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
-because the multiplication carry always moves from the lowest digit upward, matching natural forward
-iteration over an array; this keeps the inner loop simple and cache-friendly and avoids a final
-reversal. Big-endian storage would force backward scans or a reversal at the end. For any
-multiply-by-scalar bignum routine,
-<a href="https://en.wikipedia.org/wiki/Endianness" class="reference-source" target="_blank" rel="noopener noreferrer">little-endian</a>
-is the right default.
-</p>
-
-<h4>Fixed-Size Stack Buffers with an Analytical Bound</h4>
-<p>
-Rather than calling <code>malloc</code>, I declared a fixed 512-element array on the stack, sizing it
-by reasoning about the worst case first:
-<a href="https://en.wikipedia.org/wiki/Stirling%27s_approximation" class="reference-source" target="_blank" rel="noopener noreferrer">Stirling's approximation</a>
-bounds <code>100!</code> at 158 digits, so 512 is more than twice the requirement. A fixed stack
-buffer avoids allocation overhead, removes any chance of an allocation failure in the hot path, and
-keeps the code shorter. Reach for this whenever you can derive a tight, modest upper bound on a
-structure's size analytically.
-</p>
-
-<h4>Generator Expressions for Map-then-Fold in Python</h4>
-<p>
-The Python solution feeds a
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
-straight into <code>sum()</code>. A
-<a href="https://docs.python.org/3/reference/expressions.html#generator-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">generator expression</a>
-is a lazy iterable: it yields one value at a time without materialising an intermediate list, so
-memory stays constant. Here it converts each character to an integer on the fly and folds the
-results into a running total — the idiomatic Python way to express "transform each element, then
-aggregate", and the pattern to reach for instead of an explicit accumulation loop.
-</p>
-
-<h4>Leveraging the Standard Library for Big Numbers</h4>
-<p>
-Python's <code>math.factorial</code> is implemented in C inside CPython and uses efficient
-internal techniques — including
-<a href="https://en.wikipedia.org/wiki/Karatsuba_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Karatsuba multiplication</a>
-for large operands — so delegating to it yields a correct, tested, fast routine for free and reduces
-the solution to one line. The principle generalises: check what the standard library offers before
-writing an algorithm by hand. The manual C version is invaluable for understanding the mechanics,
-but the library version is almost always the better production choice — and, as the timings below
-show, often the faster one too.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The unlocking insight is representational: by storing each decimal digit explicitly and computing in
-base 10 from the start, a "huge number" problem collapses into routine array manipulation with
-trivial carry arithmetic — no library, no floating point, no mid-computation base conversion.
-</p>
-<p>
-The recorded averages are revealing. On the <code>main</code> case (<code>100!</code>) Python runs
-in 8.9 µs versus 12.2 µs for C, and on the <code>dev</code> case (<code>10!</code>) C runs in
-0.45 µs versus 1.26 µs for Python. The crossover is instructive: for the tiny input C wins on raw
-overhead, but for <code>100!</code> CPython's
-<a href="https://en.wikipedia.org/wiki/Karatsuba_algorithm" class="reference-source" target="_blank" rel="noopener noreferrer">Karatsuba multiplication</a>
-overtakes my hand-written
-<a href="https://en.wikipedia.org/wiki/Multiplication_algorithm#Long_multiplication" class="reference-source" target="_blank" rel="noopener noreferrer">long multiplication</a>,
-whose <code>O(D)</code> per-multiply cost the library improves on. The Python solution is thus both
-the more elegant <em>and</em> the faster at the target size; the C version's value is pedagogical,
-exposing the mechanics the library hides. For far larger inputs, the C digit array would itself need
-a higher-radix representation or a faster multiplication algorithm to keep pace.
-</p>
-<ul>
-  <li>When a problem asks about the digits of a large number, represent it in base 10 from the
-      outset to eliminate a base-conversion step.</li>
-  <li>Little-endian digit arrays align with carry propagation and are the default for hand-written
-      big-integer multiplication in C.</li>
-  <li>Prefer a fixed stack buffer over heap allocation whenever you can bound the size analytically
-      and the bound is modest.</li>
-  <li>Combine generator expressions with built-in aggregators like <code>sum()</code> to express
-      map-then-fold cleanly and without intermediate storage.</li>
-  <li>Check the standard library before implementing an algorithm yourself — its routines are tested,
-      optimised, and often asymptotically better than a naive hand-rolled version.</li>
-  <li>A microbenchmark can overturn intuition: "C is faster than Python" held only for the trivial
-      input here — always measure rather than assume.</li>
-</ul>
-
 </article>

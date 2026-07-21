@@ -1,46 +1,38 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
 The probability of drawing two blue discs in succession, without replacement, from a box of
 <code>n</code> total discs containing <code>b</code> blue discs is
 <code>(b/n) * ((b-1)/(n-1))</code>. Setting this equal to <code>1/2</code> and clearing
 denominators gives <code>2 * b * (b - 1) = n * (n - 1)</code>. Because both quantities count
 physical discs, only integer solutions matter, which makes this a
-<a href="https://en.wikipedia.org/wiki/Diophantine_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Diophantine equation</a> - a polynomial equation for which we seek integer solutions only. A naive search over all <code>n</code> up to <code>10^12</code> is hopeless, so the task is really to find hidden structure in this relation.
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Diophantine_equation" rel="noopener noreferrer" target="_blank">Diophantine equation</a> - a polynomial equation for which we seek integer solutions only. A naive search over all <code>n</code> up to <code>10^12</code> is hopeless, so the task is really to find hidden structure in this relation.
 </p>
-
 <p>
 The decisive observation comes from
-<a href="https://en.wikipedia.org/wiki/Completing_the_square" class="reference-source" target="_blank" rel="noopener noreferrer">completing the square</a> on both sides. Multiplying out and rearranging yields
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Completing_the_square" rel="noopener noreferrer" target="_blank">completing the square</a> on both sides. Multiplying out and rearranging yields
 <code>(2n - 1)^2 - 2 * (2b - 1)^2 = -1</code>. With the substitution <code>x = 2n - 1</code> and
 <code>y = 2b - 1</code> this is exactly <code>x^2 - 2*y^2 = -1</code>, a classic
-<a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell equation</a>. A
-<a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell equation</a> of the form <code>x^2 - D*y^2 = ±1</code> has infinitely many integer solutions, all generated from a small fundamental solution by a fixed linear
-<a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a>. Once this structure is recognised, the open-ended search collapses into a direct iteration: each step produces the next valid arrangement. Because the solutions grow geometrically (by a factor of roughly <code>3 + 2*sqrt(2) ≈ 5.83</code> per step), only about 40 iterations suffice to cross <code>10^12</code>. The overall complexity is <code>O(log T)</code> in the threshold <code>T</code>, with each iteration performing constant-time arithmetic.
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Pell%27s_equation" rel="noopener noreferrer" target="_blank">Pell equation</a>. A
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Pell%27s_equation" rel="noopener noreferrer" target="_blank">Pell equation</a> of the form <code>x^2 - D*y^2 = ±1</code> has infinitely many integer solutions, all generated from a small fundamental solution by a fixed linear
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Recurrence_relation" rel="noopener noreferrer" target="_blank">recurrence relation</a>. Once this structure is recognised, the open-ended search collapses into a direct iteration: each step produces the next valid arrangement. Because the solutions grow geometrically (by a factor of roughly <code>3 + 2*sqrt(2) ≈ 5.83</code> per step), only about 40 iterations suffice to cross <code>10^12</code>. The overall complexity is <code>O(log T)</code> in the threshold <code>T</code>, with each iteration performing constant-time arithmetic.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Iterating the Pell equation recurrence (Python and C)</h4>
-
 <p>
 Both files implement the same algorithm: iterate the linear recurrence that generates successive
 solutions of the
-<a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell equation</a>
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Pell%27s_equation" rel="noopener noreferrer" target="_blank">Pell equation</a>
 <code>x^2 - 2*y^2 = -1</code>. The fundamental solution is <code>(x, y) = (1, 1)</code>, which
 corresponds to the trivial arrangement <code>n = 1, b = 1</code>. From any solution the next is
 obtained by composing with the fundamental solution <code>(3, 2)</code> of the companion equation
 <code>X^2 - 2*Y^2 = +1</code>. Worked out in matrix form, this gives the
-<a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a>:
+<a class="reference-source" href="https://en.wikipedia.org/wiki/Recurrence_relation" rel="noopener noreferrer" target="_blank">recurrence relation</a>:
 </p>
-
 <p>
-<code>x' = 3x + 4y</code><br>
+<code>x' = 3x + 4y</code><br/>
 <code>y' = 2x + 3y</code>
 </p>
-
 <p>
 I start at <code>(x, y) = (1, 1)</code> and apply the step in a loop. After each step I recover the
 disc counts with <code>n = (x + 1) / 2</code> and <code>b = (y + 1) / 2</code>. These divisions are
@@ -49,7 +41,6 @@ recurrence preserves from odd starting values (each new value is an even multipl
 multiple of two odd numbers, hence odd). The loop stops and returns <code>b</code> as soon as
 <code>n</code> first meets or exceeds the target total.
 </p>
-
 <p>
 The two implementations are line-for-line equivalent. The chief language-specific difference is
 integer handling: Python uses arbitrary-precision integers automatically, while C declares
@@ -59,72 +50,4 @@ machinery. The second difference is in how the recurrence step is written: Pytho
 tuple assignment, whereas C introduces two temporaries (<code>nx</code>, <code>ny</code>) so that
 the new <code>x</code> does not clobber the old <code>x</code> before <code>y</code> is computed.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Parallel (tuple) assignment for recurrence state</h4>
-<p>
-In Python I write <code>x, y = (3*x + 4*y, 2*x + 3*y)</code> as one statement. Python fully
-evaluates the right-hand tuple before binding any name, so both new values derive from the old
-<code>x</code> and <code>y</code>. This is the idiomatic, error-free way to advance a multi-variable
-<a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a> without a temporary. In C, where assignment is eager, I must introduce
-<code>nx</code> and <code>ny</code> to capture the new values before overwriting the old - forgetting
-this is a classic bug when translating recurrences. Whenever new state depends on the whole old
-state, reach for parallel assignment (Python) or explicit temporaries (C).
-</p>
-
-<h4>Carrying transformed variables that evolve linearly</h4>
-<p>
-Rather than tracking <code>n</code> and <code>b</code> directly - which would force solving a
-quadratic each step - I carry the
-<a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell equation</a> variables <code>x = 2n - 1</code> and <code>y = 2b - 1</code>, which satisfy a simple linear
-<a href="https://en.wikipedia.org/wiki/Recurrence_relation" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence relation</a>, and recover <code>n</code> and <code>b</code> with a single divide-by-two at the end of each
-step. This change-of-variable trick is broadly useful: when the natural quantities obey a nonlinear
-relation but a simple function of them obeys a linear one, work in the linear domain and invert
-cheaply at the boundaries.
-</p>
-
-<h4>Infinite loop with an internal exit condition</h4>
-<p>
-Both solutions use <code>while True:</code> / <code>while (1)</code> with a <code>return</code>
-inside. The number of iterations is data-dependent, and bounding it in advance would itself require
-a logarithm, so an unbounded loop with an explicit early return most honestly expresses "iterate
-until the threshold is crossed." Reach for this pattern when the iteration count is unknown up front
-but termination is guaranteed - here by the geometric growth of the solutions.
-</p>
-
-<h4>Command-line parameterisation for incremental testing</h4>
-<p>
-The target total is passed as an argument rather than hard-coded. This lets the same program run the
-small developer checks (21 and 120 discs, whose answers are verifiable by hand) and the full
-<code>10^12</code> case through one identical code path, with no recompilation. Parameterising by
-input is a habit that pays off on harder problems where the final answer cannot be checked directly
-but a code path already validated on small inputs can be trusted.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is purely mathematical: the innocuous probability condition rearranges into a
-<a href="https://en.wikipedia.org/wiki/Pell%27s_equation" class="reference-source" target="_blank" rel="noopener noreferrer">Pell equation</a>, and Pell equations come with a built-in generator for all their solutions. That turns what looks like a brute-force search over <code>10^12</code> possibilities into a handful of constant-time arithmetic steps. Recognising a special equation form is worth more here than any amount of loop optimisation.
-</p>
-
-<p>
-Both implementations run in unmeasurable time (reported as 0.0000 s) on every test case, because the
-loop executes only a few dozen times. With such a short, geometrically growing iteration the choice
-between C and Python is irrelevant to performance; the Python version is marginally more elegant
-thanks to tuple assignment, while the C version is a faithful, equally fast translation. Neither is
-meaningfully faster than the other.
-</p>
-
-<ul>
-  <li>When a probability or combinatorial condition reduces to a polynomial equation in two integer unknowns, look for Pell or other special structure before attempting a search.</li>
-  <li>A Pell equation <code>x^2 - D*y^2 = ±1</code> always has a fundamental solution from which all others follow by a fixed linear recurrence, turning enumeration into iteration.</li>
-  <li>Work in transformed variables that evolve linearly, then recover the natural quantities by cheap arithmetic, to avoid repeated nonlinear computation inside a loop.</li>
-  <li>Advance multi-variable recurrences with parallel assignment or explicit temporaries so you never read partially updated state.</li>
-  <li>Use an unbounded loop with an internal exit when the iteration count is data-dependent but termination is guaranteed.</li>
-  <li>Parameterise solutions by their inputs so small, hand-verifiable cases and the full problem share one trusted code path.</li>
-  <li>An <code>O(log T)</code> loop body makes runtime negligible even for thresholds as large as <code>10^12</code> or beyond.</li>
-</ul>
-
 </article>

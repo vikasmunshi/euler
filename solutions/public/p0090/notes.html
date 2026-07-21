@@ -1,18 +1,15 @@
 <article>
-
 <h3>Problem Analysis</h3>
 <p>
-At its core this is a <a href="https://en.wikipedia.org/wiki/Combinatorics" class="reference-source" target="_blank" rel="noopener noreferrer">combinatorics</a> problem about counting subsets. A cube is fully described by the set of six distinct digits printed on its faces - the physical orientation of the faces is irrelevant, because any face can be rotated into view. So a cube is simply a 6-element <a href="https://en.wikipedia.org/wiki/Combination" class="reference-source" target="_blank" rel="noopener noreferrer">combination</a> (an unordered selection, with no element repeated) drawn from the ten digits {0, ..., 9}. The number of such combinations is the <a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a> C(10, 6) = 210. Recognising this change of representation is the entire trick: a tangible object with rotatable faces becomes a plain set, and the problem dissolves into counting.
+At its core this is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Combinatorics" rel="noopener noreferrer" target="_blank">combinatorics</a> problem about counting subsets. A cube is fully described by the set of six distinct digits printed on its faces - the physical orientation of the faces is irrelevant, because any face can be rotated into view. So a cube is simply a 6-element <a class="reference-source" href="https://en.wikipedia.org/wiki/Combination" rel="noopener noreferrer" target="_blank">combination</a> (an unordered selection, with no element repeated) drawn from the ten digits {0, ..., 9}. The number of such combinations is the <a class="reference-source" href="https://en.wikipedia.org/wiki/Binomial_coefficient" rel="noopener noreferrer" target="_blank">binomial coefficient</a> C(10, 6) = 210. Recognising this change of representation is the entire trick: a tangible object with rotatable faces becomes a plain set, and the problem dissolves into counting.
 </p>
 <p>
-An "arrangement" is a pair of cubes, and the problem states the pair is unordered: cube A beside cube B is the same arrangement as cube B beside cube A. Counting unordered pairs with repetition allowed - two identical cubes are a legitimate physical arrangement - gives C(210 + 1, 2) = 22,155 candidate pairs. That is a tiny number, so a <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute-force search</a> over every pair is the natural and optimal strategy. For each pair I test the nine two-digit squares below 100 (01, 04, 09, 16, 25, 36, 49, 64, 81). Two observations make that test clean: each square can be formed with either cube supplying the tens digit, so the check considers both orientations; and the 6/9 flip rule means a face showing 6 can also serve as 9 and vice versa, so "can this cube show a 6 or 9?" reduces to "is 6 or 9 present?". The overall complexity is O(C(10,6)^2 * 9) - effectively constant for fixed input, completing in well under a millisecond in C.
+An "arrangement" is a pair of cubes, and the problem states the pair is unordered: cube A beside cube B is the same arrangement as cube B beside cube A. Counting unordered pairs with repetition allowed - two identical cubes are a legitimate physical arrangement - gives C(210 + 1, 2) = 22,155 candidate pairs. That is a tiny number, so a <a class="reference-source" href="https://en.wikipedia.org/wiki/Brute-force_search" rel="noopener noreferrer" target="_blank">brute-force search</a> over every pair is the natural and optimal strategy. For each pair I test the nine two-digit squares below 100 (01, 04, 09, 16, 25, 36, 49, 64, 81). Two observations make that test clean: each square can be formed with either cube supplying the tens digit, so the check considers both orientations; and the 6/9 flip rule means a face showing 6 can also serve as 9 and vice versa, so "can this cube show a 6 or 9?" reduces to "is 6 or 9 present?". The overall complexity is O(C(10,6)^2 * 9) - effectively constant for fixed input, completing in well under a millisecond in C.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Brute-Force Combination Enumeration (Python and C)</h4>
 <p>
-Both files implement the identical algorithm; only the language idioms differ. I chose <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute force</a> deliberately because, as the analysis shows, the search space is minuscule. When a problem fits comfortably under roughly 10^7 operations, correctness and clarity matter far more than algorithmic cleverness.
+Both files implement the identical algorithm; only the language idioms differ. I chose <a class="reference-source" href="https://en.wikipedia.org/wiki/Brute-force_search" rel="noopener noreferrer" target="_blank">brute force</a> deliberately because, as the analysis shows, the search space is minuscule. When a problem fits comfortably under roughly 10^7 operations, correctness and clarity matter far more than algorithmic cleverness.
 </p>
 <p>
 Step 1 - enumerate the cubes. In Python I call <code>itertools.combinations(range(10), 6)</code>, which yields all 210 six-element subsets in lexicographic order. In C I reproduce the same enumeration with six nested loops whose index bounds enforce a strictly increasing sequence (<code>a &lt; b &lt; c &lt; d &lt; e &lt; f</code>), storing the digits in a fixed <code>all_cubes[210][6]</code> array. Both produce exactly the same 210 cubes.
@@ -29,48 +26,4 @@ Step 4 - the pair check. <code>can_pair_display_all</code> loops over the nine s
 <p>
 Step 5 - count unordered pairs. The outer loops run <code>for i in range(n): for j in range(i, n)</code>. Starting <code>j</code> at <code>i</code> (not <code>i + 1</code>) counts each unordered pair once and crucially admits a cube paired with an identical copy of itself.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>itertools.combinations for Subset Enumeration</h4>
-<p>
-Python's <a href="https://docs.python.org/3/library/itertools.html#itertools.combinations" class="reference-source" target="_blank" rel="noopener noreferrer">itertools.combinations</a> generates every r-length subset in lexicographic order, without repetition, and is implemented in C internally for speed. I reach for it whenever I need to enumerate fixed-size subsets, because it states intent directly and removes the risk of off-by-one errors in hand-written nested loops. The C equivalent - r nested loops with strictly increasing bounds - is the canonical low-level pattern when no such library exists.
-</p>
-
-<h4>Symmetry Reduction via Triangular Iteration</h4>
-<p>
-Because the two cubes are interchangeable, counting ordered pairs would double-count every arrangement. Iterating <code>for i in range(n): for j in range(i, n)</code> visits each unordered pair exactly once. Choosing the lower bound <code>j = i</code> rather than <code>j = i + 1</code> is the deliberate decision that includes self-pairs. This triangular-iteration pattern is the go-to idiom whenever you enumerate unordered pairs of interchangeable objects.
-</p>
-
-<h4>Single-Responsibility Rule Encoding</h4>
-<p>
-The 6/9 equivalence is the one piece of domain logic that is easy to get wrong, so I confined it to the <code>can_display</code> helper. Encoding each business rule in exactly one place makes the code self-documenting and guarantees the rule is applied consistently everywhere it is needed. This habit pays off most when requirements are subtle or likely to change.
-</p>
-
-<h4>Zero-Padded String Extraction for Digit Splitting (Python)</h4>
-<p>
-The Python solution builds the square list with <code>[(int((i_sq := f"{i*i:02d}")[0]), int(i_sq[1])) for i in range(1, 10)]</code>. The <code>:02d</code> format specifier pads to two characters, so 1 becomes "01" and both digit positions are indexable. The <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> (<code>:=</code>) binds the formatted string once so it is not recomputed for the units digit. Formatting a number as a fixed-width string is a clean alternative to integer arithmetic (<code>n // 10</code>, <code>n % 10</code>) when readability is the priority.
-</p>
-
-<h4>Static 2D Arrays for Fixed Tabular Data (C)</h4>
-<p>
-In C I store the 210 cubes in <code>int all_cubes[210][6]</code> and the squares in <code>int squares[9][2]</code>, both stack-allocated with compile-time-known dimensions. This avoids dynamic allocation entirely, keeps each cube's six digits contiguous in memory (row-major layout, <a href="https://en.wikipedia.org/wiki/Locality_of_reference" class="reference-source" target="_blank" rel="noopener noreferrer">cache-friendly</a>), and makes bounds trivially auditable. When the problem size is fixed and small, prefer static allocation over <code>malloc</code> for both clarity and speed.
-</p>
-
-<h3>Key Takeaways</h3>
-<p>
-The unlocking insight is the change of representation: a "cube with digits on rotatable faces" is just an unordered 6-element subset of {0, ..., 9}, an "arrangement" is an unordered pair of such subsets, and the 6/9 flip is a predicate-level equivalence rather than data duplication. Once modelled this way, the apparent physical complexity collapses into a 22,155-pair enumeration that <a href="https://en.wikipedia.org/wiki/Brute-force_search" class="reference-source" target="_blank" rel="noopener noreferrer">brute force</a> handles instantly.
-</p>
-<p>
-Both solutions are correct and return 1217. The C implementation runs in about 0.0007 s, roughly 14 times faster than the Python implementation at about 0.0096 s - the expected gap between compiled and interpreted code on tight loops over small arrays. Neither time is a concern here; the value lies entirely in clean problem modelling, and the Python version is arguably the more elegant for expressing the enumeration declaratively.
-</p>
-<ul>
-<li>When selecting items where order does not matter, enumerate combinations rather than permutations - the search space shrinks dramatically.</li>
-<li>Estimate the brute-force search space before reaching for a clever algorithm; under about 10^7 operations, brute force is usually the right first choice.</li>
-<li>Count unordered pairs with triangular iteration <code>for i: for j in range(i, n)</code>; start <code>j</code> at <code>i</code> to allow self-pairs when they are physically meaningful.</li>
-<li>Encode each subtle domain rule in a single named helper so it is documented and applied consistently.</li>
-<li>Model interchangeable values (like the flippable 6 and 9) as equivalent at the predicate level rather than duplicating them in the data.</li>
-<li>In C, prefer stack-allocated fixed-size arrays when dimensions are compile-time constants - they need no cleanup, stay cache-friendly, and make bounds easy to verify.</li>
-</ul>
-
 </article>

@@ -1,70 +1,17 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-This problem sits squarely in <a href="https://en.wikipedia.org/wiki/Combinatorics" class="reference-source" target="_blank" rel="noopener noreferrer">combinatorics</a>, and its difficulty is not conceptual but arithmetic. The object of interest is the <a href="https://en.wikipedia.org/wiki/Binomial_coefficient" class="reference-source" target="_blank" rel="noopener noreferrer">binomial coefficient</a> C(n, r) = n! / (r!(n-r)!), which counts how many ways one can choose r items from n distinct items without regard to order. The naive route - computing the three factorials and dividing - is a trap: 100! has more than 150 decimal digits, so building it explicitly forces big-integer arithmetic and burns time dividing enormous numbers. The real skill here is finding a way to obtain the coefficients without ever touching a factorial.
+This problem sits squarely in <a class="reference-source" href="https://en.wikipedia.org/wiki/Combinatorics" rel="noopener noreferrer" target="_blank">combinatorics</a>, and its difficulty is not conceptual but arithmetic. The object of interest is the <a class="reference-source" href="https://en.wikipedia.org/wiki/Binomial_coefficient" rel="noopener noreferrer" target="_blank">binomial coefficient</a> C(n, r) = n! / (r!(n-r)!), which counts how many ways one can choose r items from n distinct items without regard to order. The naive route - computing the three factorials and dividing - is a trap: 100! has more than 150 decimal digits, so building it explicitly forces big-integer arithmetic and burns time dividing enormous numbers. The real skill here is finding a way to obtain the coefficients without ever touching a factorial.
 </p>
-
 <p>
-Two structural facts about <a href="https://en.wikipedia.org/wiki/Pascal%27s_triangle" class="reference-source" target="_blank" rel="noopener noreferrer">Pascal's triangle</a> make this clean. First, each row - the values C(n, 0), C(n, 1), ..., C(n, n) - is symmetric, since C(n, r) = C(n, n-r), and it is unimodal: it rises monotonically to a single peak near r = n/2 and then falls. A unimodal sequence is one that increases up to one maximum and then decreases, so once a value crosses a threshold on the way up it stays above it until the peak. This means that as soon as I find the first r whose coefficient exceeds one-million, every entry from r through n-r also exceeds it, and I can count them all with a formula instead of evaluating them. Second, neighbouring coefficients in a row are related by the multiplicative recurrence C(n, r+1) = C(n, r) * (n - r) / (r + 1), so I can walk along a row one cell at a time using only modest-sized multiplications and an exact division. The worst-case complexity is O(max_n^2) - every row scanned to its midpoint - but the early exit trims most rows to a handful of steps, and with max_n capped at 100 the total work is trivial.
+Two structural facts about <a class="reference-source" href="https://en.wikipedia.org/wiki/Pascal%27s_triangle" rel="noopener noreferrer" target="_blank">Pascal's triangle</a> make this clean. First, each row - the values C(n, 0), C(n, 1), ..., C(n, n) - is symmetric, since C(n, r) = C(n, n-r), and it is unimodal: it rises monotonically to a single peak near r = n/2 and then falls. A unimodal sequence is one that increases up to one maximum and then decreases, so once a value crosses a threshold on the way up it stays above it until the peak. This means that as soon as I find the first r whose coefficient exceeds one-million, every entry from r through n-r also exceeds it, and I can count them all with a formula instead of evaluating them. Second, neighbouring coefficients in a row are related by the multiplicative recurrence C(n, r+1) = C(n, r) * (n - r) / (r + 1), so I can walk along a row one cell at a time using only modest-sized multiplications and an exact division. The worst-case complexity is O(max_n^2) - every row scanned to its midpoint - but the early exit trims most rows to a handful of steps, and with max_n capped at 100 the total work is trivial.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Incremental Row Traversal with Symmetry Early-Exit</h4>
-
 <p>
 Both the C and Python files implement one and the same algorithm. I iterate over each row n from 1 to max_n. Within a row I initialise the running coefficient <code>c</code> to C(n, 0) = 1 and step r from 0 up to n/2 - only the left half, because symmetry will account for the right. At each step I test whether <code>c</code> already exceeds the threshold. If it does, I know from unimodality that every coefficient from index r up to the midpoint qualifies, and by symmetry their mirror images from the midpoint to n-r qualify too. The number of qualifying entries is therefore exactly n - 2*r + 1, the count of integers from r to n-r inclusive. I add that and break out of the inner loop immediately. If <code>c</code> has not yet crossed the threshold, I advance to the next cell with <code>c = c * (n - r) / (r + 1)</code> and continue.
 </p>
-
 <p>
 The crucial arithmetic decision is multiplying before dividing in the recurrence. Because every binomial coefficient is a whole number, the product <code>c * (n - r)</code> is always exactly divisible by <code>(r + 1)</code>, so doing the multiplication first guarantees the integer division is exact and loses nothing. The two implementations differ only in language detail. The C version reads max_n and threshold from the command line via <code>parse_int</code>, and accumulates the running coefficient in a <code>long long</code> so the intermediate values - which grow large as n approaches 100 - do not overflow. The Python version takes the same two inputs and relies on Python's arbitrary-precision integers, so overflow is simply impossible; it uses floor division <code>//</code> where C uses truncating <code>/</code>, but since the division is always exact the distinction never bites.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Multiplicative Recurrence Instead of Factorials</h4>
-
-<p>
-Rather than recomputing C(n, r) from scratch, I derive each coefficient from its left neighbour using C(n, r+1) = C(n, r) * (n - r) / (r + 1). This rolling computation keeps every intermediate value as small as it can be and sidesteps 150-digit factorials entirely. The general lesson: whenever a quantity is defined as a ratio of factorials, or by any simple multiplicative relationship to its neighbour, look for a recurrence that steps from one term to the next in constant time. It almost always beats the closed form numerically and in clarity.
-</p>
-
-<h4>Symmetry-Based Early Exit and Analytic Counting</h4>
-
-<p>
-The unimodal, symmetric structure of each <a href="https://en.wikipedia.org/wiki/Pascal%27s_triangle" class="reference-source" target="_blank" rel="noopener noreferrer">Pascal's triangle</a> row lets me stop scanning the instant the threshold is crossed and replace the remaining iterations with the closed-form count n - 2*r + 1. This "scan to a boundary, then count the tail with a formula" pattern recurs across many problems: whenever a search space is monotonic or symmetric, you can usually halve the work and count the mirrored cases arithmetically rather than enumerating them.
-</p>
-
-<h4>Integer-Safe Multiply-Then-Divide Ordering</h4>
-
-<p>
-The order of operations in <code>c = c * (n - r) / (r + 1)</code> is deliberate, not incidental. Because each binomial coefficient is a whole number, doing the multiplication first guarantees the subsequent integer division is exact; reversing the order could produce a fractional intermediate and corrupt the result under truncating division. The reusable rule: when a chain of multiplications and integer divisions is mathematically guaranteed to land on an integer, always multiply before dividing to preserve exactness.
-</p>
-
-<h4>Parameterised Entry Point</h4>
-
-<p>
-Neither solution hardcodes max_n or the threshold; both accept them as runtime inputs (command-line arguments parsed with <code>parse_int</code>). This lets the same binary or script serve the dev case (threshold 100) and the main case (threshold 1,000,000) without modification, which is precisely what the benchmark harness exploits. Parameterising the solver over its inputs costs almost nothing and pays off immediately the moment you need to exercise several scenarios.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The insight that unlocks this problem is recognising each <a href="https://en.wikipedia.org/wiki/Pascal%27s_triangle" class="reference-source" target="_blank" rel="noopener noreferrer">Pascal's triangle</a> row as a symmetric, unimodal sequence. That one observation supplies both the early-exit stopping rule and the analytic tail count, while the multiplicative recurrence avoids factorial arithmetic altogether. The result is a compact double loop that is fast and easy to verify against the known landmark C(23, 10) = 1144066.
-</p>
-
-<p>
-Both files implement the identical algorithm, so the only difference is language overhead. The benchmark recorded both the C and Python versions at 0.0000 s on both the dev and main cases - below the measurement resolution - which is unsurprising given max_n is capped at 100 and the early exit trims most rows to a few iterations. The C version would be marginally faster in raw cycles, but at this problem size both are effectively instant, and the Python version is arguably the more readable expression of the idea.
-</p>
-
-<ul>
-  <li>When a quantity is a ratio of factorials, derive a step-by-step recurrence rather than computing the factorials directly.</li>
-  <li>Symmetry in a structure is an invitation to halve your work and count the mirrored cases with arithmetic.</li>
-  <li>In a unimodal sequence, crossing a threshold while ascending lets you count every remaining value without evaluating it.</li>
-  <li>When a product is guaranteed divisible, multiply before dividing to keep integer arithmetic exact.</li>
-  <li>Parameterise your solver over its inputs from the start - it makes testing multiple scenarios effortless and costs nothing.</li>
-  <li>For small fixed input ranges, spend your effort on boundary correctness (r = 0, the midpoint, odd versus even n) rather than chasing asymptotic gains.</li>
-</ul>
-
 </article>

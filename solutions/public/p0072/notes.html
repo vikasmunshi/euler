@@ -1,131 +1,64 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
+<h3>Problem Analysis</h3>
+<p>
     The problem asks me to count reduced proper fractions <code>n/d</code> with <code>1 &lt;= n &lt; d</code>
     whose numerator and denominator share no common factor other than 1, for every denominator up to one
-    million. Two integers whose greatest common divisor is 1 are called <a href="https://en.wikipedia.org/wiki/Coprime_integers" class="reference-source" target="_blank" rel="noopener noreferrer">coprime</a>.
+    million. Two integers whose greatest common divisor is 1 are called <a class="reference-source" href="https://en.wikipedia.org/wiki/Coprime_integers" rel="noopener noreferrer" target="_blank">coprime</a>.
     The decisive observation is that for a fixed denominator <code>d</code>, the number of valid numerators is
     exactly the count of integers in <code>1..d-1</code> that are coprime to <code>d</code> - and that quantity
-    is precisely <a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" class="reference-source" target="_blank" rel="noopener noreferrer">Euler's totient function</a>,
+    is precisely <a class="reference-source" href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" rel="noopener noreferrer" target="_blank">Euler's totient function</a>,
     written <code>phi(d)</code>. So the answer to a question about coprime fractions collapses into a single
     sum: the running total of <code>phi(d)</code> from <code>d = 2</code> up to the limit. I start at 2 rather
     than 1 because <code>phi(1) = 1</code> would count <code>1/1</code>, which is not a proper fraction with
     <code>n &lt; d</code>.
   </p>
-  <p>
+<p>
     The remaining work is computing <code>phi(d)</code> for every <code>d</code> efficiently. The totient is a
-    <a href="https://en.wikipedia.org/wiki/Multiplicative_function" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative function</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Multiplicative_function" rel="noopener noreferrer" target="_blank">multiplicative function</a>
     given by <code>phi(d) = d * product over distinct primes p dividing d of (1 - 1/p)</code>. Because this is a
     product over prime factors, I can compute all totients up to <code>N</code> simultaneously with a sieve
-    modelled on the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>:
+    modelled on the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>:
     seed each <code>phi[d] = d</code>, then for every prime <code>p</code> apply the factor <code>(p-1)/p</code>
     to each multiple of <code>p</code>. The cost is dominated by the inner loops, which run
     <code>N/2 + N/3 + N/5 + ...</code> times over the primes - a sum that grows like
-    <code>N log log N</code>, the same near-linear bound as the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
+    <code>N log log N</code>, the same near-linear bound as the <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>
     itself. Memory is <code>O(N)</code>. Both are entirely practical even at <code>N = 10^7</code>.
   </p>
-
-  <h3>Solution Approach</h3>
-  <h4>Euler Totient Sieve (Python and C)</h4>
-  <p>
-    Both files implement the same <a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" class="reference-source" target="_blank" rel="noopener noreferrer">totient</a>
+<h3>Solution Approach</h3>
+<h4>Euler Totient Sieve (Python and C)</h4>
+<p>
+    Both files implement the same <a class="reference-source" href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" rel="noopener noreferrer" target="_blank">totient</a>
     sieve; the C version exists purely for speed. The algorithm proceeds as follows:
   </p>
-  <ul>
-    <li>
+<ul>
+<li>
       Allocate an array <code>euler_totients</code> of length <code>max_d + 1</code> and set
       <code>euler_totients[d] = d</code>. This is the "no prime factors applied yet" identity value, matching
       the leading <code>d</code> in the product formula. In Python I write this compactly as
       <code>list(range(max_d + 1))</code>; in C it is a single initialisation loop.
     </li>
-    <li>
+<li>
       Iterate <code>n</code> from 2 upward. If <code>euler_totients[n] == n</code>, no smaller prime has yet
       touched this cell, so <code>n</code> must itself be prime. This doubles as the primality test - I need no
       separate boolean sieve.
     </li>
-    <li>
+<li>
       When <code>n</code> is prime, I walk every multiple <code>j = n, 2n, 3n, ...</code> and apply
       <code>euler_totients[j] = euler_totients[j] / n * (n - 1)</code>. Each distinct prime factor of
       <code>j</code> is applied exactly once this way, so once all primes <code>&lt;= j</code> have been
       processed, the cell at <code>j</code> holds its true totient.
     </li>
-    <li>
+<li>
       I accumulate <code>result += euler_totients[n]</code> in the same outer loop. This is correct because
       every prime factor of <code>n</code> is at most <code>n</code>, so the totient of <code>n</code> is fully
       finalised by the time the outer loop reaches index <code>n</code>.
     </li>
-  </ul>
-  <p>
+</ul>
+<p>
     The two implementations differ only in their host language. The C version uses <code>malloc</code> for the
     heap array and <code>long long</code> to hold the running total (about 3.0e11 at <code>max_d = 1000000</code>,
     and roughly 3.0e13 at <code>10^7</code> - both comfortably inside a 64-bit integer). The Python version
     relies on arbitrary-precision integers and a built-in list, so there is no overflow concern at all. Both run
     one linear outer pass with nested per-prime inner passes.
   </p>
-
-  <h3>Programming Techniques</h3>
-  <h4>Sieve Initialisation with Identity Values</h4>
-  <p>
-    I seed the array with <code>euler_totients[i] = i</code>, the value that survives unchanged when zero prime
-    corrections are applied. This mirrors how the <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
-    seeds a boolean array as "prime until proven otherwise." The general pattern - initialise with the
-    uncorrected state, then let the sieve apply <a href="https://en.wikipedia.org/wiki/Multiplicative_function" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative</a>
-    corrections - works for any multiplicative arithmetic function you need to tabulate across a whole range.
-  </p>
-  <h4>In-place Primality Detection</h4>
-  <p>
-    The test <code>euler_totients[n] == n</code> detects primes without a separate flag array. Any composite
-    <code>n</code> would already have had a smaller prime factor reduce its cell below <code>n</code>, so an
-    untouched cell can only be prime. This is a reusable idea: whenever a sieve modifies cells monotonically in
-    one direction, "has this cell been touched?" can serve as a derived predicate, saving an entire parallel
-    array and the memory traffic that goes with it.
-  </p>
-  <h4>Divide-before-Multiply to Avoid Overflow</h4>
-  <p>
-    I deliberately write the update as <code>euler_totients[j] / n * (n - 1)</code> rather than the
-    algebraically equal <code>euler_totients[j] * (n - 1) / n</code>. At the moment of update,
-    <code>euler_totients[j]</code> is guaranteed divisible by <code>n</code> - I am applying <code>n</code> as a
-    fresh prime factor - so the division is exact and loses nothing. Dividing first keeps the intermediate value
-    smaller, which protects against overflow in C's fixed-width arithmetic. The general rule: when a division is
-    known to be exact, perform it before any multiplication.
-  </p>
-  <h4>Accumulation Inside the Sieve Loop</h4>
-  <p>
-    Rather than running the sieve and then summing in a second pass, I add <code>euler_totients[n]</code> to the
-    running total within the same loop. This is correct because each entry's totient is finalised before the
-    outer loop reaches its index. It removes a whole pass over the array and improves cache locality - the value
-    just written is immediately read back from a warm cache line.
-  </p>
-  <h4>Heap Allocation for Large Runtime-sized Arrays (C)</h4>
-  <p>
-    The C code uses <code>malloc</code> and <code>free</code> for the totient array. At <code>max_d = 10^7</code>
-    that is roughly 80 MB of <code>long long</code> values, far beyond a typical stack limit. Heap allocation is
-    the right tool when an array's size is known only at runtime and may be large, and I pair each
-    <code>malloc</code> with a <code>free</code> so repeated benchmark runs stay leak-free. I also check the
-    allocation result and fail gracefully rather than dereferencing a null pointer.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is the identity "number of reduced proper fractions with denominator exactly
-    <code>d</code>" equals <a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" class="reference-source" target="_blank" rel="noopener noreferrer">phi(d)</a>.
-    Once you see that, a coprime-counting problem becomes a totient sum, and a <a href="https://en.wikipedia.org/wiki/Multiplicative_function" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative</a>
-    sieve computes all the needed totients in near-linear time.
-  </p>
-  <p>
-    Both solutions use the same algorithm, so the benchmark is a pure language comparison. On the main case
-    (<code>max_d = 1000000</code>) the C build runs in about 0.0113 s versus 0.5135 s for Python - roughly 45x
-    faster - and on the extra case (<code>10^7</code>) it is 0.2836 s versus 6.6851 s, about 24x faster. The gap
-    reflects the interpreter overhead and dynamic-typing cost Python pays on tight arithmetic loops. Both are
-    correct and elegant; I reach for C when latency matters and Python when clarity and arbitrary precision
-    matter.
-  </p>
-  <ul>
-    <li>When counting integers coprime to a fixed modulus, reach for <a href="https://en.wikipedia.org/wiki/Euler%27s_totient_function" class="reference-source" target="_blank" rel="noopener noreferrer">Euler's totient</a> - it is exactly that count.</li>
-    <li>Any <a href="https://en.wikipedia.org/wiki/Multiplicative_function" class="reference-source" target="_blank" rel="noopener noreferrer">multiplicative arithmetic function</a> can be tabulated for all values up to N with one <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Eratosthenes-style</a> sieve in O(N log log N).</li>
-    <li>Initialise a sieve with identity (uncorrected) values and detect primes by checking whether a cell is still untouched - no extra boolean array required.</li>
-    <li>In integer arithmetic, divide before you multiply whenever the division is known to be exact, to keep intermediates small and avoid overflow.</li>
-    <li>Accumulate results inside the computing loop when each entry is finalised before its index is visited - it saves a pass and improves cache locality.</li>
-    <li>Use heap allocation for large, runtime-sized arrays, pair every allocation with a release, and check for failure to stay both leak-free and robust.</li>
-  </ul>
 </article>

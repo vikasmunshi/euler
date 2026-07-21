@@ -1,85 +1,29 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-We are asked to find every multiplication identity <code>a * b = c</code> whose three numbers, written side by side, use each digit from 1 to 9 exactly once - a property called being <a href="https://en.wikipedia.org/wiki/Pandigital_number" class="reference-source" target="_blank" rel="noopener noreferrer">pandigital</a> - and then to sum the distinct products. A naive search over wide ranges of <code>a</code> and <code>b</code> would waste enormous effort, so the first thing I did was reason about digit counts to shrink the search space before writing any enumeration code.
+We are asked to find every multiplication identity <code>a * b = c</code> whose three numbers, written side by side, use each digit from 1 to 9 exactly once - a property called being <a class="reference-source" href="https://en.wikipedia.org/wiki/Pandigital_number" rel="noopener noreferrer" target="_blank">pandigital</a> - and then to sum the distinct products. A naive search over wide ranges of <code>a</code> and <code>b</code> would waste enormous effort, so the first thing I did was reason about digit counts to shrink the search space before writing any enumeration code.
 </p>
-
 <p>
-The pivotal observation is a digit-count identity. The concatenation of <code>a</code>, <code>b</code>, and <code>c</code> must be exactly 9 characters long, so the digit-lengths of the three numbers sum to 9. Multiplication, in turn, almost preserves additivity of length: the product of an <code>m</code>-digit number and an <code>n</code>-digit number has either <code>m+n-1</code> or <code>m+n</code> digits. This follows directly from <a href="https://en.wikipedia.org/wiki/Logarithm" class="reference-source" target="_blank" rel="noopener noreferrer">logarithms</a>, since the digit-count of <code>x</code> is roughly <code>log10(x) + 1</code> and logarithms turn products into sums. Combining "lengths sum to 9" with "product length is about the sum of operand lengths" leaves only two consistent shapes for <code>(len(a), len(b), len(c))</code>: <code>(1, 4, 4)</code> and <code>(2, 3, 4)</code>. Every other arrangement - a 3x3 product, a 1x3 product, and so on - fails this arithmetic and can be discarded without ever computing a product. This <a href="https://en.wikipedia.org/wiki/Combinatorics" class="reference-source" target="_blank" rel="noopener noreferrer">combinatorial</a> pruning step is the heart of the solution.
+The pivotal observation is a digit-count identity. The concatenation of <code>a</code>, <code>b</code>, and <code>c</code> must be exactly 9 characters long, so the digit-lengths of the three numbers sum to 9. Multiplication, in turn, almost preserves additivity of length: the product of an <code>m</code>-digit number and an <code>n</code>-digit number has either <code>m+n-1</code> or <code>m+n</code> digits. This follows directly from <a class="reference-source" href="https://en.wikipedia.org/wiki/Logarithm" rel="noopener noreferrer" target="_blank">logarithms</a>, since the digit-count of <code>x</code> is roughly <code>log10(x) + 1</code> and logarithms turn products into sums. Combining "lengths sum to 9" with "product length is about the sum of operand lengths" leaves only two consistent shapes for <code>(len(a), len(b), len(c))</code>: <code>(1, 4, 4)</code> and <code>(2, 3, 4)</code>. Every other arrangement - a 3x3 product, a 1x3 product, and so on - fails this arithmetic and can be discarded without ever computing a product. This <a class="reference-source" href="https://en.wikipedia.org/wiki/Combinatorics" rel="noopener noreferrer" target="_blank">combinatorial</a> pruning step is the heart of the solution.
 </p>
-
 <p>
 With the two splits fixed, I enumerate ordered selections of digits for <code>a</code> and then for <code>b</code> from the digits <code>a</code> did not use, compute <code>c = a * b</code>, and verify pandigitality. The number of candidates is a small fixed constant (on the order of a couple of thousand), so the runtime is O(1) - it does not grow with any input, because the input is fixed at the digits 1 through 9.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Constrained Permutation Enumeration with Digit-Split Filtering (Python and C)</h4>
-
 <p>
 Both the Python and C solutions implement the same algorithm; they differ only in how they generate the permutations. The steps are:
 </p>
 <ul>
-  <li>Fix the two valid splits <code>(a_len, b_len)</code> as <code>(1, 4)</code> and <code>(2, 3)</code>. In each, the product has 4 digits, giving <code>1+4+4=9</code> or <code>2+3+4=9</code>.</li>
-  <li>For each split, generate every ordered selection of <code>a_len</code> digits from {1,...,9} to form <code>a</code>, then every ordered selection of <code>b_len</code> digits from the unused digits to form <code>b</code>.</li>
-  <li>Compute <code>c = a * b</code> and check that the concatenation of all three is 1-through-9 pandigital. Because <code>a</code> and <code>b</code> already draw distinct digits from the pool, this check effectively verifies that <code>c</code> supplies exactly the remaining digits.</li>
-  <li>Insert each valid product into a set so a product reachable through more than one <code>(a, b)</code> pair is counted only once, then sum the set.</li>
+<li>Fix the two valid splits <code>(a_len, b_len)</code> as <code>(1, 4)</code> and <code>(2, 3)</code>. In each, the product has 4 digits, giving <code>1+4+4=9</code> or <code>2+3+4=9</code>.</li>
+<li>For each split, generate every ordered selection of <code>a_len</code> digits from {1,...,9} to form <code>a</code>, then every ordered selection of <code>b_len</code> digits from the unused digits to form <code>b</code>.</li>
+<li>Compute <code>c = a * b</code> and check that the concatenation of all three is 1-through-9 pandigital. Because <code>a</code> and <code>b</code> already draw distinct digits from the pool, this check effectively verifies that <code>c</code> supplies exactly the remaining digits.</li>
+<li>Insert each valid product into a set so a product reachable through more than one <code>(a, b)</code> pair is counted only once, then sum the set.</li>
 </ul>
-
 <p>
-The <strong>Python</strong> version expresses the whole search as a single set comprehension. It loops over the two splits, uses <code>itertools.permutations(nine_digits, a_len)</code> for <code>a</code>, and feeds a generator <code>(d for d in nine_digits if d not in a)</code> into a second <code>itertools.permutations(..., b_len)</code> call so that <code>b</code> draws only from unused digits. The <a href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> (<code>:=</code>) assigns <code>a_str</code>, <code>b_str</code>, and <code>c</code> inside the filter condition so they are computed once and reused. Wrapping the generator in <code>set()</code> deduplicates, and <code>sum()</code> finishes the job. The helper <code>is_nine_pandigital</code> confirms both that the decimal string is 9 characters long and that its character set equals {1,...,9}.
+The <strong>Python</strong> version expresses the whole search as a single set comprehension. It loops over the two splits, uses <code>itertools.permutations(nine_digits, a_len)</code> for <code>a</code>, and feeds a generator <code>(d for d in nine_digits if d not in a)</code> into a second <code>itertools.permutations(..., b_len)</code> call so that <code>b</code> draws only from unused digits. The <a class="reference-source" href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" rel="noopener noreferrer" target="_blank">walrus operator</a> (<code>:=</code>) assigns <code>a_str</code>, <code>b_str</code>, and <code>c</code> inside the filter condition so they are computed once and reused. Wrapping the generator in <code>set()</code> deduplicates, and <code>sum()</code> finishes the job. The helper <code>is_nine_pandigital</code> confirms both that the decimal string is 9 characters long and that its character set equals {1,...,9}.
 </p>
-
 <p>
 The <strong>C</strong> version reproduces the same logic with explicit nested loops, since there is no permutation library to lean on. For the <code>(1, 4)</code> split it builds a <code>rem[]</code> array of the eight digits not used by <code>a</code>, then runs four nested loops with collision guards (<code>if (q1 == q0) continue</code>) to enumerate the ordered 4-selections. The <code>(2, 3)</code> split uses two outer loops for <code>a</code> and three inner loops for <code>b</code>. The pandigital test formats the three integers into a buffer with <code>snprintf</code>, rejects immediately if the combined length is not 9, then marks each digit in a <code>seen[10]</code> array, rejecting any repeat or any zero. Uniqueness is enforced by <code>set_add</code>, which linearly scans the small <code>products[]</code> array before inserting.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Filtering at Construction Time Instead of Post-Filtering</h4>
-<p>
-Neither solution generates all 9! = 362,880 permutations and then discards the bad ones. Instead they build only the prefix for <code>a</code> at the correct length and draw the suffix for <code>b</code> from the complement of the already-used digits. In Python this is the inline generator passed to the second <a href="https://docs.python.org/3/library/itertools.html#itertools.permutations" class="reference-source" target="_blank" rel="noopener noreferrer">permutations</a> call; in C it is the explicitly constructed <code>rem[]</code> array. The principle - apply constraints as early as possible in a search so branches are pruned before they expand - is a cornerstone of efficient enumeration and carries over directly to <a href="https://en.wikipedia.org/wiki/Backtracking" class="reference-source" target="_blank" rel="noopener noreferrer">backtracking</a>, constraint solving, and tree search in general.
-</p>
-
-<h4>The Walrus Operator for Single-Pass Reuse (Python)</h4>
-<p>
-The <a href="https://docs.python.org/3/whatsnew/3.8.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">walrus operator</a> lets the code compute <code>a_str</code>, <code>b_str</code>, and <code>c</code> once, inside the <code>if</code> condition, and then reuse <code>c</code> as the value the comprehension yields. Without it I would either compute these values twice or break the comprehension into a loop with temporaries. Reach for an assignment expression whenever a value is needed both in a filter test and in the produced result and you want to keep the pipeline in one place.
-</p>
-
-<h4>Deduplication via a Set</h4>
-<p>
-Because the problem warns that a product can arise from several identities, both solutions collect into a set. Python uses the built-in <code>set</code>, a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> giving amortized O(1) inserts. C uses a linear-scan array because the number of distinct valid products is only a couple of dozen - at that scale a linear scan is simpler, allocates nothing, and stays friendly to the cache. Matching a data structure's sophistication to the actual scale of the data is an engineering judgment worth practising.
-</p>
-
-<h4>Format-String Digit Extraction (C)</h4>
-<p>
-The C pandigital check uses <code>snprintf(buf, sizeof(buf), "%d%d%d", a, b, c)</code> to both concatenate the three numbers and obtain their combined digit count from the return value. This trades repeated division by 10 for a single formatting call and gives the length for free, enabling the early exit <code>if (len != 9) return 0</code> before any character is inspected. Whenever you need both the textual form of a number and its length together, this idiom is concise and hard to get wrong.
-</p>
-
-<h4>Loop Unrolling for Fixed, Small Permutation Depths (C)</h4>
-<p>
-Rather than write a general recursive permutation generator, the C code unrolls the enumeration into explicit nested loops - four deep for the <code>(1,4)</code> split, three deep for <code>(2,3)</code> - with inline collision guards enforcing distinctness. When the recursion depth is a known small constant, unrolling avoids call-stack overhead and makes the distinctness logic visible and auditable. This is a good default for fixed-depth combinatorial enumeration where both performance and clarity matter.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The insight that unlocks this problem is the digit-count identity: the operand and product lengths must sum to 9, and only the <code>(1,4,4)</code> and <code>(2,3,4)</code> splits are consistent with how multiplication transforms digit-lengths. That single deduction turns a sprawling brute force into a tightly bounded search.
-</p>
-
-<p>
-Both solutions are correct and effectively instant. The C implementation runs in about 0.0019 s and the Python in about 0.0112 s - roughly a 6x speedup for C, driven by the absence of interpreter overhead and by avoiding per-candidate string allocation. At this scale the difference is immaterial: the Python version is markedly more concise and readable, while the C version shows how to express the same algorithm with explicit loops when no permutation library is at hand. The algorithmic pruning matters far more than the language choice.
-</p>
-
-<ul>
-  <li>Derive structural constraints (digit counts, parity, modular relations) first and use them to eliminate whole classes of candidates before evaluating any single one.</li>
-  <li>When the answer requires distinct values, collect into a set from the start rather than deduplicating afterward.</li>
-  <li>Build constrained permutations by drawing each element from a shrinking pool of unused values instead of generating everything and filtering.</li>
-  <li>For fixed, small enumeration depths, explicit nested loops are faster and easier to verify than a general recursive generator.</li>
-  <li>An assignment expression lets you compute a value once and use it in both a test and a result, keeping pipeline code in a single expression.</li>
-  <li>Match data-structure complexity to the actual data size - a linear scan can beat a hash set when the collection is tiny.</li>
-</ul>
-
 </article>

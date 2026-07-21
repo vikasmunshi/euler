@@ -1,90 +1,23 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-A <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> represents a number as a nested expression <code>a0 + 1/(a1 + 1/(a2 + ...))</code>, where the integers <code>a_k</code> are the partial quotients. If you truncate the expansion after <code>k</code> levels you get a rational number called the k-th <em>convergent</em>; these are provably the best rational approximations to the underlying real number for their denominator size. For the constant <a href="https://en.wikipedia.org/wiki/E_(mathematical_constant)" class="reference-source" target="_blank" rel="noopener noreferrer">e</a> the partial quotients follow a clean rule: <code>[2; 1, 2, 1, 1, 4, 1, 1, 6, ...]</code>, where every third quotient is an even number <code>2k</code> and all the others are <code>1</code>. The task asks for the numerator of the 100th <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> convergent of <a href="https://en.wikipedia.org/wiki/E_(mathematical_constant)" class="reference-source" target="_blank" rel="noopener noreferrer">e</a>, then the sum of that numerator's decimal digits.
+A <a class="reference-source" href="https://en.wikipedia.org/wiki/Continued_fraction" rel="noopener noreferrer" target="_blank">continued fraction</a> represents a number as a nested expression <code>a0 + 1/(a1 + 1/(a2 + ...))</code>, where the integers <code>a_k</code> are the partial quotients. If you truncate the expansion after <code>k</code> levels you get a rational number called the k-th <em>convergent</em>; these are provably the best rational approximations to the underlying real number for their denominator size. For the constant <a class="reference-source" href="https://en.wikipedia.org/wiki/E_(mathematical_constant)" rel="noopener noreferrer" target="_blank">e</a> the partial quotients follow a clean rule: <code>[2; 1, 2, 1, 1, 4, 1, 1, 6, ...]</code>, where every third quotient is an even number <code>2k</code> and all the others are <code>1</code>. The task asks for the numerator of the 100th <a class="reference-source" href="https://en.wikipedia.org/wiki/Continued_fraction" rel="noopener noreferrer" target="_blank">continued fraction</a> convergent of <a class="reference-source" href="https://en.wikipedia.org/wiki/E_(mathematical_constant)" rel="noopener noreferrer" target="_blank">e</a>, then the sum of that numerator's decimal digits.
 </p>
-
 <p>
-The key observation is that I never need to evaluate the nested fraction by hand. The numerators <code>h(k)</code> and denominators of successive convergents obey the standard three-term <a href="https://en.wikipedia.org/wiki/Continued_fraction#Some_useful_theorems" class="reference-source" target="_blank" rel="noopener noreferrer">convergent recurrence</a> <code>h(k) = a(k)*h(k-1) + h(k-2)</code>, seeded with <code>h(0) = 1</code> and <code>h(1) = a(1)</code>. This turns an awkward nested division into a plain linear iteration. The one complication is magnitude: the numerator grows roughly like <code>e^n</code>, so by <code>n = 100</code> it has about 40 decimal digits - already past the range of a 64-bit integer - and by <code>n = 10000</code> it spans thousands of digits. Since each multiply-add touches all <code>O(n)</code> digits of the running value, the whole computation costs <code>O(n^2)</code> digit-operations: quadratic, but easily fast enough.
+The key observation is that I never need to evaluate the nested fraction by hand. The numerators <code>h(k)</code> and denominators of successive convergents obey the standard three-term <a class="reference-source" href="https://en.wikipedia.org/wiki/Continued_fraction#Some_useful_theorems" rel="noopener noreferrer" target="_blank">convergent recurrence</a> <code>h(k) = a(k)*h(k-1) + h(k-2)</code>, seeded with <code>h(0) = 1</code> and <code>h(1) = a(1)</code>. This turns an awkward nested division into a plain linear iteration. The one complication is magnitude: the numerator grows roughly like <code>e^n</code>, so by <code>n = 100</code> it has about 40 decimal digits - already past the range of a 64-bit integer - and by <code>n = 10000</code> it spans thousands of digits. Since each multiply-add touches all <code>O(n)</code> digits of the running value, the whole computation costs <code>O(n^2)</code> digit-operations: quadratic, but easily fast enough.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Three-Term Convergent Recurrence (Python and C)</h4>
-
 <p>
-Both files compute the same quantity via the same <a href="https://en.wikipedia.org/wiki/Continued_fraction#Some_useful_theorems" class="reference-source" target="_blank" rel="noopener noreferrer">convergent recurrence</a>; they differ only in how they manage the large numerator. Each starts with a small helper, <code>e_denominator(n)</code>, that encodes the partial-quotient pattern directly: it returns <code>2</code> for <code>n == 1</code>, <code>2*(n/3)</code> when <code>3</code> divides <code>n</code>, and <code>1</code> otherwise. I chose to express the rule as a tiny function rather than a precomputed table, because the function is trivially correct for any <code>n</code> and generalises immediately without resizing anything.
+Both files compute the same quantity via the same <a class="reference-source" href="https://en.wikipedia.org/wiki/Continued_fraction#Some_useful_theorems" rel="noopener noreferrer" target="_blank">convergent recurrence</a>; they differ only in how they manage the large numerator. Each starts with a small helper, <code>e_denominator(n)</code>, that encodes the partial-quotient pattern directly: it returns <code>2</code> for <code>n == 1</code>, <code>2*(n/3)</code> when <code>3</code> divides <code>n</code>, and <code>1</code> otherwise. I chose to express the rule as a tiny function rather than a precomputed table, because the function is trivially correct for any <code>n</code> and generalises immediately without resizing anything.
 </p>
-
 <p>
 The C solution iterates the recurrence directly. It seeds <code>h_prev2 = 1</code> (the artificial <code>h(0)</code> that makes the first multiply-add come out right) and <code>h_prev1 = 2</code> (which is <code>a(1)</code>). For each <code>k</code> from 2 to <code>n</code> it computes <code>h_curr = a(k)*h_prev1 + h_prev2</code> and rotates the three buffers so only the two most recent numerators survive. After the loop, <code>h_prev1</code> is the numerator of the n-th convergent, and a digit-sum pass produces the answer.
 </p>
-
 <p>
-The Python solution expresses the same mathematics recursively. <code>nth_convergent_of_e</code> descends to depth <code>n</code> and then unwinds, repeatedly forming <code>a + 1/sub-result</code> using <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer"><code>fractions.Fraction</code></a> for exact rational arithmetic. This is a literal transcription of the definition of a <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a>, so it is very easy to verify by inspection. Its cost is that it carries both numerator and denominator through every level and recurses to depth <code>n</code> - which is why it raises <code>sys.setrecursionlimit</code> - making it slower than the pure-numerator iteration at large <code>n</code>. The digit sum falls out of <code>sum_digits</code>, a repeated mod-10 / divide-10 loop.
+The Python solution expresses the same mathematics recursively. <code>nth_convergent_of_e</code> descends to depth <code>n</code> and then unwinds, repeatedly forming <code>a + 1/sub-result</code> using <a class="reference-source" href="https://docs.python.org/3/library/fractions.html" rel="noopener noreferrer" target="_blank"><code>fractions.Fraction</code></a> for exact rational arithmetic. This is a literal transcription of the definition of a <a class="reference-source" href="https://en.wikipedia.org/wiki/Continued_fraction" rel="noopener noreferrer" target="_blank">continued fraction</a>, so it is very easy to verify by inspection. Its cost is that it carries both numerator and denominator through every level and recurses to depth <code>n</code> - which is why it raises <code>sys.setrecursionlimit</code> - making it slower than the pure-numerator iteration at large <code>n</code>. The digit sum falls out of <code>sum_digits</code>, a repeated mod-10 / divide-10 loop.
 </p>
-
 <p>
 The C version has no built-in big integers, so it supplies its own. It stores a number as an array of <code>unsigned long long</code> limbs in base <code>10^9</code> (the <code>BigInt</code> type). The workhorse is <code>bigint_mul_add(dst, a, scalar, b)</code>, which computes <code>a*scalar + b</code> in a single pass: at each limb position it forms <code>av*scalar + bv + carry</code>, stores <code>val % BASE</code>, and propagates <code>val / BASE</code>. I deliberately picked base <code>10^9</code> for two reasons. First, the product of a limb (under <code>10^9</code>) and a small scalar (at most about <code>6667</code> at <code>n = 10000</code>), plus a carry, stays comfortably within 64 bits, so no overflow can occur. Second, because the base is a power of ten, each limb is itself a block of decimal digits, so the final digit sum is a free byproduct rather than requiring a base conversion.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Sliding-Window State for Linear Recurrences</h4>
-
-<p>
-The numerators satisfy <code>f(n) = expr(f(n-1), f(n-2))</code>, so at any moment I only need the last two values. The C loop keeps exactly three <code>BigInt</code> objects and recycles them, giving <code>O(1)</code> auxiliary storage no matter how large <code>n</code> is. This is the same pattern used to compute <a href="https://en.wikipedia.org/wiki/Fibonacci_sequence" class="reference-source" target="_blank" rel="noopener noreferrer">Fibonacci numbers</a> iteratively. Whenever you recognise a fixed-order linear recurrence, reach for a small set of state variables rather than storing the whole history.
-</p>
-
-<h4>Pointer Rotation Instead of Copying</h4>
-
-<p>
-Advancing the recurrence means "previous-1" becomes "previous-2" and the freshly computed value becomes "previous-1". Rather than <code>memcpy</code> multi-kilobyte <code>BigInt</code> structs each step, the C code swaps the three pointers and reuses the now-stale buffer as the destination for the next computation. This avoids per-iteration copying of large arrays and is the standard idiom for double- or triple-buffering in tight loops.
-</p>
-
-<h4>Limb-Based Big Integers with a Decimal Base</h4>
-
-<p>
-When native integer types are too narrow, a number can be held as an array of limbs, each carrying one digit-chunk in some base. My choice of base <code>10^9</code> (rather than a power of two) trades a little space efficiency for a free decimal digit sum: each limb is decoded with a simple <code>v % 10; v /= 10</code> loop, with no base conversion. Choose your big-integer base to match the questions you will ask of the result.
-</p>
-
-<h4>Fused Multiply-Add</h4>
-
-<p>
-The recurrence's core is exactly <code>coeff * prev + prev2</code>. Instead of computing the product into a temporary and adding it in a second pass, <code>bigint_mul_add</code> fuses both into one loop over the limbs. This halves the memory traffic and avoids allocating an intermediate. Whenever a hot loop computes <code>a*scalar + b</code>, consider fusing the two steps.
-</p>
-
-<h4>Arbitrary-Precision Integers and Exact Rationals in Python</h4>
-
-<p>
-Python integers grow without bound, so the recurrence could be written with bare <code>*</code> and <code>+</code> and no big-integer library at all. The Python solution goes further and uses <a href="https://docs.python.org/3/library/fractions.html" class="reference-source" target="_blank" rel="noopener noreferrer"><code>fractions.Fraction</code></a> to model the nested fraction exactly, eliminating any floating-point error. For moderate inputs this is the quickest route to a verified-correct answer; the cost only becomes visible at very large <code>n</code>.
-</p>
-
-<h4>Encoding a Coefficient Rule as a Function</h4>
-
-<p>
-The partial-quotient pattern of <a href="https://en.wikipedia.org/wiki/E_(mathematical_constant)" class="reference-source" target="_blank" rel="noopener noreferrer">e</a> is a simple modular rule, so I encoded it as <code>e_denominator(n)</code> rather than as a lookup table. A function is easier to verify than a hand-typed array, costs nothing to maintain, and works for any <code>n</code> without bounds management. Prefer a small generating function over a table whenever the rule is concise.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is that <a href="https://en.wikipedia.org/wiki/Continued_fraction" class="reference-source" target="_blank" rel="noopener noreferrer">continued fraction</a> convergents satisfy a simple three-term <a href="https://en.wikipedia.org/wiki/Continued_fraction#Some_useful_theorems" class="reference-source" target="_blank" rel="noopener noreferrer">recurrence</a>, so the numerator can be built up with elementary arithmetic instead of nested-fraction evaluation. Both solutions share this recurrence; they differ only in how they cope with numbers too large for a machine word.
-</p>
-
-<p>
-The benchmarks make the trade-off concrete. For the actual problem (<code>n = 100</code>) both are effectively instantaneous - C at 0.0000 s, Python at 0.0002 s. The gap widens with scale: at <code>n = 1000</code> Python takes 0.0096 s versus 0.0001 s for C, and at <code>n = 10000</code> Python takes 6.3311 s while the C limb-based big integer finishes in 0.0119 s - roughly a 500x speedup. The Python version is the more elegant and self-documenting, mirroring the mathematical definition directly; the C version is the one to reach for once <code>n</code> grows into the thousands.
-</p>
-
-<ul>
-  <li>A fixed-order linear recurrence needs only a fixed number of state variables - never store the full history when a sliding window suffices.</li>
-  <li>Rotate pointers instead of copying large buffers when advancing a multi-buffer loop.</li>
-  <li>Choose a big-integer base that matches the final query: a power-of-10 base makes decimal digit sums free.</li>
-  <li>Fuse <code>a*scalar + b</code> into a single pass when it sits in an inner loop.</li>
-  <li>Encode a simple modular coefficient rule as a small function, not a table - it is easier to verify and generalises immediately.</li>
-  <li>Reach for a hand-written big integer only when profiling shows the language's native arbitrary precision is too slow; for moderate inputs, exact-arithmetic convenience wins.</li>
-</ul>
-
 </article>

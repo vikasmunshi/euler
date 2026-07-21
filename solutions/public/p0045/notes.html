@@ -1,83 +1,23 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-This problem asks me to find a number that appears simultaneously in three <a href="https://en.wikipedia.org/wiki/Figurate_number" class="reference-source" target="_blank" rel="noopener noreferrer">figurate number</a> sequences - triangular, pentagonal, and hexagonal. A <a href="https://en.wikipedia.org/wiki/Figurate_number" class="reference-source" target="_blank" rel="noopener noreferrer">figurate number</a> is one that can be arranged into a regular geometric shape, and each of the three sequences here has a closed-form <a href="https://en.wikipedia.org/wiki/Quadratic_function" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic</a> generator: T(n) = n(n+1)/2, P(n) = n(3n-1)/2, and H(n) = n(2n-1). I am told that 40755 is the smallest such common value (after the trivial 1) and must find the next one. A brute-force scan that generates all three sequences and intersects them would work, but there is a much sharper structural observation to be had first.
+This problem asks me to find a number that appears simultaneously in three <a class="reference-source" href="https://en.wikipedia.org/wiki/Figurate_number" rel="noopener noreferrer" target="_blank">figurate number</a> sequences - triangular, pentagonal, and hexagonal. A <a class="reference-source" href="https://en.wikipedia.org/wiki/Figurate_number" rel="noopener noreferrer" target="_blank">figurate number</a> is one that can be arranged into a regular geometric shape, and each of the three sequences here has a closed-form <a class="reference-source" href="https://en.wikipedia.org/wiki/Quadratic_function" rel="noopener noreferrer" target="_blank">quadratic</a> generator: T(n) = n(n+1)/2, P(n) = n(3n-1)/2, and H(n) = n(2n-1). I am told that 40755 is the smallest such common value (after the trivial 1) and must find the next one. A brute-force scan that generates all three sequences and intersects them would work, but there is a much sharper structural observation to be had first.
 </p>
-
 <p>
-The decisive insight is an algebraic identity: every hexagonal number is also triangular. Substitute m = 2n-1 into the triangular formula and you get T(2n-1) = (2n-1)(2n)/2 = n(2n-1) = H(n). In other words, the hexagonal numbers are exactly the triangular numbers with odd index, so any number that is hexagonal is automatically triangular. That collapses a three-way intersection into a two-way one: I only need values that are simultaneously triangular (or equivalently hexagonal) and pentagonal. To test pentagonal membership efficiently I invert the formula. Solving P(k) = x with the <a href="https://en.wikipedia.org/wiki/Quadratic_formula" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic formula</a> gives k = (1 + sqrt(1 + 24x))/6, so x is pentagonal exactly when the <a href="https://en.wikipedia.org/wiki/Discriminant" class="reference-source" target="_blank" rel="noopener noreferrer">discriminant</a> 1 + 24x is a <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a> whose root is congruent to 5 mod 6 (making k a positive integer). Each test is constant-time arithmetic plus one square root, so scanning candidate triangular numbers and testing each is O(k) where k is the number of candidates examined before a hit - a tiny count in practice.
+The decisive insight is an algebraic identity: every hexagonal number is also triangular. Substitute m = 2n-1 into the triangular formula and you get T(2n-1) = (2n-1)(2n)/2 = n(2n-1) = H(n). In other words, the hexagonal numbers are exactly the triangular numbers with odd index, so any number that is hexagonal is automatically triangular. That collapses a three-way intersection into a two-way one: I only need values that are simultaneously triangular (or equivalently hexagonal) and pentagonal. To test pentagonal membership efficiently I invert the formula. Solving P(k) = x with the <a class="reference-source" href="https://en.wikipedia.org/wiki/Quadratic_formula" rel="noopener noreferrer" target="_blank">quadratic formula</a> gives k = (1 + sqrt(1 + 24x))/6, so x is pentagonal exactly when the <a class="reference-source" href="https://en.wikipedia.org/wiki/Discriminant" rel="noopener noreferrer" target="_blank">discriminant</a> 1 + 24x is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Square_number" rel="noopener noreferrer" target="_blank">perfect square</a> whose root is congruent to 5 mod 6 (making k a positive integer). Each test is constant-time arithmetic plus one square root, so scanning candidate triangular numbers and testing each is O(k) where k is the number of candidates examined before a hit - a tiny count in practice.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Analytical Inverse-Formula Check (Python and C)</h4>
-
 <p>
 Both files implement the same algorithm. I start from a supplied index n - 285, which is the index of the known solution T(285) = 40755 - and increment n by one each iteration. For each n I compute the triangular number T(n) = n(n+1)/2 and apply two membership filters.
 </p>
-
 <p>
-The first filter tests whether T(n) is pentagonal. From the inverse k = (1 + sqrt(1 + 24x))/6, k is a positive integer precisely when 1 + sqrt(1+24x) is divisible by 6, which means sqrt(1+24x) must be congruent to 5 mod 6. The code checks this directly: <code>(1 + 24 * t) ** 0.5 % 6 == 5.0</code> in Python, and <code>fmod(sqrt(1 + 24*t), 6.0) != 5.0</code> in C. This one comparison implicitly verifies that the <a href="https://en.wikipedia.org/wiki/Discriminant" class="reference-source" target="_blank" rel="noopener noreferrer">discriminant</a> is a <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a> - if it were not, the floating-point remainder would not land exactly on 5.0.
+The first filter tests whether T(n) is pentagonal. From the inverse k = (1 + sqrt(1 + 24x))/6, k is a positive integer precisely when 1 + sqrt(1+24x) is divisible by 6, which means sqrt(1+24x) must be congruent to 5 mod 6. The code checks this directly: <code>(1 + 24 * t) ** 0.5 % 6 == 5.0</code> in Python, and <code>fmod(sqrt(1 + 24*t), 6.0) != 5.0</code> in C. This one comparison implicitly verifies that the <a class="reference-source" href="https://en.wikipedia.org/wiki/Discriminant" rel="noopener noreferrer" target="_blank">discriminant</a> is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Square_number" rel="noopener noreferrer" target="_blank">perfect square</a> - if it were not, the floating-point remainder would not land exactly on 5.0.
 </p>
-
 <p>
 The second filter tests triangularity using k = (-1 + sqrt(1 + 8x))/2, which requires sqrt(1+8x) to be congruent to 3 mod 4: <code>(1 + 8 * t) ** 0.5 % 4 == 3.0</code>. Strictly this second filter is redundant - I am already iterating over triangular numbers, so T(n) is triangular by construction - but it keeps the formulation symmetric, self-contained, and trivially correct, and it costs almost nothing. When both filters pass, the value is returned. The answer is 1533776805.
 </p>
-
 <p>
-The language-specific differences are purely mechanical. C uses <code>fmod</code> from <code>&lt;math.h&gt;</code> for the floating-point remainder and structures the filters with explicit <code>continue</code> statements; Python uses <code>%</code> on floats and nests two <code>if</code> blocks. Both rely on <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="reference-source" target="_blank" rel="noopener noreferrer">IEEE 754 double precision</a> being exact for the integers involved (the answer is about 1.5 billion, well below 2^53), so the floating-point square roots are reliable.
+The language-specific differences are purely mechanical. C uses <code>fmod</code> from <code>&lt;math.h&gt;</code> for the floating-point remainder and structures the filters with explicit <code>continue</code> statements; Python uses <code>%</code> on floats and nests two <code>if</code> blocks. Both rely on <a class="reference-source" href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" rel="noopener noreferrer" target="_blank">IEEE 754 double precision</a> being exact for the integers involved (the answer is about 1.5 billion, well below 2^53), so the floating-point square roots are reliable.
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Inverse-Formula Membership Testing</h4>
-
-<p>
-When a sequence is defined by a closed-form function f(n) = x, I can test whether a given x is a member by algebraically inverting f and checking that the result is a positive integer. For <a href="https://en.wikipedia.org/wiki/Quadratic_function" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic</a> formulas this reduces, via the <a href="https://en.wikipedia.org/wiki/Quadratic_formula" class="reference-source" target="_blank" rel="noopener noreferrer">quadratic formula</a>, to a "the <a href="https://en.wikipedia.org/wiki/Discriminant" class="reference-source" target="_blank" rel="noopener noreferrer">discriminant</a> must be a <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a>" condition, expressible as a <a href="https://en.wikipedia.org/wiki/Modular_arithmetic" class="reference-source" target="_blank" rel="noopener noreferrer">modular</a> residue check on the square root. This pattern eliminates lookup tables entirely and makes each test O(1). It recurs across many polygonal-number problems: derive the inverse once, identify the integrality condition, and reach for it whenever you need a fast "is this value in the sequence" test.
-</p>
-
-<h4>Floating-Point Square Root for Integer Checks</h4>
-
-<p>
-Both solutions use a floating-point square root and test its remainder against a small modulus. This is safe because the candidate values stay around 1.5 * 10^9, well below 2^53 - the largest integer a <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="reference-source" target="_blank" rel="noopener noreferrer">double-precision float</a> can represent exactly. A <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect-square</a> discriminant therefore produces an exact integer square root, so the residue comparison is reliable. For larger inputs I would instead compute an <a href="https://en.wikipedia.org/wiki/Integer_square_root" class="reference-source" target="_blank" rel="noopener noreferrer">integer square root</a> and verify by squaring, to remove any rounding risk.
-</p>
-
-<h4>Early-Continue Filtering</h4>
-
-<p>
-The C version applies the more selective pentagonal filter first and uses <code>continue</code> to abandon the iteration immediately on failure, before the second test runs; the Python version achieves the same short-circuit through nested <code>if</code> blocks. When two independent conditions must both hold, ordering them most-selective-first and exiting early minimises wasted work per iteration - a habit worth keeping in any tight loop with multiple guards.
-</p>
-
-<h4>Walrus Operator for Loop Control (Python)</h4>
-
-<p>
-The Python loop header <code>while n := (n + 1):</code> uses the <a href="https://docs.python.org/3/reference/expressions.html#assignment-expressions" class="reference-source" target="_blank" rel="noopener noreferrer">assignment expression (walrus operator)</a> to increment n and use its new value as the condition in a single step. Since n is always a positive integer the condition is always truthy, making this an effectively infinite loop exited only by <code>return</code>. It is compact, though an explicit <code>n += 1</code> in the body reads more plainly where clarity outranks brevity.
-</p>
-
-<h4>Command-Line Parameterisation of Starting State</h4>
-
-<p>
-Both solutions read the starting index from the command line rather than hard-coding it, letting the harness resume the search from the known good point (285) instead of rescanning from 1. Making the search state an external parameter is good practice whenever the worked example sits close to the answer: it avoids redundant work and keeps the solver restartable.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is the structural identity H(n) = T(2n-1): every hexagonal number is triangular, which turns a three-way intersection into a two-way membership test. Recognising relationships like this before writing any code is what separates a clean solution from a brute-force scan. Combined with inverting the pentagonal formula into a <a href="https://en.wikipedia.org/wiki/Discriminant" class="reference-source" target="_blank" rel="noopener noreferrer">discriminant</a> check, the whole problem reduces to a short loop with two arithmetic guards.
-</p>
-
-<p>
-Both solutions implement the identical algorithm, so the benchmark gap is pure interpreter overhead: the C build runs in about 0.0004 s versus 0.0086 s for Python, roughly a 20x difference. Since both finish in well under a hundredth of a second, the language choice has no practical bearing here - the C version simply shows how much per-iteration overhead a lower-level implementation strips away.
-</p>
-
-<ul>
-  <li>Look for algebraic identities between sequences before coding; one substitution can shrink the search space dramatically.</li>
-  <li>Invert a closed-form formula to get a free O(1) membership test - for quadratics this becomes a perfect-square discriminant check.</li>
-  <li>Floating-point sqrt is safe for integer checks while values stay below 2^53; use an integer square root and verify by squaring above that.</li>
-  <li>When multiple guards must all pass, order them most-selective-first and exit early to avoid wasted work.</li>
-  <li>Parameterise the starting state of a search so it can resume from a known point rather than restarting from scratch.</li>
-</ul>
-
 </article>

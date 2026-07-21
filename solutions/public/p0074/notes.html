@@ -1,103 +1,31 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-The engine of this problem is a single deterministic rule: from any positive integer <code>n</code>, the successor is the sum of the factorials of its decimal digits, so <code>145 -&gt; 1! + 4! + 5! = 145</code>. Iterating this rule traces a path through the integers, and because every integer has exactly one successor, the structure is a <a href="https://en.wikipedia.org/wiki/Functional_graph" class="reference-source" target="_blank" rel="noopener noreferrer">functional graph</a> - a directed graph in which every node has out-degree exactly one. A fundamental property of any functional graph on a finite set is that every trajectory eventually enters a cycle: there are only finitely many reachable values, so by the <a href="https://en.wikipedia.org/wiki/Pigeonhole_principle" class="reference-source" target="_blank" rel="noopener noreferrer">pigeonhole principle</a> some value must repeat, and once it does the path loops forever. The <em>chain</em> the problem asks about is the count of distinct values visited before the first repetition. Our task is to count how many starting numbers below one million produce a chain of exactly sixty distinct terms.
+The engine of this problem is a single deterministic rule: from any positive integer <code>n</code>, the successor is the sum of the factorials of its decimal digits, so <code>145 -&gt; 1! + 4! + 5! = 145</code>. Iterating this rule traces a path through the integers, and because every integer has exactly one successor, the structure is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Functional_graph" rel="noopener noreferrer" target="_blank">functional graph</a> - a directed graph in which every node has out-degree exactly one. A fundamental property of any functional graph on a finite set is that every trajectory eventually enters a cycle: there are only finitely many reachable values, so by the <a class="reference-source" href="https://en.wikipedia.org/wiki/Pigeonhole_principle" rel="noopener noreferrer" target="_blank">pigeonhole principle</a> some value must repeat, and once it does the path loops forever. The <em>chain</em> the problem asks about is the count of distinct values visited before the first repetition. Our task is to count how many starting numbers below one million produce a chain of exactly sixty distinct terms.
 </p>
-
 <p>
-Two observations make this tractable. First, the state space is tightly bounded. The digit factorials are fixed constants - the largest is <code>9! = 362880</code> - so any 7-digit number maps to at most <code>7 x 362880 = 2540160</code>. Every value we ever encounter, even for starting numbers up to ten million, stays below about 2.5 million, so a flat array of three million slots covers the entire universe of reachable values. Second, because each value has a single fixed successor, two paths that ever meet stay merged forever. This means each value's chain length can be computed once and reused - the defining condition for <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a>. Without caching, the cost is roughly O(N x L), where N is the limit and L the maximum chain length (sixty here); with caching, the amortised cost per starting number falls toward O(1), giving an effectively linear O(N) algorithm.
+Two observations make this tractable. First, the state space is tightly bounded. The digit factorials are fixed constants - the largest is <code>9! = 362880</code> - so any 7-digit number maps to at most <code>7 x 362880 = 2540160</code>. Every value we ever encounter, even for starting numbers up to ten million, stays below about 2.5 million, so a flat array of three million slots covers the entire universe of reachable values. Second, because each value has a single fixed successor, two paths that ever meet stay merged forever. This means each value's chain length can be computed once and reused - the defining condition for <a class="reference-source" href="https://en.wikipedia.org/wiki/Memoization" rel="noopener noreferrer" target="_blank">memoization</a>. Without caching, the cost is roughly O(N x L), where N is the limit and L the maximum chain length (sixty here); with caching, the amortised cost per starting number falls toward O(1), giving an effectively linear O(N) algorithm.
 </p>
-
 <h3>Solution Approach</h3>
-
 <h4>Algorithm 0 - Walk-and-cache storing only chain lengths (p0074_s0.py and p0074_s0.c)</h4>
-
 <p>
-This is the most direct <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a> strategy and the fastest of the three. For each starting number I walk forward along the successor map, appending each value to a <code>seen</code> list, and stop as soon as one of two things happens: either the current value is already in <code>seen</code> (the walk has closed a cycle entirely within itself), or the current value is already in the cache (we have reached a value whose chain length is already known). At that point the total length of the chain beginning at <code>seen[0]</code> is fully determined: it is <code>len(seen)</code> plus the cached length of the value we stopped on, or just <code>len(seen)</code> if we closed a cycle.
+This is the most direct <a class="reference-source" href="https://en.wikipedia.org/wiki/Memoization" rel="noopener noreferrer" target="_blank">memoization</a> strategy and the fastest of the three. For each starting number I walk forward along the successor map, appending each value to a <code>seen</code> list, and stop as soon as one of two things happens: either the current value is already in <code>seen</code> (the walk has closed a cycle entirely within itself), or the current value is already in the cache (we have reached a value whose chain length is already known). At that point the total length of the chain beginning at <code>seen[0]</code> is fully determined: it is <code>len(seen)</code> plus the cached length of the value we stopped on, or just <code>len(seen)</code> if we closed a cycle.
 </p>
-
 <p>
-The decisive step is the back-propagation pass. Once I know the chain length of the first node, every node on the walk has a known length too: <code>seen[i]</code> has length <code>total - i</code>, because it sits exactly <code>i</code> steps further along the same chain. A single backward loop fills the cache for every node visited, so the work this walk performed benefits every future walk that ever touches one of these nodes. This is precisely the flattening idea behind <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Path_compression" class="reference-source" target="_blank" rel="noopener noreferrer">path compression</a> in union-find structures: collapse a whole traversal into the cache in one go.
+The decisive step is the back-propagation pass. Once I know the chain length of the first node, every node on the walk has a known length too: <code>seen[i]</code> has length <code>total - i</code>, because it sits exactly <code>i</code> steps further along the same chain. A single backward loop fills the cache for every node visited, so the work this walk performed benefits every future walk that ever touches one of these nodes. This is precisely the flattening idea behind <a class="reference-source" href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Path_compression" rel="noopener noreferrer" target="_blank">path compression</a> in union-find structures: collapse a whole traversal into the cache in one go.
 </p>
-
 <p>
 The Python version (<code>p0074_s0.py</code>) uses two dictionaries: <code>chain_length_cache</code> mapping a value to its chain length, and <code>graph</code> mapping a value to its precomputed successor so the digit-factorial sum is never recomputed. The C version (<code>p0074_s0.c</code>) replaces both dictionaries with flat <code>int</code> arrays of size three million, using <code>0</code> as the "not yet computed" sentinel. Cycle detection during the walk is a simple linear scan over <code>seen</code>; this looks like an O(L) operation, but L is bounded near sixty, so it costs at most a few dozen comparisons per step - cheaper in practice than maintaining a hash set. At N = 1,000,000 the C version runs in 0.0160 s and the Python version in 0.9436 s.
 </p>
-
 <h4>Algorithm 1 - Walk-and-cache storing full chain lists (p0074_s1.py and p0074_s1.c)</h4>
-
 <p>
 Algorithm 1 stores, in Python, the actual list of values that make up each chain rather than just its length. The function <code>add_chains</code> builds a <code>current_chain</code> list and a <code>visited</code> set. When the walk reaches a value already in the cache, it splices the cached list onto the current chain with <code>list.extend</code>; when it reaches a value already in <code>visited</code>, it has found a self-contained cycle. Each previously unseen node is then assigned the appropriate tail slice of <code>current_chain</code>. This is conceptually clean and supports visualisation - you can print an entire chain - but it allocates a fresh list slice for every cached node, which is expensive. In Python it runs in 2.6839 s at N = 1,000,000, roughly three times slower than Algorithm 0's 0.9436 s.
 </p>
-
 <p>
 The C translation (<code>p0074_s1.c</code>) recognises that storing the full list is unnecessary: only the lengths are needed for the answer. It therefore keeps a single <code>chain_length</code> array, exactly like Algorithm 0, and reconstructs the same length information from each value's position index in <code>current_chain</code>. The one structural difference from s0 is that s1's C code uses a boolean <code>visited_flag</code> array - cleared after each walk via a tracked <code>visited_list</code> - for O(1) cycle-membership testing, instead of s0's linear scan. This extra bookkeeping is why s1_c is marginally slower than s0_c (0.0185 s vs 0.0160 s at N = 1,000,000).
 </p>
-
 <h4>Algorithm 2 - Visualisation variant of Algorithm 1 (p0074_s2.py and p0074_s2.c)</h4>
-
 <p>
 Algorithm 2 is functionally identical to Algorithm 1; it lives in a separate file purely to add optional coloured terminal output gated behind the <code>--show</code> flag. The Python file (<code>p0074_s2.py</code>) adds a <code>ColorCodes</code> enum of ANSI escape sequences and a <code>print_chains</code> function that renders each chain with its cycle entry highlighted. The C translation (<code>p0074_s2.c</code>) drops the visualisation entirely and is therefore essentially identical to s1_c. Its benchmarks track s1 closely across every input size (0.0214 s vs 0.0185 s in C, 2.6254 s vs 2.6839 s in Python at N = 1,000,000).
 </p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Memoization with a flat array</h4>
-
-<p>
-In the C solutions I allocate a contiguous <code>int</code> array of three million entries, initialised to zero by <a href="https://en.cppreference.com/w/c/memory/calloc" class="reference-source" target="_blank" rel="noopener noreferrer">calloc</a>, using zero as the "not computed" sentinel. Because the array index <em>is</em> the value itself, every cache lookup is a single dereference - no hashing, no collision handling. This relies on the key being a bounded non-negative integer, which the problem's mathematics guarantees (every reachable value stays below 2.5 million). Whenever your keys are integers confined to a small known range, a flat array beats a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> on both raw speed and cache locality. Reach for it as the default; fall back to a hash map only when the key space is genuinely sparse or unbounded.
-</p>
-
-<h4>Path-compression back-propagation</h4>
-
-<p>
-Rather than recomputing each chain length from scratch, I collect the whole walk and fill the cache for every node on it in a single backward pass, assigning <code>seen[i]</code> the length <code>total - i</code>. This amortises the cost so that the next traversal touching any of those nodes is served instantly. It is the same flattening idea that makes union-find with <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Path_compression" class="reference-source" target="_blank" rel="noopener noreferrer">path compression</a> run in near-constant time. The general principle: when one traversal reveals the answer for many intermediate states, write them all back at once.
-</p>
-
-<h4>Precomputed lookup table for digit factorials</h4>
-
-<p>
-Both languages define a ten-element constant array holding <code>0!</code> through <code>9!</code>. Computing a <a href="https://en.wikipedia.org/wiki/Factorial" class="reference-source" target="_blank" rel="noopener noreferrer">factorial</a> inside the innermost loop, which runs millions of times, would be wasteful when there are only ten possible inputs. The table fits permanently in L1 cache, so each digit costs one indexed read. Any function with a small fixed domain that is called repeatedly inside a hot loop is a candidate for this substitution of arithmetic by a table read.
-</p>
-
-<h4>Linear scan justified by a bounded constant</h4>
-
-<p>
-Algorithm 0 detects cycles by scanning the <code>seen</code> list, an O(L) operation. For unbounded L this would be a red flag, but here L is capped near sixty, so the scan is a tiny constant that avoids the allocation and hashing overhead of a set. The benchmark confirms the call: s0_c, with its linear scan, beats s1_c, which maintains a boolean-flag set, even though the latter is asymptotically "better" (0.0160 s vs 0.0185 s at N = 1,000,000). Knowing a problem-specific bound can justify a simpler design that the textbook would reject - measure rather than assume.
-</p>
-
-<h4>Decoupling the benchmark harness from the solver</h4>
-
-<p>
-The C <code>solve</code> functions receive a clean argument vector and concern themselves only with the algorithm; the surrounding runner strips out framework flags such as <code>--runs=</code> and <code>--show</code> before invoking them. This keeps the algorithmic core ignorant of timing and presentation concerns, making it independently testable. Separating measurement infrastructure from the code being measured is good practice for any program that must run both interactively and under a benchmark.
-</p>
-
-<h4>Python StrEnum for ANSI codes</h4>
-
-<p>
-Algorithm 2's Python file defines its terminal colours with <a href="https://docs.python.org/3/library/enum.html#enum.StrEnum" class="reference-source" target="_blank" rel="noopener noreferrer">enum.StrEnum</a>. Members of a <a href="https://docs.python.org/3/library/enum.html#enum.StrEnum" class="reference-source" target="_blank" rel="noopener noreferrer">StrEnum</a> behave as plain strings, so they drop directly into f-strings without needing <code>.value</code>. This gives meaningful names to magic escape sequences while keeping zero-overhead string semantics - a tidy way to name a set of related string constants.
-</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The unlocking insight is to recognise the successor map as a <a href="https://en.wikipedia.org/wiki/Functional_graph" class="reference-source" target="_blank" rel="noopener noreferrer">functional graph</a>: every component contains exactly one cycle, every trajectory falls into it, and - because the map is deterministic - each value's chain length can be computed once and cached. The supporting observation that all reachable values stay below about 2.5 million lets us swap a hash map for a flat array, which simplifies the code and speeds it up at the same time.
-</p>
-
-<p>
-Comparing the three approaches, Algorithm 0 is the clear winner. At N = 1,000,000 it runs in 0.0160 s in C and 0.9436 s in Python, versus 0.0185 s / 2.6839 s for Algorithm 1 and 0.0214 s / 2.6254 s for Algorithm 2. The Python gap is the most dramatic: storing only an integer per node (Algorithm 0) avoids the per-node list-slice allocations that dominate Algorithms 1 and 2. In C the three converge because the C translations of s1 and s2 discard list storage and reduce to the same integer-per-node scheme; s0_c stays marginally ahead thanks to its lighter cycle-detection scan. The same ordering holds at the largest inputs - at N = 10,000,000, s0.py finishes in 9.3755 s against roughly 27-28 s for the others. The lesson is that the minimal representation - one integer per node - is both faster and simpler once the algorithm is understood; full chain lists are worth their cost only for debugging and visualisation.
-</p>
-
-<ul>
-  <li>When a problem iterates a deterministic function, identify its <a href="https://en.wikipedia.org/wiki/Functional_graph" class="reference-source" target="_blank" rel="noopener noreferrer">functional-graph</a> structure and <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoize</a>: compute each node's value once and reuse it.</li>
-  <li>Back-propagate cache entries across an entire traversal in one pass - this is <a href="https://en.wikipedia.org/wiki/Disjoint-set_data_structure#Path_compression" class="reference-source" target="_blank" rel="noopener noreferrer">path compression</a> and makes future lookups effectively free.</li>
-  <li>When keys are bounded non-negative integers, prefer a flat array over a <a href="https://en.wikipedia.org/wiki/Hash_table" class="reference-source" target="_blank" rel="noopener noreferrer">hash table</a> for both speed and simplicity.</li>
-  <li>Replace repeated computation over a small fixed domain with a precomputed lookup table.</li>
-  <li>A linear scan can outperform an asymptotically superior hash set when the scanned length is a small known constant - let measured bounds, not textbook asymptotics, guide the choice.</li>
-  <li>Store the minimal representation needed for the answer; richer intermediate structures cost memory and time and belong only where you need them for inspection.</li>
-  <li>Keep the algorithmic core free of harness and presentation concerns so it stays testable and easy to reason about.</li>
-</ul>
-
 </article>

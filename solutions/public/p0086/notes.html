@@ -1,26 +1,17 @@
 <article>
-
 <h3>Problem Analysis</h3>
-
 <p>
-At its heart this is a piece of <a href="https://en.wikipedia.org/wiki/Geometry" class="reference-source" target="_blank" rel="noopener noreferrer">geometry</a> wrapped around a counting problem. A spider walking across the faces of a cuboid cannot travel through the interior, so the "straight line" distance is the shortest path constrained to the surface. The standard trick is to <a href="https://en.wikipedia.org/wiki/Net_(polyhedron)" class="reference-source" target="_blank" rel="noopener noreferrer">unfold</a> the cuboid: cut along an edge and rotate the two adjacent faces the path crosses until they lie flat in a single plane. Once flattened, the shortest surface path becomes an ordinary straight line, and its length follows directly from the <a href="https://en.wikipedia.org/wiki/Pythagorean_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean theorem</a>. A cuboid with dimensions <code>a</code>, <code>b</code>, <code>c</code> admits three unfoldings, but if I impose the canonical ordering <code>a &gt;= b &gt;= c</code> (so <code>a</code> is the largest dimension), the minimal one always lays the two smaller faces side by side, giving a path length of <code>sqrt(a^2 + (b + c)^2)</code>. This ordering simultaneously discharges the "ignoring rotations" requirement, because each distinct cuboid maps to exactly one unordered triple.</p>
-
+At its heart this is a piece of <a class="reference-source" href="https://en.wikipedia.org/wiki/Geometry" rel="noopener noreferrer" target="_blank">geometry</a> wrapped around a counting problem. A spider walking across the faces of a cuboid cannot travel through the interior, so the "straight line" distance is the shortest path constrained to the surface. The standard trick is to <a class="reference-source" href="https://en.wikipedia.org/wiki/Net_(polyhedron)" rel="noopener noreferrer" target="_blank">unfold</a> the cuboid: cut along an edge and rotate the two adjacent faces the path crosses until they lie flat in a single plane. Once flattened, the shortest surface path becomes an ordinary straight line, and its length follows directly from the <a class="reference-source" href="https://en.wikipedia.org/wiki/Pythagorean_theorem" rel="noopener noreferrer" target="_blank">Pythagorean theorem</a>. A cuboid with dimensions <code>a</code>, <code>b</code>, <code>c</code> admits three unfoldings, but if I impose the canonical ordering <code>a &gt;= b &gt;= c</code> (so <code>a</code> is the largest dimension), the minimal one always lays the two smaller faces side by side, giving a path length of <code>sqrt(a^2 + (b + c)^2)</code>. This ordering simultaneously discharges the "ignoring rotations" requirement, because each distinct cuboid maps to exactly one unordered triple.</p>
 <p>
-The task then reduces to counting integer triples <code>(a, b, c)</code> with <code>a &gt;= b &gt;= c &gt;= 1</code> for which <code>a^2 + (b + c)^2</code> is a <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a>. The key efficiency observation is that the formula depends on <code>b</code> and <code>c</code> only through their sum <code>s = b + c</code>. So rather than looping over both, I fix <code>a</code>, loop over <code>s</code> from <code>1</code> to <code>2a</code>, test whether <code>a^2 + s^2</code> is a perfect square once per value of <code>s</code>, and then count - in constant time - how many <code>(b, c)</code> pairs sum to <code>s</code> under the constraints. This collapses what would be a three-nested-loop search into an O(M^2) scan in the answer M, with an early exit the instant the running count crosses the target.</p>
-
+The task then reduces to counting integer triples <code>(a, b, c)</code> with <code>a &gt;= b &gt;= c &gt;= 1</code> for which <code>a^2 + (b + c)^2</code> is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Square_number" rel="noopener noreferrer" target="_blank">perfect square</a>. The key efficiency observation is that the formula depends on <code>b</code> and <code>c</code> only through their sum <code>s = b + c</code>. So rather than looping over both, I fix <code>a</code>, loop over <code>s</code> from <code>1</code> to <code>2a</code>, test whether <code>a^2 + s^2</code> is a perfect square once per value of <code>s</code>, and then count - in constant time - how many <code>(b, c)</code> pairs sum to <code>s</code> under the constraints. This collapses what would be a three-nested-loop search into an O(M^2) scan in the answer M, with an early exit the instant the running count crosses the target.</p>
 <h3>Solution Approach</h3>
-
 <h4>Unfolding plus sum-substitution counting (Python and C)</h4>
-
 <p>
 Both files implement the identical algorithm; only the language idiom differs. The structure has three parts.</p>
-
 <p>
 <strong>Outer loop with no fixed bound.</strong> I iterate <code>a</code> from <code>1</code> upward indefinitely - <code>itertools.count(1)</code> in Python, an open <code>for (int a = 1; ; a++)</code> in C. Since every new value of <code>a</code> can only add to the running total, iterating in increasing order lets me return the answer the moment the threshold is reached, without ever needing to guess an upper bound for <code>M</code>.</p>
-
 <p>
-<strong>Inner loop over the sum.</strong> For each <code>a</code> I loop <code>b_plus_c</code> (my name for <code>s = b + c</code>) from <code>1</code> to <code>2a</code>. The lower bound is <code>1</code> because <code>b</code> and <code>c</code> are each at least <code>1</code>; the upper bound is <code>2a</code> because each is at most <code>a</code>. I test whether <code>a^2 + s^2</code> is a <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect square</a>. In Python I write <code>math.sqrt(a**2 + b_plus_c**2).is_integer()</code>; in C I compute the square root, round to the nearest integer with <code>(long long)(sq + 0.5)</code>, and verify by squaring back with <code>isq * isq == (long long)val</code>.</p>
-
+<strong>Inner loop over the sum.</strong> For each <code>a</code> I loop <code>b_plus_c</code> (my name for <code>s = b + c</code>) from <code>1</code> to <code>2a</code>. The lower bound is <code>1</code> because <code>b</code> and <code>c</code> are each at least <code>1</code>; the upper bound is <code>2a</code> because each is at most <code>a</code>. I test whether <code>a^2 + s^2</code> is a <a class="reference-source" href="https://en.wikipedia.org/wiki/Square_number" rel="noopener noreferrer" target="_blank">perfect square</a>. In Python I write <code>math.sqrt(a**2 + b_plus_c**2).is_integer()</code>; in C I compute the square root, round to the nearest integer with <code>(long long)(sq + 0.5)</code>, and verify by squaring back with <code>isq * isq == (long long)val</code>.</p>
 <p>
 <strong>Closed-form pair counting.</strong> When the square test passes, I count the pairs <code>(b, c)</code> with <code>b &gt;= c &gt;= 1</code>, <code>b &lt;= a</code>, and <code>b + c = s</code>. The condition <code>b &gt;= c &gt;= 1</code> lets <code>c</code> range from <code>1</code> to <code>floor(s/2)</code>. The extra cap <code>b &lt;= a</code> means <code>s - c &lt;= a</code>, i.e. <code>c &gt;= s - a</code>. This splits into two cases:</p>
 <ul>
@@ -29,56 +20,6 @@ Both files implement the identical algorithm; only the language idiom differs. T
 </ul>
 <p>
 I add this count to a running accumulator and return <code>a</code> when the accumulator first meets or exceeds <code>target_solutions</code>. In code this is the <code>b_plus_c &lt;= a + 1</code> branch yielding <code>b_plus_c / 2</code> versus the <code>(2 * a - b_plus_c + 2) / 2</code> branch.</p>
-
 <p>
-The only real difference between the two files is the perfect-square test: Python's <code>is_integer()</code> is the most readable form available, while C uses the classic <code>round(sqrt(n))</code>-then-square pattern. Both are safe because the largest value involved stays below roughly <code>6.6</code> million, far inside the exact-integer range of <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="reference-source" target="_blank" rel="noopener noreferrer">double-precision floating point</a>.</p>
-
-<h3>Programming Techniques</h3>
-
-<h4>Unfolding a 3-D surface into a 2-D plane</h4>
-<p>
-The central move is converting a surface-path problem into a straight-line distance by flattening adjacent faces into one plane via the cuboid's <a href="https://en.wikipedia.org/wiki/Net_(polyhedron)" class="reference-source" target="_blank" rel="noopener noreferrer">net</a>. This is a general-purpose technique: whenever you need the shortest path across a polyhedral surface, unfold and apply the <a href="https://en.wikipedia.org/wiki/Pythagorean_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean theorem</a>. The same idea recurs in packaging design, robot navigation over faceted terrain, and computational origami.</p>
-
-<h4>Iterating over a derived quantity</h4>
-<p>
-Rather than looping over <code>b</code> and <code>c</code> independently, I loop over their sum <code>s = b + c</code>, because that is the only way they enter the distance formula. This drops the inner work from O(a^2) to O(a) per outer step and makes the perfect-square test a single check per value of <code>s</code>. Whenever a formula depends only on a sum (or product) of variables, iterate over that combined quantity and recover the multiplicity with a closed-form count.</p>
-
-<h4>Closed-form counting instead of enumeration</h4>
-<p>
-Instead of generating each <code>(b, c)</code> pair, I derive an O(1) formula for how many pairs map to a given sum under the constraints. Replacing an inner counting loop with arithmetic shaves an entire factor off the complexity and forces careful reasoning about boundary conditions - here the two-case split at <code>s = a + 1</code>. This <a href="https://en.wikipedia.org/wiki/Combinatorics" class="reference-source" target="_blank" rel="noopener noreferrer">combinatorial</a> shortcut is what makes the overall algorithm O(M^2) rather than O(M^3).</p>
-
-<h4>Monotone accumulator with early exit</h4>
-<p>
-Because the count never decreases as <code>a</code> grows, I keep a single running total and stop the instant it crosses the target. This avoids having to guess an upper bound for <code>M</code> in advance and guarantees the minimum amount of work. Reach for this pattern whenever the quantity you are searching for is <a href="https://en.wikipedia.org/wiki/Monotonic_function" class="reference-source" target="_blank" rel="noopener noreferrer">monotone</a> in the loop variable.</p>
-
-<h4>Floating-point perfect-square test</h4>
-<p>
-For moderate integers, <code>s = round(sqrt(n))</code> followed by <code>s * s == n</code> is a fast and correct <a href="https://en.wikipedia.org/wiki/Square_number" class="reference-source" target="_blank" rel="noopener noreferrer">perfect-square</a> test. Python's <code>math.sqrt(n).is_integer()</code> expresses the same idea concisely. The caveat is precision: <a href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" class="reference-source" target="_blank" rel="noopener noreferrer">doubles</a> represent integers exactly only up to <code>2^53</code>, and the rounding-then-squaring pattern stays safe well below that. For much larger inputs, switch to an <a href="https://en.wikipedia.org/wiki/Integer_square_root" class="reference-source" target="_blank" rel="noopener noreferrer">integer square root</a> or a precomputed set of squares.</p>
-
-<h4>Generator-driven unbounded iteration</h4>
-<p>
-The Python version uses <a href="https://docs.python.org/3/library/itertools.html#itertools.count" class="reference-source" target="_blank" rel="noopener noreferrer"><code>itertools.count</code></a> to produce an unbounded ascending sequence of <code>a</code> values lazily, while C uses a bare infinite <code>for</code>. Both express the same intent: "search upward until the threshold is met." A lazy <a href="https://en.wikipedia.org/wiki/Generator_(computer_programming)" class="reference-source" target="_blank" rel="noopener noreferrer">generator</a> is the natural tool when the termination condition lives inside the loop rather than in a known bound.</p>
-
-<h4>Separating solver from harness in C</h4>
-<p>
-The C file isolates the algorithmic <code>solve()</code> from the timing and argument-parsing harness. This keeps the algorithm free of I/O concerns, makes multi-run benchmarking trivial, and improves testability - a small structural discipline that repays itself across a whole problem set.</p>
-
-<h3>Key Takeaways</h3>
-
-<p>
-The insight that unlocks this problem is recognising that the shortest surface path is found by <a href="https://en.wikipedia.org/wiki/Net_(polyhedron)" class="reference-source" target="_blank" rel="noopener noreferrer">unfolding</a> faces into a plane, turning a hard geometric search into a single <a href="https://en.wikipedia.org/wiki/Pythagorean_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">Pythagorean</a> check. The second insight is that, under the ordering <code>a &gt;= b &gt;= c</code>, only the unfolding <code>sqrt(a^2 + (b + c)^2)</code> can ever be minimal, so just one candidate needs testing. Substituting <code>s = b + c</code> then reduces a three-variable count to a two-variable scan with O(1) counting per sum.</p>
-
-<p>
-Both solutions share the same algorithm, so the comparison is purely about language overhead. On the main case (<code>target = 1000000</code>, answer <code>1818</code>), the C implementation runs in about <code>0.0053 s</code> while the Python version takes about <code>0.2905 s</code> - roughly a 55x speedup from compiled execution, with identical logic. For the small dev cases both finish in well under a millisecond. The C version is the fastest; the Python version is the more readable, thanks to <code>is_integer()</code> and <a href="https://docs.python.org/3/library/itertools.html#itertools.count" class="reference-source" target="_blank" rel="noopener noreferrer"><code>itertools.count</code></a>.</p>
-
-<ul>
-<li>When a shortest-path problem lives on a surface, unfold the faces into a plane and apply straight-line distance.</li>
-<li>If a formula depends only on the sum or product of two variables, iterate over that derived quantity to cut a loop level.</li>
-<li>Replace inner counting loops with closed-form arithmetic whenever the multiplicity can be computed directly.</li>
-<li>A monotone accumulator with an early-exit threshold avoids guessing search bounds and does the minimum work.</li>
-<li>Floating-point square-root tests are fine for moderate integers; know the precision limit and switch to integer methods when values grow large.</li>
-<li>Fixing the largest dimension and enforcing a canonical ordering eliminates rotated duplicates with no explicit deduplication.</li>
-<li>Separating the solver from the benchmarking harness keeps algorithmic logic clean and easy to test.</li>
-</ul>
-
+The only real difference between the two files is the perfect-square test: Python's <code>is_integer()</code> is the most readable form available, while C uses the classic <code>round(sqrt(n))</code>-then-square pattern. Both are safe because the largest value involved stays below roughly <code>6.6</code> million, far inside the exact-integer range of <a class="reference-source" href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format" rel="noopener noreferrer" target="_blank">double-precision floating point</a>.</p>
 </article>

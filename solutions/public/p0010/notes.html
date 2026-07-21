@@ -1,40 +1,38 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
+<h3>Problem Analysis</h3>
+<p>
     The task is to add up every prime below two million. The arithmetic is trivial — a single
     running sum — so the entire difficulty lies in <em>enumerating the primes</em> quickly. By the
-    <a href="https://en.wikipedia.org/wiki/Prime_number_theorem" class="reference-source" target="_blank" rel="noopener noreferrer">prime number theorem</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number_theorem" rel="noopener noreferrer" target="_blank">prime number theorem</a>
     there are about <code>n / ln n</code> primes below <code>n</code>, so for <code>n = 2,000,000</code>
     we are summing roughly 148,933 numbers; the answer, 142,913,828,922, overflows 32 bits and must
     be accumulated in a 64-bit integer (Python integers are unbounded, so this only bites the C side).
   </p>
-  <p>
+<p>
     The decisive question is how cheaply each prime can be found. Testing each candidate independently
     by
-    <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>
-    costs <code>O(&radic;n)</code> per number and <code>O(n&radic;n / ln n)</code> overall — correct
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a>
+    costs <code>O(√n)</code> per number and <code>O(n√n / ln n)</code> overall — correct
     but slow. A sieve flips the economics: instead of interrogating each number, it crosses off the
     multiples of primes it has already found, sharing work across the whole range. The classical
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>
     runs in <code>O(n log log n)</code> time — effectively linear — which is the complexity class
     that makes this problem easy at two million and still comfortable at ten million. I implemented
     five solutions to contrast the approaches: a
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>,
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>,
     a
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>,
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a>,
     an unbounded incremental sieve, plain
-    <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>,
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a>,
     and a call into a specialised C library.
   </p>
-
-  <h3>Solution Approach</h3>
-
-  <h4>Solution 0 — Sieve of Eratosthenes</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Solution 0 — Sieve of Eratosthenes</h4>
+<p>
     My baseline is the
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>.
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>.
     I allocate a <code>bytearray</code> of <code>max_num + 1</code> flags initialised to 1, clear
-    indices 0 and 1, then for each <code>i</code> up to <code>&radic;max_num</code> that is still
+    indices 0 and 1, then for each <code>i</code> up to <code>√max_num</code> that is still
     marked prime I clear every multiple starting at <code>i*i</code> (smaller multiples were already
     cleared by smaller primes). The remaining set indices are the primes, and I sum them. The Python
     version leans on a key trick: the inner loop is replaced by the slice assignment
@@ -42,28 +40,26 @@
     one C-level operation. The C sibling writes the inner loop explicitly over an
     <code>unsigned char</code> array. Time is <code>O(n log log n)</code>, space <code>O(n)</code>.
   </p>
-
-  <h4>Solution 1 — Sieve of Sundaram</h4>
-  <p>
+<h4>Solution 1 — Sieve of Sundaram</h4>
+<p>
     The
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>
-    sieves only the odd numbers. It works on indices <code>i &le; n = (max_num - 1) / 2</code>, where
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" rel="noopener noreferrer" target="_blank">Sieve of Sundaram</a>
+    sieves only the odd numbers. It works on indices <code>i ≤ n = (max_num - 1) / 2</code>, where
     index <code>k</code> represents the odd number <code>2k + 1</code>. The insight is that an odd
     number <code>2k + 1</code> is composite exactly when <code>k</code> can be written as
-    <code>i + j + 2ij</code> for some <code>1 &le; i &le; j</code>, because
+    <code>i + j + 2ij</code> for some <code>1 ≤ i ≤ j</code>, because
     <code>2(i + j + 2ij) + 1 = (2i + 1)(2j + 1)</code>. So I mark every <code>i + j + 2ij</code>, then
     every unmarked index <code>i</code> yields the prime <code>2i + 1</code> (with 2 prepended). It is
     a tidy reformulation of the same sieving idea on a half-sized array; in practice its bound is a
     touch looser than Eratosthenes, around <code>O(n log n)</code>. Python and C implement the marking
     loop identically.
   </p>
-
-  <h4>Solution 2 — Unbounded incremental sieve</h4>
-  <p>
+<h4>Solution 2 — Unbounded incremental sieve</h4>
+<p>
     Solution 2 is an unbounded
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>
     expressed as a
-    <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator function</a>.
+    <a class="reference-source" href="https://docs.python.org/3/glossary.html#term-generator" rel="noopener noreferrer" target="_blank">generator function</a>.
     Rather than allocating the full table up front, it keeps a dictionary mapping the next composite
     each known prime will strike to that prime's step. When the running counter <code>n</code> is
     absent from the map it is prime, and I schedule its first multiple <code>n*n</code>; when it is
@@ -71,114 +67,32 @@
     order, so <code>solve()</code> can stop the instant a prime reaches <code>max_num</code> without
     knowing the bound in advance. The C translation reproduces the dictionary with a hand-written
     hash table using
-    <a href="https://en.wikipedia.org/wiki/Open_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">open addressing</a>,
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Open_addressing" rel="noopener noreferrer" target="_blank">open addressing</a>,
     including the cluster-rehash needed after a deletion. The time complexity matches the array sieve,
     <code>O(n log log n)</code>, but the constant factor is far worse because of per-number map churn.
   </p>
-
-  <h4>Solution 3 — Trial division</h4>
-  <p>
+<h4>Solution 3 — Trial division</h4>
+<p>
     Solution 3 is the deliberately naive baseline:
-    <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>.
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Trial_division" rel="noopener noreferrer" target="_blank">trial division</a>.
     For each candidate below <code>max_num</code> I test divisibility by 2 and then by odd numbers up
-    to <code>&radic;num</code>; the first divisor found proves compositeness. It needs no extra memory
-    beyond the loop variables, which is its only virtue here. The cost is <code>O(n&radic;n / ln n)</code>,
+    to <code>√num</code>; the first divisor found proves compositeness. It needs no extra memory
+    beyond the loop variables, which is its only virtue here. The cost is <code>O(n√n / ln n)</code>,
     and the timings below show exactly how badly that scales against the sieves. Python and C share
     the same <code>is_prime</code> structure.
   </p>
-
-  <h4>Solution 4 — primesieve library</h4>
-  <p>
+<h4>Solution 4 — primesieve library</h4>
+<p>
     Solution 4 delegates to
-    <a href="https://github.com/kimwalisch/primesieve" class="reference-source" target="_blank" rel="noopener noreferrer">primesieve</a>,
+    <a class="reference-source" href="https://github.com/kimwalisch/primesieve" rel="noopener noreferrer" target="_blank">primesieve</a>,
     a highly optimised segmented sieve that uses
-    <a href="https://en.wikipedia.org/wiki/Wheel_factorization" class="reference-source" target="_blank" rel="noopener noreferrer">wheel factorization</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Wheel_factorization" rel="noopener noreferrer" target="_blank">wheel factorization</a>
     and cache-friendly segmentation to enumerate primes at close to memory bandwidth. The Python code
     is a one-liner over <code>primesieve.primes(max_num - 1)</code>; the C code calls
     <code>primesieve_generate_primes</code> over <code>[2, max_num - 1]</code> and sums the array. Both
     pass <code>max_num - 1</code> so the upper endpoint stays strictly below <code>max_num</code>, as
     the problem demands. This is the fastest of the five and shows what a purpose-built library buys
     over a hand-rolled
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>.
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" rel="noopener noreferrer" target="_blank">Sieve of Eratosthenes</a>.
   </p>
-
-  <h3>Programming Techniques</h3>
-
-  <h4>Vectorised slice assignment</h4>
-  <p>
-    The Python
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
-    clears composites with <code>sieve[i*i::i] = bytearray(len(range(i*i, max_num + 1, i)))</code>.
-    Pushing the inner loop into a single slice assignment moves the work from the interpreter into a
-    C memory operation, which is why the array sieve in Python beats the explicitly-looped
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>
-    by nearly seven times. Reach for this whenever an inner loop writes a regular stride of a
-    <code>bytearray</code> or <code>list</code>.
-  </p>
-
-  <h4>Generator functions for lazy, unbounded sequences</h4>
-  <p>
-    Solution 2 models an infinite prime stream as a
-    <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator function</a>,
-    consumed with the walrus operator in <code>while (p := next(gen)) &lt; max_num</code>. A
-    <a href="https://docs.python.org/3/glossary.html#term-generator" class="reference-source" target="_blank" rel="noopener noreferrer">generator function</a>
-    decouples production from consumption, so the caller decides when to stop and no bound is baked in.
-    This is the tool of choice when the length of a sequence is not known up front or could be infinite.
-  </p>
-
-  <h4>Hand-written hash table with open addressing (C)</h4>
-  <p>
-    C has no built-in dictionary, so porting solution 2 meant writing one. I used
-    <a href="https://en.wikipedia.org/wiki/Open_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">open addressing</a>
-    with linear probing, a load-factor-triggered grow, and — the subtle part — a backward rehash of
-    the probe cluster after each deletion, since under
-    <a href="https://en.wikipedia.org/wiki/Open_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">open addressing</a>
-    a naive delete would strand later entries that probed past the hole. This is the standard pattern
-    when a contiguous, cache-friendly map is wanted without a dependency.
-  </p>
-
-  <h4>Reusing a specialised library</h4>
-  <p>
-    Solution 4 shows the engineering default that is easy to forget while enjoying the algorithms: a
-    mature library such as
-    <a href="https://github.com/kimwalisch/primesieve" class="reference-source" target="_blank" rel="noopener noreferrer">primesieve</a>
-    will, for a well-studied primitive, beat almost anything hand-written and remove a class of bugs.
-    Implement the sieve to learn; call the library to ship.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The recorded averages on the main case (<code>max_num = 2,000,000</code>) make the hierarchy
-    concrete. Among hand-written code the sieves dominate
-    <a href="https://en.wikipedia.org/wiki/Trial_division" class="reference-source" target="_blank" rel="noopener noreferrer">trial division</a>,
-    and the gap widens with size:
-  </p>
-  <table>
-    <tr><th>Solution</th><th>C (s)</th><th>Python (s)</th></tr>
-    <tr><td>s4 — primesieve</td><td>0.00065</td><td>0.0041</td></tr>
-    <tr><td>s1 — Sieve of Sundaram</td><td>0.0029</td><td>0.31</td></tr>
-    <tr><td>s0 — Sieve of Eratosthenes</td><td>0.0037</td><td>0.047</td></tr>
-    <tr><td>s2 — incremental sieve</td><td>0.088</td><td>0.22</td></tr>
-    <tr><td>s3 — trial division</td><td>0.12</td><td>3.4</td></tr>
-  </table>
-  <p>
-    The
-    <a href="https://github.com/kimwalisch/primesieve" class="reference-source" target="_blank" rel="noopener noreferrer">primesieve</a>
-    library wins outright. The most instructive contrast is between solutions 0 and 1: in C the
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>
-    edges out the
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
-    (half the array to touch), yet in Python the
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>
-    wins nearly sevenfold — purely because its inner loop vectorises into a slice assignment
-    while Sundaram's cannot. Algorithmic order is necessary but not sufficient; the constant factor,
-    set by which loop the language can vectorise, decided the race here.
-  </p>
-  <ul>
-    <li>Pick the complexity class first — a sieve's <code>O(n log log n)</code> beats trial division's <code>O(n&radic;n / ln n)</code> long before the constants matter.</li>
-    <li>Then mind the constant factor: in interpreted languages, prefer the algorithm whose hot loop pushes into native, vectorised operations.</li>
-    <li>Accumulate large sums in a 64-bit integer in C; know where your language's fixed-width arithmetic will overflow.</li>
-    <li>Use a generator when a sequence is unbounded or its length is unknown, so the consumer owns the stopping condition.</li>
-    <li>For a well-studied primitive, a mature library usually beats hand-rolled code — implement it once to understand it, then reuse the library.</li>
-  </ul>
 </article>

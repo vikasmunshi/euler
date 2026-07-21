@@ -1,36 +1,34 @@
 <article>
-  <h3>Problem Analysis</h3>
-  <p>
+<h3>Problem Analysis</h3>
+<p>
     This problem asks me to count, for each integer n, the number of ways it can be written as an
     unordered sum of primes (with repetition allowed), and to find the first n whose count exceeds a
     given threshold. This is a constrained form of the
-    <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)" class="reference-source" target="_blank" rel="noopener noreferrer">integer partition</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Partition_(number_theory)" rel="noopener noreferrer" target="_blank">integer partition</a>
     problem: a partition of n is any multiset of positive integers summing to n, and here the allowed
-    parts are restricted to <a href="https://en.wikipedia.org/wiki/Prime_number" class="reference-source" target="_blank" rel="noopener noreferrer">primes</a>.
+    parts are restricted to <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime_number" rel="noopener noreferrer" target="_blank">primes</a>.
     The word "unordered" is the crux: <code>7 + 3</code> and <code>3 + 7</code> describe the same
     decomposition and must be counted once. The standard device for enforcing this is to impose a
     canonical ordering on the parts - I require parts to be non-increasing, so each multiset is
     reached through exactly one ordered representative.
   </p>
-  <p>
+<p>
     The tractability insight is to parameterise a recursion by two quantities: the remaining sum and
     a ceiling on the largest prime part still allowed. I call this ceiling <code>slots</code>. When I
     select a prime p, every later part must be at most p, so the recursive call passes p as the new
     ceiling - this single parameter eliminates double-counting. Because the same (number, slots) pair
     recurs across many branches, I apply
-    <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoization</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Memoization" rel="noopener noreferrer" target="_blank">memoization</a>
     to cache each subproblem's answer, turning an exponential recursion into a
-    <a href="https://en.wikipedia.org/wiki/Dynamic_programming" class="reference-source" target="_blank" rel="noopener noreferrer">dynamic programming</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Dynamic_programming" rel="noopener noreferrer" target="_blank">dynamic programming</a>
     computation. The number of distinct subproblems is O(N * pi(N)), where pi(N) is the
-    <a href="https://en.wikipedia.org/wiki/Prime-counting_function" class="reference-source" target="_blank" rel="noopener noreferrer">prime-counting function</a>,
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Prime-counting_function" rel="noopener noreferrer" target="_blank">prime-counting function</a>,
     and each subproblem does O(pi(N)) work. Since the answer for the largest test case lies near
     n = 104, this is effectively instantaneous.
   </p>
-
-  <h3>Solution Approach</h3>
-
-  <h4>Count-only memoised recursion (p0077_s0.py and p0077_s0.c)</h4>
-  <p>
+<h3>Solution Approach</h3>
+<h4>Count-only memoised recursion (p0077_s0.py and p0077_s0.c)</h4>
+<p>
     My primary approach computes only the <em>count</em> of prime partitions, never the partitions
     themselves. The recursive function <code>num_prime_partitions(number, slots)</code> returns the
     number of ways to partition <code>number</code> using prime parts each at most <code>slots</code>.
@@ -40,11 +38,11 @@
     <code>num_prime_partitions(number - p, p)</code>. Passing p (not <code>slots</code>) as the next
     ceiling is precisely what enforces the non-increasing constraint and prevents duplicate counting.
   </p>
-  <p>
+<p>
     In Python I let
-    <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer"><code>functools.lru_cache</code></a>
+    <a class="reference-source" href="https://docs.python.org/3/library/functools.html#functools.lru_cache" rel="noopener noreferrer" target="_blank"><code>functools.lru_cache</code></a>
     handle the cache transparently. In C I hand-roll an
-    <a href="https://en.wikipedia.org/wiki/Open_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">open-addressing</a>
+    <a class="reference-source" href="https://en.wikipedia.org/wiki/Open_addressing" rel="noopener noreferrer" target="_blank">open-addressing</a>
     hash table: each (number, slots) key is hashed to a bucket, and linear probing resolves
     collisions. I sized the table at 2^18 (262144) buckets so the load factor stays low across the
     input range, and the modulo reduces to a bitwise AND because the size is a power of two. The
@@ -52,9 +50,8 @@
     first n whose count reaches the threshold. This is the fastest design because it allocates nothing
     beyond the memo table and stores a single integer per subproblem.
   </p>
-
-  <h4>Enumeration-based recursion (p0077_s1.py and p0077_s1.c)</h4>
-  <p>
+<h4>Enumeration-based recursion (p0077_s1.py and p0077_s1.c)</h4>
+<p>
     The second approach constructs and stores every individual partition as a list of integers,
     returning a list-of-lists; the answer is then just its length. In Python,
     <code>get_prime_partitions_simple_recursion</code> returns <code>list[list[int]]</code> and is
@@ -65,7 +62,7 @@
     thresholds 5000 and 50000: the answers (71 and 104) exceed the limit, so the search aborts before
     reaching them.
   </p>
-  <p>
+<p>
     The C version is far more involved because C offers no built-in dynamic lists or garbage
     collection. I define a <code>Partition</code> struct (an int array plus a length) and a
     <code>PartList</code> struct (a growable array of Partitions). The memo is a separate hash table
@@ -77,91 +74,4 @@
     approach allocates and copies O(count) int arrays per subproblem, so it is dramatically slower
     than the count-only version.
   </p>
-
-  <h3>Programming Techniques</h3>
-
-  <h4>Memoisation with lru_cache</h4>
-  <p>
-    Both Python solutions decorate the recursive function with
-    <a href="https://docs.python.org/3/library/functools.html#functools.lru_cache" class="reference-source" target="_blank" rel="noopener noreferrer"><code>functools.lru_cache</code></a>.
-    The decorator intercepts each call, uses the arguments as a dictionary key, and returns a cached
-    result on a hit; <code>maxsize=None</code> makes the cache unbounded. This is the right tool for
-    any pure (side-effect-free) recursive function with overlapping subproblems - reach for it
-    whenever the return value depends only on the arguments and the same argument combinations recur.
-  </p>
-
-  <h4>Open-addressing hash table in C</h4>
-  <p>
-    Both C solutions implement their own
-    <a href="https://en.wikipedia.org/wiki/Open_addressing" class="reference-source" target="_blank" rel="noopener noreferrer">open-addressing</a>
-    hash table with linear probing. I preferred this over a chained (linked-list) table for cache
-    locality: all entries live in one flat array, so probing adjacent buckets touches the same cache
-    lines. The hash mixes the two integer keys with a multiplicative constant and XOR-shifts to spread
-    keys uniformly, and a power-of-two size lets the index reduce to a bitwise AND. This is the go-to
-    pattern for a fast key-value store in C when the key space is bounded.
-  </p>
-
-  <h4>Sieve of Sundaram for prime generation</h4>
-  <p>
-    All solutions generate primes with the
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Sundaram" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Sundaram</a>,
-    which marks integers of the form i + j + 2ij and reads off odd primes 2k+1 from the unmarked
-    positions. It works only on odd numbers, so it uses roughly half the memory of the
-    <a href="https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes" class="reference-source" target="_blank" rel="noopener noreferrer">Sieve of Eratosthenes</a>.
-    Here it is called with small ceilings, so its overhead is negligible; I include it for a clean,
-    correct prime source.
-  </p>
-
-  <h4>Canonical ordering to avoid duplicate counting</h4>
-  <p>
-    The <code>slots</code> parameter encodes a non-increasing constraint: after picking prime p, all
-    later parts must be at most p. The recursion therefore explores exactly one representative of each
-    multiset, so no explicit deduplication is needed. This shrinking-upper-bound pattern is a general
-    technique for enumerating or counting unordered selections with repetition.
-  </p>
-
-  <h4>Dynamic arrays with doubling reallocation (C enumeration)</h4>
-  <p>
-    The <code>PartList</code> grows by doubling its capacity (starting at 8) whenever it fills. This
-    <a href="https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost" class="reference-source" target="_blank" rel="noopener noreferrer">geometric expansion</a>
-    amortises the cost of <code>realloc</code> to O(1) per append. Always grow by a multiplicative
-    factor rather than a fixed increment, which would degrade total allocation work to O(n^2).
-  </p>
-
-  <h4>Defensive recursion guards</h4>
-  <p>
-    The enumeration solutions carry a safe-limit parameter that aborts when <code>number</code>
-    exceeds a threshold, raising <code>OverflowError</code> in Python or returning NULL in C. This is
-    a deliberate guard against an algorithm whose memory grows explosively. When an approach has a
-    known scaling cliff, an explicit limit converts silent resource exhaustion into a clear,
-    diagnosable failure - the Python overflow verdicts in the benchmark are exactly this guard doing
-    its job.
-  </p>
-
-  <h3>Key Takeaways</h3>
-  <p>
-    The unlocking insight is that prime partitions can be <em>counted</em> efficiently without ever
-    being <em>enumerated</em>, via a
-    <a href="https://en.wikipedia.org/wiki/Memoization" class="reference-source" target="_blank" rel="noopener noreferrer">memoised</a>
-    recursion over (remaining sum, maximum allowed part). The <code>slots</code> parameter does double
-    duty: it enforces canonical ordering and keeps the memo key compact.
-  </p>
-  <p>
-    The benchmarks make the cost of enumeration vivid. The count-only C solution finishes both the
-    main case (threshold 5000) and the extra case (50000) in about 0.0001 s. The enumeration C
-    solution is markedly slower at 0.0003 s and 0.0034 s respectively, because it allocates and copies
-    a growing collection of int arrays per subproblem. The count-only Python solution is comparably
-    fast (0.0001 s and 0.0003 s) and beats the enumeration C version on the larger input, while the
-    Python enumeration version cannot reach the answer under its safe limit and reports overflow on
-    both the main and extra cases. When you only need a count, never enumerate.
-  </p>
-  <ul>
-    <li>Before enumerating combinatorial objects, ask whether a pure count suffices - enumeration is exponentially more expensive in time and memory.</li>
-    <li>A shrinking "maximum allowed part" parameter is the standard device for avoiding duplicate multisets in any unordered selection with repetition.</li>
-    <li>Memoisation turns exponential recursion into polynomial dynamic programming whenever the number of distinct subproblem keys is polynomial.</li>
-    <li>In C, prefer a flat open-addressing hash table with a power-of-two size for fast, cache-friendly memoisation.</li>
-    <li>Grow dynamic arrays by doubling, never by a fixed increment, to guarantee amortised O(1) insertion.</li>
-    <li>Add explicit limits to algorithms with known scaling cliffs so resource exhaustion surfaces as a clear, diagnosable error.</li>
-    <li>For primes in a bounded range, reach for a sieve rather than trial division.</li>
-  </ul>
 </article>
