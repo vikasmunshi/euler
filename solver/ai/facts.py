@@ -209,8 +209,21 @@ def prepare_anthropic_request(prompt: str, images: dict[str, bytes] | None = Non
     return client, system_blocks, messages
 
 
+#: An explicit system/user split point. A template that needs '## ' headings in its *system*
+#: half (e.g. an injected conventions doc) puts this on its own line instead of relying on the
+#: first-heading heuristic below.
+USER_MARKER = '<!--user-->'
+
+
 def _split_prompt(prompt: str) -> tuple[str, str]:
-    """Split a combined prompt into '(system, user)' at the first '## ' heading."""
+    """Split a combined prompt into '(system, user)'.
+
+    At the explicit ``USER_MARKER`` line when the template has one; otherwise at the first
+    '## ' heading. The explicit form lets a template keep large static blocks (vocabularies,
+    conventions) in the cached system half even when those blocks contain '## ' headings.
+    """
+    if (idx := prompt.find(USER_MARKER)) != -1:
+        return prompt[:idx].rstrip(), prompt[idx + len(USER_MARKER):].lstrip('\n')
     marker = '\n## '
     idx = prompt.find(marker)
     if idx == -1:

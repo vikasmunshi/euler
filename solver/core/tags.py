@@ -94,12 +94,17 @@ def _facet_of(central: dict[str, Any]) -> dict[str, str]:
     return {tag['slug']: tag['facet'] for tag in central['tags']}
 
 
-def format_vocabulary() -> str:
+def format_vocabulary(facets: tuple[str, ...] = FACETS) -> str:
     """The current tag vocabulary as compact markdown, grouped by facet, for a generation prompt.
-    Lists each tag as ``- slug — name`` (takeaways append the summary)."""
+    Lists each tag as ``- slug — name`` (takeaways append the summary).
+
+    ``facets`` narrows the listing: a domain-only prompt (an unsolved problem, which has no
+    solutions to carry techniques or takeaways) passes ``('domain',)`` so the model is not shown
+    - and cannot pick from - vocabulary it has no business assigning.
+    """
     tags = _load_central()['tags']
     lines: list[str] = []
-    for facet in FACETS:
+    for facet in facets:
         entries = sorted((t for t in tags if t['facet'] == facet), key=lambda t: t['slug'])
         lines.append(f'\n### {facet} ({len(entries)})')
         for t in entries:

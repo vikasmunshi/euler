@@ -50,6 +50,7 @@ a parameter that accepts repetition.
 | [`?`](#command--help) | `help` | List commands or show help for a specific command. |
 | [`benchmark`](#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
 | [`claude-api`](#command-claude-api) | — | Generate specified target using Claude API. ❏ |
+| [`claude-batch`](#command-claude-batch) | — | Generate tags.json for many problems in one Message Batches job. |
 | [`claude-blog`](#command-claude-blog) | — | Launch the Claude Euler Blogger skill to write a topic article for a tag/topic. |
 | [`claude-solve`](#command-claude-solve) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
@@ -264,6 +265,44 @@ Args:
     model:  The AI model to use for generation; defaults to Opus for code, docs and notes, Sonnet for test cases.
 
 Prints the USD/EUR cost of the call and returns non-zero if the generator reports failure.
+```
+
+---
+
+#### Command: `claude-batch`
+
+Generate tags.json for many problems in one Message Batches job.
+* profiles: admin, maintainer
+
+```
+claude-batch
+[action=run|submit|collect|list] (default run)
+[target=solved|unsolved|untagged|all] (default untagged)
+[limit=<int>] (default 250)
+[batch_id=<str>] (default '')
+[model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5] (default claude-sonnet-5)
+```
+
+```text
+Bulk-tag a wave of problems via the Message Batches API (half price, one shared cache).
+
+Solved problems get the full prompt (domain + per-index techniques + takeaways); unsolved
+ones get the domain-only prompt. Run `update-tags` after each wave to promote the proposed
+`new-tags` before submitting the next, so later waves are prompted with the settled vocabulary.
+
+Args:
+    action:   `run` submits and waits and collects; `submit` returns as soon as the job is
+              queued; `collect` writes the results of an already-submitted job; `list` shows
+              waves that were submitted but not yet collected.
+    target:   Which problems to cover - `untagged` (no tags.json yet, the resumable default),
+              `solved`, `unsolved`, or `all`.
+    limit:    Maximum problems in this wave. Keep it to a few hundred so that `new-tags`
+              proposals get reconciled often enough to avoid duplicate slugs.
+    batch_id: The job to collect (required for `collect`).
+    model:    The model to run the wave on.
+
+Note: the `costs` command counts batched tokens at standard list price, so its total
+overstates a batch wave by roughly 2x; this command prints the true discounted cost.
 ```
 
 ---

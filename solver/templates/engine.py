@@ -21,6 +21,7 @@ class Templates(StrEnum):
     PROMPT_PY = 'prompt_py.txt'
     PROMPT_NOTES = 'prompt_notes.txt'
     PROMPT_TAGS = 'prompt_tags.txt'
+    PROMPT_TAGS_DOMAIN = 'prompt_tags_domain.txt'
     PROMPT_TEST_CASES = 'prompt_test_cases.txt'
 
 

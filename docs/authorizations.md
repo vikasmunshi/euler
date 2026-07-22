@@ -41,6 +41,7 @@ a profile on each channel.
 | Module | Command | Reader | Contributor | Maintainer | Admin |
 |--------|---------|:------:|:-----------:|:----------:|:-----:|
 | `solver.ai.api` | `claude-api` |  | ✓ | ✓ | ✓ |
+| `solver.ai.batch` | `claude-batch` |  |  | ✓ | ✓ |
 | `solver.ai.models` | `costs` |  | ✓ | ✓ | ✓ |
 | `solver.ai.skill` | `claude-blog` |  |  | ✓ | ✓ |
 | `solver.ai.skill` | `claude-solve` |  | ✓ | ✓ | ✓ |

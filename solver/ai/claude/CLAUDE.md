@@ -116,6 +116,7 @@ solver/
   version.py          — The solver build version — the single source of truth.
   ai/
     api.py            — The `claude-api` command: generate solution artifacts (code / docs / test cases) via the Claude API.
+    batch.py          — The `claude-batch` command: bulk tag generation over the Message Batches API.
     code.py           — Generate and re-document Project Euler solutions (Python and C) via the Claude API.
     docs.py           — Module to generate notes for solver solutions, leveraging AI.
     facts.py          — Utility function for gathering problem inputs for AI

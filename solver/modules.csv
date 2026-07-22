@@ -1,5 +1,6 @@
 module,registers_commands
 solver.ai.api,True
+solver.ai.batch,True
 solver.ai.code,
 solver.ai.docs,
 solver.ai.facts,

@@ -208,6 +208,7 @@ command name below links to its full entry — usage and description — in the
 | [`?`](commands-index.md#command--help) | `help` | List commands or show help for a specific command. |
 | [`benchmark`](commands-index.md#command-benchmark) | — | Benchmark solutions to given/current problem. ❏ » |
 | [`claude-api`](commands-index.md#command-claude-api) | — | Generate specified target using Claude API. ❏ |
+| [`claude-batch`](commands-index.md#command-claude-batch) | — | Generate tags.json for many problems in one Message Batches job. |
 | [`claude-blog`](commands-index.md#command-claude-blog) | — | Launch the Claude Euler Blogger skill to write a topic article for a tag/topic. |
 | [`claude-solve`](commands-index.md#command-claude-solve) | — | Launch the Claude Euler Solver skill. ❏ |
 | [`clear`](commands-index.md#command-clear-cls) | `cls` | Clear the screen. |

@@ -3,6 +3,25 @@ You read the problem and every solution, then record the problem's domain, each 
 programming techniques, and any transferable takeaways as tags - choosing from an existing
 vocabulary and proposing a new tag only when nothing fits.
 
+Everything below - the conventions, the vocabulary and the output contract - is fixed. The single
+problem to tag arrives in the message that follows.
+
+$tag_conventions
+
+### Tag vocabulary (choose by slug; propose new only when nothing fits)
+$vocabulary
+
+### Output contract
+
+Emit the problem's `tags.json` following the tag conventions above in full.
+
+Output the JSON object only - no markdown, no code fences, no prose. It must start with `{` and
+end with `}`, and contain exactly the keys `domain`, `takeaways`, `techniques`, and `new-tags`.
+The `techniques` map must have one key per solution index (`s0`, `s1`, …) that the message
+provides, each listing only the techniques *that index* uses. Prefer existing vocabulary slugs;
+put any genuinely new tag's full definition in `new-tags`, never a bare slug in a facet list.
+$house_style
+<!--user-->
 ## Problem
 Number : $number
 Title  : $title
@@ -24,19 +43,3 @@ $test_cases
 
 ## Benchmark results
 $results
-
-## Tag vocabulary (choose by slug; propose new only when nothing fits)
-$vocabulary
-
----
-
-Emit the problem's `tags.json` following these tag conventions in full:
-
-$tag_conventions
-
-Output the JSON object only - no markdown, no code fences, no prose. It must start with `{` and
-end with `}`, and contain exactly the keys `domain`, `takeaways`, `techniques`, and `new-tags`.
-The `techniques` map must have one key per solution index (`s0`, `s1`, …) that exists above, each
-listing only the techniques *that index* uses. Prefer existing vocabulary slugs; put any genuinely
-new tag's full definition in `new-tags`, never a bare slug in a facet list.
-$house_style

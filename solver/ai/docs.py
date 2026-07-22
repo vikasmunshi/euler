@@ -129,12 +129,37 @@ def _parse_tags_json(raw: str) -> str | None:
     return dumps(data, indent=2)
 
 
+def has_solutions(problem: Problem) -> bool:
+    """Whether the problem has any solution file on disk (``pNNNN_sK.py`` / ``.c``).
+
+    This - not the progress-file ``solved`` flag - is what decides which tag prompt applies:
+    the full prompt reads solutions to assign techniques and takeaways, so with no solution to
+    read there is nothing for those two facets to describe.
+    """
+    return any(problem.solution_dir.glob('p*_s*.py')) or any(problem.solution_dir.glob('p*_s*.c'))
+
+
+def tags_prompt(problem: Problem, facts: Facts) -> str:
+    """The filled tag-generation prompt for a problem: full, or domain-only when unsolved.
+
+    Shared with the batch path (`solver.ai.batch`) so a batched request and an interactive one
+    are byte-identical - which is also what lets a whole batch share one cached system prefix.
+    """
+    if has_solutions(problem):
+        return filled_template(Templates.PROMPT_TAGS, facts=facts, vocabulary=format_vocabulary())
+    return filled_template(Templates.PROMPT_TAGS_DOMAIN, facts=facts,
+                           vocabulary=format_vocabulary(facets=('domain',)))
+
+
 def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
     """Generate a problem's tags.json (domain / per-index techniques / takeaways / new-tags).
 
     The model chooses from the current vocabulary (`topics/tags.json`) and proposes new tags only
     via `new-tags`; the maintainer's `update-tags` promotes those and reconciles the central legs.
     Retries once with a strict-JSON reminder if the first response cannot be parsed.
+
+    An unsolved problem (no solution files on disk) gets the domain-only prompt: it is filed by
+    subject matter alone, with empty `takeaways` / `techniques`.
 
     Args:
         model (Model)     : The AI model used to generate tags.
@@ -150,8 +175,8 @@ def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -
         console.print('[muted]tags.json exists; use [accent]--force[/accent] to regenerate.[/muted]')
         return None
     facts: Facts = gather_facts(problem, strict=False)
-    prompt = filled_template(Templates.PROMPT_TAGS, facts=facts, vocabulary=format_vocabulary())
-    console.print('[primary]Generating tags...[/primary]')
+    prompt = tags_prompt(problem, facts)
+    console.print(f'[primary]Generating {"tags" if has_solutions(problem) else "domain tags"}...[/primary]')
     raw: str | None = _generate_doc(prompt=prompt, model=model, images=facts.images)
     parsed: str | None = _parse_tags_json(raw) if raw is not None else None
     if parsed is None:
