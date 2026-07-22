@@ -139,7 +139,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bijection",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0098", "p0167", "p0940"]
+      "refs": ["p0098", "p0167"]
     },
     {
       "slug": "binary-logarithm",
@@ -175,7 +175,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_tree",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0219", "p0872"]
+      "refs": ["p0219"]
     },
     {
       "slug": "binomial-coefficient",
@@ -184,7 +184,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binomial_coefficient",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0015", "p0120", "p0123"]
+      "refs": ["p0015", "p0120", "p0123", "p0231", "p0493", "p0788", "p0862"]
     },
     {
       "slug": "bisection-method",
@@ -409,7 +409,7 @@
       "reference": "https://en.wikipedia.org/wiki/Composition_(combinatorics)",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0710", "p0845", "p0862"]
     },
     {
       "slug": "computational-geometry",
@@ -463,7 +463,7 @@
       "reference": "https://en.wikipedia.org/wiki/Coprime_integers",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003", "p0012", "p0069", "p0070", "p0071", "p0072", "p0073", "p0127", "p0134", "p0139", "p0157", "p0183", "p0195", "p0202", "p0420", "p0478", "p0694", "p0834", "p0932"]
+      "refs": ["p0003", "p0012", "p0026", "p0039", "p0069", "p0070", "p0071", "p0072", "p0073", "p0127", "p0139", "p0157", "p0165", "p0183", "p0195", "p0202", "p0420", "p0478", "p0694", "p0834", "p0932"]
     },
     {
       "slug": "counting",
@@ -472,7 +472,7 @@
       "reference": "https://en.wikipedia.org/wiki/Counting",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0068", "p0086", "p0109", "p0116", "p0166", "p0174", "p0800"]
+      "refs": ["p0068", "p0086", "p0109", "p0115", "p0116", "p0166", "p0174"]
     },
     {
       "slug": "cuban-prime",
@@ -544,7 +544,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_sum",
       "additional-references": ["https://en.wikipedia.org/wiki/Digit_sum#Digital_root"],
       "summary": "",
-      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0056", "p0065", "p0080", "p0092", "p0111", "p0112", "p0164", "p0171", "p0217", "p0387", "p0725"]
+      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0056", "p0065", "p0080", "p0092", "p0111", "p0112", "p0164", "p0171", "p0217", "p0387", "p0725", "p0845"]
     },
     {
       "slug": "digital-root",
@@ -571,7 +571,7 @@
       "reference": "https://en.wikipedia.org/wiki/Diophantine_equation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0009", "p0033", "p0066", "p0094", "p0100", "p0108", "p0110", "p0135", "p0136", "p0137", "p0138", "p0139", "p0140", "p0141", "p0157", "p0168", "p0180", "p0221", "p0223", "p0313", "p0321", "p0757", "p0932"]
+      "refs": ["p0009", "p0033", "p0039", "p0066", "p0094", "p0100", "p0108", "p0110", "p0135", "p0136", "p0137", "p0138", "p0139", "p0140", "p0141", "p0157", "p0168", "p0221", "p0223", "p0313", "p0321", "p0757", "p0932"]
     },
     {
       "slug": "directed-acyclic-graph",
@@ -724,7 +724,7 @@
       "reference": "https://en.wikipedia.org/wiki/Euler%27s_totient_function",
       "additional-references": ["https://en.wikipedia.org/wiki/Euler%27s_totient_function#Computing_Euler%27s_totient_function"],
       "summary": "",
-      "refs": ["p0069", "p0070", "p0072", "p0180", "p0182", "p0188", "p0202", "p0214", "p0228", "p0243", "p0478"]
+      "refs": ["p0069", "p0070", "p0072", "p0182", "p0188", "p0202", "p0214", "p0228", "p0243", "p0478"]
     },
     {
       "slug": "exclusive-or",
@@ -742,7 +742,7 @@
       "reference": "https://en.wikipedia.org/wiki/Expected_value",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0213", "p0493", "p0965"]
     },
     {
       "slug": "exponentiation",
@@ -751,7 +751,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0016", "p0029", "p0048", "p0056", "p0063", "p0097", "p0099", "p0119", "p0122", "p0461"]
+      "refs": ["p0016", "p0029", "p0048", "p0056", "p0063", "p0097", "p0099", "p0119", "p0122", "p0461", "p0800"]
     },
     {
       "slug": "factorial",
@@ -760,7 +760,7 @@
       "reference": "https://en.wikipedia.org/wiki/Factorial",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0015", "p0020", "p0024", "p0160", "p0288", "p0429", "p0549", "p0926"]
+      "refs": ["p0015", "p0020", "p0024", "p0160", "p0288", "p0381", "p0429", "p0549", "p0926"]
     },
     {
       "slug": "factorial-number-system",
@@ -778,7 +778,7 @@
       "reference": "https://en.wikipedia.org/wiki/Farey_sequence",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0071", "p0073", "p0198", "p0965"]
+      "refs": ["p0071", "p0073", "p0180", "p0198", "p0965"]
     },
     {
       "slug": "fermat-point",
@@ -805,7 +805,7 @@
       "reference": "https://en.wikipedia.org/wiki/Fermat%27s_little_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0026", "p0130"]
     },
     {
       "slug": "fibbinary-numbers",
@@ -1039,7 +1039,7 @@
       "reference": "https://en.wikipedia.org/wiki/Greatest_common_divisor",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0504"]
     },
     {
       "slug": "harshad-number",
@@ -1147,7 +1147,7 @@
       "reference": "https://en.wikipedia.org/wiki/Independence_(probability_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0205", "p0213"]
+      "refs": ["p0205"]
     },
     {
       "slug": "independent-set-graph-theory",
@@ -1210,7 +1210,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lagged_Fibonacci_generator",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0149", "p0186"]
     },
     {
       "slug": "lagrange-multiplier",
@@ -1255,7 +1255,7 @@
       "reference": "https://en.wikipedia.org/wiki/Least_common_multiple",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0005", "p0130"]
+      "refs": ["p0005"]
     },
     {
       "slug": "legendre-symbol",
@@ -1291,7 +1291,7 @@
       "reference": "https://en.wikipedia.org/wiki/Linear-feedback_shift_register",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0167", "p0186"]
+      "refs": ["p0167"]
     },
     {
       "slug": "loss-function",
@@ -1390,7 +1390,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0048", "p0097", "p0120", "p0123", "p0129", "p0130", "p0132", "p0134", "p0160", "p0206", "p0381", "p0710", "p0820", "p0940"]
     },
     {
       "slug": "modular-multiplicative-inverse",
@@ -1399,7 +1399,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_multiplicative_inverse",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0134", "p0216", "p0381"]
     },
     {
       "slug": "multiplicative-function",
@@ -1417,7 +1417,7 @@
       "reference": "https://en.wikipedia.org/wiki/Multiplicative_order",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0026", "p0129", "p0130", "p0132", "p0133"]
+      "refs": ["p0026", "p0130", "p0132", "p0133"]
     },
     {
       "slug": "nimber",
@@ -1462,7 +1462,7 @@
       "reference": "https://en.wikipedia.org/wiki/Number_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004", "p0026", "p0047", "p0062", "p0080", "p0088", "p0124", "p0127", "p0146", "p0152", "p0153", "p0157", "p0168", "p0179", "p0182", "p0193", "p0198", "p0221", "p0487", "p0745"]
+      "refs": ["p0004", "p0026", "p0047", "p0062", "p0080", "p0088", "p0124", "p0127", "p0146", "p0152", "p0153", "p0157", "p0179", "p0182", "p0193", "p0198", "p0221", "p0231", "p0487", "p0745"]
     },
     {
       "slug": "oeis-a000119",
@@ -1498,7 +1498,7 @@
       "reference": "https://en.wikipedia.org/wiki/Optimal_substructure",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0018", "p0067", "p0081", "p0114", "p0117", "p0159", "p0222"]
+      "refs": ["p0018", "p0067", "p0081", "p0114", "p0115", "p0117", "p0159", "p0222"]
     },
     {
       "slug": "orbit-dynamics",
@@ -1507,7 +1507,7 @@
       "reference": "https://en.wikipedia.org/wiki/Orbit_(dynamics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0197"]
+      "refs": []
     },
     {
       "slug": "overlapping-subproblems",
@@ -1516,7 +1516,7 @@
       "reference": "https://en.wikipedia.org/wiki/Overlapping_subproblems",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014", "p0082"]
+      "refs": ["p0014", "p0082", "p0115"]
     },
     {
       "slug": "p-adic-number",
@@ -1561,7 +1561,7 @@
       "reference": "https://en.wikipedia.org/wiki/Palindromic_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004", "p0036", "p0055", "p0125", "p0206"]
+      "refs": ["p0004", "p0036", "p0055", "p0125"]
     },
     {
       "slug": "pandigital-number",
@@ -1579,7 +1579,7 @@
       "reference": "https://en.wikipedia.org/wiki/Parity_(mathematics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002", "p0012", "p0027", "p0120", "p0123", "p0142", "p0145", "p0174", "p0420", "p0720", "p0868", "p0918", "p0938", "p0974", "p0980"]
+      "refs": ["p0002", "p0012", "p0027", "p0120", "p0123", "p0142", "p0145", "p0174", "p0420", "p0720", "p0868", "p0918", "p0974", "p0980"]
     },
     {
       "slug": "partition-number-theory",
@@ -1588,7 +1588,7 @@
       "reference": "https://en.wikipedia.org/wiki/Partition_(number_theory)",
       "additional-references": ["https://en.wikipedia.org/wiki/Partition_(number_theory)#Asymptotic_growth"],
       "summary": "",
-      "refs": ["p0031", "p0076", "p0077", "p0078", "p0207", "p0772"]
+      "refs": ["p0031", "p0076", "p0077", "p0078", "p0772"]
     },
     {
       "slug": "pentagonal-number-theorem",
@@ -1714,7 +1714,7 @@
       "reference": "https://en.wikipedia.org/wiki/Positional_notation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0013", "p0022", "p0030", "p0036", "p0040", "p0145", "p0148", "p0156", "p0162", "p0217", "p0277", "p0288", "p0346", "p0885", "p0926", "p0961"]
+      "refs": ["p0013", "p0022", "p0030", "p0036", "p0040", "p0145", "p0148", "p0156", "p0162", "p0168", "p0217", "p0277", "p0288", "p0346", "p0788", "p0885", "p0926", "p0961"]
     },
     {
       "slug": "power-of-two",
@@ -1723,7 +1723,7 @@
       "reference": "https://en.wikipedia.org/wiki/Power_of_two",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0207", "p0872"]
     },
     {
       "slug": "prefix-code",
@@ -1750,7 +1750,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime-counting_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0007", "p0050", "p0187", "p0347", "p0501", "p0642"]
+      "refs": ["p0007", "p0050", "p0187", "p0501", "p0642"]
     },
     {
       "slug": "prime-factor",
@@ -1768,7 +1768,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_factorization",
       "additional-references": [],
       "summary": "Decomposing a number into its prime power components to compute multiplicative properties like divisor counts.",
-      "refs": []
+      "refs": ["p0231", "p0347"]
     },
     {
       "slug": "prime-number",
@@ -1777,7 +1777,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003", "p0007", "p0010", "p0027", "p0035", "p0037", "p0041", "p0046", "p0049", "p0050", "p0051", "p0058", "p0060", "p0069", "p0077", "p0087", "p0097", "p0111", "p0118", "p0123", "p0128", "p0131", "p0132", "p0133", "p0134", "p0146", "p0148", "p0187", "p0196", "p0203", "p0204", "p0214", "p0216", "p0231", "p0304", "p0313", "p0347", "p0357", "p0381", "p0387", "p0429", "p0487", "p0545", "p0772", "p0800", "p0808", "p0845", "p0934"]
+      "refs": ["p0003", "p0007", "p0010", "p0027", "p0035", "p0037", "p0041", "p0046", "p0049", "p0050", "p0051", "p0058", "p0060", "p0069", "p0077", "p0087", "p0097", "p0111", "p0118", "p0123", "p0128", "p0131", "p0132", "p0133", "p0134", "p0146", "p0148", "p0187", "p0196", "p0203", "p0204", "p0214", "p0216", "p0304", "p0313", "p0347", "p0357", "p0381", "p0387", "p0429", "p0487", "p0545", "p0772", "p0800", "p0808", "p0845", "p0934"]
     },
     {
       "slug": "prime-number-theorem",
@@ -1786,7 +1786,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime_number_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0007", "p0231", "p0304"]
+      "refs": ["p0007", "p0304"]
     },
     {
       "slug": "prime-power",
@@ -1795,7 +1795,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime_power",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0087", "p0549"]
+      "refs": ["p0087", "p0160", "p0549"]
     },
     {
       "slug": "prime-proof-number",
@@ -1813,7 +1813,7 @@
       "reference": "https://en.wikipedia.org/wiki/Probability_distribution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0084", "p0121", "p0151", "p0205", "p0213", "p0938"]
+      "refs": ["p0084", "p0121", "p0151", "p0205", "p0938"]
     },
     {
       "slug": "product-rule",
@@ -1849,7 +1849,7 @@
       "reference": "https://en.wikipedia.org/wiki/Pseudorandom_number_generator",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0149", "p0816"]
     },
     {
       "slug": "pythagorean-theorem",
@@ -1876,7 +1876,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_equation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0042", "p0044", "p0045", "p0137", "p0140", "p0144", "p0757", "p0932"]
+      "refs": ["p0042", "p0044", "p0045", "p0137", "p0140", "p0144", "p0504", "p0757", "p0932"]
     },
     {
       "slug": "quadratic-form",
@@ -1921,7 +1921,7 @@
       "reference": "https://en.wikipedia.org/wiki/Rational_number",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0165", "p0180", "p0259"]
     },
     {
       "slug": "recurrence-relation",
@@ -1930,7 +1930,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0115", "p0117", "p0197", "p0872", "p0938", "p0940"]
     },
     {
       "slug": "reflection-physics",
@@ -2056,7 +2056,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0216"]
+      "refs": ["p0845"]
     },
     {
       "slug": "similarity-geometry",
@@ -2146,7 +2146,7 @@
       "reference": "https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0071", "p0073", "p0198", "p0965"]
+      "refs": ["p0071", "p0073", "p0198"]
     },
     {
       "slug": "sterns-diatomic-sequence",
@@ -2200,7 +2200,7 @@
       "reference": "https://en.wikipedia.org/wiki/Summation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0006", "p0010", "p0013", "p0028", "p0125", "p0694", "p0918", "p0934"]
+      "refs": ["p0006", "p0010", "p0013", "p0028", "p0048", "p0125", "p0694", "p0918", "p0934"]
     },
     {
       "slug": "summation-by-parts",
@@ -2254,7 +2254,7 @@
       "reference": "https://en.wikipedia.org/wiki/Three-distance_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0965"]
     },
     {
       "slug": "tiling",
@@ -2416,7 +2416,7 @@
       "reference": "https://en.wikipedia.org/wiki/Wilson%27s_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0160", "p0381"]
     },
     {
       "slug": "zeckendorfs-theorem",
@@ -2569,7 +2569,7 @@
       "reference": "https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic",
       "additional-references": ["https://docs.python.org/3/library/stdtypes.html#numeric-types-int-float-complex"],
       "summary": "",
-      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0063_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0113_s0", "p0116_s0", "p0117_s0", "p0119_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0146_s0", "p0152_s0", "p0157_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0221_s0", "p0243_s0", "p0259_s0", "p0321_s0", "p0387_s0", "p0484_s0", "p0493_s0", "p0545_s0", "p0686_s0", "p0686_s1", "p0694_s0", "p0743_s0", "p0751_s0", "p0788_s0", "p0800_s0", "p0853_s0", "p0862_s0", "p0872_s0", "p0934_s0", "p0974_s0"]
+      "refs": ["p0005_s0", "p0013_s0", "p0015_s0", "p0016_s0", "p0020_s0", "p0025_s0", "p0029_s0", "p0029_s1", "p0031_s0", "p0055_s0", "p0056_s0", "p0057_s0", "p0063_s0", "p0065_s0", "p0066_s0", "p0068_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0080_s0", "p0080_s1", "p0113_s0", "p0116_s0", "p0117_s0", "p0119_s0", "p0121_s0", "p0137_s0", "p0138_s0", "p0140_s0", "p0146_s0", "p0152_s0", "p0157_s0", "p0162_s0", "p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0178_s0", "p0180_s0", "p0181_s0", "p0191_s0", "p0192_s0", "p0194_s0", "p0201_s0", "p0203_s0", "p0221_s0", "p0243_s0", "p0259_s0", "p0321_s0", "p0387_s0", "p0484_s0", "p0493_s0", "p0545_s0", "p0686_s0", "p0686_s1", "p0694_s0", "p0710_s0", "p0743_s0", "p0751_s0", "p0788_s0", "p0800_s0", "p0853_s0", "p0862_s0", "p0872_s0", "p0934_s0", "p0974_s0"]
     },
     {
       "slug": "arg-max",
@@ -2578,7 +2578,7 @@
       "reference": "https://en.wikipedia.org/wiki/Arg_max",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0039_s0", "p0099_s0"]
+      "refs": ["p0099_s0"]
     },
     {
       "slug": "arithmetic-shift",
@@ -2596,7 +2596,7 @@
       "reference": "https://docs.python.org/3/library/array.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0084_s0", "p0174_s0"]
+      "refs": ["p0084_s0", "p0130_s0", "p0174_s0"]
     },
     {
       "slug": "array-data-structure",
@@ -2614,7 +2614,7 @@
       "reference": "https://en.wikipedia.org/wiki/Array_programming",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0154_s0"]
+      "refs": ["p0154_s0", "p0213_s0"]
     },
     {
       "slug": "ascii",
@@ -2731,7 +2731,7 @@
       "reference": "https://docs.python.org/3/library/bisect.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0085_s1"]
+      "refs": ["p0085_s1", "p0134_s0"]
     },
     {
       "slug": "bit-array",
@@ -2740,7 +2740,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bit_array",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0050_s0", "p0079_s0", "p0087_s0", "p0143_s0", "p0201_s0", "p0772_s0"]
+      "refs": ["p0050_s0", "p0079_s0", "p0087_s0", "p0143_s0", "p0201_s0", "p0504_s0", "p0772_s0"]
     },
     {
       "slug": "bit-length",
@@ -2758,7 +2758,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bit_manipulation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0036_s0", "p0079_s0", "p0105_s0", "p0125_s0", "p0152_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0177_s0", "p0202_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0269_s0", "p0301_s0", "p0304_s0", "p0304_s1", "p0345_s0", "p0679_s0", "p0755_s0", "p0834_s0", "p0872_s0", "p0918_s0", "p0961_s0", "p0974_s0"]
+      "refs": ["p0036_s0", "p0079_s0", "p0105_s0", "p0125_s0", "p0152_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0177_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0269_s0", "p0301_s0", "p0304_s0", "p0304_s1", "p0345_s0", "p0679_s0", "p0755_s0", "p0834_s0", "p0872_s0", "p0918_s0", "p0961_s0", "p0974_s0"]
     },
     {
       "slug": "bit-numbering",
@@ -2767,7 +2767,7 @@
       "reference": "https://en.wikipedia.org/wiki/Bit_numbering",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0872_s0"]
     },
     {
       "slug": "bitwise-operation",
@@ -2830,7 +2830,7 @@
       "reference": "https://en.wikipedia.org/wiki/Brute-force_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s1", "p0004_s0", "p0008_s0", "p0009_s0", "p0011_s0", "p0012_s1", "p0026_s0", "p0027_s0", "p0028_s0", "p0033_s0", "p0038_s0", "p0044_s0", "p0047_s0", "p0052_s0", "p0055_s0", "p0056_s0", "p0059_s0", "p0076_s2", "p0085_s0", "p0086_s0", "p0090_s0", "p0093_s0", "p0102_s0", "p0104_s0", "p0109_s0", "p0112_s0", "p0119_s0", "p0125_s0", "p0126_s0", "p0129_s0", "p0139_s0", "p0140_s0", "p0163_s0", "p0165_s0", "p0168_s0", "p0180_s0", "p0182_s0", "p0206_s0", "p0225_s0", "p0478_s0", "p0504_s0"]
+      "refs": ["p0001_s1", "p0004_s0", "p0008_s0", "p0009_s0", "p0011_s0", "p0012_s1", "p0026_s0", "p0027_s0", "p0028_s0", "p0033_s0", "p0038_s0", "p0044_s0", "p0047_s0", "p0052_s0", "p0055_s0", "p0056_s0", "p0059_s0", "p0076_s2", "p0085_s0", "p0086_s0", "p0090_s0", "p0093_s0", "p0102_s0", "p0104_s0", "p0109_s0", "p0112_s0", "p0119_s0", "p0125_s0", "p0126_s0", "p0129_s0", "p0139_s0", "p0140_s0", "p0163_s0", "p0165_s0", "p0182_s0", "p0225_s0", "p0478_s0", "p0504_s0"]
     },
     {
       "slug": "bss",
@@ -2902,7 +2902,7 @@
       "reference": "https://en.wikipedia.org/wiki/Canonical_form",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0029_s0", "p0029_s1", "p0049_s0", "p0052_s0", "p0054_s0", "p0060_s0", "p0062_s0", "p0068_s0", "p0165_s0", "p0177_s0", "p0199_s0", "p0259_s0"]
+      "refs": ["p0029_s0", "p0029_s1", "p0049_s0", "p0052_s0", "p0054_s0", "p0060_s0", "p0062_s0", "p0068_s0", "p0165_s0", "p0177_s0", "p0199_s0"]
     },
     {
       "slug": "carmichael-function",
@@ -2911,7 +2911,7 @@
       "reference": "https://en.wikipedia.org/wiki/Carmichael_function",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0130_s0"]
     },
     {
       "slug": "carry-arithmetic",
@@ -2929,7 +2929,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cartesian_product",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0853_s0"]
+      "refs": ["p0259_s0", "p0853_s0"]
     },
     {
       "slug": "catastrophic-cancellation",
@@ -3010,7 +3010,7 @@
       "reference": "https://en.wikipedia.org/wiki/Closed-form_expression",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0030_s0", "p0044_s0", "p0045_s0", "p0061_s0", "p0063_s0", "p0070_s0", "p0071_s0", "p0085_s1", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0145_s0", "p0147_s0", "p0150_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0226_s0", "p0269_s0", "p0288_s0", "p0313_s0", "p0321_s0", "p0420_s0", "p0420_s1", "p0484_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0743_s0", "p0757_s0", "p0868_s0", "p0872_s0", "p0899_s0", "p0918_s0", "p0932_s0", "p0944_s0", "p1000_s0"]
+      "refs": ["p0001_s0", "p0006_s0", "p0015_s0", "p0028_s0", "p0030_s0", "p0044_s0", "p0045_s0", "p0061_s0", "p0063_s0", "p0070_s0", "p0071_s0", "p0085_s1", "p0086_s0", "p0104_s0", "p0106_s0", "p0113_s0", "p0120_s0", "p0126_s0", "p0128_s0", "p0137_s0", "p0145_s0", "p0147_s0", "p0150_s0", "p0156_s0", "p0158_s0", "p0159_s0", "p0162_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0173_s0", "p0180_s0", "p0183_s0", "p0190_s0", "p0194_s0", "p0198_s0", "p0199_s0", "p0207_s0", "p0210_s0", "p0226_s0", "p0269_s0", "p0288_s0", "p0313_s0", "p0321_s0", "p0420_s0", "p0420_s1", "p0484_s0", "p0493_s0", "p0587_s0", "p0704_s0", "p0743_s0", "p0757_s0", "p0862_s0", "p0868_s0", "p0872_s0", "p0899_s0", "p0918_s0", "p0932_s0", "p0944_s0", "p0965_s0", "p1000_s0"]
     },
     {
       "slug": "closure-computer-programming",
@@ -3046,7 +3046,7 @@
       "reference": "https://en.wikipedia.org/wiki/Collinearity",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0165_s0"]
     },
     {
       "slug": "combination",
@@ -3055,7 +3055,7 @@
       "reference": "https://en.wikipedia.org/wiki/Combination",
       "additional-references": ["https://en.wikipedia.org/wiki/Combination#Number_of_combinations_with_repetition"],
       "summary": "",
-      "refs": ["p0030_s0", "p0090_s0", "p0093_s0", "p0103_s0", "p0103_s1", "p0106_s0", "p0184_s0"]
+      "refs": ["p0030_s0", "p0090_s0", "p0093_s0", "p0103_s0", "p0103_s1", "p0106_s0", "p0184_s0", "p0862_s0"]
     },
     {
       "slug": "combinations-with-replacement",
@@ -3073,7 +3073,7 @@
       "reference": "https://en.wikipedia.org/wiki/Combinatorial_principles",
       "additional-references": ["https://en.wikipedia.org/wiki/Combinatorial_principles#Complementary_counting", "https://en.wikipedia.org/wiki/Combinatorial_principles#Rule_of_subtraction"],
       "summary": "",
-      "refs": ["p0111_s0", "p0116_s0", "p0162_s0", "p0788_s0", "p0862_s0"]
+      "refs": ["p0111_s0", "p0116_s0", "p0162_s0", "p0788_s0"]
     },
     {
       "slug": "complete-graph",
@@ -3085,13 +3085,13 @@
       "refs": ["p1000_s0"]
     },
     {
-      "slug": "composition-combinatorics-computing",
+      "slug": "composition-combinatorics-application",
       "facet": "technique",
-      "name": "Composition (combinatorics) (computing)",
+      "name": "Composition (combinatorics) (application)",
       "reference": "https://en.wikipedia.org/wiki/Composition_(combinatorics)",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0862_s0"]
     },
     {
       "slug": "concatenation",
@@ -3100,7 +3100,7 @@
       "reference": "https://en.wikipedia.org/wiki/Concatenation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0017_s0", "p0038_s0", "p0060_s0", "p0068_s0", "p0170_s0", "p0259_s0", "p0751_s0", "p0932_s0"]
+      "refs": ["p0017_s0", "p0038_s0", "p0060_s0", "p0068_s0", "p0170_s0", "p0751_s0", "p0932_s0"]
     },
     {
       "slug": "concurrent-lines",
@@ -3352,7 +3352,7 @@
       "reference": "https://en.wikipedia.org/wiki/Depth-first_search",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0484_s0", "p0642_s0", "p0862_s0"]
+      "refs": ["p0060_s0", "p0061_s0", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0122_s0", "p0139_s1", "p0170_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0484_s0", "p0642_s0"]
     },
     {
       "slug": "descartes-circle-theorem",
@@ -3415,7 +3415,7 @@
       "reference": "https://docs.python.org/3/library/stdtypes.html#dict",
       "additional-references": ["https://docs.python.org/3/tutorial/datastructures.html#dictionaries"],
       "summary": "",
-      "refs": ["p0010_s2", "p0028_s0", "p0037_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0075_s0", "p0079_s0", "p0089_s0", "p0118_s0", "p0145_s0", "p0151_s0", "p0153_s0", "p0164_s0", "p0166_s0", "p0199_s0", "p0208_s0", "p0219_s0", "p0269_s0", "p0926_s0"]
+      "refs": ["p0010_s2", "p0028_s0", "p0037_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0075_s0", "p0079_s0", "p0089_s0", "p0118_s0", "p0145_s0", "p0151_s0", "p0153_s0", "p0164_s0", "p0166_s0", "p0199_s0", "p0208_s0", "p0219_s0", "p0269_s0", "p0816_s0", "p0926_s0"]
     },
     {
       "slug": "digit-dp",
@@ -3496,7 +3496,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divide-and-conquer_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0816_s0", "p0918_s0"]
+      "refs": ["p0918_s0"]
     },
     {
       "slug": "division-algorithm",
@@ -3541,7 +3541,7 @@
       "reference": "https://en.wikipedia.org/wiki/Double-precision_floating-point_format",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0197_s0", "p0965_s0"]
+      "refs": ["p0197_s0"]
     },
     {
       "slug": "doubly-linked-list",
@@ -3559,7 +3559,7 @@
       "reference": "https://en.wikipedia.org/wiki/Dynamic_array",
       "additional-references": ["https://en.wikipedia.org/wiki/Dynamic_array#Geometric_expansion_and_amortized_cost"],
       "summary": "",
-      "refs": ["p0046_s0", "p0059_s0", "p0062_s0", "p0064_s0", "p0077_s1", "p0078_s0", "p0093_s0", "p0095_s0", "p0142_s0", "p0143_s0", "p0155_s0", "p0167_s0", "p0200_s0", "p0212_s0", "p0213_s0", "p0221_s0", "p0223_s0", "p0224_s0", "p0346_s0", "p0387_s0", "p0710_s0", "p0757_s0", "p0834_s0", "p0853_s0"]
+      "refs": ["p0046_s0", "p0059_s0", "p0062_s0", "p0064_s0", "p0077_s1", "p0078_s0", "p0093_s0", "p0095_s0", "p0142_s0", "p0143_s0", "p0155_s0", "p0165_s0", "p0167_s0", "p0200_s0", "p0212_s0", "p0221_s0", "p0223_s0", "p0224_s0", "p0346_s0", "p0387_s0", "p0710_s0", "p0757_s0", "p0834_s0", "p0853_s0"]
     },
     {
       "slug": "dynamic-memory-allocation",
@@ -3568,7 +3568,7 @@
       "reference": "https://en.wikipedia.org/wiki/Dynamic_memory_allocation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0016_s0", "p0051_s0", "p0056_s0", "p0073_s2", "p0077_s1", "p0088_s0", "p0092_s0", "p0096_s0", "p0127_s0", "p0139_s1", "p0150_s0", "p0161_s0", "p0171_s0", "p0181_s0", "p0189_s0", "p0218_s0", "p0313_s0", "p0545_s0", "p0549_s0", "p0642_s0", "p0720_s0"]
+      "refs": ["p0016_s0", "p0051_s0", "p0056_s0", "p0073_s2", "p0077_s1", "p0088_s0", "p0092_s0", "p0096_s0", "p0127_s0", "p0139_s1", "p0150_s0", "p0161_s0", "p0171_s0", "p0181_s0", "p0189_s0", "p0218_s0", "p0259_s0", "p0313_s0", "p0545_s0", "p0549_s0", "p0642_s0", "p0720_s0"]
     },
     {
       "slug": "dynamic-programming",
@@ -3577,7 +3577,7 @@
       "reference": "https://en.wikipedia.org/wiki/Dynamic_programming",
       "additional-references": ["https://en.wikipedia.org/wiki/Dynamic_programming#Bottom-up_approach"],
       "summary": "",
-      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0259_s0", "p0301_s0", "p0345_s0", "p0549_s0", "p0642_s0", "p0679_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0885_s0", "p0938_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0259_s0", "p0301_s0", "p0345_s0", "p0549_s0", "p0642_s0", "p0679_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0885_s0", "p0938_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "eafp",
@@ -3649,7 +3649,7 @@
       "reference": "https://en.wikipedia.org/wiki/Euclidean_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0005_s0", "p0026_s0", "p0033_s0", "p0039_s0", "p0071_s0", "p0075_s0", "p0091_s0", "p0101_s0", "p0101_s3", "p0127_s0", "p0139_s0", "p0139_s2", "p0175_s0", "p0182_s0", "p0183_s0", "p0195_s0", "p0198_s0", "p0420_s0", "p0420_s1", "p0504_s0", "p0686_s0", "p0686_s1", "p0694_s0"]
+      "refs": ["p0005_s0", "p0026_s0", "p0033_s0", "p0039_s0", "p0071_s0", "p0075_s0", "p0091_s0", "p0101_s0", "p0101_s3", "p0127_s0", "p0129_s0", "p0139_s0", "p0139_s2", "p0175_s0", "p0180_s0", "p0182_s0", "p0183_s0", "p0195_s0", "p0198_s0", "p0420_s0", "p0420_s1", "p0504_s0", "p0686_s0", "p0686_s1", "p0694_s0"]
     },
     {
       "slug": "euclidean-distance",
@@ -3679,9 +3679,9 @@
       "refs": ["p0096_s1", "p0161_s0"]
     },
     {
-      "slug": "expected-value-computing",
+      "slug": "expected-value-application",
       "facet": "technique",
-      "name": "Expected value (computing)",
+      "name": "Expected value (application)",
       "reference": "https://en.wikipedia.org/wiki/Expected_value",
       "additional-references": ["https://en.wikipedia.org/wiki/Expected_value#Linearity"],
       "summary": "",
@@ -3712,7 +3712,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation_by_squaring",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0040_s0", "p0048_s0", "p0097_s1", "p0200_s0", "p0304_s0", "p0304_s1", "p0347_s0", "p0478_s1", "p0820_s0", "p0940_s0", "p0944_s0", "p0961_s0"]
+      "refs": ["p0040_s0", "p0048_s0", "p0097_s0", "p0200_s0", "p0304_s0", "p0304_s1", "p0478_s1", "p0820_s0", "p0940_s0", "p0944_s0", "p0961_s0"]
     },
     {
       "slug": "extended-euclidean-algorithm",
@@ -3760,9 +3760,9 @@
       "refs": []
     },
     {
-      "slug": "fermats-little-theorem-computing",
+      "slug": "fermats-little-theorem-application",
       "facet": "technique",
-      "name": "Fermat's little theorem (computing)",
+      "name": "Fermat's little theorem (application)",
       "reference": "https://en.wikipedia.org/wiki/Fermat%27s_little_theorem",
       "additional-references": [],
       "summary": "",
@@ -3820,7 +3820,7 @@
       "reference": "https://en.wikipedia.org/wiki/Floating-point_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0042_s0", "p0044_s0", "p0045_s0", "p0066_s0", "p0086_s0", "p0093_s0", "p0104_s0", "p0144_s0", "p0190_s0", "p0197_s0", "p0199_s0", "p0800_s0", "p0808_s0"]
+      "refs": ["p0042_s0", "p0044_s0", "p0045_s0", "p0066_s0", "p0086_s0", "p0093_s0", "p0104_s0", "p0144_s0", "p0190_s0", "p0197_s0", "p0199_s0", "p0800_s0", "p0808_s0", "p0965_s0"]
     },
     {
       "slug": "floor-and-ceiling-functions",
@@ -3829,7 +3829,7 @@
       "reference": "https://en.wikipedia.org/wiki/Floor_and_ceiling_functions",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0195_s0", "p0210_s0", "p0228_s0", "p0277_s0", "p0694_s0", "p0751_s0", "p0899_s0"]
+      "refs": ["p0195_s0", "p0197_s0", "p0210_s0", "p0228_s0", "p0277_s0", "p0694_s0", "p0751_s0", "p0820_s0", "p0899_s0"]
     },
     {
       "slug": "floor-sum-algorithm",
@@ -3991,7 +3991,7 @@
       "reference": "https://en.wikipedia.org/wiki/Generate_and_test",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0030_s0", "p0032_s0", "p0035_s0", "p0035_s1", "p0036_s0", "p0037_s0", "p0041_s0", "p0043_s0", "p0051_s0", "p0062_s0", "p0063_s0", "p0068_s0", "p0085_s0", "p0098_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0167_s0", "p0174_s0", "p0200_s0", "p0757_s0"]
+      "refs": ["p0030_s0", "p0032_s0", "p0035_s0", "p0035_s1", "p0036_s0", "p0037_s0", "p0041_s0", "p0043_s0", "p0051_s0", "p0062_s0", "p0063_s0", "p0068_s0", "p0085_s0", "p0098_s0", "p0141_s0", "p0141_s1", "p0142_s0", "p0167_s0", "p0174_s0", "p0180_s0", "p0200_s0", "p0206_s0", "p0757_s0"]
     },
     {
       "slug": "generation-of-primes",
@@ -4045,7 +4045,7 @@
       "reference": "https://gmplib.org/",
       "additional-references": ["https://en.wikipedia.org/wiki/GNU_Multiple_Precision_Arithmetic_Library"],
       "summary": "",
-      "refs": ["p0169_s0", "p0172_s0", "p0176_s0", "p0192_s0", "p0203_s0", "p0321_s0", "p0387_s0"]
+      "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0321_s0", "p0387_s0"]
     },
     {
       "slug": "gnu-mpfr",
@@ -4066,9 +4066,9 @@
       "refs": []
     },
     {
-      "slug": "greatest-common-divisor-computing",
+      "slug": "greatest-common-divisor-application",
       "facet": "technique",
-      "name": "Greatest common divisor (computing)",
+      "name": "Greatest common divisor (application)",
       "reference": "https://en.wikipedia.org/wiki/Greatest_common_divisor",
       "additional-references": [],
       "summary": "",
@@ -4090,7 +4090,7 @@
       "reference": "https://en.wikipedia.org/wiki/Grid_(spatial_index)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0212_s0"]
+      "refs": ["p0212_s0", "p0816_s0"]
     },
     {
       "slug": "hamming-weight",
@@ -4117,7 +4117,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hash_function",
       "additional-references": ["http://www.cse.yorku.ca/~oz/hash.html", "https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function", "https://en.wikipedia.org/wiki/MurmurHash"],
       "summary": "",
-      "refs": ["p0037_s0", "p0077_s0", "p0077_s1", "p0098_s0", "p0145_s0", "p0155_s0", "p0208_s0", "p0816_s0"]
+      "refs": ["p0037_s0", "p0077_s0", "p0077_s1", "p0098_s0", "p0145_s0", "p0155_s0", "p0208_s0"]
     },
     {
       "slug": "hash-table",
@@ -4126,7 +4126,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hash_table",
       "additional-references": ["https://en.wikipedia.org/wiki/Hash_table#Separate_chaining"],
       "summary": "",
-      "refs": ["p0010_s2", "p0029_s0", "p0029_s1", "p0037_s0", "p0049_s0", "p0060_s0", "p0062_s0", "p0083_s0", "p0087_s0", "p0095_s0", "p0125_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0145_s0", "p0152_s0", "p0153_s0", "p0155_s0", "p0166_s0", "p0184_s0", "p0208_s0", "p0259_s0", "p0269_s0", "p0504_s0", "p0816_s0"]
+      "refs": ["p0010_s2", "p0029_s0", "p0029_s1", "p0037_s0", "p0049_s0", "p0060_s0", "p0062_s0", "p0083_s0", "p0087_s0", "p0095_s0", "p0125_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0145_s0", "p0152_s0", "p0153_s0", "p0155_s0", "p0166_s0", "p0184_s0", "p0208_s0", "p0259_s0", "p0269_s0", "p0816_s0"]
     },
     {
       "slug": "hashable",
@@ -4234,7 +4234,7 @@
       "reference": "https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s0", "p0001_s2", "p0001_s3", "p0001_s4", "p0113_s0", "p0162_s0", "p0184_s0", "p0193_s0", "p0202_s0", "p0212_s0", "p0269_s0", "p0710_s0", "p0725_s0", "p0788_s0"]
+      "refs": ["p0001_s0", "p0001_s2", "p0001_s3", "p0001_s4", "p0113_s0", "p0162_s0", "p0184_s0", "p0193_s0", "p0202_s0", "p0212_s0", "p0269_s0", "p0710_s0", "p0725_s0"]
     },
     {
       "slug": "index-php-simons-favorite-factoring-trick",
@@ -4288,7 +4288,7 @@
       "reference": "https://gcc.gnu.org/onlinedocs/gcc/_005f_005fint128.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0097_s1", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0259_s0", "p0277_s0", "p0288_s0", "p0304_s0", "p0304_s1", "p0387_s0", "p0487_s0", "p0493_s0", "p0545_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0686_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0932_s0", "p0934_s0", "p0944_s0", "p0974_s0", "p1000_s0"]
+      "refs": ["p0031_s0", "p0048_s0", "p0066_s0", "p0097_s0", "p0101_s0", "p0101_s3", "p0111_s0", "p0121_s0", "p0130_s0", "p0131_s0", "p0133_s0", "p0137_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0146_s0", "p0184_s0", "p0188_s0", "p0200_s0", "p0208_s0", "p0209_s0", "p0216_s0", "p0217_s0", "p0221_s0", "p0259_s0", "p0277_s0", "p0288_s0", "p0304_s0", "p0304_s1", "p0387_s0", "p0487_s0", "p0493_s0", "p0545_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0686_s0", "p0745_s0", "p0853_s0", "p0862_s0", "p0932_s0", "p0934_s0", "p0944_s0", "p0974_s0", "p1000_s0"]
     },
     {
       "slug": "int64",
@@ -4297,7 +4297,7 @@
       "reference": "https://numpy.org/doc/stable/reference/arrays.dtypes.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0010_s0", "p0010_s1", "p0010_s2", "p0010_s3", "p0010_s4", "p0050_s0", "p0075_s0", "p0092_s0", "p0148_s0", "p0155_s0", "p0156_s0", "p0193_s0", "p0194_s0", "p0210_s0", "p0223_s0", "p0420_s0", "p0420_s1", "p0694_s0", "p0704_s0", "p0757_s0", "p0872_s0"]
+      "refs": ["p0010_s0", "p0010_s1", "p0010_s2", "p0010_s3", "p0010_s4", "p0050_s0", "p0075_s0", "p0092_s0", "p0134_s0", "p0148_s0", "p0155_s0", "p0156_s0", "p0193_s0", "p0194_s0", "p0210_s0", "p0223_s0", "p0420_s0", "p0420_s1", "p0694_s0", "p0704_s0", "p0757_s0", "p0872_s0"]
     },
     {
       "slug": "integer-factorization",
@@ -4324,7 +4324,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_overflow",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0006_s0", "p0009_s0", "p0027_s0", "p0063_s0", "p0108_s1", "p0110_s0", "p0119_s0", "p0120_s0", "p0127_s0", "p0136_s0", "p0147_s0", "p0157_s0", "p0420_s0", "p0420_s1", "p0484_s0", "p0501_s0"]
+      "refs": ["p0006_s0", "p0009_s0", "p0027_s0", "p0063_s0", "p0108_s1", "p0110_s0", "p0119_s0", "p0123_s0", "p0127_s0", "p0136_s0", "p0147_s0", "p0157_s0", "p0420_s0", "p0420_s1", "p0484_s0", "p0501_s0"]
     },
     {
       "slug": "integer-square-root",
@@ -4333,7 +4333,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_square_root",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0153_s0", "p0179_s0", "p0192_s0", "p0195_s0", "p0200_s0", "p0210_s0", "p0229_s0", "p0420_s0", "p0420_s1", "p0745_s0", "p0808_s0", "p0932_s0", "p0944_s0"]
+      "refs": ["p0003_s0", "p0064_s0", "p0080_s0", "p0080_s1", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0153_s0", "p0179_s0", "p0180_s0", "p0192_s0", "p0195_s0", "p0200_s0", "p0206_s0", "p0210_s0", "p0229_s0", "p0420_s0", "p0420_s1", "p0745_s0", "p0808_s0", "p0932_s0", "p0944_s0"]
     },
     {
       "slug": "integral",
@@ -4396,7 +4396,7 @@
       "reference": "https://en.wikipedia.org/wiki/Irreducible_fraction",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0183_s0"]
+      "refs": ["p0180_s0", "p0183_s0"]
     },
     {
       "slug": "iterative-deepening-depth-first-search",
@@ -4498,13 +4498,13 @@
       "refs": ["p0107_s0"]
     },
     {
-      "slug": "lagged-fibonacci-generator-computing",
+      "slug": "lagged-fibonacci-generator-application",
       "facet": "technique",
-      "name": "Lagged Fibonacci generator (computing)",
+      "name": "Lagged Fibonacci generator (application)",
       "reference": "https://en.wikipedia.org/wiki/Lagged_Fibonacci_generator",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0212_s0"]
+      "refs": ["p0149_s0", "p0186_s0", "p0212_s0"]
     },
     {
       "slug": "lagrange-polynomial",
@@ -4531,7 +4531,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lazy_evaluation",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0800_s0"]
     },
     {
       "slug": "leap-year",
@@ -4702,7 +4702,7 @@
       "reference": "https://en.wikipedia.org/wiki/Loop-invariant_code_motion",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0504_s0"]
     },
     {
       "slug": "loop-nest-optimization",
@@ -4783,7 +4783,7 @@
       "reference": "https://docs.python.org/3/library/math.html#math.gcd",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0005_s0", "p0039_s0", "p0155_s0", "p0853_s0"]
+      "refs": ["p0005_s0", "p0155_s0", "p0853_s0"]
     },
     {
       "slug": "math-isqrt",
@@ -4792,7 +4792,7 @@
       "reference": "https://docs.python.org/3/library/math.html#math.isqrt",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0141_s0", "p0141_s1", "p0142_s0", "p0192_s0", "p0193_s0", "p0218_s0", "p0420_s0", "p0420_s1", "p0719_s0"]
+      "refs": ["p0141_s0", "p0141_s1", "p0142_s0", "p0192_s0", "p0193_s0", "p0206_s0", "p0218_s0", "p0420_s0", "p0420_s1", "p0719_s0"]
     },
     {
       "slug": "math-prod",
@@ -4957,13 +4957,13 @@
       "refs": ["p0145_s0", "p0151_s0", "p0189_s0", "p0868_s0"]
     },
     {
-      "slug": "modular-arithmetic-computing",
+      "slug": "modular-arithmetic-application",
       "facet": "technique",
-      "name": "Modular arithmetic (computing)",
+      "name": "Modular arithmetic (application)",
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004_s0", "p0019_s0", "p0026_s0", "p0078_s0", "p0104_s0", "p0120_s0", "p0129_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0146_s0", "p0149_s0", "p0152_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0194_s0", "p0202_s0", "p0206_s0", "p0210_s0", "p0217_s0", "p0218_s0", "p0225_s0", "p0226_s0", "p0277_s0", "p0288_s0", "p0304_s0", "p0304_s1", "p0478_s1", "p0487_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0650_s0", "p0710_s0", "p0719_s0", "p0720_s0", "p0725_s0", "p0743_s0", "p0745_s0", "p0772_s0", "p0788_s0", "p0853_s0", "p0885_s0", "p0940_s0", "p0944_s0", "p0974_s0", "p0980_s0", "p1000_s0"]
+      "refs": ["p0004_s0", "p0019_s0", "p0078_s0", "p0097_s0", "p0104_s0", "p0120_s0", "p0123_s0", "p0135_s0", "p0136_s0", "p0146_s0", "p0149_s0", "p0152_s0", "p0167_s0", "p0168_s0", "p0168_s1", "p0171_s0", "p0194_s0", "p0202_s0", "p0206_s0", "p0210_s0", "p0217_s0", "p0218_s0", "p0225_s0", "p0226_s0", "p0277_s0", "p0288_s0", "p0304_s0", "p0304_s1", "p0478_s1", "p0487_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0650_s0", "p0710_s0", "p0719_s0", "p0720_s0", "p0725_s0", "p0743_s0", "p0745_s0", "p0772_s0", "p0788_s0", "p0853_s0", "p0885_s0", "p0944_s0", "p0974_s0", "p0980_s0", "p1000_s0"]
     },
     {
       "slug": "modular-exponentiation",
@@ -4972,16 +4972,16 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0", "p0097_s1", "p0111_s0", "p0123_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0217_s0", "p0293_s0", "p0387_s0", "p0429_s0", "p0478_s1", "p0487_s0", "p0545_s0", "p0650_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0885_s0", "p0926_s0", "p0944_s0", "p0980_s0"]
+      "refs": ["p0048_s0", "p0097_s0", "p0111_s0", "p0129_s0", "p0130_s0", "p0131_s0", "p0132_s0", "p0133_s0", "p0146_s0", "p0160_s0", "p0188_s0", "p0194_s0", "p0200_s0", "p0216_s0", "p0217_s0", "p0293_s0", "p0387_s0", "p0429_s0", "p0478_s1", "p0487_s0", "p0545_s0", "p0650_s0", "p0743_s0", "p0745_s0", "p0820_s0", "p0885_s0", "p0926_s0", "p0940_s0", "p0944_s0", "p0980_s0"]
     },
     {
-      "slug": "modular-multiplicative-inverse-computing",
+      "slug": "modular-multiplicative-inverse-application",
       "facet": "technique",
-      "name": "Modular multiplicative inverse (computing)",
+      "name": "Modular multiplicative inverse (application)",
       "reference": "https://en.wikipedia.org/wiki/Modular_multiplicative_inverse",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0216_s0", "p0381_s0", "p0487_s0", "p0650_s0", "p0926_s0", "p0932_s0", "p0934_s0"]
+      "refs": ["p0134_s0", "p0152_s0", "p0160_s0", "p0198_s0", "p0202_s0", "p0381_s0", "p0487_s0", "p0650_s0", "p0926_s0", "p0932_s0", "p0934_s0"]
     },
     {
       "slug": "modulo",
@@ -4990,7 +4990,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modulo",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001_s1", "p0040_s0", "p0073_s0", "p0097_s0", "p0097_s1", "p0195_s0", "p0269_s0"]
+      "refs": ["p0001_s1", "p0040_s0", "p0073_s0", "p0195_s0", "p0269_s0"]
     },
     {
       "slug": "monotonic-function",
@@ -5044,7 +5044,7 @@
       "reference": "https://en.wikipedia.org/wiki/Multinomial_theorem",
       "additional-references": ["https://en.wikipedia.org/wiki/Multinomial_theorem#Multinomial_coefficients"],
       "summary": "",
-      "refs": ["p0743_s0", "p0885_s0"]
+      "refs": ["p0743_s0", "p0862_s0", "p0885_s0"]
     },
     {
       "slug": "multiple-buffering",
@@ -5206,7 +5206,7 @@
       "reference": "https://numpy.org/doc/stable/reference/generated/numpy.flatnonzero.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0023_s0", "p0133_s0", "p0134_s0", "p0216_s0", "p0429_s0", "p0565_s0"]
+      "refs": ["p0023_s0", "p0133_s0", "p0134_s0", "p0429_s0", "p0565_s0"]
     },
     {
       "slug": "np-where",
@@ -5224,7 +5224,7 @@
       "reference": "https://numpy.org/doc/stable/",
       "additional-references": ["https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html", "https://numpy.org/", "https://numpy.org/doc/stable/reference/generated/numpy.arange.html", "https://numpy.org/doc/stable/reference/generated/numpy.searchsorted.html", "https://numpy.org/doc/stable/reference/arrays.ndarray.html", "https://numpy.org/doc/stable/reference/generated/numpy.maximum.html", "https://numpy.org/doc/stable/reference/generated/numpy.cumsum.html", "https://en.wikipedia.org/wiki/NumPy", "https://numpy.org/doc/stable/reference/generated/numpy.ones.html", "https://numpy.org/doc/stable/reference/routines.math.html", "https://numpy.org/doc/stable/reference/generated/numpy.roll.html", "https://numpy.org/doc/stable/reference/generated/numpy.sqrt.html", "https://numpy.org/doc/stable/reference/generated/numpy.zeros.html", "https://numpy.org/doc/stable/reference/generated/numpy.concatenate.html", "https://numpy.org/doc/stable/user/basics.indexing.html#integer-array-indexing"],
       "summary": "",
-      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0304_s0", "p0357_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0429_s0", "p0461_s0", "p0478_s1", "p0487_s0", "p0501_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0720_s0", "p0757_s0", "p0772_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0"]
+      "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0304_s0", "p0357_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0429_s0", "p0461_s0", "p0478_s1", "p0487_s0", "p0501_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0720_s0", "p0757_s0", "p0772_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0"]
     },
     {
       "slug": "numpy-bit-operations-and-np-unique",
@@ -5251,7 +5251,7 @@
       "reference": "https://numpy.org/doc/stable/reference/arrays.indexing.html",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0179_s0", "p0501_s0"]
+      "refs": ["p0134_s0", "p0179_s0", "p0501_s0"]
     },
     {
       "slug": "object-copying",
@@ -5413,7 +5413,7 @@
       "reference": "https://docs.python.org/3/library/functions.html#pow",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0048_s0"]
+      "refs": []
     },
     {
       "slug": "power-iteration",
@@ -5425,9 +5425,9 @@
       "refs": ["p0084_s0"]
     },
     {
-      "slug": "power-of-two-computing",
+      "slug": "power-of-two-application",
       "facet": "technique",
-      "name": "Power of two (computing)",
+      "name": "Power of two (application)",
       "reference": "https://en.wikipedia.org/wiki/Power_of_two",
       "additional-references": [],
       "summary": "",
@@ -5461,13 +5461,13 @@
       "refs": ["p0022_s0", "p0040_s0", "p0050_s0", "p0072_s0", "p0082_s0", "p0103_s0", "p0103_s1", "p0125_s0", "p0149_s0", "p0150_s0", "p0174_s0", "p0205_s0", "p0478_s0", "p0478_s1", "p0487_s0", "p0565_s0", "p0565_s1", "p0710_s0"]
     },
     {
-      "slug": "prime-factorization-computing",
+      "slug": "prime-factorization-application",
       "facet": "technique",
-      "name": "Prime factorization (computing)",
+      "name": "Prime factorization (application)",
       "reference": "https://en.wikipedia.org/wiki/Integer_factorization",
       "additional-references": [],
       "summary": "Decomposing a number into its prime power components to compute multiplicative properties like divisor counts.",
-      "refs": ["p0012_s0", "p0012_s1", "p0029_s0", "p0029_s1", "p0110_s0", "p0130_s0", "p0133_s0", "p0204_s0", "p0214_s0", "p0221_s0", "p0357_s0", "p0545_s0", "p0549_s0", "p0642_s0", "p0650_s0", "p0834_s0"]
+      "refs": ["p0012_s0", "p0012_s1", "p0029_s0", "p0029_s1", "p0110_s0", "p0130_s0", "p0133_s0", "p0204_s0", "p0214_s0", "p0221_s0", "p0231_s0", "p0357_s0", "p0545_s0", "p0549_s0", "p0642_s0", "p0650_s0", "p0834_s0"]
     },
     {
       "slug": "primesieve",
@@ -5476,7 +5476,7 @@
       "reference": "https://github.com/kimwalisch/primesieve",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0010_s4", "p0035_s1", "p0187_s0", "p0231_s0", "p0304_s1", "p0484_s0", "p0565_s1", "p0772_s0", "p0808_s0"]
+      "refs": ["p0010_s4", "p0035_s1", "p0187_s0", "p0304_s1", "p0347_s0", "p0484_s0", "p0565_s1", "p0772_s0", "p0800_s0", "p0808_s0"]
     },
     {
       "slug": "primorial",
@@ -5497,13 +5497,13 @@
       "refs": []
     },
     {
-      "slug": "pseudorandom-number-generator-computing",
+      "slug": "pseudorandom-number-generator-application",
       "facet": "technique",
-      "name": "Pseudorandom number generator (computing)",
+      "name": "Pseudorandom number generator (application)",
       "reference": "https://en.wikipedia.org/wiki/Pseudorandom_number_generator",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0185_s0", "p0288_s0"]
+      "refs": ["p0165_s0", "p0185_s0", "p0288_s0"]
     },
     {
       "slug": "pure-function",
@@ -5521,7 +5521,7 @@
       "reference": "https://en.cppreference.com/w/c/algorithm/qsort",
       "additional-references": ["https://en.wikipedia.org/wiki/Qsort"],
       "summary": "",
-      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0118_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0184_s0", "p0203_s0", "p0221_s0", "p0346_s0", "p0757_s0", "p0926_s0"]
+      "refs": ["p0022_s0", "p0049_s0", "p0052_s0", "p0118_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0142_s0", "p0165_s0", "p0184_s0", "p0203_s0", "p0221_s0", "p0346_s0", "p0757_s0", "p0926_s0"]
     },
     {
       "slug": "quadratic-formula",
@@ -5596,6 +5596,15 @@
       "refs": []
     },
     {
+      "slug": "randomized-incremental-algorithm",
+      "facet": "technique",
+      "name": "Randomized incremental algorithm",
+      "reference": "https://en.wikipedia.org/wiki/Closest_pair_of_points_problem",
+      "additional-references": [],
+      "summary": "Processing inputs in random order so that each insertion's expected update cost is small, yielding expected-linear-time algorithms like the incremental closest-pair method.",
+      "refs": ["p0816_s0"]
+    },
+    {
       "slug": "rate-of-convergence",
       "facet": "technique",
       "name": "Rate of convergence",
@@ -5614,13 +5623,13 @@
       "refs": []
     },
     {
-      "slug": "rational-number-computing",
+      "slug": "rational-number-application",
       "facet": "technique",
-      "name": "Rational number (computing)",
+      "name": "Rational number (application)",
       "reference": "https://en.wikipedia.org/wiki/Rational_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0155_s0"]
+      "refs": ["p0155_s0", "p0259_s0"]
     },
     {
       "slug": "ray-tracing-graphics",
@@ -5632,13 +5641,13 @@
       "refs": []
     },
     {
-      "slug": "recurrence-relation-computing",
+      "slug": "recurrence-relation-application",
       "facet": "technique",
-      "name": "Recurrence relation (computing)",
+      "name": "Recurrence relation (application)",
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0094_s0", "p0101_s1", "p0101_s3", "p0114_s0", "p0116_s0", "p0117_s0", "p0137_s0", "p0148_s0", "p0160_s0", "p0169_s0", "p0192_s0", "p0288_s0", "p0321_s0", "p0346_s0", "p0692_s0", "p0720_s0", "p0725_s0", "p0743_s0", "p0868_s0", "p1000_s0"]
+      "refs": ["p0002_s0", "p0053_s0", "p0057_s0", "p0065_s0", "p0066_s0", "p0094_s0", "p0101_s1", "p0101_s3", "p0114_s0", "p0116_s0", "p0137_s0", "p0148_s0", "p0169_s0", "p0192_s0", "p0288_s0", "p0321_s0", "p0346_s0", "p0692_s0", "p0720_s0", "p0725_s0", "p0743_s0", "p0868_s0", "p1000_s0"]
     },
     {
       "slug": "recursion-computer-science",
@@ -5647,7 +5656,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recursion_(computer_science)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0060_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0118_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0484_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0862_s0"]
+      "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0060_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0118_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0293_s0", "p0301_s0", "p0484_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0862_s0"]
     },
     {
       "slug": "repdigit",
@@ -5728,7 +5737,7 @@
       "reference": "https://docs.python.org/3/library/stdtypes.html#set",
       "additional-references": ["https://docs.python.org/3/tutorial/datastructures.html#sets", "https://en.wikipedia.org/wiki/Set_(abstract_data_type)"],
       "summary": "",
-      "refs": ["p0029_s0", "p0029_s1", "p0032_s0", "p0035_s0", "p0035_s1", "p0037_s0", "p0050_s0", "p0052_s0", "p0061_s0", "p0079_s0", "p0087_s0", "p0088_s0", "p0095_s0", "p0111_s0", "p0122_s0", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0155_s0", "p0180_s0", "p0203_s0", "p0221_s0", "p0293_s0", "p0346_s0", "p0757_s0"]
+      "refs": ["p0029_s0", "p0029_s1", "p0032_s0", "p0035_s0", "p0035_s1", "p0037_s0", "p0050_s0", "p0052_s0", "p0061_s0", "p0079_s0", "p0087_s0", "p0088_s0", "p0095_s0", "p0111_s0", "p0122_s0", "p0125_s0", "p0140_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0155_s0", "p0180_s0", "p0203_s0", "p0221_s0", "p0293_s0", "p0346_s0", "p0504_s0", "p0757_s0"]
     },
     {
       "slug": "short-circuit-evaluation",
@@ -5746,7 +5755,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes",
       "additional-references": ["https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Incremental_sieve", "https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler%27s_sieve"],
       "summary": "",
-      "refs": ["p0010_s0", "p0010_s2", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0146_s0", "p0152_s0", "p0153_s0", "p0157_s0", "p0159_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0211_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0304_s0", "p0313_s0", "p0347_s0", "p0357_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0429_s0", "p0478_s0", "p0478_s1", "p0501_s0", "p0545_s0", "p0549_s0", "p0565_s0", "p0650_s0", "p0772_s0", "p0800_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0"]
+      "refs": ["p0010_s0", "p0010_s2", "p0023_s0", "p0035_s0", "p0037_s0", "p0046_s0", "p0069_s0", "p0070_s0", "p0072_s0", "p0075_s0", "p0123_s0", "p0124_s0", "p0127_s0", "p0128_s0", "p0130_s0", "p0132_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0146_s0", "p0152_s0", "p0153_s0", "p0157_s0", "p0159_s0", "p0179_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0200_s0", "p0203_s0", "p0204_s0", "p0211_s0", "p0214_s0", "p0216_s0", "p0221_s0", "p0228_s0", "p0231_s0", "p0304_s0", "p0313_s0", "p0347_s0", "p0357_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0429_s0", "p0478_s0", "p0478_s1", "p0501_s0", "p0545_s0", "p0549_s0", "p0565_s0", "p0650_s0", "p0772_s0", "p0834_s0", "p0845_s0", "p0926_s0", "p0934_s0"]
     },
     {
       "slug": "sieve-of-sundaram",
@@ -5809,7 +5818,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sorting_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0022_s0", "p0052_s0", "p0054_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0143_s0", "p0165_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0321_s0", "p1000_s0"]
+      "refs": ["p0022_s0", "p0052_s0", "p0054_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0143_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0321_s0", "p1000_s0"]
     },
     {
       "slug": "sparse-matrix",
@@ -5845,7 +5854,7 @@
       "reference": "https://en.cppreference.com/w/c/numeric/math/sqrt",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0010_s0", "p0142_s0", "p0193_s0", "p0218_s0", "p0222_s0", "p0816_s0"]
+      "refs": ["p0010_s0", "p0142_s0", "p0193_s0", "p0206_s0", "p0218_s0", "p0222_s0", "p0816_s0"]
     },
     {
       "slug": "sqrt-decomposition",
@@ -5863,7 +5872,7 @@
       "reference": "https://en.wikipedia.org/wiki/Square_root",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0021_s0", "p0023_s1", "p0042_s0", "p0045_s0", "p0046_s0", "p0086_s0", "p0173_s0", "p0180_s0", "p0198_s0", "p0206_s0", "p0211_s0"]
+      "refs": ["p0021_s0", "p0023_s1", "p0042_s0", "p0045_s0", "p0046_s0", "p0086_s0", "p0173_s0", "p0198_s0", "p0211_s0"]
     },
     {
       "slug": "stack-abstract-data-type",
@@ -5989,7 +5998,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sweep_line_algorithm",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0165_s0", "p0212_s0", "p0926_s0"]
+      "refs": ["p0212_s0", "p0926_s0"]
     },
     {
       "slug": "switch-statement",
@@ -6253,13 +6262,13 @@
       "refs": ["p0010_s4", "p0146_s0"]
     },
     {
-      "slug": "wilsons-theorem-computing",
+      "slug": "wilsons-theorem-application",
       "facet": "technique",
-      "name": "Wilson's theorem (computing)",
+      "name": "Wilson's theorem (application)",
       "reference": "https://en.wikipedia.org/wiki/Wilson%27s_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0160_s0", "p0381_s0"]
     },
     {
       "slug": "algorithm-beats-language",
@@ -6268,7 +6277,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "A better asymptotic class in a slow language beats a worse one in a fast language.",
-      "refs": ["p0005", "p0010", "p0016", "p0018", "p0020", "p0064", "p0065", "p0072", "p0073", "p0075", "p0076", "p0081", "p0083", "p0084", "p0095", "p0097", "p0108", "p0112", "p0126", "p0127", "p0129", "p0135", "p0146", "p0167", "p0171", "p0174", "p0211", "p0214", "p0223", "p0345", "p0504", "p0545", "p0565", "p0788", "p0816", "p0820"]
+      "refs": ["p0005", "p0010", "p0016", "p0018", "p0020", "p0064", "p0065", "p0072", "p0073", "p0075", "p0076", "p0081", "p0083", "p0084", "p0095", "p0097", "p0108", "p0112", "p0126", "p0127", "p0129", "p0135", "p0146", "p0167", "p0171", "p0174", "p0211", "p0214", "p0223", "p0345", "p0504", "p0545", "p0565", "p0788"]
     },
     {
       "slug": "closed-form-over-iteration",
@@ -6277,7 +6286,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Replace an O(n) accumulation with an O(1) formula when the data is structured.",
-      "refs": ["p0001", "p0002", "p0006", "p0015", "p0024", "p0028", "p0039", "p0040", "p0042", "p0044", "p0058", "p0069", "p0071", "p0085", "p0086", "p0089", "p0099", "p0104", "p0106", "p0113", "p0120", "p0123", "p0128", "p0131", "p0134", "p0139", "p0140", "p0141", "p0145", "p0147", "p0148", "p0156", "p0158", "p0160", "p0167", "p0168", "p0173", "p0175", "p0176", "p0183", "p0190", "p0191", "p0193", "p0195", "p0197", "p0198", "p0205", "p0207", "p0213", "p0219", "p0225", "p0226", "p0228", "p0231", "p0313", "p0321", "p0381", "p0487", "p0587", "p0686", "p0692", "p0704", "p0710", "p0772", "p0800", "p0845", "p0868", "p0872", "p0899", "p0918", "p0934", "p0940", "p0944", "p0965", "p1000"]
+      "refs": ["p0001", "p0002", "p0006", "p0015", "p0024", "p0028", "p0040", "p0042", "p0044", "p0058", "p0069", "p0071", "p0085", "p0086", "p0089", "p0099", "p0104", "p0106", "p0113", "p0120", "p0123", "p0128", "p0131", "p0134", "p0139", "p0140", "p0141", "p0145", "p0147", "p0148", "p0156", "p0158", "p0167", "p0168", "p0173", "p0175", "p0176", "p0183", "p0190", "p0191", "p0193", "p0195", "p0197", "p0198", "p0205", "p0207", "p0219", "p0225", "p0226", "p0228", "p0313", "p0321", "p0381", "p0487", "p0587", "p0686", "p0692", "p0704", "p0772", "p0845", "p0868", "p0872", "p0899", "p0918", "p0934", "p0940", "p0944", "p0965", "p1000"]
     },
     {
       "slug": "decompose-overlap",
@@ -6286,7 +6295,16 @@
       "reference": null,
       "additional-references": [],
       "summary": "Inclusion-exclusion turns one tangled test into independent summable parts.",
-      "refs": ["p0001", "p0043", "p0045", "p0059", "p0113", "p0162", "p0184", "p0202", "p0212", "p0269", "p0493", "p0710", "p0725", "p0940"]
+      "refs": ["p0001", "p0043", "p0045", "p0059", "p0113", "p0162", "p0184", "p0202", "p0212", "p0213", "p0216", "p0269", "p0493", "p0710", "p0725"]
+    },
+    {
+      "slug": "exact-arithmetic-for-equality",
+      "facet": "takeaway",
+      "name": "Use exact arithmetic for equality checks",
+      "reference": null,
+      "additional-references": [],
+      "summary": "Represent computed geometric or numeric values as exact integers or reduced fractions when the answer depends on testing equality, since floating point can spuriously merge or split truly equal values.",
+      "refs": ["p0165"]
     },
     {
       "slug": "exploit-symmetry",
@@ -6295,7 +6313,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Count the complement, or one representative per orbit, when it is smaller.",
-      "refs": ["p0012", "p0027", "p0034", "p0041", "p0049", "p0053", "p0068", "p0091", "p0107", "p0108", "p0110", "p0118", "p0125", "p0154", "p0156", "p0172", "p0177", "p0184", "p0194", "p0199", "p0204", "p0210", "p0220", "p0224", "p0227", "p0243", "p0420", "p0461", "p0478", "p0565", "p0862"]
+      "refs": ["p0012", "p0027", "p0034", "p0041", "p0049", "p0053", "p0068", "p0091", "p0107", "p0108", "p0110", "p0118", "p0125", "p0154", "p0156", "p0172", "p0177", "p0184", "p0194", "p0199", "p0204", "p0210", "p0213", "p0220", "p0224", "p0227", "p0243", "p0420", "p0461", "p0478", "p0565", "p0788", "p0862"]
     },
     {
       "slug": "parity-across-languages",
@@ -6304,7 +6322,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Keep the C and Python algorithms identical so benchmarks compare constant factors.",
-      "refs": ["p0029", "p0037", "p0066", "p0075", "p0088", "p0098", "p0100", "p0103", "p0118", "p0122", "p0124", "p0149", "p0150", "p0152", "p0153", "p0155", "p0166", "p0169", "p0170", "p0175", "p0179", "p0193", "p0196", "p0198", "p0200", "p0208", "p0212", "p0213", "p0215", "p0229", "p0259", "p0346", "p0429", "p0478", "p0484", "p0549", "p0650", "p0694", "p0719", "p0757", "p0772", "p0980"]
+      "refs": ["p0029", "p0037", "p0066", "p0075", "p0088", "p0098", "p0100", "p0103", "p0118", "p0122", "p0124", "p0130", "p0150", "p0152", "p0153", "p0155", "p0166", "p0169", "p0170", "p0175", "p0179", "p0193", "p0196", "p0198", "p0200", "p0208", "p0212", "p0215", "p0229", "p0346", "p0429", "p0478", "p0484", "p0549", "p0650", "p0694", "p0719", "p0757", "p0772", "p0800", "p0816", "p0872", "p0980"]
     },
     {
       "slug": "precompute-once-reuse",
@@ -6313,7 +6331,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Amortise an expensive table across many queries when inputs share structure.",
-      "refs": ["p0014", "p0017", "p0035", "p0037", "p0039", "p0049", "p0050", "p0060", "p0061", "p0072", "p0074", "p0078", "p0079", "p0092", "p0096", "p0101", "p0103", "p0115", "p0118", "p0128", "p0133", "p0146", "p0150", "p0159", "p0187", "p0214", "p0220", "p0259", "p0357", "p0504", "p0549", "p0834"]
+      "refs": ["p0014", "p0017", "p0035", "p0037", "p0049", "p0050", "p0060", "p0061", "p0072", "p0074", "p0078", "p0079", "p0092", "p0096", "p0101", "p0103", "p0118", "p0128", "p0133", "p0146", "p0150", "p0159", "p0187", "p0214", "p0220", "p0357", "p0504", "p0549", "p0834"]
     },
     {
       "slug": "reduce-before-coding",
@@ -6322,7 +6340,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Simplify the math first; the cheapest loop is the one you eliminate.",
-      "refs": ["p0002", "p0004", "p0009", "p0012", "p0032", "p0033", "p0041", "p0045", "p0046", "p0051", "p0053", "p0054", "p0065", "p0068", "p0070", "p0075", "p0082", "p0086", "p0088", "p0091", "p0094", "p0099", "p0100", "p0101", "p0102", "p0106", "p0109", "p0110", "p0120", "p0121", "p0123", "p0128", "p0130", "p0131", "p0132", "p0133", "p0134", "p0135", "p0136", "p0137", "p0138", "p0139", "p0140", "p0142", "p0143", "p0144", "p0146", "p0147", "p0148", "p0152", "p0153", "p0154", "p0155", "p0157", "p0158", "p0159", "p0160", "p0163", "p0165", "p0168", "p0169", "p0170", "p0173", "p0176", "p0177", "p0178", "p0180", "p0182", "p0187", "p0190", "p0192", "p0194", "p0195", "p0198", "p0199", "p0201", "p0202", "p0203", "p0205", "p0206", "p0207", "p0208", "p0209", "p0210", "p0216", "p0217", "p0218", "p0221", "p0222", "p0227", "p0228", "p0243", "p0269", "p0277", "p0288", "p0293", "p0301", "p0321", "p0347", "p0357", "p0381", "p0420", "p0429", "p0478", "p0484", "p0487", "p0493", "p0545", "p0642", "p0650", "p0692", "p0694", "p0719", "p0720", "p0743", "p0745", "p0755", "p0757", "p0834", "p0853", "p0862", "p0872", "p0885", "p0899", "p0918", "p0926", "p0932", "p0938", "p0961", "p0965", "p0980"]
+      "refs": ["p0002", "p0004", "p0009", "p0012", "p0032", "p0033", "p0039", "p0041", "p0045", "p0046", "p0051", "p0053", "p0054", "p0065", "p0068", "p0070", "p0075", "p0082", "p0086", "p0088", "p0091", "p0094", "p0099", "p0100", "p0101", "p0102", "p0106", "p0109", "p0110", "p0120", "p0121", "p0123", "p0128", "p0131", "p0132", "p0133", "p0134", "p0135", "p0136", "p0137", "p0138", "p0139", "p0140", "p0142", "p0143", "p0144", "p0146", "p0147", "p0148", "p0152", "p0153", "p0154", "p0155", "p0157", "p0158", "p0159", "p0160", "p0163", "p0169", "p0170", "p0173", "p0176", "p0177", "p0178", "p0180", "p0182", "p0187", "p0190", "p0192", "p0194", "p0195", "p0198", "p0199", "p0201", "p0202", "p0203", "p0205", "p0206", "p0207", "p0208", "p0209", "p0210", "p0217", "p0218", "p0221", "p0222", "p0227", "p0228", "p0231", "p0243", "p0269", "p0277", "p0288", "p0293", "p0301", "p0321", "p0347", "p0357", "p0381", "p0420", "p0429", "p0478", "p0484", "p0487", "p0493", "p0504", "p0545", "p0642", "p0650", "p0692", "p0694", "p0710", "p0719", "p0720", "p0743", "p0745", "p0755", "p0757", "p0800", "p0820", "p0834", "p0853", "p0862", "p0885", "p0899", "p0918", "p0926", "p0932", "p0938", "p0940", "p0961", "p0965", "p0980"]
     },
     {
       "slug": "right-tool-per-cost",
@@ -6331,7 +6349,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Generators/laziness win on memory, not on a tight numeric loop.",
-      "refs": ["p0001", "p0074", "p0077", "p0185", "p0808"]
+      "refs": ["p0001", "p0074", "p0077", "p0149", "p0185", "p0231", "p0808"]
     },
     {
       "slug": "size-work-to-the-input",
@@ -6340,7 +6358,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Bound sieves, tables and caches by the actual inputs, built inside solve().",
-      "refs": ["p0003", "p0007", "p0010", "p0011", "p0013", "p0014", "p0021", "p0023", "p0025", "p0026", "p0027", "p0029", "p0030", "p0034", "p0036", "p0038", "p0047", "p0051", "p0055", "p0056", "p0060", "p0062", "p0067", "p0077", "p0078", "p0082", "p0087", "p0090", "p0092", "p0095", "p0105", "p0111", "p0119", "p0122", "p0125", "p0126", "p0127", "p0129", "p0130", "p0136", "p0142", "p0151", "p0161", "p0164", "p0166", "p0171", "p0174", "p0178", "p0179", "p0186", "p0188", "p0189", "p0193", "p0196", "p0197", "p0200", "p0201", "p0204", "p0206", "p0211", "p0215", "p0216", "p0218", "p0221", "p0231", "p0288", "p0293", "p0304", "p0347", "p0357", "p0387", "p0461", "p0501", "p0549", "p0642", "p0694", "p0710", "p0725", "p0745", "p0816", "p0845", "p0938", "p0961", "p0974"]
+      "refs": ["p0003", "p0007", "p0010", "p0011", "p0013", "p0014", "p0021", "p0023", "p0025", "p0026", "p0027", "p0029", "p0030", "p0034", "p0036", "p0038", "p0039", "p0047", "p0051", "p0055", "p0056", "p0060", "p0062", "p0067", "p0077", "p0078", "p0082", "p0087", "p0090", "p0092", "p0095", "p0105", "p0111", "p0119", "p0122", "p0125", "p0126", "p0127", "p0129", "p0132", "p0136", "p0142", "p0151", "p0161", "p0164", "p0166", "p0171", "p0174", "p0178", "p0179", "p0186", "p0188", "p0189", "p0193", "p0196", "p0200", "p0201", "p0204", "p0211", "p0215", "p0216", "p0218", "p0221", "p0288", "p0293", "p0304", "p0347", "p0357", "p0387", "p0461", "p0501", "p0549", "p0642", "p0694", "p0710", "p0725", "p0745", "p0816", "p0845", "p0938", "p0961", "p0974"]
     },
     {
       "slug": "watch-integer-width",
@@ -6349,7 +6367,7 @@
       "reference": null,
       "additional-references": [],
       "summary": "Anticipate 32/64-bit overflow in C where Python bignums silently cope.",
-      "refs": ["p0003", "p0006", "p0008", "p0009", "p0010", "p0031", "p0048", "p0050", "p0056", "p0058", "p0063", "p0066", "p0076", "p0092", "p0094", "p0097", "p0111", "p0114", "p0119", "p0121", "p0136", "p0138", "p0140", "p0147", "p0153", "p0155", "p0157", "p0162", "p0165", "p0166", "p0168", "p0169", "p0180", "p0181", "p0184", "p0192", "p0196", "p0200", "p0208", "p0209", "p0210", "p0217", "p0221", "p0223", "p0259", "p0277", "p0288", "p0321", "p0387", "p0420", "p0484", "p0545", "p0642", "p0686", "p0788", "p0800", "p0820", "p0918", "p0932", "p0934", "p0944", "p0974", "p1000"]
+      "refs": ["p0003", "p0006", "p0008", "p0009", "p0010", "p0031", "p0048", "p0050", "p0056", "p0058", "p0063", "p0066", "p0076", "p0092", "p0094", "p0111", "p0114", "p0119", "p0120", "p0121", "p0136", "p0138", "p0140", "p0147", "p0153", "p0155", "p0157", "p0162", "p0166", "p0168", "p0169", "p0180", "p0181", "p0184", "p0192", "p0196", "p0200", "p0208", "p0209", "p0210", "p0217", "p0221", "p0223", "p0259", "p0277", "p0288", "p0321", "p0387", "p0420", "p0484", "p0545", "p0642", "p0686", "p0820", "p0862", "p0872", "p0918", "p0932", "p0934", "p0944", "p0974", "p1000"]
     }
   ]
 }

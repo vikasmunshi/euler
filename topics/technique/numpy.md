@@ -10,7 +10,6 @@ _TODO: what this technique is, the shared idea across the problems below, and wh
 p0023
 p0056
 p0128
-p0132
 p0133
 p0134
 p0135

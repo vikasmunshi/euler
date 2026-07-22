@@ -10,6 +10,8 @@ _TODO: expand this principle with the problems below that teach it._
 p0001
 p0074
 p0077
+p0149
 p0185
+p0231
 p0808
 -->

@@ -1,21 +1,18 @@
 {
   "domain": [
+    "modular-arithmetic",
     "prime-number",
     "exponentiation"
   ],
   "takeaways": [
-    "algorithm-beats-language",
-    "watch-integer-width"
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
-      "modulo"
-    ],
-    "s1": [
-      "exponentiation-by-squaring",
       "modular-exponentiation",
-      "int128",
-      "modulo"
+      "modular-arithmetic-application",
+      "exponentiation-by-squaring",
+      "int128"
     ]
   },
   "new-tags": []

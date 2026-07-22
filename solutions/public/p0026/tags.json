@@ -2,6 +2,8 @@
   "domain": [
     "repeating-decimal",
     "multiplicative-order",
+    "fermats-little-theorem",
+    "coprime-integers",
     "number-theory"
   ],
   "takeaways": [
@@ -9,10 +11,9 @@
   ],
   "techniques": {
     "s0": [
-      "greatest-common-divisor-computing",
-      "euclidean-algorithm",
+      "greatest-common-divisor-application",
       "brute-force-search",
-      "modular-arithmetic-computing"
+      "euclidean-algorithm"
     ]
   },
   "new-tags": []

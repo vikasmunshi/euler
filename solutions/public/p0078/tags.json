@@ -10,7 +10,7 @@
   "techniques": {
     "s0": [
       "dynamic-programming",
-      "modular-arithmetic-computing",
+      "modular-arithmetic-application",
       "dynamic-array",
       "memoization"
     ]

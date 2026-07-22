@@ -13,11 +13,11 @@
   "techniques": {
     "s0": [
       "trial-division",
-      "prime-factorization-computing"
+      "prime-factorization-application"
     ],
     "s1": [
       "trial-division",
-      "prime-factorization-computing",
+      "prime-factorization-application",
       "brute-force-search"
     ]
   },

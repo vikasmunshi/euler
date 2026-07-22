@@ -1,6 +1,8 @@
 {
   "domain": [
-    "exponentiation"
+    "exponentiation",
+    "modular-arithmetic",
+    "summation"
   ],
   "takeaways": [
     "watch-integer-width"
@@ -9,7 +11,6 @@
     "s0": [
       "modular-exponentiation",
       "exponentiation-by-squaring",
-      "pow",
       "int128"
     ]
   },

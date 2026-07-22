@@ -10,7 +10,7 @@
     "s0": [
       "brute-force-search",
       "cross-multiplication",
-      "greatest-common-divisor-computing",
+      "greatest-common-divisor-application",
       "euclidean-algorithm",
       "fractions-fraction",
       "functools-reduce"

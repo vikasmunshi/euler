@@ -1,19 +1,19 @@
 {
   "domain": [
-    "pythagorean-triple"
+    "pythagorean-triple",
+    "diophantine-equation",
+    "coprime-integers"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "precompute-once-reuse"
+    "reduce-before-coding",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "tree-of-primitive-pythagorean-triples",
       "euclidean-algorithm",
-      "math-gcd",
       "counting-sort",
-      "collections-counter",
-      "arg-max"
+      "collections-counter"
     ]
   },
   "new-tags": []

@@ -10,7 +10,6 @@ _TODO: what this domain is about, the shared structure across the problems below
 p0007
 p0050
 p0187
-p0347
 p0501
 p0642
 -->
