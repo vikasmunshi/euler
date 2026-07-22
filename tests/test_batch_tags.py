@@ -140,5 +140,38 @@ class ExplicitSelectorTests(unittest.TestCase):
         self.assertEqual(batch._explicit(''), [])
 
 
+class RedundantWaveWarningTests(unittest.TestCase):
+    """`solved`/`unsolved` select by kind, not by what is missing - repeating one without
+    advancing `start` silently re-covers the same problems. It cost a wave before this warned."""
+
+    def _wave(self, tagged: list[bool]) -> list[Any]:
+        from unittest.mock import MagicMock
+        wave = []
+        for is_tagged in tagged:
+            p = MagicMock()
+            p.solution_dir.__truediv__.return_value.exists.return_value = is_tagged
+            wave.append(p)
+        return wave
+
+    def test_warns_when_the_wave_would_regenerate(self) -> None:
+        from solver.ai import batch
+        with patch.object(batch, 'console') as con:
+            batch._warn_if_redundant(self._wave([True, True, False]), 'unsolved')
+        self.assertIn('2 of 3', con.print.call_args[0][0])
+
+    def test_silent_when_nothing_is_tagged(self) -> None:
+        from solver.ai import batch
+        with patch.object(batch, 'console') as con:
+            batch._warn_if_redundant(self._wave([False, False]), 'unsolved')
+        con.print.assert_not_called()
+
+    def test_silent_for_the_self_advancing_selector(self) -> None:
+        """`untagged` cannot re-select what it already wrote, so it never warns."""
+        from solver.ai import batch
+        with patch.object(batch, 'console') as con:
+            batch._warn_if_redundant(self._wave([True, True]), 'untagged')
+        con.print.assert_not_called()
+
+
 if __name__ == '__main__':
     unittest.main()

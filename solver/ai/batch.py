@@ -138,6 +138,25 @@ def _build_request(problem: Problem, model: Model) -> Request:
     )
 
 
+def _warn_if_redundant(wave: list[Problem], target: Target) -> None:
+    """Warn when a wave is about to regenerate files it already wrote.
+
+    `solved` and `unsolved` filter on what a problem *is*, not on whether it has been tagged, so
+    repeating one of them without advancing `start` re-selects the same problems - three waves
+    that look like they walk the stack can all cover the same head of it. Only `untagged` is
+    self-advancing. Re-tagging is legitimate (that is the whole re-tag campaign), so this informs
+    rather than blocks; it just makes the difference visible before the money is spent.
+    """
+    if target == 'untagged':
+        return
+    already = sum(1 for p in wave if (p.solution_dir / config.tags_filename).exists())
+    if already:
+        console.print(f'[warning]note:[/warning] {already} of {len(wave)} already have '
+                      f'{config.tags_filename} and will be regenerated. `target={target}` selects '
+                      f'by kind, not by what is missing - use [accent]target=untagged[/accent] to '
+                      f'cover only what has none, or [accent]start=[/accent] to advance the wave.')
+
+
 def _submit(client: Anthropic, wave: list[Problem], model: Model) -> str:
     """Submit a wave and record it in the store; returns the batch id."""
     console.print(f'[primary]Building {len(wave)} request(s)...[/primary]')
@@ -305,6 +324,8 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
             return ExitCodes.EXIT_OK
         console.print(f'[primary]{len(wave)} problem(s)[/primary] - '
                       f'p{wave[0].number:04d} .. p{wave[-1].number:04d}')
+        if not problems_list:
+            _warn_if_redundant(wave, target)
         new_id = _submit(client, wave, model)
         if action == 'submit':
             console.print(f'[muted]collect with [accent]claude-batch collect --batch-id {new_id}[/accent][/muted]')
