@@ -19,10 +19,14 @@ from solver.ai import skill
 from solver.config import ExitCodes
 
 _INDEX: list[dict[str, Any]] = [
-    {'path': 'domain/alpha', 'title': 'Alpha', 'status': 'missing', 'tags': ['alpha'], 'problems': 3},
-    {'path': 'domain/beta', 'title': 'Beta', 'status': 'missing', 'tags': ['beta'], 'problems': 9},
-    {'path': 'technique/gamma', 'title': 'Gamma', 'status': 'draft', 'tags': ['gamma'], 'problems': 40},
-    {'path': 'number-theory/primes', 'title': 'Primes', 'status': 'final', 'tags': ['delta'], 'problems': 12},
+    {'path': 'domain/alpha', 'title': 'Alpha', 'status': 'draft', 'tags': ['alpha'],
+     'refs': ['p0001', 'p0002', 'p0003']},
+    {'path': 'domain/beta', 'title': 'Beta', 'status': 'draft', 'tags': ['beta'],
+     'refs': ['p0004']},
+    {'path': 'technique/gamma', 'title': 'Gamma', 'status': 'draft', 'tags': ['gamma'],
+     'refs': ['p0005_s0', 'p0005_s1', 'p0006_s0']},
+    {'path': 'number-theory/primes', 'title': 'Primes', 'status': 'final', 'tags': ['delta'],
+     'refs': ['p0007', 'p0008']},
 ]
 
 
@@ -38,21 +42,25 @@ class TopicCompletionTests(unittest.TestCase):
     def _paths(self, incomplete: str = '') -> list[str]:
         return [c.text for c in _completions(incomplete)]
 
-    def test_unwritten_first_then_draft_then_final(self) -> None:
-        """Ordering is the writing queue: missing (most-referenced first), then drafts, final last."""
-        self.assertEqual(self._paths(), ['domain/beta', 'domain/alpha', 'technique/gamma',
-                                         'number-theory/primes'])
+    def test_completions_are_alphabetical(self) -> None:
+        """Sorted by path, not by how much needs writing: a maintainer types the name of the topic
+        they have in mind, and an order that shifts as pages get written cannot be learned."""
+        self.assertEqual(self._paths(), ['domain/alpha', 'domain/beta', 'number-theory/primes',
+                                         'technique/gamma'])
 
     def test_curated_topics_are_offered_not_just_tag_pages(self) -> None:
         """A page that is no tag's own (`number-theory/primes`) is a completion like any other."""
         self.assertEqual(self._paths('number-theory'), ['number-theory/primes'])
         self.assertEqual(self._paths('prime'), ['number-theory/primes'])
 
-    def test_status_shows_on_written_topics_only(self) -> None:
+    def test_meta_shows_folder_distinct_problems_and_status(self) -> None:
+        """Every page has a status now, so every entry shows one. The count is *distinct
+        problems*, so a technique's per-index refs (p0005_s0, p0005_s1) count once."""
         meta = {c.text: str(c.display_meta) for c in _completions('')}
         self.assertIn('draft', meta['technique/gamma'])
         self.assertIn('final', meta['number-theory/primes'])
-        self.assertNotIn('missing', meta['domain/beta'])      # the default state goes unsaid
+        self.assertIn('technique · 2 · draft', meta['technique/gamma'])
+        self.assertIn('domain · 3 · draft', meta['domain/alpha'])
 
 
 class FinalGateTests(unittest.TestCase):

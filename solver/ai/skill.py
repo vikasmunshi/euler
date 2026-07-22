@@ -18,7 +18,6 @@ from rich.text import Text
 
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem
-from solver.core.tags import STATUSES
 from solver.shell import console, register
 from solver.shell.command import Context
 
@@ -74,16 +73,18 @@ def _find_topic(topic: str) -> dict[str, Any] | None:
 
 
 def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
-    """`claude-blog` targets: every writable topic in the article index as its ``<folder>/<slug>``
-    path — the tag pages *and* the curated ones. **Unwritten topics come first, most-referenced at
-    the top**, then the drafts, with finished articles last. Each shows its folder, its
-    distinct-problem count, and its status once it has a page."""
-    rank = {status: i for i, status in enumerate(STATUSES)}
-    rows = [r for r in _topic_index() if incomplete in r['path']]
-    rows.sort(key=lambda r: (rank.get(r['status'], 9), -r['problems'], r['path']))
+    """`claude-blog` targets: every topic in the article index as its ``<folder>/<slug>`` path —
+    the tag pages *and* the curated ones — **sorted alphabetically**.
+
+    Ranking by how much needs writing sounds helpful and is not: what a maintainer types is the
+    name of the topic they have in mind, and a list whose order shifts as pages get written is
+    one you cannot learn. Each entry shows its folder, the number of problems behind it, and
+    its status."""
+    rows = sorted((r for r in _topic_index() if incomplete in r['path']), key=lambda r: r['path'])
     return [Completion(r['path'], start_position=-len(incomplete), display=r['path'].rsplit('/', 1)[-1],
-                       display_meta=f"{r['path'].rsplit('/', 1)[0]} · {r['problems']}"
-                                    + ('' if r['status'] == 'missing' else f" · {r['status']}"))
+                       display_meta=f"{r['path'].rsplit('/', 1)[0]} · "
+                                    f"{len({ref.split('_')[0] for ref in r.get('refs', [])})}"
+                                    f" · {r['status']}")
             for r in rows]
 
 

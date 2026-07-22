@@ -14,6 +14,7 @@ from solver.config import config
 
 
 class Templates(StrEnum):
+    ARTICLE = 'article.md'
     NEW_C = 'new.c'
     NEW_PY = 'new.py'
     PROMPT_C = 'prompt_c.txt'

@@ -22,7 +22,6 @@ from pathlib import Path
 import jinja2
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.config import config
 from solver.web.site import content, gitstate
 from solver.web.site.app import build_app
 
@@ -32,13 +31,6 @@ from tests import silence
 
 silence()   # filter aiohttp's request-key warning the handlers trip
 
-#: These assertions read the repository's real topic articles. The tree is deliberately empty
-#: between the articles-redesign baseline and the pass where `update-tags` generates a page per
-#: tag, and an empty tree renders tag chips as plain spans rather than links - correct behaviour,
-#: not a regression. Skip while it is empty so the gate stays meaningful, and start running again
-#: by themselves once articles exist.
-_HAS_ARTICLES = any(config.topics_dir.rglob('*.md'))
-_needs_articles = unittest.skipUnless(_HAS_ARTICLES, 'no topic articles on disk (articles redesign)')
 
 _READER = {'X-User': 'r@example.com', 'X-Profile': 'reader'}
 _CONTRIBUTOR = {'X-User': 'c@example.com', 'X-Profile': 'contributor'}
@@ -256,7 +248,6 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertLess(body.index('test-cases'), body.index('file-flow'))
         self.assertLess(body.index('class="results"'), body.index('file-flow'))
 
-    @_needs_articles
     @unittest_run_loop
     async def test_problem_page_tags_and_topics(self) -> None:
         """A: the header chip row, facet-classed, each chip linking to its tag page.
@@ -269,13 +260,11 @@ class ContentServiceTests(AioHTTPTestCase):
         # The slug itself is regenerated content (see `claude-batch`), so assert the link *shape*
         # a chip must produce - facet-scoped tag page - not whichever technique p0007 carries today.
         self.assertIn('href="/topics/technique/', body)
-        # B — workbench panel: per-index technique row + curated topic (not a per-tag skeleton)
+        # B — workbench panel: per-index technique row. The curated-topic card is not asserted
+        # here: curated pages are created by `create-topic`, and none exists in a fresh tree.
         self.assertIn('Tags &amp; topics', body)
         self.assertIn('<span class="idx">s0</span>', body)
-        self.assertIn('/topics/number-theory/primes', body)
-        self.assertIn('Generating and testing primes', body)
 
-    @_needs_articles
     @unittest_run_loop
     async def test_problem_block_renders_tag_chips(self) -> None:
         """The htmx path renders the content block alone — chips and all.
@@ -443,7 +432,6 @@ class ContentServiceTests(AioHTTPTestCase):
             resp = await self.client.get(f'/docs/{name}', headers=_READER)
             self.assertEqual(resp.status, 404, name)
 
-    @_needs_articles
     @unittest_run_loop
     async def test_topics_index_and_page(self) -> None:
         resp = await self.client.get('/topics/', headers=_READER)
@@ -452,22 +440,27 @@ class ContentServiceTests(AioHTTPTestCase):
         resp = await self.client.get('/topics/technique/sieve-of-eratosthenes', headers=_READER)
         self.assertEqual(resp.status, 200)
         self.assertIn('Sieve of Eratosthenes', await resp.text())
+        # every tag now has a page, so a tag the vocabulary carries is always servable
+        resp = await self.client.get('/topics/domain/practical-number', headers=_READER)
+        self.assertEqual(resp.status, 200)
 
-    @_needs_articles
     @unittest_run_loop
     async def test_topics_nested_folder(self) -> None:
         """A `topics/<folder>/<page>.md` is listed with its folder-qualified name and
-        served at the nested route; the index groups it under its folder."""
+        served at the nested route; the index groups it under its folder.
+
+        Every tag page is nested now (`domain/<slug>.md`), so this uses one rather than the
+        curated `number-theory/primes` it used to - curated pages come from `create-topic`."""
         index = await (await self.client.get('/topics/', headers=_READER)).text()
-        self.assertIn('/topics/number-theory/primes', index)
-        self.assertIn('<h3>Number Theory</h3>', index)              # the folder is the section
-        self.assertIn('class="card-title">Primes<', index)          # the card carries the leaf
+        self.assertIn('/topics/domain/practical-number', index)
+        self.assertIn('<h3>Domain</h3>', index)                     # the folder is the section
+        self.assertIn('class="card-title">Practical Number<', index)  # the card carries the leaf
         self.assertIn('class="cards cards-4"', index)               # four to a row
-        resp = await self.client.get('/topics/number-theory/primes', headers=_READER)
+        resp = await self.client.get('/topics/domain/practical-number', headers=_READER)
         self.assertEqual(resp.status, 200)
-        self.assertIn('Generating and testing primes', await resp.text())
+        self.assertIn('Practical number', await resp.text())
         # a missing nested page is a 404, not a stray match
-        missing = await self.client.get('/topics/number-theory/no-such-page', headers=_READER)
+        missing = await self.client.get('/topics/domain/no-such-page', headers=_READER)
         self.assertEqual(missing.status, 404)
 
     @unittest_run_loop

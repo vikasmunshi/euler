@@ -115,19 +115,36 @@ class ArticleIndexTests(unittest.TestCase):
         self.assertEqual(tags._stamp_status(stamped), stamped)
         self.assertEqual(tags._stamp_status('# Alpha\n').splitlines()[0], '<!-- status: draft -->')
 
-    def test_index_spans_the_vocabulary_and_the_pages(self) -> None:
-        """Every tag is a row (missing until written); a page on disk overrides its own."""
+    def test_index_is_built_from_the_pages_and_carries_their_refs(self) -> None:
+        """A row exists because a page does — update-tags creates one per tag, so there is no
+        vocabulary-only row and no `missing`. Each row carries the page's own refs, at the legs'
+        granularity, so a consumer can rank or filter without re-deriving them."""
         self._article('domain/alpha.md', '<!-- tags: [alpha] -->\n<!-- status: final -->\n# Alpha, at length\n')
         self._article('curated/mix.md', '<!-- tags: [alpha, beta] -->\n# Mixed\n')
         index = tags._build_index(_central())
         rows = {row['path']: row for row in index['articles']}
         self.assertEqual([row['path'] for row in index['articles']], sorted(rows))   # sorted by path
+        self.assertEqual(set(rows), {'domain/alpha', 'curated/mix'})                 # pages only
         self.assertEqual(rows['domain/alpha']['status'], 'final')
         self.assertEqual(rows['domain/alpha']['title'], 'Alpha, at length')          # the page's own H1
-        self.assertEqual(rows['domain/beta'], {'path': 'domain/beta', 'title': 'Beta', 'status': 'missing',
-                                               'tags': ['beta'], 'problems': 1})     # vocabulary only
+        self.assertEqual(rows['domain/alpha']['refs'], ['p0002', 'p0003'])
         self.assertEqual(rows['curated/mix']['status'], 'draft')                     # no comment → draft
-        self.assertEqual(rows['curated/mix']['problems'], 2)                         # p0002 + p0003
+        self.assertEqual(rows['curated/mix']['refs'], ['p0002', 'p0003'])            # union of both tags
+        self.assertNotIn('problems', rows['curated/mix'])                            # replaced by refs
+
+    def test_a_tag_without_a_page_gets_one_from_the_template(self) -> None:
+        """This is what removes `missing`: every tag has a file, so status only answers whether
+        the page has been *written*."""
+        central = _central()
+        tags._regen_articles(central, write=True)
+        page = self.topics / 'domain' / 'beta.md'
+        self.assertTrue(page.exists())
+        text = page.read_text()
+        self.assertIn('<!-- tags: [beta] -->', text)
+        self.assertIn('<!-- status: draft -->', text)
+        self.assertIn('# Beta', text)
+        self.assertIn('p0002', text)                                                 # its generated refs
+        self.assertEqual(tags.article_status(text), 'draft')
 
     def test_check_flags_a_stale_index(self) -> None:
         central = _central()
