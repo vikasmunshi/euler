@@ -505,13 +505,6 @@
       "problems": 1
     },
     {
-      "path": "domain/eulers-theorem",
-      "title": "Euler's theorem",
-      "status": "missing",
-      "tags": ["eulers-theorem"],
-      "problems": 0
-    },
-    {
       "path": "domain/eulers-totient-function",
       "title": "Euler's totient function",
       "status": "missing",
@@ -673,13 +666,6 @@
       "problems": 1
     },
     {
-      "path": "domain/geometric-mean",
-      "title": "Geometric mean",
-      "status": "missing",
-      "tags": ["geometric-mean"],
-      "problems": 0
-    },
-    {
       "path": "domain/geometric-progression",
       "title": "Geometric progression",
       "status": "missing",
@@ -813,13 +799,6 @@
       "problems": 1
     },
     {
-      "path": "domain/indefinite-orthogonal-group",
-      "title": "Indefinite orthogonal group",
-      "status": "missing",
-      "tags": ["indefinite-orthogonal-group"],
-      "problems": 0
-    },
-    {
       "path": "domain/independence-probability-theory",
       "title": "Independence (probability theory)",
       "status": "missing",
@@ -918,13 +897,6 @@
       "problems": 4
     },
     {
-      "path": "domain/legendre-symbol",
-      "title": "Legendre symbol",
-      "status": "missing",
-      "tags": ["legendre-symbol"],
-      "problems": 0
-    },
-    {
       "path": "domain/legendres-formula",
       "title": "Legendre's formula",
       "status": "missing",
@@ -993,13 +965,6 @@
       "status": "missing",
       "tags": ["minimum-spanning-tree"],
       "problems": 1
-    },
-    {
-      "path": "domain/minkowski-addition",
-      "title": "Minkowski addition",
-      "status": "missing",
-      "tags": ["minkowski-addition"],
-      "problems": 0
     },
     {
       "path": "domain/modular-arithmetic",
@@ -1471,13 +1436,6 @@
       "problems": 1
     },
     {
-      "path": "domain/series-parallel-graph",
-      "title": "Series\u2013parallel graph",
-      "status": "missing",
-      "tags": ["series-parallel-graph"],
-      "problems": 0
-    },
-    {
       "path": "domain/set-mathematics",
       "title": "Set (mathematics)",
       "status": "missing",
@@ -1651,13 +1609,6 @@
       "status": "missing",
       "tags": ["thaless-theorem"],
       "problems": 1
-    },
-    {
-      "path": "domain/three-distance-theorem",
-      "title": "Three-distance theorem",
-      "status": "missing",
-      "tags": ["three-distance-theorem"],
-      "problems": 0
     },
     {
       "path": "domain/tiling",
@@ -1954,13 +1905,6 @@
       "problems": 1
     },
     {
-      "path": "technique/apollonian-gasket",
-      "title": "Apollonian gasket",
-      "status": "missing",
-      "tags": ["apollonian-gasket"],
-      "problems": 0
-    },
-    {
       "path": "technique/arbitrary-precision-arithmetic",
       "title": "Arbitrary-precision arithmetic",
       "status": "missing",
@@ -2003,13 +1947,6 @@
       "problems": 2
     },
     {
-      "path": "technique/atoi",
-      "title": "atoi",
-      "status": "missing",
-      "tags": ["atoi"],
-      "problems": 0
-    },
-    {
       "path": "technique/baby-step-giant-step",
       "title": "Baby-step giant-step",
       "status": "missing",
@@ -2022,13 +1959,6 @@
       "status": "missing",
       "tags": ["backtracking"],
       "problems": 9
-    },
-    {
-      "path": "technique/binary-expression-tree",
-      "title": "Binary expression tree",
-      "status": "missing",
-      "tags": ["binary-expression-tree"],
-      "problems": 0
     },
     {
       "path": "technique/binary-search-algorithm",
@@ -2071,13 +2001,6 @@
       "status": "missing",
       "tags": ["bit-manipulation"],
       "problems": 27
-    },
-    {
-      "path": "technique/bit-numbering",
-      "title": "Bit numbering",
-      "status": "missing",
-      "tags": ["bit-numbering"],
-      "problems": 0
     },
     {
       "path": "technique/bitwise-operation",
@@ -2199,25 +2122,11 @@
       "problems": 1
     },
     {
-      "path": "technique/center-group-theory",
-      "title": "Center (group theory)",
-      "status": "missing",
-      "tags": ["center-group-theory"],
-      "problems": 0
-    },
-    {
       "path": "technique/chinese-remainder-theorem",
       "title": "Chinese remainder theorem",
       "status": "missing",
       "tags": ["chinese-remainder-theorem"],
       "problems": 3
-    },
-    {
-      "path": "technique/circular-segment",
-      "title": "Circular segment",
-      "status": "missing",
-      "tags": ["circular-segment"],
-      "problems": 0
     },
     {
       "path": "technique/closed-form-expression",
@@ -2248,13 +2157,6 @@
       "problems": 3
     },
     {
-      "path": "technique/collinearity",
-      "title": "Collinearity",
-      "status": "missing",
-      "tags": ["collinearity"],
-      "problems": 0
-    },
-    {
       "path": "technique/combination",
       "title": "Combination",
       "status": "missing",
@@ -2267,20 +2169,6 @@
       "status": "missing",
       "tags": ["combinatorial-principles"],
       "problems": 2
-    },
-    {
-      "path": "technique/complete-graph",
-      "title": "Complete graph",
-      "status": "missing",
-      "tags": ["complete-graph"],
-      "problems": 0
-    },
-    {
-      "path": "technique/composition-combinatorics-application",
-      "title": "Composition (combinatorics) (application)",
-      "status": "missing",
-      "tags": ["composition-combinatorics-application"],
-      "problems": 0
     },
     {
       "path": "technique/concatenation",
@@ -2325,13 +2213,6 @@
       "problems": 3
     },
     {
-      "path": "technique/cpu-cache",
-      "title": "CPU cache",
-      "status": "missing",
-      "tags": ["cpu-cache"],
-      "problems": 0
-    },
-    {
       "path": "technique/cramers-rule",
       "title": "Cramer's rule",
       "status": "missing",
@@ -2351,13 +2232,6 @@
       "status": "missing",
       "tags": ["cross-product"],
       "problems": 4
-    },
-    {
-      "path": "technique/curvature",
-      "title": "Curvature",
-      "status": "missing",
-      "tags": ["curvature"],
-      "problems": 0
     },
     {
       "path": "technique/cycle-detection",
@@ -2407,13 +2281,6 @@
       "status": "missing",
       "tags": ["descartes-circle-theorem"],
       "problems": 1
-    },
-    {
-      "path": "technique/deterministic-finite-automaton",
-      "title": "Deterministic finite automaton",
-      "status": "missing",
-      "tags": ["deterministic-finite-automaton"],
-      "problems": 0
     },
     {
       "path": "technique/dict",
@@ -2780,13 +2647,6 @@
       "problems": 2
     },
     {
-      "path": "technique/gcc-nested-function",
-      "title": "GCC nested-function",
-      "status": "missing",
-      "tags": ["gcc-nested-function"],
-      "problems": 0
-    },
-    {
       "path": "technique/generate-and-test",
       "title": "Generate and test",
       "status": "missing",
@@ -3081,25 +2941,11 @@
       "problems": 3
     },
     {
-      "path": "technique/lazy-evaluation",
-      "title": "Lazy evaluation",
-      "status": "missing",
-      "tags": ["lazy-evaluation"],
-      "problems": 0
-    },
-    {
       "path": "technique/leap-year",
       "title": "Leap year",
       "status": "missing",
       "tags": ["leap-year"],
       "problems": 1
-    },
-    {
-      "path": "technique/lehmer-code",
-      "title": "Lehmer code",
-      "status": "missing",
-      "tags": ["lehmer-code"],
-      "problems": 0
     },
     {
       "path": "technique/lexicographic-order",
@@ -3114,20 +2960,6 @@
       "status": "missing",
       "tags": ["linear-congruential-generator"],
       "problems": 2
-    },
-    {
-      "path": "technique/linear-map",
-      "title": "Linear map",
-      "status": "missing",
-      "tags": ["linear-map"],
-      "problems": 0
-    },
-    {
-      "path": "technique/linear-probing",
-      "title": "Linear probing",
-      "status": "missing",
-      "tags": ["linear-probing"],
-      "problems": 0
     },
     {
       "path": "technique/linear-recurrence-with-constant-coefficients",
@@ -3305,13 +3137,6 @@
       "problems": 18
     },
     {
-      "path": "technique/memory-management",
-      "title": "Memory management",
-      "status": "missing",
-      "tags": ["memory-management"],
-      "problems": 0
-    },
-    {
       "path": "technique/mersenne-twister",
       "title": "Mersenne Twister",
       "status": "missing",
@@ -3410,13 +3235,6 @@
       "problems": 1
     },
     {
-      "path": "technique/mpmath-log10",
-      "title": "mpmath.log10",
-      "status": "missing",
-      "tags": ["mpmath-log10"],
-      "problems": 0
-    },
-    {
       "path": "technique/multinomial-theorem",
       "title": "Multinomial theorem",
       "status": "missing",
@@ -3464,13 +3282,6 @@
       "status": "missing",
       "tags": ["newtons-method"],
       "problems": 1
-    },
-    {
-      "path": "technique/next",
-      "title": "next()",
-      "status": "missing",
-      "tags": ["next"],
-      "problems": 0
     },
     {
       "path": "technique/nonlocal",
@@ -3543,13 +3354,6 @@
       "problems": 4
     },
     {
-      "path": "technique/partition-of-a-set",
-      "title": "Partition of a set",
-      "status": "missing",
-      "tags": ["partition-of-a-set"],
-      "problems": 0
-    },
-    {
       "path": "technique/pascals-triangle",
       "title": "Pascal's triangle",
       "status": "missing",
@@ -3590,13 +3394,6 @@
       "status": "missing",
       "tags": ["power-set"],
       "problems": 4
-    },
-    {
-      "path": "technique/powerful-number",
-      "title": "Powerful number",
-      "status": "missing",
-      "tags": ["powerful-number"],
-      "problems": 0
     },
     {
       "path": "technique/prefix-sum",
@@ -3711,13 +3508,6 @@
       "problems": 35
     },
     {
-      "path": "technique/repdigit",
-      "title": "Repdigit",
-      "status": "missing",
-      "tags": ["repdigit"],
-      "problems": 0
-    },
-    {
       "path": "technique/rotation-matrix",
       "title": "Rotation matrix",
       "status": "missing",
@@ -3781,13 +3571,6 @@
       "problems": 10
     },
     {
-      "path": "technique/simons-favorite-factoring-trick",
-      "title": "Simon's Favorite Factoring Trick",
-      "status": "missing",
-      "tags": ["simons-favorite-factoring-trick"],
-      "problems": 0
-    },
-    {
       "path": "technique/simulated-annealing",
       "title": "Simulated annealing",
       "status": "missing",
@@ -3814,13 +3597,6 @@
       "status": "missing",
       "tags": ["specular-reflection"],
       "problems": 1
-    },
-    {
-      "path": "technique/sprague-grundy-theorem",
-      "title": "Sprague\u2013Grundy theorem",
-      "status": "missing",
-      "tags": ["sprague-grundy-theorem"],
-      "problems": 0
     },
     {
       "path": "technique/sqrt",
@@ -3858,25 +3634,11 @@
       "problems": 2
     },
     {
-      "path": "technique/static-inline",
-      "title": "static inline",
-      "status": "missing",
-      "tags": ["static-inline"],
-      "problems": 0
-    },
-    {
       "path": "technique/stencil-numerical-analysis",
       "title": "Stencil (numerical analysis)",
       "status": "missing",
       "tags": ["stencil-numerical-analysis"],
       "problems": 1
-    },
-    {
-      "path": "technique/stochastic-matrix",
-      "title": "Stochastic matrix",
-      "status": "missing",
-      "tags": ["stochastic-matrix"],
-      "problems": 0
     },
     {
       "path": "technique/strcmp",
@@ -3940,13 +3702,6 @@
       "status": "missing",
       "tags": ["tensor-network"],
       "problems": 1
-    },
-    {
-      "path": "technique/tetrahedral-number",
-      "title": "Tetrahedral number",
-      "status": "missing",
-      "tags": ["tetrahedral-number"],
-      "problems": 0
     },
     {
       "path": "technique/tonelli-shanks-algorithm",
@@ -4017,13 +3772,6 @@
       "status": "missing",
       "tags": ["two-pointer-technique"],
       "problems": 5
-    },
-    {
-      "path": "technique/two-pointers-technique",
-      "title": "Two pointers technique",
-      "status": "missing",
-      "tags": ["two-pointers-technique"],
-      "problems": 0
     },
     {
       "path": "technique/unranking",

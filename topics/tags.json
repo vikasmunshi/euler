@@ -655,15 +655,6 @@
       "refs": ["p0686"]
     },
     {
-      "slug": "eulers-theorem",
-      "facet": "domain",
-      "name": "Euler's theorem",
-      "reference": "https://en.wikipedia.org/wiki/Euler%27s_theorem",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "eulers-totient-function",
       "facet": "domain",
       "name": "Euler's totient function",
@@ -871,15 +862,6 @@
       "refs": ["p0229"]
     },
     {
-      "slug": "geometric-mean",
-      "facet": "domain",
-      "name": "Geometric mean",
-      "reference": "https://en.wikipedia.org/wiki/Geometric_mean",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "geometric-progression",
       "facet": "domain",
       "name": "Geometric progression",
@@ -1051,15 +1033,6 @@
       "refs": ["p0195"]
     },
     {
-      "slug": "indefinite-orthogonal-group",
-      "facet": "domain",
-      "name": "Indefinite orthogonal group",
-      "reference": "https://en.wikipedia.org/wiki/Indefinite_orthogonal_group",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "independence-probability-theory",
       "facet": "domain",
       "name": "Independence (probability theory)",
@@ -1186,15 +1159,6 @@
       "refs": ["p0005", "p0152", "p0545", "p0772"]
     },
     {
-      "slug": "legendre-symbol",
-      "facet": "domain",
-      "name": "Legendre symbol",
-      "reference": "https://en.wikipedia.org/wiki/Legendre_symbol",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "legendres-formula",
       "facet": "domain",
       "name": "Legendre's formula",
@@ -1283,15 +1247,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Minimum_spanning_tree#Cut_property"],
       "summary": "",
       "refs": ["p0107"]
-    },
-    {
-      "slug": "minkowski-addition",
-      "facet": "domain",
-      "name": "Minkowski addition",
-      "reference": "https://en.wikipedia.org/wiki/Minkowski_addition",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "modular-arithmetic",
@@ -1897,15 +1852,6 @@
       "refs": ["p0155"]
     },
     {
-      "slug": "series-parallel-graph",
-      "facet": "domain",
-      "name": "Series\u2013parallel graph",
-      "reference": "https://en.wikipedia.org/wiki/Series%E2%80%93parallel_graph",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "set-mathematics",
       "facet": "domain",
       "name": "Set (mathematics)",
@@ -2129,15 +2075,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0210"]
-    },
-    {
-      "slug": "three-distance-theorem",
-      "facet": "domain",
-      "name": "Three-distance theorem",
-      "reference": "https://en.wikipedia.org/wiki/Three-distance_theorem",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "tiling",
@@ -2410,15 +2347,6 @@
       "refs": ["p0074_s2"]
     },
     {
-      "slug": "apollonian-gasket",
-      "facet": "technique",
-      "name": "Apollonian gasket",
-      "reference": "https://en.wikipedia.org/wiki/Apollonian_gasket",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "arbitrary-precision-arithmetic",
       "facet": "technique",
       "name": "Arbitrary-precision arithmetic",
@@ -2473,15 +2401,6 @@
       "refs": ["p0177_s0", "p0184_s0"]
     },
     {
-      "slug": "atoi",
-      "facet": "technique",
-      "name": "atoi",
-      "reference": "https://en.cppreference.com/w/c/string/byte/atoi",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "baby-step-giant-step",
       "facet": "technique",
       "name": "Baby-step giant-step",
@@ -2498,15 +2417,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0043_s0", "p0060_s0", "p0061_s0", "p0068_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0118_s0", "p0122_s0", "p0170_s0", "p0719_s0"]
-    },
-    {
-      "slug": "binary-expression-tree",
-      "facet": "technique",
-      "name": "Binary expression tree",
-      "reference": "https://en.wikipedia.org/wiki/Binary_expression_tree",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "binary-search-algorithm",
@@ -2561,15 +2471,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0036_s0", "p0079_s0", "p0096_s2", "p0103_s0", "p0103_s1", "p0105_s0", "p0118_s0", "p0143_s0", "p0152_s0", "p0161_s0", "p0162_s0", "p0167_s0", "p0169_s0", "p0170_s0", "p0202_s0", "p0207_s0", "p0209_s0", "p0215_s0", "p0226_s0", "p0269_s0", "p0345_s0", "p0704_s0", "p0755_s0", "p0872_s0", "p0918_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
-    },
-    {
-      "slug": "bit-numbering",
-      "facet": "technique",
-      "name": "Bit numbering",
-      "reference": "https://en.wikipedia.org/wiki/Bit_numbering",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "bitwise-operation",
@@ -2725,15 +2626,6 @@
       "refs": ["p0980_s0"]
     },
     {
-      "slug": "center-group-theory",
-      "facet": "technique",
-      "name": "Center (group theory)",
-      "reference": "https://en.wikipedia.org/wiki/Center_(group_theory)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "chinese-remainder-theorem",
       "facet": "technique",
       "name": "Chinese remainder theorem",
@@ -2741,15 +2633,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0160_s0", "p0932_s0", "p0934_s0"]
-    },
-    {
-      "slug": "circular-segment",
-      "facet": "technique",
-      "name": "Circular segment",
-      "reference": "https://en.wikipedia.org/wiki/Circular_segment",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "closed-form-expression",
@@ -2788,15 +2671,6 @@
       "refs": ["p0062_s0", "p0142_s0", "p0212_s0"]
     },
     {
-      "slug": "collinearity",
-      "facet": "technique",
-      "name": "Collinearity",
-      "reference": "https://en.wikipedia.org/wiki/Collinearity",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "combination",
       "facet": "technique",
       "name": "Combination",
@@ -2813,24 +2687,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Combinatorial_principles#Complementary_counting", "https://en.wikipedia.org/wiki/Combinatorial_principles#Rule_of_subtraction"],
       "summary": "",
       "refs": ["p0032_s0", "p0788_s0"]
-    },
-    {
-      "slug": "complete-graph",
-      "facet": "technique",
-      "name": "Complete graph",
-      "reference": "https://en.wikipedia.org/wiki/Complete_graph",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "composition-combinatorics-application",
-      "facet": "technique",
-      "name": "Composition (combinatorics) (application)",
-      "reference": "https://en.wikipedia.org/wiki/Composition_(combinatorics)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "concatenation",
@@ -2887,15 +2743,6 @@
       "refs": ["p0039_s0", "p0166_s0", "p0174_s0"]
     },
     {
-      "slug": "cpu-cache",
-      "facet": "technique",
-      "name": "CPU cache",
-      "reference": "https://en.wikipedia.org/wiki/CPU_cache",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "cramers-rule",
       "facet": "technique",
       "name": "Cramer's rule",
@@ -2921,15 +2768,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Cross_product#Cross_product_and_handedness"],
       "summary": "",
       "refs": ["p0102_s0", "p0102_s1", "p0165_s0", "p0184_s0", "p0478_s0"]
-    },
-    {
-      "slug": "curvature",
-      "facet": "technique",
-      "name": "Curvature",
-      "reference": "https://en.wikipedia.org/wiki/Curvature",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "cycle-detection",
@@ -2993,15 +2831,6 @@
       "additional-references": [],
       "summary": "A relation among the curvatures of four mutually tangent circles, used to find the curvature of the circle filling a gap.",
       "refs": ["p0199_s0"]
-    },
-    {
-      "slug": "deterministic-finite-automaton",
-      "facet": "technique",
-      "name": "Deterministic finite automaton",
-      "reference": "https://en.wikipedia.org/wiki/Deterministic_finite_automaton",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "dict",
@@ -3472,15 +3301,6 @@
       "refs": ["p0153_s0", "p0220_s0"]
     },
     {
-      "slug": "gcc-nested-function",
-      "facet": "technique",
-      "name": "GCC nested-function",
-      "reference": "https://gcc.gnu.org/onlinedocs/gcc/Nested-Functions.html",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "generate-and-test",
       "facet": "technique",
       "name": "Generate and test",
@@ -3859,15 +3679,6 @@
       "refs": ["p0091_s0", "p0229_s0", "p0313_s0"]
     },
     {
-      "slug": "lazy-evaluation",
-      "facet": "technique",
-      "name": "Lazy evaluation",
-      "reference": "https://en.wikipedia.org/wiki/Lazy_evaluation",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "leap-year",
       "facet": "technique",
       "name": "Leap year",
@@ -3875,15 +3686,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Leap_year#Gregorian_calendar"],
       "summary": "",
       "refs": ["p0019_s0"]
-    },
-    {
-      "slug": "lehmer-code",
-      "facet": "technique",
-      "name": "Lehmer code",
-      "reference": "https://en.wikipedia.org/wiki/Lehmer_code",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "lexicographic-order",
@@ -3902,24 +3704,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0150_s0", "p0980_s0"]
-    },
-    {
-      "slug": "linear-map",
-      "facet": "technique",
-      "name": "Linear map",
-      "reference": "https://en.wikipedia.org/wiki/Linear_map",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "linear-probing",
-      "facet": "technique",
-      "name": "Linear probing",
-      "reference": "https://en.wikipedia.org/wiki/Linear_probing",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "linear-recurrence-with-constant-coefficients",
@@ -4147,15 +3931,6 @@
       "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0060_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0078_s0", "p0092_s0", "p0103_s0", "p0103_s1", "p0115_s0", "p0153_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0549_s0", "p0755_s0", "p1000_s0"]
     },
     {
-      "slug": "memory-management",
-      "facet": "technique",
-      "name": "Memory management",
-      "reference": "https://en.wikipedia.org/wiki/Memory_management",
-      "additional-references": ["https://en.wikipedia.org/wiki/Memory_management#Dynamic_memory_allocation"],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "mersenne-twister",
       "facet": "technique",
       "name": "Mersenne Twister",
@@ -4282,15 +4057,6 @@
       "refs": ["p0686_s1"]
     },
     {
-      "slug": "mpmath-log10",
-      "facet": "technique",
-      "name": "mpmath.log10",
-      "reference": "https://mpmath.org/doc/current/functions/powers.html",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "multinomial-theorem",
       "facet": "technique",
       "name": "Multinomial theorem",
@@ -4352,15 +4118,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0229_s0"]
-    },
-    {
-      "slug": "next",
-      "facet": "technique",
-      "name": "next()",
-      "reference": "https://docs.python.org/3/library/functions.html#next",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "nonlocal",
@@ -4453,15 +4210,6 @@
       "refs": ["p0025_s0", "p0094_s0", "p0138_s0", "p0139_s2"]
     },
     {
-      "slug": "partition-of-a-set",
-      "facet": "technique",
-      "name": "Partition of a set",
-      "reference": "https://en.wikipedia.org/wiki/Partition_of_a_set",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "pascals-triangle",
       "facet": "technique",
       "name": "Pascal's triangle",
@@ -4514,15 +4262,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0103_s0", "p0103_s1", "p0118_s0", "p0152_s0", "p0357_s0"]
-    },
-    {
-      "slug": "powerful-number",
-      "facet": "technique",
-      "name": "Powerful number",
-      "reference": "https://en.wikipedia.org/wiki/Powerful_number",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "prefix-sum",
@@ -4669,15 +4408,6 @@
       "refs": ["p0014_s0", "p0017_s0", "p0024_s0", "p0043_s0", "p0065_s0", "p0073_s1", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0084_s0", "p0088_s0", "p0093_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0103_s0", "p0103_s1", "p0108_s1", "p0110_s0", "p0111_s0", "p0115_s0", "p0118_s0", "p0122_s0", "p0152_s0", "p0161_s0", "p0176_s0", "p0188_s0", "p0199_s0", "p0204_s0", "p0215_s0", "p0220_s0", "p0259_s0", "p0293_s0", "p0301_s0", "p0565_s0", "p0565_s1", "p0642_s0", "p0755_s0", "p0862_s0", "p1000_s0"]
     },
     {
-      "slug": "repdigit",
-      "facet": "technique",
-      "name": "Repdigit",
-      "reference": "https://en.wikipedia.org/wiki/Repdigit",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "rotation-matrix",
       "facet": "technique",
       "name": "Rotation matrix",
@@ -4759,15 +4489,6 @@
       "refs": ["p0007_s0", "p0010_s1", "p0027_s0", "p0035_s0", "p0049_s0", "p0050_s0", "p0051_s0", "p0060_s0", "p0077_s0", "p0077_s1", "p0087_s0"]
     },
     {
-      "slug": "simons-favorite-factoring-trick",
-      "facet": "technique",
-      "name": "Simon's Favorite Factoring Trick",
-      "reference": "https://artofproblemsolving.com/wiki/index.php/Simon%27s_Favorite_Factoring_Trick",
-      "additional-references": [],
-      "summary": "Adding a constant to both sides of an equation to factor it into a product of shifted variables.",
-      "refs": []
-    },
-    {
       "slug": "simulated-annealing",
       "facet": "technique",
       "name": "Simulated annealing",
@@ -4802,15 +4523,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Specular_reflection#Vector_formulation"],
       "summary": "",
       "refs": ["p0144_s0"]
-    },
-    {
-      "slug": "sprague-grundy-theorem",
-      "facet": "technique",
-      "name": "Sprague\u2013Grundy theorem",
-      "reference": "https://en.wikipedia.org/wiki/Sprague%E2%80%93Grundy_theorem",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "sqrt",
@@ -4858,15 +4570,6 @@
       "refs": ["p0113_s0", "p0862_s0"]
     },
     {
-      "slug": "static-inline",
-      "facet": "technique",
-      "name": "static inline",
-      "reference": "https://en.cppreference.com/w/c/language/inline",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "stencil-numerical-analysis",
       "facet": "technique",
       "name": "Stencil (numerical analysis)",
@@ -4874,15 +4577,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0213_s0"]
-    },
-    {
-      "slug": "stochastic-matrix",
-      "facet": "technique",
-      "name": "Stochastic matrix",
-      "reference": "https://en.wikipedia.org/wiki/Stochastic_matrix",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "strcmp",
@@ -4964,15 +4658,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0189_s0"]
-    },
-    {
-      "slug": "tetrahedral-number",
-      "facet": "technique",
-      "name": "Tetrahedral number",
-      "reference": "https://en.wikipedia.org/wiki/Tetrahedral_number",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "tonelli-shanks-algorithm",
@@ -5063,15 +4748,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0004_s0", "p0143_s0", "p0184_s0", "p0461_s0", "p0478_s0"]
-    },
-    {
-      "slug": "two-pointers-technique",
-      "facet": "technique",
-      "name": "Two pointers technique",
-      "reference": "https://en.wikipedia.org/wiki/Two_pointers_technique",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "unranking",
