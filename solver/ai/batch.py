@@ -159,6 +159,27 @@ def _wait(client: Anthropic, batch_id: str) -> bool:
             return False
 
 
+#: How many of a wave's requests may be salvaged one-at-a-time before the fallback is abandoned.
+#: A stray unparseable response is normal (~1 in 150) and worth retrying; a wave where dozens
+#: failed has something systemically wrong - a cancelled or expired batch, a broken prompt - and
+#: quietly re-running it at full list price, serially, is the wrong answer to that.
+max_salvage: int = 10
+
+
+def _salvage(problem: Problem, model: Model) -> bool:
+    """Re-generate one problem's tags through the interactive path; True if it wrote a file.
+
+    A batch request is one shot: unlike `generate_tags`, there is no way to hand the model back
+    its own malformed output and ask again mid-batch. Rather than duplicate that retry here, a
+    failed request falls back to `generate_tags`, which already re-prompts with a strict-JSON
+    reminder and applies the same facet enforcement. It costs full list price and runs serially,
+    which is exactly why `max_salvage` keeps it to the handful of genuine one-offs.
+    """
+    from solver.ai.docs import generate_tags
+    console.print(f'[muted]salvaging p{problem.number:04d} via the interactive path...[/muted]')
+    return generate_tags(model, problem=problem, force=True, major=False) is True
+
+
 def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[str], Counter[str]]:
     """Write every succeeded result to its problem's tags.json.
 
@@ -166,27 +187,43 @@ def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[
     `enforce_facets` had to make, tallied by slug across the whole wave - one problem reaching
     for a slug in the wrong facet is a slip, the same slug recurring across a wave is the
     vocabulary telling you the concept is filed under the wrong facet.
+
+    Anything the batch could not deliver - a non-succeeded request, or output that will not parse
+    as tags.json - is retried once through `_salvage`, up to `max_salvage` per wave.
     """
     written = 0
     failures: list[str] = []
+    unresolved: list[tuple[int, str]] = []
     conflicts: Counter[str] = Counter()
     for result in client.messages.batches.results(batch_id):
-        custom_id = result.custom_id
+        number = int(result.custom_id.lstrip('p'))
         if result.result.type != 'succeeded':
-            failures.append(f'{custom_id}: {result.result.type}')
+            unresolved.append((number, result.result.type))
             continue
         message = result.result.message
         record_usage(model, message.usage)
         text = next((b.text for b in message.content if b.type == 'text'), None)
         parsed = _parse_tags_json(text) if text is not None else None
         if parsed is None:
-            failures.append(f'{custom_id}: unparseable tags JSON')
+            unresolved.append((number, 'unparseable tags JSON'))
             continue
         parsed, found = enforce_facets(parsed)
         conflicts.update(found)
-        problem = Problem.from_number(int(custom_id.lstrip('p')))
+        problem = Problem.from_number(number)
         write_file(problem.solution_dir / config.tags_filename, parsed.encode())
         written += 1
+
+    if len(unresolved) > max_salvage:
+        console.print(f'[error]error:[/error] {len(unresolved)} request(s) failed - past the '
+                      f'{max_salvage} the fallback will retry. Re-run the wave rather than salvaging.')
+        failures = [f'p{n:04d}: {why}' for n, why in unresolved]
+    else:
+        for number, why in unresolved:
+            if _salvage(Problem.from_number(number), model):
+                written += 1
+            else:
+                failures.append(f'p{number:04d}: {why} (salvage also failed)')
+
     store = _load_store()
     store.pop(batch_id, None)
     _save_store(store)
