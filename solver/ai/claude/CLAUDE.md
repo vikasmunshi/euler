@@ -176,6 +176,7 @@ solver/
     update_doc.py     — Regenerate the machine-maintained sections of the guides under `docs/`.
     version.py        — The `version` command: report the running solver build's version.
   web/                — The web app services (see docs/web-server-guide.md).
+    cache.py          — Cache-Control middleware: what a browser may reuse, and for how long (shared).
     csp.py            — Content-Security-Policy middleware with a per-response nonce (shared).
     auth/             — Web authentication: the auth service and its clients.
       __main__.py     — Auth service entry point: ``python -m solver.web.auth``.
