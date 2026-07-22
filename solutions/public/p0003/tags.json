@@ -1,6 +1,6 @@
 {
   "domain": [
-    "prime-factor",
+    "prime-factorization",
     "prime-number",
     "coprime-integers"
   ],
@@ -11,7 +11,8 @@
   "techniques": {
     "s0": [
       "trial-division",
-      "integer-square-root"
+      "integer-square-root",
+      "square-root"
     ]
   },
   "new-tags": []

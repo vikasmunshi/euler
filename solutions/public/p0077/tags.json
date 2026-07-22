@@ -4,8 +4,8 @@
     "prime-number"
   ],
   "takeaways": [
-    "right-tool-per-cost",
-    "size-work-to-the-input"
+    "precompute-once-reuse",
+    "right-tool-per-cost"
   ],
   "techniques": {
     "s0": [
@@ -14,18 +14,22 @@
       "dynamic-programming",
       "recursion-computer-science",
       "functools-lru-cache",
+      "hash-table",
       "open-addressing",
-      "hash-function"
+      "bytearray",
+      "dynamic-memory-allocation"
     ],
     "s1": [
       "sieve-of-sundaram",
       "memoization",
       "recursion-computer-science",
       "functools-lru-cache",
-      "dynamic-array",
+      "hash-table",
       "open-addressing",
-      "hash-function",
-      "dynamic-memory-allocation"
+      "dynamic-array",
+      "memcpy",
+      "dynamic-memory-allocation",
+      "bytearray"
     ]
   },
   "new-tags": []

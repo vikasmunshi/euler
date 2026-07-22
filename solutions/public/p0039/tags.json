@@ -1,17 +1,17 @@
 {
   "domain": [
     "pythagorean-triple",
-    "diophantine-equation",
-    "coprime-integers"
+    "greatest-common-divisor"
   ],
   "takeaways": [
     "reduce-before-coding",
-    "size-work-to-the-input"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
       "tree-of-primitive-pythagorean-triples",
       "euclidean-algorithm",
+      "math-gcd",
       "counting-sort",
       "collections-counter"
     ]

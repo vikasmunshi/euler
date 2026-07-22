@@ -1,16 +1,18 @@
 {
   "domain": [
     "fibonacci-sequence",
-    "golden-ratio",
     "digit-counting-function"
   ],
   "takeaways": [
-    "size-work-to-the-input"
+    "watch-integer-width"
   ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",
-      "parallel-assignment"
+      "parallel-assignment",
+      "carry-arithmetic",
+      "array-data-structure",
+      "memcpy"
     ]
   },
   "new-tags": []

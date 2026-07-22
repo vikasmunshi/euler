@@ -1,18 +1,19 @@
 {
   "domain": [
     "permutation",
-    "square-number",
-    "number-theory"
+    "cyclic-number"
   ],
   "takeaways": [
+    "exact-arithmetic-for-equality",
     "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "hash-table",
       "canonical-form",
-      "generate-and-test",
-      "dynamic-array"
+      "hash-table",
+      "collections-defaultdict-list",
+      "dynamic-array",
+      "generation-of-primes"
     ]
   },
   "new-tags": []

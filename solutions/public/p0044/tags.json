@@ -1,18 +1,23 @@
 {
   "domain": [
-    "pentagonal-number-theorem",
+    "figurate-number",
     "quadratic-equation"
   ],
   "takeaways": [
-    "closed-form-over-iteration"
+    "exact-arithmetic-for-equality"
   ],
   "techniques": {
     "s0": [
-      "brute-force-search",
       "closed-form-expression",
       "quadratic-formula",
+      "sqrt",
+      "brute-force-search",
       "floating-point-arithmetic",
-      "round-off-error"
+      "round-off-error",
+      "c-mathematical-functions",
+      "snprintf",
+      "walrus-operator",
+      "for-else"
     ]
   },
   "new-tags": []

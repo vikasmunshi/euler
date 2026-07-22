@@ -1,23 +1,22 @@
 {
   "domain": [
-    "truncatable-prime",
-    "prime-number"
+    "prime-number",
+    "truncatable-prime"
   ],
   "takeaways": [
-    "parity-across-languages",
-    "precompute-once-reuse"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "sieve-of-eratosthenes",
+      "generate-and-test",
       "hash-table",
       "open-addressing",
       "hash-function",
+      "string-slicing",
       "dict",
       "set",
-      "string-slicing",
-      "generate-and-test",
-      "snprintf"
+      "generator"
     ]
   },
   "new-tags": []

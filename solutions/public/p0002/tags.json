@@ -1,16 +1,17 @@
 {
   "domain": [
     "fibonacci-sequence",
-    "parity-mathematics"
+    "parity-mathematics",
+    "recurrence-relation"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
     "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "recurrence-relation-application",
-      "generator"
+      "generator",
+      "tuple-assignment"
     ]
   },
   "new-tags": []

@@ -1,11 +1,12 @@
 {
   "domain": [
     "champernowne-constant",
-    "positional-notation",
-    "digit-counting-function"
+    "digit-counting-function",
+    "positional-notation"
   ],
   "takeaways": [
-    "closed-form-over-iteration"
+    "closed-form-over-iteration",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
@@ -13,7 +14,8 @@
       "division-algorithm",
       "modulo",
       "exponentiation-by-squaring",
-      "functools-reduce"
+      "functools-reduce",
+      "snprintf"
     ]
   },
   "new-tags": []

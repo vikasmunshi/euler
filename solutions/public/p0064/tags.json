@@ -2,14 +2,15 @@
   "domain": [
     "periodic-continued-fraction",
     "square-number",
-    "pigeonhole-principle"
+    "continued-fraction"
   ],
   "takeaways": [
-    "algorithm-beats-language"
+    "exact-arithmetic-for-equality"
   ],
   "techniques": {
     "s0": [
       "cycle-detection",
+      "math-isqrt",
       "integer-square-root",
       "dynamic-array"
     ]

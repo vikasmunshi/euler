@@ -2,7 +2,7 @@
   "domain": [
     "amicable-numbers",
     "divisor-function",
-    "perfect-number"
+    "divisor"
   ],
   "takeaways": [
     "size-work-to-the-input"
@@ -11,6 +11,7 @@
     "s0": [
       "trial-division",
       "square-root",
+      "memoization",
       "functools-lru-cache",
       "short-circuit-evaluation"
     ]

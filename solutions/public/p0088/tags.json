@@ -1,10 +1,10 @@
 {
   "domain": [
-    "number-theory",
     "product-sum-number"
   ],
   "takeaways": [
     "reduce-before-coding",
+    "size-work-to-the-input",
     "parity-across-languages"
   ],
   "techniques": {
@@ -12,11 +12,10 @@
       "recursion-computer-science",
       "branch-and-bound",
       "integer-factorization",
-      "multiplicative-partition",
-      "lookup-table",
+      "direct-addressing",
       "set",
-      "global-variable",
-      "dynamic-memory-allocation"
+      "closure-computer-programming",
+      "global-variable"
     ]
   },
   "new-tags": []

@@ -1,12 +1,15 @@
 {
   "domain": [
-    "arithmetic-progression"
+    "modular-arithmetic",
+    "periodic-sequence"
   ],
   "takeaways": [],
   "techniques": {
     "s0": [
       "modular-arithmetic-application",
       "leap-year",
+      "brute-force-search",
+      "lookup-table",
       "generator"
     ]
   },

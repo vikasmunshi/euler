@@ -1,7 +1,6 @@
 {
   "domain": [
-    "summation",
-    "positional-notation"
+    "summation"
   ],
   "takeaways": [
     "size-work-to-the-input"
@@ -11,8 +10,7 @@
       "arbitrary-precision-arithmetic",
       "carry-arithmetic",
       "string-slicing",
-      "list-comprehension",
-      "c-dynamic-memory-allocation"
+      "dynamic-memory-allocation"
     ]
   },
   "new-tags": []

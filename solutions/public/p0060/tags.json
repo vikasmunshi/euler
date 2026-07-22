@@ -1,25 +1,26 @@
 {
   "domain": [
     "prime-number",
-    "clique-problem"
+    "clique-problem",
+    "combinatorial-optimization",
+    "np-hardness"
   ],
   "takeaways": [
+    "exploit-symmetry",
     "size-work-to-the-input",
-    "precompute-once-reuse"
+    "parity-across-languages"
   ],
   "techniques": {
     "s0": [
-      "sieve-of-sundaram",
-      "trial-division",
-      "memoization",
       "depth-first-search",
       "backtracking",
-      "concatenation",
+      "memoization",
+      "sieve-of-sundaram",
+      "trial-division",
       "hash-table",
-      "functools-lru-cache",
       "generator",
-      "recursion-computer-science",
-      "canonical-form"
+      "functools-lru-cache",
+      "concatenation"
     ]
   },
   "new-tags": []

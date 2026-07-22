@@ -4,12 +4,12 @@
   ],
   "takeaways": [
     "closed-form-over-iteration",
-    "reduce-before-coding"
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
-      "logarithm",
       "monotonic-function",
+      "natural-logarithm",
       "arg-max"
     ]
   },

@@ -1,21 +1,21 @@
 {
   "domain": [
     "triangular-number",
-    "combinatorics"
+    "combinatorics",
+    "binomial-coefficient"
   ],
   "takeaways": [
-    "closed-form-over-iteration"
+    "closed-form-over-iteration",
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "brute-force-search",
-      "itertools",
       "generate-and-test"
     ],
     "s1": [
       "binary-search-algorithm",
-      "closed-form-expression",
-      "bisect"
+      "generate-and-test"
     ]
   },
   "new-tags": []

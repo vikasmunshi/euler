@@ -2,8 +2,8 @@
   "domain": [
     "pythagorean-theorem",
     "integer-lattice",
-    "geometry",
-    "combinatorics"
+    "combinatorics",
+    "geometry"
   ],
   "takeaways": [
     "reduce-before-coding",
@@ -11,8 +11,8 @@
   ],
   "techniques": {
     "s0": [
-      "greatest-common-divisor-application",
       "euclidean-algorithm",
+      "greatest-common-divisor-application",
       "lattice-point"
     ]
   },

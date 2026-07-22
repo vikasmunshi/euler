@@ -1,14 +1,13 @@
 {
   "domain": [
     "digit-sum",
-    "positional-notation"
+    "english-numerals"
   ],
   "takeaways": [],
   "techniques": {
     "s0": [
       "sorting-algorithm",
       "strcmp",
-      "qsort",
       "strtok",
       "prefix-sum"
     ]

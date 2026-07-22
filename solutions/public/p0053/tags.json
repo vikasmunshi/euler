@@ -1,16 +1,18 @@
 {
   "domain": [
+    "binomial-coefficient",
     "combinatorics"
   ],
   "takeaways": [
-    "reduce-before-coding",
-    "exploit-symmetry"
+    "exploit-symmetry",
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
       "pascals-triangle",
       "symmetry",
-      "recurrence-relation-application"
+      "recurrence-relation-application",
+      "int64"
     ]
   },
   "new-tags": []

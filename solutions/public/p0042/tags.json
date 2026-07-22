@@ -5,14 +5,17 @@
     "quadratic-equation"
   ],
   "takeaways": [
-    "closed-form-over-iteration"
+    "closed-form-over-iteration",
+    "exact-arithmetic-for-equality"
   ],
   "techniques": {
     "s0": [
+      "quadratic-formula",
       "square-root",
+      "floating-point-arithmetic",
       "functools-lru-cache",
       "strtok",
-      "floating-point-arithmetic"
+      "round-off-error"
     ]
   },
   "new-tags": []

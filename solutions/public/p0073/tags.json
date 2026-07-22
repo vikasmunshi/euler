@@ -1,8 +1,8 @@
 {
   "domain": [
     "farey-sequence",
-    "stern-brocot-tree",
-    "coprime-integers"
+    "coprime-integers",
+    "greatest-common-divisor"
   ],
   "takeaways": [
     "algorithm-beats-language"
@@ -13,11 +13,14 @@
       "modulo"
     ],
     "s1": [
+      "recursion-computer-science",
       "mediant-mathematics",
-      "recursion-computer-science"
+      "global-variable"
     ],
     "s2": [
       "mobius-inversion-formula",
+      "harmonic-series-mathematics",
+      "list-comprehension",
       "dynamic-memory-allocation"
     ]
   },

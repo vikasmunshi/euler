@@ -1,19 +1,17 @@
 {
   "domain": [
     "repeating-decimal",
+    "number-theory",
     "multiplicative-order",
-    "fermats-little-theorem",
-    "coprime-integers",
-    "number-theory"
+    "fermats-little-theorem"
   ],
   "takeaways": [
     "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "greatest-common-divisor-application",
-      "brute-force-search",
-      "euclidean-algorithm"
+      "euclidean-algorithm",
+      "brute-force-search"
     ]
   },
   "new-tags": []

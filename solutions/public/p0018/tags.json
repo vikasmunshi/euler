@@ -1,17 +1,17 @@
 {
   "domain": [
-    "triangular-number",
-    "combinatorial-optimization",
-    "optimal-substructure"
+    "optimal-substructure",
+    "overlapping-subproblems"
   ],
   "takeaways": [
-    "algorithm-beats-language"
+    "parity-across-languages"
   ],
   "techniques": {
     "s0": [
       "dynamic-programming",
       "list-comprehension",
-      "c-string-handling"
+      "c-string-handling",
+      "dynamic-memory-allocation"
     ]
   },
   "new-tags": []

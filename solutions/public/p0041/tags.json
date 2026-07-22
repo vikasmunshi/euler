@@ -2,9 +2,8 @@
   "domain": [
     "pandigital-number",
     "prime-number",
-    "divisibility-rule",
-    "triangular-number",
-    "permutation"
+    "permutation",
+    "divisibility-rule"
   ],
   "takeaways": [
     "reduce-before-coding",
@@ -13,8 +12,8 @@
   "techniques": {
     "s0": [
       "trial-division",
-      "generate-and-test",
       "lexicographic-order",
+      "generate-and-test",
       "generator"
     ]
   },

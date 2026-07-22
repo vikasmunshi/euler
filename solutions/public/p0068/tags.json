@@ -2,8 +2,7 @@
   "domain": [
     "cycle-graph",
     "permutation",
-    "graph-theory",
-    "counting"
+    "graph-theory"
   ],
   "takeaways": [
     "reduce-before-coding",
@@ -12,11 +11,12 @@
   "techniques": {
     "s0": [
       "backtracking",
-      "generate-and-test",
-      "canonical-form",
       "direct-addressing",
-      "arbitrary-precision-arithmetic",
+      "set",
       "concatenation",
+      "arbitrary-precision-arithmetic",
+      "lexicographic-order",
+      "canonical-form",
       "itertools"
     ]
   },

@@ -1,20 +1,22 @@
 {
   "domain": [
     "prime-power",
-    "prime-number",
-    "square-number"
+    "prime-number"
   ],
   "takeaways": [
-    "size-work-to-the-input"
+    "size-work-to-the-input",
+    "watch-integer-width",
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
       "sieve-of-sundaram",
       "generator",
-      "hash-table",
       "set",
       "direct-addressing",
-      "bit-array"
+      "generate-and-test",
+      "c-dynamic-memory-allocation",
+      "int64"
     ]
   },
   "new-tags": []

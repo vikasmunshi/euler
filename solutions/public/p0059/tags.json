@@ -1,18 +1,17 @@
 {
   "domain": [
-    "frequency-analysis",
+    "exclusive-or",
     "stream-cipher",
     "vigenere-cipher",
-    "exclusive-or"
+    "frequency-analysis"
   ],
-  "takeaways": [
-    "decompose-overlap"
-  ],
+  "takeaways": [],
   "techniques": {
     "s0": [
-      "brute-force-search",
-      "bitwise-operation",
+      "generate-and-test",
+      "frequency-statistics",
       "extended-slice",
+      "list-comprehension",
       "dynamic-array"
     ]
   },

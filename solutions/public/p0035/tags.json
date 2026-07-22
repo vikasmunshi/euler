@@ -4,6 +4,7 @@
     "divisibility-rule"
   ],
   "takeaways": [
+    "decompose-overlap",
     "precompute-once-reuse"
   ],
   "techniques": {
@@ -11,18 +12,13 @@
       "sieve-of-eratosthenes",
       "sieve-of-sundaram",
       "string-slicing",
-      "set",
-      "bytearray",
-      "atoi",
-      "snprintf",
-      "generate-and-test"
+      "set"
     ],
     "s1": [
       "primesieve",
+      "string-slicing",
       "set",
-      "atoi",
-      "snprintf",
-      "generate-and-test"
+      "bit-array"
     ]
   },
   "new-tags": []

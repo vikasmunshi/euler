@@ -1,7 +1,8 @@
 {
   "domain": [
     "prime-number",
-    "prime-counting-function"
+    "prime-counting-function",
+    "summation"
   ],
   "takeaways": [
     "precompute-once-reuse",
@@ -11,10 +12,10 @@
     "s0": [
       "sieve-of-sundaram",
       "prefix-sum",
-      "set",
+      "hash-table",
       "bit-array",
-      "int64",
-      "itertools-accumulate"
+      "itertools-accumulate",
+      "arbitrary-precision-arithmetic"
     ]
   },
   "new-tags": []

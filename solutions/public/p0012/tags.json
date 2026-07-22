@@ -2,22 +2,20 @@
   "domain": [
     "triangular-number",
     "divisor-function",
-    "coprime-integers",
     "multiplicative-function",
+    "coprime-integers",
+    "prime-factorization",
     "parity-mathematics"
   ],
   "takeaways": [
-    "exploit-symmetry",
-    "reduce-before-coding"
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
-      "trial-division",
-      "prime-factorization-application"
+      "trial-division"
     ],
     "s1": [
       "trial-division",
-      "prime-factorization-application",
       "brute-force-search"
     ]
   },

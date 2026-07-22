@@ -1,6 +1,7 @@
 {
   "domain": [
-    "prime-factor",
+    "prime-factorization",
+    "consecutive-integers",
     "number-theory"
   ],
   "takeaways": [

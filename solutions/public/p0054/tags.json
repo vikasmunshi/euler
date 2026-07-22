@@ -1,21 +1,21 @@
 {
   "domain": [
-    "combinatorics",
-    "total-order"
+    "total-order",
+    "combinatorics"
   ],
   "takeaways": [
-    "reduce-before-coding"
+    "parity-across-languages"
   ],
   "techniques": {
     "s0": [
+      "frequency-statistics",
       "canonical-form",
       "lexicographic-order",
-      "frequency-statistics",
-      "enum",
-      "intenum",
       "dataclass",
+      "intenum",
       "functools-cached-property",
-      "sorting-algorithm"
+      "qsort",
+      "strtok"
     ]
   },
   "new-tags": []

@@ -1,30 +1,29 @@
 {
   "domain": [
+    "prime-factorization",
     "exponentiation",
-    "fundamental-theorem-of-arithmetic",
-    "prime-factor"
+    "fundamental-theorem-of-arithmetic"
   ],
   "takeaways": [
-    "size-work-to-the-input",
-    "parity-across-languages"
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
-      "set",
-      "hash-table",
       "trial-division",
       "prime-factorization-application",
+      "canonical-form",
+      "hash-table",
       "arbitrary-precision-arithmetic",
-      "canonical-form"
+      "brute-force-search"
     ],
     "s1": [
-      "set",
-      "hash-table",
       "trial-division",
       "prime-factorization-application",
-      "arbitrary-precision-arithmetic",
       "canonical-form",
-      "generation-of-primes"
+      "hash-table",
+      "arbitrary-precision-arithmetic",
+      "primesieve",
+      "brute-force-search"
     ]
   },
   "new-tags": []

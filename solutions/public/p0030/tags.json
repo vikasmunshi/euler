@@ -1,20 +1,22 @@
 {
   "domain": [
     "digit-sum",
-    "positional-notation"
+    "combinatorics"
   ],
   "takeaways": [
-    "size-work-to-the-input"
+    "size-work-to-the-input",
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "narcissistic-number",
-      "combination",
       "generate-and-test",
+      "combination",
+      "logarithm",
       "itertools",
       "walrus-operator",
-      "generator",
-      "closed-form-expression"
+      "lexicographic-order",
+      "modulo"
     ]
   },
   "new-tags": []

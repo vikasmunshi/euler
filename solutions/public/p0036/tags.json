@@ -12,8 +12,7 @@
       "generate-and-test",
       "generator",
       "bit-manipulation",
-      "string-slicing",
-      "snprintf"
+      "string-slicing"
     ]
   },
   "new-tags": []

@@ -4,14 +4,16 @@
     "divisibility-rule"
   ],
   "takeaways": [
-    "decompose-overlap"
+    "decompose-overlap",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "backtracking",
       "constraint-propagation",
-      "generate-and-test",
-      "generator"
+      "recursion-computer-science",
+      "generator",
+      "lookup-table"
     ]
   },
   "new-tags": []

@@ -1,17 +1,18 @@
 {
   "domain": [
     "diophantine-equation",
+    "probability-distribution",
     "completing-the-square",
-    "hypergeometric-distribution"
+    "parity-mathematics"
   ],
   "takeaways": [
-    "reduce-before-coding",
-    "parity-across-languages"
+    "closed-form-over-iteration",
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "pells-equation",
-      "linear-recurrence-with-constant-coefficients",
+      "recurrence-relation-application",
       "tuple-assignment"
     ]
   },

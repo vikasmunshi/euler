@@ -1,12 +1,12 @@
 {
   "domain": [
     "shortest-path-problem",
-    "combinatorial-optimization",
-    "overlapping-subproblems"
+    "lattice-path",
+    "optimal-substructure"
   ],
   "takeaways": [
     "reduce-before-coding",
-    "size-work-to-the-input"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [

@@ -5,18 +5,22 @@
   ],
   "takeaways": [
     "precompute-once-reuse",
-    "size-work-to-the-input"
+    "size-work-to-the-input",
+    "parity-across-languages"
   ],
   "techniques": {
     "s0": [
       "memoization",
       "dynamic-programming",
-      "functools-lru-cache",
       "recursion-computer-science",
       "power-of-two-application",
-      "sentinel-value",
+      "functools-lru-cache",
+      "bit-length",
+      "hash-table",
       "array-data-structure",
-      "locality-of-reference"
+      "locality-of-reference",
+      "sentinel-value",
+      "global-variable"
     ]
   },
   "new-tags": []

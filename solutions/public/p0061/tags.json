@@ -5,23 +5,23 @@
     "cycle-graph"
   ],
   "takeaways": [
-    "precompute-once-reuse"
+    "parity-across-languages",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "depth-first-search",
       "backtracking",
       "directed-graph",
-      "cycle-detection",
       "adjacency-list",
-      "closed-form-expression",
+      "canonical-form",
       "insertion-sort",
       "function-pointer",
-      "enum",
-      "decorator",
-      "generator",
+      "dict",
       "set",
-      "monotonic-function"
+      "generator",
+      "enum",
+      "decorator"
     ]
   },
   "new-tags": []

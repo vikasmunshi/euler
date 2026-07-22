@@ -1,21 +1,18 @@
 {
   "domain": [
-    "pythagorean-triple"
+    "pythagorean-triple",
+    "number-theory"
   ],
   "takeaways": [
-    "algorithm-beats-language",
-    "parity-across-languages",
-    "reduce-before-coding"
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
-      "euclidean-algorithm",
       "tree-of-primitive-pythagorean-triples",
       "sieve-of-eratosthenes",
-      "harmonic-series-mathematics",
+      "euclidean-algorithm",
       "generator",
-      "dict",
-      "int64"
+      "dict"
     ]
   },
   "new-tags": []

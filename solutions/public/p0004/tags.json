@@ -1,19 +1,17 @@
 {
   "domain": [
     "palindromic-number",
-    "divisibility-rule",
-    "number-theory"
+    "divisibility-rule"
   ],
   "takeaways": [
-    "reduce-before-coding"
+    "decompose-overlap",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "brute-force-search",
       "modular-arithmetic-application",
-      "monotonic-function",
-      "two-pointers-technique",
-      "snprintf"
+      "two-pointer-technique"
     ]
   },
   "new-tags": []

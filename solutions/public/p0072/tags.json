@@ -2,11 +2,11 @@
   "domain": [
     "eulers-totient-function",
     "coprime-integers",
+    "number-theory",
     "multiplicative-function"
   ],
   "takeaways": [
-    "algorithm-beats-language",
-    "precompute-once-reuse"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [

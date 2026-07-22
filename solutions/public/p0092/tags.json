@@ -2,22 +2,19 @@
   "domain": [
     "digit-sum",
     "combinatorics",
-    "generating-function"
+    "recurrence-relation"
   ],
   "takeaways": [
-    "precompute-once-reuse",
-    "watch-integer-width",
+    "closed-form-over-iteration",
+    "exploit-symmetry",
     "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "dynamic-programming",
       "convolution",
-      "lookup-table",
-      "cycle-detection",
-      "dynamic-memory-allocation",
-      "memcpy",
-      "int64"
+      "memoization",
+      "cycle-detection"
     ]
   },
   "new-tags": []

@@ -1,20 +1,19 @@
 {
   "domain": [
     "amicable-numbers",
-    "perfect-number",
     "divisor-function",
     "functional-graph"
   ],
   "takeaways": [
-    "size-work-to-the-input",
-    "algorithm-beats-language"
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
-      "dynamic-array",
-      "hash-table",
+      "cycle-detection",
+      "direct-addressing",
+      "dict",
       "set",
-      "cycle-detection"
+      "divisor-sum-sieve"
     ]
   },
   "new-tags": []

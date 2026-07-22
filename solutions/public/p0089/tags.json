@@ -3,13 +3,16 @@
     "roman-numerals"
   ],
   "takeaways": [
-    "closed-form-over-iteration"
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "greedy-algorithm",
+      "canonical-form",
       "lookup-table",
-      "dict"
+      "dict",
+      "parallel-array",
+      "switch-statement"
     ]
   },
   "new-tags": []

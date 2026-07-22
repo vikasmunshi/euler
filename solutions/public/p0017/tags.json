@@ -1,18 +1,21 @@
 {
   "domain": [
-    "english-numerals"
+    "english-numerals",
+    "positional-notation"
   ],
   "takeaways": [
     "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
-      "lookup-table",
       "memoization",
-      "functools-lru-cache",
       "recursion-computer-science",
+      "lookup-table",
+      "functools-lru-cache",
+      "dict",
       "concatenation",
-      "snprintf"
+      "snprintf",
+      "array-data-structure"
     ]
   },
   "new-tags": []

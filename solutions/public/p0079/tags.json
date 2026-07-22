@@ -1,20 +1,18 @@
 {
   "domain": [
     "directed-acyclic-graph",
-    "combinatorics"
+    "graph-theory"
   ],
   "takeaways": [
-    "precompute-once-reuse"
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "topological-sorting",
-      "directed-graph",
-      "set",
-      "dict",
       "for-else",
       "bit-manipulation",
-      "bit-array"
+      "dict",
+      "set"
     ]
   },
   "new-tags": []

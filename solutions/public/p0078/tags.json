@@ -1,16 +1,19 @@
 {
   "domain": [
     "partition-number-theory",
-    "pentagonal-number-theorem"
+    "pentagonal-number-theorem",
+    "generating-function",
+    "number-theory",
+    "recurrence-relation",
+    "modular-arithmetic"
   ],
   "takeaways": [
-    "precompute-once-reuse",
-    "size-work-to-the-input"
+    "size-work-to-the-input",
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
       "dynamic-programming",
-      "modular-arithmetic-application",
       "dynamic-array",
       "memoization"
     ]

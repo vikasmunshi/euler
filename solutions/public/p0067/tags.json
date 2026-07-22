@@ -5,12 +5,12 @@
     "directed-acyclic-graph"
   ],
   "takeaways": [
-    "size-work-to-the-input"
+    "algorithm-beats-language",
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
-      "dynamic-programming",
-      "memory-management"
+      "dynamic-programming"
     ]
   },
   "new-tags": []

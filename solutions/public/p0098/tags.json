@@ -1,18 +1,23 @@
 {
   "domain": [
-    "square-number",
-    "bijection"
+    "bijection",
+    "square-number"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "anagram",
-      "hash-function",
       "invariant-mathematics",
+      "hash-function",
       "generate-and-test",
-      "dataclass"
+      "branch-and-bound-search",
+      "square-root",
+      "sorting-algorithm",
+      "dynamic-array",
+      "dataclass",
+      "itertools"
     ]
   },
   "new-tags": []

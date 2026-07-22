@@ -11,8 +11,7 @@
   "techniques": {
     "s0": [
       "closed-form-expression",
-      "inclusion-exclusion-principle",
-      "gauss-summation"
+      "inclusion-exclusion-principle"
     ],
     "s1": [
       "brute-force-search",

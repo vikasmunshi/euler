@@ -9,7 +9,6 @@
   "techniques": {
     "s0": [
       "dynamic-programming",
-      "knapsack-problem",
       "int128",
       "arbitrary-precision-arithmetic"
     ]

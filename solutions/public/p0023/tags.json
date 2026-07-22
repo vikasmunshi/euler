@@ -1,23 +1,27 @@
 {
   "domain": [
     "abundant-number",
-    "divisor",
-    "divisor-function"
+    "divisor-function",
+    "summation"
   ],
   "takeaways": [
-    "size-work-to-the-input"
+    "precompute-once-reuse",
+    "size-work-to-the-input",
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
       "sieve-of-eratosthenes",
+      "brute-force-search",
       "numpy",
-      "np-flatnonzero",
       "vectorized",
-      "harmonic-series-mathematics"
+      "np-flatnonzero",
+      "dynamic-memory-allocation"
     ],
     "s1": [
       "trial-division",
-      "square-root"
+      "brute-force-search",
+      "list-comprehension"
     ]
   },
   "new-tags": []

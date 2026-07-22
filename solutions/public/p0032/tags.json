@@ -1,8 +1,7 @@
 {
   "domain": [
     "pandigital-number",
-    "permutation",
-    "digit-counting-function"
+    "combinatorics"
   ],
   "takeaways": [
     "reduce-before-coding"
@@ -10,12 +9,12 @@
   "techniques": {
     "s0": [
       "generate-and-test",
+      "combinatorial-principles",
       "itertools",
       "walrus-operator",
       "set",
-      "generator",
-      "snprintf",
-      "array-data-structure"
+      "concatenation",
+      "snprintf"
     ]
   },
   "new-tags": []

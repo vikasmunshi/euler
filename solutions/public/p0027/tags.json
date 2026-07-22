@@ -1,11 +1,10 @@
 {
   "domain": [
     "quadratic-function",
-    "prime-number",
-    "parity-mathematics"
+    "prime-number"
   ],
   "takeaways": [
-    "size-work-to-the-input",
+    "reduce-before-coding",
     "exploit-symmetry"
   ],
   "techniques": {
@@ -13,8 +12,8 @@
       "sieve-of-sundaram",
       "trial-division",
       "brute-force-search",
-      "tuple",
-      "integer-overflow"
+      "integer-overflow",
+      "tuple"
     ]
   },
   "new-tags": []

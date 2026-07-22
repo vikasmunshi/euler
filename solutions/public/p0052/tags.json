@@ -1,13 +1,17 @@
 {
   "domain": [
-    "permutation"
+    "permutation",
+    "positional-notation"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "reduce-before-coding",
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
-      "brute-force-search",
       "canonical-form",
       "sorting-algorithm",
+      "brute-force-search",
       "qsort",
       "strcmp",
       "set"

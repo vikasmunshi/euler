@@ -2,19 +2,18 @@
   "domain": [
     "pythagorean-theorem",
     "square-number",
-    "combinatorics",
-    "counting"
+    "unfolding-functions",
+    "geometry"
   ],
   "takeaways": [
-    "reduce-before-coding",
-    "closed-form-over-iteration"
+    "closed-form-over-iteration",
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "brute-force-search",
-      "square-root",
       "closed-form-expression",
-      "floating-point-arithmetic"
+      "square-root"
     ]
   },
   "new-tags": []

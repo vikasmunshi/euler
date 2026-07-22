@@ -6,14 +6,15 @@
   "techniques": {
     "s0": [
       "recursion-computer-science",
-      "memoization",
-      "functools-lru-cache",
-      "floating-point-arithmetic",
+      "generate-and-test",
       "brute-force-search",
-      "binary-expression-tree",
-      "combination",
+      "floating-point-arithmetic",
+      "functools-lru-cache",
+      "set",
+      "tuple",
       "dynamic-array",
-      "c-dynamic-memory-allocation"
+      "memcpy",
+      "snprintf"
     ]
   },
   "new-tags": []

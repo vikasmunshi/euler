@@ -1,43 +1,34 @@
 {
   "domain": [
     "prime-number",
-    "summation"
+    "summation",
+    "sieve-theory"
   ],
   "takeaways": [
     "algorithm-beats-language",
-    "watch-integer-width",
     "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "sieve-of-eratosthenes",
       "bytearray",
-      "array-data-structure",
-      "sqrt",
-      "int64"
+      "extended-slice"
     ],
     "s1": [
       "sieve-of-sundaram",
-      "bytearray",
-      "array-data-structure",
-      "int64"
+      "bytearray"
     ],
     "s2": [
-      "sieve-of-eratosthenes",
-      "generator",
-      "dict",
       "hash-table",
       "open-addressing",
-      "int64"
+      "generator"
     ],
     "s3": [
-      "trial-division",
-      "int64"
+      "trial-division"
     ],
     "s4": [
       "primesieve",
-      "wheel-factorization",
-      "int64"
+      "wheel-factorization"
     ]
   },
   "new-tags": []

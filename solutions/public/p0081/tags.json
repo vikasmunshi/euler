@@ -1,17 +1,21 @@
 {
   "domain": [
-    "optimal-substructure",
+    "shortest-path-problem",
     "directed-acyclic-graph",
-    "combinatorics"
+    "lattice-path",
+    "combinatorial-optimization",
+    "optimal-substructure"
   ],
   "takeaways": [
-    "algorithm-beats-language"
+    "precompute-once-reuse",
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
       "dynamic-programming",
       "topological-sorting",
-      "generator"
+      "generator",
+      "in-place-algorithm"
     ]
   },
   "new-tags": []

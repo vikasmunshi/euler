@@ -1,7 +1,7 @@
 {
   "domain": [
-    "np-completeness",
-    "sudoku"
+    "sudoku",
+    "np-completeness"
   ],
   "takeaways": [
     "precompute-once-reuse"
@@ -9,22 +9,29 @@
   "techniques": {
     "s0": [
       "backtracking",
-      "constraint-satisfaction-problem",
       "look-ahead-backtracking",
+      "recursion-computer-science",
       "sorting-algorithm",
-      "dynamic-memory-allocation"
+      "memcpy",
+      "dynamic-memory-allocation",
+      "constraint-satisfaction-problem"
     ],
     "s1": [
       "exact-cover",
       "dancing-links",
       "doubly-linked-list",
-      "backtracking"
+      "parallel-array",
+      "backtracking",
+      "recursion-computer-science"
     ],
     "s2": [
       "constraint-propagation",
-      "bitwise-operation",
+      "bit-manipulation",
       "hamming-weight",
-      "backtracking"
+      "find-first-set",
+      "backtracking",
+      "recursion-computer-science",
+      "memcpy"
     ]
   },
   "new-tags": []

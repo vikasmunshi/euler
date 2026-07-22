@@ -1,7 +1,8 @@
 {
   "domain": [
     "partition-number-theory",
-    "pentagonal-number-theorem"
+    "pentagonal-number-theorem",
+    "recurrence-relation"
   ],
   "takeaways": [
     "algorithm-beats-language",
@@ -12,23 +13,23 @@
       "dynamic-programming",
       "memoization",
       "functools-lru-cache",
-      "itertools",
+      "recursion-computer-science",
       "arbitrary-precision-arithmetic",
-      "recursion-computer-science"
+      "itertools"
     ],
     "s1": [
       "dynamic-programming",
       "memoization",
       "functools-lru-cache",
-      "arbitrary-precision-arithmetic",
-      "recursion-computer-science"
+      "recursion-computer-science",
+      "arbitrary-precision-arithmetic"
     ],
     "s2": [
-      "brute-force-search",
+      "dynamic-programming",
       "memoization",
       "functools-lru-cache",
-      "arbitrary-precision-arithmetic",
-      "recursion-computer-science"
+      "recursion-computer-science",
+      "arbitrary-precision-arithmetic"
     ]
   },
   "new-tags": []

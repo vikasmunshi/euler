@@ -1,7 +1,8 @@
 {
   "domain": [
     "combinatorics",
-    "square-number"
+    "square-number",
+    "binomial-coefficient"
   ],
   "takeaways": [
     "size-work-to-the-input"

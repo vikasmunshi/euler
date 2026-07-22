@@ -1,16 +1,21 @@
 {
   "domain": [
+    "factorial",
     "digit-sum",
-    "digit-counting-function"
+    "combinatorics"
   ],
   "takeaways": [
     "exploit-symmetry",
-    "size-work-to-the-input"
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
+      "combination",
+      "generate-and-test",
+      "lookup-table",
       "itertools",
-      "lookup-table"
+      "snprintf",
+      "modulo"
     ]
   },
   "new-tags": []

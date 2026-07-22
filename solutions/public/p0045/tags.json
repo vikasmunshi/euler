@@ -1,22 +1,21 @@
 {
   "domain": [
     "triangular-number",
+    "figurate-number",
     "pentagonal-number-theorem",
     "hexagonal-number",
-    "figurate-number",
     "quadratic-equation"
   ],
   "takeaways": [
     "reduce-before-coding",
-    "decompose-overlap"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
-      "closed-form-expression",
       "quadratic-formula",
       "discriminant",
       "square-root",
-      "floating-point-arithmetic"
+      "modulo"
     ]
   },
   "new-tags": []

@@ -1,19 +1,19 @@
 {
   "domain": [
-    "fundamental-theorem-of-arithmetic",
-    "diophantine-equation"
+    "rational-number",
+    "coprime-integers"
   ],
   "takeaways": [
-    "reduce-before-coding"
+    "exact-arithmetic-for-equality"
   ],
   "techniques": {
     "s0": [
-      "brute-force-search",
       "cross-multiplication",
-      "greatest-common-divisor-application",
+      "brute-force-search",
       "euclidean-algorithm",
       "fractions-fraction",
-      "functools-reduce"
+      "functools-reduce",
+      "generator"
     ]
   },
   "new-tags": []

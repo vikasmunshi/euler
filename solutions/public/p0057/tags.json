@@ -2,15 +2,18 @@
   "domain": [
     "continued-fraction",
     "convergent-continued-fraction",
+    "recurrence-relation",
     "digit-counting-function"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "exact-arithmetic-for-equality"
+  ],
   "techniques": {
     "s0": [
-      "recurrence-relation-application",
       "arbitrary-precision-arithmetic",
+      "recurrence-relation-application",
       "tuple-assignment",
-      "carry-arithmetic"
+      "linear-recurrence-with-constant-coefficients"
     ]
   },
   "new-tags": []

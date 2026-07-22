@@ -2,18 +2,17 @@
   "domain": [
     "markov-chain",
     "stationary-distribution",
-    "probability-distribution",
-    "state-computer-science"
+    "probability-distribution"
   ],
   "takeaways": [
-    "algorithm-beats-language"
+    "parity-across-languages"
   ],
   "techniques": {
     "s0": [
-      "stochastic-matrix",
       "power-iteration",
       "recursion-computer-science",
-      "array"
+      "modulo",
+      "c-string-handling"
     ]
   },
   "new-tags": []

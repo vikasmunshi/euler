@@ -3,19 +3,21 @@
     "eulers-totient-function",
     "semiprime",
     "permutation",
-    "coprime-integers",
-    "multiplicative-function"
+    "prime-number"
   ],
   "takeaways": [
-    "reduce-before-coding"
+    "reduce-before-coding",
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
-      "sieve-of-eratosthenes",
       "generation-of-primes",
-      "generator",
       "closed-form-expression",
-      "anagram"
+      "sieve-of-eratosthenes",
+      "dynamic-memory-allocation",
+      "generator",
+      "walrus-operator",
+      "sorting-algorithm"
     ]
   },
   "new-tags": []

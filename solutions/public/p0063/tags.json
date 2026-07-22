@@ -1,20 +1,21 @@
 {
   "domain": [
     "digit-counting-function",
-    "exponentiation"
+    "exponentiation",
+    "common-logarithm"
   ],
   "takeaways": [
-    "watch-integer-width"
+    "exact-arithmetic-for-equality",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "closed-form-expression",
-      "arbitrary-precision-arithmetic",
-      "walrus-operator",
+      "brute-force-search",
+      "floating-point-arithmetic",
       "integer-overflow",
-      "c-mathematical-functions",
-      "snprintf",
-      "generate-and-test"
+      "walrus-operator",
+      "generator",
+      "snprintf"
     ]
   },
   "new-tags": []

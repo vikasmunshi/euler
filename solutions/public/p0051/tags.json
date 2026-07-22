@@ -1,24 +1,19 @@
 {
   "domain": [
     "prime-number",
+    "digit-sum",
     "combinatorics"
   ],
   "takeaways": [
     "reduce-before-coding",
-    "size-work-to-the-input"
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
       "sieve-of-sundaram",
       "trial-division",
       "generate-and-test",
-      "generator",
-      "walrus-operator",
-      "bytearray",
-      "extended-slice",
-      "snprintf",
-      "atoi",
-      "dynamic-memory-allocation"
+      "string-slicing"
     ]
   },
   "new-tags": []

@@ -1,7 +1,8 @@
 {
   "domain": [
     "functional-graph",
-    "pigeonhole-principle"
+    "pigeonhole-principle",
+    "factorial"
   ],
   "takeaways": [
     "precompute-once-reuse",
@@ -12,21 +13,26 @@
       "memoization",
       "cycle-detection",
       "dict",
-      "array-data-structure"
+      "direct-addressing",
+      "c-dynamic-memory-allocation"
     ],
     "s1": [
       "memoization",
       "cycle-detection",
+      "set",
       "dict",
-      "array-data-structure"
+      "direct-addressing",
+      "c-dynamic-memory-allocation"
     ],
     "s2": [
       "memoization",
       "cycle-detection",
+      "set",
       "dict",
-      "array-data-structure",
-      "enum-strenum",
-      "ansi-escape-code"
+      "direct-addressing",
+      "c-dynamic-memory-allocation",
+      "ansi-escape-code",
+      "enum-strenum"
     ]
   },
   "new-tags": []
