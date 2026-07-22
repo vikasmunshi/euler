@@ -35,6 +35,7 @@ from solver.auth import Authorizations, Subject
 from solver.auth.identity import system_slug
 from solver.crypto import vault
 from solver.web.auth.client import request as auth_request
+from solver.web.cache import cache_middleware
 from solver.web.csp import csp_middleware
 from solver.web.site.app import _MAX_BODY, install_content
 from solver.web.site.render import SUBJECT_KEY
@@ -103,7 +104,7 @@ def build_app(config: UserConfig) -> web.Application:
         request[SUBJECT_KEY] = _subject_from_headers(request, authz, pin_slug)
         return await handler(request)
 
-    app = web.Application(middlewares=[csp_middleware, identity_middleware],
+    app = web.Application(middlewares=[cache_middleware, csp_middleware, identity_middleware],
                           client_max_size=_MAX_BODY)
     # The content surface (routes + jinja + static + /healthz) — reused verbatim.
     install_content(app, config.site_config(), authz)

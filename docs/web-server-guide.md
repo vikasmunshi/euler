@@ -1199,6 +1199,47 @@ divergence read but the worktree scan is blocked (the locked-vault case above), 
 `worktree_unknown`: most of the answer, honestly labelled pending. None of the three ever
 paints "clean" over data it could not read.
 
+### 11.10 Caching
+
+The failure this policy exists to prevent is a response that says **nothing**. With no
+`Cache-Control`, a browser may apply *heuristic freshness* — reuse a response for a
+fraction of its age since `Last-Modified` — so a file last touched months ago can be
+served from cache for days without a single request reaching us. It is invisible from the
+server, it only bites the users who happen to hold the old copy, and its symptom is the
+worst kind of bug report: "works for me, they need a hard refresh".
+
+Every response therefore carries a directive, stamped by an app middleware
+(`solver/web/cache.py`, shared by every service — the same shape as the CSP one above)
+and by the edge for what Caddy serves itself. Two classes, split on what the response
+**is**, not on what it contains:
+
+| class | directive | why |
+| --- | --- | --- |
+| rendered pages, htmx fragments, JSON | `no-store` | per-user, authenticated, and stale the moment the file behind it changes; there is no version worth keeping, and it stays off disk on shared machines |
+| `FileResponse` — served files, `/assets`, `/vendor` | `no-cache` | identical bytes for every user, already carrying `ETag`/`Last-Modified`: keep it, but **revalidate before every use** — an unchanged file costs one 304, a changed one is picked up at once |
+
+`no-cache` is not "do not cache" (that is `no-store`); it is "ask first". That distinction
+is the whole design: the file classes stay cheap without ever being able to go stale.
+
+Two paths need naming because they are easy to miss:
+
+- **Error responses.** A raised `HTTPException` *is* a response, and an unstamped 404 is
+  heuristically cacheable like any other — a browser that cached "404" for a problem you
+  have since written would keep serving it. The middleware stamps the exception path too.
+- **htmx's own history.** htmx snapshots the swapped pane into `localStorage` and restores
+  it on Back **without asking the server** — a cache no HTTP header reaches. Since this
+  app's content changes underneath the browser (you edit in the terminal, or another tab),
+  `base.html` sets `<meta name="htmx-config" content='{"historyCacheSize": 0}'>`: Back is
+  a history miss, and htmx re-requests the pane (`refreshOnHistoryMiss` stays `false`, so
+  it is an ajax fetch, not a full reload).
+
+**No positive `max-age` anywhere, deliberately.** Nothing here is addressed by a versioned
+URL: `/assets/site.css` is the same path before and after a redeploy. Caching those hard
+would need content-stamped URLs (`site.css?v=<hash>`) generated into the templates and an
+edge rule marking versioned requests `immutable` — a real option if revalidation traffic
+ever matters, but until then "ask every time" is the honest setting, and one conditional
+request per asset is a rounding error against a page that also fetches MathJax.
+
 ## 12 · The web shell
 
 The terminal is the front door: **every rung gets one**. What varies by rung is what the

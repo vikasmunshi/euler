@@ -41,6 +41,7 @@ from solver.auth import Authorizations, Subject
 from solver.auth.identity import system_slug
 from solver.web.auth import policy
 from solver.web.site import content
+from solver.web.cache import cache_middleware
 from solver.web.csp import csp_middleware
 from solver.web.auth.config import AuthConfig
 from solver.web.auth.mail import Mailer
@@ -427,7 +428,7 @@ def build_public_app(service: AuthService) -> web.Application:
         return {'subject': subject, 'readme_html': content.readme_html()}
 
     app = web.Application(
-        middlewares=[csp_middleware, aiohttp_jinja2.context_processors_middleware])
+        middlewares=[cache_middleware, csp_middleware, aiohttp_jinja2.context_processors_middleware])
     # Templates ship as package data: solver/web/templates, autoescape on.
     # The content service's templates come second, and that ordering is the design:
     # this service renders the *shell* (base.html, _nav.html, _home.html, the crumbs

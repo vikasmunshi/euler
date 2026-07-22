@@ -70,6 +70,15 @@ class AuthPageTests(AioHTTPTestCase):
     # ── the pages render ──────────────────────────────────────────────────────────
 
     @unittest_run_loop
+    async def test_signed_out_pages_are_never_stored(self) -> None:
+        """The auth tier is stamped by the same middleware as the content tier (§11.10):
+        a login page carries a one-shot handshake, and belongs in no cache at all."""
+        for path, _ in _PAGES:
+            with self.subTest(path=path):
+                resp = await self.client.get(path)
+                self.assertEqual(resp.headers.get('Cache-Control'), 'no-store')
+
+    @unittest_run_loop
     async def test_every_signed_out_page_renders(self) -> None:
         for path, expected in _PAGES:
             with self.subTest(path=path):

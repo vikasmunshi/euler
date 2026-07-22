@@ -180,6 +180,35 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn("style-src 'self' 'unsafe-inline'", csp)
         self.assertNotIn('unsafe-eval', csp)
 
+    @unittest_run_loop
+    async def test_cache_control_by_response_class(self) -> None:
+        """Pages and fragments are never stored; served files revalidate (§ Caching).
+
+        The bug this guards is a *missing* header: with none, a browser applies
+        heuristic freshness and keeps serving yesterday's page until a hard refresh.
+        """
+        for path in ('/', '/solutions/0042/', '/topics/'):
+            resp = await self.client.get(path, headers=_READER)
+            self.assertEqual(resp.headers.get('Cache-Control'), 'no-store', path)
+        fragment = await self.client.get('/solutions/0042/', headers={**_READER, **_HTMX})
+        self.assertEqual(fragment.headers.get('Cache-Control'), 'no-store')
+        # A served file (this app runs with serve_static off, so take a repo file the
+        # README links: a binary suffix is handed over as a FileResponse).
+        served = await self.client.get('/docs/file/docs/badges/python.svg', headers=_READER)
+        self.assertEqual(served.status, 200)
+        self.assertEqual(served.headers.get('Cache-Control'), 'no-cache')
+        self.assertIn('ETag', served.headers)         # …so revalidating costs a 304
+        missing = await self.client.get('/solutions/9999/', headers=_READER)
+        self.assertEqual(missing.status, 404)
+        self.assertEqual(missing.headers.get('Cache-Control'), 'no-store')
+
+    @unittest_run_loop
+    async def test_htmx_history_snapshots_are_off(self) -> None:
+        """Back must re-request the pane, not restore htmx's localStorage snapshot."""
+        body = await (await self.client.get('/', headers=_READER)).text()
+        self.assertIn('name="htmx-config"', body)
+        self.assertIn('"historyCacheSize": 0', body)
+
     # ── 5b: solutions ────────────────────────────────────────────────────────
 
     @unittest_run_loop

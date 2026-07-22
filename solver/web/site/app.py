@@ -35,6 +35,7 @@ import jinja2
 from aiohttp import web
 
 from solver.auth import LADDER, Authorizations, Subject, slugify
+from solver.web.cache import cache_middleware
 from solver.web.csp import csp_middleware
 from solver.web.site import content, gitstate
 from solver.web.site.config import SiteConfig
@@ -764,7 +765,7 @@ def build_app(config: SiteConfig) -> web.Application:
         request[SUBJECT_KEY] = _subject_from_headers(request, authz, pin)
         return await handler(request)
 
-    app = web.Application(middlewares=[csp_middleware, identity_middleware],
+    app = web.Application(middlewares=[cache_middleware, csp_middleware, identity_middleware],
                           client_max_size=_MAX_BODY)
     install_content(app, config, authz)
     return app

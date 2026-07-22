@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}euler{% endblock %}</title>
   <meta name="robots" content="noindex">
+  {# htmx keeps its own history: by default it snapshots the swapped pane into
+     localStorage and restores it on Back without asking the server — a cache no HTTP
+     header reaches, showing content that has since changed (you edited the file in the
+     terminal, or another tab). historyCacheSize 0 turns the snapshot off, so Back is a
+     history *miss* and htmx re-requests the pane (refreshOnHistoryMiss stays false: an
+     ajax fetch, not a full page reload). The config meta is htmx's own hook — no inline
+     script, so the CSP stays nonce-only. See docs/web-server-guide.md § Caching. #}
+  <meta name="htmx-config" content='{"historyCacheSize": 0}'>
   {# The app shell — every page, both tiers (web-server-guide § The site). The auth
      service renders this same template for its standalone public pages (its own
      base.html is gone), so the signed-out and signed-in layouts are one layout.

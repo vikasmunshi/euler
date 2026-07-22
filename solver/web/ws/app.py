@@ -34,6 +34,7 @@ from solver.auth.authorizations import Authorizations
 from solver.auth.identity import slugify
 from solver.auth.subject import Subject
 from solver.web.auth.client import request as auth_request
+from solver.web.cache import cache_middleware
 from solver.web.ws.config import WsConfig
 from solver.web.ws.manager import PtyManager
 from solver.web.ws.pty import PtySession
@@ -207,7 +208,7 @@ def build_app(config: WsConfig) -> web.Application:
             except asyncio.CancelledError:
                 pass
 
-    app = web.Application()
+    app = web.Application(middlewares=[cache_middleware])
     app[PTY_MANAGER] = manager
     app.add_routes([
         web.get('/healthz', healthz),

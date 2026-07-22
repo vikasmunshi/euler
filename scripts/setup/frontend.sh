@@ -483,6 +483,9 @@ generate_caddyfile() {
 	}
 	header Content-Type "text/html; charset=utf-8"
 	header Retry-After "3600"
+	# A cached "we are down" outlives the outage: the next visit would render the
+	# holding page from cache with the site already back. Never store it.
+	header Cache-Control "no-store"
 }
 
 ${DOMAIN} {
