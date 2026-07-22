@@ -11,7 +11,7 @@
   ],
   "techniques": {
     "s0": [
-      "greatest-common-divisor",
+      "greatest-common-divisor-computing",
       "euclidean-algorithm",
       "lattice-point"
     ]

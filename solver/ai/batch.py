@@ -77,6 +77,19 @@ def _save_store(store: dict[str, Any]) -> None:
     write_file(_store_path(), dumps(store, indent=2).encode())
 
 
+def _explicit(numbers: str) -> list[Problem]:
+    """Problems named outright, comma-separated - the selector for a targeted re-run.
+
+    Neither `untagged` nor `start` can express "these particular problems": after a vocabulary
+    change only the problems that actually lost a tag need regenerating, and they are scattered.
+    """
+    chosen: list[Problem] = []
+    for part in numbers.replace(' ', '').split(','):
+        if part:
+            chosen.append(Problem.from_number(int(part.lstrip('pP') or 0)))
+    return chosen
+
+
 def _select(target: Target, limit: int, start: int = 0) -> list[Problem]:
     """The problems a wave covers, in problem-number order, from ``start``, capped at ``limit``.
 
@@ -237,6 +250,7 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
                  limit: int = 250,
                  start: int = 0,
                  batch_id: str = '',
+                 problems_list: str = '',
                  model: Model = Model.CLAUDE_SONNET_5,
                  ) -> int:
     """Bulk-tag a wave of problems via the Message Batches API (half price, one shared cache).
@@ -255,6 +269,8 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
                   proposals get reconciled often enough to avoid duplicate slugs.
         start:    Skip problems numbered below this. Paces a re-tag through the stack in waves,
                   where `untagged` cannot help because every problem already has a file.
+        problems_list: Comma-separated problem numbers to run instead of a `target` sweep - the
+                  targeted re-run after a vocabulary change (`23,39,146`). Overrides `target`.
         batch_id: The job to collect (required for `collect`).
         model:    The model to run the wave on.
 
@@ -283,7 +299,7 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
             return ExitCodes.EXIT_ERROR
         written, failures, conflicts = _collect(client, batch_id, wave_model)
     else:
-        wave = _select(target, limit, start)
+        wave = _explicit(problems_list) if problems_list else _select(target, limit, start)
         if not wave:
             console.print(f'[muted]nothing to do: no {target} problems[/muted]')
             return ExitCodes.EXIT_OK

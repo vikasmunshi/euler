@@ -122,5 +122,23 @@ class EnforceFacetsTests(unittest.TestCase):
         self.assertEqual(cleaned, dumps(loads(cleaned), indent=2) + '\n')
 
 
+class ExplicitSelectorTests(unittest.TestCase):
+    """The targeted-re-run selector, which neither `untagged` nor `start` can express."""
+
+    def test_parses_a_comma_separated_list(self) -> None:
+        from solver.ai import batch
+        with patch.object(batch.Problem, 'from_number', side_effect=lambda n: n):
+            self.assertEqual(batch._explicit('26,39,146'), [26, 39, 146])
+
+    def test_tolerates_spaces_and_a_p_prefix(self) -> None:
+        from solver.ai import batch
+        with patch.object(batch.Problem, 'from_number', side_effect=lambda n: n):
+            self.assertEqual(batch._explicit('p26, 39 , P146'), [26, 39, 146])
+
+    def test_empty_selects_nothing(self) -> None:
+        from solver.ai import batch
+        self.assertEqual(batch._explicit(''), [])
+
+
 if __name__ == '__main__':
     unittest.main()

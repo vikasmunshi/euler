@@ -9,10 +9,10 @@
   ],
   "techniques": {
     "s0": [
-      "greatest-common-divisor",
+      "greatest-common-divisor-computing",
       "euclidean-algorithm",
       "brute-force-search",
-      "modular-arithmetic"
+      "modular-arithmetic-computing"
     ]
   },
   "new-tags": []

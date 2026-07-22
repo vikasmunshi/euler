@@ -9,7 +9,7 @@
   ],
   "techniques": {
     "s0": [
-      "recurrence-relation",
+      "recurrence-relation-computing",
       "pells-equation",
       "parallel-assignment"
     ]

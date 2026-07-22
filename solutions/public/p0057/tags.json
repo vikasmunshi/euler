@@ -7,7 +7,7 @@
   "takeaways": [],
   "techniques": {
     "s0": [
-      "recurrence-relation",
+      "recurrence-relation-computing",
       "arbitrary-precision-arithmetic",
       "tuple-assignment",
       "carry-arithmetic"

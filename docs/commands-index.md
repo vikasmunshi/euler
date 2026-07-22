@@ -279,7 +279,9 @@ claude-batch
 [action=run|submit|collect|list] (default run)
 [target=solved|unsolved|untagged|all] (default untagged)
 [limit=<int>] (default 250)
+[start=<int>] (default 0)
 [batch_id=<str>] (default '')
+[problems_list=<str>] (default '')
 [model=claude-fable-5|claude-opus-4-8|claude-opus-4-7|claude-opus-4-6|claude-opus-4-5|claude-sonnet-4-6|claude-sonnet-4-5|claude-sonnet-5|claude-haiku-4-5] (default claude-sonnet-5)
 ```
 
@@ -298,6 +300,10 @@ Args:
               `solved`, `unsolved`, or `all`.
     limit:    Maximum problems in this wave. Keep it to a few hundred so that `new-tags`
               proposals get reconciled often enough to avoid duplicate slugs.
+    start:    Skip problems numbered below this. Paces a re-tag through the stack in waves,
+              where `untagged` cannot help because every problem already has a file.
+    problems_list: Comma-separated problem numbers to run instead of a `target` sweep - the
+              targeted re-run after a vocabulary change (`23,39,146`). Overrides `target`.
     batch_id: The job to collect (required for `collect`).
     model:    The model to run the wave on.
 

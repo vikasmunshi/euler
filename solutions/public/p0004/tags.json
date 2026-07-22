@@ -10,7 +10,7 @@
   "techniques": {
     "s0": [
       "brute-force-search",
-      "modular-arithmetic",
+      "modular-arithmetic-computing",
       "monotonic-function",
       "two-pointers-technique",
       "snprintf"

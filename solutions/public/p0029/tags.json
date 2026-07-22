@@ -13,7 +13,7 @@
       "set",
       "hash-table",
       "trial-division",
-      "prime-factorization",
+      "prime-factorization-computing",
       "arbitrary-precision-arithmetic",
       "canonical-form"
     ],
@@ -21,7 +21,7 @@
       "set",
       "hash-table",
       "trial-division",
-      "prime-factorization",
+      "prime-factorization-computing",
       "arbitrary-precision-arithmetic",
       "canonical-form",
       "generation-of-primes"

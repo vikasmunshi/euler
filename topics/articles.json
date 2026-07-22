@@ -309,6 +309,13 @@
       "problems": 4
     },
     {
+      "path": "domain/composition-combinatorics",
+      "title": "Composition (combinatorics)",
+      "status": "missing",
+      "tags": ["composition-combinatorics"],
+      "problems": 0
+    },
+    {
       "path": "domain/computational-geometry",
       "title": "Computational geometry",
       "status": "missing",
@@ -561,6 +568,13 @@
       "problems": 2
     },
     {
+      "path": "domain/expected-value",
+      "title": "Expected value",
+      "status": "missing",
+      "tags": ["expected-value"],
+      "problems": 0
+    },
+    {
       "path": "domain/exponentiation",
       "title": "Exponentiation",
       "status": "missing",
@@ -601,6 +615,13 @@
       "status": "missing",
       "tags": ["fermats-last-theorem"],
       "problems": 1
+    },
+    {
+      "path": "domain/fermats-little-theorem",
+      "title": "Fermat's little theorem",
+      "status": "missing",
+      "tags": ["fermats-little-theorem"],
+      "problems": 0
     },
     {
       "path": "domain/fibbinary-numbers",
@@ -778,6 +799,13 @@
       "problems": 1
     },
     {
+      "path": "domain/greatest-common-divisor",
+      "title": "Greatest common divisor",
+      "status": "missing",
+      "tags": ["greatest-common-divisor"],
+      "problems": 0
+    },
+    {
       "path": "domain/harshad-number",
       "title": "Harshad number",
       "status": "missing",
@@ -902,6 +930,13 @@
       "status": "missing",
       "tags": ["l-system"],
       "problems": 1
+    },
+    {
+      "path": "domain/lagged-fibonacci-generator",
+      "title": "Lagged Fibonacci generator",
+      "status": "missing",
+      "tags": ["lagged-fibonacci-generator"],
+      "problems": 0
     },
     {
       "path": "domain/lagrange-multiplier",
@@ -1035,6 +1070,20 @@
       "status": "missing",
       "tags": ["minkowski-addition"],
       "problems": 1
+    },
+    {
+      "path": "domain/modular-arithmetic",
+      "title": "Modular arithmetic",
+      "status": "missing",
+      "tags": ["modular-arithmetic"],
+      "problems": 0
+    },
+    {
+      "path": "domain/modular-multiplicative-inverse",
+      "title": "Modular multiplicative inverse",
+      "status": "missing",
+      "tags": ["modular-multiplicative-inverse"],
+      "problems": 0
     },
     {
       "path": "domain/multiplicative-function",
@@ -1282,6 +1331,13 @@
       "problems": 16
     },
     {
+      "path": "domain/power-of-two",
+      "title": "Power of two",
+      "status": "missing",
+      "tags": ["power-of-two"],
+      "problems": 0
+    },
+    {
       "path": "domain/prefix-code",
       "title": "Prefix code",
       "status": "missing",
@@ -1308,6 +1364,13 @@
       "status": "missing",
       "tags": ["prime-factor"],
       "problems": 6
+    },
+    {
+      "path": "domain/prime-factorization",
+      "title": "Prime factorization",
+      "status": "missing",
+      "tags": ["prime-factorization"],
+      "problems": 0
     },
     {
       "path": "domain/prime-number",
@@ -1366,6 +1429,13 @@
       "problems": 1
     },
     {
+      "path": "domain/pseudorandom-number-generator",
+      "title": "Pseudorandom number generator",
+      "status": "missing",
+      "tags": ["pseudorandom-number-generator"],
+      "problems": 0
+    },
+    {
       "path": "domain/pythagorean-theorem",
       "title": "Pythagorean theorem",
       "status": "missing",
@@ -1413,6 +1483,20 @@
       "status": "missing",
       "tags": ["random-walk"],
       "problems": 2
+    },
+    {
+      "path": "domain/rational-number",
+      "title": "Rational number",
+      "status": "missing",
+      "tags": ["rational-number"],
+      "problems": 0
+    },
+    {
+      "path": "domain/recurrence-relation",
+      "title": "Recurrence relation",
+      "status": "missing",
+      "tags": ["recurrence-relation"],
+      "problems": 0
     },
     {
       "path": "domain/reflection-physics",
@@ -1784,6 +1868,13 @@
       "status": "missing",
       "tags": ["weyls-criterion"],
       "problems": 1
+    },
+    {
+      "path": "domain/wilsons-theorem",
+      "title": "Wilson's theorem",
+      "status": "missing",
+      "tags": ["wilsons-theorem"],
+      "problems": 0
     },
     {
       "path": "domain/zeckendorfs-theorem",
@@ -2395,10 +2486,10 @@
       "problems": 1
     },
     {
-      "path": "technique/composition-combinatorics",
-      "title": "Composition (combinatorics)",
+      "path": "technique/composition-combinatorics-computing",
+      "title": "Composition (combinatorics) (computing)",
       "status": "missing",
-      "tags": ["composition-combinatorics"],
+      "tags": ["composition-combinatorics-computing"],
       "problems": 0
     },
     {
@@ -2857,10 +2948,10 @@
       "problems": 2
     },
     {
-      "path": "technique/expected-value",
-      "title": "Expected value",
+      "path": "technique/expected-value-computing",
+      "title": "Expected value (computing)",
       "status": "missing",
-      "tags": ["expected-value"],
+      "tags": ["expected-value-computing"],
       "problems": 1
     },
     {
@@ -2927,11 +3018,11 @@
       "problems": 0
     },
     {
-      "path": "technique/fermats-little-theorem",
+      "path": "technique/fermats-little-theorem-computing",
       "title": "Fermat's little theorem",
       "status": "draft",
       "tags": ["fermats-little-theorem"],
-      "problems": 5
+      "problems": 0
     },
     {
       "path": "technique/find-first-set",
@@ -3165,11 +3256,11 @@
       "problems": 0
     },
     {
-      "path": "technique/greatest-common-divisor",
+      "path": "technique/greatest-common-divisor-computing",
       "title": "Greatest common divisor",
       "status": "draft",
       "tags": ["greatest-common-divisor"],
-      "problems": 20
+      "problems": 0
     },
     {
       "path": "technique/greedy-algorithm",
@@ -3501,10 +3592,10 @@
       "problems": 1
     },
     {
-      "path": "technique/lagged-fibonacci-generator",
-      "title": "Lagged Fibonacci generator",
+      "path": "technique/lagged-fibonacci-generator-computing",
+      "title": "Lagged Fibonacci generator (computing)",
       "status": "missing",
-      "tags": ["lagged-fibonacci-generator"],
+      "tags": ["lagged-fibonacci-generator-computing"],
       "problems": 1
     },
     {
@@ -3865,11 +3956,11 @@
       "problems": 4
     },
     {
-      "path": "technique/modular-arithmetic",
+      "path": "technique/modular-arithmetic-computing",
       "title": "Modular arithmetic",
       "status": "draft",
       "tags": ["modular-arithmetic"],
-      "problems": 47
+      "problems": 0
     },
     {
       "path": "technique/modular-exponentiation",
@@ -3879,11 +3970,11 @@
       "problems": 29
     },
     {
-      "path": "technique/modular-multiplicative-inverse",
+      "path": "technique/modular-multiplicative-inverse-computing",
       "title": "Modular multiplicative inverse",
       "status": "draft",
       "tags": ["modular-multiplicative-inverse"],
-      "problems": 12
+      "problems": 0
     },
     {
       "path": "technique/modulo",
@@ -4229,10 +4320,10 @@
       "problems": 1
     },
     {
-      "path": "technique/power-of-two",
-      "title": "Power of two",
+      "path": "technique/power-of-two-computing",
+      "title": "Power of two (computing)",
       "status": "missing",
-      "tags": ["power-of-two"],
+      "tags": ["power-of-two-computing"],
       "problems": 1
     },
     {
@@ -4257,10 +4348,10 @@
       "problems": 15
     },
     {
-      "path": "technique/prime-factorization",
-      "title": "Prime factorization",
+      "path": "technique/prime-factorization-computing",
+      "title": "Prime factorization (computing)",
       "status": "missing",
-      "tags": ["prime-factorization"],
+      "tags": ["prime-factorization-computing"],
       "problems": 14
     },
     {
@@ -4285,10 +4376,10 @@
       "problems": 0
     },
     {
-      "path": "technique/pseudorandom-number-generator",
-      "title": "Pseudorandom number generator",
+      "path": "technique/pseudorandom-number-generator-computing",
+      "title": "Pseudorandom number generator (computing)",
       "status": "missing",
-      "tags": ["pseudorandom-number-generator"],
+      "tags": ["pseudorandom-number-generator-computing"],
       "problems": 2
     },
     {
@@ -4376,10 +4467,10 @@
       "problems": 0
     },
     {
-      "path": "technique/rational-number",
-      "title": "Rational number",
+      "path": "technique/rational-number-computing",
+      "title": "Rational number (computing)",
       "status": "missing",
-      "tags": ["rational-number"],
+      "tags": ["rational-number-computing"],
       "problems": 1
     },
     {
@@ -4390,11 +4481,11 @@
       "problems": 0
     },
     {
-      "path": "technique/recurrence-relation",
+      "path": "technique/recurrence-relation-computing",
       "title": "Recurrence relation",
       "status": "draft",
       "tags": ["recurrence-relation"],
-      "problems": 24
+      "problems": 0
     },
     {
       "path": "technique/recursion-computer-science",
@@ -4873,10 +4964,10 @@
       "problems": 2
     },
     {
-      "path": "technique/wilsons-theorem",
-      "title": "Wilson's theorem",
+      "path": "technique/wilsons-theorem-computing",
+      "title": "Wilson's theorem (computing)",
       "status": "missing",
-      "tags": ["wilsons-theorem"],
+      "tags": ["wilsons-theorem-computing"],
       "problems": 0
     }
   ]
