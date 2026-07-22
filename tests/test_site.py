@@ -19,11 +19,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import jinja2
 from aiohttp.test_utils import AioHTTPTestCase, unittest_run_loop
 
-from solver.web.site import gitstate
+from solver.web.site import content, gitstate
 from solver.web.site.app import build_app
 from solver.web.site.config import SiteConfig
+from solver.web.site.render import render_block
 from tests import silence
 
 silence()   # filter aiohttp's request-key warning the handlers trip
@@ -445,8 +447,6 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('<h3>Number Theory</h3>', index)              # the folder is the section
         self.assertIn('class="card-title">Primes<', index)          # the card carries the leaf
         self.assertIn('class="cards cards-4"', index)               # four to a row
-        # status comes from the article index: a page still being written is muted
-        self.assertRegex(index, r'class="card is-draft"[^>]*\n?[^>]*/topics/number-theory/primes')
         resp = await self.client.get('/topics/number-theory/primes', headers=_READER)
         self.assertEqual(resp.status, 200)
         self.assertIn('Generating and testing primes', await resp.text())
@@ -646,6 +646,37 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertIn('id="crumbs" class="crumbs" aria-label="Breadcrumb" hx-swap-oob="true"', body)
         self.assertIn('id="actions" class="actions" hx-swap-oob="true"', body)
         self.assertIn('0009', body)                          # the crumb leaf
+
+
+class TopicCardStatusTests(unittest.TestCase):
+    """How an article's status reaches the card — rendered from a synthetic index.
+
+    Deliberately not asserted against the live `topics/` tree: a page's status is
+    exactly the thing that changes when someone writes an article, and a test that
+    reads "primes is a draft" fails the day it stops being one.
+    """
+
+    def _render(self, status: str) -> str:
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(Path(__file__).resolve().parents[1]
+                                           / 'solver/web/site/templates'),
+            autoescape=True)
+        entry = content.DocEntry(name='number-theory/primes', heading='Primes',
+                                 title='Generating and testing primes', status=status)
+        group = content.TopicGroup(name='number-theory', heading='Number Theory', entries=[entry])
+        return render_block(env, 'topics.html', 'content',
+                            {'groups': [group], 'crumbs': [], 'actions': [], 'git': None,
+                             'csp_nonce': '', 'subject': None})
+
+    def test_a_draft_card_is_muted_and_carries_no_pill(self) -> None:
+        body = self._render('draft')
+        self.assertIn('class="card is-draft"', body)
+        self.assertNotIn('pill-final', body)
+
+    def test_a_final_card_says_so_and_is_not_muted(self) -> None:
+        body = self._render('final')
+        self.assertIn('pill-final', body)
+        self.assertNotIn('is-draft', body)
 
 
 class GitStatusTests(unittest.TestCase):
