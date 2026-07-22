@@ -58,10 +58,12 @@ a parameter that accepts repetition.
 | [`echo`](#command-echo) | — | Print text. |
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
-| [`gh-pr`](#command-gh-pr-pr) | `pr` | Pull requests: list | merge (walk the queue). » |
+| [`gh-merge`](#command-gh-merge-merge) | `merge` | Content pull requests: list | merge (walk the queue). » |
+| [`gh-merge-docs`](#command-gh-merge-docs-merge-docs) | `merge-docs` | Walk the open pull requests and merge one confined to the docs set. » |
 | [`git-audit`](#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
 | [`git-commit`](#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
 | [`git-commit-amend`](#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
+| [`git-commit-docs`](#command-git-commit-docs-commit-docs) | `commit-docs` | Commit the docs set: everything update-docs, update-models and update-tags write. » |
 | [`git-filter`](#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
@@ -506,14 +508,14 @@ verbose:            If True, prints error information during evaluation. Default
 
 ---
 
-#### Command: `gh-pr` (`pr`)
+#### Command: `gh-merge` (`merge`)
 
-Pull requests: list | merge (walk the queue).
+Content pull requests: list | merge (walk the queue).
 * profiles: admin, maintainer
 * » supports `--silent`
 
 ```
-gh-pr
+gh-merge
 [action=list|merge] (default list)
 [silent=true|--silent]
 ```
@@ -534,10 +536,44 @@ merging a branch that carries solutions or topic articles is reviewing content,
 but a branch that also edits the framework, the scripts, or the keys is asking for
 something else entirely. Merge those on GitHub, as an admin who has read them.
 
+The docs set has its own gate and its own verb — `gh-merge-docs` — and the two are
+disjoint: a docs branch is refused here, a solutions branch is refused there.
+
 Args:
     action: 'list' (default) or 'merge' (walk the open queue interactively).
 
-Aliased as `pr`.
+Aliased as `merge`.
+```
+
+---
+
+#### Command: `gh-merge-docs` (`merge-docs`)
+
+Walk the open pull requests and merge one confined to the docs set.
+* profiles: admin, maintainer
+* » supports `--silent`
+
+```
+gh-merge-docs
+[silent=true|--silent]
+```
+
+```text
+Walk the open pull requests, squash-merging those that touch only the docs set.
+
+`gh-merge`'s sibling for documentation: same interactive walk — per request
+**merge**, **skip**, or **quit** — but the gate admits :data:`DOCS_PATHS` instead of the
+content trees. `gh-merge list` shows the queue either command is walking.
+
+Which verb you reach for names the review you are doing. A branch of *solutions* is
+refused here, and a branch of docs is refused by `gh-merge` — with one deliberate
+overlap, a problem's `tags.json`: it is a solution's file that `update-tags` maintains,
+so it can land either as part of the problem or as part of a graph reconciliation.
+
+Unlike the content gate this one does not insist on a single path: the docs set is one
+body of work, and a regeneration touches most of it at once.
+
+Aliased as `merge-docs`.
 ```
 
 ---
@@ -644,6 +680,48 @@ Args:
     problem:        The problem whose changes are folded into HEAD.
 
 Aliased as `amend`.
+```
+
+---
+
+#### Command: `git-commit-docs` (`commit-docs`)
+
+Commit the docs set: everything update-docs, update-models and update-tags write.
+* profiles: admin, maintainer
+* » supports `--silent`
+
+```
+git-commit-docs
+[message=<str>] (default '')
+[reset=true|--reset]
+[silent=true|--silent]
+```
+
+```text
+Stage and commit the documentation set — and nothing else.
+
+The counterpart of `git-commit` for prose and generated docs: it stages exactly
+    :data:`DOCS_PATHS` — the `docs/` guides, the `topics/` articles and tag graph, the
+    README and the start page's slice of it, `solver/modules.csv`, `solver/config.json`,
+    the model enum, the Claude guidance, and each problem's `tags.json` — so a run of
+    `update-docs`, `update-tags` and `update-models` lands as one commit, whole.
+
+The message is tagged `(docs)` unless it already says so, and an empty one becomes
+    `(docs) update`. Unlike `git-commit` an empty message never folds into HEAD: docs
+    are regenerated wholesale and often, and a silent amend would rewrite a commit
+    somebody may already be reading.
+
+A clean docs set is a no-op, not a failure — so this composes in a `&&` chain after a
+    regeneration that had nothing to do.
+
+Args:
+    message:        The commit message, tagged `(docs)` if it is not already.
+                    Defaults to `(docs) update`.
+    reset:          When True, first soft-reset to `origin/master` so the new commit
+                    squashes all local commits into a single checkpoint (working tree
+                    untouched). Defaults to False.
+
+Aliased as `commit-docs`.
 ```
 
 ---
@@ -769,7 +847,7 @@ Push the current branch to origin as yourself, then open its pull request.
 
 In a per-user clone the current branch is `user/<slug>`, pushed with your own
 GitHub identity — `git-identity` is the one-time setup. Landing work on master
-is a maintainer's `gh-pr merge`, never a direct push: pushing master requires
+is a maintainer's `gh-merge`, never a direct push: pushing master requires
 the `admin` floor, and force-pushing it is always refused.
 
 The PR is the second half of the push: an unreviewed branch on origin is not
@@ -1377,6 +1455,13 @@ after changing any command's name, alias, help text, signature,
 `requires`/`channels`, a module's first docstring line, or the README's HOME
 region.
 
+**Admin-floored on purpose, not out of caution.** Registration is itself
+profile-filtered (`solver/shell/command.py`): a command above your floor is never
+registered, so `registry.all()` returns only what *you* may run. Regenerating from a
+lesser profile's registry would drop every admin-floored command from the audit table
+and the command index — silently, and in exactly the documents whose worth is being
+complete. The floor is what keeps the generated view whole.
+
 Args:
     ctx:    The command context.
     check:  When True, write nothing and fail (non-zero) if any doc is out
@@ -1389,7 +1474,7 @@ Args:
 #### Command: `update-models`
 
 Update Model enum, pricing, and USD→EUR rate.
-* profiles: admin
+* profiles: admin, maintainer
 * » supports `--silent`
 
 ```

@@ -203,7 +203,7 @@ def _render(models: list[tuple[str, str, float, float]], comments: dict[str, str
     ])
 
 
-@register(requires='admin',
+@register(requires='maintainer',
           help_text='Update Model enum, pricing, and USD→EUR rate.',
           quietable=True)
 def update_models(check: bool = False) -> int:

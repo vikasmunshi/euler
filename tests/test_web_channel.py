@@ -123,13 +123,21 @@ class WebChannelCommandSetTest(unittest.TestCase):
 
     def test_formerly_terminal_only_commands_are_now_profile_gated(self) -> None:
         """The commands that were ``channels=('terminal',)`` are gated purely by
-        ``requires`` now. The infra ones (``update-models``/``update-docs``) and ``users``
-        are all admin-floored, so none of them reach any web rung: ``users`` administers
+        ``requires`` now — each by what it actually does, not by where it is typed.
+
+        ``users`` stays admin-floored and so reaches no web rung at all: it administers
         accounts + the invite-request queue only from the admin's local terminal (every
-        verb re-execs the admin CLI under sudo, which a web uid cannot obtain)."""
-        for infra_cmd in ('update-models', 'update-docs', 'users'):
+        verb re-execs the admin CLI under sudo, which a web uid cannot obtain). The
+        ``update-docs`` stays admin-floored for a reason of its own: registration is
+        profile-filtered, so a lesser profile's registry is truncated and regenerating from
+        it would silently drop the admin-floored commands from the generated docs.
+        ``update-models`` is maintainer work — it rewrites tracked files that land through
+        `git-commit-docs` — so it reaches a maintainer's shell, web included."""
+        for admin_only in ('users', 'update-docs'):
             for rung in _WEB_RUNGS:
-                self.assertNotIn(infra_cmd, self.web[rung], f'{infra_cmd} must not reach {rung}')
+                self.assertNotIn(admin_only, self.web[rung], f'{admin_only} must not reach {rung}')
+        self.assertIn('update-models', self.web['maintainer'])
+        self.assertNotIn('update-models', self.web['contributor'])
 
 
 if __name__ == '__main__':

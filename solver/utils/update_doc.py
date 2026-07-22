@@ -380,6 +380,13 @@ def update_docs(ctx: Context, check: bool = False) -> int:
     `requires`/`channels`, a module's first docstring line, or the README's HOME
     region.
 
+    **Admin-floored on purpose, not out of caution.** Registration is itself
+    profile-filtered (`solver/shell/command.py`): a command above your floor is never
+    registered, so `registry.all()` returns only what *you* may run. Regenerating from a
+    lesser profile's registry would drop every admin-floored command from the audit table
+    and the command index — silently, and in exactly the documents whose worth is being
+    complete. The floor is what keeps the generated view whole.
+
     Args:
         ctx:    The command context.
         check:  When True, write nothing and fail (non-zero) if any doc is out

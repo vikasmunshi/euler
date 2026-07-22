@@ -8,9 +8,14 @@ plain rank comparison on the ladder `reader` → `contributor` → `maintainer` 
 The table below is **generated from the live command registry** by the
 `update-docs` command — do not edit it by hand. It mirrors each command's
 `@register(requires='<profile>')` declaration; run `update-docs` after changing
-any command's `requires`, name, or module. Because `update-docs` itself is
-admin-only, the registry it reads always holds the complete command set, so the
-audit is never truncated to a lesser profile.
+any command's `requires`, name, or module.
+
+`update-docs` is **admin-floored**, and this table is why. Registration is itself
+profile-filtered — a command above your floor is never registered — so the registry
+a lesser profile sees omits the admin-floored commands, and regenerating from it
+would drop those rows silently, in the very document whose value is being complete.
+Only an admin's registry holds the whole command set, so the audit is never
+truncated.
 
 This is the **audit view** — who holds which profile is decided in the deployed
 system of record at `/etc/euler/authorizations.json` (root-owned, outside the
@@ -39,14 +44,16 @@ a profile on each channel.
 | `solver.ai.models` | `costs` |  | ✓ | ✓ | ✓ |
 | `solver.ai.skill` | `claude-blog` |  |  | ✓ | ✓ |
 | `solver.ai.skill` | `claude-solve` |  | ✓ | ✓ | ✓ |
-| `solver.ai.update_models` | `update-models` |  |  |  | ✓ |
+| `solver.ai.update_models` | `update-models` |  |  | ✓ | ✓ |
 | `solver.core.evaluate` | `benchmark` |  | ✓ | ✓ | ✓ |
 | `solver.core.evaluate` | `compile-c` |  | ✓ | ✓ | ✓ |
 | `solver.core.evaluate` | `evaluate` |  | ✓ | ✓ | ✓ |
-| `solver.core.git` | `gh-pr` |  |  | ✓ | ✓ |
+| `solver.core.git` | `gh-merge` |  |  | ✓ | ✓ |
+| `solver.core.git` | `gh-merge-docs` |  |  | ✓ | ✓ |
 | `solver.core.git` | `git-audit` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-commit` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-commit-amend` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-commit-docs` |  |  | ✓ | ✓ |
 | `solver.core.git` | `git-filter` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-hooks` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-identity` |  | ✓ | ✓ | ✓ |

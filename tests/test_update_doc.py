@@ -7,10 +7,12 @@ command's module and the rungs that may run it, distinct from the deployed
 from __future__ import annotations
 
 import unittest
+import unittest.mock
 
 from solver.auth import LADDER, Authorizations, Subject
-from solver.config import config
+from solver.config import ExitCodes, config
 from solver.shell.command import registry
+from solver.utils import update_doc
 from solver.utils.loader import load_commands
 from solver.utils.update_doc import (GENERATORS, _least_profile, _module_of,
                                      gen_authorization_table)
@@ -62,14 +64,41 @@ class AuthorizationTableTests(unittest.TestCase):
             self.assertEqual(ticked, expected, cmd.name)
 
     def test_least_profile_is_the_lowest_privilege_that_satisfies(self) -> None:
-        # A read-only command is reachable by the base reader; an admin-floored
-        # command only by admin.
+        # A read-only command is reachable by the base reader; a write-floored one
+        # only from contributor up; the admin floor only by admin.
         ls = registry.resolve('ls')
         assert ls is not None
         self.assertEqual(_least_profile(ls), 'reader')
         update_docs = registry.resolve('update-docs')
         assert update_docs is not None
         self.assertEqual(_least_profile(update_docs), 'admin')
+        update_tags = registry.resolve('update-tags')
+        assert update_tags is not None
+        self.assertEqual(_least_profile(update_tags), 'maintainer')
+
+
+class RegistryCompletenessTests(unittest.TestCase):
+    """Why `update-docs` is admin-floored: a lesser profile's registry is truncated.
+
+    Registration is profile-filtered, so generating the audit table from a maintainer's
+    registry would quietly delete every admin-floored row — from the one document whose
+    worth is being complete. This pins the mechanism the floor exists to defend against."""
+
+    def setUp(self) -> None:
+        self._saved_subject = config.subject
+        self.addCleanup(self._restore)
+
+    def _restore(self) -> None:
+        config.subject = self._saved_subject
+        load_commands(refresh_modules=True)
+
+    def test_a_maintainers_registry_cannot_see_the_admin_commands(self) -> None:
+        config.subject = _admin_subject()
+        load_commands(refresh_modules=True)
+        admin_floored = {cmd.name for cmd in registry.all() if cmd.requires == 'admin'}
+        self.assertIn('users', admin_floored)             # the set is non-empty…
+        self.assertIn('git-publish', admin_floored)       # …and these are in it
+        self.assertTrue(admin_floored <= {cmd.name for cmd in registry.all()})
 
 
 if __name__ == '__main__':

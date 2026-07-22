@@ -216,10 +216,12 @@ command name below links to its full entry — usage and description — in the
 | [`echo`](commands-index.md#command-echo) | — | Print text. |
 | [`edit`](commands-index.md#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](commands-index.md#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
-| [`gh-pr`](commands-index.md#command-gh-pr-pr) | `pr` | Pull requests: list | merge (walk the queue). » |
+| [`gh-merge`](commands-index.md#command-gh-merge-merge) | `merge` | Content pull requests: list | merge (walk the queue). » |
+| [`gh-merge-docs`](commands-index.md#command-gh-merge-docs-merge-docs) | `merge-docs` | Walk the open pull requests and merge one confined to the docs set. » |
 | [`git-audit`](commands-index.md#command-git-audit-audit) | `audit` | Audit the whole tracked tree: private encrypted, no compiled binaries. » |
 | [`git-commit`](commands-index.md#command-git-commit-commit) | `commit` | Commit a problem's solution directory and progress, optionally resetting to origin/master. ❏ » |
 | [`git-commit-amend`](commands-index.md#command-git-commit-amend-amend) | `amend` | Amend the last unpushed commit with a problem's current changes. ❏ » |
+| [`git-commit-docs`](commands-index.md#command-git-commit-docs-commit-docs) | `commit-docs` | Commit the docs set: everything update-docs, update-models and update-tags write. » |
 | [`git-filter`](commands-index.md#command-git-filter-filter) | `filter` | Wire the git encryption filter: status | install. |
 | [`git-hooks`](commands-index.md#command-git-hooks-hooks) | `hooks` | Run pre-commit hook and simulated pre-push hook. » |
 | [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
