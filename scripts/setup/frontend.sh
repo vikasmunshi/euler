@@ -506,8 +506,11 @@ ${DOMAIN} {
 	# the header). Content and /ws share the one per-user instance, so no path split.
 	@user header_regexp X-User-Slug ^[a-z][a-z0-9-]{1,30}$
 
-	# Health probe — Caddy-native, no upstream.
+	# Health probe — Caddy-native, no upstream. no-store because a probe answers
+	# "is the edge up *now*": a monitor that got its "ok" from a cache is not
+	# monitoring anything.
 	handle /healthz {
+		header Cache-Control "no-store"
 		respond "ok" 200
 	}
 
@@ -578,6 +581,11 @@ ${DOMAIN} {
 				copy_headers X-User X-Profile X-User-Slug
 				@unauthed status 401
 				handle_response @unauthed {
+					# "You are not signed in" is a statement about *this* moment.
+					# A stored copy would keep sending a signed-in browser to the
+					# login page; 302 is not heuristically cacheable, so this is
+					# belt-and-braces — but the belt costs one header.
+					header Cache-Control "no-store"
 					redir * /login 302
 				}
 			}
