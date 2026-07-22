@@ -527,11 +527,12 @@ the open pull requests interactively — per request **merge** (squash onto mast
 how a collaborator's `user/<slug>` branch lands on master; their next `git-sync`
 then rebases the squashed commit away and prunes the merged branch.
 
-A pull request touching anything outside `solutions/` is refused, and that gate
-is what makes this a maintainer's command rather than an admin's: merging a
-branch that carries solutions is reviewing solutions, but a branch that also
-edits the framework, the scripts, or the keys is asking for something else
-entirely. Merge those on GitHub, as an admin who has read them.
+A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
+anything else is refused, and a branch spanning both is asked to become two pull
+requests. That gate is what makes this a maintainer's command rather than an admin's:
+merging a branch that carries solutions or topic articles is reviewing content,
+but a branch that also edits the framework, the scripts, or the keys is asking for
+something else entirely. Merge those on GitHub, as an admin who has read them.
 
 Args:
     action: 'list' (default) or 'merge' (walk the open queue interactively).

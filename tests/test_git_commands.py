@@ -262,10 +262,28 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])         # refused before gh ran
 
+    def test_a_topics_only_pr_is_squash_merged_too(self) -> None:
+        """Topic articles are the other content tree a collaborator authors (PR_SCOPE)."""
+        self.as_profile('maintainer')
+        self.files = ['topics/technique/sieve-of-eratosthenes.md', 'topics/articles.json']
+        self.assertEqual(git._merge_pr(12), 0)
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+
+    def test_a_pr_spanning_both_trees_is_refused(self) -> None:
+        """Either tree, never both: solving a problem and writing an article are two reviews."""
+        self.as_profile('maintainer')
+        self.files = ['solutions/public/p0042/p0042_s0.py', 'topics/technique/memoization.md']
+        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])         # refused before gh ran
+
     def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
-        # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/.
+        # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/;
+        # likewise 'topics.md' for topics/ — the scope is prefixes, not name stems.
         self.as_profile('maintainer')
         self.files = ['solutions-of-mine/x.py']
+        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
+        self.assertEqual(self.cmdlines, [])
+        self.files = ['topics.md']
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
 

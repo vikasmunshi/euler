@@ -751,9 +751,12 @@ Git is **native** in the user's own clone — there is no broker, and nothing pr
   Skipped on master, on a branch level with origin/master (nothing to review), and with
   `--no-pr`.
 - **`gh-pr`** is the one gate to master: `list` shows what is waiting, `merge <number>`
-  squash-merges it. **A pull request touching anything outside `solutions/` is refused**,
+  squash-merges it. **A pull request must sit wholly inside `solutions/` or wholly inside
+  `topics/`** — anything outside is refused, and a branch spanning both is asked to become
+  two pull requests (one review is of one kind of work),
   and that gate is what puts the command at `maintainer` rather than `admin`: merging a
-  branch of solutions is reviewing solutions, but a branch that also edits the framework,
+  branch of solutions or topic articles is reviewing content, but a branch that also
+  edits the framework,
   the scripts, or the keys is asking for something else, and belongs to an admin reading
   it on GitHub. The file list is read from the pull request (`gh pr view --json files`);
   a list that cannot be read refuses the merge rather than passing for an empty one.

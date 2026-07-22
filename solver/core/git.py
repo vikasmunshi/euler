@@ -8,8 +8,9 @@ broker — the read verbs (`git-status`, `git-sync`) are ``reader``-floor and th
 write verbs (`git-commit`, `git-push`, `git-hooks`) plus the tree audit
 (`git-audit`) are ``contributor``-floor; the blast radius is their own branch.
 ``master`` stays gated: `gh-pr merge` (``maintainer``) is the one gate through which
-a ``user/<slug>`` branch lands on master, and it opens only for a pull request that
-touches nothing outside ``solutions/``.
+a ``user/<slug>`` branch lands on master, and it opens only for a pull request that sits
+wholly inside one of the content trees a collaborator authors — ``solutions/`` **or**
+``topics/``, never both (:data:`PR_SCOPE`).
 """
 from __future__ import annotations
 
@@ -478,10 +479,17 @@ def git_push(force: bool = False, pr: bool = True) -> int:
     return _ensure_pull_request(branch)
 
 
-#: What a collaborator's pull request is allowed to touch. Their branch carries
-#: solutions and the progress file; framework code, scripts, keys and docs reach
-#: master another way, and `gh-pr merge` is not the review for those.
-PR_SCOPE: str = 'solutions/'
+#: The content trees a collaborator's pull request may touch: solutions (plus the
+#: progress file) and topic articles. Framework code, scripts, keys and docs reach master
+#: another way, and `gh-pr merge` is not the review for those. Prefixes, so a lookalike
+#: sibling (`solutions-of-mine/`) does not pass.
+#:
+#: **One tree per pull request.** A review is of one kind of work — solving a problem or
+#: writing an article — and the two carry different risks: solutions bring encrypted
+#: files and the progress file, articles bring prose and the reconciled tag graph. A
+#: branch that mixes them is two reviews wearing one hat, so the gate refuses it and asks
+#: for two pull requests.
+PR_SCOPE: tuple[str, ...] = ('solutions/', 'topics/')
 
 
 def _pr_files(number: int) -> list[str] | None:
@@ -490,7 +498,7 @@ def _pr_files(number: int) -> list[str] | None:
     None is NOT "no files": a `gh` that is unauthenticated or offline, and a pull
     request that does not exist, all fail here. The merge gate must refuse on a file
     list it could not read rather than read an empty one as "touches nothing outside
-    solutions/" and merge.
+    the scope" and merge.
     """
     proc = run(['gh', 'pr', 'view', str(number), '--json', 'files', '--jq', '.files[].path'],
                cwd=config.root_dir, capture_output=True, text=True)
@@ -518,12 +526,13 @@ def _open_prs() -> list[dict[str, object]] | None:
 
 
 def _merge_pr(number: int) -> int:
-    """Squash-merge pull request *number* onto master, refusing anything beyond `solutions/`.
+    """Squash-merge pull request *number* onto master, refusing anything beyond :data:`PR_SCOPE`.
 
     The gate that makes this a maintainer's command rather than an admin's: merging a
-    branch that carries solutions is reviewing solutions, but a branch that also edits
-    the framework, the scripts, or the keys is asking for something else entirely —
-    merge those on GitHub, as an admin who has read them. On a clean merge the header
+    branch that carries solutions or topic articles is reviewing content, but a branch
+    that also edits the framework, the scripts, or the keys is asking for something else
+    entirely — merge those on GitHub, as an admin who has read them. The files must sit
+    in **one** of the trees, never both (:data:`PR_SCOPE`). On a clean merge the header
     chip is nudged (:func:`osc.git_changed`), since master moved.
     """
     files: list[str] | None = _pr_files(number)
@@ -538,15 +547,21 @@ def _merge_pr(number: int) -> int:
     outside: list[str] = [path for path in files if not path.startswith(PR_SCOPE)]
     if outside:
         console.print(f'[error]error:[/error] pull request [accent]#{number}[/accent] touches '
-                      f'{len(outside)} file(s) outside [accent]{PR_SCOPE}[/accent]:')
+                      f'{len(outside)} file(s) outside [accent]{" / ".join(PR_SCOPE)}[/accent]:')
         for path in outside[:10]:
             console.print(f'  !! {path}')
         if len(outside) > 10:
             console.print(f'  … and {len(outside) - 10} more')
-        console.print('this is not a solutions review — merge it on GitHub if it is genuinely wanted.')
+        console.print('this is not a content review — merge it on GitHub if it is genuinely wanted.')
+        return ExitCodes.EXIT_ERROR
+    trees: list[str] = sorted({prefix for path in files for prefix in PR_SCOPE if path.startswith(prefix)})
+    if len(trees) > 1:
+        console.print(f'[error]error:[/error] pull request [accent]#{number}[/accent] spans '
+                      f'[accent]{" and ".join(trees)}[/accent] — one tree per review.')
+        console.print('split it into a pull request per tree, then merge them separately.')
         return ExitCodes.EXIT_ERROR
     console.print(f'pull request [accent]#{number}[/accent]: {len(files)} file(s), all under '
-                  f'[accent]{PR_SCOPE}[/accent] — merging.')
+                  f'[accent]{trees[0]}[/accent] — merging.')
     # --admin: land it immediately with administrator privileges. master's base-branch
     # policy prohibits a plain merge (that policy is what gates other collaborators);
     # the owner running this review has the bypass, and without --admin `gh pr merge`
@@ -606,11 +621,12 @@ def gh_pr(action: Literal['list', 'merge'] = 'list') -> int:
     how a collaborator's `user/<slug>` branch lands on master; their next `git-sync`
     then rebases the squashed commit away and prunes the merged branch.
 
-    A pull request touching anything outside `solutions/` is refused, and that gate
-    is what makes this a maintainer's command rather than an admin's: merging a
-    branch that carries solutions is reviewing solutions, but a branch that also
-    edits the framework, the scripts, or the keys is asking for something else
-    entirely. Merge those on GitHub, as an admin who has read them.
+    A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
+    anything else is refused, and a branch spanning both is asked to become two pull
+    requests. That gate is what makes this a maintainer's command rather than an admin's:
+    merging a branch that carries solutions or topic articles is reviewing content,
+    but a branch that also edits the framework, the scripts, or the keys is asking for
+    something else entirely. Merge those on GitHub, as an admin who has read them.
 
     Args:
         action: 'list' (default) or 'merge' (walk the open queue interactively).
