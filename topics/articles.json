@@ -5,6 +5,13 @@
       "title": "15 puzzle",
       "status": "missing",
       "tags": ["15-puzzle"],
+      "problems": 2
+    },
+    {
+      "path": "domain/3-smooth-numbers-not-in-list",
+      "title": "3-smooth number",
+      "status": "missing",
+      "tags": ["3-smooth-numbers-not-in-list"],
       "problems": 1
     },
     {
@@ -13,6 +20,13 @@
       "status": "missing",
       "tags": ["abundant-number"],
       "problems": 1
+    },
+    {
+      "path": "domain/ackermann-function",
+      "title": "Ackermann function",
+      "status": "missing",
+      "tags": ["ackermann-function"],
+      "problems": 2
     },
     {
       "path": "domain/acute-and-obtuse-triangles",
@@ -33,6 +47,13 @@
       "title": "Adjacency (graph theory)",
       "status": "missing",
       "tags": ["adjacency-graph-theory"],
+      "problems": 5
+    },
+    {
+      "path": "domain/algebraic-number-conjugates",
+      "title": "Algebraic conjugate",
+      "status": "missing",
+      "tags": ["algebraic-number-conjugates"],
       "problems": 1
     },
     {
@@ -41,6 +62,27 @@
       "status": "missing",
       "tags": ["amicable-numbers"],
       "problems": 2
+    },
+    {
+      "path": "domain/angle-bisector",
+      "title": "Angle bisector",
+      "status": "missing",
+      "tags": ["angle-bisector"],
+      "problems": 1
+    },
+    {
+      "path": "domain/angular-bisector-and-tangent",
+      "title": "Angle bisector and tangent line to circumcircle",
+      "status": "missing",
+      "tags": ["angular-bisector-and-tangent"],
+      "problems": 1
+    },
+    {
+      "path": "domain/angular-bisector-tangent",
+      "title": "Angular bisector and tangent to circumcircle",
+      "status": "missing",
+      "tags": ["angular-bisector-tangent"],
+      "problems": 1
     },
     {
       "path": "domain/april-fools-day-request-for-comments",
@@ -61,13 +103,20 @@
       "title": "Arithmetic progression",
       "status": "missing",
       "tags": ["arithmetic-progression"],
-      "problems": 8
+      "problems": 11
     },
     {
       "path": "domain/assignment-problem",
       "title": "Assignment problem",
       "status": "missing",
       "tags": ["assignment-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/automorphic-number",
+      "title": "Automorphic number",
+      "status": "missing",
+      "tags": ["automorphic-number"],
       "problems": 1
     },
     {
@@ -85,11 +134,25 @@
       "problems": 1
     },
     {
+      "path": "domain/bezier-curve",
+      "title": "B\u00e9zier curve",
+      "status": "missing",
+      "tags": ["bezier-curve"],
+      "problems": 1
+    },
+    {
+      "path": "domain/bi-unitary-divisor",
+      "title": "Bi-unitary divisor",
+      "status": "missing",
+      "tags": ["bi-unitary-divisor"],
+      "problems": 1
+    },
+    {
       "path": "domain/bijection",
       "title": "Bijection",
       "status": "missing",
       "tags": ["bijection"],
-      "problems": 2
+      "problems": 5
     },
     {
       "path": "domain/binary-logarithm",
@@ -103,28 +166,28 @@
       "title": "Binary number",
       "status": "missing",
       "tags": ["binary-number"],
-      "problems": 6
+      "problems": 42
     },
     {
       "path": "domain/binary-quadratic-form",
       "title": "Binary quadratic form",
       "status": "missing",
       "tags": ["binary-quadratic-form"],
-      "problems": 1
+      "problems": 10
     },
     {
       "path": "domain/binary-tree",
       "title": "Binary tree",
       "status": "missing",
       "tags": ["binary-tree"],
-      "problems": 1
+      "problems": 8
     },
     {
       "path": "domain/binomial-coefficient",
       "title": "Binomial coefficient",
       "status": "missing",
       "tags": ["binomial-coefficient"],
-      "problems": 20
+      "problems": 36
     },
     {
       "path": "domain/bisection-method",
@@ -138,14 +201,28 @@
       "title": "Blancmange curve",
       "status": "missing",
       "tags": ["blancmange-curve"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/blum-blum-shub",
       "title": "Blum Blum Shub",
       "status": "missing",
       "tags": ["blum-blum-shub"],
+      "problems": 2
+    },
+    {
+      "path": "domain/box-ball-system",
+      "title": "Box-Ball System",
+      "status": "missing",
+      "tags": ["box-ball-system"],
       "problems": 1
+    },
+    {
+      "path": "domain/brahmaguptas-formula",
+      "title": "Brahmagupta's formula",
+      "status": "missing",
+      "tags": ["brahmaguptas-formula"],
+      "problems": 2
     },
     {
       "path": "domain/broken-profile",
@@ -173,7 +250,7 @@
       "title": "Catalan number",
       "status": "missing",
       "tags": ["catalan-number"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/cathetus",
@@ -201,6 +278,34 @@
       "title": "Champernowne constant",
       "status": "missing",
       "tags": ["champernowne-constant"],
+      "problems": 2
+    },
+    {
+      "path": "domain/chromatic-polynomial",
+      "title": "Chromatic polynomial",
+      "status": "missing",
+      "tags": ["chromatic-polynomial"],
+      "problems": 1
+    },
+    {
+      "path": "domain/circumcircle-and-incircle",
+      "title": "Circumscribed and inscribed circles",
+      "status": "missing",
+      "tags": ["circumcircle-and-incircle"],
+      "problems": 1
+    },
+    {
+      "path": "domain/circumcircle-orthocenter",
+      "title": "Circumcenter and orthocenter of a triangle",
+      "status": "missing",
+      "tags": ["circumcircle-orthocenter"],
+      "problems": 1
+    },
+    {
+      "path": "domain/circumradius-of-a-triangle",
+      "title": "Circumradius of a triangle",
+      "status": "missing",
+      "tags": ["circumradius-of-a-triangle"],
       "problems": 1
     },
     {
@@ -208,7 +313,7 @@
       "title": "Class number (number theory)",
       "status": "missing",
       "tags": ["class-number-number-theory"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/clique-problem",
@@ -225,32 +330,53 @@
       "problems": 1
     },
     {
+      "path": "domain/coin-fountain",
+      "title": "Coin fountain",
+      "status": "missing",
+      "tags": ["coin-fountain"],
+      "problems": 1
+    },
+    {
       "path": "domain/collatz-conjecture",
       "title": "Collatz conjecture",
       "status": "missing",
       "tags": ["collatz-conjecture"],
-      "problems": 2
+      "problems": 3
     },
     {
       "path": "domain/combinatorial-game-theory",
       "title": "Combinatorial game theory",
       "status": "missing",
       "tags": ["combinatorial-game-theory"],
-      "problems": 5
+      "problems": 73
+    },
+    {
+      "path": "domain/combinatorial-geometry",
+      "title": "Combinatorial geometry",
+      "status": "missing",
+      "tags": ["combinatorial-geometry"],
+      "problems": 1
     },
     {
       "path": "domain/combinatorial-optimization",
       "title": "Combinatorial optimization",
       "status": "missing",
       "tags": ["combinatorial-optimization"],
-      "problems": 7
+      "problems": 48
     },
     {
       "path": "domain/combinatorics",
       "title": "Combinatorics",
       "status": "missing",
       "tags": ["combinatorics"],
-      "problems": 53
+      "problems": 286
+    },
+    {
+      "path": "domain/combinatory-logic",
+      "title": "Combinatory logic",
+      "status": "missing",
+      "tags": ["combinatory-logic"],
+      "problems": 1
     },
     {
       "path": "domain/common-logarithm",
@@ -271,28 +397,28 @@
       "title": "Component (graph theory)",
       "status": "missing",
       "tags": ["component-graph-theory"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/composite-number",
       "title": "Composite number",
       "status": "missing",
       "tags": ["composite-number"],
-      "problems": 3
+      "problems": 5
     },
     {
       "path": "domain/composition-combinatorics",
       "title": "Composition (combinatorics)",
       "status": "missing",
       "tags": ["composition-combinatorics"],
-      "problems": 4
+      "problems": 8
     },
     {
       "path": "domain/computational-geometry",
       "title": "Computational geometry",
       "status": "missing",
       "tags": ["computational-geometry"],
-      "problems": 7
+      "problems": 47
     },
     {
       "path": "domain/concave-function",
@@ -302,18 +428,32 @@
       "problems": 3
     },
     {
+      "path": "domain/condorcet-paradox",
+      "title": "Condorcet paradox",
+      "status": "missing",
+      "tags": ["condorcet-paradox"],
+      "problems": 1
+    },
+    {
       "path": "domain/consecutive-integers",
       "title": "Consecutive integers",
       "status": "missing",
       "tags": ["consecutive-integers"],
-      "problems": 2
+      "problems": 5
+    },
+    {
+      "path": "domain/constraint-satisfaction",
+      "title": "Constraint satisfaction problem",
+      "status": "missing",
+      "tags": ["constraint-satisfaction"],
+      "problems": 1
     },
     {
       "path": "domain/continued-fraction",
       "title": "Continued fraction",
       "status": "missing",
       "tags": ["continued-fraction"],
-      "problems": 6
+      "problems": 12
     },
     {
       "path": "domain/contraction-mapping",
@@ -327,21 +467,56 @@
       "title": "Convergent (continued fraction)",
       "status": "missing",
       "tags": ["convergent-continued-fraction"],
-      "problems": 2
+      "problems": 3
+    },
+    {
+      "path": "domain/convex-function",
+      "title": "Convex function",
+      "status": "missing",
+      "tags": ["convex-function"],
+      "problems": 1
+    },
+    {
+      "path": "domain/convex-hull",
+      "title": "Convex hull",
+      "status": "missing",
+      "tags": ["convex-hull"],
+      "problems": 1
+    },
+    {
+      "path": "domain/convex-polygon",
+      "title": "Convex polygon",
+      "status": "missing",
+      "tags": ["convex-polygon"],
+      "problems": 1
     },
     {
       "path": "domain/coprime-integers",
       "title": "Coprime integers",
       "status": "missing",
       "tags": ["coprime-integers"],
-      "problems": 14
+      "problems": 48
     },
     {
       "path": "domain/counting",
       "title": "Counting",
       "status": "missing",
       "tags": ["counting"],
-      "problems": 8
+      "problems": 73
+    },
+    {
+      "path": "domain/coupon-collector-problem",
+      "title": "Coupon collector's problem",
+      "status": "missing",
+      "tags": ["coupon-collector-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/cribbage",
+      "title": "Cribbage",
+      "status": "missing",
+      "tags": ["cribbage"],
+      "problems": 1
     },
     {
       "path": "domain/cuban-prime",
@@ -355,20 +530,27 @@
       "title": "Cycle graph",
       "status": "missing",
       "tags": ["cycle-graph"],
-      "problems": 3
+      "problems": 10
     },
     {
       "path": "domain/cyclic-group",
       "title": "Cyclic group",
       "status": "missing",
       "tags": ["cyclic-group"],
-      "problems": 1
+      "problems": 8
     },
     {
       "path": "domain/cyclic-number",
       "title": "Cyclic number",
       "status": "missing",
       "tags": ["cyclic-number"],
+      "problems": 2
+    },
+    {
+      "path": "domain/cyclic-polygon",
+      "title": "Cyclic polygon",
+      "status": "missing",
+      "tags": ["cyclic-polygon"],
       "problems": 1
     },
     {
@@ -376,49 +558,56 @@
       "title": "Cyclotomic polynomial",
       "status": "missing",
       "tags": ["cyclotomic-polynomial"],
-      "problems": 1
+      "problems": 5
+    },
+    {
+      "path": "domain/de-bruijn-sequence",
+      "title": "De Bruijn sequence",
+      "status": "missing",
+      "tags": ["de-bruijn-sequence"],
+      "problems": 2
     },
     {
       "path": "domain/difference-of-two-squares",
       "title": "Difference of two squares",
       "status": "missing",
       "tags": ["difference-of-two-squares"],
-      "problems": 3
+      "problems": 4
     },
     {
       "path": "domain/digit-counting-function",
       "title": "Digit-counting function",
       "status": "missing",
       "tags": ["digit-counting-function"],
-      "problems": 5
+      "problems": 12
     },
     {
       "path": "domain/digit-sum",
       "title": "Digit sum",
       "status": "missing",
       "tags": ["digit-sum"],
-      "problems": 23
+      "problems": 63
     },
     {
       "path": "domain/diophantine-approximation",
       "title": "Diophantine approximation",
       "status": "missing",
       "tags": ["diophantine-approximation"],
-      "problems": 2
+      "problems": 10
     },
     {
       "path": "domain/diophantine-equation",
       "title": "Diophantine equation",
       "status": "missing",
       "tags": ["diophantine-equation"],
-      "problems": 21
+      "problems": 85
     },
     {
       "path": "domain/directed-acyclic-graph",
       "title": "Directed acyclic graph",
       "status": "missing",
       "tags": ["directed-acyclic-graph"],
-      "problems": 3
+      "problems": 4
     },
     {
       "path": "domain/dirichlet-convolution",
@@ -432,35 +621,35 @@
       "title": "Discrete uniform distribution",
       "status": "missing",
       "tags": ["discrete-uniform-distribution"],
-      "problems": 1
+      "problems": 33
     },
     {
       "path": "domain/divisibility-rule",
       "title": "Divisibility rule",
       "status": "missing",
       "tags": ["divisibility-rule"],
-      "problems": 6
+      "problems": 24
     },
     {
       "path": "domain/divisor",
       "title": "Divisor",
       "status": "missing",
       "tags": ["divisor"],
-      "problems": 8
+      "problems": 45
     },
     {
       "path": "domain/divisor-function",
       "title": "Divisor function",
       "status": "missing",
       "tags": ["divisor-function"],
-      "problems": 15
+      "problems": 44
     },
     {
       "path": "domain/divisor-summatory-function",
       "title": "Divisor summatory function",
       "status": "missing",
       "tags": ["divisor-summatory-function"],
-      "problems": 2
+      "problems": 10
     },
     {
       "path": "domain/dragon-curve",
@@ -474,14 +663,21 @@
       "title": "E (mathematical constant)",
       "status": "missing",
       "tags": ["e-mathematical-constant"],
-      "problems": 3
+      "problems": 6
     },
     {
       "path": "domain/eisenstein-triple",
       "title": "Eisenstein triple",
       "status": "missing",
       "tags": ["eisenstein-triple"],
-      "problems": 2
+      "problems": 3
+    },
+    {
+      "path": "domain/ellipse",
+      "title": "Ellipse",
+      "status": "missing",
+      "tags": ["ellipse"],
+      "problems": 1
     },
     {
       "path": "domain/english-numerals",
@@ -495,13 +691,34 @@
       "title": "Enumerative combinatorics",
       "status": "missing",
       "tags": ["enumerative-combinatorics"],
-      "problems": 2
+      "problems": 19
+    },
+    {
+      "path": "domain/epistemic-logic",
+      "title": "Epistemic logic",
+      "status": "missing",
+      "tags": ["epistemic-logic"],
+      "problems": 1
     },
     {
       "path": "domain/equidistributed-sequence",
       "title": "Equidistributed sequence",
       "status": "missing",
       "tags": ["equidistributed-sequence"],
+      "problems": 3
+    },
+    {
+      "path": "domain/equivalence-relation",
+      "title": "Equivalence relation",
+      "status": "missing",
+      "tags": ["equivalence-relation"],
+      "problems": 1
+    },
+    {
+      "path": "domain/eulerian-path",
+      "title": "Eulerian path",
+      "status": "missing",
+      "tags": ["eulerian-path"],
       "problems": 1
     },
     {
@@ -509,35 +726,42 @@
       "title": "Euler's totient function",
       "status": "missing",
       "tags": ["eulers-totient-function"],
-      "problems": 10
+      "problems": 28
     },
     {
       "path": "domain/exclusive-or",
       "title": "Exclusive or",
       "status": "missing",
       "tags": ["exclusive-or"],
-      "problems": 3
+      "problems": 17
     },
     {
       "path": "domain/expected-value",
       "title": "Expected value",
       "status": "missing",
       "tags": ["expected-value"],
-      "problems": 5
+      "problems": 79
+    },
+    {
+      "path": "domain/exponential-distribution",
+      "title": "Exponential distribution",
+      "status": "missing",
+      "tags": ["exponential-distribution"],
+      "problems": 1
     },
     {
       "path": "domain/exponentiation",
       "title": "Exponentiation",
       "status": "missing",
       "tags": ["exponentiation"],
-      "problems": 8
+      "problems": 18
     },
     {
       "path": "domain/factorial",
       "title": "Factorial",
       "status": "missing",
       "tags": ["factorial"],
-      "problems": 11
+      "problems": 29
     },
     {
       "path": "domain/factorial-number-system",
@@ -551,7 +775,7 @@
       "title": "Farey sequence",
       "status": "missing",
       "tags": ["farey-sequence"],
-      "problems": 4
+      "problems": 6
     },
     {
       "path": "domain/fermat-point",
@@ -565,14 +789,14 @@
       "title": "Fermat's Last Theorem",
       "status": "missing",
       "tags": ["fermats-last-theorem"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/fermats-little-theorem",
       "title": "Fermat's little theorem",
       "status": "missing",
       "tags": ["fermats-little-theorem"],
-      "problems": 3
+      "problems": 5
     },
     {
       "path": "domain/fibbinary-numbers",
@@ -593,14 +817,28 @@
       "title": "Fibonacci sequence",
       "status": "missing",
       "tags": ["fibonacci-sequence"],
-      "problems": 10
+      "problems": 37
+    },
+    {
+      "path": "domain/fibonacci-word",
+      "title": "Fibonacci word",
+      "status": "missing",
+      "tags": ["fibonacci-word"],
+      "problems": 1
     },
     {
       "path": "domain/figurate-number",
       "title": "Figurate number",
       "status": "missing",
       "tags": ["figurate-number"],
-      "problems": 3
+      "problems": 6
+    },
+    {
+      "path": "domain/floor-function",
+      "title": "Floor function",
+      "status": "missing",
+      "tags": ["floor-function"],
+      "problems": 1
     },
     {
       "path": "domain/fortunate-number",
@@ -610,18 +848,32 @@
       "problems": 1
     },
     {
+      "path": "domain/four-exponentials-conjecture",
+      "title": "Four exponentials conjecture",
+      "status": "missing",
+      "tags": ["four-exponentials-conjecture"],
+      "problems": 1
+    },
+    {
       "path": "domain/fractal",
       "title": "Fractal",
       "status": "missing",
       "tags": ["fractal"],
-      "problems": 2
+      "problems": 7
     },
     {
       "path": "domain/fractional-part",
       "title": "Fractional part",
       "status": "missing",
       "tags": ["fractional-part"],
-      "problems": 2
+      "problems": 3
+    },
+    {
+      "path": "domain/fractran",
+      "title": "Fractran",
+      "status": "missing",
+      "tags": ["fractran"],
+      "problems": 1
     },
     {
       "path": "domain/frequency-analysis",
@@ -631,11 +883,18 @@
       "problems": 1
     },
     {
+      "path": "domain/frobenius-number",
+      "title": "Frobenius number (coin problem)",
+      "status": "missing",
+      "tags": ["frobenius-number"],
+      "problems": 1
+    },
+    {
       "path": "domain/functional-graph",
       "title": "Functional graph",
       "status": "missing",
       "tags": ["functional-graph"],
-      "problems": 2
+      "problems": 8
     },
     {
       "path": "domain/fundamental-theorem-of-arithmetic",
@@ -645,24 +904,45 @@
       "problems": 3
     },
     {
+      "path": "domain/game-theory",
+      "title": "Game theory",
+      "status": "missing",
+      "tags": ["game-theory"],
+      "problems": 1
+    },
+    {
       "path": "domain/gauss-circle-problem",
       "title": "Gauss circle problem",
       "status": "missing",
       "tags": ["gauss-circle-problem"],
-      "problems": 1
+      "problems": 6
     },
     {
       "path": "domain/generating-function",
       "title": "Generating function",
       "status": "missing",
       "tags": ["generating-function"],
-      "problems": 5
+      "problems": 27
     },
     {
       "path": "domain/genus-theory",
       "title": "Genus theory",
       "status": "missing",
       "tags": ["genus-theory"],
+      "problems": 2
+    },
+    {
+      "path": "domain/geometric-mean",
+      "title": "Geometric mean",
+      "status": "missing",
+      "tags": ["geometric-mean"],
+      "problems": 1
+    },
+    {
+      "path": "domain/geometric-probability",
+      "title": "Geometric probability",
+      "status": "missing",
+      "tags": ["geometric-probability"],
       "problems": 1
     },
     {
@@ -670,35 +950,35 @@
       "title": "Geometric progression",
       "status": "missing",
       "tags": ["geometric-progression"],
-      "problems": 2
+      "problems": 11
     },
     {
       "path": "domain/geometrical-optics",
       "title": "Geometrical optics",
       "status": "missing",
       "tags": ["geometrical-optics"],
-      "problems": 1
+      "problems": 5
     },
     {
       "path": "domain/geometry",
       "title": "Geometry",
       "status": "missing",
       "tags": ["geometry"],
-      "problems": 8
+      "problems": 71
     },
     {
       "path": "domain/goldbachs-conjecture",
       "title": "Goldbach's conjecture",
       "status": "missing",
       "tags": ["goldbachs-conjecture"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/golden-ratio",
       "title": "Golden ratio",
       "status": "missing",
       "tags": ["golden-ratio"],
-      "problems": 2
+      "problems": 8
     },
     {
       "path": "domain/gradient",
@@ -712,14 +992,14 @@
       "title": "Graph coloring",
       "status": "missing",
       "tags": ["graph-coloring"],
-      "problems": 2
+      "problems": 11
     },
     {
       "path": "domain/graph-theory",
       "title": "Graph theory",
       "status": "missing",
       "tags": ["graph-theory"],
-      "problems": 9
+      "problems": 44
     },
     {
       "path": "domain/gray-code",
@@ -733,7 +1013,42 @@
       "title": "Greatest common divisor",
       "status": "missing",
       "tags": ["greatest-common-divisor"],
-      "problems": 8
+      "problems": 30
+    },
+    {
+      "path": "domain/greedy-algorithm-simulation",
+      "title": "Greedy algorithm simulation",
+      "status": "missing",
+      "tags": ["greedy-algorithm-simulation"],
+      "problems": 1
+    },
+    {
+      "path": "domain/hamiltonian-cycle",
+      "title": "Hamiltonian cycle",
+      "status": "missing",
+      "tags": ["hamiltonian-cycle"],
+      "problems": 1
+    },
+    {
+      "path": "domain/hamiltonian-path",
+      "title": "Hamiltonian path",
+      "status": "missing",
+      "tags": ["hamiltonian-path"],
+      "problems": 2
+    },
+    {
+      "path": "domain/harmonic-progression",
+      "title": "Harmonic number",
+      "status": "missing",
+      "tags": ["harmonic-progression"],
+      "problems": 1
+    },
+    {
+      "path": "domain/harmonic-series",
+      "title": "Harmonic series",
+      "status": "missing",
+      "tags": ["harmonic-series"],
+      "problems": 1
     },
     {
       "path": "domain/harshad-number",
@@ -747,6 +1062,20 @@
       "title": "Heron's formula",
       "status": "missing",
       "tags": ["herons-formula"],
+      "problems": 7
+    },
+    {
+      "path": "domain/herons-method",
+      "title": "Heron's method",
+      "status": "missing",
+      "tags": ["herons-method"],
+      "problems": 1
+    },
+    {
+      "path": "domain/hexagonal-lattice",
+      "title": "Hexagonal lattice",
+      "status": "missing",
+      "tags": ["hexagonal-lattice"],
       "problems": 1
     },
     {
@@ -754,14 +1083,14 @@
       "title": "Hexagonal number",
       "status": "missing",
       "tags": ["hexagonal-number"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/highly-composite-number",
       "title": "Highly composite number",
       "status": "missing",
       "tags": ["highly-composite-number"],
-      "problems": 3
+      "problems": 4
     },
     {
       "path": "domain/histogram",
@@ -775,7 +1104,7 @@
       "title": "Hypergeometric distribution",
       "status": "missing",
       "tags": ["hypergeometric-distribution"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/hyperplane-separation-theorem",
@@ -785,31 +1114,59 @@
       "problems": 1
     },
     {
+      "path": "domain/hypocycloid",
+      "title": "Hypocycloid",
+      "status": "missing",
+      "tags": ["hypocycloid"],
+      "problems": 1
+    },
+    {
+      "path": "domain/idempotent-matrix",
+      "title": "Idempotent matrix",
+      "status": "missing",
+      "tags": ["idempotent-matrix"],
+      "problems": 1
+    },
+    {
       "path": "domain/impartial-game",
       "title": "Impartial game",
       "status": "missing",
       "tags": ["impartial-game"],
-      "problems": 2
+      "problems": 29
     },
     {
       "path": "domain/incircle-and-excircles-of-a-triangle",
       "title": "Incircle and excircles of a triangle",
       "status": "missing",
       "tags": ["incircle-and-excircles-of-a-triangle"],
-      "problems": 1
+      "problems": 6
     },
     {
       "path": "domain/independence-probability-theory",
       "title": "Independence (probability theory)",
       "status": "missing",
       "tags": ["independence-probability-theory"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/independent-set-graph-theory",
       "title": "Independent set (graph theory)",
       "status": "missing",
       "tags": ["independent-set-graph-theory"],
+      "problems": 2
+    },
+    {
+      "path": "domain/inequality",
+      "title": "Inequality",
+      "status": "missing",
+      "tags": ["inequality"],
+      "problems": 1
+    },
+    {
+      "path": "domain/information-theory-search",
+      "title": "Adaptive binary search / decision tree information theory",
+      "status": "missing",
+      "tags": ["information-theory-search"],
       "problems": 1
     },
     {
@@ -817,13 +1174,34 @@
       "title": "Integer lattice",
       "status": "missing",
       "tags": ["integer-lattice"],
-      "problems": 5
+      "problems": 48
     },
     {
       "path": "domain/irrational-number",
       "title": "Irrational number",
       "status": "missing",
       "tags": ["irrational-number"],
+      "problems": 11
+    },
+    {
+      "path": "domain/isoperimetric-inequality",
+      "title": "Isoperimetric inequality",
+      "status": "missing",
+      "tags": ["isoperimetric-inequality"],
+      "problems": 1
+    },
+    {
+      "path": "domain/kaprekar-constant",
+      "title": "Kaprekar's constant",
+      "status": "missing",
+      "tags": ["kaprekar-constant"],
+      "problems": 1
+    },
+    {
+      "path": "domain/khinchins-constant",
+      "title": "Khinchin's constant",
+      "status": "missing",
+      "tags": ["khinchins-constant"],
       "problems": 1
     },
     {
@@ -838,6 +1216,13 @@
       "title": "Klee's measure problem",
       "status": "missing",
       "tags": ["klees-measure-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/kolakoski-sequence",
+      "title": "Kolakoski sequence",
+      "status": "missing",
+      "tags": ["kolakoski-sequence"],
       "problems": 1
     },
     {
@@ -859,13 +1244,27 @@
       "title": "Lagged Fibonacci generator",
       "status": "missing",
       "tags": ["lagged-fibonacci-generator"],
-      "problems": 3
+      "problems": 4
     },
     {
       "path": "domain/lagrange-multiplier",
       "title": "Lagrange multiplier",
       "status": "missing",
       "tags": ["lagrange-multiplier"],
+      "problems": 4
+    },
+    {
+      "path": "domain/lambda-calculus",
+      "title": "Lambda calculus",
+      "status": "missing",
+      "tags": ["lambda-calculus"],
+      "problems": 1
+    },
+    {
+      "path": "domain/langtons-ant",
+      "title": "Langton's ant",
+      "status": "missing",
+      "tags": ["langtons-ant"],
       "problems": 1
     },
     {
@@ -873,48 +1272,83 @@
       "title": "Lattice path",
       "status": "missing",
       "tags": ["lattice-path"],
-      "problems": 3
+      "problems": 17
     },
     {
       "path": "domain/law-of-cosines",
       "title": "Law of cosines",
       "status": "missing",
       "tags": ["law-of-cosines"],
-      "problems": 3
+      "problems": 8
     },
     {
       "path": "domain/law-of-sines",
       "title": "Law of sines",
       "status": "missing",
       "tags": ["law-of-sines"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/least-common-multiple",
       "title": "Least common multiple",
       "status": "missing",
       "tags": ["least-common-multiple"],
-      "problems": 4
+      "problems": 11
     },
     {
       "path": "domain/legendres-formula",
       "title": "Legendre's formula",
       "status": "missing",
       "tags": ["legendres-formula"],
-      "problems": 9
+      "problems": 10
+    },
+    {
+      "path": "domain/lenticular-hole",
+      "title": "Lenticular hole",
+      "status": "missing",
+      "tags": ["lenticular-hole"],
+      "problems": 1
+    },
+    {
+      "path": "domain/lights-out-puzzle",
+      "title": "Lights Out (puzzle)",
+      "status": "missing",
+      "tags": ["lights-out-puzzle"],
+      "problems": 1
     },
     {
       "path": "domain/linear-congruence-theorem",
       "title": "Linear congruence theorem",
       "status": "missing",
       "tags": ["linear-congruence-theorem"],
-      "problems": 1
+      "problems": 5
     },
     {
       "path": "domain/linear-feedback-shift-register",
       "title": "Linear-feedback shift register",
       "status": "missing",
       "tags": ["linear-feedback-shift-register"],
+      "problems": 2
+    },
+    {
+      "path": "domain/liouville-function",
+      "title": "Liouville function",
+      "status": "missing",
+      "tags": ["liouville-function"],
+      "problems": 1
+    },
+    {
+      "path": "domain/longest-increasing-subsequence",
+      "title": "Longest increasing subsequence",
+      "status": "missing",
+      "tags": ["longest-increasing-subsequence"],
+      "problems": 1
+    },
+    {
+      "path": "domain/look-and-say-sequence",
+      "title": "Look-and-say sequence",
+      "status": "missing",
+      "tags": ["look-and-say-sequence"],
       "problems": 1
     },
     {
@@ -929,7 +1363,7 @@
       "title": "Lucas's theorem",
       "status": "missing",
       "tags": ["lucass-theorem"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/lychrel-number",
@@ -943,7 +1377,7 @@
       "title": "Markov chain",
       "status": "missing",
       "tags": ["markov-chain"],
-      "problems": 5
+      "problems": 22
     },
     {
       "path": "domain/mastermind-board-game",
@@ -953,11 +1387,25 @@
       "problems": 1
     },
     {
+      "path": "domain/median",
+      "title": "Median",
+      "status": "missing",
+      "tags": ["median"],
+      "problems": 2
+    },
+    {
       "path": "domain/meissel-lehmer-algorithm",
       "title": "Meissel\u2013Lehmer algorithm",
       "status": "missing",
       "tags": ["meissel-lehmer-algorithm"],
       "problems": 2
+    },
+    {
+      "path": "domain/mex-function-set-theory",
+      "title": "Mex (minimum excludant)",
+      "status": "missing",
+      "tags": ["mex-function-set-theory"],
+      "problems": 1
     },
     {
       "path": "domain/minimum-spanning-tree",
@@ -971,48 +1419,69 @@
       "title": "M\u00f6bius function",
       "status": "missing",
       "tags": ["mobius-function"],
-      "problems": 0
+      "problems": 1
     },
     {
       "path": "domain/modular-arithmetic",
       "title": "Modular arithmetic",
       "status": "missing",
       "tags": ["modular-arithmetic"],
-      "problems": 40
+      "problems": 239
     },
     {
       "path": "domain/modular-multiplicative-inverse",
       "title": "Modular multiplicative inverse",
       "status": "missing",
       "tags": ["modular-multiplicative-inverse"],
-      "problems": 3
+      "problems": 8
+    },
+    {
+      "path": "domain/moving-sofa-problem",
+      "title": "Moving sofa problem",
+      "status": "missing",
+      "tags": ["moving-sofa-problem"],
+      "problems": 1
     },
     {
       "path": "domain/multiplicative-function",
       "title": "Multiplicative function",
       "status": "missing",
       "tags": ["multiplicative-function"],
-      "problems": 15
+      "problems": 36
     },
     {
       "path": "domain/multiplicative-order",
       "title": "Multiplicative order",
       "status": "missing",
       "tags": ["multiplicative-order"],
-      "problems": 5
+      "problems": 11
+    },
+    {
+      "path": "domain/necklace-counting",
+      "title": "Necklace (combinatorics)",
+      "status": "missing",
+      "tags": ["necklace-counting"],
+      "problems": 1
     },
     {
       "path": "domain/nimber",
       "title": "Nimber",
       "status": "missing",
       "tags": ["nimber"],
-      "problems": 1
+      "problems": 20
     },
     {
       "path": "domain/nonlinear-feedback-shift-register",
       "title": "Nonlinear-feedback shift register",
       "status": "missing",
       "tags": ["nonlinear-feedback-shift-register"],
+      "problems": 2
+    },
+    {
+      "path": "domain/nontransitive-dice",
+      "title": "Nontransitive dice",
+      "status": "missing",
+      "tags": ["nontransitive-dice"],
       "problems": 1
     },
     {
@@ -1027,14 +1496,14 @@
       "title": "NP-hardness",
       "status": "missing",
       "tags": ["np-hardness"],
-      "problems": 2
+      "problems": 3
     },
     {
       "path": "domain/number-theory",
       "title": "Number theory",
       "status": "missing",
       "tags": ["number-theory"],
-      "problems": 18
+      "problems": 145
     },
     {
       "path": "domain/oeis-a000119",
@@ -1048,7 +1517,7 @@
       "title": "Optimal substructure",
       "status": "missing",
       "tags": ["optimal-substructure"],
-      "problems": 7
+      "problems": 9
     },
     {
       "path": "domain/overlapping-subproblems",
@@ -1062,98 +1531,112 @@
       "title": "P-adic valuation",
       "status": "missing",
       "tags": ["p-adic-valuation"],
-      "problems": 6
+      "problems": 10
     },
     {
       "path": "domain/palindrome",
       "title": "Palindrome",
       "status": "missing",
       "tags": ["palindrome"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/palindromic-number",
       "title": "Palindromic number",
       "status": "missing",
       "tags": ["palindromic-number"],
-      "problems": 5
+      "problems": 8
     },
     {
       "path": "domain/pandigital-number",
       "title": "Pandigital number",
       "status": "missing",
       "tags": ["pandigital-number"],
-      "problems": 8
+      "problems": 11
     },
     {
       "path": "domain/parity-mathematics",
       "title": "Parity (mathematics)",
       "status": "missing",
       "tags": ["parity-mathematics"],
-      "problems": 12
+      "problems": 23
     },
     {
       "path": "domain/partition-number-theory",
       "title": "Partition (number theory)",
       "status": "missing",
       "tags": ["partition-number-theory"],
-      "problems": 6
+      "problems": 17
+    },
+    {
+      "path": "domain/partizan-game",
+      "title": "Partizan game",
+      "status": "missing",
+      "tags": ["partizan-game"],
+      "problems": 1
     },
     {
       "path": "domain/pentagonal-number-theorem",
       "title": "Pentagonal number theorem",
       "status": "missing",
       "tags": ["pentagonal-number-theorem"],
-      "problems": 3
+      "problems": 4
+    },
+    {
+      "path": "domain/perfect-cube",
+      "title": "Perfect cube",
+      "status": "missing",
+      "tags": ["perfect-cube"],
+      "problems": 1
     },
     {
       "path": "domain/perfect-number",
       "title": "Perfect number",
       "status": "missing",
       "tags": ["perfect-number"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/periodic-continued-fraction",
       "title": "Periodic continued fraction",
       "status": "missing",
       "tags": ["periodic-continued-fraction"],
-      "problems": 3
+      "problems": 4
     },
     {
       "path": "domain/periodic-point",
       "title": "Periodic point",
       "status": "missing",
       "tags": ["periodic-point"],
-      "problems": 1
+      "problems": 7
     },
     {
       "path": "domain/periodic-sequence",
       "title": "Periodic sequence",
       "status": "missing",
       "tags": ["periodic-sequence"],
-      "problems": 4
+      "problems": 14
     },
     {
       "path": "domain/permutation",
       "title": "Permutation",
       "status": "missing",
       "tags": ["permutation"],
-      "problems": 14
+      "problems": 59
     },
     {
       "path": "domain/pi",
       "title": "Pi",
       "status": "missing",
       "tags": ["pi"],
-      "problems": 1
+      "problems": 4
     },
     {
       "path": "domain/picks-theorem",
       "title": "Pick's theorem",
       "status": "missing",
       "tags": ["picks-theorem"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/pigeonhole-principle",
@@ -1167,6 +1650,13 @@
       "title": "Pisano period",
       "status": "missing",
       "tags": ["pisano-period"],
+      "problems": 4
+    },
+    {
+      "path": "domain/planar-graph",
+      "title": "Planar graph",
+      "status": "missing",
+      "tags": ["planar-graph"],
       "problems": 1
     },
     {
@@ -1174,6 +1664,13 @@
       "title": "Polar coordinate system",
       "status": "missing",
       "tags": ["polar-coordinate-system"],
+      "problems": 4
+    },
+    {
+      "path": "domain/polygon-kernel",
+      "title": "Kernel of a polygon",
+      "status": "missing",
+      "tags": ["polygon-kernel"],
       "problems": 1
     },
     {
@@ -1181,7 +1678,7 @@
       "title": "Polynomial",
       "status": "missing",
       "tags": ["polynomial"],
-      "problems": 1
+      "problems": 16
     },
     {
       "path": "domain/polynomial-interpolation",
@@ -1191,25 +1688,32 @@
       "problems": 2
     },
     {
+      "path": "domain/polyomino",
+      "title": "Polyomino",
+      "status": "missing",
+      "tags": ["polyomino"],
+      "problems": 1
+    },
+    {
       "path": "domain/positional-notation",
       "title": "Positional notation",
       "status": "missing",
       "tags": ["positional-notation"],
-      "problems": 15
+      "problems": 53
     },
     {
       "path": "domain/power-of-two",
       "title": "Power of two",
       "status": "missing",
       "tags": ["power-of-two"],
-      "problems": 6
+      "problems": 16
     },
     {
       "path": "domain/practical-number",
       "title": "Practical number",
       "status": "missing",
       "tags": ["practical-number"],
-      "problems": 0
+      "problems": 1
     },
     {
       "path": "domain/prefix-code",
@@ -1223,35 +1727,35 @@
       "title": "Primality test",
       "status": "missing",
       "tags": ["primality-test"],
-      "problems": 5
+      "problems": 6
     },
     {
       "path": "domain/prime-counting-function",
       "title": "Prime-counting function",
       "status": "missing",
       "tags": ["prime-counting-function"],
-      "problems": 5
+      "problems": 12
     },
     {
       "path": "domain/prime-factor",
       "title": "Prime factor",
       "status": "missing",
       "tags": ["prime-factor"],
-      "problems": 2
+      "problems": 10
     },
     {
       "path": "domain/prime-factorization",
       "title": "Prime factorization",
       "status": "missing",
       "tags": ["prime-factorization"],
-      "problems": 18
+      "problems": 73
     },
     {
       "path": "domain/prime-number",
       "title": "Prime number",
       "status": "missing",
       "tags": ["prime-number"],
-      "problems": 43
+      "problems": 100
     },
     {
       "path": "domain/prime-number-theorem",
@@ -1265,7 +1769,7 @@
       "title": "Prime power",
       "status": "missing",
       "tags": ["prime-power"],
-      "problems": 3
+      "problems": 7
     },
     {
       "path": "domain/prime-proof-number",
@@ -1275,11 +1779,18 @@
       "problems": 1
     },
     {
+      "path": "domain/primitive-root",
+      "title": "Primitive root modulo n",
+      "status": "missing",
+      "tags": ["primitive-root"],
+      "problems": 1
+    },
+    {
       "path": "domain/probability-distribution",
       "title": "Probability distribution",
       "status": "missing",
       "tags": ["probability-distribution"],
-      "problems": 3
+      "problems": 40
     },
     {
       "path": "domain/product-sum-number",
@@ -1296,52 +1807,66 @@
       "problems": 1
     },
     {
+      "path": "domain/protein-folding",
+      "title": "Protein folding",
+      "status": "missing",
+      "tags": ["protein-folding"],
+      "problems": 1
+    },
+    {
       "path": "domain/pseudorandom-number-generator",
       "title": "Pseudorandom number generator",
       "status": "missing",
       "tags": ["pseudorandom-number-generator"],
-      "problems": 5
+      "problems": 19
     },
     {
       "path": "domain/pythagorean-theorem",
       "title": "Pythagorean theorem",
       "status": "missing",
       "tags": ["pythagorean-theorem"],
-      "problems": 3
+      "problems": 4
     },
     {
       "path": "domain/pythagorean-triple",
       "title": "Pythagorean triple",
       "status": "missing",
       "tags": ["pythagorean-triple"],
-      "problems": 8
+      "problems": 25
     },
     {
       "path": "domain/quadratic-equation",
       "title": "Quadratic equation",
       "status": "missing",
       "tags": ["quadratic-equation"],
-      "problems": 8
+      "problems": 14
     },
     {
       "path": "domain/quadratic-form",
       "title": "Quadratic form",
       "status": "missing",
       "tags": ["quadratic-form"],
-      "problems": 2
+      "problems": 12
     },
     {
       "path": "domain/quadratic-function",
       "title": "Quadratic function",
       "status": "missing",
       "tags": ["quadratic-function"],
-      "problems": 2
+      "problems": 5
     },
     {
       "path": "domain/quadratic-reciprocity",
       "title": "Quadratic reciprocity",
       "status": "missing",
       "tags": ["quadratic-reciprocity"],
+      "problems": 1
+    },
+    {
+      "path": "domain/quadtree",
+      "title": "Quadtree",
+      "status": "missing",
+      "tags": ["quadtree"],
       "problems": 1
     },
     {
@@ -1356,28 +1881,28 @@
       "title": "Random walk",
       "status": "missing",
       "tags": ["random-walk"],
-      "problems": 2
+      "problems": 19
     },
     {
       "path": "domain/rational-number",
       "title": "Rational number",
       "status": "missing",
       "tags": ["rational-number"],
-      "problems": 4
+      "problems": 13
     },
     {
       "path": "domain/recurrence-relation",
       "title": "Recurrence relation",
       "status": "missing",
       "tags": ["recurrence-relation"],
-      "problems": 24
+      "problems": 130
     },
     {
       "path": "domain/reflection-physics",
       "title": "Reflection (physics)",
       "status": "missing",
       "tags": ["reflection-physics"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/regular-number",
@@ -1391,14 +1916,14 @@
       "title": "Repeating decimal",
       "status": "missing",
       "tags": ["repeating-decimal"],
-      "problems": 3
+      "problems": 5
     },
     {
       "path": "domain/repunit",
       "title": "Repunit",
       "status": "missing",
       "tags": ["repunit"],
-      "problems": 7
+      "problems": 8
     },
     {
       "path": "domain/reversible-number",
@@ -1412,13 +1937,20 @@
       "title": "Roman numerals",
       "status": "missing",
       "tags": ["roman-numerals"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/root-of-unity",
       "title": "Root of unity",
       "status": "missing",
       "tags": ["root-of-unity"],
+      "problems": 2
+    },
+    {
+      "path": "domain/roulette-curve",
+      "title": "Roulette (curve)",
+      "status": "missing",
+      "tags": ["roulette-curve"],
       "problems": 1
     },
     {
@@ -1429,18 +1961,39 @@
       "problems": 1
     },
     {
+      "path": "domain/rubiks-cube-group",
+      "title": "Rubik's Cube group",
+      "status": "missing",
+      "tags": ["rubiks-cube-group"],
+      "problems": 1
+    },
+    {
+      "path": "domain/rudin-shapiro-sequence",
+      "title": "Rudin-Shapiro sequence",
+      "status": "missing",
+      "tags": ["rudin-shapiro-sequence"],
+      "problems": 1
+    },
+    {
+      "path": "domain/self-intersection",
+      "title": "Self-intersection",
+      "status": "missing",
+      "tags": ["self-intersection"],
+      "problems": 1
+    },
+    {
       "path": "domain/self-similarity",
       "title": "Self-similarity",
       "status": "missing",
       "tags": ["self-similarity"],
-      "problems": 3
+      "problems": 11
     },
     {
       "path": "domain/semiprime",
       "title": "Semiprime",
       "status": "missing",
       "tags": ["semiprime"],
-      "problems": 2
+      "problems": 3
     },
     {
       "path": "domain/series-and-parallel-circuits",
@@ -1454,6 +2007,13 @@
       "title": "Set (mathematics)",
       "status": "missing",
       "tags": ["set-mathematics"],
+      "problems": 7
+    },
+    {
+      "path": "domain/seven-segment-display",
+      "title": "Seven-segment display",
+      "status": "missing",
+      "tags": ["seven-segment-display"],
       "problems": 2
     },
     {
@@ -1461,21 +2021,21 @@
       "title": "Shortest path problem",
       "status": "missing",
       "tags": ["shortest-path-problem"],
-      "problems": 3
+      "problems": 8
     },
     {
       "path": "domain/sieve-theory",
       "title": "Sieve theory",
       "status": "missing",
       "tags": ["sieve-theory"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/similarity-geometry",
       "title": "Similarity (geometry)",
       "status": "missing",
       "tags": ["similarity-geometry"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/simplex",
@@ -1485,25 +2045,46 @@
       "problems": 1
     },
     {
+      "path": "domain/simpsons-paradox",
+      "title": "Simpson's paradox",
+      "status": "missing",
+      "tags": ["simpsons-paradox"],
+      "problems": 1
+    },
+    {
+      "path": "domain/sliding-block-puzzle",
+      "title": "Sliding block puzzle",
+      "status": "missing",
+      "tags": ["sliding-block-puzzle"],
+      "problems": 1
+    },
+    {
       "path": "domain/smooth-number",
       "title": "Smooth number",
       "status": "missing",
       "tags": ["smooth-number"],
-      "problems": 2
+      "problems": 8
+    },
+    {
+      "path": "domain/spanning-tree",
+      "title": "Spanning tree",
+      "status": "missing",
+      "tags": ["spanning-tree"],
+      "problems": 1
     },
     {
       "path": "domain/square-free-integer",
       "title": "Square-free integer",
       "status": "missing",
       "tags": ["square-free-integer"],
-      "problems": 5
+      "problems": 18
     },
     {
       "path": "domain/square-number",
       "title": "Square number",
       "status": "missing",
       "tags": ["square-number"],
-      "problems": 22
+      "problems": 43
     },
     {
       "path": "domain/square-pyramidal-number",
@@ -1520,17 +2101,45 @@
       "problems": 1
     },
     {
+      "path": "domain/standard-young-tableau",
+      "title": "Standard Young tableau",
+      "status": "missing",
+      "tags": ["standard-young-tableau"],
+      "problems": 1
+    },
+    {
+      "path": "domain/star-polygon",
+      "title": "Star polygon",
+      "status": "missing",
+      "tags": ["star-polygon"],
+      "problems": 2
+    },
+    {
       "path": "domain/state-computer-science",
       "title": "State (computer science)",
       "status": "missing",
       "tags": ["state-computer-science"],
-      "problems": 1
+      "problems": 6
     },
     {
       "path": "domain/stationary-distribution",
       "title": "Stationary distribution",
       "status": "missing",
       "tags": ["stationary-distribution"],
+      "problems": 2
+    },
+    {
+      "path": "domain/steiner-chain",
+      "title": "Steiner chain",
+      "status": "missing",
+      "tags": ["steiner-chain"],
+      "problems": 1
+    },
+    {
+      "path": "domain/steiner-inellipse",
+      "title": "Steiner inellipse",
+      "status": "missing",
+      "tags": ["steiner-inellipse"],
       "problems": 1
     },
     {
@@ -1545,7 +2154,7 @@
       "title": "Stern\u2013Brocot tree",
       "status": "missing",
       "tags": ["stern-brocot-tree"],
-      "problems": 2
+      "problems": 3
     },
     {
       "path": "domain/sterns-diatomic-sequence",
@@ -1562,11 +2171,25 @@
       "problems": 1
     },
     {
+      "path": "domain/structural-rigidity",
+      "title": "Structural rigidity",
+      "status": "missing",
+      "tags": ["structural-rigidity"],
+      "problems": 1
+    },
+    {
       "path": "domain/subset-sum-problem",
       "title": "Subset sum problem",
       "status": "missing",
       "tags": ["subset-sum-problem"],
-      "problems": 8
+      "problems": 14
+    },
+    {
+      "path": "domain/substring",
+      "title": "Substring",
+      "status": "missing",
+      "tags": ["substring"],
+      "problems": 1
     },
     {
       "path": "domain/sudoku",
@@ -1580,14 +2203,14 @@
       "title": "Sum of two squares theorem",
       "status": "missing",
       "tags": ["sum-of-two-squares-theorem"],
-      "problems": 4
+      "problems": 12
     },
     {
       "path": "domain/summation",
       "title": "Summation",
       "status": "missing",
       "tags": ["summation"],
-      "problems": 11
+      "problems": 93
     },
     {
       "path": "domain/summation-by-parts",
@@ -1601,21 +2224,21 @@
       "title": "Symmetry in mathematics",
       "status": "missing",
       "tags": ["symmetry-in-mathematics"],
-      "problems": 3
+      "problems": 11
     },
     {
       "path": "domain/taxicab-geometry",
       "title": "Taxicab geometry",
       "status": "missing",
       "tags": ["taxicab-geometry"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/tetration",
       "title": "Tetration",
       "status": "missing",
       "tags": ["tetration"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "domain/thaless-theorem",
@@ -1625,11 +2248,25 @@
       "problems": 1
     },
     {
+      "path": "domain/three-distance-theorem",
+      "title": "Three-distance theorem",
+      "status": "missing",
+      "tags": ["three-distance-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/thue-morse-sequence",
+      "title": "Thue-Morse sequence",
+      "status": "missing",
+      "tags": ["thue-morse-sequence"],
+      "problems": 2
+    },
+    {
       "path": "domain/tiling",
       "title": "Tiling",
       "status": "missing",
       "tags": ["tiling"],
-      "problems": 7
+      "problems": 19
     },
     {
       "path": "domain/toads-and-frogs",
@@ -1646,6 +2283,13 @@
       "problems": 1
     },
     {
+      "path": "domain/tower-of-hanoi",
+      "title": "Tower of Hanoi",
+      "status": "missing",
+      "tags": ["tower-of-hanoi"],
+      "problems": 1
+    },
+    {
       "path": "domain/trace-linear-algebra",
       "title": "Trace (linear algebra)",
       "status": "missing",
@@ -1657,34 +2301,48 @@
       "title": "Transfer matrix method",
       "status": "missing",
       "tags": ["transfer-matrix-method"],
-      "problems": 2
+      "problems": 6
     },
     {
       "path": "domain/tree-graph-theory",
       "title": "Tree (graph theory)",
       "status": "missing",
       "tags": ["tree-graph-theory"],
-      "problems": 1
+      "problems": 5
     },
     {
       "path": "domain/triangular-number",
       "title": "Triangular number",
       "status": "missing",
       "tags": ["triangular-number"],
-      "problems": 10
+      "problems": 20
     },
     {
       "path": "domain/triangular-tiling",
       "title": "Triangular tiling",
       "status": "missing",
       "tags": ["triangular-tiling"],
-      "problems": 4
+      "problems": 8
     },
     {
       "path": "domain/tribonacci-number",
       "title": "Tribonacci number",
       "status": "missing",
       "tags": ["tribonacci-number"],
+      "problems": 4
+    },
+    {
+      "path": "domain/trigonometric-functions",
+      "title": "Trigonometric functions",
+      "status": "missing",
+      "tags": ["trigonometric-functions"],
+      "problems": 1
+    },
+    {
+      "path": "domain/trigonometric-parametric-curve",
+      "title": "Lissajous curve",
+      "status": "missing",
+      "tags": ["trigonometric-parametric-curve"],
       "problems": 1
     },
     {
@@ -1709,6 +2367,13 @@
       "problems": 2
     },
     {
+      "path": "domain/turans-theorem",
+      "title": "Tur\u00e1n's theorem",
+      "status": "missing",
+      "tags": ["turans-theorem"],
+      "problems": 1
+    },
+    {
       "path": "domain/ulam-number",
       "title": "Ulam number",
       "status": "missing",
@@ -1727,13 +2392,20 @@
       "title": "Unitary divisor",
       "status": "missing",
       "tags": ["unitary-divisor"],
-      "problems": 1
+      "problems": 2
     },
     {
       "path": "domain/vandermonde-matrix",
       "title": "Vandermonde matrix",
       "status": "missing",
       "tags": ["vandermonde-matrix"],
+      "problems": 1
+    },
+    {
+      "path": "domain/variance",
+      "title": "Variance",
+      "status": "missing",
+      "tags": ["variance"],
       "problems": 1
     },
     {
@@ -1765,11 +2437,18 @@
       "problems": 2
     },
     {
+      "path": "domain/young-diagram",
+      "title": "Young diagram",
+      "status": "missing",
+      "tags": ["young-diagram"],
+      "problems": 1
+    },
+    {
       "path": "domain/zeckendorfs-theorem",
       "title": "Zeckendorf's theorem",
       "status": "missing",
       "tags": ["zeckendorfs-theorem"],
-      "problems": 1
+      "problems": 3
     },
     {
       "path": "takeaway/algorithm-beats-language",

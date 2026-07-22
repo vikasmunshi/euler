@@ -13,7 +13,16 @@
       "reference": "https://en.wikipedia.org/wiki/15_puzzle",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0313"]
+      "refs": ["p0244", "p0313"]
+    },
+    {
+      "slug": "3-smooth-numbers-not-in-list",
+      "facet": "domain",
+      "name": "3-smooth number",
+      "reference": "https://en.wikipedia.org/wiki/Smooth_number",
+      "additional-references": [],
+      "summary": "An integer whose prime factors are all at most 3.",
+      "refs": ["p0462"]
     },
     {
       "slug": "abundant-number",
@@ -23,6 +32,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0023"]
+    },
+    {
+      "slug": "ackermann-function",
+      "facet": "domain",
+      "name": "Ackermann function",
+      "reference": "https://en.wikipedia.org/wiki/Ackermann_function",
+      "additional-references": [],
+      "summary": "A rapidly growing recursive function that is a classic example of a computable but not primitive recursive function.",
+      "refs": ["p0282", "p0910"]
     },
     {
       "slug": "acute-and-obtuse-triangles",
@@ -49,7 +67,16 @@
       "reference": "https://en.wikipedia.org/wiki/Adjacency_(graph_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0189"]
+      "refs": ["p0189", "p0393", "p0701", "p0984", "p0996"]
+    },
+    {
+      "slug": "algebraic-number-conjugates",
+      "facet": "domain",
+      "name": "Algebraic conjugate",
+      "reference": "https://en.wikipedia.org/wiki/Conjugate_element_(field_theory)",
+      "additional-references": [],
+      "summary": "Pairing an algebraic number with its conjugate so their powers sum to an integer, forcing the fractional part toward 0 or 1.",
+      "refs": ["p0318"]
     },
     {
       "slug": "amicable-numbers",
@@ -59,6 +86,33 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0021", "p0095"]
+    },
+    {
+      "slug": "angle-bisector",
+      "facet": "domain",
+      "name": "Angle bisector",
+      "reference": "https://en.wikipedia.org/wiki/Bisection",
+      "additional-references": ["https://en.wikipedia.org/wiki/Bisection#Angle_bisector"],
+      "summary": "A line dividing an angle into two equal parts, used here to construct points cutting a triangle's sides.",
+      "refs": ["p0257"]
+    },
+    {
+      "slug": "angular-bisector-and-tangent",
+      "facet": "domain",
+      "name": "Angle bisector and tangent line to circumcircle",
+      "reference": "https://en.wikipedia.org/wiki/Angle_bisector_of_a_triangle",
+      "additional-references": [],
+      "summary": "Geometric configuration involving the angle bisector of a triangle and the tangent line to its circumscribed circle.",
+      "refs": ["p0296"]
+    },
+    {
+      "slug": "angular-bisector-tangent",
+      "facet": "domain",
+      "name": "Angular bisector and tangent to circumcircle",
+      "reference": "https://en.wikipedia.org/wiki/Angle_bisector_theorem",
+      "additional-references": [],
+      "summary": "Geometric configuration involving the angle bisector of a triangle and the tangent line to its circumscribed circle.",
+      "refs": ["p0962"]
     },
     {
       "slug": "april-fools-day-request-for-comments",
@@ -85,7 +139,7 @@
       "reference": "https://en.wikipedia.org/wiki/Arithmetic_progression",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001", "p0028", "p0049", "p0058", "p0135", "p0136", "p0198", "p0720"]
+      "refs": ["p0001", "p0028", "p0049", "p0058", "p0135", "p0136", "p0198", "p0235", "p0319", "p0720", "p0828"]
     },
     {
       "slug": "assignment-problem",
@@ -95,6 +149,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0345"]
+    },
+    {
+      "slug": "automorphic-number",
+      "facet": "domain",
+      "name": "Automorphic number",
+      "reference": "https://en.wikipedia.org/wiki/Automorphic_number",
+      "additional-references": [],
+      "summary": "A number whose square ends in the same digits as the number itself, in a given base.",
+      "refs": ["p0284"]
     },
     {
       "slug": "banach-fixed-point-theorem",
@@ -115,13 +178,31 @@
       "refs": ["p0545"]
     },
     {
+      "slug": "bezier-curve",
+      "facet": "domain",
+      "name": "B\u00e9zier curve",
+      "reference": "https://en.wikipedia.org/wiki/B%C3%A9zier_curve",
+      "additional-references": [],
+      "summary": "A parametric curve defined by repeated linear interpolation of control points.",
+      "refs": ["p0363"]
+    },
+    {
+      "slug": "bi-unitary-divisor",
+      "facet": "domain",
+      "name": "Bi-unitary divisor",
+      "reference": "https://en.wikipedia.org/wiki/Unitary_divisor#Bi-unitary_divisors",
+      "additional-references": [],
+      "summary": "A divisor d of n whose only unitary divisor in common with n/d is 1.",
+      "refs": ["p0861"]
+    },
+    {
       "slug": "bijection",
       "facet": "domain",
       "name": "Bijection",
       "reference": "https://en.wikipedia.org/wiki/Bijection",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0098", "p0175"]
+      "refs": ["p0098", "p0175", "p0359", "p0480", "p0674"]
     },
     {
       "slug": "binary-logarithm",
@@ -139,7 +220,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0036", "p0169", "p0175", "p0872", "p0899", "p0918"]
+      "refs": ["p0036", "p0169", "p0175", "p0265", "p0323", "p0361", "p0384", "p0391", "p0409", "p0463", "p0486", "p0505", "p0508", "p0538", "p0539", "p0626", "p0689", "p0703", "p0711", "p0734", "p0759", "p0760", "p0767", "p0774", "p0782", "p0806", "p0810", "p0811", "p0813", "p0869", "p0872", "p0877", "p0878", "p0882", "p0890", "p0899", "p0912", "p0918", "p0945", "p0948", "p0949", "p1006"]
     },
     {
       "slug": "binary-quadratic-form",
@@ -148,7 +229,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_quadratic_form",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0229"]
+      "refs": ["p0229", "p0287", "p0354", "p0422", "p0586", "p0647", "p0769", "p0804", "p0833", "p0937"]
     },
     {
       "slug": "binary-tree",
@@ -157,7 +238,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binary_tree",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0219"]
+      "refs": ["p0219", "p0400", "p0406", "p0505", "p0674", "p0829", "p0887", "p1007"]
     },
     {
       "slug": "binomial-coefficient",
@@ -166,7 +247,7 @@
       "reference": "https://en.wikipedia.org/wiki/Binomial_coefficient",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0015", "p0053", "p0085", "p0090", "p0101", "p0106", "p0113", "p0147", "p0148", "p0158", "p0172", "p0194", "p0203", "p0231", "p0493", "p0650", "p0704", "p0788", "p0862", "p0885"]
+      "refs": ["p0015", "p0053", "p0085", "p0090", "p0101", "p0106", "p0113", "p0147", "p0148", "p0158", "p0172", "p0194", "p0203", "p0231", "p0242", "p0267", "p0322", "p0365", "p0408", "p0445", "p0468", "p0493", "p0498", "p0567", "p0568", "p0588", "p0650", "p0704", "p0739", "p0788", "p0792", "p0830", "p0831", "p0862", "p0885", "p0951"]
     },
     {
       "slug": "bisection-method",
@@ -184,7 +265,7 @@
       "reference": "https://en.wikipedia.org/wiki/Blancmange_curve",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0226"]
+      "refs": ["p0226", "p0889"]
     },
     {
       "slug": "blum-blum-shub",
@@ -193,7 +274,25 @@
       "reference": "https://en.wikipedia.org/wiki/Blum_Blum_Shub",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0165"]
+      "refs": ["p0165", "p0238"]
+    },
+    {
+      "slug": "box-ball-system",
+      "facet": "domain",
+      "name": "Box-Ball System",
+      "reference": "https://en.wikipedia.org/wiki/Soliton_cellular_automaton",
+      "additional-references": [],
+      "summary": "A discrete integrable dynamical system where balls in boxes move according to a fixed rule, exhibiting soliton-like behavior.",
+      "refs": ["p0426"]
+    },
+    {
+      "slug": "brahmaguptas-formula",
+      "facet": "domain",
+      "name": "Brahmagupta's formula",
+      "reference": "https://en.wikipedia.org/wiki/Brahmagupta%27s_formula",
+      "additional-references": [],
+      "summary": "Gives the maximum possible area of a quadrilateral with given side lengths, achieved when it is cyclic.",
+      "refs": ["p0538", "p0681"]
     },
     {
       "slug": "broken-profile",
@@ -229,7 +328,7 @@
       "reference": "https://en.wikipedia.org/wiki/Catalan_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0106"]
+      "refs": ["p0106", "p0892", "p1007"]
     },
     {
       "slug": "cathetus",
@@ -265,7 +364,43 @@
       "reference": "https://en.wikipedia.org/wiki/Champernowne_constant",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0040"]
+      "refs": ["p0040", "p0305"]
+    },
+    {
+      "slug": "chromatic-polynomial",
+      "facet": "domain",
+      "name": "Chromatic polynomial",
+      "reference": "https://en.wikipedia.org/wiki/Chromatic_polynomial",
+      "additional-references": [],
+      "summary": "A polynomial counting the number of proper colourings of a graph as a function of the number of colours.",
+      "refs": ["p0544"]
+    },
+    {
+      "slug": "circumcircle-and-incircle",
+      "facet": "domain",
+      "name": "Circumscribed and inscribed circles",
+      "reference": "https://en.wikipedia.org/wiki/Incircle_and_excircles",
+      "additional-references": [],
+      "summary": "The circumcircle and incircle of a triangle-like figure, and the geometric relationships between their centres and radii.",
+      "refs": ["p0727"]
+    },
+    {
+      "slug": "circumcircle-orthocenter",
+      "facet": "domain",
+      "name": "Circumcenter and orthocenter of a triangle",
+      "reference": "https://en.wikipedia.org/wiki/Altitude_(triangle)",
+      "additional-references": [],
+      "summary": "The relationship between a triangle's circumscribed circle center and the intersection point of its altitudes.",
+      "refs": ["p0264"]
+    },
+    {
+      "slug": "circumradius-of-a-triangle",
+      "facet": "domain",
+      "name": "Circumradius of a triangle",
+      "reference": "https://en.wikipedia.org/wiki/Circumscribed_circle",
+      "additional-references": [],
+      "summary": "The radius of the unique circle passing through all three vertices of a triangle.",
+      "refs": ["p0562"]
     },
     {
       "slug": "class-number-number-theory",
@@ -274,7 +409,7 @@
       "reference": "https://en.wikipedia.org/wiki/Class_number_(number_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0229"]
+      "refs": ["p0229", "p0804"]
     },
     {
       "slug": "clique-problem",
@@ -295,13 +430,22 @@
       "refs": ["p0816"]
     },
     {
+      "slug": "coin-fountain",
+      "facet": "domain",
+      "name": "Coin fountain",
+      "reference": "https://oeis.org/A005169",
+      "additional-references": [],
+      "summary": "Arrangements of coins stacked in rows where each coin touches exactly two coins in the row below.",
+      "refs": ["p0519"]
+    },
+    {
       "slug": "collatz-conjecture",
       "facet": "domain",
       "name": "Collatz conjecture",
       "reference": "https://en.wikipedia.org/wiki/Collatz_conjecture",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0014", "p0277"]
+      "refs": ["p0014", "p0277", "p0494"]
     },
     {
       "slug": "combinatorial-game-theory",
@@ -310,7 +454,16 @@
       "reference": "https://en.wikipedia.org/wiki/Combinatorial_game_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0301", "p0692", "p0899", "p0961", "p1000"]
+      "refs": ["p0232", "p0260", "p0301", "p0306", "p0310", "p0325", "p0334", "p0335", "p0344", "p0366", "p0367", "p0391", "p0396", "p0400", "p0406", "p0409", "p0426", "p0444", "p0459", "p0477", "p0481", "p0488", "p0497", "p0509", "p0550", "p0560", "p0566", "p0629", "p0640", "p0644", "p0649", "p0653", "p0661", "p0664", "p0665", "p0666", "p0683", "p0690", "p0692", "p0711", "p0758", "p0761", "p0770", "p0787", "p0798", "p0806", "p0825", "p0847", "p0848", "p0855", "p0859", "p0860", "p0870", "p0882", "p0888", "p0895", "p0899", "p0900", "p0922", "p0923", "p0933", "p0939", "p0948", "p0949", "p0950", "p0953", "p0960", "p0961", "p0963", "p0976", "p0982", "p0986", "p1000"]
+    },
+    {
+      "slug": "combinatorial-geometry",
+      "facet": "domain",
+      "name": "Combinatorial geometry",
+      "reference": "https://en.wikipedia.org/wiki/Combinatorial_geometry",
+      "additional-references": [],
+      "summary": "Study of geometric arrangements of points, lines, and figures using combinatorial counting methods.",
+      "refs": ["p0994"]
     },
     {
       "slug": "combinatorial-optimization",
@@ -319,7 +472,7 @@
       "reference": "https://en.wikipedia.org/wiki/Combinatorial_optimization",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060", "p0081", "p0103", "p0185", "p0190", "p0222", "p0345"]
+      "refs": ["p0060", "p0081", "p0103", "p0185", "p0190", "p0222", "p0236", "p0252", "p0275", "p0300", "p0327", "p0328", "p0336", "p0339", "p0345", "p0352", "p0355", "p0406", "p0424", "p0434", "p0453", "p0470", "p0503", "p0534", "p0554", "p0594", "p0667", "p0726", "p0732", "p0750", "p0765", "p0775", "p0782", "p0789", "p0794", "p0821", "p0828", "p0855", "p0863", "p0867", "p0871", "p0874", "p0886", "p0887", "p0893", "p0957", "p0966", "p1002"]
     },
     {
       "slug": "combinatorics",
@@ -328,7 +481,16 @@
       "reference": "https://en.wikipedia.org/wiki/Combinatorics",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0011", "p0024", "p0030", "p0031", "p0032", "p0034", "p0051", "p0053", "p0054", "p0085", "p0090", "p0091", "p0092", "p0093", "p0105", "p0106", "p0109", "p0111", "p0113", "p0114", "p0115", "p0116", "p0117", "p0121", "p0126", "p0147", "p0155", "p0158", "p0162", "p0163", "p0164", "p0166", "p0171", "p0172", "p0173", "p0174", "p0178", "p0181", "p0191", "p0201", "p0204", "p0208", "p0215", "p0228", "p0259", "p0269", "p0679", "p0710", "p0725", "p0788", "p0862", "p0885", "p0944"]
+      "refs": ["p0011", "p0024", "p0030", "p0031", "p0032", "p0034", "p0051", "p0053", "p0054", "p0085", "p0090", "p0091", "p0092", "p0093", "p0105", "p0106", "p0109", "p0111", "p0113", "p0114", "p0115", "p0116", "p0117", "p0121", "p0126", "p0147", "p0155", "p0158", "p0162", "p0163", "p0164", "p0166", "p0171", "p0172", "p0173", "p0174", "p0178", "p0181", "p0191", "p0201", "p0204", "p0208", "p0215", "p0228", "p0237", "p0239", "p0240", "p0242", "p0244", "p0247", "p0249", "p0253", "p0256", "p0259", "p0265", "p0269", "p0270", "p0275", "p0276", "p0281", "p0289", "p0292", "p0294", "p0307", "p0319", "p0322", "p0324", "p0331", "p0333", "p0338", "p0344", "p0350", "p0361", "p0362", "p0364", "p0369", "p0371", "p0376", "p0377", "p0378", "p0380", "p0382", "p0386", "p0393", "p0398", "p0409", "p0412", "p0413", "p0415", "p0416", "p0423", "p0426", "p0427", "p0430", "p0434", "p0438", "p0452", "p0453", "p0456", "p0458", "p0462", "p0465", "p0466", "p0469", "p0472", "p0475", "p0480", "p0483", "p0486", "p0490", "p0491", "p0494", "p0495", "p0502", "p0511", "p0519", "p0520", "p0522", "p0523", "p0524", "p0528", "p0529", "p0534", "p0537", "p0544", "p0553", "p0557", "p0559", "p0564", "p0572", "p0573", "p0577", "p0579", "p0584", "p0590", "p0594", "p0595", "p0597", "p0598", "p0599", "p0600", "p0602", "p0606", "p0612", "p0619", "p0623", "p0626", "p0628", "p0630", "p0631", "p0635", "p0636", "p0638", "p0645", "p0651", "p0654", "p0657", "p0658", "p0662", "p0669", "p0670", "p0671", "p0677", "p0679", "p0682", "p0685", "p0687", "p0688", "p0690", "p0696", "p0698", "p0701", "p0705", "p0706", "p0707", "p0709", "p0710", "p0713", "p0716", "p0724", "p0725", "p0726", "p0728", "p0733", "p0734", "p0736", "p0738", "p0740", "p0741", "p0744", "p0746", "p0747", "p0756", "p0762", "p0763", "p0766", "p0767", "p0768", "p0774", "p0778", "p0780", "p0781", "p0782", "p0783", "p0786", "p0788", "p0791", "p0796", "p0798", "p0807", "p0814", "p0815", "p0818", "p0819", "p0824", "p0828", "p0837", "p0842", "p0847", "p0848", "p0849", "p0851", "p0856", "p0857", "p0858", "p0860", "p0862", "p0865", "p0866", "p0867", "p0873", "p0878", "p0879", "p0885", "p0886", "p0887", "p0888", "p0891", "p0892", "p0895", "p0896", "p0902", "p0903", "p0906", "p0907", "p0908", "p0913", "p0916", "p0922", "p0923", "p0925", "p0927", "p0928", "p0930", "p0936", "p0941", "p0944", "p0948", "p0949", "p0950", "p0951", "p0954", "p0957", "p0960", "p0964", "p0968", "p0973", "p0976", "p0977", "p0979", "p0981", "p0984", "p0987", "p0988", "p0990", "p0992", "p0993", "p0994", "p0996", "p0997", "p1001", "p1003", "p1004", "p1005", "p1006", "p1007"]
+    },
+    {
+      "slug": "combinatory-logic",
+      "facet": "domain",
+      "name": "Combinatory logic",
+      "reference": "https://en.wikipedia.org/wiki/Combinatory_logic",
+      "additional-references": [],
+      "summary": "A formal system of combinators and rewriting rules (like the A, Z, S symbols here) used to express computation without variables.",
+      "refs": ["p0910"]
     },
     {
       "slug": "common-logarithm",
@@ -355,7 +517,7 @@
       "reference": "https://en.wikipedia.org/wiki/Component_(graph_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0186"]
+      "refs": ["p0186", "p0553", "p0701"]
     },
     {
       "slug": "composite-number",
@@ -364,7 +526,7 @@
       "reference": "https://en.wikipedia.org/wiki/Composite_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0046", "p0130", "p0159"]
+      "refs": ["p0046", "p0130", "p0159", "p0245", "p0467"]
     },
     {
       "slug": "composition-combinatorics",
@@ -373,7 +535,7 @@
       "reference": "https://en.wikipedia.org/wiki/Composition_(combinatorics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0710", "p0719", "p0845", "p0862"]
+      "refs": ["p0398", "p0502", "p0606", "p0710", "p0719", "p0845", "p0862", "p0929"]
     },
     {
       "slug": "computational-geometry",
@@ -382,7 +544,7 @@
       "reference": "https://en.wikipedia.org/wiki/Computational_geometry",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0102", "p0165", "p0184", "p0199", "p0212", "p0226", "p0587"]
+      "refs": ["p0102", "p0165", "p0184", "p0199", "p0212", "p0226", "p0246", "p0252", "p0262", "p0270", "p0287", "p0292", "p0314", "p0317", "p0392", "p0397", "p0415", "p0431", "p0449", "p0453", "p0456", "p0460", "p0476", "p0514", "p0525", "p0547", "p0562", "p0569", "p0587", "p0604", "p0607", "p0630", "p0667", "p0695", "p0702", "p0742", "p0786", "p0807", "p0842", "p0879", "p0897", "p0957", "p0966", "p0972", "p0983", "p0994", "p0998"]
     },
     {
       "slug": "concave-function",
@@ -394,13 +556,31 @@
       "refs": ["p0183", "p0190", "p0222"]
     },
     {
+      "slug": "condorcet-paradox",
+      "facet": "domain",
+      "name": "Condorcet paradox",
+      "reference": "https://en.wikipedia.org/wiki/Condorcet_paradox",
+      "additional-references": [],
+      "summary": "The phenomenon where collective pairwise preferences among voters can be cyclic, preventing a clear group choice even when individual preferences are transitive.",
+      "refs": ["p0906"]
+    },
+    {
       "slug": "consecutive-integers",
       "facet": "domain",
       "name": "Consecutive integers",
       "reference": "https://en.wikipedia.org/wiki/Integer_sequence",
       "additional-references": [],
       "summary": "A run of successive whole numbers, each required to satisfy some shared property.",
-      "refs": ["p0047", "p0164"]
+      "refs": ["p0047", "p0164", "p0374", "p0526", "p0835"]
+    },
+    {
+      "slug": "constraint-satisfaction",
+      "facet": "domain",
+      "name": "Constraint satisfaction problem",
+      "reference": "https://en.wikipedia.org/wiki/Constraint_satisfaction_problem",
+      "additional-references": [],
+      "summary": "A problem defined by variables subject to constraints that must all be simultaneously satisfied, as in Kakuro.",
+      "refs": ["p0424"]
     },
     {
       "slug": "continued-fraction",
@@ -409,7 +589,7 @@
       "reference": "https://en.wikipedia.org/wiki/Continued_fraction",
       "additional-references": ["https://en.wikipedia.org/wiki/Continued_fraction#Some_useful_theorems", "https://en.wikipedia.org/wiki/Continued_fraction#Convergents", "https://en.wikipedia.org/wiki/Continued_fraction#Semiconvergents"],
       "summary": "",
-      "refs": ["p0057", "p0064", "p0065", "p0066", "p0175", "p0192"]
+      "refs": ["p0057", "p0064", "p0065", "p0066", "p0175", "p0192", "p0325", "p0591", "p0656", "p0911", "p0946", "p0958"]
     },
     {
       "slug": "contraction-mapping",
@@ -427,7 +607,34 @@
       "reference": "https://en.wikipedia.org/wiki/Convergent_(continued_fraction)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0057", "p0192"]
+      "refs": ["p0057", "p0192", "p0946"]
+    },
+    {
+      "slug": "convex-function",
+      "facet": "domain",
+      "name": "Convex function",
+      "reference": "https://en.wikipedia.org/wiki/Convex_function",
+      "additional-references": [],
+      "summary": "A function whose graph lies below the line segment between any two of its points, key to bounding lattice-point counts along it.",
+      "refs": ["p0604"]
+    },
+    {
+      "slug": "convex-hull",
+      "facet": "domain",
+      "name": "Convex hull",
+      "reference": "https://en.wikipedia.org/wiki/Convex_hull",
+      "additional-references": [],
+      "summary": "The subset of points visible from a given vantage point along a skyline forms an upper convex hull of peak coordinates.",
+      "refs": ["p0569"]
+    },
+    {
+      "slug": "convex-polygon",
+      "facet": "domain",
+      "name": "Convex polygon",
+      "reference": "https://en.wikipedia.org/wiki/Convex_polygon",
+      "additional-references": [],
+      "summary": "A polygon whose interior angles are all less than 180 degrees, relevant to maximizing area given fixed side lengths.",
+      "refs": ["p0564"]
     },
     {
       "slug": "coprime-integers",
@@ -436,7 +643,7 @@
       "reference": "https://en.wikipedia.org/wiki/Coprime_integers",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003", "p0012", "p0033", "p0071", "p0072", "p0073", "p0127", "p0141", "p0157", "p0202", "p0420", "p0694", "p0834", "p0932"]
+      "refs": ["p0003", "p0012", "p0033", "p0071", "p0072", "p0073", "p0127", "p0141", "p0157", "p0202", "p0251", "p0274", "p0278", "p0351", "p0355", "p0388", "p0420", "p0441", "p0451", "p0540", "p0560", "p0574", "p0605", "p0643", "p0652", "p0694", "p0718", "p0727", "p0730", "p0748", "p0754", "p0758", "p0764", "p0769", "p0773", "p0777", "p0784", "p0785", "p0787", "p0805", "p0834", "p0838", "p0841", "p0886", "p0932", "p0958", "p0975", "p0988"]
     },
     {
       "slug": "counting",
@@ -445,7 +652,25 @@
       "reference": "https://en.wikipedia.org/wiki/Counting",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0109", "p0112", "p0166", "p0173", "p0191", "p0201", "p0679", "p0800"]
+      "refs": ["p0109", "p0112", "p0166", "p0173", "p0191", "p0201", "p0240", "p0242", "p0275", "p0281", "p0309", "p0311", "p0364", "p0369", "p0370", "p0376", "p0378", "p0397", "p0412", "p0415", "p0428", "p0465", "p0466", "p0475", "p0513", "p0563", "p0572", "p0578", "p0579", "p0585", "p0586", "p0600", "p0601", "p0612", "p0620", "p0623", "p0627", "p0634", "p0651", "p0652", "p0657", "p0678", "p0679", "p0696", "p0726", "p0733", "p0740", "p0741", "p0746", "p0762", "p0771", "p0780", "p0800", "p0814", "p0815", "p0818", "p0824", "p0837", "p0849", "p0864", "p0878", "p0879", "p0883", "p0891", "p0895", "p0907", "p0922", "p0928", "p0963", "p0972", "p0987", "p0997", "p1001"]
+    },
+    {
+      "slug": "coupon-collector-problem",
+      "facet": "domain",
+      "name": "Coupon collector's problem",
+      "reference": "https://en.wikipedia.org/wiki/Coupon_collector%27s_problem",
+      "additional-references": [],
+      "summary": "The classic problem of determining the expected number of random draws needed to collect every distinct item in a set.",
+      "refs": ["p0796"]
+    },
+    {
+      "slug": "cribbage",
+      "facet": "domain",
+      "name": "Cribbage",
+      "reference": "https://en.wikipedia.org/wiki/Cribbage",
+      "additional-references": [],
+      "summary": "A card game whose scoring rules (pairs, runs, fifteens) define the combinatorial counting problem.",
+      "refs": ["p0928"]
     },
     {
       "slug": "cuban-prime",
@@ -463,7 +688,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cycle_graph",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0061", "p0068", "p0209"]
+      "refs": ["p0061", "p0068", "p0209", "p0673", "p0781", "p0814", "p0824", "p0843", "p0846", "p0857"]
     },
     {
       "slug": "cyclic-group",
@@ -472,7 +697,7 @@
       "reference": "https://en.wikipedia.org/wiki/Cyclic_group",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0182"]
+      "refs": ["p0182", "p0272", "p0281", "p0483", "p0622", "p0651", "p0902", "p0903"]
     },
     {
       "slug": "cyclic-number",
@@ -481,7 +706,16 @@
       "reference": "https://en.wikipedia.org/wiki/Cyclic_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0062"]
+      "refs": ["p0062", "p0358"]
+    },
+    {
+      "slug": "cyclic-polygon",
+      "facet": "domain",
+      "name": "Cyclic polygon",
+      "reference": "https://en.wikipedia.org/wiki/Cyclic_polygon",
+      "additional-references": [],
+      "summary": "A polygon whose vertices lie on a common circle, which maximizes area for a given multiset of side lengths.",
+      "refs": ["p0564"]
     },
     {
       "slug": "cyclotomic-polynomial",
@@ -490,7 +724,16 @@
       "reference": "https://en.wikipedia.org/wiki/Cyclotomic_polynomial",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0208"]
+      "refs": ["p0208", "p0271", "p0797", "p0880", "p0995"]
+    },
+    {
+      "slug": "de-bruijn-sequence",
+      "facet": "domain",
+      "name": "De Bruijn sequence",
+      "reference": "https://en.wikipedia.org/wiki/De_Bruijn_sequence",
+      "additional-references": [],
+      "summary": "A cyclic sequence of symbols in which every possible length-N subsequence appears exactly once.",
+      "refs": ["p0265", "p0941"]
     },
     {
       "slug": "difference-of-two-squares",
@@ -499,7 +742,7 @@
       "reference": "https://en.wikipedia.org/wiki/Difference_of_two_squares",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0131", "p0174", "p0176"]
+      "refs": ["p0131", "p0174", "p0176", "p0291"]
     },
     {
       "slug": "digit-counting-function",
@@ -508,7 +751,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit-counting_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0025", "p0040", "p0057", "p0063", "p0156"]
+      "refs": ["p0025", "p0040", "p0057", "p0063", "p0156", "p0255", "p0305", "p0368", "p0413", "p0419", "p0731", "p0990"]
     },
     {
       "slug": "digit-sum",
@@ -517,7 +760,7 @@
       "reference": "https://en.wikipedia.org/wiki/Digit_sum",
       "additional-references": ["https://en.wikipedia.org/wiki/Digit_sum#Digital_root"],
       "summary": "",
-      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0051", "p0056", "p0065", "p0080", "p0092", "p0112", "p0119", "p0159", "p0164", "p0171", "p0217", "p0387", "p0719", "p0725", "p0788", "p0845", "p0974"]
+      "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0051", "p0056", "p0065", "p0080", "p0092", "p0112", "p0119", "p0159", "p0164", "p0171", "p0217", "p0230", "p0238", "p0254", "p0284", "p0290", "p0294", "p0303", "p0315", "p0358", "p0377", "p0387", "p0391", "p0442", "p0467", "p0474", "p0506", "p0508", "p0520", "p0529", "p0538", "p0551", "p0612", "p0637", "p0676", "p0684", "p0685", "p0698", "p0705", "p0706", "p0711", "p0714", "p0719", "p0725", "p0749", "p0776", "p0778", "p0788", "p0805", "p0817", "p0845", "p0912", "p0924", "p0925", "p0954", "p0974", "p1004"]
     },
     {
       "slug": "diophantine-approximation",
@@ -526,7 +769,7 @@
       "reference": "https://en.wikipedia.org/wiki/Diophantine_approximation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0192", "p0198"]
+      "refs": ["p0192", "p0198", "p0318", "p0542", "p0566", "p0576", "p0591", "p0771", "p0889", "p0904"]
     },
     {
       "slug": "diophantine-equation",
@@ -535,7 +778,7 @@
       "reference": "https://en.wikipedia.org/wiki/Diophantine_equation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0009", "p0066", "p0094", "p0100", "p0108", "p0110", "p0131", "p0135", "p0136", "p0137", "p0138", "p0140", "p0142", "p0157", "p0168", "p0180", "p0221", "p0223", "p0313", "p0757", "p0932"]
+      "refs": ["p0009", "p0066", "p0094", "p0100", "p0108", "p0110", "p0131", "p0135", "p0136", "p0137", "p0138", "p0140", "p0142", "p0157", "p0168", "p0180", "p0221", "p0223", "p0236", "p0241", "p0251", "p0257", "p0261", "p0278", "p0279", "p0283", "p0291", "p0296", "p0299", "p0309", "p0311", "p0313", "p0348", "p0360", "p0390", "p0397", "p0404", "p0410", "p0418", "p0428", "p0438", "p0454", "p0455", "p0482", "p0496", "p0510", "p0513", "p0518", "p0528", "p0557", "p0581", "p0582", "p0583", "p0585", "p0620", "p0621", "p0647", "p0660", "p0674", "p0678", "p0681", "p0718", "p0730", "p0748", "p0753", "p0757", "p0764", "p0769", "p0784", "p0785", "p0791", "p0799", "p0833", "p0835", "p0844", "p0876", "p0877", "p0880", "p0919", "p0932", "p0945", "p0962", "p0988", "p0991", "p0998"]
     },
     {
       "slug": "directed-acyclic-graph",
@@ -544,7 +787,7 @@
       "reference": "https://en.wikipedia.org/wiki/Directed_acyclic_graph",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0067", "p0079", "p0081"]
+      "refs": ["p0067", "p0079", "p0081", "p0716"]
     },
     {
       "slug": "dirichlet-convolution",
@@ -562,7 +805,7 @@
       "reference": "https://en.wikipedia.org/wiki/Discrete_uniform_distribution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0205"]
+      "refs": ["p0205", "p0285", "p0298", "p0316", "p0371", "p0389", "p0398", "p0430", "p0436", "p0469", "p0503", "p0514", "p0527", "p0567", "p0568", "p0573", "p0584", "p0589", "p0640", "p0645", "p0695", "p0724", "p0744", "p0783", "p0819", "p0863", "p0901", "p0906", "p0964", "p0969", "p0970", "p0978", "p0982"]
     },
     {
       "slug": "divisibility-rule",
@@ -571,7 +814,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divisibility_rule",
       "additional-references": ["https://en.wikipedia.org/wiki/Divisibility_rule#Divisibility_by_3"],
       "summary": "",
-      "refs": ["p0004", "p0035", "p0041", "p0043", "p0139", "p0974"]
+      "refs": ["p0004", "p0035", "p0041", "p0043", "p0139", "p0234", "p0274", "p0303", "p0322", "p0333", "p0383", "p0402", "p0413", "p0486", "p0491", "p0601", "p0614", "p0635", "p0655", "p0706", "p0714", "p0954", "p0967", "p0974"]
     },
     {
       "slug": "divisor",
@@ -580,7 +823,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divisor",
       "additional-references": ["https://en.wikipedia.org/wiki/Divisor#Further_notions_and_facts", "https://en.wikipedia.org/wiki/Divisor#Definition"],
       "summary": "",
-      "refs": ["p0021", "p0168", "p0170", "p0225", "p0357", "p0545", "p0834", "p0944"]
+      "refs": ["p0021", "p0168", "p0170", "p0225", "p0256", "p0263", "p0266", "p0268", "p0320", "p0357", "p0359", "p0386", "p0417", "p0418", "p0421", "p0454", "p0462", "p0468", "p0474", "p0509", "p0511", "p0530", "p0541", "p0545", "p0548", "p0550", "p0561", "p0563", "p0580", "p0598", "p0601", "p0606", "p0608", "p0646", "p0705", "p0735", "p0797", "p0834", "p0881", "p0896", "p0927", "p0931", "p0944", "p0956", "p0995"]
     },
     {
       "slug": "divisor-function",
@@ -589,7 +832,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divisor_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0012", "p0021", "p0023", "p0095", "p0108", "p0110", "p0153", "p0157", "p0176", "p0179", "p0211", "p0420", "p0501", "p0565", "p0650"]
+      "refs": ["p0012", "p0021", "p0023", "p0095", "p0108", "p0110", "p0153", "p0157", "p0176", "p0179", "p0211", "p0233", "p0241", "p0378", "p0379", "p0401", "p0420", "p0439", "p0452", "p0474", "p0485", "p0500", "p0501", "p0548", "p0561", "p0565", "p0598", "p0608", "p0632", "p0636", "p0641", "p0646", "p0650", "p0675", "p0699", "p0722", "p0723", "p0735", "p0738", "p0827", "p0840", "p0861", "p0920", "p0956"]
     },
     {
       "slug": "divisor-summatory-function",
@@ -598,7 +841,7 @@
       "reference": "https://en.wikipedia.org/wiki/Divisor_summatory_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0153", "p0694"]
+      "refs": ["p0153", "p0401", "p0452", "p0530", "p0608", "p0615", "p0625", "p0639", "p0641", "p0694"]
     },
     {
       "slug": "dragon-curve",
@@ -616,7 +859,7 @@
       "reference": "https://en.wikipedia.org/wiki/E_(mathematical_constant)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0065", "p0183", "p0461"]
+      "refs": ["p0065", "p0183", "p0330", "p0461", "p0969", "p0970"]
     },
     {
       "slug": "eisenstein-triple",
@@ -625,7 +868,16 @@
       "reference": "https://en.wikipedia.org/wiki/Eisenstein_triple",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0143", "p0195"]
+      "refs": ["p0143", "p0195", "p0582"]
+    },
+    {
+      "slug": "ellipse",
+      "facet": "domain",
+      "name": "Ellipse",
+      "reference": "https://en.wikipedia.org/wiki/Ellipse",
+      "additional-references": [],
+      "summary": "A conic section defined as the locus of points with constant sum of distances to two foci, here rotated and intersected with a copy of itself.",
+      "refs": ["p0404"]
     },
     {
       "slug": "english-numerals",
@@ -643,7 +895,16 @@
       "reference": "https://en.wikipedia.org/wiki/Enumerative_combinatorics",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0114", "p0126"]
+      "refs": ["p0114", "p0126", "p0480", "p0502", "p0626", "p0631", "p0657", "p0658", "p0696", "p0709", "p0762", "p0763", "p0781", "p0818", "p0849", "p0873", "p0907", "p0936", "p0987"]
+    },
+    {
+      "slug": "epistemic-logic",
+      "facet": "domain",
+      "name": "Epistemic logic",
+      "reference": "https://en.wikipedia.org/wiki/Epistemic_logic",
+      "additional-references": [],
+      "summary": "Reasoning about what agents know, and what they know about others' knowledge, used to model puzzles where players deduce hidden values from mutual ignorance.",
+      "refs": ["p0905"]
     },
     {
       "slug": "equidistributed-sequence",
@@ -652,7 +913,25 @@
       "reference": "https://en.wikipedia.org/wiki/Equidistributed_sequence",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0686"]
+      "refs": ["p0576", "p0686", "p0794"]
+    },
+    {
+      "slug": "equivalence-relation",
+      "facet": "domain",
+      "name": "Equivalence relation",
+      "reference": "https://en.wikipedia.org/wiki/Equivalence_relation",
+      "additional-references": [],
+      "summary": "A relation partitioning objects into classes of equivalent items, used here to count non-equivalent tilings.",
+      "refs": ["p0780"]
+    },
+    {
+      "slug": "eulerian-path",
+      "facet": "domain",
+      "name": "Eulerian path",
+      "reference": "https://en.wikipedia.org/wiki/Eulerian_path",
+      "additional-references": [],
+      "summary": "A closed or open walk in a graph that traverses every edge exactly once.",
+      "refs": ["p0289"]
     },
     {
       "slug": "eulers-totient-function",
@@ -661,7 +940,7 @@
       "reference": "https://en.wikipedia.org/wiki/Euler%27s_totient_function",
       "additional-references": ["https://en.wikipedia.org/wiki/Euler%27s_totient_function#Computing_Euler%27s_totient_function"],
       "summary": "",
-      "refs": ["p0069", "p0070", "p0072", "p0180", "p0182", "p0188", "p0214", "p0228", "p0243", "p0478"]
+      "refs": ["p0069", "p0070", "p0072", "p0180", "p0182", "p0188", "p0214", "p0228", "p0243", "p0245", "p0248", "p0302", "p0337", "p0342", "p0351", "p0432", "p0441", "p0448", "p0478", "p0512", "p0516", "p0531", "p0533", "p0625", "p0652", "p0715", "p0756", "p0931"]
     },
     {
       "slug": "exclusive-or",
@@ -670,7 +949,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exclusive_or",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0059", "p0301", "p1000"]
+      "refs": ["p0059", "p0301", "p0323", "p0334", "p0691", "p0707", "p0760", "p0774", "p0806", "p0810", "p0813", "p0832", "p0877", "p0878", "p0945", "p0973", "p1000"]
     },
     {
       "slug": "expected-value",
@@ -679,7 +958,16 @@
       "reference": "https://en.wikipedia.org/wiki/Expected_value",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0121", "p0151", "p0213", "p0493", "p0965"]
+      "refs": ["p0121", "p0151", "p0213", "p0232", "p0253", "p0255", "p0267", "p0280", "p0285", "p0298", "p0300", "p0307", "p0316", "p0323", "p0339", "p0352", "p0367", "p0371", "p0389", "p0394", "p0398", "p0430", "p0436", "p0444", "p0469", "p0470", "p0481", "p0493", "p0497", "p0503", "p0514", "p0523", "p0527", "p0547", "p0564", "p0567", "p0568", "p0573", "p0584", "p0589", "p0595", "p0597", "p0602", "p0610", "p0613", "p0640", "p0644", "p0645", "p0648", "p0661", "p0683", "p0687", "p0695", "p0701", "p0724", "p0727", "p0744", "p0756", "p0765", "p0783", "p0796", "p0815", "p0819", "p0826", "p0852", "p0856", "p0863", "p0866", "p0869", "p0898", "p0901", "p0930", "p0959", "p0965", "p0969", "p0970", "p0973", "p0978", "p0982"]
+    },
+    {
+      "slug": "exponential-distribution",
+      "facet": "domain",
+      "name": "Exponential distribution",
+      "reference": "https://en.wikipedia.org/wiki/Exponential_distribution",
+      "additional-references": [],
+      "summary": "A continuous probability distribution modeling the time between events with a constant rate, used here for groundwater depth.",
+      "refs": ["p0901"]
     },
     {
       "slug": "exponentiation",
@@ -688,7 +976,7 @@
       "reference": "https://en.wikipedia.org/wiki/Exponentiation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0016", "p0029", "p0048", "p0056", "p0063", "p0099", "p0119", "p0122"]
+      "refs": ["p0016", "p0029", "p0048", "p0056", "p0063", "p0099", "p0119", "p0122", "p0250", "p0302", "p0411", "p0616", "p0617", "p0678", "p0749", "p0801", "p0830", "p0905"]
     },
     {
       "slug": "factorial",
@@ -697,7 +985,7 @@
       "reference": "https://en.wikipedia.org/wiki/Factorial",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0020", "p0024", "p0034", "p0074", "p0121", "p0160", "p0288", "p0381", "p0429", "p0549", "p0926"]
+      "refs": ["p0020", "p0024", "p0034", "p0074", "p0121", "p0160", "p0248", "p0254", "p0288", "p0320", "p0330", "p0381", "p0383", "p0418", "p0429", "p0474", "p0495", "p0549", "p0592", "p0598", "p0608", "p0636", "p0646", "p0829", "p0851", "p0926", "p0937", "p0952", "p0956"]
     },
     {
       "slug": "factorial-number-system",
@@ -715,7 +1003,7 @@
       "reference": "https://en.wikipedia.org/wiki/Farey_sequence",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0071", "p0073", "p0198", "p0965"]
+      "refs": ["p0071", "p0073", "p0198", "p0604", "p0787", "p0965"]
     },
     {
       "slug": "fermat-point",
@@ -733,7 +1021,7 @@
       "reference": "https://en.wikipedia.org/wiki/Fermat%27s_Last_Theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0180"]
+      "refs": ["p0180", "p0678", "p0753"]
     },
     {
       "slug": "fermats-little-theorem",
@@ -742,7 +1030,7 @@
       "reference": "https://en.wikipedia.org/wiki/Fermat%27s_little_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0026", "p0130", "p0133"]
+      "refs": ["p0026", "p0130", "p0133", "p0536", "p0717"]
     },
     {
       "slug": "fibbinary-numbers",
@@ -769,7 +1057,16 @@
       "reference": "https://en.wikipedia.org/wiki/Fibonacci_sequence",
       "additional-references": ["https://en.wikipedia.org/wiki/Generalizations_of_Fibonacci_numbers#Tribonacci_numbers", "https://en.wikipedia.org/wiki/Fibonacci_number", "https://en.wikipedia.org/wiki/Fibonacci_sequence#Closed-form_expression", "https://en.wikipedia.org/wiki/Generalizations_of_Fibonacci_numbers#Tetranacci_numbers", "https://en.wikipedia.org/wiki/Fibonacci_sequence#Matrix_form"],
       "summary": "",
-      "refs": ["p0002", "p0025", "p0104", "p0137", "p0301", "p0304", "p0692", "p0755", "p0853", "p0940"]
+      "refs": ["p0002", "p0025", "p0104", "p0137", "p0230", "p0297", "p0301", "p0304", "p0384", "p0399", "p0400", "p0402", "p0406", "p0435", "p0437", "p0481", "p0543", "p0554", "p0618", "p0651", "p0662", "p0669", "p0680", "p0684", "p0692", "p0707", "p0755", "p0841", "p0853", "p0854", "p0921", "p0940", "p0947", "p0958", "p0989", "p1006", "p1007"]
+    },
+    {
+      "slug": "fibonacci-word",
+      "facet": "domain",
+      "name": "Fibonacci word",
+      "reference": "https://en.wikipedia.org/wiki/Fibonacci_word",
+      "additional-references": [],
+      "summary": "The golden-ratio Beatty/Fibonacci binary sequence used as the second component combined via XOR to form the problem's string.",
+      "refs": ["p0691"]
     },
     {
       "slug": "figurate-number",
@@ -778,7 +1075,16 @@
       "reference": "https://en.wikipedia.org/wiki/Figurate_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0044", "p0045", "p0061"]
+      "refs": ["p0044", "p0045", "p0061", "p0348", "p0647", "p0799"]
+    },
+    {
+      "slug": "floor-function",
+      "facet": "domain",
+      "name": "Floor function",
+      "reference": "https://en.wikipedia.org/wiki/Floor_and_ceiling_functions",
+      "additional-references": [],
+      "summary": "Rounding down to the nearest integer, central to counting lattice points satisfying a floor-based parity condition.",
+      "refs": ["p0372"]
     },
     {
       "slug": "fortunate-number",
@@ -790,13 +1096,22 @@
       "refs": ["p0293"]
     },
     {
+      "slug": "four-exponentials-conjecture",
+      "facet": "domain",
+      "name": "Four exponentials conjecture",
+      "reference": "https://en.wikipedia.org/wiki/Four_exponentials_conjecture",
+      "additional-references": [],
+      "summary": "A number-theoretic conjecture about the transcendence of certain exponential expressions, invoked here to justify treating the logarithm as proto-logarithmic.",
+      "refs": ["p0652"]
+    },
+    {
       "slug": "fractal",
       "facet": "domain",
       "name": "Fractal",
       "reference": "https://en.wikipedia.org/wiki/Fractal",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0199", "p0226"]
+      "refs": ["p0199", "p0226", "p0312", "p0395", "p0535", "p0570", "p0702"]
     },
     {
       "slug": "fractional-part",
@@ -805,7 +1120,16 @@
       "reference": "https://en.wikipedia.org/wiki/Fractional_part",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0820", "p0965"]
+      "refs": ["p0820", "p0850", "p0965"]
+    },
+    {
+      "slug": "fractran",
+      "facet": "domain",
+      "name": "Fractran",
+      "reference": "https://en.wikipedia.org/wiki/FRACTRAN",
+      "additional-references": [],
+      "summary": "An esoteric Turing-complete programming language based on multiplying a state integer by a list of fractions.",
+      "refs": ["p0308"]
     },
     {
       "slug": "frequency-analysis",
@@ -817,13 +1141,22 @@
       "refs": ["p0059"]
     },
     {
+      "slug": "frobenius-number",
+      "facet": "domain",
+      "name": "Frobenius number (coin problem)",
+      "reference": "https://en.wikipedia.org/wiki/Coin_problem",
+      "additional-references": [],
+      "summary": "The largest value not representable as a non-negative integer linear combination of a given set of coprime integers.",
+      "refs": ["p0278"]
+    },
+    {
       "slug": "functional-graph",
       "facet": "domain",
       "name": "Functional graph",
       "reference": "https://en.wikipedia.org/wiki/Functional_graph",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0074", "p0095"]
+      "refs": ["p0074", "p0095", "p0414", "p0522", "p0703", "p0871", "p0971", "p0977"]
     },
     {
       "slug": "fundamental-theorem-of-arithmetic",
@@ -835,13 +1168,22 @@
       "refs": ["p0029", "p0204", "p0347"]
     },
     {
+      "slug": "game-theory",
+      "facet": "domain",
+      "name": "Game theory",
+      "reference": "https://en.wikipedia.org/wiki/Game_theory",
+      "additional-references": [],
+      "summary": "Strategic decision-making among rational agents, here modeling pirates voting on treasure distribution.",
+      "refs": ["p0950"]
+    },
+    {
       "slug": "gauss-circle-problem",
       "facet": "domain",
       "name": "Gauss circle problem",
       "reference": "https://en.wikipedia.org/wiki/Gauss_circle_problem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0210"]
+      "refs": ["p0210", "p0285", "p0403", "p0540", "p0596", "p0611"]
     },
     {
       "slug": "generating-function",
@@ -850,7 +1192,7 @@
       "reference": "https://en.wikipedia.org/wiki/Generating_function",
       "additional-references": ["https://en.wikipedia.org/wiki/Generating_function#Exponential_generating_function_(EGF)"],
       "summary": "",
-      "refs": ["p0078", "p0137", "p0140", "p0172", "p0743"]
+      "refs": ["p0078", "p0137", "p0140", "p0172", "p0249", "p0250", "p0377", "p0511", "p0519", "p0537", "p0588", "p0614", "p0618", "p0621", "p0623", "p0638", "p0648", "p0677", "p0709", "p0722", "p0743", "p0768", "p0851", "p0865", "p0881", "p0890", "p0929"]
     },
     {
       "slug": "genus-theory",
@@ -859,7 +1201,25 @@
       "reference": "https://en.wikipedia.org/wiki/Genus_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0229"]
+      "refs": ["p0229", "p0937"]
+    },
+    {
+      "slug": "geometric-mean",
+      "facet": "domain",
+      "name": "Geometric mean",
+      "reference": "https://en.wikipedia.org/wiki/Geometric_mean",
+      "additional-references": [],
+      "summary": "",
+      "refs": ["p0911"]
+    },
+    {
+      "slug": "geometric-probability",
+      "facet": "domain",
+      "name": "Geometric probability",
+      "reference": "https://en.wikipedia.org/wiki/Geometric_probability",
+      "additional-references": [],
+      "summary": "Probability problems involving randomly chosen points or shapes in geometric regions.",
+      "refs": ["p0695"]
     },
     {
       "slug": "geometric-progression",
@@ -868,7 +1228,7 @@
       "reference": "https://en.wikipedia.org/wiki/Geometric_progression",
       "additional-references": [],
       "summary": "A sequence of numbers where each term after the first is found by multiplying the previous term by a fixed, non-zero ratio.",
-      "refs": ["p0141", "p0346"]
+      "refs": ["p0141", "p0235", "p0346", "p0370", "p0394", "p0479", "p0518", "p0542", "p0770", "p0771", "p0894"]
     },
     {
       "slug": "geometrical-optics",
@@ -877,7 +1237,7 @@
       "reference": "https://en.wikipedia.org/wiki/Geometrical_optics",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0144"]
+      "refs": ["p0144", "p0317", "p0460", "p0607", "p0613"]
     },
     {
       "slug": "geometry",
@@ -886,7 +1246,7 @@
       "reference": "https://en.wikipedia.org/wiki/Geometry",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0086", "p0091", "p0144", "p0163", "p0177", "p0222", "p0228", "p0587"]
+      "refs": ["p0086", "p0091", "p0144", "p0163", "p0177", "p0222", "p0228", "p0246", "p0247", "p0264", "p0279", "p0285", "p0295", "p0296", "p0299", "p0309", "p0311", "p0314", "p0332", "p0338", "p0353", "p0363", "p0373", "p0385", "p0390", "p0397", "p0404", "p0410", "p0428", "p0431", "p0460", "p0465", "p0476", "p0510", "p0525", "p0532", "p0547", "p0557", "p0563", "p0566", "p0579", "p0583", "p0587", "p0600", "p0607", "p0613", "p0620", "p0644", "p0667", "p0681", "p0727", "p0737", "p0747", "p0761", "p0775", "p0786", "p0841", "p0855", "p0883", "p0891", "p0894", "p0897", "p0904", "p0914", "p0919", "p0935", "p0962", "p0966", "p0972", "p0985", "p0998"]
     },
     {
       "slug": "goldbachs-conjecture",
@@ -895,7 +1255,7 @@
       "reference": "https://en.wikipedia.org/wiki/Goldbach%27s_conjecture",
       "additional-references": [],
       "summary": "A family of conjectures about expressing numbers as sums involving primes, including this problem's disproven 'other' variant.",
-      "refs": ["p0046"]
+      "refs": ["p0046", "p0543"]
     },
     {
       "slug": "golden-ratio",
@@ -904,7 +1264,7 @@
       "reference": "https://en.wikipedia.org/wiki/Golden_ratio",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0104", "p0138"]
+      "refs": ["p0104", "p0138", "p0325", "p0341", "p0473", "p0691", "p0921", "p0989"]
     },
     {
       "slug": "gradient",
@@ -922,7 +1282,7 @@
       "reference": "https://en.wikipedia.org/wiki/Graph_coloring",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0189", "p0194"]
+      "refs": ["p0189", "p0194", "p0519", "p0544", "p0554", "p0670", "p0671", "p0677", "p0857", "p0892", "p1002"]
     },
     {
       "slug": "graph-theory",
@@ -931,7 +1291,7 @@
       "reference": "https://en.wikipedia.org/wiki/Graph_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0061", "p0068", "p0079", "p0083", "p0107", "p0143", "p0186", "p0215", "p1000"]
+      "refs": ["p0061", "p0068", "p0079", "p0083", "p0107", "p0143", "p0186", "p0215", "p0237", "p0244", "p0270", "p0289", "p0303", "p0312", "p0380", "p0393", "p0425", "p0434", "p0475", "p0490", "p0522", "p0553", "p0649", "p0651", "p0669", "p0673", "p0690", "p0701", "p0713", "p0716", "p0741", "p0766", "p0781", "p0846", "p0857", "p0881", "p0931", "p0975", "p0979", "p0984", "p0992", "p1000", "p1001", "p1002"]
     },
     {
       "slug": "gray-code",
@@ -949,7 +1309,52 @@
       "reference": "https://en.wikipedia.org/wiki/Greatest_common_divisor",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0005", "p0039", "p0073", "p0120", "p0139", "p0157", "p0484", "p0504"]
+      "refs": ["p0005", "p0039", "p0073", "p0120", "p0139", "p0157", "p0257", "p0276", "p0338", "p0343", "p0350", "p0388", "p0433", "p0440", "p0443", "p0484", "p0489", "p0504", "p0530", "p0570", "p0625", "p0643", "p0715", "p0728", "p0795", "p0876", "p0913", "p0915", "p0958", "p0959"]
+    },
+    {
+      "slug": "greedy-algorithm-simulation",
+      "facet": "domain",
+      "name": "Greedy algorithm simulation",
+      "reference": "https://en.wikipedia.org/wiki/Greedy_algorithm",
+      "additional-references": [],
+      "summary": "A process where a fixed, suboptimal step-by-step strategy is simulated and compared against optimal behaviour.",
+      "refs": ["p0336"]
+    },
+    {
+      "slug": "hamiltonian-cycle",
+      "facet": "domain",
+      "name": "Hamiltonian cycle",
+      "reference": "https://en.wikipedia.org/wiki/Hamiltonian_path",
+      "additional-references": [],
+      "summary": "A cycle that visits every vertex of a graph exactly once before returning to its start.",
+      "refs": ["p0312"]
+    },
+    {
+      "slug": "hamiltonian-path",
+      "facet": "domain",
+      "name": "Hamiltonian path",
+      "reference": "https://en.wikipedia.org/wiki/Hamiltonian_path",
+      "additional-references": [],
+      "summary": "A path in a graph that visits every vertex exactly once, the structure underlying the board tours counted here.",
+      "refs": ["p0237", "p0669"]
+    },
+    {
+      "slug": "harmonic-progression",
+      "facet": "domain",
+      "name": "Harmonic number",
+      "reference": "https://en.wikipedia.org/wiki/Harmonic_number",
+      "additional-references": [],
+      "summary": "The nth harmonic number is the sum of the reciprocals of the first n positive integers.",
+      "refs": ["p0541"]
+    },
+    {
+      "slug": "harmonic-series",
+      "facet": "domain",
+      "name": "Harmonic series",
+      "reference": "https://en.wikipedia.org/wiki/Harmonic_series_(mathematics)",
+      "additional-references": [],
+      "summary": "The divergent series of reciprocals of positive integers, and modified variants like the Kempner series that converge when certain terms are omitted.",
+      "refs": ["p0368"]
     },
     {
       "slug": "harshad-number",
@@ -967,7 +1372,25 @@
       "reference": "https://en.wikipedia.org/wiki/Heron%27s_formula",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0094"]
+      "refs": ["p0094", "p0283", "p0390", "p0471", "p0482", "p0583", "p0966"]
+    },
+    {
+      "slug": "herons-method",
+      "facet": "domain",
+      "name": "Heron's method",
+      "reference": "https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Heron's_method",
+      "additional-references": [],
+      "summary": "An iterative Newton-like method for approximating square roots by repeated averaging.",
+      "refs": ["p0255"]
+    },
+    {
+      "slug": "hexagonal-lattice",
+      "facet": "domain",
+      "name": "Hexagonal lattice",
+      "reference": "https://en.wikipedia.org/wiki/Hexagonal_lattice",
+      "additional-references": [],
+      "summary": "A triangular/hexagonal arrangement of lattice points where each point has six equidistant neighbours.",
+      "refs": ["p0883"]
     },
     {
       "slug": "hexagonal-number",
@@ -976,7 +1399,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hexagonal_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0045"]
+      "refs": ["p0045", "p0354", "p0866"]
     },
     {
       "slug": "highly-composite-number",
@@ -985,7 +1408,7 @@
       "reference": "https://en.wikipedia.org/wiki/Highly_composite_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0108", "p0110", "p0243"]
+      "refs": ["p0108", "p0110", "p0243", "p0485"]
     },
     {
       "slug": "histogram",
@@ -1003,7 +1426,7 @@
       "reference": "https://en.wikipedia.org/wiki/Hypergeometric_distribution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0493"]
+      "refs": ["p0493", "p0783"]
     },
     {
       "slug": "hyperplane-separation-theorem",
@@ -1015,13 +1438,31 @@
       "refs": ["p0478"]
     },
     {
+      "slug": "hypocycloid",
+      "facet": "domain",
+      "name": "Hypocycloid",
+      "reference": "https://en.wikipedia.org/wiki/Hypocycloid",
+      "additional-references": [],
+      "summary": "A curve traced by a point on a small circle rolling inside a larger circle.",
+      "refs": ["p0450"]
+    },
+    {
+      "slug": "idempotent-matrix",
+      "facet": "domain",
+      "name": "Idempotent matrix",
+      "reference": "https://en.wikipedia.org/wiki/Idempotent_matrix",
+      "additional-references": [],
+      "summary": "A matrix M satisfying M^2 = M.",
+      "refs": ["p0572"]
+    },
+    {
       "slug": "impartial-game",
       "facet": "domain",
       "name": "Impartial game",
       "reference": "https://en.wikipedia.org/wiki/Impartial_game",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0899", "p0961"]
+      "refs": ["p0260", "p0306", "p0310", "p0344", "p0366", "p0391", "p0400", "p0459", "p0488", "p0550", "p0560", "p0629", "p0644", "p0649", "p0665", "p0711", "p0798", "p0859", "p0860", "p0870", "p0888", "p0899", "p0900", "p0933", "p0939", "p0949", "p0953", "p0961", "p0976"]
     },
     {
       "slug": "incircle-and-excircles-of-a-triangle",
@@ -1030,7 +1471,7 @@
       "reference": "https://en.wikipedia.org/wiki/Incircle_and_excircles_of_a_triangle",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0195"]
+      "refs": ["p0195", "p0471", "p0482", "p0496", "p0883", "p0914"]
     },
     {
       "slug": "independence-probability-theory",
@@ -1039,7 +1480,7 @@
       "reference": "https://en.wikipedia.org/wiki/Independence_(probability_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0205"]
+      "refs": ["p0205", "p0286", "p0898"]
     },
     {
       "slug": "independent-set-graph-theory",
@@ -1048,7 +1489,25 @@
       "reference": "https://en.wikipedia.org/wiki/Independent_set_(graph_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0209"]
+      "refs": ["p0209", "p0703"]
+    },
+    {
+      "slug": "inequality",
+      "facet": "domain",
+      "name": "Inequality",
+      "reference": "https://en.wikipedia.org/wiki/Inequality_(mathematics)",
+      "additional-references": [],
+      "summary": "A relation comparing quantities that are not equal, used to bound sequence terms.",
+      "refs": ["p0319"]
+    },
+    {
+      "slug": "information-theory-search",
+      "facet": "domain",
+      "name": "Adaptive binary search / decision tree information theory",
+      "reference": "https://en.wikipedia.org/wiki/Twenty_questions",
+      "additional-references": [],
+      "summary": "Finding the minimal number of yes/no questions needed to identify an unknown item among possibilities, a decision-tree search problem.",
+      "refs": ["p0847"]
     },
     {
       "slug": "integer-lattice",
@@ -1057,7 +1516,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_lattice",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0091", "p0147", "p0184", "p0229", "p0478"]
+      "refs": ["p0091", "p0147", "p0184", "p0229", "p0233", "p0246", "p0257", "p0264", "p0270", "p0279", "p0283", "p0289", "p0292", "p0295", "p0296", "p0299", "p0332", "p0351", "p0353", "p0360", "p0373", "p0385", "p0388", "p0403", "p0415", "p0450", "p0453", "p0465", "p0478", "p0507", "p0510", "p0514", "p0562", "p0577", "p0579", "p0596", "p0604", "p0662", "p0664", "p0723", "p0736", "p0742", "p0763", "p0790", "p0879", "p0883", "p0962", "p0983"]
     },
     {
       "slug": "irrational-number",
@@ -1066,7 +1525,34 @@
       "reference": "https://en.wikipedia.org/wiki/Irrational_number",
       "additional-references": [],
       "summary": "A real number that cannot be written as a ratio of integers and whose decimal expansion never terminates or repeats.",
-      "refs": ["p0080"]
+      "refs": ["p0080", "p0318", "p0517", "p0558", "p0566", "p0576", "p0585", "p0656", "p0721", "p0731", "p0911"]
+    },
+    {
+      "slug": "isoperimetric-inequality",
+      "facet": "domain",
+      "name": "Isoperimetric inequality",
+      "reference": "https://en.wikipedia.org/wiki/Isoperimetric_inequality",
+      "additional-references": [],
+      "summary": "The relationship bounding the maximum area enclosable for a given perimeter length.",
+      "refs": ["p0314"]
+    },
+    {
+      "slug": "kaprekar-constant",
+      "facet": "domain",
+      "name": "Kaprekar's constant",
+      "reference": "https://en.wikipedia.org/wiki/6174_(number)",
+      "additional-references": [],
+      "summary": "A fixed point reached by repeatedly sorting a number's digits and subtracting the smaller arrangement from the larger.",
+      "refs": ["p0414"]
+    },
+    {
+      "slug": "khinchins-constant",
+      "facet": "domain",
+      "name": "Khinchin's constant",
+      "reference": "https://en.wikipedia.org/wiki/Khinchin%27s_constant",
+      "additional-references": [],
+      "summary": "The almost-everywhere limiting geometric mean of continued fraction partial quotients.",
+      "refs": ["p0911"]
     },
     {
       "slug": "king-chess",
@@ -1085,6 +1571,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0212"]
+    },
+    {
+      "slug": "kolakoski-sequence",
+      "facet": "domain",
+      "name": "Kolakoski sequence",
+      "reference": "https://en.wikipedia.org/wiki/Kolakoski_sequence",
+      "additional-references": [],
+      "summary": "A self-describing sequence over two symbols whose own run lengths reproduce the sequence.",
+      "refs": ["p0943"]
     },
     {
       "slug": "kummers-theorem",
@@ -1111,7 +1606,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lagged_Fibonacci_generator",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0149", "p0186", "p0212"]
+      "refs": ["p0149", "p0186", "p0212", "p0258"]
     },
     {
       "slug": "lagrange-multiplier",
@@ -1120,7 +1615,25 @@
       "reference": "https://en.wikipedia.org/wiki/Lagrange_multiplier",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0190"]
+      "refs": ["p0190", "p0314", "p0392", "p0897"]
+    },
+    {
+      "slug": "lambda-calculus",
+      "facet": "domain",
+      "name": "Lambda calculus",
+      "reference": "https://en.wikipedia.org/wiki/Lambda_calculus",
+      "additional-references": [],
+      "summary": "A formal system for expressing computation via function abstraction, application, and variable binding.",
+      "refs": ["p0623"]
+    },
+    {
+      "slug": "langtons-ant",
+      "facet": "domain",
+      "name": "Langton's ant",
+      "reference": "https://en.wikipedia.org/wiki/Langton%27s_ant",
+      "additional-references": [],
+      "summary": "A two-state, four-direction Turing-machine-like ant that walks on a grid flipping cell colours according to simple local rules, eventually building a recurring 'highway' pattern.",
+      "refs": ["p0349"]
     },
     {
       "slug": "lattice-path",
@@ -1129,7 +1642,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lattice_path",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0015", "p0081", "p0082"]
+      "refs": ["p0015", "p0081", "p0082", "p0246", "p0295", "p0300", "p0354", "p0372", "p0403", "p0408", "p0411", "p0416", "p0460", "p0628", "p0638", "p0662", "p1005"]
     },
     {
       "slug": "law-of-cosines",
@@ -1138,7 +1651,7 @@
       "reference": "https://en.wikipedia.org/wiki/Law_of_cosines",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0143", "p0195", "p0224"]
+      "refs": ["p0143", "p0195", "p0224", "p0279", "p0496", "p0582", "p0660", "p0919"]
     },
     {
       "slug": "law-of-sines",
@@ -1147,7 +1660,7 @@
       "reference": "https://en.wikipedia.org/wiki/Law_of_sines",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0177"]
+      "refs": ["p0177", "p0373"]
     },
     {
       "slug": "least-common-multiple",
@@ -1156,7 +1669,7 @@
       "reference": "https://en.wikipedia.org/wiki/Least_common_multiple",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0005", "p0152", "p0545", "p0772"]
+      "refs": ["p0005", "p0152", "p0350", "p0379", "p0448", "p0483", "p0545", "p0590", "p0772", "p0838", "p0858"]
     },
     {
       "slug": "legendres-formula",
@@ -1165,7 +1678,25 @@
       "reference": "https://en.wikipedia.org/wiki/Legendre%27s_formula",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0154", "p0160", "p0231", "p0288", "p0429", "p0549", "p0650", "p0704", "p0926"]
+      "refs": ["p0154", "p0160", "p0231", "p0288", "p0383", "p0429", "p0549", "p0650", "p0704", "p0926"]
+    },
+    {
+      "slug": "lenticular-hole",
+      "facet": "domain",
+      "name": "Lenticular hole",
+      "reference": "https://en.wikipedia.org/wiki/Lens_(geometry)",
+      "additional-references": [],
+      "summary": "A lens-shaped convex region enclosed between two intersecting circles.",
+      "refs": ["p0295"]
+    },
+    {
+      "slug": "lights-out-puzzle",
+      "facet": "domain",
+      "name": "Lights Out (puzzle)",
+      "reference": "https://en.wikipedia.org/wiki/Lights_Out_(game)",
+      "additional-references": [],
+      "summary": "A toggle-based grid puzzle where selecting a cell flips it and its edge-adjacent neighbors, with solvability analyzed via linear algebra over GF(2).",
+      "refs": ["p0707"]
     },
     {
       "slug": "linear-congruence-theorem",
@@ -1174,7 +1705,7 @@
       "reference": "https://en.wikipedia.org/wiki/Linear_congruence_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134"]
+      "refs": ["p0134", "p0331", "p0531", "p0552", "p0728"]
     },
     {
       "slug": "linear-feedback-shift-register",
@@ -1183,7 +1714,34 @@
       "reference": "https://en.wikipedia.org/wiki/Linear-feedback_shift_register",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0167"]
+      "refs": ["p0167", "p0707"]
+    },
+    {
+      "slug": "liouville-function",
+      "facet": "domain",
+      "name": "Liouville function",
+      "reference": "https://en.wikipedia.org/wiki/Liouville_function",
+      "additional-references": [],
+      "summary": "A multiplicative function of a positive integer defined by the parity of the total count of prime factors with multiplicity.",
+      "refs": ["p0646"]
+    },
+    {
+      "slug": "longest-increasing-subsequence",
+      "facet": "domain",
+      "name": "Longest increasing subsequence",
+      "reference": "https://en.wikipedia.org/wiki/Longest_increasing_subsequence",
+      "additional-references": [],
+      "summary": "The problem of finding the longest (weakly or strictly) monotonic subsequence of a sequence, here applied to a number's decimal digits.",
+      "refs": ["p1004"]
+    },
+    {
+      "slug": "look-and-say-sequence",
+      "facet": "domain",
+      "name": "Look-and-say sequence",
+      "reference": "https://en.wikipedia.org/wiki/Look-and-say_sequence",
+      "additional-references": [],
+      "summary": "A sequence formed by describing consecutive runs of digits in the previous term.",
+      "refs": ["p0419"]
     },
     {
       "slug": "loss-function",
@@ -1201,7 +1759,7 @@
       "reference": "https://en.wikipedia.org/wiki/Lucas%27s_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0148"]
+      "refs": ["p0148", "p0365"]
     },
     {
       "slug": "lychrel-number",
@@ -1219,7 +1777,7 @@
       "reference": "https://en.wikipedia.org/wiki/Markov_chain",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0084", "p0151", "p0213", "p0227", "p0938"]
+      "refs": ["p0084", "p0151", "p0213", "p0227", "p0280", "p0298", "p0329", "p0339", "p0367", "p0470", "p0575", "p0589", "p0595", "p0610", "p0640", "p0683", "p0819", "p0825", "p0852", "p0930", "p0938", "p0973"]
     },
     {
       "slug": "mastermind-board-game",
@@ -1231,6 +1789,15 @@
       "refs": ["p0185"]
     },
     {
+      "slug": "median",
+      "facet": "domain",
+      "name": "Median",
+      "reference": "https://en.wikipedia.org/wiki/Median",
+      "additional-references": [],
+      "summary": "The middle value of a sorted list, used here to define sliding-window medians of a generated sequence.",
+      "refs": ["p0593", "p0793"]
+    },
+    {
       "slug": "meissel-lehmer-algorithm",
       "facet": "domain",
       "name": "Meissel\u2013Lehmer algorithm",
@@ -1238,6 +1805,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0501", "p0642"]
+    },
+    {
+      "slug": "mex-function-set-theory",
+      "facet": "domain",
+      "name": "Mex (minimum excludant)",
+      "reference": "https://en.wikipedia.org/wiki/Mex_(mathematics)",
+      "additional-references": [],
+      "summary": "The smallest non-negative (or positive) integer not present in a set, used here to define the sequence-generating process.",
+      "refs": ["p0832"]
     },
     {
       "slug": "minimum-spanning-tree",
@@ -1255,7 +1831,7 @@
       "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_function",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0464"]
     },
     {
       "slug": "modular-arithmetic",
@@ -1264,7 +1840,7 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_arithmetic",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0019", "p0048", "p0078", "p0097", "p0104", "p0120", "p0123", "p0129", "p0132", "p0135", "p0136", "p0146", "p0152", "p0171", "p0182", "p0188", "p0202", "p0206", "p0216", "p0217", "p0218", "p0225", "p0277", "p0304", "p0381", "p0429", "p0487", "p0565", "p0710", "p0719", "p0788", "p0816", "p0820", "p0834", "p0885", "p0934", "p0940", "p0944", "p0974", "p1000"]
+      "refs": ["p0019", "p0048", "p0078", "p0097", "p0104", "p0120", "p0123", "p0129", "p0132", "p0135", "p0136", "p0146", "p0152", "p0171", "p0182", "p0188", "p0202", "p0206", "p0216", "p0217", "p0218", "p0225", "p0237", "p0250", "p0258", "p0266", "p0271", "p0272", "p0274", "p0277", "p0282", "p0284", "p0294", "p0303", "p0304", "p0312", "p0322", "p0324", "p0325", "p0326", "p0330", "p0335", "p0344", "p0356", "p0364", "p0365", "p0374", "p0381", "p0401", "p0402", "p0405", "p0407", "p0408", "p0409", "p0411", "p0412", "p0413", "p0416", "p0421", "p0422", "p0423", "p0427", "p0429", "p0435", "p0437", "p0439", "p0440", "p0445", "p0446", "p0447", "p0451", "p0455", "p0456", "p0457", "p0463", "p0467", "p0474", "p0475", "p0477", "p0479", "p0487", "p0492", "p0495", "p0498", "p0500", "p0505", "p0506", "p0511", "p0512", "p0515", "p0517", "p0522", "p0528", "p0529", "p0531", "p0536", "p0537", "p0546", "p0552", "p0554", "p0559", "p0565", "p0592", "p0593", "p0602", "p0603", "p0605", "p0612", "p0614", "p0615", "p0619", "p0622", "p0624", "p0626", "p0627", "p0628", "p0631", "p0635", "p0638", "p0641", "p0653", "p0654", "p0658", "p0663", "p0666", "p0672", "p0673", "p0680", "p0682", "p0684", "p0685", "p0693", "p0696", "p0700", "p0706", "p0707", "p0709", "p0710", "p0715", "p0716", "p0717", "p0719", "p0721", "p0728", "p0732", "p0733", "p0734", "p0739", "p0746", "p0747", "p0750", "p0752", "p0753", "p0754", "p0758", "p0759", "p0760", "p0767", "p0773", "p0774", "p0778", "p0784", "p0788", "p0789", "p0790", "p0797", "p0801", "p0803", "p0805", "p0809", "p0811", "p0812", "p0813", "p0814", "p0816", "p0820", "p0822", "p0823", "p0824", "p0830", "p0834", "p0835", "p0837", "p0839", "p0840", "p0844", "p0849", "p0850", "p0851", "p0854", "p0858", "p0865", "p0866", "p0871", "p0873", "p0874", "p0875", "p0885", "p0889", "p0891", "p0892", "p0902", "p0903", "p0909", "p0910", "p0912", "p0916", "p0917", "p0921", "p0924", "p0925", "p0929", "p0934", "p0940", "p0941", "p0942", "p0943", "p0944", "p0947", "p0950", "p0952", "p0956", "p0960", "p0967", "p0968", "p0971", "p0974", "p0977", "p0981", "p0984", "p0989", "p0990", "p0992", "p0995", "p0996", "p0999", "p1000", "p1001", "p1004"]
     },
     {
       "slug": "modular-multiplicative-inverse",
@@ -1273,7 +1849,16 @@
       "reference": "https://en.wikipedia.org/wiki/Modular_multiplicative_inverse",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0134", "p0198", "p0381"]
+      "refs": ["p0134", "p0198", "p0274", "p0381", "p0451", "p0515", "p0624", "p0784"]
+    },
+    {
+      "slug": "moving-sofa-problem",
+      "facet": "domain",
+      "name": "Moving sofa problem",
+      "reference": "https://en.wikipedia.org/wiki/Moving_sofa_problem",
+      "additional-references": [],
+      "summary": "Finding the largest shape that can be maneuvered through an L-shaped corridor.",
+      "refs": ["p0667"]
     },
     {
       "slug": "multiplicative-function",
@@ -1282,7 +1867,7 @@
       "reference": "https://en.wikipedia.org/wiki/Multiplicative_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0012", "p0072", "p0108", "p0110", "p0124", "p0127", "p0211", "p0243", "p0429", "p0484", "p0501", "p0565", "p0650", "p0745", "p0853"]
+      "refs": ["p0012", "p0072", "p0108", "p0110", "p0124", "p0127", "p0211", "p0243", "p0271", "p0342", "p0362", "p0379", "p0429", "p0432", "p0445", "p0446", "p0447", "p0448", "p0464", "p0466", "p0484", "p0501", "p0530", "p0548", "p0565", "p0633", "p0639", "p0650", "p0675", "p0699", "p0708", "p0745", "p0754", "p0795", "p0853", "p0875"]
     },
     {
       "slug": "multiplicative-order",
@@ -1291,7 +1876,16 @@
       "reference": "https://en.wikipedia.org/wiki/Multiplicative_order",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0026", "p0129", "p0130", "p0132", "p0133"]
+      "refs": ["p0026", "p0129", "p0130", "p0132", "p0133", "p0417", "p0533", "p0622", "p0750", "p0752", "p0952"]
+    },
+    {
+      "slug": "necklace-counting",
+      "facet": "domain",
+      "name": "Necklace (combinatorics)",
+      "reference": "https://en.wikipedia.org/wiki/Necklace_(combinatorics)",
+      "additional-references": [],
+      "summary": "Counting arrangements of colored beads around a circle up to rotation, using Burnside's lemma.",
+      "refs": ["p0281"]
     },
     {
       "slug": "nimber",
@@ -1300,7 +1894,7 @@
       "reference": "https://en.wikipedia.org/wiki/Nimber",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0301"]
+      "refs": ["p0260", "p0301", "p0306", "p0310", "p0459", "p0488", "p0509", "p0550", "p0560", "p0629", "p0649", "p0665", "p0798", "p0806", "p0860", "p0888", "p0900", "p0933", "p0953", "p0976"]
     },
     {
       "slug": "nonlinear-feedback-shift-register",
@@ -1309,7 +1903,16 @@
       "reference": "https://en.wikipedia.org/wiki/Nonlinear-feedback_shift_register",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0209"]
+      "refs": ["p0209", "p0703"]
+    },
+    {
+      "slug": "nontransitive-dice",
+      "facet": "domain",
+      "name": "Nontransitive dice",
+      "reference": "https://en.wikipedia.org/wiki/Intransitive_dice",
+      "additional-references": [],
+      "summary": "Sets of dice where the relation 'beats with probability > 1/2' forms a cycle rather than a total order.",
+      "refs": ["p0376"]
     },
     {
       "slug": "np-completeness",
@@ -1327,7 +1930,7 @@
       "reference": "https://en.wikipedia.org/wiki/NP-hardness",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0060", "p0122"]
+      "refs": ["p0060", "p0122", "p0300"]
     },
     {
       "slug": "number-theory",
@@ -1336,7 +1939,7 @@
       "reference": "https://en.wikipedia.org/wiki/Number_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0026", "p0047", "p0072", "p0075", "p0078", "p0124", "p0127", "p0153", "p0168", "p0179", "p0193", "p0231", "p0243", "p0321", "p0346", "p0800", "p0834", "p0926"]
+      "refs": ["p0026", "p0047", "p0072", "p0075", "p0078", "p0124", "p0127", "p0153", "p0168", "p0179", "p0193", "p0231", "p0241", "p0243", "p0245", "p0248", "p0251", "p0254", "p0268", "p0271", "p0272", "p0273", "p0276", "p0278", "p0309", "p0321", "p0335", "p0337", "p0343", "p0346", "p0350", "p0354", "p0355", "p0359", "p0360", "p0370", "p0372", "p0379", "p0388", "p0407", "p0410", "p0417", "p0421", "p0432", "p0433", "p0439", "p0443", "p0445", "p0446", "p0447", "p0448", "p0451", "p0452", "p0454", "p0455", "p0457", "p0462", "p0466", "p0485", "p0489", "p0508", "p0512", "p0513", "p0516", "p0531", "p0533", "p0540", "p0541", "p0552", "p0556", "p0561", "p0571", "p0578", "p0580", "p0585", "p0586", "p0596", "p0601", "p0615", "p0616", "p0617", "p0625", "p0632", "p0634", "p0637", "p0639", "p0641", "p0643", "p0652", "p0655", "p0659", "p0672", "p0674", "p0675", "p0693", "p0699", "p0700", "p0708", "p0712", "p0714", "p0715", "p0718", "p0730", "p0735", "p0738", "p0748", "p0749", "p0753", "p0754", "p0764", "p0771", "p0785", "p0789", "p0791", "p0792", "p0795", "p0800", "p0801", "p0804", "p0812", "p0821", "p0822", "p0823", "p0827", "p0832", "p0834", "p0838", "p0844", "p0850", "p0854", "p0858", "p0864", "p0876", "p0880", "p0884", "p0908", "p0915", "p0920", "p0926", "p0931", "p0937", "p0954", "p0967", "p0986", "p0999"]
     },
     {
       "slug": "oeis-a000119",
@@ -1354,7 +1957,7 @@
       "reference": "https://en.wikipedia.org/wiki/Optimal_substructure",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0018", "p0067", "p0081", "p0082", "p0114", "p0117", "p0159"]
+      "refs": ["p0018", "p0067", "p0081", "p0082", "p0114", "p0117", "p0159", "p0352", "p0470"]
     },
     {
       "slug": "overlapping-subproblems",
@@ -1372,7 +1975,7 @@
       "reference": "https://en.wikipedia.org/wiki/P-adic_valuation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0154", "p0160", "p0484", "p0549", "p0650", "p0834"]
+      "refs": ["p0154", "p0160", "p0383", "p0484", "p0549", "p0650", "p0712", "p0779", "p0792", "p0834"]
     },
     {
       "slug": "palindrome",
@@ -1381,7 +1984,7 @@
       "reference": "https://en.wikipedia.org/wiki/Palindrome",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0710"]
+      "refs": ["p0486", "p0656", "p0710"]
     },
     {
       "slug": "palindromic-number",
@@ -1390,7 +1993,7 @@
       "reference": "https://en.wikipedia.org/wiki/Palindromic_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0004", "p0036", "p0055", "p0125", "p0808"]
+      "refs": ["p0004", "p0036", "p0055", "p0125", "p0348", "p0473", "p0655", "p0808"]
     },
     {
       "slug": "pandigital-number",
@@ -1399,7 +2002,7 @@
       "reference": "https://en.wikipedia.org/wiki/Pandigital_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0032", "p0038", "p0041", "p0043", "p0104", "p0118", "p0170", "p0178"]
+      "refs": ["p0032", "p0038", "p0041", "p0043", "p0104", "p0118", "p0170", "p0178", "p0491", "p0571", "p0660"]
     },
     {
       "slug": "parity-mathematics",
@@ -1408,7 +2011,7 @@
       "reference": "https://en.wikipedia.org/wiki/Parity_(mathematics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002", "p0012", "p0100", "p0120", "p0123", "p0142", "p0145", "p0174", "p0720", "p0868", "p0974", "p0980"]
+      "refs": ["p0002", "p0012", "p0100", "p0120", "p0123", "p0142", "p0145", "p0174", "p0242", "p0331", "p0430", "p0502", "p0520", "p0539", "p0588", "p0611", "p0720", "p0859", "p0868", "p0974", "p0980", "p0981", "p1003"]
     },
     {
       "slug": "partition-number-theory",
@@ -1417,7 +2020,16 @@
       "reference": "https://en.wikipedia.org/wiki/Partition_(number_theory)",
       "additional-references": ["https://en.wikipedia.org/wiki/Partition_(number_theory)#Asymptotic_growth"],
       "summary": "",
-      "refs": ["p0031", "p0076", "p0077", "p0078", "p0181", "p0772"]
+      "refs": ["p0031", "p0076", "p0077", "p0078", "p0181", "p0333", "p0374", "p0614", "p0618", "p0629", "p0688", "p0772", "p0840", "p0859", "p0890", "p0922", "p0939"]
+    },
+    {
+      "slug": "partizan-game",
+      "facet": "domain",
+      "name": "Partizan game",
+      "reference": "https://en.wikipedia.org/wiki/Partizan_game",
+      "additional-references": [],
+      "summary": "A combinatorial game where the moves available to each player differ, unlike impartial games.",
+      "refs": ["p0963"]
     },
     {
       "slug": "pentagonal-number-theorem",
@@ -1426,7 +2038,16 @@
       "reference": "https://en.wikipedia.org/wiki/Pentagonal_number_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0045", "p0076", "p0078"]
+      "refs": ["p0045", "p0076", "p0078", "p0799"]
+    },
+    {
+      "slug": "perfect-cube",
+      "facet": "domain",
+      "name": "Perfect cube",
+      "reference": "https://en.wikipedia.org/wiki/Cube_(algebra)",
+      "additional-references": [],
+      "summary": "An integer that is the third power of another integer, the building block of the cube-subtraction procedure in this problem.",
+      "refs": ["p0884"]
     },
     {
       "slug": "perfect-number",
@@ -1435,7 +2056,7 @@
       "reference": "https://en.wikipedia.org/wiki/Perfect_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0218"]
+      "refs": ["p0218", "p0241"]
     },
     {
       "slug": "periodic-continued-fraction",
@@ -1444,7 +2065,7 @@
       "reference": "https://en.wikipedia.org/wiki/Periodic_continued_fraction",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0064", "p0066", "p0192"]
+      "refs": ["p0064", "p0066", "p0192", "p0656"]
     },
     {
       "slug": "periodic-point",
@@ -1453,7 +2074,7 @@
       "reference": "https://en.wikipedia.org/wiki/Periodic_point",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0197"]
+      "refs": ["p0197", "p0555", "p0729", "p0802", "p0843", "p0935", "p0971"]
     },
     {
       "slug": "periodic-sequence",
@@ -1462,7 +2083,7 @@
       "reference": "https://en.wikipedia.org/wiki/Periodic_sequence",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0019", "p0167", "p0225", "p0743"]
+      "refs": ["p0019", "p0167", "p0225", "p0306", "p0349", "p0426", "p0506", "p0617", "p0729", "p0743", "p0843", "p0908", "p0947", "p0993"]
     },
     {
       "slug": "permutation",
@@ -1471,7 +2092,7 @@
       "reference": "https://en.wikipedia.org/wiki/Permutation",
       "additional-references": ["https://en.wikipedia.org/wiki/Permutation#Numbering_permutations", "https://en.wikipedia.org/wiki/Permutation#Generation_in_lexicographic_order", "https://en.wikipedia.org/wiki/Permutation#Ascents,_descents,_runs,_and_excedances", "https://en.wikipedia.org/wiki/Permutation#Permutations_of_multisets"],
       "summary": "",
-      "refs": ["p0024", "p0041", "p0049", "p0052", "p0062", "p0068", "p0070", "p0158", "p0170", "p0209", "p0345", "p0720", "p0862", "p0868"]
+      "refs": ["p0024", "p0041", "p0049", "p0052", "p0062", "p0068", "p0070", "p0158", "p0170", "p0209", "p0239", "p0253", "p0336", "p0345", "p0367", "p0393", "p0424", "p0458", "p0462", "p0480", "p0483", "p0491", "p0494", "p0503", "p0523", "p0524", "p0559", "p0595", "p0597", "p0599", "p0622", "p0626", "p0628", "p0631", "p0673", "p0680", "p0687", "p0720", "p0740", "p0746", "p0750", "p0796", "p0837", "p0842", "p0862", "p0866", "p0868", "p0886", "p0896", "p0902", "p0903", "p0906", "p0913", "p0916", "p0924", "p0925", "p0928", "p0964", "p0996"]
     },
     {
       "slug": "pi",
@@ -1480,7 +2101,7 @@
       "reference": "https://en.wikipedia.org/wiki/Pi",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0461"]
+      "refs": ["p0230", "p0363", "p0461", "p0591"]
     },
     {
       "slug": "picks-theorem",
@@ -1489,7 +2110,7 @@
       "reference": "https://en.wikipedia.org/wiki/Pick%27s_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0504"]
+      "refs": ["p0504", "p0562", "p0742"]
     },
     {
       "slug": "pigeonhole-principle",
@@ -1507,7 +2128,16 @@
       "reference": "https://en.wikipedia.org/wiki/Pisano_period",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0853"]
+      "refs": ["p0399", "p0853", "p0854", "p0947"]
+    },
+    {
+      "slug": "planar-graph",
+      "facet": "domain",
+      "name": "Planar graph",
+      "reference": "https://en.wikipedia.org/wiki/Planar_graph",
+      "additional-references": [],
+      "summary": "A graph that can be drawn without edge crossings, relevant to connecting pairs above or below a line without intersections.",
+      "refs": ["p1002"]
     },
     {
       "slug": "polar-coordinate-system",
@@ -1516,7 +2146,16 @@
       "reference": "https://en.wikipedia.org/wiki/Polar_coordinate_system",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0184"]
+      "refs": ["p0184", "p0404", "p0532", "p0894"]
+    },
+    {
+      "slug": "polygon-kernel",
+      "facet": "domain",
+      "name": "Kernel of a polygon",
+      "reference": "https://en.wikipedia.org/wiki/Star-shaped_polygon",
+      "additional-references": [],
+      "summary": "The set of points from which a polygon's entire boundary is visible, used to define visibility/star-shaped properties of polygons.",
+      "refs": ["p0465"]
     },
     {
       "slug": "polynomial",
@@ -1525,7 +2164,7 @@
       "reference": "https://en.wikipedia.org/wiki/Polynomial",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0269"]
+      "refs": ["p0269", "p0286", "p0356", "p0363", "p0402", "p0435", "p0438", "p0479", "p0498", "p0602", "p0797", "p0802", "p0812", "p0813", "p0969", "p0995"]
     },
     {
       "slug": "polynomial-interpolation",
@@ -1537,13 +2176,22 @@
       "refs": ["p0101", "p0487"]
     },
     {
+      "slug": "polyomino",
+      "facet": "domain",
+      "name": "Polyomino",
+      "reference": "https://en.wikipedia.org/wiki/Polyomino",
+      "additional-references": [],
+      "summary": "A shape formed by joining identical squares edge-to-edge, the basic object being counted and balanced in this problem.",
+      "refs": ["p0275"]
+    },
+    {
       "slug": "positional-notation",
       "facet": "domain",
       "name": "Positional notation",
       "reference": "https://en.wikipedia.org/wiki/Positional_notation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0016", "p0017", "p0036", "p0040", "p0052", "p0145", "p0156", "p0162", "p0168", "p0206", "p0269", "p0288", "p0885", "p0926", "p0932"]
+      "refs": ["p0016", "p0017", "p0036", "p0040", "p0052", "p0145", "p0156", "p0162", "p0168", "p0206", "p0255", "p0269", "p0284", "p0288", "p0305", "p0316", "p0361", "p0368", "p0396", "p0414", "p0419", "p0425", "p0442", "p0473", "p0508", "p0520", "p0524", "p0558", "p0571", "p0592", "p0603", "p0637", "p0660", "p0676", "p0698", "p0714", "p0731", "p0749", "p0776", "p0778", "p0805", "p0817", "p0831", "p0865", "p0885", "p0893", "p0926", "p0932", "p0963", "p0990", "p1003", "p1004", "p1006"]
     },
     {
       "slug": "power-of-two",
@@ -1552,7 +2200,7 @@
       "reference": "https://en.wikipedia.org/wiki/Power_of_two",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0207", "p0293", "p0686", "p0704", "p0872", "p0944"]
+      "refs": ["p0207", "p0293", "p0305", "p0442", "p0494", "p0499", "p0500", "p0643", "p0686", "p0704", "p0717", "p0811", "p0872", "p0890", "p0942", "p0944"]
     },
     {
       "slug": "practical-number",
@@ -1561,7 +2209,7 @@
       "reference": "https://en.wikipedia.org/wiki/Practical_number",
       "additional-references": [],
       "summary": "",
-      "refs": []
+      "refs": ["p0263"]
     },
     {
       "slug": "prefix-code",
@@ -1579,7 +2227,7 @@
       "reference": "https://en.wikipedia.org/wiki/Primality_test",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0111", "p0146", "p0200", "p0216", "p0293"]
+      "refs": ["p0111", "p0146", "p0200", "p0216", "p0293", "p0574"]
     },
     {
       "slug": "prime-counting-function",
@@ -1588,7 +2236,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime-counting_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0050", "p0187", "p0347", "p0501", "p0642"]
+      "refs": ["p0050", "p0187", "p0308", "p0315", "p0347", "p0423", "p0501", "p0537", "p0609", "p0642", "p0801", "p0869"]
     },
     {
       "slug": "prime-factor",
@@ -1597,7 +2245,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime_factor",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0132", "p0642"]
+      "refs": ["p0132", "p0521", "p0526", "p0632", "p0642", "p0668", "p0779", "p0823", "p0829", "p0967"]
     },
     {
       "slug": "prime-factorization",
@@ -1606,7 +2254,7 @@
       "reference": "https://en.wikipedia.org/wiki/Integer_factorization",
       "additional-references": [],
       "summary": "Decomposing a number into its prime power components to compute multiplicative properties like divisor counts.",
-      "refs": ["p0003", "p0012", "p0029", "p0047", "p0069", "p0108", "p0124", "p0152", "p0221", "p0231", "p0288", "p0293", "p0347", "p0549", "p0650", "p0800", "p0834", "p0853"]
+      "refs": ["p0003", "p0012", "p0029", "p0047", "p0069", "p0108", "p0124", "p0152", "p0221", "p0231", "p0233", "p0245", "p0248", "p0272", "p0288", "p0293", "p0302", "p0320", "p0342", "p0347", "p0362", "p0386", "p0399", "p0418", "p0421", "p0446", "p0468", "p0495", "p0500", "p0516", "p0533", "p0536", "p0548", "p0549", "p0556", "p0561", "p0563", "p0574", "p0578", "p0590", "p0592", "p0598", "p0606", "p0615", "p0616", "p0618", "p0619", "p0627", "p0632", "p0633", "p0636", "p0646", "p0650", "p0668", "p0675", "p0682", "p0699", "p0708", "p0712", "p0738", "p0800", "p0821", "p0823", "p0829", "p0834", "p0838", "p0840", "p0853", "p0861", "p0881", "p0920", "p0953", "p0956"]
     },
     {
       "slug": "prime-number",
@@ -1615,7 +2263,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0003", "p0007", "p0010", "p0027", "p0035", "p0037", "p0041", "p0046", "p0049", "p0050", "p0051", "p0058", "p0060", "p0070", "p0077", "p0087", "p0097", "p0111", "p0118", "p0123", "p0128", "p0130", "p0131", "p0134", "p0146", "p0187", "p0196", "p0203", "p0214", "p0216", "p0304", "p0313", "p0347", "p0357", "p0381", "p0387", "p0487", "p0545", "p0565", "p0800", "p0808", "p0845", "p0934"]
+      "refs": ["p0003", "p0007", "p0010", "p0027", "p0035", "p0037", "p0041", "p0046", "p0049", "p0050", "p0051", "p0058", "p0060", "p0070", "p0077", "p0087", "p0097", "p0111", "p0118", "p0123", "p0128", "p0130", "p0131", "p0134", "p0146", "p0187", "p0196", "p0203", "p0214", "p0216", "p0234", "p0239", "p0249", "p0263", "p0266", "p0268", "p0273", "p0274", "p0291", "p0304", "p0308", "p0313", "p0315", "p0329", "p0333", "p0347", "p0355", "p0357", "p0365", "p0381", "p0387", "p0425", "p0437", "p0457", "p0467", "p0487", "p0492", "p0515", "p0517", "p0518", "p0521", "p0541", "p0543", "p0545", "p0552", "p0565", "p0569", "p0574", "p0593", "p0603", "p0609", "p0633", "p0635", "p0659", "p0687", "p0705", "p0717", "p0734", "p0753", "p0758", "p0773", "p0779", "p0800", "p0801", "p0808", "p0810", "p0817", "p0826", "p0845", "p0869", "p0874", "p0927", "p0934", "p0942", "p0946", "p0952", "p0971", "p0975", "p0995", "p1005"]
     },
     {
       "slug": "prime-number-theorem",
@@ -1633,7 +2281,7 @@
       "reference": "https://en.wikipedia.org/wiki/Prime_power",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0087", "p0160", "p0772"]
+      "refs": ["p0087", "p0160", "p0578", "p0634", "p0639", "p0772", "p0846"]
     },
     {
       "slug": "prime-proof-number",
@@ -1645,13 +2293,22 @@
       "refs": ["p0200"]
     },
     {
+      "slug": "primitive-root",
+      "facet": "domain",
+      "name": "Primitive root modulo n",
+      "reference": "https://en.wikipedia.org/wiki/Primitive_root_modulo_n",
+      "additional-references": [],
+      "summary": "An integer whose powers generate all nonzero residues modulo a prime.",
+      "refs": ["p0437"]
+    },
+    {
       "slug": "probability-distribution",
       "facet": "domain",
       "name": "Probability distribution",
       "reference": "https://en.wikipedia.org/wiki/Probability_distribution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0084", "p0100", "p0205"]
+      "refs": ["p0084", "p0100", "p0205", "p0232", "p0239", "p0267", "p0286", "p0307", "p0323", "p0329", "p0352", "p0371", "p0376", "p0389", "p0394", "p0436", "p0444", "p0481", "p0499", "p0567", "p0568", "p0573", "p0584", "p0597", "p0605", "p0624", "p0661", "p0666", "p0689", "p0697", "p0744", "p0765", "p0807", "p0825", "p0826", "p0852", "p0856", "p0863", "p0898", "p0978"]
     },
     {
       "slug": "product-sum-number",
@@ -1672,13 +2329,22 @@
       "refs": ["p0207"]
     },
     {
+      "slug": "protein-folding",
+      "facet": "domain",
+      "name": "Protein folding",
+      "reference": "https://en.wikipedia.org/wiki/Protein_folding",
+      "additional-references": [],
+      "summary": "Modeling a protein as an HP-string folded on a lattice to maximize favorable H-H contacts.",
+      "refs": ["p0300"]
+    },
+    {
       "slug": "pseudorandom-number-generator",
       "facet": "domain",
       "name": "Pseudorandom number generator",
       "reference": "https://en.wikipedia.org/wiki/Pseudorandom_number_generator",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0149", "p0185", "p0288", "p0816", "p0980"]
+      "refs": ["p0149", "p0185", "p0238", "p0252", "p0288", "p0334", "p0375", "p0426", "p0456", "p0630", "p0653", "p0790", "p0793", "p0803", "p0816", "p0839", "p0917", "p0941", "p0980"]
     },
     {
       "slug": "pythagorean-theorem",
@@ -1687,7 +2353,7 @@
       "reference": "https://en.wikipedia.org/wiki/Pythagorean_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0086", "p0091", "p0138"]
+      "refs": ["p0086", "p0091", "p0138", "p0395"]
     },
     {
       "slug": "pythagorean-triple",
@@ -1696,7 +2362,7 @@
       "reference": "https://en.wikipedia.org/wiki/Pythagorean_triple",
       "additional-references": ["https://en.wikipedia.org/wiki/Pythagorean_triple#Generating_a_triple", "https://en.wikipedia.org/wiki/Pythagorean_triple#Parent/child_relationships"],
       "summary": "",
-      "refs": ["p0009", "p0039", "p0075", "p0139", "p0176", "p0218", "p0223", "p0224"]
+      "refs": ["p0009", "p0039", "p0075", "p0139", "p0176", "p0218", "p0223", "p0224", "p0292", "p0295", "p0311", "p0373", "p0450", "p0540", "p0583", "p0613", "p0723", "p0730", "p0748", "p0764", "p0827", "p0835", "p0904", "p0914", "p0998"]
     },
     {
       "slug": "quadratic-equation",
@@ -1705,7 +2371,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_equation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0042", "p0044", "p0045", "p0137", "p0144", "p0587", "p0757", "p0932"]
+      "refs": ["p0042", "p0044", "p0045", "p0137", "p0144", "p0261", "p0317", "p0318", "p0356", "p0457", "p0587", "p0757", "p0932", "p0935"]
     },
     {
       "slug": "quadratic-form",
@@ -1714,7 +2380,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_form",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0223", "p0224"]
+      "refs": ["p0223", "p0224", "p0582", "p0586", "p0621", "p0659", "p0752", "p0769", "p0785", "p0875", "p0876", "p0989"]
     },
     {
       "slug": "quadratic-function",
@@ -1723,7 +2389,7 @@
       "reference": "https://en.wikipedia.org/wiki/Quadratic_function",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0027", "p0126"]
+      "refs": ["p0027", "p0126", "p0403", "p0492", "p0802"]
     },
     {
       "slug": "quadratic-reciprocity",
@@ -1733,6 +2399,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0216"]
+    },
+    {
+      "slug": "quadtree",
+      "facet": "domain",
+      "name": "Quadtree",
+      "reference": "https://en.wikipedia.org/wiki/Quadtree",
+      "additional-references": [],
+      "summary": "A tree data structure recursively partitioning a 2D region into four quadrants, used here to encode a black-and-white image.",
+      "refs": ["p0287"]
     },
     {
       "slug": "radical-of-an-integer",
@@ -1750,7 +2425,7 @@
       "reference": "https://en.wikipedia.org/wiki/Random_walk",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0213", "p0227"]
+      "refs": ["p0213", "p0227", "p0253", "p0280", "p0329", "p0497", "p0499", "p0575", "p0589", "p0648", "p0661", "p0683", "p0697", "p0807", "p0930", "p0959", "p0970", "p0978", "p0979"]
     },
     {
       "slug": "rational-number",
@@ -1759,7 +2434,7 @@
       "reference": "https://en.wikipedia.org/wiki/Rational_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0033", "p0155", "p0180", "p0259"]
+      "refs": ["p0033", "p0155", "p0180", "p0236", "p0259", "p0343", "p0422", "p0450", "p0809", "p0880", "p0889", "p0972", "p0991"]
     },
     {
       "slug": "recurrence-relation",
@@ -1768,7 +2443,7 @@
       "reference": "https://en.wikipedia.org/wiki/Recurrence_relation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0002", "p0057", "p0065", "p0076", "p0078", "p0092", "p0094", "p0114", "p0115", "p0116", "p0117", "p0140", "p0169", "p0197", "p0214", "p0225", "p0226", "p0227", "p0751", "p0872", "p0918", "p0938", "p0940", "p1000"]
+      "refs": ["p0002", "p0057", "p0065", "p0076", "p0078", "p0092", "p0094", "p0114", "p0115", "p0116", "p0117", "p0140", "p0169", "p0197", "p0214", "p0225", "p0226", "p0227", "p0230", "p0237", "p0247", "p0258", "p0282", "p0287", "p0312", "p0319", "p0324", "p0326", "p0327", "p0330", "p0334", "p0335", "p0337", "p0339", "p0340", "p0341", "p0343", "p0356", "p0364", "p0366", "p0375", "p0382", "p0384", "p0396", "p0405", "p0416", "p0419", "p0422", "p0423", "p0440", "p0443", "p0458", "p0463", "p0469", "p0472", "p0477", "p0490", "p0492", "p0497", "p0505", "p0515", "p0517", "p0523", "p0527", "p0532", "p0535", "p0539", "p0546", "p0551", "p0555", "p0558", "p0570", "p0605", "p0609", "p0617", "p0623", "p0624", "p0645", "p0654", "p0664", "p0666", "p0670", "p0671", "p0672", "p0693", "p0698", "p0700", "p0721", "p0729", "p0736", "p0737", "p0739", "p0751", "p0752", "p0759", "p0770", "p0774", "p0809", "p0811", "p0812", "p0822", "p0825", "p0832", "p0839", "p0843", "p0844", "p0848", "p0872", "p0887", "p0909", "p0910", "p0912", "p0915", "p0917", "p0918", "p0921", "p0924", "p0927", "p0935", "p0938", "p0940", "p0943", "p0955", "p0968", "p0969", "p0985", "p0993", "p0999", "p1000", "p1003"]
     },
     {
       "slug": "reflection-physics",
@@ -1777,7 +2452,7 @@
       "reference": "https://en.wikipedia.org/wiki/Reflection_(physics)",
       "additional-references": ["https://en.wikipedia.org/wiki/Reflection_(physics)#Laws_of_reflection"],
       "summary": "",
-      "refs": ["p0144"]
+      "refs": ["p0144", "p0786"]
     },
     {
       "slug": "regular-number",
@@ -1795,7 +2470,7 @@
       "reference": "https://en.wikipedia.org/wiki/Repeating_decimal",
       "additional-references": ["https://en.wikipedia.org/wiki/Repeating_decimal#Fractions_with_terminating_expansions"],
       "summary": "",
-      "refs": ["p0026", "p0183", "p0820"]
+      "refs": ["p0026", "p0183", "p0358", "p0417", "p0820"]
     },
     {
       "slug": "repunit",
@@ -1804,7 +2479,7 @@
       "reference": "https://en.wikipedia.org/wiki/Repunit",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0129", "p0130", "p0132", "p0133", "p0288", "p0346", "p0885"]
+      "refs": ["p0129", "p0130", "p0132", "p0133", "p0288", "p0346", "p0847", "p0885"]
     },
     {
       "slug": "reversible-number",
@@ -1822,7 +2497,7 @@
       "reference": "https://en.wikipedia.org/wiki/Roman_numerals",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0089"]
+      "refs": ["p0089", "p0610"]
     },
     {
       "slug": "root-of-unity",
@@ -1831,7 +2506,16 @@
       "reference": "https://en.wikipedia.org/wiki/Root_of_unity",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0208"]
+      "refs": ["p0208", "p0768"]
+    },
+    {
+      "slug": "roulette-curve",
+      "facet": "domain",
+      "name": "Roulette (curve)",
+      "reference": "https://en.wikipedia.org/wiki/Roulette_(curve)",
+      "additional-references": [],
+      "summary": "The curve traced by a point attached to a curve as it rolls without slipping along another curve.",
+      "refs": ["p0525"]
     },
     {
       "slug": "rsa-cryptosystem",
@@ -1843,13 +2527,40 @@
       "refs": ["p0182"]
     },
     {
+      "slug": "rubiks-cube-group",
+      "facet": "domain",
+      "name": "Rubik's Cube group",
+      "reference": "https://en.wikipedia.org/wiki/Rubik%27s_Cube_group",
+      "additional-references": [],
+      "summary": "The group of permutations of a Rubik's Cube's cubelets/faces reachable by legal moves, used to classify colourings up to equivalence.",
+      "refs": ["p0599"]
+    },
+    {
+      "slug": "rudin-shapiro-sequence",
+      "facet": "domain",
+      "name": "Rudin-Shapiro sequence",
+      "reference": "https://en.wikipedia.org/wiki/Rudin%E2%80%93Shapiro_sequence",
+      "additional-references": [],
+      "summary": "A binary sequence derived from counting adjacent one-bits in the binary expansion of n.",
+      "refs": ["p0384"]
+    },
+    {
+      "slug": "self-intersection",
+      "facet": "domain",
+      "name": "Self-intersection",
+      "reference": "https://en.wikipedia.org/wiki/Self-intersection",
+      "additional-references": [],
+      "summary": "A point where a curve crosses itself, common in the study of parametric curves.",
+      "refs": ["p0777"]
+    },
+    {
       "slug": "self-similarity",
       "facet": "domain",
       "name": "Self-similarity",
       "reference": "https://en.wikipedia.org/wiki/Self-similarity",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0199", "p0220", "p0226"]
+      "refs": ["p0199", "p0220", "p0226", "p0312", "p0395", "p0535", "p0570", "p0588", "p0702", "p0894", "p0943"]
     },
     {
       "slug": "semiprime",
@@ -1858,7 +2569,7 @@
       "reference": "https://en.wikipedia.org/wiki/Semiprime",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0070", "p0187"]
+      "refs": ["p0070", "p0187", "p0278"]
     },
     {
       "slug": "series-and-parallel-circuits",
@@ -1876,7 +2587,16 @@
       "reference": "https://en.wikipedia.org/wiki/Set_(mathematics)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0105", "p0118"]
+      "refs": ["p0105", "p0118", "p0553", "p0590", "p0821", "p0871", "p0927"]
+    },
+    {
+      "slug": "seven-segment-display",
+      "facet": "domain",
+      "name": "Seven-segment display",
+      "reference": "https://en.wikipedia.org/wiki/Seven-segment_display",
+      "additional-references": [],
+      "summary": "A display made of segments that light up to represent digits, whose on/off transitions determine energy cost.",
+      "refs": ["p0315", "p0893"]
     },
     {
       "slug": "shortest-path-problem",
@@ -1885,7 +2605,7 @@
       "reference": "https://en.wikipedia.org/wiki/Shortest_path_problem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0081", "p0082", "p0083"]
+      "refs": ["p0081", "p0082", "p0083", "p0244", "p0262", "p0353", "p0736", "p0917"]
     },
     {
       "slug": "sieve-theory",
@@ -1894,7 +2614,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sieve_theory",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0010"]
+      "refs": ["p0010", "p0521", "p0580"]
     },
     {
       "slug": "similarity-geometry",
@@ -1903,7 +2623,7 @@
       "reference": "https://en.wikipedia.org/wiki/Similarity_(geometry)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0177"]
+      "refs": ["p0177", "p0299"]
     },
     {
       "slug": "simplex",
@@ -1915,13 +2635,40 @@
       "refs": ["p0478"]
     },
     {
+      "slug": "simpsons-paradox",
+      "facet": "domain",
+      "name": "Simpson's paradox",
+      "reference": "https://en.wikipedia.org/wiki/Simpson%27s_paradox",
+      "additional-references": [],
+      "summary": "A statistical phenomenon where a trend appearing in each group of data reverses when the groups are combined.",
+      "refs": ["p0236"]
+    },
+    {
+      "slug": "sliding-block-puzzle",
+      "facet": "domain",
+      "name": "Sliding block puzzle",
+      "reference": "https://en.wikipedia.org/wiki/Sliding_puzzle",
+      "additional-references": [],
+      "summary": "A puzzle where pieces confined to a grid are moved by sliding to reach different configurations.",
+      "refs": ["p0766"]
+    },
+    {
       "slug": "smooth-number",
       "facet": "domain",
       "name": "Smooth number",
       "reference": "https://en.wikipedia.org/wiki/Smooth_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0108", "p0204"]
+      "refs": ["p0108", "p0204", "p0468", "p0516", "p0581", "p0627", "p0668", "p0682"]
+    },
+    {
+      "slug": "spanning-tree",
+      "facet": "domain",
+      "name": "Spanning tree",
+      "reference": "https://en.wikipedia.org/wiki/Spanning_tree",
+      "additional-references": [],
+      "summary": "A subgraph that connects all vertices of a graph with no cycles, exactly one such path existing between any two vertices.",
+      "refs": ["p0380"]
     },
     {
       "slug": "square-free-integer",
@@ -1930,7 +2677,7 @@
       "reference": "https://en.wikipedia.org/wiki/Square-free_integer",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0193", "p0203", "p0357", "p0694", "p0745"]
+      "refs": ["p0193", "p0203", "p0273", "p0357", "p0362", "p0399", "p0464", "p0536", "p0556", "p0580", "p0591", "p0632", "p0633", "p0634", "p0668", "p0694", "p0745", "p0864"]
     },
     {
       "slug": "square-number",
@@ -1939,7 +2686,7 @@
       "reference": "https://en.wikipedia.org/wiki/Square_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0028", "p0042", "p0046", "p0058", "p0064", "p0080", "p0086", "p0090", "p0098", "p0125", "p0141", "p0171", "p0173", "p0174", "p0201", "p0206", "p0211", "p0218", "p0504", "p0719", "p0757", "p0808"]
+      "refs": ["p0028", "p0042", "p0046", "p0058", "p0064", "p0080", "p0086", "p0090", "p0098", "p0125", "p0141", "p0171", "p0173", "p0174", "p0201", "p0206", "p0211", "p0218", "p0234", "p0261", "p0310", "p0342", "p0348", "p0359", "p0395", "p0408", "p0431", "p0459", "p0504", "p0558", "p0575", "p0585", "p0611", "p0619", "p0648", "p0719", "p0757", "p0769", "p0808", "p0817", "p0833", "p0864", "p0925"]
     },
     {
       "slug": "square-pyramidal-number",
@@ -1960,13 +2707,31 @@
       "refs": ["p0200"]
     },
     {
+      "slug": "standard-young-tableau",
+      "facet": "domain",
+      "name": "Standard Young tableau",
+      "reference": "https://en.wikipedia.org/wiki/Young_tableau",
+      "additional-references": [],
+      "summary": "A filling of a (skew) shape with numbers increasing along rows and columns, the combinatorial object being counted for the gnomon grid.",
+      "refs": ["p0412"]
+    },
+    {
+      "slug": "star-polygon",
+      "facet": "domain",
+      "name": "Star polygon",
+      "reference": "https://en.wikipedia.org/wiki/Star_polygon",
+      "additional-references": [],
+      "summary": "A self-intersecting polygon {p/q} formed by connecting every q-th vertex of a regular p-gon, wrapping q times around the centre.",
+      "refs": ["p0841", "p0842"]
+    },
+    {
       "slug": "state-computer-science",
       "facet": "domain",
       "name": "State (computer science)",
       "reference": "https://en.wikipedia.org/wiki/State_(computer_science)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0151"]
+      "refs": ["p0151", "p0298", "p0327", "p0758", "p0766", "p0993"]
     },
     {
       "slug": "stationary-distribution",
@@ -1975,7 +2740,25 @@
       "reference": "https://en.wikipedia.org/wiki/Stationary_distribution",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0084"]
+      "refs": ["p0084", "p0575"]
+    },
+    {
+      "slug": "steiner-chain",
+      "facet": "domain",
+      "name": "Steiner chain",
+      "reference": "https://en.wikipedia.org/wiki/Steiner_chain",
+      "additional-references": [],
+      "summary": "A closed cyclic chain of circles each tangent to two fixed circles and to its neighbours in the chain.",
+      "refs": ["p0428"]
+    },
+    {
+      "slug": "steiner-inellipse",
+      "facet": "domain",
+      "name": "Steiner inellipse",
+      "reference": "https://en.wikipedia.org/wiki/Steiner_inellipse",
+      "additional-references": [],
+      "summary": "The unique largest-area ellipse inscribed in a triangle, tangent to the midpoints of its sides.",
+      "refs": ["p0385"]
     },
     {
       "slug": "steinhaus-johnson-trotter-algorithm",
@@ -1993,7 +2776,7 @@
       "reference": "https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0071", "p0198"]
+      "refs": ["p0071", "p0198", "p0787"]
     },
     {
       "slug": "sterns-diatomic-sequence",
@@ -2014,13 +2797,31 @@
       "refs": ["p0059"]
     },
     {
+      "slug": "structural-rigidity",
+      "facet": "domain",
+      "name": "Structural rigidity",
+      "reference": "https://en.wikipedia.org/wiki/Structural_rigidity",
+      "additional-references": [],
+      "summary": "The property of a framework of rods and hinges being unable to flex, studied via rigidity theory of embedded graphs.",
+      "refs": ["p0434"]
+    },
+    {
       "slug": "subset-sum-problem",
       "facet": "domain",
       "name": "Subset sum problem",
       "reference": "https://en.wikipedia.org/wiki/Subset_sum_problem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0103", "p0105", "p0106", "p0152", "p0201", "p0461", "p0755", "p0772"]
+      "refs": ["p0103", "p0105", "p0106", "p0152", "p0201", "p0249", "p0250", "p0266", "p0382", "p0461", "p0663", "p0732", "p0755", "p0772"]
+    },
+    {
+      "slug": "substring",
+      "facet": "domain",
+      "name": "Substring",
+      "reference": "https://en.wikipedia.org/wiki/Substring",
+      "additional-references": [],
+      "summary": "A contiguous run of characters (here, digits) taken from within a larger string or number.",
+      "refs": ["p0603"]
     },
     {
       "slug": "sudoku",
@@ -2038,7 +2839,7 @@
       "reference": "https://en.wikipedia.org/wiki/Sum_of_two_squares_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0142", "p0153", "p0221", "p0229"]
+      "refs": ["p0142", "p0153", "p0221", "p0229", "p0233", "p0273", "p0596", "p0611", "p0659", "p0723", "p0846", "p0983"]
     },
     {
       "slug": "summation",
@@ -2047,7 +2848,7 @@
       "reference": "https://en.wikipedia.org/wiki/Summation",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0006", "p0010", "p0013", "p0023", "p0028", "p0048", "p0050", "p0125", "p0150", "p0918", "p0940"]
+      "refs": ["p0006", "p0010", "p0013", "p0023", "p0028", "p0048", "p0050", "p0125", "p0150", "p0235", "p0240", "p0261", "p0297", "p0320", "p0326", "p0340", "p0341", "p0372", "p0374", "p0375", "p0384", "p0390", "p0401", "p0427", "p0432", "p0433", "p0435", "p0439", "p0441", "p0444", "p0447", "p0448", "p0463", "p0471", "p0479", "p0489", "p0490", "p0506", "p0512", "p0521", "p0528", "p0534", "p0535", "p0539", "p0542", "p0543", "p0546", "p0555", "p0577", "p0603", "p0658", "p0663", "p0672", "p0676", "p0680", "p0684", "p0685", "p0688", "p0689", "p0708", "p0712", "p0733", "p0735", "p0737", "p0739", "p0747", "p0756", "p0759", "p0760", "p0775", "p0776", "p0779", "p0792", "p0794", "p0795", "p0804", "p0830", "p0831", "p0850", "p0875", "p0884", "p0893", "p0905", "p0908", "p0915", "p0918", "p0933", "p0940", "p0943", "p0960", "p0968", "p0986", "p0991"]
     },
     {
       "slug": "summation-by-parts",
@@ -2065,7 +2866,7 @@
       "reference": "https://en.wikipedia.org/wiki/Symmetry_in_mathematics",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0126", "p0177", "p0194"]
+      "refs": ["p0126", "p0177", "p0194", "p0392", "p0532", "p0599", "p0741", "p0742", "p0768", "p0951", "p0997"]
     },
     {
       "slug": "taxicab-geometry",
@@ -2074,7 +2875,7 @@
       "reference": "https://en.wikipedia.org/wiki/Taxicab_geometry",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0210"]
+      "refs": ["p0210", "p0360", "p0507"]
     },
     {
       "slug": "tetration",
@@ -2083,7 +2884,7 @@
       "reference": "https://en.wikipedia.org/wiki/Tetration",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0188"]
+      "refs": ["p0188", "p0282", "p0909"]
     },
     {
       "slug": "thaless-theorem",
@@ -2095,13 +2896,31 @@
       "refs": ["p0210"]
     },
     {
+      "slug": "three-distance-theorem",
+      "facet": "domain",
+      "name": "Three-distance theorem",
+      "reference": "https://en.wikipedia.org/wiki/Three-distance_theorem",
+      "additional-references": [],
+      "summary": "",
+      "refs": ["p0576"]
+    },
+    {
+      "slug": "thue-morse-sequence",
+      "facet": "domain",
+      "name": "Thue-Morse sequence",
+      "reference": "https://en.wikipedia.org/wiki/Thue%E2%80%93Morse_sequence",
+      "additional-references": [],
+      "summary": "A binary sequence defined by recursively negating or duplicating terms, central to this problem's subsequence condition.",
+      "refs": ["p0361", "p0691"]
+    },
+    {
       "slug": "tiling",
       "facet": "domain",
       "name": "Tiling",
       "reference": "https://en.wikipedia.org/wiki/Tessellation",
       "additional-references": [],
       "summary": "Covering a region (here a 1D row) completely using a set of tile shapes without overlap.",
-      "refs": ["p0115", "p0116", "p0117", "p0128", "p0139", "p0161", "p0215"]
+      "refs": ["p0115", "p0116", "p0117", "p0128", "p0139", "p0161", "p0215", "p0256", "p0324", "p0338", "p0405", "p0440", "p0594", "p0670", "p0671", "p0766", "p0780", "p0867", "p0979"]
     },
     {
       "slug": "toads-and-frogs",
@@ -2122,6 +2941,15 @@
       "refs": ["p0054"]
     },
     {
+      "slug": "tower-of-hanoi",
+      "facet": "domain",
+      "name": "Tower of Hanoi",
+      "reference": "https://en.wikipedia.org/wiki/Tower_of_Hanoi",
+      "additional-references": [],
+      "summary": "Classic puzzle of moving a stack of differently-sized disks between rods under size-ordering restrictions.",
+      "refs": ["p0497"]
+    },
+    {
       "slug": "trace-linear-algebra",
       "facet": "domain",
       "name": "Trace (linear algebra)",
@@ -2137,7 +2965,7 @@
       "reference": "https://en.wikipedia.org/wiki/Transfer_matrix_method",
       "additional-references": ["https://en.wikipedia.org/wiki/Transfer-matrix_method"],
       "summary": "",
-      "refs": ["p0189", "p0194"]
+      "refs": ["p0189", "p0194", "p0458", "p0544", "p0654", "p0767"]
     },
     {
       "slug": "tree-graph-theory",
@@ -2146,7 +2974,7 @@
       "reference": "https://en.wikipedia.org/wiki/Tree_(graph_theory)",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0872"]
+      "refs": ["p0380", "p0677", "p0872", "p0936", "p0983"]
     },
     {
       "slug": "triangular-number",
@@ -2155,7 +2983,7 @@
       "reference": "https://en.wikipedia.org/wiki/Triangular_number",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0001", "p0006", "p0012", "p0042", "p0045", "p0067", "p0085", "p0196", "p0321", "p0944"]
+      "refs": ["p0001", "p0006", "p0012", "p0042", "p0045", "p0067", "p0085", "p0196", "p0321", "p0378", "p0459", "p0581", "p0621", "p0647", "p0726", "p0747", "p0833", "p0944", "p0955", "p0985"]
     },
     {
       "slug": "triangular-tiling",
@@ -2164,7 +2992,7 @@
       "reference": "https://en.wikipedia.org/wiki/Triangular_tiling",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0150", "p0163", "p0189", "p0202"]
+      "refs": ["p0150", "p0163", "p0189", "p0202", "p0257", "p0577", "p0702", "p0780"]
     },
     {
       "slug": "tribonacci-number",
@@ -2173,7 +3001,25 @@
       "reference": "https://en.wikipedia.org/wiki/Generalizations_of_Fibonacci_numbers",
       "additional-references": ["https://en.wikipedia.org/wiki/Generalizations_of_Fibonacci_numbers#Tribonacci_numbers"],
       "summary": "A generalization of the Fibonacci sequence in which each term is the sum of the preceding three terms.",
-      "refs": ["p0225"]
+      "refs": ["p0225", "p0382", "p0507", "p0663"]
+    },
+    {
+      "slug": "trigonometric-functions",
+      "facet": "domain",
+      "name": "Trigonometric functions",
+      "reference": "https://en.wikipedia.org/wiki/Trigonometric_functions",
+      "additional-references": [],
+      "summary": "Functions of angles such as sine and cosine used to define curves and periodic behavior.",
+      "refs": ["p0975"]
+    },
+    {
+      "slug": "trigonometric-parametric-curve",
+      "facet": "domain",
+      "name": "Lissajous curve",
+      "reference": "https://en.wikipedia.org/wiki/Lissajous_curve",
+      "additional-references": [],
+      "summary": "A curve traced by parametric equations combining sinusoidal motions in two perpendicular directions.",
+      "refs": ["p0777"]
     },
     {
       "slug": "trinomial-triangle",
@@ -2203,6 +3049,15 @@
       "refs": ["p0037", "p0387"]
     },
     {
+      "slug": "turans-theorem",
+      "facet": "domain",
+      "name": "Tur\u00e1n's theorem",
+      "reference": "https://en.wikipedia.org/wiki/Tur%C3%A1n%27s_theorem",
+      "additional-references": [],
+      "summary": "Extremal graph theory result bounding the number of edges a graph can have while avoiding a large independent set, which underlies the fuse-testing strategy in this problem.",
+      "refs": ["p0713"]
+    },
+    {
       "slug": "ulam-number",
       "facet": "domain",
       "name": "Ulam number",
@@ -2227,7 +3082,7 @@
       "reference": "https://en.wikipedia.org/wiki/Unitary_divisor",
       "additional-references": [],
       "summary": "A divisor d of n such that gcd(d, n/d) = 1, i.e. d and n share no repeated prime factor between them.",
-      "refs": ["p0429"]
+      "refs": ["p0429", "p0861"]
     },
     {
       "slug": "vandermonde-matrix",
@@ -2237,6 +3092,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0101"]
+    },
+    {
+      "slug": "variance",
+      "facet": "domain",
+      "name": "Variance",
+      "reference": "https://en.wikipedia.org/wiki/Variance",
+      "additional-references": [],
+      "summary": "A measure of the spread of a set of numbers, defined as the average of squared deviations from the mean.",
+      "refs": ["p0791"]
     },
     {
       "slug": "vigenere-cipher",
@@ -2275,13 +3139,22 @@
       "refs": ["p0160", "p0381"]
     },
     {
+      "slug": "young-diagram",
+      "facet": "domain",
+      "name": "Young diagram",
+      "reference": "https://en.wikipedia.org/wiki/Young_tableau#Diagrams",
+      "additional-references": [],
+      "summary": "A finite collection of left- and top-aligned squares arranged in non-increasing rows and columns, used to model partitions and combinatorial games.",
+      "refs": ["p0923"]
+    },
+    {
       "slug": "zeckendorfs-theorem",
       "facet": "domain",
       "name": "Zeckendorf's theorem",
       "reference": "https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem",
       "additional-references": [],
       "summary": "",
-      "refs": ["p0692"]
+      "refs": ["p0297", "p0473", "p0692"]
     },
     {
       "slug": "abels-summation-formula",

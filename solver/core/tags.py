@@ -157,9 +157,15 @@ def _solution_indices(num: int) -> list[int]:
 
 
 def _all_problem_numbers() -> list[int]:
-    """Every problem that has a notes.html (public + private)."""
+    """Every problem the reconciler must consider - those that have a ``tags.json``.
+
+    This used to key on ``notes.html``, which only a *solved* problem has. Once the unsolved
+    problems were tagged too, that made 705 of 1007 files invisible here: their tags built no
+    refs, their ``new-tags`` were never promoted (so slugs they used dangled), and ``--check``
+    silently skipped them. The file the reconciler reconciles is the one to look for.
+    """
     nums: list[int] = []
-    for pattern in (f'public/p*/{config.notes_filename}', f'private/p*/p*/{config.notes_filename}'):
+    for pattern in (f'public/p*/{config.tags_filename}', f'private/p*/p*/{config.tags_filename}'):
         for f in config.solutions_dir.glob(pattern):
             if m := re.search(r'p(\d+)', f.parent.name):
                 nums.append(int(m.group(1)))
