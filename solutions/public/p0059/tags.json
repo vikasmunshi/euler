@@ -2,7 +2,7 @@
   "domain": [
     "frequency-analysis",
     "stream-cipher",
-    "vigen-re-cipher",
+    "vigenere-cipher",
     "exclusive-or"
   ],
   "takeaways": [

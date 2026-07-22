@@ -25,15 +25,6 @@
       "refs": ["p0023"]
     },
     {
-      "slug": "ackermann-function",
-      "facet": "domain",
-      "name": "Ackermann function",
-      "reference": "https://en.wikipedia.org/wiki/Ackermann_function",
-      "additional-references": ["https://en.wikipedia.org/wiki/Ackermann_function#Inverse"],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "acute-and-obtuse-triangles",
       "facet": "domain",
       "name": "Acute and obtuse triangles",
@@ -59,15 +50,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0189"]
-    },
-    {
-      "slug": "algebraic-geometry",
-      "facet": "domain",
-      "name": "Algebraic geometry",
-      "reference": "https://en.wikipedia.org/wiki/Algebraic_geometry",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "amicable-numbers",
@@ -295,15 +277,6 @@
       "refs": ["p0229"]
     },
     {
-      "slug": "clique-graph-theory",
-      "facet": "domain",
-      "name": "Clique (graph theory)",
-      "reference": "https://en.wikipedia.org/wiki/Clique_(graph_theory)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "clique-problem",
       "facet": "domain",
       "name": "Clique problem",
@@ -365,15 +338,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0686"]
-    },
-    {
-      "slug": "commutative-property",
-      "facet": "domain",
-      "name": "Commutative property",
-      "reference": "https://en.wikipedia.org/wiki/Commutative_property",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "completing-the-square",
@@ -547,15 +511,6 @@
       "refs": ["p0008", "p0016", "p0020", "p0022", "p0030", "p0034", "p0056", "p0065", "p0080", "p0092", "p0111", "p0112", "p0164", "p0171", "p0217", "p0387", "p0725", "p0845"]
     },
     {
-      "slug": "digital-root",
-      "facet": "domain",
-      "name": "Digital root",
-      "reference": "https://en.wikipedia.org/wiki/Digital_root",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "diophantine-approximation",
       "facet": "domain",
       "name": "Diophantine approximation",
@@ -581,15 +536,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0067", "p0079", "p0081"]
-    },
-    {
-      "slug": "direction-geometry",
-      "facet": "domain",
-      "name": "Direction (geometry)",
-      "reference": "https://en.wikipedia.org/wiki/Direction_(geometry)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "dirichlet-convolution",
@@ -644,15 +590,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0153", "p0694", "p0926"]
-    },
-    {
-      "slug": "dot-product",
-      "facet": "domain",
-      "name": "Dot product",
-      "reference": "https://en.wikipedia.org/wiki/Dot_product",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "dragon-curve",
@@ -835,15 +772,6 @@
       "refs": ["p0002", "p0025", "p0104", "p0137", "p0140", "p0155", "p0225", "p0304", "p0692", "p0755", "p0853", "p0940"]
     },
     {
-      "slug": "field-norm",
-      "facet": "domain",
-      "name": "Field norm",
-      "reference": "https://en.wikipedia.org/wiki/Field_norm",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "figurate-number",
       "facet": "domain",
       "name": "Figurate number",
@@ -961,15 +889,6 @@
       "refs": ["p0091", "p0199", "p0222", "p0587"]
     },
     {
-      "slug": "glossary-of-graph-theory",
-      "facet": "domain",
-      "name": "Glossary of graph theory",
-      "reference": "https://en.wikipedia.org/wiki/Glossary_of_graph_theory",
-      "additional-references": ["https://en.wikipedia.org/wiki/Glossary_of_graph_theory#simple"],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "goldbachs-conjecture",
       "facet": "domain",
       "name": "Goldbach's conjecture",
@@ -1004,15 +923,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0189", "p0194"]
-    },
-    {
-      "slug": "graph-discrete-mathematics",
-      "facet": "domain",
-      "name": "Graph (discrete mathematics)",
-      "reference": "https://en.wikipedia.org/wiki/Graph_(discrete_mathematics)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "graph-theory",
@@ -1085,15 +995,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0126"]
-    },
-    {
-      "slug": "hungarian-algorithm",
-      "facet": "domain",
-      "name": "Hungarian algorithm",
-      "reference": "https://en.wikipedia.org/wiki/Hungarian_algorithm",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "hypergeometric-distribution",
@@ -1339,15 +1240,6 @@
       "refs": ["p0185"]
     },
     {
-      "slug": "mathematical-induction",
-      "facet": "domain",
-      "name": "Mathematical induction",
-      "reference": "https://en.wikipedia.org/wiki/Mathematical_induction",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "meissel-lehmer-algorithm",
       "facet": "domain",
       "name": "Meissel\u2013Lehmer algorithm",
@@ -1355,15 +1247,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0501", "p0642"]
-    },
-    {
-      "slug": "meissel-mertens-constant",
-      "facet": "domain",
-      "name": "Meissel\u2013Mertens constant",
-      "reference": "https://en.wikipedia.org/wiki/Meissel%E2%80%93Mertens_constant",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "minimum-spanning-tree",
@@ -1474,24 +1357,6 @@
       "refs": ["p0755"]
     },
     {
-      "slug": "oeis-a002407",
-      "facet": "domain",
-      "name": "OEIS A002407",
-      "reference": "https://oeis.org/A002407",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "oeis-a048211",
-      "facet": "domain",
-      "name": "OEIS A048211",
-      "reference": "https://oeis.org/A048211",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "optimal-substructure",
       "facet": "domain",
       "name": "Optimal substructure",
@@ -1499,15 +1364,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0018", "p0067", "p0081", "p0114", "p0115", "p0117", "p0159", "p0222"]
-    },
-    {
-      "slug": "orbit-dynamics",
-      "facet": "domain",
-      "name": "Orbit (dynamics)",
-      "reference": "https://en.wikipedia.org/wiki/Orbit_(dynamics)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "overlapping-subproblems",
@@ -1519,15 +1375,6 @@
       "refs": ["p0014", "p0082", "p0115"]
     },
     {
-      "slug": "p-adic-number",
-      "facet": "domain",
-      "name": "P-adic number",
-      "reference": "https://en.wikipedia.org/wiki/P-adic_number",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "p-adic-valuation",
       "facet": "domain",
       "name": "P-adic valuation",
@@ -1535,15 +1382,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0154", "p0160", "p0484", "p0549", "p0650", "p0834", "p0926"]
-    },
-    {
-      "slug": "padovan-sequence",
-      "facet": "domain",
-      "name": "Padovan sequence",
-      "reference": "https://en.wikipedia.org/wiki/Padovan_sequence",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "palindrome",
@@ -1814,15 +1652,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0084", "p0121", "p0151", "p0205", "p0938"]
-    },
-    {
-      "slug": "product-rule",
-      "facet": "domain",
-      "name": "Product rule",
-      "reference": "https://en.wikipedia.org/wiki/Product_rule",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "product-sum-number",
@@ -2383,7 +2212,7 @@
       "refs": ["p0101"]
     },
     {
-      "slug": "vigen-re-cipher",
+      "slug": "vigenere-cipher",
       "facet": "domain",
       "name": "Vigen\u00e8re cipher",
       "reference": "https://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher",
@@ -2437,15 +2266,6 @@
       "refs": ["p0487_s0", "p0934_s0"]
     },
     {
-      "slug": "absorbing-element",
-      "facet": "technique",
-      "name": "Absorbing element",
-      "reference": "https://en.wikipedia.org/wiki/Absorbing_element",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "absorbing-markov-chain",
       "facet": "technique",
       "name": "Absorbing Markov chain",
@@ -2491,15 +2311,6 @@
       "refs": ["p0679_s0"]
     },
     {
-      "slug": "aliquot-sum",
-      "facet": "technique",
-      "name": "Aliquot sum",
-      "reference": "https://en.wikipedia.org/wiki/Aliquot_sum",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "amortized-analysis",
       "facet": "technique",
       "name": "Amortized analysis",
@@ -2518,15 +2329,6 @@
       "refs": ["p0070_s0", "p0098_s0"]
     },
     {
-      "slug": "and",
-      "facet": "technique",
-      "name": "and",
-      "reference": "https://docs.python.org/3/reference/expressions.html#boolean-operations",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "ansi-escape-code",
       "facet": "technique",
       "name": "ANSI escape code",
@@ -2534,24 +2336,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0074_s2"]
-    },
-    {
-      "slug": "any",
-      "facet": "technique",
-      "name": "any",
-      "reference": "https://docs.python.org/3/library/functions.html#any",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "aos-and-soa",
-      "facet": "technique",
-      "name": "AoS and SoA",
-      "reference": "https://en.wikipedia.org/wiki/AoS_and_SoA",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "apollonian-gasket",
@@ -2581,15 +2365,6 @@
       "refs": ["p0099_s0"]
     },
     {
-      "slug": "arithmetic-shift",
-      "facet": "technique",
-      "name": "Arithmetic shift",
-      "reference": "https://en.wikipedia.org/wiki/Arithmetic_shift",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "array",
       "facet": "technique",
       "name": "array",
@@ -2615,24 +2390,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0154_s0", "p0213_s0"]
-    },
-    {
-      "slug": "ascii",
-      "facet": "technique",
-      "name": "ASCII",
-      "reference": "https://en.wikipedia.org/wiki/ASCII",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "assignment-computer-science",
-      "facet": "technique",
-      "name": "Assignment (computer science)",
-      "reference": "https://en.wikipedia.org/wiki/Assignment_(computer_science)",
-      "additional-references": ["https://en.wikipedia.org/wiki/Assignment_(computer_science)#Parallel_assignment"],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "atan2",
@@ -2671,24 +2428,6 @@
       "refs": ["p0043_s0", "p0060_s0", "p0061_s0", "p0068_s0", "p0096_s0", "p0096_s1", "p0096_s2", "p0111_s0", "p0118_s0", "p0122_s0", "p0170_s0", "p0204_s0", "p0719_s0"]
     },
     {
-      "slug": "bertrands-postulate",
-      "facet": "technique",
-      "name": "Bertrand's postulate",
-      "reference": "https://en.wikipedia.org/wiki/Bertrand%27s_postulate",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "bilinear-form",
-      "facet": "technique",
-      "name": "Bilinear form",
-      "reference": "https://en.wikipedia.org/wiki/Bilinear_form",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "binary-expression-tree",
       "facet": "technique",
       "name": "Binary expression tree",
@@ -2696,15 +2435,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0093_s0"]
-    },
-    {
-      "slug": "binary-heap",
-      "facet": "technique",
-      "name": "Binary heap",
-      "reference": "https://en.wikipedia.org/wiki/Binary_heap",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "binary-search-algorithm",
@@ -2833,24 +2563,6 @@
       "refs": ["p0001_s1", "p0004_s0", "p0008_s0", "p0009_s0", "p0011_s0", "p0012_s1", "p0026_s0", "p0027_s0", "p0028_s0", "p0033_s0", "p0038_s0", "p0044_s0", "p0047_s0", "p0052_s0", "p0055_s0", "p0056_s0", "p0059_s0", "p0076_s2", "p0085_s0", "p0086_s0", "p0090_s0", "p0093_s0", "p0102_s0", "p0104_s0", "p0109_s0", "p0112_s0", "p0119_s0", "p0125_s0", "p0126_s0", "p0129_s0", "p0139_s0", "p0140_s0", "p0163_s0", "p0165_s0", "p0182_s0", "p0225_s0", "p0478_s0", "p0504_s0"]
     },
     {
-      "slug": "bss",
-      "facet": "technique",
-      "name": ".bss",
-      "reference": "https://en.wikipedia.org/wiki/.bss",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "burnsides-lemma",
-      "facet": "technique",
-      "name": "Burnside's lemma",
-      "reference": "https://en.wikipedia.org/wiki/Burnside%27s_lemma",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "bytearray",
       "facet": "technique",
       "name": "bytearray",
@@ -2858,15 +2570,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0010_s0", "p0010_s1", "p0035_s0", "p0051_s0", "p0209_s0", "p0961_s0"]
-    },
-    {
-      "slug": "c-data-types",
-      "facet": "technique",
-      "name": "C data types",
-      "reference": "https://en.wikipedia.org/wiki/C_data_types",
-      "additional-references": ["https://en.wikipedia.org/wiki/C_data_types#Main_types"],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "c-dynamic-memory-allocation",
@@ -2959,33 +2662,6 @@
       "refs": ["p0980_s0"]
     },
     {
-      "slug": "chained-comparison",
-      "facet": "technique",
-      "name": "chained comparison",
-      "reference": "https://docs.python.org/3/reference/expressions.html#comparisons",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "characteristic-polynomial",
-      "facet": "technique",
-      "name": "Characteristic polynomial",
-      "reference": "https://en.wikipedia.org/wiki/Characteristic_polynomial",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "chi-squared-test",
-      "facet": "technique",
-      "name": "Chi-squared test",
-      "reference": "https://en.wikipedia.org/wiki/Chi-squared_test",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "chinese-remainder-theorem",
       "facet": "technique",
       "name": "Chinese remainder theorem",
@@ -3058,15 +2734,6 @@
       "refs": ["p0030_s0", "p0090_s0", "p0093_s0", "p0103_s0", "p0103_s1", "p0106_s0", "p0184_s0", "p0862_s0"]
     },
     {
-      "slug": "combinations-with-replacement",
-      "facet": "technique",
-      "name": "combinations with replacement",
-      "reference": "https://docs.python.org/3/library/itertools.html#itertools.combinations_with_replacement",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "combinatorial-principles",
       "facet": "technique",
       "name": "Combinatorial principles",
@@ -3112,15 +2779,6 @@
       "refs": ["p0163_s0"]
     },
     {
-      "slug": "conditional-probability",
-      "facet": "technique",
-      "name": "Conditional probability",
-      "reference": "https://en.wikipedia.org/wiki/Conditional_probability",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "constraint-propagation",
       "facet": "technique",
       "name": "Constraint propagation",
@@ -3139,42 +2797,6 @@
       "refs": ["p0096_s0"]
     },
     {
-      "slug": "convex-combination",
-      "facet": "technique",
-      "name": "Convex combination",
-      "reference": "https://en.wikipedia.org/wiki/Convex_combination",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "convex-function",
-      "facet": "technique",
-      "name": "Convex function",
-      "reference": "https://en.wikipedia.org/wiki/Convex_function",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "convex-hull",
-      "facet": "technique",
-      "name": "Convex hull",
-      "reference": "https://en.wikipedia.org/wiki/Convex_hull",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "convex-hull-algorithms",
-      "facet": "technique",
-      "name": "Convex hull algorithms",
-      "reference": "https://en.wikipedia.org/wiki/Convex_hull_algorithms",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "convolution",
       "facet": "technique",
       "name": "Convolution",
@@ -3182,24 +2804,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0092_s0", "p0205_s0", "p0217_s0", "p0743_s0", "p0980_s0"]
-    },
-    {
-      "slug": "conways-game-of-life",
-      "facet": "technique",
-      "name": "Conway's Game of Life",
-      "reference": "https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "coordinate-descent",
-      "facet": "technique",
-      "name": "Coordinate descent",
-      "reference": "https://en.wikipedia.org/wiki/Coordinate_descent",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "counting-sort",
@@ -3218,15 +2822,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0229_s0"]
-    },
-    {
-      "slug": "cpython",
-      "facet": "technique",
-      "name": "CPython",
-      "reference": "https://en.wikipedia.org/wiki/CPython",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "cramers-rule",
@@ -3256,15 +2851,6 @@
       "refs": ["p0102_s0", "p0102_s1", "p0165_s0", "p0184_s0", "p0478_s0"]
     },
     {
-      "slug": "cube-algebra",
-      "facet": "technique",
-      "name": "Cube (algebra)",
-      "reference": "https://en.wikipedia.org/wiki/Cube_(algebra)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "curvature",
       "facet": "technique",
       "name": "Curvature",
@@ -3283,24 +2869,6 @@
       "refs": ["p0061_s0", "p0064_s0", "p0074_s0", "p0074_s1", "p0074_s2", "p0092_s0", "p0095_s0", "p0167_s0", "p0197_s0", "p0209_s0", "p0225_s0"]
     },
     {
-      "slug": "cycle-graph-theory",
-      "facet": "technique",
-      "name": "Cycle (graph theory)",
-      "reference": "https://en.wikipedia.org/wiki/Cycle_(graph_theory)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "cyclic-permutation",
-      "facet": "technique",
-      "name": "Cyclic permutation",
-      "reference": "https://en.wikipedia.org/wiki/Cyclic_permutation",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "dancing-links",
       "facet": "technique",
       "name": "Dancing Links",
@@ -3308,15 +2876,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0096_s1"]
-    },
-    {
-      "slug": "daniel-j-bernstein",
-      "facet": "technique",
-      "name": "Daniel J. Bernstein",
-      "reference": "https://en.wikipedia.org/wiki/Daniel_J._Bernstein",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "dataclass",
@@ -3364,33 +2923,6 @@
       "refs": ["p0199_s0"]
     },
     {
-      "slug": "descartes-theorem",
-      "facet": "technique",
-      "name": "Descartes' theorem",
-      "reference": "https://en.wikipedia.org/wiki/Descartes%27_theorem",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "determinant",
-      "facet": "technique",
-      "name": "Determinant",
-      "reference": "https://en.wikipedia.org/wiki/Determinant",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "deterministic-algorithm",
-      "facet": "technique",
-      "name": "Deterministic algorithm",
-      "reference": "https://en.wikipedia.org/wiki/Deterministic_algorithm",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "deterministic-finite-automaton",
       "facet": "technique",
       "name": "Deterministic finite automaton",
@@ -3398,15 +2930,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0679_s0"]
-    },
-    {
-      "slug": "diagonal",
-      "facet": "technique",
-      "name": "Diagonal",
-      "reference": "https://en.wikipedia.org/wiki/Diagonal",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "dict",
@@ -3425,15 +2948,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0145_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0178_s0", "p0217_s0", "p0269_s0", "p0301_s0", "p0755_s0", "p0845_s0", "p0974_s0", "p1000_s0"]
-    },
-    {
-      "slug": "dihedral-group",
-      "facet": "technique",
-      "name": "Dihedral group",
-      "reference": "https://en.wikipedia.org/wiki/Dihedral_group",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "dijkstras-algorithm",
@@ -3508,24 +3022,6 @@
       "refs": ["p0040_s0", "p0080_s0", "p0175_s0"]
     },
     {
-      "slug": "division-mathematics",
-      "facet": "technique",
-      "name": "Division (mathematics)",
-      "reference": "https://en.wikipedia.org/wiki/Division_(mathematics)",
-      "additional-references": ["https://en.wikipedia.org/wiki/Division_(mathematics)#Of_integers"],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "dont-repeat-yourself",
-      "facet": "technique",
-      "name": "Don't repeat yourself",
-      "reference": "https://en.wikipedia.org/wiki/Don%27t_repeat_yourself",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "double-counting-proof-technique",
       "facet": "technique",
       "name": "Double counting (proof technique)",
@@ -3580,24 +3076,6 @@
       "refs": ["p0014_s0", "p0018_s0", "p0031_s0", "p0067_s0", "p0076_s0", "p0076_s1", "p0077_s0", "p0078_s0", "p0081_s0", "p0082_s0", "p0092_s0", "p0105_s0", "p0114_s0", "p0115_s0", "p0116_s0", "p0117_s0", "p0121_s0", "p0145_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0155_s0", "p0159_s0", "p0161_s0", "p0164_s0", "p0169_s0", "p0171_s0", "p0172_s0", "p0178_s0", "p0181_s0", "p0189_s0", "p0191_s0", "p0201_s0", "p0205_s0", "p0208_s0", "p0213_s0", "p0214_s0", "p0215_s0", "p0217_s0", "p0220_s0", "p0222_s0", "p0259_s0", "p0301_s0", "p0345_s0", "p0549_s0", "p0642_s0", "p0679_s0", "p0692_s0", "p0710_s0", "p0725_s0", "p0755_s0", "p0845_s0", "p0885_s0", "p0938_s0", "p0961_s0", "p0974_s0", "p1000_s0"]
     },
     {
-      "slug": "eafp",
-      "facet": "technique",
-      "name": "EAFP",
-      "reference": "https://docs.python.org/3/glossary.html#term-EAFP",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "egyptian-fraction",
-      "facet": "technique",
-      "name": "Egyptian fraction",
-      "reference": "https://en.wikipedia.org/wiki/Egyptian_fraction",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "eisenstein-integer",
       "facet": "technique",
       "name": "Eisenstein integer",
@@ -3632,15 +3110,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0074_s2"]
-    },
-    {
-      "slug": "equivalence-class",
-      "facet": "technique",
-      "name": "Equivalence class",
-      "reference": "https://en.wikipedia.org/wiki/Equivalence_class",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "euclidean-algorithm",
@@ -3742,24 +3211,6 @@
       "refs": ["p0150_s0", "p0229_s0"]
     },
     {
-      "slug": "faulhabers-formula",
-      "facet": "technique",
-      "name": "Faulhaber's formula",
-      "reference": "https://en.wikipedia.org/wiki/Faulhaber%27s_formula",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "fenwick-tree",
-      "facet": "technique",
-      "name": "Fenwick tree",
-      "reference": "https://en.wikipedia.org/wiki/Fenwick_tree",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "fermats-little-theorem-application",
       "facet": "technique",
       "name": "Fermat's little theorem (application)",
@@ -3805,15 +3256,6 @@
       "refs": ["p0214_s0", "p0751_s0"]
     },
     {
-      "slug": "fixed-point-mathematics",
-      "facet": "technique",
-      "name": "Fixed point (mathematics)",
-      "reference": "https://en.wikipedia.org/wiki/Fixed_point_(mathematics)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "floating-point-arithmetic",
       "facet": "technique",
       "name": "Floating-point arithmetic",
@@ -3839,15 +3281,6 @@
       "additional-references": [],
       "summary": "Evaluates sum_{i=0}^{n-1} floor((a*i+b)/m) in O(log m) via a Euclidean-style recursive reduction, avoiding per-term iteration.",
       "refs": ["p0686_s0", "p0686_s1"]
-    },
-    {
-      "slug": "fold-higher-order-function",
-      "facet": "technique",
-      "name": "Fold (higher-order function)",
-      "reference": "https://en.wikipedia.org/wiki/Fold_(higher-order_function)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "for-else",
@@ -3886,15 +3319,6 @@
       "refs": ["p0146_s0", "p0259_s0"]
     },
     {
-      "slug": "function-composition",
-      "facet": "technique",
-      "name": "Function composition",
-      "reference": "https://en.wikipedia.org/wiki/Function_composition",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "function-pointer",
       "facet": "technique",
       "name": "Function pointer",
@@ -3920,15 +3344,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0014_s0", "p0017_s0", "p0021_s0", "p0042_s0", "p0060_s0", "p0076_s0", "p0076_s1", "p0076_s2", "p0077_s0", "p0077_s1", "p0093_s0", "p0161_s0", "p0259_s0", "p0301_s0", "p0755_s0"]
-    },
-    {
-      "slug": "functools-partial",
-      "facet": "technique",
-      "name": "functools.partial",
-      "reference": "https://docs.python.org/3/library/functools.html#functools.partial",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "functools-reduce",
@@ -3976,15 +3391,6 @@
       "refs": ["p0142_s0"]
     },
     {
-      "slug": "generalized-pentagonal-numbers",
-      "facet": "technique",
-      "name": "generalized pentagonal numbers",
-      "reference": "https://oeis.org/A001318",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "generate-and-test",
       "facet": "technique",
       "name": "Generate and test",
@@ -4012,15 +3418,6 @@
       "refs": ["p0001_s3", "p0001_s4", "p0002_s0", "p0008_s0", "p0009_s0", "p0010_s2", "p0011_s0", "p0019_s0", "p0028_s0", "p0030_s0", "p0032_s0", "p0036_s0", "p0041_s0", "p0043_s0", "p0046_s0", "p0051_s0", "p0058_s0", "p0060_s0", "p0061_s0", "p0069_s0", "p0070_s0", "p0075_s0", "p0081_s0", "p0087_s0", "p0104_s0", "p0109_s0", "p0111_s0", "p0152_s0", "p0186_s0", "p0965_s0"]
     },
     {
-      "slug": "geometric-progression",
-      "facet": "technique",
-      "name": "Geometric progression",
-      "reference": "https://en.wikipedia.org/wiki/Geometric_progression",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "geometric-series",
       "facet": "technique",
       "name": "Geometric series",
@@ -4046,24 +3443,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/GNU_Multiple_Precision_Arithmetic_Library"],
       "summary": "",
       "refs": ["p0168_s0", "p0168_s1", "p0169_s0", "p0172_s0", "p0176_s0", "p0180_s0", "p0192_s0", "p0203_s0", "p0321_s0", "p0387_s0"]
-    },
-    {
-      "slug": "gnu-mpfr",
-      "facet": "technique",
-      "name": "GNU MPFR",
-      "reference": "https://en.wikipedia.org/wiki/GNU_MPFR",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "goto",
-      "facet": "technique",
-      "name": "Goto",
-      "reference": "https://en.wikipedia.org/wiki/Goto",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "greatest-common-divisor-application",
@@ -4129,15 +3508,6 @@
       "refs": ["p0010_s2", "p0029_s0", "p0029_s1", "p0037_s0", "p0049_s0", "p0060_s0", "p0062_s0", "p0083_s0", "p0087_s0", "p0095_s0", "p0125_s0", "p0141_s0", "p0141_s1", "p0143_s0", "p0145_s0", "p0152_s0", "p0153_s0", "p0155_s0", "p0166_s0", "p0184_s0", "p0208_s0", "p0259_s0", "p0269_s0", "p0816_s0"]
     },
     {
-      "slug": "hashable",
-      "facet": "technique",
-      "name": "hashable",
-      "reference": "https://docs.python.org/3/glossary.html#term-hashable",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "heaps-algorithm",
       "facet": "technique",
       "name": "Heap's algorithm",
@@ -4147,15 +3517,6 @@
       "refs": ["p0049_s0"]
     },
     {
-      "slug": "heapsort",
-      "facet": "technique",
-      "name": "Heapsort",
-      "reference": "https://en.wikipedia.org/wiki/Heapsort",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "hensels-lemma",
       "facet": "technique",
       "name": "Hensel's lemma",
@@ -4163,24 +3524,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0277_s0"]
-    },
-    {
-      "slug": "hexadecimal",
-      "facet": "technique",
-      "name": "Hexadecimal",
-      "reference": "https://en.wikipedia.org/wiki/Hexadecimal",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "hill-climbing",
-      "facet": "technique",
-      "name": "Hill climbing",
-      "reference": "https://en.wikipedia.org/wiki/Hill_climbing",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "hockey-stick-identity",
@@ -4210,24 +3553,6 @@
       "refs": ["p0219_s0"]
     },
     {
-      "slug": "identity-element",
-      "facet": "technique",
-      "name": "Identity element",
-      "reference": "https://en.wikipedia.org/wiki/Identity_element",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "ieee-754",
-      "facet": "technique",
-      "name": "IEEE 754",
-      "reference": "https://en.wikipedia.org/wiki/IEEE_754",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "inclusion-exclusion-principle",
       "facet": "technique",
       "name": "Inclusion\u2013exclusion principle",
@@ -4237,24 +3562,6 @@
       "refs": ["p0001_s0", "p0001_s2", "p0001_s3", "p0001_s4", "p0113_s0", "p0162_s0", "p0184_s0", "p0193_s0", "p0202_s0", "p0212_s0", "p0269_s0", "p0710_s0", "p0725_s0"]
     },
     {
-      "slug": "index-php-simons-favorite-factoring-trick",
-      "facet": "technique",
-      "name": "index.php/Simon's Favorite Factoring Trick",
-      "reference": "https://artofproblemsolving.com/wiki/index.php/Simon%27s_Favorite_Factoring_Trick",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "indicator-function",
-      "facet": "technique",
-      "name": "Indicator function",
-      "reference": "https://en.wikipedia.org/wiki/Indicator_function",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "insertion-sort",
       "facet": "technique",
       "name": "Insertion sort",
@@ -4262,24 +3569,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0061_s0", "p0868_s0"]
-    },
-    {
-      "slug": "instruction-level-parallelism",
-      "facet": "technique",
-      "name": "Instruction-level parallelism",
-      "reference": "https://en.wikipedia.org/wiki/Instruction-level_parallelism",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "int",
-      "facet": "technique",
-      "name": "int",
-      "reference": "https://docs.python.org/3/library/functions.html#int",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "int128",
@@ -4307,15 +3596,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0088_s0"]
-    },
-    {
-      "slug": "integer-literals",
-      "facet": "technique",
-      "name": "integer literals",
-      "reference": "https://docs.python.org/3/reference/lexical_analysis.html",
-      "additional-references": ["https://docs.python.org/3/reference/lexical_analysis.html#integer-literals"],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "integer-overflow",
@@ -4381,15 +3661,6 @@
       "refs": ["p0686_s0"]
     },
     {
-      "slug": "irrational-number",
-      "facet": "technique",
-      "name": "Irrational number",
-      "reference": "https://en.wikipedia.org/wiki/Irrational_number",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "irreducible-fraction",
       "facet": "technique",
       "name": "Irreducible fraction",
@@ -4426,24 +3697,6 @@
       "refs": ["p0050_s0"]
     },
     {
-      "slug": "itertools-product",
-      "facet": "technique",
-      "name": "itertools.product",
-      "reference": "https://docs.python.org/3/library/itertools.html#itertools.product",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "jacobi-method",
-      "facet": "technique",
-      "name": "Jacobi method",
-      "reference": "https://en.wikipedia.org/wiki/Jacobi_method",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "kahan-summation-algorithm",
       "facet": "technique",
       "name": "Kahan summation algorithm",
@@ -4453,24 +3706,6 @@
       "refs": ["p0965_s0"]
     },
     {
-      "slug": "karatsuba-algorithm",
-      "facet": "technique",
-      "name": "Karatsuba algorithm",
-      "reference": "https://en.wikipedia.org/wiki/Karatsuba_algorithm",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "keyword-only",
-      "facet": "technique",
-      "name": "keyword-only",
-      "reference": "https://docs.python.org/3/glossary.html#term-parameter",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "knapsack-problem",
       "facet": "technique",
       "name": "Knapsack problem",
@@ -4478,15 +3713,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Knapsack_problem#Unbounded_knapsack_problem"],
       "summary": "",
       "refs": ["p0031_s0", "p0181_s0", "p0201_s0"]
-    },
-    {
-      "slug": "knuths-algorithm-x",
-      "facet": "technique",
-      "name": "Knuth's Algorithm X",
-      "reference": "https://en.wikipedia.org/wiki/Knuth%27s_Algorithm_X",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "kruskals-algorithm",
@@ -4550,15 +3776,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0720_s0"]
-    },
-    {
-      "slug": "lexical-analysis",
-      "facet": "technique",
-      "name": "Lexical analysis",
-      "reference": "https://en.wikipedia.org/wiki/Lexical_analysis",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "lexicographic-order",
@@ -4678,24 +3895,6 @@
       "refs": ["p0017_s0", "p0034_s0", "p0088_s0", "p0089_s0", "p0092_s0", "p0146_s0", "p0154_s0", "p0159_s0", "p0160_s0", "p0167_s0", "p0177_s0", "p0381_s0", "p0504_s0", "p0961_s0"]
     },
     {
-      "slug": "loop-fission-and-fusion",
-      "facet": "technique",
-      "name": "Loop fission and fusion",
-      "reference": "https://en.wikipedia.org/wiki/Loop_fission_and_fusion",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "loop-invariant",
-      "facet": "technique",
-      "name": "Loop invariant",
-      "reference": "https://en.wikipedia.org/wiki/Loop_invariant",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "loop-invariant-code-motion",
       "facet": "technique",
       "name": "Loop-invariant code motion",
@@ -4703,24 +3902,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0504_s0"]
-    },
-    {
-      "slug": "loop-nest-optimization",
-      "facet": "technique",
-      "name": "Loop nest optimization",
-      "reference": "https://en.wikipedia.org/wiki/Loop_nest_optimization",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "loop-unrolling",
-      "facet": "technique",
-      "name": "Loop unrolling",
-      "reference": "https://en.wikipedia.org/wiki/Loop_unrolling",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "lu-decomposition",
@@ -4739,33 +3920,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0209_s0"]
-    },
-    {
-      "slug": "m-bius-function",
-      "facet": "technique",
-      "name": "M\u00f6bius function",
-      "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_function",
-      "additional-references": [],
-      "summary": "",
-      "refs": ["p0153_s0", "p0193_s0", "p0202_s0", "p0745_s0"]
-    },
-    {
-      "slug": "m-bius-inversion-formula",
-      "facet": "technique",
-      "name": "M\u00f6bius inversion formula",
-      "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula",
-      "additional-references": [],
-      "summary": "",
-      "refs": ["p0073_s2", "p0153_s0", "p0478_s0", "p0478_s1"]
-    },
-    {
-      "slug": "mapreduce",
-      "facet": "technique",
-      "name": "MapReduce",
-      "reference": "https://en.wikipedia.org/wiki/MapReduce",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "mask-computing",
@@ -4820,15 +3974,6 @@
       "additional-references": [],
       "summary": "Representing a linear recurrence as repeated multiplication by a fixed transfer matrix, computed via fast exponentiation.",
       "refs": ["p0940_s0"]
-    },
-    {
-      "slug": "max",
-      "facet": "technique",
-      "name": "max",
-      "reference": "https://docs.python.org/3/library/functions.html#max",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "maximum-subarray-problem",
@@ -4903,15 +4048,6 @@
       "refs": ["p0185_s0"]
     },
     {
-      "slug": "mertens-function",
-      "facet": "technique",
-      "name": "Mertens function",
-      "reference": "https://en.wikipedia.org/wiki/Mertens_function",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "methods-of-computing-square-roots",
       "facet": "technique",
       "name": "Methods of computing square roots",
@@ -4955,6 +4091,24 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0145_s0", "p0151_s0", "p0189_s0", "p0868_s0"]
+    },
+    {
+      "slug": "mobius-function",
+      "facet": "technique",
+      "name": "M\u00f6bius function",
+      "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_function",
+      "additional-references": [],
+      "summary": "",
+      "refs": ["p0153_s0", "p0193_s0", "p0202_s0", "p0745_s0"]
+    },
+    {
+      "slug": "mobius-inversion-formula",
+      "facet": "technique",
+      "name": "M\u00f6bius inversion formula",
+      "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_inversion_formula",
+      "additional-references": [],
+      "summary": "",
+      "refs": ["p0073_s2", "p0153_s0", "p0478_s0", "p0478_s1"]
     },
     {
       "slug": "modular-arithmetic-application",
@@ -5002,24 +4156,6 @@
       "refs": ["p0004_s0", "p0061_s0", "p0099_s0", "p0156_s0", "p0168_s1", "p0207_s0", "p0587_s0", "p0800_s0"]
     },
     {
-      "slug": "monte-carlo-method",
-      "facet": "technique",
-      "name": "Monte Carlo method",
-      "reference": "https://en.wikipedia.org/wiki/Monte_Carlo_method",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "montgomery-modular-multiplication",
-      "facet": "technique",
-      "name": "Montgomery modular multiplication",
-      "reference": "https://en.wikipedia.org/wiki/Montgomery_modular_multiplication",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "mpmath",
       "facet": "technique",
       "name": "mpmath",
@@ -5047,15 +4183,6 @@
       "refs": ["p0743_s0", "p0862_s0", "p0885_s0"]
     },
     {
-      "slug": "multiple-buffering",
-      "facet": "technique",
-      "name": "Multiple buffering",
-      "reference": "https://en.wikipedia.org/wiki/Multiple_buffering",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "multiplication-algorithm",
       "facet": "technique",
       "name": "Multiplication algorithm",
@@ -5065,15 +4192,6 @@
       "refs": ["p0015_s0", "p0016_s0", "p0020_s0", "p0056_s0", "p0066_s0", "p0080_s0", "p0080_s1"]
     },
     {
-      "slug": "multiplicative-group-of-integers-modulo-n",
-      "facet": "technique",
-      "name": "Multiplicative group of integers modulo n",
-      "reference": "https://en.wikipedia.org/wiki/Multiplicative_group_of_integers_modulo_n",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "multiplicative-partition",
       "facet": "technique",
       "name": "Multiplicative partition",
@@ -5081,24 +4199,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0088_s0"]
-    },
-    {
-      "slug": "multiset",
-      "facet": "technique",
-      "name": "Multiset",
-      "reference": "https://en.wikipedia.org/wiki/Multiset",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "named-tuples",
-      "facet": "technique",
-      "name": "named tuples",
-      "reference": "https://docs.python.org/3/library/collections.html#collections.namedtuple",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "namedtuple",
@@ -5128,24 +4228,6 @@
       "refs": ["p0183_s0", "p0800_s0"]
     },
     {
-      "slug": "net-polyhedron",
-      "facet": "technique",
-      "name": "Net (polyhedron)",
-      "reference": "https://en.wikipedia.org/wiki/Net_(polyhedron)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "newline",
-      "facet": "technique",
-      "name": "Newline",
-      "reference": "https://en.wikipedia.org/wiki/Newline",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "newtons-method",
       "facet": "technique",
       "name": "Newton's method",
@@ -5164,15 +4246,6 @@
       "refs": ["p0009_s0"]
     },
     {
-      "slug": "nim",
-      "facet": "technique",
-      "name": "Nim",
-      "reference": "https://en.wikipedia.org/wiki/Nim",
-      "additional-references": ["https://en.wikipedia.org/wiki/Nim#Mathematical_theory"],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "nonlocal",
       "facet": "technique",
       "name": "nonlocal",
@@ -5180,15 +4253,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0110_s0"]
-    },
-    {
-      "slug": "normal-play-convention",
-      "facet": "technique",
-      "name": "Normal play convention",
-      "reference": "https://en.wikipedia.org/wiki/Normal_play_convention",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "np-bincount",
@@ -5227,15 +4291,6 @@
       "refs": ["p0023_s0", "p0056_s0", "p0128_s0", "p0133_s0", "p0134_s0", "p0135_s0", "p0136_s0", "p0149_s0", "p0150_s0", "p0154_s0", "p0165_s0", "p0177_s0", "p0187_s0", "p0193_s0", "p0196_s0", "p0210_s0", "p0211_s0", "p0213_s0", "p0214_s0", "p0216_s0", "p0229_s0", "p0231_s0", "p0304_s0", "p0357_s0", "p0381_s0", "p0420_s0", "p0420_s1", "p0429_s0", "p0461_s0", "p0478_s1", "p0487_s0", "p0501_s0", "p0549_s0", "p0565_s0", "p0565_s1", "p0650_s0", "p0720_s0", "p0757_s0", "p0772_s0", "p0934_s0", "p0938_s0", "p0944_s0", "p0980_s0"]
     },
     {
-      "slug": "numpy-bit-operations-and-np-unique",
-      "facet": "technique",
-      "name": "NumPy bit operations and np.unique",
-      "reference": "https://numpy.org/doc/stable/reference/generated/numpy.unique.html",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "numpy-linalg-solve",
       "facet": "technique",
       "name": "numpy.linalg.solve",
@@ -5254,24 +4309,6 @@
       "refs": ["p0134_s0", "p0179_s0", "p0501_s0"]
     },
     {
-      "slug": "object-copying",
-      "facet": "technique",
-      "name": "Object copying",
-      "reference": "https://en.wikipedia.org/wiki/Object_copying",
-      "additional-references": ["https://en.wikipedia.org/wiki/Object_copying#Deep_copy"],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "object-pool-pattern",
-      "facet": "technique",
-      "name": "Object pool pattern",
-      "reference": "https://en.wikipedia.org/wiki/Object_pool_pattern",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "open-addressing",
       "facet": "technique",
       "name": "Open addressing",
@@ -5279,33 +4316,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0010_s2", "p0037_s0", "p0077_s0", "p0077_s1", "p0125_s0", "p0145_s0", "p0152_s0", "p0153_s0", "p0155_s0", "p0208_s0", "p0259_s0", "p0269_s0", "p0755_s0"]
-    },
-    {
-      "slug": "operator-itemgetter",
-      "facet": "technique",
-      "name": "operator.itemgetter",
-      "reference": "https://docs.python.org/3/library/operator.html",
-      "additional-references": ["https://docs.python.org/3/library/operator.html#operator.itemgetter"],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "optimization-problem",
-      "facet": "technique",
-      "name": "Optimization problem",
-      "reference": "https://en.wikipedia.org/wiki/Optimization_problem",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "orthogonal-group",
-      "facet": "technique",
-      "name": "Orthogonal group",
-      "reference": "https://en.wikipedia.org/wiki/Orthogonal_group",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "parallel-array",
@@ -5326,15 +4336,6 @@
       "refs": ["p0025_s0", "p0094_s0", "p0138_s0"]
     },
     {
-      "slug": "partially-ordered-set",
-      "facet": "technique",
-      "name": "Partially ordered set",
-      "reference": "https://en.wikipedia.org/wiki/Partially_ordered_set",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "partition-of-a-set",
       "facet": "technique",
       "name": "Partition of a set",
@@ -5353,15 +4354,6 @@
       "refs": ["p0053_s0", "p0194_s0", "p0788_s0", "p0885_s0"]
     },
     {
-      "slug": "pell-number",
-      "facet": "technique",
-      "name": "Pell number",
-      "reference": "https://en.wikipedia.org/wiki/Pell_number",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "pells-equation",
       "facet": "technique",
       "name": "Pell's equation",
@@ -5371,24 +4363,6 @@
       "refs": ["p0066_s0", "p0094_s0", "p0100_s0", "p0137_s0", "p0138_s0", "p0139_s2", "p0140_s0", "p0224_s0", "p0321_s0"]
     },
     {
-      "slug": "pentagonal-number",
-      "facet": "technique",
-      "name": "Pentagonal number",
-      "reference": "https://en.wikipedia.org/wiki/Pentagonal_number",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "peter-norvigs-well-known-essay",
-      "facet": "technique",
-      "name": "Peter Norvig's well-known essay",
-      "reference": "https://norvig.com/sudoku.html",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "pivot-element",
       "facet": "technique",
       "name": "Pivot element",
@@ -5396,24 +4370,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Pivot_element#Partial_and_complete_pivoting"],
       "summary": "",
       "refs": ["p0227_s0"]
-    },
-    {
-      "slug": "polygonal-number",
-      "facet": "technique",
-      "name": "Polygonal number",
-      "reference": "https://en.wikipedia.org/wiki/Polygonal_number",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "pow",
-      "facet": "technique",
-      "name": "pow",
-      "reference": "https://docs.python.org/3/library/functions.html#pow",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "power-iteration",
@@ -5488,15 +4444,6 @@
       "refs": ["p0069_s0", "p0146_s0", "p0243_s0", "p0293_s0"]
     },
     {
-      "slug": "priority-queue",
-      "facet": "technique",
-      "name": "Priority queue",
-      "reference": "https://en.wikipedia.org/wiki/Priority_queue",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "pseudorandom-number-generator-application",
       "facet": "technique",
       "name": "Pseudorandom number generator (application)",
@@ -5504,15 +4451,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0165_s0", "p0185_s0", "p0288_s0"]
-    },
-    {
-      "slug": "pure-function",
-      "facet": "technique",
-      "name": "Pure function",
-      "reference": "https://en.wikipedia.org/wiki/Pure_function",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "qsort",
@@ -5578,24 +4516,6 @@
       "refs": ["p0153_s0", "p0429_s0", "p0501_s0", "p0565_s1", "p0926_s0"]
     },
     {
-      "slug": "radical-of-an-integer",
-      "facet": "technique",
-      "name": "Radical of an integer",
-      "reference": "https://en.wikipedia.org/wiki/Radical_of_an_integer",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "radix",
-      "facet": "technique",
-      "name": "Radix",
-      "reference": "https://en.wikipedia.org/wiki/Radix",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "randomized-incremental-algorithm",
       "facet": "technique",
       "name": "Randomized incremental algorithm",
@@ -5605,24 +4525,6 @@
       "refs": ["p0816_s0"]
     },
     {
-      "slug": "rate-of-convergence",
-      "facet": "technique",
-      "name": "Rate of convergence",
-      "reference": "https://en.wikipedia.org/wiki/Rate_of_convergence",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "rational-function",
-      "facet": "technique",
-      "name": "Rational function",
-      "reference": "https://en.wikipedia.org/wiki/Rational_function",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "rational-number-application",
       "facet": "technique",
       "name": "Rational number (application)",
@@ -5630,15 +4532,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0155_s0", "p0259_s0"]
-    },
-    {
-      "slug": "ray-tracing-graphics",
-      "facet": "technique",
-      "name": "Ray tracing (graphics)",
-      "reference": "https://en.wikipedia.org/wiki/Ray_tracing_(graphics)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "recurrence-relation-application",
@@ -5668,15 +4561,6 @@
       "refs": ["p0113_s0"]
     },
     {
-      "slug": "ring-homomorphism",
-      "facet": "technique",
-      "name": "Ring homomorphism",
-      "reference": "https://en.wikipedia.org/wiki/Ring_homomorphism",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "rotation-matrix",
       "facet": "technique",
       "name": "Rotation matrix",
@@ -5702,15 +4586,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Rounding#Round_half_to_even"],
       "summary": "",
       "refs": ["p0493_s0", "p0751_s0"]
-    },
-    {
-      "slug": "row-and-column-major-order",
-      "facet": "technique",
-      "name": "Row- and column-major order",
-      "reference": "https://en.wikipedia.org/wiki/Row-_and_column-major_order",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "run-length-encoding",
@@ -5767,15 +4642,6 @@
       "refs": ["p0007_s0", "p0010_s1", "p0027_s0", "p0035_s0", "p0049_s0", "p0050_s0", "p0051_s0", "p0060_s0", "p0077_s0", "p0077_s1", "p0087_s0"]
     },
     {
-      "slug": "significand",
-      "facet": "technique",
-      "name": "Significand",
-      "reference": "https://en.wikipedia.org/wiki/Significand",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "simons-favorite-factoring-trick",
       "facet": "technique",
       "name": "Simon's Favorite Factoring Trick",
@@ -5794,15 +4660,6 @@
       "refs": ["p0185_s0"]
     },
     {
-      "slug": "sliding-window-protocol",
-      "facet": "technique",
-      "name": "Sliding window protocol",
-      "reference": "https://en.wikipedia.org/wiki/Sliding_window_protocol",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "snprintf",
       "facet": "technique",
       "name": "snprintf",
@@ -5819,15 +4676,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0022_s0", "p0052_s0", "p0054_s0", "p0096_s0", "p0103_s0", "p0103_s1", "p0107_s0", "p0111_s0", "p0119_s0", "p0124_s0", "p0127_s0", "p0140_s0", "p0143_s0", "p0180_s0", "p0184_s0", "p0200_s0", "p0203_s0", "p0321_s0", "p1000_s0"]
-    },
-    {
-      "slug": "sparse-matrix",
-      "facet": "technique",
-      "name": "Sparse matrix",
-      "reference": "https://en.wikipedia.org/wiki/Sparse_matrix",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "specular-reflection",
@@ -5884,15 +4732,6 @@
       "refs": ["p0139_s1", "p0145_s0", "p0218_s0", "p0223_s0", "p0224_s0", "p0226_s0", "p0642_s0"]
     },
     {
-      "slug": "stack-based-memory-allocation",
-      "facet": "technique",
-      "name": "Stack-based memory allocation",
-      "reference": "https://en.wikipedia.org/wiki/Stack-based_memory_allocation",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "stars-and-bars-combinatorics",
       "facet": "technique",
       "name": "Stars and bars (combinatorics)",
@@ -5911,15 +4750,6 @@
       "refs": ["p0142_s0", "p0145_s0"]
     },
     {
-      "slug": "steinhaus-johnson-trotter-algorithm",
-      "facet": "technique",
-      "name": "Steinhaus\u2013Johnson\u2013Trotter algorithm",
-      "reference": "https://en.wikipedia.org/wiki/Steinhaus%E2%80%93Johnson%E2%80%93Trotter_algorithm",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "stencil-numerical-analysis",
       "facet": "technique",
       "name": "Stencil (numerical analysis)",
@@ -5927,24 +4757,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0213_s0"]
-    },
-    {
-      "slug": "step-function",
-      "facet": "technique",
-      "name": "Step function",
-      "reference": "https://en.wikipedia.org/wiki/Step_function",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "stirlings-approximation",
-      "facet": "technique",
-      "name": "Stirling's approximation",
-      "reference": "https://en.wikipedia.org/wiki/Stirling%27s_approximation",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "stochastic-matrix",
@@ -5963,15 +4775,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0022_s0", "p0052_s0"]
-    },
-    {
-      "slug": "strength-reduction",
-      "facet": "technique",
-      "name": "Strength reduction",
-      "reference": "https://en.wikipedia.org/wiki/Strength_reduction",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "string-slicing",
@@ -6008,15 +4811,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0151_s0"]
-    },
-    {
-      "slug": "symmetric-matrix",
-      "facet": "technique",
-      "name": "Symmetric matrix",
-      "reference": "https://en.wikipedia.org/wiki/Symmetric_matrix",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "symmetry",
@@ -6064,15 +4858,6 @@
       "refs": ["p0147_s0"]
     },
     {
-      "slug": "timsort",
-      "facet": "technique",
-      "name": "Timsort",
-      "reference": "https://en.wikipedia.org/wiki/Timsort",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "tonelli-shanks-algorithm",
       "facet": "technique",
       "name": "Tonelli\u2013Shanks algorithm",
@@ -6089,15 +4874,6 @@
       "additional-references": ["https://en.wikipedia.org/wiki/Topological_sorting#Kahn's_algorithm"],
       "summary": "",
       "refs": ["p0079_s0", "p0081_s0"]
-    },
-    {
-      "slug": "translation-lookaside-buffer",
-      "facet": "technique",
-      "name": "Translation lookaside buffer",
-      "reference": "https://en.wikipedia.org/wiki/Translation_lookaside_buffer",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "trapezoidal-rule",
@@ -6125,15 +4901,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0003_s0", "p0010_s3", "p0012_s0", "p0012_s1", "p0021_s0", "p0023_s1", "p0027_s0", "p0029_s0", "p0029_s1", "p0041_s0", "p0046_s0", "p0047_s0", "p0051_s0", "p0058_s0", "p0060_s0", "p0069_s0", "p0108_s0", "p0118_s0", "p0128_s0", "p0130_s0", "p0131_s0", "p0152_s0", "p0157_s0", "p0170_s0", "p0176_s0", "p0188_s0", "p0200_s0", "p0202_s0", "p0221_s0", "p0243_s0", "p0293_s0", "p0357_s0", "p0478_s0", "p0545_s0", "p0694_s0", "p0853_s0", "p0926_s0", "p0932_s0"]
-    },
-    {
-      "slug": "triangle-free-graph",
-      "facet": "technique",
-      "name": "Triangle-free graph",
-      "reference": "https://en.wikipedia.org/wiki/Triangle-free_graph",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "triangle-inequality",
@@ -6190,24 +4957,6 @@
       "refs": ["p0004_s0"]
     },
     {
-      "slug": "twos-complement",
-      "facet": "technique",
-      "name": "Two's complement",
-      "reference": "https://en.wikipedia.org/wiki/Two%27s_complement",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "undefined-behavior",
-      "facet": "technique",
-      "name": "Undefined behavior",
-      "reference": "https://en.wikipedia.org/wiki/Undefined_behavior",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
       "slug": "unranking",
       "facet": "technique",
       "name": "Unranking",
@@ -6215,24 +4964,6 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0024_s0", "p0845_s0", "p0974_s0"]
-    },
-    {
-      "slug": "unsigned-short",
-      "facet": "technique",
-      "name": "unsigned short",
-      "reference": "https://en.cppreference.com/w/c/types/integer",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
-    },
-    {
-      "slug": "vectorization-mathematics",
-      "facet": "technique",
-      "name": "Vectorization (mathematics)",
-      "reference": "https://en.wikipedia.org/wiki/Vectorization_(mathematics)",
-      "additional-references": [],
-      "summary": "",
-      "refs": []
     },
     {
       "slug": "vectorized",
