@@ -255,7 +255,9 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('class="tagbar"', body)
         self.assertIn('tag-chip domain', body)
         self.assertIn('tag-chip takeaway', body)
-        self.assertIn('href="/topics/technique/sieve-of-eratosthenes"', body)
+        # The slug itself is regenerated content (see `claude-batch`), so assert the link *shape*
+        # a chip must produce - facet-scoped tag page - not whichever technique p0007 carries today.
+        self.assertIn('href="/topics/technique/', body)
         # B — workbench panel: per-index technique row + curated topic (not a per-tag skeleton)
         self.assertIn('Tags &amp; topics', body)
         self.assertIn('<span class="idx">s0</span>', body)
@@ -275,7 +277,7 @@ class ContentServiceTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('class="tagbar"', body)
         self.assertIn('tag-chip domain', body)
-        self.assertIn('href="/topics/technique/sieve-of-eratosthenes"', body)
+        self.assertIn('href="/topics/technique/', body)
 
     @unittest_run_loop
     async def test_problem_page_off_site_links(self) -> None:

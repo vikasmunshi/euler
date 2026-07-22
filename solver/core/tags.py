@@ -28,7 +28,8 @@ its page to ``final`` when it finishes writing.
 """
 from __future__ import annotations
 
-__all__ = ['tags', 'topics', 'topic', 'update_tags', 'format_vocabulary', 'STATUSES', 'article_status']
+__all__ = ['tags', 'topics', 'topic', 'update_tags', 'format_vocabulary', 'facet_map', 'STATUSES',
+           'article_status']
 
 import json
 import re
@@ -94,6 +95,12 @@ def _facet_of(central: dict[str, Any]) -> dict[str, str]:
     return {tag['slug']: tag['facet'] for tag in central['tags']}
 
 
+def facet_map() -> dict[str, str]:
+    """Every known slug mapped to its facet - the authority a generated tags.json is checked
+    against before it is written (see `solver.ai.docs.enforce_facets`)."""
+    return _facet_of(_load_central())
+
+
 def format_vocabulary(facets: tuple[str, ...] = FACETS) -> str:
     """The current tag vocabulary as compact markdown, grouped by facet, for a generation prompt.
     Lists each tag as ``- slug — name`` (takeaways append the summary).
@@ -101,15 +108,22 @@ def format_vocabulary(facets: tuple[str, ...] = FACETS) -> str:
     ``facets`` narrows the listing: a domain-only prompt (an unsolved problem, which has no
     solutions to carry techniques or takeaways) passes ``('domain',)`` so the model is not shown
     - and cannot pick from - vocabulary it has no business assigning.
+
+    When more than one facet is listed, each entry repeats its facet inline (``- slug [technique]
+    — name``). Section grouping alone is not enough: a generator recalling a slug loses which
+    ``###`` block it came from and files it under the wrong facet, which `update-tags --check`
+    then rejects. The marker travels with the slug, so it cannot be lost.
     """
     tags = _load_central()['tags']
     lines: list[str] = []
+    mark = len(facets) > 1
     for facet in facets:
         entries = sorted((t for t in tags if t['facet'] == facet), key=lambda t: t['slug'])
         lines.append(f'\n### {facet} ({len(entries)})')
         for t in entries:
             extra = f": {t['summary']}" if facet == 'takeaway' and t.get('summary') else ''
-            lines.append(f"- {t['slug']} — {t['name']}{extra}")
+            tag = f" [{facet}]" if mark else ''
+            lines.append(f"- {t['slug']}{tag} — {t['name']}{extra}")
     return '\n'.join(lines)
 
 

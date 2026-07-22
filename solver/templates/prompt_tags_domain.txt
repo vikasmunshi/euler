@@ -24,7 +24,10 @@ follows from there being no solution: **assign `domain` tags only**.
   are no solution indices yet.
 - `new-tags` - a full tag definition only when the problem's subject genuinely has no slug above.
   Prefer an existing slug: a near-fit that a reader would find beats a perfect one nobody searches
-  for. Anything you do propose must be facet `domain`.
+  for. Anything you do propose must be facet `domain`. Slugs are globally unique across the whole
+  vocabulary, of which only the `domain` facet is shown above - so a slug you invent may already
+  exist as a technique or takeaway. Keep proposals specific to the subject matter (`digit-sum`,
+  `amicable-numbers`) and never propose a bare restatement of the problem title.
 
 Judge only from the statement. Do not guess how the problem would be solved, and do not tag an
 algorithm or data structure you imagine a solver might reach for - that is a technique, and

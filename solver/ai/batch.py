@@ -28,6 +28,7 @@ from __future__ import annotations
 __all__ = ['claude_batch']
 
 import time
+from collections import Counter
 from json import dumps, loads
 from typing import Any, Literal
 
@@ -35,7 +36,8 @@ from anthropic import Anthropic
 from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
 from anthropic.types.messages.batch_create_params import Request
 
-from solver.ai.docs import _parse_tags_json, has_solutions, max_output_tokens, tags_prompt
+from solver.ai.docs import (_parse_tags_json, enforce_facets, has_solutions,
+                            max_output_tokens, tags_prompt)
 from solver.ai.facts import Facts, _split_prompt, gather_facts, user_message_content
 from solver.ai.models import Model, get_api_key, record_usage
 from solver.config import ExitCodes, config
@@ -153,10 +155,17 @@ def _wait(client: Anthropic, batch_id: str) -> bool:
             return False
 
 
-def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[str]]:
-    """Write every succeeded result to its problem's tags.json; returns (written, failures)."""
+def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[str], Counter[str]]:
+    """Write every succeeded result to its problem's tags.json.
+
+    Returns ``(written, failures, conflicts)``. ``conflicts`` counts the facet corrections
+    `enforce_facets` had to make, tallied by slug across the whole wave - one problem reaching
+    for a slug in the wrong facet is a slip, the same slug recurring across a wave is the
+    vocabulary telling you the concept is filed under the wrong facet.
+    """
     written = 0
     failures: list[str] = []
+    conflicts: Counter[str] = Counter()
     for result in client.messages.batches.results(batch_id):
         custom_id = result.custom_id
         if result.result.type != 'succeeded':
@@ -169,13 +178,15 @@ def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[
         if parsed is None:
             failures.append(f'{custom_id}: unparseable tags JSON')
             continue
+        parsed, found = enforce_facets(parsed)
+        conflicts.update(found)
         problem = Problem.from_number(int(custom_id.lstrip('p')))
         write_file(problem.solution_dir / config.tags_filename, parsed.encode())
         written += 1
     store = _load_store()
     store.pop(batch_id, None)
     _save_store(store)
-    return written, failures
+    return written, failures, conflicts
 
 
 @register(requires='maintainer',
@@ -226,7 +237,7 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
         wave_model = Model(meta['model']) if meta.get('model') else model
         if not _wait(client, batch_id):
             return ExitCodes.EXIT_ERROR
-        written, failures = _collect(client, batch_id, wave_model)
+        written, failures, conflicts = _collect(client, batch_id, wave_model)
     else:
         wave = _select(target, limit)
         if not wave:
@@ -240,11 +251,13 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
             return ExitCodes.EXIT_OK
         if not _wait(client, new_id):
             return ExitCodes.EXIT_ERROR
-        written, failures = _collect(client, new_id, model)
+        written, failures, conflicts = _collect(client, new_id, model)
 
     for failure in failures:
-        console.print(f'  [warning]•[/warning] {failure}')
+        console.print(f'  [error]•[/error] {failure}')
+    for conflict, count in conflicts.most_common():
+        console.print(f'  [warning]•[/warning] {conflict} (x{count})')
     console.print(f'[accent]claude-batch:[/accent] wrote {written} {config.tags_filename} file(s), '
-                  f'{len(failures)} failure(s)')
+                  f'{len(failures)} failure(s), {sum(conflicts.values())} facet correction(s)')
     console.print('[muted]Run [accent]update-tags[/accent] to reconcile before the next wave.[/muted]')
     return ExitCodes.EXIT_ERROR if failures else ExitCodes.EXIT_OK

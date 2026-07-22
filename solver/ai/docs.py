@@ -6,6 +6,7 @@ from __future__ import annotations
 __all__ = ['generate_notes', 'generate_tags', 'generate_test_cases']
 
 from json import JSONDecodeError, dumps, loads
+from typing import Any
 
 from anthropic import APIError
 from anthropic.types import MessageParam, TextBlock
@@ -126,7 +127,9 @@ def _parse_tags_json(raw: str) -> str | None:
         return None
     if not isinstance(data, dict) or not {'domain', 'takeaways', 'techniques', 'new-tags'} <= data.keys():
         return None
-    return dumps(data, indent=2)
+    # Trailing newline to match `tags._write_problem_tags`, so an AI-authored file and the one
+    # update-tags rewrites are byte-identical - otherwise every reconcile shows phantom churn.
+    return dumps(data, indent=2) + '\n'
 
 
 def has_solutions(problem: Problem) -> bool:
@@ -149,6 +152,66 @@ def tags_prompt(problem: Problem, facts: Facts) -> str:
         return filled_template(Templates.PROMPT_TAGS, facts=facts, vocabulary=format_vocabulary())
     return filled_template(Templates.PROMPT_TAGS_DOMAIN, facts=facts,
                            vocabulary=format_vocabulary(facets=('domain',)))
+
+
+def enforce_facets(tags_json: str) -> tuple[str, list[str]]:
+    """Drop slugs the vocabulary files under a different facet; return (cleaned, conflicts).
+
+    A slug's facet is a fact the vocabulary owns, not a judgement the generator gets to make,
+    and `update-tags --check` rejects a file that disagrees. Prose alone does not hold the line -
+    telling the model the rule and marking every vocabulary entry with its facet both failed - so
+    the rule is enforced here, where the facet map is known and compliance is not optional.
+
+    Only slugs that exist under a *different* facet are dropped. An entirely unknown slug is left
+    alone: it is either a `new-tags` proposal the model is also using (legitimate, and promoted by
+    update-tags) or a typo, which `--check` reports rather than silently swallowing.
+
+    The dropped slugs are returned, not discarded quietly: a slug the generator keeps reaching for
+    in the wrong facet is usually pointing at a real gap in the vocabulary (a concept that is
+    genuinely subject matter but was harvested as a technique), and that signal is the maintainer's
+    to act on.
+    """
+    from solver.core.tags import facet_map
+    facets = facet_map()
+    data = loads(tags_json)
+    conflicts: list[str] = []
+    rehomed: dict[str, list[str]] = {'domain': [], 'takeaway': []}
+
+    def keep(slug: str, wanted: str) -> bool:
+        actual = facets.get(slug)
+        if actual is None or actual == wanted:
+            return True
+        # `domain` and `takeaways` are problem-level, so a slug belonging to either can be moved
+        # to its right list without inventing anything. A `technique` cannot: techniques attach to
+        # a specific solution index, and guessing one - or copying it to every index - is the
+        # expand-to-all-indices defect this whole re-tag exists to remove. So that direction drops.
+        if actual in rehomed:
+            rehomed[actual].append(slug)
+            conflicts.append(f'{slug} is {actual}, moved out of {wanted}')
+        else:
+            conflicts.append(f'{slug} is {actual}, dropped from {wanted}')
+        return False
+
+    data['domain'] = [s for s in data.get('domain', []) if keep(s, 'domain')]
+    data['takeaways'] = [s for s in data.get('takeaways', []) if keep(s, 'takeaway')]
+    data['techniques'] = {idx: [s for s in slugs if keep(s, 'technique')]
+                          for idx, slugs in data.get('techniques', {}).items()}
+    for slug in rehomed['domain']:
+        if slug not in data['domain']:
+            data['domain'].append(slug)
+    for slug in rehomed['takeaway']:
+        if slug not in data['takeaways']:
+            data['takeaways'].append(slug)
+    # A proposal whose slug is already taken - in any facet - can never be promoted.
+    proposals: list[Any] = []
+    for proposed in data.get('new-tags', []):
+        slug = proposed.get('slug')
+        if slug in facets:
+            conflicts.append(f'{slug} already exists as {facets[slug]}, proposal dropped')
+        else:
+            proposals.append(proposed)
+    data['new-tags'] = proposals
+    return dumps(data, indent=2) + '\n', conflicts
 
 
 def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -> bool | None:
@@ -195,6 +258,9 @@ def generate_tags(model: Model, *, problem: Problem, force: bool, major: bool) -
         if raw is not None:
             console.print(f'Generated tags: {raw}', markup=False, highlight=False)
         return False
+    parsed, conflicts = enforce_facets(parsed)
+    for conflict in conflicts:
+        console.print(f'  [warning]•[/warning] {conflict}')
     write_file(tags_path, parsed.encode(), f'Updated {config.tags_filename}')
     console.print('[muted]Run [accent]update-tags[/accent] to reconcile the central vocabulary and articles.[/muted]')
     return True

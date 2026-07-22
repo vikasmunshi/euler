@@ -20,6 +20,14 @@ end with `}`, and contain exactly the keys `domain`, `takeaways`, `techniques`, 
 The `techniques` map must have one key per solution index (`s0`, `s1`, …) that the message
 provides, each listing only the techniques *that index* uses. Prefer existing vocabulary slugs;
 put any genuinely new tag's full definition in `new-tags`, never a bare slug in a facet list.
+
+**A slug's facet is fixed by the vocabulary, and it is the whole slug's identity.** Every entry
+above is marked `[domain]`, `[technique]` or `[takeaway]`. A slug marked `[technique]` may appear
+only inside `techniques`; one marked `[domain]` only in `domain`; one marked `[takeaway]` only in
+`takeaways`. Putting a slug in any other list is rejected outright - so if a slug fits what you
+want to say but sits in the wrong facet, do not file it there and do not re-propose it under the
+facet you wanted. Slugs are globally unique across facets: never propose a `new-tags` slug that
+already appears above, whatever its facet. Drop the tag, or pick a different, unused slug.
 $house_style
 <!--user-->
 ## Problem
