@@ -1,4 +1,5 @@
 <!-- tags: [exponentiation-by-squaring] -->
+<!-- status: draft -->
 # Exponentiation by squaring
 
 Reference: [Exponentiation by squaring](https://en.wikipedia.org/wiki/Exponentiation_by_squaring)

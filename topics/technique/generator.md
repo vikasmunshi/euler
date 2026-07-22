@@ -1,4 +1,5 @@
 <!-- tags: [generator] -->
+<!-- status: draft -->
 # generator expression
 
 Reference: [generator expression](https://docs.python.org/3/reference/expressions.html#generator-expressions)

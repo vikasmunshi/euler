@@ -1,4 +1,5 @@
 <!-- tags: [harmonic-series-mathematics] -->
+<!-- status: draft -->
 # Harmonic series (mathematics)
 
 Reference: [Harmonic series (mathematics)](https://en.wikipedia.org/wiki/Harmonic_series_(mathematics))

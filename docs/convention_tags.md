@@ -82,6 +82,33 @@ command promotes each proposal into `topics/tags.json` and files it into the rig
 
 Prefer reusing an existing tag over proposing a near-duplicate; propose sparingly.
 
+## Topic articles and the index — `topics/articles.json`
+
+Each tag can carry an article at `topics/<facet>/<slug>.md`; curated cross-cutting topics live
+elsewhere under `topics/` (e.g. `topics/number-theory/primes.md`). Every article opens with two
+comments — the tags it covers, and its **status**:
+
+```markdown
+<!-- tags: [sieve-of-eratosthenes, prime-number] -->
+<!-- status: draft -->
+# Generating and testing primes
+```
+
+`update-tags` maintains **`topics/articles.json`**, the article index: one row per writable topic —
+every tag in the vocabulary, plus the curated pages — with its title, declared tags, distinct-problem
+count and status. Three statuses:
+
+| status | meaning |
+| --- | --- |
+| `missing` | no page on disk yet; the tag is vocabulary only |
+| `draft` | a page exists and is still open for writing (the skeleton stubs start here) |
+| `final` | the article is done |
+
+The article is the source of truth (`update-tags` stamps a `draft` comment on any page missing one);
+the index only mirrors it. The blogger skill sets `final` when it finishes writing a page, and
+`claude-blog` then refuses that topic unless run with `--force`. The index also drives `claude-blog`
+tab-completion (unwritten and most-referenced first) and the web `/topics` grid.
+
 ## Choosing good tags
 
 - **domain**: name the subject a reader would search for, not the method. Two or three is typical.

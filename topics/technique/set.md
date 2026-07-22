@@ -1,4 +1,5 @@
 <!-- tags: [set] -->
+<!-- status: draft -->
 # set
 
 Reference: [set](https://docs.python.org/3/library/stdtypes.html#set)

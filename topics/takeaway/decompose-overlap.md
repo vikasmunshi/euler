@@ -1,4 +1,5 @@
 <!-- tags: [decompose-overlap] -->
+<!-- status: draft -->
 # Decompose overlapping conditions
 
 _Inclusion-exclusion turns one tangled test into independent summable parts._

@@ -1,4 +1,5 @@
 <!-- tags: [monotonic-function] -->
+<!-- status: draft -->
 # Monotonic function
 
 Reference: [Monotonic function](https://en.wikipedia.org/wiki/Monotonic_function)

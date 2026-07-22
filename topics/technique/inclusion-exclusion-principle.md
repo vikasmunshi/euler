@@ -1,4 +1,5 @@
 <!-- tags: [inclusion-exclusion-principle] -->
+<!-- status: draft -->
 # Inclusion–exclusion principle
 
 Reference: [Inclusion–exclusion principle](https://en.wikipedia.org/wiki/Inclusion%E2%80%93exclusion_principle)

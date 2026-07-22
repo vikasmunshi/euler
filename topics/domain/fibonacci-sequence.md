@@ -1,4 +1,5 @@
 <!-- tags: [fibonacci-sequence] -->
+<!-- status: draft -->
 # Fibonacci sequence
 
 Reference: [Fibonacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence)

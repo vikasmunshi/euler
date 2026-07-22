@@ -1,4 +1,5 @@
 <!-- tags: [diophantine-equation] -->
+<!-- status: draft -->
 # Diophantine equation
 
 Reference: [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation)

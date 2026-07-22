@@ -1,4 +1,5 @@
 <!-- tags: [m-bius-function] -->
+<!-- status: draft -->
 # Möbius function
 
 Reference: [Möbius function](https://en.wikipedia.org/wiki/M%C3%B6bius_function)

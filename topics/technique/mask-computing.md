@@ -1,4 +1,5 @@
 <!-- tags: [mask-computing] -->
+<!-- status: draft -->
 # Mask (computing)
 
 Reference: [Mask (computing)](https://en.wikipedia.org/wiki/Mask_(computing))

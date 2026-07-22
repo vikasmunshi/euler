@@ -1,4 +1,5 @@
 <!-- tags: [factorial] -->
+<!-- status: draft -->
 # Factorial
 
 Reference: [Factorial](https://en.wikipedia.org/wiki/Factorial)

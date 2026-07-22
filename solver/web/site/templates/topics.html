@@ -7,18 +7,27 @@
   <p class="lede">Writeups on the ideas the problems keep reusing — sieve once,
      solve forever.</p>
 </header>
-{% if entries %}
-<nav class="cards" aria-label="Topics">
-  {% for e in entries %}
-  <a class="card" href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
+{% if groups %}
+{# One section per folder of topics/: the folder is the heading, so the cards below
+   carry only their leaf name and pack four to a row. A card's second line is the
+   page's own title — dropped where it only repeats the name (the per-tag pages). #}
+{% for g in groups %}
+<div class="subrule"><h3>{{ g.heading }}</h3><span class="count">{{ g.entries | length }}</span></div>
+<nav class="cards cards-4" aria-label="{{ g.heading }} topics">
+  {% for e in g.entries %}
+  {# A page still being written is muted; a finished one says so. Status comes from the
+     article index (topics/articles.json), which update-tags keeps in step with the pages. #}
+  <a class="card{% if e.status == 'draft' %} is-draft{% endif %}"
+     href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
     <span class="card-ic">&lambda;</span>
     <span><span class="card-title">{{ e.heading }}</span>
-      <span class="card-desc">{{ e.title }}</span></span>
-    <span class="card-go">&rarr;</span>
+      {% if e.title %}<span class="card-desc">{{ e.title }}</span>{% endif %}</span>
+    {% if e.status == 'final' %}<span class="pill pill-final">final</span>{% endif %}
   </a>
   {% endfor %}
 </nav>
+{% endfor %}
 {% else %}
 <p class="muted">Nothing written yet — the mathematics is still oral tradition.</p>
 {% endif %}

@@ -1,4 +1,5 @@
 <!-- tags: [sorting-algorithm] -->
+<!-- status: draft -->
 # Sorting algorithm
 
 Reference: [Sorting algorithm](https://en.wikipedia.org/wiki/Sorting_algorithm)

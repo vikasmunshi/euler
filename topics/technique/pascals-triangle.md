@@ -1,4 +1,5 @@
 <!-- tags: [pascals-triangle] -->
+<!-- status: draft -->
 # Pascal's triangle
 
 Reference: [Pascal's triangle](https://en.wikipedia.org/wiki/Pascal%27s_triangle)

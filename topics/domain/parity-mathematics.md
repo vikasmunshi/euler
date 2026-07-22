@@ -1,4 +1,5 @@
 <!-- tags: [parity-mathematics] -->
+<!-- status: draft -->
 # Parity (mathematics)
 
 Reference: [Parity (mathematics)](https://en.wikipedia.org/wiki/Parity_(mathematics))

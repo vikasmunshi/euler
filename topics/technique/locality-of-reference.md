@@ -1,4 +1,5 @@
 <!-- tags: [locality-of-reference] -->
+<!-- status: draft -->
 # Locality of reference
 
 Reference: [Locality of reference](https://en.wikipedia.org/wiki/Locality_of_reference)

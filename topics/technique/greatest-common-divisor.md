@@ -1,4 +1,5 @@
 <!-- tags: [greatest-common-divisor] -->
+<!-- status: draft -->
 # Greatest common divisor
 
 Reference: [Greatest common divisor](https://en.wikipedia.org/wiki/Greatest_common_divisor)

@@ -1,0 +1,4757 @@
+{
+  "articles": [
+    {
+      "path": "domain/15-puzzle",
+      "title": "15 puzzle",
+      "status": "missing",
+      "tags": ["15-puzzle"],
+      "problems": 1
+    },
+    {
+      "path": "domain/ackermann-function",
+      "title": "Ackermann function",
+      "status": "missing",
+      "tags": ["ackermann-function"],
+      "problems": 1
+    },
+    {
+      "path": "domain/acute-and-obtuse-triangles",
+      "title": "Acute and obtuse triangles",
+      "status": "missing",
+      "tags": ["acute-and-obtuse-triangles"],
+      "problems": 1
+    },
+    {
+      "path": "domain/addition-chain",
+      "title": "Addition chain",
+      "status": "missing",
+      "tags": ["addition-chain"],
+      "problems": 1
+    },
+    {
+      "path": "domain/adjacency-graph-theory",
+      "title": "Adjacency (graph theory)",
+      "status": "missing",
+      "tags": ["adjacency-graph-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/algebraic-geometry",
+      "title": "Algebraic geometry",
+      "status": "missing",
+      "tags": ["algebraic-geometry"],
+      "problems": 1
+    },
+    {
+      "path": "domain/amicable-numbers",
+      "title": "Amicable numbers",
+      "status": "missing",
+      "tags": ["amicable-numbers"],
+      "problems": 2
+    },
+    {
+      "path": "domain/april-fools-day-request-for-comments",
+      "title": "April Fools' Day Request for Comments",
+      "status": "missing",
+      "tags": ["april-fools-day-request-for-comments"],
+      "problems": 1
+    },
+    {
+      "path": "domain/arithmetic-derivative",
+      "title": "Arithmetic derivative",
+      "status": "missing",
+      "tags": ["arithmetic-derivative"],
+      "problems": 1
+    },
+    {
+      "path": "domain/assignment-problem",
+      "title": "Assignment problem",
+      "status": "missing",
+      "tags": ["assignment-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/banach-fixed-point-theorem",
+      "title": "Banach fixed-point theorem",
+      "status": "missing",
+      "tags": ["banach-fixed-point-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/bernoulli-number",
+      "title": "Bernoulli number",
+      "status": "missing",
+      "tags": ["bernoulli-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/bijection",
+      "title": "Bijection",
+      "status": "missing",
+      "tags": ["bijection"],
+      "problems": 2
+    },
+    {
+      "path": "domain/binary-logarithm",
+      "title": "Binary logarithm",
+      "status": "missing",
+      "tags": ["binary-logarithm"],
+      "problems": 1
+    },
+    {
+      "path": "domain/binary-number",
+      "title": "Binary number",
+      "status": "missing",
+      "tags": ["binary-number"],
+      "problems": 4
+    },
+    {
+      "path": "domain/binary-quadratic-form",
+      "title": "Binary quadratic form",
+      "status": "missing",
+      "tags": ["binary-quadratic-form"],
+      "problems": 1
+    },
+    {
+      "path": "domain/binary-tree",
+      "title": "Binary tree",
+      "status": "missing",
+      "tags": ["binary-tree"],
+      "problems": 1
+    },
+    {
+      "path": "domain/bisection-method",
+      "title": "Bisection method",
+      "status": "missing",
+      "tags": ["bisection-method"],
+      "problems": 1
+    },
+    {
+      "path": "domain/blancmange-curve",
+      "title": "Blancmange curve",
+      "status": "missing",
+      "tags": ["blancmange-curve"],
+      "problems": 1
+    },
+    {
+      "path": "domain/blum-blum-shub",
+      "title": "Blum Blum Shub",
+      "status": "missing",
+      "tags": ["blum-blum-shub"],
+      "problems": 1
+    },
+    {
+      "path": "domain/broken-profile",
+      "title": "broken profile",
+      "status": "missing",
+      "tags": ["broken-profile"],
+      "problems": 1
+    },
+    {
+      "path": "domain/calkin-wilf-tree",
+      "title": "Calkin\u2013Wilf tree",
+      "status": "missing",
+      "tags": ["calkin-wilf-tree"],
+      "problems": 1
+    },
+    {
+      "path": "domain/capacitance",
+      "title": "Capacitance",
+      "status": "missing",
+      "tags": ["capacitance"],
+      "problems": 1
+    },
+    {
+      "path": "domain/catalan-number",
+      "title": "Catalan number",
+      "status": "missing",
+      "tags": ["catalan-number"],
+      "problems": 2
+    },
+    {
+      "path": "domain/cathetus",
+      "title": "Cathetus",
+      "status": "missing",
+      "tags": ["cathetus"],
+      "problems": 1
+    },
+    {
+      "path": "domain/cayley-hamilton-theorem",
+      "title": "Cayley\u2013Hamilton theorem",
+      "status": "missing",
+      "tags": ["cayley-hamilton-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/central-binomial-coefficient",
+      "title": "Central binomial coefficient",
+      "status": "missing",
+      "tags": ["central-binomial-coefficient"],
+      "problems": 1
+    },
+    {
+      "path": "domain/champernowne-constant",
+      "title": "Champernowne constant",
+      "status": "missing",
+      "tags": ["champernowne-constant"],
+      "problems": 1
+    },
+    {
+      "path": "domain/class-number-number-theory",
+      "title": "Class number (number theory)",
+      "status": "missing",
+      "tags": ["class-number-number-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/clique-graph-theory",
+      "title": "Clique (graph theory)",
+      "status": "missing",
+      "tags": ["clique-graph-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/clique-problem",
+      "title": "Clique problem",
+      "status": "missing",
+      "tags": ["clique-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/closest-pair-of-points-problem",
+      "title": "Closest pair of points problem",
+      "status": "missing",
+      "tags": ["closest-pair-of-points-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/collatz-conjecture",
+      "title": "Collatz conjecture",
+      "status": "missing",
+      "tags": ["collatz-conjecture"],
+      "problems": 2
+    },
+    {
+      "path": "domain/combinatorial-game-theory",
+      "title": "Combinatorial game theory",
+      "status": "missing",
+      "tags": ["combinatorial-game-theory"],
+      "problems": 3
+    },
+    {
+      "path": "domain/combinatorial-optimization",
+      "title": "Combinatorial optimization",
+      "status": "missing",
+      "tags": ["combinatorial-optimization"],
+      "problems": 1
+    },
+    {
+      "path": "domain/combinatorics",
+      "title": "Combinatorics",
+      "status": "draft",
+      "tags": ["combinatorics"],
+      "problems": 19
+    },
+    {
+      "path": "domain/common-logarithm",
+      "title": "Common logarithm",
+      "status": "missing",
+      "tags": ["common-logarithm"],
+      "problems": 3
+    },
+    {
+      "path": "domain/commutative-property",
+      "title": "Commutative property",
+      "status": "missing",
+      "tags": ["commutative-property"],
+      "problems": 1
+    },
+    {
+      "path": "domain/completing-the-square",
+      "title": "Completing the square",
+      "status": "missing",
+      "tags": ["completing-the-square"],
+      "problems": 3
+    },
+    {
+      "path": "domain/component-graph-theory",
+      "title": "Component (graph theory)",
+      "status": "missing",
+      "tags": ["component-graph-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/composite-number",
+      "title": "Composite number",
+      "status": "missing",
+      "tags": ["composite-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/computational-geometry",
+      "title": "Computational geometry",
+      "status": "missing",
+      "tags": ["computational-geometry"],
+      "problems": 1
+    },
+    {
+      "path": "domain/concave-function",
+      "title": "Concave function",
+      "status": "missing",
+      "tags": ["concave-function"],
+      "problems": 1
+    },
+    {
+      "path": "domain/continued-fraction",
+      "title": "Continued fraction",
+      "status": "draft",
+      "tags": ["continued-fraction"],
+      "problems": 7
+    },
+    {
+      "path": "domain/contraction-mapping",
+      "title": "Contraction mapping",
+      "status": "missing",
+      "tags": ["contraction-mapping"],
+      "problems": 2
+    },
+    {
+      "path": "domain/convergent-continued-fraction",
+      "title": "Convergent (continued fraction)",
+      "status": "missing",
+      "tags": ["convergent-continued-fraction"],
+      "problems": 1
+    },
+    {
+      "path": "domain/coprime-integers",
+      "title": "Coprime integers",
+      "status": "draft",
+      "tags": ["coprime-integers"],
+      "problems": 13
+    },
+    {
+      "path": "domain/counting",
+      "title": "Counting",
+      "status": "missing",
+      "tags": ["counting"],
+      "problems": 1
+    },
+    {
+      "path": "domain/cuban-prime",
+      "title": "Cuban prime",
+      "status": "missing",
+      "tags": ["cuban-prime"],
+      "problems": 1
+    },
+    {
+      "path": "domain/cycle-graph",
+      "title": "Cycle graph",
+      "status": "missing",
+      "tags": ["cycle-graph"],
+      "problems": 1
+    },
+    {
+      "path": "domain/cyclic-group",
+      "title": "Cyclic group",
+      "status": "missing",
+      "tags": ["cyclic-group"],
+      "problems": 1
+    },
+    {
+      "path": "domain/cyclic-number",
+      "title": "Cyclic number",
+      "status": "missing",
+      "tags": ["cyclic-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/cyclotomic-polynomial",
+      "title": "Cyclotomic polynomial",
+      "status": "missing",
+      "tags": ["cyclotomic-polynomial"],
+      "problems": 1
+    },
+    {
+      "path": "domain/difference-of-two-squares",
+      "title": "Difference of two squares",
+      "status": "missing",
+      "tags": ["difference-of-two-squares"],
+      "problems": 2
+    },
+    {
+      "path": "domain/digital-root",
+      "title": "Digital root",
+      "status": "missing",
+      "tags": ["digital-root"],
+      "problems": 1
+    },
+    {
+      "path": "domain/diophantine-approximation",
+      "title": "Diophantine approximation",
+      "status": "missing",
+      "tags": ["diophantine-approximation"],
+      "problems": 1
+    },
+    {
+      "path": "domain/diophantine-equation",
+      "title": "Diophantine equation",
+      "status": "draft",
+      "tags": ["diophantine-equation"],
+      "problems": 11
+    },
+    {
+      "path": "domain/directed-acyclic-graph",
+      "title": "Directed acyclic graph",
+      "status": "missing",
+      "tags": ["directed-acyclic-graph"],
+      "problems": 4
+    },
+    {
+      "path": "domain/direction-geometry",
+      "title": "Direction (geometry)",
+      "status": "missing",
+      "tags": ["direction-geometry"],
+      "problems": 1
+    },
+    {
+      "path": "domain/dirichlet-convolution",
+      "title": "Dirichlet convolution",
+      "status": "missing",
+      "tags": ["dirichlet-convolution"],
+      "problems": 2
+    },
+    {
+      "path": "domain/discrete-uniform-distribution",
+      "title": "Discrete uniform distribution",
+      "status": "missing",
+      "tags": ["discrete-uniform-distribution"],
+      "problems": 1
+    },
+    {
+      "path": "domain/divisibility-rule",
+      "title": "Divisibility rule",
+      "status": "missing",
+      "tags": ["divisibility-rule"],
+      "problems": 3
+    },
+    {
+      "path": "domain/divisor",
+      "title": "Divisor",
+      "status": "draft",
+      "tags": ["divisor"],
+      "problems": 7
+    },
+    {
+      "path": "domain/divisor-function",
+      "title": "Divisor function",
+      "status": "draft",
+      "tags": ["divisor-function"],
+      "problems": 13
+    },
+    {
+      "path": "domain/divisor-summatory-function",
+      "title": "Divisor summatory function",
+      "status": "missing",
+      "tags": ["divisor-summatory-function"],
+      "problems": 3
+    },
+    {
+      "path": "domain/dot-product",
+      "title": "Dot product",
+      "status": "missing",
+      "tags": ["dot-product"],
+      "problems": 2
+    },
+    {
+      "path": "domain/dragon-curve",
+      "title": "Dragon curve",
+      "status": "missing",
+      "tags": ["dragon-curve"],
+      "problems": 1
+    },
+    {
+      "path": "domain/e-mathematical-constant",
+      "title": "E (mathematical constant)",
+      "status": "missing",
+      "tags": ["e-mathematical-constant"],
+      "problems": 2
+    },
+    {
+      "path": "domain/eisenstein-triple",
+      "title": "Eisenstein triple",
+      "status": "missing",
+      "tags": ["eisenstein-triple"],
+      "problems": 1
+    },
+    {
+      "path": "domain/enumerative-combinatorics",
+      "title": "Enumerative combinatorics",
+      "status": "missing",
+      "tags": ["enumerative-combinatorics"],
+      "problems": 3
+    },
+    {
+      "path": "domain/equidistributed-sequence",
+      "title": "Equidistributed sequence",
+      "status": "missing",
+      "tags": ["equidistributed-sequence"],
+      "problems": 1
+    },
+    {
+      "path": "domain/eulers-theorem",
+      "title": "Euler's theorem",
+      "status": "missing",
+      "tags": ["eulers-theorem"],
+      "problems": 2
+    },
+    {
+      "path": "domain/eulers-totient-function",
+      "title": "Euler's totient function",
+      "status": "draft",
+      "tags": ["eulers-totient-function"],
+      "problems": 13
+    },
+    {
+      "path": "domain/exclusive-or",
+      "title": "Exclusive or",
+      "status": "missing",
+      "tags": ["exclusive-or"],
+      "problems": 2
+    },
+    {
+      "path": "domain/factorial-number-system",
+      "title": "Factorial number system",
+      "status": "missing",
+      "tags": ["factorial-number-system"],
+      "problems": 3
+    },
+    {
+      "path": "domain/farey-sequence",
+      "title": "Farey sequence",
+      "status": "missing",
+      "tags": ["farey-sequence"],
+      "problems": 4
+    },
+    {
+      "path": "domain/fermat-point",
+      "title": "Fermat point",
+      "status": "missing",
+      "tags": ["fermat-point"],
+      "problems": 1
+    },
+    {
+      "path": "domain/fermats-last-theorem",
+      "title": "Fermat's Last Theorem",
+      "status": "missing",
+      "tags": ["fermats-last-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/fibbinary-numbers",
+      "title": "fibbinary numbers",
+      "status": "missing",
+      "tags": ["fibbinary-numbers"],
+      "problems": 1
+    },
+    {
+      "path": "domain/fibonacci-nim",
+      "title": "Fibonacci nim",
+      "status": "missing",
+      "tags": ["fibonacci-nim"],
+      "problems": 1
+    },
+    {
+      "path": "domain/fibonacci-sequence",
+      "title": "Fibonacci sequence",
+      "status": "draft",
+      "tags": ["fibonacci-sequence"],
+      "problems": 16
+    },
+    {
+      "path": "domain/field-norm",
+      "title": "Field norm",
+      "status": "missing",
+      "tags": ["field-norm"],
+      "problems": 1
+    },
+    {
+      "path": "domain/figurate-number",
+      "title": "Figurate number",
+      "status": "missing",
+      "tags": ["figurate-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/fortunate-number",
+      "title": "Fortunate number",
+      "status": "missing",
+      "tags": ["fortunate-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/fractal",
+      "title": "Fractal",
+      "status": "missing",
+      "tags": ["fractal"],
+      "problems": 1
+    },
+    {
+      "path": "domain/fractional-part",
+      "title": "Fractional part",
+      "status": "missing",
+      "tags": ["fractional-part"],
+      "problems": 3
+    },
+    {
+      "path": "domain/frequency-analysis",
+      "title": "Frequency analysis",
+      "status": "missing",
+      "tags": ["frequency-analysis"],
+      "problems": 1
+    },
+    {
+      "path": "domain/functional-graph",
+      "title": "Functional graph",
+      "status": "missing",
+      "tags": ["functional-graph"],
+      "problems": 2
+    },
+    {
+      "path": "domain/fundamental-theorem-of-arithmetic",
+      "title": "Fundamental theorem of arithmetic",
+      "status": "draft",
+      "tags": ["fundamental-theorem-of-arithmetic"],
+      "problems": 5
+    },
+    {
+      "path": "domain/gauss-circle-problem",
+      "title": "Gauss circle problem",
+      "status": "missing",
+      "tags": ["gauss-circle-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/generating-function",
+      "title": "Generating function",
+      "status": "draft",
+      "tags": ["generating-function"],
+      "problems": 5
+    },
+    {
+      "path": "domain/genus-theory",
+      "title": "Genus theory",
+      "status": "missing",
+      "tags": ["genus-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/geometric-mean",
+      "title": "Geometric mean",
+      "status": "missing",
+      "tags": ["geometric-mean"],
+      "problems": 1
+    },
+    {
+      "path": "domain/geometrical-optics",
+      "title": "Geometrical optics",
+      "status": "missing",
+      "tags": ["geometrical-optics"],
+      "problems": 1
+    },
+    {
+      "path": "domain/geometry",
+      "title": "Geometry",
+      "status": "missing",
+      "tags": ["geometry"],
+      "problems": 1
+    },
+    {
+      "path": "domain/glossary-of-graph-theory",
+      "title": "Glossary of graph theory",
+      "status": "missing",
+      "tags": ["glossary-of-graph-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/golden-ratio",
+      "title": "Golden ratio",
+      "status": "draft",
+      "tags": ["golden-ratio"],
+      "problems": 6
+    },
+    {
+      "path": "domain/gradient",
+      "title": "Gradient",
+      "status": "missing",
+      "tags": ["gradient"],
+      "problems": 1
+    },
+    {
+      "path": "domain/graph-coloring",
+      "title": "Graph coloring",
+      "status": "missing",
+      "tags": ["graph-coloring"],
+      "problems": 1
+    },
+    {
+      "path": "domain/graph-discrete-mathematics",
+      "title": "Graph (discrete mathematics)",
+      "status": "draft",
+      "tags": ["graph-discrete-mathematics"],
+      "problems": 5
+    },
+    {
+      "path": "domain/graph-theory",
+      "title": "Graph theory",
+      "status": "missing",
+      "tags": ["graph-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/gray-code",
+      "title": "Gray code",
+      "status": "missing",
+      "tags": ["gray-code"],
+      "problems": 1
+    },
+    {
+      "path": "domain/harshad-number",
+      "title": "Harshad number",
+      "status": "missing",
+      "tags": ["harshad-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/herons-formula",
+      "title": "Heron's formula",
+      "status": "missing",
+      "tags": ["herons-formula"],
+      "problems": 1
+    },
+    {
+      "path": "domain/hexagonal-number",
+      "title": "Hexagonal number",
+      "status": "missing",
+      "tags": ["hexagonal-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/highly-composite-number",
+      "title": "Highly composite number",
+      "status": "missing",
+      "tags": ["highly-composite-number"],
+      "problems": 2
+    },
+    {
+      "path": "domain/histogram",
+      "title": "Histogram",
+      "status": "missing",
+      "tags": ["histogram"],
+      "problems": 1
+    },
+    {
+      "path": "domain/hungarian-algorithm",
+      "title": "Hungarian algorithm",
+      "status": "missing",
+      "tags": ["hungarian-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "domain/hypergeometric-distribution",
+      "title": "Hypergeometric distribution",
+      "status": "missing",
+      "tags": ["hypergeometric-distribution"],
+      "problems": 1
+    },
+    {
+      "path": "domain/hyperplane-separation-theorem",
+      "title": "Hyperplane separation theorem",
+      "status": "missing",
+      "tags": ["hyperplane-separation-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/impartial-game",
+      "title": "Impartial game",
+      "status": "missing",
+      "tags": ["impartial-game"],
+      "problems": 2
+    },
+    {
+      "path": "domain/incircle-and-excircles-of-a-triangle",
+      "title": "Incircle and excircles of a triangle",
+      "status": "missing",
+      "tags": ["incircle-and-excircles-of-a-triangle"],
+      "problems": 1
+    },
+    {
+      "path": "domain/indefinite-orthogonal-group",
+      "title": "Indefinite orthogonal group",
+      "status": "missing",
+      "tags": ["indefinite-orthogonal-group"],
+      "problems": 1
+    },
+    {
+      "path": "domain/independence-probability-theory",
+      "title": "Independence (probability theory)",
+      "status": "missing",
+      "tags": ["independence-probability-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/independent-set-graph-theory",
+      "title": "Independent set (graph theory)",
+      "status": "missing",
+      "tags": ["independent-set-graph-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/integer-lattice",
+      "title": "Integer lattice",
+      "status": "missing",
+      "tags": ["integer-lattice"],
+      "problems": 1
+    },
+    {
+      "path": "domain/king-chess",
+      "title": "King (chess)",
+      "status": "missing",
+      "tags": ["king-chess"],
+      "problems": 1
+    },
+    {
+      "path": "domain/klees-measure-problem",
+      "title": "Klee's measure problem",
+      "status": "missing",
+      "tags": ["klees-measure-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/kummers-theorem",
+      "title": "Kummer's theorem",
+      "status": "draft",
+      "tags": ["kummers-theorem"],
+      "problems": 5
+    },
+    {
+      "path": "domain/l-system",
+      "title": "L-system",
+      "status": "missing",
+      "tags": ["l-system"],
+      "problems": 1
+    },
+    {
+      "path": "domain/lagrange-multiplier",
+      "title": "Lagrange multiplier",
+      "status": "missing",
+      "tags": ["lagrange-multiplier"],
+      "problems": 1
+    },
+    {
+      "path": "domain/lattice-path",
+      "title": "Lattice path",
+      "status": "missing",
+      "tags": ["lattice-path"],
+      "problems": 1
+    },
+    {
+      "path": "domain/law-of-cosines",
+      "title": "Law of cosines",
+      "status": "missing",
+      "tags": ["law-of-cosines"],
+      "problems": 4
+    },
+    {
+      "path": "domain/law-of-sines",
+      "title": "Law of sines",
+      "status": "missing",
+      "tags": ["law-of-sines"],
+      "problems": 1
+    },
+    {
+      "path": "domain/legendre-symbol",
+      "title": "Legendre symbol",
+      "status": "missing",
+      "tags": ["legendre-symbol"],
+      "problems": 1
+    },
+    {
+      "path": "domain/legendres-formula",
+      "title": "Legendre's formula",
+      "status": "draft",
+      "tags": ["legendres-formula"],
+      "problems": 9
+    },
+    {
+      "path": "domain/linear-congruence-theorem",
+      "title": "Linear congruence theorem",
+      "status": "missing",
+      "tags": ["linear-congruence-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/linear-feedback-shift-register",
+      "title": "Linear-feedback shift register",
+      "status": "missing",
+      "tags": ["linear-feedback-shift-register"],
+      "problems": 1
+    },
+    {
+      "path": "domain/loss-function",
+      "title": "Loss function",
+      "status": "missing",
+      "tags": ["loss-function"],
+      "problems": 1
+    },
+    {
+      "path": "domain/lucass-theorem",
+      "title": "Lucas's theorem",
+      "status": "missing",
+      "tags": ["lucass-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/lychrel-number",
+      "title": "Lychrel number",
+      "status": "missing",
+      "tags": ["lychrel-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/markov-chain",
+      "title": "Markov chain",
+      "status": "missing",
+      "tags": ["markov-chain"],
+      "problems": 4
+    },
+    {
+      "path": "domain/mastermind-board-game",
+      "title": "Mastermind (board game)",
+      "status": "missing",
+      "tags": ["mastermind-board-game"],
+      "problems": 1
+    },
+    {
+      "path": "domain/mathematical-induction",
+      "title": "Mathematical induction",
+      "status": "missing",
+      "tags": ["mathematical-induction"],
+      "problems": 1
+    },
+    {
+      "path": "domain/meissel-lehmer-algorithm",
+      "title": "Meissel\u2013Lehmer algorithm",
+      "status": "missing",
+      "tags": ["meissel-lehmer-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "domain/meissel-mertens-constant",
+      "title": "Meissel\u2013Mertens constant",
+      "status": "missing",
+      "tags": ["meissel-mertens-constant"],
+      "problems": 1
+    },
+    {
+      "path": "domain/minimum-spanning-tree",
+      "title": "Minimum spanning tree",
+      "status": "missing",
+      "tags": ["minimum-spanning-tree"],
+      "problems": 1
+    },
+    {
+      "path": "domain/minkowski-addition",
+      "title": "Minkowski addition",
+      "status": "missing",
+      "tags": ["minkowski-addition"],
+      "problems": 1
+    },
+    {
+      "path": "domain/multiplicative-function",
+      "title": "Multiplicative function",
+      "status": "draft",
+      "tags": ["multiplicative-function"],
+      "problems": 17
+    },
+    {
+      "path": "domain/multiplicative-order",
+      "title": "Multiplicative order",
+      "status": "missing",
+      "tags": ["multiplicative-order"],
+      "problems": 4
+    },
+    {
+      "path": "domain/nimber",
+      "title": "Nimber",
+      "status": "missing",
+      "tags": ["nimber"],
+      "problems": 1
+    },
+    {
+      "path": "domain/nonlinear-feedback-shift-register",
+      "title": "Nonlinear-feedback shift register",
+      "status": "missing",
+      "tags": ["nonlinear-feedback-shift-register"],
+      "problems": 1
+    },
+    {
+      "path": "domain/np-completeness",
+      "title": "NP-completeness",
+      "status": "missing",
+      "tags": ["np-completeness"],
+      "problems": 1
+    },
+    {
+      "path": "domain/np-hardness",
+      "title": "NP-hardness",
+      "status": "missing",
+      "tags": ["np-hardness"],
+      "problems": 1
+    },
+    {
+      "path": "domain/number-theory",
+      "title": "Number theory",
+      "status": "missing",
+      "tags": ["number-theory"],
+      "problems": 2
+    },
+    {
+      "path": "domain/oeis-a000119",
+      "title": "OEIS A000119",
+      "status": "missing",
+      "tags": ["oeis-a000119"],
+      "problems": 1
+    },
+    {
+      "path": "domain/oeis-a002407",
+      "title": "OEIS A002407",
+      "status": "missing",
+      "tags": ["oeis-a002407"],
+      "problems": 1
+    },
+    {
+      "path": "domain/oeis-a048211",
+      "title": "OEIS A048211",
+      "status": "missing",
+      "tags": ["oeis-a048211"],
+      "problems": 1
+    },
+    {
+      "path": "domain/optimal-substructure",
+      "title": "Optimal substructure",
+      "status": "draft",
+      "tags": ["optimal-substructure"],
+      "problems": 5
+    },
+    {
+      "path": "domain/orbit-dynamics",
+      "title": "Orbit (dynamics)",
+      "status": "missing",
+      "tags": ["orbit-dynamics"],
+      "problems": 1
+    },
+    {
+      "path": "domain/p-adic-number",
+      "title": "P-adic number",
+      "status": "missing",
+      "tags": ["p-adic-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/p-adic-valuation",
+      "title": "P-adic valuation",
+      "status": "draft",
+      "tags": ["p-adic-valuation"],
+      "problems": 7
+    },
+    {
+      "path": "domain/padovan-sequence",
+      "title": "Padovan sequence",
+      "status": "missing",
+      "tags": ["padovan-sequence"],
+      "problems": 1
+    },
+    {
+      "path": "domain/palindrome",
+      "title": "Palindrome",
+      "status": "missing",
+      "tags": ["palindrome"],
+      "problems": 2
+    },
+    {
+      "path": "domain/palindromic-number",
+      "title": "Palindromic number",
+      "status": "missing",
+      "tags": ["palindromic-number"],
+      "problems": 4
+    },
+    {
+      "path": "domain/pandigital-number",
+      "title": "Pandigital number",
+      "status": "draft",
+      "tags": ["pandigital-number"],
+      "problems": 6
+    },
+    {
+      "path": "domain/parity-mathematics",
+      "title": "Parity (mathematics)",
+      "status": "draft",
+      "tags": ["parity-mathematics"],
+      "problems": 6
+    },
+    {
+      "path": "domain/partition-number-theory",
+      "title": "Partition (number theory)",
+      "status": "draft",
+      "tags": ["partition-number-theory"],
+      "problems": 6
+    },
+    {
+      "path": "domain/pentagonal-number-theorem",
+      "title": "Pentagonal number theorem",
+      "status": "missing",
+      "tags": ["pentagonal-number-theorem"],
+      "problems": 2
+    },
+    {
+      "path": "domain/perfect-number",
+      "title": "Perfect number",
+      "status": "missing",
+      "tags": ["perfect-number"],
+      "problems": 3
+    },
+    {
+      "path": "domain/periodic-continued-fraction",
+      "title": "Periodic continued fraction",
+      "status": "missing",
+      "tags": ["periodic-continued-fraction"],
+      "problems": 2
+    },
+    {
+      "path": "domain/periodic-point",
+      "title": "Periodic point",
+      "status": "missing",
+      "tags": ["periodic-point"],
+      "problems": 1
+    },
+    {
+      "path": "domain/periodic-sequence",
+      "title": "Periodic sequence",
+      "status": "missing",
+      "tags": ["periodic-sequence"],
+      "problems": 2
+    },
+    {
+      "path": "domain/permutation",
+      "title": "Permutation",
+      "status": "draft",
+      "tags": ["permutation"],
+      "problems": 11
+    },
+    {
+      "path": "domain/pi",
+      "title": "Pi",
+      "status": "missing",
+      "tags": ["pi"],
+      "problems": 1
+    },
+    {
+      "path": "domain/picks-theorem",
+      "title": "Pick's theorem",
+      "status": "missing",
+      "tags": ["picks-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/pigeonhole-principle",
+      "title": "Pigeonhole principle",
+      "status": "missing",
+      "tags": ["pigeonhole-principle"],
+      "problems": 3
+    },
+    {
+      "path": "domain/pisano-period",
+      "title": "Pisano period",
+      "status": "missing",
+      "tags": ["pisano-period"],
+      "problems": 2
+    },
+    {
+      "path": "domain/polar-coordinate-system",
+      "title": "Polar coordinate system",
+      "status": "missing",
+      "tags": ["polar-coordinate-system"],
+      "problems": 1
+    },
+    {
+      "path": "domain/polynomial",
+      "title": "Polynomial",
+      "status": "missing",
+      "tags": ["polynomial"],
+      "problems": 1
+    },
+    {
+      "path": "domain/polynomial-interpolation",
+      "title": "Polynomial interpolation",
+      "status": "missing",
+      "tags": ["polynomial-interpolation"],
+      "problems": 1
+    },
+    {
+      "path": "domain/positional-notation",
+      "title": "Positional notation",
+      "status": "missing",
+      "tags": ["positional-notation"],
+      "problems": 3
+    },
+    {
+      "path": "domain/prefix-code",
+      "title": "Prefix code",
+      "status": "missing",
+      "tags": ["prefix-code"],
+      "problems": 1
+    },
+    {
+      "path": "domain/primality-test",
+      "title": "Primality test",
+      "status": "missing",
+      "tags": ["primality-test"],
+      "problems": 4
+    },
+    {
+      "path": "domain/prime-counting-function",
+      "title": "Prime-counting function",
+      "status": "draft",
+      "tags": ["prime-counting-function"],
+      "problems": 9
+    },
+    {
+      "path": "domain/prime-factor",
+      "title": "Prime factor",
+      "status": "missing",
+      "tags": ["prime-factor"],
+      "problems": 1
+    },
+    {
+      "path": "domain/prime-number",
+      "title": "Prime number",
+      "status": "draft",
+      "tags": ["prime-number"],
+      "problems": 22
+    },
+    {
+      "path": "domain/prime-number-theorem",
+      "title": "Prime number theorem",
+      "status": "draft",
+      "tags": ["prime-number-theorem"],
+      "problems": 8
+    },
+    {
+      "path": "domain/probability-distribution",
+      "title": "Probability distribution",
+      "status": "missing",
+      "tags": ["probability-distribution"],
+      "problems": 1
+    },
+    {
+      "path": "domain/product-rule",
+      "title": "Product rule",
+      "status": "missing",
+      "tags": ["product-rule"],
+      "problems": 1
+    },
+    {
+      "path": "domain/pronic-number",
+      "title": "Pronic number",
+      "status": "missing",
+      "tags": ["pronic-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/pythagorean-theorem",
+      "title": "Pythagorean theorem",
+      "status": "missing",
+      "tags": ["pythagorean-theorem"],
+      "problems": 2
+    },
+    {
+      "path": "domain/pythagorean-triple",
+      "title": "Pythagorean triple",
+      "status": "draft",
+      "tags": ["pythagorean-triple"],
+      "problems": 10
+    },
+    {
+      "path": "domain/quadratic-equation",
+      "title": "Quadratic equation",
+      "status": "missing",
+      "tags": ["quadratic-equation"],
+      "problems": 1
+    },
+    {
+      "path": "domain/quadratic-form",
+      "title": "Quadratic form",
+      "status": "missing",
+      "tags": ["quadratic-form"],
+      "problems": 1
+    },
+    {
+      "path": "domain/quadratic-function",
+      "title": "Quadratic function",
+      "status": "missing",
+      "tags": ["quadratic-function"],
+      "problems": 3
+    },
+    {
+      "path": "domain/quadratic-reciprocity",
+      "title": "Quadratic reciprocity",
+      "status": "missing",
+      "tags": ["quadratic-reciprocity"],
+      "problems": 1
+    },
+    {
+      "path": "domain/random-walk",
+      "title": "Random walk",
+      "status": "missing",
+      "tags": ["random-walk"],
+      "problems": 2
+    },
+    {
+      "path": "domain/reflection-physics",
+      "title": "Reflection (physics)",
+      "status": "missing",
+      "tags": ["reflection-physics"],
+      "problems": 1
+    },
+    {
+      "path": "domain/regular-number",
+      "title": "Regular number",
+      "status": "missing",
+      "tags": ["regular-number"],
+      "problems": 2
+    },
+    {
+      "path": "domain/repeating-decimal",
+      "title": "Repeating decimal",
+      "status": "missing",
+      "tags": ["repeating-decimal"],
+      "problems": 2
+    },
+    {
+      "path": "domain/repunit",
+      "title": "Repunit",
+      "status": "draft",
+      "tags": ["repunit"],
+      "problems": 5
+    },
+    {
+      "path": "domain/roman-numerals",
+      "title": "Roman numerals",
+      "status": "missing",
+      "tags": ["roman-numerals"],
+      "problems": 1
+    },
+    {
+      "path": "domain/root-of-unity",
+      "title": "Root of unity",
+      "status": "missing",
+      "tags": ["root-of-unity"],
+      "problems": 1
+    },
+    {
+      "path": "domain/rsa-cryptosystem",
+      "title": "RSA (cryptosystem)",
+      "status": "missing",
+      "tags": ["rsa-cryptosystem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/self-similarity",
+      "title": "Self-similarity",
+      "status": "missing",
+      "tags": ["self-similarity"],
+      "problems": 1
+    },
+    {
+      "path": "domain/semiprime",
+      "title": "Semiprime",
+      "status": "missing",
+      "tags": ["semiprime"],
+      "problems": 2
+    },
+    {
+      "path": "domain/series-and-parallel-circuits",
+      "title": "Series and parallel circuits",
+      "status": "missing",
+      "tags": ["series-and-parallel-circuits"],
+      "problems": 1
+    },
+    {
+      "path": "domain/series-parallel-graph",
+      "title": "Series\u2013parallel graph",
+      "status": "missing",
+      "tags": ["series-parallel-graph"],
+      "problems": 1
+    },
+    {
+      "path": "domain/set-mathematics",
+      "title": "Set (mathematics)",
+      "status": "missing",
+      "tags": ["set-mathematics"],
+      "problems": 1
+    },
+    {
+      "path": "domain/shortest-path-problem",
+      "title": "Shortest path problem",
+      "status": "missing",
+      "tags": ["shortest-path-problem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/sieve-theory",
+      "title": "Sieve theory",
+      "status": "draft",
+      "tags": ["sieve-theory"],
+      "problems": 6
+    },
+    {
+      "path": "domain/similarity-geometry",
+      "title": "Similarity (geometry)",
+      "status": "missing",
+      "tags": ["similarity-geometry"],
+      "problems": 1
+    },
+    {
+      "path": "domain/simplex",
+      "title": "Simplex",
+      "status": "missing",
+      "tags": ["simplex"],
+      "problems": 1
+    },
+    {
+      "path": "domain/smooth-number",
+      "title": "Smooth number",
+      "status": "missing",
+      "tags": ["smooth-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/square-free-integer",
+      "title": "Square-free integer",
+      "status": "draft",
+      "tags": ["square-free-integer"],
+      "problems": 7
+    },
+    {
+      "path": "domain/square-number",
+      "title": "Square number",
+      "status": "draft",
+      "tags": ["square-number"],
+      "problems": 15
+    },
+    {
+      "path": "domain/square-pyramidal-number",
+      "title": "Square pyramidal number",
+      "status": "missing",
+      "tags": ["square-pyramidal-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/state-computer-science",
+      "title": "State (computer science)",
+      "status": "missing",
+      "tags": ["state-computer-science"],
+      "problems": 1
+    },
+    {
+      "path": "domain/stationary-distribution",
+      "title": "Stationary distribution",
+      "status": "missing",
+      "tags": ["stationary-distribution"],
+      "problems": 1
+    },
+    {
+      "path": "domain/stern-brocot-tree",
+      "title": "Stern\u2013Brocot tree",
+      "status": "draft",
+      "tags": ["stern-brocot-tree"],
+      "problems": 5
+    },
+    {
+      "path": "domain/sterns-diatomic-sequence",
+      "title": "Stern's diatomic sequence",
+      "status": "missing",
+      "tags": ["sterns-diatomic-sequence"],
+      "problems": 2
+    },
+    {
+      "path": "domain/stream-cipher",
+      "title": "Stream cipher",
+      "status": "missing",
+      "tags": ["stream-cipher"],
+      "problems": 1
+    },
+    {
+      "path": "domain/subset-sum-problem",
+      "title": "Subset sum problem",
+      "status": "missing",
+      "tags": ["subset-sum-problem"],
+      "problems": 4
+    },
+    {
+      "path": "domain/sum-of-two-squares-theorem",
+      "title": "Sum of two squares theorem",
+      "status": "missing",
+      "tags": ["sum-of-two-squares-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/summation",
+      "title": "Summation",
+      "status": "missing",
+      "tags": ["summation"],
+      "problems": 2
+    },
+    {
+      "path": "domain/summation-by-parts",
+      "title": "Summation by parts",
+      "status": "missing",
+      "tags": ["summation-by-parts"],
+      "problems": 1
+    },
+    {
+      "path": "domain/symmetry-in-mathematics",
+      "title": "Symmetry in mathematics",
+      "status": "missing",
+      "tags": ["symmetry-in-mathematics"],
+      "problems": 1
+    },
+    {
+      "path": "domain/taxicab-geometry",
+      "title": "Taxicab geometry",
+      "status": "missing",
+      "tags": ["taxicab-geometry"],
+      "problems": 1
+    },
+    {
+      "path": "domain/tetration",
+      "title": "Tetration",
+      "status": "missing",
+      "tags": ["tetration"],
+      "problems": 1
+    },
+    {
+      "path": "domain/thaless-theorem",
+      "title": "Thales's theorem",
+      "status": "missing",
+      "tags": ["thaless-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/three-distance-theorem",
+      "title": "Three-distance theorem",
+      "status": "missing",
+      "tags": ["three-distance-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/toads-and-frogs",
+      "title": "Toads and Frogs",
+      "status": "missing",
+      "tags": ["toads-and-frogs"],
+      "problems": 1
+    },
+    {
+      "path": "domain/total-order",
+      "title": "Total order",
+      "status": "missing",
+      "tags": ["total-order"],
+      "problems": 1
+    },
+    {
+      "path": "domain/trace-linear-algebra",
+      "title": "Trace (linear algebra)",
+      "status": "missing",
+      "tags": ["trace-linear-algebra"],
+      "problems": 1
+    },
+    {
+      "path": "domain/transfer-matrix-method",
+      "title": "Transfer matrix method",
+      "status": "missing",
+      "tags": ["transfer-matrix-method"],
+      "problems": 2
+    },
+    {
+      "path": "domain/tree-graph-theory",
+      "title": "Tree (graph theory)",
+      "status": "missing",
+      "tags": ["tree-graph-theory"],
+      "problems": 1
+    },
+    {
+      "path": "domain/triangular-number",
+      "title": "Triangular number",
+      "status": "draft",
+      "tags": ["triangular-number"],
+      "problems": 11
+    },
+    {
+      "path": "domain/triangular-tiling",
+      "title": "Triangular tiling",
+      "status": "missing",
+      "tags": ["triangular-tiling"],
+      "problems": 1
+    },
+    {
+      "path": "domain/trinomial-triangle",
+      "title": "Trinomial triangle",
+      "status": "missing",
+      "tags": ["trinomial-triangle"],
+      "problems": 1
+    },
+    {
+      "path": "domain/tromino",
+      "title": "Tromino",
+      "status": "missing",
+      "tags": ["tromino"],
+      "problems": 1
+    },
+    {
+      "path": "domain/truncatable-prime",
+      "title": "Truncatable prime",
+      "status": "missing",
+      "tags": ["truncatable-prime"],
+      "problems": 1
+    },
+    {
+      "path": "domain/ulam-number",
+      "title": "Ulam number",
+      "status": "missing",
+      "tags": ["ulam-number"],
+      "problems": 1
+    },
+    {
+      "path": "domain/unfolding-functions",
+      "title": "Unfolding (functions)",
+      "status": "missing",
+      "tags": ["unfolding-functions"],
+      "problems": 1
+    },
+    {
+      "path": "domain/vandermonde-matrix",
+      "title": "Vandermonde matrix",
+      "status": "missing",
+      "tags": ["vandermonde-matrix"],
+      "problems": 1
+    },
+    {
+      "path": "domain/vigen-re-cipher",
+      "title": "Vigen\u00e8re cipher",
+      "status": "missing",
+      "tags": ["vigen-re-cipher"],
+      "problems": 1
+    },
+    {
+      "path": "domain/von-staudt-clausen-theorem",
+      "title": "Von Staudt\u2013Clausen theorem",
+      "status": "missing",
+      "tags": ["von-staudt-clausen-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "domain/weyls-criterion",
+      "title": "Weyl's criterion",
+      "status": "missing",
+      "tags": ["weyls-criterion"],
+      "problems": 1
+    },
+    {
+      "path": "domain/zeckendorfs-theorem",
+      "title": "Zeckendorf's theorem",
+      "status": "missing",
+      "tags": ["zeckendorfs-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "number-theory/primes",
+      "title": "Generating and testing primes",
+      "status": "draft",
+      "tags": ["sieve-of-eratosthenes", "trial-division", "wheel-factorization", "miller-rabin-primality-test", "prime-number"],
+      "problems": 87
+    },
+    {
+      "path": "takeaway/algorithm-beats-language",
+      "title": "Algorithm beats language",
+      "status": "draft",
+      "tags": ["algorithm-beats-language"],
+      "problems": 24
+    },
+    {
+      "path": "takeaway/closed-form-over-iteration",
+      "title": "Prefer closed form over iteration",
+      "status": "draft",
+      "tags": ["closed-form-over-iteration"],
+      "problems": 80
+    },
+    {
+      "path": "takeaway/decompose-overlap",
+      "title": "Decompose overlapping conditions",
+      "status": "draft",
+      "tags": ["decompose-overlap"],
+      "problems": 14
+    },
+    {
+      "path": "takeaway/exploit-symmetry",
+      "title": "Exploit symmetry and complementary counting",
+      "status": "draft",
+      "tags": ["exploit-symmetry"],
+      "problems": 33
+    },
+    {
+      "path": "takeaway/parity-across-languages",
+      "title": "Hold complexity fixed across ports",
+      "status": "draft",
+      "tags": ["parity-across-languages"],
+      "problems": 109
+    },
+    {
+      "path": "takeaway/precompute-once-reuse",
+      "title": "Precompute once, reuse",
+      "status": "draft",
+      "tags": ["precompute-once-reuse"],
+      "problems": 48
+    },
+    {
+      "path": "takeaway/reduce-before-coding",
+      "title": "Reduce algebraically before coding",
+      "status": "draft",
+      "tags": ["reduce-before-coding"],
+      "problems": 18
+    },
+    {
+      "path": "takeaway/right-tool-per-cost",
+      "title": "Match the abstraction to the hot path",
+      "status": "draft",
+      "tags": ["right-tool-per-cost"],
+      "problems": 4
+    },
+    {
+      "path": "takeaway/size-work-to-the-input",
+      "title": "Size the work to the input",
+      "status": "draft",
+      "tags": ["size-work-to-the-input"],
+      "problems": 7
+    },
+    {
+      "path": "takeaway/watch-integer-width",
+      "title": "Watch integer width",
+      "status": "draft",
+      "tags": ["watch-integer-width"],
+      "problems": 108
+    },
+    {
+      "path": "technique/abels-summation-formula",
+      "title": "Abel's summation formula",
+      "status": "missing",
+      "tags": ["abels-summation-formula"],
+      "problems": 1
+    },
+    {
+      "path": "technique/absorbing-element",
+      "title": "Absorbing element",
+      "status": "missing",
+      "tags": ["absorbing-element"],
+      "problems": 1
+    },
+    {
+      "path": "technique/absorbing-markov-chain",
+      "title": "Absorbing Markov chain",
+      "status": "missing",
+      "tags": ["absorbing-markov-chain"],
+      "problems": 1
+    },
+    {
+      "path": "technique/abundant-number",
+      "title": "Abundant number",
+      "status": "missing",
+      "tags": ["abundant-number"],
+      "problems": 1
+    },
+    {
+      "path": "technique/adjacency-list",
+      "title": "Adjacency list",
+      "status": "missing",
+      "tags": ["adjacency-list"],
+      "problems": 1
+    },
+    {
+      "path": "technique/adjacency-matrix",
+      "title": "Adjacency matrix",
+      "status": "missing",
+      "tags": ["adjacency-matrix"],
+      "problems": 2
+    },
+    {
+      "path": "technique/affine-transformation",
+      "title": "Affine transformation",
+      "status": "missing",
+      "tags": ["affine-transformation"],
+      "problems": 2
+    },
+    {
+      "path": "technique/aho-corasick-algorithm",
+      "title": "Aho\u2013Corasick algorithm",
+      "status": "missing",
+      "tags": ["aho-corasick-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/aliquot-sum",
+      "title": "Aliquot sum",
+      "status": "missing",
+      "tags": ["aliquot-sum"],
+      "problems": 1
+    },
+    {
+      "path": "technique/amortized-analysis",
+      "title": "Amortized analysis",
+      "status": "draft",
+      "tags": ["amortized-analysis"],
+      "problems": 5
+    },
+    {
+      "path": "technique/anagram",
+      "title": "Anagram",
+      "status": "missing",
+      "tags": ["anagram"],
+      "problems": 1
+    },
+    {
+      "path": "technique/and",
+      "title": "and",
+      "status": "missing",
+      "tags": ["and"],
+      "problems": 1
+    },
+    {
+      "path": "technique/ansi-escape-code",
+      "title": "ANSI escape code",
+      "status": "missing",
+      "tags": ["ansi-escape-code"],
+      "problems": 1
+    },
+    {
+      "path": "technique/any",
+      "title": "any",
+      "status": "missing",
+      "tags": ["any"],
+      "problems": 1
+    },
+    {
+      "path": "technique/aos-and-soa",
+      "title": "AoS and SoA",
+      "status": "missing",
+      "tags": ["aos-and-soa"],
+      "problems": 2
+    },
+    {
+      "path": "technique/apollonian-gasket",
+      "title": "Apollonian gasket",
+      "status": "missing",
+      "tags": ["apollonian-gasket"],
+      "problems": 1
+    },
+    {
+      "path": "technique/arbitrary-precision-arithmetic",
+      "title": "Arbitrary-precision arithmetic",
+      "status": "draft",
+      "tags": ["arbitrary-precision-arithmetic"],
+      "problems": 44
+    },
+    {
+      "path": "technique/arg-max",
+      "title": "Arg max",
+      "status": "missing",
+      "tags": ["arg-max"],
+      "problems": 1
+    },
+    {
+      "path": "technique/arithmetic-progression",
+      "title": "Arithmetic progression",
+      "status": "draft",
+      "tags": ["arithmetic-progression"],
+      "problems": 7
+    },
+    {
+      "path": "technique/arithmetic-shift",
+      "title": "Arithmetic shift",
+      "status": "missing",
+      "tags": ["arithmetic-shift"],
+      "problems": 1
+    },
+    {
+      "path": "technique/array",
+      "title": "array",
+      "status": "missing",
+      "tags": ["array"],
+      "problems": 1
+    },
+    {
+      "path": "technique/array-data-structure",
+      "title": "Array data structure",
+      "status": "missing",
+      "tags": ["array-data-structure"],
+      "problems": 1
+    },
+    {
+      "path": "technique/array-programming",
+      "title": "Array programming",
+      "status": "draft",
+      "tags": ["array-programming"],
+      "problems": 9
+    },
+    {
+      "path": "technique/ascii",
+      "title": "ASCII",
+      "status": "missing",
+      "tags": ["ascii"],
+      "problems": 2
+    },
+    {
+      "path": "technique/assignment-computer-science",
+      "title": "Assignment (computer science)",
+      "status": "missing",
+      "tags": ["assignment-computer-science"],
+      "problems": 4
+    },
+    {
+      "path": "technique/atan2",
+      "title": "Atan2",
+      "status": "missing",
+      "tags": ["atan2"],
+      "problems": 1
+    },
+    {
+      "path": "technique/atoi",
+      "title": "atoi",
+      "status": "missing",
+      "tags": ["atoi"],
+      "problems": 1
+    },
+    {
+      "path": "technique/baby-step-giant-step",
+      "title": "Baby-step giant-step",
+      "status": "missing",
+      "tags": ["baby-step-giant-step"],
+      "problems": 1
+    },
+    {
+      "path": "technique/backtracking",
+      "title": "Backtracking",
+      "status": "draft",
+      "tags": ["backtracking"],
+      "problems": 9
+    },
+    {
+      "path": "technique/bertrands-postulate",
+      "title": "Bertrand's postulate",
+      "status": "missing",
+      "tags": ["bertrands-postulate"],
+      "problems": 1
+    },
+    {
+      "path": "technique/bilinear-form",
+      "title": "Bilinear form",
+      "status": "missing",
+      "tags": ["bilinear-form"],
+      "problems": 1
+    },
+    {
+      "path": "technique/binary-expression-tree",
+      "title": "Binary expression tree",
+      "status": "missing",
+      "tags": ["binary-expression-tree"],
+      "problems": 1
+    },
+    {
+      "path": "technique/binary-heap",
+      "title": "Binary heap",
+      "status": "missing",
+      "tags": ["binary-heap"],
+      "problems": 2
+    },
+    {
+      "path": "technique/binary-search-algorithm",
+      "title": "Binary search algorithm",
+      "status": "draft",
+      "tags": ["binary-search-algorithm"],
+      "problems": 13
+    },
+    {
+      "path": "technique/binomial-coefficient",
+      "title": "Binomial coefficient",
+      "status": "draft",
+      "tags": ["binomial-coefficient"],
+      "problems": 22
+    },
+    {
+      "path": "technique/binomial-theorem",
+      "title": "Binomial theorem",
+      "status": "missing",
+      "tags": ["binomial-theorem"],
+      "problems": 2
+    },
+    {
+      "path": "technique/bisect",
+      "title": "bisect",
+      "status": "missing",
+      "tags": ["bisect"],
+      "problems": 1
+    },
+    {
+      "path": "technique/bit-array",
+      "title": "Bit array",
+      "status": "draft",
+      "tags": ["bit-array"],
+      "problems": 7
+    },
+    {
+      "path": "technique/bit-length",
+      "title": "Bit-length",
+      "status": "missing",
+      "tags": ["bit-length"],
+      "problems": 1
+    },
+    {
+      "path": "technique/bit-manipulation",
+      "title": "Bit manipulation",
+      "status": "missing",
+      "tags": ["bit-manipulation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/bit-numbering",
+      "title": "Bit numbering",
+      "status": "missing",
+      "tags": ["bit-numbering"],
+      "problems": 1
+    },
+    {
+      "path": "technique/bitwise-operation",
+      "title": "Bitwise operation",
+      "status": "draft",
+      "tags": ["bitwise-operation"],
+      "problems": 6
+    },
+    {
+      "path": "technique/brahmagupta-fibonacci-identity",
+      "title": "Brahmagupta\u2013Fibonacci identity",
+      "status": "missing",
+      "tags": ["brahmagupta-fibonacci-identity"],
+      "problems": 1
+    },
+    {
+      "path": "technique/branch-and-bound",
+      "title": "Branch and bound",
+      "status": "draft",
+      "tags": ["branch-and-bound"],
+      "problems": 13
+    },
+    {
+      "path": "technique/breadth-first-search",
+      "title": "Breadth-first search",
+      "status": "draft",
+      "tags": ["breadth-first-search"],
+      "problems": 6
+    },
+    {
+      "path": "technique/broadcasting",
+      "title": "broadcasting",
+      "status": "missing",
+      "tags": ["broadcasting"],
+      "problems": 2
+    },
+    {
+      "path": "technique/brute-force-search",
+      "title": "Brute-force search",
+      "status": "draft",
+      "tags": ["brute-force-search"],
+      "problems": 11
+    },
+    {
+      "path": "technique/bss",
+      "title": ".bss",
+      "status": "missing",
+      "tags": ["bss"],
+      "problems": 1
+    },
+    {
+      "path": "technique/burnsides-lemma",
+      "title": "Burnside's lemma",
+      "status": "missing",
+      "tags": ["burnsides-lemma"],
+      "problems": 1
+    },
+    {
+      "path": "technique/bytearray",
+      "title": "bytearray",
+      "status": "missing",
+      "tags": ["bytearray"],
+      "problems": 1
+    },
+    {
+      "path": "technique/c-data-types",
+      "title": "C data types",
+      "status": "missing",
+      "tags": ["c-data-types"],
+      "problems": 1
+    },
+    {
+      "path": "technique/c-dynamic-memory-allocation",
+      "title": "calloc",
+      "status": "draft",
+      "tags": ["c-dynamic-memory-allocation"],
+      "problems": 25
+    },
+    {
+      "path": "technique/c-mathematical-functions",
+      "title": "C mathematical functions",
+      "status": "missing",
+      "tags": ["c-mathematical-functions"],
+      "problems": 1
+    },
+    {
+      "path": "technique/c-string-handling",
+      "title": "C string handling",
+      "status": "missing",
+      "tags": ["c-string-handling"],
+      "problems": 2
+    },
+    {
+      "path": "technique/canonical-form",
+      "title": "Canonical form",
+      "status": "missing",
+      "tags": ["canonical-form"],
+      "problems": 2
+    },
+    {
+      "path": "technique/carmichael-function",
+      "title": "Carmichael function",
+      "status": "missing",
+      "tags": ["carmichael-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/carry-arithmetic",
+      "title": "Carry (arithmetic)",
+      "status": "missing",
+      "tags": ["carry-arithmetic"],
+      "problems": 3
+    },
+    {
+      "path": "technique/cartesian-product",
+      "title": "Cartesian product",
+      "status": "missing",
+      "tags": ["cartesian-product"],
+      "problems": 2
+    },
+    {
+      "path": "technique/catastrophic-cancellation",
+      "title": "Catastrophic cancellation",
+      "status": "missing",
+      "tags": ["catastrophic-cancellation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/cayley-table",
+      "title": "Cayley table",
+      "status": "missing",
+      "tags": ["cayley-table"],
+      "problems": 1
+    },
+    {
+      "path": "technique/center-group-theory",
+      "title": "Center (group theory)",
+      "status": "missing",
+      "tags": ["center-group-theory"],
+      "problems": 1
+    },
+    {
+      "path": "technique/chained-comparison",
+      "title": "chained comparison",
+      "status": "missing",
+      "tags": ["chained-comparison"],
+      "problems": 2
+    },
+    {
+      "path": "technique/characteristic-polynomial",
+      "title": "Characteristic polynomial",
+      "status": "missing",
+      "tags": ["characteristic-polynomial"],
+      "problems": 1
+    },
+    {
+      "path": "technique/chi-squared-test",
+      "title": "Chi-squared test",
+      "status": "missing",
+      "tags": ["chi-squared-test"],
+      "problems": 1
+    },
+    {
+      "path": "technique/chinese-remainder-theorem",
+      "title": "Chinese remainder theorem",
+      "status": "missing",
+      "tags": ["chinese-remainder-theorem"],
+      "problems": 4
+    },
+    {
+      "path": "technique/circular-segment",
+      "title": "Circular segment",
+      "status": "missing",
+      "tags": ["circular-segment"],
+      "problems": 1
+    },
+    {
+      "path": "technique/closed-form-expression",
+      "title": "Closed-form expression",
+      "status": "missing",
+      "tags": ["closed-form-expression"],
+      "problems": 3
+    },
+    {
+      "path": "technique/closure-computer-programming",
+      "title": "Closure (computer programming)",
+      "status": "missing",
+      "tags": ["closure-computer-programming"],
+      "problems": 3
+    },
+    {
+      "path": "technique/collections-counter",
+      "title": "collections.Counter",
+      "status": "missing",
+      "tags": ["collections-counter"],
+      "problems": 1
+    },
+    {
+      "path": "technique/collections-defaultdict-list",
+      "title": "collections.defaultdict(list)",
+      "status": "missing",
+      "tags": ["collections-defaultdict-list"],
+      "problems": 4
+    },
+    {
+      "path": "technique/collinearity",
+      "title": "Collinearity",
+      "status": "missing",
+      "tags": ["collinearity"],
+      "problems": 1
+    },
+    {
+      "path": "technique/combination",
+      "title": "Combination",
+      "status": "draft",
+      "tags": ["combination"],
+      "problems": 6
+    },
+    {
+      "path": "technique/combinations-with-replacement",
+      "title": "combinations with replacement",
+      "status": "missing",
+      "tags": ["combinations-with-replacement"],
+      "problems": 2
+    },
+    {
+      "path": "technique/combinatorial-principles",
+      "title": "Combinatorial principles",
+      "status": "missing",
+      "tags": ["combinatorial-principles"],
+      "problems": 2
+    },
+    {
+      "path": "technique/complete-graph",
+      "title": "Complete graph",
+      "status": "missing",
+      "tags": ["complete-graph"],
+      "problems": 1
+    },
+    {
+      "path": "technique/composition-combinatorics",
+      "title": "Composition (combinatorics)",
+      "status": "missing",
+      "tags": ["composition-combinatorics"],
+      "problems": 3
+    },
+    {
+      "path": "technique/concatenation",
+      "title": "Concatenation",
+      "status": "missing",
+      "tags": ["concatenation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/concurrent-lines",
+      "title": "Concurrent lines",
+      "status": "missing",
+      "tags": ["concurrent-lines"],
+      "problems": 1
+    },
+    {
+      "path": "technique/conditional-probability",
+      "title": "Conditional probability",
+      "status": "missing",
+      "tags": ["conditional-probability"],
+      "problems": 1
+    },
+    {
+      "path": "technique/constraint-propagation",
+      "title": "Constraint propagation",
+      "status": "missing",
+      "tags": ["constraint-propagation"],
+      "problems": 2
+    },
+    {
+      "path": "technique/constraint-satisfaction-problem",
+      "title": "Constraint satisfaction problem",
+      "status": "missing",
+      "tags": ["constraint-satisfaction-problem"],
+      "problems": 2
+    },
+    {
+      "path": "technique/convex-combination",
+      "title": "Convex combination",
+      "status": "missing",
+      "tags": ["convex-combination"],
+      "problems": 2
+    },
+    {
+      "path": "technique/convex-function",
+      "title": "Convex function",
+      "status": "missing",
+      "tags": ["convex-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/convex-hull",
+      "title": "Convex hull",
+      "status": "missing",
+      "tags": ["convex-hull"],
+      "problems": 1
+    },
+    {
+      "path": "technique/convex-hull-algorithms",
+      "title": "Convex hull algorithms",
+      "status": "missing",
+      "tags": ["convex-hull-algorithms"],
+      "problems": 1
+    },
+    {
+      "path": "technique/convolution",
+      "title": "Convolution",
+      "status": "missing",
+      "tags": ["convolution"],
+      "problems": 2
+    },
+    {
+      "path": "technique/conways-game-of-life",
+      "title": "Conway's Game of Life",
+      "status": "missing",
+      "tags": ["conways-game-of-life"],
+      "problems": 1
+    },
+    {
+      "path": "technique/coordinate-descent",
+      "title": "Coordinate descent",
+      "status": "missing",
+      "tags": ["coordinate-descent"],
+      "problems": 1
+    },
+    {
+      "path": "technique/counting-sort",
+      "title": "Counting sort",
+      "status": "missing",
+      "tags": ["counting-sort"],
+      "problems": 3
+    },
+    {
+      "path": "technique/cpu-cache",
+      "title": "CPU cache",
+      "status": "missing",
+      "tags": ["cpu-cache"],
+      "problems": 3
+    },
+    {
+      "path": "technique/cpython",
+      "title": "CPython",
+      "status": "missing",
+      "tags": ["cpython"],
+      "problems": 1
+    },
+    {
+      "path": "technique/cramers-rule",
+      "title": "Cramer's rule",
+      "status": "missing",
+      "tags": ["cramers-rule"],
+      "problems": 1
+    },
+    {
+      "path": "technique/cross-multiplication",
+      "title": "Cross-multiplication",
+      "status": "missing",
+      "tags": ["cross-multiplication"],
+      "problems": 1
+    },
+    {
+      "path": "technique/cross-product",
+      "title": "Cross product",
+      "status": "missing",
+      "tags": ["cross-product"],
+      "problems": 4
+    },
+    {
+      "path": "technique/cube-algebra",
+      "title": "Cube (algebra)",
+      "status": "missing",
+      "tags": ["cube-algebra"],
+      "problems": 1
+    },
+    {
+      "path": "technique/curvature",
+      "title": "Curvature",
+      "status": "missing",
+      "tags": ["curvature"],
+      "problems": 1
+    },
+    {
+      "path": "technique/cycle-detection",
+      "title": "Cycle detection",
+      "status": "missing",
+      "tags": ["cycle-detection"],
+      "problems": 2
+    },
+    {
+      "path": "technique/cycle-graph-theory",
+      "title": "Cycle (graph theory)",
+      "status": "missing",
+      "tags": ["cycle-graph-theory"],
+      "problems": 2
+    },
+    {
+      "path": "technique/cyclic-permutation",
+      "title": "Cyclic permutation",
+      "status": "missing",
+      "tags": ["cyclic-permutation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/dancing-links",
+      "title": "Dancing Links",
+      "status": "missing",
+      "tags": ["dancing-links"],
+      "problems": 1
+    },
+    {
+      "path": "technique/daniel-j-bernstein",
+      "title": "Daniel J. Bernstein",
+      "status": "missing",
+      "tags": ["daniel-j-bernstein"],
+      "problems": 1
+    },
+    {
+      "path": "technique/dataclass",
+      "title": "dataclass",
+      "status": "missing",
+      "tags": ["dataclass"],
+      "problems": 1
+    },
+    {
+      "path": "technique/decimal",
+      "title": "decimal",
+      "status": "missing",
+      "tags": ["decimal"],
+      "problems": 2
+    },
+    {
+      "path": "technique/decorator",
+      "title": "decorator",
+      "status": "missing",
+      "tags": ["decorator"],
+      "problems": 1
+    },
+    {
+      "path": "technique/depth-first-search",
+      "title": "Depth-first search",
+      "status": "draft",
+      "tags": ["depth-first-search"],
+      "problems": 17
+    },
+    {
+      "path": "technique/descartes-theorem",
+      "title": "Descartes' theorem",
+      "status": "missing",
+      "tags": ["descartes-theorem"],
+      "problems": 1
+    },
+    {
+      "path": "technique/determinant",
+      "title": "Determinant",
+      "status": "missing",
+      "tags": ["determinant"],
+      "problems": 2
+    },
+    {
+      "path": "technique/deterministic-algorithm",
+      "title": "Deterministic algorithm",
+      "status": "missing",
+      "tags": ["deterministic-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/deterministic-finite-automaton",
+      "title": "Deterministic finite automaton",
+      "status": "missing",
+      "tags": ["deterministic-finite-automaton"],
+      "problems": 1
+    },
+    {
+      "path": "technique/diagonal",
+      "title": "Diagonal",
+      "status": "missing",
+      "tags": ["diagonal"],
+      "problems": 2
+    },
+    {
+      "path": "technique/dict",
+      "title": "dict",
+      "status": "draft",
+      "tags": ["dict"],
+      "problems": 6
+    },
+    {
+      "path": "technique/digit-counting-function",
+      "title": "Digit-counting function",
+      "status": "missing",
+      "tags": ["digit-counting-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/digit-dp",
+      "title": "Digit DP",
+      "status": "draft",
+      "tags": ["digit-dp"],
+      "problems": 7
+    },
+    {
+      "path": "technique/digit-sum",
+      "title": "Digit sum",
+      "status": "missing",
+      "tags": ["digit-sum"],
+      "problems": 3
+    },
+    {
+      "path": "technique/dihedral-group",
+      "title": "Dihedral group",
+      "status": "missing",
+      "tags": ["dihedral-group"],
+      "problems": 1
+    },
+    {
+      "path": "technique/dijkstras-algorithm",
+      "title": "Dijkstra's algorithm",
+      "status": "missing",
+      "tags": ["dijkstras-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/direct-addressing",
+      "title": "Direct addressing",
+      "status": "missing",
+      "tags": ["direct-addressing"],
+      "problems": 2
+    },
+    {
+      "path": "technique/directed-graph",
+      "title": "Directed graph",
+      "status": "missing",
+      "tags": ["directed-graph"],
+      "problems": 1
+    },
+    {
+      "path": "technique/dirichlet-hyperbola-method",
+      "title": "Dirichlet hyperbola method",
+      "status": "missing",
+      "tags": ["dirichlet-hyperbola-method"],
+      "problems": 1
+    },
+    {
+      "path": "technique/discriminant",
+      "title": "Discriminant",
+      "status": "missing",
+      "tags": ["discriminant"],
+      "problems": 3
+    },
+    {
+      "path": "technique/disjoint-set-data-structure",
+      "title": "Disjoint-set data structure",
+      "status": "missing",
+      "tags": ["disjoint-set-data-structure"],
+      "problems": 3
+    },
+    {
+      "path": "technique/divide-and-conquer-algorithm",
+      "title": "Divide-and-conquer algorithm",
+      "status": "missing",
+      "tags": ["divide-and-conquer-algorithm"],
+      "problems": 2
+    },
+    {
+      "path": "technique/division-algorithm",
+      "title": "Division algorithm",
+      "status": "missing",
+      "tags": ["division-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/division-mathematics",
+      "title": "Division (mathematics)",
+      "status": "missing",
+      "tags": ["division-mathematics"],
+      "problems": 2
+    },
+    {
+      "path": "technique/dont-repeat-yourself",
+      "title": "Don't repeat yourself",
+      "status": "missing",
+      "tags": ["dont-repeat-yourself"],
+      "problems": 1
+    },
+    {
+      "path": "technique/double-counting-proof-technique",
+      "title": "Double counting (proof technique)",
+      "status": "missing",
+      "tags": ["double-counting-proof-technique"],
+      "problems": 1
+    },
+    {
+      "path": "technique/double-precision-floating-point-format",
+      "title": "Double-precision floating-point format",
+      "status": "draft",
+      "tags": ["double-precision-floating-point-format"],
+      "problems": 8
+    },
+    {
+      "path": "technique/doubly-linked-list",
+      "title": "Doubly linked list",
+      "status": "missing",
+      "tags": ["doubly-linked-list"],
+      "problems": 1
+    },
+    {
+      "path": "technique/dynamic-array",
+      "title": "Dynamic array",
+      "status": "draft",
+      "tags": ["dynamic-array"],
+      "problems": 14
+    },
+    {
+      "path": "technique/dynamic-memory-allocation",
+      "title": "Dynamic memory allocation",
+      "status": "missing",
+      "tags": ["dynamic-memory-allocation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/dynamic-programming",
+      "title": "Dynamic programming",
+      "status": "draft",
+      "tags": ["dynamic-programming"],
+      "problems": 64
+    },
+    {
+      "path": "technique/eafp",
+      "title": "EAFP",
+      "status": "missing",
+      "tags": ["eafp"],
+      "problems": 1
+    },
+    {
+      "path": "technique/egyptian-fraction",
+      "title": "Egyptian fraction",
+      "status": "missing",
+      "tags": ["egyptian-fraction"],
+      "problems": 1
+    },
+    {
+      "path": "technique/eisenstein-integer",
+      "title": "Eisenstein integer",
+      "status": "missing",
+      "tags": ["eisenstein-integer"],
+      "problems": 1
+    },
+    {
+      "path": "technique/endianness",
+      "title": "Endianness",
+      "status": "draft",
+      "tags": ["endianness"],
+      "problems": 6
+    },
+    {
+      "path": "technique/enum",
+      "title": "enum",
+      "status": "missing",
+      "tags": ["enum"],
+      "problems": 1
+    },
+    {
+      "path": "technique/enum-strenum",
+      "title": "enum.StrEnum",
+      "status": "missing",
+      "tags": ["enum-strenum"],
+      "problems": 1
+    },
+    {
+      "path": "technique/equivalence-class",
+      "title": "Equivalence class",
+      "status": "missing",
+      "tags": ["equivalence-class"],
+      "problems": 1
+    },
+    {
+      "path": "technique/euclidean-algorithm",
+      "title": "Euclidean algorithm",
+      "status": "draft",
+      "tags": ["euclidean-algorithm"],
+      "problems": 21
+    },
+    {
+      "path": "technique/euclidean-distance",
+      "title": "Euclidean distance",
+      "status": "missing",
+      "tags": ["euclidean-distance"],
+      "problems": 1
+    },
+    {
+      "path": "technique/eulerian-number",
+      "title": "Eulerian number",
+      "status": "missing",
+      "tags": ["eulerian-number"],
+      "problems": 1
+    },
+    {
+      "path": "technique/exact-cover",
+      "title": "Exact cover",
+      "status": "missing",
+      "tags": ["exact-cover"],
+      "problems": 2
+    },
+    {
+      "path": "technique/expected-value",
+      "title": "Expected value",
+      "status": "missing",
+      "tags": ["expected-value"],
+      "problems": 4
+    },
+    {
+      "path": "technique/expm1",
+      "title": "expm1",
+      "status": "missing",
+      "tags": ["expm1"],
+      "problems": 1
+    },
+    {
+      "path": "technique/exponential-search",
+      "title": "Exponential search",
+      "status": "missing",
+      "tags": ["exponential-search"],
+      "problems": 1
+    },
+    {
+      "path": "technique/exponentiation",
+      "title": "Exponentiation",
+      "status": "missing",
+      "tags": ["exponentiation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/exponentiation-by-squaring",
+      "title": "Exponentiation by squaring",
+      "status": "draft",
+      "tags": ["exponentiation-by-squaring"],
+      "problems": 10
+    },
+    {
+      "path": "technique/extended-euclidean-algorithm",
+      "title": "Extended Euclidean algorithm",
+      "status": "draft",
+      "tags": ["extended-euclidean-algorithm"],
+      "problems": 7
+    },
+    {
+      "path": "technique/extended-slice",
+      "title": "extended slice",
+      "status": "missing",
+      "tags": ["extended-slice"],
+      "problems": 1
+    },
+    {
+      "path": "technique/factorial",
+      "title": "Factorial",
+      "status": "draft",
+      "tags": ["factorial"],
+      "problems": 9
+    },
+    {
+      "path": "technique/fancy-indexing",
+      "title": "fancy-indexing",
+      "status": "missing",
+      "tags": ["fancy-indexing"],
+      "problems": 3
+    },
+    {
+      "path": "technique/faulhabers-formula",
+      "title": "Faulhaber's formula",
+      "status": "missing",
+      "tags": ["faulhabers-formula"],
+      "problems": 1
+    },
+    {
+      "path": "technique/fenwick-tree",
+      "title": "Fenwick tree",
+      "status": "missing",
+      "tags": ["fenwick-tree"],
+      "problems": 1
+    },
+    {
+      "path": "technique/fermats-little-theorem",
+      "title": "Fermat's little theorem",
+      "status": "draft",
+      "tags": ["fermats-little-theorem"],
+      "problems": 7
+    },
+    {
+      "path": "technique/find-first-set",
+      "title": "Find first set",
+      "status": "missing",
+      "tags": ["find-first-set"],
+      "problems": 1
+    },
+    {
+      "path": "technique/finite-difference",
+      "title": "Finite difference",
+      "status": "missing",
+      "tags": ["finite-difference"],
+      "problems": 1
+    },
+    {
+      "path": "technique/finite-state-machine",
+      "title": "Finite-state machine",
+      "status": "missing",
+      "tags": ["finite-state-machine"],
+      "problems": 3
+    },
+    {
+      "path": "technique/fixed-point-iteration",
+      "title": "Fixed-point iteration",
+      "status": "missing",
+      "tags": ["fixed-point-iteration"],
+      "problems": 1
+    },
+    {
+      "path": "technique/fixed-point-mathematics",
+      "title": "Fixed point (mathematics)",
+      "status": "missing",
+      "tags": ["fixed-point-mathematics"],
+      "problems": 1
+    },
+    {
+      "path": "technique/floating-point-arithmetic",
+      "title": "Floating-point arithmetic",
+      "status": "draft",
+      "tags": ["floating-point-arithmetic"],
+      "problems": 17
+    },
+    {
+      "path": "technique/floor-and-ceiling-functions",
+      "title": "Floor and ceiling functions",
+      "status": "draft",
+      "tags": ["floor-and-ceiling-functions"],
+      "problems": 10
+    },
+    {
+      "path": "technique/fold-higher-order-function",
+      "title": "Fold (higher-order function)",
+      "status": "missing",
+      "tags": ["fold-higher-order-function"],
+      "problems": 2
+    },
+    {
+      "path": "technique/for-else",
+      "title": "for/else",
+      "status": "missing",
+      "tags": ["for-else"],
+      "problems": 2
+    },
+    {
+      "path": "technique/fractions-fraction",
+      "title": "fractions.Fraction",
+      "status": "draft",
+      "tags": ["fractions-fraction"],
+      "problems": 7
+    },
+    {
+      "path": "technique/frequency-statistics",
+      "title": "Frequency (statistics)",
+      "status": "missing",
+      "tags": ["frequency-statistics"],
+      "problems": 2
+    },
+    {
+      "path": "technique/frozenset",
+      "title": "frozenset",
+      "status": "missing",
+      "tags": ["frozenset"],
+      "problems": 2
+    },
+    {
+      "path": "technique/function-composition",
+      "title": "Function composition",
+      "status": "missing",
+      "tags": ["function-composition"],
+      "problems": 1
+    },
+    {
+      "path": "technique/function-pointer",
+      "title": "Function pointer",
+      "status": "missing",
+      "tags": ["function-pointer"],
+      "problems": 1
+    },
+    {
+      "path": "technique/functools-cached-property",
+      "title": "functools.cached_property",
+      "status": "missing",
+      "tags": ["functools-cached-property"],
+      "problems": 1
+    },
+    {
+      "path": "technique/functools-lru-cache",
+      "title": "functools.lru_cache",
+      "status": "draft",
+      "tags": ["functools-lru-cache"],
+      "problems": 11
+    },
+    {
+      "path": "technique/functools-partial",
+      "title": "functools.partial",
+      "status": "missing",
+      "tags": ["functools-partial"],
+      "problems": 1
+    },
+    {
+      "path": "technique/functools-reduce",
+      "title": "functools.reduce",
+      "status": "missing",
+      "tags": ["functools-reduce"],
+      "problems": 2
+    },
+    {
+      "path": "technique/gauss-summation",
+      "title": "Gauss summation trick",
+      "status": "missing",
+      "tags": ["gauss-summation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/gaussian-elimination",
+      "title": "Gaussian elimination",
+      "status": "missing",
+      "tags": ["gaussian-elimination"],
+      "problems": 1
+    },
+    {
+      "path": "technique/gaussian-integer",
+      "title": "Gaussian integer",
+      "status": "missing",
+      "tags": ["gaussian-integer"],
+      "problems": 3
+    },
+    {
+      "path": "technique/gcc-nested-function",
+      "title": "GCC nested-function",
+      "status": "missing",
+      "tags": ["gcc-nested-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/generalized-pentagonal-numbers",
+      "title": "generalized pentagonal numbers",
+      "status": "missing",
+      "tags": ["generalized-pentagonal-numbers"],
+      "problems": 1
+    },
+    {
+      "path": "technique/generate-and-test",
+      "title": "Generate and test",
+      "status": "missing",
+      "tags": ["generate-and-test"],
+      "problems": 1
+    },
+    {
+      "path": "technique/generation-of-primes",
+      "title": "Generation of primes",
+      "status": "missing",
+      "tags": ["generation-of-primes"],
+      "problems": 2
+    },
+    {
+      "path": "technique/generator",
+      "title": "generator expression",
+      "status": "draft",
+      "tags": ["generator"],
+      "problems": 44
+    },
+    {
+      "path": "technique/geometric-progression",
+      "title": "Geometric progression",
+      "status": "missing",
+      "tags": ["geometric-progression"],
+      "problems": 1
+    },
+    {
+      "path": "technique/geometric-series",
+      "title": "Geometric series",
+      "status": "missing",
+      "tags": ["geometric-series"],
+      "problems": 2
+    },
+    {
+      "path": "technique/global-variable",
+      "title": "Global variable",
+      "status": "missing",
+      "tags": ["global-variable"],
+      "problems": 1
+    },
+    {
+      "path": "technique/gmp",
+      "title": "GMP",
+      "status": "draft",
+      "tags": ["gmp"],
+      "problems": 15
+    },
+    {
+      "path": "technique/gnu-mpfr",
+      "title": "GNU MPFR",
+      "status": "missing",
+      "tags": ["gnu-mpfr"],
+      "problems": 1
+    },
+    {
+      "path": "technique/goto",
+      "title": "Goto",
+      "status": "missing",
+      "tags": ["goto"],
+      "problems": 2
+    },
+    {
+      "path": "technique/greatest-common-divisor",
+      "title": "Greatest common divisor",
+      "status": "draft",
+      "tags": ["greatest-common-divisor"],
+      "problems": 19
+    },
+    {
+      "path": "technique/greedy-algorithm",
+      "title": "Greedy algorithm",
+      "status": "missing",
+      "tags": ["greedy-algorithm"],
+      "problems": 4
+    },
+    {
+      "path": "technique/grid-spatial-index",
+      "title": "Grid (spatial index)",
+      "status": "missing",
+      "tags": ["grid-spatial-index"],
+      "problems": 1
+    },
+    {
+      "path": "technique/hamming-weight",
+      "title": "Hamming weight",
+      "status": "missing",
+      "tags": ["hamming-weight"],
+      "problems": 4
+    },
+    {
+      "path": "technique/harmonic-series-mathematics",
+      "title": "Harmonic series (mathematics)",
+      "status": "draft",
+      "tags": ["harmonic-series-mathematics"],
+      "problems": 6
+    },
+    {
+      "path": "technique/hash-function",
+      "title": "Hash function",
+      "status": "draft",
+      "tags": ["hash-function"],
+      "problems": 7
+    },
+    {
+      "path": "technique/hash-table",
+      "title": "Hash table",
+      "status": "draft",
+      "tags": ["hash-table"],
+      "problems": 24
+    },
+    {
+      "path": "technique/hashable",
+      "title": "hashable",
+      "status": "missing",
+      "tags": ["hashable"],
+      "problems": 1
+    },
+    {
+      "path": "technique/heaps-algorithm",
+      "title": "Heap's algorithm",
+      "status": "missing",
+      "tags": ["heaps-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/heapsort",
+      "title": "Heapsort",
+      "status": "missing",
+      "tags": ["heapsort"],
+      "problems": 1
+    },
+    {
+      "path": "technique/hensels-lemma",
+      "title": "Hensel's lemma",
+      "status": "missing",
+      "tags": ["hensels-lemma"],
+      "problems": 1
+    },
+    {
+      "path": "technique/hexadecimal",
+      "title": "Hexadecimal",
+      "status": "missing",
+      "tags": ["hexadecimal"],
+      "problems": 1
+    },
+    {
+      "path": "technique/hill-climbing",
+      "title": "Hill climbing",
+      "status": "missing",
+      "tags": ["hill-climbing"],
+      "problems": 1
+    },
+    {
+      "path": "technique/hockey-stick-identity",
+      "title": "Hockey stick identity",
+      "status": "missing",
+      "tags": ["hockey-stick-identity"],
+      "problems": 1
+    },
+    {
+      "path": "technique/horners-method",
+      "title": "Horner's method",
+      "status": "draft",
+      "tags": ["horners-method"],
+      "problems": 6
+    },
+    {
+      "path": "technique/huffman-coding",
+      "title": "Huffman coding",
+      "status": "missing",
+      "tags": ["huffman-coding"],
+      "problems": 2
+    },
+    {
+      "path": "technique/identity-element",
+      "title": "Identity element",
+      "status": "missing",
+      "tags": ["identity-element"],
+      "problems": 1
+    },
+    {
+      "path": "technique/ieee-754",
+      "title": "IEEE 754",
+      "status": "missing",
+      "tags": ["ieee-754"],
+      "problems": 1
+    },
+    {
+      "path": "technique/inclusion-exclusion-principle",
+      "title": "Inclusion\u2013exclusion principle",
+      "status": "draft",
+      "tags": ["inclusion-exclusion-principle"],
+      "problems": 9
+    },
+    {
+      "path": "technique/index-php-simons-favorite-factoring-trick",
+      "title": "index.php/Simon's Favorite Factoring Trick",
+      "status": "missing",
+      "tags": ["index-php-simons-favorite-factoring-trick"],
+      "problems": 1
+    },
+    {
+      "path": "technique/indicator-function",
+      "title": "Indicator function",
+      "status": "missing",
+      "tags": ["indicator-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/insertion-sort",
+      "title": "Insertion sort",
+      "status": "missing",
+      "tags": ["insertion-sort"],
+      "problems": 4
+    },
+    {
+      "path": "technique/instruction-level-parallelism",
+      "title": "Instruction-level parallelism",
+      "status": "missing",
+      "tags": ["instruction-level-parallelism"],
+      "problems": 1
+    },
+    {
+      "path": "technique/int",
+      "title": "int",
+      "status": "missing",
+      "tags": ["int"],
+      "problems": 1
+    },
+    {
+      "path": "technique/int128",
+      "title": "__int128",
+      "status": "draft",
+      "tags": ["int128"],
+      "problems": 14
+    },
+    {
+      "path": "technique/int64",
+      "title": "int64",
+      "status": "missing",
+      "tags": ["int64"],
+      "problems": 1
+    },
+    {
+      "path": "technique/integer-factorization",
+      "title": "Integer factorization",
+      "status": "draft",
+      "tags": ["integer-factorization"],
+      "problems": 11
+    },
+    {
+      "path": "technique/integer-literals",
+      "title": "integer literals",
+      "status": "missing",
+      "tags": ["integer-literals"],
+      "problems": 1
+    },
+    {
+      "path": "technique/integer-overflow",
+      "title": "Integer overflow",
+      "status": "draft",
+      "tags": ["integer-overflow"],
+      "problems": 15
+    },
+    {
+      "path": "technique/integer-square-root",
+      "title": "Integer square root",
+      "status": "draft",
+      "tags": ["integer-square-root"],
+      "problems": 19
+    },
+    {
+      "path": "technique/integral",
+      "title": "Integral",
+      "status": "missing",
+      "tags": ["integral"],
+      "problems": 1
+    },
+    {
+      "path": "technique/intenum",
+      "title": "IntEnum",
+      "status": "missing",
+      "tags": ["intenum"],
+      "problems": 1
+    },
+    {
+      "path": "technique/introsort",
+      "title": "Introsort",
+      "status": "missing",
+      "tags": ["introsort"],
+      "problems": 1
+    },
+    {
+      "path": "technique/invariant-mathematics",
+      "title": "Invariant (mathematics)",
+      "status": "missing",
+      "tags": ["invariant-mathematics"],
+      "problems": 2
+    },
+    {
+      "path": "technique/inverse-hyperbolic-functions",
+      "title": "Inverse hyperbolic functions",
+      "status": "missing",
+      "tags": ["inverse-hyperbolic-functions"],
+      "problems": 1
+    },
+    {
+      "path": "technique/irrational-number",
+      "title": "Irrational number",
+      "status": "missing",
+      "tags": ["irrational-number"],
+      "problems": 1
+    },
+    {
+      "path": "technique/irreducible-fraction",
+      "title": "Irreducible fraction",
+      "status": "missing",
+      "tags": ["irreducible-fraction"],
+      "problems": 1
+    },
+    {
+      "path": "technique/iterative-deepening-depth-first-search",
+      "title": "Iterative deepening depth-first search",
+      "status": "missing",
+      "tags": ["iterative-deepening-depth-first-search"],
+      "problems": 1
+    },
+    {
+      "path": "technique/itertools",
+      "title": "itertools",
+      "status": "draft",
+      "tags": ["itertools"],
+      "problems": 11
+    },
+    {
+      "path": "technique/itertools-accumulate",
+      "title": "itertools.accumulate",
+      "status": "missing",
+      "tags": ["itertools-accumulate"],
+      "problems": 1
+    },
+    {
+      "path": "technique/itertools-product",
+      "title": "itertools.product",
+      "status": "missing",
+      "tags": ["itertools-product"],
+      "problems": 1
+    },
+    {
+      "path": "technique/jacobi-method",
+      "title": "Jacobi method",
+      "status": "missing",
+      "tags": ["jacobi-method"],
+      "problems": 1
+    },
+    {
+      "path": "technique/kahan-summation-algorithm",
+      "title": "Kahan summation algorithm",
+      "status": "missing",
+      "tags": ["kahan-summation-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/karatsuba-algorithm",
+      "title": "Karatsuba algorithm",
+      "status": "missing",
+      "tags": ["karatsuba-algorithm"],
+      "problems": 2
+    },
+    {
+      "path": "technique/keyword-only",
+      "title": "keyword-only",
+      "status": "missing",
+      "tags": ["keyword-only"],
+      "problems": 2
+    },
+    {
+      "path": "technique/knapsack-problem",
+      "title": "Knapsack problem",
+      "status": "missing",
+      "tags": ["knapsack-problem"],
+      "problems": 3
+    },
+    {
+      "path": "technique/knuths-algorithm-x",
+      "title": "Knuth's Algorithm X",
+      "status": "missing",
+      "tags": ["knuths-algorithm-x"],
+      "problems": 1
+    },
+    {
+      "path": "technique/kruskals-algorithm",
+      "title": "Kruskal's algorithm",
+      "status": "missing",
+      "tags": ["kruskals-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/lagged-fibonacci-generator",
+      "title": "Lagged Fibonacci generator",
+      "status": "missing",
+      "tags": ["lagged-fibonacci-generator"],
+      "problems": 4
+    },
+    {
+      "path": "technique/lagrange-polynomial",
+      "title": "Lagrange polynomial",
+      "status": "missing",
+      "tags": ["lagrange-polynomial"],
+      "problems": 2
+    },
+    {
+      "path": "technique/lattice-point",
+      "title": "Lattice point",
+      "status": "missing",
+      "tags": ["lattice-point"],
+      "problems": 2
+    },
+    {
+      "path": "technique/lazy-evaluation",
+      "title": "Lazy evaluation",
+      "status": "missing",
+      "tags": ["lazy-evaluation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/leap-year",
+      "title": "Leap year",
+      "status": "missing",
+      "tags": ["leap-year"],
+      "problems": 1
+    },
+    {
+      "path": "technique/least-common-multiple",
+      "title": "Least common multiple",
+      "status": "draft",
+      "tags": ["least-common-multiple"],
+      "problems": 6
+    },
+    {
+      "path": "technique/lehmer-code",
+      "title": "Lehmer code",
+      "status": "missing",
+      "tags": ["lehmer-code"],
+      "problems": 1
+    },
+    {
+      "path": "technique/lexical-analysis",
+      "title": "Lexical analysis",
+      "status": "missing",
+      "tags": ["lexical-analysis"],
+      "problems": 1
+    },
+    {
+      "path": "technique/lexicographic-order",
+      "title": "Lexicographic order",
+      "status": "draft",
+      "tags": ["lexicographic-order"],
+      "problems": 7
+    },
+    {
+      "path": "technique/linear-congruential-generator",
+      "title": "Linear congruential generator",
+      "status": "missing",
+      "tags": ["linear-congruential-generator"],
+      "problems": 2
+    },
+    {
+      "path": "technique/linear-map",
+      "title": "Linear map",
+      "status": "missing",
+      "tags": ["linear-map"],
+      "problems": 1
+    },
+    {
+      "path": "technique/linear-probing",
+      "title": "Linear probing",
+      "status": "draft",
+      "tags": ["linear-probing"],
+      "problems": 6
+    },
+    {
+      "path": "technique/linear-recurrence-with-constant-coefficients",
+      "title": "Linear recurrence with constant coefficients",
+      "status": "missing",
+      "tags": ["linear-recurrence-with-constant-coefficients"],
+      "problems": 3
+    },
+    {
+      "path": "technique/list-comprehension",
+      "title": "list comprehension",
+      "status": "missing",
+      "tags": ["list-comprehension"],
+      "problems": 3
+    },
+    {
+      "path": "technique/local-optimum",
+      "title": "Local optimum",
+      "status": "missing",
+      "tags": ["local-optimum"],
+      "problems": 1
+    },
+    {
+      "path": "technique/locality-of-reference",
+      "title": "Locality of reference",
+      "status": "draft",
+      "tags": ["locality-of-reference"],
+      "problems": 10
+    },
+    {
+      "path": "technique/logarithm",
+      "title": "Logarithm",
+      "status": "missing",
+      "tags": ["logarithm"],
+      "problems": 4
+    },
+    {
+      "path": "technique/long-division",
+      "title": "Long division",
+      "status": "missing",
+      "tags": ["long-division"],
+      "problems": 2
+    },
+    {
+      "path": "technique/look-ahead-backtracking",
+      "title": "Look-ahead (backtracking)",
+      "status": "missing",
+      "tags": ["look-ahead-backtracking"],
+      "problems": 1
+    },
+    {
+      "path": "technique/lookup-table",
+      "title": "Lookup table",
+      "status": "missing",
+      "tags": ["lookup-table"],
+      "problems": 2
+    },
+    {
+      "path": "technique/loop-fission-and-fusion",
+      "title": "Loop fission and fusion",
+      "status": "missing",
+      "tags": ["loop-fission-and-fusion"],
+      "problems": 1
+    },
+    {
+      "path": "technique/loop-invariant",
+      "title": "Loop invariant",
+      "status": "missing",
+      "tags": ["loop-invariant"],
+      "problems": 1
+    },
+    {
+      "path": "technique/loop-invariant-code-motion",
+      "title": "Loop-invariant code motion",
+      "status": "missing",
+      "tags": ["loop-invariant-code-motion"],
+      "problems": 3
+    },
+    {
+      "path": "technique/loop-nest-optimization",
+      "title": "Loop nest optimization",
+      "status": "missing",
+      "tags": ["loop-nest-optimization"],
+      "problems": 1
+    },
+    {
+      "path": "technique/loop-unrolling",
+      "title": "Loop unrolling",
+      "status": "missing",
+      "tags": ["loop-unrolling"],
+      "problems": 1
+    },
+    {
+      "path": "technique/lu-decomposition",
+      "title": "LU decomposition",
+      "status": "missing",
+      "tags": ["lu-decomposition"],
+      "problems": 1
+    },
+    {
+      "path": "technique/lucas-number",
+      "title": "Lucas number",
+      "status": "missing",
+      "tags": ["lucas-number"],
+      "problems": 3
+    },
+    {
+      "path": "technique/m-bius-function",
+      "title": "M\u00f6bius function",
+      "status": "draft",
+      "tags": ["m-bius-function"],
+      "problems": 7
+    },
+    {
+      "path": "technique/m-bius-inversion-formula",
+      "title": "M\u00f6bius inversion formula",
+      "status": "missing",
+      "tags": ["m-bius-inversion-formula"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mapreduce",
+      "title": "MapReduce",
+      "status": "missing",
+      "tags": ["mapreduce"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mask-computing",
+      "title": "Mask (computing)",
+      "status": "draft",
+      "tags": ["mask-computing"],
+      "problems": 6
+    },
+    {
+      "path": "technique/math-gcd",
+      "title": "math.gcd",
+      "status": "missing",
+      "tags": ["math-gcd"],
+      "problems": 1
+    },
+    {
+      "path": "technique/math-isqrt",
+      "title": "math.isqrt",
+      "status": "draft",
+      "tags": ["math-isqrt"],
+      "problems": 6
+    },
+    {
+      "path": "technique/math-prod",
+      "title": "math.prod",
+      "status": "missing",
+      "tags": ["math-prod"],
+      "problems": 1
+    },
+    {
+      "path": "technique/matplotlib-heatmaps",
+      "title": "Matplotlib heatmaps",
+      "status": "missing",
+      "tags": ["matplotlib-heatmaps"],
+      "problems": 1
+    },
+    {
+      "path": "technique/max",
+      "title": "max",
+      "status": "missing",
+      "tags": ["max"],
+      "problems": 1
+    },
+    {
+      "path": "technique/maximum-subarray-problem",
+      "title": "Maximum subarray problem",
+      "status": "missing",
+      "tags": ["maximum-subarray-problem"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mediant-mathematics",
+      "title": "Mediant (mathematics)",
+      "status": "missing",
+      "tags": ["mediant-mathematics"],
+      "problems": 2
+    },
+    {
+      "path": "technique/meet-in-the-middle-attack",
+      "title": "Meet-in-the-middle attack",
+      "status": "missing",
+      "tags": ["meet-in-the-middle-attack"],
+      "problems": 3
+    },
+    {
+      "path": "technique/memcpy",
+      "title": "memcpy",
+      "status": "missing",
+      "tags": ["memcpy"],
+      "problems": 1
+    },
+    {
+      "path": "technique/memmove",
+      "title": "memmove",
+      "status": "missing",
+      "tags": ["memmove"],
+      "problems": 1
+    },
+    {
+      "path": "technique/memoization",
+      "title": "Memoization",
+      "status": "draft",
+      "tags": ["memoization"],
+      "problems": 27
+    },
+    {
+      "path": "technique/memory-management",
+      "title": "Memory management",
+      "status": "missing",
+      "tags": ["memory-management"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mersenne-twister",
+      "title": "Mersenne Twister",
+      "status": "missing",
+      "tags": ["mersenne-twister"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mertens-function",
+      "title": "Mertens function",
+      "status": "missing",
+      "tags": ["mertens-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/methods-of-computing-square-roots",
+      "title": "Methods of computing square roots",
+      "status": "missing",
+      "tags": ["methods-of-computing-square-roots"],
+      "problems": 2
+    },
+    {
+      "path": "technique/metropolis-hastings-algorithm",
+      "title": "Metropolis\u2013Hastings algorithm",
+      "status": "missing",
+      "tags": ["metropolis-hastings-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/miller-rabin-primality-test",
+      "title": "Miller\u2013Rabin primality test",
+      "status": "draft",
+      "tags": ["miller-rabin-primality-test"],
+      "problems": 8
+    },
+    {
+      "path": "technique/min-25-sieve",
+      "title": "Min_25 sieve",
+      "status": "missing",
+      "tags": ["min-25-sieve"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mixed-radix",
+      "title": "Mixed radix",
+      "status": "missing",
+      "tags": ["mixed-radix"],
+      "problems": 4
+    },
+    {
+      "path": "technique/modular-arithmetic",
+      "title": "Modular arithmetic",
+      "status": "draft",
+      "tags": ["modular-arithmetic"],
+      "problems": 43
+    },
+    {
+      "path": "technique/modular-exponentiation",
+      "title": "Modular exponentiation",
+      "status": "draft",
+      "tags": ["modular-exponentiation"],
+      "problems": 28
+    },
+    {
+      "path": "technique/modular-multiplicative-inverse",
+      "title": "Modular multiplicative inverse",
+      "status": "draft",
+      "tags": ["modular-multiplicative-inverse"],
+      "problems": 12
+    },
+    {
+      "path": "technique/modulo",
+      "title": "Modulo",
+      "status": "missing",
+      "tags": ["modulo"],
+      "problems": 2
+    },
+    {
+      "path": "technique/monotonic-function",
+      "title": "Monotonic function",
+      "status": "draft",
+      "tags": ["monotonic-function"],
+      "problems": 10
+    },
+    {
+      "path": "technique/monte-carlo-method",
+      "title": "Monte Carlo method",
+      "status": "missing",
+      "tags": ["monte-carlo-method"],
+      "problems": 3
+    },
+    {
+      "path": "technique/montgomery-modular-multiplication",
+      "title": "Montgomery modular multiplication",
+      "status": "missing",
+      "tags": ["montgomery-modular-multiplication"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mpmath",
+      "title": "mpmath",
+      "status": "missing",
+      "tags": ["mpmath"],
+      "problems": 1
+    },
+    {
+      "path": "technique/mpmath-log10",
+      "title": "mpmath.log10",
+      "status": "missing",
+      "tags": ["mpmath-log10"],
+      "problems": 1
+    },
+    {
+      "path": "technique/multinomial-theorem",
+      "title": "Multinomial theorem",
+      "status": "missing",
+      "tags": ["multinomial-theorem"],
+      "problems": 3
+    },
+    {
+      "path": "technique/multiple-buffering",
+      "title": "Multiple buffering",
+      "status": "missing",
+      "tags": ["multiple-buffering"],
+      "problems": 3
+    },
+    {
+      "path": "technique/multiplication-algorithm",
+      "title": "Multiplication algorithm",
+      "status": "missing",
+      "tags": ["multiplication-algorithm"],
+      "problems": 2
+    },
+    {
+      "path": "technique/multiplicative-group-of-integers-modulo-n",
+      "title": "Multiplicative group of integers modulo n",
+      "status": "missing",
+      "tags": ["multiplicative-group-of-integers-modulo-n"],
+      "problems": 1
+    },
+    {
+      "path": "technique/multiplicative-partition",
+      "title": "Multiplicative partition",
+      "status": "missing",
+      "tags": ["multiplicative-partition"],
+      "problems": 1
+    },
+    {
+      "path": "technique/multiset",
+      "title": "Multiset",
+      "status": "draft",
+      "tags": ["multiset"],
+      "problems": 5
+    },
+    {
+      "path": "technique/named-tuples",
+      "title": "named tuples",
+      "status": "missing",
+      "tags": ["named-tuples"],
+      "problems": 1
+    },
+    {
+      "path": "technique/namedtuple",
+      "title": "NamedTuple",
+      "status": "missing",
+      "tags": ["namedtuple"],
+      "problems": 1
+    },
+    {
+      "path": "technique/narcissistic-number",
+      "title": "Narcissistic number",
+      "status": "missing",
+      "tags": ["narcissistic-number"],
+      "problems": 1
+    },
+    {
+      "path": "technique/natural-logarithm",
+      "title": "Natural logarithm",
+      "status": "missing",
+      "tags": ["natural-logarithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/net-polyhedron",
+      "title": "Net (polyhedron)",
+      "status": "missing",
+      "tags": ["net-polyhedron"],
+      "problems": 1
+    },
+    {
+      "path": "technique/newline",
+      "title": "Newline",
+      "status": "missing",
+      "tags": ["newline"],
+      "problems": 1
+    },
+    {
+      "path": "technique/newtons-method",
+      "title": "Newton's method",
+      "status": "missing",
+      "tags": ["newtons-method"],
+      "problems": 2
+    },
+    {
+      "path": "technique/next",
+      "title": "next()",
+      "status": "missing",
+      "tags": ["next"],
+      "problems": 2
+    },
+    {
+      "path": "technique/nim",
+      "title": "Nim",
+      "status": "missing",
+      "tags": ["nim"],
+      "problems": 3
+    },
+    {
+      "path": "technique/nonlocal",
+      "title": "nonlocal",
+      "status": "missing",
+      "tags": ["nonlocal"],
+      "problems": 1
+    },
+    {
+      "path": "technique/normal-play-convention",
+      "title": "Normal play convention",
+      "status": "missing",
+      "tags": ["normal-play-convention"],
+      "problems": 1
+    },
+    {
+      "path": "technique/np-bincount",
+      "title": "np.bincount",
+      "status": "missing",
+      "tags": ["np-bincount"],
+      "problems": 1
+    },
+    {
+      "path": "technique/np-flatnonzero",
+      "title": "np.flatnonzero",
+      "status": "missing",
+      "tags": ["np-flatnonzero"],
+      "problems": 1
+    },
+    {
+      "path": "technique/np-where",
+      "title": "np.where",
+      "status": "missing",
+      "tags": ["np-where"],
+      "problems": 1
+    },
+    {
+      "path": "technique/numpy",
+      "title": "NumPy",
+      "status": "draft",
+      "tags": ["numpy"],
+      "problems": 38
+    },
+    {
+      "path": "technique/numpy-bit-operations-and-np-unique",
+      "title": "NumPy bit operations and np.unique",
+      "status": "missing",
+      "tags": ["numpy-bit-operations-and-np-unique"],
+      "problems": 1
+    },
+    {
+      "path": "technique/numpy-linalg-solve",
+      "title": "numpy.linalg.solve",
+      "status": "missing",
+      "tags": ["numpy-linalg-solve"],
+      "problems": 1
+    },
+    {
+      "path": "technique/numpy-slice-assignment",
+      "title": "NumPy slice assignment",
+      "status": "missing",
+      "tags": ["numpy-slice-assignment"],
+      "problems": 1
+    },
+    {
+      "path": "technique/object-copying",
+      "title": "Object copying",
+      "status": "missing",
+      "tags": ["object-copying"],
+      "problems": 1
+    },
+    {
+      "path": "technique/object-pool-pattern",
+      "title": "Object pool pattern",
+      "status": "missing",
+      "tags": ["object-pool-pattern"],
+      "problems": 1
+    },
+    {
+      "path": "technique/open-addressing",
+      "title": "Open addressing",
+      "status": "draft",
+      "tags": ["open-addressing"],
+      "problems": 9
+    },
+    {
+      "path": "technique/operator-itemgetter",
+      "title": "operator.itemgetter",
+      "status": "missing",
+      "tags": ["operator-itemgetter"],
+      "problems": 1
+    },
+    {
+      "path": "technique/optimization-problem",
+      "title": "Optimization problem",
+      "status": "missing",
+      "tags": ["optimization-problem"],
+      "problems": 1
+    },
+    {
+      "path": "technique/orthogonal-group",
+      "title": "Orthogonal group",
+      "status": "missing",
+      "tags": ["orthogonal-group"],
+      "problems": 1
+    },
+    {
+      "path": "technique/overlapping-subproblems",
+      "title": "Overlapping subproblems",
+      "status": "missing",
+      "tags": ["overlapping-subproblems"],
+      "problems": 1
+    },
+    {
+      "path": "technique/parallel-array",
+      "title": "Parallel array",
+      "status": "missing",
+      "tags": ["parallel-array"],
+      "problems": 1
+    },
+    {
+      "path": "technique/parallel-assignment",
+      "title": "Parallel assignment",
+      "status": "missing",
+      "tags": ["parallel-assignment"],
+      "problems": 1
+    },
+    {
+      "path": "technique/partially-ordered-set",
+      "title": "Partially ordered set",
+      "status": "missing",
+      "tags": ["partially-ordered-set"],
+      "problems": 1
+    },
+    {
+      "path": "technique/partition-of-a-set",
+      "title": "Partition of a set",
+      "status": "missing",
+      "tags": ["partition-of-a-set"],
+      "problems": 1
+    },
+    {
+      "path": "technique/pascals-triangle",
+      "title": "Pascal's triangle",
+      "status": "draft",
+      "tags": ["pascals-triangle"],
+      "problems": 6
+    },
+    {
+      "path": "technique/pell-number",
+      "title": "Pell number",
+      "status": "missing",
+      "tags": ["pell-number"],
+      "problems": 1
+    },
+    {
+      "path": "technique/pells-equation",
+      "title": "Pell's equation",
+      "status": "draft",
+      "tags": ["pells-equation"],
+      "problems": 9
+    },
+    {
+      "path": "technique/pentagonal-number",
+      "title": "Pentagonal number",
+      "status": "missing",
+      "tags": ["pentagonal-number"],
+      "problems": 2
+    },
+    {
+      "path": "technique/peter-norvigs-well-known-essay",
+      "title": "Peter Norvig's well-known essay",
+      "status": "missing",
+      "tags": ["peter-norvigs-well-known-essay"],
+      "problems": 1
+    },
+    {
+      "path": "technique/pivot-element",
+      "title": "Pivot element",
+      "status": "missing",
+      "tags": ["pivot-element"],
+      "problems": 1
+    },
+    {
+      "path": "technique/polygonal-number",
+      "title": "Polygonal number",
+      "status": "missing",
+      "tags": ["polygonal-number"],
+      "problems": 2
+    },
+    {
+      "path": "technique/pow",
+      "title": "pow",
+      "status": "missing",
+      "tags": ["pow"],
+      "problems": 4
+    },
+    {
+      "path": "technique/power-iteration",
+      "title": "Power iteration",
+      "status": "missing",
+      "tags": ["power-iteration"],
+      "problems": 1
+    },
+    {
+      "path": "technique/power-of-two",
+      "title": "Power of two",
+      "status": "missing",
+      "tags": ["power-of-two"],
+      "problems": 2
+    },
+    {
+      "path": "technique/power-set",
+      "title": "Power set",
+      "status": "missing",
+      "tags": ["power-set"],
+      "problems": 1
+    },
+    {
+      "path": "technique/powerful-number",
+      "title": "Powerful number",
+      "status": "missing",
+      "tags": ["powerful-number"],
+      "problems": 2
+    },
+    {
+      "path": "technique/prefix-sum",
+      "title": "Prefix sum",
+      "status": "draft",
+      "tags": ["prefix-sum"],
+      "problems": 10
+    },
+    {
+      "path": "technique/prime-power",
+      "title": "Prime power",
+      "status": "missing",
+      "tags": ["prime-power"],
+      "problems": 4
+    },
+    {
+      "path": "technique/primesieve",
+      "title": "primesieve",
+      "status": "draft",
+      "tags": ["primesieve"],
+      "problems": 10
+    },
+    {
+      "path": "technique/primorial",
+      "title": "Primorial",
+      "status": "missing",
+      "tags": ["primorial"],
+      "problems": 4
+    },
+    {
+      "path": "technique/priority-queue",
+      "title": "Priority queue",
+      "status": "missing",
+      "tags": ["priority-queue"],
+      "problems": 1
+    },
+    {
+      "path": "technique/pseudorandom-number-generator",
+      "title": "Pseudorandom number generator",
+      "status": "missing",
+      "tags": ["pseudorandom-number-generator"],
+      "problems": 2
+    },
+    {
+      "path": "technique/pure-function",
+      "title": "Pure function",
+      "status": "missing",
+      "tags": ["pure-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/qsort",
+      "title": "qsort",
+      "status": "draft",
+      "tags": ["qsort"],
+      "problems": 9
+    },
+    {
+      "path": "technique/quadratic-formula",
+      "title": "Quadratic formula",
+      "status": "draft",
+      "tags": ["quadratic-formula"],
+      "problems": 9
+    },
+    {
+      "path": "technique/quadratic-irrational-number",
+      "title": "Quadratic irrational number",
+      "status": "missing",
+      "tags": ["quadratic-irrational-number"],
+      "problems": 2
+    },
+    {
+      "path": "technique/quadratic-residue",
+      "title": "Quadratic residue",
+      "status": "missing",
+      "tags": ["quadratic-residue"],
+      "problems": 3
+    },
+    {
+      "path": "technique/quaternion-group",
+      "title": "Quaternion group",
+      "status": "missing",
+      "tags": ["quaternion-group"],
+      "problems": 1
+    },
+    {
+      "path": "technique/quicksort",
+      "title": "Quicksort",
+      "status": "missing",
+      "tags": ["quicksort"],
+      "problems": 2
+    },
+    {
+      "path": "technique/quotient-blocking",
+      "title": "quotient blocking",
+      "status": "missing",
+      "tags": ["quotient-blocking"],
+      "problems": 1
+    },
+    {
+      "path": "technique/radical-of-an-integer",
+      "title": "Radical of an integer",
+      "status": "missing",
+      "tags": ["radical-of-an-integer"],
+      "problems": 2
+    },
+    {
+      "path": "technique/radix",
+      "title": "Radix",
+      "status": "missing",
+      "tags": ["radix"],
+      "problems": 2
+    },
+    {
+      "path": "technique/rate-of-convergence",
+      "title": "Rate of convergence",
+      "status": "missing",
+      "tags": ["rate-of-convergence"],
+      "problems": 1
+    },
+    {
+      "path": "technique/rational-function",
+      "title": "Rational function",
+      "status": "missing",
+      "tags": ["rational-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/rational-number",
+      "title": "Rational number",
+      "status": "missing",
+      "tags": ["rational-number"],
+      "problems": 4
+    },
+    {
+      "path": "technique/ray-tracing-graphics",
+      "title": "Ray tracing (graphics)",
+      "status": "missing",
+      "tags": ["ray-tracing-graphics"],
+      "problems": 1
+    },
+    {
+      "path": "technique/recurrence-relation",
+      "title": "Recurrence relation",
+      "status": "draft",
+      "tags": ["recurrence-relation"],
+      "problems": 17
+    },
+    {
+      "path": "technique/recursion-computer-science",
+      "title": "Recursion (computer science)",
+      "status": "draft",
+      "tags": ["recursion-computer-science"],
+      "problems": 5
+    },
+    {
+      "path": "technique/repdigit",
+      "title": "Repdigit",
+      "status": "missing",
+      "tags": ["repdigit"],
+      "problems": 1
+    },
+    {
+      "path": "technique/ring-homomorphism",
+      "title": "Ring homomorphism",
+      "status": "missing",
+      "tags": ["ring-homomorphism"],
+      "problems": 1
+    },
+    {
+      "path": "technique/rotation-matrix",
+      "title": "Rotation matrix",
+      "status": "missing",
+      "tags": ["rotation-matrix"],
+      "problems": 1
+    },
+    {
+      "path": "technique/round-off-error",
+      "title": "Round-off error",
+      "status": "missing",
+      "tags": ["round-off-error"],
+      "problems": 1
+    },
+    {
+      "path": "technique/rounding",
+      "title": "Rounding",
+      "status": "missing",
+      "tags": ["rounding"],
+      "problems": 2
+    },
+    {
+      "path": "technique/row-and-column-major-order",
+      "title": "Row- and column-major order",
+      "status": "missing",
+      "tags": ["row-and-column-major-order"],
+      "problems": 1
+    },
+    {
+      "path": "technique/run-length-encoding",
+      "title": "Run-length encoding",
+      "status": "missing",
+      "tags": ["run-length-encoding"],
+      "problems": 1
+    },
+    {
+      "path": "technique/sentinel-value",
+      "title": "Sentinel value",
+      "status": "missing",
+      "tags": ["sentinel-value"],
+      "problems": 3
+    },
+    {
+      "path": "technique/set",
+      "title": "set",
+      "status": "draft",
+      "tags": ["set"],
+      "problems": 19
+    },
+    {
+      "path": "technique/short-circuit-evaluation",
+      "title": "Short-circuit evaluation",
+      "status": "draft",
+      "tags": ["short-circuit-evaluation"],
+      "problems": 6
+    },
+    {
+      "path": "technique/sieve-of-eratosthenes",
+      "title": "Sieve of Eratosthenes",
+      "status": "draft",
+      "tags": ["sieve-of-eratosthenes"],
+      "problems": 73
+    },
+    {
+      "path": "technique/sieve-of-sundaram",
+      "title": "Sieve of Sundaram",
+      "status": "draft",
+      "tags": ["sieve-of-sundaram"],
+      "problems": 10
+    },
+    {
+      "path": "technique/significand",
+      "title": "Significand",
+      "status": "missing",
+      "tags": ["significand"],
+      "problems": 1
+    },
+    {
+      "path": "technique/simulated-annealing",
+      "title": "Simulated annealing",
+      "status": "missing",
+      "tags": ["simulated-annealing"],
+      "problems": 1
+    },
+    {
+      "path": "technique/sliding-window-protocol",
+      "title": "Sliding window protocol",
+      "status": "missing",
+      "tags": ["sliding-window-protocol"],
+      "problems": 1
+    },
+    {
+      "path": "technique/snprintf",
+      "title": "snprintf",
+      "status": "missing",
+      "tags": ["snprintf"],
+      "problems": 1
+    },
+    {
+      "path": "technique/sorting-algorithm",
+      "title": "Sorting algorithm",
+      "status": "draft",
+      "tags": ["sorting-algorithm"],
+      "problems": 5
+    },
+    {
+      "path": "technique/sparse-matrix",
+      "title": "Sparse matrix",
+      "status": "missing",
+      "tags": ["sparse-matrix"],
+      "problems": 1
+    },
+    {
+      "path": "technique/specular-reflection",
+      "title": "Specular reflection",
+      "status": "missing",
+      "tags": ["specular-reflection"],
+      "problems": 1
+    },
+    {
+      "path": "technique/sprague-grundy-theorem",
+      "title": "Sprague\u2013Grundy theorem",
+      "status": "missing",
+      "tags": ["sprague-grundy-theorem"],
+      "problems": 2
+    },
+    {
+      "path": "technique/sqrt",
+      "title": "sqrt",
+      "status": "missing",
+      "tags": ["sqrt"],
+      "problems": 1
+    },
+    {
+      "path": "technique/sqrt-decomposition",
+      "title": "sqrt-decomposition",
+      "status": "missing",
+      "tags": ["sqrt-decomposition"],
+      "problems": 1
+    },
+    {
+      "path": "technique/square-root",
+      "title": "Square root",
+      "status": "missing",
+      "tags": ["square-root"],
+      "problems": 3
+    },
+    {
+      "path": "technique/stack-abstract-data-type",
+      "title": "Stack (abstract data type)",
+      "status": "missing",
+      "tags": ["stack-abstract-data-type"],
+      "problems": 2
+    },
+    {
+      "path": "technique/stack-based-memory-allocation",
+      "title": "Stack-based memory allocation",
+      "status": "missing",
+      "tags": ["stack-based-memory-allocation"],
+      "problems": 2
+    },
+    {
+      "path": "technique/stars-and-bars-combinatorics",
+      "title": "Stars and bars (combinatorics)",
+      "status": "missing",
+      "tags": ["stars-and-bars-combinatorics"],
+      "problems": 1
+    },
+    {
+      "path": "technique/static-inline",
+      "title": "static inline",
+      "status": "missing",
+      "tags": ["static-inline"],
+      "problems": 1
+    },
+    {
+      "path": "technique/steinhaus-johnson-trotter-algorithm",
+      "title": "Steinhaus\u2013Johnson\u2013Trotter algorithm",
+      "status": "missing",
+      "tags": ["steinhaus-johnson-trotter-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/stencil-numerical-analysis",
+      "title": "Stencil (numerical analysis)",
+      "status": "missing",
+      "tags": ["stencil-numerical-analysis"],
+      "problems": 1
+    },
+    {
+      "path": "technique/step-function",
+      "title": "Step function",
+      "status": "missing",
+      "tags": ["step-function"],
+      "problems": 1
+    },
+    {
+      "path": "technique/stirlings-approximation",
+      "title": "Stirling's approximation",
+      "status": "missing",
+      "tags": ["stirlings-approximation"],
+      "problems": 1
+    },
+    {
+      "path": "technique/stochastic-matrix",
+      "title": "Stochastic matrix",
+      "status": "missing",
+      "tags": ["stochastic-matrix"],
+      "problems": 1
+    },
+    {
+      "path": "technique/strcmp",
+      "title": "strcmp",
+      "status": "missing",
+      "tags": ["strcmp"],
+      "problems": 2
+    },
+    {
+      "path": "technique/strength-reduction",
+      "title": "Strength reduction",
+      "status": "missing",
+      "tags": ["strength-reduction"],
+      "problems": 1
+    },
+    {
+      "path": "technique/string-slicing",
+      "title": "string slicing",
+      "status": "missing",
+      "tags": ["string-slicing"],
+      "problems": 1
+    },
+    {
+      "path": "technique/strtok",
+      "title": "strtok",
+      "status": "draft",
+      "tags": ["strtok"],
+      "problems": 5
+    },
+    {
+      "path": "technique/sweep-line-algorithm",
+      "title": "Sweep line algorithm",
+      "status": "missing",
+      "tags": ["sweep-line-algorithm"],
+      "problems": 2
+    },
+    {
+      "path": "technique/switch-statement",
+      "title": "Switch statement",
+      "status": "missing",
+      "tags": ["switch-statement"],
+      "problems": 1
+    },
+    {
+      "path": "technique/symmetric-matrix",
+      "title": "Symmetric matrix",
+      "status": "missing",
+      "tags": ["symmetric-matrix"],
+      "problems": 1
+    },
+    {
+      "path": "technique/symmetry",
+      "title": "Symmetry",
+      "status": "missing",
+      "tags": ["symmetry"],
+      "problems": 4
+    },
+    {
+      "path": "technique/system-of-linear-equations",
+      "title": "System of linear equations",
+      "status": "missing",
+      "tags": ["system-of-linear-equations"],
+      "problems": 1
+    },
+    {
+      "path": "technique/telescoping-series",
+      "title": "Telescoping series",
+      "status": "missing",
+      "tags": ["telescoping-series"],
+      "problems": 1
+    },
+    {
+      "path": "technique/tensor-network",
+      "title": "Tensor network",
+      "status": "missing",
+      "tags": ["tensor-network"],
+      "problems": 1
+    },
+    {
+      "path": "technique/tetrahedral-number",
+      "title": "Tetrahedral number",
+      "status": "missing",
+      "tags": ["tetrahedral-number"],
+      "problems": 1
+    },
+    {
+      "path": "technique/timsort",
+      "title": "Timsort",
+      "status": "missing",
+      "tags": ["timsort"],
+      "problems": 1
+    },
+    {
+      "path": "technique/tonelli-shanks-algorithm",
+      "title": "Tonelli\u2013Shanks algorithm",
+      "status": "missing",
+      "tags": ["tonelli-shanks-algorithm"],
+      "problems": 1
+    },
+    {
+      "path": "technique/topological-sorting",
+      "title": "Topological sorting",
+      "status": "missing",
+      "tags": ["topological-sorting"],
+      "problems": 2
+    },
+    {
+      "path": "technique/translation-lookaside-buffer",
+      "title": "Translation lookaside buffer",
+      "status": "missing",
+      "tags": ["translation-lookaside-buffer"],
+      "problems": 1
+    },
+    {
+      "path": "technique/trapezoidal-rule",
+      "title": "Trapezoidal rule",
+      "status": "missing",
+      "tags": ["trapezoidal-rule"],
+      "problems": 1
+    },
+    {
+      "path": "technique/tree-of-primitive-pythagorean-triples",
+      "title": "Tree of primitive Pythagorean triples",
+      "status": "missing",
+      "tags": ["tree-of-primitive-pythagorean-triples"],
+      "problems": 4
+    },
+    {
+      "path": "technique/trial-division",
+      "title": "Trial division",
+      "status": "draft",
+      "tags": ["trial-division"],
+      "problems": 22
+    },
+    {
+      "path": "technique/triangle-free-graph",
+      "title": "Triangle-free graph",
+      "status": "missing",
+      "tags": ["triangle-free-graph"],
+      "problems": 1
+    },
+    {
+      "path": "technique/triangle-inequality",
+      "title": "Triangle inequality",
+      "status": "missing",
+      "tags": ["triangle-inequality"],
+      "problems": 1
+    },
+    {
+      "path": "technique/trie",
+      "title": "Trie",
+      "status": "missing",
+      "tags": ["trie"],
+      "problems": 1
+    },
+    {
+      "path": "technique/tuple",
+      "title": "Tuple",
+      "status": "missing",
+      "tags": ["tuple"],
+      "problems": 3
+    },
+    {
+      "path": "technique/tuple-assignment",
+      "title": "tuple assignment",
+      "status": "draft",
+      "tags": ["tuple-assignment"],
+      "problems": 8
+    },
+    {
+      "path": "technique/two-pointer-technique",
+      "title": "Two-pointer technique",
+      "status": "missing",
+      "tags": ["two-pointer-technique"],
+      "problems": 1
+    },
+    {
+      "path": "technique/two-pointers-technique",
+      "title": "Two pointers technique",
+      "status": "missing",
+      "tags": ["two-pointers-technique"],
+      "problems": 3
+    },
+    {
+      "path": "technique/twos-complement",
+      "title": "Two's complement",
+      "status": "missing",
+      "tags": ["twos-complement"],
+      "problems": 2
+    },
+    {
+      "path": "technique/undefined-behavior",
+      "title": "Undefined behavior",
+      "status": "missing",
+      "tags": ["undefined-behavior"],
+      "problems": 2
+    },
+    {
+      "path": "technique/unranking",
+      "title": "Unranking",
+      "status": "missing",
+      "tags": ["unranking"],
+      "problems": 2
+    },
+    {
+      "path": "technique/unsigned-short",
+      "title": "unsigned short",
+      "status": "missing",
+      "tags": ["unsigned-short"],
+      "problems": 1
+    },
+    {
+      "path": "technique/vectorization-mathematics",
+      "title": "Vectorization (mathematics)",
+      "status": "missing",
+      "tags": ["vectorization-mathematics"],
+      "problems": 1
+    },
+    {
+      "path": "technique/vectorized",
+      "title": "vectorized",
+      "status": "missing",
+      "tags": ["vectorized"],
+      "problems": 1
+    },
+    {
+      "path": "technique/walrus-operator",
+      "title": "walrus operator",
+      "status": "draft",
+      "tags": ["walrus-operator"],
+      "problems": 21
+    },
+    {
+      "path": "technique/wheel-factorization",
+      "title": "Wheel factorization",
+      "status": "missing",
+      "tags": ["wheel-factorization"],
+      "problems": 2
+    },
+    {
+      "path": "technique/wilsons-theorem",
+      "title": "Wilson's theorem",
+      "status": "missing",
+      "tags": ["wilsons-theorem"],
+      "problems": 2
+    }
+  ]
+}

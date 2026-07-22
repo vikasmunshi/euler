@@ -1,4 +1,5 @@
 <!-- tags: [functools-lru-cache] -->
+<!-- status: draft -->
 # functools.lru_cache
 
 Reference: [functools.lru_cache](https://docs.python.org/3/library/functools.html#functools.lru_cache)

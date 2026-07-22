@@ -1,4 +1,5 @@
 <!-- tags: [pandigital-number] -->
+<!-- status: draft -->
 # Pandigital number
 
 Reference: [Pandigital number](https://en.wikipedia.org/wiki/Pandigital_number)

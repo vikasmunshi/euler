@@ -1,4 +1,5 @@
 <!-- tags: [extended-euclidean-algorithm] -->
+<!-- status: draft -->
 # Extended Euclidean algorithm
 
 Reference: [Extended Euclidean algorithm](https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm)

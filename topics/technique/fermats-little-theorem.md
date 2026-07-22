@@ -1,4 +1,5 @@
 <!-- tags: [fermats-little-theorem] -->
+<!-- status: draft -->
 # Fermat's little theorem
 
 Reference: [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem)

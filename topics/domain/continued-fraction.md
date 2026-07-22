@@ -1,4 +1,5 @@
 <!-- tags: [continued-fraction] -->
+<!-- status: draft -->
 # Continued fraction
 
 Reference: [Continued fraction](https://en.wikipedia.org/wiki/Continued_fraction)

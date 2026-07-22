@@ -1,4 +1,5 @@
 <!-- tags: [right-tool-per-cost] -->
+<!-- status: draft -->
 # Match the abstraction to the hot path
 
 _Generators/laziness win on memory, not on a tight numeric loop._

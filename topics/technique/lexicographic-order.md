@@ -1,4 +1,5 @@
 <!-- tags: [lexicographic-order] -->
+<!-- status: draft -->
 # Lexicographic order
 
 Reference: [Lexicographic order](https://en.wikipedia.org/wiki/Lexicographic_order)

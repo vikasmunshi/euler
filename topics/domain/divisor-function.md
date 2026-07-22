@@ -1,4 +1,5 @@
 <!-- tags: [divisor-function] -->
+<!-- status: draft -->
 # Divisor function
 
 Reference: [Divisor function](https://en.wikipedia.org/wiki/Divisor_function)

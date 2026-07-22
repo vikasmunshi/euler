@@ -1,4 +1,5 @@
 <!-- tags: [linear-probing] -->
+<!-- status: draft -->
 # Linear probing
 
 Reference: [Linear probing](https://en.wikipedia.org/wiki/Linear_probing)

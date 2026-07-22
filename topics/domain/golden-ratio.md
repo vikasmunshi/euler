@@ -1,4 +1,5 @@
 <!-- tags: [golden-ratio] -->
+<!-- status: draft -->
 # Golden ratio
 
 Reference: [Golden ratio](https://en.wikipedia.org/wiki/Golden_ratio)

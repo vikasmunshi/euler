@@ -1,4 +1,5 @@
 <!-- tags: [kummers-theorem] -->
+<!-- status: draft -->
 # Kummer's theorem
 
 Reference: [Kummer's theorem](https://en.wikipedia.org/wiki/Kummer%27s_theorem)

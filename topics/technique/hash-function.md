@@ -1,4 +1,5 @@
 <!-- tags: [hash-function] -->
+<!-- status: draft -->
 # Hash function
 
 Reference: [Hash function](https://en.wikipedia.org/wiki/Hash_function)

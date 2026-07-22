@@ -1,4 +1,5 @@
 <!-- tags: [optimal-substructure] -->
+<!-- status: draft -->
 # Optimal substructure
 
 Reference: [Optimal substructure](https://en.wikipedia.org/wiki/Optimal_substructure)

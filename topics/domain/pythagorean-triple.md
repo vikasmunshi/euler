@@ -1,4 +1,5 @@
 <!-- tags: [pythagorean-triple] -->
+<!-- status: draft -->
 # Pythagorean triple
 
 Reference: [Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple)

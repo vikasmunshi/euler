@@ -1,4 +1,5 @@
 <!-- tags: [array-programming] -->
+<!-- status: draft -->
 # Array programming
 
 Reference: [Array programming](https://en.wikipedia.org/wiki/Array_programming)

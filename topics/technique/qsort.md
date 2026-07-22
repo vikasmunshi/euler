@@ -1,4 +1,5 @@
 <!-- tags: [qsort] -->
+<!-- status: draft -->
 # qsort
 
 Reference: [qsort](https://en.cppreference.com/w/c/algorithm/qsort)

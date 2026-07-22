@@ -1,4 +1,5 @@
 <!-- tags: [euclidean-algorithm] -->
+<!-- status: draft -->
 # Euclidean algorithm
 
 Reference: [Euclidean algorithm](https://en.wikipedia.org/wiki/Euclidean_algorithm)

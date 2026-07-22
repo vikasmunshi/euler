@@ -1,4 +1,5 @@
 <!-- tags: [fundamental-theorem-of-arithmetic] -->
+<!-- status: draft -->
 # Fundamental theorem of arithmetic
 
 Reference: [Fundamental theorem of arithmetic](https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic)

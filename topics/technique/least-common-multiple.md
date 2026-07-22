@@ -1,4 +1,5 @@
 <!-- tags: [least-common-multiple] -->
+<!-- status: draft -->
 # Least common multiple
 
 Reference: [Least common multiple](https://en.wikipedia.org/wiki/Least_common_multiple)

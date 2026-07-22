@@ -1,4 +1,5 @@
 <!-- tags: [algorithm-beats-language] -->
+<!-- status: draft -->
 # Algorithm beats language
 
 _A better asymptotic class in a slow language beats a worse one in a fast language._

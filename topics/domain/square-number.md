@@ -1,4 +1,5 @@
 <!-- tags: [square-number] -->
+<!-- status: draft -->
 # Square number
 
 Reference: [Square number](https://en.wikipedia.org/wiki/Square_number)

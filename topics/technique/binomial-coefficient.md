@@ -1,4 +1,5 @@
 <!-- tags: [binomial-coefficient] -->
+<!-- status: draft -->
 # Binomial coefficient
 
 Reference: [Binomial coefficient](https://en.wikipedia.org/wiki/Binomial_coefficient)

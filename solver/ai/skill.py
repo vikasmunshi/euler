@@ -18,6 +18,7 @@ from rich.text import Text
 
 from solver.config import ExitCodes, config
 from solver.core.problems import Problem
+from solver.core.tags import STATUSES
 from solver.shell import console, register
 from solver.shell.command import Context
 
@@ -51,54 +52,67 @@ def claude_solve(
     return _run_skill(ctx, invocation, f'[accent]claude · {action}[/accent]')
 
 
-def _blog_written(facet: str, slug: str) -> bool:
-    """A tag's article counts as *written* once its page exists and is no longer the TODO skeleton."""
-    page = config.topics_dir / facet / f'{slug}.md'
+def _topic_index() -> list[dict[str, Any]]:
+    """The article index — ``topics/articles.json``, maintained by ``update-tags``.
+
+    Empty when it has not been built yet; every reader here degrades to "no topics known"
+    rather than failing, so a clone that has not run ``update-tags`` still works."""
     try:
-        return page.is_file() and '_TODO:' not in page.read_text(encoding='utf-8')
-    except OSError:
-        return False
+        data = json.loads(config.topics_index_file.read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
+    return list(data.get('articles', []))
+
+
+def _find_topic(topic: str) -> dict[str, Any] | None:
+    """The index row a ``claude-blog`` target names: a full ``<folder>/<slug>`` path (the way
+    completion offers it) or a bare slug, with or without the ``.md``."""
+    topic = topic.removesuffix('.md').strip('/')
+    rows = _topic_index()
+    return (next((r for r in rows if r['path'] == topic), None)
+            or next((r for r in rows if r['path'].rsplit('/', 1)[-1] == topic), None))
 
 
 def _topic_completions(_ctx: Context, incomplete: str) -> Iterable[str | Completion]:
-    """`claude-blog` targets: every tag as its ``<facet>/<slug>`` topic path. **Unwritten tags come
-    first, most-referenced at the top**; already-written blogs sink to the end (flagged `written`).
-    Each shows its facet and distinct-problem count."""
-    try:
-        central = json.loads(config.central_tags_file.read_text())
-    except (OSError, json.JSONDecodeError):
-        return []
-
-    def refs(tag: dict[str, Any]) -> int:
-        return len({r.split('_')[0] for r in tag.get('refs', [])})
-
-    rows: list[tuple[bool, int, dict[str, Any]]] = []
-    for tag in central.get('tags', []):
-        path = f"{tag['facet']}/{tag['slug']}"
-        if path.startswith(incomplete) or incomplete in tag['slug']:
-            rows.append((_blog_written(tag['facet'], tag['slug']), refs(tag), tag))
-    rows.sort(key=lambda r: (r[0], -r[1], r[2]['slug']))    # unwritten first, then by refs desc
-    return [Completion(f"{t['facet']}/{t['slug']}", start_position=-len(incomplete), display=t['slug'],
-                       display_meta=f"{t['facet']} · {n}{' · written' if w else ''}")
-            for w, n, t in rows]
+    """`claude-blog` targets: every writable topic in the article index as its ``<folder>/<slug>``
+    path — the tag pages *and* the curated ones. **Unwritten topics come first, most-referenced at
+    the top**, then the drafts, with finished articles last. Each shows its folder, its
+    distinct-problem count, and its status once it has a page."""
+    rank = {status: i for i, status in enumerate(STATUSES)}
+    rows = [r for r in _topic_index() if incomplete in r['path']]
+    rows.sort(key=lambda r: (rank.get(r['status'], 9), -r['problems'], r['path']))
+    return [Completion(r['path'], start_position=-len(incomplete), display=r['path'].rsplit('/', 1)[-1],
+                       display_meta=f"{r['path'].rsplit('/', 1)[0]} · {r['problems']}"
+                                    + ('' if r['status'] == 'missing' else f" · {r['status']}"))
+            for r in rows]
 
 
 @register(requires='maintainer', pass_ctx=True, completers={'topic': _topic_completions},
           help_text='Launch the Claude Euler Blogger skill to write a topic article for a tag/topic.')
-def claude_blog(ctx: Context, topic: str, additional_prompt: str = '') -> int:
+def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force: bool = False) -> int:
     """Write (or flesh out) a topic article via the claude-euler-blogger skill.
 
     *topic* names what to write about: a tag's ``<facet>/<slug>`` path (e.g.
     ``technique/sieve-of-eratosthenes``), a bare tag slug, or a curated topic path
-    (``number-theory/primes``). Tab-completion offers the tags, most-referenced first.
+    (``number-theory/primes``). Tab-completion offers every topic in the article index
+    (``topics/articles.json``), unwritten and most-referenced first.
     Launches Claude Code headless to research the covering problems and write the article
     under ``topics/``, then streams a live Markdown summary. Needs the `claude` CLI and an
     `ANTHROPIC_API_KEY`.
 
+    A topic whose article the index reports as ``final`` is left alone — the skill marks a page
+    final when it is done writing it, and rewriting one is an explicit ``--force``.
+
     Args:
         topic:              The tag or topic to write about (completed most-referenced first).
         additional_prompt:  Extra free-text guidance for the writer. Defaults to empty.
+        force:              Rewrite the article even when it is already final. Defaults to False.
     """
+    entry = _find_topic(topic)
+    if entry is not None and entry['status'] == 'final' and not force:
+        console.print(f'[muted]{entry["path"]} is already [accent]final[/accent] — '
+                      f'use [accent]--force[/accent] to rewrite it.[/muted]')
+        return ExitCodes.EXIT_OK
     invocation = f'/claude-euler-blogger {topic} {additional_prompt}'.strip()
     return _run_skill(ctx, invocation, '[accent]claude · blog[/accent]')
 

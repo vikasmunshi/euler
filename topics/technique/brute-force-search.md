@@ -1,4 +1,5 @@
 <!-- tags: [brute-force-search] -->
+<!-- status: draft -->
 # Brute-force search
 
 Reference: [Brute-force search](https://en.wikipedia.org/wiki/Brute-force_search)

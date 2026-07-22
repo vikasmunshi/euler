@@ -1,4 +1,5 @@
 <!-- tags: [branch-and-bound] -->
+<!-- status: draft -->
 # Branch and bound
 
 Reference: [Branch and bound](https://en.wikipedia.org/wiki/Branch_and_bound)

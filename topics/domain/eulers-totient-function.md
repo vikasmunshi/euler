@@ -1,4 +1,5 @@
 <!-- tags: [eulers-totient-function] -->
+<!-- status: draft -->
 # Euler's totient function
 
 Reference: [Euler's totient function](https://en.wikipedia.org/wiki/Euler%27s_totient_function)

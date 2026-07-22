@@ -1,4 +1,5 @@
 <!-- tags: [triangular-number] -->
+<!-- status: draft -->
 # Triangular number
 
 Reference: [Triangular number](https://en.wikipedia.org/wiki/Triangular_number)

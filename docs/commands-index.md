@@ -274,6 +274,7 @@ Launch the Claude Euler Blogger skill to write a topic article for a tag/topic.
 ```
 claude-blog <topic>
 [additional_prompt=<str>] (default '')
+[force=true|--force]
 ```
 
 ```text
@@ -281,14 +282,19 @@ Write (or flesh out) a topic article via the claude-euler-blogger skill.
 
 *topic* names what to write about: a tag's ``<facet>/<slug>`` path (e.g.
 ``technique/sieve-of-eratosthenes``), a bare tag slug, or a curated topic path
-(``number-theory/primes``). Tab-completion offers the tags, most-referenced first.
+(``number-theory/primes``). Tab-completion offers every topic in the article index
+(``topics/articles.json``), unwritten and most-referenced first.
 Launches Claude Code headless to research the covering problems and write the article
 under ``topics/``, then streams a live Markdown summary. Needs the `claude` CLI and an
 `ANTHROPIC_API_KEY`.
 
+A topic whose article the index reports as ``final`` is left alone — the skill marks a page
+final when it is done writing it, and rewriting one is an explicit ``--force``.
+
 Args:
     topic:              The tag or topic to write about (completed most-referenced first).
     additional_prompt:  Extra free-text guidance for the writer. Defaults to empty.
+    force:              Rewrite the article even when it is already final. Defaults to False.
 ```
 
 ---
@@ -381,7 +387,7 @@ Display total cost of AI API tokens consumed in session.
 
 ```
 costs
-[ecb_usd_rate=<float>] (default 1.1467)
+[ecb_usd_rate=<float>] (default 1.1418)
 ```
 
 ```text
@@ -1425,11 +1431,14 @@ The glue for the double-entry tag graph.
 Order (maintainer beats solver/contributor): apply maintainer edits to the central
 vocabulary (vs HEAD) into the per-problem files first; promote ``new-tags`` proposals into
 the vocabulary; rebuild every central ``refs`` leg from the per-problem files; regenerate the
-topic articles' problem lists. A problem with notes but no ``tags.json`` is reported, not
-created here — the ``claude-api tags`` target (or the skill) authors it.
+topic articles' problem lists and rewrite the article index ``topics/articles.json`` (one
+row per writable topic: title, tags, problem count and status). A problem with notes but no
+``tags.json`` is reported, not created here — the ``claude-api tags`` target (or the skill)
+authors it.
 
 With ``--check`` nothing is written: report unknown slugs, facet violations, unpromoted
-proposals and missing files, and exit non-zero if the graph is inconsistent.
+proposals, missing files and a stale article index, and exit non-zero if the graph is
+inconsistent.
 ```
 
 ---

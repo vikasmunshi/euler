@@ -1,4 +1,5 @@
 <!-- tags: [multiplicative-function] -->
+<!-- status: draft -->
 # Multiplicative function
 
 Reference: [Multiplicative function](https://en.wikipedia.org/wiki/Multiplicative_function)

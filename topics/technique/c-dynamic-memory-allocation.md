@@ -1,4 +1,5 @@
 <!-- tags: [c-dynamic-memory-allocation] -->
+<!-- status: draft -->
 # calloc
 
 Reference: [calloc](https://en.cppreference.com/w/c/memory/calloc)

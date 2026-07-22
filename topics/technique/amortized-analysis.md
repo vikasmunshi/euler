@@ -1,4 +1,5 @@
 <!-- tags: [amortized-analysis] -->
+<!-- status: draft -->
 # Amortized analysis
 
 Reference: [Amortized analysis](https://en.wikipedia.org/wiki/Amortized_analysis)

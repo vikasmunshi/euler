@@ -1,4 +1,5 @@
 <!-- tags: [size-work-to-the-input] -->
+<!-- status: draft -->
 # Size the work to the input
 
 _Bound sieves, tables and caches by the actual inputs, built inside solve()._

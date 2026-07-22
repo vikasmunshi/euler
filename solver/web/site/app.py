@@ -455,9 +455,9 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def topics_index(request: web.Request) -> web.StreamResponse:
-    """``GET /topics/`` — the topics index (card grid)."""
+    """``GET /topics/`` — the topics index (card grid, one section per folder)."""
     return render(request, 'topics.html', {
-        'entries': content.list_topics(request.app[CONFIG_KEY].repo_root),
+        'groups': content.list_topic_groups(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('topics', None)],
     }, block='content')
 

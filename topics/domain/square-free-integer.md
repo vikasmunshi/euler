@@ -1,4 +1,5 @@
 <!-- tags: [square-free-integer] -->
+<!-- status: draft -->
 # Square-free integer
 
 Reference: [Square-free integer](https://en.wikipedia.org/wiki/Square-free_integer)

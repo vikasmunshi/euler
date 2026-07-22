@@ -1,4 +1,5 @@
 <!-- tags: [horners-method] -->
+<!-- status: draft -->
 # Horner's method
 
 Reference: [Horner's method](https://en.wikipedia.org/wiki/Horner%27s_method)

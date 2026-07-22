@@ -1,4 +1,5 @@
 <!-- tags: [arithmetic-progression] -->
+<!-- status: draft -->
 # Arithmetic progression
 
 Reference: [Arithmetic progression](https://en.wikipedia.org/wiki/Arithmetic_progression)

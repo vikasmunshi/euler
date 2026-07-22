@@ -1,4 +1,5 @@
 <!-- tags: [coprime-integers] -->
+<!-- status: draft -->
 # Coprime integers
 
 Reference: [Coprime integers](https://en.wikipedia.org/wiki/Coprime_integers)

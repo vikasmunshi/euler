@@ -1,4 +1,5 @@
 <!-- tags: [gmp] -->
+<!-- status: draft -->
 # GMP
 
 Reference: [GMP](https://gmplib.org/)

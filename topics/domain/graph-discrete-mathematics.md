@@ -1,4 +1,5 @@
 <!-- tags: [graph-discrete-mathematics] -->
+<!-- status: draft -->
 # Graph (discrete mathematics)
 
 Reference: [Graph (discrete mathematics)](https://en.wikipedia.org/wiki/Graph_(discrete_mathematics))

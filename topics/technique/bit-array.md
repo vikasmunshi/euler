@@ -1,4 +1,5 @@
 <!-- tags: [bit-array] -->
+<!-- status: draft -->
 # Bit array
 
 Reference: [Bit array](https://en.wikipedia.org/wiki/Bit_array)

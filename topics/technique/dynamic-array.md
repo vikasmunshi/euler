@@ -1,4 +1,5 @@
 <!-- tags: [dynamic-array] -->
+<!-- status: draft -->
 # Dynamic array
 
 Reference: [Dynamic array](https://en.wikipedia.org/wiki/Dynamic_array)

@@ -1,4 +1,5 @@
 <!-- tags: [breadth-first-search] -->
+<!-- status: draft -->
 # Breadth-first search
 
 Reference: [Breadth-first search](https://en.wikipedia.org/wiki/Breadth-first_search)

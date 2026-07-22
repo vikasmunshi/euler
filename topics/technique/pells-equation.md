@@ -1,4 +1,5 @@
 <!-- tags: [pells-equation] -->
+<!-- status: draft -->
 # Pell's equation
 
 Reference: [Pell's equation](https://en.wikipedia.org/wiki/Pell%27s_equation)

@@ -410,10 +410,14 @@ class ContentServiceTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_topics_nested_folder(self) -> None:
         """A `topics/<folder>/<page>.md` is listed with its folder-qualified name and
-        served at the nested route; the folder trail is the card heading."""
+        served at the nested route; the index groups it under its folder."""
         index = await (await self.client.get('/topics/', headers=_READER)).text()
         self.assertIn('/topics/number-theory/primes', index)
-        self.assertIn('Number Theory / Primes', index)             # folder-trail heading
+        self.assertIn('<h3>Number Theory</h3>', index)              # the folder is the section
+        self.assertIn('class="card-title">Primes<', index)          # the card carries the leaf
+        self.assertIn('class="cards cards-4"', index)               # four to a row
+        # status comes from the article index: a page still being written is muted
+        self.assertRegex(index, r'class="card is-draft"[^>]*\n?[^>]*/topics/number-theory/primes')
         resp = await self.client.get('/topics/number-theory/primes', headers=_READER)
         self.assertEqual(resp.status, 200)
         self.assertIn('Generating and testing primes', await resp.text())

@@ -1,4 +1,5 @@
 <!-- tags: [floor-and-ceiling-functions] -->
+<!-- status: draft -->
 # Floor and ceiling functions
 
 Reference: [Floor and ceiling functions](https://en.wikipedia.org/wiki/Floor_and_ceiling_functions)

@@ -1,4 +1,5 @@
 <!-- tags: [prefix-sum] -->
+<!-- status: draft -->
 # Prefix sum
 
 Reference: [Prefix sum](https://en.wikipedia.org/wiki/Prefix_sum)

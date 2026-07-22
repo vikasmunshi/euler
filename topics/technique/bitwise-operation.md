@@ -1,4 +1,5 @@
 <!-- tags: [bitwise-operation] -->
+<!-- status: draft -->
 # Bitwise operation
 
 Reference: [Bitwise operation](https://en.wikipedia.org/wiki/Bitwise_operation)

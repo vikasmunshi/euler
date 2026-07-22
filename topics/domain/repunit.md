@@ -1,4 +1,5 @@
 <!-- tags: [repunit] -->
+<!-- status: draft -->
 # Repunit
 
 Reference: [Repunit](https://en.wikipedia.org/wiki/Repunit)

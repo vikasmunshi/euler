@@ -1,4 +1,5 @@
 <!-- tags: [stern-brocot-tree] -->
+<!-- status: draft -->
 # Stern–Brocot tree
 
 Reference: [Stern–Brocot tree](https://en.wikipedia.org/wiki/Stern%E2%80%93Brocot_tree)

@@ -1,4 +1,5 @@
 <!-- tags: [p-adic-valuation] -->
+<!-- status: draft -->
 # P-adic valuation
 
 Reference: [P-adic valuation](https://en.wikipedia.org/wiki/P-adic_valuation)

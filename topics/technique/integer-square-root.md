@@ -1,4 +1,5 @@
 <!-- tags: [integer-square-root] -->
+<!-- status: draft -->
 # Integer square root
 
 Reference: [Integer square root](https://en.wikipedia.org/wiki/Integer_square_root)

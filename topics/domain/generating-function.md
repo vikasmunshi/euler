@@ -1,4 +1,5 @@
 <!-- tags: [generating-function] -->
+<!-- status: draft -->
 # Generating function
 
 Reference: [Generating function](https://en.wikipedia.org/wiki/Generating_function)

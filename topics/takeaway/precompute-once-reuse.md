@@ -1,4 +1,5 @@
 <!-- tags: [precompute-once-reuse] -->
+<!-- status: draft -->
 # Precompute once, reuse
 
 _Amortise an expensive table across many queries when inputs share structure._

@@ -1,4 +1,5 @@
 <!-- tags: [divisor] -->
+<!-- status: draft -->
 # Divisor
 
 Reference: [Divisor](https://en.wikipedia.org/wiki/Divisor)

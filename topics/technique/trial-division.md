@@ -1,4 +1,5 @@
 <!-- tags: [trial-division] -->
+<!-- status: draft -->
 # Trial division
 
 Reference: [Trial division](https://en.wikipedia.org/wiki/Trial_division)

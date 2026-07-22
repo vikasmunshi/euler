@@ -1,4 +1,5 @@
 <!-- tags: [strtok] -->
+<!-- status: draft -->
 # strtok
 
 Reference: [strtok](https://en.cppreference.com/w/c/string/byte/strtok)

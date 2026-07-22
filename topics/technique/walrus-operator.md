@@ -1,4 +1,5 @@
 <!-- tags: [walrus-operator] -->
+<!-- status: draft -->
 # walrus operator
 
 Reference: [walrus operator](https://docs.python.org/3/reference/expressions.html#assignment-expressions)

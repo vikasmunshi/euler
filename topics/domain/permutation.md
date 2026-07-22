@@ -1,4 +1,5 @@
 <!-- tags: [permutation] -->
+<!-- status: draft -->
 # Permutation
 
 Reference: [Permutation](https://en.wikipedia.org/wiki/Permutation)

@@ -12,11 +12,12 @@ not read them.
 """
 from __future__ import annotations
 
-__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
+__all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown',
            'rewrite_statement_links', 'git_status',
-           'list_docs', 'read_doc', 'list_topics', 'read_topic', 'problem_tag_view',
+           'list_docs', 'read_doc', 'list_topics', 'list_topic_groups', 'read_topic',
+           'problem_tag_view',
            'read_about', 'readme_html',
            'parse_progress', 'save_progress']
 
@@ -72,11 +73,25 @@ class DocEntry(NamedTuple):
     """A docs/topics index row (web-server-guide § The site): the URL *name*, the *heading*
     derived from the filename (title-cased, separators → spaces — the card's
     first line), and the *title* from the page's leading ``#`` heading (second
-    line). Index lists are sorted by *name* (the filename)."""
+    line). Index lists are sorted by *name* (the filename).
+
+    *status* is carried by topic articles only (``draft`` / ``final``, from the article
+    index); the docs tree leaves it empty."""
 
     name: str
     heading: str
     title: str
+    status: str = ''
+
+
+class TopicGroup(NamedTuple):
+    """One folder of the topics tree: the folder segment, its display *heading*,
+    and the pages inside it (each :class:`DocEntry` keeping its full URL *name*).
+    Pages sitting directly under ``topics/`` collect into the group named ``''``."""
+
+    name: str
+    heading: str
+    entries: list[DocEntry]
 
 
 # ── solutions ────────────────────────────────────────────────────────────────────────
@@ -644,6 +659,48 @@ def list_topics(repo_root: Path) -> list[DocEntry]:
                                 heading=' / '.join(_filename_heading(part) for part in rel.parts),
                                 title=_page_title(text, path.stem)))
     return entries
+
+
+def _same_words(a: str, b: str) -> bool:
+    """True when two labels differ only in case, spacing or punctuation —
+    ``'Arbitrary-precision arithmetic'`` and ``'Arbitrary Precision Arithmetic'``."""
+    return re.sub(r'\W+', '', a).lower() == re.sub(r'\W+', '', b).lower()
+
+
+def _indexed_topics(repo_root: Path) -> list[DocEntry]:
+    """The written pages of the article index (``topics/articles.json``, maintained by
+    ``update-tags``) — with their status. Its ``missing`` rows are vocabulary rather than
+    pages, so they are dropped: there is nothing to open. Empty when the index is absent
+    or unreadable, which sends the caller back to walking the tree."""
+    data = load_json(repo_root / 'topics' / 'articles.json')
+    rows = data.get('articles', []) if isinstance(data, dict) else []
+    return [DocEntry(name=str(row['path']), heading=str(row['path']),
+                     title=str(row.get('title', '')), status=str(row.get('status', '')))
+            for row in rows
+            if isinstance(row, dict) and row.get('path') and row.get('status') in ('draft', 'final')]
+
+
+def list_topic_groups(repo_root: Path) -> list[TopicGroup]:
+    """The topics index, folded by folder.
+
+    The article index is the source when it is there (it alone knows each page's status);
+    otherwise the tree is walked as :func:`list_topics` does, statusless.
+
+    The folder is the section heading, so each card drops the trail and shows only
+    its leaf heading. Groups come out in path order, the pages loose at the root of
+    ``topics/`` (if any) first under a generic heading. A page whose own title just
+    restates its filename (the per-tag skeletons) keeps an empty *title*, so the card
+    shows one line instead of saying the same thing twice.
+    """
+    groups: dict[str, list[DocEntry]] = {}
+    for entry in _indexed_topics(repo_root) or list_topics(repo_root):
+        folder, _, leaf = entry.name.rpartition('/')
+        heading = _filename_heading(leaf)
+        title = '' if _same_words(entry.title, heading) else entry.title
+        groups.setdefault(folder, []).append(entry._replace(heading=heading, title=title))
+    return [TopicGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
+                       entries=entries)
+            for folder, entries in sorted(groups.items())]
 
 
 def read_topic(repo_root: Path, name: str) -> str | None:

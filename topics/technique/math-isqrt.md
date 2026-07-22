@@ -1,4 +1,5 @@
 <!-- tags: [math-isqrt] -->
+<!-- status: draft -->
 # math.isqrt
 
 Reference: [math.isqrt](https://docs.python.org/3/library/math.html#math.isqrt)

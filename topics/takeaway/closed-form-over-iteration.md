@@ -1,4 +1,5 @@
 <!-- tags: [closed-form-over-iteration] -->
+<!-- status: draft -->
 # Prefer closed form over iteration
 
 _Replace an O(n) accumulation with an O(1) formula when the data is structured._

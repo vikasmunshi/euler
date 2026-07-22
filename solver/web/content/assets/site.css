@@ -397,8 +397,23 @@ body.terminal-doc {
 }
 .cards.cards-1 { grid-template-columns: 1fr; }        /* the landing: one box per row */
 .cards.cards-3 { grid-template-columns: repeat(3, 1fr); }
-@media (max-width: 1200px) { .cards.cards-3 { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 700px) { .cards, .cards.cards-3 { grid-template-columns: 1fr; } }
+/* Four-up: an index long enough to scan rather than read (the topics folders).
+   Half-width cards drop the arrow and tighten to the name they carry. */
+.cards.cards-4 { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+/* Third column is the status pill — zero-width on the cards that carry none. */
+.cards-4 .card { grid-template-columns: 1.1rem 1fr auto; gap: 0.5rem; padding: 0.55rem 0.7rem; }
+.cards-4 .card-go { display: none; }
+.cards-4 .card-title { font-size: 0.88rem; font-weight: 500; }
+.cards-4 .card-desc { font-size: 0.75rem; }
+/* A draft is a page that exists but is not written yet — readable, not advertised. */
+.card.is-draft .card-ic, .card.is-draft .card-title { color: var(--muted); }
+.card .pill-final { font-size: 0.6rem; padding: 0.05rem 0.4rem; }
+@media (max-width: 1200px) {
+  .cards.cards-3 { grid-template-columns: repeat(2, 1fr); }
+  .cards.cards-4 { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) { .cards.cards-4 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .cards, .cards.cards-3, .cards.cards-4 { grid-template-columns: 1fr; } }
 .card {
   display: grid;
   grid-template-columns: 1.7rem 1fr auto;
@@ -1025,12 +1040,15 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 .facet-label .idx { color: var(--f-technique); }
 .taglist { display: flex; flex-wrap: wrap; gap: 0.4rem; }
 
-.tag-panel .subrule { display: flex; align-items: center; gap: 0.6rem; margin: 0.95rem 0 0.6rem; }
-.tag-panel .subrule h3 {
+/* A section divider — a small mono label trailed by a hairline. Shared: the problem
+   page's tag facets and the topics index's folders read as the same kind of break. */
+.subrule { display: flex; align-items: center; gap: 0.6rem; margin: 0.95rem 0 0.6rem; }
+.subrule h3 {
   font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.7rem; letter-spacing: 0.12em;
   text-transform: uppercase; color: var(--muted); margin: 0;
 }
-.tag-panel .subrule::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.subrule .count { font-size: 0.7rem; color: var(--muted); }
+.subrule::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 
 .topic-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
 @media (max-width: 700px) { .topic-cards { grid-template-columns: 1fr; } }

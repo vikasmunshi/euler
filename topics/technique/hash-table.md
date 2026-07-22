@@ -1,4 +1,5 @@
 <!-- tags: [hash-table] -->
+<!-- status: draft -->
 # Hash table
 
 Reference: [Hash table](https://en.wikipedia.org/wiki/Hash_table)

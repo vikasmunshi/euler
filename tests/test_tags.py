@@ -8,10 +8,13 @@ used throughout so `_apply_membership` never needs on-disk solution indices.
 """
 from __future__ import annotations
 
+import tempfile
 import unittest
+from pathlib import Path
 from typing import Any
 from unittest.mock import patch
 
+from solver.config import config
 from solver.core import tags
 
 
@@ -77,6 +80,63 @@ class TagReconcileTests(unittest.TestCase):
         self._run(central, ptags, head)
         self.assertIn('gamma', ptags[3]['domain'])
         self.assertTrue(any('gamma' in msg for msg in tags._validate(central, ptags)))
+
+
+class ArticleIndexTests(unittest.TestCase):
+    """The article status comment, and the index update-tags builds from it.
+
+    Runs against a scratch `topics/` tree — config is pointed at it for the duration, so
+    the real one is never read or written."""
+
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.topics = Path(tmp.name)
+        saved = (config.topics_dir, config.topics_index_file)
+        config.topics_dir = self.topics
+        config.topics_index_file = self.topics / 'articles.json'
+        self.addCleanup(lambda: setattr(config, 'topics_index_file', saved[1]))
+        self.addCleanup(lambda: setattr(config, 'topics_dir', saved[0]))
+
+    def _article(self, rel: str, text: str) -> None:
+        path = self.topics / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+
+    def test_status_is_draft_unless_the_page_says_final(self) -> None:
+        self.assertEqual(tags.article_status('# Alpha\n'), 'draft')
+        self.assertEqual(tags.article_status('<!-- status: FINAL -->\n# Alpha\n'), 'final')
+        # a page on disk is never 'missing', whatever its comment claims
+        self.assertEqual(tags.article_status('<!-- status: missing -->\n# Alpha\n'), 'draft')
+
+    def test_stamp_lands_under_the_tags_comment_and_is_idempotent(self) -> None:
+        stamped = tags._stamp_status('<!-- tags: [alpha] -->\n# Alpha\n')
+        self.assertEqual(stamped.splitlines()[:2], ['<!-- tags: [alpha] -->', '<!-- status: draft -->'])
+        self.assertEqual(tags._stamp_status(stamped), stamped)
+        self.assertEqual(tags._stamp_status('# Alpha\n').splitlines()[0], '<!-- status: draft -->')
+
+    def test_index_spans_the_vocabulary_and_the_pages(self) -> None:
+        """Every tag is a row (missing until written); a page on disk overrides its own."""
+        self._article('domain/alpha.md', '<!-- tags: [alpha] -->\n<!-- status: final -->\n# Alpha, at length\n')
+        self._article('curated/mix.md', '<!-- tags: [alpha, beta] -->\n# Mixed\n')
+        index = tags._build_index(_central())
+        rows = {row['path']: row for row in index['articles']}
+        self.assertEqual([row['path'] for row in index['articles']], sorted(rows))   # sorted by path
+        self.assertEqual(rows['domain/alpha']['status'], 'final')
+        self.assertEqual(rows['domain/alpha']['title'], 'Alpha, at length')          # the page's own H1
+        self.assertEqual(rows['domain/beta'], {'path': 'domain/beta', 'title': 'Beta', 'status': 'missing',
+                                               'tags': ['beta'], 'problems': 1})     # vocabulary only
+        self.assertEqual(rows['curated/mix']['status'], 'draft')                     # no comment → draft
+        self.assertEqual(rows['curated/mix']['problems'], 2)                         # p0002 + p0003
+
+    def test_check_flags_a_stale_index(self) -> None:
+        central = _central()
+        self._article('domain/alpha.md', '<!-- tags: [alpha] -->\n# Alpha\n')
+        self.assertIsNone(tags._load_index())                        # nothing written yet
+        tags._write_index(tags._build_index(central))
+        self.assertEqual(tags._load_index(), tags._build_index(central))
+        self._article('domain/alpha.md', '<!-- tags: [alpha] -->\n<!-- status: final -->\n# Alpha\n')
+        self.assertNotEqual(tags._load_index(), tags._build_index(central))
 
 
 if __name__ == '__main__':

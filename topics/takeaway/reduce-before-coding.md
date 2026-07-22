@@ -1,4 +1,5 @@
 <!-- tags: [reduce-before-coding] -->
+<!-- status: draft -->
 # Reduce algebraically before coding
 
 _Simplify the math first; the cheapest loop is the one you eliminate._

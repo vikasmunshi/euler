@@ -1,4 +1,5 @@
 <!-- tags: [tuple-assignment] -->
+<!-- status: draft -->
 # tuple assignment
 
 Reference: [tuple assignment](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)

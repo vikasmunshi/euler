@@ -1,4 +1,5 @@
 <!-- tags: [depth-first-search] -->
+<!-- status: draft -->
 # Depth-first search
 
 Reference: [Depth-first search](https://en.wikipedia.org/wiki/Depth-first_search)

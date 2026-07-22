@@ -1,4 +1,5 @@
 <!-- tags: [watch-integer-width] -->
+<!-- status: draft -->
 # Watch integer width
 
 _Anticipate 32/64-bit overflow in C where Python bignums silently cope._

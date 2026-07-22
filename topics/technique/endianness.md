@@ -1,4 +1,5 @@
 <!-- tags: [endianness] -->
+<!-- status: draft -->
 # Endianness
 
 Reference: [Endianness](https://en.wikipedia.org/wiki/Endianness)

@@ -1,4 +1,5 @@
 <!-- tags: [legendres-formula] -->
+<!-- status: draft -->
 # Legendre's formula
 
 Reference: [Legendre's formula](https://en.wikipedia.org/wiki/Legendre%27s_formula)

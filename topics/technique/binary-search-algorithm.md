@@ -1,4 +1,5 @@
 <!-- tags: [binary-search-algorithm] -->
+<!-- status: draft -->
 # Binary search algorithm
 
 Reference: [Binary search algorithm](https://en.wikipedia.org/wiki/Binary_search_algorithm)

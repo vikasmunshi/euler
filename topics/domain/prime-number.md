@@ -1,4 +1,5 @@
 <!-- tags: [prime-number] -->
+<!-- status: draft -->
 # Prime number
 
 Reference: [Prime number](https://en.wikipedia.org/wiki/Prime_number)

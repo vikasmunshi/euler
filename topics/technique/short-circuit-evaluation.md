@@ -1,4 +1,5 @@
 <!-- tags: [short-circuit-evaluation] -->
+<!-- status: draft -->
 # Short-circuit evaluation
 
 Reference: [Short-circuit evaluation](https://en.wikipedia.org/wiki/Short-circuit_evaluation)
