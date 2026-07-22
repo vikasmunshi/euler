@@ -1,13 +1,16 @@
 {
   "domain": [
-    "directed-acyclic-graph",
-    "optimal-substructure"
+    "triangular-number",
+    "optimal-substructure",
+    "directed-acyclic-graph"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "size-work-to-the-input"
+  ],
   "techniques": {
     "s0": [
       "dynamic-programming",
-      "list-comprehension"
+      "memory-management"
     ]
   },
   "new-tags": []

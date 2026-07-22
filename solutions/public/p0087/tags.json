@@ -1,22 +1,20 @@
 {
   "domain": [
+    "prime-power",
     "prime-number",
-    "prime-number-theorem"
+    "square-number"
   ],
   "takeaways": [
-    "size-work-to-the-input",
-    "watch-integer-width"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "c-dynamic-memory-allocation",
+      "sieve-of-sundaram",
       "generator",
       "hash-table",
-      "integer-overflow",
       "set",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram",
-      "walrus-operator"
+      "direct-addressing",
+      "bit-array"
     ]
   },
   "new-tags": []

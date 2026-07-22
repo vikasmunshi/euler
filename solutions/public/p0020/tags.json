@@ -1,15 +1,17 @@
 {
-  "domain": [],
-  "takeaways": [],
+  "domain": [
+    "factorial",
+    "digit-sum"
+  ],
+  "takeaways": [
+    "algorithm-beats-language"
+  ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",
-      "endianness",
-      "factorial",
-      "generator",
-      "karatsuba-algorithm",
       "multiplication-algorithm",
-      "stirlings-approximation"
+      "carry-arithmetic",
+      "endianness"
     ]
   },
   "new-tags": []

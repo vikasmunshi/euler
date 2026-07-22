@@ -1,16 +1,20 @@
 {
   "domain": [
     "amicable-numbers",
-    "divisor",
-    "functional-graph",
-    "perfect-number"
+    "perfect-number",
+    "divisor-function",
+    "functional-graph"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "size-work-to-the-input",
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
-      "sieve-of-eratosthenes"
+      "dynamic-array",
+      "hash-table",
+      "set",
+      "cycle-detection"
     ]
   },
   "new-tags": []

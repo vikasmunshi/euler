@@ -1,16 +1,18 @@
 {
-  "domain": [],
+  "domain": [
+    "exponentiation",
+    "digit-sum"
+  ],
   "takeaways": [
-    "watch-integer-width"
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",
+      "multiplication-algorithm",
       "endianness",
-      "generator",
-      "karatsuba-algorithm",
-      "list-comprehension",
-      "multiplication-algorithm"
+      "carry-arithmetic",
+      "dynamic-memory-allocation"
     ]
   },
   "new-tags": []

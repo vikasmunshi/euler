@@ -1,18 +1,16 @@
 {
-  "domain": [],
-  "takeaways": [
-    "precompute-once-reuse",
-    "watch-integer-width"
+  "domain": [
+    "digit-sum",
+    "positional-notation"
   ],
+  "takeaways": [],
   "techniques": {
     "s0": [
-      "c-string-handling",
-      "generator",
-      "mapreduce",
-      "memoization",
-      "qsort",
       "sorting-algorithm",
-      "timsort"
+      "strcmp",
+      "qsort",
+      "strtok",
+      "prefix-sum"
     ]
   },
   "new-tags": []

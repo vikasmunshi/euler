@@ -4,20 +4,15 @@
     "pentagonal-number-theorem"
   ],
   "takeaways": [
-    "exploit-symmetry",
-    "parity-across-languages",
     "precompute-once-reuse",
-    "right-tool-per-cost"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "dynamic-array",
       "dynamic-programming",
-      "functools-lru-cache",
-      "generalized-pentagonal-numbers",
-      "itertools",
-      "memoization",
-      "modular-arithmetic"
+      "modular-arithmetic",
+      "dynamic-array",
+      "memoization"
     ]
   },
   "new-tags": []

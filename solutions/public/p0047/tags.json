@@ -1,15 +1,16 @@
 {
-  "domain": [],
+  "domain": [
+    "prime-factor",
+    "number-theory"
+  ],
   "takeaways": [
-    "precompute-once-reuse"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "integer-factorization",
-      "itertools",
-      "next",
-      "sieve-of-eratosthenes",
-      "trial-division"
+      "trial-division",
+      "brute-force-search",
+      "short-circuit-evaluation"
     ]
   },
   "new-tags": []

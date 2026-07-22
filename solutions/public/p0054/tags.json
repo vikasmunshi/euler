@@ -1,20 +1,21 @@
 {
   "domain": [
+    "combinatorics",
     "total-order"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
       "canonical-form",
-      "frequency-statistics",
-      "functools-cached-property",
-      "generator",
-      "insertion-sort",
-      "intenum",
       "lexicographic-order",
-      "qsort",
-      "strtok",
-      "walrus-operator"
+      "frequency-statistics",
+      "enum",
+      "intenum",
+      "dataclass",
+      "functools-cached-property",
+      "sorting-algorithm"
     ]
   },
   "new-tags": []

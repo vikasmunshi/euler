@@ -1,17 +1,17 @@
 {
   "domain": [
-    "continued-fraction",
     "periodic-continued-fraction",
+    "square-number",
     "pigeonhole-principle"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
       "cycle-detection",
-      "generator",
-      "quadratic-irrational-number"
+      "integer-square-root",
+      "dynamic-array"
     ]
   },
   "new-tags": []

@@ -2,16 +2,19 @@
   "domain": [
     "composite-number",
     "prime-number",
-    "prime-number-theorem",
-    "square-number"
+    "square-number",
+    "goldbachs-conjecture"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
-      "collections-defaultdict-list",
-      "generator",
       "sieve-of-eratosthenes",
-      "trial-division"
+      "trial-division",
+      "square-root",
+      "dynamic-array",
+      "generator"
     ]
   },
   "new-tags": []

@@ -1,21 +1,24 @@
 {
   "domain": [
-    "coprime-integers",
+    "triangular-number",
     "divisor-function",
+    "coprime-integers",
     "multiplicative-function",
-    "triangular-number"
+    "parity-mathematics"
   ],
   "takeaways": [
-    "watch-integer-width"
+    "exploit-symmetry",
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
-      "integer-factorization",
-      "trial-division"
+      "trial-division",
+      "prime-factorization"
     ],
     "s1": [
-      "integer-factorization",
-      "trial-division"
+      "trial-division",
+      "prime-factorization",
+      "brute-force-search"
     ]
   },
   "new-tags": []

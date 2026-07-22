@@ -1,13 +1,19 @@
 {
   "domain": [
     "markov-chain",
-    "stationary-distribution"
+    "stationary-distribution",
+    "probability-distribution",
+    "state-computer-science"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "algorithm-beats-language"
+  ],
   "techniques": {
     "s0": [
-      "monte-carlo-method",
-      "power-iteration"
+      "stochastic-matrix",
+      "power-iteration",
+      "recursion-computer-science",
+      "array"
     ]
   },
   "new-tags": []

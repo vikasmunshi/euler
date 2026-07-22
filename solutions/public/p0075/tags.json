@@ -9,13 +9,13 @@
   ],
   "techniques": {
     "s0": [
-      "c-dynamic-memory-allocation",
-      "dict",
       "euclidean-algorithm",
-      "generator",
+      "tree-of-primitive-pythagorean-triples",
+      "sieve-of-eratosthenes",
       "harmonic-series-mathematics",
-      "integer-overflow",
-      "sieve-of-eratosthenes"
+      "generator",
+      "dict",
+      "int64"
     ]
   },
   "new-tags": []

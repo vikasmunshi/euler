@@ -1,18 +1,18 @@
 {
   "domain": [
-    "permutation"
+    "permutation",
+    "square-number",
+    "number-theory"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "size-work-to-the-input"
+  ],
   "techniques": {
     "s0": [
-      "c-dynamic-memory-allocation",
-      "collections-defaultdict-list",
-      "daniel-j-bernstein",
-      "dynamic-array",
-      "floating-point-arithmetic",
-      "generator",
       "hash-table",
-      "multiset"
+      "canonical-form",
+      "generate-and-test",
+      "dynamic-array"
     ]
   },
   "new-tags": []

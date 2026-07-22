@@ -3,13 +3,14 @@
     "combinatorics"
   ],
   "takeaways": [
-    "exploit-symmetry",
-    "parity-across-languages"
+    "reduce-before-coding",
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
-      "binomial-coefficient",
-      "pascals-triangle"
+      "pascals-triangle",
+      "symmetry",
+      "recurrence-relation"
     ]
   },
   "new-tags": []

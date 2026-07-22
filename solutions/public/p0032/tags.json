@@ -1,19 +1,21 @@
 {
   "domain": [
-    "combinatorics",
-    "pandigital-number"
+    "pandigital-number",
+    "permutation",
+    "digit-counting-function"
   ],
   "takeaways": [
-    "parity-across-languages",
-    "precompute-once-reuse"
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
-      "backtracking",
-      "hash-table",
+      "generate-and-test",
       "itertools",
-      "logarithm",
-      "walrus-operator"
+      "walrus-operator",
+      "set",
+      "generator",
+      "snprintf",
+      "array-data-structure"
     ]
   },
   "new-tags": []

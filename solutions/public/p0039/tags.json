@@ -3,19 +3,17 @@
     "pythagorean-triple"
   ],
   "takeaways": [
-    "closed-form-over-iteration"
+    "closed-form-over-iteration",
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
-      "collections-counter",
-      "counting-sort",
+      "tree-of-primitive-pythagorean-triples",
       "euclidean-algorithm",
-      "generator",
-      "greatest-common-divisor",
-      "harmonic-series-mathematics",
-      "hash-table",
-      "quadratic-formula",
-      "walrus-operator"
+      "math-gcd",
+      "counting-sort",
+      "collections-counter",
+      "arg-max"
     ]
   },
   "new-tags": []

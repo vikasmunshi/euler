@@ -1,17 +1,16 @@
 {
   "domain": [
     "pandigital-number",
-    "permutation"
+    "divisibility-rule"
   ],
   "takeaways": [
-    "parity-across-languages",
-    "precompute-once-reuse"
+    "decompose-overlap"
   ],
   "techniques": {
     "s0": [
       "backtracking",
       "constraint-propagation",
-      "finite-state-machine",
+      "generate-and-test",
       "generator"
     ]
   },

@@ -1,15 +1,14 @@
 {
   "domain": [
     "prime-number",
-    "prime-number-theorem"
+    "prime-number-theorem",
+    "prime-counting-function"
   ],
   "takeaways": [
-    "parity-across-languages",
-    "watch-integer-width"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "sieve-of-eratosthenes",
       "sieve-of-sundaram"
     ]
   },

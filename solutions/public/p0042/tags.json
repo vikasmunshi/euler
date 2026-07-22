@@ -1,22 +1,18 @@
 {
   "domain": [
-    "quadratic-equation",
+    "triangular-number",
     "square-number",
-    "triangular-number"
+    "quadratic-equation"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "parity-across-languages",
-    "precompute-once-reuse"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
-      "floating-point-arithmetic",
+      "square-root",
       "functools-lru-cache",
-      "memoization",
-      "polygonal-number",
-      "quadratic-formula",
-      "strtok"
+      "strtok",
+      "floating-point-arithmetic"
     ]
   },
   "new-tags": []

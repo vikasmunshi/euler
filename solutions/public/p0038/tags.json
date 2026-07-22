@@ -1,14 +1,15 @@
 {
   "domain": [
-    "pandigital-number"
+    "pandigital-number",
+    "digit-counting-function"
   ],
   "takeaways": [
-    "reduce-before-coding"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "brute-force-search",
-      "frequency-statistics"
+      "concatenation"
     ]
   },
   "new-tags": []

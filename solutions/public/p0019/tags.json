@@ -1,12 +1,13 @@
 {
-  "domain": [],
+  "domain": [
+    "arithmetic-progression"
+  ],
   "takeaways": [],
   "techniques": {
     "s0": [
-      "dynamic-programming",
-      "generator",
+      "modular-arithmetic",
       "leap-year",
-      "modular-arithmetic"
+      "generator"
     ]
   },
   "new-tags": []

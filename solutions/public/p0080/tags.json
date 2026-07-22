@@ -1,34 +1,24 @@
 {
   "domain": [
-    "square-number"
+    "digit-sum",
+    "square-number",
+    "number-theory"
   ],
   "takeaways": [],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",
-      "binary-search-algorithm",
-      "division-algorithm",
-      "int128",
-      "integer-square-root",
-      "irrational-number",
-      "long-division",
-      "methods-of-computing-square-roots",
       "newtons-method",
-      "rate-of-convergence",
+      "integer-square-root",
+      "division-algorithm",
+      "multiplication-algorithm",
       "walrus-operator"
     ],
     "s1": [
       "arbitrary-precision-arithmetic",
       "binary-search-algorithm",
-      "division-algorithm",
-      "int128",
       "integer-square-root",
-      "irrational-number",
-      "long-division",
-      "methods-of-computing-square-roots",
-      "newtons-method",
-      "rate-of-convergence",
-      "walrus-operator"
+      "multiplication-algorithm"
     ]
   },
   "new-tags": []

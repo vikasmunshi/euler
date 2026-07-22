@@ -4,32 +4,29 @@
     "pigeonhole-principle"
   ],
   "takeaways": [
-    "precompute-once-reuse"
+    "precompute-once-reuse",
+    "right-tool-per-cost"
   ],
   "techniques": {
     "s0": [
-      "c-dynamic-memory-allocation",
-      "disjoint-set-data-structure",
-      "enum-strenum",
-      "factorial",
-      "hash-table",
-      "memoization"
+      "memoization",
+      "cycle-detection",
+      "dict",
+      "array-data-structure"
     ],
     "s1": [
-      "c-dynamic-memory-allocation",
-      "disjoint-set-data-structure",
-      "enum-strenum",
-      "factorial",
-      "hash-table",
-      "memoization"
+      "memoization",
+      "cycle-detection",
+      "dict",
+      "array-data-structure"
     ],
     "s2": [
-      "c-dynamic-memory-allocation",
-      "disjoint-set-data-structure",
+      "memoization",
+      "cycle-detection",
+      "dict",
+      "array-data-structure",
       "enum-strenum",
-      "factorial",
-      "hash-table",
-      "memoization"
+      "ansi-escape-code"
     ]
   },
   "new-tags": []

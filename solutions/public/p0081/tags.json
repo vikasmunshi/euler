@@ -1,24 +1,17 @@
 {
   "domain": [
+    "optimal-substructure",
     "directed-acyclic-graph",
-    "optimal-substructure"
+    "combinatorics"
   ],
   "takeaways": [
-    "algorithm-beats-language",
-    "parity-across-languages"
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
-      "atoi",
-      "binomial-coefficient",
-      "c-dynamic-memory-allocation",
-      "diagonal",
       "dynamic-programming",
-      "generator",
-      "sentinel-value",
-      "strtok",
       "topological-sorting",
-      "walrus-operator"
+      "generator"
     ]
   },
   "new-tags": []

@@ -1,18 +1,21 @@
 {
   "domain": [
-    "divisibility-rule",
     "pandigital-number",
-    "permutation",
     "prime-number",
-    "triangular-number"
+    "divisibility-rule",
+    "triangular-number",
+    "permutation"
   ],
   "takeaways": [
-    "precompute-once-reuse"
+    "reduce-before-coding",
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
-      "itertools",
-      "trial-division"
+      "trial-division",
+      "generate-and-test",
+      "lexicographic-order",
+      "generator"
     ]
   },
   "new-tags": []

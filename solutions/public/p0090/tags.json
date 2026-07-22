@@ -1,16 +1,15 @@
 {
   "domain": [
-    "combinatorics"
+    "combinatorics",
+    "square-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "size-work-to-the-input"
+  ],
   "techniques": {
     "s0": [
-      "binomial-coefficient",
       "brute-force-search",
-      "combination",
-      "itertools",
-      "locality-of-reference",
-      "walrus-operator"
+      "combination"
     ]
   },
   "new-tags": []

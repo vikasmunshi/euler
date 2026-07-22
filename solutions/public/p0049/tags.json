@@ -1,20 +1,21 @@
 {
   "domain": [
-    "prime-number-theorem"
+    "prime-number",
+    "permutation"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "exploit-symmetry",
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
-      "arithmetic-progression",
+      "sieve-of-sundaram",
+      "canonical-form",
+      "hash-table",
       "binary-search-algorithm",
-      "collections-defaultdict-list",
-      "heaps-algorithm",
       "itertools",
-      "set",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram"
+      "heaps-algorithm",
+      "qsort"
     ]
   },
   "new-tags": []

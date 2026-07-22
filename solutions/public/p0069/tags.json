@@ -1,16 +1,19 @@
 {
   "domain": [
+    "eulers-totient-function",
     "coprime-integers",
-    "eulers-totient-function"
+    "prime-number"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration"
+  ],
   "techniques": {
     "s0": [
-      "generator",
+      "greedy-algorithm",
       "primorial",
-      "sieve-of-eratosthenes",
       "trial-division",
-      "walrus-operator"
+      "sieve-of-eratosthenes",
+      "generator"
     ]
   },
   "new-tags": []

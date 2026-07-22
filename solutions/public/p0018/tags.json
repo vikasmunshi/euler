@@ -1,14 +1,17 @@
 {
   "domain": [
+    "triangular-number",
+    "combinatorial-optimization",
     "optimal-substructure"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "algorithm-beats-language"
+  ],
   "techniques": {
     "s0": [
-      "c-string-handling",
       "dynamic-programming",
       "list-comprehension",
-      "object-copying"
+      "c-string-handling"
     ]
   },
   "new-tags": []

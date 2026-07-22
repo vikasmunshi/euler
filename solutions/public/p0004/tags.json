@@ -1,22 +1,19 @@
 {
   "domain": [
-    "divisibility-rule",
-    "number-theory",
     "palindromic-number",
-    "prime-number"
+    "divisibility-rule",
+    "number-theory"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
-      "keyword-only",
-      "loop-invariant-code-motion",
-      "memory-management",
+      "brute-force-search",
       "modular-arithmetic",
       "monotonic-function",
-      "stack-based-memory-allocation",
-      "two-pointers-technique"
+      "two-pointers-technique",
+      "snprintf"
     ]
   },
   "new-tags": []

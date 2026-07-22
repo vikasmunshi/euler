@@ -1,16 +1,14 @@
 {
   "domain": [
-    "commutative-property"
+    "combinatorics"
   ],
   "takeaways": [
-    "exploit-symmetry",
-    "watch-integer-width"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "brute-force-search",
-      "generator",
-      "instruction-level-parallelism"
+      "generator"
     ]
   },
   "new-tags": []

@@ -2,16 +2,15 @@
   "domain": [
     "permutation"
   ],
-  "takeaways": [
-    "parity-across-languages"
-  ],
+  "takeaways": [],
   "techniques": {
     "s0": [
       "brute-force-search",
-      "qsort",
-      "set",
+      "canonical-form",
       "sorting-algorithm",
-      "strcmp"
+      "qsort",
+      "strcmp",
+      "set"
     ]
   },
   "new-tags": []

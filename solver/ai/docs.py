@@ -177,9 +177,20 @@ def enforce_facets(tags_json: str) -> tuple[str, list[str]]:
     conflicts: list[str] = []
     rehomed: dict[str, list[str]] = {'domain': [], 'takeaway': []}
 
+    # A slug absent from the vocabulary is only legitimate when this same file also defines it
+    # under `new-tags`; update-tags promotes the definition and the use resolves. Used without a
+    # definition it is an invention - `string_matching_placeholder` is not even valid slug syntax -
+    # and would land as a dangling reference that `--check` rejects.
+    proposed_here = {t.get('slug') for t in data.get('new-tags', []) if isinstance(t, dict)}
+
     def keep(slug: str, wanted: str) -> bool:
         actual = facets.get(slug)
-        if actual is None or actual == wanted:
+        if actual is None:
+            if slug in proposed_here:
+                return True
+            conflicts.append(f'{slug} is undefined and unproposed, dropped from {wanted}')
+            return False
+        if actual == wanted:
             return True
         # `domain` and `takeaways` are problem-level, so a slug belonging to either can be moved
         # to its right list without inventing anything. A `technique` cannot: techniques attach to

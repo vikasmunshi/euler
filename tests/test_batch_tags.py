@@ -86,13 +86,26 @@ class EnforceFacetsTests(unittest.TestCase):
         out, _ = self.run_guard(raw)
         self.assertEqual(out['domain'], ['optimal-substructure'])
 
-    def test_unknown_slug_is_left_for_update_tags_to_report(self) -> None:
-        """An unknown slug is either a new-tags proposal in use or a typo; --check reports it."""
+    def test_unknown_slug_backed_by_a_proposal_is_kept(self) -> None:
+        """Propose-and-use is the designed path: update-tags promotes, the use resolves."""
         raw = _tags(domain=['not-in-vocabulary'], new_tags=[{'slug': 'not-in-vocabulary'}])
         out, conflicts = self.run_guard(raw)
         self.assertEqual(out['domain'], ['not-in-vocabulary'])
         self.assertEqual(conflicts, [])
         self.assertEqual(len(out['new-tags']), 1)
+
+    def test_unknown_slug_without_a_proposal_is_dropped(self) -> None:
+        """Used but never defined, it would land as a dangling reference --check rejects.
+
+        A real one: `string_matching_placeholder` reached p0679 this way - not even valid slug
+        syntax, and invented rather than proposed.
+        """
+        raw = _tags(domain=['prime-number', 'string_matching_placeholder'])
+        out, conflicts = self.run_guard(raw)
+        self.assertEqual(out['domain'], ['prime-number'])
+        self.assertEqual(conflicts,
+                         ['string_matching_placeholder is undefined and unproposed, '
+                          'dropped from domain'])
 
     def test_proposal_reusing_a_taken_slug_is_dropped(self) -> None:
         """Slugs are globally unique, so a proposal colliding in any facet can never be promoted."""

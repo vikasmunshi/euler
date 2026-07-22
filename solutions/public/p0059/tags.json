@@ -1,21 +1,19 @@
 {
   "domain": [
-    "exclusive-or",
     "frequency-analysis",
     "stream-cipher",
-    "vigen-re-cipher"
+    "vigen-re-cipher",
+    "exclusive-or"
   ],
   "takeaways": [
-    "watch-integer-width"
+    "decompose-overlap"
   ],
   "techniques": {
     "s0": [
-      "aos-and-soa",
-      "chi-squared-test",
-      "dynamic-array",
+      "brute-force-search",
+      "bitwise-operation",
       "extended-slice",
-      "generator",
-      "walrus-operator"
+      "dynamic-array"
     ]
   },
   "new-tags": []

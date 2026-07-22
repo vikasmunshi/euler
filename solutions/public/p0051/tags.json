@@ -1,16 +1,24 @@
 {
   "domain": [
-    "prime-number"
+    "prime-number",
+    "combinatorics"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "reduce-before-coding",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "sieve-of-eratosthenes",
       "sieve-of-sundaram",
       "trial-division",
-      "walrus-operator"
+      "generate-and-test",
+      "generator",
+      "walrus-operator",
+      "bytearray",
+      "extended-slice",
+      "snprintf",
+      "atoi",
+      "dynamic-memory-allocation"
     ]
   },
   "new-tags": []

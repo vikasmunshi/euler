@@ -1,15 +1,19 @@
 {
-  "domain": [],
-  "takeaways": [
-    "algorithm-beats-language"
+  "domain": [
+    "combinatorics"
   ],
+  "takeaways": [],
   "techniques": {
     "s0": [
+      "recursion-computer-science",
+      "memoization",
+      "functools-lru-cache",
+      "floating-point-arithmetic",
+      "brute-force-search",
       "binary-expression-tree",
       "combination",
-      "floating-point-arithmetic",
-      "functools-lru-cache",
-      "memoization"
+      "dynamic-array",
+      "c-dynamic-memory-allocation"
     ]
   },
   "new-tags": []

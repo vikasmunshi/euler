@@ -1,5 +1,7 @@
 {
   "domain": [
+    "square-number",
+    "arithmetic-progression",
     "summation"
   ],
   "takeaways": [
@@ -7,12 +9,13 @@
   ],
   "techniques": {
     "s0": [
-      "ansi-escape-code",
-      "c-dynamic-memory-allocation",
       "closed-form-expression",
-      "dict",
+      "horners-method",
+      "brute-force-search",
       "generator",
-      "horners-method"
+      "dict",
+      "c-dynamic-memory-allocation",
+      "array-data-structure"
     ]
   },
   "new-tags": []

@@ -1,19 +1,19 @@
 {
   "domain": [
-    "champernowne-constant"
+    "champernowne-constant",
+    "positional-notation",
+    "digit-counting-function"
   ],
   "takeaways": [
     "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
-      "c-mathematical-functions",
-      "division-mathematics",
-      "floating-point-arithmetic",
-      "functools-reduce",
-      "modulo",
       "prefix-sum",
-      "snprintf"
+      "division-algorithm",
+      "modulo",
+      "exponentiation-by-squaring",
+      "functools-reduce"
     ]
   },
   "new-tags": []

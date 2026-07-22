@@ -1,21 +1,20 @@
 {
   "domain": [
-    "catalan-number",
+    "lattice-path",
     "central-binomial-coefficient",
-    "lattice-path"
+    "binomial-coefficient",
+    "combinatorics",
+    "factorial"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "watch-integer-width"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
+      "closed-form-expression",
       "arbitrary-precision-arithmetic",
-      "binomial-coefficient",
-      "dynamic-programming",
-      "endianness",
-      "gmp",
-      "long-division"
+      "long-division",
+      "multiplication-algorithm"
     ]
   },
   "new-tags": []

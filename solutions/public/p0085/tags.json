@@ -1,24 +1,21 @@
 {
   "domain": [
-    "triangular-number"
+    "triangular-number",
+    "combinatorics"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration"
+  ],
   "techniques": {
     "s0": [
-      "binary-search-algorithm",
-      "binomial-coefficient",
-      "bisect",
-      "functools-partial",
-      "goto",
-      "walrus-operator"
+      "brute-force-search",
+      "itertools",
+      "generate-and-test"
     ],
     "s1": [
       "binary-search-algorithm",
-      "binomial-coefficient",
-      "bisect",
-      "functools-partial",
-      "goto",
-      "walrus-operator"
+      "closed-form-expression",
+      "bisect"
     ]
   },
   "new-tags": []

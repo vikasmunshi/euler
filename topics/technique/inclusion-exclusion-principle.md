@@ -10,10 +10,12 @@ _TODO: what this technique is, the shared idea across the problems below, and wh
 p0001
 p0113
 p0162
+p0184
 p0193
 p0202
 p0212
 p0269
 p0710
 p0725
+p0788
 -->

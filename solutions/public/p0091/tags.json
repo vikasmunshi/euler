@@ -1,19 +1,19 @@
 {
   "domain": [
-    "dot-product",
-    "stern-brocot-tree"
+    "pythagorean-theorem",
+    "integer-lattice",
+    "geometry",
+    "combinatorics"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "exploit-symmetry",
-    "watch-integer-width"
+    "reduce-before-coding",
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
-      "dont-repeat-yourself",
-      "euclidean-algorithm",
       "greatest-common-divisor",
-      "integer-overflow"
+      "euclidean-algorithm",
+      "lattice-point"
     ]
   },
   "new-tags": []

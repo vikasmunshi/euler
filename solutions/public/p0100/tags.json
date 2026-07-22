@@ -1,13 +1,18 @@
 {
   "domain": [
+    "diophantine-equation",
     "completing-the-square",
-    "diophantine-equation"
+    "hypergeometric-distribution"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "reduce-before-coding",
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
       "pells-equation",
-      "recurrence-relation"
+      "linear-recurrence-with-constant-coefficients",
+      "tuple-assignment"
     ]
   },
   "new-tags": []

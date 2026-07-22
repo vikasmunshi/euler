@@ -1,12 +1,19 @@
 {
   "domain": [
-    "palindromic-number"
+    "palindromic-number",
+    "binary-number",
+    "positional-notation"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "size-work-to-the-input"
+  ],
   "techniques": {
     "s0": [
       "generate-and-test",
-      "generator"
+      "generator",
+      "bit-manipulation",
+      "string-slicing",
+      "snprintf"
     ]
   },
   "new-tags": []

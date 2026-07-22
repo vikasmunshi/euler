@@ -1,18 +1,18 @@
 {
-  "domain": [],
+  "domain": [
+    "pentagonal-number-theorem",
+    "quadratic-equation"
+  ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "parity-across-languages",
-    "precompute-once-reuse"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
-      "floating-point-arithmetic",
-      "loop-invariant-code-motion",
-      "pentagonal-number",
+      "brute-force-search",
+      "closed-form-expression",
       "quadratic-formula",
-      "square-root",
-      "walrus-operator"
+      "floating-point-arithmetic",
+      "round-off-error"
     ]
   },
   "new-tags": []

@@ -1,25 +1,23 @@
 {
   "domain": [
-    "counting",
-    "graph-discrete-mathematics",
-    "permutation"
+    "cycle-graph",
+    "permutation",
+    "graph-theory",
+    "counting"
   ],
   "takeaways": [
+    "reduce-before-coding",
     "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
       "backtracking",
-      "cycle-graph-theory",
+      "generate-and-test",
+      "canonical-form",
       "direct-addressing",
-      "eafp",
-      "for-else",
-      "int",
-      "itertools",
-      "named-tuples",
-      "set",
-      "strcmp",
-      "walrus-operator"
+      "arbitrary-precision-arithmetic",
+      "concatenation",
+      "itertools"
     ]
   },
   "new-tags": []

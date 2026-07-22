@@ -1,47 +1,30 @@
 {
   "domain": [
-    "np-completeness"
+    "np-completeness",
+    "sudoku"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
       "backtracking",
-      "constraint-propagation",
       "constraint-satisfaction-problem",
-      "dancing-links",
-      "depth-first-search",
-      "doubly-linked-list",
-      "exact-cover",
-      "generator",
-      "knuths-algorithm-x",
       "look-ahead-backtracking",
-      "peter-norvigs-well-known-essay"
+      "sorting-algorithm",
+      "dynamic-memory-allocation"
     ],
     "s1": [
-      "backtracking",
-      "constraint-propagation",
-      "constraint-satisfaction-problem",
-      "dancing-links",
-      "depth-first-search",
-      "doubly-linked-list",
       "exact-cover",
-      "generator",
-      "knuths-algorithm-x",
-      "look-ahead-backtracking",
-      "peter-norvigs-well-known-essay"
+      "dancing-links",
+      "doubly-linked-list",
+      "backtracking"
     ],
     "s2": [
-      "backtracking",
       "constraint-propagation",
-      "constraint-satisfaction-problem",
-      "dancing-links",
-      "depth-first-search",
-      "doubly-linked-list",
-      "exact-cover",
-      "generator",
-      "knuths-algorithm-x",
-      "look-ahead-backtracking",
-      "peter-norvigs-well-known-essay"
+      "bitwise-operation",
+      "hamming-weight",
+      "backtracking"
     ]
   },
   "new-tags": []

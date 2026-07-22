@@ -1,20 +1,18 @@
 {
   "domain": [
     "amicable-numbers",
-    "divisor",
     "divisor-function",
     "perfect-number"
   ],
   "takeaways": [
-    "decompose-overlap"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
+      "trial-division",
+      "square-root",
       "functools-lru-cache",
-      "generator",
-      "memoization",
-      "short-circuit-evaluation",
-      "walrus-operator"
+      "short-circuit-evaluation"
     ]
   },
   "new-tags": []

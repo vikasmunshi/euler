@@ -1,22 +1,20 @@
 {
   "domain": [
-    "combinatorics",
-    "geometry",
     "pythagorean-theorem",
-    "square-number"
+    "square-number",
+    "combinatorics",
+    "counting"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "parity-across-languages"
+    "reduce-before-coding",
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
-      "double-precision-floating-point-format",
-      "generator",
-      "integer-square-root",
-      "itertools",
-      "monotonic-function",
-      "net-polyhedron"
+      "brute-force-search",
+      "square-root",
+      "closed-form-expression",
+      "floating-point-arithmetic"
     ]
   },
   "new-tags": []

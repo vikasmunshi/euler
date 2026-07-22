@@ -1,6 +1,9 @@
 {
   "domain": [
-    "prime-number"
+    "prime-number",
+    "square-number",
+    "diophantine-approximation",
+    "arithmetic-progression"
   ],
   "takeaways": [
     "closed-form-over-iteration",
@@ -9,9 +12,7 @@
   "techniques": {
     "s0": [
       "generator",
-      "sieve-of-eratosthenes",
-      "trial-division",
-      "walrus-operator"
+      "trial-division"
     ]
   },
   "new-tags": []

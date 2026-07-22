@@ -1,17 +1,16 @@
 {
-  "domain": [],
+  "domain": [
+    "digit-sum",
+    "digit-counting-function"
+  ],
   "takeaways": [
     "exploit-symmetry",
-    "parity-across-languages",
-    "precompute-once-reuse"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "combination",
-      "combinations-with-replacement",
-      "factorial",
-      "generator",
-      "multiset"
+      "itertools",
+      "lookup-table"
     ]
   },
   "new-tags": []

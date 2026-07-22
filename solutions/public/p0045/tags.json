@@ -1,22 +1,22 @@
 {
   "domain": [
+    "triangular-number",
+    "pentagonal-number-theorem",
+    "hexagonal-number",
     "figurate-number",
-    "quadratic-function",
-    "square-number"
+    "quadratic-equation"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "parity-across-languages",
-    "reduce-before-coding"
+    "reduce-before-coding",
+    "decompose-overlap"
   ],
   "techniques": {
     "s0": [
-      "discriminant",
-      "double-precision-floating-point-format",
-      "integer-square-root",
-      "modular-arithmetic",
+      "closed-form-expression",
       "quadratic-formula",
-      "walrus-operator"
+      "discriminant",
+      "square-root",
+      "floating-point-arithmetic"
     ]
   },
   "new-tags": []

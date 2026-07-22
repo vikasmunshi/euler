@@ -1,12 +1,18 @@
 {
-  "domain": [],
+  "domain": [
+    "english-numerals"
+  ],
   "takeaways": [
-    "watch-integer-width"
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
+      "lookup-table",
+      "memoization",
       "functools-lru-cache",
-      "memoization"
+      "recursion-computer-science",
+      "concatenation",
+      "snprintf"
     ]
   },
   "new-tags": []

@@ -1,14 +1,16 @@
 {
   "domain": [
     "fibonacci-sequence",
-    "golden-ratio"
+    "golden-ratio",
+    "digit-counting-function"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "size-work-to-the-input"
+  ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",
-      "assignment-computer-science",
-      "recurrence-relation"
+      "parallel-assignment"
     ]
   },
   "new-tags": []

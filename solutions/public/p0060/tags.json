@@ -1,26 +1,25 @@
 {
   "domain": [
-    "clique-graph-theory",
-    "clique-problem",
-    "graph-discrete-mathematics",
-    "primality-test"
+    "prime-number",
+    "clique-problem"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "size-work-to-the-input",
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
-      "combination",
+      "sieve-of-sundaram",
+      "trial-division",
+      "memoization",
       "depth-first-search",
-      "deterministic-algorithm",
+      "backtracking",
+      "concatenation",
+      "hash-table",
       "functools-lru-cache",
       "generator",
-      "hash-table",
-      "memoization",
-      "next",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram",
-      "trial-division"
+      "recursion-computer-science",
+      "canonical-form"
     ]
   },
   "new-tags": []

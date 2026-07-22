@@ -1,16 +1,17 @@
 {
   "domain": [
-    "coprime-integers",
     "eulers-totient-function",
+    "coprime-integers",
     "multiplicative-function"
   ],
   "takeaways": [
-    "parity-across-languages",
-    "watch-integer-width"
+    "algorithm-beats-language",
+    "precompute-once-reuse"
   ],
   "techniques": {
     "s0": [
-      "sieve-of-eratosthenes"
+      "sieve-of-eratosthenes",
+      "prefix-sum"
     ]
   },
   "new-tags": []

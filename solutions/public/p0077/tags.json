@@ -1,30 +1,31 @@
 {
   "domain": [
     "partition-number-theory",
-    "prime-counting-function",
     "prime-number"
   ],
   "takeaways": [
-    "watch-integer-width"
+    "right-tool-per-cost",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "dynamic-array",
-      "dynamic-programming",
-      "functools-lru-cache",
+      "sieve-of-sundaram",
       "memoization",
+      "dynamic-programming",
+      "recursion-computer-science",
+      "functools-lru-cache",
       "open-addressing",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram"
+      "hash-function"
     ],
     "s1": [
-      "dynamic-array",
-      "dynamic-programming",
-      "functools-lru-cache",
+      "sieve-of-sundaram",
       "memoization",
+      "recursion-computer-science",
+      "functools-lru-cache",
+      "dynamic-array",
       "open-addressing",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram"
+      "hash-function",
+      "dynamic-memory-allocation"
     ]
   },
   "new-tags": []

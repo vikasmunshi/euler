@@ -1,15 +1,16 @@
 {
-  "domain": [],
+  "domain": [
+    "shortest-path-problem",
+    "combinatorial-optimization",
+    "overlapping-subproblems"
+  ],
   "takeaways": [
-    "algorithm-beats-language",
-    "watch-integer-width"
+    "reduce-before-coding",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "bss",
       "dynamic-programming",
-      "generator",
-      "jacobi-method",
       "prefix-sum"
     ]
   },

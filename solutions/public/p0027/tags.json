@@ -1,25 +1,20 @@
 {
   "domain": [
-    "parity-mathematics",
-    "prime-number",
     "quadratic-function",
-    "sieve-theory"
+    "prime-number",
+    "parity-mathematics"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "size-work-to-the-input",
+    "exploit-symmetry"
   ],
   "techniques": {
     "s0": [
-      "bytearray",
-      "cpython",
-      "integer-overflow",
-      "lexicographic-order",
-      "pure-function",
-      "sieve-of-eratosthenes",
       "sieve-of-sundaram",
-      "symmetry",
       "trial-division",
-      "tuple"
+      "brute-force-search",
+      "tuple",
+      "integer-overflow"
     ]
   },
   "new-tags": []

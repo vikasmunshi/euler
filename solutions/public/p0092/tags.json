@@ -1,24 +1,23 @@
 {
   "domain": [
+    "digit-sum",
     "combinatorics",
     "generating-function"
   ],
   "takeaways": [
-    "algorithm-beats-language",
-    "parity-across-languages",
-    "precompute-once-reuse"
+    "precompute-once-reuse",
+    "watch-integer-width",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "c-dynamic-memory-allocation",
-      "convolution",
-      "conways-game-of-life",
       "dynamic-programming",
+      "convolution",
+      "lookup-table",
+      "cycle-detection",
+      "dynamic-memory-allocation",
       "memcpy",
-      "memoization",
-      "multiple-buffering",
-      "sparse-matrix",
-      "tuple"
+      "int64"
     ]
   },
   "new-tags": []

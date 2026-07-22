@@ -1,21 +1,16 @@
 {
-  "domain": [],
+  "domain": [
+    "least-common-multiple"
+  ],
   "takeaways": [
-    "parity-across-languages",
-    "reduce-before-coding",
-    "watch-integer-width"
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
-      "arbitrary-precision-arithmetic",
-      "endianness",
       "euclidean-algorithm",
-      "fold-higher-order-function",
-      "greatest-common-divisor",
-      "integer-factorization",
-      "least-common-multiple",
-      "modular-arithmetic",
-      "prime-power"
+      "math-gcd",
+      "functools-reduce",
+      "arbitrary-precision-arithmetic"
     ]
   },
   "new-tags": []

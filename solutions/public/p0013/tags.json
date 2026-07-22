@@ -1,12 +1,18 @@
 {
-  "domain": [],
+  "domain": [
+    "summation",
+    "positional-notation"
+  ],
   "takeaways": [
-    "watch-integer-width"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",
-      "carry-arithmetic"
+      "carry-arithmetic",
+      "string-slicing",
+      "list-comprehension",
+      "c-dynamic-memory-allocation"
     ]
   },
   "new-tags": []

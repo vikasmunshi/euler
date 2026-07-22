@@ -4,12 +4,12 @@
     "palindromic-number"
   ],
   "takeaways": [
-    "watch-integer-width"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
       "arbitrary-precision-arithmetic",
-      "endianness"
+      "brute-force-search"
     ]
   },
   "new-tags": []

@@ -1,7 +1,7 @@
 {
   "domain": [
-    "bijection",
-    "square-number"
+    "square-number",
+    "bijection"
   ],
   "takeaways": [
     "parity-across-languages"
@@ -9,13 +9,10 @@
   "techniques": {
     "s0": [
       "anagram",
-      "branch-and-bound",
-      "dataclass",
-      "equivalence-class",
+      "hash-function",
       "invariant-mathematics",
-      "itertools-product",
-      "lexical-analysis",
-      "parallel-array"
+      "generate-and-test",
+      "dataclass"
     ]
   },
   "new-tags": []

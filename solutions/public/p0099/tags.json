@@ -1,14 +1,16 @@
 {
-  "domain": [],
-  "takeaways": [],
+  "domain": [
+    "exponentiation"
+  ],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
-      "arg-max",
-      "double-precision-floating-point-format",
       "logarithm",
       "monotonic-function",
-      "newline",
-      "strtok"
+      "arg-max"
     ]
   },
   "new-tags": []

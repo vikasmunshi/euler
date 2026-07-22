@@ -3,13 +3,13 @@
     "roman-numerals"
   ],
   "takeaways": [
-    "precompute-once-reuse"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
-      "aos-and-soa",
-      "generator",
-      "greedy-algorithm"
+      "greedy-algorithm",
+      "lookup-table",
+      "dict"
     ]
   },
   "new-tags": []

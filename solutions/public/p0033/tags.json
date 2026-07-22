@@ -1,20 +1,19 @@
 {
-  "domain": [],
-  "takeaways": [],
+  "domain": [
+    "fundamental-theorem-of-arithmetic",
+    "diophantine-equation"
+  ],
+  "takeaways": [
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
       "brute-force-search",
-      "chained-comparison",
       "cross-multiplication",
-      "euclidean-algorithm",
-      "floating-point-arithmetic",
-      "fold-higher-order-function",
-      "fractions-fraction",
-      "functools-reduce",
-      "generator",
       "greatest-common-divisor",
-      "identity-element",
-      "rational-number"
+      "euclidean-algorithm",
+      "fractions-fraction",
+      "functools-reduce"
     ]
   },
   "new-tags": []

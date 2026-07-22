@@ -1,5 +1,6 @@
 {
   "domain": [
+    "prime-number",
     "divisibility-rule"
   ],
   "takeaways": [
@@ -7,20 +8,21 @@
   ],
   "techniques": {
     "s0": [
-      "c-dynamic-memory-allocation",
-      "hash-table",
-      "primesieve",
-      "set",
       "sieve-of-eratosthenes",
-      "sieve-of-sundaram"
+      "sieve-of-sundaram",
+      "string-slicing",
+      "set",
+      "bytearray",
+      "atoi",
+      "snprintf",
+      "generate-and-test"
     ],
     "s1": [
-      "c-dynamic-memory-allocation",
-      "hash-table",
       "primesieve",
       "set",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram"
+      "atoi",
+      "snprintf",
+      "generate-and-test"
     ]
   },
   "new-tags": []

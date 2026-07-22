@@ -1,20 +1,21 @@
 {
   "domain": [
-    "coprime-integers",
     "eulers-totient-function",
-    "multiplicative-function",
+    "semiprime",
     "permutation",
-    "prime-counting-function",
-    "prime-number",
-    "semiprime"
+    "coprime-integers",
+    "multiplicative-function"
   ],
   "takeaways": [
-    "precompute-once-reuse"
+    "reduce-before-coding"
   ],
   "techniques": {
     "s0": [
       "sieve-of-eratosthenes",
-      "walrus-operator"
+      "generation-of-primes",
+      "generator",
+      "closed-form-expression",
+      "anagram"
     ]
   },
   "new-tags": []

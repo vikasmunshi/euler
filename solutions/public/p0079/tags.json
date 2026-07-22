@@ -1,17 +1,20 @@
 {
   "domain": [
-    "directed-acyclic-graph"
+    "directed-acyclic-graph",
+    "combinatorics"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "precompute-once-reuse"
+  ],
   "techniques": {
     "s0": [
-      "adjacency-matrix",
-      "bit-array",
-      "bitwise-operation",
-      "for-else",
-      "partially-ordered-set",
+      "topological-sorting",
+      "directed-graph",
       "set",
-      "topological-sorting"
+      "dict",
+      "for-else",
+      "bit-manipulation",
+      "bit-array"
     ]
   },
   "new-tags": []

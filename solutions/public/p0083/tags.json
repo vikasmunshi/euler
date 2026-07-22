@@ -1,22 +1,17 @@
 {
   "domain": [
-    "directed-acyclic-graph",
-    "shortest-path-problem"
+    "shortest-path-problem",
+    "graph-theory"
   ],
   "takeaways": [
-    "parity-across-languages",
-    "watch-integer-width"
+    "algorithm-beats-language"
   ],
   "techniques": {
     "s0": [
-      "binary-heap",
-      "c-dynamic-memory-allocation",
-      "dict",
       "dijkstras-algorithm",
-      "dynamic-programming",
-      "integer-overflow",
-      "row-and-column-major-order",
-      "set"
+      "adjacency-list",
+      "array-data-structure",
+      "hash-table"
     ]
   },
   "new-tags": []

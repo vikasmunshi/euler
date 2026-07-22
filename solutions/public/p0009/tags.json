@@ -1,7 +1,7 @@
 {
   "domain": [
-    "diophantine-equation",
-    "pythagorean-triple"
+    "pythagorean-triple",
+    "diophantine-equation"
   ],
   "takeaways": [
     "reduce-before-coding",
@@ -9,7 +9,10 @@
   ],
   "techniques": {
     "s0": [
-      "generator"
+      "brute-force-search",
+      "generator",
+      "next",
+      "integer-overflow"
     ]
   },
   "new-tags": []

@@ -1,21 +1,20 @@
 {
   "domain": [
-    "common-logarithm"
+    "digit-sum",
+    "positional-notation"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "parity-across-languages"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "combination",
-      "combinations-with-replacement",
-      "exponentiation",
-      "floating-point-arithmetic",
-      "lexicographic-order",
       "narcissistic-number",
-      "short-circuit-evaluation",
-      "walrus-operator"
+      "combination",
+      "generate-and-test",
+      "itertools",
+      "walrus-operator",
+      "generator",
+      "closed-form-expression"
     ]
   },
   "new-tags": []

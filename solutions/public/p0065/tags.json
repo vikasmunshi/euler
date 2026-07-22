@@ -2,12 +2,19 @@
   "domain": [
     "continued-fraction",
     "e-mathematical-constant",
-    "fibonacci-sequence"
+    "convergent-continued-fraction",
+    "digit-sum"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "reduce-before-coding",
+    "algorithm-beats-language"
+  ],
   "techniques": {
     "s0": [
-      "fractions-fraction"
+      "recurrence-relation",
+      "recursion-computer-science",
+      "fractions-fraction",
+      "arbitrary-precision-arithmetic"
     ]
   },
   "new-tags": []

@@ -1,18 +1,16 @@
 {
   "domain": [
     "fibonacci-sequence",
-    "golden-ratio",
     "parity-mathematics"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration",
+    "reduce-before-coding"
+  ],
   "techniques": {
     "s0": [
-      "assignment-computer-science",
-      "dynamic-programming",
-      "generator",
-      "linear-recurrence-with-constant-coefficients",
-      "lucas-number",
-      "recurrence-relation"
+      "recurrence-relation",
+      "generator"
     ]
   },
   "new-tags": []

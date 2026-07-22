@@ -1,24 +1,23 @@
 {
-  "domain": [],
+  "domain": [
+    "abundant-number",
+    "divisor",
+    "divisor-function"
+  ],
   "takeaways": [
-    "algorithm-beats-language"
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "abundant-number",
-      "aliquot-sum",
-      "harmonic-series-mathematics",
-      "numpy",
       "sieve-of-eratosthenes",
-      "trial-division"
+      "numpy",
+      "np-flatnonzero",
+      "vectorized",
+      "harmonic-series-mathematics"
     ],
     "s1": [
-      "abundant-number",
-      "aliquot-sum",
-      "harmonic-series-mathematics",
-      "numpy",
-      "sieve-of-eratosthenes",
-      "trial-division"
+      "trial-division",
+      "square-root"
     ]
   },
   "new-tags": []

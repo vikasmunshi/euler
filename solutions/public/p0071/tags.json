@@ -1,18 +1,18 @@
 {
   "domain": [
     "farey-sequence",
-    "stern-brocot-tree"
+    "stern-brocot-tree",
+    "coprime-integers"
   ],
   "takeaways": [
-    "closed-form-over-iteration",
-    "watch-integer-width"
+    "closed-form-over-iteration"
   ],
   "techniques": {
     "s0": [
+      "closed-form-expression",
       "euclidean-algorithm",
-      "fractions-fraction",
       "greatest-common-divisor",
-      "integer-overflow"
+      "fractions-fraction"
     ]
   },
   "new-tags": []

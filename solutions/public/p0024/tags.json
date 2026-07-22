@@ -1,13 +1,16 @@
 {
   "domain": [
-    "factorial-number-system",
-    "permutation"
+    "permutation",
+    "factorial",
+    "factorial-number-system"
   ],
-  "takeaways": [],
+  "takeaways": [
+    "closed-form-over-iteration"
+  ],
   "techniques": {
     "s0": [
-      "factorial",
-      "lexicographic-order"
+      "unranking",
+      "recursion-computer-science"
     ]
   },
   "new-tags": []

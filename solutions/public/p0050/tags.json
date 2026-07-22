@@ -1,21 +1,20 @@
 {
   "domain": [
-    "prime-number"
+    "prime-number",
+    "prime-counting-function"
   ],
   "takeaways": [
-    "parity-across-languages",
+    "precompute-once-reuse",
     "watch-integer-width"
   ],
   "techniques": {
     "s0": [
-      "branch-and-bound",
-      "dynamic-programming",
-      "hash-table",
-      "integer-overflow",
-      "itertools-accumulate",
+      "sieve-of-sundaram",
       "prefix-sum",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram"
+      "set",
+      "bit-array",
+      "int64",
+      "itertools-accumulate"
     ]
   },
   "new-tags": []

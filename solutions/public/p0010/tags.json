@@ -1,55 +1,43 @@
 {
   "domain": [
-    "prime-number-theorem"
+    "prime-number",
+    "summation"
   ],
   "takeaways": [
-    "watch-integer-width"
+    "algorithm-beats-language",
+    "watch-integer-width",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "generator",
-      "open-addressing",
-      "primesieve",
       "sieve-of-eratosthenes",
-      "sieve-of-sundaram",
-      "trial-division",
-      "wheel-factorization"
+      "bytearray",
+      "array-data-structure",
+      "sqrt",
+      "int64"
     ],
     "s1": [
-      "generator",
-      "open-addressing",
-      "primesieve",
-      "sieve-of-eratosthenes",
       "sieve-of-sundaram",
-      "trial-division",
-      "wheel-factorization"
+      "bytearray",
+      "array-data-structure",
+      "int64"
     ],
     "s2": [
-      "generator",
-      "open-addressing",
-      "primesieve",
       "sieve-of-eratosthenes",
-      "sieve-of-sundaram",
-      "trial-division",
-      "wheel-factorization"
+      "generator",
+      "dict",
+      "hash-table",
+      "open-addressing",
+      "int64"
     ],
     "s3": [
-      "generator",
-      "open-addressing",
-      "primesieve",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram",
       "trial-division",
-      "wheel-factorization"
+      "int64"
     ],
     "s4": [
-      "generator",
-      "open-addressing",
       "primesieve",
-      "sieve-of-eratosthenes",
-      "sieve-of-sundaram",
-      "trial-division",
-      "wheel-factorization"
+      "wheel-factorization",
+      "int64"
     ]
   },
   "new-tags": []

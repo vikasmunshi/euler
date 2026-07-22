@@ -4,35 +4,31 @@
     "pentagonal-number-theorem"
   ],
   "takeaways": [
-    "algorithm-beats-language"
+    "algorithm-beats-language",
+    "watch-integer-width"
   ],
   "techniques": {
     "s0": [
-      "arbitrary-precision-arithmetic",
       "dynamic-programming",
-      "functools-lru-cache",
-      "keyword-only",
-      "locality-of-reference",
       "memoization",
-      "pentagonal-number"
+      "functools-lru-cache",
+      "itertools",
+      "arbitrary-precision-arithmetic",
+      "recursion-computer-science"
     ],
     "s1": [
-      "arbitrary-precision-arithmetic",
       "dynamic-programming",
-      "functools-lru-cache",
-      "keyword-only",
-      "locality-of-reference",
       "memoization",
-      "pentagonal-number"
+      "functools-lru-cache",
+      "arbitrary-precision-arithmetic",
+      "recursion-computer-science"
     ],
     "s2": [
-      "arbitrary-precision-arithmetic",
-      "dynamic-programming",
-      "functools-lru-cache",
-      "keyword-only",
-      "locality-of-reference",
+      "brute-force-search",
       "memoization",
-      "pentagonal-number"
+      "functools-lru-cache",
+      "arbitrary-precision-arithmetic",
+      "recursion-computer-science"
     ]
   },
   "new-tags": []

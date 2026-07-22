@@ -1,15 +1,22 @@
 {
-  "domain": [],
-  "takeaways": [],
+  "domain": [
+    "number-theory",
+    "product-sum-number"
+  ],
+  "takeaways": [
+    "reduce-before-coding",
+    "parity-across-languages"
+  ],
   "techniques": {
     "s0": [
+      "recursion-computer-science",
       "branch-and-bound",
-      "closure-computer-programming",
-      "direct-addressing",
-      "global-variable",
-      "hash-table",
       "integer-factorization",
-      "recursion-computer-science"
+      "multiplicative-partition",
+      "lookup-table",
+      "set",
+      "global-variable",
+      "dynamic-memory-allocation"
     ]
   },
   "new-tags": []

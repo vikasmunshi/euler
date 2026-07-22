@@ -1,15 +1,16 @@
 {
   "domain": [
     "continued-fraction",
-    "convergent-continued-fraction"
+    "convergent-continued-fraction",
+    "digit-counting-function"
   ],
-  "takeaways": [
-    "parity-across-languages"
-  ],
+  "takeaways": [],
   "techniques": {
     "s0": [
+      "recurrence-relation",
       "arbitrary-precision-arithmetic",
-      "recurrence-relation"
+      "tuple-assignment",
+      "carry-arithmetic"
     ]
   },
   "new-tags": []

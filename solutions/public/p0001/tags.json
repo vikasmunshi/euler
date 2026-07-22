@@ -1,37 +1,33 @@
 {
   "domain": [
+    "arithmetic-progression",
     "triangular-number"
   ],
   "takeaways": [
-    "algorithm-beats-language",
     "closed-form-over-iteration",
     "decompose-overlap",
-    "parity-across-languages",
-    "right-tool-per-cost",
-    "watch-integer-width"
+    "right-tool-per-cost"
   ],
   "techniques": {
     "s0": [
-      "inclusion-exclusion-principle",
       "closed-form-expression",
-      "least-common-multiple",
-      "arbitrary-precision-arithmetic",
+      "inclusion-exclusion-principle",
       "gauss-summation"
     ],
-    "s1": [],
+    "s1": [
+      "brute-force-search",
+      "modulo"
+    ],
     "s2": [
-      "arithmetic-progression",
       "inclusion-exclusion-principle"
     ],
     "s3": [
-      "generator",
-      "lazy-evaluation",
-      "inclusion-exclusion-principle"
+      "inclusion-exclusion-principle",
+      "generator"
     ],
     "s4": [
-      "generator",
-      "lazy-evaluation",
-      "inclusion-exclusion-principle"
+      "inclusion-exclusion-principle",
+      "generator"
     ]
   },
   "new-tags": []

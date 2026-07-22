@@ -1,20 +1,21 @@
 {
-  "domain": [],
+  "domain": [
+    "digit-sum",
+    "exponentiation"
+  ],
   "takeaways": [
+    "size-work-to-the-input",
     "watch-integer-width"
   ],
   "techniques": {
     "s0": [
-      "arbitrary-precision-arithmetic",
       "brute-force-search",
-      "c-dynamic-memory-allocation",
-      "dynamic-array",
-      "endianness",
-      "generator",
-      "integer-overflow",
-      "matplotlib-heatmaps",
+      "arbitrary-precision-arithmetic",
+      "multiplication-algorithm",
+      "carry-arithmetic",
+      "dynamic-memory-allocation",
       "numpy",
-      "radix"
+      "matplotlib-heatmaps"
     ]
   },
   "new-tags": []

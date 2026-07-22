@@ -1,21 +1,22 @@
 {
   "domain": [
-    "collatz-conjecture"
+    "collatz-conjecture",
+    "overlapping-subproblems"
   ],
   "takeaways": [
-    "parity-across-languages"
+    "precompute-once-reuse",
+    "size-work-to-the-input"
   ],
   "techniques": {
     "s0": [
-      "c-dynamic-memory-allocation",
+      "memoization",
       "dynamic-programming",
       "functools-lru-cache",
-      "hash-table",
-      "locality-of-reference",
-      "memoization",
-      "overlapping-subproblems",
+      "recursion-computer-science",
+      "power-of-two",
       "sentinel-value",
-      "tuple-assignment"
+      "array-data-structure",
+      "locality-of-reference"
     ]
   },
   "new-tags": []
