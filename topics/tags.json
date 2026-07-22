@@ -1249,6 +1249,15 @@
       "refs": ["p0107"]
     },
     {
+      "slug": "mobius-function",
+      "facet": "domain",
+      "name": "M\u00f6bius function",
+      "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_function",
+      "additional-references": [],
+      "summary": "",
+      "refs": []
+    },
+    {
       "slug": "modular-arithmetic",
       "facet": "domain",
       "name": "Modular arithmetic",
@@ -1544,6 +1553,15 @@
       "additional-references": [],
       "summary": "",
       "refs": ["p0207", "p0293", "p0686", "p0704", "p0872", "p0944"]
+    },
+    {
+      "slug": "practical-number",
+      "facet": "domain",
+      "name": "Practical number",
+      "reference": "https://en.wikipedia.org/wiki/Practical_number",
+      "additional-references": [],
+      "summary": "",
+      "refs": []
     },
     {
       "slug": "prefix-code",
@@ -3985,9 +4003,9 @@
       "refs": ["p0145_s0", "p0868_s0"]
     },
     {
-      "slug": "mobius-function",
+      "slug": "mobius-function-application",
       "facet": "technique",
-      "name": "M\u00f6bius function",
+      "name": "M\u00f6bius function (application)",
       "reference": "https://en.wikipedia.org/wiki/M%C3%B6bius_function",
       "additional-references": [],
       "summary": "",

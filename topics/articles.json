@@ -967,6 +967,13 @@
       "problems": 1
     },
     {
+      "path": "domain/mobius-function",
+      "title": "M\u00f6bius function",
+      "status": "missing",
+      "tags": ["mobius-function"],
+      "problems": 0
+    },
+    {
       "path": "domain/modular-arithmetic",
       "title": "Modular arithmetic",
       "status": "missing",
@@ -1196,6 +1203,13 @@
       "status": "missing",
       "tags": ["power-of-two"],
       "problems": 6
+    },
+    {
+      "path": "domain/practical-number",
+      "title": "Practical number",
+      "status": "missing",
+      "tags": ["practical-number"],
+      "problems": 0
     },
     {
       "path": "domain/prefix-code",
@@ -3179,10 +3193,10 @@
       "problems": 2
     },
     {
-      "path": "technique/mobius-function",
-      "title": "M\u00f6bius function",
+      "path": "technique/mobius-function-application",
+      "title": "M\u00f6bius function (application)",
       "status": "missing",
-      "tags": ["mobius-function"],
+      "tags": ["mobius-function-application"],
       "problems": 5
     },
     {
