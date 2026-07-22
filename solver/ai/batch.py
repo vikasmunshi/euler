@@ -77,14 +77,18 @@ def _save_store(store: dict[str, Any]) -> None:
     write_file(_store_path(), dumps(store, indent=2).encode())
 
 
-def _select(target: Target, limit: int) -> list[Problem]:
-    """The problems a wave covers, in problem-number order, capped at ``limit``.
+def _select(target: Target, limit: int, start: int = 0) -> list[Problem]:
+    """The problems a wave covers, in problem-number order, from ``start``, capped at ``limit``.
 
     ``untagged`` is the resumable selector - it skips anything that already has a ``tags.json``,
-    so re-running after a partial wave picks up only what is still missing.
+    so re-running after a partial wave picks up only what is still missing. It cannot pace a
+    *re-tag*, though: every problem being regenerated already has a file. ``start`` is what walks
+    a re-tag through the stack in waves - carry it forward by the previous wave's last number + 1.
     """
     chosen: list[Problem] = []
     for problem in sorted(problems.problems_list, key=lambda p: p.number):
+        if problem.number < start:
+            continue
         tagged = (problem.solution_dir / config.tags_filename).exists()
         solved = has_solutions(problem)
         if target == 'solved' and not solved:
@@ -194,6 +198,7 @@ def _collect(client: Anthropic, batch_id: str, model: Model) -> tuple[int, list[
 def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
                  target: Target = 'untagged',
                  limit: int = 250,
+                 start: int = 0,
                  batch_id: str = '',
                  model: Model = Model.CLAUDE_SONNET_5,
                  ) -> int:
@@ -211,6 +216,8 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
                   `solved`, `unsolved`, or `all`.
         limit:    Maximum problems in this wave. Keep it to a few hundred so that `new-tags`
                   proposals get reconciled often enough to avoid duplicate slugs.
+        start:    Skip problems numbered below this. Paces a re-tag through the stack in waves,
+                  where `untagged` cannot help because every problem already has a file.
         batch_id: The job to collect (required for `collect`).
         model:    The model to run the wave on.
 
@@ -239,7 +246,7 @@ def claude_batch(action: Literal['run', 'submit', 'collect', 'list'] = 'run', *,
             return ExitCodes.EXIT_ERROR
         written, failures, conflicts = _collect(client, batch_id, wave_model)
     else:
-        wave = _select(target, limit)
+        wave = _select(target, limit, start)
         if not wave:
             console.print(f'[muted]nothing to do: no {target} problems[/muted]')
             return ExitCodes.EXIT_OK
