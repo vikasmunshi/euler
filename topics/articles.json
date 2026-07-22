@@ -1676,7 +1676,7 @@
     {
       "path": "number-theory/primes",
       "title": "Generating and testing primes",
-      "status": "draft",
+      "status": "final",
       "tags": ["sieve-of-eratosthenes", "trial-division", "wheel-factorization", "miller-rabin-primality-test", "prime-number"],
       "problems": 87
     },
