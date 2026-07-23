@@ -1058,6 +1058,19 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 
 /* A section divider — a small mono label trailed by a hairline. Shared: the problem
    page's tag facets and the topics index's folders read as the same kind of break. */
+/* The topics filter box (F2) — full-width, styled to the shell. */
+.topic-filter {
+  width: 100%;
+  margin: 0 0 0.9rem;
+  font: inherit; color: var(--text);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+}
+.topic-filter:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.topic-filter::placeholder { color: var(--muted); }
+/* The filter hides via the [hidden] attribute, which the display rules on these
+   elements would otherwise override — so [hidden] wins here explicitly. */
+.card[hidden], nav.cards[hidden], .subrule[hidden] { display: none !important; }
 .subrule { display: flex; align-items: center; gap: 0.6rem; margin: 0.95rem 0 0.6rem; }
 .subrule h3 {
   font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.7rem; letter-spacing: 0.12em;

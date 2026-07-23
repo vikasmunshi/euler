@@ -8,6 +8,11 @@
      apply forever.</p>
 </header>
 {% if groups %}
+{# Client-side filter (site.js): typing hides the cards whose text does not match, and
+   a folder heading whose cards are all hidden goes with them. No server round-trip —
+   the whole tree is already on the page. #}
+<input type="search" class="topic-filter" placeholder="Filter topics…"
+       aria-label="Filter topics" autocomplete="off">
 {# One section per folder of topics/: the folder is the heading, so the cards below
    carry only their leaf name and pack four to a row. A card's second line is the
    page's own title — dropped where it only repeats the name (the per-tag pages). #}
