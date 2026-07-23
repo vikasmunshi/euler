@@ -7,11 +7,10 @@ only positive divisors are $1$ and itself. That one-line definition hides the de
 number theory: the primes are the *multiplicative atoms* from which every other integer is built,
 their individual behaviour is erratic while their collective behaviour is astonishingly regular, and
 the gap between how easily you can *multiply* them and how hard it is to *un-multiply* a number back
-into them is the foundation the modern digital economy is quietly standing on. This page is about the
-mathematics of the primes themselves — what is true of them, how that truth was won, and where it is
-put to work. For the *algorithms* that generate, test, and factor them in code, see the companion
-page on [generating and testing primes](/topics/number-theory/primes); here the interest is the
-mathematics those algorithms serve.
+into them is the foundation the modern digital economy is quietly standing on. This page covers the
+primes end to end — the mathematics of what is true of them and how that truth was won, the
+[algorithms](#generating-and-testing-primes) that generate, test, and factor them in code, and where
+both are put to work.
 
 ## A short history
 
@@ -94,6 +93,68 @@ $\pi(x)$ strays from its smooth approximation $\mathrm{Li}(x)$ — is exactly wh
 hypothesis governs, which is why an innocent-looking count of primes reaches all the way to the
 deepest open problem in the field.
 
+## Generating and testing primes
+
+Knowing what the primes *are* is one thing; getting the ones you need into a program is another, and
+a prime-heavy problem almost always reduces to one of three questions — *give me every prime up to a
+bound*, *is this one number prime*, or *what are the prime factors of this number*. Each has its own
+right tool, and reaching for the wrong one is the usual reason a prime solution is slow.
+
+**Enumerate every prime up to $N$ — the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes).**
+Write down every integer from $2$ to $N$; walk the list, and each time you meet a number still
+standing, cross out all of its multiples. What survives is exactly the primes. Two observations make
+it fast: start crossing out from $p^2$ (every smaller multiple of $p$ already carries a smaller
+factor), and stop once $p^2 > N$. The whole pass runs in $O(N \log \log N)$ — very nearly linear — so
+whenever a problem needs *all* the primes below a known ceiling, the sieve is almost always the
+answer. In `solutions/public/p0010/` the core is three lines of `bytearray` strided assignment:
+
+```python
+sieve = bytearray(b"\x01") * (max_num + 1)
+sieve[0] = sieve[1] = 0
+for i in range(2, int(max_num ** 0.5) + 1):
+    if sieve[i]:
+        sieve[i * i:: i] = bytearray(len(range(i * i, max_num + 1, i)))
+```
+
+The subtlety the sieve carries is the *bound*. You often want "the first $n$ primes" rather than
+"primes below $N$", and must size the array before you know where the $n$-th prime lands — which is
+exactly where the prime number theorem above earns its keep: $p_n \sim n \ln n$, so sieving up to
+$n \ln n$ (with a small margin) suffices, the ceiling problem 7 uses to reach the 10 001st prime.
+When even that range will not fit in memory, a [*segmented* sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Segmented_sieve)
+processes the interval in cache-sized windows, and an *incremental* sieve — a generator keyed on each
+prime's next multiple — yields primes endlessly with no ceiling fixed in advance. Variants trade the
+same idea around: the [Sieve of Sundaram](https://en.wikipedia.org/wiki/Sieve_of_Sundaram) sieves odd
+numbers through a different indexing, and a [linear sieve](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes#Euler's_sieve)
+crosses each composite off exactly once (via its smallest prime factor), handing you a factorisation
+table as a by-product — useful when a problem needs the least prime factor of every $n \le N$, not
+just a primality flag.
+
+**Factor or test a single number — [trial division](https://en.wikipedia.org/wiki/Trial_division).**
+When you have one number, not a range, sieving the whole space below it is wasteful. To factor $n$,
+divide by $2, 3, 4, \dots$ and peel off each divisor you find; to test primality, divide by
+candidates up to $\sqrt{n}$ and call it prime if none divide it. The $\sqrt{n}$ cutoff is the crux: a
+composite $n$ must have a factor no larger than its square root, so nothing above $\sqrt{n}$ can be
+its *smallest* factor. A second saving is to divide each factor out completely as you go — then every
+divisor you meet is automatically prime and needs no separate check. Problem 3
+(`solutions/public/p0003/`) does exactly this, recomputing the $\sqrt{}$-ceiling against the shrinking
+remainder so the loop ends early once only a large prime cofactor is left. [Wheel
+factorization](https://en.wikipedia.org/wiki/Wheel_factorization) sharpens the constant: every prime
+past $2$ is odd and every prime past $3$ is $\equiv \pm 1 \pmod 6$, so stepping through $6k \pm 1$
+skips two-thirds of the candidates — it does not change the asymptotics, but on a factoriser's hot
+loop that factor is worth having.
+
+**Test a *large* single number — the [Miller–Rabin primality test](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test).**
+Trial division to $\sqrt{n}$ is fine up to perhaps $10^{12}$; past that its cost explodes.
+Miller–Rabin instead asks a witness question rooted in Fermat's little theorem: write
+$n - 1 = 2^s \cdot d$ and check, for a chosen base $a$, whether the repeated squarings of $a^d
+\pmod n$ betray $n$ as composite. A single base can be fooled, but each independent base that passes
+multiplies your confidence — and for $n$ below fixed thresholds a *specific small set of bases* makes
+the test **deterministic**, exactly correct with no probability left. Its cost is $O(k \log^3 n)$ for
+$k$ bases: effectively instant even for numbers with dozens of digits, which is why the
+higher-numbered primality problems (and RSA key generation) reach for it rather than a sieve. It is
+this cheap, one-sided test — easy to *confirm* a prime, hard to *factor* a composite — that the next
+section turns into a lever.
+
 ## The asymmetry that pays the modern bills
 
 Here is the fact the applications turn on: **multiplying primes is easy, and factoring their product
@@ -150,12 +211,17 @@ that makes some larger quantity computable:
 - **See a one-way structure** — a public key, a semiprime to be split, a discrete log — and recognise
   that its security *is* the hardness of a prime problem. The Euler problems that touch cryptography
   (RSA-flavoured factorisation, modular inverses) are miniatures of the same asymmetry.
+- **Then pick the tool by the shape of the question.** Many primes below a known bound → sieve, sized
+  to the inputs ($n \ln n$ for "the $n$-th prime") and built *inside* `solve()` so the benchmark
+  counts it honestly. Factor one number, or a modest range → trial division to $\sqrt{n}$ with
+  full division-out and a $6k \pm 1$ wheel. A yes/no on one *large* number → Miller–Rabin with a
+  deterministic base set. The classic mistake is answering a range question one number at a time — a
+  primality test in a loop where a single $O(N \log \log N)$ sieve would produce the whole set — or
+  answering a single-number question with a sieve of millions of primes to check just one.
 
-Match the mathematics to the shape of the question and the erratic surface of the primes gives way to
-a small set of reliable laws — the same laws that, four centuries after Fermat, keep the world's
-secrets. Which specific tool computes the primes you need is the subject of the companion page on
-[generating and testing primes](/topics/number-theory/primes); the problems below draw on the
-mathematics laid out here.
+Match the mathematics and the algorithm to the shape of the question and the erratic surface of the
+primes gives way to a small set of reliable laws — the same laws that, four centuries after Fermat,
+keep the world's secrets. The problems below all turn on that fit.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
