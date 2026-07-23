@@ -16,16 +16,16 @@
 {% set is_contrib = subject and subject.has('contributor') %}
 {% set steps = [
      {'label': 'Create your identity', 'done': pubkey_state == 'key',
-      'hint': 'Run <code>user</code> in your terminal to mint your keypair, or click <b>Create identity</b> below.'},
+      'hint': 'Run <code>user</code> in your terminal to mint your keypair, or click the <b>Create identity</b> button below.'},
      {'label': 'Get decrypt access', 'done': can_decrypt,
-      'hint': 'Copy your public key to the admin below and wait for authorization, then run <code>git-sync</code> or click the <b>Private solutions</b> tool below.'}
+      'hint': 'Copy your public key to the admin below and wait for authorization, then run <code>git-sync</code> or click the <b>Private solutions</b> tool button below.'}
    ] %}
 {% if is_contrib %}
 {% set _ = steps.extend([
      {'label': 'Sign in to the GitHub CLI', 'done': gh_status == 'signed in',
-      'hint': 'Run <code>git-identity</code> in your terminal, or click the <b>GitHub CLI</b> tool below.'},
+      'hint': 'Run <code>git-identity</code> in your terminal, or click the <b>GitHub CLI</b> tool button below.'},
      {'label': 'Sign in to Claude Code', 'done': claude_status == 'signed in',
-      'hint': 'Sign in from your terminal, or click the <b>Claude Code</b> tool below.'},
+      'hint': 'Sign in from your terminal, or click the <b>Claude Code</b> tool button below.'},
      {'label': 'Store your ANTHROPIC_API_KEY', 'done': 'ANTHROPIC_API_KEY' in secret_names,
       'hint': 'Add it under <b>Secrets</b> below.'}
    ]) %}

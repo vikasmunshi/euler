@@ -979,13 +979,28 @@ dl.account dd { margin: 0; min-width: 0; }
 }
 .state-pill.ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
 .state-pill.warn { color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 55%, var(--border)); }
-/* A pill that is also the verb (the tool rows): same shape, but it must invite the
-   click that a plain status pill must not. Disabled = the tool is not installed,
-   and no command in this panel would change that. */
-.state-pill.state-action { background: none; font: inherit; font-size: 0.78rem;
-                           font-weight: 600; cursor: pointer; }
+/* A pill that is also the verb (the tool rows, Create identity): it must read as a
+   real, clickable button — the same shape as Save Secret (.btn), a rounded rectangle
+   with the surface fill and button padding, not a status chip. The tone (.ok/.warn)
+   still tints the border and the dot carries the state; disabled = nothing here would
+   change it (the tool is not installed, or this profile may not run it). */
+.state-pill.state-action {
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 0.35rem 0.9rem;
+  font: inherit; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer;
+  /* One shared width + centred content, so every action button (Create identity and
+     the tool rows) lines up in a single right-hand column rather than sizing to its
+     own label. */
+  min-width: 9rem;
+  justify-content: center;
+}
 .state-pill.state-action:hover:not(:disabled) { border-color: var(--accent); background: var(--surface-hi); }
 .state-pill.state-action:disabled { cursor: default; color: var(--muted); }
+/* The action sits opposite its label — the tool rows push it right already; the
+   Create-identity row (a muted note + the button) does the same. */
+.state-row .state-action { margin-left: auto; }
 
 .pubkey {
   display: block; padding: 0.4rem 0.6rem;
