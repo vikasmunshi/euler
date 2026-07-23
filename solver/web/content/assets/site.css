@@ -366,6 +366,22 @@ body.terminal-doc {
 .fold[open] > summary.fold-summary::before { transform: rotate(90deg) translateX(-0.05em); }
 .fold .fold-title { font-size: 1.12rem; font-weight: 600; color: var(--text); }
 .fold[open] > summary.fold-summary { margin-bottom: 0.8rem; }
+
+/* A topic article's generated Problems list, folded closed (click to expand). The
+   heading doubles as the fold summary, so its default margins are dropped; the count
+   rides alongside as a muted pill so the summary says how many without opening. */
+.topic-problems { margin: 1.2rem 0; }
+.topic-problems > summary .fold-title { margin: 0; }
+.topic-problems .problems-count {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.topic-problems[open] > summary .problems-count { color: var(--text); }
 .lead { font-size: 1rem; }
 .meta { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 .pill-solved { color: var(--accent-ink); }

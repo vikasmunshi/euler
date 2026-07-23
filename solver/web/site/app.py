@@ -511,7 +511,9 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
             actions.append(Action(label='Write', kind='term', command=f'claude-blog {name}'))
     return render(request, 'topic.html', {
         'name': name,
-        'body': content.render_markdown(text, route_base='/topics/'),
+        # Collapse the generated Problems list (click to expand) — a topic-page
+        # presentation choice, so it wraps the rendered HTML, not the source article.
+        'body': content.collapse_problems(content.render_markdown(text, route_base='/topics/')),
         'crumbs': [_HOME, ('topics', '/topics/'), (name, None)],
         'actions': actions,
     }, block='content')
