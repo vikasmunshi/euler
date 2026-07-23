@@ -684,6 +684,31 @@ class EditRouteTests(AioHTTPTestCase):
         self.assertFalse((self.pdir / 'p0009_s0.py').exists())
 
     @unittest_run_loop
+    async def test_article_delete_gated_below_maintainer(self) -> None:
+        for headers in (_READER, _CONTRIBUTOR):
+            resp = await self.client.delete('/edit/topics/domain/alpha', headers=headers)
+            self.assertEqual(resp.status, 403, headers['X-Profile'])
+        self.assertTrue(self.article.exists())                       # a refused request deletes nothing
+
+    @unittest_run_loop
+    async def test_article_delete_removes_file_and_returns_topics_index(self) -> None:
+        resp = await self.client.delete('/edit/topics/domain/alpha', headers=_MAINTAINER)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertNotIn('<!DOCTYPE html>', body)                    # a fragment of the topics index
+        self.assertEqual(resp.headers.get('HX-Push-Url'), '/topics/')
+        self.assertFalse(self.article.exists())
+
+    # ── solved/total count on a topic page ─────────────────────────────────────
+
+    @unittest_run_loop
+    async def test_topic_problems_count_shows_solved_over_total(self) -> None:
+        """The Problems fold summary reads `solved / total` against this clone's progress —
+        problem 9 is the one entry and problems.json marks it solved, so `1 / 1`."""
+        page = await (await self.client.get('/topics/domain/alpha', headers=_READER)).text()
+        self.assertIn('class="problems-count">1 / 1<', page)
+
+    @unittest_run_loop
     async def test_only_solution_files_are_deletable(self) -> None:
         resp = await self.client.delete('/edit/solutions/0009/test_cases.json', headers=_MAINTAINER)
         self.assertEqual(resp.status, 400)

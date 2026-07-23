@@ -16,7 +16,7 @@ __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'TEXT_SUFFIXES', 
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown', 'collapse_problems',
            'rewrite_statement_links', 'git_status', 'topic_status',
-           'list_docs', 'read_doc', 'list_topics', 'list_topic_groups', 'read_topic',
+           'list_docs', 'read_doc', 'list_topics', 'list_topic_groups', 'read_topic', 'drop_article',
            'problem_tag_view',
            'read_about', 'readme_html',
            'parse_progress', 'save_progress']
@@ -457,14 +457,15 @@ def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None)
     """
     def _wrap(match: re.Match[str]) -> str:
         listing = match.group('list')
-        total: int = listing.count('<li>')
         if problems is not None:
-            numbers = re.findall(r'/solutions/(\d+)/', listing)
+            # Anchor on href= so each entry counts once — render_markdown boosts the
+            # link, so the number also appears in an hx-get on the same anchor.
+            numbers = [int(n) for n in re.findall(r'href="/solutions/(\d+)/', listing)]
             solved = sum(1 for n in numbers
-                         if (info := problems.get(int(n))) is not None and info.solved)
-            label = f'{solved} / {total}'
+                         if (info := problems.get(n)) is not None and info.solved)
+            label = f'{solved} / {len(numbers)}'
         else:
-            label = str(total)
+            label = str(listing.count('<li>'))
         return ('<details class="fold topic-problems">'
                 '<summary class="fold-summary">'
                 f'<h2 id="problems" class="fold-title">{match.group("title")}'
@@ -780,6 +781,30 @@ def topic_status(text: str) -> str:
 def read_topic(repo_root: Path, name: str) -> str | None:
     """The raw Markdown of `/topics/{name}`, where *name* may be a nested `folder/page` path."""
     return _read_nested_page(repo_root / 'topics', name)
+
+
+def drop_article(repo_root: Path, name: str) -> None:
+    """Best-effort removal of *name*'s row from ``topics/articles.json``.
+
+    The article file is the page; the index is the catalogue. Deleting the file alone would
+    leave a dangling index row — `_indexed_topics` would keep listing a page that now 404s —
+    so the matching ``path == name`` row is dropped here too. Best-effort by design: an
+    absent or malformed index is left untouched, and `update-tags` reconciles it fully on
+    its next run.
+    """
+    path = repo_root / 'topics' / 'articles.json'
+    data = load_json(path)
+    if not isinstance(data, dict) or not isinstance(data.get('articles'), list):
+        return
+    kept = [row for row in data['articles']
+            if not (isinstance(row, dict) and str(row.get('path', '')) == name)]
+    if len(kept) == len(data['articles']):
+        return
+    data['articles'] = kept
+    try:
+        path.write_text(json.dumps(data, indent=2), encoding='utf-8')
+    except OSError:
+        pass
 
 
 def _read_nested_page(tree: Path, name: str) -> str | None:

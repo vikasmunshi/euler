@@ -511,6 +511,8 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
             actions.append(Action(label='Rewrite', kind='term', command=f'claude-blog {name} --force'))
         else:
             actions.append(Action(label='Write', kind='term', command=f'claude-blog {name}'))
+        actions.append(Action(label='Delete', kind='delete', path=f'/edit/topics/{name}',
+                              confirm=f'Delete {name}?'))
     return render(request, 'topic.html', {
         'name': name,
         # Collapse the generated Problems list (click to expand) — a topic-page
@@ -703,6 +705,28 @@ async def article_save(request: web.Request) -> web.StreamResponse:
 
 
 @requires('maintainer')
+async def article_delete(request: web.Request) -> web.StreamResponse:
+    """``DELETE /edit/topics/{name}`` — delete a topic article → the topics index.
+
+    Maintainer-only, mirroring :func:`file_delete`: the ``.md`` is unlinked, its row is
+    pruned from the article index (:func:`content.drop_article`), and the response swaps the
+    ``/topics/`` index back into ``#content`` (the deleted page has none to stay on). The
+    :func:`_article_target` resolver 404s a name that does not resolve to an existing page.
+    """
+    repo_root = request.app[CONFIG_KEY].repo_root
+    name, target = _article_target(request)
+    target.unlink(missing_ok=True)
+    content.drop_article(repo_root, name)
+    response = render(request, 'topics.html', {
+        'groups': content.list_topic_groups(repo_root),
+        'crumbs': [_HOME, ('topics', None)],
+        'actions': [],
+    }, block='content', fragment=True)
+    response.headers['HX-Push-Url'] = '/topics/'
+    return response
+
+
+@requires('maintainer')
 async def file_delete(request: web.Request) -> web.StreamResponse:
     """``DELETE /edit/solutions/{n}/{filename}`` — delete → the problem fragment.
 
@@ -796,6 +820,7 @@ def add_content_routes(app: web.Application) -> None:
         web.get(r'/topics/{name:.+}', topic_page),  # {name} may be a nested folder/page path
         web.get(r'/edit/topics/{name:.+}', article_editor),
         web.post(r'/edit/topics/{name:.+}', article_save),
+        web.delete(r'/edit/topics/{name:.+}', article_delete),
         web.get(r'/about/{name}', about_page),
         # account
         web.get('/account', account),
