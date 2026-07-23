@@ -339,6 +339,11 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertLess(page.index('id="nav-back"'), page.index('id="crumbs"'))
         self.assertRegex(page, r'id="nav-back"[^>]*href="/"')     # a real link with no JS
         self.assertNotRegex(page, r'id="nav-back"[^>]*hx-get')    # …and never an htmx binding
+        # The refresh sits right after back, before the crumbs; like back it is a plain link
+        # (site.js swaps only #content, so the terminal pane survives), never an htmx binding.
+        self.assertLess(page.index('id="nav-back"'), page.index('id="nav-refresh"'))
+        self.assertLess(page.index('id="nav-refresh"'), page.index('id="crumbs"'))
+        self.assertNotRegex(page, r'id="nav-refresh"[^>]*hx-get')
 
     @unittest_run_loop
     async def test_docs_index_leads_with_the_readme(self) -> None:

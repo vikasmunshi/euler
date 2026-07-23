@@ -52,6 +52,14 @@
     <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
       d="M20 11H7.8l5.6-5.6L12 4l-8 8 8 8 1.4-1.4L7.8 13H20z"/></svg>
   </a>
+  {# Refresh the pane, and only the pane. It re-fetches the current page into #content — the
+     terminal lives in the *other* pane, so a document reload (the address bar's refresh) would
+     drop the shell, the one thing the app promises to keep. Like the back arrow this is a swap
+     driven by site.js; the href is the no-JS / middle-click fallback, kept current there. #}
+  <a id="nav-refresh" class="nav-refresh" href="#" title="refresh" aria-label="refresh this page">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor"
+      d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 1 0 7.75 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"/></svg>
+  </a>
   <span class="hsep" aria-hidden="true"></span>
   {% include "_crumbs.html" %}
   <div class="app-who">

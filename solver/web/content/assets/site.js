@@ -80,6 +80,15 @@
     back.setAttribute('href', target);                  // a real href: no-JS, middle-click
     back.classList.toggle('is-first', paneStack.length < 2);
     back.title = paneStack.length > 1 ? 'back to ' + target : 'back';
+    var refresh = document.getElementById('nav-refresh');
+    if (refresh) { refresh.setAttribute('href', panePath()); }   // no-JS / middle-click fallback
+  }
+
+  // Refresh the content pane in place: re-fetch the current URL into #content. The terminal is a
+  // separate pane (#ws), so it is untouched — this is the pane's own reload, not the document's.
+  // No history push and no stack change: it re-renders the same page, it does not navigate.
+  function paneRefresh() {
+    window.htmx.ajax('GET', panePath(), { target: '#content', swap: 'innerHTML' });
   }
 
   function paneBack() {
@@ -144,6 +153,11 @@
     if (ev.target.closest('#nav-back') && window.htmx && !ev.metaKey && !ev.ctrlKey) {
       ev.preventDefault();
       paneBack();
+    }
+    // The header's refresh: a pane swap, never a document reload (which would drop the terminal).
+    if (ev.target.closest('#nav-refresh') && window.htmx && !ev.metaKey && !ev.ctrlKey) {
+      ev.preventDefault();
+      paneRefresh();
     }
   });
 

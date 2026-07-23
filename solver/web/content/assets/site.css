@@ -98,7 +98,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
    the browser's history, which would reload the document and the terminal with it.
    `is-first` = nothing behind it yet (it points at the current page); it stays
    clickable, so the arrow never becomes a control that does nothing on click. */
-.nav-back {
+.nav-back, .nav-refresh {
   display: inline-flex;
   align-items: center;
   padding: 0.25rem;
@@ -106,8 +106,8 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fo
   color: var(--muted);
   text-decoration: none;
 }
-.nav-back svg { width: 1.05rem; height: 1.05rem; display: block; }
-.nav-back:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.nav-back svg, .nav-refresh svg { width: 1.05rem; height: 1.05rem; display: block; }
+.nav-back:hover, .nav-refresh:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .nav-back.is-first { color: var(--border); }
 .nav-back.is-first:hover { color: var(--muted); background: none; }
 
