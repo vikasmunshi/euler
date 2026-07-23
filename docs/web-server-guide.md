@@ -982,6 +982,17 @@ directly. One source of truth per page: the handler supplies `crumbs` and `actio
 the git middleware supplies `git`. Actions is filtered by the subject's profile, but
 **hiding is UX; the route's floor is the boundary**.
 
+**Page-specific verbs go in the Actions menu, never on the page.** A page's controls —
+Edit, Save, Delete, a "show drafts" toggle, a topic's Write / Rewrite — belong in the
+header **Actions** menu, built as the handler's `actions` list, not rendered as links or
+buttons in the content pane. One place to look for what a page can do, one rendering path,
+and the pane stays the content. An Action is `{label, kind, …}`: `kind` is `get` (an hx
+pane-swap), `post` / `delete` (an hx mutation), `submit` (submit the pane's editor form),
+or **`term`** (type its `command` into the web shell via `data-term-cmd`, the same
+one-execution-path move the git chip's verbs make — so the command's own `requires()` is
+the real boundary). **The back-step is the breadcrumb trail** in the header (and the `←`
+control beside it); a page carries no "← docs" / "← topics" link of its own.
+
 ### 11.6 Content pages
 
 - **Landing, docs index, topics index** — a short hero over a **card grid**. The landing

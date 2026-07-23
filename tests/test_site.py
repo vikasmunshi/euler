@@ -435,16 +435,18 @@ class ContentServiceTests(AioHTTPTestCase):
     @unittest_run_loop
     async def test_topics_index_lists_final_pages_only(self) -> None:
         """update-tags gives every tag a skeleton, so an unfiltered index would bury the few
-        written pages under hundreds of TODO stubs. A page is still servable by URL."""
-        resp = await self.client.get('/topics/', headers=_READER)
-        self.assertEqual(resp.status, 200)
-        body = await resp.text()
-        self.assertNotIn('/topics/technique/sieve-of-eratosthenes', body)   # a draft: not listed
-        # …but reachable directly, and it renders
-        resp = await self.client.get('/topics/technique/sieve-of-eratosthenes', headers=_READER)
-        self.assertEqual(resp.status, 200)
-        self.assertIn('Sieve of Eratosthenes', await resp.text())
-        resp = await self.client.get('/topics/domain/practical-number', headers=_READER)
+        written pages under hundreds of TODO stubs. A draft is still servable by URL.
+
+        The draft/final examples are read from the live index rather than hardcoded, since which
+        pages are final changes as articles get written."""
+        rows = json.loads((Path(__file__).resolve().parents[1] / 'topics/articles.json').read_text())
+        a_draft = next(r['path'] for r in rows['articles'] if r['status'] == 'draft')
+        a_final = next(r['path'] for r in rows['articles'] if r['status'] == 'final')
+        body = await (await self.client.get('/topics/', headers=_READER)).text()
+        self.assertIn(f'/topics/{a_final}', body)                       # a final: listed
+        self.assertNotIn(f'/topics/{a_draft}', body)                    # a draft: not listed
+        # …but the draft is reachable directly, and it renders
+        resp = await self.client.get(f'/topics/{a_draft}', headers=_READER)
         self.assertEqual(resp.status, 200)
 
     @unittest_run_loop
@@ -599,6 +601,33 @@ class EditRouteTests(AioHTTPTestCase):
     async def test_article_editor_404s_for_a_missing_page(self) -> None:
         resp = await self.client.get('/edit/topics/domain/no-such', headers=_MAINTAINER)
         self.assertEqual(resp.status, 404)
+
+    @unittest_run_loop
+    async def test_article_page_offers_its_verbs_in_the_actions_menu(self) -> None:
+        """Edit / Write / Rewrite are header Actions, not controls on the page body. A draft
+        offers Write, a final offers Rewrite --force, and a non-maintainer gets neither."""
+        page = await (await self.client.get('/topics/domain/alpha', headers=_MAINTAINER)).text()
+        header, _, panel = page.partition('id="content"')      # Actions live in the header; body follows
+        self.assertIn('hx-get="/edit/topics/domain/alpha"', header)            # Edit, in Actions
+        self.assertIn('data-term-cmd="claude-blog domain/alpha"', header)      # Write, in Actions
+        self.assertNotIn('--force', header)
+        self.assertNotIn('claude-blog', panel)                                 # not on the page body
+        # a final page swaps Write for Rewrite --force
+        self.article.write_text(self.article.read_text().replace('status: draft', 'status: final'))
+        final = await (await self.client.get('/topics/domain/alpha', headers=_MAINTAINER)).text()
+        self.assertIn('data-term-cmd="claude-blog domain/alpha --force"', final)
+        # a reader sees neither verb, anywhere
+        reader = await (await self.client.get('/topics/domain/alpha', headers=_READER)).text()
+        self.assertNotIn('/edit/topics/domain/alpha', reader)
+        self.assertNotIn('claude-blog', reader)
+
+    @unittest_run_loop
+    async def test_article_page_shows_no_status_badge(self) -> None:
+        """The article page renders the prose only — no draft/final badge on the page body."""
+        page = await (await self.client.get('/topics/domain/alpha', headers=_MAINTAINER)).text()
+        panel = page.partition('id="content"')[2]
+        self.assertNotIn('pill-draft', panel)
+        self.assertNotIn('pill-final', panel)
 
     @unittest_run_loop
     async def test_article_save_writes_edited_prose(self) -> None:
@@ -765,35 +794,6 @@ class TopicCardStatusTests(unittest.TestCase):
         body = self._render('draft')
         self.assertIn('class="card is-draft"', body)
         self.assertNotIn('pill-final', body)
-
-    def test_article_verbs_track_status_and_the_maintainer_floor(self) -> None:
-        """Write on a draft, Rewrite --force on a final, nothing for a non-maintainer."""
-        env = jinja2.Environment(
-            loader=jinja2.FileSystemLoader(Path(__file__).resolve().parents[1]
-                                           / 'solver/web/site/templates'),
-            autoescape=True)
-
-        class _Subject:
-            def __init__(self, top: str) -> None:
-                self._floors = {'reader': ('reader',),
-                                'maintainer': ('reader', 'contributor', 'maintainer')}[top]
-
-            def has(self, cap: str) -> bool:
-                return cap in self._floors
-
-        def _page(status: str, top: str) -> str:
-            return render_block(env, 'topic.html', 'content',
-                                {'name': 'domain/x', 'status': status, 'body': '<p>x</p>',
-                                 'crumbs': [], 'actions': [], 'git': None, 'csp_nonce': '',
-                                 'subject': _Subject(top)})
-
-        draft = _page('draft', 'maintainer')
-        self.assertIn('hx-get="/edit/topics/domain/x"', draft)       # Edit is always offered
-        self.assertIn('data-term-cmd="claude-blog domain/x"', draft)
-        self.assertNotIn('--force', draft)
-        final = _page('final', 'maintainer')
-        self.assertIn('data-term-cmd="claude-blog domain/x --force"', final)
-        self.assertNotIn('topic-verbs', _page('draft', 'reader'))   # no verbs below the floor
 
     def test_a_final_card_says_so_and_is_not_muted(self) -> None:
         body = self._render('final')

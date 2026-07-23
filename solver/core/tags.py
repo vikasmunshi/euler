@@ -525,10 +525,15 @@ def _problems_block(declared: list[str], by_slug: dict[str, Any],
     lines = [f'<!-- {_GEN_OPEN} -->', '## Problems', '']
     if nums:
         for n in nums:
-            title = titles.get(n, '')
-            mark = 'solved' if n in solved else 'unsolved'
+            # Some problems.json titles carry a trailing space; strip so the list line never
+            # ends in whitespace (the pre-commit hook rejects it, and it is invisible noise).
+            title = titles.get(n, '').strip()
+            # A glyph, not a word: a filled dot marks solved, a hollow one unsolved, so the
+            # column scans at a glance. Plain Unicode, so it survives Markdown rendering and the
+            # article save-gate's no-raw-HTML rule.
+            mark = '●' if n in solved else '○'
             dash = f' — {title}' if title else ''
-            lines.append(f'- [{n:04d}](/solutions/{n:04d}/){dash} · {mark}')
+            lines.append(f'- {mark} [{n:04d}](/solutions/{n:04d}/){dash}')
     else:
         lines.append('_No problems carry this tag yet._')
     lines += ['', f'<!-- {_GEN_CLOSE} -->']

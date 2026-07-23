@@ -13,6 +13,12 @@
         {% if a.kind == 'get' %}
         <a href="{{ a.path }}" hx-get="{{ a.path }}" hx-target="#content"
            hx-swap="innerHTML" hx-push-url="true">{{ a.label }}</a>
+        {% elif a.kind == 'term' %}
+        {# Types a real command into the web shell and lets it answer there — the same move the
+           git menu's verbs make (one execution path, one audit trail; the command's own
+           requires() is the boundary). site.js binds [data-term-cmd] globally. #}
+        <button type="button" data-term-cmd="{{ a.command }}"
+                title="run `{{ a.command }}` in your terminal">{{ a.label }}</button>
         {% elif a.kind == 'submit' %}
         {# Submits the pane's editor form (site.js) — Save without leaving the menu bar. #}
         <button type="button" data-action="submit-editor">{{ a.label }}</button>

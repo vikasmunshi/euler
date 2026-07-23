@@ -6,12 +6,6 @@
   <h1>The mathematics</h1>
   <p class="lede">Writeups on the ideas the problems keep reusing — sieve once,
      solve forever.</p>
-  {# The maintainer's way into the writing queue. `/topics/` is finished pages only, so
-     without this the drafts are unreachable from the UI. Readers never see the link. #}
-  {% if not show_status and subject and subject.has('maintainer') %}
-  <p class="meta"><a href="/topics/all" hx-get="/topics/all" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true">show drafts →</a></p>
-  {% endif %}
 </header>
 {% if groups %}
 {# One section per folder of topics/: the folder is the heading, so the cards below
@@ -36,9 +30,7 @@
 </nav>
 {% endfor %}
 {% else %}
-<p class="muted">Nothing written yet — the mathematics is still oral tradition.{%
-   if not show_status and subject and subject.has('maintainer') %}
-   <a href="/topics/all" hx-get="/topics/all" hx-target="#content" hx-swap="innerHTML"
-      hx-push-url="true">See the drafts</a>.{% endif %}</p>
+<p class="muted">Nothing written yet — the mathematics is still oral tradition.
+   {% if not show_status %}The drafts are under <strong>Actions ▸ Show drafts</strong>.{% endif %}</p>
 {% endif %}
 {% endblock %}

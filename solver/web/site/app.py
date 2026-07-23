@@ -86,8 +86,9 @@ class Action(TypedDict, total=False):
     """One Actions-menu item (§6): a verb the current page offers."""
 
     label: str
-    kind: str      # 'get' | 'post' | 'delete' | 'submit'
+    kind: str      # 'get' | 'post' | 'delete' | 'submit' | 'term'
     path: str
+    command: str   # the shell command a 'term' action types into the web shell
     target: str
     swap: str
     confirm: str
@@ -461,10 +462,17 @@ async def topics_index(request: web.Request) -> web.StreamResponse:
     Finished pages only. ``update-tags`` creates a skeleton for every tag, so the tree holds
     a page per topic whether or not anyone has written it; a reader given all of them cannot
     find the few that say something. Nothing here is marked ``final`` because everything is.
+
+    The maintainer's way into the drafts is an Action, not a link on the page — page verbs live
+    in the header's Actions menu (web-server-guide § The site).
     """
+    actions: list[Action] = []
+    if _subject(request).has('maintainer'):
+        actions.append(Action(label='Show drafts', kind='get', path='/topics/all'))
     return render(request, 'topics.html', {
         'groups': content.list_topic_groups(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('topics', None)],
+        'actions': actions,
     }, block='content')
 
 
@@ -490,13 +498,22 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
     text = content.read_topic(request.app[CONFIG_KEY].repo_root, name)
     if text is None:
         raise web.HTTPNotFound(text=f'no topic called {html.escape(name)}')
+    # The maintainer's verbs are Actions in the header, not controls on the page (web-server-guide
+    # § The site). Which of Write/Rewrite appears is the page's own status — read from the file,
+    # not the index, so a page written since the last update-tags is not offered a stale verb;
+    # claude-blog refuses a final page without --force, so offering "Write" on one would decline.
+    actions: list[Action] = []
+    if _subject(request).has('maintainer'):
+        actions.append(Action(label='Edit', kind='get', path=f'/edit/topics/{name}'))
+        if content.topic_status(text) == 'final':
+            actions.append(Action(label='Rewrite', kind='term', command=f'claude-blog {name} --force'))
+        else:
+            actions.append(Action(label='Write', kind='term', command=f'claude-blog {name}'))
     return render(request, 'topic.html', {
         'name': name,
-        # Read from the page itself rather than the index: the file is the fact, and a page
-        # written since the last `update-tags` would otherwise show a stale verb.
-        'status': content.topic_status(text),
         'body': content.render_markdown(text, route_base='/topics/'),
         'crumbs': [_HOME, ('topics', '/topics/'), (name, None)],
+        'actions': actions,
     }, block='content')
 
 

@@ -1,32 +1,10 @@
 {% extends "base.html" %}
 {% block title %}ς euler — {{ name }}{% endblock %}
 {% block content %}
+{# Just the article. The back-step is the header breadcrumb (`topics ›`), and the maintainer's
+   Edit / Write / Rewrite verbs are Actions in the header — page controls live there, not on the
+   page (web-server-guide § The site). #}
 <section class="panel">
-  <p class="meta"><a href="/topics/" hx-get="/topics/" hx-target="#content"
-     hx-swap="innerHTML" hx-push-url="true">← topics</a></p>
-  {# The maintainer's verbs for this page. Write and Rewrite type a real `claude-blog` into
-     the shell rather than calling it from here — the same move the git menu and the account
-     page's tool rows make, so there is one execution path and one audit trail, and the
-     command's own `requires()` is the boundary whatever this template shows. Which verb
-     appears is the page's status: `claude-blog` refuses a finished page without --force, so
-     offering "Write" on one would hand the maintainer a command that declines. #}
-  {% if subject and subject.has('maintainer') %}
-  <p class="meta topic-verbs">
-    {# Edit tweaks the prose in the browser; Write/Rewrite hand the whole page to claude-blog in
-       the terminal. Edit is an ordinary content-pane swap (it saves through the gate), so it is
-       an hx link, not a terminal command. #}
-    <a href="/edit/{{ name }}" hx-get="/edit/topics/{{ name }}" hx-target="#content"
-       hx-swap="innerHTML" hx-push-url="true">Edit</a>
-    {% if status == 'final' %}
-    <button type="button" data-term-cmd="claude-blog {{ name }} --force"
-            title="run `claude-blog {{ name }} --force` in your terminal">Rewrite</button>
-    {% else %}
-    <button type="button" data-term-cmd="claude-blog {{ name }}"
-            title="run `claude-blog {{ name }}` in your terminal">Write</button>
-    {% endif %}
-    <span class="pill pill-{{ status }}">{{ status }}</span>
-  </p>
-  {% endif %}
   <div class="doc-body">{{ body | safe }}</div>
 </section>
 {% endblock %}
