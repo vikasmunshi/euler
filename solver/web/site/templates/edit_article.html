@@ -14,22 +14,18 @@
     </ul>
     {% endif %}
   </div>
-  {# The buffer always shows what is (or would be) stored: a save echoes the
-     gate's canonical content back. Save lives in the Actions menu (and ⌘/Ctrl-S);
-     no in-form button. data-cm enhances this into CodeMirror on JS (site.js
-     lazy-loads it); with no JS the plain textarea still edits and submits. #}
-  {# `action_path` lets the article editor reuse this form; the solution editor leaves it unset
-     and keeps its problem-scoped route. #}
-  {% set post_to = action_path if action_path else '/edit/solutions/%04d/%s' % (number, filename) %}
+  {# Same editor as a solution file, saving to the article route. The tags, status and refs
+     comments are machine-owned: the gate rejects a save that changes them, so they are visible
+     here (the maintainer edits around them) but not editable through this page. #}
   <form class="editor-form"
-        hx-post="{{ post_to }}"
-        hx-target="#content" hx-swap="innerHTML"
-        method="post" action="{{ post_to }}">
+        hx-post="{{ action_path }}" hx-target="#content" hx-swap="innerHTML"
+        method="post" action="{{ action_path }}">
     <textarea class="editor-buffer" name="content" data-cm data-language="{{ language }}"
               spellcheck="false" autocomplete="off" autocapitalize="off">{{ text }}</textarea>
   </form>
   <p class="muted editor-hint">Save with <strong>Actions ▸ Save</strong> or
-     <kbd>⌘/Ctrl-S</kbd> — every save passes the validation gate (Python auto-fixed
-     &amp; flake8-checked, C compiled, JSON re-indented, HTML sanitised).</p>
+     <kbd>⌘/Ctrl-S</kbd>. The <code>tags</code>, <code>status</code> and <code>refs</code>
+     comments are maintained by <code>update-tags</code> — leave them as they are; a save that
+     edits them, or adds raw HTML, is refused.</p>
 </section>
 {% endblock %}

@@ -40,7 +40,7 @@ from solver.web.csp import csp_middleware
 from solver.web.site import content, gitstate
 from solver.web.site.config import SiteConfig
 from solver.web.site.render import GIT_KEY, SUBJECT_KEY, is_htmx, render
-from solver.web.site.validate import EDITABLE_SUFFIXES, validate
+from solver.web.site.validate import EDITABLE_SUFFIXES, validate, validate_article
 
 log = logging.getLogger('euler-content')
 
@@ -616,6 +616,68 @@ async def file_save(request: web.Request) -> web.StreamResponse:
                   block='content', fragment=True)
 
 
+def _article_target(request: web.Request) -> tuple[str, Path]:
+    """Resolve an ``/edit/topics/{name}`` route to its on-disk article, path-safely.
+
+    Reuses :func:`content.read_topic`'s segment rules (word-and-hyphen only, confined to the
+    tree) by resolving through the same helper: a name it refuses to read is one we refuse to
+    edit. The page must already exist — update-tags creates the skeleton, the editor edits it.
+    """
+    name = request.match_info['name']
+    if content.read_topic(request.app[CONFIG_KEY].repo_root, name) is None:
+        raise web.HTTPNotFound(text=f'no editable topic called {html.escape(name)}')
+    return name, request.app[CONFIG_KEY].repo_root / 'topics' / f'{name}.md'
+
+
+def _article_context(name: str, text: str, status: str = '', ok: bool = True,
+                     diagnostics: list[Any] | None = None) -> dict[str, Any]:
+    """The article-editor view context (the file editor's template, article-shaped path)."""
+    return {
+        'filename': name, 'text': text, 'language': 'markdown',
+        'action_path': f'/edit/topics/{name}',
+        'status': status, 'ok': ok, 'diagnostics': diagnostics or [],
+        'crumbs': [_HOME, ('topics', '/topics/'), (name, f'/topics/{name}'), ('edit', None)],
+        'actions': [Action(label='Save', kind='submit')],
+    }
+
+
+@requires('maintainer')
+async def article_editor(request: web.Request) -> web.StreamResponse:
+    """``GET /edit/topics/{name}`` — the Markdown editor for a topic article."""
+    name, target = _article_target(request)
+    text = target.read_text(encoding='utf-8', errors='replace')
+    return render(request, 'edit_article.html', _article_context(name, text), block='content')
+
+
+@requires('maintainer')
+async def article_save(request: web.Request) -> web.StreamResponse:
+    """``POST /edit/topics/{name}`` — gate against the on-disk original, write, editor block.
+
+    The gate (:func:`~solver.web.site.validate.validate_article`) keeps the tags/status/refs
+    comments that bind the page to the graph and refuses raw HTML in the prose; nothing is
+    written on a refusal.
+    """
+    name, target = _article_target(request)
+    original = target.read_text(encoding='utf-8', errors='replace')
+    submitted = str((await request.post()).get('content', ''))
+    result = validate_article(submitted, original)
+    if not result.ok:
+        return render(request, 'edit_article.html',
+                      _article_context(name, submitted, status=result.message, ok=False,
+                                       diagnostics=list(result.diagnostics)),
+                      block='content', fragment=True)
+    stored = result.content.decode('utf-8', errors='replace')
+    try:
+        target.write_bytes(result.content)
+    except OSError as exc:
+        return render(request, 'edit_article.html',
+                      _article_context(name, submitted, status=f'could not write {name}: {exc}',
+                                       ok=False), block='content', fragment=True)
+    return render(request, 'edit_article.html',
+                  _article_context(name, stored, status='saved', ok=True),
+                  block='content', fragment=True)
+
+
 @requires('maintainer')
 async def file_delete(request: web.Request) -> web.StreamResponse:
     """``DELETE /edit/solutions/{n}/{filename}`` — delete → the problem fragment.
@@ -708,6 +770,8 @@ def add_content_routes(app: web.Application) -> None:
         web.get('/topics/', topics_index),
         web.get('/topics/all', topics_all),         # before the catch-all, which would match it
         web.get(r'/topics/{name:.+}', topic_page),  # {name} may be a nested folder/page path
+        web.get(r'/edit/topics/{name:.+}', article_editor),
+        web.post(r'/edit/topics/{name:.+}', article_save),
         web.get(r'/about/{name}', about_page),
         # account
         web.get('/account', account),

@@ -12,6 +12,11 @@
      offering "Write" on one would hand the maintainer a command that declines. #}
   {% if subject and subject.has('maintainer') %}
   <p class="meta topic-verbs">
+    {# Edit tweaks the prose in the browser; Write/Rewrite hand the whole page to claude-blog in
+       the terminal. Edit is an ordinary content-pane swap (it saves through the gate), so it is
+       an hx link, not a terminal command. #}
+    <a href="/edit/{{ name }}" hx-get="/edit/topics/{{ name }}" hx-target="#content"
+       hx-swap="innerHTML" hx-push-url="true">Edit</a>
     {% if status == 'final' %}
     <button type="button" data-term-cmd="claude-blog {{ name }} --force"
             title="run `claude-blog {{ name }} --force` in your terminal">Rewrite</button>
