@@ -1,8 +1,95 @@
 <!-- tags: [prime-number, sieve-of-eratosthenes, trial-division, wheel-factorization, miller-rabin-primality-test] -->
-<!-- status: draft -->
-# Primes
+<!-- status: final -->
+# Generating and testing primes
 
-_TODO: write this page. Curated topic — draw the through-line across the tags below yourself._
+A [prime number](https://en.wikipedia.org/wiki/Prime_number) is a whole number
+greater than 1 whose only divisors are 1 and itself — the multiplicative atoms every
+other integer factors into. They are the single most recurrent object in Project
+Euler, and a prime-heavy problem almost always reduces to one of three questions:
+*give me every prime up to some bound*, *is this one number prime*, or *what are the
+prime factors of this number*. Each has its own right tool, and reaching for the
+wrong one is the usual reason a prime-heavy solution is slow.
+
+## The three questions, and their tools
+
+The tools sort cleanly by which question you are asking.
+
+**Enumerate every prime up to N — the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes).**
+Write down every number from 2 to `N`; walk the list, and each time you meet a number
+still standing, cross out all of its multiples. What survives is exactly the primes.
+Two observations make it fast: start crossing out from `p*p` (every smaller multiple
+of `p` already carries a smaller factor), and stop sieving once `p*p > N`. The whole
+pass runs in `O(N log log N)` — very nearly linear — so whenever a problem needs *all*
+the primes below a known ceiling, the sieve is almost always the answer. In
+`solutions/public/p0010/` the core is three lines of `bytearray` strided assignment:
+
+```python
+sieve = bytearray(b"\x01") * (max_num + 1)
+sieve[0] = sieve[1] = 0
+for i in range(2, int(max_num ** 0.5) + 1):
+    if sieve[i]:
+        sieve[i * i:: i] = bytearray(len(range(i * i, max_num + 1, i)))
+```
+
+The subtlety a sieve carries into Euler work is the *bound*. You often want "the first
+`n` primes" rather than "primes below `N`", and you must size the sieve before you
+know where the `n`-th prime lands. The
+[prime number theorem](https://en.wikipedia.org/wiki/Prime_number_theorem) supplies
+the estimate: the `n`-th prime is near `n·ln n`, so sieving `[1, n·ln n]` is enough —
+exactly the ceiling `solutions/public/p0007/` uses to reach the 10 001st prime. When
+even that range will not fit in memory, a *segmented* sieve processes the interval in
+cache-sized windows, and an *incremental* sieve — a generator keyed on each prime's
+next multiple — yields primes endlessly with no upper bound fixed in advance.
+
+**Factor or test a single number — [trial division](https://en.wikipedia.org/wiki/Trial_division).**
+When you have one number, not a range, sieving the whole space below it is wasteful.
+To factor `n`, divide by 2, 3, 4, … and peel off each divisor you find; to test
+primality, divide by candidates up to `√n` and call it prime if none divide it. The
+`√n` cutoff is the crux: a composite `n` must have a factor no larger than its square
+root, so nothing above `√n` can be its *smallest* factor. A second saving is to divide
+each factor out completely as you go — then every divisor you meet is automatically
+prime and needs no separate primality check. Problem 3 in `solutions/public/p0003/`
+does exactly this, recomputing the `√`-ceiling against the shrinking remainder so the
+loop ends early once only a large prime cofactor is left.
+
+**Skip the numbers that can't be prime — [wheel factorization](https://en.wikipedia.org/wiki/Wheel_factorization).**
+Trial division spends most of its time dividing by numbers that are themselves
+composite. Every prime past 2 is odd, so stepping by 2 halves the work; every prime
+past 3 is `≡ 1` or `5 (mod 6)`, so walking the pattern `6k ± 1` skips two-thirds. A
+*wheel* generalises this: fix a few small primes (2, 3, 5, …) and visit only the
+residues coprime to their product. It does not change the asymptotics — it shaves a
+constant factor off both trial division and the sieve — but on a factoriser's hot
+loop that constant is worth having.
+
+**Test a *large* single number — the [Miller–Rabin primality test](https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test).**
+Trial division to `√n` is fine up to perhaps `10^12`; past that its cost explodes.
+Miller–Rabin instead asks a witness question: write `n − 1 = 2^s · d` and check, for a
+chosen base `a`, whether the repeated squarings of `a^d (mod n)` betray `n` as
+composite. A single base can be fooled, but each independent base that passes
+multiplies your confidence — and for `n` below fixed thresholds a *specific small set
+of bases* makes the test **deterministic**, exactly correct with no probability left.
+Its cost is `O(k log³ n)` for `k` bases: effectively instant even for numbers with
+dozens of digits, which is why the higher-numbered primality problems reach for it
+rather than a sieve.
+
+## How to reason about which one
+
+The decision is almost mechanical:
+
+- Need **many** primes below a **known** bound? → sieve. Size it to the inputs
+  (`n·ln n` for "the `n`-th prime"), and build it *inside* `solve()`, not at module
+  level, so the benchmark counts its cost honestly.
+- Need to **factor** one number, or the numbers in a modest range? → trial division
+  with the `√n` cutoff and full division-out, sped up by a `6k ± 1` wheel.
+- Need a **yes/no** on one **large** number? → Miller–Rabin, with a deterministic base
+  set when the number fits the known thresholds.
+
+The classic mistake is to answer a range question one number at a time — calling a
+primality test in a loop where a single sieve would produce the whole set in one
+`O(N log log N)` pass — or to answer a single-number question with a sieve, building a
+table of millions of primes to check just one. Match the tool to the shape of the
+question and most prime problems become straightforward. The problems below all turn
+on that choice.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
