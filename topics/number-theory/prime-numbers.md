@@ -88,10 +88,84 @@ a small safety margin) is the estimate that tells you how far to reach; problem 
 `solutions/public/p0007/` sizes its sieve exactly this way. The same law tells you roughly how many
 primes, semiprimes, or smooth numbers live below a bound — the density argument behind problems like
 187 (counting semiprimes) and 304 (walking the primes just past $10^{16}$, whose spacing near
-$n \ln n$ makes a sieve hopeless and a per-candidate test essential). The finer question — *how far*
-$\pi(x)$ strays from its smooth approximation $\mathrm{Li}(x)$ — is exactly what the Riemann
-hypothesis governs, which is why an innocent-looking count of primes reaches all the way to the
-deepest open problem in the field.
+$n \ln n$ makes a sieve hopeless and a per-candidate test essential). A sharper count replaces
+$x/\ln x$ with the [logarithmic integral](https://en.wikipedia.org/wiki/Logarithmic_integral_function)
+$\mathrm{Li}(x) = \int_2^x \mathrm{d}t/\ln t$, which tracks $\pi(x)$ far more closely — and the
+question of *how closely* is where the shallow-looking business of counting primes plunges into the
+deepest water in mathematics.
+
+### From counting to the zeta function
+
+The bridge from the discrete, unruly primes to the smooth machinery of analysis is a single identity
+Euler wrote down in 1737. For a real (later complex) variable $s > 1$, the
+[Riemann zeta function](https://en.wikipedia.org/wiki/Riemann_zeta_function) is the sum over *all*
+integers
+
+$$\zeta(s) = \sum_{n=1}^{\infty} \frac{1}{n^s} = \prod_{p \text{ prime}} \frac{1}{1 - p^{-s}}.$$
+
+The right-hand side — the [Euler product](https://en.wikipedia.org/wiki/Euler_product) — is unique
+factorisation restated in analytic form: expand each factor as a geometric series
+$1 + p^{-s} + p^{-2s} + \cdots$, multiply them out, and every term $n^{-s}$ appears *exactly once*,
+because every $n$ has exactly one prime factorisation. That one equals sign carries all the arithmetic
+of the primes into a single analytic object. Set $s = 1$ and the left side is the divergent harmonic
+series, so the product over primes must diverge too — which forces infinitely many primes, and even
+that $\sum 1/p$ diverges: Euler's analytic reproof of Euclid, and the first time the primes were
+studied as the raw material of a continuous function rather than one at a time.
+
+### The Riemann hypothesis
+
+Riemann's 1859 memoir took the decisive step: he extended $\zeta(s)$ from the half-plane
+$\Re(s) > 1$, where the sum converges, to a single [analytic function](https://en.wikipedia.org/wiki/Analytic_continuation)
+on the whole complex plane (bar a simple pole at $s = 1$), and discovered that the distribution of
+the primes is encoded in the *zeros* of that continuation. The zeta function vanishes at the negative
+even integers $-2, -4, -6, \dots$ — the "trivial" zeros — and at infinitely many complex points, all
+lying in the **critical strip** $0 < \Re(s) < 1$. The
+[Riemann hypothesis](https://en.wikipedia.org/wiki/Riemann_hypothesis) is the assertion, still
+unproven after more than a century and one of the [Millennium Prize Problems](https://en.wikipedia.org/wiki/Millennium_Prize_Problems),
+that every one of these non-trivial zeros lies exactly on the **critical line** $\Re(s) = \tfrac12$.
+
+Why should an engineer counting primes care where a complex function happens to vanish? Because of
+Riemann's [explicit formula](https://en.wikipedia.org/wiki/Explicit_formulae_for_L-functions), which
+writes $\pi(x)$ — the jagged prime staircase — as the smooth term $\mathrm{Li}(x)$ *minus a sum of
+correction waves, one per zero $\rho$ of the zeta function*:
+
+$$\pi(x) \approx \mathrm{Li}(x) - \sum_{\rho} \mathrm{Li}(x^{\rho}).$$
+
+Each zero $\rho = \beta + i\gamma$ contributes an oscillation whose *amplitude* is governed by its
+real part $\beta$ and whose *frequency* is its imaginary part $\gamma$ — the zeros are literally the
+harmonics of the primes, which is why the subject is often called the
+"[music of the primes](https://en.wikipedia.org/wiki/Music_of_the_Primes)". The Riemann hypothesis
+says every one of these waves has the *same* real part $\tfrac12$, so none of them grows faster than
+$\sqrt{x}$, and the error in the prime number theorem is as small as it could possibly be:
+
+$$\bigl|\pi(x) - \mathrm{Li}(x)\bigr| = O\!\left(\sqrt{x}\,\ln x\right).$$
+
+A single off-line zero would let one correction wave swell out of proportion and the primes would
+cluster more erratically than anyone has ever observed. So the hypothesis is not idle: it is the
+precise statement that the primes are distributed *as regularly as possible*, and a vast body of
+number theory — sharp bounds on prime gaps, the reliability of fast primality tests, the running time
+of factorisation algorithms — is proved conditionally on it, waiting for a proof. It also warns
+against trusting small data: $\mathrm{Li}(x)$ overshoots $\pi(x)$ for every $x$ anyone has ever
+computed, yet [Littlewood proved](https://en.wikipedia.org/wiki/Skewes%27s_number) the difference
+changes sign infinitely often, the first crossing hiding somewhere near the almost unimaginable
+Skewes bound — a standing reminder that an asymptotic law is not a promise about the numbers you can
+reach.
+
+### Order inside the randomness
+
+The tension between local chaos and global law runs right through the open problems. The gaps between
+consecutive primes average $\ln p$ by the prime number theorem, yet
+[Bertrand's postulate](https://en.wikipedia.org/wiki/Bertrand%27s_postulate) guarantees one always
+falls before $2p$, prime "deserts" of arbitrary length exist (the run $n! + 2, \dots, n! + n$ is all
+composite), and the [twin prime conjecture](https://en.wikipedia.org/wiki/Twin_prime) — that $p$ and
+$p + 2$ are both prime infinitely often — remains open even though Zhang's 2013 breakthrough proved
+*some* bounded gap recurs forever. [Goldbach's conjecture](https://en.wikipedia.org/wiki/Goldbach%27s_conjecture)
+(every even number $> 2$ is a sum of two primes) is another century-old statement about additive
+structure that the multiplicative theory has never cracked. Project Euler mines exactly this seam:
+problem 46 tests Goldbach's *other* conjecture, problem 196 hunts twin- and triplet-prime
+neighbourhoods, and problem 50 chases the longest run of consecutive primes that sums to a prime —
+each a small window onto the same theme, that the primes are random enough to be endlessly surprising
+and structured enough that the surprises obey laws.
 
 ## Generating and testing primes
 
