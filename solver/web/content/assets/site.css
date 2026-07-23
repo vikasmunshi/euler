@@ -715,6 +715,10 @@ tr.verdict-correct td:nth-child(4) { color: var(--accent); font-weight: 600; }
    the Copy button wears the ok green, not the neutral border. */
 .btn-ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--border)); }
 .btn-ok:hover { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, transparent); }
+/* A .btn sized to the account panel's action column: the same width and type scale as
+   the state-action buttons, so Copy and Save secret line up with Create identity and
+   the tool rows in one right-hand column. */
+.btn-col { min-width: 9rem; font-size: 0.78rem; }
 
 /* ── The auth dialogue (right pane, signed out) ──────────────────────────── */
 /* Same surface, border and radius as the terminal it stands in for: the pane
@@ -1007,10 +1011,11 @@ dl.account dd { margin: 0; min-width: 0; }
   background: var(--bg); border: 1px solid var(--border); border-radius: 7px;
   font-size: 0.78rem; overflow-x: auto; white-space: nowrap;
 }
-/* The key scrolls; the Copy button beside it must not scroll away with it. */
+/* The key scrolls; the Copy button beside it must not scroll away with it. The button
+   is sized to the action column (btn-col) and the key takes the rest (flex:1, min 0). */
 .pubkey-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
 .pubkey-row .pubkey { flex: 1; min-width: 0; }
-.pubkey-row .btn { flex: none; font-size: 0.78rem; padding: 0.25rem 0.6rem; }
+.pubkey-row .btn { flex: none; font-size: 0.78rem; padding: 0.35rem 0.9rem; min-width: 9rem; }
 .secret-list { list-style: none; padding: 0; margin: 0 0 0.6rem; display: flex; flex-direction: column; gap: 0.3rem; }
 .secret-list li {
   display: flex; align-items: center; justify-content: space-between; gap: 0.6rem;
@@ -1021,8 +1026,10 @@ dl.account dd { margin: 0; min-width: 0; }
 .btn-danger { color: var(--danger); border-color: transparent; background: none; font-size: 0.85rem; }
 .btn-danger:hover { border-color: var(--danger); }
 .vault-form { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+/* min-width 6rem (was 8): with the Save button now sized to the action column, the two
+   secret fields shrink to keep the button on the same line rather than wrapping it. */
 .vault-form input {
-  flex: 1; min-width: 8rem;
+  flex: 1; min-width: 6rem;
   font: inherit; color: var(--text);
   background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
   padding: 0.4rem 0.6rem;
