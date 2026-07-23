@@ -1,8 +1,90 @@
 <!-- tags: [dynamic-programming] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Dynamic programming
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Dynamic_programming>._
+[Dynamic programming](https://en.wikipedia.org/wiki/Dynamic_programming) (DP) solves a
+problem by solving its smaller subproblems once, storing each answer, and building the
+larger answers out of the stored ones. It is the tool for a specific shape of problem —
+one where a brute-force search would recompute the same subproblem an exponential number
+of times — and that shape recurs constantly in Project Euler: counting the ways to do
+something, finding a best path, filling a grid, or evaluating a game position.
+
+## When it applies — two properties
+
+A problem yields to DP when it has both of these:
+
+- **Overlapping subproblems** — the naive recursion asks the same smaller question over
+  and over. The number of *distinct* questions is small (polynomial), even though the
+  recursion tree that asks them is huge. DP pays for each distinct question once.
+- **Optimal substructure** — the answer to a problem is built from the answers to its
+  subproblems by a fixed rule. "The best path to this cell is this cell's value plus the
+  better of the two paths into it" is optimal substructure; so is "the number of ways to
+  make *n* is the sum of the ways that use each coin."
+
+If a subproblem's answer can change depending on *how* you reached it, the substructure
+is not there and DP does not apply — that is the usual reason an attempted DP gives wrong
+answers.
+
+## The two forms
+
+The same recurrence can be filled two ways.
+
+**Top-down (memoization).** Write the natural recursion, then cache its results keyed on
+the arguments. The first call for a given state computes it; every later call reads the
+cache. This is the smallest change to a brute-force solution — often a single decorator —
+and it only ever computes the states the problem actually reaches.
+
+**Bottom-up (tabulation).** Order the states so that every state's dependencies come
+before it, then fill a table in that order with a loop. No recursion, no call-stack
+limit, and the table's memory is explicit and easy to shrink.
+
+Coin Sums (`solutions/public/p0031/`) is the recurrence at its cleanest — count the
+unordered ways to make an amount from a set of coins, bottom-up:
+
+```python
+result = [1] + [0] * target_amount
+for coin in coins:
+    for i in range(coin, target_amount + 1):
+        result[i] += result[i - coin]
+return str(result[-1])
+```
+
+`result[i]` is the number of ways to make amount `i`. The two loops encode the whole
+idea: putting `coins` on the outside and sweeping amounts upward counts *combinations*
+rather than permutations (each coin's contribution is folded in once), and the upward
+sweep is what lets a coin be reused any number of times. It runs in
+`O(coins · amount)` time and `O(amount)` space — a single row, reused.
+
+## How to reason about it
+
+The work is almost entirely in **choosing the state**: the smallest set of variables
+that fully describes a subproblem. Get the state right and the recurrence and the loop
+order usually fall out; get it wrong — omit a variable the answer actually depends on —
+and you have silently broken the optimal-substructure property. Once the state is fixed:
+
+- **Evaluation order.** Bottom-up needs the dependencies of each state filled before it.
+  A grid of right/down moves fills by rows or by anti-diagonals; a path-in-a-triangle
+  fills from the bottom row up, so each cell already knows the best path below it
+  (`solutions/public/p0018/`, and the 100-row `solutions/public/p0067/` that would defeat
+  brute force). When the order is awkward to state explicitly, top-down memoization
+  sidesteps it — the recursion visits dependencies first by construction.
+- **Shrink the table.** If each state depends only on the previous row or the last few
+  states, you do not need the whole table — keep a rolling row (the coin loop above keeps
+  exactly one), or overwrite the grid in place, as the right/down min-path sum does
+  (`solutions/public/p0081/`). When the moves are richer the state changes shape rather
+  than just shrinking: allowing vertical detours too (`solutions/public/p0082/`) turns
+  each column into its own one-dimensional minimisation, a reminder that the state must
+  match the moves the problem actually allows.
+- **Build it inside `solve()`.** The table, cache, or memo dict must be constructed on
+  each call, sized to the inputs — not kept warm at module level. With `--runs=N` the
+  harness times repeated `solve()` calls, and a cache that survives between runs makes
+  every run after the first look free, understating the real cost.
+
+The tell that a problem wants DP is a brute force that is correct but times out because
+it re-explores the same partial states — a path halfway down a grid, an amount partway
+made, a game position seen before. When you notice that, name the state, decide top-down
+or bottom-up, and the exponential search collapses to a table. The problems below are all
+that collapse in one guise or another.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
