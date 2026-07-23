@@ -1,8 +1,161 @@
 <!-- tags: [coprime-integers, cuban-prime, prime-counting-function, prime-factor, prime-factorization, prime-number, prime-number-theorem, prime-power, prime-proof-number, semiprime, truncatable-prime, generation-of-primes, prime-factorization-application, primesieve, sieve-of-sundaram, sieve-of-eratosthenes, linear-sieve, sieve-theory, divisor-sum-sieve, min-25-sieve] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Prime Numbers
 
-_TODO: write this page. Curated topic — draw the through-line across the tags below yourself._
+A [prime number](https://en.wikipedia.org/wiki/Prime_number) is an integer greater than $1$ whose
+only positive divisors are $1$ and itself. That one-line definition hides the deepest object in
+number theory: the primes are the *multiplicative atoms* from which every other integer is built,
+their individual behaviour is erratic while their collective behaviour is astonishingly regular, and
+the gap between how easily you can *multiply* them and how hard it is to *un-multiply* a number back
+into them is the foundation the modern digital economy is quietly standing on. This page is about the
+mathematics of the primes themselves — what is true of them, how that truth was won, and where it is
+put to work. For the *algorithms* that generate, test, and factor them in code, see the companion
+page on [generating and testing primes](/topics/number-theory/primes); here the interest is the
+mathematics those algorithms serve.
+
+## A short history
+
+The primes are one of the oldest studied objects in mathematics, and a handful of results mark the
+road from antiquity to the present:
+
+- **Euclid, c. 300 BC.** *Elements* Book IX contains the first two theorems that still anchor the
+  subject: that every integer factors into primes, and — Proposition 20 — that
+  [there are infinitely many primes](https://en.wikipedia.org/wiki/Euclid%27s_theorem). His proof is
+  the model of elegance: if $p_1, \dots, p_k$ were all of them, then $p_1 p_2 \cdots p_k + 1$ is
+  divisible by none of them, so either it is a new prime or has a prime factor outside the list —
+  a contradiction. A generation later [Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes)
+  gave the sieve that still bears his name.
+- **Fermat and Euler, 17th–18th c.** [Fermat's little theorem](https://en.wikipedia.org/wiki/Fermat%27s_little_theorem)
+  ($a^{p-1} \equiv 1 \pmod p$ for a prime $p \nmid a$) exposed the arithmetic *structure* of a prime
+  modulus. Euler proved it, generalised it through his
+  [totient function](https://en.wikipedia.org/wiki/Euler%27s_totient_function) $\varphi(n)$, and
+  recast Euclid's infinitude as an analytic fact — the sum $\sum 1/p$ over primes *diverges* — the
+  first hint that the primes could be studied with the tools of continuous mathematics.
+- **Gauss, Legendre, Riemann, 19th c.** As teenagers, Gauss and Legendre independently conjectured
+  the [prime number theorem](https://en.wikipedia.org/wiki/Prime_number_theorem): the primes thin out
+  like $1/\ln x$. Gauss's *Disquisitiones Arithmeticae* (1801) also gave the first rigorous proof of
+  unique factorisation. In 1859 [Riemann](https://en.wikipedia.org/wiki/Riemann_hypothesis) tied the
+  fine distribution of the primes to the complex zeros of the zeta function — the
+  [Riemann hypothesis](https://en.wikipedia.org/wiki/Riemann_hypothesis), still unproven, is a
+  statement about how evenly the primes are spread.
+- **1896 and after.** Hadamard and de la Vallée Poussin independently *proved* the prime number
+  theorem. The 20th century then made the primes *computational*: fast primality tests, the 1977
+  arrival of [RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem), and in 2002 the
+  [AKS test](https://en.wikipedia.org/wiki/AKS_primality_test) — the first deterministic,
+  polynomial-time proof of primality. Much remains open:
+  [Goldbach's conjecture](https://en.wikipedia.org/wiki/Goldbach%27s_conjecture), the
+  [twin prime conjecture](https://en.wikipedia.org/wiki/Twin_prime), and the Riemann hypothesis are
+  all still unresolved.
+
+## The one structural fact: unique factorisation
+
+Everything else rests on the [fundamental theorem of arithmetic](https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic):
+every integer $n > 1$ is a product of primes in exactly one way, up to order —
+
+$$n = p_1^{a_1} p_2^{a_2} \cdots p_k^{a_k}.$$
+
+This is why a prime problem is so often *really* a factorisation problem. The exponent vector
+$(a_1, \dots, a_k)$ is the true "shape" of a number, and almost every multiplicative quantity is a
+simple function of it: the number of divisors is $\prod (a_i + 1)$, their sum is a product of
+geometric series, Euler's totient is $n \prod (1 - 1/p_i)$, and two numbers are
+[coprime](https://en.wikipedia.org/wiki/Coprime_integers) exactly when their factorisations share no
+prime. Whole families of Euler problems are built on reading a number through this lens — counting
+divisors (problem 12), summing totients, working with [semiprimes](https://en.wikipedia.org/wiki/Semiprime)
+$n = pq$ (problem 187), [prime powers](https://en.wikipedia.org/wiki/Prime_power) $p^k$ (problem 87),
+or the largest prime factor of a number (problem 3, public in `solutions/public/p0003/`). The
+uniqueness is what lets you compute a global answer prime-by-prime and multiply the pieces together —
+the same decompose-and-recombine move that the [Chinese Remainder Theorem](https://en.wikipedia.org/wiki/Chinese_remainder_theorem)
+performs on the modulus side.
+
+Unique factorisation also explains the exotic *shapes* the problems name. A
+[truncatable prime](https://en.wikipedia.org/wiki/Truncatable_prime) (problem 37) stays prime as you
+strip digits; a [cuban prime](https://en.wikipedia.org/wiki/Cuban_prime) (problem 131) is a prime
+difference of consecutive cubes; a [prime-proof number](https://projecteuler.net/problem=200)
+(problem 200) can never be *made* prime by changing one digit. Each is a constraint layered on top of
+primality, and each is tractable precisely because primality is the atom underneath.
+
+## How the primes are distributed
+
+Individually the primes look random — the gaps between them are unpredictable, and no simple formula
+generates them — yet *in aggregate* they obey the prime number theorem with great precision. Writing
+$\pi(x)$ for the [prime-counting function](https://en.wikipedia.org/wiki/Prime-counting_function), the
+number of primes $\le x$,
+
+$$\pi(x) \sim \frac{x}{\ln x}, \qquad \text{equivalently the } n\text{-th prime } p_n \sim n \ln n.$$
+
+This asymptotic is not a curiosity — it is a practical sizing tool. When a problem asks for "the
+$n$-th prime" you must allocate a sieve *before* you know where that prime lands, and $n \ln n$ (with
+a small safety margin) is the estimate that tells you how far to reach; problem 7 in
+`solutions/public/p0007/` sizes its sieve exactly this way. The same law tells you roughly how many
+primes, semiprimes, or smooth numbers live below a bound — the density argument behind problems like
+187 (counting semiprimes) and 304 (walking the primes just past $10^{16}$, whose spacing near
+$n \ln n$ makes a sieve hopeless and a per-candidate test essential). The finer question — *how far*
+$\pi(x)$ strays from its smooth approximation $\mathrm{Li}(x)$ — is exactly what the Riemann
+hypothesis governs, which is why an innocent-looking count of primes reaches all the way to the
+deepest open problem in the field.
+
+## The asymmetry that pays the modern bills
+
+Here is the fact the applications turn on: **multiplying primes is easy, and factoring their product
+is hard.** Given two large primes you can multiply them in microseconds, but given only the product —
+a [semiprime](https://en.wikipedia.org/wiki/Semiprime) $n = pq$ — recovering $p$ and $q$ is, as far as
+anyone knows, infeasible once the primes are a few hundred digits long. No polynomial-time
+[integer-factorisation](https://en.wikipedia.org/wiki/Integer_factorization) algorithm is known
+(on classical hardware), yet *checking* primality is cheap. That gap between an easy forward operation
+and an intractable inverse is a **one-way function**, and it is the engine of modern public-key
+cryptography:
+
+- **[RSA](https://en.wikipedia.org/wiki/RSA_cryptosystem).** A public key is a semiprime $n = pq$
+  built from two secret large primes. Encryption and decryption are modular exponentiations whose
+  correctness is guaranteed by Fermat's and Euler's theorems — you work in the exponent modulo
+  $\varphi(n) = (p-1)(q-1)$ — and the scheme is secure precisely because an attacker who cannot factor
+  $n$ cannot recover $\varphi(n)$. Generating the keys means *manufacturing* large primes, which is
+  where fast probabilistic primality tests earn their keep.
+- **[Diffie–Hellman](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange) and the
+  [discrete logarithm](https://en.wikipedia.org/wiki/Discrete_logarithm).** Arithmetic modulo a large
+  prime $p$ forms a cyclic group; exponentiating a generator is easy but inverting it (the discrete
+  log) is hard, giving a second one-way function that underlies key exchange and signatures. The same
+  idea over the points of an [elliptic curve](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography)
+  gives equivalent security with far smaller keys.
+
+The reach of the mathematics goes well past cryptography, because a prime modulus has the cleanest
+possible arithmetic — the integers modulo $p$ form a [finite field](https://en.wikipedia.org/wiki/Finite_field),
+where every non-zero element is invertible:
+
+- **Hashing.** [Hash tables](https://en.wikipedia.org/wiki/Hash_table) size their bucket arrays to a
+  prime and reduce keys modulo it, because a prime shares no factor with the strides that real-world
+  keys tend to arrive on, spreading them evenly instead of piling them into a few buckets. Polynomial
+  "rolling" hashes evaluate a string as a polynomial modulo a large prime for the same reason.
+- **Pseudo-random numbers.** The classic [linear congruential generator](https://en.wikipedia.org/wiki/Linear_congruential_generator)
+  MINSTD uses the Mersenne prime $2^{31} - 1$ as its modulus to attain full period, and the
+  [Mersenne Twister](https://en.wikipedia.org/wiki/Mersenne_Twister) — the default generator in
+  Python, and in problem 213's kind of stochastic simulation — takes its name and its period
+  $2^{19937} - 1$ from a Mersenne prime.
+- **Error correction and signal processing.** [Reed–Solomon codes](https://en.wikipedia.org/wiki/Reed%E2%80%93Solomon_error_correction)
+  behind QR codes, CDs, and deep-space links do their arithmetic in a finite field; prime-length
+  [fast Fourier transforms](https://en.wikipedia.org/wiki/Rader%27s_FFT_algorithm) exploit the
+  multiplicative group of $\mathbb{Z}/p\mathbb{Z}$ to reindex a transform.
+
+## How to reason about it
+
+The through-line across the problems below is that a prime is never *just* a prime — it is the atom
+that makes some larger quantity computable:
+
+- **See a multiplicative quantity** — a divisor count, a totient, a coprimality condition, a "product
+  of two primes" — and reach for the factorisation. The exponent vector is the object you actually
+  manipulate; the answer is a product over the primes dividing $n$.
+- **Need a bound or a density** — how many primes below $N$, how large the $n$-th prime, how many
+  semiprimes in a range — and the prime number theorem ($\pi(x) \sim x/\ln x$, $p_n \sim n \ln n$) is
+  your estimate. Use it to *size* a sieve, not to replace an exact count.
+- **See a one-way structure** — a public key, a semiprime to be split, a discrete log — and recognise
+  that its security *is* the hardness of a prime problem. The Euler problems that touch cryptography
+  (RSA-flavoured factorisation, modular inverses) are miniatures of the same asymmetry.
+
+Match the mathematics to the shape of the question and the erratic surface of the primes gives way to
+a small set of reliable laws — the same laws that, four centuries after Fermat, keep the world's
+secrets. Which specific tool computes the primes you need is the subject of the companion page on
+[generating and testing primes](/topics/number-theory/primes); the problems below draw on the
+mathematics laid out here.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
