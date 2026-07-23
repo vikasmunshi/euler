@@ -404,7 +404,7 @@ def update_docs(ctx: Context, check: bool = False) -> int:
         if stale:
             console.print('[error]docs out of date[/error] (run [accent]update-docs[/accent]):')
             for entry in stale:
-                console.print(f'  [warning]{entry}[/warning]')
+                console.print(f'  [warning]•[/warning] {entry}')
         else:
             console.print('[success]docs are up to date[/success]')
         return ExitCodes.EXIT_ERROR if stale else ExitCodes.EXIT_OK

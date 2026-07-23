@@ -236,13 +236,17 @@ def update_models(check: bool = False) -> int:
     rate_stale = rate is not None and abs(rate - config.ecb_usd_rate) > 5e-5
 
     if not models_stale and not rate_stale:
-        console.print('[muted]models and USD→EUR rate already up to date[/muted]')
+        if check:
+            console.print('[success]models and USD→EUR rate are up to date[/success]')
+        else:
+            console.print('[muted]models and USD→EUR rate already up to date[/muted]')
         return ExitCodes.EXIT_OK
     if check:
+        console.print('[error]models out of date[/error] (run [accent]update-models[/accent]):')
         if models_stale:
-            console.print('[error]models out of date[/error] (run [accent]update-models[/accent])')
+            console.print('  [warning]•[/warning] model pricing')
         if rate_stale:
-            console.print(f'[error]USD→EUR rate out of date[/error] '
+            console.print(f'  [warning]•[/warning] USD→EUR rate '
                           f'([accent]{config.ecb_usd_rate} → {rate}[/accent])')
         return ExitCodes.EXIT_ERROR
 

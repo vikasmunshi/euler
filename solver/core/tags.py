@@ -654,13 +654,15 @@ def update_tags(check: bool = False) -> int:
         issues = _validate(central, ptags)
         issues += _regen_articles(central, write=False)
         if _load_index() != _build_index(central):
-            issues.append(f'{config.topics_index_file.name} is out of date (run update-tags)')
+            issues.append(f'{config.topics_index_file.name} is out of date')
         if missing:
-            issues.append(f'{len(missing)} problem(s) have no {config.tags_filename} (run update-tags)')
-        for msg in issues:
-            console.print(f'  [error]•[/error] {msg}')
-        console.print(f'[{"error" if issues else "accent"}]update-tags --check: '
-                      f'{len(issues) or "no"} issue(s)[/]')
+            issues.append(f'{len(missing)} problem(s) have no {config.tags_filename}')
+        if issues:
+            console.print('[error]tags out of date[/error] (run [accent]update-tags[/accent]):')
+            for msg in issues:
+                console.print(f'  [warning]•[/warning] {msg}')
+        else:
+            console.print('[success]tags are up to date[/success]')
         return ExitCodes.EXIT_ERROR if issues else ExitCodes.EXIT_OK
 
     diff_changes = _maintainer_diff(central, ptags)
