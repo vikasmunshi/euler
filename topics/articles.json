@@ -2474,7 +2474,7 @@
     {
       "path": "takeaway/algorithm-beats-language",
       "title": "Algorithm beats language",
-      "status": "draft",
+      "status": "final",
       "tags": ["algorithm-beats-language"],
       "refs": ["p0010", "p0067", "p0073", "p0075", "p0076", "p0078", "p0083", "p0108", "p0112", "p0129", "p0146", "p0150", "p0174", "p0191", "p0214", "p0345", "p0429", "p0461", "p0686", "p0788", "p0816", "p0834", "p0934"]
     },
