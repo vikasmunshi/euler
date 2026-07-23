@@ -50,8 +50,9 @@
     externalize(document);
     // A swapped-in pane may carry terminal controls of its own (the start page's
     // Terminal card): they arrive with the server's static markup and know nothing
-    // of the live socket, so paint them from the state we hold.
+    // of the live socket / minimize state, so paint them from the state we hold.
     paintTerminalControls();
+    paintWsMinimized();
   });
 
   // ── the pane's back arrow (web-server-guide § The site) ─────────────────────────────────
@@ -224,6 +225,41 @@
     var button = ev.target.closest && ev.target.closest('[data-term-toggle]');
     if (!button) { return; }
     postToTerminal({ euler: termConnected ? 'disconnect' : 'connect' });
+    var menu = button.closest('details');
+    if (menu) { menu.open = false; }
+  });
+
+  // ── minimize the terminal to the footer (F1) ────────────────────────────────
+  // Layout only: a persisted flag collapses the right pane (body.ws-minimized in the
+  // CSS) so #content spans the full width, with a restore strip in the footer. The
+  // socket is never touched — Connect/Disconnect stays its own control. Any
+  // [data-term-minimize] toggles it (the pane handle, the footer strip, the Home
+  // tile); the Home tile also carries a [data-term-min-label] painted Restore/Minimize
+  // from the one flag, so every control agrees.
+  var WS_MIN_KEY = 'euler:ws-minimized';
+
+  function wsMinimized() {
+    try { return localStorage.getItem(WS_MIN_KEY) === '1'; } catch (e) { return false; }
+  }
+  function setWsMinimized(on) {
+    try { localStorage.setItem(WS_MIN_KEY, on ? '1' : '0'); } catch (e) { /* private mode */ }
+  }
+  function paintWsMinimized() {
+    // Only where there is a terminal to minimize — the signed-out shell holds a sign-in
+    // box in the right pane, not a session, so a stale flag never collapses it.
+    var min = !!document.getElementById('terminal') && wsMinimized();
+    document.body.classList.toggle('ws-minimized', min);
+    document.querySelectorAll('[data-term-min-label]').forEach(function (label) {
+      label.textContent = min ? 'Restore' : 'Minimize';
+    });
+  }
+  document.addEventListener('DOMContentLoaded', paintWsMinimized);
+
+  document.addEventListener('click', function (ev) {
+    var button = ev.target.closest && ev.target.closest('[data-term-minimize]');
+    if (!button || !document.getElementById('terminal')) { return; }
+    setWsMinimized(!wsMinimized());
+    paintWsMinimized();
     var menu = button.closest('details');
     if (menu) { menu.open = false; }
   });

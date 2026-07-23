@@ -63,6 +63,14 @@
     </main>
     <aside id="ws" class="pane pane-ws" aria-label="{% block ws_label %}solver terminal{% endblock %}">
       {% block ws %}
+      {# Minimize is layout only (site.js toggles body.ws-minimized): it collapses this
+         pane so #content spans full width and drops a restore strip into the footer —
+         the terminal session is never touched. In the default ws block, so the
+         signed-out auth pages (which override it) get no minimize control. #}
+      <button type="button" class="ws-min" data-term-minimize
+              aria-label="minimize terminal" title="minimize terminal">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 19h12v2H6z"/></svg>
+      </button>
       <iframe id="terminal" class="terminal-frame" src="/terminal"
               title="solver terminal"></iframe>
       {% endblock %}
@@ -101,6 +109,14 @@
        hx-swap="innerHTML" hx-push-url="true">acknowledgements</a>
     {% else %}
     <span class="is-locked">acknowledgements</span>
+    {% endif %}
+    {% if subject %}
+    {# Shown only while the terminal is minimized (site.js toggles body.ws-minimized on
+       the CSS): the way back to the shell that now sits collapsed. margin-left:auto in
+       the CSS parks it at the right of the footer. #}
+    <button type="button" class="ws-restore" data-term-minimize>
+      <span aria-hidden="true">&#8249;</span>&nbsp;solver&nbsp;terminal&nbsp;&mdash;&nbsp;click&nbsp;to&nbsp;restore
+    </button>
     {% endif %}
   </footer>
   {% block scripts %}{% endblock %}
