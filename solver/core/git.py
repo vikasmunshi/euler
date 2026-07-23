@@ -393,6 +393,8 @@ def git_publish(*targets: Literal['keys', 'scripts', 'solutions', 'solver'],
         result = run_cmdline(f'{config.scripts.publish} --dry-run {" ".join(targets)}')
     else:
         result = run_cmdline(f'{config.scripts.publish} {" ".join(targets)}')
+    if result == 0:
+        osc.git_changed()
     return result
 
 
@@ -741,7 +743,7 @@ def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *,
     # just refuses with "the base branch policy prohibits the merge".
     result: int = run_cmdline(f'gh pr merge {number} --rebase --admin')
     if result == 0:
-        osc.git_changed()  # master moved: the chip's ahead/behind counts changed
+        return git_sync()
     return result
 
 

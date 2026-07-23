@@ -18,12 +18,12 @@ from unittest.mock import MagicMock
 
 from solver.auth import Subject
 from solver.config import ExitCodes, config
-from solver.shell.command import registry
 from solver.core import git
+from solver.shell.command import registry
 from solver.utils.loader import load_commands
 from tests import silence
 
-silence()   # the command tests drive console error/progress paths on purpose
+silence()  # the command tests drive console error/progress paths on purpose
 
 
 def _subject(profile: str) -> Subject:
@@ -62,8 +62,8 @@ class _GitCommandCase(unittest.TestCase):
 
     def setUp(self) -> None:
         self.cmdlines: list[str] = []
-        self.rcs: list[int] = []                    # queued rcs; default 0
-        self.prs: list[str] = []                    # branches a PR was opened for
+        self.rcs: list[int] = []  # queued rcs; default 0
+        self.prs: list[str] = []  # branches a PR was opened for
         self.pr_rc: int = 0
 
         def fake_run_cmdline(cmdline: str) -> int:
@@ -79,7 +79,7 @@ class _GitCommandCase(unittest.TestCase):
         self._saved_pr = git._ensure_pull_request
         self._saved_subject = config.subject
         self._saved_emit = git.osc.emit
-        git.run_cmdline = fake_run_cmdline      # type: ignore[assignment]
+        git.run_cmdline = fake_run_cmdline  # type: ignore[assignment]
         git._current_branch = lambda: self.branch  # type: ignore[assignment]
         # git-push opens a PR, which reaches the GitHub API through `gh` — recorded here
         # like run_cmdline, so no test can touch a real remote (module docstring).
@@ -87,13 +87,13 @@ class _GitCommandCase(unittest.TestCase):
         # The subject is web-channel, so the commands' osc.git_changed() nudges would
         # write raw OSC 5379 escape sequences to the test's stdout. This suite is not
         # the OSC wire's test (that is test_web_channel) — swallow the emit.
-        git.osc.emit = lambda *a, **k: None     # type: ignore[assignment]
+        git.osc.emit = lambda *a, **k: None  # type: ignore[assignment]
 
     def tearDown(self) -> None:
-        git.run_cmdline = self._saved_run       # type: ignore[assignment]
+        git.run_cmdline = self._saved_run  # type: ignore[assignment]
         git._current_branch = self._saved_branch  # type: ignore[assignment]
         git._ensure_pull_request = self._saved_pr  # type: ignore[assignment]
-        git.osc.emit = self._saved_emit         # type: ignore[assignment]
+        git.osc.emit = self._saved_emit  # type: ignore[assignment]
         config.subject = self._saved_subject
 
     def as_profile(self, profile: str) -> None:
@@ -122,7 +122,7 @@ class GitPushGuardTest(_GitCommandCase):
         self.as_profile('contributor')
         self.rcs = [1]
         self.assertNotEqual(git.git_push(), 0)
-        self.assertEqual(self.prs, [])              # nothing to review — the branch never landed
+        self.assertEqual(self.prs, [])  # nothing to review — the branch never landed
 
     def test_a_failed_pr_fails_the_command(self) -> None:
         # The push succeeded, but git-push promises a PR: reporting success would leave
@@ -135,14 +135,14 @@ class GitPushGuardTest(_GitCommandCase):
         self.branch = 'master'
         self.as_profile('contributor')
         self.assertEqual(git.git_push(), ExitCodes.EXIT_ERROR)
-        self.assertEqual(self.cmdlines, [])         # refused before any git ran
+        self.assertEqual(self.cmdlines, [])  # refused before any git ran
 
     def test_admin_may_push_master_but_never_forced(self) -> None:
         self.branch = 'master'
         self.as_profile('admin')
         self.assertEqual(git.git_push(), 0)
         self.assertEqual(self.cmdlines, ['git push -u origin master'])
-        self.assertEqual(self.prs, [])              # master has nothing to merge into itself
+        self.assertEqual(self.prs, [])  # master has nothing to merge into itself
         self.cmdlines.clear()
         self.assertEqual(git.git_push(force=True), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])
@@ -163,13 +163,13 @@ class GitResetTest(_GitCommandCase):
 
     def setUp(self) -> None:
         super().setUp()
-        self.ahead: str = '2\n'                     # commits `git rev-list --count` reports
+        self.ahead: str = '2\n'  # commits `git rev-list --count` reports
         self._saved_run_proc = git.run
 
         def fake_run(argv: list[str], **kwargs: Any) -> Any:
             return MagicMock(returncode=0, stdout=self.ahead)
 
-        git.run = fake_run                          # type: ignore[assignment]
+        git.run = fake_run  # type: ignore[assignment]
         self.addCleanup(lambda: setattr(git, 'run', self._saved_run_proc))
         self.as_profile('contributor')
 
@@ -215,7 +215,7 @@ class PullRequestTest(unittest.TestCase):
             self.calls.append(argv)
             return self.responses.pop(0)
 
-        git.run = fake_run                      # type: ignore[assignment]
+        git.run = fake_run  # type: ignore[assignment]
         self.responses: list[Any] = []
         self.addCleanup(lambda: setattr(git, 'run', self._saved_run))
 
@@ -226,15 +226,15 @@ class PullRequestTest(unittest.TestCase):
     # Every response queue starts with the `git rev-list --count` that `_commits_ahead`
     # runs first: a branch level with origin/master gets no pull request at all.
     def test_an_open_pr_is_reported_not_duplicated(self) -> None:
-        self.responses = [self._result(stdout='2\n'),           # 2 commits beyond master
+        self.responses = [self._result(stdout='2\n'),  # 2 commits beyond master
                           self._result(stdout='https://github.com/o/r/pull/7\n')]
         self.assertEqual(git._ensure_pull_request('user/t-000000'), 0)
-        self.assertEqual(len(self.calls), 2)                    # the count and the lookup
+        self.assertEqual(len(self.calls), 2)  # the count and the lookup
         self.assertEqual(self.calls[1][:3], ['gh', 'pr', 'view'])
 
     def test_no_open_pr_opens_one_onto_master(self) -> None:
-        self.responses = [self._result(stdout='1\n'),           # 1 commit beyond master
-                          self._result(stdout=''),              # lookup: none open
+        self.responses = [self._result(stdout='1\n'),  # 1 commit beyond master
+                          self._result(stdout=''),  # lookup: none open
                           self._result(stdout='https://github.com/o/r/pull/8\n')]
         self.assertEqual(git._ensure_pull_request('user/t-000000'), 0)
         created = self.calls[2]
@@ -259,8 +259,8 @@ class PullRequestTest(unittest.TestCase):
         # `_commits_ahead` returns None when it cannot compare (no origin/master, or
         # the branch never reached origin). That is not "nothing to review": refusing
         # here would silently drop the PR for a branch that has work on it.
-        self.responses = [self._result(returncode=1),           # rev-list: cannot tell
-                          self._result(stdout=''),              # lookup: none open
+        self.responses = [self._result(returncode=1),  # rev-list: cannot tell
+                          self._result(stdout=''),  # lookup: none open
                           self._result(stdout='https://github.com/o/r/pull/9\n')]
         self.assertEqual(git._ensure_pull_request('user/t-000000'), 0)
         self.assertEqual(self.calls[2][:3], ['gh', 'pr', 'create'])
@@ -283,14 +283,14 @@ class GhPrTest(_GitCommandCase):
         self._saved_open_prs = git._open_prs
         self._saved_input = git.console.input
         git._pr_files = lambda number: self.files  # type: ignore[assignment]
-        git._open_prs = lambda: self.open_prs      # type: ignore[assignment]
+        git._open_prs = lambda: self.open_prs  # type: ignore[assignment]
         # Each prompt consumes the next queued keypress; an empty queue quits the walk.
         git.console.input = lambda *a, **k: self.answers.pop(0) if self.answers else 'q'  # type: ignore[assignment]
 
     def tearDown(self) -> None:
-        git._pr_files = self._saved_pr_files    # type: ignore[assignment]
-        git._open_prs = self._saved_open_prs    # type: ignore[assignment]
-        git.console.input = self._saved_input   # type: ignore[assignment]
+        git._pr_files = self._saved_pr_files  # type: ignore[assignment]
+        git._open_prs = self._saved_open_prs  # type: ignore[assignment]
+        git.console.input = self._saved_input  # type: ignore[assignment]
         super().tearDown()
 
     def test_list_is_the_default_action(self) -> None:
@@ -302,27 +302,27 @@ class GhPrTest(_GitCommandCase):
     def test_a_solutions_only_pr_is_rebase_merged(self) -> None:
         self.as_profile('maintainer')
         self.assertEqual(git._merge_pr(12), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'solver/utils/scripts.py']
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
-        self.assertEqual(self.cmdlines, [])         # refused before gh ran
+        self.assertEqual(self.cmdlines, [])  # refused before gh ran
 
     def test_a_topics_only_pr_is_rebase_merged_too(self) -> None:
         """Topic articles are the other content tree a collaborator authors (PR_SCOPE)."""
         self.as_profile('maintainer')
         self.files = ['topics/technique/sieve-of-eratosthenes.md', 'topics/articles.json']
         self.assertEqual(git._merge_pr(12), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
 
     def test_a_pr_spanning_both_trees_is_refused(self) -> None:
         """Either tree, never both: solving a problem and writing an article are two reviews."""
         self.as_profile('maintainer')
         self.files = ['solutions/public/p0042/p0042_s0.py', 'topics/technique/memoization.md']
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
-        self.assertEqual(self.cmdlines, [])         # refused before gh ran
+        self.assertEqual(self.cmdlines, [])  # refused before gh ran
 
     def test_a_lookalike_path_does_not_pass_for_solutions(self) -> None:
         # 'solutions-of-mine/x' starts with 'solutions' but is not under solutions/;
@@ -353,7 +353,7 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.answers = ['m']
         self.assertEqual(git.gh_merge('merge'), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
 
     def test_skip_leaves_the_pr_untouched(self) -> None:
         self.as_profile('maintainer')
@@ -390,17 +390,17 @@ class GhPrTest(_GitCommandCase):
                       'solver/modules.csv', 'solver/config.json', 'solver/ai/claude/CLAUDE.md']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
 
     def test_the_two_gates_refuse_each_other(self) -> None:
         """Whichever verb you reach for names the review you are doing."""
         self.as_profile('maintainer')
         self.files = ['docs/user-guide.md']
-        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)            # docs via gh-merge
+        self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)  # docs via gh-merge
         self.files = ['solutions/public/p0042/p0042_s0.py']
         self.answers = ['m']
-        self.assertEqual(git.gh_merge_docs(), 0)                            # the walk survives…
-        self.assertEqual(self.cmdlines, [])                                  # …but nothing merged
+        self.assertEqual(git.gh_merge_docs(), 0)  # the walk survives…
+        self.assertEqual(self.cmdlines, [])  # …but nothing merged
 
     def test_the_docs_gate_admits_only_the_named_files_under_solver(self) -> None:
         """`solver/config.json` is in scope; the `solver/` tree around it is not."""
@@ -408,11 +408,11 @@ class GhPrTest(_GitCommandCase):
         self.answers = ['m']
         self.files = ['solver/config.py']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, [])                                  # refused
+        self.assertEqual(self.cmdlines, [])  # refused
         self.files = ['solver/config.json']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
 
     def test_the_docs_gate_reaches_the_tag_leg_but_not_the_solution_beside_it(self) -> None:
         """`update-tags` writes each problem's tags.json, so a reconciliation must merge —
@@ -422,12 +422,12 @@ class GhPrTest(_GitCommandCase):
                       'solutions/private/p0100_0199/p0101/tags.json', 'topics/tags.json']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin', './scripts/git/sync.sh'])
         self.cmdlines.clear()
         self.files = ['solutions/public/p0042/tags.json', 'solutions/public/p0042/p0042_s0.py']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, [])                                  # refused
+        self.assertEqual(self.cmdlines, [])  # refused
 
 
 class GitFilterCommandTest(_GitCommandCase):
@@ -440,10 +440,11 @@ class GitFilterCommandTest(_GitCommandCase):
 
         def fake_run(*_a: Any, **_k: Any) -> Any:
             return MagicMock(returncode=0, stdout=self.dirty)
-        git.run = fake_run                      # type: ignore[assignment]
+
+        git.run = fake_run  # type: ignore[assignment]
 
     def tearDown(self) -> None:
-        git.run = self._saved_run_proc          # type: ignore[assignment]
+        git.run = self._saved_run_proc  # type: ignore[assignment]
         super().tearDown()
 
     def test_status_is_a_passthrough(self) -> None:
@@ -458,14 +459,14 @@ class GitFilterCommandTest(_GitCommandCase):
         self.assertIn('git checkout -- solutions/private', self.cmdlines[1])
 
     def test_refused_install_stops_before_the_recheckout(self) -> None:
-        self.rcs = [1]                              # not key-authorized: install refuses
+        self.rcs = [1]  # not key-authorized: install refuses
         self.assertEqual(git.git_filter('install'), 1)
         self.assertEqual(len(self.cmdlines), 1)
 
     def test_local_private_edits_skip_the_recheckout(self) -> None:
         self.dirty = ' M solutions/private/p0101/x.py'
         self.assertEqual(git.git_filter('install'), 0)
-        self.assertEqual(len(self.cmdlines), 1)     # wired, but nothing clobbered
+        self.assertEqual(len(self.cmdlines), 1)  # wired, but nothing clobbered
 
 
 class EncKeyPullFlowTest(_GitCommandCase):
@@ -477,17 +478,18 @@ class EncKeyPullFlowTest(_GitCommandCase):
         self._saved_run_proc = git.run
         self.master = MagicMock(return_value=b'\x00' * 32)
         self.master.cache_clear = MagicMock()
-        git.read_master_key = self.master       # type: ignore[assignment]
+        git.read_master_key = self.master  # type: ignore[assignment]
 
     def tearDown(self) -> None:
         git.read_master_key = self._saved_master  # type: ignore[assignment]
-        git.run = self._saved_run_proc          # type: ignore[assignment]
+        git.run = self._saved_run_proc  # type: ignore[assignment]
         super().tearDown()
 
     def _wire_state(self, wired: bool) -> None:
         def fake_run(*_a: Any, **_k: Any) -> Any:
             return MagicMock(returncode=0 if wired else 1)
-        git.run = fake_run                      # type: ignore[assignment]
+
+        git.run = fake_run  # type: ignore[assignment]
 
     def test_already_wired_is_a_silent_noop(self) -> None:
         self._wire_state(wired=True)
@@ -504,14 +506,14 @@ class EncKeyPullFlowTest(_GitCommandCase):
     def test_newly_authorized_wires_and_rechecks_out(self) -> None:
         self._wire_state(wired=False)
         git._enc_key_pull_flow()
-        self.master.cache_clear.assert_called_once()    # the pull may have delivered access
+        self.master.cache_clear.assert_called_once()  # the pull may have delivered access
         self.assertEqual(len(self.cmdlines), 2)
         self.assertIn('solver.crypto.gitfilter install', self.cmdlines[0])
         self.assertIn('git checkout -- solutions/private', self.cmdlines[1])
 
     def test_failed_install_skips_the_recheckout(self) -> None:
         self._wire_state(wired=False)
-        self.rcs = [1]                              # install refused (key check failed late)
+        self.rcs = [1]  # install refused (key check failed late)
         git._enc_key_pull_flow()
         self.assertEqual(len(self.cmdlines), 1)
 
@@ -527,8 +529,8 @@ class CanAmendTest(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.head_rc: int = 0                       # rev-parse HEAD: 0 = a commit exists
-        self.pushed: list[str] | None = []          # _remotes_containing_head: [] = unpushed
+        self.head_rc: int = 0  # rev-parse HEAD: 0 = a commit exists
+        self.pushed: list[str] | None = []  # _remotes_containing_head: [] = unpushed
         self.status: str = ' M solutions/public/p0218/p0218_s0.py'
 
         def fake_run(argv: list[str], **_k: Any) -> Any:
@@ -541,33 +543,33 @@ class CanAmendTest(unittest.TestCase):
         self._saved_run = git.run
         self._saved_remotes = git._remotes_containing_head
         self._saved_paths = git._commit_paths
-        git.run = fake_run                       # type: ignore[assignment]
+        git.run = fake_run  # type: ignore[assignment]
         git._remotes_containing_head = lambda: self.pushed  # type: ignore[assignment]
         git._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
         self.problem: Any = MagicMock(number=218)
 
     def tearDown(self) -> None:
-        git.run = self._saved_run                # type: ignore[assignment]
+        git.run = self._saved_run  # type: ignore[assignment]
         git._remotes_containing_head = self._saved_remotes  # type: ignore[assignment]
-        git._commit_paths = self._saved_paths    # type: ignore[assignment]
+        git._commit_paths = self._saved_paths  # type: ignore[assignment]
 
     def test_unpushed_head_with_dirty_paths_can_amend(self) -> None:
         self.assertTrue(git._can_amend(self.problem))
 
     def test_no_head_cannot_amend(self) -> None:
-        self.head_rc = 1                             # no commit to amend yet
+        self.head_rc = 1  # no commit to amend yet
         self.assertFalse(git._can_amend(self.problem))
 
     def test_a_pushed_head_cannot_amend(self) -> None:
-        self.pushed = ['origin/user/t-000000']       # on origin — amending would force-push
+        self.pushed = ['origin/user/t-000000']  # on origin — amending would force-push
         self.assertFalse(git._can_amend(self.problem))
 
     def test_an_undecidable_push_state_cannot_amend(self) -> None:
-        self.pushed = None                           # cannot tell — never assume unpushed
+        self.pushed = None  # cannot tell — never assume unpushed
         self.assertFalse(git._can_amend(self.problem))
 
     def test_clean_paths_cannot_amend(self) -> None:
-        self.status = ''                             # nothing under this problem changed
+        self.status = ''  # nothing under this problem changed
         self.assertFalse(git._can_amend(self.problem))
 
 
@@ -592,26 +594,26 @@ class GitCommitDispatchTest(_GitCommandCase):
         self._saved_amend = git.git_commit_amend
         self._saved_paths = git._commit_paths
         git._can_amend = lambda problem: self.amendable  # type: ignore[assignment]
-        git.git_commit_amend = fake_amend        # type: ignore[assignment]
+        git.git_commit_amend = fake_amend  # type: ignore[assignment]
         git._commit_paths = lambda problem: ['solutions/public/p0218']  # type: ignore[assignment]
         self.as_profile('contributor')
         self.problem: Any = MagicMock(number=218)
 
     def tearDown(self) -> None:
-        git._can_amend = self._saved_can_amend   # type: ignore[assignment]
+        git._can_amend = self._saved_can_amend  # type: ignore[assignment]
         git.git_commit_amend = self._saved_amend  # type: ignore[assignment]
-        git._commit_paths = self._saved_paths    # type: ignore[assignment]
+        git._commit_paths = self._saved_paths  # type: ignore[assignment]
         super().tearDown()
 
     def test_empty_message_amends_when_it_can(self) -> None:
         self.assertEqual(git.git_commit(self.problem), 0)
         self.assertEqual(self.amend_calls, 1)
-        self.assertEqual(self.cmdlines, [])          # folded into HEAD; no fresh commit ran
+        self.assertEqual(self.cmdlines, [])  # folded into HEAD; no fresh commit ran
 
     def test_a_failing_amend_is_returned_not_retried_as_fresh(self) -> None:
-        self.amend_rc = ExitCodes.EXIT_ERROR         # _can_amend said yes, so trust the amend
+        self.amend_rc = ExitCodes.EXIT_ERROR  # _can_amend said yes, so trust the amend
         self.assertEqual(git.git_commit(self.problem), ExitCodes.EXIT_ERROR)
-        self.assertEqual(self.cmdlines, [])          # never a second, fresh commit
+        self.assertEqual(self.cmdlines, [])  # never a second, fresh commit
 
     def test_empty_message_commits_fresh_when_it_cannot_amend(self) -> None:
         self.amendable = False
@@ -620,7 +622,7 @@ class GitCommitDispatchTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, [self._FRESH])
 
     def test_reset_suppresses_the_amend_even_when_it_could(self) -> None:
-        self.amendable = True                        # amendable — but --reset must win
+        self.amendable = True  # amendable — but --reset must win
         self.assertEqual(git.git_commit(self.problem, reset=True), 0)
         self.assertEqual(self.amend_calls, 0)
         self.assertEqual(self.cmdlines, ['git reset --soft origin/master && ' + self._FRESH])
@@ -647,7 +649,7 @@ class GitCommitDocsTest(_GitCommandCase):
             return MagicMock(returncode=0, stdout=self.dirty)
 
         self._saved_run_proc = git.run
-        git.run = fake_run                       # type: ignore[assignment]
+        git.run = fake_run  # type: ignore[assignment]
         self.addCleanup(lambda: setattr(git, 'run', self._saved_run_proc))
         self.as_profile('maintainer')
 

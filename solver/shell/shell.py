@@ -16,6 +16,7 @@ import re
 import shlex
 import sys
 from contextlib import contextmanager
+from time import time
 from typing import Any, Iterable, Iterator
 
 from prompt_toolkit.completion import Completer, Completion
@@ -297,6 +298,7 @@ class SolverShell:
                 bottom_toolbar=self._bottom_toolbar,
             )
             try:
+                previous_eof: float = 0.0
                 while True:
                     try:
                         set_title(f'solver · {variables.problem}')
@@ -305,7 +307,11 @@ class SolverShell:
                         self.console.print('[muted]^C[/muted]')
                         continue
                     except EOFError:
-                        break
+                        if (this_eof := time()) - previous_eof < 1.0:
+                            break
+                        previous_eof = this_eof
+                        self.console.print('[muted]Press ^D again to exit.[/muted]')
+                        continue
                     if not block.strip():
                         continue
                     try:

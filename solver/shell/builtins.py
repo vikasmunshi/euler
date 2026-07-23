@@ -117,7 +117,7 @@ def _help(ctx: Context, *args: str) -> int:
     ctx.console.print(Panel(table,
                             border_style='panel.border',
                             title='[accent]▎[/accent] [primary]commands[/primary]',
-                            subtitle='[warning]❏ uses/sets current problem | » supports --silent[/warning]',
+                            subtitle='[warning][❏ uses/sets current problem | » supports --silent][/warning]',
                             subtitle_align='right',
                             title_align='left',
                             padding=(1, 2)))

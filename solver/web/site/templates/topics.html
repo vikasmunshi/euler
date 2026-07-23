@@ -22,8 +22,7 @@
      href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
     <span class="card-ic">&lambda;</span>
-    <span><span class="card-title">{{ e.heading }}</span>
-      {% if e.title %}<span class="card-desc">{{ e.title }}</span>{% endif %}</span>
+    <span class="card-title">{{ e.heading }}</span>
     {% if show_status and e.status == 'final' %}<span class="pill pill-final">final</span>{% endif %}
   </a>
   {% endfor %}
