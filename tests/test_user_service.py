@@ -324,6 +324,25 @@ class VaultRouteTests(_UserServiceCase):
         self.assertNotIn('<code>ANTHROPIC_API_KEY</code>', await resp.text())
 
     @unittest_run_loop
+    async def test_account_vault_shows_the_onboarding_checklist(self) -> None:
+        """The credential panel leads with a live Getting-started checklist; _OWN is a
+        contributor, so all six steps show and the API-key step tracks the stored secrets."""
+        resp = await self.client.get('/account/vault', headers=_OWN)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('Getting started', body)
+        self.assertIn('Create your identity', body)            # a reader+ step
+        self.assertIn('of 6 done', body)                       # contributor sees 6 steps
+        self.assertIn('Store your ANTHROPIC_API_KEY', body)    # a contributor+ step
+        # storing the key ticks its step off
+        await self._unlock()
+        await self.client.post('/account/secret', headers=_OWN,
+                               data={'name': 'ANTHROPIC_API_KEY', 'value': 'sk-x'})
+        after = await (await self.client.get('/account/vault', headers=_OWN)).text()
+        key_step = after.split('Store your ANTHROPIC_API_KEY')[0].rsplit('onboard-step', 1)[-1]
+        self.assertIn('is-done', key_step)                     # its row now carries the done class
+
+    @unittest_run_loop
     async def test_secret_upsert_locked_is_409_and_bad_name_400(self) -> None:
         resp = await self.client.post('/account/secret', headers=_OWN,
                                       data={'name': 'X_KEY', 'value': 'v'})

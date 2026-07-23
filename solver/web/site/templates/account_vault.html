@@ -4,6 +4,52 @@
    Write-only by design: secret VALUES are never rendered back.
    This replaces the whole panel, heading included — account.html's placeholder is
    only what stands there until this lands. #}
+{# ── Getting started: the live onboarding checklist (F9) ─────────────────────────
+   Every value here is already in this fragment's context, so the checklist re-renders
+   with the panel whenever a terminal command reports account/git state changed (the
+   #vault-panel refresh triggers). Steps 1–3 apply to every reader; 4–6 are the
+   contributor tools, shown and counted only at that rung. The hints are static template
+   copy (not user input), so the inline markup is marked safe. #}
+{% set is_contrib = subject and subject.has('contributor') %}
+{% set steps = [
+     {'label': 'Create your identity', 'done': pubkey_state == 'key',
+      'hint': 'Run <code>user</code> in your terminal to mint your keypair.'},
+     {'label': 'Unlock your vault', 'done': unlocked,
+      'hint': 'Unlock it below with your password.'},
+     {'label': 'Get decrypt access', 'done': can_decrypt,
+      'hint': 'Copy your public key to the admin, wait for authorization, then <b>Sync</b>.'}
+   ] %}
+{% if is_contrib %}
+{% set _ = steps.extend([
+     {'label': 'Sign in to the GitHub CLI', 'done': gh_status == 'signed in',
+      'hint': 'Run <code>git-identity</code> in your terminal.'},
+     {'label': 'Sign in to Claude Code', 'done': claude_status == 'signed in',
+      'hint': 'Sign in from your terminal (Claude Code row below).'},
+     {'label': 'Store your ANTHROPIC_API_KEY', 'done': 'ANTHROPIC_API_KEY' in secret_names,
+      'hint': 'Add it under Secrets below.'}
+   ]) %}
+{% endif %}
+{% set done = steps | selectattr('done') | list | length %}
+<section class="onboard">
+  <div class="onboard-head">
+    <span class="onboard-title">Getting started</span>
+    <span class="onboard-count">{{ done }} of {{ steps | length }} done</span>
+  </div>
+  <ul class="onboard-list">
+    {% for s in steps %}
+    <li class="onboard-step{% if s.done %} is-done{% endif %}">
+      <span class="dot {{ 'on' if s.done else 'off' }}"></span>
+      <span class="onboard-label">{{ s.label }}</span>
+      {% if not s.done %}<span class="onboard-hint muted">{{ s.hint | safe }}</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% if not is_contrib %}
+  <p class="onboard-note muted">The contributor tools — GitHub CLI, Claude Code, the API key —
+     unlock at the next rung.</p>
+  {% endif %}
+</section>
+
 <h2>Credentials</h2>
 <section class="vault" id="vault-state"
          data-vault="{{ 'yes' if vault_exists else 'no' }}"

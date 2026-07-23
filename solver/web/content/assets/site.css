@@ -295,6 +295,21 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
 .dot.on { background: var(--ok); }
 .dot.off { background: var(--danger); }
 
+/* The account onboarding checklist (F9): live next steps, computed from the credential
+   signals already in the panel. Reuses the .dot on/off idiom for done/pending. */
+.onboard { margin: 0 0 1.4rem; }
+.onboard-head { display: flex; align-items: baseline; gap: 0.7rem; margin-bottom: 0.6rem; }
+.onboard-title { font-size: 1.12rem; font-weight: 600; color: var(--text); }
+.onboard-count { font-size: 0.78rem; color: var(--muted); }
+.onboard-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.onboard-step { display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+.onboard-step .dot { flex: none; align-self: center; }
+.onboard-label { color: var(--text); }
+.onboard-step.is-done .onboard-label { color: var(--muted); }
+.onboard-hint { font-size: 0.82rem; }
+.onboard-hint code { color: var(--accent); }
+.onboard-note { margin: 0.7rem 0 0; font-size: 0.82rem; }
+
 .pill {
   font-size: 0.72rem;
   font-weight: 600;
