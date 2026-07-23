@@ -101,7 +101,7 @@
     {
       "path": "domain/arithmetic-progression",
       "title": "Arithmetic progression",
-      "status": "draft",
+      "status": "final",
       "tags": ["arithmetic-progression"],
       "refs": ["p0001", "p0028", "p0049", "p0058", "p0135", "p0136", "p0198", "p0235", "p0319", "p0720", "p0828"]
     },
