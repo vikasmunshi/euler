@@ -38,6 +38,7 @@ class PolicyShapeTest(unittest.TestCase):
         load_commands()
         expected = {'git-status': 'reader', 'git-sync': 'reader', 'git-filter': 'reader',
                     'git-commit': 'contributor', 'git-commit-amend': 'contributor',
+                    'git-reset': 'contributor',
                     'git-push': 'contributor', 'git-hooks': 'contributor',
                     'git-identity': 'contributor', 'gh-merge': 'maintainer',
                     'git-commit-docs': 'maintainer', 'gh-merge-docs': 'maintainer',
@@ -153,6 +154,52 @@ class GitPushGuardTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, [])
 
 
+class GitResetTest(_GitCommandCase):
+    """git-reset: a soft reset to origin/master — un-commit, keep the changes, no commit.
+
+    The count that sizes the report is faked at the `run` boundary; the reset itself is
+    recorded through run_cmdline like every other verb, so no test touches the repo.
+    """
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.ahead: str = '2\n'                     # commits `git rev-list --count` reports
+        self._saved_run_proc = git.run
+
+        def fake_run(argv: list[str], **kwargs: Any) -> Any:
+            return MagicMock(returncode=0, stdout=self.ahead)
+
+        git.run = fake_run                          # type: ignore[assignment]
+        self.addCleanup(lambda: setattr(git, 'run', self._saved_run_proc))
+        self.as_profile('contributor')
+
+    def test_it_soft_resets_to_origin_master(self) -> None:
+        self.assertEqual(git.git_reset(), 0)
+        self.assertEqual(self.cmdlines, ['git reset --soft origin/master'])
+
+    def test_it_makes_no_commit(self) -> None:
+        """The whole point vs `git-commit --reset`: one command, and it is the reset."""
+        git.git_reset()
+        self.assertEqual(len(self.cmdlines), 1)
+        self.assertNotIn('commit', self.cmdlines[0])
+
+    def test_a_level_branch_is_a_clean_noop(self) -> None:
+        # Zero commits ahead: the reset still runs (a no-op in git) and exits 0.
+        self.ahead = '0\n'
+        self.assertEqual(git.git_reset(), 0)
+        self.assertEqual(self.cmdlines, ['git reset --soft origin/master'])
+
+    def test_an_unreadable_count_does_not_break_the_reset(self) -> None:
+        # _commits_ahead_of_master returns 0 on any failure; the reset is unaffected.
+        self.ahead = 'not-a-number'
+        self.assertEqual(git.git_reset(), 0)
+        self.assertEqual(self.cmdlines, ['git reset --soft origin/master'])
+
+    def test_a_failed_reset_is_reported(self) -> None:
+        self.rcs = [1]
+        self.assertNotEqual(git.git_reset(), 0)
+
+
 class PullRequestTest(unittest.TestCase):
     """`_ensure_pull_request`: idempotent, and never a second PR for one branch.
 
@@ -252,10 +299,10 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, ['gh pr list'])
 
     # ── the file gate (_merge_pr), judged on the PR's file list ──
-    def test_a_solutions_only_pr_is_squash_merged(self) -> None:
+    def test_a_solutions_only_pr_is_rebase_merged(self) -> None:
         self.as_profile('maintainer')
         self.assertEqual(git._merge_pr(12), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
 
     def test_a_pr_touching_anything_else_is_refused(self) -> None:
         self.as_profile('maintainer')
@@ -263,12 +310,12 @@ class GhPrTest(_GitCommandCase):
         self.assertEqual(git._merge_pr(12), ExitCodes.EXIT_ERROR)
         self.assertEqual(self.cmdlines, [])         # refused before gh ran
 
-    def test_a_topics_only_pr_is_squash_merged_too(self) -> None:
+    def test_a_topics_only_pr_is_rebase_merged_too(self) -> None:
         """Topic articles are the other content tree a collaborator authors (PR_SCOPE)."""
         self.as_profile('maintainer')
         self.files = ['topics/technique/sieve-of-eratosthenes.md', 'topics/articles.json']
         self.assertEqual(git._merge_pr(12), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
 
     def test_a_pr_spanning_both_trees_is_refused(self) -> None:
         """Either tree, never both: solving a problem and writing an article are two reviews."""
@@ -306,7 +353,7 @@ class GhPrTest(_GitCommandCase):
         self.as_profile('maintainer')
         self.answers = ['m']
         self.assertEqual(git.gh_merge('merge'), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
 
     def test_skip_leaves_the_pr_untouched(self) -> None:
         self.as_profile('maintainer')
@@ -343,7 +390,7 @@ class GhPrTest(_GitCommandCase):
                       'solver/modules.csv', 'solver/config.json', 'solver/ai/claude/CLAUDE.md']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
 
     def test_the_two_gates_refuse_each_other(self) -> None:
         """Whichever verb you reach for names the review you are doing."""
@@ -365,7 +412,7 @@ class GhPrTest(_GitCommandCase):
         self.files = ['solver/config.json']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
 
     def test_the_docs_gate_reaches_the_tag_leg_but_not_the_solution_beside_it(self) -> None:
         """`update-tags` writes each problem's tags.json, so a reconciliation must merge —
@@ -375,7 +422,7 @@ class GhPrTest(_GitCommandCase):
                       'solutions/private/p0100_0199/p0101/tags.json', 'topics/tags.json']
         self.answers = ['m']
         self.assertEqual(git.gh_merge_docs(), 0)
-        self.assertEqual(self.cmdlines, ['gh pr merge 12 --squash --admin'])
+        self.assertEqual(self.cmdlines, ['gh pr merge 12 --rebase --admin'])
         self.cmdlines.clear()
         self.files = ['solutions/public/p0042/tags.json', 'solutions/public/p0042/p0042_s0.py']
         self.answers = ['m']

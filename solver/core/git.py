@@ -22,7 +22,7 @@ commit that carries nothing else.
 from __future__ import annotations
 
 __all__ = ['get_gh_user_email', 'get_repo_owner_email', 'git_commit', 'git_commit_amend',
-           'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
+           'git_reset', 'git_commit_docs', 'git_publish', 'git_status', 'git_filter', 'git_sync',
            'git_identity', 'git_push', 'gh_merge', 'gh_merge_docs', 'git_hooks', 'git_audit']
 
 import json
@@ -208,6 +208,51 @@ def git_commit_amend(problem: Problem) -> int:
     if result == 0:
         osc.git_changed()
     return result
+
+
+def _commits_ahead_of_master() -> int:
+    """How many local commits HEAD carries beyond ``origin/master`` (0 when unreadable).
+
+    Read from HEAD, not ``origin/<branch>``: this counts the commits a reset is about to
+    undo, which live in *this* clone whether or not they ever reached the remote. Zero on
+    any failure — a missing ``origin/master``, a detached HEAD — since the reset that
+    follows either no-ops or errors on its own, and this only sizes the report.
+    """
+    proc = run(['git', 'rev-list', '--count', 'origin/master..HEAD'],
+               cwd=config.root_dir, capture_output=True, text=True)
+    out: str = proc.stdout.strip()
+    return int(out) if proc.returncode == 0 and out.isdigit() else 0
+
+
+@register(requires='contributor', quietable=True, aliases=('reset',),
+          help_text='Un-commit local commits back to origin/master, keeping the changes staged.')
+def git_reset() -> int:
+    """Soft-reset your branch to origin/master — un-commit, keep every change.
+
+    The undo `git-commit --reset` never lets you stop at: this runs
+        `git reset --soft origin/master`, moving your branch tip back to origin/master
+        while leaving the working tree untouched, so every local commit's changes survive
+        as staged edits. From there re-commit differently (`git-commit`), restage
+        selectively, or leave it — whereas `git-commit --reset` squashes straight into one
+        fresh commit and gives you no such pause.
+
+    Makes no commit, so it runs no hooks and is a clean no-op — exit 0 — when your branch
+        is already level with origin/master. Undone commits are not lost: they stay
+        reachable through the reflog until git eventually prunes them.
+
+    Aliased as `reset`.
+    """
+    ahead: int = _commits_ahead_of_master()
+    result: int = run_cmdline('git reset --soft origin/master')
+    if result != 0:
+        return result
+    if ahead:
+        console.print(f'[accent]{ahead}[/accent] commit(s) undone; your changes are kept, staged — '
+                      'run [accent]git-commit[/accent] to re-commit.')
+    else:
+        console.print('already level with [accent]origin/master[/accent] — nothing to undo.')
+    osc.git_changed()
+    return int(ExitCodes.EXIT_OK)
 
 
 # ── the docs set ────────────────────────────────────────────────────────────────────────
@@ -646,7 +691,11 @@ def _open_prs() -> list[dict[str, object]] | None:
 
 def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *,
               one_tree: bool = True, label: str = 'content') -> int:
-    """Squash-merge pull request *number* onto master, refusing anything beyond *scope*.
+    """Rebase-merge pull request *number* onto master, refusing anything beyond *scope*.
+
+    Rebase, not squash: each of the branch's commits is replayed onto master (with fresh
+    SHAs), so a review of several commits lands as several commits rather than one folded
+    checkpoint — master's history stays linear, and the individual commits survive.
 
     The gate that makes this a maintainer's command rather than an admin's: merging a
     branch that carries solutions, topic articles or docs is reviewing what a maintainer
@@ -690,7 +739,7 @@ def _merge_pr(number: int, scope: tuple[str, ...] = PR_SCOPE, *,
     # policy prohibits a plain merge (that policy is what gates other collaborators);
     # the owner running this review has the bypass, and without --admin `gh pr merge`
     # just refuses with "the base branch policy prohibits the merge".
-    result: int = run_cmdline(f'gh pr merge {number} --squash --admin')
+    result: int = run_cmdline(f'gh pr merge {number} --rebase --admin')
     if result == 0:
         osc.git_changed()  # master moved: the chip's ahead/behind counts changed
     return result
@@ -702,7 +751,7 @@ def _merge_walk(scope: tuple[str, ...] = PR_SCOPE, *,
 
     The interactive counterpart of `users process-requests`: read the open PRs once,
     then per request show its number, title and branch and offer **merge** (the
-    scope-gated squash), **skip** (leave it open), or **quit**. Merging is
+    scope-gated rebase), **skip** (leave it open), or **quit**. Merging is
     :func:`_merge_pr`, so the same file gate and the same git-changed nudge apply as a
     numbered merge once did. *scope* selects which queue this walk can land: the content
     trees (`gh-merge`) or the docs set (`gh-merge-docs`).
@@ -739,13 +788,14 @@ def _merge_walk(scope: tuple[str, ...] = PR_SCOPE, *,
           help_text='Content pull requests: [accent.dim]list[/accent.dim] | merge (walk the queue).',
           aliases=('merge',), )
 def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
-    """List the open pull requests, or walk them one at a time to squash-merge.
+    """List the open pull requests, or walk them one at a time to rebase-merge.
 
     `list` (the default) shows what is waiting: number, title, branch. `merge` walks
-    the open pull requests interactively — per request **merge** (squash onto master),
+    the open pull requests interactively — per request **merge** (rebase onto master),
     **skip**, or **quit** — the same shape as `users process-requests`. Merging one is
-    how a collaborator's `user/<slug>` branch lands on master; their next `git-sync`
-    then rebases the squashed commit away and prunes the merged branch.
+    how a collaborator's `user/<slug>` branch lands on master, each of its commits
+    replayed onto the tip; their next `git-sync` then rebases those already-applied
+    commits away and prunes the merged branch.
 
     A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
     anything else is refused, and a branch spanning both is asked to become two pull
@@ -770,7 +820,7 @@ def gh_merge(action: Literal['list', 'merge'] = 'list') -> int:
 @register(requires='maintainer', quietable=True, aliases=('merge-docs',),
           help_text='Walk the open pull requests and merge one confined to the docs set.')
 def gh_merge_docs() -> int:
-    """Walk the open pull requests, squash-merging those that touch only the docs set.
+    """Walk the open pull requests, rebase-merging those that touch only the docs set.
 
     `gh-merge`'s sibling for documentation: same interactive walk — per request
     **merge**, **skip**, or **quit** — but the gate admits :data:`DOCS_PATHS` instead of the
