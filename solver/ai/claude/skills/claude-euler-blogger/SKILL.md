@@ -85,9 +85,9 @@ The argument is one of: a `<facet>/<slug>` path, a bare tag slug, or a curated t
    current graph — so the list you write around is fresh, with each problem's title and a
    solved/unsolved marker baked in as of now. (You will run it again at the end.)
 1. Resolve the argument to a file:
-   - a `<facet>/<slug>` path → `topics/<facet>/<slug>.md`;
-   - a bare slug → look it up in `topics/tags.json`, take its `facet`, target `topics/<facet>/<slug>.md`;
-   - any other path → `topics/<path>.md`.
+    - a `<facet>/<slug>` path → `topics/<facet>/<slug>.md`;
+    - a bare slug → look it up in `topics/tags.json`, take its `facet`, target `topics/<facet>/<slug>.md`;
+    - any other path → `topics/<path>.md`.
 2. Run `solver "topic <path-without-.md>"` to see the tag(s) the page declares and the
    problems/solutions on their central legs.
 3. Read the target file — after step 0 it always exists. It is usually a **skeleton**: a
@@ -110,10 +110,9 @@ conventions.
 ## Phase 2 — Research the idea
 
 1. Read the tag's `reference` URL and `name` from `topics/tags.json` to pin the concept.
-2. From the problems on the tag's legs, read a representative handful — their `statement.html` and
-   `notes.html` (Problem Analysis + Solution Approach), and, for **public** problems, the solution
-   code — to see how the idea is actually used and where it varies. Favour public problems for any
-   concrete example (see the private-problem rule above).
+2. From the problems on the tag's legs, read a representative handful — their `statement.html`,
+   `notes.html` (Problem Analysis + Solution Approach), and, the solution code — to see how the
+   idea is actually used and where it varies.
 3. Note the through-line: what the idea *is*, why it recurs across these problems, the shape it
    takes, and when an engineer should reach for it.
 
