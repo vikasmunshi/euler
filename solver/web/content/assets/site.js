@@ -232,10 +232,12 @@
   // ── minimize the terminal to the footer (F1) ────────────────────────────────
   // Layout only: a persisted flag collapses the right pane (body.ws-minimized in the
   // CSS) so #content spans the full width, with a restore strip in the footer. The
-  // socket is never touched — Connect/Disconnect stays its own control. Any
-  // [data-term-minimize] toggles it (the pane handle, the footer strip, the Home
-  // tile); the Home tile also carries a [data-term-min-label] painted Restore/Minimize
-  // from the one flag, so every control agrees.
+  // socket is never touched — Connect/Disconnect stays its own control.
+  //
+  // Minimize and restore are SEPARATE acts, so each control does one predictable thing:
+  //   [data-term-minimize] — the pane's handle — always minimizes;
+  //   [data-term-restore]  — the header's Terminal item, the Home tile, the footer strip
+  //                          — always restores, and is a no-op when already open.
   var WS_MIN_KEY = 'euler:ws-minimized';
 
   function wsMinimized() {
@@ -247,20 +249,19 @@
   function paintWsMinimized() {
     // Only where there is a terminal to minimize — the signed-out shell holds a sign-in
     // box in the right pane, not a session, so a stale flag never collapses it.
-    var min = !!document.getElementById('terminal') && wsMinimized();
-    document.body.classList.toggle('ws-minimized', min);
-    document.querySelectorAll('[data-term-min-label]').forEach(function (label) {
-      label.textContent = min ? 'Restore' : 'Minimize';
-    });
+    document.body.classList.toggle('ws-minimized',
+      !!document.getElementById('terminal') && wsMinimized());
   }
   document.addEventListener('DOMContentLoaded', paintWsMinimized);
 
   document.addEventListener('click', function (ev) {
-    var button = ev.target.closest && ev.target.closest('[data-term-minimize]');
-    if (!button || !document.getElementById('terminal')) { return; }
-    setWsMinimized(!wsMinimized());
+    if (!ev.target.closest) { return; }
+    var minBtn = ev.target.closest('[data-term-minimize]');
+    var resBtn = ev.target.closest('[data-term-restore]');
+    if ((!minBtn && !resBtn) || !document.getElementById('terminal')) { return; }
+    setWsMinimized(!!minBtn);           // minimize → true, restore → false (no-op if already open)
     paintWsMinimized();
-    var menu = button.closest('details');
+    var menu = (minBtn || resBtn).closest('details');
     if (menu) { menu.open = false; }
   });
 

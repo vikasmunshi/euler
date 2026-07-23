@@ -59,15 +59,15 @@
   {{ card('/topics/', 'λ', 'Topics',
           'The mathematics behind the problems, written down before it was forgotten.') }}
   {% if subject %}
-  {# The one card that is not a place to go: the terminal is already here, in the
-     right pane. This tile toggles its layout — minimize it to the footer to give the
-     content the full width, or restore it — while Connect/Disconnect (the socket) stays
-     in the user menu. It wears the same arrow as the other tiles for one visual family;
-     the description says what it does. #}
-  <button type="button" class="card card-term" data-term-minimize>
+  {# The one card that is not a place to go: the terminal is already here, in the right
+     pane. This tile restores it when it has been minimized to the footer (and is a no-op
+     when it is already open) — the same act as the header's Terminal item. The socket is
+     untouched (Connect/Disconnect stays in the user menu). It wears the same arrow as the
+     other tiles for one visual family. #}
+  <button type="button" class="card card-term" data-term-restore>
     <span class="card-ic">&#10095;</span>
     <span><span class="card-title">Terminal</span>
-      <span class="card-desc">Minimize the shell to the footer, or bring it back — the session keeps running.</span></span>
+      <span class="card-desc">Bring the shell back if you minimized it to the footer — the session keeps running.</span></span>
     <span class="card-go">&rarr;</span>
   </button>
   {% else %}

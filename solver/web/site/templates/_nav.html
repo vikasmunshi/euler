@@ -27,10 +27,16 @@
     <a href="/solutions/" hx-get="/solutions/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Solutions</a>
     <a href="/docs/" hx-get="/docs/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Docs</a>
     <a href="/topics/" hx-get="/topics/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true">Topics</a>
+    {# Terminal is not a page — it lives in the right pane. This item restores it when it
+       has been minimized to the footer, and is a no-op when it is already open (site.js).
+       Not a link: it swaps nothing and never navigates. #}
+    <button type="button" class="nav-term" data-term-restore
+            title="restore the terminal">Terminal</button>
     {% else %}
     <span class="is-locked" aria-disabled="true">Solutions</span>
     <span class="is-locked" aria-disabled="true">Docs</span>
     <span class="is-locked" aria-disabled="true">Topics</span>
+    <span class="is-locked" aria-disabled="true">Terminal</span>
     {% endif %}
   </nav>
   <span class="hsep" aria-hidden="true"></span>
