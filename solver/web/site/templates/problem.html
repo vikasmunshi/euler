@@ -52,39 +52,6 @@
 <div class="workbench">
   <p class="workbench-eyebrow">workbench</p>
 
-  {# B — the full structure: techniques keyed to each solution index, and the curated topic
-     pages that cover this problem's tags. #}
-  {% if tags and tags.has_tags %}
-  <section class="panel tag-panel">
-    <h2>Tags &amp; topics</h2>
-    {% if tags.domain %}
-    <div class="facet-row"><span class="facet-label">domain</span>
-      <span class="taglist">{% for c in tags.domain %}{{ chip(c) }}{% endfor %}</span></div>
-    {% endif %}
-    {% for grp in tags.techniques %}
-    <div class="facet-row"><span class="facet-label">technique <span class="idx">{{ grp.index }}</span></span>
-      <span class="taglist">{% for c in grp.tags %}{{ chip(c) }}{% endfor %}</span></div>
-    {% endfor %}
-    {% if tags.takeaways %}
-    <div class="facet-row"><span class="facet-label">takeaway</span>
-      <span class="taglist">{% for c in tags.takeaways %}{{ chip(c) }}{% endfor %}</span></div>
-    {% endif %}
-    {% if tags.topics %}
-    <div class="subrule"><h3>Topics</h3></div>
-    <div class="topic-cards">
-      {% for t in tags.topics %}
-      <a class="tcard" href="/topics/{{ t.name }}" hx-get="/topics/{{ t.name }}"
-         hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
-        <span class="lam">λ</span>
-        <span class="tc-body"><span class="tc-name">{{ t.title }}</span>
-          <span class="tc-facet">{{ t.name }}</span></span>
-        <span class="go">→</span></a>
-      {% endfor %}
-    </div>
-    {% endif %}
-  </section>
-  {% endif %}
-
   {% if test_cases %}
   <section class="panel">
     <h2>Test cases</h2>
@@ -131,6 +98,39 @@
 
   {% if files %}
   {% include "_files.html" %}
+  {% endif %}
+
+  {# B — the full structure: techniques keyed to each solution index, and the curated topic
+     pages that cover this problem's tags. Sits at the end of the workbench, after the files. #}
+  {% if tags and tags.has_tags %}
+  <section class="panel tag-panel">
+    <h2>Tags &amp; topics</h2>
+    {% if tags.domain %}
+    <div class="facet-row"><span class="facet-label">domain</span>
+      <span class="taglist">{% for c in tags.domain %}{{ chip(c) }}{% endfor %}</span></div>
+    {% endif %}
+    {% for grp in tags.techniques %}
+    <div class="facet-row"><span class="facet-label">technique <span class="idx">{{ grp.index }}</span></span>
+      <span class="taglist">{% for c in grp.tags %}{{ chip(c) }}{% endfor %}</span></div>
+    {% endfor %}
+    {% if tags.takeaways %}
+    <div class="facet-row"><span class="facet-label">takeaway</span>
+      <span class="taglist">{% for c in tags.takeaways %}{{ chip(c) }}{% endfor %}</span></div>
+    {% endif %}
+    {% if tags.topics %}
+    <div class="subrule"><h3>Topics</h3></div>
+    <div class="topic-cards">
+      {% for t in tags.topics %}
+      <a class="tcard" href="/topics/{{ t.name }}" hx-get="/topics/{{ t.name }}"
+         hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+        <span class="lam">λ</span>
+        <span class="tc-body"><span class="tc-name">{{ t.title }}</span>
+          <span class="tc-facet">{{ t.name }}</span></span>
+        <span class="go">→</span></a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
   {% endif %}
 </div>
 {% endif %}

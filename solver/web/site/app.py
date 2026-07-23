@@ -262,7 +262,7 @@ async def solutions_index(request: web.Request) -> web.StreamResponse:
 
 def _problem_context(request: web.Request, number: int) -> dict[str, Any]:
     """The problem-page context: statement · notes, a tag chip row, then the workbench
-    (tags & topics · test-cases · results · files) — shared by the GET view and the
+    (test-cases · results · files · tags & topics) — shared by the GET view and the
     post-delete fragment. `tags` is the facet-grouped view model (content.problem_tag_view)."""
     config = request.app[CONFIG_KEY]
     repo_root = config.repo_root
