@@ -18,17 +18,21 @@
    page's own title — dropped where it only repeats the name (the per-tag pages). #}
 {% for g in groups %}
 <div class="subrule"><h3>{{ g.heading }}</h3><span class="count">{{ g.entries | length }}</span></div>
-<nav class="cards cards-4" aria-label="{{ g.heading }} topics">
+<nav class="cards" aria-label="{{ g.heading }} topics">
   {% for e in g.entries %}
-  {# Status comes from the article index (topics/articles.json), which update-tags keeps in
-     step with the pages. It is only shown on the maintainer's all-pages view: on `/topics/`
-     everything listed is final, so a "final" pill on every card would say nothing. #}
+  {# The same card shape as the home and docs indexes: glyph · name + page title · arrow,
+     so the three read as one family. Status comes from the article index
+     (topics/articles.json); it is only shown on the maintainer's all-pages view — on
+     `/topics/` everything listed is final, so a "final" pill on every card would say
+     nothing, and there the arrow takes the trailing slot instead. #}
   <a class="card{% if show_status and e.status == 'draft' %} is-draft{% endif %}"
      href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
     <span class="card-ic">&lambda;</span>
-    <span class="card-title">{{ e.heading }}</span>
-    {% if show_status and e.status == 'final' %}<span class="pill pill-final">final</span>{% endif %}
+    <span><span class="card-title">{{ e.heading }}</span>
+      {% if e.title %}<span class="card-desc">{{ e.title }}</span>{% endif %}</span>
+    {% if show_status and e.status == 'final' %}<span class="pill pill-final">final</span>
+    {% else %}<span class="card-go">&rarr;</span>{% endif %}
   </a>
   {% endfor %}
 </nav>

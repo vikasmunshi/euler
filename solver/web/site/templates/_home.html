@@ -60,15 +60,15 @@
           'The mathematics behind the problems, written down before it was forgotten.') }}
   {% if subject %}
   {# The one card that is not a place to go: the terminal is already here, in the
-     right pane. So this tile does the layout thing — minimize it to the footer to give
-     the content the full width, or restore it — while Connect/Disconnect (the socket)
-     stays in the user menu. site.js paints the [data-term-min-label] Restore/Minimize
-     from the one persisted flag, so the tile, the pane handle and the footer strip agree. #}
+     right pane. This tile toggles its layout — minimize it to the footer to give the
+     content the full width, or restore it — while Connect/Disconnect (the socket) stays
+     in the user menu. It wears the same arrow as the other tiles for one visual family;
+     the description says what it does. #}
   <button type="button" class="card card-term" data-term-minimize>
     <span class="card-ic">&#10095;</span>
     <span><span class="card-title">Terminal</span>
       <span class="card-desc">Minimize the shell to the footer, or bring it back — the session keeps running.</span></span>
-    <span class="card-go" data-term-min-label>Minimize</span>
+    <span class="card-go">&rarr;</span>
   </button>
   {% else %}
   <span class="card is-locked">

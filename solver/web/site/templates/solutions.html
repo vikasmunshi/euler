@@ -1,34 +1,38 @@
 {% extends "base.html" %}
 {% block title %}solutions · euler{% endblock %}
 {% block content %}
-<section class="panel">
-  <h1>Solutions</h1>
-  {% if status %}<p class="status ok">{{ status }}</p>{% endif %}
-  {# Frost, "Stopping by Woods on a Snowy Evening" — the count is the fact; the
-     lede is for the miles still to go, not for restating what the grid shows. #}
-  <p class="lead"><strong>{{ solved }}</strong> of <strong>{{ total }}</strong> solved —
+{% if status %}<p class="status ok">{{ status }}</p>{% endif %}
+{# The same hero header the docs and topics indexes wear, so the three read as one page.
+   Frost, "Stopping by Woods on a Snowy Evening" — the count is the fact; the lede is for
+   the miles still to go, not for restating what the grid shows. #}
+<header class="hero">
+  <p class="kicker">solutions</p>
+  <h1>Every problem</h1>
+  <p class="lede"><strong>{{ solved }}</strong> of <strong>{{ total }}</strong> solved —
      the woods are lovely, dark and deep, but I have promises to keep,
      and miles to go before I sleep.</p>
-  <div class="grid-row">
-    {% for grid in grids %}
-    <div class="century">
-      <h2 class="century-label">{{ '%04d' % grid.start }} – {{ '%04d' % (grid.start + 99) }}
-          <span class="muted">({{ grid.solved }} solved)</span></h2>
-      <div class="century-grid">
-        {% for cell in grid.cells %}
-          {% set n = grid.start + loop.index0 %}
-          {% if cell %}
-            <a class="cell {{ 'solved heat-%d' % cell.heat if cell.solved else 'unsolved' }}"
-               href="/solutions/{{ '%04d' % n }}/"
-               hx-get="/solutions/{{ '%04d' % n }}/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
-               title="{{ n }} · {{ cell.title }}{% if cell.pct %} · {{ cell.pct }}%{% endif %}">{{ n }}</a>
-          {% else %}
-            <span class="cell empty"></span>
-          {% endif %}
-        {% endfor %}
-      </div>
+</header>
+<div class="grid-row">
+  {% for grid in grids %}
+  <div class="century">
+    {# The grid heading in the shared tile/eyebrow idiom — a monospace accent kicker,
+       matching the hero's kicker and the workbench/readme eyebrows across the app. #}
+    <h2 class="century-label">{{ '%04d' % grid.start }} – {{ '%04d' % (grid.start + 99) }}
+        <span class="muted">({{ grid.solved }} solved)</span></h2>
+    <div class="century-grid">
+      {% for cell in grid.cells %}
+        {% set n = grid.start + loop.index0 %}
+        {% if cell %}
+          <a class="cell {{ 'solved heat-%d' % cell.heat if cell.solved else 'unsolved' }}"
+             href="/solutions/{{ '%04d' % n }}/"
+             hx-get="/solutions/{{ '%04d' % n }}/" hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+             title="{{ n }} · {{ cell.title }}{% if cell.pct %} · {{ cell.pct }}%{% endif %}">{{ n }}</a>
+        {% else %}
+          <span class="cell empty"></span>
+        {% endif %}
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
-</section>
+  {% endfor %}
+</div>
 {% endblock %}
