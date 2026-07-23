@@ -466,6 +466,11 @@ body.terminal-doc {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
+  /* A little right padding so the rightmost tile's hover (a 2px shift + the accent
+     border) and its keyboard focus ring (a 2px outline at 2px offset) are not clipped
+     by the content pane's overflow edge. Left stays flush, so the grid still lines up
+     with the hero above it. */
+  padding-right: 0.5rem;
 }
 .cards.cards-3 { grid-template-columns: repeat(3, 1fr); }
 /* A draft is a page that exists but is not written yet — readable, not advertised. */
