@@ -499,6 +499,8 @@ class ContentServiceTests(AioHTTPTestCase):
         body = await resp.text()
         self.assertIn('a@example.com', body)
         self.assertIn('pill-admin', body)                   # the profile rung, the whole story now
+        self.assertIn('id="password-fold"', body)           # the fold the Change password action opens
+        self.assertIn('data-action="change-password"', body)  # the Change password Action (F8)
 
 
 _PY_OK = 'def solve() -> str:\n    return str(42)\n'

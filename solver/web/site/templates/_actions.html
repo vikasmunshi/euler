@@ -22,6 +22,10 @@
         {% elif a.kind == 'submit' %}
         {# Submits the pane's editor form (site.js) — Save without leaving the menu bar. #}
         <button type="button" data-action="submit-editor">{{ a.label }}</button>
+        {% elif a.kind == 'client' %}
+        {# A page-local behaviour handled entirely in site.js (e.g. opening the account
+           page's folded password form). `command` names the action; no server round-trip. #}
+        <button type="button" data-action="{{ a.command }}">{{ a.label }}</button>
         {% else %}
         <button type="button"
                 {% if a.kind == 'post' %}hx-post="{{ a.path }}"{% else %}hx-delete="{{ a.path }}"{% endif %}

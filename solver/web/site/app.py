@@ -538,6 +538,9 @@ async def account(request: web.Request) -> web.StreamResponse:
         'ladder': LADDER,
         'email': _subject(request).user,
         'crumbs': [_HOME, ('account', None)],
+        # A client-side Action (site.js) that opens the folded password form in place —
+        # a rare, deliberate act kept behind a summary on the page, surfaced from the menu.
+        'actions': [Action(label='Change password', kind='client', command='change-password')],
     }, block='content')
 
 

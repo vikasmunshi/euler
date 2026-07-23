@@ -148,6 +148,11 @@
       var form = document.querySelector('#content form.editor-form');
       if (form) { form.requestSubmit(); }
     }
+    // The account page's "Change password" Action opens the folded form in place.
+    if (ev.target.closest('[data-action="change-password"]')) {
+      var fold = document.getElementById('password-fold');
+      if (fold) { fold.open = true; fold.scrollIntoView({ block: 'nearest' }); }
+    }
     // The header's back arrow: a swap, never a document navigation (its href is
     // the no-JS fallback, and what a middle-click opens in a new tab).
     if (ev.target.closest('#nav-back') && window.htmx && !ev.metaKey && !ev.ctrlKey) {
