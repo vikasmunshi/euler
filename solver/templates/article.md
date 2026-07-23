@@ -4,6 +4,5 @@
 
 _TODO: write this page. ${reference}_
 
-<!-- $gen_marker
-$refs
--->
+<!-- $gen_open -->
+<!-- $gen_close -->
