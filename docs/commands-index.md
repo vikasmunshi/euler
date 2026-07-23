@@ -71,6 +71,7 @@ a parameter that accepts repetition.
 | [`git-identity`](#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
 | [`git-publish`](#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-push`](#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
+| [`git-reset`](#command-git-reset-reset) | `reset` | Un-commit local commits back to origin/master, keeping the changes staged. » |
 | [`git-status`](#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](#command-key-reconstruct) | — | Recover master key from shares. |
@@ -595,13 +596,14 @@ gh-merge
 ```
 
 ```text
-List the open pull requests, or walk them one at a time to squash-merge.
+List the open pull requests, or walk them one at a time to rebase-merge.
 
 `list` (the default) shows what is waiting: number, title, branch. `merge` walks
-the open pull requests interactively — per request **merge** (squash onto master),
+the open pull requests interactively — per request **merge** (rebase onto master),
 **skip**, or **quit** — the same shape as `users process-requests`. Merging one is
-how a collaborator's `user/<slug>` branch lands on master; their next `git-sync`
-then rebases the squashed commit away and prunes the merged branch.
+how a collaborator's `user/<slug>` branch lands on master, each of its commits
+replayed onto the tip; their next `git-sync` then rebases those already-applied
+commits away and prunes the merged branch.
 
 A pull request must sit wholly inside `solutions/` **or** wholly inside `topics/` —
 anything else is refused, and a branch spanning both is asked to become two pull
@@ -633,7 +635,7 @@ gh-merge-docs
 ```
 
 ```text
-Walk the open pull requests, squash-merging those that touch only the docs set.
+Walk the open pull requests, rebase-merging those that touch only the docs set.
 
 `gh-merge`'s sibling for documentation: same interactive walk — per request
 **merge**, **skip**, or **quit** — but the gate admits :data:`DOCS_PATHS` instead of the
@@ -934,6 +936,36 @@ Args:
            branch onto a moved origin/master. Refused on master.
     pr:    Open a pull request onto master after a successful push. Defaults to
            True; `--no-pr` pushes and stops there.
+```
+
+---
+
+#### Command: `git-reset` (`reset`)
+
+Un-commit local commits back to origin/master, keeping the changes staged.
+* profiles: admin, maintainer, contributor
+* » supports `--silent`
+
+```
+git-reset
+[silent=true|--silent]
+```
+
+```text
+Soft-reset your branch to origin/master — un-commit, keep every change.
+
+The undo `git-commit --reset` never lets you stop at: this runs
+    `git reset --soft origin/master`, moving your branch tip back to origin/master
+    while leaving the working tree untouched, so every local commit's changes survive
+    as staged edits. From there re-commit differently (`git-commit`), restage
+    selectively, or leave it — whereas `git-commit --reset` squashes straight into one
+    fresh commit and gives you no such pause.
+
+Makes no commit, so it runs no hooks and is a clean no-op — exit 0 — when your branch
+    is already level with origin/master. Undone commits are not lost: they stay
+    reachable through the reflog until git eventually prunes them.
+
+Aliased as `reset`.
 ```
 
 ---

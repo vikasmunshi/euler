@@ -229,6 +229,7 @@ command name below links to its full entry — usage and description — in the
 | [`git-identity`](commands-index.md#command-git-identity-identity) | `identity` | Sign in to GitHub (gh) and set this clone's git identity from it. |
 | [`git-publish`](commands-index.md#command-git-publish-publish) | `publish` | Push targets (keys|scripts|solutions|solver) to remote. » |
 | [`git-push`](commands-index.md#command-git-push-push) | `push` | Push the current branch to origin and open a pull request onto master. » |
+| [`git-reset`](commands-index.md#command-git-reset-reset) | `reset` | Un-commit local commits back to origin/master, keeping the changes staged. » |
 | [`git-status`](commands-index.md#command-git-status-status) | `status` | Display sync state between local and origin/master. |
 | [`git-sync`](commands-index.md#command-git-sync-sync) | `sync` | Bring the local repository in sync with origin/master. |
 | [`key-reconstruct`](commands-index.md#command-key-reconstruct) | — | Recover master key from shares. |

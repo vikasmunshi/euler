@@ -60,6 +60,7 @@ a profile on each channel.
 | `solver.core.git` | `git-identity` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-publish` |  |  |  | ✓ |
 | `solver.core.git` | `git-push` |  | ✓ | ✓ | ✓ |
+| `solver.core.git` | `git-reset` |  | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-status` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.git` | `git-sync` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.list` | `ls` | ✓ | ✓ | ✓ | ✓ |
