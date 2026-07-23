@@ -456,10 +456,30 @@ async def doc_page(request: web.Request) -> web.StreamResponse:
 
 @requires('reader')
 async def topics_index(request: web.Request) -> web.StreamResponse:
-    """``GET /topics/`` — the topics index (card grid, one section per folder)."""
+    """``GET /topics/`` — the topics index (card grid, one section per folder).
+
+    Finished pages only. ``update-tags`` creates a skeleton for every tag, so the tree holds
+    a page per topic whether or not anyone has written it; a reader given all of them cannot
+    find the few that say something. Nothing here is marked ``final`` because everything is.
+    """
     return render(request, 'topics.html', {
         'groups': content.list_topic_groups(request.app[CONFIG_KEY].repo_root),
         'crumbs': [_HOME, ('topics', None)],
+    }, block='content')
+
+
+@requires('maintainer')
+async def topics_all(request: web.Request) -> web.StreamResponse:
+    """``GET /topics/all`` — every page, draft and final: the writing queue.
+
+    The maintainer's view of the same grid, where the status *is* the information, so the
+    finished ones are marked. Registered ahead of the ``{name:.+}`` page route, which would
+    otherwise swallow it — the cost is that a topic may not be called ``all``.
+    """
+    return render(request, 'topics.html', {
+        'groups': content.list_topic_groups(request.app[CONFIG_KEY].repo_root, drafts=True),
+        'show_status': True,
+        'crumbs': [_HOME, ('topics', '/topics/'), ('all', None)],
     }, block='content')
 
 
@@ -472,6 +492,9 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
         raise web.HTTPNotFound(text=f'no topic called {html.escape(name)}')
     return render(request, 'topic.html', {
         'name': name,
+        # Read from the page itself rather than the index: the file is the fact, and a page
+        # written since the last `update-tags` would otherwise show a stale verb.
+        'status': content.topic_status(text),
         'body': content.render_markdown(text, route_base='/topics/'),
         'crumbs': [_HOME, ('topics', '/topics/'), (name, None)],
     }, block='content')
@@ -683,6 +706,7 @@ def add_content_routes(app: web.Application) -> None:
         web.get(r'/docs/{name}', doc_page),
         web.get('/topics', redirect_slash),
         web.get('/topics/', topics_index),
+        web.get('/topics/all', topics_all),         # before the catch-all, which would match it
         web.get(r'/topics/{name:.+}', topic_page),  # {name} may be a nested folder/page path
         web.get(r'/about/{name}', about_page),
         # account

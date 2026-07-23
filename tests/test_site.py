@@ -433,16 +433,38 @@ class ContentServiceTests(AioHTTPTestCase):
             self.assertEqual(resp.status, 404, name)
 
     @unittest_run_loop
-    async def test_topics_index_and_page(self) -> None:
+    async def test_topics_index_lists_final_pages_only(self) -> None:
+        """update-tags gives every tag a skeleton, so an unfiltered index would bury the few
+        written pages under hundreds of TODO stubs. A page is still servable by URL."""
         resp = await self.client.get('/topics/', headers=_READER)
         self.assertEqual(resp.status, 200)
-        self.assertIn('/topics/technique/sieve-of-eratosthenes', await resp.text())
+        body = await resp.text()
+        self.assertNotIn('/topics/technique/sieve-of-eratosthenes', body)   # a draft: not listed
+        # …but reachable directly, and it renders
         resp = await self.client.get('/topics/technique/sieve-of-eratosthenes', headers=_READER)
         self.assertEqual(resp.status, 200)
         self.assertIn('Sieve of Eratosthenes', await resp.text())
-        # every tag now has a page, so a tag the vocabulary carries is always servable
         resp = await self.client.get('/topics/domain/practical-number', headers=_READER)
         self.assertEqual(resp.status, 200)
+
+    @unittest_run_loop
+    async def test_topics_all_is_maintainer_only_and_shows_drafts(self) -> None:
+        """The writing queue: same grid, drafts included, gated at maintainer."""
+        for headers in (_READER, _CONTRIBUTOR):
+            resp = await self.client.get('/topics/all', headers=headers)
+            self.assertEqual(resp.status, 403, headers['X-Profile'])
+        resp = await self.client.get('/topics/all', headers=_MAINTAINER)
+        self.assertEqual(resp.status, 200)
+        body = await resp.text()
+        self.assertIn('/topics/technique/sieve-of-eratosthenes', body)      # the draft is listed
+        self.assertIn('is-draft', body)                                     # …and marked as one
+
+    @unittest_run_loop
+    async def test_topics_all_is_not_swallowed_by_the_page_route(self) -> None:
+        """`/topics/{name:.+}` would match 'all'; the specific route is registered first."""
+        resp = await self.client.get('/topics/all', headers=_MAINTAINER)
+        self.assertEqual(resp.status, 200)
+        self.assertIn('cards', await resp.text())            # the grid, not a 404 page lookup
 
     @unittest_run_loop
     async def test_topics_nested_folder(self) -> None:
@@ -451,7 +473,7 @@ class ContentServiceTests(AioHTTPTestCase):
 
         Every tag page is nested now (`domain/<slug>.md`), so this uses one rather than the
         curated `number-theory/primes` it used to - curated pages come from `create-topic`."""
-        index = await (await self.client.get('/topics/', headers=_READER)).text()
+        index = await (await self.client.get('/topics/all', headers=_MAINTAINER)).text()
         self.assertIn('/topics/domain/practical-number', index)
         self.assertIn('<h3>Domain</h3>', index)                     # the folder is the section
         self.assertIn('class="card-title">Practical Number<', index)  # the card carries the leaf
@@ -663,9 +685,13 @@ class TopicCardStatusTests(unittest.TestCase):
     Deliberately not asserted against the live `topics/` tree: a page's status is
     exactly the thing that changes when someone writes an article, and a test that
     reads "primes is a draft" fails the day it stops being one.
+
+    Rendered with ``show_status``, i.e. the maintainer's `/topics/all`. That is the only
+    view where status is shown: `/topics/` lists finished pages exclusively, so a "final"
+    pill on every card there would carry no information.
     """
 
-    def _render(self, status: str) -> str:
+    def _render(self, status: str, *, show_status: bool = True) -> str:
         env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(Path(__file__).resolve().parents[1]
                                            / 'solver/web/site/templates'),
@@ -675,12 +701,46 @@ class TopicCardStatusTests(unittest.TestCase):
         group = content.TopicGroup(name='number-theory', heading='Number Theory', entries=[entry])
         return render_block(env, 'topics.html', 'content',
                             {'groups': [group], 'crumbs': [], 'actions': [], 'git': None,
-                             'csp_nonce': '', 'subject': None})
+                             'show_status': show_status, 'csp_nonce': '', 'subject': None})
+
+    def test_the_reader_index_marks_nothing(self) -> None:
+        """Without show_status there is no pill and no muting: everything listed is final."""
+        body = self._render('final', show_status=False)
+        self.assertNotIn('pill-final', body)
+        self.assertNotIn('is-draft', body)
 
     def test_a_draft_card_is_muted_and_carries_no_pill(self) -> None:
         body = self._render('draft')
         self.assertIn('class="card is-draft"', body)
         self.assertNotIn('pill-final', body)
+
+    def test_article_verbs_track_status_and_the_maintainer_floor(self) -> None:
+        """Write on a draft, Rewrite --force on a final, nothing for a non-maintainer."""
+        env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(Path(__file__).resolve().parents[1]
+                                           / 'solver/web/site/templates'),
+            autoescape=True)
+
+        class _Subject:
+            def __init__(self, top: str) -> None:
+                self._floors = {'reader': ('reader',),
+                                'maintainer': ('reader', 'contributor', 'maintainer')}[top]
+
+            def has(self, cap: str) -> bool:
+                return cap in self._floors
+
+        def _page(status: str, top: str) -> str:
+            return render_block(env, 'topic.html', 'content',
+                                {'name': 'domain/x', 'status': status, 'body': '<p>x</p>',
+                                 'crumbs': [], 'actions': [], 'git': None, 'csp_nonce': '',
+                                 'subject': _Subject(top)})
+
+        draft = _page('draft', 'maintainer')
+        self.assertIn('data-term-cmd="claude-blog domain/x"', draft)
+        self.assertNotIn('--force', draft)
+        final = _page('final', 'maintainer')
+        self.assertIn('data-term-cmd="claude-blog domain/x --force"', final)
+        self.assertNotIn('topic-verbs', _page('draft', 'reader'))   # no verbs below the floor
 
     def test_a_final_card_says_so_and_is_not_muted(self) -> None:
         body = self._render('final')

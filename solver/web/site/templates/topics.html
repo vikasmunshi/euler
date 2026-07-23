@@ -6,6 +6,12 @@
   <h1>The mathematics</h1>
   <p class="lede">Writeups on the ideas the problems keep reusing — sieve once,
      solve forever.</p>
+  {# The maintainer's way into the writing queue. `/topics/` is finished pages only, so
+     without this the drafts are unreachable from the UI. Readers never see the link. #}
+  {% if not show_status and subject and subject.has('maintainer') %}
+  <p class="meta"><a href="/topics/all" hx-get="/topics/all" hx-target="#content"
+     hx-swap="innerHTML" hx-push-url="true">show drafts →</a></p>
+  {% endif %}
 </header>
 {% if groups %}
 {# One section per folder of topics/: the folder is the heading, so the cards below
@@ -15,20 +21,24 @@
 <div class="subrule"><h3>{{ g.heading }}</h3><span class="count">{{ g.entries | length }}</span></div>
 <nav class="cards cards-4" aria-label="{{ g.heading }} topics">
   {% for e in g.entries %}
-  {# A page still being written is muted; a finished one says so. Status comes from the
-     article index (topics/articles.json), which update-tags keeps in step with the pages. #}
-  <a class="card{% if e.status == 'draft' %} is-draft{% endif %}"
+  {# Status comes from the article index (topics/articles.json), which update-tags keeps in
+     step with the pages. It is only shown on the maintainer's all-pages view: on `/topics/`
+     everything listed is final, so a "final" pill on every card would say nothing. #}
+  <a class="card{% if show_status and e.status == 'draft' %} is-draft{% endif %}"
      href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
      hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
     <span class="card-ic">&lambda;</span>
     <span><span class="card-title">{{ e.heading }}</span>
       {% if e.title %}<span class="card-desc">{{ e.title }}</span>{% endif %}</span>
-    {% if e.status == 'final' %}<span class="pill pill-final">final</span>{% endif %}
+    {% if show_status and e.status == 'final' %}<span class="pill pill-final">final</span>{% endif %}
   </a>
   {% endfor %}
 </nav>
 {% endfor %}
 {% else %}
-<p class="muted">Nothing written yet — the mathematics is still oral tradition.</p>
+<p class="muted">Nothing written yet — the mathematics is still oral tradition.{%
+   if not show_status and subject and subject.has('maintainer') %}
+   <a href="/topics/all" hx-get="/topics/all" hx-target="#content" hx-swap="innerHTML"
+      hx-push-url="true">See the drafts</a>.{% endif %}</p>
 {% endif %}
 {% endblock %}

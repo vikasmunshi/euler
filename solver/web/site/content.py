@@ -15,7 +15,7 @@ from __future__ import annotations
 __all__ = ['ProblemInfo', 'Century', 'DocEntry', 'TopicGroup', 'TEXT_SUFFIXES', 'ABOUT_PAGES',
            'solution_dir', 'load_problems', 'centuries', 'problem_files',
            'resolve_file', 'resolve_repo_file', 'load_json', 'render_markdown',
-           'rewrite_statement_links', 'git_status',
+           'rewrite_statement_links', 'git_status', 'topic_status',
            'list_docs', 'read_doc', 'list_topics', 'list_topic_groups', 'read_topic',
            'problem_tag_view',
            'read_about', 'readme_html',
@@ -680,11 +680,17 @@ def _indexed_topics(repo_root: Path) -> list[DocEntry]:
             if isinstance(row, dict) and row.get('path') and row.get('status') in ('draft', 'final')]
 
 
-def list_topic_groups(repo_root: Path) -> list[TopicGroup]:
+def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGroup]:
     """The topics index, folded by folder.
 
     The article index is the source when it is there (it alone knows each page's status);
     otherwise the tree is walked as :func:`list_topics` does, statusless.
+
+    ``drafts`` decides *which* pages: by default only the finished ones, because update-tags
+    now creates a skeleton for every tag and a reader offered six hundred TODO stubs cannot
+    find the handful worth reading. The maintainer view passes ``drafts=True`` to see the
+    writing queue. A statusless fallback (no index on disk) lists everything either way —
+    there is nothing to filter on, and showing nothing would be worse.
 
     The folder is the section heading, so each card drops the trail and shows only
     its leaf heading. Groups come out in path order, the pages loose at the root of
@@ -692,8 +698,14 @@ def list_topic_groups(repo_root: Path) -> list[TopicGroup]:
     restates its filename (the per-tag skeletons) keeps an empty *title*, so the card
     shows one line instead of saying the same thing twice.
     """
+    # `or list_topics(...)` only when the index is *absent*. An index that filters to nothing
+    # (no page is final yet) must list nothing - falling back there would show every draft,
+    # which is precisely what the filter exists to prevent.
+    indexed = _indexed_topics(repo_root)
+    entries = ([entry for entry in indexed if drafts or entry.status == 'final']
+               if indexed else list_topics(repo_root))
     groups: dict[str, list[DocEntry]] = {}
-    for entry in _indexed_topics(repo_root) or list_topics(repo_root):
+    for entry in entries:
         folder, _, leaf = entry.name.rpartition('/')
         heading = _filename_heading(leaf)
         title = '' if _same_words(entry.title, heading) else entry.title
@@ -701,6 +713,22 @@ def list_topic_groups(repo_root: Path) -> list[TopicGroup]:
     return [TopicGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
                        entries=entries)
             for folder, entries in sorted(groups.items())]
+
+
+#: An article's own status comment. Mirrors `solver.core.tags.article_status`, deliberately
+#: rather than importing it: that module pulls in the shell framework (prompt-toolkit and the
+#: command registry), which has no business inside a web service. Three lines of regex is the
+#: cheaper coupling.
+_ARTICLE_STATUS_RE = re.compile(r'<!--\s*status:\s*(\w+)\s*-->', re.IGNORECASE)
+
+
+def topic_status(text: str) -> str:
+    """An article's status: ``final`` only when it says so, else ``draft``.
+
+    A page on disk is never ``missing`` however its comment reads - the file is the fact.
+    """
+    m = _ARTICLE_STATUS_RE.search(text)
+    return 'final' if m and m.group(1).lower() == 'final' else 'draft'
 
 
 def read_topic(repo_root: Path, name: str) -> str | None:
