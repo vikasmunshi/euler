@@ -2481,7 +2481,7 @@
     {
       "path": "takeaway/cheap-checks-first",
       "title": "Order checks by cost",
-      "status": "draft",
+      "status": "final",
       "tags": ["cheap-checks-first"],
       "refs": ["p0103", "p0200", "p0206", "p0216", "p0347", "p0357", "p0719", "p0808"]
     },
