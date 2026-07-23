@@ -1,8 +1,89 @@
 <!-- tags: [sieve-of-eratosthenes] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Sieve of Eratosthenes
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes>._
+The [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) finds
+every prime up to a bound `N` by elimination: start with all numbers from 2 to `N`
+marked prime, then for each number still marked, strike out its multiples. Whatever
+survives is prime. It is the default answer whenever a problem needs *many* primes below
+a bound you know in advance — but its real value in Project Euler is often the artefact
+it leaves behind, not the enumeration itself.
+
+## The mechanism
+
+Two observations turn the naive "cross out every multiple of every prime" into something
+fast:
+
+- **Start at `p*p`.** When you reach a prime `p`, every multiple of `p` below `p*p` — that
+  is `2p, 3p, … (p-1)p` — was already struck out by a smaller prime factor. So the first
+  multiple worth touching is `p*p`.
+- **Stop at `√N`.** Once `p*p > N` there is nothing left to strike: any composite `≤ N`
+  has a prime factor `≤ √N`, so by the time you have sieved with every prime up to `√N`,
+  every composite is already marked.
+
+Those two bounds are what give the sieve its `O(N log log N)` running time — near-linear,
+and the reason it beats testing each number one at a time. The whole thing is a few lines
+of strided assignment over a byte array (`solutions/public/p0010/`):
+
+```python
+sieve = bytearray(b"\x01") * (max_num + 1)
+sieve[0] = sieve[1] = 0
+for i in range(2, int(max_num ** 0.5) + 1):
+    if sieve[i]:
+        sieve[i * i:: i] = bytearray(len(range(i * i, max_num + 1, i)))
+```
+
+Assigning a zero-filled slice with a stride of `i` marks every multiple in one operation,
+which is what makes this far faster than a Python loop that visits each multiple by hand.
+
+## The table is the point
+
+`sieve` is not just a step toward a list of primes — it is a **primality oracle**:
+`sieve[k]` answers "is `k` prime?" in `O(1)`, for every `k` up to the bound, for the rest
+of the program. A great many prime problems are really "build the oracle once, then query
+it a lot": circular primes rotate a candidate's digits and test each rotation
+(`solutions/public/p0035/`), truncatable primes chip digits off both ends and test the
+survivors (`solutions/public/p0037/`). Both do thousands of membership checks; both want a
+table, not a fresh test each time. If your solution calls a primality function in a tight
+loop, a sieve that precomputes the answers is usually the speed-up.
+
+The same idea generalises past a boolean: sieve a table of each number's **smallest prime
+factor**, and you can factor any number up to the bound by repeated lookup, with no trial
+division at all — the right tool when a problem needs the *factorisations* of a whole
+range, not merely which numbers are prime.
+
+## Variants, and when you need them
+
+- **Bounded array** — the default above. You know `N`, it fits in memory, you want a table.
+- **Unbounded / incremental** — when you do *not* know the bound: you need "primes until
+  some condition holds", not "primes below `N`". An incremental sieve is a generator that
+  keeps a dictionary mapping each known prime's next multiple to the prime, and yields
+  primes forever with no ceiling fixed in advance (`solutions/public/p0010/` carries one
+  such generator; `solutions/public/p0037/` streams primes from Eppstein's dict-based
+  version until the eleven truncatable primes are found). You trade the array's raw speed
+  for not having to guess `N`.
+- **Segmented** — when `N` is known but the array will not fit: sieve `[1, √N]` once for
+  the small primes, then sweep the range in cache-sized windows, marking each window with
+  those primes. Same primes, bounded memory.
+- **Sieve of Sundaram** — a variant that marks `i + j + 2ij` to knock out the odd
+  composites directly (`solutions/public/p0010/` has one for contrast). It is a tidy
+  curio, but at `O(N log N)` it is asymptotically slower than Eratosthenes; reach for it to
+  understand the family, not for speed.
+
+For contrast, the same `solutions/public/p0010/` also solves the problem by trial-division
+primality on each candidate — correct, and `O(N√N / log N)`, which is exactly the blow-up
+the sieve exists to avoid when the question is about a whole range.
+
+## Two things to get right
+
+- **Size it to the inputs.** When the problem gives you an *index* — "the `n`-th prime" —
+  rather than a value ceiling, use the prime number theorem's estimate that the `n`-th
+  prime is near `n·ln n` and sieve that far. When it gives a value bound, sieve to the
+  bound.
+- **Build it inside `solve()`.** Construct the sieve on each call, sized to the inputs —
+  not once at module level. With `--runs=N` the harness times repeated `solve()` calls; a
+  sieve built once at import is excluded from the first run and free thereafter, which
+  flatters the benchmark and hides the cost that is often the bulk of the work.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
