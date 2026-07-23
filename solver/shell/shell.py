@@ -269,7 +269,7 @@ class SolverShell:
                     except SystemExit as exit_signal:
                         return int(exit_signal.code) if isinstance(exit_signal.code, int) else 0
                     except KeyboardInterrupt:
-                        self.console.print('[muted]^C[/muted]')
+                        self.console.print('[muted]Ctrl-C[/muted]')
                         break
                     finally:
                         last_problem = self._persist_last_problem(last_problem)
@@ -304,13 +304,13 @@ class SolverShell:
                         set_title(f'solver · {variables.problem}')
                         block = session.prompt(self._prompt())
                     except KeyboardInterrupt:
-                        self.console.print('[muted]^C[/muted]')
+                        self.console.print('[muted]Ctrl-C[/muted]')
                         continue
                     except EOFError:
                         if (this_eof := time()) - previous_eof < 1.0:
                             break
                         previous_eof = this_eof
-                        self.console.print('[muted]Press ^D again to exit.[/muted]')
+                        self.console.print('[muted]Press Ctrl-D again to exit.[/muted]')
                         continue
                     if not block.strip():
                         continue
@@ -319,7 +319,7 @@ class SolverShell:
                     except SystemExit:
                         break
                     except KeyboardInterrupt:
-                        self.console.print('[muted]^C[/muted]')
+                        self.console.print('[muted]Ctrl-C[/muted]')
                     finally:
                         last_problem = self._persist_last_problem(last_problem)
             finally:
