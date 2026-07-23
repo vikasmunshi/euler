@@ -1093,13 +1093,14 @@ a.tag-chip:hover { border-color: var(--fc); background: color-mix(in srgb, var(-
 
 /* A section divider — a small mono label trailed by a hairline. Shared: the problem
    page's tag facets and the topics index's folders read as the same kind of break. */
-/* The topics filter box (F2) — full-width, styled to the shell. */
+/* The topics filter box (F2) — styled to the shell, inset a touch from the pane edges
+   with comfortable internal padding on both sides. */
 .topic-filter {
-  width: 100%;
-  margin: 0 0 0.9rem;
+  width: calc(100% - 1rem);
+  margin: 0 0.5rem 0.9rem;
   font: inherit; color: var(--text);
   background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  padding: 0.45rem 0.65rem;
+  padding: 0.5rem 0.85rem;
 }
 .topic-filter:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .topic-filter::placeholder { color: var(--muted); }

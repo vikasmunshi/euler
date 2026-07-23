@@ -8,11 +8,13 @@
      apply forever.</p>
 </header>
 {% if groups %}
-{# Client-side filter (site.js): typing hides the cards whose text does not match, and
-   a folder heading whose cards are all hidden goes with them. No server round-trip —
-   the whole tree is already on the page. #}
-<input type="search" class="topic-filter" placeholder="Filter topics…"
-       aria-label="Filter topics" autocomplete="off">
+{# Client-side filter (site.js): typing hides the cards whose data-filter string does not
+   match, and a folder heading whose cards are all hidden goes with them. No server
+   round-trip — the whole tree is already on the page. Each card's data-filter carries the
+   full path (facet/slug), the folder heading and the display name, so the facet
+   ('technique') and the slug ('np-where') both match even though the card shows 'Np Where'. #}
+<input type="search" class="topic-filter" placeholder="Filter by name, slug or facet…"
+       aria-label="Filter topics by name, slug or facet" autocomplete="off">
 {# One section per folder of topics/: the folder is the heading, so the cards below
    carry only their leaf name and pack four to a row. A card's second line is the
    page's own title — dropped where it only repeats the name (the per-tag pages). #}
@@ -27,7 +29,8 @@
      nothing, and there the arrow takes the trailing slot instead. #}
   <a class="card{% if show_status and e.status == 'draft' %} is-draft{% endif %}"
      href="/topics/{{ e.name }}" hx-get="/topics/{{ e.name }}"
-     hx-target="#content" hx-swap="innerHTML" hx-push-url="true">
+     hx-target="#content" hx-swap="innerHTML" hx-push-url="true"
+     data-filter="{{ e.name }} {{ g.heading }} {{ e.heading }} {{ e.title }}">
     <span class="card-ic">&lambda;</span>
     <span><span class="card-title">{{ e.heading }}</span>
       {% if e.title %}<span class="card-desc">{{ e.title }}</span>{% endif %}</span>

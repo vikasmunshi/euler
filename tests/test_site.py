@@ -485,6 +485,9 @@ class ContentServiceTests(AioHTTPTestCase):
         self.assertIn('<h3>Domain</h3>', index)                     # the folder is the section
         self.assertIn('class="card-title">Practical Number<', index)  # the card carries the leaf
         self.assertIn('class="cards"', index)                       # the shared card grid (F7)
+        # the filter matches facet + slug, not just the display name: the full path is
+        # in the card's data-filter search string
+        self.assertIn('data-filter="domain/practical-number', index)
         resp = await self.client.get('/topics/domain/practical-number', headers=_READER)
         self.assertEqual(resp.status, 200)
         self.assertIn('Practical number', await resp.text())

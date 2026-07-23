@@ -341,11 +341,14 @@
 
   // ── the topics filter ──────────────────────────────────────────────────────
   // A .topic-filter box (topics.html) narrows the card grid in place: hide the cards
-  // whose text does not contain the query, and hide a folder heading (.subrule) plus
-  // its card grid when every card under it is gone. Client-side only — the whole tree
-  // is already in the pane — and delegated, so it survives the htmx swap that brings
-  // the page in. [hidden] is beaten by the display rules on .card/.cards in site.css,
-  // so those elements carry a matching [hidden] override there.
+  // whose data-filter string does not contain the query, and hide a folder heading
+  // (.subrule) plus its card grid when every card under it is gone. The data-filter
+  // carries the full path (facet/slug), the folder heading and the display name, so
+  // the facet and the slug match as well as the visible name (it falls back to the
+  // card's text if the attribute is ever absent). Client-side only — the whole tree is
+  // already in the pane — and delegated, so it survives the htmx swap that brings the
+  // page in. [hidden] is beaten by the display rules on .card/.cards in site.css, so
+  // those elements carry a matching [hidden] override there.
   document.addEventListener('input', function (ev) {
     var input = ev.target.closest && ev.target.closest('.topic-filter');
     if (!input) { return; }
@@ -354,7 +357,8 @@
     pane.querySelectorAll('nav.cards').forEach(function (nav) {
       var anyVisible = false;
       nav.querySelectorAll('.card').forEach(function (card) {
-        var match = !q || card.textContent.toLowerCase().indexOf(q) !== -1;
+        var hay = (card.getAttribute('data-filter') || card.textContent).toLowerCase();
+        var match = !q || hay.indexOf(q) !== -1;
         card.hidden = !match;
         if (match) { anyVisible = true; }
       });
