@@ -240,7 +240,7 @@ DOCS_PATHS: tuple[str, ...] = ('docs/', 'topics/', 'README.md',
 
 #: Prefixed onto a docs commit's message when it does not already say so, so the log reads
 #: at a glance and `git log --grep` finds the set.
-DOCS_TAG: str = '(docs)'
+DOCS_TAG: str = 'docs(topic):'
 
 
 def _in_scope(path: str, scope: tuple[str, ...]) -> bool:
@@ -274,7 +274,7 @@ def _pathspecs(scope: tuple[str, ...]) -> list[str]:
 def _docs_message(message: str) -> str:
     """A docs commit message: the caller's text, tagged :data:`DOCS_TAG` unless it says so."""
     message = message.strip() or 'update'
-    return message if DOCS_TAG in message else f'{DOCS_TAG} {message}'
+    return message if message.startswith(DOCS_TAG) else f'{DOCS_TAG} {message}'
 
 
 @register(requires='maintainer', quietable=True, aliases=('commit-docs',),

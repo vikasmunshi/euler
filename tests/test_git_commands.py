@@ -610,15 +610,15 @@ class GitCommitDocsTest(_GitCommandCase):
         self.assertEqual(self.cmdlines, [
             'git add -A docs/ topics/ README.md solver/modules.csv solver/config.json '
             'solver/ai/models.py solver/ai/claude/CLAUDE.md solver/web/content/home-summary.md '
-            "':(glob)solutions/**/tags.json' && git commit --message \"(docs) regenerate\""])
+            "':(glob)solutions/**/tags.json' && git commit --message \"docs(topic): regenerate\""])
 
     def test_the_message_is_tagged_once(self) -> None:
-        git.git_commit_docs('(docs) already tagged')
-        self.assertIn('--message "(docs) already tagged"', self.cmdlines[0])
+        git.git_commit_docs('docs(topic): already tagged')
+        self.assertIn('--message "docs(topic): already tagged"', self.cmdlines[0])
 
     def test_an_empty_message_becomes_the_default(self) -> None:
         git.git_commit_docs()
-        self.assertIn('--message "(docs) update"', self.cmdlines[0])
+        self.assertIn('--message "docs(topic): update"', self.cmdlines[0])
 
     def test_a_clean_docs_set_is_a_noop_not_a_failure(self) -> None:
         """It composes in a `&&` chain after a regeneration that had nothing to do."""

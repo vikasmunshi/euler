@@ -159,7 +159,7 @@ fill.
 3. **Sanity-check:** `solver "topic <path>"` lists the tags and problems the page now resolves to.
 4. **Commit with `git-commit-docs`:**
 
-       solver "git-commit-docs '(docs) topic: <name>'"
+       solver "git-commit-docs 'docs(topic): <name>'"
 
    That command stages the whole documentation set — `topics/` included — so your page goes in
    together with everything `update-tags` touched (`topics/tags.json`, `topics/articles.json`) in
