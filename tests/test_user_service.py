@@ -326,14 +326,18 @@ class VaultRouteTests(_UserServiceCase):
     @unittest_run_loop
     async def test_account_vault_shows_the_onboarding_checklist(self) -> None:
         """The credential panel leads with a live Getting-started checklist; _OWN is a
-        contributor, so all six steps show and the API-key step tracks the stored secrets."""
+        contributor, so the five steps show and the API-key step tracks the stored secrets.
+        Vault-unlock is not a step (it is true for any signed-in session)."""
         resp = await self.client.get('/account/vault', headers=_OWN)
         self.assertEqual(resp.status, 200)
         body = await resp.text()
         self.assertIn('Getting started', body)
         self.assertIn('Create your identity', body)            # a reader+ step
-        self.assertIn('of 6 done', body)                       # contributor sees 6 steps
+        self.assertNotIn('Unlock your vault', body)            # not a getting-started step
+        self.assertIn('of 5 done', body)                       # contributor sees 5 steps
         self.assertIn('Store your ANTHROPIC_API_KEY', body)    # a contributor+ step
+        # a pending step names both routes — the terminal command and the control below
+        self.assertIn('<code>git-identity</code>', body)
         # storing the key ticks its step off
         await self._unlock()
         await self.client.post('/account/secret', headers=_OWN,
@@ -341,6 +345,18 @@ class VaultRouteTests(_UserServiceCase):
         after = await (await self.client.get('/account/vault', headers=_OWN)).text()
         key_step = after.split('Store your ANTHROPIC_API_KEY')[0].rsplit('onboard-step', 1)[-1]
         self.assertIn('is-done', key_step)                     # its row now carries the done class
+
+    @unittest_run_loop
+    async def test_account_vault_reader_sees_reader_steps_and_unavailable_tools(self) -> None:
+        """A reader gets the two reader-floor steps only; a contributor tool it cannot run
+        reads 'not available' (not 'not signed in', which would imply it could sign in)."""
+        reader = {'X-User': _EMAIL, 'X-Profile': 'reader'}
+        body = await (await self.client.get('/account/vault', headers=reader)).text()
+        self.assertIn('of 2 done', body)                       # reader steps only
+        self.assertNotIn('Sign in to the GitHub CLI', body)    # contributor steps hidden
+        gh_tool = body.rsplit('GitHub CLI', 1)[1][:300]        # the tool row, not the note
+        self.assertIn('not available', gh_tool)
+        self.assertNotIn('not signed in', gh_tool)
 
     @unittest_run_loop
     async def test_secret_upsert_locked_is_409_and_bad_name_400(self) -> None:

@@ -7,29 +7,31 @@
 {# ── Getting started: the live onboarding checklist (F9) ─────────────────────────
    Every value here is already in this fragment's context, so the checklist re-renders
    with the panel whenever a terminal command reports account/git state changed (the
-   #vault-panel refresh triggers). Steps 1–3 apply to every reader; 4–6 are the
-   contributor tools, shown and counted only at that rung. The hints are static template
+   #vault-panel refresh triggers). The reader steps apply to every rung; the contributor
+   tools are shown and counted only at that rung. Each pending step names both ways to do
+   it — the terminal command and the control lower in this panel. The whole section is
+   dropped once every step is done. Vault-unlock is not a step: it is true for any
+   signed-in session (the browser auto-unlocks on load). The hints are static template
    copy (not user input), so the inline markup is marked safe. #}
 {% set is_contrib = subject and subject.has('contributor') %}
 {% set steps = [
      {'label': 'Create your identity', 'done': pubkey_state == 'key',
-      'hint': 'Run <code>user</code> in your terminal to mint your keypair.'},
-     {'label': 'Unlock your vault', 'done': unlocked,
-      'hint': 'Unlock it below with your password.'},
+      'hint': 'Run <code>user</code> in your terminal to mint your keypair, or click <b>Create identity</b> below.'},
      {'label': 'Get decrypt access', 'done': can_decrypt,
-      'hint': 'Copy your public key to the admin, wait for authorization, then <b>Sync</b>.'}
+      'hint': 'Copy your public key to the admin below and wait for authorization, then run <code>git-sync</code> or click the <b>Private solutions</b> tool below.'}
    ] %}
 {% if is_contrib %}
 {% set _ = steps.extend([
      {'label': 'Sign in to the GitHub CLI', 'done': gh_status == 'signed in',
-      'hint': 'Run <code>git-identity</code> in your terminal.'},
+      'hint': 'Run <code>git-identity</code> in your terminal, or click the <b>GitHub CLI</b> tool below.'},
      {'label': 'Sign in to Claude Code', 'done': claude_status == 'signed in',
-      'hint': 'Sign in from your terminal (Claude Code row below).'},
+      'hint': 'Sign in from your terminal, or click the <b>Claude Code</b> tool below.'},
      {'label': 'Store your ANTHROPIC_API_KEY', 'done': 'ANTHROPIC_API_KEY' in secret_names,
-      'hint': 'Add it under Secrets below.'}
+      'hint': 'Add it under <b>Secrets</b> below.'}
    ]) %}
 {% endif %}
 {% set done = steps | selectattr('done') | list | length %}
+{% if done < steps | length %}
 <section class="onboard">
   <div class="onboard-head">
     <span class="onboard-title">Getting started</span>
@@ -49,6 +51,7 @@
      unlock at the next rung.</p>
   {% endif %}
 </section>
+{% endif %}
 
 <h2>Credentials</h2>
 <section class="vault" id="vault-state"
@@ -178,14 +181,20 @@
      to earn a refusal is worse than one plainly disabled, so the row reads the same
      floor here and does not offer it. #}
   {% set permitted = subject and subject.has(floor) %}
+  {# When this profile may not run the command, the status it reports is moot — a reader
+     cannot sign the GitHub CLI in, so `not signed in` would be a to-do it is not allowed
+     to do. Show a neutral `not available` (no tone, no dot) instead, and reserve the real
+     status for a profile that can actually change it. #}
+  {% set shown_tone = tone if permitted else '' %}
+  {% set label = status if permitted else 'not available' %}
   <div class="tool-row">
     <span class="tool-name">{{ name }}</span>
     <button type="button" data-term-cmd="{{ command }}"
-            class="state-pill state-action{% if tone %} {{ tone }}{% endif %}"
-            {% if not tone or not permitted %}disabled{% endif %}
+            class="state-pill state-action{% if shown_tone %} {{ shown_tone }}{% endif %}"
+            {% if not permitted or not tone %}disabled{% endif %}
             title="{% if not permitted %}{{ name }} needs the {{ floor }} profile{% elif not tone %}{{ name }} is not installed on this instance{% else %}run `{{ command }}` in your terminal{% endif %}">
-      <span class="dot{% if tone == 'ok' %} on{% elif tone == 'warn' %} off{% endif %}"></span>
-      {{ status }}</button>
+      <span class="dot{% if shown_tone == 'ok' %} on{% elif shown_tone == 'warn' %} off{% endif %}"></span>
+      {{ label }}</button>
   </div>
   {% endmacro %}
   {# First, because it is the one that decides whether there is anything to read:
