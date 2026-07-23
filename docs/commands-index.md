@@ -56,6 +56,7 @@ a parameter that accepts repetition.
 | [`clear`](#command-clear-cls) | `cls` | Clear the screen. |
 | [`compile-c`](#command-compile-c-compile) | `compile` | Build all C source files for given/current problem. ❏ » |
 | [`costs`](#command-costs) | — | Display total cost of AI API tokens consumed in session. |
+| [`create-topic`](#command-create-topic) | — | Create a curated topic page, choosing its tags interactively. |
 | [`echo`](#command-echo) | — | Print text. |
 | [`edit`](#command-edit-ed) | `ed` | Open a solution file in the web code editor. ❏ » |
 | [`evaluate`](#command-evaluate-eval) | `eval` | Evaluate solutions to given/current problem. ❏ |
@@ -447,6 +448,34 @@ then converts to EUR using "ecb_usd_rate".
 
 Args:
     ecb_usd_rate: conversion rate (1 € = N $). Defaults to 'config.ecb_usd_rate'.
+```
+
+---
+
+#### Command: `create-topic`
+
+Create a curated topic page, choosing its tags interactively.
+* profiles: admin, maintainer
+
+```
+create-topic <path>
+[<tags>...]
+```
+
+```text
+Seed a curated cross-cutting topic (e.g. ``number-theory/primes``) — a page that gathers
+several tags under one idea, unlike a tag's own auto-generated page.
+
+*path* is the ``folder/leaf`` the page lives at under ``topics/``. Give the tag slugs as
+arguments to create non-interactively; give none and, in an interactive shell, pick them with
+a search-and-select prompt. Every slug must exist in the vocabulary. The page is seeded from
+the same template a tag page uses (its title is the leaf, title-cased — edit it when you
+write the page) and reconciled straight away, so it appears in the draft index and its
+Problems section is filled. Write it with ``claude-blog <path>``.
+
+Args:
+    path: The ``folder/leaf`` location under ``topics/`` (lowercase words and hyphens).
+    tags: The tag slugs the page covers; omit to choose interactively.
 ```
 
 ---

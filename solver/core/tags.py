@@ -28,12 +28,13 @@ its page to ``final`` when it finishes writing.
 """
 from __future__ import annotations
 
-__all__ = ['tags', 'topics', 'topic', 'update_tags', 'format_vocabulary', 'facet_map', 'STATUSES',
-           'article_status']
+__all__ = ['tags', 'topics', 'topic', 'update_tags', 'create_topic', 'format_vocabulary',
+           'facet_map', 'STATUSES', 'article_status']
 
 import json
 import re
 import subprocess
+import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -681,3 +682,126 @@ def update_tags(check: bool = False) -> int:
                   f'{promoted} tag(s) promoted, {diff_changes} maintainer edit(s) applied')
     console.print('[accent]articles:[/accent] ' + ' · '.join(f'{written[s]} {s}' for s in STATUSES))
     return ExitCodes.EXIT_OK
+
+
+# ── curated topics ──────────────────────────────────────────────────────────────────────
+
+#: A curated-topic path segment: lowercase words and hyphens, matching the web nested-page route
+#: (`solver.web.site.content._NAME_RE`), so a topic that is creatable here is also servable there.
+_TOPIC_SEG_RE = re.compile(r'[a-z0-9][a-z0-9-]*')
+
+
+def _select_tags_interactively(vocab: list[dict[str, Any]]) -> list[str] | None:
+    """A line-based search-and-select over the tag vocabulary; the chosen slugs, or None to abort.
+
+    Line-based rather than a full-screen picker on purpose: it works identically in a terminal and
+    in the web PTY (both feed `console.input` over stdin), where a curses UI would not. Type a term
+    to search, a result's number to toggle it, ``sel`` to review, ``done`` to finish, ``quit`` to
+    abort.
+    """
+    selected: list[str] = []
+    results: list[str] = []
+    console.print('[muted]search a term · number toggles it · [accent]sel[/accent] review · '
+                  '[accent]done[/accent] · [accent]quit[/accent][/muted]')
+    while True:
+        line = console.input('[accent]tag>[/accent] ').strip()
+        if not line:
+            continue
+        if line == 'quit':
+            return None
+        if line == 'done':
+            if not selected:
+                console.print('[warning]pick at least one tag, or [accent]quit[/accent][/warning]')
+                continue
+            return selected
+        if line == 'sel':
+            console.print('[accent]selected:[/accent] ' + (', '.join(selected) or '[muted]none[/muted]'))
+            continue
+        if line.isdigit():
+            i = int(line)
+            if not 0 <= i < len(results):
+                console.print('[warning]no result with that number — search first[/warning]')
+                continue
+            slug = results[i]
+            if slug in selected:
+                selected.remove(slug)
+                console.print(f'  [muted]removed[/muted] {slug}')
+            else:
+                selected.append(slug)
+                console.print(f'  [accent]added[/accent] {slug}')
+            continue
+        term = line.lower()
+        matches = [t for t in vocab if term in t['slug'] or term in t['name'].lower()]
+        results = [t['slug'] for t in matches[:20]]
+        if not matches:
+            console.print('[muted]no tags match[/muted]')
+            continue
+        for i, t in enumerate(matches[:20]):
+            mark = '[accent]✓[/accent]' if t['slug'] in selected else ' '
+            console.print(f'  [muted]{i:2}[/muted] {mark} {t["slug"]} '
+                          f'[muted]{t["facet"]} — {t["name"]}[/muted]')
+        if len(matches) > 20:
+            console.print(f'  [muted]… {len(matches) - 20} more — refine the search[/muted]')
+
+
+@register(requires='maintainer',
+          help_text='Create a curated topic page, choosing its tags interactively.')
+def create_topic(path: str, *tags: str) -> int:
+    """Seed a curated cross-cutting topic (e.g. ``number-theory/primes``) — a page that gathers
+    several tags under one idea, unlike a tag's own auto-generated page.
+
+    *path* is the ``folder/leaf`` the page lives at under ``topics/``. Give the tag slugs as
+    arguments to create non-interactively; give none and, in an interactive shell, pick them with
+    a search-and-select prompt. Every slug must exist in the vocabulary. The page is seeded from
+    the same template a tag page uses (its title is the leaf, title-cased — edit it when you
+    write the page) and reconciled straight away, so it appears in the draft index and its
+    Problems section is filled. Write it with ``claude-blog <path>``.
+
+    Args:
+        path: The ``folder/leaf`` location under ``topics/`` (lowercase words and hyphens).
+        tags: The tag slugs the page covers; omit to choose interactively.
+    """
+    segments = path.removesuffix('.md').strip('/').split('/')
+    if len(segments) < 2 or not all(_TOPIC_SEG_RE.fullmatch(s) for s in segments):
+        console.print('[error]error:[/error] path must be [accent]folder/leaf[/accent] '
+                      '(lowercase words and hyphens), e.g. [accent]number-theory/primes[/accent]')
+        return ExitCodes.EXIT_ERROR
+    target = config.topics_dir.joinpath(*segments).with_suffix('.md')
+    if target.exists():
+        console.print(f'[error]error:[/error] {target.relative_to(config.topics_dir)} already exists')
+        return ExitCodes.EXIT_ERROR
+
+    vocab = _load_central()['tags']
+    known = {t['slug'] for t in vocab}
+    if tags:
+        chosen = list(dict.fromkeys(tags))                 # de-dupe, keep order
+        unknown = [t for t in chosen if t not in known]
+        if unknown:
+            console.print(f'[error]error:[/error] not in the vocabulary: {", ".join(unknown)}')
+            return ExitCodes.EXIT_ERROR
+    else:
+        if not sys.stdin.isatty():
+            console.print('[error]error:[/error] no tags given and not an interactive shell — '
+                          'pass the slugs as arguments (e.g. [accent]create-topic '
+                          f'{path} prime-number sieve-of-eratosthenes[/accent])')
+            return ExitCodes.EXIT_ERROR
+        console.print(f'[primary]New topic[/primary] [accent]{"/".join(segments)}[/accent] — '
+                      'choose the tags it covers.')
+        picked = _select_tags_interactively(vocab)
+        if picked is None:
+            console.print('[muted]aborted — nothing written[/muted]')
+            return ExitCodes.EXIT_OK
+        chosen = picked
+
+    title = segments[-1].replace('-', ' ').title()
+    from solver.templates.engine import Templates, get_template
+    body = get_template(Templates.ARTICLE).substitute(
+        slug=', '.join(chosen), title=title, gen_open=_GEN_OPEN, gen_close=_GEN_CLOSE,
+        reference='Curated topic — draw the through-line across the tags below yourself.')
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(body)
+    console.print(f'[accent]created[/accent] {target.relative_to(config.topics_dir)} '
+                  f'covering {len(chosen)} tag(s): {", ".join(chosen)}')
+    rc = update_tags()                                     # index it and fill its Problems section
+    console.print(f'[muted]write it with [accent]claude-blog {"/".join(segments)}[/accent][/muted]')
+    return rc

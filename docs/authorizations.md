@@ -65,6 +65,7 @@ a profile on each channel.
 | `solver.core.list` | `ls` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.new` | `new` |  | ✓ | ✓ | ✓ |
 | `solver.core.results` | `results` | ✓ | ✓ | ✓ | ✓ |
+| `solver.core.tags` | `create-topic` |  |  | ✓ | ✓ |
 | `solver.core.tags` | `tags` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `topic` | ✓ | ✓ | ✓ | ✓ |
 | `solver.core.tags` | `topics` | ✓ | ✓ | ✓ | ✓ |
