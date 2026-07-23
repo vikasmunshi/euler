@@ -3,7 +3,7 @@
     {
       "path": "domain/15-puzzle",
       "title": "15 puzzle",
-      "status": "draft",
+      "status": "final",
       "tags": ["15-puzzle"],
       "refs": ["p0244", "p0313"]
     },
