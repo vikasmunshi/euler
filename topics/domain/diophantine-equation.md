@@ -1,8 +1,112 @@
 <!-- tags: [diophantine-equation] -->
-<!-- status: draft -->
+<!-- status: final -->
 # Diophantine equation
 
-_TODO: write this page. Start from <https://en.wikipedia.org/wiki/Diophantine_equation>._
+A [Diophantine equation](https://en.wikipedia.org/wiki/Diophantine_equation) is a
+polynomial equation in which only **integer** solutions are admitted. That one word —
+*integer* — changes everything. Over the reals, `x² - 2y² = 1` is an unremarkable curve;
+over the integers it is [Pell's equation](https://en.wikipedia.org/wiki/Pell%27s_equation),
+with infinitely many solutions that march off to infinity in a rigid, predictable pattern.
+This is the largest single domain in the archive precisely because "which integers satisfy
+this?" is the question a huge fraction of number-theory problems are really asking, once you
+strip away the story about triangles, discs, or reciprocals.
+
+## The shape of the difficulty
+
+The defining trap of a Diophantine problem is that the solutions are sparse but can be
+enormous. You cannot search for them by their magnitude. Problem 66 asks for the fundamental
+solution of `x² - Dy²= 1` over `D ≤ 1000`; for `D = 661` the smallest `x` already exceeds
+`10¹⁷`, so any loop bounded by the size of the answer would never finish. The whole craft of
+solving these is to **stop searching over values and start exploiting structure** — to find
+the algebraic identity or the recurrence that hands you the solutions directly.
+
+Across the problems below, the same handful of structural moves recur.
+
+### Eliminate a variable with a linear constraint
+
+The gentlest case. When a Diophantine system pairs a hard equation with a *linear* one, the
+linear equation lets you delete a variable and collapse the search a dimension. In
+[Problem 9](/solutions/0009/) — a
+[Pythagorean triple](https://en.wikipedia.org/wiki/Pythagorean_triple) `a² + b² = c²` with
+the side constraint `a + b + c = 1000` — you never search for `c` at all:
+
+```python
+for a in range(1, s // 4 + 1):
+    for b in range(a, s // 2):
+        c = s - a - b            # the linear constraint fixes c; no third loop
+        if a * a + b * b == c * c:
+            return a * b * c
+```
+
+Two nested loops instead of three, exact integer arithmetic instead of a floating-point
+square root. The lesson generalises: a linear side-condition is a free dimension of pruning.
+
+### Reduce to Pell's equation, then iterate a recurrence
+
+The workhorse pattern. Many geometric or probabilistic constraints, after
+[completing the square](https://en.wikipedia.org/wiki/Completing_the_square) and clearing
+denominators, become a **Pell** or **Pell-like** equation `x² - Dy² = N` for small constants
+`D` and `N`. [Problem 100](/solutions/0100/) turns "two blue discs with probability exactly
+½" into `x² - 2y² = -1`; [Problem 94](/solutions/0094/) turns "almost-equilateral triangle
+with integer area" into a family built on `x² - 3y² = 1`. The decisive fact about Pell
+equations is that their infinitely many solutions are **not scattered** — they satisfy a
+fixed linear
+[recurrence relation](https://en.wikipedia.org/wiki/Recurrence_relation). Once you know the
+fundamental solution, every later one is a constant-time arithmetic update:
+
+```
+x' = 3x + 4y
+y' = 2x + 3y      # Problem 100: each step is the next valid arrangement
+```
+
+Because the solutions grow geometrically (here by `3 + 2√2 ≈ 5.83` per step), you cross a
+threshold of `10¹²` in about forty iterations — `O(log N)` in the bound rather than `O(N)`.
+Finding the *fundamental* solution when it is not obvious is itself a classical algorithm:
+the [continued fraction](https://en.wikipedia.org/wiki/Continued_fraction) expansion of `√D`
+is eventually periodic, and one specific convergent (chosen by the parity of the period
+length) is guaranteed to be it — the method Problem 66 uses. When `D` is large the numerators
+outrun 64 bits, so you reach for
+[arbitrary-precision arithmetic](https://en.wikipedia.org/wiki/Arbitrary-precision_arithmetic).
+
+### Factor the equation into a divisor count
+
+The algebraic sleight-of-hand. An equation in two variables can sometimes be **factored**
+into a product of shifted variables, at which point counting solutions becomes counting
+divisors. The reciprocal equation `1/x + 1/y = 1/n` behind
+[Problem 108](/solutions/0108/) and [Problem 110](/solutions/0110/) is the canonical example.
+Multiply through and rearrange, then add `n²` to both sides so the left factors:
+
+$$ (x - n)(y - n) = n^2 $$
+
+This is [Simon's Favorite Factoring Trick](https://artofproblemsolving.com/wiki/index.php/Simon%27s_Favorite_Factoring_Trick).
+Now every solution `(x, y)` is an ordered factorisation of `n²`, so the number of solutions
+is governed by the [divisor-counting function](https://en.wikipedia.org/wiki/Divisor_function)
+`τ(n²)` — a multiplicative function you compute from the prime exponents of `n` without ever
+forming `n²`. Asking for the least `n` with more than a thousand solutions then reduces to a
+search over [highly composite numbers](https://en.wikipedia.org/wiki/Highly_composite_number),
+which is a tiny structured tree rather than a linear scan.
+
+## How to reason about one
+
+When a problem admits only integer answers — and most Project Euler problems do — treat it as
+a Diophantine equation and work through these questions before writing any loop:
+
+- **Normalise first.** Clear denominators, complete the square, substitute. The messy
+  statement almost always hides one of a few canonical forms: linear, Pell/Pell-like, or
+  something that factors.
+- **Is there a linear constraint to spend?** Each one eliminates a variable and a loop level.
+- **Does it become `x² - Dy² = N`?** Then the solutions form a recurrence-generated family;
+  find the fundamental solution (by inspection, or via continued fractions) and iterate. Never
+  bound the loop by the size of the answer.
+- **Does it factor?** If you can force a product `(…)(…) = k`, counting solutions becomes
+  counting divisors of `k`, and the problem turns into a factorisation question.
+- **Mind the integers themselves.** Solutions grow geometrically; a 64-bit type overflows
+  fast. Know whether your language gives you big integers for free (Python) or whether you
+  must carry them yourself (C), and prefer exact integer tests over floating-point ones — a
+  Diophantine equality checked with a tolerance is a bug waiting to happen.
+
+The payoff is always the same trade: a moment of algebra up front buys you an algorithm whose
+cost depends on the *structure* of the solution set, not on how large the numbers get.
 
 <!-- problems (generated by update-tags) -->
 ## Problems
