@@ -708,12 +708,6 @@ def list_topics(repo_root: Path) -> list[DocEntry]:
     return entries
 
 
-def _same_words(a: str, b: str) -> bool:
-    """True when two labels differ only in case, spacing or punctuation —
-    ``'Arbitrary-precision arithmetic'`` and ``'Arbitrary Precision Arithmetic'``."""
-    return re.sub(r'\W+', '', a).lower() == re.sub(r'\W+', '', b).lower()
-
-
 def _indexed_topics(repo_root: Path) -> list[DocEntry]:
     """The written pages of the article index (``topics/articles.json``, maintained by
     ``update-tags``) — with their status. Its ``missing`` rows are vocabulary rather than
@@ -741,9 +735,9 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
 
     The folder is the section heading, so each card drops the trail and shows only
     its leaf heading. Groups come out in path order, the pages loose at the root of
-    ``topics/`` (if any) first under a generic heading. A page whose own title just
-    restates its filename (the per-tag skeletons) keeps an empty *title*, so the card
-    shows one line instead of saying the same thing twice.
+    ``topics/`` (if any) first under a generic heading. Every card keeps a *title* — the
+    page's own heading, or its leaf slug when it has none — so all cards carry a second
+    line and stand the same height in the grid.
     """
     # `or list_topics(...)` only when the index is *absent*. An index that filters to nothing
     # (no page is final yet) must list nothing - falling back there would show every draft,
@@ -755,7 +749,7 @@ def list_topic_groups(repo_root: Path, *, drafts: bool = False) -> list[TopicGro
     for entry in entries:
         folder, _, leaf = entry.name.rpartition('/')
         heading = _filename_heading(leaf)
-        title = '' if _same_words(entry.title, heading) else entry.title
+        title = entry.title or leaf
         groups.setdefault(folder, []).append(entry._replace(heading=heading, title=title))
     return [TopicGroup(name=folder, heading=_filename_heading(folder) if folder else 'General',
                        entries=entries)

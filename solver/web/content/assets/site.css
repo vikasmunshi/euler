@@ -453,7 +453,6 @@ body.terminal-doc {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.6rem;
 }
-.cards.cards-1 { grid-template-columns: 1fr; }        /* the landing: one box per row */
 .cards.cards-3 { grid-template-columns: repeat(3, 1fr); }
 /* A draft is a page that exists but is not written yet — readable, not advertised. */
 .card.is-draft .card-ic, .card.is-draft .card-title { color: var(--muted); }
