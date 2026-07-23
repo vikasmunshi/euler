@@ -488,6 +488,7 @@ async def topics_all(request: web.Request) -> web.StreamResponse:
         'groups': content.list_topic_groups(request.app[CONFIG_KEY].repo_root, drafts=True),
         'show_status': True,
         'crumbs': [_HOME, ('topics', '/topics/'), ('all', None)],
+        'actions': [Action(label='Hide drafts', kind='get', path='/topics/')],
     }, block='content')
 
 
