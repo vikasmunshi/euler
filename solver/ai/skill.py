@@ -8,6 +8,7 @@ __all__ = ['claude_solve', 'claude_blog']
 import json
 import shlex
 import subprocess
+import sys
 from typing import Any, Callable, Iterable, Literal
 
 from prompt_toolkit.completion import Completion
@@ -114,6 +115,13 @@ def claude_blog(ctx: Context, topic: str, additional_prompt: str = '', *, force:
         console.print(f'[muted]{entry["path"]} is already [accent]final[/accent] — '
                       f'use [accent]--force[/accent] to rewrite it.[/muted]')
         return ExitCodes.EXIT_OK
+    # The Write / Rewrite web Actions type a bare `claude-blog <path>`, so a maintainer never gets
+    # to pass an angle. Offer one interactively when none was given — Enter skips it. Only in an
+    # interactive shell (a terminal, or the web PTY); a command block has no tty and stays as-is.
+    if not additional_prompt and sys.stdin.isatty():
+        console.print('[muted]Guidance for the writer — an angle, an emphasis, a constraint — '
+                      'or Enter to skip.[/muted]')
+        additional_prompt = console.input('[accent]prompt>[/accent] ').strip()
     invocation = f'/claude-euler-blogger {topic} {additional_prompt}'.strip()
     return _run_skill(ctx, invocation, '[accent]claude · blog[/accent]')
 
