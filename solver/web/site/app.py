@@ -496,7 +496,8 @@ async def topics_all(request: web.Request) -> web.StreamResponse:
 async def topic_page(request: web.Request) -> web.StreamResponse:
     """``GET /topics/{name}`` — one rendered topic page."""
     name = request.match_info['name']
-    text = content.read_topic(request.app[CONFIG_KEY].repo_root, name)
+    repo_root = request.app[CONFIG_KEY].repo_root
+    text = content.read_topic(repo_root, name)
     if text is None:
         raise web.HTTPNotFound(text=f'no topic called {html.escape(name)}')
     # The maintainer's verbs are Actions in the header, not controls on the page (web-server-guide
@@ -514,7 +515,10 @@ async def topic_page(request: web.Request) -> web.StreamResponse:
         'name': name,
         # Collapse the generated Problems list (click to expand) — a topic-page
         # presentation choice, so it wraps the rendered HTML, not the source article.
-        'body': content.collapse_problems(content.render_markdown(text, route_base='/topics/')),
+        # problems.json feeds the solved/total count on the fold summary.
+        'body': content.collapse_problems(
+            content.render_markdown(text, route_base='/topics/'),
+            content.load_problems(repo_root)),
         'crumbs': [_HOME, ('topics', '/topics/'), (name, None)],
         'actions': actions,
     }, block='content')

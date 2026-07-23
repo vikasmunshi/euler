@@ -378,6 +378,7 @@ body.terminal-doc {
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 500;
+  white-space: nowrap;
   color: var(--muted);
   background: color-mix(in srgb, var(--accent) 12%, transparent);
 }

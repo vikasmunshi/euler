@@ -440,7 +440,7 @@ _RENDERED_PROBLEMS_RE = re.compile(
     re.DOTALL)
 
 
-def collapse_problems(html: str) -> str:
+def collapse_problems(html: str, problems: dict[int, ProblemInfo] | None = None) -> str:
     """Fold a topic's generated Problems list into a collapsed ``<details>`` (click to expand).
 
     The block `update-tags` writes can run to dozens of entries and pushes the article's
@@ -449,14 +449,27 @@ def collapse_problems(html: str) -> str:
     land — and the entry count, with the list revealed on click. Purely presentational: the
     source article keeps the plain heading-and-list that renders on GitHub. An article
     without the block is returned unchanged.
+
+    With *problems* given (the parsed ``problems.json``), the count reads ``solved / total``
+    — the numbers taken from *this clone's* progress against the ``/solutions/NNNN/`` links
+    the list carries, so it stays live rather than frozen at the last ``update-tags``.
+    Without it (the default) the bare total is shown, as before.
     """
     def _wrap(match: re.Match[str]) -> str:
-        count: int = match.group('list').count('<li>')
+        listing = match.group('list')
+        total: int = listing.count('<li>')
+        if problems is not None:
+            numbers = re.findall(r'/solutions/(\d+)/', listing)
+            solved = sum(1 for n in numbers
+                         if (info := problems.get(int(n))) is not None and info.solved)
+            label = f'{solved} / {total}'
+        else:
+            label = str(total)
         return ('<details class="fold topic-problems">'
                 '<summary class="fold-summary">'
                 f'<h2 id="problems" class="fold-title">{match.group("title")}'
-                f'<span class="problems-count">{count}</span></h2></summary>'
-                f'{match.group("list")}'
+                f'<span class="problems-count">{label}</span></h2></summary>'
+                f'{listing}'
                 '</details>')
     return _RENDERED_PROBLEMS_RE.sub(_wrap, html)
 
