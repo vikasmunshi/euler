@@ -335,13 +335,26 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
 }
 .pane { min-width: 0; min-height: 0; }
 .pane-content { overflow: auto; }            /* both axes when content overflows */
-.pane-ws { overflow: hidden; position: relative; }  /* the iframe scrolls itself; anchor .ws-min */
-.terminal-frame {
-  width: 100%;
-  height: 100%;
-  border: 0;
+/* The terminal pane is a little window: a titlebar over an iframe that scrolls itself.
+   The pane owns the frame (border, radius, fill) and clips the iframe's corners. */
+.pane-ws {
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
+}
+.terminal-frame { flex: 1; width: 100%; border: 0; background: var(--surface); }
+/* The titlebar: the terminal's name and, opposite it, the minimize button. */
+.ws-bar {
+  flex: none;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 0.2rem 0.35rem 0.2rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+}
+.ws-bar-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem; letter-spacing: 0.04em; color: var(--muted);
 }
 
 /* ── Minimize the terminal to the footer (F1): layout only, socket untouched ─── */
@@ -349,17 +362,15 @@ summary.user-glyph.is-anon:hover { color: var(--accent); border-color: var(--acc
    #content fills the width; the footer's restore strip appears. */
 body.ws-minimized .app-panes { grid-template-columns: 1fr; }
 body.ws-minimized .pane-ws { display: none; }
-/* The minimize handle, floated over the terminal's top-right corner. */
+/* The minimize button in the titlebar. */
 .ws-min {
-  position: absolute; top: 0.45rem; right: 0.45rem; z-index: 2;
   width: 1.6rem; height: 1.6rem; padding: 0;
   display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--border); border-radius: 6px;
-  background: var(--surface); color: var(--muted);
-  cursor: pointer; opacity: 0.55;
-  transition: opacity 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  border: 0; border-radius: 6px;
+  background: none; color: var(--muted); cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
 }
-.ws-min:hover { opacity: 1; color: var(--accent); border-color: var(--accent); }
+.ws-min:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
 .ws-min svg { width: 1rem; height: 1rem; }
 /* The footer restore strip: hidden until minimized, then parked at the footer's right. */
 .ws-restore {
